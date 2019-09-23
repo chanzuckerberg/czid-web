@@ -9,6 +9,24 @@ import cx from "classnames";
 const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
 
+const makeCancelable = promise => {
+  let hasCanceled_ = false;
+
+  const wrappedPromise = new Promise((resolve, reject) => {
+    promise.then(
+      val => (hasCanceled_ ? reject({ isCanceled: true }) : resolve(val)),
+      error => (hasCanceled_ ? reject({ isCanceled: true }) : reject(error))
+    );
+  });
+
+  return {
+    promise: wrappedPromise,
+    cancel() {
+      hasCanceled_ = true;
+    },
+  };
+};
+
 class InfiniteTable extends React.Component {
   // Encapsulates Table in an InfiniteLoader component.
   // Keeps track of rows for which a load request was made, to avoid requesting the same row twice.
@@ -25,7 +43,15 @@ class InfiniteTable extends React.Component {
     this.state = {
       rowCount: this.props.rowCount,
     };
+
+    this.cancelableLoadRowsPromise = null;
   }
+
+  componentWillUnmount = () => {
+    if (this.cancelableLoadRowsPromise) {
+      this.cancelableLoadRowsPromise.cancel();
+    }
+  };
 
   isRowLoadingOrLoaded = ({ index }) => {
     return !!this.loadedRowsMap[index];
@@ -38,21 +64,34 @@ class InfiniteTable extends React.Component {
       this.loadedRowsMap[i] = STATUS_LOADING;
     }
 
-    const newRows = await onLoadRows({ startIndex, stopIndex });
-    const requestedNumberOfRows = stopIndex - startIndex + 1;
-    this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
+    this.cancelableLoadRowsPromise = makeCancelable(
+      onLoadRows({ startIndex, stopIndex })
+    );
+    this.cancelableLoadRowsPromise.promise
+      .then(newRows => {
+        const requestedNumberOfRows = stopIndex - startIndex + 1;
+        this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
 
-    if (requestedNumberOfRows !== newRows.length) {
-      this.setState({ rowCount: this.rows.length });
-    } else {
-      this.setState({ rowCount: this.rows.length + minimumBatchSize });
-    }
+        if (requestedNumberOfRows !== newRows.length) {
+          this.setState({ rowCount: this.rows.length });
+        } else {
+          this.setState({ rowCount: this.rows.length + minimumBatchSize });
+        }
 
-    for (let i = startIndex; i <= stopIndex; i++) {
-      this.loadedRowsMap[i] = STATUS_LOADED;
-    }
+        for (let i = startIndex; i <= stopIndex; i++) {
+          this.loadedRowsMap[i] = STATUS_LOADED;
+        }
 
-    return true;
+        this.cancelableLoadRowsPromise = null;
+        return true;
+      })
+      .catch(error => {
+        if (!error.isCanceled) {
+          // eslint-disable-next-line no-console
+          console.error("Error loading rows", error);
+        }
+      });
+    return this.cancelableLoadRowsPromise.promise;
   };
 
   getRow = ({ index }) => {
@@ -82,6 +121,15 @@ class InfiniteTable extends React.Component {
     );
   };
 
+  handleGetRowHeight = ({ index }) => {
+    const { defaultRowHeight } = this.props;
+    const height =
+      typeof defaultRowHeight === "function"
+        ? defaultRowHeight({ index, row: this.rows[index] })
+        : defaultRowHeight;
+    return height;
+  };
+
   reset = () => {
     // Reset function MUST be called if previously loaded data changes
     const { rowCount } = this.props;
@@ -100,12 +148,11 @@ class InfiniteTable extends React.Component {
       minimumBatchSize,
       onSelectRow,
       onSelectAllRows,
+      defaultRowHeight,
       threshold,
       ...extraProps
     } = this.props;
-
     const { rowCount } = this.state;
-
     return (
       <InfiniteLoader
         ref={infiniteLoader => (this.infiniteLoader = infiniteLoader)}
@@ -128,6 +175,7 @@ class InfiniteTable extends React.Component {
               onSelectRow={onSelectRow}
               rowCount={rowCount}
               rowGetter={this.getRow}
+              rowHeight={this.handleGetRowHeight}
               rowRenderer={this.rowRenderer}
             />
           );
@@ -155,6 +203,7 @@ InfiniteTable.propTypes = {
   onSelectRow: PropTypes.func,
   onSelectAllRows: PropTypes.func,
   rowCount: PropTypes.number,
+  defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
   threshold: PropTypes.number,
 };
 

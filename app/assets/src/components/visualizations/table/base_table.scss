@@ -35,13 +35,17 @@
   color: $medium-grey;
   font-weight: $font-weight-semibold;
   outline: 0;
-  text-align: center;
   text-transform: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 
   .sortableHeader {
     max-width: 100%;
     display: flex;
-    align-items: center;
+    flex: 1 0 auto;
+    align-items: inherit;
+    justify-content: inherit;
 
     .label {
       // Shrink once you're at the maximum width (e.g. don't overflow). Do not grow unless needed.

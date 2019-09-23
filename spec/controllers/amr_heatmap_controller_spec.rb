@@ -1,8 +1,6 @@
 require 'rails_helper'
 require 'webmock/rspec'
 
-S3_JSON_BUCKET = "idseq-database".freeze
-S3_JSON_PREFIX = "amr/ontology/".freeze
 ONTOLOGY_BUILD_DATE = "2019-06-20".freeze
 
 OQXB_LABEL = "oqxB".freeze
