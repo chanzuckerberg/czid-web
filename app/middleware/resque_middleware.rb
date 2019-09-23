@@ -6,18 +6,23 @@ class ResqueMiddleware
     @app = app
   end
 
-  # CSRF reference: https://medium.com/rubyinside/a-deep-dive-into-csrf-protection-in-rails-19fa0a42c0ef
   def call(env)
-    # Regular execution for non-Resque paths
-    unless env['PATH_INFO'].start_with?("/resque")
-      return @app.call(env)
+    if env['PATH_INFO'].start_with?("/resque")
+      handle_resque_request(env)
+    else
+      @app.call(env)
     end
+  end
 
+  def handle_resque_request(env)
     rack_request = Rack::Request.new(env)
     rack_session = rack_request.session
 
-    ### INPUT VERIFICATION
+    handle_input(env, rack_session, rack_request)
+    handle_output(env, rack_session)
+  end
 
+  def handle_input(env, rack_session, rack_request)
     # Restrict allowed characters going to Resque server params.
     # update_param will modify the original 'env' object.
     rack_request.params.each do |k, v|
@@ -40,9 +45,10 @@ class ResqueMiddleware
         raise ActionController::InvalidAuthenticityToken
       end
     end
+  end
 
-    ### OUTPUT ADDITIONS
-
+  # CSRF reference: https://medium.com/rubyinside/a-deep-dive-into-csrf-protection-in-rails-19fa0a42c0ef
+  def handle_output(env, rack_session)
     # Get regular application response
     status, headers, response = @app.call(env)
 
@@ -51,6 +57,7 @@ class ResqueMiddleware
       doc = Nokogiri::HTML.parse(response[0])
 
       # Masked token varies on each request but is valid for the session.
+      # Note: The original token can be computed from the masked token, so the masked token must still be securely transmitted.
       masked_token = BASE_CONTROLLER.send(:masked_authenticity_token, rack_session)
       form_nodes = doc.xpath("//form")
       form_nodes.each do |form|
