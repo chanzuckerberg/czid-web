@@ -84,18 +84,20 @@ class RemoteSampleFileUpload extends React.Component {
         newSamples: newSamples.length,
       });
     } catch (e) {
-      if (e.status.startsWith("No samples imported")) {
-        this.setState({
-          // TODO (gdingle): we should have an error state for
-          // bucket not found as well.
-          error: "No valid samples were found.",
-        });
+      if (e.status) {
+        // Use error message provided by the backend if it exists
+        this.setState({ error: e.status });
+      } else {
+        // Otherwise fallback to a generic error message and write the original error to the console
+        generic_msg = "No valid samples were found.";
+        this.setState({ error: generic_msg });
+        console.error(generic_msg, e);
       }
 
       logAnalyticsEvent("RemoteSampleFileUpload_connect_failed", {
         projectId: this.props.project.id,
         bulkPath: this.state.remoteS3Path,
-        error: e.status,
+        error: e.status || e.message || e,
       });
     }
   };
