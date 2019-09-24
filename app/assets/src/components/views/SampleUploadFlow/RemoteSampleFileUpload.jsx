@@ -8,7 +8,10 @@ import { bulkImportRemoteSamples } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import Notification from "~ui/notifications/Notification";
 
-import { NO_TARGET_PROJECT_ERROR } from "./constants";
+import {
+  NO_TARGET_PROJECT_ERROR,
+  NO_VALID_SAMPLES_FOUND_ERROR,
+} from "./constants";
 import cs from "./sample_upload_flow.scss";
 
 class RemoteSampleFileUpload extends React.Component {
@@ -89,9 +92,8 @@ class RemoteSampleFileUpload extends React.Component {
         this.setState({ error: e.status });
       } else {
         // Otherwise fallback to a generic error message and write the original error to the console
-        generic_msg = "No valid samples were found.";
-        this.setState({ error: generic_msg });
-        console.error(generic_msg, e);
+        this.setState({ error: NO_VALID_SAMPLES_FOUND_ERROR });
+        console.error(NO_VALID_SAMPLES_FOUND_ERROR, e);
       }
 
       logAnalyticsEvent("RemoteSampleFileUpload_connect_failed", {
