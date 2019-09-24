@@ -36,7 +36,7 @@ class MonitorPipelineResults
       ActiveRecord::Base.connection_pool.with_connection do
         monitor_pr(pr)
       end
-    end
+    end.join
 
     Parallel.each(PhyloTree.in_progress, in_threads: THREAD_COUNT) do |pt|
       # Explicitly use ActiveRecord connection pool
@@ -44,7 +44,7 @@ class MonitorPipelineResults
       ActiveRecord::Base.connection_pool.with_connection do
         monitor_pt(pt)
       end
-    end
+    end.join
 
     # "stalled uploads" are not pipeline jobs, but they fit in here better than
     # anywhere else.
