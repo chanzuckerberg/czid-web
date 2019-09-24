@@ -147,32 +147,56 @@ RSpec.describe PipelineRun, type: :model do
     let(:sample) { build_stubbed(:sample, user: user) }
     let(:list_of_previous_pipeline_runs_same_version) { [] }
     let(:previous_pipeline_runs_same_version_relation) { instance_double("PipelineRun::ActiveRecord_Relation", to_a: list_of_previous_pipeline_runs_same_version) }
+    let(:pipeline_run_stages) do
+      [
+        build_stubbed(:pipeline_run_stage, step_number: 1, job_status: PipelineRunStage::STATUS_SUCCEEDED),
+        build_stubbed(:pipeline_run_stage, step_number: 2, job_status: PipelineRunStage::STATUS_SUCCEEDED),
+        build_stubbed(:pipeline_run_stage, step_number: 3, job_status: PipelineRunStage::STATUS_FAILED),
+        build_stubbed(:pipeline_run_stage, step_number: 4, job_status: nil),
+      ]
+    end
+    before { allow(pipeline_run).to receive(:active_stage).and_return(pipeline_run_stages[2]) }
     before { allow(pipeline_run).to receive(:previous_pipeline_runs_same_version).and_return(previous_pipeline_runs_same_version_relation) }
 
     subject { pipeline_run.automatic_restart_allowed? }
 
     context "when branch is not master" do
-      let(:pipeline_run) { build_stubbed(:pipeline_run, pipeline_version: "3.7", sample: sample, pipeline_branch: "anything_other_than_master") }
+      let(:pipeline_run) { build_stubbed(:pipeline_run, pipeline_version: "3.7", sample: sample, pipeline_run_stages: pipeline_run_stages, pipeline_branch: "anything_other_than_master") }
       it { is_expected.to be_falsy }
     end
 
     context "when branch is master" do
-      let(:pipeline_run) { build_stubbed(:pipeline_run, pipeline_version: "3.7", sample: sample, pipeline_branch: nil) }
-      context "and sample has no previous pipeline runs with the same pipeline version" do
-        it { is_expected.to be_truthy }
+      let(:pipeline_run) { build_stubbed(:pipeline_run, pipeline_version: "3.7", sample: sample, pipeline_run_stages: pipeline_run_stages) }
+
+      context "and stage is not allowed to restart in AppConfig::AUTO_RESTART_ALLOWED_STAGES configuration" do
+        before { AppConfigHelper.set_app_config(AppConfig::AUTO_RESTART_ALLOWED_STAGES, "[1,2,4]") }
+        it { is_expected.to be_falsy }
       end
 
-      context "and sample has previous pipeline runs with the same pipeline version" do
-        context "and they all succeeded" do
-          let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run)] }
+      context "and AppConfig::AUTO_RESTART_ALLOWED_STAGES configuration is invalid" do
+        before { AppConfigHelper.set_app_config(AppConfig::AUTO_RESTART_ALLOWED_STAGES, "invalid_json_value") }
+        it { is_expected.to be_falsy }
+      end
 
+      context "and stage is authorized to restart in AppConfig::AUTO_RESTART_ALLOWED_STAGES configuration" do
+        before { AppConfigHelper.set_app_config(AppConfig::AUTO_RESTART_ALLOWED_STAGES, "[1,2,3,4]") }
+
+        context "and sample has no previous pipeline runs with the same pipeline version" do
           it { is_expected.to be_truthy }
         end
 
-        context "and at least one of them failed" do
-          let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run, job_status: 'FAILED')] }
+        context "and sample has previous pipeline runs with the same pipeline version" do
+          context "and they all succeeded" do
+            let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run)] }
 
-          it { is_expected.to be_falsy }
+            it { is_expected.to be_truthy }
+          end
+
+          context "and at least one of them failed" do
+            let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run, job_status: 'FAILED')] }
+
+            it { is_expected.to be_falsy }
+          end
         end
       end
     end

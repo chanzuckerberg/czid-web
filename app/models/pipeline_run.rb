@@ -869,8 +869,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def automatic_restart_allowed?
-    return false unless pipeline_branch.nil? || pipeline_branch == "master"
-    previous_pipeline_runs_same_version.to_a.none?(&:failed?)
+    (pipeline_branch.nil? || pipeline_branch == "master") \
+    && AppConfigHelper.get_json_app_config(AppConfig::AUTO_RESTART_ALLOWED_STAGES, []).include?(active_stage&.step_number) \
+    && previous_pipeline_runs_same_version.to_a.none?(&:failed?)
   end
 
   def previous_pipeline_runs_same_version
