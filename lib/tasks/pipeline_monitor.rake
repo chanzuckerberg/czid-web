@@ -285,6 +285,7 @@ class CheckPipelineRuns
           update_pr(prid)
         end
       end
+      ActiveRecord::Base.connection.reconnect!
       Parallel.each(pt_ids, in_threads: THREAD_COUNT) do |ptid|
         # Explicitly use ActiveRecord connection pool
         # https://github.com/grosser/parallel#activerecord
@@ -292,6 +293,7 @@ class CheckPipelineRuns
           update_pt(ptid)
         end
       end
+      ActiveRecord::Base.connection.reconnect!
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
