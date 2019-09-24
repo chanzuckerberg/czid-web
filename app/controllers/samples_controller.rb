@@ -453,12 +453,12 @@ class SamplesController < ApplicationController
     @project_id = params[:project_id]
     @project = Project.find(@project_id)
     unless current_power.updatable_project?(@project)
-      render json: { status: "User is not authorized to update to project #{@project.name}" }, status: :unprocessable_entity
+      render json: { status: "Sorry, your email doesn’t have permissions to upload to this project." }, status: :unprocessable_entity
       return
     end
 
     unless current_user.can_upload(params[:bulk_path])
-      render json: { status: "User is not authorized to upload from s3 url #{params[:bulk_path]}" }, status: :unprocessable_entity
+      render json: { status: "Sorry, it looks like your email doesn’t have permissions to this s3 bucket." }, status: :unprocessable_entity
       return
     end
 
@@ -470,7 +470,7 @@ class SamplesController < ApplicationController
         if @samples.present?
           render json: { samples: @samples }
         else
-          render json: { status: "No valid samples were found in s3 url \"#{@bulk_path}\". Files must have extension fastq.gz/fq.gz/fastq/fq/fasta.gz/fa.gz/fasta/fa, and the bucket must be authorized by IDseq." }, status: :unprocessable_entity
+          render json: { status: "Sorry, we couldn’t find any valid samples in this s3 bucket. Remember, IDseq needs to already have permissions to this bucket. Also, double-check the way you named the files and their extensions. Find the details about permissions and file format requirements by clicking on the \"More Info\" link." }, status: :unprocessable_entity
         end
       end
     end

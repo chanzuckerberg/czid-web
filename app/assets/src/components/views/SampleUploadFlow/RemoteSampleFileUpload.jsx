@@ -91,7 +91,7 @@ class RemoteSampleFileUpload extends React.Component {
         // Use error message provided by the backend if it exists
         this.setState({ error: e.status });
       } else {
-        // Otherwise fallback to a generic error message and write the original error to the console
+        // Otherwise fallback to a generic error message
         this.setState({ error: NO_VALID_SAMPLES_FOUND_ERROR });
       }
 
