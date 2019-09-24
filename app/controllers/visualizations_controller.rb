@@ -212,12 +212,17 @@ class VisualizationsController < ApplicationController
     end
   end
 
-  # The most recent update time of any samples pipeline run.
+  # The most recent update time of all samples pipeline runs and metadata.
   def heatmap_ts
-    updated_ats = samples_for_heatmap
-                  .map(&:first_pipeline_run)
-                  .compact
-                  .map(&:updated_at)
-    updated_ats.max.to_i
+    pipeline_updated_ats = samples_for_heatmap
+                           .map(&:first_pipeline_run)
+                           .compact
+                           .map(&:updated_at)
+                           .compact
+    metadata_updated_ats = samples_for_heatmap
+                           .map(&:metadata)
+                           .map { |ms| ms.map(&:updated_at) }
+                           .flatten
+    [pipeline_updated_ats.max, metadata_updated_ats.max].compact.max.to_i
   end
 end
