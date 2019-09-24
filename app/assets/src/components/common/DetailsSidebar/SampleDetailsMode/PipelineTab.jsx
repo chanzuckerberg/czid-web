@@ -15,6 +15,7 @@ class PipelineTab extends React.Component {
   state = {
     sectionOpen: {
       pipelineInfo: true,
+      readsRemaining: false,
       erccScatterplot: false,
       downloads: false,
     },
@@ -95,6 +96,14 @@ class PipelineTab extends React.Component {
           title="Pipeline Info"
         >
           {PIPELINE_INFO_FIELDS.map(this.renderPipelineInfoField)}
+        </MetadataSection>
+        <MetadataSection
+          toggleable
+          onToggle={() => this.toggleSection("readsRemaining")}
+          open={this.state.sectionOpen.readsRemaining}
+          title="Reads Remaining"
+        >
+          {pipelineRun.outputs_by_step}
         </MetadataSection>
         <MetadataSection
           toggleable
