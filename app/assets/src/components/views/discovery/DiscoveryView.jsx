@@ -3,14 +3,12 @@ import PropTypes from "prop-types";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import moment from "moment";
 import {
-  at,
   capitalize,
   clone,
   compact,
   concat,
   escapeRegExp,
   find,
-  findIndex,
   isEmpty,
   keyBy,
   map,
@@ -46,10 +44,8 @@ import DiscoveryFilters from "./DiscoveryFilters";
 import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
 import ProjectHeader from "./ProjectHeader";
 import {
-  getDiscoverySyncData,
   getDiscoveryDimensions,
   getDiscoveryStats,
-  getDiscoverySamples,
   getDiscoveryLocations,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
@@ -106,19 +102,15 @@ class DiscoveryView extends React.Component {
             : "projects",
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
+        filteredProjectStats: {},
         filteredSampleStats: {},
         filters: {},
         loadingDimensions: true,
         loadingLocations: true,
-        loadingProjects: true,
         loadingStats: true,
-        loadingVisualizations: true,
         mapLevel: "country",
         mapLocationData: {},
         mapPreviewedLocationId: null,
-        mapPreviewedProjects: [],
-        mapPreviewedSampleIds: [],
-        mapPreviewedSamples: [],
         mapSidebarProjectDimensions: [],
         mapSidebarSampleDimensions: [],
         mapSidebarSampleStats: {},
@@ -126,7 +118,6 @@ class DiscoveryView extends React.Component {
         project: null,
         projectDimensions: [],
         projectId: projectId,
-        projects: [],
         rawMapLocationData: {},
         sampleActiveColumns: undefined,
         sampleDimensions: [],
@@ -134,13 +125,36 @@ class DiscoveryView extends React.Component {
         selectedSampleIds: new Set(),
         showFilters: true,
         showStats: true,
-        visualizations: [],
       },
       localState,
       sessionState,
       urlState
     );
     this.dataLayer = new DiscoveryDataLayer(this.props.domain);
+    const conditions = this.getConditions();
+    this.samples = this.dataLayer.samples.createView({ conditions });
+    this.projects = this.dataLayer.projects.createView({
+      conditions,
+      onViewChange: this.refreshProjectStats,
+    });
+    this.visualizations = this.dataLayer.visualizations.createView({
+      conditions,
+    });
+    this.mapPreviewProjects = this.projects;
+    this.mapPreviewSamples = this.samples;
+
+    // hold references to the views to allow resetting the tables
+    this.projectsView = null;
+    this.samplesView = null;
+    this.mapPreviewSidebar = null;
+
+    // preload first pages
+    const pageSize = 50;
+    const firstPageArgs = { startIndex: 0, stopIndex: pageSize - 1 };
+    this.projects.handleLoadObjectRows(firstPageArgs);
+    this.samples.handleLoadObjectRows(firstPageArgs);
+    this.visualizations.handleLoadObjectRows(firstPageArgs);
+
     this.updateBrowsingHistory("replace");
   }
 
@@ -150,7 +164,9 @@ class DiscoveryView extends React.Component {
 
     window.onpopstate = () => {
       this.setState(history.state, () => {
-        this.initialLoad();
+        this.resetData({
+          callback: this.initialLoad,
+        });
       });
     };
   }
@@ -169,28 +185,23 @@ class DiscoveryView extends React.Component {
   updateBrowsingHistory = (action = "push") => {
     const { domain } = this.props;
 
-    const urlFields = [
-      "currentDisplay",
-      "currentTab",
-      "filters",
-      "mapSidebarTab",
-      "projectId",
-      "sampleActiveColumns",
-      "search",
-      "showFilters",
-      "showStats",
-    ];
-    const stateFields = concat(urlFields, ["project"]);
     const localFields = [
       "currentTab",
       "sampleActiveColumns",
       "showFilters",
       "showStats",
     ];
+    const sessionFields = concat(localFields, [
+      "currentDisplay",
+      "mapSidebarTab",
+    ]);
+    const urlFields = concat(sessionFields, ["filters", "projectId", "search"]);
+    const stateFields = concat(urlFields, ["project"]);
 
-    const historyState = pick(stateFields, this.state);
-    const urlState = pick(urlFields, this.state);
     const localState = pick(localFields, this.state);
+    const sessionState = pick(sessionFields, this.state);
+    const urlState = pick(urlFields, this.state);
+    const historyState = pick(stateFields, this.state);
 
     // Saving on URL enables sharing current view with other users
     let urlQuery = this.urlParser.stringify(urlState);
@@ -215,7 +226,10 @@ class DiscoveryView extends React.Component {
     }
 
     // We want to persist all options when user navigates to other pages within the same session
-    sessionStorage.setItem("DiscoveryViewOptions", JSON.stringify(urlState));
+    sessionStorage.setItem(
+      "DiscoveryViewOptions",
+      JSON.stringify(sessionState)
+    );
 
     // We want to persist some options when user returns to the page on a different session
     localStorage.setItem("DiscoveryViewOptions", JSON.stringify(localState));
@@ -251,10 +265,14 @@ class DiscoveryView extends React.Component {
     return preparedFilters;
   };
 
-  resetData = ({ callback }) => {
-    const { project } = this.state;
+  resetData = ({ callback } = {}) => {
+    const conditions = this.getConditions();
 
-    this.dataLayer.samples.reset();
+    this.samples.reset({ conditions });
+    this.projects.reset({ conditions });
+    this.visualizations.reset({ conditions });
+    this.mapPreviewSamples.reset({ conditions });
+    this.mapPreviewProjects.reset({ conditions });
 
     this.setState(
       {
@@ -262,12 +280,10 @@ class DiscoveryView extends React.Component {
         filteredSampleDimensions: [],
         filteredSampleStats: {},
         loadingDimensions: true,
-        // instead of resetting projects we use the current project info, if selected
-        projects: compact([project]),
-        visualizations: [],
       },
       () => {
         this.samplesView && this.samplesView.reset();
+        this.projectsView && this.projectsView.reset();
         callback && callback();
       }
     );
@@ -280,14 +296,12 @@ class DiscoveryView extends React.Component {
     this.refreshDimensions();
     this.refreshFilteredStats();
     this.refreshFilteredLocations();
-    this.refreshSynchronousData();
     //   * if filter or project is set
     //     - load (B) filtered dimensions
     (this.getFilterCount() || project) && this.refreshFilteredDimensions();
   };
 
   resetDataFromFilterChange = () => {
-    const { project } = this.state;
     this.resetData({
       callback: () => {
         // * On filter change:
@@ -295,9 +309,6 @@ class DiscoveryView extends React.Component {
         this.refreshFilteredDimensions();
         this.refreshFilteredStats();
         this.refreshFilteredLocations();
-        //  * if project not set
-        //       load (E) synchronous table data
-        !project && this.refreshSynchronousData();
       },
     });
   };
@@ -314,35 +325,6 @@ class DiscoveryView extends React.Component {
         this.refreshFilteredLocations();
       },
     });
-  };
-
-  refreshSynchronousData = async () => {
-    const { domain } = this.props;
-    const { projectId, search } = this.state;
-
-    this.setState({
-      loadingProjects: true,
-      loadingVisualizations: true,
-    });
-
-    const { projects = [], visualizations = [] } = await getDiscoverySyncData({
-      domain,
-      filters: this.preparedFilters(),
-      projectId: projectId,
-      search,
-    });
-
-    this.setState(
-      {
-        project: projectId ? projects[0] : null,
-        projects,
-        visualizations,
-        loadingProjects: false,
-        loadingVisualizations: false,
-      },
-      // Uses 'projects'
-      this.refreshMapPreviewedProjects
-    );
   };
 
   refreshDimensions = async () => {
@@ -386,6 +368,14 @@ class DiscoveryView extends React.Component {
     this.setState({
       filteredSampleStats,
       loadingStats: false,
+    });
+  };
+
+  refreshProjectStats = () => {
+    this.setState({
+      filteredProjectStats: {
+        count: this.projects.length,
+      },
     });
   };
 
@@ -436,8 +426,7 @@ class DiscoveryView extends React.Component {
         loadingLocations: false,
       },
       () => {
-        this.refreshMapPreviewedSamples();
-        this.refreshMapPreviewedProjects();
+        this.refreshMapPreviewedData();
         this.handleMapLevelChange(mapLevel);
       }
     );
@@ -445,12 +434,7 @@ class DiscoveryView extends React.Component {
 
   computeTabs = () => {
     const { domain } = this.props;
-    const {
-      projectId,
-      projects,
-      visualizations,
-      filteredSampleStats,
-    } = this.state;
+    const { projectId, filteredProjectStats, filteredSampleStats } = this.state;
 
     const renderTab = (label, count) => {
       return (
@@ -460,19 +444,18 @@ class DiscoveryView extends React.Component {
         </div>
       );
     };
-
     return compact([
       !projectId && {
-        label: renderTab("Projects", (projects || []).length),
+        label: renderTab("Projects", filteredProjectStats.count || "-"),
         value: "projects",
       },
       {
-        label: renderTab("Samples", filteredSampleStats.count || 0),
+        label: renderTab("Samples", filteredSampleStats.count || "-"),
         value: "samples",
       },
       domain !== DISCOVERY_DOMAIN_PUBLIC &&
         !projectId && {
-          label: renderTab("Visualizations", (visualizations || []).length),
+          label: renderTab("Visualizations", this.visualizations.length || "-"),
           value: "visualizations",
         },
     ]);
@@ -526,7 +509,7 @@ class DiscoveryView extends React.Component {
   };
 
   handleSearchSelected = ({ key, value, text }, currentEvent) => {
-    const { filters, projects, search } = this.state;
+    const { filters, search } = this.state;
 
     const dimensions = this.getCurrentDimensions();
 
@@ -550,10 +533,7 @@ class DiscoveryView extends React.Component {
         break;
       }
       case "project": {
-        const project = find({ id: value }, projects);
-        if (project) {
-          this.handleProjectSelected({ project });
-        }
+        this.handleProjectSelected({ project: this.projects.get(value) });
         break;
       }
       default: {
@@ -622,20 +602,14 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
-    const { dataLayer } = this;
+  getConditions = () => {
     const { projectId, search } = this.state;
 
-    return dataLayer.handleLoadObjectRows({
-      dataType: "samples",
-      startIndex,
-      stopIndex,
-      conditions: {
-        projectId,
-        search,
-        filters: this.preparedFilters(),
-      },
-    });
+    return {
+      projectId,
+      search,
+      filters: this.preparedFilters(),
+    };
   };
 
   handleProjectSelected = ({ project }) => {
@@ -645,7 +619,7 @@ class DiscoveryView extends React.Component {
         currentDisplay: "table",
         currentTab: "samples",
         mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
-        project,
+        project: project,
         projectId: project.id,
         search: null,
       },
@@ -662,13 +636,9 @@ class DiscoveryView extends React.Component {
   };
 
   handleProjectUpdated = ({ project }) => {
-    const { projects } = this.state;
-    const projectIndex = findIndex({ id: project.id }, projects);
-    let newProjects = projects.slice();
-    newProjects.splice(projectIndex, 1, project);
+    this.dataLayer.projects.update(project);
     this.setState({
       project,
-      projects: newProjects,
     });
   };
 
@@ -682,7 +652,6 @@ class DiscoveryView extends React.Component {
   };
 
   getClientSideSuggestions = async query => {
-    const { projects } = this.state;
     const dimensions = this.getCurrentDimensions();
 
     let suggestions = {};
@@ -707,18 +676,6 @@ class DiscoveryView extends React.Component {
       }
     });
 
-    const filteredProjects = projects.filter(project => re.test(project.name));
-    if (filteredProjects.length) {
-      suggestions["project"] = {
-        name: "Project",
-        results: filteredProjects.map(project => ({
-          category: "project",
-          title: project.name,
-          id: project.id,
-        })),
-      };
-    }
-
     return suggestions;
   };
 
@@ -726,7 +683,7 @@ class DiscoveryView extends React.Component {
     const { domain } = this.props;
 
     let results = await getSearchSuggestions({
-      categories: ["sample", "taxon"],
+      categories: ["sample", "project", "taxon"],
       query,
       domain,
     });
@@ -735,9 +692,9 @@ class DiscoveryView extends React.Component {
 
   handleSearchTriggered = async query => {
     const [clientSideSuggestions, serverSideSuggestions] = await Promise.all([
-      // client side: for dimensions (host, location, tissue) and projects search
+      // client side: for dimensions (host, location, tissue)
       this.getClientSideSuggestions(query),
-      // server side: for taxa and samples search (filter by domain)
+      // server side: for taxa, projects and samples search (filter by domain)
       this.getServerSideSuggestions(query),
     ]);
 
@@ -767,8 +724,7 @@ class DiscoveryView extends React.Component {
         showStats: true,
       },
       () => {
-        this.refreshMapPreviewedSamples();
-        this.refreshMapPreviewedProjects();
+        this.refreshMapPreviewedData();
       }
     );
   };
@@ -780,8 +736,7 @@ class DiscoveryView extends React.Component {
         showStats: true,
       },
       () => {
-        this.refreshMapPreviewedSamples();
-        this.refreshMapPreviewedProjects();
+        this.refreshMapPreviewedData();
       }
     );
   };
@@ -789,11 +744,10 @@ class DiscoveryView extends React.Component {
   clearMapPreview = () => {
     const { mapPreviewedLocationId } = this.state;
     if (mapPreviewedLocationId) {
+      this.mapPreviewProjects = this.projects;
+      this.mapPreviewSamples = this.samples;
       this.setState({
         mapPreviewedLocationId: null,
-        mapPreviewedProjects: [],
-        mapPreviewedSampleIds: [],
-        mapPreviewedSamples: [],
         mapSidebarProjectDimensions: [],
         mapSidebarSampleDimensions: [],
         mapSidebarSampleStats: {},
@@ -802,63 +756,60 @@ class DiscoveryView extends React.Component {
   };
 
   refreshMapPreviewedSamples = async () => {
-    const { domain } = this.props;
-    const {
-      mapLocationData,
-      mapPreviewedLocationId,
-      projectId,
-      search,
-    } = this.state;
+    const { mapLocationData, mapPreviewedLocationId } = this.state;
 
-    if (!mapPreviewedLocationId) return;
-
-    if (!mapLocationData[mapPreviewedLocationId]) {
+    if (!mapPreviewedLocationId || !mapLocationData[mapPreviewedLocationId]) {
       // Previewed location has been filtered out, so exit preview mode.
-      this.clearMapPreview();
+      this.mapPreviewSamples = this.samples;
+      return;
+    } else {
+      let conditions = this.getConditions();
+      conditions.filters.locationV2 = [
+        mapLocationData[mapPreviewedLocationId].name,
+      ];
+      this.mapPreviewSamples = this.dataLayer.samples.createView({
+        conditions,
+      });
+    }
+  };
+
+  refreshMapPreviewedProjects = async () => {
+    const { mapLocationData, mapPreviewedLocationId } = this.state;
+
+    if (!mapPreviewedLocationId || !mapLocationData[mapPreviewedLocationId]) {
+      // Previewed location has been filtered out, so exit preview mode.
+      this.mapPreviewProjects = this.projects;
+      return;
+    } else {
+      let conditions = this.getConditions();
+      conditions.filters.locationV2 = [
+        mapLocationData[mapPreviewedLocationId].name,
+      ];
+      this.mapPreviewProjects = this.dataLayer.projects.createView({
+        conditions,
+      });
+    }
+  };
+
+  refreshMapPreviewedDimensions = async () => {
+    const { mapLocationData, mapPreviewedLocationId } = this.state;
+    const { domain } = this.props;
+
+    if (!mapPreviewedLocationId || !mapLocationData[mapPreviewedLocationId]) {
       return;
     }
 
-    const filters = this.preparedFilters();
-    filters["locationV2"] = mapLocationData[mapPreviewedLocationId].name;
-
-    // Fetch previewed samples
-    // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
-    const {
-      samples: fetchedSamples,
-      sampleIds: fetchedSampleIds,
-    } = await getDiscoverySamples({
-      // TODO(jsheu): Consider using location ID instead (need multi-level search).
-      domain,
-      filters,
-      limit: 1e4, // Server needs a max, 1e4 at one location is a good cutoff.
-      listAllIds: true,
-      projectId,
-      search,
-    });
-    this.setState(
-      {
-        mapPreviewedSampleIds: fetchedSampleIds,
-        mapPreviewedSamples: fetchedSamples,
-      },
-      () => {
-        this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
-      }
-    );
-
     // Fetch stats and dimensions for the map sidebar. Special request with the current filters
     // and the previewed location.
-    const params = {
-      domain,
-      projectId,
-      filters,
-      search,
-    };
-    const { sampleStats } = await getDiscoveryStats(params);
-    const {
-      projectDimensions,
-      sampleDimensions,
-    } = await getDiscoveryDimensions(params);
-
+    const params = this.getConditions();
+    params.filters["locationV2"] = mapLocationData[mapPreviewedLocationId].name;
+    const [
+      { sampleStats },
+      { projectDimensions, sampleDimensions },
+    ] = await Promise.all([
+      getDiscoveryStats({ domain, ...params }),
+      getDiscoveryDimensions({ domain, ...params }),
+    ]);
     this.setState({
       mapSidebarProjectDimensions: projectDimensions,
       mapSidebarSampleDimensions: sampleDimensions,
@@ -866,24 +817,11 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  // This uses 'projects' so it comes after refreshSynchronousData
-  refreshMapPreviewedProjects = async () => {
-    const { mapLocationData, mapPreviewedLocationId, projects } = this.state;
-
-    if (!mapPreviewedLocationId) return;
-
-    if (!mapLocationData[mapPreviewedLocationId]) {
-      // Previewed location has been filtered out, so exit preview mode.
-      this.clearMapPreview();
-      return;
-    }
-
-    const projectIds = mapLocationData[mapPreviewedLocationId].project_ids;
-    const mapPreviewedProjects = at(projectIds, keyBy("id", projects));
-
-    this.setState({ mapPreviewedProjects }, () => {
-      this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
-    });
+  refreshMapPreviewedData = async () => {
+    this.refreshMapPreviewedSamples();
+    this.refreshMapPreviewedProjects();
+    this.refreshMapPreviewedDimensions();
+    this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
   };
 
   handleSelectedSamplesUpdate = selectedSampleIds => {
@@ -992,8 +930,6 @@ class DiscoveryView extends React.Component {
     const {
       currentDisplay,
       currentTab,
-      loadingProjects,
-      loadingVisualizations,
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
@@ -1001,11 +937,10 @@ class DiscoveryView extends React.Component {
       sampleActiveColumns,
       selectedSampleIds,
       projectId,
-      projects,
-      visualizations,
     } = this.state;
+
     const { admin, allowedFeatures, mapTilerKey } = this.props;
-    const { dataLayer } = this;
+    const { projects, samples, visualizations } = this;
 
     return (
       <React.Fragment>
@@ -1022,16 +957,18 @@ class DiscoveryView extends React.Component {
                 mapTilerKey={mapTilerKey}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
+                onLoadRows={projects.handleLoadObjectRows}
                 onMapClick={this.clearMapPreview}
                 onMapLevelChange={this.handleMapLevelChange}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onProjectSelected={this.handleProjectSelected}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                 projects={projects}
+                ref={projectsView => (this.projectsView = projectsView)}
               />
             </div>
             {!projects.length &&
-              !loadingProjects &&
+              !projects.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
@@ -1057,7 +994,7 @@ class DiscoveryView extends React.Component {
                 onActiveColumnsChange={this.handleSampleActiveColumnsChange}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
-                onLoadRows={this.handleLoadSampleRows}
+                onLoadRows={samples.handleLoadObjectRows}
                 onMapClick={this.clearMapPreview}
                 onMapLevelChange={this.handleMapLevelChange}
                 onMapMarkerClick={this.handleMapMarkerClick}
@@ -1066,13 +1003,13 @@ class DiscoveryView extends React.Component {
                 onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}
-                samples={dataLayer.samples}
-                selectableIds={dataLayer.samples.getIds()}
+                samples={samples}
+                selectableIds={samples.getIds()}
                 selectedSampleIds={selectedSampleIds}
               />
             </div>
-            {!dataLayer.samples.getLength() &&
-              !dataLayer.samples.isLoading() &&
+            {!samples.length &&
+              !samples.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
@@ -1087,7 +1024,8 @@ class DiscoveryView extends React.Component {
               <VisualizationsView visualizations={visualizations} />
             </div>
             {!visualizations.length &&
-              !loadingVisualizations && (
+              !visualizations.isLoading() &&
+              currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
                   type="visualizations"
@@ -1107,11 +1045,9 @@ class DiscoveryView extends React.Component {
       filteredProjectDimensions,
       filteredSampleDimensions,
       filteredSampleStats,
+      filteredProjectStats,
       loadingDimensions,
       loadingStats,
-      mapPreviewedProjects,
-      mapPreviewedSampleIds,
-      mapPreviewedSamples,
       mapSidebarProjectDimensions,
       mapSidebarSampleDimensions,
       mapSidebarSampleStats,
@@ -1119,7 +1055,6 @@ class DiscoveryView extends React.Component {
       mapSidebarTab,
       projectDimensions,
       project,
-      projects,
       sampleDimensions,
       search,
       showStats,
@@ -1131,7 +1066,6 @@ class DiscoveryView extends React.Component {
     const computedSampleDimensions =
       filterCount || search ? filteredSampleDimensions : sampleDimensions;
     const loading = loadingDimensions || loadingStats;
-    const projectStats = { count: projects.length };
 
     return (
       <div className={cs.rightPane}>
@@ -1153,12 +1087,10 @@ class DiscoveryView extends React.Component {
                   ? computedProjectDimensions
                   : mapSidebarProjectDimensions
               }
-              projects={
-                isEmpty(mapPreviewedProjects) ? projects : mapPreviewedProjects
-              }
+              projects={this.mapPreviewProjects}
               projectStats={
                 isEmpty(mapSidebarSampleStats)
-                  ? projectStats
+                  ? filteredProjectStats
                   : { count: mapSidebarSampleStats.projectCount }
               }
               ref={mapPreviewSidebar =>
@@ -1169,13 +1101,12 @@ class DiscoveryView extends React.Component {
                   ? computedSampleDimensions
                   : mapSidebarSampleDimensions
               }
-              samples={mapPreviewedSamples}
+              samples={this.mapPreviewSamples}
               sampleStats={
                 isEmpty(mapSidebarSampleStats)
                   ? filteredSampleStats
                   : mapSidebarSampleStats
               }
-              selectableIds={mapPreviewedSampleIds}
               selectedSampleIds={selectedSampleIds}
             />
           ) : (
@@ -1185,7 +1116,7 @@ class DiscoveryView extends React.Component {
               loading={loading}
               onFilterClick={this.handleMetadataFilterClick}
               projectDimensions={computedProjectDimensions}
-              projectStats={projectStats}
+              projectStats={filteredProjectStats}
               sampleDimensions={computedSampleDimensions}
               sampleStats={filteredSampleStats}
               project={project}
@@ -1207,7 +1138,6 @@ class DiscoveryView extends React.Component {
       showStats,
     } = this.state;
     const { domain, allowedFeatures } = this.props;
-    const { dataLayer } = this;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -1219,7 +1149,7 @@ class DiscoveryView extends React.Component {
           {projectId && (
             <ProjectHeader
               project={project || {}}
-              fetchedSamples={dataLayer.samples.loaded}
+              fetchedSamples={this.samples.loaded}
               onProjectUpdated={this.handleProjectUpdated}
               onMetadataUpdated={this.refreshDataFromProjectChange}
             />

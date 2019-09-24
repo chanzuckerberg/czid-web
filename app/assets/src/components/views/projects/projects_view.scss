@@ -2,7 +2,7 @@
 @import "~styles/themes/elements";
 
 .projectHeader {
-  text-align: left;
+  justify-content: left;
 }
 
 .container {
@@ -13,6 +13,12 @@
 
   .toggleContainer {
     margin-bottom: 10px;
+  }
+
+  .table {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
   }
 
   .map {

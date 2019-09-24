@@ -5,10 +5,6 @@ S3_JSON_PREFIX = "amr/ontology/".freeze
 class AmrHeatmapController < ApplicationController
   include S3Util
 
-  before_action do
-    allowed_feature_required("amr_heatmap", true)
-  end
-
   def index
     @sample_ids = params[:sampleIds].map(&:to_i)
   end
