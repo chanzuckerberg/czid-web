@@ -31,22 +31,12 @@ class MonitorPipelineResults
 
   def self.update_jobs
     Parallel.each(PipelineRun.results_in_progress, in_threads: THREAD_COUNT) do |pr|
-      # Explicitly use ActiveRecord connection pool
-      # https://github.com/grosser/parallel#activerecord
-      ActiveRecord::Base.connection_pool.with_connection do
-        monitor_pr(pr)
-      end
+      monitor_pr(pr)
     end
-    ActiveRecord::Base.connection.reconnect!
 
     Parallel.each(PhyloTree.in_progress, in_threads: THREAD_COUNT) do |pt|
-      # Explicitly use ActiveRecord connection pool
-      # https://github.com/grosser/parallel#activerecord
-      ActiveRecord::Base.connection_pool.with_connection do
-        monitor_pt(pt)
-      end
+      monitor_pt(pt)
     end
-    ActiveRecord::Base.connection.reconnect!
 
     # "stalled uploads" are not pipeline jobs, but they fit in here better than
     # anywhere else.

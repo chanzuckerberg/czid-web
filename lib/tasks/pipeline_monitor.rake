@@ -279,21 +279,11 @@ class CheckPipelineRuns
       pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
       Parallel.each(pr_ids, in_threads: THREAD_COUNT) do |prid|
-        # Explicitly use ActiveRecord connection pool
-        # https://github.com/grosser/parallel#activerecord
-        ActiveRecord::Base.connection_pool.with_connection do
-          update_pr(prid)
-        end
+        update_pr(prid)
       end
-      ActiveRecord::Base.connection.reconnect!
       Parallel.each(pt_ids, in_threads: THREAD_COUNT) do |ptid|
-        # Explicitly use ActiveRecord connection pool
-        # https://github.com/grosser/parallel#activerecord
-        ActiveRecord::Base.connection_pool.with_connection do
-          update_pt(ptid)
-        end
+        update_pt(ptid)
       end
-      ActiveRecord::Base.connection.reconnect!
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
