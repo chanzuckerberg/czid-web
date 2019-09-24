@@ -223,6 +223,6 @@ class VisualizationsController < ApplicationController
                            .map(&:metadata)
                            .map { |ms| ms.map(&:updated_at) }
                            .flatten
-    [pipeline_updated_ats.max, metadata_updated_ats.max].compact.max
+    [pipeline_updated_ats.max, metadata_updated_ats.max].compact.max.to_i
   end
 end
