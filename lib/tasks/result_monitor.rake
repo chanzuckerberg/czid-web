@@ -1,8 +1,5 @@
 # Check for pipeline results and load them if available
 require 'English'
-require 'parallel'
-
-THREAD_COUNT = 20
 
 class MonitorPipelineResults
   @sleep_quantum = 5.0
@@ -13,36 +10,26 @@ class MonitorPipelineResults
     attr_accessor :shutdown_requested
   end
 
-  def self.monitor_pr(pr)
-    Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
-    pr.monitor_results
-  rescue => exception
-    LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
-    LogUtil.log_backtrace(exception)
-  end
-
-  def self.monitor_pt(pt)
-    Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
-    pt.monitor_results
-  rescue => exception
-    LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
-    LogUtil.log_backtrace(exception)
-  end
-
   def self.update_jobs
-    Parallel.each(PipelineRun.results_in_progress, in_threads: THREAD_COUNT) do |pr|
-      # Explicitly use ActiveRecord connection pool
-      # https://github.com/grosser/parallel#activerecord
-      ActiveRecord::Base.connection_pool.with_connection do
-        monitor_pr(pr)
+    PipelineRun.results_in_progress.each do |pr|
+      begin
+        break if @shutdown_requested
+        Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
+        pr.monitor_results
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
+        LogUtil.log_backtrace(exception)
       end
     end
 
-    Parallel.each(PhyloTree.in_progress, in_threads: THREAD_COUNT) do |pt|
-      # Explicitly use ActiveRecord connection pool
-      # https://github.com/grosser/parallel#activerecord
-      ActiveRecord::Base.connection_pool.with_connection do
-        monitor_pt(pt)
+    PhyloTree.in_progress.each do |pt|
+      begin
+        break if @shutdown_requested
+        Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
+        pt.monitor_results
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
+        LogUtil.log_backtrace(exception)
       end
     end
 
