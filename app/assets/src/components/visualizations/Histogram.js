@@ -2,7 +2,7 @@ import { histogram, extent, min, max, mean, deviation } from "d3-array";
 import cx from "classnames";
 import { axisBottom, axisLeft } from "d3-axis";
 import { select, event as currentEvent, mouse } from "d3-selection";
-import { scaleLinear } from "d3-scale";
+import { scaleLinear, scaleLog } from "d3-scale";
 import { map } from "lodash/fp";
 
 import ArrayUtils from "~/components/utils/ArrayUtils";
@@ -39,6 +39,7 @@ export default class Histogram {
         // { x0, length }
         skipBin: false,
         hoverBuffer: 5,
+        xScaleLog: false,
       },
       options
     );
@@ -136,7 +137,8 @@ export default class Histogram {
       }
     }
 
-    return [min(mins), max(maxs)];
+    // cannot include 0 values in log scale's domain, since log(0) is -Infinity
+    return this.options.xScaleLog ? [1, max(maxs)] : [min(mins), max(maxs)];
   };
 
   getBins = x => {
@@ -274,10 +276,17 @@ export default class Histogram {
     if (!this.data) return;
 
     let colors = this.getColors();
-
+    // cannot pass in 0 if using log scale, since log(0) is -Infinity,
+    // so increment everything by 1
+    if (this.options.xScaleLog) {
+      for (let i = 0; i < this.data.length; i++) {
+        this.data[i] = this.data[i].map(d => d + 1);
+      }
+    }
     const domain = this.getDomain();
 
-    let x = scaleLinear()
+    let x = this.options.xScaleLog ? scaleLog() : scaleLinear();
+    x
       .domain(domain)
       .nice()
       .range([this.margins.left, this.size.width - this.margins.right]);
@@ -301,20 +310,38 @@ export default class Histogram {
     const barCenters = [];
 
     for (let i = 0; i < bins.length; i++) {
-      this.svg
-        .append("g")
-        .attr("class", `bar-${i}`)
-        .attr("fill", colors[i])
-        .selectAll("rect")
-        .data(bins[i])
-        .enter()
-        .append("rect")
-        .attr("class", (_, index) => `rect-${index}`)
-        .attr("x", d => x(d.x0) + i * barWidth)
-        .attr("width", d => barWidth)
-        .attr("y", d => y(d.length))
-        .attr("height", d => y(0) - y(d.length))
-        .style("opacity", barOpacity);
+      // if using log scale for x, the histogram bins should be variable width
+      // so the x and width attributes need to be calculated differently
+      // TODO(julie): is there a better way to consolidate this?
+      this.options.xScaleLog
+        ? this.svg
+            .append("g")
+            .attr("class", `bar-${i}`)
+            .attr("fill", colors[i])
+            .selectAll("rect")
+            .data(bins[i])
+            .enter()
+            .append("rect")
+            .attr("class", (_, index) => `rect-${index}`)
+            .attr("x", d => x(d.x0) + i * ((x(d.x1) - x(d.x0)) / 2))
+            .attr("width", d => (x(d.x1) - x(d.x0)) / 2)
+            .attr("y", d => y(d.length))
+            .attr("height", d => y(0) - y(d.length))
+            .style("opacity", barOpacity)
+        : this.svg
+            .append("g")
+            .attr("class", `bar-${i}`)
+            .attr("fill", colors[i])
+            .selectAll("rect")
+            .data(bins[i])
+            .enter()
+            .append("rect")
+            .attr("class", (_, index) => `rect-${index}`)
+            .attr("x", d => x(d.x0) + i * barWidth)
+            .attr("width", d => barWidth)
+            .attr("y", d => y(d.length))
+            .attr("height", d => y(0) - y(d.length))
+            .style("opacity", barOpacity);
 
       bins[i].forEach((bin, index) => {
         const xMidpoint = x(bin.x0) + i * barWidth + barWidth / 2;
@@ -358,18 +385,23 @@ export default class Histogram {
         let refs = this.svg.append("g").attr("class", "refs");
 
         for (let ref of this.options.refValues) {
+          // cannot pass in 0 if using log scale, since log(0) is -Infinity,
+          // so increment everything by 1
+          let xRef = this.options.xScaleLog
+            ? x(ref.values[i] + 1)
+            : x(ref.values[i]);
           refs
             .append("line")
             .attr("stroke", colors[i])
             .style("stroke-dasharray", "4, 4")
-            .attr("x1", x(ref.values[i]))
-            .attr("x2", x(ref.values[i]))
+            .attr("x1", xRef)
+            .attr("x2", xRef)
             .attr("y1", this.margins.top)
             .attr("y2", this.size.height - this.margins.bottom);
           refs
             .append("text")
             .attr("x", -this.margins.top)
-            .attr("y", x(ref.values[i]) - 4)
+            .attr("y", xRef - 4)
             .attr("transform", "rotate(-90)")
             .attr("text-anchor", "end")
             .attr("font-weight", "bold")

@@ -184,7 +184,7 @@ export default class TaxonDetailsMode extends React.Component {
       this.state.histogramRpmSeries,
       {
         seriesNames: ["NT", "NR"],
-        labelX: "rpm",
+        labelX: "rpm+1",
         labelY: "count",
         refValues: [
           {
@@ -195,6 +195,8 @@ export default class TaxonDetailsMode extends React.Component {
             ],
           },
         ],
+        showStatistics: false,
+        xScaleLog: true,
       }
     );
     this.histogram.update();
