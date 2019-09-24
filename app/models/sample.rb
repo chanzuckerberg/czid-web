@@ -69,7 +69,7 @@ class Sample < ApplicationRecord
   FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT = Rails.root.join("scripts", "fastq-fasta-line-validation.awk").to_s
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
-  attr_accessor :bulk_mode, :basespace_dataset_id, :basespace_access_token
+  attr_accessor :bulk_mode, :basespace_dataset_id
 
   belongs_to :project
   # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
