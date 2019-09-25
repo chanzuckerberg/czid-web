@@ -17,13 +17,13 @@ module BasespaceHelper
     )
   end
 
-  def verify_access_token_revoked(access_token)
+  def verify_access_token_revoked(access_token, sample_id)
     # Verify that the token was revoked by using it to call an API endpoint.
     # The API endpoint should return a 401.
 
     fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token, {}, true)
 
-    LogUtil.log_err_and_airbrake("BasespaceAccessTokenError Revoke access token check failed")
+    LogUtil.log_err_and_airbrake("BasespaceAccessTokenError: Failed to revoke access token for sample id #{sample_id}")
   rescue
     # The call should fail.
     Rails.logger.info("Revoke access token check succeeded")

@@ -11,8 +11,21 @@ class TransferBasespaceFiles
     sample = Sample.find(sample_id)
     sample.transfer_basespace_files(basespace_dataset_id, basespace_access_token)
 
-    # TODO: Revoke the access token, so that it can no longer be used.
-    # Need to do this after ALL samples that use the access token can be uploaded.
+    # If ALL samples relying on this access token are done transferring files, revoke the access token.
+    samples_remaining = Sample.where(basespace_access_token: basespace_access_token, status: Sample::STATUS_CREATED)
+
+    # If multiple samples finish file transfer at exactly the same time, this block of code may be run multiple times.
+    if samples_remaining.empty?
+      begin
+        BasespaceHelper.revoke_access_token(basespace_access_token)
+      rescue
+        # If revoke_access_token is called multiple times, it will fail on the subsequent calls. This is okay.
+        nil
+      end
+
+      # This verification call will work even if called multiple times.
+      BasespaceHelper.verify_access_token_revoked(basespace_access_token, sample_id)
+    end
   rescue => e
     Rails.logger.error(e)
   end
