@@ -55,76 +55,115 @@ end
 json.steps do
   steps = []
   steps << {
-      :in => ["fastqs"],
-      :out => "validate_input_out",
-      :class => "PipelineStepRunValidateInput",
-      :module => "idseq_dag.steps.run_validate_input",
-      :additional_files => {},
-      :additional_attributes => {
-          :truncate_fragments_to => attr[:max_fragments],
-          :file_ext => attr[:file_ext]
-      }
-  }
-  steps << {
-      :in => ["validate_input_out"],
-      :out => "star_out",
-      :class => "PipelineStepRunStar",
-      :module => "idseq_dag.steps.run_star",
-      :additional_files => {:star_genome => attr[:star_genome]},
-      :additional_attributes => {:output_gene_file => "reads_per_gene.star.tab"}
-  }
-  steps << {
-      :in => ["star_out"],
-      :out => "trimmomatic_out",
-      :class => "PipelineStepRunTrimmomatic",
-      :module => "idseq_dag.steps.run_trimmomatic",
-      :additional_files => {:adapter_fasta => attr[:adapter_fasta]},
-      :additional_attributes => {}
-  }
-  steps << {
-      :in => ["trimmomatic_out"],
-      :out => "priceseq_out",
-      :class => "PipelineStepRunPriceSeq",
-      :module => "idseq_dag.steps.run_priceseq",
-      :additional_files => {},
-      :additional_attributes => {}
-  }
-      {
-          "in": ["priceseq_out"],
-          "out": "cdhitdup_out",
-          "class": "PipelineStepRunCDHitDup",
-          "module": "idseq_dag.steps.run_cdhitdup",
-          "additional_files": {},
-      "additional_attributes": {}
-  },
-      {
-          "in": ["cdhitdup_out"],
-          "out": "lzw_out",
-          "class": "PipelineStepRunLZW",
-          "module": "idseq_dag.steps.run_lzw",
-          "additional_files": {},
-      "additional_attributes": {
-      "thresholds": [0.45, 0.42],
-      "threshold_readlength": 150
-  }
-  },
-      {
-          "in": ["lzw_out"],
-          "out": "bowtie2_out",
-          "class": "PipelineStepRunBowtie2",
-          "module": "idseq_dag.steps.run_bowtie2",
-          "additional_files": {
-              "bowtie2_genome": "<%= @attribute_dict[:bowtie2_genome] %>"
-      },
-      "additional_attributes": { "output_sam_file": "bowtie2.sam" }
-  }
-  ,
-      {
-          "in": ["bowtie2_out"],
-          "out": "subsampled_out",
-          "class": "PipelineStepRunSubsample",
-          "module": "idseq_dag.steps.run_subsample",
-          "additional_files": {},
-      "additional_attributes": { "max_fragments": <%= @attribute_dict[:max_subsample_frag] %> }
+    :in => ["fastqs"],
+    :out => "validate_input_out",
+    :class => "PipelineStepRunValidateInput",
+    :module => "idseq_dag.steps.run_validate_input",
+    :additional_files => {},
+    :additional_attributes => {
+      :truncate_fragments_to => attr[:max_fragments],
+      :file_ext => attr[:file_ext],
     },
+  }
+  steps << {
+    :in => ["validate_input_out"],
+    :out => "star_out",
+    :class => "PipelineStepRunStar",
+    :module => "idseq_dag.steps.run_star",
+    :additional_files => {:star_genome => attr[:star_genome]},
+    :additional_attributes => {:output_gene_file => "reads_per_gene.star.tab"},
+  }
+  steps << {
+    :in => ["star_out"],
+    :out => "trimmomatic_out",
+    :class => "PipelineStepRunTrimmomatic",
+    :module => "idseq_dag.steps.run_trimmomatic",
+    :additional_files => {:adapter_fasta => attr[:adapter_fasta]},
+    :additional_attributes => {},
+  }
+  steps << {
+    :in => ["trimmomatic_out"],
+    :out => "priceseq_out",
+    :class => "PipelineStepRunPriceSeq",
+    :module => "idseq_dag.steps.run_priceseq",
+    :additional_files => {},
+    :additional_attributes => {},
+  }
+  steps << {
+    :in => ["priceseq_out"],
+    :out => "cdhitdup_out",
+    :class => "PipelineStepRunCDHitDup",
+    :module => "idseq_dag.steps.run_cdhitdup",
+    :additional_files => {},
+    :additional_attributes => {},
+  }
+  steps << {
+    :in => ["cdhitdup_out"],
+    :out => "lzw_out",
+    :class => "PipelineStepRunLZW",
+    :module => "idseq_dag.steps.run_lzw",
+    :additional_files => {},
+    :additional_attributes => {
+      :thresholds => [0.45, 0.42],
+      :threshold_readlength => 150,
+    },
+  }
+  steps << {
+    :in => ["lzw_out"],
+    :out => "bowtie2_out",
+    :class => "PipelineStepRunBowtie2",
+    :module => "idseq_dag.steps.run_bowtie2",
+    :additional_files => {
+      :bowtie2_genome => attr[:bowtie2_genome],
+    },
+    :additional_attributes => {:output_sam_file => "bowtie2.sam"},
+  }
+  steps << {
+    :in => ["bowtie2_out"],
+    :out => "subsampled_out",
+    :class => "PipelineStepRunSubsample",
+    :module => "idseq_dag.steps.run_subsample",
+    :additional_files => {},
+    :additional_attributes => {:max_fragments => attr[:max_subsample_frag]},
+  }
+
+  if attr[:host_genome] != "human"
+    steps << {
+      :in => ["subsampled_out", "validate_input_out"],
+      :out => "star_human_out",
+      :class => "PipelineStepRunStarDownstream",
+      :module => "idseq_dag.steps.run_star_downstream",
+      :additional_files => {:star_genome => attr[:human_star_genome]},
+      :additional_attributes => {},
+    }
+    steps << {
+      :in => ["star_human_out"],
+      :out => "bowtie2_human_out",
+      :class => "PipelineStepRunBowtie2",
+      :module => "idseq_dag.steps.run_bowtie2",
+      :additional_files => {:bowtie2_genome => attr[:human_bowtie2_genome]},
+      :additional_attributes => {:output_sam_file => "bowtie2_human.sam"},
+    }
+  end
+
+  steps << {
+    :in => [(attr[:host_genome] != "human") ? "bowtie2_human_out" : "subsampled_out"],
+    :out => "gsnap_filter_out",
+    :class => "PipelineStepRunGsnapFilter",
+    :module => "idseq_dag.steps.run_gsnap_filter",
+    :additional_files => {
+      :gsnap_genome => "s3://idseq-database/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/hg38_pantro5_k16.tar",
+    },
+    :additional_attributes => {:output_sam_file => "gsnap_filter.sam"},
+  }
+
+  json.array! steps
+end
+
+json.given_targets do
+  json.fastqs do
+    json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/fastqs"
+    json.count_reads 1
+    json.max_fragments attr[:max_fragments]
+  end
 end
