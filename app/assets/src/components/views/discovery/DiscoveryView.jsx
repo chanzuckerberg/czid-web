@@ -135,7 +135,7 @@ class DiscoveryView extends React.Component {
     this.samples = this.dataLayer.samples.createView({ conditions });
     this.projects = this.dataLayer.projects.createView({
       conditions,
-      onViewChange: this.refreshProjectStats,
+      onViewChange: this.refreshProjectData,
     });
     this.visualizations = this.dataLayer.visualizations.createView({
       conditions,
@@ -184,13 +184,15 @@ class DiscoveryView extends React.Component {
 
   updateBrowsingHistory = (action = "push") => {
     const { domain } = this.props;
+    const { projectId } = this.state;
 
     const localFields = [
-      "currentTab",
+      ...(projectId ? [] : ["currentTab"]),
       "sampleActiveColumns",
       "showFilters",
       "showStats",
     ];
+
     const sessionFields = concat(localFields, [
       "currentDisplay",
       "mapSidebarTab",
@@ -377,6 +379,19 @@ class DiscoveryView extends React.Component {
         count: this.projects.length,
       },
     });
+  };
+
+  refreshProject = () => {
+    const { projectId } = this.state;
+
+    this.setState({
+      project: this.projects.get(projectId),
+    });
+  };
+
+  refreshProjectData = () => {
+    this.refreshProject();
+    this.refreshProjectStats();
   };
 
   refreshFilteredDimensions = async () => {
