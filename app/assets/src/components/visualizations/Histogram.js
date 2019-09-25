@@ -163,13 +163,17 @@ export default class Histogram {
     return bins;
   };
 
-  getBarWidth = () => {
+  getBarWidth = (x, bin) => {
     if (this.options.skipBins) {
       return (
         (this.size.width - this.margins.right - this.margins.left) /
         (this.options.numBins ||
           max(map(seriesData => seriesData.length, this.data)))
       );
+    }
+
+    if (this.options.xScaleLog) {
+      return (x(bin.x1) - x(bin.x0)) / 2;
     }
 
     return (
@@ -309,7 +313,6 @@ export default class Histogram {
     this.svg.append("g").call(this.xAxis.bind(this), x);
     this.svg.append("g").call(this.yAxis.bind(this), y);
 
-    let barWidth = this.getBarWidth();
     const barOpacity = this.getBarOpacity();
 
     // Maps from x-coordinate to the data plotted at that x-coordinate.
@@ -318,40 +321,23 @@ export default class Histogram {
     const barCenters = [];
 
     for (let i = 0; i < bins.length; i++) {
-      // if using log scale for x, the histogram bins should be variable width
-      // so the x and width attributes need to be calculated differently
-      // TODO(julie): is there a better way to consolidate this?
-      this.options.xScaleLog
-        ? this.svg
-            .append("g")
-            .attr("class", `bar-${i}`)
-            .attr("fill", colors[i])
-            .selectAll("rect")
-            .data(bins[i])
-            .enter()
-            .append("rect")
-            .attr("class", (_, index) => `rect-${index}`)
-            .attr("x", d => x(d.x0) + i * ((x(d.x1) - x(d.x0)) / 2))
-            .attr("width", d => (x(d.x1) - x(d.x0)) / 2)
-            .attr("y", d => y(d.length))
-            .attr("height", d => y(0) - y(d.length))
-            .style("opacity", barOpacity)
-        : this.svg
-            .append("g")
-            .attr("class", `bar-${i}`)
-            .attr("fill", colors[i])
-            .selectAll("rect")
-            .data(bins[i])
-            .enter()
-            .append("rect")
-            .attr("class", (_, index) => `rect-${index}`)
-            .attr("x", d => x(d.x0) + i * barWidth)
-            .attr("width", d => barWidth)
-            .attr("y", d => y(d.length))
-            .attr("height", d => y(0) - y(d.length))
-            .style("opacity", barOpacity);
+      this.svg
+        .append("g")
+        .attr("class", `bar-${i}`)
+        .attr("fill", colors[i])
+        .selectAll("rect")
+        .data(bins[i])
+        .enter()
+        .append("rect")
+        .attr("class", (_, index) => `rect-${index}`)
+        .attr("x", d => x(d.x0) + i * this.getBarWidth(x, d))
+        .attr("width", d => this.getBarWidth(x, d))
+        .attr("y", d => y(d.length))
+        .attr("height", d => y(0) - y(d.length))
+        .style("opacity", barOpacity);
 
       bins[i].forEach((bin, index) => {
+        let barWidth = this.getBarWidth(x, bin);
         const xMidpoint = x(bin.x0) + i * barWidth + barWidth / 2;
         barCentersToIndices[xMidpoint] = [i, index];
         barCenters.push(xMidpoint);
