@@ -4,8 +4,8 @@ FactoryBot.define do
     # Host Filtering, GSNAPLgcRAPSEARCH alignment,
     # Post Processing, Experimental
     step_number { 1 }
-    name { "Host Filtering" }
-    job_status { "COMPLETED" }
+    name { PipelineRunStage::HOST_FILTERING_STAGE_NAME }
+    job_status { PipelineRunStage::STATUS_SUCCEEDED }
     dag_json do
       {
         output_dir_s3: "s3:gc/someBucket/samples/theProjectId/theSampleId/results",
