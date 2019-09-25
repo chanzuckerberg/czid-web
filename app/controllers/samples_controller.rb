@@ -470,7 +470,7 @@ class SamplesController < ApplicationController
         if @samples.present?
           render json: { samples: @samples }
         else
-          render json: { status: "Sorry, we couldn’t find any valid samples in this s3 bucket. Remember, IDseq needs to already have permissions to this bucket. Also, double-check the way you named the files and their extensions. Find the details about permissions and file format requirements by clicking on the \"More Info\" link." }, status: :unprocessable_entity
+          render json: { status: "Sorry, we couldn’t find any valid samples in this s3 bucket. There may be an issue with permissions or the file format. Click the \"More Info\" link above for more detailed instructions." }, status: :unprocessable_entity
         end
       end
     end
