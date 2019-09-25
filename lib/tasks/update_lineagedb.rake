@@ -9,6 +9,7 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
   ### Full Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 LINEAGE_VERSION=3 rake update_lineage_db
   ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
   ### LINEAGE_VERSION needs to be incremented by 1 from the current highest version in taxon_lineages
+  current_date = Time.now.utc
 
   puts "\n\nDRY RUN" if args.dryrun
 
@@ -20,7 +21,7 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
                       end
 
   puts "\n\nStarting import of #{reference_s3_path} ...\n\n"
-  import_lineage_database!(reference_s3_path) unless args.dryrun
+  import_lineage_database!(reference_s3_path, current_date) unless args.dryrun
   puts "\n\nDone import of #{reference_s3_path}."
 
   current_lineage_version = ENV['LINEAGE_VERSION'].to_i
@@ -29,14 +30,14 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
   end
 
   puts "\n\nStarting update of lineage versions to #{current_lineage_version} ...\n\n"
-  add_lineage_version_numbers!(current_lineage_version) unless args.dryrun
+  add_lineage_version_numbers!(current_lineage_version, current_date) unless args.dryrun
   puts "\n\nDone update of lineage versions to #{current_lineage_version}."
 
   ## Instructions on next steps
   puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
 end
 
-def import_lineage_database!(reference_s3_path)
+def import_lineage_database!(reference_s3_path, current_date)
   local_taxonomy_path = "/app/tmp/taxonomy"
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
@@ -50,7 +51,6 @@ def import_lineage_database!(reference_s3_path)
                  name_column_array.join(",")
   n_columns = column_names.split(",").count
 
-  current_date = Time.now.utc
   `
    set -xe
    ## Set work directory
@@ -111,7 +111,7 @@ def import_lineage_database!(reference_s3_path)
   raise "lineage database update failed" unless $CHILD_STATUS.success?
 end
 
-def add_lineage_version_numbers!(current_lineage_version)
+def add_lineage_version_numbers!(current_lineage_version, current_date)
   TaxonLineage.where(started_at: current_date).update_all(version_start: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
   TaxonLineage.where(ended_at: TaxonLineage.column_defaults["ended_at"]).update_all(version_end: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
 end
