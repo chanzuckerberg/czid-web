@@ -1,7 +1,5 @@
 desc 'Creates a new AlignmentConfig for a set of indexes'
 
-# TODO: (gdingle): TEST ME!!
-
 task create_alignment_config: :environment do
   name = ENV['NCBI_DATE'] # YYYY-MM-DD
   raise "Must have a $NCBI_DATE" unless name
@@ -17,8 +15,8 @@ task create_alignment_config: :environment do
     lineage_version: lineage_version,
     index_dir_suffix: name,
 
-    # s3_nt_db_path: "#{bucket}/alignment_data/#{name}/nt",
-    # s3_nt_loc_db_path: "#{bucket}/alignment_data/#{name}/nt_loc.#{db_file_ext}",
+    s3_nt_db_path: "#{bucket}/alignment_data/#{name}/nt",
+    s3_nt_loc_db_path: "#{bucket}/alignment_data/#{name}/nt_loc.#{db_file_ext}",
     s3_nr_db_path: "#{bucket}/alignment_data/#{name}/nr",
     s3_nr_loc_db_path: "#{bucket}/alignment_data/#{name}/nr_loc.#{db_file_ext}",
     s3_accession2taxid_path: "#{bucket}/alignment_data/#{name}/accession2taxid.#{db_file_ext}",
