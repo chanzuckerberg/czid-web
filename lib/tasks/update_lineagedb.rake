@@ -112,6 +112,6 @@ def import_lineage_database!(reference_s3_path)
 end
 
 def add_lineage_version_numbers!(current_lineage_version)
-  TaxonLineage.where(started_at: current_date).update_all(version_start: current_lineage_version)
-  TaxonLineage.where(ended_at: TaxonLineage.column_defaults["ended_at"]).update_all(version_end: current_lineage_version)
+  TaxonLineage.where(started_at: current_date).update_all(version_start: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
+  TaxonLineage.where(ended_at: TaxonLineage.column_defaults["ended_at"]).update_all(version_end: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
 end
