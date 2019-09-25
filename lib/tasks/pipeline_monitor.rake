@@ -3,13 +3,15 @@ require 'English'
 require 'json'
 require 'thread/pool'
 
+THREAD_COUNT = 20
+
 Rails.application.config.after_initialize do
   ActiveRecord::Base.connection_pool.disconnect!
 
   ActiveSupport.on_load(:active_record) do
     config = ActiveRecord::Base.configurations[Rails.env] ||
-              Rails.application.config.database_configuration[Rails.env]
-    config['pool'] = 20
+      Rails.application.config.database_configuration[Rails.env]
+    config['pool'] = THREAD_COUNT
     ActiveRecord::Base.establish_connection(config)
   end
 end
@@ -25,8 +27,6 @@ IDSEQ_BENCH_MIN_FREQUENCY_HOURS = 1.0
 IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json".freeze
 
 AWS_DEFAULT_REGION = ENV.fetch('AWS_DEFAULT_REGION') { "us-west-2" }
-
-THREAD_COUNT = 20
 
 class CheckPipelineRuns
   @sleep_quantum = 5.0
@@ -261,7 +261,7 @@ class CheckPipelineRuns
       begin
         create_sample_for_benchmark(s3path, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_proj, bm_host, bm_comment, t_now)
       rescue => exception
-        LogUtil.log_err_and_airbrake("Creating sample for benchmark failed with exception: #{exception.message}")
+        LogUtil.log_err_and_airbrake("Creating sample for benchmark #{s3path} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -300,7 +300,6 @@ class CheckPipelineRuns
       pr_ids.each do |prid|
         pool.process do
           update_pr(prid)
-          puts ActiveRecord::Base.connection_pool.stat()
         end
       end
       pt_ids.each do |ptid|
