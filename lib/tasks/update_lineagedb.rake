@@ -26,7 +26,7 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
 
   current_lineage_version = ENV['LINEAGE_VERSION'].to_i
   if current_lineage_version.zero?
-    current_lineage_version = AlignmentConfig.last.lineage_version + 1
+    current_lineage_version = AlignmentConfig.maximum("lineage_version")
   end
 
   puts "\n\nStarting update of lineage versions to #{current_lineage_version} ...\n\n"
