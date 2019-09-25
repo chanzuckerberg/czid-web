@@ -4,7 +4,8 @@ task create_alignment_config: :environment do
   name = ENV['NCBI_DATE'] # YYYY-MM-DD
   raise "Must have a $NCBI_DATE" unless name
 
-  lineage_version = ENV['LINEAGE_VERSION'] || AlignmentConfig.last.lineage_version
+  # lineage_version should be in sync with that used in lib/tasks/update_lineagedb.rake
+  lineage_version = ENV['LINEAGE_VERSION'] || AlignmentConfig.last.lineage_version + 1
 
   bucket = 's3://idseq-database'
   # SQLite was reverted because of a concurrency issue
