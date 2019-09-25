@@ -75,6 +75,14 @@ export default class Histogram {
         `translate(0,${this.size.height - this.margins.bottom})`
       )
       .call(axisBottom(x).tickSizeOuter(0));
+
+    // if using log10 scale, set the number of ticks according to the size of
+    // the domain (in powers of 10) to prevent extra labels from showing up
+    if (this.options.xScaleLog) {
+      let nTicks = Math.log10(x.domain()[1]) + 1;
+      g.call(axisBottom(x).ticks(nTicks));
+    }
+
     g
       .append("text")
       .attr("x", this.size.width - this.margins.right)
