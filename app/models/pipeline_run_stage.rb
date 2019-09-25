@@ -220,11 +220,10 @@ class PipelineRunStage < ApplicationRecord
     #                        attribute_dict,
     #                        pipeline_run.parse_dag_vars)
 
-    res = ActionController::Base.new.render_to_string(file: Rails.root.join('lib/dags/host_filter.json.jbuilder'), :locals => { :attr => attribute_dict })
+    res = ActionController::Base.new.render_to_string(file: Rails.root.join('lib/dags/host_filter.json.jbuilder'), locals: { attr: attribute_dict })
     puts "4:47pm: ", res
 
     # res = render_to_string(template: "app/lib/dags/host_filter.json.jbuilder")
-
 
     # dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.jbuilder",
     #                        sample.project_id,
