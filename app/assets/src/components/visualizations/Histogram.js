@@ -284,10 +284,16 @@ export default class Histogram {
     if (!this.data) return;
 
     let colors = this.getColors();
-
+    // cannot pass in 0 if using log scale, since log(0) is -Infinity,
+    // so increment everything by 1
+    if (this.options.xScaleLog) {
+      for (let i = 0; i < this.data.length; i++) {
+        this.data[i] = this.data[i].map(d => d + 1);
+      }
+    }
     const domain = this.getDomain();
 
-    let x = this.options.xScaleLog ? scaleLog().clamp(true) : scaleLinear();
+    let x = this.options.xScaleLog ? scaleLog() : scaleLinear();
     x
       .domain(domain)
       .nice()
@@ -387,18 +393,23 @@ export default class Histogram {
         let refs = this.svg.append("g").attr("class", "refs");
 
         for (let ref of this.options.refValues) {
+          // cannot pass in 0 if using log scale, since log(0) is -Infinity,
+          // so increment everything by 1
+          let xRef = this.options.xScaleLog
+            ? x(ref.values[i] + 1)
+            : x(ref.values[i]);
           refs
             .append("line")
             .attr("stroke", colors[i])
             .style("stroke-dasharray", "4, 4")
-            .attr("x1", x(ref.values[i]))
-            .attr("x2", x(ref.values[i]))
+            .attr("x1", xRef)
+            .attr("x2", xRef)
             .attr("y1", this.margins.top)
             .attr("y2", this.size.height - this.margins.bottom);
           refs
             .append("text")
             .attr("x", -this.margins.top)
-            .attr("y", x(ref.values[i]) - 4)
+            .attr("y", xRef - 4)
             .attr("transform", "rotate(-90)")
             .attr("text-anchor", "end")
             .attr("font-weight", "bold")
