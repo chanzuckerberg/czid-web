@@ -4,11 +4,13 @@ require 'English'
 
 desc 'Imports NCBI lineage data into IDseq'
 
-# TODO: (gdingle): dryrun not working!!!
 task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
-  ### Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 LINEAGE_VERSION=3 rake update_lineage_db
+  ### Short Usage: NCBI_DATE=2018-12-01 rake update_lineage_db
+  ### Full Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 LINEAGE_VERSION=3 rake update_lineage_db
   ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
   ### LINEAGE_VERSION needs to be incremented by 1 from the current highest version in taxon_lineages
+
+  puts "\n\nDRY RUN" if args.dryrun
 
   ncbi_date = ENV['NCBI_DATE']
   reference_s3_path = if ncbi_date.present?
@@ -21,7 +23,11 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
   import_lineage_database!(reference_s3_path) unless args.dryrun
   puts "\n\nDone import of #{reference_s3_path}."
 
-  current_lineage_version = ENV['LINEAGE_VERSION'].to_i || AlignmentConfig.last.lineage_version + 1
+  current_lineage_version = ENV['LINEAGE_VERSION'].to_i
+  if current_lineage_version.zero?
+    current_lineage_version = AlignmentConfig.last.lineage_version + 1
+  end
+
   puts "\n\nStarting update of lineage versions to #{current_lineage_version} ...\n\n"
   add_lineage_version_numbers!(current_lineage_version) unless args.dryrun
   puts "\n\nDone update of lineage versions to #{current_lineage_version}."
