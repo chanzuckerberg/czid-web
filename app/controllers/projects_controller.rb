@@ -94,7 +94,6 @@ class ProjectsController < ApplicationController
         limited_projects = limit ? projects.offset(offset).limit(limit) : projects
 
         if basic
-          limited_projects = limited_projects
           attrs = [
             'id', 'name', 'description', 'created_at', 'public_access', 'COUNT(DISTINCT samples.id) AS number_of_samples',
           ]
@@ -107,7 +106,7 @@ class ProjectsController < ApplicationController
                              .includes(samples: [:host_genome, :user, { metadata: [:metadata_field, :location] }])
                              .group(:id)
                              .references(:samples)
-
+          # get aggregated lists of association values in string by using MySQL's GROUP_CONCAT (should update to JSON_ARRAYAGG when possible)
           group_concat_host = "GROUP_CONCAT(DISTINCT host_genomes.name SEPARATOR '::') AS hosts"
           group_concat_sample_type = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'sample_type' THEN metadata.string_validated_value ELSE NULL END SEPARATOR '::') AS tissues"
           group_concat_location = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'collection_location' THEN IFNULL(locations.name, metadata.string_validated_value) ELSE NULL END SEPARATOR '::') AS locations"
