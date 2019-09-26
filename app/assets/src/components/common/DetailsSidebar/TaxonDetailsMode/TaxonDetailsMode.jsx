@@ -5,6 +5,8 @@ import PropTypes from "prop-types";
 import { getTaxonDescriptions, getTaxonDistributionForBackground } from "~/api";
 import Histogram from "~/components/visualizations/Histogram";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import InfoCircleIcon from "~/components/ui/icons/InfoCircleIcon";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
 import cs from "./taxon_details_mode.scss";
 
@@ -184,11 +186,11 @@ export default class TaxonDetailsMode extends React.Component {
       this.state.histogramRpmSeries,
       {
         seriesNames: ["NT", "NR"],
-        labelX: "rpm+1",
-        labelY: "count",
+        labelX: "rPM+1",
+        labelY: "# of Background Samples",
         refValues: [
           {
-            name: "sample",
+            name: "this sample",
             values: [
               this.props.taxonValues.NT.rpm,
               this.props.taxonValues.NR.rpm,
@@ -324,6 +326,17 @@ export default class TaxonDetailsMode extends React.Component {
           <div>
             <div className={cs.subtitle}>
               Reference Background: {this.props.background.name}
+              <ColumnHeaderTooltip
+                trigger={
+                  <span>
+                    <InfoCircleIcon className={cs.infoIcon} />
+                  </span>
+                }
+                content="This chart shows how abundant (rPM) this taxon is in your
+                sample compared to the other samples in the chosen Background Model.
+                The farther your sample line is to the right of the other samples, the
+                higher the likelihood that this taxon is unique to your sample."
+              />
             </div>
             <div
               className={cs.histogram}

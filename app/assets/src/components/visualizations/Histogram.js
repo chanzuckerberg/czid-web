@@ -85,10 +85,10 @@ export default class Histogram {
 
     g
       .append("text")
-      .attr("x", this.size.width - this.margins.right)
+      .attr("x", (this.size.width + this.margins.left) / 2 - 2)
       .attr("y", +30)
       .attr("fill", "#000")
-      .attr("font-weight", "bold")
+      .attr("font-weight", 600)
       .attr("text-anchor", "end")
       .attr("class", cs.labelX)
       .text(this.options.labelX);
@@ -115,11 +115,11 @@ export default class Histogram {
     g
       .select(".tick:last-of-type text")
       .clone()
-      .attr("x", 4)
+      .attr("x", 12)
       .attr("y", -30 - (this.options.labelYOffset || 0))
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "end")
-      .attr("font-weight", "bold")
+      .attr("font-weight", 600)
       .attr("class", cx(cs.labelY, this.options.labelYLarge && cs.large))
       .text(this.options.labelY);
   }
@@ -435,15 +435,15 @@ export default class Histogram {
       legend
         .append("rect")
         .attr("x", this.size.width - 5)
-        .attr("width", 20)
-        .attr("height", 20)
+        .attr("width", 14)
+        .attr("height", 14)
         .attr("fill", (_, i) => colors[i]);
 
       legend
         .append("text")
         .attr("x", this.size.width - 10)
         .attr("y", this.margins.top)
-        .attr("dy", -9)
+        .attr("dy", -11)
         .attr("alignment-baseline", "middle")
         .text(d => d);
     }
