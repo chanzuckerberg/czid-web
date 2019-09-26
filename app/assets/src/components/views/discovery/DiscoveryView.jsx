@@ -197,7 +197,12 @@ class DiscoveryView extends React.Component {
       "currentDisplay",
       "mapSidebarTab",
     ]);
-    const urlFields = concat(sessionFields, ["filters", "projectId", "search"]);
+    const urlFields = concat(sessionFields, [
+      ...(projectId ? ["currentTab"] : []),
+      "filters",
+      "projectId",
+      "search",
+    ]);
     const stateFields = concat(urlFields, ["project"]);
 
     const localState = pick(localFields, this.state);
