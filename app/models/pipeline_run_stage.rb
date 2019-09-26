@@ -221,6 +221,7 @@ class PipelineRunStage < ApplicationRecord
               else
                 "erb"
               end
+    # See our dag templates in app/lib/dags.
     dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.#{dag_ext}",
                            sample.project_id,
                            sample.id,

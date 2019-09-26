@@ -19,6 +19,7 @@ class DagGenerator
     @dag_vars_dict = dag_vars_dict
   end
 
+  # See our dag templates in app/lib/dags.
   def render
     # Interoperable between .jbuilder and .erb templates
     if File.extname(@template_file) == ".jbuilder"
