@@ -228,22 +228,24 @@ const getProjectDimensions = ({ domain, filters, projectId, search }) =>
 const getSamplesV1 = params => get("/samples.json", { params });
 
 const getProjects = ({
+  basic,
   domain,
   filters,
   limit,
+  listAllIds,
   offset,
   search,
   projectId,
-  basic,
 } = {}) =>
   get("/projects.json", {
     params: {
+      basic,
       domain,
       limit,
+      listAllIds,
       offset,
       search,
       projectId,
-      basic,
       ...filters,
     },
   });
