@@ -62,8 +62,8 @@ json.steps do
     additional_files: {},
     additional_attributes: {
       truncate_fragments_to: attr[:max_fragments],
-      file_ext: attr[:file_ext]
-    }
+      file_ext: attr[:file_ext],
+    },
   }
   steps << {
     in: ['validate_input_out'],
@@ -71,7 +71,7 @@ json.steps do
     class: 'PipelineStepRunStar',
     module: 'idseq_dag.steps.run_star',
     additional_files: { star_genome: attr[:star_genome] },
-    additional_attributes: { output_gene_file: 'reads_per_gene.star.tab' }
+    additional_attributes: { output_gene_file: 'reads_per_gene.star.tab' },
   }
   steps << {
     in: ['star_out'],
@@ -79,7 +79,7 @@ json.steps do
     class: 'PipelineStepRunTrimmomatic',
     module: 'idseq_dag.steps.run_trimmomatic',
     additional_files: { adapter_fasta: attr[:adapter_fasta] },
-    additional_attributes: {}
+    additional_attributes: {},
   }
   steps << {
     in: ['trimmomatic_out'],
@@ -87,7 +87,7 @@ json.steps do
     class: 'PipelineStepRunPriceSeq',
     module: 'idseq_dag.steps.run_priceseq',
     additional_files: {},
-    additional_attributes: {}
+    additional_attributes: {},
   }
   steps << {
     in: ['priceseq_out'],
@@ -95,7 +95,7 @@ json.steps do
     class: 'PipelineStepRunCDHitDup',
     module: 'idseq_dag.steps.run_cdhitdup',
     additional_files: {},
-    additional_attributes: {}
+    additional_attributes: {},
   }
   steps << {
     in: ['cdhitdup_out'],
@@ -105,8 +105,8 @@ json.steps do
     additional_files: {},
     additional_attributes: {
       thresholds: [0.45, 0.42],
-      threshold_readlength: 150
-    }
+      threshold_readlength: 150,
+    },
   }
   steps << {
     in: ['lzw_out'],
@@ -114,9 +114,9 @@ json.steps do
     class: 'PipelineStepRunBowtie2',
     module: 'idseq_dag.steps.run_bowtie2',
     additional_files: {
-      bowtie2_genome: attr[:bowtie2_genome]
+      bowtie2_genome: attr[:bowtie2_genome],
     },
-    additional_attributes: { output_sam_file: 'bowtie2.sam' }
+    additional_attributes: { output_sam_file: 'bowtie2.sam' },
   }
   steps << {
     in: ['bowtie2_out'],
@@ -124,7 +124,7 @@ json.steps do
     class: 'PipelineStepRunSubsample',
     module: 'idseq_dag.steps.run_subsample',
     additional_files: {},
-    additional_attributes: { max_fragments: attr[:max_subsample_frag] }
+    additional_attributes: { max_fragments: attr[:max_subsample_frag] },
   }
 
   if attr[:host_genome] != 'human'
@@ -134,7 +134,7 @@ json.steps do
       class: 'PipelineStepRunStarDownstream',
       module: 'idseq_dag.steps.run_star_downstream',
       additional_files: { star_genome: attr[:human_star_genome] },
-      additional_attributes: {}
+      additional_attributes: {},
     }
     steps << {
       in: ['star_human_out'],
@@ -142,7 +142,7 @@ json.steps do
       class: 'PipelineStepRunBowtie2',
       module: 'idseq_dag.steps.run_bowtie2',
       additional_files: { bowtie2_genome: attr[:human_bowtie2_genome] },
-      additional_attributes: { output_sam_file: 'bowtie2_human.sam' }
+      additional_attributes: { output_sam_file: 'bowtie2_human.sam' },
     }
   end
 
@@ -152,9 +152,9 @@ json.steps do
     class: 'PipelineStepRunGsnapFilter',
     module: 'idseq_dag.steps.run_gsnap_filter',
     additional_files: {
-      gsnap_genome: 's3://idseq-database/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/hg38_pantro5_k16.tar'
+      gsnap_genome: 's3://idseq-database/host_filter/human/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime/hg38_pantro5_k16.tar',
     },
-    additional_attributes: { output_sam_file: 'gsnap_filter.sam' }
+    additional_attributes: { output_sam_file: 'gsnap_filter.sam' },
   }
 
   json.array! steps
