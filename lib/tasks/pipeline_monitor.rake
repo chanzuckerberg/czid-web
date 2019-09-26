@@ -1,9 +1,9 @@
 # Jos to check the status of pipeline runs
 require 'English'
 require 'json'
-require 'thread/pool'
+require 'parallel'
 
-THREAD_COUNT = 20
+PROCESS_COUNT = 20
 
 Rails.application.config.after_initialize do
   ActiveRecord::Base.connection_pool.disconnect!
@@ -11,7 +11,7 @@ Rails.application.config.after_initialize do
   ActiveSupport.on_load(:active_record) do
     config = ActiveRecord::Base.configurations[Rails.env] ||
              Rails.application.config.database_configuration[Rails.env]
-    config['pool'] = THREAD_COUNT
+    config['pool'] = PROCESS_COUNT
     ActiveRecord::Base.establish_connection(config)
   end
 end
@@ -296,18 +296,15 @@ class CheckPipelineRuns
       t_iter_start = t_now
       pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
-      pool = Thread.pool(THREAD_COUNT)
-      pr_ids.each do |prid|
-        pool.process do
-          update_pr(prid)
-        end
+      Parallel.each(pr_ids, in_processes: PROCESS_COUNT) do |prid|
+        @reconnected ||= ActiveRecord::Base.connection.reconnect! || true
+        update_pr(prid)
       end
-      pt_ids.each do |ptid|
-        pool.process do
-          update_pt(ptid)
-        end
+      Parallel.each(pt_ids, in_processes: PROCESS_COUNT) do |ptid|
+        @reconnected ||= ActiveRecord::Base.connection.reconnect! || true
+        update_pt(ptid)
       end
-      pool.shutdown
+      ActiveRecord::Base.connection.reconnect!
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
