@@ -3,6 +3,19 @@ require 'English'
 require 'json'
 require 'thread/pool'
 
+THREAD_COUNT = 20
+
+Rails.application.config.after_initialize do
+  ActiveRecord::Base.connection_pool.disconnect!
+
+  ActiveSupport.on_load(:active_record) do
+    config = ActiveRecord::Base.configurations[Rails.env] ||
+             Rails.application.config.database_configuration[Rails.env]
+    config['pool'] = THREAD_COUNT
+    ActiveRecord::Base.establish_connection(config)
+  end
+end
+
 # Benchmark status will not be updated faster than this.
 IDSEQ_BENCH_UPDATE_FREQUENCY_SECONDS = 600
 
@@ -16,10 +29,6 @@ IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json".freeze
 AWS_DEFAULT_REGION = ENV.fetch('AWS_DEFAULT_REGION') { "us-west-2" }
 
 class CheckPipelineRuns
-  # Concurrency allowed
-  MAX_SHARDS = 10
-  MIN_JOBS_PER_SHARD = 20
-
   @sleep_quantum = 5.0
 
   @shutdown_requested = false
@@ -28,36 +37,26 @@ class CheckPipelineRuns
     attr_accessor :shutdown_requested
   end
 
-  def self.update_jobs(num_shards, shard_id, pr_ids, pt_ids)
-    ActiveRecord::Base.connection.reconnect! if shard_id > 0
-    num_pr = pr_ids.count
-    num_pt = pt_ids.count
-    Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr and #{num_pt} pt. shard #{shard_id} out of #{num_shards}")
-    pr_ids.each do |prid|
-      next unless prid % num_shards == shard_id
+  def self.update_pr(prid)
+    unless @shutdown_requested
       pr = PipelineRun.find(prid)
-      begin
-        break if @shutdown_requested
-        Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
-        pr.update_job_status
-      rescue => exception
-        LogUtil.log_err_and_airbrake("Failed to update pipeline run #{pr.id}")
-        LogUtil.log_backtrace(exception)
-      end
+      Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
+      pr.update_job_status
     end
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Updating pipeline run #{pr.id} failed with exception: #{exception.message}")
+    LogUtil.log_backtrace(exception)
+  end
 
-    pt_ids.each do |ptid|
-      next unless ptid % num_shards == shard_id
+  def self.update_pt(ptid)
+    unless @shutdown_requested
       pt = PhyloTree.find(ptid)
-      begin
-        break if @shutdown_requested
-        Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
-        pt.monitor_job
-      rescue => exception
-        LogUtil.log_err_and_airbrake("Failed monitor job for phylo_tree #{pt.id}")
-        LogUtil.log_backtrace(exception)
-      end
+      Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
+      pt.monitor_job
     end
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Monitor job for phylo_tree #{pt.id} failed with exception: #{exception.message}")
+    LogUtil.log_backtrace(exception)
   end
 
   def self.forced_update_interval
@@ -169,7 +168,10 @@ class CheckPipelineRuns
       next if k == "ORIGIN"
       new_metadata[k] = v
     end
-    known_organisms = metadata['verified_contents'].pluck('genome').join(", ")
+    # HACK: for benchmark 5 this string is always too long for the DB
+    #   depending on the connection type you are using it may be truncated or throw an error
+    #   truncating manually prevents an error
+    known_organisms = metadata['verified_contents'].pluck('genome').join(", ")[0..254]
     bm_sample_params = {
       name: bm_sample_name,
       host_genome_id: bm_host.id,
@@ -259,7 +261,7 @@ class CheckPipelineRuns
       begin
         create_sample_for_benchmark(s3path, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_proj, bm_host, bm_comment, t_now)
       rescue => exception
-        LogUtil.log_err_and_airbrake("Failed to create sample for benchmark #{s3path}")
+        LogUtil.log_err_and_airbrake("Creating sample for benchmark #{s3path} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -271,7 +273,7 @@ class CheckPipelineRuns
       begin
         benchmark_update(t_now)
       rescue => exception
-        LogUtil.log_err_and_airbrake("Failed to update benchmarks")
+        LogUtil.log_err_and_airbrake("Updating benchmarks failed with error: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -294,16 +296,18 @@ class CheckPipelineRuns
       t_iter_start = t_now
       pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
-      num_shards = ((pr_ids.count + pt_ids.count) / MIN_JOBS_PER_SHARD).to_i
-      num_shards = [[num_shards, MAX_SHARDS].min, 1].max
-      fork_pids = []
-      shard_id = 0
-      while shard_id < num_shards
-        pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids) }
-        fork_pids << pid
-        shard_id += 1
+      pool = Thread.pool(THREAD_COUNT)
+      pr_ids.each do |prid|
+        pool.process do
+          update_pr(prid)
+        end
       end
-      fork_pids.each { |p| Process.waitpid(p) }
+      pt_ids.each do |ptid|
+        pool.process do
+          update_pt(ptid)
+        end
+      end
+      pool.shutdown
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
@@ -315,7 +319,6 @@ class CheckPipelineRuns
         duration: (after_iter_timestamp - before_iter_timestamp),
         pr_id_count: pr_ids.count,
         pt_id_count: pt_ids.count,
-        num_shards: num_shards,
       }
       Rails.logger.info(JSON.generate(logger_iteration_data))
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
