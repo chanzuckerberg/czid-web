@@ -212,6 +212,7 @@ class PipelineRunStage < ApplicationRecord
   def prepare_dag(attribute_dict, key_s3_params = nil)
     sample = pipeline_run.sample
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
+    attribute_dict[:dag_name] = dag_name
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
     # dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
     #                        sample.project_id,
