@@ -8,7 +8,10 @@ import { bulkImportRemoteSamples } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import Notification from "~ui/notifications/Notification";
 
-import { NO_TARGET_PROJECT_ERROR } from "./constants";
+import {
+  NO_TARGET_PROJECT_ERROR,
+  NO_VALID_SAMPLES_FOUND_ERROR,
+} from "./constants";
 import cs from "./sample_upload_flow.scss";
 
 class RemoteSampleFileUpload extends React.Component {
@@ -84,18 +87,18 @@ class RemoteSampleFileUpload extends React.Component {
         newSamples: newSamples.length,
       });
     } catch (e) {
-      if (e.status.startsWith("No samples imported")) {
-        this.setState({
-          // TODO (gdingle): we should have an error state for
-          // bucket not found as well.
-          error: "No valid samples were found.",
-        });
+      if (e.status) {
+        // Use error message provided by the backend if it exists
+        this.setState({ error: e.status });
+      } else {
+        // Otherwise fallback to a generic error message
+        this.setState({ error: NO_VALID_SAMPLES_FOUND_ERROR });
       }
 
       logAnalyticsEvent("RemoteSampleFileUpload_connect_failed", {
         projectId: this.props.project.id,
         bulkPath: this.state.remoteS3Path,
-        error: e.status,
+        error: e.status || e.message || e,
       });
     }
   };

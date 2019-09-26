@@ -1,7 +1,20 @@
 # Jos to check the status of pipeline runs
 require 'English'
 require 'json'
-require 'parallel'
+require 'thread/pool'
+
+THREAD_COUNT = 20
+
+Rails.application.config.after_initialize do
+  ActiveRecord::Base.connection_pool.disconnect!
+
+  ActiveSupport.on_load(:active_record) do
+    config = ActiveRecord::Base.configurations[Rails.env] ||
+             Rails.application.config.database_configuration[Rails.env]
+    config['pool'] = THREAD_COUNT
+    ActiveRecord::Base.establish_connection(config)
+  end
+end
 
 # Benchmark status will not be updated faster than this.
 IDSEQ_BENCH_UPDATE_FREQUENCY_SECONDS = 600
@@ -15,8 +28,6 @@ IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json".freeze
 
 AWS_DEFAULT_REGION = ENV.fetch('AWS_DEFAULT_REGION') { "us-west-2" }
 
-THREAD_COUNT = 20
-
 class CheckPipelineRuns
   @sleep_quantum = 5.0
 
@@ -27,20 +38,24 @@ class CheckPipelineRuns
   end
 
   def self.update_pr(prid)
-    pr = PipelineRun.find(prid)
-    Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
-    pr.update_job_status
+    unless @shutdown_requested
+      pr = PipelineRun.find(prid)
+      Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
+      pr.update_job_status
+    end
   rescue => exception
-    LogUtil.log_err_and_airbrake("Failed to update pipeline run #{pr.id}")
+    LogUtil.log_err_and_airbrake("Updating pipeline run #{pr.id} failed with exception: #{exception.message}")
     LogUtil.log_backtrace(exception)
   end
 
   def self.update_pt(ptid)
-    pt = PhyloTree.find(ptid)
-    Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
-    pt.monitor_job
+    unless @shutdown_requested
+      pt = PhyloTree.find(ptid)
+      Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
+      pt.monitor_job
+    end
   rescue => exception
-    LogUtil.log_err_and_airbrake("Failed monitor job for phylo_tree #{pt.id}")
+    LogUtil.log_err_and_airbrake("Monitor job for phylo_tree #{pt.id} failed with exception: #{exception.message}")
     LogUtil.log_backtrace(exception)
   end
 
@@ -153,7 +168,10 @@ class CheckPipelineRuns
       next if k == "ORIGIN"
       new_metadata[k] = v
     end
-    known_organisms = metadata['verified_contents'].pluck('genome').join(", ")
+    # HACK: for benchmark 5 this string is always too long for the DB
+    #   depending on the connection type you are using it may be truncated or throw an error
+    #   truncating manually prevents an error
+    known_organisms = metadata['verified_contents'].pluck('genome').join(", ")[0..254]
     bm_sample_params = {
       name: bm_sample_name,
       host_genome_id: bm_host.id,
@@ -243,7 +261,7 @@ class CheckPipelineRuns
       begin
         create_sample_for_benchmark(s3path, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_proj, bm_host, bm_comment, t_now)
       rescue => exception
-        LogUtil.log_err_and_airbrake("Failed to create sample for benchmark #{s3path}")
+        LogUtil.log_err_and_airbrake("Creating sample for benchmark #{s3path} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -255,7 +273,7 @@ class CheckPipelineRuns
       begin
         benchmark_update(t_now)
       rescue => exception
-        LogUtil.log_err_and_airbrake("Failed to update benchmarks")
+        LogUtil.log_err_and_airbrake("Updating benchmarks failed with error: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -278,20 +296,18 @@ class CheckPipelineRuns
       t_iter_start = t_now
       pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
-      Parallel.each(pr_ids, in_threads: THREAD_COUNT) do |prid|
-        # Explicitly use ActiveRecord connection pool
-        # https://github.com/grosser/parallel#activerecord
-        ActiveRecord::Base.connection_pool.with_connection do
+      pool = Thread.pool(THREAD_COUNT)
+      pr_ids.each do |prid|
+        pool.process do
           update_pr(prid)
         end
       end
-      Parallel.each(pt_ids, in_threads: THREAD_COUNT) do |ptid|
-        # Explicitly use ActiveRecord connection pool
-        # https://github.com/grosser/parallel#activerecord
-        ActiveRecord::Base.connection_pool.with_connection do
+      pt_ids.each do |ptid|
+        pool.process do
           update_pt(ptid)
         end
       end
+      pool.shutdown
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f

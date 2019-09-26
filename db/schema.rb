@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_823_223_316) do
+ActiveRecord::Schema.define(version: 20_190_920_003_723) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -35,6 +35,11 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
     t.string "drug_family"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "annotation_gene"
+    t.string "genbank_accession"
+    t.integer "total_reads"
+    t.float "rpm", limit: 24
+    t.float "dpm", limit: 24
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
   end
 
@@ -56,7 +61,6 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "project_id"
     t.text "description"
     t.integer "public_access", limit: 1
     t.integer "ready", limit: 1, default: 0
@@ -184,7 +188,6 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
     t.datetime "updated_at", null: false
     t.date "date_validated_value"
     t.bigint "metadata_field_id"
-    t.string "specificity"
     t.bigint "location_id"
     t.index ["metadata_field_id"], name: "index_metadata_on_metadata_field_id"
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
@@ -195,7 +198,6 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
     t.string "display_name"
     t.string "description"
     t.integer "base_type", limit: 1, null: false
-    t.string "validation_type"
     t.string "options"
     t.integer "force_options", limit: 1, default: 0
     t.integer "is_core", limit: 1, default: 0
@@ -287,31 +289,20 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
   end
 
   create_table "pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "job_id"
-    t.text "command"
-    t.string "command_stdout"
-    t.text "command_error"
-    t.string "command_status"
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "job_status"
-    t.text "job_description"
-    t.string "job_log_id"
-    t.string "postprocess_status"
     t.integer "finalized", default: 0, null: false
     t.bigint "total_reads"
     t.bigint "adjusted_remaining_reads"
     t.bigint "unmapped_reads"
-    t.text "version"
     t.integer "subsample"
     t.string "pipeline_branch"
-    t.integer "ready_step"
     t.integer "total_ercc_reads"
     t.float "fraction_subsampled", limit: 24
     t.string "pipeline_version"
     t.string "pipeline_commit"
-    t.text "assembled_taxids"
     t.bigint "truncated"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
@@ -379,6 +370,7 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
     t.integer "max_input_fragments"
     t.datetime "client_updated_at"
     t.integer "uploaded_from_basespace", limit: 1, default: 0
+    t.string "basespace_access_token"
     t.string "upload_error"
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
@@ -415,9 +407,8 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "hit_type"
-    t.integer "tax_level"
     t.bigint "pipeline_run_id"
-    t.index ["pipeline_run_id", "taxid", "hit_type", "tax_level"], name: "index_pr_tax_ht_level_tb", unique: true
+    t.index ["pipeline_run_id", "taxid", "hit_type"], name: "index_pr_tax_ht_level_tb", unique: true
     t.index ["taxid"], name: "index_taxon_byteranges_on_taxid"
   end
 
@@ -445,10 +436,6 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
     t.float "e_value", limit: 24
     t.integer "genus_taxid", default: -200, null: false
     t.integer "superkingdom_taxid", default: -700, null: false
-    t.float "percent_concordant", limit: 24
-    t.float "species_total_concordant", limit: 24
-    t.float "genus_total_concordant", limit: 24
-    t.float "family_total_concordant", limit: 24
     t.bigint "pipeline_run_id"
     t.string "common_name"
     t.integer "family_taxid", default: -300, null: false
@@ -523,7 +510,6 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "model_type"
-    t.bigint "user_id"
     t.index ["name"], name: "index_taxon_scoring_models_on_name", unique: true
   end
 
@@ -532,7 +518,6 @@ ActiveRecord::Schema.define(version: 20_190_823_223_316) do
     t.integer "tax_id"
     t.string "count_type"
     t.integer "tax_level"
-    t.string "name"
     t.float "mean", limit: 24
     t.float "stdev", limit: 24
     t.datetime "created_at", null: false
