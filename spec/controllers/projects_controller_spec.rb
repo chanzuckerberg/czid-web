@@ -26,8 +26,8 @@ RSpec.describe ProjectsController, type: :controller do
         get :index, params: { format: "json" }
 
         json_response = JSON.parse(response.body)
-        expect(json_response.count).to eq(expected_projects.count)
-        expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+        expect(json_response["projects"].count).to eq(expected_projects.count)
+        expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
       end
     end
 
@@ -45,8 +45,8 @@ RSpec.describe ProjectsController, type: :controller do
         get :index, params: { format: "json", domain: "updatable" }
 
         json_response = JSON.parse(response.body)
-        expect(json_response.count).to eq(expected_projects.count)
-        expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+        expect(json_response["projects"].count).to eq(expected_projects.count)
+        expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
       end
     end
 
@@ -59,8 +59,8 @@ RSpec.describe ProjectsController, type: :controller do
         get :index, params: { format: "json", projectId: chosen_project.id }
 
         json_response = JSON.parse(response.body)
-        expect(json_response.count).to eq(1)
-        expect(json_response[0]["id"]).to eq(chosen_project.id)
+        expect(json_response["projects"].count).to eq(1)
+        expect(json_response["projects"][0]["id"]).to eq(chosen_project.id)
       end
     end
   end
@@ -82,8 +82,8 @@ RSpec.describe ProjectsController, type: :controller do
         get :index, params: { format: "json" }
 
         json_response = JSON.parse(response.body)
-        expect(json_response.count).to eq(expected_projects.count)
-        expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+        expect(json_response["projects"].count).to eq(expected_projects.count)
+        expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
       end
     end
 
@@ -98,8 +98,8 @@ RSpec.describe ProjectsController, type: :controller do
         get :index, params: { format: "json", domain: "updatable" }
 
         json_response = JSON.parse(response.body)
-        expect(json_response.count).to eq(expected_projects.count)
-        expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+        expect(json_response["projects"].count).to eq(expected_projects.count)
+        expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
       end
     end
 
@@ -112,8 +112,8 @@ RSpec.describe ProjectsController, type: :controller do
         get :index, params: { format: "json", projectId: chosen_project.id }
 
         json_response = JSON.parse(response.body)
-        expect(json_response.count).to eq(1)
-        expect(json_response[0]["id"]).to eq(chosen_project.id)
+        expect(json_response["projects"].count).to eq(1)
+        expect(json_response["projects"][0]["id"]).to eq(chosen_project.id)
       end
     end
   end
@@ -137,8 +137,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", domain: "my_data" }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
         end
       end
 
@@ -151,8 +151,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", domain: "public" }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
         end
 
         it "sees public projects" do
@@ -165,8 +165,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", domain: "public" }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
         end
 
         it "sees projects with public samples" do
@@ -179,8 +179,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", domain: "public" }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
         end
       end
 
@@ -195,13 +195,13 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", orderBy: "name" }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
         end
       end
 
       describe "GET index for a specific page" do
-        it "sees projects from that page only" do
+        it "sees projects from that page only and no list of all ids" do
           expected_projects = []
           create(:project, name: "Project A", users: [@user])
           create(:project, name: "Project B", users: [@user])
@@ -209,13 +209,39 @@ RSpec.describe ProjectsController, type: :controller do
           expected_projects << create(:project, name: "Project D", users: [@user])
           create(:project, name: "Project E", users: [@user])
           create(:project, name: "Project F", users: [@user])
-          expected_projects.sort_by!(&:name).reverse!
+          expected_projects.sort_by!(&:id).reverse!
 
           get :index, params: { format: "json", limit: 2, offset: 2 }
+          json_response = JSON.parse(response.body)
+
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response).not_to have_key("all_projects_ids")
+        end
+      end
+
+      describe "GET index for a specific page and request all ids" do
+        it "sees page projects and a list of all ids" do
+          all_projects = [
+            create(:project, name: "Project A", users: [@user]),
+            create(:project, name: "Project B", users: [@user]),
+            create(:project, name: "Project C", users: [@user]),
+            create(:project, name: "Project D", users: [@user]),
+            create(:project, name: "Project E", users: [@user]),
+            create(:project, name: "Project F", users: [@user]),
+          ]
+          all_projects.sort_by!(&:id).reverse!
+
+          offset = 2
+          limit = 2
+          expected_projects = all_projects[offset, limit]
+
+          get :index, params: { format: "json", limit: limit, offset: offset, listAllIds: 1 }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response["all_projects_ids"]).to eq(all_projects.pluck("id"))
         end
       end
 
@@ -230,8 +256,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", orderBy: "name", orderDir: "asc" }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
         end
       end
 
@@ -246,8 +272,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", orderBy: "name", orderDir: "desc" }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
         end
       end
 
@@ -263,8 +289,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", orderBy: "name", orderDir: "asc;" }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
         end
       end
 
@@ -279,8 +305,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", orderBy: "name;SELECT 1 FROM projects LIMIT 1;", orderDir: "asc" }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
         end
       end
 
@@ -294,8 +320,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", projectId: chosen_project.id }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(1)
-          expect(json_response[0]["id"]).to eq(chosen_project.id)
+          expect(json_response["projects"].count).to eq(1)
+          expect(json_response["projects"][0]["id"]).to eq(chosen_project.id)
         end
       end
 
@@ -309,8 +335,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", projectId: chosen_project.id }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(1)
-          expect(json_response[0]["id"]).to eq(chosen_project.id)
+          expect(json_response["projects"].count).to eq(1)
+          expect(json_response["projects"][0]["id"]).to eq(chosen_project.id)
         end
       end
 
@@ -324,8 +350,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", projectId: chosen_project.id }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(1)
-          expect(json_response[0]["id"]).to eq(chosen_project.id)
+          expect(json_response["projects"].count).to eq(1)
+          expect(json_response["projects"][0]["id"]).to eq(chosen_project.id)
         end
       end
 
@@ -339,8 +365,8 @@ RSpec.describe ProjectsController, type: :controller do
           get :index, params: { format: "json", projectId: chosen_project.id }
 
           json_response = JSON.parse(response.body)
-          expect(json_response.count).to eq(1)
-          expect(json_response[0]["id"]).to eq(chosen_project.id)
+          expect(json_response["projects"].count).to eq(1)
+          expect(json_response["projects"][0]["id"]).to eq(chosen_project.id)
         end
       end
 
@@ -369,10 +395,10 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
 
-            response_project = json_response[0]
+            response_project = json_response["projects"][0]
             expect(response_project).to include_json(id: expected_projects[0].id,
                                                      name: expected_projects[0].name,
                                                      created_at: expected_projects[0].created_at.as_json,
@@ -407,10 +433,10 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain, basic: true }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
 
-            response_project = json_response[0]
+            response_project = json_response["projects"][0]
             expect(response_project).to include_json(id: expected_projects[0].id,
                                                      name: expected_projects[0].name,
                                                      created_at: expected_projects[0].created_at.as_json,
@@ -433,8 +459,8 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain, visibility: "private" }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
           end
 
           it "sees public projects when filtering by public visibility" do
@@ -448,8 +474,8 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain, visibility: "public" }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
           end
 
           it "sees correct projects when filtering by sample_type metadata field" do
@@ -463,8 +489,8 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain, tissue: "Serum" }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
           end
 
           it "sees correct projects when filtering by location metadata field" do
@@ -478,8 +504,8 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain, location: "San Francisco, USA" }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
           end
 
           it "sees correct projects when filtering by host_genome" do
@@ -493,8 +519,8 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain, host: HostGenome.find_by(name: "human").id }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
           end
 
           it "sees correct projects when filtering by time" do
@@ -519,8 +545,8 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain, time: [30.days.ago.strftime("%Y%m%d"), DateTime.current.strftime("%Y%m%d")] }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
           end
 
           it "sees correct projects when filtering by taxon" do
@@ -534,8 +560,8 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain, taxon: TaxonLineage.find_by(tax_name: "klebsiella").id }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
           end
 
           it "sees correct projects when filtering by a search string" do
@@ -550,8 +576,8 @@ RSpec.describe ProjectsController, type: :controller do
             get :index, params: { format: "json", domain: domain, search: "find_this" }
 
             json_response = JSON.parse(response.body)
-            expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+            expect(json_response["projects"].count).to eq(expected_projects.count)
+            expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
           end
         end
       end

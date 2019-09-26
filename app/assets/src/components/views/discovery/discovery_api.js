@@ -143,7 +143,7 @@ const getDiscoveryProjects = async ({
   offset = 0,
   listAllIds = false,
 } = {}) => {
-  const projects = await getProjects({
+  const projectResults = await getProjects({
     domain,
     filters,
     projectId,
@@ -153,8 +153,8 @@ const getDiscoveryProjects = async ({
     listAllIds,
   });
   return {
-    projects,
-    projectIds: listAllIds ? projects.map(project => project.id) : null,
+    projects: projectResults.projects,
+    projectIds: projectResults.all_projects_ids,
   };
 };
 

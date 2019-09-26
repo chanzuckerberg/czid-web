@@ -122,7 +122,7 @@ class Project < ApplicationRecord
     if user.admin?
       all
     else
-      where("id in (select project_id from projects_users where user_id=?)", user.id)
+      where("projects.id in (select project_id from projects_users where user_id=?)", user.id)
     end
   end
 
@@ -130,25 +130,16 @@ class Project < ApplicationRecord
     if user.admin?
       all
     else
-      where("id in (select project_id from projects_users where user_id=?)
+      where("projects.id in (select project_id from projects_users where user_id=?)
              or
-             id in (?) ",
+             projects.id in (?) ",
             user.id,
-            Sample.public_samples.select("project_id, count(1)")
-                  .group("project_id")
-                  .pluck(:project_id))
+            Sample.public_samples.distinct.pluck(:project_id))
     end
   end
 
   def self.public_projects
-    where("id in (?)",
-          Sample.public_samples.select("project_id, count(1)")
-                .group("project_id")
-                .pluck(:project_id))
-  end
-
-  def self.my_data_projects(user)
-    includes(:users).where(users: { id: user.id })
+    where("projects.id in (?)", Sample.public_samples.distinct.pluck(:project_id))
   end
 
   def destroy
