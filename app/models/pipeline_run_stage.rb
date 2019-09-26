@@ -214,23 +214,28 @@ class PipelineRunStage < ApplicationRecord
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
     attribute_dict[:dag_name] = dag_name
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
-                           sample.project_id,
-                           sample.id,
-                           sample.host_genome_name.downcase,
-                           attribute_dict,
-                           pipeline_run.parse_dag_vars)
-    self.dag_json = dag.render
-    puts "ERB 5:25pm:", self.dag_json
 
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.jbuilder",
+    dag_ext = "erb"
+    if step_number == 1
+      dag_ext = "jbuilder"
+    end
+    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.#{dag_ext}",
                            sample.project_id,
                            sample.id,
                            sample.host_genome_name.downcase,
                            attribute_dict,
                            pipeline_run.parse_dag_vars)
     self.dag_json = dag.render
-    puts "JBUILDER 5:25pm:", self.dag_json
+    puts "RENDERED: ", dag_ext, dag_json
+
+    # dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.jbuilder",
+    #                        sample.project_id,
+    #                        sample.id,
+    #                        sample.host_genome_name.downcase,
+    #                        attribute_dict,
+    #                        pipeline_run.parse_dag_vars)
+    # self.dag_json = dag.render
+    # puts "JBUILDER 5:25pm:", dag_json
 
     copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
     upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)

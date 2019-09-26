@@ -23,7 +23,7 @@ class DagGenerator
     if File.extname(@template_file) == ".jbuilder"
       rendered = ActionController::Base.new.render_to_string(
         file: @template_file,
-        :locals => {:attr => @attribute_dict},
+        locals: { attr: @attribute_dict }
       )
       # Couldn't find a more direct way to prettify from template
       json_object = JSON.parse(rendered)
