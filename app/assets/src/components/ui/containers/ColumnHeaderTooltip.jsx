@@ -10,7 +10,9 @@ class ColumnHeaderTooltip extends React.Component {
         {...this.props}
         content={
           <div className={cs.tooltip}>
-            <span className={cs.title}>{this.props.title}:</span>
+            {this.props.title && (
+              <span className={cs.title}>{this.props.title}:</span>
+            )}
             {this.props.content}
             {this.props.link && (
               <a
