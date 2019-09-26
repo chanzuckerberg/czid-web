@@ -142,6 +142,26 @@ RSpec.describe ProjectsController, type: :controller do
         end
       end
 
+      describe "GET index for my_data domain in basic mode" do
+        it "sees own projects" do
+          other_user = create(:user)
+          expected_projects = []
+          expected_projects << create(:project, users: [@user])
+          create(:project, users: [other_user])
+          expected_projects << create(:project, users: [other_user, @user])
+          create(:public_project)
+          expected_projects << create(:public_project, users: [@user])
+          create(:project, samples_data: [{ created_at: 1.year.ago }])
+          expected_projects << create(:project, users: [@user], samples_data: [{ created_at: 1.year.ago }])
+
+          get :index, params: { format: "json", domain: "my_data", basic: 1 }
+
+          json_response = JSON.parse(response.body)
+          expect(json_response["projects"].count).to eq(expected_projects.count)
+          expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+        end
+      end
+
       describe "GET index for public domain" do
         it "does not see project without samples" do
           expected_projects = []

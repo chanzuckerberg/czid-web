@@ -90,7 +90,6 @@ class ProjectsController < ApplicationController
           projects = projects.where(samples: { id: filter_samples(current_power.samples, params) })
         end
         projects = projects.order(Hash[order_by => order_dir])
-
         limited_projects = limit ? projects.offset(offset).limit(limit) : projects
 
         if basic
@@ -99,7 +98,7 @@ class ProjectsController < ApplicationController
           ]
           names = attrs.map { |attr| attr.split(' AS ').last }
           render json: {
-            projects: limited_projects.pluck(*attrs).map { |p| names.zip(p).to_h },
+            projects: limited_projects.group(:id).pluck(*attrs).map { |p| names.zip(p).to_h },
           }
         else
           limited_projects = limited_projects
