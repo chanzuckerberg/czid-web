@@ -1,82 +1,62 @@
-require "net/http"
+require "http"
 
 module HttpHelper
+  class HttpError < StandardError
+    attr_reader :status_code
+
+    def initialize(msg, status_code)
+      @status_code = status_code
+      super(msg)
+    end
+  end
+
   def self.post_json(url, body)
-    uri = URI.parse(url)
+    response = HTTP.post(url, json: body)
 
-    request = Net::HTTP::Post.new(uri.request_uri)
-    request.content_type = "application/json"
-    request.body = JSON.dump(body)
-
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = uri.scheme == "https"
-
-    response = http.request(request)
-
-    unless response.is_a?(Net::HTTPSuccess)
-      Rails.logger.warn("POST request to #{url} failed: #{response.message}")
-      raise "HTTP POST request failed"
+    unless response.status.success?
+      Rails.logger.warn("POST request to #{url} failed: #{response.body}")
+      raise HttpError.new("HTTP POST request failed", response.code)
     end
 
     begin
       # Parse the body as JSON and return it.
       JSON.parse(response.body)
-    rescue JSON::ParserError
+    rescue JSON::ParserError => e
       Rails.logger.warn("POST response from #{url} was not valid JSON")
-      raise
+      raise e
     end
   end
 
   def self.get_json(url, params, headers, silence_errors = false)
-    uri = URI.parse(url)
-    # Add params to url
-    uri.query = params.to_query
+    http = HTTP.headers(headers)
 
-    request = Net::HTTP::Get.new(uri.request_uri)
-    # Add headers
-    headers.each do |key, value|
-      request[key] = value
-    end
+    response = http.get(url, params: params)
 
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = uri.scheme == "https"
-
-    response = http.request(request)
-
-    unless response.is_a?(Net::HTTPSuccess)
+    unless response.status.success?
       unless silence_errors
-        Rails.logger.warn("GET request to #{url} failed: #{response.message}")
+        Rails.logger.warn("GET request to #{url} failed: #{response.body}")
       end
-      raise "HTTP GET request failed"
+      raise HttpError.new("HTTP GET request failed", response.code)
     end
 
     begin
       # Parse the body as JSON and return it.
       JSON.parse(response.body)
-    rescue JSON::ParserError
+    rescue JSON::ParserError => e
       Rails.logger.warn("GET response from #{url} was not valid JSON")
-      raise
+      raise e
     end
   end
 
   # Delete requests typically don't contain a request body.
   def self.delete(url, headers)
-    uri = URI.parse(url)
+    http = HTTP.headers(headers)
 
-    request = Net::HTTP::Delete.new(uri.request_uri)
-    # Add headers
-    headers.each do |key, value|
-      request[key] = value
-    end
+    response = http.delete(url)
 
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = uri.scheme == "https"
-
-    response = http.request(request)
-
-    unless response.is_a?(Net::HTTPSuccess)
-      Rails.logger.warn("DELETE request to #{url} failed: #{response.message}")
-      raise "HTTP DELETE request failed"
+    unless response.status.success?
+      Rails.logger.warn("DELETE request to #{url} failed: #{response.body}")
+      raise HttpError.new("HTTP DELETE request failed", response.code)
     end
 
     return nil

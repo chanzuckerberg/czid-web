@@ -18,15 +18,20 @@ class TransferBasespaceFiles
     if samples_remaining.empty?
       begin
         BasespaceHelper.revoke_access_token(basespace_access_token)
-      rescue
+      rescue HttpHelper::HttpError => e
         # If revoke_access_token is called multiple times, it will fail on the subsequent calls. This is okay.
-        nil
+        if e.status_code == 401
+          Rails.logger.warn("Revoke access token failed for sample #{sample_id}. Likely called multiple times by samples sharing the same token.")
+        else
+          raise e
+        end
       end
 
       # This verification call will work even if called multiple times.
       BasespaceHelper.verify_access_token_revoked(basespace_access_token, sample_id)
     end
   rescue => e
-    Rails.logger.error(e)
+    LogUtil.log_err_and_airbrake("Error transferring basespace files for sample #{sample_id}. Reason: #{e}")
+    raise e
   end
 end

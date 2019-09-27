@@ -19,14 +19,18 @@ module BasespaceHelper
 
   def verify_access_token_revoked(access_token, sample_id)
     # Verify that the token was revoked by using it to call an API endpoint.
-    # The API endpoint should return a 401.
 
     fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token, {}, true)
 
+    # If we reach this step, the access token must not have been revoked.
     LogUtil.log_err_and_airbrake("BasespaceAccessTokenError: Failed to revoke access token for sample id #{sample_id}")
-  rescue
-    # The call should fail.
-    Rails.logger.info("Revoke access token check succeeded")
+  rescue HttpHelper::HttpError => e
+    # We expect the API endpoint to return a 401.
+    if e.status_code == 401
+      Rails.logger.info("Revoke access token check succeeded")
+    else
+      raise e
+    end
   end
 
   # In one instance, we send a request expecting it to fail. So we provide a silence_errors option.

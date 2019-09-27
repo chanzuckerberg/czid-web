@@ -1170,6 +1170,7 @@ DEPENDENCIES
   guard-rspec (~> 4.7)
   health_check (>= 2.7.0)
   honeycomb-rails (>= 0.8.1)
+  http
   http-2
   immigrant
   jbuilder (~> 2.5)
