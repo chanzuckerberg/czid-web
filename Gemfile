@@ -121,3 +121,5 @@ end
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 gem "parallel", "~> 1.14"
+# HTTP library with a simpler, better designed API than the native Net::HTTP
+gem 'http'
