@@ -2,7 +2,7 @@ import { histogram, extent, min, max, mean, deviation } from "d3-array";
 import cx from "classnames";
 import { axisBottom, axisLeft } from "d3-axis";
 import { select, event as currentEvent, mouse } from "d3-selection";
-import { scaleLinear } from "d3-scale";
+import { scaleLinear, scaleLog } from "d3-scale";
 import { map } from "lodash/fp";
 
 import ArrayUtils from "~/components/utils/ArrayUtils";
@@ -39,6 +39,7 @@ export default class Histogram {
         // { x0, length }
         skipBin: false,
         hoverBuffer: 5,
+        xScaleLog: false,
       },
       options
     );
@@ -74,12 +75,20 @@ export default class Histogram {
         `translate(0,${this.size.height - this.margins.bottom})`
       )
       .call(axisBottom(x).tickSizeOuter(0));
+
+    // if using log10 scale, set the number of ticks according to the size of
+    // the domain (in powers of 10) to prevent extra labels from showing up
+    if (this.options.xScaleLog) {
+      let nTicks = Math.log10(x.domain()[1]) + 1;
+      g.call(axisBottom(x).ticks(nTicks));
+    }
+
     g
       .append("text")
-      .attr("x", this.size.width - this.margins.right)
+      .attr("x", (this.size.width + this.margins.left) / 2 - 2)
       .attr("y", +30)
       .attr("fill", "#000")
-      .attr("font-weight", "bold")
+      .attr("font-weight", 600)
       .attr("text-anchor", "end")
       .attr("class", cs.labelX)
       .text(this.options.labelX);
@@ -106,11 +115,11 @@ export default class Histogram {
     g
       .select(".tick:last-of-type text")
       .clone()
-      .attr("x", 4)
+      .attr("x", 12)
       .attr("y", -30 - (this.options.labelYOffset || 0))
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "end")
-      .attr("font-weight", "bold")
+      .attr("font-weight", 600)
       .attr("class", cx(cs.labelY, this.options.labelYLarge && cs.large))
       .text(this.options.labelY);
   }
@@ -136,7 +145,8 @@ export default class Histogram {
       }
     }
 
-    return [min(mins), max(maxs)];
+    // cannot include 0 values in log scale's domain, since log(0) is -Infinity
+    return this.options.xScaleLog ? [1, max(maxs)] : [min(mins), max(maxs)];
   };
 
   getBins = x => {
@@ -153,13 +163,17 @@ export default class Histogram {
     return bins;
   };
 
-  getBarWidth = () => {
+  getBarWidth = (x, bin) => {
     if (this.options.skipBins) {
       return (
         (this.size.width - this.margins.right - this.margins.left) /
         (this.options.numBins ||
           max(map(seriesData => seriesData.length, this.data)))
       );
+    }
+
+    if (this.options.xScaleLog) {
+      return (x(bin.x1) - x(bin.x0)) / 2;
     }
 
     return (
@@ -274,10 +288,17 @@ export default class Histogram {
     if (!this.data) return;
 
     let colors = this.getColors();
-
+    // cannot pass in 0 if using log scale, since log(0) is -Infinity,
+    // so increment everything by 1
+    if (this.options.xScaleLog) {
+      for (let i = 0; i < this.data.length; i++) {
+        this.data[i] = this.data[i].map(d => d + 1);
+      }
+    }
     const domain = this.getDomain();
 
-    let x = scaleLinear()
+    let x = this.options.xScaleLog ? scaleLog() : scaleLinear();
+    x
       .domain(domain)
       .nice()
       .range([this.margins.left, this.size.width - this.margins.right]);
@@ -292,7 +313,6 @@ export default class Histogram {
     this.svg.append("g").call(this.xAxis.bind(this), x);
     this.svg.append("g").call(this.yAxis.bind(this), y);
 
-    let barWidth = this.getBarWidth();
     const barOpacity = this.getBarOpacity();
 
     // Maps from x-coordinate to the data plotted at that x-coordinate.
@@ -310,13 +330,14 @@ export default class Histogram {
         .enter()
         .append("rect")
         .attr("class", (_, index) => `rect-${index}`)
-        .attr("x", d => x(d.x0) + i * barWidth)
-        .attr("width", d => barWidth)
+        .attr("x", d => x(d.x0) + i * this.getBarWidth(x, d))
+        .attr("width", d => this.getBarWidth(x, d))
         .attr("y", d => y(d.length))
         .attr("height", d => y(0) - y(d.length))
         .style("opacity", barOpacity);
 
       bins[i].forEach((bin, index) => {
+        let barWidth = this.getBarWidth(x, bin);
         const xMidpoint = x(bin.x0) + i * barWidth + barWidth / 2;
         barCentersToIndices[xMidpoint] = [i, index];
         barCenters.push(xMidpoint);
@@ -358,18 +379,23 @@ export default class Histogram {
         let refs = this.svg.append("g").attr("class", "refs");
 
         for (let ref of this.options.refValues) {
+          // cannot pass in 0 if using log scale, since log(0) is -Infinity,
+          // so increment everything by 1
+          let xRef = this.options.xScaleLog
+            ? x(ref.values[i] + 1)
+            : x(ref.values[i]);
           refs
             .append("line")
             .attr("stroke", colors[i])
             .style("stroke-dasharray", "4, 4")
-            .attr("x1", x(ref.values[i]))
-            .attr("x2", x(ref.values[i]))
+            .attr("x1", xRef)
+            .attr("x2", xRef)
             .attr("y1", this.margins.top)
             .attr("y2", this.size.height - this.margins.bottom);
           refs
             .append("text")
             .attr("x", -this.margins.top)
-            .attr("y", x(ref.values[i]) - 4)
+            .attr("y", xRef - 4)
             .attr("transform", "rotate(-90)")
             .attr("text-anchor", "end")
             .attr("font-weight", "bold")
@@ -409,15 +435,15 @@ export default class Histogram {
       legend
         .append("rect")
         .attr("x", this.size.width - 5)
-        .attr("width", 20)
-        .attr("height", 20)
+        .attr("width", 14)
+        .attr("height", 14)
         .attr("fill", (_, i) => colors[i]);
 
       legend
         .append("text")
         .attr("x", this.size.width - 10)
         .attr("y", this.margins.top)
-        .attr("dy", -9)
+        .attr("dy", -11)
         .attr("alignment-baseline", "middle")
         .text(d => d);
     }
