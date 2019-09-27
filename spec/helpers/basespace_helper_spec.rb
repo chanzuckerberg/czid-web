@@ -139,7 +139,7 @@ RSpec.describe BasespaceHelper, type: :helper do
 
       it "should call Basespace API to test access token" do
         expect(HttpHelper).to receive(:get_json).with(anything, anything, { "Authorization" => "Bearer #{fake_access_token}" }, anything)
-                                                .exactly(1).times.and_raise(StandardError)
+                                                .exactly(1).times.and_raise(HttpHelper::HttpError.new("HTTP Get request failed", 401))
         expect(LogUtil).to receive(:log_err_and_airbrake).with("BasespaceAccessTokenError: Failed to revoke access token for sample id 123abc")
                                                          .exactly(0).times
         expect(Rails.logger).to receive(:info).with("Revoke access token check succeeded").exactly(1).times
