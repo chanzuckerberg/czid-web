@@ -297,11 +297,11 @@ class CheckPipelineRuns
       pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
       Parallel.each(pr_ids, in_processes: PROCESS_COUNT) do |prid|
-        @reconnected ||= ActiveRecord::Base.connection.reconnect! || true
+        ActiveRecord::Base.connection.reconnect!
         update_pr(prid)
       end
       Parallel.each(pt_ids, in_processes: PROCESS_COUNT) do |ptid|
-        @reconnected ||= ActiveRecord::Base.connection.reconnect! || true
+        ActiveRecord::Base.connection.reconnect!
         update_pt(ptid)
       end
       ActiveRecord::Base.connection.reconnect!
