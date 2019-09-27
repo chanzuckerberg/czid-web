@@ -62,94 +62,76 @@ class ProjectsController < ApplicationController
         limit = params[:limit] ? params[:limit].to_i : nil
         offset = params[:offset] ? params[:offset].to_i : 0
 
-        project_id = params[:projectId]
-
         # we do not want to search samples by name
         search = params.delete(:search)
+        project_id = params.delete(:projectId)
+
         # If basic, just return a few fields for the project.
         basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
 
-        samples = samples_by_domain(domain)
-        samples = filter_samples(samples, params)
+        list_all_project_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
-        # if we are applying any filters that constrain project's samples, we should not show projects with zero samples
-        hide_empty_projects = [:host, :location, :locationV2, :taxon, :time, :tissue, :visibility].any? do |key|
-          params.key? key
-        end
-
-        # Retrieve a json of projects associated with samples;
-        # augment with number_of_samples, hosts, tissues.
         projects = case domain
                    when "my_data"
                      current_user.projects
                    when "public"
-                     current_power.projects.where(id: samples.pluck(:project_id).uniq)
+                     Project.public_projects
                    when "updatable"
                      current_power.updatable_projects
                    else
                      current_power.projects
                    end
-
+        # including these early ensures that users and samples are joined in the same order, making rails assign deterministic aliases
+        # we use includes because we need data from both associations to return aggregate data for the project
+        projects = projects.includes(:users).includes(:samples)
         projects = projects.where(id: project_id) if project_id
         projects = projects.db_search(search) if search
-        projects = projects.order(Hash[order_by => order_dir])
-        if limit
-          projects = projects.offset(offset).limit(limit)
-          samples = samples.where(project_id: projects.pluck(:id))
+        if [:host, :location, :locationV2, :taxon, :time, :tissue, :visibility].any? { |key| params.key? key }
+          projects = projects.where(samples: { id: filter_samples(current_power.samples, params) })
         end
+        projects = projects.order(Hash[order_by => order_dir])
+        limited_projects = limit ? projects.offset(offset).limit(limit) : projects
 
         if basic
-          # Use group_by for performance.
-          samples_by_project_id = samples.group_by(&:project_id)
-          projects_formatted = projects.map do |project|
-            {
-              id: project.id,
-              name: project.name,
-              description: project.description,
-              created_at: project.created_at,
-              public_access: project.public_access,
-              number_of_samples: (samples_by_project_id[project.id] || []).length,
-            }
-          end
-          render json: projects_formatted
-          return
-        end
+          attrs = [
+            'id', 'name', 'description', 'created_at', 'public_access', 'COUNT(DISTINCT samples.id) AS number_of_samples',
+          ]
+          names = attrs.map { |attr| attr.split(' AS ').last }
+          render json: {
+            projects: limited_projects.group(:id).pluck(*attrs).map { |p| names.zip(p).to_h },
+          }
+        else
+          limited_projects = limited_projects
+                             .includes(samples: [:host_genome, :user, { metadata: [:metadata_field, :location] }])
+                             .group(:id)
+                             .references(:samples)
+          # get aggregated lists of association values in string by using MySQL's GROUP_CONCAT (should update to JSON_ARRAYAGG when possible)
+          group_concat_host = "GROUP_CONCAT(DISTINCT host_genomes.name SEPARATOR '::') AS hosts"
+          group_concat_sample_type = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'sample_type' THEN metadata.string_validated_value ELSE NULL END SEPARATOR '::') AS tissues"
+          group_concat_location = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'collection_location' THEN IFNULL(locations.name, metadata.string_validated_value) ELSE NULL END SEPARATOR '::') AS locations"
+          group_concat_users = "GROUP_CONCAT(DISTINCT CONCAT(users.name,'|',users.email) SEPARATOR '::') AS users"
+          editable = "BIT_OR(IF(users.id=#{current_user.id}, 1, 0)) AS editable"
+          uploaders = "GROUP_CONCAT(DISTINCT users_samples.name ORDER BY samples.id SEPARATOR '::') AS uploaders"
 
-        updatable_projects = current_power.updatable_projects.pluck(:id).to_set
-        sample_count_by_project_id = Hash[samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
-        host_genome_names_by_project_id = {}
-        tissues_by_project_id = {}
-        min_sample_by_project_id = {}
-        owner_by_project_id = {}
-        locations_by_project_id = {}
-        metadata = Metadatum.by_sample_ids(samples.pluck(:id))
-        samples.includes(:host_genome, :user).each do |s|
-          (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
-          (tissues_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:sample_type] if (metadata[s.id] || {})[:sample_type]
-          (locations_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:collection_location] if (metadata[s.id] || {})[:collection_location]
-          # Assumes project owner is the uploader of the project's first sample
-          if !min_sample_by_project_id[s.project_id] || min_sample_by_project_id[s.project_id] > s.id
-            min_sample_by_project_id[s.project_id] = s.id
-            owner_by_project_id[s.project_id] = s.user ? s.user.name : nil
-          end
+          attrs = [
+            'id', 'name', 'description', 'created_at', 'public_access', 'COUNT(DISTINCT samples.id) AS number_of_samples',
+            group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, uploaders,
+          ]
+          names = attrs.map { |attr| attr.split(' AS ').last }
+          render json: {
+            # Parentheses are very important. With do..end map returns nil before it is run (same does not happen with curly braces {} )
+            projects: (limited_projects.pluck(*attrs).map do |p|
+              project_hash = names.zip(p).to_h
+              project_hash["users"] = (project_hash["users"] || '').split('::').map { |u| ["name", "email"].zip(u.split('|')).to_h }
+              project_hash["owner"] = (project_hash["uploaders"] || '').split('::')[0]
+              project_hash["editable"] = project_hash["editable"] == 1
+              project_hash.delete("uploaders")
+              ["locations", "hosts", "tissues"].each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
+              project_hash
+            end),
+            all_projects_ids: (projects.pluck(:id).uniq if list_all_project_ids),
+          }.compact
         end
-
-        filtered_projects = projects.includes(:users).select do |project|
-          !hide_empty_projects || (sample_count_by_project_id[project.id] || 0) > 0
-        end
-
-        extended_projects = filtered_projects.map do |project|
-          project.as_json(only: [:id, :name, :description, :created_at, :public_access]).merge(
-            number_of_samples: sample_count_by_project_id[project.id] || 0,
-            hosts: host_genome_names_by_project_id[project.id] || [],
-            tissues: tissues_by_project_id[project.id] || [],
-            owner: owner_by_project_id[project.id],
-            locations: locations_by_project_id[project.id] || [],
-            editable: updatable_projects.include?(project.id),
-            users: updatable_projects.include?(project.id) ? project.users.map { |user| { name: user[:name], email: user[:email] } } : []
-          )
-        end
-        render json: extended_projects
       end
     end
   end
