@@ -607,7 +607,7 @@ class Sample < ApplicationRecord
   end
 
   def self.my_data(user)
-    project_ids = Project.my_data_projects(user).pluck(:id)
+    project_ids = user.projects.pluck(:id)
     where("project_id in (?)", project_ids)
   end
 
