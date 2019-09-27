@@ -109,7 +109,7 @@ class ProjectsController < ApplicationController
           group_concat_host = "GROUP_CONCAT(DISTINCT host_genomes.name SEPARATOR '::') AS hosts"
           group_concat_sample_type = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'sample_type' THEN metadata.string_validated_value ELSE NULL END SEPARATOR '::') AS tissues"
           group_concat_location = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'collection_location' THEN IFNULL(locations.name, metadata.string_validated_value) ELSE NULL END SEPARATOR '::') AS locations"
-          group_concat_users = "GROUP_CONCAT(DISTINCT CONCAT(users.name,'|',users.email) SEPARATOR '::') AS users"
+          group_concat_users = "GROUP_CONCAT(DISTINCT CONCAT(users.name,'|',users.email) ORDER_BY users.name SEPARATOR '::') AS users"
           editable = "BIT_OR(IF(users.id=#{current_user.id}, 1, 0)) AS editable"
           uploaders = "GROUP_CONCAT(DISTINCT users_samples.name ORDER BY samples.id SEPARATOR '::') AS uploaders"
 
