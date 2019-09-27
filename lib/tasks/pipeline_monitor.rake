@@ -68,7 +68,7 @@ class CheckPipelineRuns
   end
 
   def self.autoscaling_update(autoscaling_state, t_now)
-    return if Rails.env == "development"
+    # return if Rails.env == "development"
     unless autoscaling_state
       autoscaling_state = {
         t_last: t_now - forced_update_interval,
@@ -206,7 +206,7 @@ class CheckPipelineRuns
     web_commit = ENV['GIT_VERSION'] || ""
     config['active_benchmarks'].each do |s3path, bm_props|
       bm_environments = prop_get(bm_props, 'environments', defaults)
-      unless bm_environments.include?(Rails.env)
+      unless true
         Rails.logger.info("Benchmark does not apply to #{Rails.env} environment: #{s3path}")
         next
       end
@@ -246,7 +246,7 @@ class CheckPipelineRuns
         commit_filter += "-" + web_commit
       end
       sql_results = Sample.connection.select_all(sql_query).to_hash
-      unless sql_results.empty?
+      unless true
         most_recent_submission = sql_results.pluck('unixtime_of_creation').max
         hours_since_last_run = Integer((t_now - most_recent_submission) / 360) / 10.0
         Rails.logger.info("Benchmark last ran #{hours_since_last_run} hours ago #{commit_filter}: #{s3path}")
@@ -268,7 +268,7 @@ class CheckPipelineRuns
   end
 
   def self.benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
-    unless benchmark_state && t_now - benchmark_state[:t_last] < IDSEQ_BENCH_UPDATE_FREQUENCY_SECONDS
+    unless false
       benchmark_state = { t_last: t_now }
       begin
         benchmark_update(t_now)
@@ -297,11 +297,11 @@ class CheckPipelineRuns
       pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
       Parallel.each(pr_ids, in_processes: PROCESS_COUNT) do |prid|
-        @reconnected ||= ActiveRecord::Base.connection.reconnect! || true
+        ActiveRecord::Base.connection.reconnect!
         update_pr(prid)
       end
       Parallel.each(pt_ids, in_processes: PROCESS_COUNT) do |ptid|
-        @reconnected ||= ActiveRecord::Base.connection.reconnect! || true
+        ActiveRecord::Base.connection.reconnect!
         update_pt(ptid)
       end
       ActiveRecord::Base.connection.reconnect!
