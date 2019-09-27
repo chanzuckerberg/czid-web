@@ -79,11 +79,11 @@ class UploadSampleStep extends React.Component {
   async componentDidMount() {
     window.addEventListener("message", this.handleBasespaceOAuthMessageEvent);
 
-    const projects = await getProjects({
+    const response = await getProjects({
       domain: "updatable",
       basic: true,
     });
-
+    const projects = (response || {}).projects;
     this.setState({
       projects,
     });
