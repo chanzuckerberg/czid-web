@@ -419,6 +419,7 @@ RSpec.describe ProjectsController, type: :controller do
             expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
 
             response_project = json_response["projects"][0]
+            expected_users = (extra_users.as_json + [@user.as_json]).map { |u| u.slice("name", "email") }.sort_by { |u| u["name"] }
             expect(response_project).to include_json(id: expected_projects[0].id,
                                                      name: expected_projects[0].name,
                                                      created_at: expected_projects[0].created_at.as_json,
@@ -429,7 +430,7 @@ RSpec.describe ProjectsController, type: :controller do
                                                      locations: ["San Francisco, USA"],
                                                      owner: extra_users[0].name,
                                                      editable: true,
-                                                     users: (extra_users.as_json + [@user.as_json]).map { |u| u.slice("name", "email") })
+                                                     users: expected_users)
           end
 
           it "sees all only limited fields when setting basic mode" do
