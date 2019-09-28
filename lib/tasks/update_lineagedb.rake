@@ -1,30 +1,67 @@
 require 'open3'
 require 'csv'
 require 'English'
-task update_lineage_db: :environment do
-  ### Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 LINEAGE_VERSION=3 rake update_lineage_db
+
+desc 'Imports NCBI lineage data into IDseq'
+
+task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
+  ### Short Usage: NCBI_DATE=2018-12-01 rake update_lineage_db
+  ### Full Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 LINEAGE_VERSION=3 rake update_lineage_db
   ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
   ### LINEAGE_VERSION needs to be incremented by 1 from the current highest version in taxon_lineages
+  current_date = Time.now.utc
 
-  reference_s3_path = ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
+  puts "\n\nDRY RUN" if args.dryrun
+
+  ncbi_date = ENV['NCBI_DATE']
+  reference_s3_path = if ncbi_date.present?
+                        "s3://idseq-database/taxonomy/#{ncbi_date}"
+                      else
+                        ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
+                      end
+
+  puts "\n\nStarting import of #{reference_s3_path} ...\n\n"
+  import_lineage_database!(reference_s3_path, current_date) unless args.dryrun
+  puts "\n\nDone import of #{reference_s3_path}."
+
   current_lineage_version = ENV['LINEAGE_VERSION'].to_i
+  if current_lineage_version.zero?
+    current_lineage_version = AlignmentConfig.maximum("lineage_version")
+  end
+
+  puts "\n\nStarting update of lineage versions to #{current_lineage_version} ...\n\n"
+  add_lineage_version_numbers!(current_lineage_version, current_date) unless args.dryrun
+  puts "\n\nDone update of lineage versions to #{current_lineage_version}."
+
+  ## Instructions on next steps
+  puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
+end
+
+def import_lineage_database!(reference_s3_path, current_date)
   local_taxonomy_path = "/app/tmp/taxonomy"
+  taxid_lineages_file = 'taxid-lineages.csv'
+  names_file = 'names.csv'
+
+  host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
+  lp = Rails.env == 'development' ? '' : '--user=$DB_USERNAME --password=$DB_PASSWORD'
+
   name_column_array = %w[superkingdom_name superkingdom_common_name kingdom_name kingdom_common_name phylum_name phylum_common_name class_name class_common_name
                          order_name order_common_name family_name family_common_name genus_name genus_common_name species_name species_common_name]
   column_names = "taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid," +
                  name_column_array.join(",")
   n_columns = column_names.split(",").count
-  host = Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
-  taxid_lineages_file = 'taxid-lineages.csv'
-  names_file = 'names.csv'
-  current_date = Time.now.utc
+
   `
+   set -xe
    ## Set work directory
    mkdir -p #{local_taxonomy_path};
    cd #{local_taxonomy_path};
 
+   ## Check database connection
+   mysql -h #{host} #{lp} -e "SELECT 1"
+
    ## Get old lineage file
-   mysql -h #{host} -u $DB_USERNAME --password=$DB_PASSWORD -e "SELECT #{column_names},started_at FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages_with_started_at.csv
+   mysql -h #{host} #{lp} -e "SELECT #{column_names},started_at FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages_with_started_at.csv
    cut -d, -f1-#{n_columns} old_taxon_lineages_with_started_at.csv > old_taxon_lineages.csv
    cut -d, -f1,#{n_columns + 1} old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
 
@@ -63,19 +100,18 @@ task update_lineage_db: :environment do
    ## Import changes to taxon_lineages
    # retired records:
    mv records_to_retire.csv taxon_lineages
-   mysqlimport --replace --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --columns=#{column_names},ended_at,started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
+   mysqlimport --replace --local --host=#{host} #{lp} --columns=#{column_names},ended_at,started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
    # new records:
    mv records_to_insert.csv taxon_lineages
-   mysqlimport --local --user=$DB_USERNAME --host=#{host} --password=$DB_PASSWORD --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
+   mysqlimport --local --host=#{host} #{lp} --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
 
    ## Clean up
    rm -rf #{local_taxonomy_path};
   `
-  ## Add lineage version numbers
+  raise "lineage database update failed" unless $CHILD_STATUS.success?
+end
+
+def add_lineage_version_numbers!(current_lineage_version, current_date)
   TaxonLineage.where(started_at: current_date).update_all(version_start: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
   TaxonLineage.where(ended_at: TaxonLineage.column_defaults["ended_at"]).update_all(version_end: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
-
-  ## Instructions on next steps
-  raise "lineage database update failed" unless $CHILD_STATUS.success?
-  puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
 end
