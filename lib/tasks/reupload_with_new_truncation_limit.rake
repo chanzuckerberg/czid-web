@@ -5,7 +5,7 @@
 # Example: rake "reupload_with_new_truncation_limit[4, 27, 100]"
 task :reupload_without_truncation, [:limit_multiplier, :sample_id, :project_id] => :environment do |_t, args|
   sample = Sample.find(args[:sample_id])
-  project = Project.find(args[:project_id)
+  project = Project.find(args[:project_id])
   new_limit = args[:limit_multiplier] * PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS
 
   new_sample = sample.deep_clone include: [:metadata, :input_files]
