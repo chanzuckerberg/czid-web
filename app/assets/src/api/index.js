@@ -326,6 +326,9 @@ const getSamplesLocations = ({ domain, filters, projectId, search }) =>
     },
   });
 
+const getSamplePipelineResults = id =>
+  get(`/samples/${id}/results_folder.json`);
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -348,6 +351,7 @@ export {
   getSampleStats,
   getSamplesV1,
   getSampleTaxons,
+  getSamplePipelineResults,
   getSearchSuggestions,
   getSummaryContigCounts,
   getTaxonDescriptions,

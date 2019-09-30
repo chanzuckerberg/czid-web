@@ -6,8 +6,10 @@ import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import PropTypes from "~/components/utils/propTypes";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
 import { logAnalyticsEvent } from "~/api/analytics";
+import { getSamplePipelineResults } from "~/api";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
-import { PIPELINE_INFO_FIELDS } from "./constants";
+import { PIPELINE_INFO_FIELDS, PIPELINE_RUN_STEPS } from "./constants";
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
@@ -21,10 +23,12 @@ class PipelineTab extends React.Component {
     },
     sectionEditing: {},
     graphWidth: 0,
+    pipelineStepDict: {},
   };
 
   componentDidMount() {
     this.updateGraphDimensions();
+    this.getReadCounts();
   }
 
   componentDidUpdate() {
@@ -85,6 +89,62 @@ class PipelineTab extends React.Component {
     );
   };
 
+  getReadCounts = async () => {
+    const { sampleId } = this.props;
+    const pipelineResults = await getSamplePipelineResults(sampleId);
+
+    this.setState({
+      pipelineStepDict: pipelineResults["displayed_data"]["Host Filtering"],
+    });
+  };
+
+  renderReadCountsTable = field => {
+    let stepName = field.name;
+    let stepKey = field.key;
+    let step = this.state.pipelineStepDict["steps"][stepKey];
+
+    const totalReads = this.props.pipelineRun.total_reads;
+    let readsAfter, percentReads;
+    if (step) {
+      readsAfter = step["reads_after"];
+      percentReads = (readsAfter / totalReads * 100).toFixed(2);
+    }
+
+    return (
+      <div className={cs.field}>
+        <div className={cs.label}>
+          <ColumnHeaderTooltip
+            position="top left"
+            trigger={<div className={cs.labelText}>{stepName}</div>}
+            content={step ? step["step_description"] : "N/A"}
+            title={stepName}
+          />
+        </div>
+        {step === undefined || step === null ? (
+          <div>
+            <div className={cs.narrowMetadataValueContainer}>
+              <div className={cs.emptyValue}>--</div>
+            </div>
+            <div className={cs.narrowMetadataValueContainer}>
+              <div className={cs.emptyValue}>--</div>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className={cs.narrowMetadataValueContainer}>
+              <div className={cs.metadataValue}>
+                {readsAfter.toLocaleString()}
+              </div>
+            </div>
+            <div className={cs.narrowMetadataValueContainer}>
+              <div className={cs.metadataValue}>{percentReads}%</div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   render() {
     const { pipelineRun, sampleId } = this.props;
     return (
@@ -103,7 +163,26 @@ class PipelineTab extends React.Component {
           open={this.state.sectionOpen.readsRemaining}
           title="Reads Remaining"
         >
-          {pipelineRun.outputs_by_step}
+          <div className={cs.field}>
+            <div className={cs.label}>
+              <ColumnHeaderTooltip
+                position="top left"
+                trigger={
+                  <div className={cs.labelText}>Host Filtering Step</div>
+                }
+                content={this.state.pipelineStepDict["stage_description"]}
+                title="Host Filtering"
+              />
+            </div>
+            <div className={cs.narrowMetadataValueContainer}>
+              <div className={cs.labelText}>Reads Remaining</div>
+            </div>
+            <div className={cs.narrowMetadataValueContainer}>
+              <div className={cs.labelText}>% Reads Remaining</div>
+            </div>
+          </div>
+          {this.state.pipelineStepDict["steps"] &&
+            PIPELINE_RUN_STEPS.map(this.renderReadCountsTable)}
         </MetadataSection>
         <MetadataSection
           toggleable
