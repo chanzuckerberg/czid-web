@@ -184,21 +184,15 @@ class DiscoveryView extends React.Component {
 
   updateBrowsingHistory = (action = "push") => {
     const { domain } = this.props;
-    const { projectId } = this.state;
 
-    const localFields = [
-      ...(projectId ? [] : ["currentTab"]),
-      "sampleActiveColumns",
-      "showFilters",
-      "showStats",
-    ];
+    const localFields = ["sampleActiveColumns", "showFilters", "showStats"];
 
     const sessionFields = concat(localFields, [
       "currentDisplay",
       "mapSidebarTab",
     ]);
     const urlFields = concat(sessionFields, [
-      ...(projectId ? ["currentTab"] : []),
+      "currentTab",
       "filters",
       "projectId",
       "search",
