@@ -40,7 +40,8 @@ class TableRenderers extends React.Component {
             trigger={<div className={cs.itemName}>{nameRenderer(item)}</div>}
             content={nameRenderer(item)}
           />
-          {item &&
+          {descriptionRenderer &&
+            item &&
             item.description && (
               <BasicPopup
                 trigger={
