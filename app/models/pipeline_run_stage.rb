@@ -212,11 +212,12 @@ class PipelineRunStage < ApplicationRecord
   def prepare_dag(attribute_dict, key_s3_params = nil)
     sample = pipeline_run.sample
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
+    puts "DAG NAME: ", dag_name
     attribute_dict[:dag_name] = dag_name
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
 
     # Temp flag for rolling out jbuilder templates
-    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1" && step_number == 1
+    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1" && [1, 2].include?(step_number)
                 "jbuilder"
               else
                 "erb"
@@ -229,6 +230,7 @@ class PipelineRunStage < ApplicationRecord
                            attribute_dict,
                            pipeline_run.parse_dag_vars)
     self.dag_json = dag.render
+    puts "1:21pm ", self.dag_json
     copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
     upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
   end
