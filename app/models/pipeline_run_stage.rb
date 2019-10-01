@@ -212,12 +212,11 @@ class PipelineRunStage < ApplicationRecord
   def prepare_dag(attribute_dict, key_s3_params = nil)
     sample = pipeline_run.sample
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
-    puts "DAG NAME: ", dag_name
     attribute_dict[:dag_name] = dag_name
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
 
     # Temp flag for rolling out jbuilder templates
-    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1" && [1, 2, 3].include?(step_number)
+    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1"
                 "jbuilder"
               else
                 "erb"
