@@ -45,6 +45,10 @@
         cursor: default;
       }
     }
+
+    .header {
+      color: $medium-grey;
+    }
   }
 
   .narrowMetadataValueContainer {
@@ -56,6 +60,7 @@
 
     .labelText {
       font-weight: 600;
+      color: $medium-grey;
     }
   }
 
@@ -86,6 +91,7 @@
 
   .emptyValue {
     color: $light-grey;
+    font-weight: 400;
   }
 
   .projectLink {

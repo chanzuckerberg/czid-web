@@ -147,9 +147,10 @@ class PipelineTab extends React.Component {
           open={this.state.sectionOpen.readsRemaining}
           title="Reads Remaining"
         >
-          {isEmpty(this.state.pipelineStepDict) ? (
+          {isEmpty(this.state.pipelineStepDict) ||
+          isEmpty(this.state.pipelineStepDict["steps"]) ? (
             <div className={cs.field}>
-              <div className={cx(cs.label, cs.emptyValue)}>No data.</div>
+              <div className={cx(cs.label, cs.emptyValue)}>No data</div>
             </div>
           ) : (
             <div>
@@ -158,10 +159,13 @@ class PipelineTab extends React.Component {
                   <ColumnHeaderTooltip
                     position="top left"
                     trigger={
-                      <div className={cs.labelText}>Host Filtering Step</div>
+                      <div className={cx(cs.labelText, cs.header)}>
+                        Host Filtering Step
+                      </div>
                     }
                     content={this.state.pipelineStepDict["stage_description"]}
                     title="Host Filtering"
+                    link="https://github.com/chanzuckerberg/idseq-dag/wiki/IDseq-Pipeline-Stage-%231:-Host-Filtering-and-QC"
                   />
                 </div>
                 <div className={cs.narrowMetadataValueContainer}>
@@ -171,16 +175,8 @@ class PipelineTab extends React.Component {
                   <div className={cs.labelText}>% Reads Remaining</div>
                 </div>
               </div>
-              {isEmpty(this.state.pipelineStepDict["steps"]) ? (
-                <div className={cs.field}>
-                  <div className={cx(cs.label, cs.emptyValue)}>No data.</div>
-                </div>
-              ) : (
-                <div>
-                  {Object.keys(this.state.pipelineStepDict["steps"]).map(
-                    this.renderReadCountsTable
-                  )}
-                </div>
+              {Object.keys(this.state.pipelineStepDict["steps"]).map(
+                this.renderReadCountsTable
               )}
             </div>
           )}
