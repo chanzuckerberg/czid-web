@@ -247,13 +247,21 @@ class PhyloTree < ApplicationRecord
   # See our dag templates in app/lib/dags.
   def prepare_dag(dag_name, attribute_dict)
     dag_s3 = "#{phylo_tree_output_s3_path}/#{dag_name}.json"
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
+
+    # Temp flag for rolling out jbuilder templates
+    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1"
+                "jbuilder"
+              else
+                "erb"
+              end
+    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.#{dag_ext}",
                            project_id,
                            nil,
                            nil,
                            attribute_dict,
                            parse_dag_vars)
     self.dag_json = dag.render
+    puts "3:29pm ", dag_json
     upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
   end
 
