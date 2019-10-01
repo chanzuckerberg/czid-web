@@ -10,7 +10,7 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import { getSamplePipelineResults } from "~/api";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
-import { PIPELINE_INFO_FIELDS } from "./constants";
+import { PIPELINE_INFO_FIELDS, HOST_FILTERING_WIKI } from "./constants";
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
@@ -165,7 +165,7 @@ class PipelineTab extends React.Component {
                     }
                     content={this.state.pipelineStepDict["stage_description"]}
                     title="Host Filtering"
-                    link="https://github.com/chanzuckerberg/idseq-dag/wiki/IDseq-Pipeline-Stage-%231:-Host-Filtering-and-QC"
+                    link={HOST_FILTERING_WIKI}
                   />
                 </div>
                 <div className={cs.narrowMetadataValueContainer}>
