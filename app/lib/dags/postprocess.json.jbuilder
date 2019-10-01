@@ -107,11 +107,110 @@ json.steps do
     },
   }
 
+  steps << {
+    in: ["rapsearch2_out"],
+    out: "rapsearch2_accessions_out",
+    class: "PipelineStepDownloadAccessions",
+    module: "idseq_dag.steps.download_accessions",
+    additional_files: {
+      lineage_db: attr[:lineage_db],
+      loc_db: attr[:nr_loc_db],
+    },
+    additional_attributes: {
+      db: attr[:nr_db],
+      db_type: "nr",
+    },
+  }
+
+  additional_files = {
+    lineage_db: attr[:lineage_db],
+  }
+  if attr[:skip_dedeuterostome_filter] == 0
+    additional_files["deuterostome_db"] = attr[:deuterostome_db]
+  end
+
+  steps << {
+    in: ["gsnap_out", "assembly_out", "gsnap_accessions_out"],
+    out: "refined_gsnap_out",
+    class: "PipelineStepBlastContigs",
+    module: "idseq_dag.steps.blast_contigs",
+    additional_files: additional_files,
+    additional_attributes: {
+      db_type: "nt",
+    },
+  }
+
+  steps << {
+    in: ["rapsearch2_out", "assembly_out", "rapsearch2_accessions_out"],
+    out: "refined_rapsearch2_out",
+    class: "PipelineStepBlastContigs",
+    module: "idseq_dag.steps.blast_contigs",
+    additional_files: additional_files,
+    additional_attributes: {
+      db_type: "nr",
+    },
+  }
+
+  steps << {
+    in: ["refined_gsnap_out", "refined_rapsearch2_out"],
+    out: "refined_taxon_count_out",
+    class: "PipelineStepCombineTaxonCounts",
+    module: "idseq_dag.steps.combine_taxon_counts",
+    additional_files: {},
+    additional_attributes: {},
+  }
+
+  steps << {
+    in: ["refined_gsnap_out", "refined_rapsearch2_out"],
+    out: "contig_summary_out",
+    class: "PipelineStepCombineJson",
+    module: "idseq_dag.steps.combine_json",
+    additional_files: {},
+    additional_attributes: {field_idx: 4},
+  }
+
+  steps << {
+    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+    out: "refined_annotated_out",
+    class: "PipelineStepGenerateAnnotatedFasta",
+    module: "idseq_dag.steps.generate_annotated_fasta",
+    additional_files: {},
+    additional_attributes: {},
+  }
+
+  steps << {
+    in: ["refined_annotated_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+    out: "refined_taxid_fasta_out",
+    class: "PipelineStepGenerateTaxidFasta",
+    module: "idseq_dag.steps.generate_taxid_fasta",
+    additional_files: {
+      lineage_db: attr[:lineage_db],
+    },
+    additional_attributes: {},
+  }
+
+  steps << {
+    in: ["refined_taxid_fasta_out"],
+    out: "refined_taxid_locator_out",
+    class: "PipelineStepGenerateTaxidLocator",
+    module: "idseq_dag.steps.generate_taxid_locator",
+    additional_files: {},
+    additional_attributes: {},
+  }
+
   json.array! steps
 end
 
 json.given_targets do
   json.host_filter_out do
+    json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
+  end
+
+  json.gsnap_out do
+    json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
+  end
+
+  json.rapsearch2_out do
     json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
   end
 end
