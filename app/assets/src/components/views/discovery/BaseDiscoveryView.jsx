@@ -2,35 +2,46 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
-import { Table } from "~/components/visualizations/table";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 // CSS file must be loaded after any elements you might want to override
 import cs from "./base_discovery_view.scss";
+import csTableRenderer from "./table_renderers.scss";
 
 class BaseDiscoveryView extends React.Component {
   // Note: This class guarantees that a couple of settings are synced
   // between views that use it (at the time of this comment, ProjectsView and VisualizationsView)
   // We might be able to get rid of it once we implement dynamic row height on the tables.
+  constructor(props) {
+    super(props);
+    this.infiniteTable = null;
+  }
+
+  reset = () => {
+    this.infiniteTable && this.infiniteTable.reset();
+  };
+
   render() {
     const {
       columns,
-      data,
       handleRowClick,
       headerClassName,
       initialActiveColumns,
+      onLoadRows,
       protectedColumns,
       rowClassName,
       rowHeight,
     } = this.props;
-
     return (
-      <Table
+      <InfiniteTable
         columns={columns}
-        data={data}
         defaultRowHeight={rowHeight}
         headerClassName={headerClassName}
         initialActiveColumns={initialActiveColumns}
+        loadingClassName={csTableRenderer.loading}
+        onLoadRows={onLoadRows}
         onRowClick={handleRowClick}
         protectedColumns={protectedColumns}
+        ref={infiniteTable => (this.infiniteTable = infiniteTable)}
         rowClassName={cx(cs.tableDataRow, rowClassName)}
         sortable
       />
@@ -50,6 +61,7 @@ BaseDiscoveryView.propTypes = {
   handleRowClick: PropTypes.func,
   headerClassName: PropTypes.string,
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
+  onLoadRows: PropTypes.func.isRequired,
   protectedColumns: PropTypes.arrayOf(PropTypes.string),
   rowClassName: PropTypes.string,
   rowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),

@@ -6,13 +6,13 @@ RSpec.describe HttpHelper, type: :helper do
     context "#a successful HTTP request" do
       before do
         stub_request(:get, "https://www.example.com")
-          .with(query: { "param_one" => ["a", "b"] })
+          .with(query: { "param_one" => "a" })
           .to_return(body: { "foo" => "bar" }.to_json)
       end
 
       def make_get_request
         HttpHelper.get_json("https://www.example.com", {
-                              "param_one" => ["a", "b"],
+                              "param_one" => "a",
                             }, "Authorization" => "Bearer abc")
       end
 
@@ -27,7 +27,7 @@ RSpec.describe HttpHelper, type: :helper do
 
         expect(
           a_request(:get, "https://www.example.com")
-            .with(headers: { "Authorization" => "Bearer abc" }, query: { "param_one" => ["a", "b"] })
+            .with(headers: { "Authorization" => "Bearer abc" }, query: { "param_one" => "a" })
         ).to have_been_made
       end
     end
@@ -41,7 +41,7 @@ RSpec.describe HttpHelper, type: :helper do
       it "returns nil on errors" do
         expect do
           HttpHelper.get_json("https://www.example.com", {}, {})
-        end.to raise_error(StandardError)
+        end.to raise_error(HttpHelper::HttpError)
       end
     end
 
