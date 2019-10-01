@@ -125,4 +125,10 @@ class ApplicationController < ActionController::Base
   rescue => e
     Rails.logger.error(e)
   end
+
+  def instrument_with_timer
+    @timer = Timer.new("#{params[:controller]}.#{params[:action]}")
+    yield
+    @timer.publish
+  end
 end
