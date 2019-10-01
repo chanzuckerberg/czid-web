@@ -141,44 +141,50 @@ class PipelineTab extends React.Component {
         >
           {PIPELINE_INFO_FIELDS.map(this.renderPipelineInfoField)}
         </MetadataSection>
-        {!isEmpty(this.state.pipelineStepDict) && (
-          <MetadataSection
-            toggleable
-            onToggle={() => this.toggleSection("readsRemaining")}
-            open={this.state.sectionOpen.readsRemaining}
-            title="Reads Remaining"
-          >
+        <MetadataSection
+          toggleable
+          onToggle={() => this.toggleSection("readsRemaining")}
+          open={this.state.sectionOpen.readsRemaining}
+          title="Reads Remaining"
+        >
+          {isEmpty(this.state.pipelineStepDict) ? (
             <div className={cs.field}>
-              <div className={cs.label}>
-                <ColumnHeaderTooltip
-                  position="top left"
-                  trigger={
-                    <div className={cs.labelText}>Host Filtering Step</div>
-                  }
-                  content={this.state.pipelineStepDict["stage_description"]}
-                  title="Host Filtering"
-                />
-              </div>
-              <div className={cs.narrowMetadataValueContainer}>
-                <div className={cs.labelText}>Reads Remaining</div>
-              </div>
-              <div className={cs.narrowMetadataValueContainer}>
-                <div className={cs.labelText}>% Reads Remaining</div>
-              </div>
+              <div className={cx(cs.label, cs.emptyValue)}>No data.</div>
             </div>
-            {isEmpty(this.state.pipelineStepDict["steps"]) ? (
+          ) : (
+            <div>
               <div className={cs.field}>
-                <div className={cx(cs.label, cs.emptyValue)}>No data.</div>
+                <div className={cs.label}>
+                  <ColumnHeaderTooltip
+                    position="top left"
+                    trigger={
+                      <div className={cs.labelText}>Host Filtering Step</div>
+                    }
+                    content={this.state.pipelineStepDict["stage_description"]}
+                    title="Host Filtering"
+                  />
+                </div>
+                <div className={cs.narrowMetadataValueContainer}>
+                  <div className={cs.labelText}>Reads Remaining</div>
+                </div>
+                <div className={cs.narrowMetadataValueContainer}>
+                  <div className={cs.labelText}>% Reads Remaining</div>
+                </div>
               </div>
-            ) : (
-              <div>
-                {Object.keys(this.state.pipelineStepDict["steps"]).map(
-                  this.renderReadCountsTable
-                )}
-              </div>
-            )}
-          </MetadataSection>
-        )}
+              {isEmpty(this.state.pipelineStepDict["steps"]) ? (
+                <div className={cs.field}>
+                  <div className={cx(cs.label, cs.emptyValue)}>No data.</div>
+                </div>
+              ) : (
+                <div>
+                  {Object.keys(this.state.pipelineStepDict["steps"]).map(
+                    this.renderReadCountsTable
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </MetadataSection>
         <MetadataSection
           toggleable
           onToggle={() => this.toggleSection("erccScatterplot")}
