@@ -3,6 +3,7 @@ json.output_dir_s3 attr[:phylo_tree_output_s3_path]
 
 targets = {}
 attr[:taxon_byteranges].keys.each do |pipeline_run_id|
+  # Only allow valid numbers in interpolated keys
   raise AssertionError unless pipeline_run_id.is_a?(Numeric)
   targets["prepare_taxon_fasta_#{pipeline_run_id}_out"] = ["#{pipeline_run_id}.fasta"]
 end
