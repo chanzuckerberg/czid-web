@@ -1,13 +1,16 @@
 import React from "react";
-import { set } from "lodash/fp";
+import { isEmpty, set } from "lodash/fp";
 import cx from "classnames";
 
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import PropTypes from "~/components/utils/propTypes";
+import { humanize } from "~/helpers/strings";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
 import { logAnalyticsEvent } from "~/api/analytics";
+import { getSamplePipelineResults } from "~/api";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
-import { PIPELINE_INFO_FIELDS } from "./constants";
+import { PIPELINE_INFO_FIELDS, HOST_FILTERING_WIKI } from "./constants";
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
@@ -15,15 +18,18 @@ class PipelineTab extends React.Component {
   state = {
     sectionOpen: {
       pipelineInfo: true,
+      readsRemaining: false,
       erccScatterplot: false,
       downloads: false,
     },
     sectionEditing: {},
     graphWidth: 0,
+    pipelineStepDict: {},
   };
 
   componentDidMount() {
     this.updateGraphDimensions();
+    this.getReadCounts();
   }
 
   componentDidUpdate() {
@@ -84,6 +90,45 @@ class PipelineTab extends React.Component {
     );
   };
 
+  getReadCounts = async () => {
+    const { sampleId } = this.props;
+    const pipelineResults = await getSamplePipelineResults(sampleId);
+
+    this.setState({
+      pipelineStepDict: pipelineResults["displayed_data"]["Host Filtering"],
+    });
+  };
+
+  renderReadCountsTable = stepKey => {
+    // Humanize step name and remove "_out",
+    // e.g. "validate_input_out" -> "Validate Input"
+    let stepName = humanize(stepKey).slice(0, -4);
+    let step = this.state.pipelineStepDict["steps"][stepKey];
+
+    const totalReads = this.props.pipelineRun.total_reads;
+    let readsAfter = step["reads_after"];
+    let percentReads = (readsAfter / totalReads * 100).toFixed(2);
+
+    return (
+      <div className={cs.field}>
+        <div className={cs.label}>
+          <ColumnHeaderTooltip
+            position="top left"
+            trigger={<div className={cs.labelText}>{stepName}</div>}
+            content={step["step_description"]}
+            title={stepName}
+          />
+        </div>
+        <div className={cs.narrowMetadataValueContainer}>
+          <div className={cs.metadataValue}>{readsAfter.toLocaleString()}</div>
+        </div>
+        <div className={cs.narrowMetadataValueContainer}>
+          <div className={cs.metadataValue}>{percentReads}%</div>
+        </div>
+      </div>
+    );
+  };
+
   render() {
     const { pipelineRun, sampleId } = this.props;
     return (
@@ -95,6 +140,46 @@ class PipelineTab extends React.Component {
           title="Pipeline Info"
         >
           {PIPELINE_INFO_FIELDS.map(this.renderPipelineInfoField)}
+        </MetadataSection>
+        <MetadataSection
+          toggleable
+          onToggle={() => this.toggleSection("readsRemaining")}
+          open={this.state.sectionOpen.readsRemaining}
+          title="Reads Remaining"
+        >
+          {isEmpty(this.state.pipelineStepDict) ||
+          isEmpty(this.state.pipelineStepDict["steps"]) ? (
+            <div className={cs.field}>
+              <div className={cx(cs.label, cs.emptyValue)}>No data</div>
+            </div>
+          ) : (
+            <div>
+              <div className={cs.field}>
+                <div className={cs.label}>
+                  <ColumnHeaderTooltip
+                    position="top left"
+                    trigger={
+                      <div className={cx(cs.labelText, cs.header)}>
+                        Host Filtering Step
+                      </div>
+                    }
+                    content={this.state.pipelineStepDict["stage_description"]}
+                    title="Host Filtering"
+                    link={HOST_FILTERING_WIKI}
+                  />
+                </div>
+                <div className={cs.narrowMetadataValueContainer}>
+                  <div className={cs.labelText}>Reads Remaining</div>
+                </div>
+                <div className={cs.narrowMetadataValueContainer}>
+                  <div className={cs.labelText}>% Reads Remaining</div>
+                </div>
+              </div>
+              {Object.keys(this.state.pipelineStepDict["steps"]).map(
+                this.renderReadCountsTable
+              )}
+            </div>
+          )}
         </MetadataSection>
         <MetadataSection
           toggleable
