@@ -261,7 +261,6 @@ class PhyloTree < ApplicationRecord
                            attribute_dict,
                            parse_dag_vars)
     self.dag_json = dag.render
-    puts "3:29pm ", dag_json
     upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
   end
 
