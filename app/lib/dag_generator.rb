@@ -14,6 +14,7 @@ class DagGenerator
     attribute_dict[:host_genome] = host_genome
     attribute_dict[:project_id] = project_id
     attribute_dict[:sample_id] = sample_id
+    attribute_dict[:rails_env] = Rails.env
 
     @attribute_dict = attribute_dict
     @dag_vars_dict = dag_vars_dict
