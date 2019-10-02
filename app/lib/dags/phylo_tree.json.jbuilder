@@ -51,4 +51,5 @@ json.steps do
 end
 
 # Explicit parens for empty hash (instead of empty block)
+# rubocop:disable ParenthesesAsGroupedExpression
 json.given_targets ({})

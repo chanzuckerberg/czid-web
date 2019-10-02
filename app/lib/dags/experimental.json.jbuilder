@@ -50,6 +50,7 @@ json.targets do
       json.nonhost_fastq_out ["nonhost_R1.fastq"]
     end
   else
+    # rubocop:disable IfInsideElse
     if attr[:fastq2]
       json.nonhost_fastq_out ["nonhost_R1.fasta", "nonhost_R2.fasta"]
     else
