@@ -40,6 +40,13 @@
   .cell,
   .header {
     @include font-body-xs;
+  }
+
+  .cell {
     text-align: left;
+  }
+
+  .header {
+    justify-content: left;
   }
 }

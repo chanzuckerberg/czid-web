@@ -26,6 +26,7 @@ import {
   difference,
   union,
   uniqueId,
+  intersection,
 } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -519,7 +520,7 @@ class UploadSampleStep extends React.Component {
   };
 
   // Handle newly added samples
-  handleSamplesAdd = async (samples, sampleType) => {
+  handleSamplesAdd = async (newSamples, sampleType) => {
     this.props.onDirty();
     const samplesKey = this.getSamplesKey(sampleType);
     const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
@@ -531,35 +532,42 @@ class UploadSampleStep extends React.Component {
       ...(sampleType === "local" ? { removedLocalFiles: [] } : {}),
     });
 
-    const samplesWithSelectIds = this.addSelectIdToSamples(samples);
+    const newSamplesWithSelectIds = this.addSelectIdToSamples(newSamples);
 
     const {
-      samples: validatedSamples,
+      samples: validatedNewSamples,
       removedLocalFiles,
-    } = await this.validateAddedSamples(samplesWithSelectIds, sampleType);
+    } = await this.validateAddedSamples(newSamplesWithSelectIds, sampleType);
 
-    const newSamples = this.mergeSamples(
+    // This de-dupes the newly added samples using the sample name. The older sample's selectId is used.
+    const mergedSamples = this.mergeSamples(
       this.state[samplesKey],
-      validatedSamples
+      validatedNewSamples
     );
 
-    const newSelectedSampleIds = new Set(
-      union(
-        Array.from(this.state[selectedSampleIdsKey]),
-        map(SELECT_ID_KEY, validatedSamples)
-      )
+    const mergedSampleIds = map(SELECT_ID_KEY, mergedSamples);
+
+    // Get the selectIds of all newly added samples that weren't already added.
+    const newlyAddedSampleIds = intersection(
+      map(SELECT_ID_KEY, validatedNewSamples),
+      mergedSampleIds
+    );
+
+    // Automatically select all newly added samples that weren't already added.
+    const mergedSelectedSampleIds = new Set(
+      union(Array.from(this.state[selectedSampleIdsKey]), newlyAddedSampleIds)
     );
 
     this.setState({
       validatingSamples: false,
-      [samplesKey]: newSamples,
-      [selectedSampleIdsKey]: newSelectedSampleIds,
+      [samplesKey]: mergedSamples,
+      [selectedSampleIdsKey]: mergedSelectedSampleIds,
       ...(sampleType === "local" ? { removedLocalFiles } : {}),
     });
 
     logAnalyticsEvent(UPLOADSAMPLESTEP_SAMPLE_CHANGED, {
-      newSamples: validatedSamples.length,
-      totalSamples: newSamples.length,
+      newSamples: validatedNewSamples.length,
+      totalSamples: mergedSamples.length,
       sampleType,
       ...(sampleType === "local"
         ? { removedLocalFiles: removedLocalFiles.length }
