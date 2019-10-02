@@ -51,4 +51,4 @@ json.steps do
 end
 
 # Explicit parens for empty hash (instead of empty block)
-json.given_targets ({ })
+json.given_targets ({})

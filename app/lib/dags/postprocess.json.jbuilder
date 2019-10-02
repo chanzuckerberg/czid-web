@@ -10,27 +10,27 @@ json.targets do
   json.host_filter_out host_filter_out
 
   json.gsnap_out [
-                   "gsnap.m8",
-                   "gsnap.deduped.m8",
-                   "gsnap.hitsummary.tab",
-                   "gsnap_counts.json",
-                 ]
+    "gsnap.m8",
+    "gsnap.deduped.m8",
+    "gsnap.hitsummary.tab",
+    "gsnap_counts.json",
+  ]
   json.rapsearch2_out [
-                        "rapsearch2.m8",
-                        "rapsearch2.deduped.m8",
-                        "rapsearch2.hitsummary.tab",
-                        "rapsearch2_counts.json",
-                      ]
+    "rapsearch2.m8",
+    "rapsearch2.deduped.m8",
+    "rapsearch2.hitsummary.tab",
+    "rapsearch2_counts.json",
+  ]
   json.assembly_out [
-                      "assembly/contigs.fasta",
-                      "assembly/scaffolds.fasta",
-                      "assembly/read-contig.sam",
-                      "assembly/contig_stats.json",
-                    ]
+    "assembly/contigs.fasta",
+    "assembly/scaffolds.fasta",
+    "assembly/read-contig.sam",
+    "assembly/contig_stats.json",
+  ]
   json.coverage_out [
-                      "assembly/contig_coverage.json",
-                      "assembly/contig_coverage_summary.csv",
-                    ]
+    "assembly/contig_coverage.json",
+    "assembly/contig_coverage_summary.csv",
+  ]
   json.gsnap_accessions_out ["assembly/nt.refseq.fasta"]
   json.rapsearch2_accessions_out ["assembly/nr.refseq.fasta"]
   json.refined_gsnap_out [
@@ -80,7 +80,7 @@ json.steps do
     class: "PipelineStepRunAssembly",
     module: "idseq_dag.steps.run_assembly",
     additional_files: {},
-    additional_attributes: {memory: 200},
+    additional_attributes: { memory: 200 },
   }
 
   steps << {
@@ -166,7 +166,7 @@ json.steps do
     class: "PipelineStepCombineJson",
     module: "idseq_dag.steps.combine_json",
     additional_files: {},
-    additional_attributes: {field_idx: 4},
+    additional_attributes: { field_idx: 4 },
   }
 
   steps << {

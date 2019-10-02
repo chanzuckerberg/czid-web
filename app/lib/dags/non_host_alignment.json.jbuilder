@@ -10,17 +10,17 @@ json.targets do
   json.host_filter_out host_filter_out
 
   json.gsnap_out [
-                   attr[:gsnap_m8],
-                   "gsnap.deduped.m8",
-                   "gsnap.hitsummary.tab",
-                   "gsnap_counts.json",
-                 ]
+    attr[:gsnap_m8],
+    "gsnap.deduped.m8",
+    "gsnap.hitsummary.tab",
+    "gsnap_counts.json",
+  ]
   json.rapsearch2_out [
-                        attr[:rapsearch_m8],
-                        "rapsearch2.deduped.m8",
-                        "rapsearch2.hitsummary.tab",
-                        "rapsearch2_counts.json",
-                      ]
+    attr[:rapsearch_m8],
+    "rapsearch2.deduped.m8",
+    "rapsearch2.hitsummary.tab",
+    "rapsearch2_counts.json",
+  ]
   json.taxon_count_out ["taxon_counts.json"]
   json.annotated_out ["annotated_merged.fa", "unidentified.fa"]
 end
