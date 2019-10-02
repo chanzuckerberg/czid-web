@@ -29,6 +29,9 @@ class PipelineRunStage < ApplicationRecord
   DAG_NAME_POSTPROCESS = "postprocess".freeze
   DAG_NAME_EXPERIMENTAL = "experimental".freeze
 
+  # Older alignment configs might not have an s3_nt_info_db_path field, so use a reasonable default in this case.
+  DEFAULT_S3_NT_INFO_DB_PATH = "s3://idseq-database/alignment_data/2019-09-17/nt_info.sqlite3".freeze
+
   STAGE_INFO = {
     1 => {
       name: HOST_FILTERING_STAGE_NAME,
@@ -336,6 +339,7 @@ class PipelineRunStage < ApplicationRecord
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
+      nt_info_db: alignment_config.s3_nt_info_db_path || DEFAULT_S3_NT_INFO_DB_PATH,
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     dag_commands = prepare_dag(attribute_dict)
