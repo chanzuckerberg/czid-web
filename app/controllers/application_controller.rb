@@ -127,6 +127,10 @@ class ApplicationController < ActionController::Base
   end
 
   def instrument_with_timer
+    unless @timer.nil?
+      Rails.logger.warn("PRevious instance of timer will be replaced")
+    end
+
     @timer = Timer.new("#{params[:controller]}.#{params[:action]}")
     yield
     @timer.publish
