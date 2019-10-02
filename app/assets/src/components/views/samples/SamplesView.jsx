@@ -19,11 +19,11 @@ import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
-import { ObjectCollection } from "../discovery/DiscoveryDataLayer";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -484,7 +484,7 @@ SamplesView.propTypes = {
   onSelectedSamplesUpdate: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
-  samples: PropTypes.instanceOf(ObjectCollection),
+  samples: PropTypes.instanceOf(ObjectCollectionView),
   selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };

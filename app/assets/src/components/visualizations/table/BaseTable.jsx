@@ -96,14 +96,14 @@ class BaseTable extends React.Component {
       <div className={cs.sortableHeader}>
         {columnData ? (
           <ColumnHeaderTooltip
-            trigger={<div className={cs.label}>{label}</div>}
+            trigger={<span className={cs.label}>{label}</span>}
             title={label}
             content={columnData.tooltip}
             link={columnData.link}
           />
         ) : (
           <BasicPopup
-            trigger={<div className={cs.label}>{label}</div>}
+            trigger={<span className={cs.label}>{label}</span>}
             content={label}
           />
         )}

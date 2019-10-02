@@ -11,6 +11,7 @@ import PhyloTreePublic from "~ui/icons/PhyloTreePublic";
 import PhyloTreePrivate from "~ui/icons/PhyloTreePrivate";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 import cs from "./visualizations_view.scss";
 
 // See also ProjectsView which is very similar
@@ -41,7 +42,7 @@ class VisualizationsView extends React.Component {
         dataKey: "updated_at",
         label: "Updated On",
         width: 120,
-        cellRenderer: TableRenderers.renderDate,
+        cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
         dataKey: "project_name",
@@ -56,11 +57,19 @@ class VisualizationsView extends React.Component {
     ];
   }
 
-  nameRenderer(visualization) {
-    return visualization.name || humanize(visualization.visualization_type);
-  }
+  nameRenderer = visualization => {
+    return (
+      <div>
+        {visualization
+          ? visualization.name || humanize(visualization.visualization_type)
+          : ""}
+      </div>
+    );
+  };
 
   visibilityIconRenderer = visualization => {
+    if (!visualization) return <div className={cs.icon} />;
+
     const {
       visualization_type: visualizationType,
       publicAccess,
@@ -84,11 +93,7 @@ class VisualizationsView extends React.Component {
   };
 
   detailsRenderer(visualization) {
-    return (
-      <div>
-        <span>{visualization.user_name}</span>
-      </div>
-    );
+    return <div>{visualization ? visualization.user_name : ""}</div>;
   }
 
   handleRowClick = ({ rowData }) => {
@@ -103,9 +108,11 @@ class VisualizationsView extends React.Component {
     });
   };
 
-  render() {
+  handleLoadRowsAndFormat = async args => {
     const { visualizations } = this.props;
-    let data = visualizations.map(visualization => {
+    const visualizationsArray = await visualizations.handleLoadObjectRows(args);
+
+    return visualizationsArray.map(visualization => {
       return merge(
         {
           visualization: pick(
@@ -119,23 +126,21 @@ class VisualizationsView extends React.Component {
         )
       );
     });
+  };
 
+  render() {
     return (
       <BaseDiscoveryView
         columns={this.columns}
-        data={data}
         handleRowClick={this.handleRowClick}
+        onLoadRows={this.handleLoadRowsAndFormat}
       />
     );
   }
 }
 
-VisualizationsView.defaultProps = {
-  visualizations: [],
-};
-
 VisualizationsView.propTypes = {
-  visualizations: PropTypes.array,
+  visualizations: PropTypes.instanceOf(ObjectCollectionView).isRequired,
 };
 
 export default VisualizationsView;
