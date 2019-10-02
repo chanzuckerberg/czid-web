@@ -120,7 +120,7 @@ json.steps do
     class: "PipelineStepGenerateCoverageViz",
     module: "idseq_dag.steps.generate_coverage_viz",
     additional_files: {
-      info_db: "s3://idseq-database/alignment_data/2018-12-01/nt_info.sqlite3",
+      info_db: attr[:nt_info_db],
     },
     additional_attributes: {},
   }
