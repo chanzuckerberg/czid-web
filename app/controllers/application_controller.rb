@@ -125,4 +125,15 @@ class ApplicationController < ActionController::Base
   rescue => e
     Rails.logger.error(e)
   end
+
+  def instrument_with_timer
+    unless @timer.nil?
+      # Since we are using an instance variable, we should not instantiate timer twice.
+      Rails.logger.warn("Previous instance of timer will be replaced")
+    end
+
+    @timer = Timer.new("#{params[:controller]}.#{params[:action]}")
+    yield
+    @timer.publish
+  end
 end
