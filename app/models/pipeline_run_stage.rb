@@ -216,7 +216,7 @@ class PipelineRunStage < ApplicationRecord
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
 
     # Temp flag for rolling out jbuilder templates
-    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1" && step_number == 1
+    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1"
                 "jbuilder"
               else
                 "erb"
