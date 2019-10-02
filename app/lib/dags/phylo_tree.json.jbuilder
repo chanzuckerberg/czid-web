@@ -1,14 +1,39 @@
 json.name "phylo_tree"
-
 json.output_dir_s3 attr[:phylo_tree_output_s3_path]
 
-json.targets do
-  attr[:taxon_byteranges].keys.each do |pipeline_run_id|
+targets = {}
+attr[:taxon_byteranges].keys.each do |pipeline_run_id|
+  targets["prepare_taxon_fasta_#{pipeline_run_id}_out"] = ["#{pipeline_run_id}.fasta"]
+end
+targets["phylo_tree_out"] = [attr[:newick_basename], attr[:ncbi_metadata_basename]]
+json.targets targets
 
+json.steps do
+  steps = []
+
+  attr[:taxon_byteranges].each do |pipeline_run_id, taxon_byteranges|
+    steps << {
+      in: [],
+      out: "prepare_taxon_fasta_#{pipeline_run_id}_out",
+      class: "PipelineStepPrepareTaxonFasta",
+      module: "idseq_dag.steps.prepare_taxon_fasta",
+      additional_files: {},
+      additional_attributes: {
+        superkingdom_name: attr[:superkingdom_name],
+        taxon_byteranges: taxon_byteranges.to_json,
+      },
+    }
+  end
+
+  generate_phylo_tree_in = attr[:taxon_byteranges].keys.map do |pipeline_run_id|
+    "prepare_taxon_fasta_#{pipeline_run_id}_out"
   end
 
 
+  json.array! steps
+end
 
+json.steps do
   host_filter_out = ["gsnap_filter_1.fa"]
   if attr[:input_file_count] > 1
     host_filter_out += ["gsnap_filter_2.fa", "gsnap_filter_merged.fa"]
@@ -16,44 +41,44 @@ json.targets do
   json.host_filter_out host_filter_out
 
   json.gsnap_out [
-                     "gsnap.m8",
-                     "gsnap.deduped.m8",
-                     "gsnap.hitsummary.tab",
-                     "gsnap_counts.json",
+                   "gsnap.m8",
+                   "gsnap.deduped.m8",
+                   "gsnap.hitsummary.tab",
+                   "gsnap_counts.json",
                  ]
   json.rapsearch2_out [
-                          "rapsearch2.m8",
-                          "rapsearch2.deduped.m8",
-                          "rapsearch2.hitsummary.tab",
-                          "rapsearch2_counts.json",
+                        "rapsearch2.m8",
+                        "rapsearch2.deduped.m8",
+                        "rapsearch2.hitsummary.tab",
+                        "rapsearch2_counts.json",
                       ]
   json.assembly_out [
-                        "assembly/contigs.fasta",
-                        "assembly/scaffolds.fasta",
-                        "assembly/read-contig.sam",
-                        "assembly/contig_stats.json",
+                      "assembly/contigs.fasta",
+                      "assembly/scaffolds.fasta",
+                      "assembly/read-contig.sam",
+                      "assembly/contig_stats.json",
                     ]
   json.coverage_out [
-                        "assembly/contig_coverage.json",
-                        "assembly/contig_coverage_summary.csv",
+                      "assembly/contig_coverage.json",
+                      "assembly/contig_coverage_summary.csv",
                     ]
   json.gsnap_accessions_out ["assembly/nt.refseq.fasta"]
   json.rapsearch2_accessions_out ["assembly/nr.refseq.fasta"]
   json.refined_gsnap_out [
-                             "assembly/gsnap.blast.m8",
-                             "assembly/gsnap.reassigned.m8",
-                             "assembly/gsnap.hitsummary2.tab",
-                             "assembly/refined_gsnap_counts.json",
-                             "assembly/gsnap_contig_summary.json",
-                             "assembly/gsnap.blast.top.m8",
+                           "assembly/gsnap.blast.m8",
+                           "assembly/gsnap.reassigned.m8",
+                           "assembly/gsnap.hitsummary2.tab",
+                           "assembly/refined_gsnap_counts.json",
+                           "assembly/gsnap_contig_summary.json",
+                           "assembly/gsnap.blast.top.m8",
                          ]
   json.refined_rapsearch2_out [
-                                  "assembly/rapsearch2.blast.m8",
-                                  "assembly/rapsearch2.reassigned.m8",
-                                  "assembly/rapsearch2.hitsummary2.tab",
-                                  "assembly/refined_rapsearch2_counts.json",
-                                  "assembly/rapsearch2_contig_summary.json",
-                                  "assembly/rapsearch2.blast.top.m8",
+                                "assembly/rapsearch2.blast.m8",
+                                "assembly/rapsearch2.reassigned.m8",
+                                "assembly/rapsearch2.hitsummary2.tab",
+                                "assembly/refined_rapsearch2_counts.json",
+                                "assembly/rapsearch2_contig_summary.json",
+                                "assembly/rapsearch2.blast.top.m8",
                               ]
   json.refined_taxon_count_out ["assembly/refined_taxon_counts.json"]
   json.contig_summary_out ["assembly/combined_contig_summary.json"]
@@ -61,19 +86,19 @@ json.targets do
   json.refined_annotated_out ["assembly/refined_annotated_merged.fa", "assembly/refined_unidentified.fa"]
   json.refined_taxid_fasta_out ["assembly/refined_taxid_annot.fasta"]
   json.refined_taxid_locator_out [
-                                     "assembly/refined_taxid_annot_sorted_nt.fasta",
-                                     "assembly/refined_taxid_locations_nt.json",
-                                     "assembly/refined_taxid_annot_sorted_nr.fasta",
-                                     "assembly/refined_taxid_locations_nr.json",
-                                     "assembly/refined_taxid_annot_sorted_genus_nt.fasta",
-                                     "assembly/refined_taxid_locations_genus_nt.json",
-                                     "assembly/refined_taxid_annot_sorted_genus_nr.fasta",
-                                     "assembly/refined_taxid_locations_genus_nr.json",
-                                     "assembly/refined_taxid_annot_sorted_family_nt.fasta",
-                                     "assembly/refined_taxid_locations_family_nt.json",
-                                     "assembly/refined_taxid_annot_sorted_family_nr.fasta",
-                                     "assembly/refined_taxid_locations_family_nr.json",
-                                     "assembly/refined_taxid_locations_combined.json",
+                                   "assembly/refined_taxid_annot_sorted_nt.fasta",
+                                   "assembly/refined_taxid_locations_nt.json",
+                                   "assembly/refined_taxid_annot_sorted_nr.fasta",
+                                   "assembly/refined_taxid_locations_nr.json",
+                                   "assembly/refined_taxid_annot_sorted_genus_nt.fasta",
+                                   "assembly/refined_taxid_locations_genus_nt.json",
+                                   "assembly/refined_taxid_annot_sorted_genus_nr.fasta",
+                                   "assembly/refined_taxid_locations_genus_nr.json",
+                                   "assembly/refined_taxid_annot_sorted_family_nt.fasta",
+                                   "assembly/refined_taxid_locations_family_nt.json",
+                                   "assembly/refined_taxid_annot_sorted_family_nr.fasta",
+                                   "assembly/refined_taxid_locations_family_nr.json",
+                                   "assembly/refined_taxid_locations_combined.json",
                                  ]
 end
 
@@ -81,127 +106,127 @@ json.steps do
   steps = []
 
   steps << {
-      in: ["host_filter_out"],
-      out: "assembly_out",
-      class: "PipelineStepRunAssembly",
-      module: "idseq_dag.steps.run_assembly",
-      additional_files: {},
-      additional_attributes: {memory: 200},
+    in: ["host_filter_out"],
+    out: "assembly_out",
+    class: "PipelineStepRunAssembly",
+    module: "idseq_dag.steps.run_assembly",
+    additional_files: {},
+    additional_attributes: {memory: 200},
   }
 
   steps << {
-      in: ["assembly_out"],
-      out: "coverage_out",
-      class: "PipelineStepGenerateCoverageStats",
-      module: "idseq_dag.steps.generate_coverage_stats",
-      additional_files: {},
-      additional_attributes: {},
+    in: ["assembly_out"],
+    out: "coverage_out",
+    class: "PipelineStepGenerateCoverageStats",
+    module: "idseq_dag.steps.generate_coverage_stats",
+    additional_files: {},
+    additional_attributes: {},
   }
 
   steps << {
-      in: ["gsnap_out"],
-      out: "gsnap_accessions_out",
-      class: "PipelineStepDownloadAccessions",
-      module: "idseq_dag.steps.download_accessions",
-      additional_files: {
-          lineage_db: attr[:lineage_db],
-          loc_db: attr[:nt_loc_db],
-      },
-      additional_attributes: {
-          db: attr[:nt_db],
-          db_type: "nt",
-      },
+    in: ["gsnap_out"],
+    out: "gsnap_accessions_out",
+    class: "PipelineStepDownloadAccessions",
+    module: "idseq_dag.steps.download_accessions",
+    additional_files: {
+      lineage_db: attr[:lineage_db],
+      loc_db: attr[:nt_loc_db],
+    },
+    additional_attributes: {
+      db: attr[:nt_db],
+      db_type: "nt",
+    },
   }
 
   steps << {
-      in: ["rapsearch2_out"],
-      out: "rapsearch2_accessions_out",
-      class: "PipelineStepDownloadAccessions",
-      module: "idseq_dag.steps.download_accessions",
-      additional_files: {
-          lineage_db: attr[:lineage_db],
-          loc_db: attr[:nr_loc_db],
-      },
-      additional_attributes: {
-          db: attr[:nr_db],
-          db_type: "nr",
-      },
+    in: ["rapsearch2_out"],
+    out: "rapsearch2_accessions_out",
+    class: "PipelineStepDownloadAccessions",
+    module: "idseq_dag.steps.download_accessions",
+    additional_files: {
+      lineage_db: attr[:lineage_db],
+      loc_db: attr[:nr_loc_db],
+    },
+    additional_attributes: {
+      db: attr[:nr_db],
+      db_type: "nr",
+    },
   }
 
   additional_files = {
-      lineage_db: attr[:lineage_db],
+    lineage_db: attr[:lineage_db],
   }
   if attr[:skip_dedeuterostome_filter] == 0
     additional_files["deuterostome_db"] = attr[:deuterostome_db]
   end
 
   steps << {
-      in: ["gsnap_out", "assembly_out", "gsnap_accessions_out"],
-      out: "refined_gsnap_out",
-      class: "PipelineStepBlastContigs",
-      module: "idseq_dag.steps.blast_contigs",
-      additional_files: additional_files,
-      additional_attributes: {
-          db_type: "nt",
-      },
+    in: ["gsnap_out", "assembly_out", "gsnap_accessions_out"],
+    out: "refined_gsnap_out",
+    class: "PipelineStepBlastContigs",
+    module: "idseq_dag.steps.blast_contigs",
+    additional_files: additional_files,
+    additional_attributes: {
+      db_type: "nt",
+    },
   }
 
   steps << {
-      in: ["rapsearch2_out", "assembly_out", "rapsearch2_accessions_out"],
-      out: "refined_rapsearch2_out",
-      class: "PipelineStepBlastContigs",
-      module: "idseq_dag.steps.blast_contigs",
-      additional_files: additional_files,
-      additional_attributes: {
-          db_type: "nr",
-      },
+    in: ["rapsearch2_out", "assembly_out", "rapsearch2_accessions_out"],
+    out: "refined_rapsearch2_out",
+    class: "PipelineStepBlastContigs",
+    module: "idseq_dag.steps.blast_contigs",
+    additional_files: additional_files,
+    additional_attributes: {
+      db_type: "nr",
+    },
   }
 
   steps << {
-      in: ["refined_gsnap_out", "refined_rapsearch2_out"],
-      out: "refined_taxon_count_out",
-      class: "PipelineStepCombineTaxonCounts",
-      module: "idseq_dag.steps.combine_taxon_counts",
-      additional_files: {},
-      additional_attributes: {},
+    in: ["refined_gsnap_out", "refined_rapsearch2_out"],
+    out: "refined_taxon_count_out",
+    class: "PipelineStepCombineTaxonCounts",
+    module: "idseq_dag.steps.combine_taxon_counts",
+    additional_files: {},
+    additional_attributes: {},
   }
 
   steps << {
-      in: ["refined_gsnap_out", "refined_rapsearch2_out"],
-      out: "contig_summary_out",
-      class: "PipelineStepCombineJson",
-      module: "idseq_dag.steps.combine_json",
-      additional_files: {},
-      additional_attributes: {field_idx: 4},
+    in: ["refined_gsnap_out", "refined_rapsearch2_out"],
+    out: "contig_summary_out",
+    class: "PipelineStepCombineJson",
+    module: "idseq_dag.steps.combine_json",
+    additional_files: {},
+    additional_attributes: {field_idx: 4},
   }
 
   steps << {
-      in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out"],
-      out: "refined_annotated_out",
-      class: "PipelineStepGenerateAnnotatedFasta",
-      module: "idseq_dag.steps.generate_annotated_fasta",
-      additional_files: {},
-      additional_attributes: {},
+    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+    out: "refined_annotated_out",
+    class: "PipelineStepGenerateAnnotatedFasta",
+    module: "idseq_dag.steps.generate_annotated_fasta",
+    additional_files: {},
+    additional_attributes: {},
   }
 
   steps << {
-      in: ["refined_annotated_out", "refined_gsnap_out", "refined_rapsearch2_out"],
-      out: "refined_taxid_fasta_out",
-      class: "PipelineStepGenerateTaxidFasta",
-      module: "idseq_dag.steps.generate_taxid_fasta",
-      additional_files: {
-          lineage_db: attr[:lineage_db],
-      },
-      additional_attributes: {},
+    in: ["refined_annotated_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+    out: "refined_taxid_fasta_out",
+    class: "PipelineStepGenerateTaxidFasta",
+    module: "idseq_dag.steps.generate_taxid_fasta",
+    additional_files: {
+      lineage_db: attr[:lineage_db],
+    },
+    additional_attributes: {},
   }
 
   steps << {
-      in: ["refined_taxid_fasta_out"],
-      out: "refined_taxid_locator_out",
-      class: "PipelineStepGenerateTaxidLocator",
-      module: "idseq_dag.steps.generate_taxid_locator",
-      additional_files: {},
-      additional_attributes: {},
+    in: ["refined_taxid_fasta_out"],
+    out: "refined_taxid_locator_out",
+    class: "PipelineStepGenerateTaxidLocator",
+    module: "idseq_dag.steps.generate_taxid_locator",
+    additional_files: {},
+    additional_attributes: {},
   }
 
   json.array! steps
