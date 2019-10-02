@@ -19,9 +19,8 @@ class Timer
   end
 
   def publish
-    Rails.logger.debug("Timer for #{@prefix}")
     end_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    Rails.logger.debug("Timer:Total: #{end_timestamp - @start_timestamp}")
+    Rails.logger.debug("Timer:Total[#{@prefix}]: #{end_timestamp - @start_timestamp}")
     MetricUtil.put_metric_now("#{@prefix}.timer", end_timestamp - @start_timestamp, tags: @tags)
 
     previous_timestamp = @start_timestamp
