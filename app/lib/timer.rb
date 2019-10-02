@@ -2,15 +2,15 @@ class Timer
   # Util function to store and report timing information to log and metrics platform.
   # Has support to handle multiple intermediary split times.
 
-  def initialize(prefix, tags = nil)
+  def initialize(prefix, tags: nil)
     @prefix = prefix
     @start_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     @splits = []
-    @tags = tags || []
+    @tags = Set.new(tags)
   end
 
   def add_tags(tags)
-    @tags += tags
+    @tags.merge(tags)
   end
 
   def split(name)
@@ -20,16 +20,20 @@ class Timer
 
   def publish
     end_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
     Rails.logger.debug("Timer:Total[#{@prefix}]: #{end_timestamp - @start_timestamp}")
-    MetricUtil.put_metric_now("#{@prefix}.timer", end_timestamp - @start_timestamp, tags: @tags)
+    MetricUtil.put_metric_now("#{@prefix}.timer", end_timestamp - @start_timestamp, tags: @tags.to_a)
 
     previous_timestamp = @start_timestamp
     @splits.each do |name, split_timestamp|
-      Rails.logger.debug("Timer:Split[#{@prefix}.#{name}]: #{split_timestamp - previous_timestamp}")
-      MetricUtil.put_metric_now("#{@prefix}.timer.splits", split_timestamp - previous_timestamp, tags: @tags + ["split:#{name}"])
+      diff = split_timestamp - previous_timestamp
+      Rails.logger.debug("Timer:Split[#{@prefix}.#{name}]: #{diff}}")
+      MetricUtil.put_metric_now("#{@prefix}.timer.splits", diff.round(6), tags: @tags.to_a + ["split:#{name}"])
       previous_timestamp = split_timestamp
     end
 
-    MetricUtil.put_metric_now("#{@prefix}.timer.splits", end_timestamp - previous_timestamp, tags: @tags + ["split:last"])
+    unless @splits.empty?
+      MetricUtil.put_metric_now("#{@prefix}.timer.splits", (end_timestamp - previous_timestamp).round(6), tags: @tags.to_a + ["split:last"])
+    end
   end
 end
