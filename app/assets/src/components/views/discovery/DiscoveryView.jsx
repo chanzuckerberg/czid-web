@@ -547,7 +547,10 @@ class DiscoveryView extends React.Component {
         break;
       }
       case "project": {
-        this.handleProjectSelected({ project: this.projects.get(value) });
+        // this.handleProjectSelected({ project: this.projects.get(value) });
+        this.handleProjectSelected({
+          project: this.projects.get(value) || { id: value },
+        });
         break;
       }
       default: {
@@ -856,6 +859,10 @@ class DiscoveryView extends React.Component {
   handleMapLevelChange = mapLevel => {
     const { rawMapLocationData, currentTab } = this.state;
 
+    if (!rawMapLocationData) {
+      return;
+    }
+
     const ids = currentTab === "samples" ? "sample_ids" : "project_ids";
     const clusteredData = {};
 
@@ -947,7 +954,6 @@ class DiscoveryView extends React.Component {
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
-      mapPreviewedSamples,
       sampleActiveColumns,
       selectedSampleIds,
       projectId,
@@ -1003,7 +1009,6 @@ class DiscoveryView extends React.Component {
                 mapLevel={mapLevel}
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
-                mapPreviewedSamples={mapPreviewedSamples}
                 mapTilerKey={mapTilerKey}
                 onActiveColumnsChange={this.handleSampleActiveColumnsChange}
                 onClearFilters={this.handleClearFilters}
