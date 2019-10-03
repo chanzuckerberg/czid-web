@@ -547,7 +547,6 @@ class DiscoveryView extends React.Component {
         break;
       }
       case "project": {
-        // this.handleProjectSelected({ project: this.projects.get(value) });
         this.handleProjectSelected({
           project: this.projects.get(value) || { id: value },
         });
