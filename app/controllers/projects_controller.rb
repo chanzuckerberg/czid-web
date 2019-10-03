@@ -26,6 +26,7 @@ class ProjectsController < ApplicationController
 
   # Required for token auth for CLI actions
   prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_METHODS
+  skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_METHODS
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
 
