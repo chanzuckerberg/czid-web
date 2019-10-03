@@ -47,6 +47,8 @@ class SamplesController < ApplicationController
   before_action :check_owner, only: OWNER_ACTIONS
   before_action :check_access
 
+  around_action :instrument_with_timer
+
   PAGE_SIZE = 30
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
@@ -183,10 +185,13 @@ class SamplesController < ApplicationController
   end
 
   def dimensions
+    @timer.add_tags([
+                      "domain:#{params[:domain]}",
+                    ])
+
     # TODO(tiago): consider split into specific controllers / models
     domain = params[:domain]
     param_sample_ids = (params[:sampleIds] || []).map(&:to_i)
-
     # Access control enforced within samples_by_domain
     samples = samples_by_domain(domain)
     unless param_sample_ids.empty?
@@ -196,9 +201,13 @@ class SamplesController < ApplicationController
 
     sample_ids = samples.pluck(:id)
     samples_count = samples.count
+    @timer.split("prep_samples")
 
     locations = LocationHelper.sample_dimensions(sample_ids, "collection_location", samples_count)
+    @timer.split("locations")
+
     locations_v2 = LocationHelper.sample_dimensions(sample_ids, "collection_location_v2", samples_count)
+    @timer.split("locations_v2")
 
     tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type").count
     tissues = tissues.map do |tissue, count|
@@ -208,6 +217,7 @@ class SamplesController < ApplicationController
     if not_set_count > 0
       tissues << { value: "not_set", text: "Unknown", count: not_set_count }
     end
+    @timer.split("tissues")
 
     # visibility
     public_count = samples.public_samples.count
@@ -216,6 +226,7 @@ class SamplesController < ApplicationController
       { value: "public", text: "Public", count: public_count },
       { value: "private", text: "Private", count: private_count },
     ]
+    @timer.split("visibility")
 
     times = [
       { value: "1_week", text: "Last Week", count: samples.where("samples.created_at >= ?", 1.week.ago.utc).count },
@@ -224,6 +235,7 @@ class SamplesController < ApplicationController
       { value: "6_month", text: "Last 6 Months", count: samples.where("samples.created_at >= ?", 6.months.ago.utc).count },
       { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count },
     ]
+    @timer.split("times")
 
     # TODO(tiago): move grouping to a helper function (similar code in projects_controller)
     time_bins = []
@@ -265,11 +277,13 @@ class SamplesController < ApplicationController
         end
       end
     end
+    @timer.split("time_bins")
 
     hosts = samples.joins(:host_genome).group(:host_genome).count
     hosts = hosts.map do |host, count|
       { value: host.id, text: host.name, count: count }
     end
+    @timer.split("hosts")
 
     respond_to do |format|
       format.json do
