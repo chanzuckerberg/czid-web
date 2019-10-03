@@ -6,7 +6,7 @@ task create_alignment_config: :environment do
 
   # lineage_version should be in sync with that used in lib/tasks/update_lineagedb.rake
   lineage_version = ENV['LINEAGE_VERSION']
-  raise "Must have a $LINEAGE_VERSION. Try `TaxonLineage.maximum('version_start')`" unless lineage_version
+  raise "Must have a $LINEAGE_VERSION. Try `TaxonLineage.maximum('version_start') + 1`" unless lineage_version
 
   bucket = 's3://idseq-database'
   # SQLite was reverted because of a concurrency issue
