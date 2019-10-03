@@ -859,10 +859,6 @@ class DiscoveryView extends React.Component {
   handleMapLevelChange = mapLevel => {
     const { rawMapLocationData, currentTab } = this.state;
 
-    if (!rawMapLocationData) {
-      return;
-    }
-
     const ids = currentTab === "samples" ? "sample_ids" : "project_ids";
     const clusteredData = {};
 
@@ -876,7 +872,7 @@ class DiscoveryView extends React.Component {
 
     const addToAncestor = (entry, ancestorLevel) => {
       const ancestorId = entry[`${ancestorLevel}_id`];
-      if (ancestorId) {
+      if (ancestorId && rawMapLocationData[ancestorId]) {
         if (!clusteredData[ancestorId]) {
           clusteredData[ancestorId] = copyLocation(
             rawMapLocationData[ancestorId]
