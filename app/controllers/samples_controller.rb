@@ -17,7 +17,6 @@ class SamplesController < ApplicationController
   #                access control should still be checked as neccessary through current_power
   #
   ##########################################
-  skip_before_action :verify_authenticity_token, only: [:create, :update, :bulk_upload_with_metadata]
 
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
@@ -34,6 +33,7 @@ class SamplesController < ApplicationController
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
   # For API-like access
+  skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
