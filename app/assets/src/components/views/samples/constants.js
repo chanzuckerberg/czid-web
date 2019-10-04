@@ -12,7 +12,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
       value is selected by the user at sample upload and dictates which
       genomes are used for initial host subtraction pipeline steps.`,
     link:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296613-Project-Page#metrics-meanings",
+      "https://help.idseq.net/hc/en-us/articles/360035296613-Project-Page#metrics-meanings",
   },
   collectionLocationV2: {
     tooltip: "User-defined location from which the sample was collected.",
@@ -24,13 +24,13 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     tooltip: `The percentage of reads that came out of step (8) of the host filtration
     and QC steps as compared to what went in at step (1).`,
     link:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790554-Pipeline-Details#passed-filters",
+      "https://help.idseq.net/hc/en-us/articles/360034790554-Pipeline-Details#passed-filters",
   },
   qcPercent: {
     tooltip: `The percentage of reads that came out of PriceSeq, step (3) of the host
     filtration and QC steps, compared to what went in to Trimmomatic, step (2).`,
     link:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790554-Pipeline-Details#passed-qc",
+      "https://help.idseq.net/hc/en-us/articles/360034790554-Pipeline-Details#passed-qc",
   },
   duplicateCompressionRatio: {
     tooltip: `Duplicate Compression Ratio is the ratio of sequences present prior to
@@ -38,13 +38,13 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     High values indicate the presence of more duplicate reads, indicating lower
     library complexity.`,
     link:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296613-Project-Page#metrics-meanings",
+      "https://help.idseq.net/hc/en-us/articles/360035296613-Project-Page#metrics-meanings",
   },
   erccReads: {
     tooltip: `The total number of reads aligning to ERCC (External RNA Controls
       Consortium) sequences.`,
     link:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790834-How-to-Interpret-ERCC-Quality",
+      "https://help.idseq.net/hc/en-us/articles/360034790834-How-to-Interpret-ERCC-Quality",
   },
   notes: {
     tooltip: "User-supplied notes.",
@@ -61,7 +61,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     million fragments (2 million paired reads). This field indicates the ratio of
     subsampled reads to total reads passing host filtration and QC steps.`,
     link:
-      "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296613-Project-Page#metrics-meanings",
+      "https://help.idseq.net/hc/en-us/articles/360035296613-Project-Page#metrics-meanings",
   },
   totalRuntime: {
     tooltip: `The total time required by the IDseq pipeline to process .fastq files into
