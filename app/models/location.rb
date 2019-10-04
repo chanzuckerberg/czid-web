@@ -96,6 +96,7 @@ class Location < ApplicationRecord
       puts "EXISTING FOUND"
       existing
     elsif loc[:osm_id].to_i > 0 && loc[:osm_type]
+      puts "EXISTING NOT FOUND"
       success, resp = geosearch_by_osm_id(loc[:osm_id], loc[:osm_type])
       raise "Couldn't fetch OSM ID #{loc[:osm_id]} (#{loc[:osm_type]})" unless success
 
@@ -103,6 +104,7 @@ class Location < ApplicationRecord
       # 'New' without saving so make sure caller saves.
       new_from_params(resp)
     else
+      puts "EXISTING NOT FOUND"
       # If osm_id and osm_type are missing, just use the original params.
       # 'New' without saving so make sure caller saves.
       new_from_params(loc)
