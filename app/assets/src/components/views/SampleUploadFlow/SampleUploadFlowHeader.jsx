@@ -50,8 +50,9 @@ class SampleUploadFlowHeader extends React.Component {
                   <ExternalLink
                     href="https://help.idseq.net/hc/en-us/articles/360034790414-Upload-with-Command-Line"
                     className={cs.link}
-                    children="View CLI Instructions."
-                  />
+                  >
+                    View CLI Instructions.
+                  </ExternalLink>
                 </div>
               )}
               {currentStep === "uploadMetadata" && (

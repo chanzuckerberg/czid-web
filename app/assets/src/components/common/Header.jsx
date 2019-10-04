@@ -162,11 +162,12 @@ const UserMenuDropDown = ({
           <ExternalLink
             className={cs.option}
             href="https://help.idseq.net"
-            children="Help Center"
             onClick={() =>
               logAnalyticsEvent("Header_dropdown-help-option_clicked")
             }
-          />
+          >
+            Help Center
+          </ExternalLink>
         }
       />,
       <BareDropdown.Item
@@ -175,11 +176,12 @@ const UserMenuDropDown = ({
           <ExternalLink
             className={cs.option}
             href="https://github.com/chanzuckerberg/idseq-dag/wiki"
-            children="IDseq Wiki"
             onClick={() =>
               logAnalyticsEvent("Header_dropdown-wiki-option_clicked")
             }
-          />
+          >
+            IDseq Wiki
+          </ExternalLink>
         }
       />,
       <BareDropdown.Item
