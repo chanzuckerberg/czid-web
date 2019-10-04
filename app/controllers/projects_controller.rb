@@ -123,7 +123,7 @@ class ProjectsController < ApplicationController
               project_hash = names.zip(p).to_h
               project_hash["users"] = (project_hash["users"] || '').split('::').map { |u| ["name", "email"].zip(u.split('|')).to_h }
               project_hash["owner"] = (project_hash["uploaders"] || '').split('::')[0]
-              project_hash["editable"] = project_hash["editable"] == 1
+              project_hash["editable"] = current_user.admin? || project_hash["editable"] == 1
               project_hash.delete("uploaders")
               ["locations", "hosts", "tissues"].each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
               project_hash
