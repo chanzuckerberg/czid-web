@@ -51,3 +51,6 @@ export const PIPELINE_INFO_FIELDS = [
     key: "lastProcessedAt",
   },
 ];
+
+export const HOST_FILTERING_WIKI =
+  "https://github.com/chanzuckerberg/idseq-dag/wiki/IDseq-Pipeline-Stage-%231:-Host-Filtering-and-QC";
