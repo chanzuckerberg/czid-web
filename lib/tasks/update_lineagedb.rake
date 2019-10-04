@@ -26,7 +26,7 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
 
   current_lineage_version = ENV['LINEAGE_VERSION'].to_i
   if current_lineage_version.zero?
-    current_lineage_version = AlignmentConfig.maximum("lineage_version")
+    current_lineage_version = AlignmentConfig.maximum("lineage_version") + 1
   end
 
   puts "\n\nStarting update of lineage versions to #{current_lineage_version} ...\n\n"
@@ -69,8 +69,9 @@ def import_lineage_database!(reference_s3_path, current_date)
    # Download new references, extract and remove header line
    aws s3 cp #{reference_s3_path}/#{taxid_lineages_file}.gz - | gunzip | tail -n +2 > taxid-lineages.csv
    aws s3 cp #{reference_s3_path}/#{names_file}.gz - | gunzip | tail -n +2 > names.csv
-   # names.csv has columns: tax_id,name_txt,name_txt_common
+    # names.csv has columns: tax_id,name_txt,name_txt_common
    # taxid-lineages.csv has columns: tax_id,superkingdom,kingdom,phylum,class,order,family,genus,species
+
    # Now perform series of joins to produce the format in column_names.
    file1_ncol=9
    file1_output_cols=1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9
@@ -86,12 +87,15 @@ def import_lineage_database!(reference_s3_path, current_date)
    # Sort in view of using "comm" command
    sort old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
    sort taxid-lineages.csv > new_taxon_lineages_sorted.csv
+
    # Find deleted lines and added lines
    comm -23 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_retire.csv
    comm -13 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_insert.csv
+
    # Add ended_at column for retired records, started_at column for new records
    sed -e 's/$/,#{current_date}/' -i records_to_retire.csv
    sed -e 's/$/,#{current_date}/' -i records_to_insert.csv
+
    # Add started_at column for retired records to make sure they violate [taxid, started_at] uniqueness and overwrite the correct record
    sort records_to_retire.csv > records_to_retire_sorted.csv
    sort taxid_to_started_at.csv > taxid_to_started_at_sorted.csv
