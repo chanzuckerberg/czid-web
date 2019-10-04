@@ -294,18 +294,24 @@ export default class AMRHeatmapView extends React.Component {
 
   computeHeatmapValuesForCSV() {
     const { samplesWithAMRCounts } = this.state;
-    const csvRows = samplesWithAMRCounts.flatMap(sample => {
-      const csvRow = sample.amrCounts.map(amrCount => {
+
+    const csvRows = [];
+
+    samplesWithAMRCounts.forEach(sample => {
+      // Each sample may have multiple amr counts.
+      // Add a separate row for each amr count.
+      sample.amrCounts.forEach(amrCount => {
         const row = [
           `${sample.sampleName},${amrCount.gene},${amrCount.allele},${
             amrCount.coverage
           },${amrCount.depth},${amrCount.rpm || "N/A"},${amrCount.dpm ||
             "N/A"},${amrCount.total_reads || "N/A"}`,
         ];
-        return row;
+
+        csvRows.push(row);
       });
-      return csvRow;
     });
+
     const csvHeaders = [
       "sample_name,gene_name,allele_name,coverage,depth,rpm,dpm,mapped_reads",
     ];
