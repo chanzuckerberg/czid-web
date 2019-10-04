@@ -21,7 +21,7 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
                       end
 
   puts "\n\nStarting import of #{reference_s3_path} ...\n\n"
-  import_lineage_database!(reference_s3_path, current_date) unless args.dryrun
+  import_lineage_database!(reference_s3_path, current_date, ncbi_date) unless args.dryrun
   puts "\n\nDone import of #{reference_s3_path}."
 
   current_lineage_version = ENV['LINEAGE_VERSION'].to_i
@@ -37,8 +37,8 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
   puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
 end
 
-def import_lineage_database!(reference_s3_path, current_date)
-  local_taxonomy_path = "/app/tmp/taxonomy"
+def import_lineage_database!(reference_s3_path, current_date, ncbi_date)
+  local_taxonomy_path = "/app/tmp/taxonomy/#{ncbi_date}"
   taxid_lineages_file = 'taxid-lineages.csv'
   names_file = 'names.csv'
 
@@ -73,6 +73,7 @@ def import_lineage_database!(reference_s3_path, current_date)
    # taxid-lineages.csv has columns: tax_id,superkingdom,kingdom,phylum,class,order,family,genus,species
 
    # Now perform series of joins to produce the format in column_names.
+   # TODO: (gdingle): this step is slow
    file1_ncol=9
    file1_output_cols=1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9
    sort -k1 -t, names.csv > names_sorted.csv
@@ -103,14 +104,17 @@ def import_lineage_database!(reference_s3_path, current_date)
 
    ## Import changes to taxon_lineages
    # retired records:
+   wc -l records_to_retire.csv
    mv records_to_retire.csv taxon_lineages
    mysqlimport --replace --local --host=#{host} #{lp} --columns=#{column_names},ended_at,started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
+
    # new records:
+   wc -l records_to_insert.csv
    mv records_to_insert.csv taxon_lineages
    mysqlimport --local --host=#{host} #{lp} --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
 
    ## Clean up
-   rm -rf #{local_taxonomy_path};
+   # rm -rf #{local_taxonomy_path};
   `
   raise "lineage database update failed" unless $CHILD_STATUS.success?
 end
@@ -118,4 +122,44 @@ end
 def add_lineage_version_numbers!(current_lineage_version, current_date)
   TaxonLineage.where(started_at: current_date).update_all(version_start: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
   TaxonLineage.where(ended_at: TaxonLineage.column_defaults["ended_at"]).update_all(version_end: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
+end
+
+# default_ended_at = TaxonLineage.column_defaults["ended_at"]
+
+def new_names
+  "aws s3 cp #{reference_s3_path}/#{names_file}.gz - | gunzip | tail -n +2 > names.csv"
+  "mysqlimport --local --host=#{host} #{lp} --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} _new_names;"
+end
+
+def new_taxid_lineages
+  "aws s3 cp #{reference_s3_path}/#{taxid_lineages_file}.gz - | gunzip | tail -n +2 > taxid-lineages.csv"
+  "mysqlimport --local --host=#{host} #{lp} --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} _new_taxid_lineages;"
+end
+
+
+def new_taxon_lineages
+  # taxid-lineages.csv has columns: tax_id,superkingdom,kingdom,phylum,class,order,family,genus,species
+  "CREATE TABLE _new_taxon_lineages AS
+   SELECT * FROM _new_taxid_lineages l
+    JOIN _new_names n ON l.superkingdom = n.taxid
+    JOIN _new_names n ON l.kingdom = n.taxid
+    JOIN _new_names n ON l.phylum = n.taxid
+    JOIN _new_names n ON l.class = n.taxid
+    JOIN _new_names n ON l.order = n.taxid
+    JOIN _new_names n ON l.family = n.taxid
+    JOIN _new_names n ON l.genus = n.taxid
+    JOIN _new_names n ON l.species = n.taxid
+  "
+end
+
+def retire
+  "SELECT old.* FROM old LEFT JOIN new WHERE new.id IS NULL AND old.ended_at = #{default_ended_at}"
+end
+
+def insert
+  "SELECT new.* FROM new LEFT JOIN old WHERE old.id IS NULL AND old.ended_at = #{default_ended_at}"
+end
+
+def update
+  "SELECT old.* FROM new INNER JOIN old WHERE old.ended_at = #{default_ended_at}"
 end
