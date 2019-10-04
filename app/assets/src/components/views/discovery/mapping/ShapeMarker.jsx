@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { clamp } from "lodash/fp";
+import { clamp, isFinite } from "lodash/fp";
 import { Marker } from "react-map-gl";
 
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -36,6 +36,9 @@ class ShapeMarker extends React.Component {
         maxSize,
         pointCount / (pointCount + divisorConst) * sizeMultiple * zoom
       );
+
+    // Ignore NaN coordinates although this should not happen.
+    if (!isFinite(lat) || !isFinite(lng)) return null;
 
     return (
       <Marker latitude={lat} longitude={lng}>
