@@ -1,5 +1,5 @@
 import React from "react";
-import { set, isEmpty, map, get, head, find } from "lodash/fp";
+import { set, isEmpty, map, get, head, find, isArray } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -91,10 +91,20 @@ export default class BasespaceSampleImport extends React.Component {
 
   fetchBasespaceProjects = async accessToken => {
     const projects = await getBasespaceProjects(accessToken);
-    this.setState({
+
+    const newState = {
       basespaceProjects: projects,
       selectedProjectId: get("id", head(projects)),
-    });
+    };
+
+    // If no projects are found, show the user an error.
+    if (isEmpty(projects)) {
+      newState.error =
+        "No projects found in logged-in Basespace account. Please contact us for help.";
+      newState.errorType = "error";
+    }
+
+    this.setState(newState);
   };
 
   fetchSamplesForBasespaceProject = async () => {
@@ -170,13 +180,28 @@ export default class BasespaceSampleImport extends React.Component {
   };
 
   renderProjectSelect = () => {
-    const { selectedProjectId, loadingSamples, error, errorType } = this.state;
+    const {
+      basespaceProjects,
+      selectedProjectId,
+      loadingSamples,
+      error,
+      errorType,
+    } = this.state;
+
+    const noBasespaceProjectsFound =
+      isArray(basespaceProjects) && isEmpty(basespaceProjects);
+
     return (
       <React.Fragment>
         <div className={cs.label}>Select Basespace Project</div>
         <div className={cs.projectSelectContainer}>
           <Dropdown
-            placeholder="Loading projects..."
+            disabled={noBasespaceProjectsFound}
+            placeholder={
+              noBasespaceProjectsFound
+                ? "No projects found"
+                : "Loading projects..."
+            }
             fluid
             floating
             scrolling
@@ -185,6 +210,7 @@ export default class BasespaceSampleImport extends React.Component {
             value={selectedProjectId}
           />
           <PrimaryButton
+            disabled={isEmpty(basespaceProjects)} // disable if no projects found and also if projects are loading.
             text="Connect to Project"
             rounded={false}
             onClick={withAnalytics(
