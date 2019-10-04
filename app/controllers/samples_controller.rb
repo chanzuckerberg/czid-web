@@ -17,7 +17,6 @@ class SamplesController < ApplicationController
   #                access control should still be checked as neccessary through current_power
   #
   ##########################################
-  skip_before_action :verify_authenticity_token, only: [:create, :update, :bulk_upload_with_metadata]
 
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
@@ -31,18 +30,15 @@ class SamplesController < ApplicationController
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
+  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
   # For API-like access
-  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
-  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
-  before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
+  skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
+  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
-  current_power do # Put this here for CLI
-    Power.new(current_user)
-  end
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
   power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
 

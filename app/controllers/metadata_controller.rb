@@ -2,13 +2,9 @@ class MetadataController < ApplicationController
   include MetadataHelper
 
   # Token auth needed for CLI uploads
-  skip_before_action :verify_authenticity_token, only: [:validate_csv_for_new_samples]
-  before_action :authenticate_user!, except: [:validate_csv_for_new_samples]
-  before_action :authenticate_user_from_token!, only: [:validate_csv_for_new_samples]
-
-  current_power do # Needed for CLI
-    Power.new(current_user)
-  end
+  TOKEN_AUTH_METHODS = [:validate_csv_for_new_samples].freeze
+  skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_METHODS
+  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_METHODS
 
   def dictionary
   end
