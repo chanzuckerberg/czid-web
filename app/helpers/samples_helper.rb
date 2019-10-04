@@ -587,9 +587,15 @@ module SamplesHelper
           ] + Location::GEO_LEVELS.map { |l| "#{l.pluralize}_locations.name" }
         )
     else
-      query
-        .includes(:metadata_field)
-        .group(Metadatum.where(key: field_name).first.validated_field)
+      first_datum = Metadatum.where(key: field_name).first
+      if first_datum
+        query
+          .includes(:metadata_field)
+          .group(first_datum.validated_field)
+      else
+        # Return empty <ActiveRecord::Relation []>
+        Metadatum.none.group(:key)
+      end
     end
   end
 
