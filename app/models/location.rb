@@ -90,8 +90,10 @@ class Location < ApplicationRecord
   # OSM ID/type. OSM IDs can change often but LocationIQ IDs should be stable. We can't geosearch
   # by LocationIQ ID, so we need to use both.
   def self.find_or_new_by_api_ids(loc)
+    puts "LOC in find_or_new_by_api_ids: ", loc, "END"
     existing = Location.find_by(locationiq_id: loc[:locationiq_id])
     if existing
+      puts "EXISTING FOUND"
       existing
     elsif loc[:osm_id].to_i > 0 && loc[:osm_type]
       success, resp = geosearch_by_osm_id(loc[:osm_id], loc[:osm_type])
