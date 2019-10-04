@@ -17,6 +17,7 @@ import {
 import { openUrl } from "~utils/links";
 import { deleteAsync } from "~/api/core";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 
 import cs from "./header.scss";
 
@@ -158,33 +159,27 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="4"
         text={
-          <a
+          <ExternalLink
             className={cs.option}
-            target="_blank"
-            rel="noopener noreferrer"
             href="https://help.idseq.net"
+            children="Help Center"
             onClick={() =>
               logAnalyticsEvent("Header_dropdown-help-option_clicked")
             }
-          >
-            Help Center
-          </a>
+          />
         }
       />,
       <BareDropdown.Item
         key="5"
         text={
-          <a
+          <ExternalLink
             className={cs.option}
-            target="_blank"
-            rel="noopener noreferrer"
             href="https://github.com/chanzuckerberg/idseq-dag/wiki"
+            children="IDseq Wiki"
             onClick={() =>
               logAnalyticsEvent("Header_dropdown-wiki-option_clicked")
             }
-          >
-            IDseq Wiki
-          </a>
+          />
         }
       />,
       <BareDropdown.Item
