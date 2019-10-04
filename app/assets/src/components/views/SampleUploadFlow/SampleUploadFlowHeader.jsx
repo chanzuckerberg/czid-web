@@ -6,6 +6,7 @@ import PropTypes from "~/components/utils/propTypes";
 import Label from "~ui/labels/Label";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { logAnalyticsEvent } from "~/api/analytics";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 
 import cs from "./sample_upload_flow.scss";
 
@@ -46,13 +47,12 @@ class SampleUploadFlowHeader extends React.Component {
               {currentStep === "uploadSamples" && (
                 <div className={cs.subtitle}>
                   Rather use our command-line interface?
-                  <a
-                    href="/cli_user_instructions"
-                    target="_blank"
+                  <ExternalLink
+                    href="https://help.idseq.net/hc/en-us/articles/360034790414-Upload-with-Command-Line"
                     className={cs.link}
                   >
                     View CLI Instructions.
-                  </a>
+                  </ExternalLink>
                 </div>
               )}
               {currentStep === "uploadMetadata" && (

@@ -1,7 +1,6 @@
 import { keys } from "lodash/fp";
 
-const DOC_LINK =
-  "https://github.com/chanzuckerberg/idseq-dag/wiki/IDseq-Pipeline-Stage-%233:-Reporting-and-Visualization#samples-table";
+const DOC_BASE_LINK = "https://help.idseq.net/hc/en-us/articles/";
 
 export const SAMPLE_TABLE_COLUMNS_V2 = {
   sample: {
@@ -14,7 +13,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     tooltip: `User-selected organism from which this sample was collected; this
       value is selected by the user at sample upload and dictates which
       genomes are used for initial host subtraction pipeline steps.`,
-    link: DOC_LINK,
+    link: DOC_BASE_LINK + "360035296613-Project-Page#metrics-meanings",
   },
   collectionLocationV2: {
     tooltip: "User-defined location from which the sample was collected.",
@@ -25,24 +24,24 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   nonHostReads: {
     tooltip: `The percentage of reads that came out of step (8) of the host filtration
     and QC steps as compared to what went in at step (1).`,
-    link: DOC_LINK,
+    link: DOC_BASE_LINK + "360034790554-Pipeline-Details#passed-filters",
   },
   qcPercent: {
     tooltip: `The percentage of reads that came out of PriceSeq, step (3) of the host
     filtration and QC steps, compared to what went in to Trimmomatic, step (2).`,
-    link: DOC_LINK,
+    link: DOC_BASE_LINK + "360034790554-Pipeline-Details#passed-qc",
   },
   duplicateCompressionRatio: {
     tooltip: `Duplicate Compression Ratio is the ratio of sequences present prior to
     running cd-hit-dup (duplicate removal) vs after duplicate removal.
     High values indicate the presence of more duplicate reads, indicating lower
     library complexity.`,
-    link: DOC_LINK,
+    link: DOC_BASE_LINK + "360035296613-Project-Page#metrics-meanings",
   },
   erccReads: {
     tooltip: `The total number of reads aligning to ERCC (External RNA Controls
       Consortium) sequences.`,
-    link: DOC_LINK,
+    link: DOC_BASE_LINK + "360034790834-How-to-Interpret-ERCC-Quality",
   },
   notes: {
     tooltip: "User-supplied notes.",
@@ -58,7 +57,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     tooltip: `After host filtration and QC, the remaining reads are subsampled to 1
     million fragments (2 million paired reads). This field indicates the ratio of
     subsampled reads to total reads passing host filtration and QC steps.`,
-    link: DOC_LINK,
+    link: DOC_BASE_LINK + "360035296613-Project-Page#metrics-meanings",
   },
   totalRuntime: {
     tooltip: `The total time required by the IDseq pipeline to process .fastq files into
