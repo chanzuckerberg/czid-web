@@ -1,6 +1,5 @@
 class PlaygroundController < ApplicationController
   before_action :login_required
-  before_action :authenticate_user!
   before_action :no_demo_user
   before_action :admin_required
 

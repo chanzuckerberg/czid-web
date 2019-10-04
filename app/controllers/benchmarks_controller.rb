@@ -1,7 +1,6 @@
 class BenchmarksController < ApplicationController
   include BenchmarksHelper
 
-  before_action :authenticate_user!
   before_action :admin_required
 
   def index
