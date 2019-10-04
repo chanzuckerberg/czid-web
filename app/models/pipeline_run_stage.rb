@@ -262,7 +262,7 @@ class PipelineRunStage < ApplicationRecord
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
 
     # Dispatch job. Use the himem settings for host filtering.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: "hostfilter", sample_id: sample.id)
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: DAG_NAME_HOST_FILTER, sample_id: sample.id)
   end
 
   def alignment_command
@@ -297,7 +297,7 @@ class PipelineRunStage < ApplicationRecord
     dag_commands = prepare_dag(attribute_dict, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Run it
-    aegea_batch_submit_command(batch_command, stage_name: "align", sample_id: sample.id)
+    aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_ALIGNMENT, sample_id: sample.id)
   end
 
   def postprocess_command
@@ -320,7 +320,7 @@ class PipelineRunStage < ApplicationRecord
     dag_commands = prepare_dag(attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: "postprocess", sample_id: sample.id)
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: DAG_NAME_POSTPROCESS, sample_id: sample.id)
   end
 
   def experimental_command
@@ -346,6 +346,6 @@ class PipelineRunStage < ApplicationRecord
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
 
     # Dispatch job
-    aegea_batch_submit_command(batch_command, stage_name: "experimental", sample_id: sample.id)
+    aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_EXPERIMENTAL, sample_id: sample.id)
   end
 end
