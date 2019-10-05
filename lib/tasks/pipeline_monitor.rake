@@ -24,7 +24,8 @@ IDSEQ_BENCH_MIN_FREQUENCY_HOURS = 1.0
 
 # This is under version control at idseq-web/config/idseq-bench-config.json, and deployed
 # by copying to the S3 location below.
-IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json".freeze
+IDSEQ_BENCH_BUCKET = "idseq-bench".freeze
+IDSEQ_BENCH_KEY_CONFIG = "config.test.json".freeze
 
 AWS_DEFAULT_REGION = ENV.fetch('AWS_DEFAULT_REGION') { "us-west-2" }
 
@@ -118,14 +119,14 @@ class CheckPipelineRuns
     autoscaling_state
   end
 
-  def self.benchmark_sample_name(s3path, timestamp_str, metadata_prefix)
+  def self.benchmark_sample_name(s3_path, timestamp_str, metadata_prefix)
     # Benchmark sample names start with a prefix determined uniquely from the s3 path,
     # like so: "idseq-bench-1|".  This enables finding quickly all samples submitted for
     # a given benchmark.  That text is followed by a unix timestamp of the creation time,
     # only because within a project, sample names must be unique.  Finally, a long metadata_prefix
     # describes the benchmark contents.  The whole thing looks like
     # "idseq-bench-1|1539204106|norg_1|nacc_1|uniform_weight_per_organism|hiseq_reads|viruses|chikungunya|37124|v4"
-    items = s3path.split("/")
+    items = s3_path.split("/")
     result = items[-2] + "-" + items[-1] + "|"
     return result if timestamp_str.blank?
     result = result + timestamp_str + "|"
@@ -133,26 +134,45 @@ class CheckPipelineRuns
     result + metadata_prefix.gsub("__", "|") # vertical bars are prettier
   end
 
-  def self.benchmark_sample_name_prefix(s3path)
-    benchmark_sample_name(s3path, "", "")
+  def self.benchmark_sample_name_prefix(s3_path)
+    benchmark_sample_name(s3_path, "", "")
   end
 
-  def self.create_sample_for_benchmark(s3path, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_project, bm_host, bm_comment, t_now)
+  def self.benchmark_has_git_commit(metadata)
+    return metadata['idseq_bench_reproducible'] && metadata['idseq_bench_git_hash'].length == 40
+  end
+
+  def self.benchmark_has_configuration(metadata, s3_bucket, s3_key)
+    if metadata['iss_version'] && metadata['idseq_bench_version'] && metadata['prefix']
+      Rails.logger.debug("bucket: #{s3_bucket}, key: #{s3_key}/#{metadata['prefix']}.yaml")
+      response = S3_CLIENT.get_object(bucket: s3_bucket, key: "#{s3_key}/#{metadata['prefix']}.yaml")
+      return response.content_length > 0
+    end
+    return false
+  end
+
+  def self.create_sample_for_benchmark(s3_bucket, s3_key, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_project, bm_host, bm_comment, t_now)
+    Rails.logger.debug([s3_bucket, s3_key, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_project, bm_host, bm_comment, t_now])
     # metadata.json is produced by idseq-bench
-    raw_metadata = `aws s3 cp #{s3path}/metadata.json -`
+    s3_path = "s3://#{s3_bucket}/#{s3_key}"
+    raw_metadata = `aws s3 cp #{s3_path}/metadata.json -`
     metadata = JSON.parse(raw_metadata)
     input_files_attributes = metadata['fastqs'].map do |fq|
       {
         name: fq,
-        source: s3path + "/" + fq,
+        source: s3_path + "/" + fq,
         source_type: "s3",
       }
     end
-    unless metadata['idseq_bench_reproducible'] && metadata['idseq_bench_git_hash'].length == 40
-      raise "Refusing to create sample for irreproducible benchmark #{s3path}"
+
+    # Keep support for older benchmarks (reproducible throught git commit) while
+    # checking for new reproducible conditions (configuration file in s3 and package versions)
+    unless benchmark_has_git_commit(metadata) || benchmark_has_configuration(metadata, s3_bucket, s3_key)
+      raise "Refusing to create sample for irreproducible benchmark #{s3_path}. Include git commit or configuration file named '#{metadata['prefix']}.yaml'."
     end
-    Rails.logger.info("Creating benchmark sample from #{s3path} with #{metadata['verified_total_reads']} reads.")
-    bm_sample_name = benchmark_sample_name(s3path, t_now.floor.to_s, metadata['prefix'])
+
+    Rails.logger.info("Creating benchmark sample from #{s3_path} with #{metadata['verified_total_reads']} reads.")
+    bm_sample_name = benchmark_sample_name(s3_path, t_now.floor.to_s, metadata['prefix'])
     # Add benchmark comment to existing metadata, and dump metadata json into sample_notes.
     # Tags added here are capitalized.  If a COMMENT tag already exists in metadata, prepend to it.
     existing_comment = metadata['COMMENT']
@@ -162,7 +182,7 @@ class CheckPipelineRuns
     new_metadata = {}
     # HACK: We want COMMENT and ORIGIN to appear at the top in the json dump, and this trick does it.
     new_metadata['COMMENT'] = (bm_comment || "") + comment_separator + (existing_comment || "")
-    new_metadata['ORIGIN'] = s3path
+    new_metadata['ORIGIN'] = s3_path
     metadata.each do |k, v|
       next if k == "COMMENT"
       next if k == "ORIGIN"
@@ -184,14 +204,22 @@ class CheckPipelineRuns
       pipeline_branch: bm_pipeline_branch,
       sample_notes: JSON.pretty_generate(new_metadata),
     }
-    @bm_sample = Sample.new(bm_sample_params)
-    # HACK: Not really sure why we have to manually set the status to STATUS_CREATED here,
-    # but if we don't, the sample is never picked up by the uploader.
-    @bm_sample.status ||= Sample::STATUS_CREATED
-    unless @bm_sample.save
-      raise "Error creating benchmark sample with #{JSON.pretty_generate(bm_sample_params)}."
-    end
-    Rails.logger.info("Benchmark sample #{@bm_sample.id} created successfully.")
+    Rails.logger.debug("")
+    Rails.logger.debug("=======================================================")
+    Rails.logger.debug("")
+    Rails.logger.debug("CREATING BENCHMARK: #{bm_sample_name}")
+    Rails.logger.debug("")
+    Rails.logger.debug("=======================================================")
+    Rails.logger.debug("")
+    Rails.logger.debug("CREATING BENCHMARK: #{bm_sample_params}")
+    # @bm_sample = Sample.new(bm_sample_params)
+    # # HACK: Not really sure why we have to manually set the status to STATUS_CREATED here,
+    # # but if we don't, the sample is never picked up by the uploader.
+    # @bm_sample.status ||= Sample::STATUS_CREATED
+    # unless @bm_sample.save
+    #   raise "Error creating benchmark sample with #{JSON.pretty_generate(bm_sample_params)}."
+    # end
+    # Rails.logger.info("Benchmark sample #{@bm_sample.id} created successfully.")
   end
 
   def self.prop_get(dict, property, defaults)
@@ -201,28 +229,32 @@ class CheckPipelineRuns
 
   def self.benchmark_update(t_now)
     Rails.logger.info("Benchmark update.")
-    config = JSON.parse(`aws s3 cp #{IDSEQ_BENCH_CONFIG} -`)
+    # config = JSON.parse(`aws s3 cp s3://#{IDSEQ_BENCH_BUCKET}/#{IDSEQ_BENCH_CONFIG} -`)
+    config = JSON.parse(`cat #{IDSEQ_BENCH_KEY_CONFIG}`)
     defaults = config['defaults']
     web_commit = ENV['GIT_VERSION'] || ""
-    config['active_benchmarks'].each do |s3path, bm_props|
+    config['active_benchmarks'].each do |bm_props|
+      s3_bucket = prop_get(bm_props, 'bucket', defaults)
+      s3_key = prop_get(bm_props, 'key', defaults)
+      s3_path = "s3://#{s3_bucket}/#{s3_key}"
       bm_environments = prop_get(bm_props, 'environments', defaults)
       unless bm_environments.include?(Rails.env)
-        Rails.logger.info("Benchmark does not apply to #{Rails.env} environment: #{s3path}")
+        Rails.logger.info("Benchmark does not apply to #{Rails.env} environment: #{s3_path}")
         next
       end
       bm_project_name = prop_get(bm_props, 'project_name', defaults)
       bm_proj = Project.find_by(name: bm_project_name)
       unless bm_proj
-        Rails.logger.info("Benchmark requires non-existent project #{bm_project_name}: #{s3path}")
+        Rails.logger.info("Benchmark requires non-existent project #{bm_project_name}: #{s3_path}")
         next
       end
       bm_frequency_hours = prop_get(bm_props, 'frequency_hours', defaults)
       bm_frequency_seconds = bm_frequency_hours * 3600
       unless bm_frequency_hours >= IDSEQ_BENCH_MIN_FREQUENCY_HOURS
-        Rails.logger.info("Benchmark frequency under #{IDSEQ_BENCH_MIN_FREQUENCY_HOURS} hour: #{s3path}")
+        Rails.logger.info("Benchmark frequency under #{IDSEQ_BENCH_MIN_FREQUENCY_HOURS} hour: #{s3_path}")
         next
       end
-      bm_name_prefix = benchmark_sample_name_prefix(s3path)
+      bm_name_prefix = benchmark_sample_name_prefix(s3_path)
       sql_query = "
         SELECT
           id,
@@ -249,19 +281,19 @@ class CheckPipelineRuns
       unless sql_results.empty?
         most_recent_submission = sql_results.pluck('unixtime_of_creation').max
         hours_since_last_run = Integer((t_now - most_recent_submission) / 360) / 10.0
-        Rails.logger.info("Benchmark last ran #{hours_since_last_run} hours ago #{commit_filter}: #{s3path}")
+        Rails.logger.info("Benchmark last ran #{hours_since_last_run} hours ago #{commit_filter}: #{s3_path}")
         next
       end
-      Rails.logger.info("Submitting benchmark: #{s3path}")
+      Rails.logger.info("Submitting benchmark: #{s3_path}")
       bm_user_email = prop_get(bm_props, 'user_email', defaults)
       bm_user = User.find_by(email: bm_user_email)
       bm_host_name = prop_get(bm_props, 'host', defaults)
       bm_host = HostGenome.find_by(name: bm_host_name)
       bm_comment = prop_get(bm_props, 'comment', defaults)
       begin
-        create_sample_for_benchmark(s3path, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_proj, bm_host, bm_comment, t_now)
+        create_sample_for_benchmark(s3_bucket, s3_key, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_proj, bm_host, bm_comment, t_now)
       rescue => exception
-        LogUtil.log_err_and_airbrake("Creating sample for benchmark #{s3path} failed with exception: #{exception.message}")
+        LogUtil.log_err_and_airbrake("Creating sample for benchmark #{s3_path} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -280,93 +312,101 @@ class CheckPipelineRuns
     benchmark_state
   end
 
-  def self.run(duration, min_refresh_interval)
-    Rails.logger.info("Checking the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
-    t_now = Time.now.to_f # unixtime
-    # Will try to return as soon as duration seconds have elapsed, but not any sooner.
-    t_end = t_now + duration
-    autoscaling_state = nil
+  def self.run()
+    t_now = Time.now.to_f
     benchmark_state = nil
-    # The duration of the longest update so far.
-    max_work_duration = 0
-    iter_count = 0
-    until @shutdown_requested
-      before_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      iter_count += 1
-      t_iter_start = t_now
-      pr_ids = PipelineRun.in_progress.pluck(:id)
-      pt_ids = PhyloTree.in_progress.pluck(:id)
-      Parallel.each(pr_ids, in_processes: PROCESS_COUNT) do |prid|
-        ActiveRecord::Base.connection.reconnect!
-        update_pr(prid)
-      end
-      Parallel.each(pt_ids, in_processes: PROCESS_COUNT) do |ptid|
-        ActiveRecord::Base.connection.reconnect!
-        update_pt(ptid)
-      end
-      ActiveRecord::Base.connection.reconnect!
-      autoscaling_state = autoscaling_update(autoscaling_state, t_now)
-      benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
-      t_now = Time.now.to_f
-      after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      # HACK: This logger isn't really meant to deal with nested json
-      #  this will appear under the message key at the top level
-      logger_iteration_data = {
-        message: "Pipeline Monitor Iteration Complete",
-        duration: (after_iter_timestamp - before_iter_timestamp),
-        pr_id_count: pr_ids.count,
-        pt_id_count: pt_ids.count,
-      }
-      Rails.logger.info(JSON.generate(logger_iteration_data))
-      max_work_duration = [t_now - t_iter_start, max_work_duration].max
-      t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
-      break unless t_iter_end + max_work_duration < t_end
-      while t_now < t_iter_end && !@shutdown_requested
-        # Ensure no iteration is shorter than min_refresh_interval.
-        sleep [t_iter_end - t_now, @sleep_quantum].min
-        t_now = Time.now.to_f
-      end
-    end
-    while t_now < t_end && !@shutdown_requested
-      # In this case (t_end - t_now) < max_work_duration.
-      sleep [t_end - t_now, @sleep_quantum].min
-      t_now = Time.now.to_f
-    end
-    Rails.logger.info("Exited loop after #{iter_count} iterations.")
+    benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
+    print(benchmark_state)
   end
+
+  # def self.run(duration, min_refresh_interval)
+  #   Rails.logger.info("Checking the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
+  #   t_now = Time.now.to_f # unixtime
+  #   # Will try to return as soon as duration seconds have elapsed, but not any sooner.
+  #   t_end = t_now + duration
+  #   autoscaling_state = nil
+  #   benchmark_state = nil
+  #   # The duration of the longest update so far.
+  #   max_work_duration = 0
+  #   iter_count = 0
+  #   until @shutdown_requested
+  #     before_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+  #     iter_count += 1
+  #     t_iter_start = t_now
+  #     pr_ids = PipelineRun.in_progress.pluck(:id)
+  #     pt_ids = PhyloTree.in_progress.pluck(:id)
+  #     Parallel.each(pr_ids, in_processes: PROCESS_COUNT) do |prid|
+  #       ActiveRecord::Base.connection.reconnect!
+  #       update_pr(prid)
+  #     end
+  #     Parallel.each(pt_ids, in_processes: PROCESS_COUNT) do |ptid|
+  #       ActiveRecord::Base.connection.reconnect!
+  #       update_pt(ptid)
+  #     end
+  #     ActiveRecord::Base.connection.reconnect!
+  #     autoscaling_state = autoscaling_update(autoscaling_state, t_now)
+  #     benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
+  #     t_now = Time.now.to_f
+  #     after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+  #     # HACK: This logger isn't really meant to deal with nested json
+  #     #  this will appear under the message key at the top level
+  #     logger_iteration_data = {
+  #       message: "Pipeline Monitor Iteration Complete",
+  #       duration: (after_iter_timestamp - before_iter_timestamp),
+  #       pr_id_count: pr_ids.count,
+  #       pt_id_count: pt_ids.count,
+  #     }
+  #     Rails.logger.info(JSON.generate(logger_iteration_data))
+  #     max_work_duration = [t_now - t_iter_start, max_work_duration].max
+  #     t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
+  #     break unless t_iter_end + max_work_duration < t_end
+  #     while t_now < t_iter_end && !@shutdown_requested
+  #       # Ensure no iteration is shorter than min_refresh_interval.
+  #       sleep [t_iter_end - t_now, @sleep_quantum].min
+  #       t_now = Time.now.to_f
+  #     end
+  #   end
+  #   while t_now < t_end && !@shutdown_requested
+  #     # In this case (t_end - t_now) < max_work_duration.
+  #     sleep [t_end - t_now, @sleep_quantum].min
+  #     t_now = Time.now.to_f
+  #   end
+  #   Rails.logger.info("Exited loop after #{iter_count} iterations.")
+  # end
 end
 
 task "pipeline_monitor", [:duration] => :environment do |_t, args|
-  trap('SIGTERM') do
-    CheckPipelineRuns.shutdown_requested = true
-  end
-  # spawn a new finite duration process every 60 minutes
-  respawn_interval = 60 * 60
-  # rate-limit status updates
-  cloud_env = ["prod", "staging"].include?(Rails.env)
-  checks_per_minute = cloud_env ? 4.0 : 1.0
-  # make sure the system is not overwhelmed under any cirmustances
-  wait_before_respawn = cloud_env ? 5 : 30
-  additional_wait_after_failure = 25
+  CheckPipelineRuns.run
+  # trap('SIGTERM') do
+  #   CheckPipelineRuns.shutdown_requested = true
+  # end
+  # # spawn a new finite duration process every 60 minutes
+  # respawn_interval = 60 * 60
+  # # rate-limit status updates
+  # cloud_env = ["prod", "staging"].include?(Rails.env)
+  # checks_per_minute = cloud_env ? 4.0 : 1.0
+  # # make sure the system is not overwhelmed under any cirmustances
+  # wait_before_respawn = cloud_env ? 5 : 30
+  # additional_wait_after_failure = 25
 
-  # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb
-  Rails.logger.level = [1, Rails.logger.level].max
-  HoneycombRails.config.sample_rate = 120
+  # # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb
+  # Rails.logger.level = [1, Rails.logger.level].max
+  # HoneycombRails.config.sample_rate = 120
 
-  if args[:duration] == "finite_duration"
-    CheckPipelineRuns.run(respawn_interval - wait_before_respawn, 60.0 / checks_per_minute)
-  else
-    # infinite duration
-    if cloud_env
-      Rails.logger.info("HACK: Sleeping 30 seconds on daemon startup for prior incarnations to drain.")
-      sleep 30
-    end
-    until CheckPipelineRuns.shutdown_requested
-      system("rake pipeline_monitor[finite_duration]")
-      sleep wait_before_respawn
-      unless $CHILD_STATUS.exitstatus.zero?
-        sleep additional_wait_after_failure
-      end
-    end
-  end
+  # if args[:duration] == "finite_duration"
+  #   CheckPipelineRuns.run(respawn_interval - wait_before_respawn, 60.0 / checks_per_minute)
+  # else
+  #   # infinite duration
+  #   if cloud_env
+  #     Rails.logger.info("HACK: Sleeping 30 seconds on daemon startup for prior incarnations to drain.")
+  #     sleep 30
+  #   end
+  #   until CheckPipelineRuns.shutdown_requested
+  #     system("rake pipeline_monitor[finite_duration]")
+  #     sleep wait_before_respawn
+  #     unless $CHILD_STATUS.exitstatus.zero?
+  #       sleep additional_wait_after_failure
+  #     end
+  #   end
+  # end
 end

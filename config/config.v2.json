@@ -1,0 +1,53 @@
+{
+    "README": [
+        "********************************************************************************",
+        " This file is under version control at idseq-web/config/idseq-bench-config.json ",
+        " It is consumed by pipeline_monitor.rake.                                       ",
+        "                                                                                ",
+        " You can test and deploy changes to it by running                               ",
+        "                                                                                ",
+        "    aws s3 cp idseq-bench-config.json s3://idseq-web/config.json                ",
+        "                                                                                ",
+        " This process allows changing webapp configuration without the cost             ",
+        " and disruption of a production push.                                           ",
+        "                                                                                ",
+        " The recommended process for deploying a new benchmark is as follows:           ",
+        "                                                                                ",
+        "    1. Branch idseq-bench, adjust to taste, commit all changes.                 ",
+        "                                                                                ",
+        "    2. aws s3 cp --recursive <idseq-bench-output> s3://idseq-bench/<number>     ",
+        "                                                                                ",
+        "    3. Deploy s3://idseq-bench/<number> by prepending to active_benchmarks.     ",
+        "                                                                                ",
+        "    4. After a day or two, move any older entries to retired_benchmarks.        ",
+        "                                                                                ",
+        "********************************************************************************"
+    ],
+    "defaults": {
+        "how_to_use_these_defaults": "These properties may be overridden in each entry of active_benchmarks below.",
+        "project_name": "IDSeq Bench",
+        "user_email": "benchbot@chanzuckerberg.com",
+        "frequency_hours": 24,
+        "trigger_on_webapp_change": true,
+        "trigger_on_pipeline_change": true,
+        "pipeline_branch": "master",
+        "host": "Human",
+        "comment":  "No comment provided for this benchmark in s3://idseq-bench/config.json."
+    },
+    "active_benchmarks": [
+        {
+            "bucket": "idseq-bench",
+            "key": "5",
+            "comment": "Comprehensive general benchmark built with idseq-bench, contains additional microbes (beyond bench/4) commonly found in IDseq samples. Deployed 2019-04-30.",
+            "environments": ["prod", "staging"]
+        },
+        {
+            "bucket": "idseq-bench",
+            "key": "7",
+            "comment": "Comprehensive general benchmark built with idseq-bench, contains additional microbes (beyond bench/4) commonly found in IDseq samples. Uses the new benchmark configuration. Deployed 2019-10-40.",
+            "environments": ["prod", "staging"]
+        }
+    ],
+    "retired_benchmarks": [
+    ]
+}
