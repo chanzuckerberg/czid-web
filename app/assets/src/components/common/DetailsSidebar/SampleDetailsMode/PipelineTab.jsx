@@ -13,6 +13,7 @@ import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip"
 import { PIPELINE_INFO_FIELDS, HOST_FILTERING_WIKI } from "./constants";
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
+import { pipeline } from "stream";
 
 class PipelineTab extends React.Component {
   state = {
@@ -149,8 +150,8 @@ class PipelineTab extends React.Component {
           open={this.state.sectionOpen.readsRemaining}
           title="Reads Remaining"
         >
-          {isEmpty(pipelineRun) ||
-          isEmpty(pipelineRun.totalReads) ||
+          {!pipelineRun ||
+          !pipelineRun.total_reads ||
           isEmpty(this.state.pipelineStepDict) ||
           isEmpty(this.state.pipelineStepDict["steps"]) ? (
             <div className={cs.field}>
