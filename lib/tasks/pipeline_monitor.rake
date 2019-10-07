@@ -152,7 +152,6 @@ class CheckPipelineRuns
   end
 
   def self.create_sample_for_benchmark(s3_bucket, s3_key, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_project, bm_host, bm_comment, t_now)
-    Rails.logger.debug([s3_bucket, s3_key, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_project, bm_host, bm_comment, t_now])
     # metadata.json is produced by idseq-bench
     s3_path = "s3://#{s3_bucket}/#{s3_key}"
     raw_metadata = `aws s3 cp #{s3_path}/metadata.json -`
@@ -230,7 +229,7 @@ class CheckPipelineRuns
       s3_path = "s3://#{s3_bucket}/#{s3_key}"
       bm_environments = prop_get(bm_props, 'environments', defaults)
       unless bm_environments.include?(Rails.env)
-        Rails.logger.info("Benchmark does not apply to #{Rails.env} environment: #{s3_path}")
+        Rails.logger.info("Benchmark not enabled for #{Rails.env} environment: #{s3_path}")
         next
       end
       bm_project_name = prop_get(bm_props, 'project_name', defaults)
