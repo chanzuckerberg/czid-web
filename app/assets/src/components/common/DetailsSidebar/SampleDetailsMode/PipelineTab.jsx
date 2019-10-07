@@ -94,9 +94,11 @@ class PipelineTab extends React.Component {
     const { sampleId } = this.props;
     const pipelineResults = await getSamplePipelineResults(sampleId);
 
-    this.setState({
-      pipelineStepDict: pipelineResults["displayed_data"]["Host Filtering"],
-    });
+    if (pipelineResults && pipelineResults["displayed_data"]) {
+      this.setState({
+        pipelineStepDict: pipelineResults["displayed_data"]["Host Filtering"],
+      });
+    }
   };
 
   renderReadCountsTable = stepKey => {
