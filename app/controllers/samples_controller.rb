@@ -981,7 +981,7 @@ class SamplesController < ApplicationController
   def results_folder
     can_see_stage1_results = (current_user.id == @sample.user_id)
     @exposed_raw_results_url = can_see_stage1_results ? raw_results_folder_sample_url(@sample) : nil
-    @file_list = @sample.first_pipeline_run ? @sample.first_pipeline_run.outputs_by_step(can_see_stage1_results) : nil
+    @file_list = @sample.first_pipeline_run ? @sample.first_pipeline_run.outputs_by_step(can_see_stage1_results) : []
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
       format.html do
