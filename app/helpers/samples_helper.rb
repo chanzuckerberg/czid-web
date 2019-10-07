@@ -634,7 +634,7 @@ module SamplesHelper
                          LocationHelper.filter_by_name(samples_with_metadata, query)
                        else
                          samples_with_metadata
-                           .where(metadata: { metadatum.metadata_field.validated_field => query })
+                           .where(metadata: { metadatum.validated_field => query })
                        end
 
     not_set_ids = []

@@ -290,6 +290,7 @@ class Metadatum < ApplicationRecord
     ""
   end
 
+  # TODO(jsheu): Move this and related methods to MetadataField.rb.
   def validated_field
     base = self.class.convert_type_to_string(metadata_field.base_type)
     return "#{base}_validated_value"
