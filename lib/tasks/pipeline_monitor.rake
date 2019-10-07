@@ -25,7 +25,7 @@ IDSEQ_BENCH_MIN_FREQUENCY_HOURS = 1.0
 # This is under version control at idseq-web/config/idseq-bench-config.json, and deployed
 # by copying to the S3 location below.
 IDSEQ_BENCH_BUCKET = "idseq-bench".freeze
-IDSEQ_BENCH_KEY_CONFIG = "config.test.json".freeze
+IDSEQ_BENCH_KEY_CONFIG = "config.v2.json".freeze
 
 AWS_DEFAULT_REGION = ENV.fetch('AWS_DEFAULT_REGION') { "us-west-2" }
 
@@ -204,22 +204,14 @@ class CheckPipelineRuns
       pipeline_branch: bm_pipeline_branch,
       sample_notes: JSON.pretty_generate(new_metadata),
     }
-    Rails.logger.debug("")
-    Rails.logger.debug("=======================================================")
-    Rails.logger.debug("")
-    Rails.logger.debug("CREATING BENCHMARK: #{bm_sample_name}")
-    Rails.logger.debug("")
-    Rails.logger.debug("=======================================================")
-    Rails.logger.debug("")
-    Rails.logger.debug("CREATING BENCHMARK: #{bm_sample_params}")
-    # @bm_sample = Sample.new(bm_sample_params)
-    # # HACK: Not really sure why we have to manually set the status to STATUS_CREATED here,
-    # # but if we don't, the sample is never picked up by the uploader.
-    # @bm_sample.status ||= Sample::STATUS_CREATED
-    # unless @bm_sample.save
-    #   raise "Error creating benchmark sample with #{JSON.pretty_generate(bm_sample_params)}."
-    # end
-    # Rails.logger.info("Benchmark sample #{@bm_sample.id} created successfully.")
+    @bm_sample = Sample.new(bm_sample_params)
+    # HACK: Not really sure why we have to manually set the status to STATUS_CREATED here,
+    # but if we don't, the sample is never picked up by the uploader.
+    @bm_sample.status ||= Sample::STATUS_CREATED
+    unless @bm_sample.save
+      raise "Error creating benchmark sample with #{JSON.pretty_generate(bm_sample_params)}."
+    end
+    Rails.logger.info("Benchmark sample #{@bm_sample.id} created successfully.")
   end
 
   def self.prop_get(dict, property, defaults)
@@ -229,8 +221,7 @@ class CheckPipelineRuns
 
   def self.benchmark_update(t_now)
     Rails.logger.info("Benchmark update.")
-    # config = JSON.parse(`aws s3 cp s3://#{IDSEQ_BENCH_BUCKET}/#{IDSEQ_BENCH_CONFIG} -`)
-    config = JSON.parse(`cat #{IDSEQ_BENCH_KEY_CONFIG}`)
+    config = JSON.parse(`aws s3 cp s3://#{IDSEQ_BENCH_BUCKET}/#{IDSEQ_BENCH_CONFIG} -`)
     defaults = config['defaults']
     web_commit = ENV['GIT_VERSION'] || ""
     config['active_benchmarks'].each do |bm_props|
@@ -312,101 +303,93 @@ class CheckPipelineRuns
     benchmark_state
   end
 
-  def self.run()
-    t_now = Time.now.to_f
+  def self.run(duration, min_refresh_interval)
+    Rails.logger.info("Checking the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
+    t_now = Time.now.to_f # unixtime
+    # Will try to return as soon as duration seconds have elapsed, but not any sooner.
+    t_end = t_now + duration
+    autoscaling_state = nil
     benchmark_state = nil
-    benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
-    print(benchmark_state)
+    # The duration of the longest update so far.
+    max_work_duration = 0
+    iter_count = 0
+    until @shutdown_requested
+      before_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      iter_count += 1
+      t_iter_start = t_now
+      pr_ids = PipelineRun.in_progress.pluck(:id)
+      pt_ids = PhyloTree.in_progress.pluck(:id)
+      Parallel.each(pr_ids, in_processes: PROCESS_COUNT) do |prid|
+        ActiveRecord::Base.connection.reconnect!
+        update_pr(prid)
+      end
+      Parallel.each(pt_ids, in_processes: PROCESS_COUNT) do |ptid|
+        ActiveRecord::Base.connection.reconnect!
+        update_pt(ptid)
+      end
+      ActiveRecord::Base.connection.reconnect!
+      autoscaling_state = autoscaling_update(autoscaling_state, t_now)
+      benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
+      t_now = Time.now.to_f
+      after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      # HACK: This logger isn't really meant to deal with nested json
+      #  this will appear under the message key at the top level
+      logger_iteration_data = {
+        message: "Pipeline Monitor Iteration Complete",
+        duration: (after_iter_timestamp - before_iter_timestamp),
+        pr_id_count: pr_ids.count,
+        pt_id_count: pt_ids.count,
+      }
+      Rails.logger.info(JSON.generate(logger_iteration_data))
+      max_work_duration = [t_now - t_iter_start, max_work_duration].max
+      t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
+      break unless t_iter_end + max_work_duration < t_end
+      while t_now < t_iter_end && !@shutdown_requested
+        # Ensure no iteration is shorter than min_refresh_interval.
+        sleep [t_iter_end - t_now, @sleep_quantum].min
+        t_now = Time.now.to_f
+      end
+    end
+    while t_now < t_end && !@shutdown_requested
+      # In this case (t_end - t_now) < max_work_duration.
+      sleep [t_end - t_now, @sleep_quantum].min
+      t_now = Time.now.to_f
+    end
+    Rails.logger.info("Exited loop after #{iter_count} iterations.")
   end
-
-  # def self.run(duration, min_refresh_interval)
-  #   Rails.logger.info("Checking the active pipeline runs every #{min_refresh_interval} seconds over the next #{duration / 60} minutes.")
-  #   t_now = Time.now.to_f # unixtime
-  #   # Will try to return as soon as duration seconds have elapsed, but not any sooner.
-  #   t_end = t_now + duration
-  #   autoscaling_state = nil
-  #   benchmark_state = nil
-  #   # The duration of the longest update so far.
-  #   max_work_duration = 0
-  #   iter_count = 0
-  #   until @shutdown_requested
-  #     before_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-  #     iter_count += 1
-  #     t_iter_start = t_now
-  #     pr_ids = PipelineRun.in_progress.pluck(:id)
-  #     pt_ids = PhyloTree.in_progress.pluck(:id)
-  #     Parallel.each(pr_ids, in_processes: PROCESS_COUNT) do |prid|
-  #       ActiveRecord::Base.connection.reconnect!
-  #       update_pr(prid)
-  #     end
-  #     Parallel.each(pt_ids, in_processes: PROCESS_COUNT) do |ptid|
-  #       ActiveRecord::Base.connection.reconnect!
-  #       update_pt(ptid)
-  #     end
-  #     ActiveRecord::Base.connection.reconnect!
-  #     autoscaling_state = autoscaling_update(autoscaling_state, t_now)
-  #     benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
-  #     t_now = Time.now.to_f
-  #     after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-  #     # HACK: This logger isn't really meant to deal with nested json
-  #     #  this will appear under the message key at the top level
-  #     logger_iteration_data = {
-  #       message: "Pipeline Monitor Iteration Complete",
-  #       duration: (after_iter_timestamp - before_iter_timestamp),
-  #       pr_id_count: pr_ids.count,
-  #       pt_id_count: pt_ids.count,
-  #     }
-  #     Rails.logger.info(JSON.generate(logger_iteration_data))
-  #     max_work_duration = [t_now - t_iter_start, max_work_duration].max
-  #     t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
-  #     break unless t_iter_end + max_work_duration < t_end
-  #     while t_now < t_iter_end && !@shutdown_requested
-  #       # Ensure no iteration is shorter than min_refresh_interval.
-  #       sleep [t_iter_end - t_now, @sleep_quantum].min
-  #       t_now = Time.now.to_f
-  #     end
-  #   end
-  #   while t_now < t_end && !@shutdown_requested
-  #     # In this case (t_end - t_now) < max_work_duration.
-  #     sleep [t_end - t_now, @sleep_quantum].min
-  #     t_now = Time.now.to_f
-  #   end
-  #   Rails.logger.info("Exited loop after #{iter_count} iterations.")
-  # end
 end
 
 task "pipeline_monitor", [:duration] => :environment do |_t, args|
-  CheckPipelineRuns.run
-  # trap('SIGTERM') do
-  #   CheckPipelineRuns.shutdown_requested = true
-  # end
-  # # spawn a new finite duration process every 60 minutes
-  # respawn_interval = 60 * 60
-  # # rate-limit status updates
-  # cloud_env = ["prod", "staging"].include?(Rails.env)
-  # checks_per_minute = cloud_env ? 4.0 : 1.0
-  # # make sure the system is not overwhelmed under any cirmustances
-  # wait_before_respawn = cloud_env ? 5 : 30
-  # additional_wait_after_failure = 25
+  trap('SIGTERM') do
+    CheckPipelineRuns.shutdown_requested = true
+  end
+  # spawn a new finite duration process every 60 minutes
+  respawn_interval = 60 * 60
+  # rate-limit status updates
+  cloud_env = ["prod", "staging"].include?(Rails.env)
+  checks_per_minute = cloud_env ? 4.0 : 1.0
+  # make sure the system is not overwhelmed under any cirmustances
+  wait_before_respawn = cloud_env ? 5 : 30
+  additional_wait_after_failure = 25
 
-  # # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb
-  # Rails.logger.level = [1, Rails.logger.level].max
-  # HoneycombRails.config.sample_rate = 120
+  # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb
+  Rails.logger.level = [1, Rails.logger.level].max
+  HoneycombRails.config.sample_rate = 120
 
-  # if args[:duration] == "finite_duration"
-  #   CheckPipelineRuns.run(respawn_interval - wait_before_respawn, 60.0 / checks_per_minute)
-  # else
-  #   # infinite duration
-  #   if cloud_env
-  #     Rails.logger.info("HACK: Sleeping 30 seconds on daemon startup for prior incarnations to drain.")
-  #     sleep 30
-  #   end
-  #   until CheckPipelineRuns.shutdown_requested
-  #     system("rake pipeline_monitor[finite_duration]")
-  #     sleep wait_before_respawn
-  #     unless $CHILD_STATUS.exitstatus.zero?
-  #       sleep additional_wait_after_failure
-  #     end
-  #   end
-  # end
+  if args[:duration] == "finite_duration"
+    CheckPipelineRuns.run(respawn_interval - wait_before_respawn, 60.0 / checks_per_minute)
+  else
+    # infinite duration
+    if cloud_env
+      Rails.logger.info("HACK: Sleeping 30 seconds on daemon startup for prior incarnations to drain.")
+      sleep 30
+    end
+    until CheckPipelineRuns.shutdown_requested
+      system("rake pipeline_monitor[finite_duration]")
+      sleep wait_before_respawn
+      unless $CHILD_STATUS.exitstatus.zero?
+        sleep additional_wait_after_failure
+      end
+    end
+  end
 end

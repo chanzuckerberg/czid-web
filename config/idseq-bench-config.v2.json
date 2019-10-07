@@ -26,7 +26,7 @@
     "defaults": {
         "how_to_use_these_defaults": "These properties may be overridden in each entry of active_benchmarks below.",
         "project_name": "IDSeq Bench",
-        "user_email": "bdimitrov@chanzuckerberg.com",
+        "user_email": "benchbot@chanzuckerberg.com",
         "frequency_hours": 24,
         "trigger_on_webapp_change": true,
         "trigger_on_pipeline_change": true,
@@ -39,22 +39,15 @@
             "bucket": "idseq-bench",
             "key": "5",
             "comment": "Comprehensive general benchmark built with idseq-bench, contains additional microbes (beyond bench/4) commonly found in IDseq samples. Deployed 2019-04-30.",
-            "environments": ["prod", "staging", "development"]
+            "environments": ["prod", "staging"]
         },
         {
             "bucket": "idseq-bench",
             "key": "7",
             "comment": "Comprehensive general benchmark built with idseq-bench, contains additional microbes (beyond bench/4) commonly found in IDseq samples. Uses the new benchmark configuration. Deployed 2019-10-40.",
-            "environments": ["prod", "staging", "development"]
+            "environments": ["prod", "staging"]
         }
     ],
     "retired_benchmarks": [
-        {
-            "bucket": "idseq-bench",
-            "comment":  "A tiny pseudo-benchmark meant for exercising the job control logic.  Deployed 2018-10-11",
-            "environments": ["development"],
-            "project_name": "IDSeq Bench Development",
-            "frequency_hours": 1.0
-        }
     ]
 }
