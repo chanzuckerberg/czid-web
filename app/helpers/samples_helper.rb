@@ -594,7 +594,7 @@ module SamplesHelper
           .includes(:metadata_field)
           .group(first_datum.validated_field)
       else
-        # No data for that field. Return empty <ActiveRecord::Relation []>.
+        # No data for that field. Return empty grouped <ActiveRecord::Relation []> to be safe.
         Metadatum.none.group(:key)
       end
     end

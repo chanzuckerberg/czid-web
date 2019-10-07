@@ -101,7 +101,7 @@ class LocationTest < ActiveSupport::TestCase
     mock = MiniTest::Mock.new
     mock.expect(:call, new_location, [{ locationiq_id: "123" }])
     Location.stub :find_by, mock do
-      res = Location.find_or_new_by_api_ids(locationiq_id: "123")
+      res = Location.find_or_new_by_fields(locationiq_id: "123")
       assert_equal new_location, res
     end
   end
@@ -117,7 +117,7 @@ class LocationTest < ActiveSupport::TestCase
     Location.stub :find_by, nil do
       Location.stub :geosearch_by_osm_id, mock_geosearch do
         Location.stub :new_from_params, new_location do
-          res = Location.find_or_new_by_api_ids(locationiq_id: "123", osm_id: osm_id, osm_type: osm_type)
+          res = Location.find_or_new_by_fields(locationiq_id: "123", osm_id: osm_id, osm_type: osm_type)
           assert_equal new_location, res
         end
       end

@@ -127,7 +127,7 @@ class Metadatum < ApplicationRecord
     # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     location = Location.check_and_restrict_specificity(loc, sample.host_genome_name)
     unless location.is_a?(Location)
-      location = Location.find_or_new_by_api_ids(loc)
+      location = Location.find_or_new_by_fields(loc)
     end
     unless location.id
       location = Location.check_and_fetch_parents(location)

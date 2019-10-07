@@ -89,13 +89,13 @@ class Location < ApplicationRecord
   # If we already have the location (via LocationIQ ID), return that. Otherwise fetch details via
   # OSM ID/type. OSM IDs can change often but LocationIQ IDs should be stable. We can't geosearch
   # by LocationIQ ID, so we need to use both.
-  def self.find_or_new_by_api_ids(loc)
-    existing = Location.find_by(locationiq_id: loc[:locationiq_id])
+  def self.find_or_new_by_fields(loc_info)
+    existing = Location.find_by(locationiq_id: loc_info[:locationiq_id])
     if existing
       existing
-    elsif loc[:osm_id].to_i > 0 && loc[:osm_type]
-      success, resp = geosearch_by_osm_id(loc[:osm_id], loc[:osm_type])
-      raise "Couldn't fetch OSM ID #{loc[:osm_id]} (#{loc[:osm_type]})" unless success
+    elsif loc_info[:osm_id].to_i > 0 && loc_info[:osm_type]
+      success, resp = geosearch_by_osm_id(loc_info[:osm_id], loc_info[:osm_type])
+      raise "Couldn't fetch OSM ID #{loc_info[:osm_id]} (#{loc_info[:osm_type]})" unless success
 
       resp = LocationHelper.adapt_location_iq_response(resp)
       # 'New' without saving so make sure caller saves.
