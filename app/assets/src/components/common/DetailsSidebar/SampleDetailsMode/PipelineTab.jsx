@@ -13,7 +13,6 @@ import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip"
 import { PIPELINE_INFO_FIELDS, HOST_FILTERING_WIKI } from "./constants";
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
-import { pipeline } from "stream";
 
 class PipelineTab extends React.Component {
   state = {
