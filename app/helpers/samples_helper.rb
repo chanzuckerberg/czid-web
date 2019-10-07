@@ -587,13 +587,14 @@ module SamplesHelper
           ] + Location::GEO_LEVELS.map { |l| "#{l.pluralize}_locations.name" }
         )
     else
+      # TODO(jsheu): Modify to get validated field from MetadataField.
       first_datum = Metadatum.where(key: field_name).first
       if first_datum
         query
           .includes(:metadata_field)
-          .group(MetadataField.find_by(name: field_name).validated_field)
+          .group(first_datum.validated_field)
       else
-        # Return empty <ActiveRecord::Relation []>
+        # No data for that field. Return empty <ActiveRecord::Relation []>.
         Metadatum.none.group(:key)
       end
     end
