@@ -22,6 +22,10 @@ x-web-variables: &web-variables
   ? SEGMENT_JS_ID
   ? SEGMENT_RUBY_ID
 
+x-auth0-variables: &auth0-variables
+  ? AUTH0_API_BEARER_TOKEN
+  ? AUTH0_DOMAIN
+
 x-aws-variables: &aws-variables
   ? AWS_ACCESS_KEY_ID
   ? AWS_SECRET_ACCESS_KEY
@@ -137,6 +141,7 @@ services:
       <<: *aws-variables
       <<: *travis-variables
       <<: *honeycomb-variables
+      <<: *auth0-variables
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
   resque:
     image: chanzuckerberg/idseq-web:compose
