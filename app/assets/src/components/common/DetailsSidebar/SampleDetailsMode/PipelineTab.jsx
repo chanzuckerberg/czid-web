@@ -94,9 +94,11 @@ class PipelineTab extends React.Component {
     const { sampleId } = this.props;
     const pipelineResults = await getSamplePipelineResults(sampleId);
 
-    this.setState({
-      pipelineStepDict: pipelineResults["displayed_data"]["Host Filtering"],
-    });
+    if (pipelineResults && pipelineResults["displayed_data"]) {
+      this.setState({
+        pipelineStepDict: pipelineResults["displayed_data"]["Host Filtering"],
+      });
+    }
   };
 
   renderReadCountsTable = stepKey => {
@@ -147,7 +149,9 @@ class PipelineTab extends React.Component {
           open={this.state.sectionOpen.readsRemaining}
           title="Reads Remaining"
         >
-          {isEmpty(this.state.pipelineStepDict) ||
+          {isEmpty(pipelineRun) ||
+          isEmpty(pipelineRun.totalReads) ||
+          isEmpty(this.state.pipelineStepDict) ||
           isEmpty(this.state.pipelineStepDict["steps"]) ? (
             <div className={cs.field}>
               <div className={cx(cs.label, cs.emptyValue)}>No data</div>
