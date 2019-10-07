@@ -1,0 +1,36 @@
+@import "~styles/themes/colors";
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+
+  &:not(.disabled) {
+    cursor: pointer;
+
+    &:hover {
+      background-color: $lightest-grey;
+    }
+
+    .icon {
+      fill: $primary-light;
+    }
+  }
+}
+
+.icon {
+  fill: $light-grey;
+  height: 21px;
+  width: 21px;
+
+  &.download {
+    width: 28px;
+  }
+
+  &.phyloTree {
+    margin-right: 4px;
+  }
+}

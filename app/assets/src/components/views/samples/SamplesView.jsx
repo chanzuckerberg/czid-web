@@ -5,23 +5,21 @@ import React from "react";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
 import MapToggle from "~/components/views/discovery/mapping/MapToggle";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
-import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import PropTypes from "~/components/utils/propTypes";
 import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
-import SaveIcon from "~ui/icons/SaveIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
-import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 
+import ToolbarIcon from "./ToolbarIcon";
+import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
 
@@ -188,11 +186,16 @@ class SamplesView extends React.Component {
     ];
 
     return selectedSampleIds.size < 2 ? (
-      <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+      <ToolbarIcon
+        className={cx(cs.action, cs.heatmap)}
+        disabled
+        icon="heatmap"
+        popupText="Heatmap"
+      />
     ) : (
       <BareDropdown
         hideArrow
-        className={cx(cs.icon, cs.heatmapDropdown)}
+        className={cx(cs.action)}
         items={heatmapOptions.map(option => {
           const params = getURLParamString({
             sampleIds: Array.from(selectedSampleIds),
@@ -210,7 +213,27 @@ class SamplesView extends React.Component {
             />
           );
         })}
-        trigger={<HeatmapIcon className={cx(cs.icon, cs.heatmap)} />}
+        trigger={
+          <ToolbarIcon
+            className={cs.heatmap}
+            icon="heatmap"
+            popupText="Heatmap"
+          />
+        }
+      />
+    );
+  };
+
+  renderPhyloTreeTrigger = () => {
+    return (
+      <ToolbarIcon
+        className={cs.action}
+        icon="phyloTree"
+        popupText="Phylogenetic Tree"
+        onClick={withAnalytics(
+          this.handlePhyloModalOpen,
+          "SamplesView_phylo-tree-modal-open_clicked"
+        )}
       />
     );
   };
@@ -233,7 +256,7 @@ class SamplesView extends React.Component {
     }
     return (
       <DownloadIconDropdown
-        iconClassName={cx(cs.icon, cs.download)}
+        className={cs.action}
         options={downloadOptions}
         onClick={downloadOption => {
           new ReportsDownloader({
@@ -256,15 +279,18 @@ class SamplesView extends React.Component {
 
     const targetSamples = samples.loaded;
     return selectedSampleIds.size < 2 ? (
-      <SaveIcon
-        className={cx(cs.icon, cs.disabled, cs.save)}
+      <ToolbarIcon
+        className={cs.action}
+        disabled
+        icon="save"
         popupText={"Save a Collection"}
       />
     ) : (
       <CollectionModal
         trigger={
-          <SaveIcon
-            className={cx(cs.icon, cs.save)}
+          <ToolbarIcon
+            className={cs.action}
+            icon="save"
             popupText={"Save a Collection"}
           />
         }
@@ -296,18 +322,10 @@ class SamplesView extends React.Component {
         </div>
         <div className={cs.separator} />
         <div className={cs.actions}>
-          <div className={cs.action}>{this.renderCollectionTrigger()}</div>
-          <div className={cs.action}>{this.renderHeatmapTrigger()}</div>
-          <div
-            className={cs.action}
-            onClick={withAnalytics(
-              this.handlePhyloModalOpen,
-              "SamplesView_phylo-tree-modal-open_clicked"
-            )}
-          >
-            <PhyloTreeIcon className={cs.icon} />
-          </div>
-          <div className={cs.action}>{this.renderDownloadTrigger()}</div>
+          {this.renderCollectionTrigger()}
+          {this.renderHeatmapTrigger()}
+          {this.renderPhyloTreeTrigger()}
+          {this.renderDownloadTrigger()}
         </div>
       </div>
     );
