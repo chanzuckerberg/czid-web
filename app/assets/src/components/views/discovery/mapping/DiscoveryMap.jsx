@@ -8,7 +8,10 @@ import ShapeMarker from "~/components/views/discovery/mapping/ShapeMarker";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import MapBanner from "~/components/views/discovery/mapping/MapBanner";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
-import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
+import {
+  indexOfMapLevel,
+  isValidCoordinate,
+} from "~/components/views/discovery/mapping/utils";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
 export const DEFAULT_THROTTLE_MS = 500;
@@ -123,6 +126,12 @@ class DiscoveryMap extends React.Component {
     const name = locationInfo.name;
     const lat = parseFloat(locationInfo.lat);
     const lng = parseFloat(locationInfo.lng);
+    // Catch NaN/invalid coordinates although this should not happen.
+    if (!isValidCoordinate(lat, lng)) {
+      console.error(`Invalid coordinates for ${name} (${id})`);
+      return null;
+    }
+
     const geoLevel = locationInfo.geo_level;
 
     const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
