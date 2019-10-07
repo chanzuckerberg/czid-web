@@ -149,7 +149,8 @@ class PipelineTab extends React.Component {
           open={this.state.sectionOpen.readsRemaining}
           title="Reads Remaining"
         >
-          {isEmpty(this.state.pipelineStepDict) ||
+          {isEmpty(pipelineRun.totalReads) ||
+          isEmpty(this.state.pipelineStepDict) ||
           isEmpty(this.state.pipelineStepDict["steps"]) ? (
             <div className={cs.field}>
               <div className={cx(cs.label, cs.emptyValue)}>No data</div>
