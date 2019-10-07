@@ -85,7 +85,7 @@ class MetadataField < ApplicationRecord
   def field_info
     {
       key: name,
-      dataType: Metadatum.convert_type_to_string(base_type),
+      dataType: MetadataField.convert_type_to_string(base_type),
       name: display_name,
       options: options && JSON.parse(options),
       group: group,
@@ -119,6 +119,19 @@ class MetadataField < ApplicationRecord
     end
   end
 
+  def self.convert_type_to_string(type)
+    if type == STRING_TYPE
+      return "string"
+    elsif type == NUMBER_TYPE
+      return "number"
+    elsif type == DATE_TYPE
+      return "date"
+    elsif type == LOCATION_TYPE
+      return "location"
+    end
+    ""
+  end
+
   private
 
   def add_examples_helper(new_examples, host_genome)
@@ -139,5 +152,10 @@ class MetadataField < ApplicationRecord
     existing_examples[host_genome] -= examples_to_remove
 
     update(examples: JSON.dump(existing_examples))
+  end
+
+  def validated_field
+    base = self.class.convert_type_to_string(base_type)
+    "#{base}_validated_value"
   end
 end

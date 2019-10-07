@@ -591,7 +591,7 @@ module SamplesHelper
       if first_datum
         query
           .includes(:metadata_field)
-          .group(first_datum.validated_field)
+          .group(MetadataField.find_by(name: field_name).validated_field)
       else
         # Return empty <ActiveRecord::Relation []>
         Metadatum.none.group(:key)
@@ -634,7 +634,7 @@ module SamplesHelper
                          LocationHelper.filter_by_name(samples_with_metadata, query)
                        else
                          samples_with_metadata
-                           .where(metadata: { metadatum.validated_field => query })
+                           .where(metadata: { metadatum.metadata_field.validated_field => query })
                        end
 
     not_set_ids = []

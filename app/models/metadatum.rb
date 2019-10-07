@@ -48,7 +48,7 @@ class Metadatum < ApplicationRecord
       return
     end
 
-    base = self.class.convert_type_to_string(metadata_field.base_type)
+    base = MetadataField.convert_type_to_string(metadata_field.base_type)
     public_send("check_and_set_#{base}_type")
   end
 
@@ -283,8 +283,7 @@ class Metadatum < ApplicationRecord
     if metadata_field.base_type == Metadatum::LOCATION_TYPE
       location_id ? Hash[Location::DEFAULT_LOCATION_FIELDS.map { |k| [k, location[k]] }] : string_validated_value
     else
-      base = self.class.convert_type_to_string(metadata_field.base_type)
-      self["#{base}_validated_value"]
+      self["#{metadata_field.validated_field}_validated_value"]
     end
   rescue
     ""
@@ -301,7 +300,7 @@ class Metadatum < ApplicationRecord
     metadata.each do |md|
       mdf = metadata_fields[md.metadata_field_id]
       if mdf
-        base = convert_type_to_string(mdf.base_type)
+        base = MetadataField.convert_type_to_string(mdf.base_type)
         validated_values[md.id] = md["#{base}_validated_value"]
       else
         validated_values[md.id] = ""
@@ -317,18 +316,5 @@ class Metadatum < ApplicationRecord
       .map do |sample_id, sample_metadata|
         [sample_id, Hash[sample_metadata.map { |m| [m.key.to_sym, m.validated_value] }]]
       end.to_h
-  end
-
-  def self.convert_type_to_string(type)
-    if type == STRING_TYPE
-      return "string"
-    elsif type == NUMBER_TYPE
-      return "number"
-    elsif type == DATE_TYPE
-      return "date"
-    elsif type == LOCATION_TYPE
-      return "location"
-    end
-    ""
   end
 end
