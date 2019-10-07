@@ -13,7 +13,7 @@
         "                                                                                ",
         " The recommended process for deploying a new benchmark is as follows:           ",
         "                                                                                ",
-        "    1. Instanll idseq-bench, create new benchmarks through configuration        ",
+        "    1. Install idseq-bench, create new benchmarks through configuration        ",
         "                                                                                ",
         "    2. aws s3 cp --recursive <idseq-bench-output> s3://idseq-bench/<name>       ",
         "                                                                                ",

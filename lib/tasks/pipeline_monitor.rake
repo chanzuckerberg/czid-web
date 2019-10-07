@@ -144,7 +144,6 @@ class CheckPipelineRuns
 
   def self.benchmark_has_configuration(metadata, s3_bucket, s3_key)
     if metadata['iss_version'] && metadata['idseq_bench_version'] && metadata['prefix']
-      Rails.logger.debug("bucket: #{s3_bucket}, key: #{s3_key}/#{metadata['prefix']}.yaml")
       response = S3_CLIENT.get_object(bucket: s3_bucket, key: "#{s3_key}/#{metadata['prefix']}.yaml")
       return response.content_length > 0
     end
