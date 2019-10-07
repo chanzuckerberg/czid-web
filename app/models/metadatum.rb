@@ -129,7 +129,6 @@ class Metadatum < ApplicationRecord
     unless location.is_a?(Location)
       location = Location.find_or_new_by_api_ids(loc)
     end
-    puts "LOCATION ID AT THIS POINT: ", location.id, "END"
     unless location.id
       location = Location.check_and_fetch_parents(location)
       location.save!
