@@ -2,24 +2,20 @@ import { forbidExtraProps } from "airbnb-prop-types";
 import PropTypes from "prop-types";
 import React from "react";
 
+import DownloadIcon from "~ui/icons/DownloadIcon";
 import ToolbarIcon from "~/components/views/samples/ToolbarIcon";
 
 import BareDropdown from "./BareDropdown";
 
 const DownloadIconDropdown = props => {
   const { iconClassName, onClick, ...extraProps } = props;
+  const downloadIcon = <DownloadIcon className={iconClassName} />;
   return (
     <BareDropdown
       {...extraProps}
       hideArrow
       onChange={onClick}
-      trigger={
-        <ToolbarIcon
-          className={iconClassName}
-          icon="download"
-          popupText="Download"
-        />
-      }
+      trigger={<ToolbarIcon icon={downloadIcon} popupText="Download" />}
     />
   );
 };

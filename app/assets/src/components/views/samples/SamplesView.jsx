@@ -5,13 +5,16 @@ import React from "react";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
 import MapToggle from "~/components/views/discovery/mapping/MapToggle";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import PropTypes from "~/components/utils/propTypes";
 import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
+import SaveIcon from "~ui/icons/SaveIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
@@ -185,11 +188,13 @@ class SamplesView extends React.Component {
       { text: "AMR Heatmap", value: "/amr_heatmap" },
     ];
 
+    const heatmapIcon = <HeatmapIcon className={cs.icon} />;
+
     return selectedSampleIds.size < 2 ? (
       <ToolbarIcon
         className={cx(cs.action, cs.heatmap)}
         disabled
-        icon="heatmap"
+        icon={heatmapIcon}
         popupText="Heatmap"
       />
     ) : (
@@ -216,7 +221,7 @@ class SamplesView extends React.Component {
         trigger={
           <ToolbarIcon
             className={cs.heatmap}
-            icon="heatmap"
+            icon={heatmapIcon}
             popupText="Heatmap"
           />
         }
@@ -225,10 +230,13 @@ class SamplesView extends React.Component {
   };
 
   renderPhyloTreeTrigger = () => {
+    const phyloTreeIcon = (
+      <PhyloTreeIcon className={cx(cs.icon, cs.phyloTree)} />
+    );
     return (
       <ToolbarIcon
         className={cs.action}
-        icon="phyloTree"
+        icon={phyloTreeIcon}
         popupText="Phylogenetic Tree"
         onClick={withAnalytics(
           this.handlePhyloModalOpen,
@@ -257,6 +265,7 @@ class SamplesView extends React.Component {
     return (
       <DownloadIconDropdown
         className={cs.action}
+        iconClassName={cx(cs.icon, cs.download)}
         options={downloadOptions}
         onClick={downloadOption => {
           new ReportsDownloader({
@@ -278,11 +287,14 @@ class SamplesView extends React.Component {
     const { samples, selectedSampleIds } = this.props;
 
     const targetSamples = samples.loaded;
+
+    const saveIcon = <SaveIcon className={cs.icon} />;
+
     return selectedSampleIds.size < 2 ? (
       <ToolbarIcon
         className={cs.action}
         disabled
-        icon="save"
+        icon={saveIcon}
         popupText={"Save a Collection"}
       />
     ) : (
@@ -290,7 +302,7 @@ class SamplesView extends React.Component {
         trigger={
           <ToolbarIcon
             className={cs.action}
-            icon="save"
+            icon={saveIcon}
             popupText={"Save a Collection"}
           />
         }

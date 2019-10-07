@@ -76,6 +76,19 @@
         margin-left: 2px;
       }
     }
+
+    .icon {
+      height: 21px;
+      width: 21px;
+
+      &.download {
+        width: 28px;
+      }
+
+      &.phyloTree {
+        margin-right: 4px;
+      }
+    }
   }
 }
 

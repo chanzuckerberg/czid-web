@@ -8,6 +8,12 @@
   width: 42px;
   height: 42px;
 
+  // The child icon will contain an <svg>.
+  // The 'fill' rule only works when applied on the svg itself, not the parent.
+  svg {
+    fill: $light-grey;
+  }
+
   &:not(.disabled) {
     cursor: pointer;
 
@@ -15,22 +21,8 @@
       background-color: $lightest-grey;
     }
 
-    .icon {
+    svg {
       fill: $primary-light;
     }
-  }
-}
-
-.icon {
-  fill: $light-grey;
-  height: 21px;
-  width: 21px;
-
-  &.download {
-    width: 28px;
-  }
-
-  &.phyloTree {
-    margin-right: 4px;
   }
 }
