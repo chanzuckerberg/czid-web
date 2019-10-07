@@ -220,7 +220,7 @@ class CheckPipelineRuns
 
   def self.benchmark_update(t_now)
     Rails.logger.info("Benchmark update.")
-    config = JSON.parse(`aws s3 cp s3://#{IDSEQ_BENCH_BUCKET}/#{IDSEQ_BENCH_CONFIG} -`)
+    config = JSON.parse(`aws s3 cp s3://#{IDSEQ_BENCH_BUCKET}/#{IDSEQ_BENCH_KEY_CONFIG} -`)
     defaults = config['defaults']
     web_commit = ENV['GIT_VERSION'] || ""
     config['active_benchmarks'].each do |bm_props|
