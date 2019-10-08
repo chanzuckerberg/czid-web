@@ -77,6 +77,8 @@ class ExportUsersAuth0
       puts "+ OK"
     end
 
+    # We don't want to be rate limited
+    sleep 0.5
     puts
 
     result
