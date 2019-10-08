@@ -109,7 +109,6 @@ class Location < ApplicationRecord
 
   # Consider it a match if all fields to refer to the same place.
   def self.find_with_fields(loc_info)
-    puts "I want to find: ", loc_info
     Location.find_by(
       name: loc_info[:name] || "",
       geo_level: loc_info[:geo_level] || "",
