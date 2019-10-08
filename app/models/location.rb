@@ -89,7 +89,7 @@ class Location < ApplicationRecord
   # If we already have the location (via matching fields), return that. Otherwise fetch details via
   # OSM ID/type.
   def self.find_or_new_by_fields(loc_info)
-    existing = Location.find_by(fields: loc_info)
+    existing = Location.find_with_fields(loc_info)
     if existing
       existing
     elsif loc_info[:osm_id].to_i > 0 && loc_info[:osm_type]
@@ -108,7 +108,8 @@ class Location < ApplicationRecord
   end
 
   # Consider it a match if all fields to refer to the same place.
-  def self.find_by_fields(loc_info)
+  def self.find_with_fields(loc_info)
+    puts "I want to find: ", loc_info
     Location.find_by(
       name: loc_info[:name] || "",
       geo_level: loc_info[:geo_level] || "",

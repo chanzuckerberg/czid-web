@@ -21,12 +21,12 @@ module LocationHelper
                 end
 
     loc = {
-      name: body["display_name"],
+      name: normalize_name_aliases(body["display_name"]),
       geo_level: geo_level,
-      country_name: address[country_key] || "",
-      state_name: address[state_key] || "",
-      subdivision_name: address[subdivision_key] || "",
-      city_name: address[city_key] || "",
+      country_name: normalize_name_aliases(address[country_key] || ""),
+      state_name: normalize_name_aliases(address[state_key] || ""),
+      subdivision_name: normalize_name_aliases(address[subdivision_key] || ""),
+      city_name: normalize_name_aliases(address[city_key] || ""),
       # Round coordinates to enhance privacy
       lat: body["lat"] ? body["lat"].to_f.round(2) : nil,
       # LocationIQ uses 'lon'
@@ -121,7 +121,15 @@ module LocationHelper
     end
   end
 
+  # Normalize some location names from the provider for matching consistency.
+  # Ex: Treat "United States of America" and "USA" as the same in cases where
+  # the provider is not internally consistent.
   def self.normalize_name_aliases(name)
-
+    # See config/initializers/location_name_aliases.rb.
+    if LOCATION_NAME_ALIASES && LOCATION_NAME_ALIASES.key?(name)
+      LOCATION_NAME_ALIASES[name]
+    else
+      name
+    end
   end
 end
