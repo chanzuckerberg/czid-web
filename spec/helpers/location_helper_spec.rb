@@ -120,4 +120,15 @@ RSpec.describe LocationHelper, type: :helper do
       expect(result).to eq(expected)
     end
   end
+
+  describe "#normalize_name_aliases" do
+    it "normalizes name aliases to a common name" do
+      name = "United States of America"
+      expected = "USA"
+      stub_const("LOCATION_NAME_ALIASES", name => expected)
+
+      result = LocationHelper.normalize_name_aliases(name)
+      expect(result).to eq(expected)
+    end
+  end
 end
