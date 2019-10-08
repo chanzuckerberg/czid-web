@@ -122,6 +122,7 @@ module MetadataHelper
             elsif project.nil?
               generate_metadata_default_value(field, sample[:host_genome_name])
             else
+              puts "FIELD INFO: 3:25pm", sample[:metadata][field.name]
               sample[:metadata][field.name] ? sample[:metadata][field.name].raw_value : nil
             end
           end
