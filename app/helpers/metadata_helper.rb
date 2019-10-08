@@ -72,6 +72,13 @@ module MetadataHelper
                project.metadata_fields.includes(:host_genomes).reject { |field| (field.host_genome_ids & host_genome_ids).empty? }
              end
 
+    # Show fields with is_required=1 first in the CSV, but otherwise keep the default order.
+    fields = fields.sort_by { |f| [-f.is_required, f.id] }
+
+    # Hide legacy collection_location (v1) field from CSV templates.
+    # TODO(jsheu): Remove legacy field and swap in collection_location_v2.
+    fields = fields.reject { |f| f.name == "collection_location" }
+
     field_names = ["Sample Name"] + (include_host_genome ? ["Host Genome"] : []) + fields.pluck(:display_name)
 
     host_genomes_by_name = HostGenome.all.includes(:metadata_fields).reject { |x| x.metadata_fields.empty? }.index_by(&:name)
