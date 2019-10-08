@@ -3,5 +3,5 @@ begin
   LOCATION_NAME_ALIASES = JSON.parse(File.read(path))
 rescue Errno::ENOENT, JSON::ParserError => err
   Rails.logger.error("Couldn't load location name aliases. #{err.message}")
-  LOCATION_NAME_ALIASES = {}
+  LOCATION_NAME_ALIASES = {}.freeze
 end
