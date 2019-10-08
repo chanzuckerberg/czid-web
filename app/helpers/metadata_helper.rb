@@ -122,8 +122,13 @@ module MetadataHelper
             elsif project.nil?
               generate_metadata_default_value(field, sample[:host_genome_name])
             else
-              puts "FIELD INFO: 3:25pm", sample[:metadata][field.name]
-              sample[:metadata][field.name] ? sample[:metadata][field.name].raw_value : nil
+              datum = sample[:metadata][field.name]
+              if datum
+                val = datum.validated_value
+                # Special-case for object values (e.g. Location types)
+                # rubocop:disable Metrics/BlockNesting
+                val.is_a?(Hash) ? val[:name] : val
+              end
             end
           end
         end
