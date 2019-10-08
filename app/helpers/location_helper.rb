@@ -124,8 +124,10 @@ module LocationHelper
   # Normalize some location names from the provider for matching consistency.
   # Ex: Treat "United States of America" and "USA" as the same in cases where
   # the provider is not internally consistent.
+  #
+  # See config/initializers/location_name_aliases.rb and add important known
+  # aliases there.
   def self.normalize_name_aliases(name)
-    # See config/initializers/location_name_aliases.rb.
     if LOCATION_NAME_ALIASES && LOCATION_NAME_ALIASES.key?(name)
       LOCATION_NAME_ALIASES[name]
     else
