@@ -144,7 +144,7 @@ class Location < ApplicationRecord
       end
 
       result = LocationHelper.adapt_location_iq_response(resp[0])
-      return Location.find_by(fields: result) || new_from_params(result)
+      return Location.find_with_fields(result) || new_from_params(result)
     end
 
     # Just return the input hash if no change

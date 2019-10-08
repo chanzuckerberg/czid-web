@@ -128,6 +128,7 @@ class DiscoveryMap extends React.Component {
     const lng = parseFloat(locationInfo.lng);
     // Catch NaN/invalid coordinates although this should not happen.
     if (!isValidCoordinate(lat, lng)) {
+      // eslint-disable-next-line no-console
       console.error(`Invalid coordinates for ${name} (${id})`);
       return null;
     }
