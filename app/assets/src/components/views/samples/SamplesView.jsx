@@ -3,8 +3,10 @@ import { difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import DownloadIcon from "~ui/icons/DownloadIcon";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
@@ -32,6 +34,7 @@ class SamplesView extends React.Component {
 
     this.state = {
       phyloTreeCreationModalOpen: false,
+      bulkDownloadModalOpen: false,
     };
 
     this.columns = [
@@ -283,6 +286,21 @@ class SamplesView extends React.Component {
     );
   };
 
+  renderBulkDownloadTrigger = () => {
+    const downloadIcon = <DownloadIcon className={cx(cs.icon, cs.download)} />;
+    return (
+      <ToolbarIcon
+        className={cs.action}
+        icon={downloadIcon}
+        popupText="Download"
+        onClick={withAnalytics(
+          this.handleBulkDownloadModalOpen,
+          "SamplesView_bulk-download-modal-open_clicked"
+        )}
+      />
+    );
+  };
+
   renderCollectionTrigger = () => {
     const { samples, selectedSampleIds } = this.props;
 
@@ -315,7 +333,7 @@ class SamplesView extends React.Component {
   };
 
   renderToolbar = () => {
-    const { selectedSampleIds } = this.props;
+    const { selectedSampleIds, allowedFeatures } = this.props;
     return (
       <div className={cs.samplesToolbar}>
         {this.renderDisplaySwitcher()}
@@ -338,6 +356,8 @@ class SamplesView extends React.Component {
           {this.renderHeatmapTrigger()}
           {this.renderPhyloTreeTrigger()}
           {this.renderDownloadTrigger()}
+          {allowedFeatures.includes("bulk_downloads") &&
+            this.renderBulkDownloadTrigger()}
         </div>
       </div>
     );
@@ -434,6 +454,14 @@ class SamplesView extends React.Component {
     this.setState({ phyloTreeCreationModalOpen: false });
   };
 
+  handleBulkDownloadModalOpen = () => {
+    this.setState({ bulkDownloadModalOpen: true });
+  };
+
+  handleBulkDownloadModalClose = () => {
+    this.setState({ bulkDownloadModalOpen: false });
+  };
+
   handleRowClick = ({ event, rowData }) => {
     const { onSampleSelected, samples } = this.props;
     const sample = samples.get(rowData.id);
@@ -445,8 +473,8 @@ class SamplesView extends React.Component {
   };
 
   render() {
-    const { currentDisplay } = this.props;
-    const { phyloTreeCreationModalOpen } = this.state;
+    const { currentDisplay, allowedFeatures } = this.props;
+    const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
     return (
       <div className={cs.container}>
         {currentDisplay === "table" ? (
@@ -462,6 +490,15 @@ class SamplesView extends React.Component {
             onClose={withAnalytics(
               this.handlePhyloModalClose,
               "SamplesView_phylo-tree-modal_closed"
+            )}
+          />
+        )}
+        {allowedFeatures.includes("bulk_downloads") && (
+          <BulkDownloadModal
+            open={bulkDownloadModalOpen}
+            onClose={withAnalytics(
+              this.handleBulkDownloadModalClose,
+              "SamplesView_bulk-download-modal_closed"
             )}
           />
         )}
