@@ -107,7 +107,7 @@ class Location < ApplicationRecord
     end
   end
 
-  # Consider a match with all fields to refer to the same place.
+  # Consider it a match if all fields to refer to the same place.
   def self.find_by_fields(loc_info)
     Location.find_by(
       name: loc_info[:name] || "",

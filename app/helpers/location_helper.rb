@@ -120,4 +120,8 @@ module LocationHelper
       samples.where("`metadata`.`string_validated_value` IN (?)", query)
     end
   end
+
+  def self.normalize_name_aliases(name)
+
+  end
 end
