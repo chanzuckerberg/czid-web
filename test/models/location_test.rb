@@ -96,12 +96,13 @@ class LocationTest < ActiveSupport::TestCase
     assert mock.verify
   end
 
-  test "should find existing Location by API ID" do
+  test "should find existing Location by matching fields" do
+    location_info = { name: "Nevada, USA", geo_level: "state", country_name: "USA", state_name: "Nevada", subdivision_name: "", city_name: "" }
     new_location = Location.new
     mock = MiniTest::Mock.new
-    mock.expect(:call, new_location, [{ locationiq_id: "123" }])
+    mock.expect(:call, new_location, [location_info])
     Location.stub :find_by, mock do
-      res = Location.find_or_new_by_fields(locationiq_id: "123")
+      res = Location.find_or_new_by_fields(location_info)
       assert_equal new_location, res
     end
   end
