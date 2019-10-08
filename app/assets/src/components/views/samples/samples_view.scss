@@ -63,7 +63,7 @@
   .separator {
     flex: 0 0 auto;
     height: 27px;
-    margin: 0 20px;
+    margin: 0 10px 0 20px;
     border-right: 1px solid $medium-grey;
   }
 
@@ -73,31 +73,20 @@
 
     .action {
       &:not(:first-child) {
-        margin-left: 20px;
+        margin-left: 2px;
+      }
+    }
+
+    .icon {
+      height: 21px;
+      width: 21px;
+
+      &.download {
+        width: 28px;
       }
 
-      .icon {
-        fill: $light-grey;
-        flex: 0 0 auto;
-        height: 21px;
-        width: 21px;
-
-        &:not(.disabled) {
-          cursor: pointer;
-          fill: $primary-light;
-        }
-
-        &.save {
-          width: 21px;
-        }
-
-        &.heatmap {
-          margin-left: 4px;
-        }
-
-        &.download {
-          width: 28px;
-        }
+      &.phyloTree {
+        margin-right: 4px;
       }
     }
   }

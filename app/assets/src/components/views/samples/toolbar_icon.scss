@@ -1,0 +1,28 @@
+@import "~styles/themes/colors";
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+
+  // The child icon will contain an <svg>.
+  // The 'fill' rule only works when applied on the svg itself, not the parent.
+  svg {
+    fill: $light-grey;
+  }
+
+  &:not(.disabled) {
+    cursor: pointer;
+
+    &:hover {
+      background-color: $lightest-grey;
+    }
+
+    svg {
+      fill: $primary-light;
+    }
+  }
+}
