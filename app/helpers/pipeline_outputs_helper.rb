@@ -4,7 +4,7 @@ module PipelineOutputsHelper
 
   def curate_pipeline_run_display(pipeline_run)
     return nil unless pipeline_run
-    pipeline_run_display = pipeline_run.as_json(only: "pipeline_version")
+    pipeline_run_display = pipeline_run.as_json.except("version")
     pipeline_run_display["version"] = {
       pipeline: pipeline_run.pipeline_version,
       alignment_db: pipeline_run.alignment_config.name,
