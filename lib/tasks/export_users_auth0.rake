@@ -146,7 +146,7 @@ class ExportUsersAuth0
   private def format_legacy_user_record(user)
     {
       'connection' => AUTH0_DB_CONNECTION_NAME,
-      'email' => "legacy_idseq|#{user.email}",
+      'email' => user.email,
       'email_verified' => true,
       'app_metadata' => {
         'roles' => user.role == 1 ? ['admin'] : [],
