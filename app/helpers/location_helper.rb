@@ -20,13 +20,19 @@ module LocationHelper
                   ""
                 end
 
+    name = normalize_name_aliases(body["display_name"], geo_level)
+    country_name = normalize_name_aliases(address[country_key] || "", Location::COUNTRY_LEVEL)
+    state_name = normalize_name_aliases(address[state_key] || "", Location::STATE_LEVEL)
+    subdivision_name = normalize_name_aliases(address[subdivision_key] || "", Location::SUBDIVISION_LEVEL)
+    city_name = normalize_name_aliases(address[city_key] || "", Location::CITY_LEVEL)
+
     loc = {
-      name: normalize_name_aliases(body["display_name"]),
+      name: name,
       geo_level: geo_level,
-      country_name: normalize_name_aliases(address[country_key] || ""),
-      state_name: normalize_name_aliases(address[state_key] || ""),
-      subdivision_name: normalize_name_aliases(address[subdivision_key] || ""),
-      city_name: normalize_name_aliases(address[city_key] || ""),
+      country_name: country_name,
+      state_name: state_name,
+      subdivision_name: subdivision_name,
+      city_name: city_name,
       # Round coordinates to enhance privacy
       lat: body["lat"] ? body["lat"].to_f.round(2) : nil,
       # LocationIQ uses 'lon'
@@ -127,9 +133,9 @@ module LocationHelper
   #
   # See config/initializers/location_name_aliases.rb and add important known
   # aliases there.
-  def self.normalize_name_aliases(name)
-    if LOCATION_NAME_ALIASES && LOCATION_NAME_ALIASES.key?(name)
-      LOCATION_NAME_ALIASES[name]
+  def self.normalize_name_aliases(name, geo_level)
+    if LOCATION_NAME_ALIASES.dig(geo_level, name)
+      LOCATION_NAME_ALIASES[geo_level][name]
     else
       name
     end

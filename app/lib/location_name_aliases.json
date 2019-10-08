@@ -1,3 +1,5 @@
 {
-  "United States of America": "USA"
+  "country": {
+    "United States of America": "USA"
+  }
 }
