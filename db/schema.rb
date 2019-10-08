@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_191_002_195_108) do
+ActiveRecord::Schema.define(version: 20_191_008_210_534) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -174,7 +174,7 @@ ActiveRecord::Schema.define(version: 20_191_002_195_108) do
     t.integer "city_id", comment: "ID of the city entry in our database"
     t.index ["country_name", "state_name", "subdivision_name", "city_name"], name: "index_locations_levels", comment: "Index for lookup within regions. Composite works for any left subset of columns."
     t.index ["geo_level"], name: "index_locations_on_geo_level", comment: "Index for lookup by level of specificity"
-    t.index ["locationiq_id"], name: "index_locations_on_locationiq_id"
+    t.index ["name", "geo_level", "country_name", "state_name", "subdivision_name", "city_name"], name: "index_locations_name_fields", comment: "Index for lookup by important fields for identifying places. Composite works for any left subset of columns."
     t.index ["name"], name: "index_locations_on_name", comment: "Index for lookup by location name"
     t.index ["osm_type", "osm_id"], name: "index_locations_on_osm_type_and_osm_id"
   end
