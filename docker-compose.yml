@@ -23,8 +23,9 @@ x-web-variables: &web-variables
   ? SEGMENT_RUBY_ID
 
 x-auth0-variables: &auth0-variables
-  ? AUTH0_API_BEARER_TOKEN
   ? AUTH0_DOMAIN
+  ? AUTH0_CLIENT_ID
+  ? AUTH0_CLIENT_SECRET
 
 x-aws-variables: &aws-variables
   ? AWS_ACCESS_KEY_ID

@@ -29,9 +29,17 @@ task 'export_users_to_auth0' => :environment do |_t, _args|
     exit 2
   end
 
+  required_env_vars = ['AUTH0_DOMAIN', 'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET']
+  missing_env_vars = required_env_vars.reject { |k| ENV.key?(k) }
+  unless missing_env_vars.empty?
+    puts "The following environment variables are missing: #{missing_env_vars}"
+    exit 2
+  end
+
   eua = ExportUsersAuth0.new(
     ENV['AUTH0_DOMAIN'],
-    ENV['AUTH0_API_BEARER_TOKEN']
+    ENV['AUTH0_CLIENT_ID'],
+    ENV['AUTH0_CLIENT_SECRET']
   )
 
   if options[:export_all]
@@ -45,9 +53,11 @@ class ExportUsersAuth0
   attr_reader :auth0_domain, :auth0_api_bearer_token
   AUTH0_DB_CONNECTION_NAME = "idseq-legacy-users"
 
-  def initialize(auth0_domain, auth0_api_bearer_token)
+  def initialize(auth0_domain, auth0_client_id, auth0_client_secret)
     @auth0_domain = auth0_domain
-    @auth0_api_bearer_token = auth0_api_bearer_token
+    @auth0_client_id = auth0_client_id
+    @auth0_client_secret = auth0_client_secret
+    @auth0_api_bearer_token = request_api_bearer_token
   end
 
   def export_all_users
@@ -82,6 +92,21 @@ class ExportUsersAuth0
     puts
 
     result
+  end
+
+  private def request_api_bearer_token
+    puts "Retrieving bearer token"
+    json_response = HTTP.post(
+      "https://#{@auth0_domain}/oauth/token",
+      json: {
+        "client_id": @auth0_client_id,
+        "client_secret": @auth0_client_secret,
+        "audience": "https://#{@auth0_domain}/api/v2/",
+        "grant_type": "client_credentials",
+      }
+    )
+    response = JSON.parse(json_response)
+    response['access_token']
   end
 
   private def auth0_api_create_user(legacy_user_record)
