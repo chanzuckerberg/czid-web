@@ -130,5 +130,12 @@ RSpec.describe LocationHelper, type: :helper do
       result = LocationHelper.normalize_name_aliases(name)
       expect(result).to eq(expected)
     end
+
+    it "doesn't modify names without an alias" do
+      name = "Kenya"
+      stub_const("LOCATION_NAME_ALIASES", {})
+      result = LocationHelper.normalize_name_aliases(name)
+      expect(result).to eq(name)
+    end
   end
 end
