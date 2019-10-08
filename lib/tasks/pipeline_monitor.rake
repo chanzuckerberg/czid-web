@@ -24,7 +24,8 @@ IDSEQ_BENCH_MIN_FREQUENCY_HOURS = 1.0
 
 # This is under version control at idseq-web/config/idseq-bench-config.json, and deployed
 # by copying to the S3 location below.
-IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json".freeze
+IDSEQ_BENCH_BUCKET = "idseq-bench".freeze
+IDSEQ_BENCH_KEY_CONFIG = "config.v2.json".freeze
 
 AWS_DEFAULT_REGION = ENV.fetch('AWS_DEFAULT_REGION') { "us-west-2" }
 
@@ -118,14 +119,14 @@ class CheckPipelineRuns
     autoscaling_state
   end
 
-  def self.benchmark_sample_name(s3path, timestamp_str, metadata_prefix)
+  def self.benchmark_sample_name(s3_path, timestamp_str, metadata_prefix)
     # Benchmark sample names start with a prefix determined uniquely from the s3 path,
     # like so: "idseq-bench-1|".  This enables finding quickly all samples submitted for
     # a given benchmark.  That text is followed by a unix timestamp of the creation time,
     # only because within a project, sample names must be unique.  Finally, a long metadata_prefix
     # describes the benchmark contents.  The whole thing looks like
     # "idseq-bench-1|1539204106|norg_1|nacc_1|uniform_weight_per_organism|hiseq_reads|viruses|chikungunya|37124|v4"
-    items = s3path.split("/")
+    items = s3_path.split("/")
     result = items[-2] + "-" + items[-1] + "|"
     return result if timestamp_str.blank?
     result = result + timestamp_str + "|"
@@ -133,26 +134,43 @@ class CheckPipelineRuns
     result + metadata_prefix.gsub("__", "|") # vertical bars are prettier
   end
 
-  def self.benchmark_sample_name_prefix(s3path)
-    benchmark_sample_name(s3path, "", "")
+  def self.benchmark_sample_name_prefix(s3_path)
+    benchmark_sample_name(s3_path, "", "")
   end
 
-  def self.create_sample_for_benchmark(s3path, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_project, bm_host, bm_comment, t_now)
+  def self.benchmark_has_git_commit(metadata)
+    return metadata['idseq_bench_reproducible'] && metadata['idseq_bench_git_hash'].length == 40
+  end
+
+  def self.benchmark_has_configuration(metadata, s3_bucket, s3_key)
+    if metadata['iss_version'] && metadata['idseq_bench_version'] && metadata['prefix']
+      response = S3_CLIENT.get_object(bucket: s3_bucket, key: "#{s3_key}/#{metadata['prefix']}.yaml")
+      return response.content_length > 0
+    end
+    return false
+  end
+
+  def self.create_sample_for_benchmark(s3_bucket, s3_key, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_project, bm_host, bm_comment, t_now)
     # metadata.json is produced by idseq-bench
-    raw_metadata = `aws s3 cp #{s3path}/metadata.json -`
+    s3_path = "s3://#{s3_bucket}/#{s3_key}"
+    raw_metadata = `aws s3 cp #{s3_path}/metadata.json -`
     metadata = JSON.parse(raw_metadata)
     input_files_attributes = metadata['fastqs'].map do |fq|
       {
         name: fq,
-        source: s3path + "/" + fq,
+        source: s3_path + "/" + fq,
         source_type: "s3",
       }
     end
-    unless metadata['idseq_bench_reproducible'] && metadata['idseq_bench_git_hash'].length == 40
-      raise "Refusing to create sample for irreproducible benchmark #{s3path}"
+
+    # Keep support for older benchmarks (reproducible throught git commit) while
+    # checking for new reproducible conditions (configuration file in s3 and package versions)
+    unless benchmark_has_git_commit(metadata) || benchmark_has_configuration(metadata, s3_bucket, s3_key)
+      raise "Refusing to create sample for irreproducible benchmark #{s3_path}. Include git commit or configuration file named '#{metadata['prefix']}.yaml'."
     end
-    Rails.logger.info("Creating benchmark sample from #{s3path} with #{metadata['verified_total_reads']} reads.")
-    bm_sample_name = benchmark_sample_name(s3path, t_now.floor.to_s, metadata['prefix'])
+
+    Rails.logger.info("Creating benchmark sample from #{s3_path} with #{metadata['verified_total_reads']} reads.")
+    bm_sample_name = benchmark_sample_name(s3_path, t_now.floor.to_s, metadata['prefix'])
     # Add benchmark comment to existing metadata, and dump metadata json into sample_notes.
     # Tags added here are capitalized.  If a COMMENT tag already exists in metadata, prepend to it.
     existing_comment = metadata['COMMENT']
@@ -162,7 +180,7 @@ class CheckPipelineRuns
     new_metadata = {}
     # HACK: We want COMMENT and ORIGIN to appear at the top in the json dump, and this trick does it.
     new_metadata['COMMENT'] = (bm_comment || "") + comment_separator + (existing_comment || "")
-    new_metadata['ORIGIN'] = s3path
+    new_metadata['ORIGIN'] = s3_path
     metadata.each do |k, v|
       next if k == "COMMENT"
       next if k == "ORIGIN"
@@ -201,28 +219,31 @@ class CheckPipelineRuns
 
   def self.benchmark_update(t_now)
     Rails.logger.info("Benchmark update.")
-    config = JSON.parse(`aws s3 cp #{IDSEQ_BENCH_CONFIG} -`)
+    config = JSON.parse(`aws s3 cp s3://#{IDSEQ_BENCH_BUCKET}/#{IDSEQ_BENCH_KEY_CONFIG} -`)
     defaults = config['defaults']
     web_commit = ENV['GIT_VERSION'] || ""
-    config['active_benchmarks'].each do |s3path, bm_props|
+    config['active_benchmarks'].each do |bm_props|
+      s3_bucket = prop_get(bm_props, 'bucket', defaults)
+      s3_key = prop_get(bm_props, 'key', defaults)
+      s3_path = "s3://#{s3_bucket}/#{s3_key}"
       bm_environments = prop_get(bm_props, 'environments', defaults)
       unless bm_environments.include?(Rails.env)
-        Rails.logger.info("Benchmark does not apply to #{Rails.env} environment: #{s3path}")
+        Rails.logger.info("Benchmark not enabled for #{Rails.env} environment: #{s3_path}")
         next
       end
       bm_project_name = prop_get(bm_props, 'project_name', defaults)
       bm_proj = Project.find_by(name: bm_project_name)
       unless bm_proj
-        Rails.logger.info("Benchmark requires non-existent project #{bm_project_name}: #{s3path}")
+        Rails.logger.info("Benchmark requires non-existent project #{bm_project_name}: #{s3_path}")
         next
       end
       bm_frequency_hours = prop_get(bm_props, 'frequency_hours', defaults)
       bm_frequency_seconds = bm_frequency_hours * 3600
       unless bm_frequency_hours >= IDSEQ_BENCH_MIN_FREQUENCY_HOURS
-        Rails.logger.info("Benchmark frequency under #{IDSEQ_BENCH_MIN_FREQUENCY_HOURS} hour: #{s3path}")
+        Rails.logger.info("Benchmark frequency under #{IDSEQ_BENCH_MIN_FREQUENCY_HOURS} hour: #{s3_path}")
         next
       end
-      bm_name_prefix = benchmark_sample_name_prefix(s3path)
+      bm_name_prefix = benchmark_sample_name_prefix(s3_path)
       sql_query = "
         SELECT
           id,
@@ -249,19 +270,19 @@ class CheckPipelineRuns
       unless sql_results.empty?
         most_recent_submission = sql_results.pluck('unixtime_of_creation').max
         hours_since_last_run = Integer((t_now - most_recent_submission) / 360) / 10.0
-        Rails.logger.info("Benchmark last ran #{hours_since_last_run} hours ago #{commit_filter}: #{s3path}")
+        Rails.logger.info("Benchmark last ran #{hours_since_last_run} hours ago #{commit_filter}: #{s3_path}")
         next
       end
-      Rails.logger.info("Submitting benchmark: #{s3path}")
+      Rails.logger.info("Submitting benchmark: #{s3_path}")
       bm_user_email = prop_get(bm_props, 'user_email', defaults)
       bm_user = User.find_by(email: bm_user_email)
       bm_host_name = prop_get(bm_props, 'host', defaults)
       bm_host = HostGenome.find_by(name: bm_host_name)
       bm_comment = prop_get(bm_props, 'comment', defaults)
       begin
-        create_sample_for_benchmark(s3path, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_proj, bm_host, bm_comment, t_now)
+        create_sample_for_benchmark(s3_bucket, s3_key, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_proj, bm_host, bm_comment, t_now)
       rescue => exception
-        LogUtil.log_err_and_airbrake("Creating sample for benchmark #{s3path} failed with exception: #{exception.message}")
+        LogUtil.log_err_and_airbrake("Creating sample for benchmark #{s3_path} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
