@@ -124,10 +124,15 @@ module MetadataHelper
             else
               datum = sample[:metadata][field.name]
               if datum
-                val = datum.validated_value
-                # Special-case for object values (e.g. Location types)
+                base_type = datum.metadata_field.base_type
                 # rubocop:disable Metrics/BlockNesting
-                val.is_a?(Hash) ? val[:name] : val
+                if base_type == Metadatum::LOCATION_TYPE
+                  # Special-case for Location types
+                  val = datum.validated_value
+                  val.is_a?(Hash) ? val[:name] : val
+                else
+                  datum.raw_value
+                end
               end
             end
           end
