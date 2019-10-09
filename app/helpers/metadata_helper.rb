@@ -125,6 +125,7 @@ module MetadataHelper
               datum = sample[:metadata][field.name]
               if datum
                 base_type = datum.metadata_field.base_type
+
                 # rubocop:disable Metrics/BlockNesting
                 if base_type == Metadatum::LOCATION_TYPE
                   # Special-case for Location types
