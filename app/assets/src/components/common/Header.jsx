@@ -171,20 +171,6 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="5"
-        text={
-          <ExternalLink
-            className={cs.option}
-            href="https://github.com/chanzuckerberg/idseq-dag/wiki"
-            onClick={() =>
-              logAnalyticsEvent("Header_dropdown-wiki-option_clicked")
-            }
-          >
-            IDseq Wiki
-          </ExternalLink>
-        }
-      />,
-      <BareDropdown.Item
         key="6"
         text={
           <a
