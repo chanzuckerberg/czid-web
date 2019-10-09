@@ -311,6 +311,18 @@ class Metadatum < ApplicationRecord
     validated_values
   end
 
+  # CSV-friendly string value for filling metadata templates
+  def csv_template_value
+    # Special case for Location objects
+    if metadata_field.base_type == Metadatum::LOCATION_TYPE
+      location_id ? location.name : string_validated_value
+    else
+      # Use raw_value, the user's original string input, to avoid conversion errors with
+      # dates/numbers.
+      raw_value
+    end
+  end
+
   def self.by_sample_ids(sample_ids)
     includes(:metadata_field, :location)
       .where(sample_id: sample_ids)

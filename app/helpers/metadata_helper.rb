@@ -122,19 +122,7 @@ module MetadataHelper
             elsif project.nil?
               generate_metadata_default_value(field, sample[:host_genome_name])
             else
-              datum = sample[:metadata][field.name]
-              if datum
-                base_type = datum.metadata_field.base_type
-
-                # rubocop:disable Metrics/BlockNesting
-                if base_type == Metadatum::LOCATION_TYPE
-                  # Special-case for Location types
-                  val = datum.validated_value
-                  val.is_a?(Hash) ? val[:name] : val
-                else
-                  datum.raw_value
-                end
-              end
+              sample[:metadata][field.name]&.csv_template_value
             end
           end
         end
