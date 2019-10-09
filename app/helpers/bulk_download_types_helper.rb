@@ -17,8 +17,9 @@ module BulkDownloadTypesHelper
       display_name: "Combined Sample Taxon Results",
       description: "The value of a particular metric (e.g. total reads, rPM) for all taxons in all selected samples, in a single data table",
       category: "report",
-      options: [
+      fields: [
         {
+          display_name: "File Format",
           type: "file_format",
           options: [".csv", ".biom"],
         },
