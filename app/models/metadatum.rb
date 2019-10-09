@@ -127,7 +127,7 @@ class Metadatum < ApplicationRecord
     # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     location = Location.check_and_restrict_specificity(loc, sample.host_genome_name)
     unless location.is_a?(Location)
-      location = Location.find_or_new_by_api_ids(loc)
+      location = Location.find_or_new_by_fields(loc)
     end
     unless location.id
       location = Location.check_and_fetch_parents(location)
@@ -290,6 +290,7 @@ class Metadatum < ApplicationRecord
     ""
   end
 
+  # TODO(jsheu): Move this and related methods to MetadataField.rb.
   def validated_field
     base = self.class.convert_type_to_string(metadata_field.base_type)
     return "#{base}_validated_value"
@@ -308,6 +309,18 @@ class Metadatum < ApplicationRecord
       end
     end
     validated_values
+  end
+
+  # CSV-friendly string value for filling metadata templates
+  def csv_template_value
+    # Special case for Location objects
+    if metadata_field.base_type == Metadatum::LOCATION_TYPE
+      location_id ? location.name : string_validated_value
+    else
+      # Use raw_value, the user's original string input, to avoid conversion errors with
+      # dates/numbers.
+      raw_value
+    end
   end
 
   def self.by_sample_ids(sample_ids)

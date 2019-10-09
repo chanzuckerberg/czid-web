@@ -86,16 +86,16 @@ class Location < ApplicationRecord
     location_api_request(endpoint_query)
   end
 
-  # If we already have the location (via LocationIQ ID), return that. Otherwise fetch details via
-  # OSM ID/type. OSM IDs can change often but LocationIQ IDs should be stable. We can't geosearch
-  # by LocationIQ ID, so we need to use both.
-  def self.find_or_new_by_api_ids(loc)
-    existing = Location.find_by(locationiq_id: loc[:locationiq_id])
+  # If we already have the location (via matching fields), return that. Otherwise fetch details via
+  # OSM ID/type.
+  def self.find_or_new_by_fields(loc_info)
+    existing = Location.find_with_fields(loc_info)
     if existing
       existing
-    elsif loc[:osm_id].to_i > 0 && loc[:osm_type]
-      success, resp = geosearch_by_osm_id(loc[:osm_id], loc[:osm_type])
-      raise "Couldn't fetch OSM ID #{loc[:osm_id]} (#{loc[:osm_type]})" unless success
+    elsif loc_info[:osm_id].to_i > 0 && loc_info[:osm_type]
+      # Warning: OSM IDs may change, but it is OK to do a service lookup with them.
+      success, resp = geosearch_by_osm_id(loc_info[:osm_id], loc_info[:osm_type])
+      raise "Couldn't fetch OSM ID #{loc_info[:osm_id]} (#{loc_info[:osm_type]})" unless success
 
       resp = LocationHelper.adapt_location_iq_response(resp)
       # 'New' without saving so make sure caller saves.
@@ -103,8 +103,20 @@ class Location < ApplicationRecord
     else
       # If osm_id and osm_type are missing, just use the original params.
       # 'New' without saving so make sure caller saves.
-      new_from_params(loc)
+      new_from_params(loc_info)
     end
+  end
+
+  # Consider it a match if all fields to refer to the same place.
+  def self.find_with_fields(loc_info)
+    Location.find_by(
+      name: loc_info[:name] || "",
+      geo_level: loc_info[:geo_level] || "",
+      country_name: loc_info[:country_name] || "",
+      state_name: loc_info[:state_name] || "",
+      subdivision_name: loc_info[:subdivision_name] || "",
+      city_name: loc_info[:city_name] || ""
+    )
   end
 
   # Restrict Human location specificity to Subdivision, State, Country. Return new Location if
@@ -132,7 +144,7 @@ class Location < ApplicationRecord
       end
 
       result = LocationHelper.adapt_location_iq_response(resp[0])
-      return Location.find_by(locationiq_id: result[:locationiq_id]) || new_from_params(result)
+      return Location.find_with_fields(result) || new_from_params(result)
     end
 
     # Just return the input hash if no change
