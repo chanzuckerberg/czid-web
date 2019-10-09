@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { forbidExtraProps } from "airbnb-prop-types";
 
 const DownloadIcon = props => {
   return (
     <svg
-      className={props.className}
+      {...props}
       viewBox="0 0 36 24"
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
@@ -26,8 +27,13 @@ const DownloadIcon = props => {
   );
 };
 
-DownloadIcon.propTypes = {
+DownloadIcon.propTypes = forbidExtraProps({
   className: PropTypes.string,
-};
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  onBlur: PropTypes.func,
+  onClick: PropTypes.func,
+  onFocus: PropTypes.func,
+});
 
 export default DownloadIcon;
