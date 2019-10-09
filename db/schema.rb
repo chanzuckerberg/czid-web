@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_191_008_210_534) do
+ActiveRecord::Schema.define(version: 20_191_009_004_932) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -81,6 +81,20 @@ ActiveRecord::Schema.define(version: 20_191_008_210_534) do
     t.bigint "sample_id", null: false
     t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
+  end
+
+  create_table "bulk_downloads", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.text "params_json", comment: "JSON of the params for this bulk download"
+    t.string "download_type", null: false, comment: "The type of bulk download"
+    t.string "status", null: false, comment: "The current status of the download, e.g. waiting, running, error, success"
+    t.string "error_message", comment: "An error message to display to the user."
+  end
+
+  create_table "bulk_downloads_pipeline_runs", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "pipeline_run_id", null: false
+    t.bigint "bulk_download_id", null: false
+    t.index ["bulk_download_id"], name: "index_bulk_downloads_pipeline_runs_on_bulk_download_id"
+    t.index ["pipeline_run_id"], name: "index_bulk_downloads_pipeline_runs_on_pipeline_run_id"
   end
 
   create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -581,6 +595,8 @@ ActiveRecord::Schema.define(version: 20_191_008_210_534) do
   add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
   add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
   add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
+  add_foreign_key "bulk_downloads_pipeline_runs", "bulk_downloads", name: "bulk_downloads_pipeline_runs_bulk_download_id_fk"
+  add_foreign_key "bulk_downloads_pipeline_runs", "pipeline_runs", name: "bulk_downloads_pipeline_runs_pipeline_run_id_fk"
   add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
   add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
   add_foreign_key "host_genomes_metadata_fields", "host_genomes", name: "host_genomes_metadata_fields_host_genome_id_fk"
