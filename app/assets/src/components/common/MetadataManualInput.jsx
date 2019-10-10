@@ -358,7 +358,7 @@ class MetadataManualInput extends React.Component {
     if (["Sample Name", "collection_location_v2"].includes(column)) {
       return 240;
     } else {
-      return 160;
+      return 145;
     }
   };
 
