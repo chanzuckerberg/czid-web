@@ -90,7 +90,7 @@ class MetadataField < ApplicationRecord
   def field_info
     {
       key: name,
-      dataType: Metadatum.convert_type_to_string(base_type),
+      dataType: self.class.convert_type_to_string(base_type),
       name: display_name,
       options: options && JSON.parse(options),
       group: group,
