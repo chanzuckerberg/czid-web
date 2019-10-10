@@ -299,7 +299,7 @@ class MetadataManualInput extends React.Component {
               sample.name === this.state.applyToAllCell.sampleName &&
               cs.extraPadding,
             // Add extra width to location inputs for long names.
-            column.startsWith("collection_location_v2") && cs.extraWidth
+            column.startsWith("collection_location") && cs.extraWidth
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
