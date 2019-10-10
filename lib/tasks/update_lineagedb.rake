@@ -138,17 +138,17 @@ class LineageDatabaseImporter
   def new_taxon_lineages
     # taxid-lineages.csv has columns: tax_id,superkingdom,kingdom,phylum,class,order,family,genus,species
     # TODO: (gdingle): handle edge cases of negative ids
-    "CREATE TABLE _new_taxon_lineages AS
-     SELECT * FROM _new_taxid_lineages l
-      JOIN _new_names n ON l.superkingdom = n.taxid
-      JOIN _new_names n ON l.kingdom = n.taxid
-      JOIN _new_names n ON l.phylum = n.taxid
-      JOIN _new_names n ON l.class = n.taxid
-      JOIN _new_names n ON l.order = n.taxid
-      JOIN _new_names n ON l.family = n.taxid
-      JOIN _new_names n ON l.genus = n.taxid
-      JOIN _new_names n ON l.species = n.taxid
-    "
+# TODO: (gdingle): more work on query
+    "ALTER TABLE _new_names ADD UNIQUE _new_names_idx(tax_id(255));
+SELECT * FROM _new_taxid_lineages l
+ JOIN _new_names a ON l.superkingdom_taxid = a.tax_id
+ JOIN _new_names b ON l.kingdom_taxid = b.tax_id
+ JOIN _new_names c ON l.phylum_taxid = c.tax_id
+ JOIN _new_names d ON l.class_taxid = d.tax_id
+ JOIN _new_names e ON l.order_taxid = e.tax_id
+ JOIN _new_names f ON l.family_taxid = f.tax_id
+ JOIN _new_names g ON l.genus_taxid = g.tax_id
+ JOIN _new_names h ON l.species_taxid = h.tax_id"
   end
 
   # TODO: (gdingle): find bette place
@@ -276,3 +276,12 @@ end
 # When the index is updated, if a lineage record is still valid, its version_end gets += 1. Otherwise it stays the same and has been replaced.
 
 # HYPOTHESIS: THE NEW RECORDS CATEGORY IS BROKEN... NOT TAGGED WITH STARTED_AT
+
+
+
+# TODO: (gdingle): check warnings
+# + mysqlimport --verbose --local --host=db --columns=taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid --fields-terminated-by=, idseq_development _new_taxid_lineages.csv
+# Loading data from LOCAL file: /app/tmp/taxonomy/2019-09-17/_new_taxid_lineages.csv into _new_taxid_lineages
+# idseq_development._new_taxid_lineages: Records: 2140257  Deleted: 0  Skipped: 0  Warnings: 2140257
+
+#
