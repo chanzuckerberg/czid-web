@@ -16,15 +16,18 @@ class LocationsController < ApplicationController
     limit = location_params[:limit].present? ? location_params[:limit] : 5
     if query.present?
       threads = []
-      [:geosearch, :geo_autocomplete].each do |method|
+      puts "BEFORE THE THREADS 4:24pm"
+      actions = [:geo_autocomplete, :geosearch]
+      raw_results = {}
+      actions.each do |action|
         threads << Thread.new do
-          success, resp = Location.public_send(method, query, limit)
+          success, resp = Location.public_send(action, query, limit)
 
           if success && resp.is_a?(Array)
-            results += resp
+            raw_results[action] = resp
           elsif success && resp.is_a?(Hash) && resp["error"] == "Unable to geocode"
             # Successful request but 0 results
-            Rails.logger.info("No #{method} results for: #{query}")
+            Rails.logger.info("No #{action} results for: #{query}")
           else
             # Unsuccessful request. Likely Net::HTTPTooManyRequests.
             # Monitor if users run up against geosearch API rate limits / record any other errs.
@@ -37,7 +40,11 @@ class LocationsController < ApplicationController
       end
       threads.each(&:join)
 
-      if results.present?
+      if raw_results.present?
+        autocomplete_results = raw_results[actions[0]] || []
+        geosearch_results = raw_results[actions[1]] || []
+        results = autocomplete_results.zip(geosearch_results).flatten.compact
+
         results = results.map { |r| LocationHelper.adapt_location_iq_response(r) }
         results = results.uniq { |r| [r[:name], r[:geo_level]] }
       end
