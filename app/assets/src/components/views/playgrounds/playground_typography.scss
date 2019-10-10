@@ -1,0 +1,194 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.header {
+  margin-top: 40px;
+
+  .title {
+    @include font-header-xxl-crop;
+  }
+
+  .controls {
+    @include font-body-s-crop;
+    color: $medium-grey;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+
+    .checkbox {
+      &:not(:first-child) {
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+.playgroundTypography {
+  display: flex;
+
+  .column {
+    width: 400px;
+
+    &:not(:last-child) {
+      margin-right: 40px;
+    }
+  }
+
+  margin-bottom: 40px;
+}
+
+.multilineText {
+  width: 350px;
+  margin: 20px 0;
+  border-bottom: none !important;
+
+  .container {
+    @include font-body-s-crop;
+  }
+}
+
+.borderContainer {
+  position: relative;
+  border-bottom: 1px solid #eee;
+
+  &.highlight {
+    border-bottom: 1px solid $primary-lighter;
+
+    &::before,
+    &::after {
+      content: "";
+      display: block;
+      background-color: $primary-light;
+      opacity: 0.2;
+      position: absolute;
+    }
+
+    &::before {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 20px;
+      width: 100%;
+    }
+
+    &::after {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 20px;
+      width: 100%;
+    }
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.container {
+  padding: 20px 0;
+
+  &.upperCase {
+    text-transform: uppercase;
+  }
+}
+
+.font-header-xxl {
+  @include font-header-xxl-crop;
+}
+
+.font-header-xl {
+  @include font-header-xl-crop;
+}
+
+.font-header-l {
+  @include font-header-l-crop;
+}
+
+.font-header-m {
+  @include font-header-m-crop;
+}
+
+.font-header-s {
+  @include font-header-s-crop;
+}
+
+.font-header-xs {
+  @include font-header-xs-crop;
+}
+
+.font-header-xxs {
+  @include font-header-xxs-crop;
+}
+
+.font-header-xxxs {
+  @include font-header-xxxs-crop;
+}
+
+.font-header-accordion {
+  @include font-header-accordion-crop;
+}
+
+.font-header-node-l {
+  @include font-header-node-l-crop;
+}
+
+.font-header-node-s {
+  @include font-header-node-s-crop;
+}
+
+.font-body-xl {
+  @include font-body-xl-crop;
+}
+
+.font-body-l {
+  @include font-body-l-crop;
+}
+
+.font-body-m {
+  @include font-body-m-crop;
+}
+
+.font-body-s {
+  @include font-body-s-crop;
+}
+
+.font-body-xs {
+  @include font-body-xs-crop;
+}
+
+.font-body-xxs {
+  @include font-body-xxs-crop;
+}
+
+.font-body-xxxs {
+  @include font-body-xxxs-crop;
+}
+
+.font-label-s {
+  @include font-label-s-crop;
+}
+
+.font-label-xs {
+  @include font-label-xs-crop;
+}
+
+.font-tag-s {
+  @include font-tag-s-crop;
+}
+
+.font-viz-label {
+  @include font-viz-label-crop;
+}
+
+.font-search-result-title {
+  @include font-search-result-title-crop;
+}
+
+.font-search-result-description {
+  @include font-search-result-description-crop;
+}
+
+.font-code {
+  @include font-code-crop;
+}

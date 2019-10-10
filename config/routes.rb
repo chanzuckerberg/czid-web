@@ -127,6 +127,7 @@ Rails.application.routes.draw do
     get :controls
     get :components
     get :icons
+    get :typography
     get :viz
   end
 
