@@ -907,7 +907,7 @@ class Sample < ApplicationRecord
   # not being applied with the non-admin path in self.viewable when combined with an 'includes'.
   # Be careful when using this because it may cause an extra query for each of your samples!
   def first_pipeline_run
-    pipeline_runs.order(created_at: :desc).first
+    pipeline_runs.order(created_at: :desc, id: :desc).first
   end
 
   # Gets the URL for the admin-only sample status page for printing in internal

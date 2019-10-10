@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { find, get, set } from "lodash/fp";
 import memoize from "memoize-one";
 
-import { getBulkDownloadTypes } from "~/api";
+import { getBulkDownloadTypes } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 
 import ChooseStep from "./ChooseStep";
@@ -14,7 +14,7 @@ const assembleSelectedDownload = memoize(
     const fields = get(selectedDownloadTypeName, allSelectedFields);
 
     return {
-      type: selectedDownloadTypeName,
+      downloadType: selectedDownloadTypeName,
       fields,
       sampleIds: Array.from(sampleIds),
     };
@@ -131,7 +131,7 @@ class BulkDownloadModal extends React.Component {
 BulkDownloadModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
-  selectedSampleIds: PropTypes.arrayOf(PropTypes.number),
+  selectedSampleIds: PropTypes.instanceOf(Set),
 };
 
 export default BulkDownloadModal;

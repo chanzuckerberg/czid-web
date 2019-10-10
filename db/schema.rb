@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_191_009_004_932) do
+ActiveRecord::Schema.define(version: 20_191_009_224_440) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -95,6 +95,13 @@ ActiveRecord::Schema.define(version: 20_191_009_004_932) do
     t.bigint "bulk_download_id", null: false
     t.index ["bulk_download_id"], name: "index_bulk_downloads_pipeline_runs_on_bulk_download_id"
     t.index ["pipeline_run_id"], name: "index_bulk_downloads_pipeline_runs_on_pipeline_run_id"
+  end
+
+  create_table "bulk_downloads_users", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "user_id", null: false
+    t.bigint "bulk_download_id", null: false
+    t.index ["bulk_download_id"], name: "index_bulk_downloads_users_on_bulk_download_id"
+    t.index ["user_id"], name: "index_bulk_downloads_users_on_user_id"
   end
 
   create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -597,6 +604,8 @@ ActiveRecord::Schema.define(version: 20_191_009_004_932) do
   add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
   add_foreign_key "bulk_downloads_pipeline_runs", "bulk_downloads", name: "bulk_downloads_pipeline_runs_bulk_download_id_fk"
   add_foreign_key "bulk_downloads_pipeline_runs", "pipeline_runs", name: "bulk_downloads_pipeline_runs_pipeline_run_id_fk"
+  add_foreign_key "bulk_downloads_users", "bulk_downloads", name: "bulk_downloads_users_bulk_download_id_fk"
+  add_foreign_key "bulk_downloads_users", "users", name: "bulk_downloads_users_user_id_fk"
   add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
   add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
   add_foreign_key "host_genomes_metadata_fields", "host_genomes", name: "host_genomes_metadata_fields_host_genome_id_fk"

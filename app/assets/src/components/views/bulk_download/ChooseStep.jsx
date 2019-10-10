@@ -62,7 +62,7 @@ class ChooseStep extends React.Component {
         }));
 
         return (
-          <div className={cs.field}>
+          <div className={cs.field} key={field.type}>
             <div className={cs.label}>File Format:</div>
             <Dropdown
               fluid
@@ -174,7 +174,7 @@ ChooseStep.propTypes = {
         })
       ),
     })
-  ).isRequired,
+  ),
   selectedDownloadTypeName: PropTypes.string,
   onSelect: PropTypes.func.isRequired,
   selectedFields: PropTypes.objectOf(PropTypes.objectOf(PropTypes.string)),

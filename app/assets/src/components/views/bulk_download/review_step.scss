@@ -9,8 +9,12 @@
 
     .editLink {
       @include font-body-xs;
-      color: $primary-light;
-      cursor: pointer;
+      color: $light-grey;
+
+      &.enabled {
+        color: $primary-light;
+        cursor: pointer;
+      }
     }
   }
 
@@ -60,6 +64,51 @@
       @include font-body-xxs;
       color: $medium-grey;
       margin-top: 6px;
+    }
+
+    .loadingMessage {
+      color: $medium-grey;
+      display: flex;
+      align-items: center;
+
+      .icon {
+        margin-right: 4px;
+      }
+
+      .text {
+        @include font-body-xxs;
+      }
+    }
+
+    .errorMessage {
+      display: flex;
+
+      .icon {
+        fill: $error;
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+      }
+
+      .text {
+        @include font-body-xxs;
+      }
+    }
+
+    .successMessage {
+      margin-bottom: 40px;
+      display: flex;
+
+      .icon {
+        fill: $success;
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+      }
+
+      .text {
+        @include font-body-xxs;
+      }
     }
   }
 }
