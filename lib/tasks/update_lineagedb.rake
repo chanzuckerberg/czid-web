@@ -40,11 +40,10 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
 end
 
 class LineageDatabaseImporter
-  def initialize(reference_s3_path, ncbi_date, test_run = false)
+  def initialize(reference_s3_path, ncbi_date)
     @reference_s3_path = reference_s3_path
     @ncbi_date = ncbi_date
     @local_taxonomy_path = "/app/tmp/taxonomy/#{ncbi_date}"
-    @test_run = test_run
     @names_table_name = "_new_names"
     @lineages_table_name = "_new_taxid_lineages"
   end
@@ -57,18 +56,18 @@ class LineageDatabaseImporter
     Rails.env == 'development' ? '' : '--user=$DB_USERNAME --password=$DB_PASSWORD'
   end
 
-  def import!
+  def import!(test_run = true)
     setup
 
-    if @test_run
-      shell_execute("
-        #{aws_s3_cp('names.csv', @names_table_name)}
-        #{aws_s3_cp('taxid-lineages.csv', @lineages_table_name)}
-      ")
-    else
+    if test_run
       shell_execute("
         echo '#{example_names_csv}' > #{@names_table_name}.csv
         echo '#{example_taxid_lineages_csv}' > #{@lineages_table_name}.csv
+      ")
+    else
+      shell_execute("
+        #{aws_s3_cp('names.csv', @names_table_name)}
+        #{aws_s3_cp('taxid-lineages.csv', @lineages_table_name)}
       ")
     end
 
