@@ -16,7 +16,7 @@ module MetadataHelper
     mf = MetadataField.new
     mf.name = name
     mf.display_name = name
-    mf.base_type = Metadatum::STRING_TYPE
+    mf.base_type = MetadataField::STRING_TYPE
     return mf
   end
 
@@ -30,7 +30,7 @@ module MetadataHelper
 
   # TODO(mark): Generate more realistic default values.
   def generate_metadata_default_value(field, host_genome_name)
-    if field.base_type == Metadatum::STRING_TYPE
+    if field.base_type == MetadataField::STRING_TYPE
       if field.options.present?
         options = JSON.parse(field.options)
         return options[Random.new.rand(options.length)]
@@ -39,11 +39,11 @@ module MetadataHelper
       return "Example " + field.display_name
     end
 
-    if field.base_type == Metadatum::NUMBER_TYPE
+    if field.base_type == MetadataField::NUMBER_TYPE
       return Random.new.rand(100)
     end
 
-    if field.base_type == Metadatum::DATE_TYPE
+    if field.base_type == MetadataField::DATE_TYPE
       return Time.zone.today.strftime(host_genome_name == "Human" ? "%Y-%m" : "%Y-%m-%d")
     end
   end

@@ -576,8 +576,10 @@ module SamplesHelper
 
   def self.samples_by_metadata_field(sample_ids, field_name)
     query = Metadatum.where(metadata_fields: { name: field_name }, sample_id: sample_ids)
+    metadata_field = MetadataField.find_by(name: field_name)
+
     # Special-case locations
-    if MetadataField.find_by(name: field_name).base_type == Metadatum::LOCATION_TYPE
+    if metadata_field.base_type == MetadataField::LOCATION_TYPE
       query
         .includes(:metadata_field, location: Location::GEO_LEVELS)
         .group(
@@ -587,16 +589,9 @@ module SamplesHelper
           ] + Location::GEO_LEVELS.map { |l| "#{l.pluralize}_locations.name" }
         )
     else
-      # TODO(jsheu): Modify to get validated field from MetadataField.
-      first_datum = Metadatum.where(key: field_name).first
-      if first_datum
-        query
-          .includes(:metadata_field)
-          .group(first_datum.validated_field)
-      else
-        # No data for that field. Return empty grouped <ActiveRecord::Relation []> to be compatible with additional ActiveRecord clauses (check callers).
-        Metadatum.none.group(:key)
-      end
+      query
+        .includes(:metadata_field)
+        .group(metadata_field.validated_field)
     end
   end
 
@@ -631,11 +626,11 @@ module SamplesHelper
                             .includes(metadata: :metadata_field)
                             .where(metadata: { metadata_field_id: metadatum.metadata_field_id })
 
-    samples_filtered = if metadatum.metadata_field.base_type == Metadatum::LOCATION_TYPE
+    samples_filtered = if metadatum.metadata_field.base_type == MetadataField::LOCATION_TYPE
                          LocationHelper.filter_by_name(samples_with_metadata, query)
                        else
                          samples_with_metadata
-                           .where(metadata: { metadatum.validated_field => query })
+                           .where(metadata: { metadatum.metadata_field.validated_field => query })
                        end
 
     not_set_ids = []

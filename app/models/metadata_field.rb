@@ -3,6 +3,11 @@ class MetadataField < ApplicationRecord
   has_and_belongs_to_many :projects
   has_many :metadata, dependent: :destroy
 
+  STRING_TYPE = 0
+  NUMBER_TYPE = 1
+  DATE_TYPE = 2
+  LOCATION_TYPE = 3
+
   # ActiveRecord documentation summary
 
   # Name/key ex: "sample_type"
@@ -117,6 +122,24 @@ class MetadataField < ApplicationRecord
     else
       raise "Invalid host genome"
     end
+  end
+
+  def validated_field
+    base = self.class.convert_type_to_string(base_type)
+    "#{base}_validated_value"
+  end
+
+  def self.convert_type_to_string(type)
+    if type == STRING_TYPE
+      return "string"
+    elsif type == NUMBER_TYPE
+      return "number"
+    elsif type == DATE_TYPE
+      return "date"
+    elsif type == LOCATION_TYPE
+      return "location"
+    end
+    ""
   end
 
   private
