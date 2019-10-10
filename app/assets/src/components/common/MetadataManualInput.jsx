@@ -297,9 +297,7 @@ class MetadataManualInput extends React.Component {
             // Add extra bottom padding to get inputs to align with the input that has Apply to All under it.
             column !== this.state.applyToAllCell.column &&
               sample.name === this.state.applyToAllCell.sampleName &&
-              cs.extraPadding,
-            // Add extra width to location inputs for long names.
-            column.startsWith("collection_location") && cs.extraWidth
+              cs.extraPadding
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
@@ -354,14 +352,6 @@ class MetadataManualInput extends React.Component {
     });
   };
 
-  getColumnWidth = column => {
-    if (["Sample Name", "collection_location_v2"].includes(column)) {
-      return 240;
-    } else {
-      return 145;
-    }
-  };
-
   render() {
     return (
       <div className={cx(cs.metadataManualInput, this.props.className)}>
@@ -372,7 +362,7 @@ class MetadataManualInput extends React.Component {
               headers={this.state.headers}
               columns={this.getManualInputColumns()}
               data={this.getManualInputData()}
-              getColumnWidth={this.getColumnWidth}
+              getColumnWidth={column => (column === "Sample Name" ? 240 : 160)}
             />
           </div>
           {this.renderColumnSelector()}
