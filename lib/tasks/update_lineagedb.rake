@@ -40,10 +40,13 @@ task 'update_lineage_db', [:dryrun] => :environment do |_t, args|
 end
 
 class LineageDatabaseImporter
-  def initialize(reference_s3_path, ncbi_date)
+  def initialize(reference_s3_path, ncbi_date, test_run = false)
     @reference_s3_path = reference_s3_path
     @ncbi_date = ncbi_date
     @local_taxonomy_path = "/app/tmp/taxonomy/#{ncbi_date}"
+    @test_run = test_run
+    @names_table_name = "_new_names"
+    @lineages_table_name = "_new_taxid_lineages"
   end
 
   def host
@@ -56,18 +59,30 @@ class LineageDatabaseImporter
 
   def import!
     setup
+
+    if @test_run
+      shell_execute("
+        #{aws_s3_cp('names.csv', @names_table_name)}
+        #{aws_s3_cp('taxid-lineages.csv', @lineages_table_name)}
+      ")
+    else
+      shell_execute("
+        echo '#{example_names_csv}' > #{@names_table_name}.csv
+        echo '#{example_taxid_lineages_csv}' > #{@lineages_table_name}.csv
+      ")
+    end
+
     import_new_names!
     import_new_taxid_lineages!
     # TODO: (gdingle): SQL import with ncbi_date
+    # TODO: (gdingle): Row 5 doesn't contain data for all columns... do we need to validate all this?
   end
 
-  def import_new_names!(names_file = 'names.csv')
-    table_name = "_new_names"
+  def import_new_names!
     names_cols = 'tax_id,name_txt,name_txt_common'
     shell_execute("
-      #{aws_s3_cp(names_file, table_name)}
-      #{mysql_execute(create_table_sql(table_name, names_cols.split(',')))}
-      #{mysql_import(names_cols, table_name)}
+      #{mysql_execute(create_table_sql(@names_table_name, names_cols.split(',')))}
+      #{mysql_import(names_cols, @names_table_name)}
     ")
   end
 
@@ -77,13 +92,11 @@ class LineageDatabaseImporter
   #                          order_name order_common_name family_name family_common_name genus_name genus_common_name species_name species_common_name]
   # end
 
-  def import_new_taxid_lineages!(taxid_lineages_file = 'taxid-lineages.csv')
-    table_name = "_new_taxid_lineages"
+  def import_new_taxid_lineages!
     column_names = "taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid"
     shell_execute("
-      #{aws_s3_cp(taxid_lineages_file, table_name)}
-      #{mysql_execute(create_table_sql(table_name, column_names.split(',')))}
-      #{mysql_import(column_names, table_name)}
+      #{mysql_execute(create_table_sql(@lineages_table_name, column_names.split(',')))}
+      #{mysql_import(column_names, @lineages_table_name)}
     ")
   end
 
@@ -278,10 +291,48 @@ end
 # HYPOTHESIS: THE NEW RECORDS CATEGORY IS BROKEN... NOT TAGGED WITH STARTED_AT
 
 
+def example_names_csv
+  "1,root,
+2,Bacteria,eubacteria
+6,Azorhizobium,
+7,Azorhizobium caulinodans,
+9,Buchnera aphidicola,
+10,Cellvibrio,
+11,Cellulomonas gilvus,
+13,Dictyoglomus,
+14,Dictyoglomus thermophilum,
+16,Methylophilus,
+2610867,unclassified Ophiocordyceps,
+2610869,unclassified Nankokuvirus,
+2611350,Pallidophorina,
+2611355,Ramoconidiophora,
+2613330,Aliibacillus,
+2613345,Ipomoea siamensis,
+2613527,unclassified Merremia,
+2613533,unclassified Goodyera,
+2613808,unclassified Wilmottia,
+2613861,unclassified Tospoviridae,"
+end
 
-# TODO: (gdingle): check warnings
-# + mysqlimport --verbose --local --host=db --columns=taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid --fields-terminated-by=, idseq_development _new_taxid_lineages.csv
-# Loading data from LOCAL file: /app/tmp/taxonomy/2019-09-17/_new_taxid_lineages.csv into _new_taxid_lineages
-# idseq_development._new_taxid_lineages: Records: 2140257  Deleted: 0  Skipped: 0  Warnings: 2140257
-
-#
+def example_taxid_lineages_csv
+  "1,-700,-650,-600,-500,-400,-300,-200,-100,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2,2,-650,-600,-500,-400,-300,-200,-100,131567,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+6,2,-650,1224,28211,356,335928,6,-100,131567,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+7,2,-650,1224,28211,356,335928,6,7,131567,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+9,2,-650,1224,1236,91347,1903409,32199,9,131567,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,-650,1224,1236,1706369,1706371,10,-100,131567,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+11,2,-650,201174,1760,85006,85016,1707,11,131567,1783272,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+13,2,-650,68297,203486,203487,203488,13,-100,131567,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+14,2,-650,68297,203486,203487,203488,13,14,131567,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+16,2,-650,1224,28216,32003,32011,16,-100,131567,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2610867,2759,4751,4890,147550,5125,474942,474995,-100,131567,33154,716545,716546,715989,0,0,0,0,0,2610867,0,0,0,0,0,0,0,0,0,0,0
+2610869,10239,-650,-600,-500,28883,10662,1925779,-100,2610869,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2611350,2759,4751,4890,147548,1484953,-300,2611350,-100,131567,33154,716545,716546,715989,0,0,0,0,0,2075528,0,0,0,0,0,0,0,0,0,0,0
+2611355,2759,4751,4890,147548,1484953,-300,2611355,-100,131567,33154,716545,716546,715989,0,0,0,0,0,2075528,0,0,0,0,0,0,0,0,0,0,0
+2613330,2,-650,1239,91061,1385,186817,2613330,-100,131567,1783272,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2613345,2759,33090,35493,-500,4069,4118,4119,2613345,131567,3193,58023,78536,58024,71274,91827,91888,71240,1437183,3398,1437201,0,0,0,0,0,0,0,0,0,0
+2613527,2759,33090,35493,-500,4069,4118,89667,-100,131567,3193,58023,78536,58024,71274,91827,91888,71240,1437183,3398,1437201,2613527,0,0,0,0,0,0,0,0,0
+2613533,2759,33090,35493,4447,73496,4747,78779,-100,131567,3193,58023,78536,58024,0,0,0,2613533,1437183,3398,0,0,0,0,0,0,0,0,0,0,0
+2613808,2,-650,1117,-500,1150,1892251,1048851,-100,131567,1783272,1798711,2613808,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2613861,10239,-650,2497569,2497576,1980410,1980419,-200,-100,2559587,2613861,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
+end
