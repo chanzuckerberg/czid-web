@@ -275,8 +275,6 @@ export default class Heatmap {
     addSvgColorFilter(defs, "blue", COLOR_HOVER_LINK);
 
     this.g = this.svg.append("g");
-    this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
-    this.gColumnLabels = this.g.append("g").attr("class", cs.columnLabels);
     this.gCells = this.g.append("g").attr("class", cs.cells);
     this.gRowDendogram = this.g
       .append("g")
@@ -284,6 +282,16 @@ export default class Heatmap {
     this.gColumnDendogram = this.g
       .append("g")
       .attr("class", cx(cs.dendogram, "columnDendogram"));
+    this.rowLabelsBackground = this.g
+      .append("rect")
+      .attr("class", "rowLabelBackground")
+      .style("fill", "white");
+    this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
+    this.columnLabelsBackground = this.g
+      .append("rect")
+      .attr("class", "columnLabelBackground")
+      .style("fill", "white");
+    this.gColumnLabels = this.g.append("g").attr("class", cs.columnLabels);
     this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
     this.gCaption = this.g.append("g").attr("class", cs.captionContainer);
   }
@@ -359,10 +367,29 @@ export default class Heatmap {
       "transform",
       `translate(${this.options.marginLeft},${this.options.marginTop})`
     );
+    this.rowLabelsBackground
+      .attr("x", -this.options.marginLeft)
+      .attr("y", totalColumnLabelsHeight + totalMetadataHeight)
+      .attr("width", this.rowLabelsWidth + this.options.marginLeft)
+      .attr("height", totalCellHeight);
     this.gRowLabels.attr(
       "transform",
       `translate(0, ${totalColumnLabelsHeight + totalMetadataHeight})`
     );
+    this.columnLabelsBackground
+      .attr("x", this.rowLabelsWidth)
+      .attr("y", -totalColumnLabelsHeight)
+      .attr(
+        "width",
+        this.rowLabelsWidth +
+          totalCellWidth +
+          totalRowClusterWidth +
+          this.options.marginRight
+      )
+      .attr(
+        "height",
+        totalColumnLabelsHeight + totalMetadataHeight + this.options.marginTop
+      );
     this.gColumnLabels.attr(
       "transform",
       `translate(${this.rowLabelsWidth},${totalColumnLabelsHeight})`
@@ -400,6 +427,125 @@ export default class Heatmap {
           this.options.spacing}
       )`
     );
+
+    // Set up scrolling behavior
+    this.g.on("wheel.zoom", this.pan.bind(this));
+
+    // In order to avoid double scrolling behavior,
+    // prevent the page from scrolling when the mouse is hovering over the heatmap
+    // unless the heatmap has already been scrolled to its limits.
+    this.svg
+      .on("mouseover", () => {
+        let yTranslate = Math.floor(
+            d3.transform(this.g.attr("transform")).translate[1]
+          ),
+          yScrollMax = Math.floor(
+            (this.container[0][0].clientHeight - this.svg.attr("height")) /
+              this.options.zoom
+          );
+        yTranslate === this.options.marginTop || yTranslate === yScrollMax
+          ? d3.select("body").attr("class", null)
+          : d3.select("body").attr("class", cs.noScroll);
+      })
+      .on("mouseleave", () => {
+        d3.select("body").attr("class", null);
+      });
+  }
+
+  pan() {
+    let wheelDeltaX = d3.event.wheelDeltaX,
+      wheelDeltaY = d3.event.wheelDeltaY;
+
+    // Define the scrolling boundaries for the svg.
+    // Upper limits are determined by the difference between the container and svg sizes,
+    // scaled by the zoom factor.
+    let containerWidth = this.container[0][0].offsetWidth,
+      containerHeight = this.container[0][0].offsetHeight;
+    let xScrollMax =
+        (containerWidth - this.svg.attr("width")) / this.options.zoom,
+      yScrollMax =
+        (containerHeight - this.svg.attr("height")) / this.options.zoom;
+
+    // Translating the svg:
+    let gCurrentTranslate = d3.transform(this.g.attr("transform")).translate;
+    // Limit translation by the boundaries set for the svg.
+    let dx = Math.min(
+      this.options.marginLeft,
+      Math.max(wheelDeltaX + gCurrentTranslate[0], xScrollMax)
+    );
+    let dy = Math.min(
+      this.options.marginTop,
+      Math.max(wheelDeltaY + gCurrentTranslate[1], yScrollMax)
+    );
+    this.g.attr("transform", `translate(${[dx, dy]})`);
+
+    // Translating the row labels in the opposite x direction of the svg.
+    let rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
+      .translate;
+    let rowLabelsDx = Math.max(
+      0,
+      Math.min(rowLabelsCurrent[0] - wheelDeltaX, -xScrollMax)
+    );
+    this.gRowLabels.attr(
+      "transform",
+      `translate(${[rowLabelsDx, rowLabelsCurrent[1]]})`
+    );
+
+    // Translating the column labels in the opposite y direction of the svg.
+    let columnLabelsCurrent = d3.transform(this.gColumnLabels.attr("transform"))
+      .translate;
+    let columnLabelsDy = Math.max(
+      this.columnLabelsHeight,
+      Math.min(
+        columnLabelsCurrent[1] - wheelDeltaY,
+        this.columnLabelsHeight + this.options.marginTop - yScrollMax
+      )
+    );
+    this.gColumnLabels.attr(
+      "transform",
+      `translate(${[columnLabelsCurrent[0], columnLabelsDy]})`
+    );
+
+    // Translating the column metadata in the opposite y direction of the svg (same as column labels).
+    let columnMetadataCurrent = d3.transform(
+      this.gColumnMetadata.attr("transform")
+    ).translate;
+    let metadataDy = Math.max(
+      this.columnLabelsHeight,
+      Math.min(
+        columnMetadataCurrent[1] - wheelDeltaY,
+        this.columnLabelsHeight + this.options.marginTop - yScrollMax
+      )
+    );
+    this.gColumnMetadata.attr(
+      "transform",
+      `translate(${[columnMetadataCurrent[0], metadataDy]})`
+    );
+
+    // Placing the white background rectangle behind the row labels.
+    this.rowLabelsBackground
+      .attr(
+        "x",
+        d3.transform(this.gRowLabels.attr("transform")).translate[0] -
+          this.options.marginLeft
+      )
+      .attr("y", d3.transform(this.gRowLabels.attr("transform")).translate[1]);
+
+    // Placing the white background rectangle behind the column labels and metadata.
+    this.columnLabelsBackground
+      .attr(
+        "x",
+        d3.transform(this.gColumnLabels.attr("transform")).translate[0] -
+          this.rowLabelsWidth
+      )
+      .attr(
+        "y",
+        d3.transform(this.gColumnLabels.attr("transform")).translate[1] -
+          this.columnLabelsHeight -
+          this.options.marginTop
+      );
+
+    d3.event.stopPropagation();
   }
 
   processMetadata() {

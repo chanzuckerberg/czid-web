@@ -20,8 +20,8 @@
 
   .heatmapContainer {
     overflow: hidden;
-    // Set the height to the entire viewport; users can scroll to hide filter controls
-    // and the heatmap will take up the entire page.
+    // Set the height to the entire viewport; the heatmap will take up the entire page
+    // if the user scrolls to hide the filter controls.
     height: 100vh;
 
     svg {
