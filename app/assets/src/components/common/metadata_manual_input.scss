@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .metadataManualInput {
   .columnPicker {
@@ -40,11 +41,15 @@
     }
 
     .input {
-      margin: 5px 30px 5px 0;
+      margin: $space-xxs $space-m $space-xxs 0;
       width: 130px;
 
       &.extraPadding {
         margin-bottom: 22px;
+      }
+
+      &.extraWidth {
+        width: 240px;
       }
     }
 
