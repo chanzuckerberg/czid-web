@@ -890,10 +890,10 @@ class Sample < ApplicationRecord
       base_type = m.metadata_field.base_type
 
       # Special-case for locations (avoid extra call to #metadata_field.base_type in #validated_value)
-      if base_type == Metadatum::LOCATION_TYPE
+      if base_type == MetadataField::LOCATION_TYPE
         resp["location_validated_value"] = m.location_id ? Location.find(m.location_id).attributes : m.string_validated_value
       end
-      resp["base_type"] = Metadatum.convert_type_to_string(base_type)
+      resp["base_type"] = MetadataField.convert_type_to_string(base_type)
       resp
     end
   end
