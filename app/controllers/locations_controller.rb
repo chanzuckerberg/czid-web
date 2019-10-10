@@ -35,7 +35,7 @@ class LocationsController < ApplicationController
           end
         end
       end
-      threads.each { |t| t.join }
+      threads.each(&:join)
 
       if results.present?
         results = results.map { |r| LocationHelper.adapt_location_iq_response(r) }
