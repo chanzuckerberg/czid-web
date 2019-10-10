@@ -23,33 +23,68 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
                         ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
                       end
 
+  new_lineage_version = ENV['LINEAGE_VERSION'].to_i
+  if new_lineage_version.zero?
+    new_lineage_version = AlignmentConfig.maximum("lineage_version") + 1
+  end
+
   puts "\n\nStarting import of #{reference_s3_path} ...\n\n"
-  importer = LineageDatabaseImporter.new(reference_s3_path, ncbi_date)
+  current_version = TaxonLineage.maximum('version_end')
+  importer = LineageDatabaseImporter.new(reference_s3_path, ncbi_date, current_version)
   importer.import!(testrun) unless dryrun
   puts "\n\nDone import of #{reference_s3_path}."
 
-  current_lineage_version = ENV['LINEAGE_VERSION'].to_i
-  if current_lineage_version.zero?
-    current_lineage_version = AlignmentConfig.maximum("lineage_version") + 1
-  end
-
-  puts "\n\nStarting update of lineage versions to #{current_lineage_version} ...\n\n"
+  puts "\n\nStarting update of lineage versions to #{new_lineage_version} ...\n\n"
   # TODO: (gdingle): reenable
-  # add_lineage_version_numbers!(current_lineage_version, ncbi_date) unless dryrun
-  puts "\n\nDone update of lineage versions to #{current_lineage_version}."
+  # add_lineage_version_numbers!(new_lineage_version, ncbi_date) unless dryrun
+  puts "\n\nDone update of lineage versions to #{new_lineage_version}."
 
   ## Instructions on next steps
   puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
 end
 
 class LineageDatabaseImporter
-  def initialize(reference_s3_path, ncbi_date)
+  def initialize(reference_s3_path, ncbi_date, current_version)
     @reference_s3_path = reference_s3_path
     @ncbi_date = ncbi_date
     @local_taxonomy_path = "/app/tmp/taxonomy/#{ncbi_date}"
     @names_table = "_new_names"
     @taxid_table = "_new_taxid_lineages"
     @taxon_lineages_table = "_new_taxon_lineages"
+    @current_version = current_version
+
+    @columns = [
+      "taxid",
+
+      "superkingdom_taxid",
+      "phylum_taxid",
+      "class_taxid",
+      "order_taxid",
+      "family_taxid",
+      "genus_taxid",
+      "species_taxid",
+
+      "superkingdom_name",
+      "phylum_name",
+      "class_name",
+      "order_name",
+      "family_name",
+      "genus_name",
+      "species_name",
+
+      "superkingdom_common_name",
+      "phylum_common_name",
+      "class_common_name",
+      "order_common_name",
+      "family_common_name",
+      "genus_common_name",
+      "species_common_name",
+
+      # These appear to have been added later
+      "kingdom_taxid",
+      "kingdom_name",
+      "kingdom_common_name",
+    ]
   end
 
   def host
@@ -79,7 +114,14 @@ class LineageDatabaseImporter
     import_new_taxid_lineages!
     build_new_taxon_lineages!
 
-
+    puts "\n\nRetire records..."
+    retire_records
+    puts "\n\nInsert records..."
+    insert_records
+    puts "\n\nUpdate records..."
+    update_records
+    puts "\n\nUnchanged records..."
+    unchanged_records
 
     # TODO: (gdingle): set these later
     # "started_at",
@@ -127,7 +169,7 @@ class LineageDatabaseImporter
 
   def setup
     `
-     set -xe
+     set -e
      ## Set work directory
      rm -rf #{@local_taxonomy_path};
      mkdir -p #{@local_taxonomy_path};
@@ -145,7 +187,7 @@ class LineageDatabaseImporter
 
   def shell_execute(*commands)
     puts `
-    set -xe
+    set -e
     cd #{@local_taxonomy_path}
     #{commands.join("\n")}
     `
@@ -169,45 +211,13 @@ class LineageDatabaseImporter
 
   def build_new_taxon_lineages!
     # TODO: (gdingle): handle edge cases of negative ids
-    cols = [
-      "taxid",
-
-      "superkingdom_taxid",
-      "phylum_taxid",
-      "class_taxid",
-      "order_taxid",
-      "family_taxid",
-      "genus_taxid",
-      "species_taxid",
-
-      "superkingdom_name",
-      "phylum_name",
-      "class_name",
-      "order_name",
-      "family_name",
-      "genus_name",
-      "species_name",
-
-      "superkingdom_common_name",
-      "phylum_common_name",
-      "class_common_name",
-      "order_common_name",
-      "family_common_name",
-      "genus_common_name",
-      "species_common_name",
-
-      # These appear to have been added later
-      "kingdom_taxid",
-      "kingdom_name",
-      "kingdom_common_name",
-    ]
 
     shell_execute(
-      mysql_query(create_table_sql(@taxon_lineages_table, cols)),
+      mysql_query(create_table_sql(@taxon_lineages_table, @columns)),
       mysql_query("ALTER TABLE #{@taxon_lineages_table} ADD UNIQUE idx(taxid(255))")
     )
 
-    col_expressions = cols.map do |col|
+    col_expressions = @columns.map do |col|
       if col == "taxid"
         "l.taxid"
       else
@@ -236,16 +246,47 @@ class LineageDatabaseImporter
   # default_ended_at = TaxonLineage.column_defaults["ended_at"]
 
 
-  def retire
-    "SELECT old.* FROM old LEFT JOIN new WHERE new.id IS NULL AND old.ended_at = #{default_ended_at}"
+  def retire_records
+    shell_execute(mysql_query(
+      "SELECT COUNT(*) FROM taxon_lineages old
+      LEFT JOIN _new_taxon_lineages new USING(taxid)
+      WHERE new.taxid IS NULL
+        AND old.version_end = #{@current_version}"
+    ))
   end
 
-  def insert
-    "SELECT new.* FROM new LEFT JOIN old WHERE old.id IS NULL AND old.ended_at = #{default_ended_at}"
+  def insert_records
+    shell_execute(mysql_query(
+      "SELECT COUNT(*) FROM taxon_lineages old
+      RIGHT JOIN _new_taxon_lineages new USING(taxid)
+      WHERE old.taxid IS NULL"
+    ))
   end
 
-  def update
-    "SELECT old.* FROM new INNER JOIN old WHERE old.ended_at = #{default_ended_at}"
+  def update_records
+    col_expressions = @columns[1..-1].map do |col|
+      "old.#{col} != new.#{col}"
+    end
+
+    shell_execute(mysql_query(
+      "SELECT COUNT(*) FROM taxon_lineages old
+      INNER JOIN _new_taxon_lineages new USING(taxid)
+      WHERE old.version_end = #{@current_version}
+        AND (#{col_expressions.join("\n OR ")})"
+    ))
+  end
+
+  def unchanged_records
+    col_expressions = @columns[1..-1].map do |col|
+      "old.#{col} = new.#{col}"
+    end
+
+    shell_execute(mysql_query(
+      "SELECT COUNT(*) FROM taxon_lineages old
+      INNER JOIN _new_taxon_lineages new USING(taxid)
+      WHERE old.version_end = #{@current_version}
+        AND #{col_expressions.join("\n AND ")}"
+    ))
   end
 
   def clean_up
@@ -265,33 +306,6 @@ def add_lineage_version_numbers!(current_lineage_version, ncbi_date)
 end
 
 ######## DEPRECATED
-
-def old_lineage_file
-  n_columns = column_names.split(",").count
-  `
-   set -xe
-   ## Get old lineage file
-   mysql -h #{host} #{lp} -e "SELECT #{column_names},started_at FROM idseq_#{Rails.env}.taxon_lineages WHERE ended_at = (SELECT MAX(ended_at) FROM idseq_#{Rails.env}.taxon_lineages);" | tr "\t" "," | tail -n +2 > old_taxon_lineages_with_started_at.csv
-   cut -d, -f1-#{n_columns} old_taxon_lineages_with_started_at.csv > old_taxon_lineages.csv
-   cut -d, -f1,#{n_columns + 1} old_taxon_lineages_with_started_at.csv > taxid_to_started_at.csv
-  `
-  check_shell_status!
-end
-
-def new_lineage_file(reference_s3_path)
-  taxid_lineages_file = 'taxid-lineages.csv'
-  names_file = 'names.csv'
-  `
-   set -xe
-   ## Get new lineage file
-   # Download new references, extract and remove header line
-   aws s3 cp #{reference_s3_path}/#{taxid_lineages_file}.gz - | gunzip | tail -n +2 > taxid-lineages.csv
-   aws s3 cp #{reference_s3_path}/#{names_file}.gz - | gunzip | tail -n +2 > names.csv
-    # names.csv has columns: tax_id,name_txt,name_txt_common
-   # taxid-lineages.csv has columns: tax_id,superkingdom,kingdom,phylum,class,order,family,genus,species
-  `
-  check_shell_status!
-end
 
 def transform
   `
@@ -357,11 +371,13 @@ end
 # between versions, so instead of storing all of them, we store a [version_start, version_end] range with each lineage record.
 # When the index is updated, if a lineage record is still valid, its version_end gets += 1. Otherwise it stays the same and has been replaced.
 
-# HYPOTHESIS: THE NEW RECORDS CATEGORY IS BROKEN... NOT TAGGED WITH STARTED_AT
 
-# Determined by all tax_ids in random sample below
+# Determined by all tax_ids in random sample below,
+# plus test inserts and updates.
 def example_names_csv
-  "2759,Eukaryota,eucaryotes
+  "99999999,Test,test insert new taxid
+99999998,Test,test update taxid
+2759,Eukaryota,eucaryotes
 3214,Bryopsida,
 4751,Fungi,fungi
 4890,Ascomycota,ascomycetes
@@ -372,8 +388,6 @@ def example_names_csv
 6854,Arachnida,arachnids
 6893,Araneae,spiders
 7041,Coleoptera,beetles
-7065,Tenebrionidae,darkling ground
-7066,Tenebrio,
 7088,Lepidoptera,butterflies and moths
 7147,Diptera,flies
 7149,Chironomidae,nonbiting midges
@@ -385,14 +399,14 @@ def example_names_csv
 33208,Metazoa,metazoans
 35493,Streptophyta,
 36668,Formicidae,
-41094,Dermestidae,skin and larder
+41094,Dermestidae,skin and larder beetles
 50557,Insecta,true insects
 70160,Anguillicolidae,
 70161,Anguillicola,
 82593,Geometridae,geometer moths
 103887,Bionectriaceae,
 119089,Chromadorea,
-142998,Pseudotrismegistia,
+142998,Pseudotrismegistia undulata,
 147550,Sordariomycetes,
 153373,Cricotopus,
 214137,Eupithecia,
@@ -402,21 +416,24 @@ def example_names_csv
 324114,Pseudotrismegistia,
 404319,Pylaisiadelphaceae,
 441264,Caenocara,
-441265,Caenocara,tsuchiguri MSL2007
-461026,Promyrmekiaphila,FTRb2
-620899,Anguillicola,
+441265,Caenocara cf. tsuchiguri MSL2007,
+461026,Promyrmekiaphila sp. FTRb2,
+620899,Anguillicola papernai,
 1283840,Euctenizidae,
-1333032,Eupithecia,BOLD:AAP1678
-1588501,Tenebrio,
-1720211,Camponotus,1 CT-2015
-2213681,Coenosia,BIOUG19916-C11
-2401214,Cricotopus,BIOUG30446-A09
-2518203,Geosmithia,22 YTH-2019"
+1333032,Eupithecia sp. BOLD:AAP1678,
+1720211,Camponotus sp. 1 CT-2015,
+2213681,Coenosia sp. BIOUG19916-C11,
+2401214,Cricotopus sp. BIOUG30446-A09,
+2518203,Geosmithia sp. 22 YTH-2019,"
 end
 
 # Determined by random sample of full set
 def example_taxid_lineages_csv
-  "1588501,2759,33208,6656,50557,7041,7065,7066,1588501
+  # First row is for testing inserts
+  # Second row is for testing updates
+  # 9 unchanged rows
+  "99999999,99999999,99999999,99999999,99999999,99999999,99999999,99999999,99999999
+1588501,99999998,99999998,99999998,99999998,99999998,99999998,99999998,99999998
 2213681,2759,33208,6656,50557,7147,7366,305609,2213681
 2518203,2759,4751,4890,147550,5125,103887,241409,2518203
 620899,2759,33208,6231,119089,6236,70160,70161,620899
