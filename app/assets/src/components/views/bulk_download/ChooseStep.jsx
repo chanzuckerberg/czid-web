@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { filter, get } from "lodash/fp";
+import { find, filter, get, some, map, isUndefined } from "lodash/fp";
 import cx from "classnames";
 
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
@@ -11,31 +11,66 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import cs from "./choose_step.scss";
 
 class ChooseStep extends React.Component {
-  renderOption = (downloadType, option) => {
-    const { selectedOptions, onOptionSelect } = this.props;
-    const selectedOption = get(
-      [downloadType.type, option.type],
-      selectedOptions
+  isDownloadValid = () => {
+    const {
+      selectedDownloadTypeName,
+      downloadTypes,
+      selectedFields,
+    } = this.props;
+
+    if (!selectedDownloadTypeName) {
+      return false;
+    }
+
+    const downloadType = find(
+      ["type", selectedDownloadTypeName],
+      downloadTypes
     );
+
+    if (!downloadType) {
+      return false;
+    }
+
+    if (downloadType.fields) {
+      if (
+        some(
+          Boolean,
+          map(
+            field =>
+              isUndefined(get([downloadType.type, field.type], selectedFields)),
+            downloadType.fields
+          )
+        )
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  renderOption = (downloadType, field) => {
+    const { selectedFields, onFieldSelect } = this.props;
+    const selectedField = get([downloadType.type, field.type], selectedFields);
     let dropdownOptions;
 
-    switch (option.type) {
+    switch (field.type) {
       case "file_format":
-        dropdownOptions = option.options.map(option => ({
+        dropdownOptions = field.options.map(option => ({
           text: option,
           value: option,
         }));
 
         return (
-          <div className={cs.option}>
+          <div className={cs.field}>
             <div className={cs.label}>File Format:</div>
             <Dropdown
               fluid
               options={dropdownOptions}
               onChange={value =>
-                onOptionSelect(downloadType.type, option.type, value)
+                onFieldSelect(downloadType.type, field.type, value)
               }
-              value={selectedOption}
+              value={selectedField}
             />
           </div>
         );
@@ -45,8 +80,8 @@ class ChooseStep extends React.Component {
   };
 
   renderDownloadType = downloadType => {
-    const { selectedDownloadType, onSelect } = this.props;
-    const selected = selectedDownloadType === downloadType.type;
+    const { selectedDownloadTypeName, onSelect } = this.props;
+    const selected = selectedDownloadTypeName === downloadType.type;
     return (
       <div
         className={cx(cs.downloadType, selected && cs.selected)}
@@ -57,13 +92,14 @@ class ChooseStep extends React.Component {
         <div className={cs.content}>
           <div className={cs.name}>{downloadType.display_name}</div>
           <div className={cs.description}>{downloadType.description}</div>
-          <div className={cs.options}>
-            {selected &&
-              downloadType.options &&
-              downloadType.options.map(option =>
-                this.renderOption(downloadType, option)
-              )}
-          </div>
+          {downloadType.fields &&
+            selected && (
+              <div className={cs.fields}>
+                {downloadType.fields.map(field =>
+                  this.renderOption(downloadType, field)
+                )}
+              </div>
+            )}
         </div>
       </div>
     );
@@ -98,6 +134,8 @@ class ChooseStep extends React.Component {
   };
 
   render() {
+    const { onContinue } = this.props;
+
     return (
       <div className={cs.chooseStep}>
         <div className={cs.header}>
@@ -108,7 +146,11 @@ class ChooseStep extends React.Component {
           {this.renderDownloadTypes()}
         </div>
         <div className={cs.footer}>
-          <PrimaryButton disabled text="Continue" />
+          <PrimaryButton
+            disabled={!this.isDownloadValid()}
+            text="Continue"
+            onClick={onContinue}
+          />
           <div className={cs.downloadDisclaimer}>
             Downloads for larger files can take multiple hours to generate.
           </div>
@@ -125,12 +167,19 @@ ChooseStep.propTypes = {
       display_name: PropTypes.string,
       description: PropTypes.string,
       category: PropTypes.string,
+      fields: PropTypes.arrayOf(
+        PropTypes.shape({
+          type: PropTypes.string,
+          display_name: PropTypes.string,
+        })
+      ),
     })
   ).isRequired,
-  selectedDownloadType: PropTypes.string,
+  selectedDownloadTypeName: PropTypes.string,
   onSelect: PropTypes.func.isRequired,
-  selectedOptions: PropTypes.objectOf(PropTypes.objectOf(PropTypes.string)),
-  onOptionSelect: PropTypes.func.isRequired,
+  selectedFields: PropTypes.objectOf(PropTypes.objectOf(PropTypes.string)),
+  onFieldSelect: PropTypes.func.isRequired,
+  onContinue: PropTypes.func.isRequired,
 };
 
 export default ChooseStep;
