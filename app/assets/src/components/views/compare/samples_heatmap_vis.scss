@@ -4,6 +4,7 @@
 
 .samplesHeatmapVis {
   .plusMinusControl {
+    z-index: 1;
     position: absolute;
     // Offset from the viewport to line up with the filter controls. This will
     // need to be adjusted if the position of the controls changes.
@@ -18,13 +19,10 @@
   }
 
   .heatmapContainer {
-    overflow-x: auto;
-    // Set the height to force the horizontal scrollbar to appear at the bottom
-    // of the viewport instead of the bottom of the page. 334px is the height
-    // of the all the elements above the heatmapContainer. It *will* need to
-    // change if the height of the elements above ever change.
-    // TODO(mark): Use flexbox instead of hard-coding the offset.
-    height: calc(100vh - 334px);
+    overflow: hidden;
+    // Set the height to the entire viewport; users can scroll to hide filter controls
+    // and the heatmap will take up the entire page.
+    height: 100vh;
 
     svg {
       display: block;

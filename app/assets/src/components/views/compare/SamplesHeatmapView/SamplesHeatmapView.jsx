@@ -14,7 +14,6 @@ import {
   find,
 } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
-import { StickyContainer, Sticky } from "react-sticky";
 
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -613,24 +612,16 @@ class SamplesHeatmapView extends React.Component {
             onSaveClick={this.handleSaveClick}
           />
         </NarrowContainer>
-        <StickyContainer>
-          <Sticky>
-            {({ style }) => (
-              <div style={style}>
-                <NarrowContainer>
-                  <SamplesHeatmapControls
-                    options={this.getControlOptions()}
-                    selectedOptions={this.state.selectedOptions}
-                    onSelectedOptionsChange={this.handleSelectedOptionsChange}
-                    loading={this.state.loading}
-                    data={this.state.data}
-                  />
-                </NarrowContainer>
-              </div>
-            )}
-          </Sticky>
-          {this.renderVisualization()}
-        </StickyContainer>
+        <NarrowContainer>
+          <SamplesHeatmapControls
+            options={this.getControlOptions()}
+            selectedOptions={this.state.selectedOptions}
+            onSelectedOptionsChange={this.handleSelectedOptionsChange}
+            loading={this.state.loading}
+            data={this.state.data}
+          />
+        </NarrowContainer>
+        {this.renderVisualization()}
         <DetailsSidebar
           visible={this.state.sidebarVisible}
           mode={this.state.sidebarMode}
