@@ -13,22 +13,33 @@ class LocationsController < ApplicationController
   def external_search
     results = []
     query = location_params[:query]
-    limit = location_params[:limit]
+    limit = location_params[:limit].present? ? location_params[:limit] : 5
     if query.present?
-      success, resp = Location.geosearch(query, limit)
-      if success && resp.is_a?(Array)
-        # Successful request with results. Just keep the first if you get duplicate locations.
-        results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
+      threads = []
+      [:geosearch, :geo_autocomplete].each do |method|
+        threads << Thread.new do
+          success, resp = Location.public_send(method, query, limit)
+
+          if success && resp.is_a?(Array)
+            results += resp
+          elsif success && resp.is_a?(Hash) && resp["error"] == "Unable to geocode"
+            # Successful request but 0 results
+            Rails.logger.info("No #{method} results for: #{query}")
+          else
+            # Unsuccessful request. Likely Net::HTTPTooManyRequests.
+            # Monitor if users run up against geosearch API rate limits / record any other errs.
+            msg = GEOSEARCH_RATE_LIMIT_ERR
+            msg += ": #{resp}" if resp
+            LogUtil.log_err_and_airbrake(msg)
+            raise msg
+          end
+        end
+      end
+      threads.each { |t| t.join }
+
+      if results.present?
+        results = results.map { |r| LocationHelper.adapt_location_iq_response(r) }
         results = results.uniq { |r| [r[:name], r[:geo_level]] }
-      elsif success && resp.is_a?(Hash) && resp["error"] == "Unable to geocode"
-        # Successful request but 0 results
-        Rails.logger.info("No geosearch results for: #{query}")
-      else
-        # Unsuccessful request. Likely Net::HTTPTooManyRequests. Monitor if users run up against geosearch API rate limits / record any other errs.
-        msg = GEOSEARCH_RATE_LIMIT_ERR
-        msg += ": #{resp}" if resp
-        LogUtil.log_err_and_airbrake(msg)
-        raise msg
       end
     end
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]

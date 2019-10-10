@@ -7,6 +7,7 @@ class Location < ApplicationRecord
 
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
   GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze
+  GEO_AUTOCOMPLETE_BASE_QUERY = "autocomplete.php?normalizecity=1".freeze
   DEFAULT_LOCATION_FIELDS = [
     :name,
     :geo_level,
@@ -57,6 +58,17 @@ class Location < ApplicationRecord
     endpoint_query = "#{GEOSEARCH_BASE_QUERY}&q=#{query}"
     endpoint_query += "&limit=#{limit}" if limit.present?
     location_api_request(endpoint_query)
+  end
+
+  def self.geo_autocomplete(query, limit = nil)
+    raise ArgumentError, "No query for geo autocomplete" if query.blank?
+    endpoint_query = "#{GEO_AUTOCOMPLETE_BASE_QUERY}&q=#{query}"
+    endpoint_query += "&limit=#{limit}" if limit.present?
+    location_api_request(endpoint_query)
+  end
+
+  def self.geo_combined_suggestions(query)
+    success, resp = Location.geosearch(query)
   end
 
   # Search request to Location IQ API by country, state, and subdivision (or left subset)
