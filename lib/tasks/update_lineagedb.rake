@@ -101,7 +101,7 @@ class LineageDatabaseImporter
     shell_execute(
       mysql_query(create_table_sql(@names_table, names_cols.split(','))),
       mysql_import(names_cols, @names_table),
-      mysql_query("ALTER TABLE #{@names_table} ADD UNIQUE _new_names_idx(taxid(255))")
+      mysql_query("ALTER TABLE #{@names_table} ADD UNIQUE idx(taxid(255))")
     )
   end
 
@@ -143,11 +143,11 @@ class LineageDatabaseImporter
     "aws s3 cp #{@reference_s3_path}/#{file_name}.gz - | gunzip | tail -n +2 > #{table_name}.csv"
   end
 
-  def shell_execute(commands)
+  def shell_execute(*commands)
     puts `
     set -xe
     cd #{@local_taxonomy_path}
-    #{commands.respond_to?('join') ? commands.join("\n") : commands}
+    #{commands.join("\n")}
     `
     check_shell_status!
   end
@@ -204,7 +204,7 @@ class LineageDatabaseImporter
 
     shell_execute(
       mysql_query(create_table_sql(@taxon_lineages_table, cols)),
-      mysql_query("ALTER TABLE #{@names_table} ADD UNIQUE _new_names_idx(taxid(255))")
+      mysql_query("ALTER TABLE #{@taxon_lineages_table} ADD UNIQUE idx(taxid(255))")
     )
 
     col_expressions = cols.map do |col|
