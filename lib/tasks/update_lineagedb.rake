@@ -4,18 +4,30 @@ require 'English'
 
 desc 'Imports NCBI lineage data into IDseq'
 
+# Lineage records have a [version_start, version_end] inclusive range. Each
+# pipline run has an AlignmentConfig that has a lineage_version. The pipeline
+# should only count lineages where:
+#
+#  lineage_version BETWEEN
+#   taxon_lineages.version_start
+#   AND taxon_lineages.version_end
+#
+# See PipelineRun#generate_aggregate_counts.
+#
+# When our NCBI indexes are updated, we should run this script.
+# If a current lineage record is still valid, its version_end gets += 1.
+# If a current lineage record is absent, its version_end stays the same.
+# If a current lineage record is different, it is updated.
+# If a new lineage record appears, it is inserted.
 task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
   ### Short Usage: NCBI_DATE=2018-12-01 rake update_lineage_db
-  ### Full Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 LINEAGE_VERSION=3 rake update_lineage_db
+  ### Full Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 rake update_lineage_db
   ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
-  ### LINEAGE_VERSION needs to be incremented by 1 from the current highest version in taxon_lineages
 
-  Rails.logger.level = :info
-  dryrun = args.run_mode == "dryrun" ? true : false
-  testrun = args.run_mode == "testrun" ? true : false
+  Logging.logger.root.level = :info
 
-  puts "\n\nDRY RUN" if dryrun
-  puts "\n\nTEST RUN" if testrun
+  testrun = args.run_mode == "testrun" ? true : falsea
+  puts "\n\nTEST RUN - LOCAL DATA" if testrun
 
   ncbi_date = ENV['NCBI_DATE']
   reference_s3_path = if ncbi_date.present?
@@ -25,7 +37,7 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
                       end
 
   current_version = TaxonLineage.maximum('version_end')
-  if !current_version || current_version <= TaxonLineage.maximum('version_start')
+  if !current_version || current_version < TaxonLineage.maximum('version_start')
     raise "Bad current_version: #{current_version}"
   end
 
@@ -35,6 +47,8 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
   puts "\n\nDone import of #{reference_s3_path}."
 
   ## Instructions on next steps
+  # TODO: Add is_vector property to taxa and refactor phages list generation
+  # https://jira.czi.team/browse/IDSEQ-1564
   puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
 end
 
@@ -116,7 +130,6 @@ class LineageDatabaseImporter
   end
 
   def upgrade_taxon_lineages!
-
     puts "\nRetire records..."
     retire_ids = retire_records_ids
     puts "#{retire_ids.count} records"
@@ -129,14 +142,14 @@ class LineageDatabaseImporter
     update_ids = update_records_ids
     puts "#{update_ids.count} records"
 
-    puts "\nDo not change records..."
+    puts "\nKeep same records..."
     unchanged_ids = unchanged_records_ids
     puts "#{unchanged_ids.count} records"
 
     check_user_input
 
-    TaxonLineage.connection.transaction do  # BEGIN
-      TaxonLineage.connection.transaction(requires_new: true) do  # CREATE SAVEPOINT
+    TaxonLineage.connection.transaction do # BEGIN
+      TaxonLineage.connection.transaction(requires_new: true) do # CREATE SAVEPOINT
         execute_upgrade(
           retire_ids,
           insert_ids,
@@ -168,7 +181,7 @@ class LineageDatabaseImporter
   private
 
   def check_user_input
-    print "Do you wish to execute the above irreversible changes? [y/N]"
+    puts "Do you wish to execute the above irreversible changes? [y/N]"
     input = STDIN.gets.strip
     if input != "y"
       raise "lineage database update aborted"
@@ -237,8 +250,8 @@ class LineageDatabaseImporter
       "`#{table}`.#{name_col}"
     end
 
-    shell_execute(mysql_query(
-      "INSERT INTO #{@taxon_lineages_table}
+    shell_execute(mysql_query("
+      INSERT INTO #{@taxon_lineages_table}
       SELECT l.taxid,
       #{@ncbi_date},
       #{new_version},
@@ -252,12 +265,11 @@ class LineageDatabaseImporter
       JOIN #{@names_table} `order` ON l.order_taxid = `order`.taxid
       JOIN #{@names_table} family ON l.family_taxid = family.taxid
       JOIN #{@names_table} genus ON l.genus_taxid = genus.taxid
-      JOIN #{@names_table} species ON l.species_taxid = species.taxid"
-    ))
+      JOIN #{@names_table} species ON l.species_taxid = species.taxid"))
   end
 
   def retire_records_ids
-    ids = TaxonLineage.connection.select_all(
+    TaxonLineage.connection.select_all(
       "SELECT old.taxid
       FROM taxon_lineages old
       LEFT JOIN _new_taxon_lineages new USING(taxid)
@@ -267,7 +279,7 @@ class LineageDatabaseImporter
   end
 
   def insert_records_ids
-    ids = TaxonLineage.connection.select_all(
+    TaxonLineage.connection.select_all(
       "SELECT new.taxid
       FROM taxon_lineages old
       RIGHT JOIN _new_taxon_lineages new USING(taxid)
@@ -280,7 +292,7 @@ class LineageDatabaseImporter
       "old.#{col} != new.#{col}"
     end
 
-    ids = TaxonLineage.connection.select_all(
+    TaxonLineage.connection.select_all(
       "SELECT old.taxid
       FROM taxon_lineages old
       INNER JOIN _new_taxon_lineages new USING(taxid)
@@ -294,7 +306,7 @@ class LineageDatabaseImporter
       "old.#{col} = new.#{col}"
     end
 
-    ids = TaxonLineage.connection.select_all(
+    TaxonLineage.connection.select_all(
       "SELECT old.taxid FROM taxon_lineages old
       INNER JOIN _new_taxon_lineages new USING(taxid)
       WHERE old.version_end = #{@current_version}
@@ -334,28 +346,13 @@ class LineageDatabaseImporter
     `
      set -xe
      ## Clean up
-     # rm -rf #{@local_taxonomy_path};
+     rm -rf #{@local_taxonomy_path}
+     #{mysql_query("DROP TABLE #{@taxid_table}")}
+     #{mysql_query("DROP TABLE #{@names_table}")}
     `
     check_shell_status
   end
 end
-
-# TODO: (gdingle): include user prompt y/n, see https://stackoverflow.com/questions/226703/how-do-i-prompt-for-yes-no-cancel-input-in-a-linux-shell-script/27875395#27875395
-#
-# Add docs:
-# It will go from alignment lineage_version to "lineage records with a [version_start, version_end] range that includes that number."
-# Current version_end values basically:
-# 0, ended 2018-04-18
-# 1, ended 2018-07-23
-# 2, current
-# AlignmentConfig 2018-04-01 is our current one so it gets lineage_version = 2. AlignmentConfig 2018-02-15 gets lineage_version = 1.
-# Every pipeline run has one of these AlignmentConfigs assigned already (no nil ones).
-# Old records that have version_end == 0 will not be used / would have be succeeded by new records.
-#
-# We use the lineage_version to figure out which lineage records to use in our pipeline run. Lineage records are highly duplicated
-# between versions, so instead of storing all of them, we store a [version_start, version_end] range with each lineage record.
-# When the index is updated, if a lineage record is still valid, its version_end gets += 1. Otherwise it stays the same and has been replaced.
-
 
 # Determined by all tax_ids in random sample below,
 # plus test inserts and updates.
@@ -429,4 +426,3 @@ def example_taxid_lineages_csv
 142998,2759,33090,35493,3214,13798,404319,324114,142998
 441265,2759,33208,6656,50557,7041,41094,441264,441265"
 end
-
