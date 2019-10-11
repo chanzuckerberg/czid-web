@@ -10,6 +10,7 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
   ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
   ### LINEAGE_VERSION needs to be incremented by 1 from the current highest version in taxon_lineages
 
+  Rails.logger.level = :info
   dryrun = args.run_mode == "dryrun" ? true : false
   testrun = args.run_mode == "testrun" ? true : false
 
@@ -23,21 +24,15 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
                         ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
                       end
 
-  new_lineage_version = ENV['LINEAGE_VERSION'].to_i
-  if new_lineage_version.zero?
-    new_lineage_version = AlignmentConfig.maximum("lineage_version") + 1
+  current_version = TaxonLineage.maximum('version_end')
+  if !current_version || current_version <= TaxonLineage.maximum('version_start')
+    raise "Bad current_version: #{current_version}"
   end
 
   puts "\n\nStarting import of #{reference_s3_path} ...\n\n"
-  current_version = TaxonLineage.maximum('version_end')
   importer = LineageDatabaseImporter.new(reference_s3_path, ncbi_date, current_version)
-  importer.import!(testrun) unless dryrun
+  importer.import!(testrun)
   puts "\n\nDone import of #{reference_s3_path}."
-
-  puts "\n\nStarting update of lineage versions to #{new_lineage_version} ...\n\n"
-  # TODO: (gdingle): reenable
-  # add_lineage_version_numbers!(new_lineage_version, ncbi_date) unless dryrun
-  puts "\n\nDone update of lineage versions to #{new_lineage_version}."
 
   ## Instructions on next steps
   puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
@@ -53,9 +48,8 @@ class LineageDatabaseImporter
     @taxon_lineages_table = "_new_taxon_lineages"
     @current_version = current_version
 
+    # columns compared between old and new taxon_lineages
     @columns = [
-      "taxid",
-
       "superkingdom_taxid",
       "phylum_taxid",
       "class_taxid",
@@ -85,6 +79,11 @@ class LineageDatabaseImporter
       "kingdom_name",
       "kingdom_common_name",
     ]
+    @new_columns = ["taxid", "started_at", "version_start", "version_end"] + @columns
+  end
+
+  def new_version
+    @current_version + 1
   end
 
   def host
@@ -95,10 +94,10 @@ class LineageDatabaseImporter
     Rails.env == 'development' ? '' : '--user=$DB_USERNAME --password=$DB_PASSWORD'
   end
 
-  def import!(test_run = false)
+  def import!(testrun = false)
     setup
 
-    if test_run
+    if testrun
       shell_execute("
         echo '#{example_names_csv}' > #{@names_table}.csv
         echo '#{example_taxid_lineages_csv}' > #{@taxid_table}.csv
@@ -113,28 +112,67 @@ class LineageDatabaseImporter
     import_new_names!
     import_new_taxid_lineages!
     build_new_taxon_lineages!
+    upgrade_taxon_lineages!
+  end
+
+  def upgrade_taxon_lineages!
 
     puts "\n\nRetire records..."
-    retire_records
+    retire_ids = retire_records_ids
+    puts "#{retire_ids.count} records"
+
     puts "\n\nInsert records..."
-    insert_records
+    insert_ids = insert_records_ids
+    puts "#{insert_ids.count} records"
+
     puts "\n\nUpdate records..."
-    update_records
-    puts "\n\nUnchanged records..."
-    unchanged_records
+    update_ids = update_records_ids
+    puts "#{update_ids.count} records"
 
-    # TODO: (gdingle): set these later
-    # "started_at",
-    # "ended_at",
-    # TODO: (gdingle): what's the story for tax_name? it is always null
-    # "tax_name",
+    puts "\n\nDo not change records..."
+    unchanged_ids = unchanged_records_ids
+    puts "#{unchanged_ids.count} records"
 
-    # TODO: (gdingle): set these later
-    # "version_start",
-    # "version_end",
+    puts "WARNING: Irreversible database change."
+    print "Do you wish to execute the above changes? [y/N]"
+    input = gets
+    return if input != "y"
 
-    # TODO: (gdingle): SQL import with ncbi_date
-    # TODO: (gdingle): Row 5 doesn't contain data for all columns... do we need to validate all this?
+    TaxonLineage.connection.transaction do  # BEGIN
+      TaxonLineage.connection.transaction(requires_new: true) do  # CREATE SAVEPOINT
+        check_affected(TaxonLineage.connection.update("
+          UPDATE taxon_lineages
+          SET ended_at = '#{@ncbi_date}' version_end = #{@current_version}
+          WHERE id IN (#{retire_ids.join(', ')})
+        "), retire_ids)
+
+        check_affected(TaxonLineage.connection.update("
+          INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
+          SELECT #{@new_columns.join(', ')}
+          FROM #{@taxon_lineages_table}
+          WHERE id IN (#{insert_ids.join(', ')})
+        "), insert_ids)
+
+        check_affected(TaxonLineage.connection.update("
+          REPLACE INTO taxon_lineages(#{@new_columns.join(', ')})
+          SELECT #{@new_columns.join(', ')}
+          FROM #{@taxon_lineages_table}
+          WHERE id IN (#{update_ids.join(', ')})
+        "), update_ids)
+
+        check_affected(TaxonLineage.connection.update("
+          UPDATE taxon_lineages
+          SET version_end = #{@new_version}
+          WHERE id IN (#{unchanged_ids.join(', ')})
+        "), unchanged_ids)
+      end
+    end
+  end
+
+  def check_affected(affected)
+    if affected != ids.count
+      raise "Wrong number of rows affected"
+    end
   end
 
   def import_new_names!
@@ -146,12 +184,6 @@ class LineageDatabaseImporter
       mysql_query("ALTER TABLE #{@names_table} ADD UNIQUE idx(taxid(255))")
     )
   end
-
-  # TODO: (gdingle): this is ugly
-  # def column_names
-  #   name_column_array = %w[superkingdom_name superkingdom_common_name kingdom_name kingdom_common_name phylum_name phylum_common_name class_name class_common_name
-  #                          order_name order_common_name family_name family_common_name genus_name genus_common_name species_name species_common_name]
-  # end
 
   def import_new_taxid_lineages!
     column_names = "taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid"
@@ -199,37 +231,34 @@ class LineageDatabaseImporter
   end
 
   def mysql_import(cols, table_name)
-    # TODO: (gdingle): choose best and remove rest
-    # mysql_query("LOAD DATA LOCAL INFILE \"#{table_name}.csv\ INTO TABLE #{table_name}; SHOW WARNINGS;")
     "mysqlimport --verbose --local --host=#{host} #{lp} --columns=#{cols} --fields-terminated-by=',' idseq_#{Rails.env} #{table_name}.csv"
   end
 
   def create_table_sql(table_name, cols)
     col_defs = cols.map { |c| "#{c} text" }.join(', ')
-    "drop table if exists #{table_name}; create table #{table_name}(#{col_defs})"
+    "DROP TABLE IF EXISTS #{table_name}; CREATE TABLE #{table_name}(#{col_defs})"
   end
 
   def build_new_taxon_lineages!
-    # TODO: (gdingle): handle edge cases of negative ids
-
     shell_execute(
-      mysql_query(create_table_sql(@taxon_lineages_table, @columns)),
+      mysql_query(create_table_sql(@taxon_lineages_table, @new_columns)),
       mysql_query("ALTER TABLE #{@taxon_lineages_table} ADD UNIQUE idx(taxid(255))")
     )
 
     col_expressions = @columns.map do |col|
-      if col == "taxid"
-        "l.taxid"
-      else
-        table, name_col = col.split('_', 2)
-        # need to escape because of "order"
-        "`#{table}`.#{name_col}"
-      end
+      table, name_col = col.split('_', 2)
+      # need to escape because of "order"
+      "`#{table}`.#{name_col}"
     end
 
     shell_execute(mysql_query(
       "INSERT INTO #{@taxon_lineages_table}
-      SELECT #{col_expressions.join(', ')} FROM #{@taxid_table} l
+      SELECT l.taxid,
+      #{@ncbi_date},
+      #{new_version},
+      #{new_version},
+      #{col_expressions.join(', ')}
+      FROM #{@taxid_table} l
       JOIN #{@names_table} superkingdom ON l.superkingdom_taxid = superkingdom.taxid
       JOIN #{@names_table} kingdom ON l.kingdom_taxid = kingdom.taxid
       JOIN #{@names_table} phylum ON l.phylum_taxid = phylum.taxid
@@ -239,54 +268,52 @@ class LineageDatabaseImporter
       JOIN #{@names_table} genus ON l.genus_taxid = genus.taxid
       JOIN #{@names_table} species ON l.species_taxid = species.taxid"
     ))
-    # TODO: (gdingle): verify that all
   end
 
-  # TODO: (gdingle): find bette place
-  # default_ended_at = TaxonLineage.column_defaults["ended_at"]
-
-
-  def retire_records
-    shell_execute(mysql_query(
-      "SELECT COUNT(*) FROM taxon_lineages old
+  def retire_records_ids
+    ids = TaxonLineage.connection.select_all(
+      "SELECT old.taxid
+      FROM taxon_lineages old
       LEFT JOIN _new_taxon_lineages new USING(taxid)
       WHERE new.taxid IS NULL
         AND old.version_end = #{@current_version}"
-    ))
+    ).pluck("taxid")
   end
 
-  def insert_records
-    shell_execute(mysql_query(
-      "SELECT COUNT(*) FROM taxon_lineages old
+  def insert_records_ids
+    ids = TaxonLineage.connection.select_all(
+      "SELECT new.taxid
+      FROM taxon_lineages old
       RIGHT JOIN _new_taxon_lineages new USING(taxid)
       WHERE old.taxid IS NULL"
-    ))
+    ).pluck("taxid")
   end
 
-  def update_records
-    col_expressions = @columns[1..-1].map do |col|
+  def update_records_ids
+    col_expressions = @columns.map do |col|
       "old.#{col} != new.#{col}"
     end
 
-    shell_execute(mysql_query(
-      "SELECT COUNT(*) FROM taxon_lineages old
+    ids = TaxonLineage.connection.select_all(
+      "SELECT old.taxid
+      FROM taxon_lineages old
       INNER JOIN _new_taxon_lineages new USING(taxid)
       WHERE old.version_end = #{@current_version}
         AND (#{col_expressions.join("\n OR ")})"
-    ))
+    ).pluck("taxid")
   end
 
-  def unchanged_records
-    col_expressions = @columns[1..-1].map do |col|
+  def unchanged_records_ids
+    col_expressions = @columns.map do |col|
       "old.#{col} = new.#{col}"
     end
 
-    shell_execute(mysql_query(
-      "SELECT COUNT(*) FROM taxon_lineages old
+    ids = TaxonLineage.connection.select_all(
+      "SELECT old.taxid FROM taxon_lineages old
       INNER JOIN _new_taxon_lineages new USING(taxid)
       WHERE old.version_end = #{@current_version}
         AND #{col_expressions.join("\n AND ")}"
-    ))
+    ).pluck("taxid")
   end
 
   def clean_up
@@ -299,62 +326,6 @@ class LineageDatabaseImporter
   end
 end
 
-def add_lineage_version_numbers!(current_lineage_version, ncbi_date)
-  # TODO: (gdingle): test me with ncbi_date instead of current_date
-  TaxonLineage.where(started_at: ncbi_date).update_all(version_start: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
-  TaxonLineage.where(ended_at: TaxonLineage.column_defaults["ended_at"]).update_all(version_end: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
-end
-
-######## DEPRECATED
-
-def transform
-  `
-   set -xe
-   # Now perform series of joins to produce the format in column_names.
-   # TODO: (gdingle): this step is slow
-   file1_ncol=9
-   file1_output_cols=1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9
-   sort -k1 -t, names.csv > names_sorted.csv
-   for i in 2 3 4 5 6 7 8 9; do
-     sort -k$i -t, taxid-lineages.csv > taxid-lineages_sorted.csv;
-     join -t, -1 $i -2 1 -a 1 -o${file1_output_cols},2.2,2.3 taxid-lineages_sorted.csv names_sorted.csv > taxid-lineages.csv;
-     file1_output_cols=${file1_output_cols},1.$((${file1_ncol}+1)),1.$((${file1_ncol}+2));
-     file1_ncol=$((${file1_ncol}+2));
-   done;
-
-   ## Determine changes to make to taxon_lineages
-   # Sort in view of using "comm" command
-   sort old_taxon_lineages.csv > old_taxon_lineages_sorted.csv
-   sort taxid-lineages.csv > new_taxon_lineages_sorted.csv
-
-   # Find deleted lines and added lines
-   comm -23 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_retire.csv
-   comm -13 old_taxon_lineages_sorted.csv new_taxon_lineages_sorted.csv > records_to_insert.csv
-
-   # Add ended_at column for retired records, started_at column for new records
-   sed -e 's/$/,#{current_date}/' -i records_to_retire.csv
-   sed -e 's/$/,#{current_date}/' -i records_to_insert.csv
-
-   # Add started_at column for retired records to make sure they violate [taxid, started_at] uniqueness and overwrite the correct record
-   sort records_to_retire.csv > records_to_retire_sorted.csv
-   sort taxid_to_started_at.csv > taxid_to_started_at_sorted.csv
-   join -t, -1 1 -2 1 -a 1 -o${file1_output_cols},1.$((${file1_ncol}+1)),2.2 records_to_retire_sorted.csv taxid_to_started_at_sorted.csv > records_to_retire.csv
-
-   ## Import changes to taxon_lineages
-   # retired records:
-   wc -l records_to_retire.csv
-   mv records_to_retire.csv taxon_lineages
-   mysqlimport --replace --local --host=#{host} #{lp} --columns=#{column_names},ended_at,started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages;
-
-   # new records:
-   wc -l records_to_insert.csv
-   mv records_to_insert.csv taxon_lineages
-   mysqlimport --local --host=#{host} #{lp} --columns=#{column_names},started_at --fields-terminated-by=',' idseq_#{Rails.env} taxon_lineages
-  `
-  check_shell_status!
-end
-
-# TODO: (gdingle): wrap all in transaction and remove temp tables.
 # TODO: (gdingle): include user prompt y/n, see https://stackoverflow.com/questions/226703/how-do-i-prompt-for-yes-no-cancel-input-in-a-linux-shell-script/27875395#27875395
 #
 # Add docs:

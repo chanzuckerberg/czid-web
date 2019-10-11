@@ -72,7 +72,8 @@ Rails.application.configure do
     "http://localhost:8080" if source =~ /wp_bundle\.js$/i
   }
 
-  ActiveRecordQueryTrace.enabled = true
+  # TODO: (gdingle): fix me
+  # ActiveRecordQueryTrace.enabled = true
 
   # Development logging configuration
   logger           = ActiveSupport::Logger.new(STDOUT)
@@ -114,6 +115,7 @@ Logging::Rails.configure do |config|
                                    layout: layout)
   end
 
-  Logging.logger.root.level = :debug
+  # TODO: (gdingle): fix me
+  Logging.logger.root.level = :info
   Logging.logger.root.appenders = config.log_to unless config.log_to.empty?
 end
