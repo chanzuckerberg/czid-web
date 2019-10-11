@@ -72,8 +72,7 @@ Rails.application.configure do
     "http://localhost:8080" if source =~ /wp_bundle\.js$/i
   }
 
-  # TODO: (gdingle): fix me
-  # ActiveRecordQueryTrace.enabled = true
+  ActiveRecordQueryTrace.enabled = true
 
   # Development logging configuration
   logger           = ActiveSupport::Logger.new(STDOUT)

@@ -163,19 +163,21 @@ class LineageDatabaseImporter
   def import_new_names!
     # modified from original file "tax_id,name_txt,name_txt_common" for convenience
     names_cols = 'taxid,name,common_name'
+    TaxonLineage.connection.update(
+      create_table_sql(@names_table, names_cols.split(','))
+    )
     shell_execute(
-      mysql_query(create_table_sql(@names_table, names_cols.split(','))),
-      mysql_import(names_cols, @names_table),
-      mysql_query("ALTER TABLE #{@names_table} ADD UNIQUE idx(taxid(255))")
+      mysql_import(names_cols, @names_table)
+    )
+    TaxonLineage.connection.update(
+      "ALTER TABLE #{@names_table} ADD UNIQUE idx(taxid(255))"
     )
   end
 
   def import_new_taxid_lineages!
     column_names = "taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid"
-    shell_execute(
-      mysql_query(create_table_sql(@taxid_table, column_names.split(','))),
-      mysql_import(column_names, @taxid_table)
-    )
+    TaxonLineage.connection.update(create_table_sql(@taxid_table, column_names.split(',')))
+    shell_execute(mysql_import(column_names, @taxid_table))
   end
 
   private
@@ -208,6 +210,10 @@ class LineageDatabaseImporter
 
      ## Check database connection
      mysql -h #{host} #{lp} -e "SELECT 1"
+     mysql -h #{host} #{lp} -D idseq_#{Rails.env} -e "
+      DROP TABLE IF EXISTS #{@names_table};
+      DROP TABLE IF EXISTS #{@taxid_table};
+      DROP TABLE IF EXISTS #{@taxon_lineages_table};"
     `
     check_shell_status
   end
@@ -225,23 +231,21 @@ class LineageDatabaseImporter
     check_shell_status
   end
 
-  def mysql_query(sql)
-    "mysql --verbose --host=#{host} #{lp} -D idseq_#{Rails.env} -e '#{sql}'"
-  end
-
   def mysql_import(cols, table_name)
     "mysqlimport --verbose --local --host=#{host} #{lp} --columns=#{cols} --fields-terminated-by=',' idseq_#{Rails.env} #{table_name}.csv"
   end
 
   def create_table_sql(table_name, cols)
     col_defs = cols.map { |c| "#{c} text" }.join(', ')
-    "DROP TABLE IF EXISTS #{table_name}; CREATE TABLE #{table_name}(#{col_defs})"
+    "CREATE TABLE #{table_name}(#{col_defs})"
   end
 
   def build_new_taxon_lineages!
-    shell_execute(
-      mysql_query(create_table_sql(@taxon_lineages_table, @new_columns)),
-      mysql_query("ALTER TABLE #{@taxon_lineages_table} ADD UNIQUE idx(taxid(255))")
+    TaxonLineage.connection.update(
+      create_table_sql(@taxon_lineages_table, @new_columns)
+    )
+    TaxonLineage.connection.update(
+      "ALTER TABLE #{@taxon_lineages_table} ADD UNIQUE idx(taxid(255))"
     )
 
     col_expressions = @columns.map do |col|
@@ -250,7 +254,7 @@ class LineageDatabaseImporter
       "`#{table}`.#{name_col}"
     end
 
-    shell_execute(mysql_query("
+    TaxonLineage.connection.update("
       INSERT INTO #{@taxon_lineages_table}
       SELECT l.taxid,
       #{@ncbi_date},
@@ -265,7 +269,7 @@ class LineageDatabaseImporter
       JOIN #{@names_table} `order` ON l.order_taxid = `order`.taxid
       JOIN #{@names_table} family ON l.family_taxid = family.taxid
       JOIN #{@names_table} genus ON l.genus_taxid = genus.taxid
-      JOIN #{@names_table} species ON l.species_taxid = species.taxid"))
+      JOIN #{@names_table} species ON l.species_taxid = species.taxid")
   end
 
   def retire_records_ids
@@ -347,8 +351,10 @@ class LineageDatabaseImporter
      set -xe
      ## Clean up
      rm -rf #{@local_taxonomy_path}
-     #{mysql_query("DROP TABLE #{@taxid_table}")}
-     #{mysql_query("DROP TABLE #{@names_table}")}
+     mysql -h #{host} #{lp} -D idseq_#{Rails.env} -e "
+      DROP TABLE IF EXISTS #{@taxid_table};
+      DROP TABLE IF EXISTS #{@names_table};
+     "
     `
     check_shell_status
   end
