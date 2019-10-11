@@ -26,7 +26,7 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
 
   Logging.logger.root.level = :info
 
-  testrun = args.run_mode == "testrun" ? true : falsea
+  testrun = args.run_mode == "testrun" ? true : false
   puts "\n\nTEST RUN - LOCAL DATA" if testrun
 
   ncbi_date = ENV['NCBI_DATE']
