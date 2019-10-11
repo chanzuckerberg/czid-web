@@ -48,7 +48,7 @@ class SampleUploadFlowHeader extends React.Component {
                 <div className={cs.subtitle}>
                   Rather use our command-line interface?
                   <ExternalLink
-                    href="https://help.idseq.net/hc/en-us/articles/360034790414-Upload-with-Command-Line"
+                    href="/cli_user_instructions"
                     className={cs.link}
                   >
                     View CLI Instructions.
