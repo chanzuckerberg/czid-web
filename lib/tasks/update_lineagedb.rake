@@ -117,61 +117,33 @@ class LineageDatabaseImporter
 
   def upgrade_taxon_lineages!
 
-    puts "\n\nRetire records..."
+    puts "\nRetire records..."
     retire_ids = retire_records_ids
     puts "#{retire_ids.count} records"
 
-    puts "\n\nInsert records..."
+    puts "\nInsert records..."
     insert_ids = insert_records_ids
     puts "#{insert_ids.count} records"
 
-    puts "\n\nUpdate records..."
+    puts "\nUpdate records..."
     update_ids = update_records_ids
     puts "#{update_ids.count} records"
 
-    puts "\n\nDo not change records..."
+    puts "\nDo not change records..."
     unchanged_ids = unchanged_records_ids
     puts "#{unchanged_ids.count} records"
 
-    puts "WARNING: Irreversible database change."
-    print "Do you wish to execute the above changes? [y/N]"
-    input = gets
-    return if input != "y"
+    check_user_input
 
     TaxonLineage.connection.transaction do  # BEGIN
       TaxonLineage.connection.transaction(requires_new: true) do  # CREATE SAVEPOINT
-        check_affected(TaxonLineage.connection.update("
-          UPDATE taxon_lineages
-          SET ended_at = '#{@ncbi_date}' version_end = #{@current_version}
-          WHERE id IN (#{retire_ids.join(', ')})
-        "), retire_ids)
-
-        check_affected(TaxonLineage.connection.update("
-          INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
-          SELECT #{@new_columns.join(', ')}
-          FROM #{@taxon_lineages_table}
-          WHERE id IN (#{insert_ids.join(', ')})
-        "), insert_ids)
-
-        check_affected(TaxonLineage.connection.update("
-          REPLACE INTO taxon_lineages(#{@new_columns.join(', ')})
-          SELECT #{@new_columns.join(', ')}
-          FROM #{@taxon_lineages_table}
-          WHERE id IN (#{update_ids.join(', ')})
-        "), update_ids)
-
-        check_affected(TaxonLineage.connection.update("
-          UPDATE taxon_lineages
-          SET version_end = #{@new_version}
-          WHERE id IN (#{unchanged_ids.join(', ')})
-        "), unchanged_ids)
+        execute_upgrade(
+          retire_ids,
+          insert_ids,
+          update_ids,
+          unchanged_ids
+        )
       end
-    end
-  end
-
-  def check_affected(affected)
-    if affected != ids.count
-      raise "Wrong number of rows affected"
     end
   end
 
@@ -195,8 +167,22 @@ class LineageDatabaseImporter
 
   private
 
-  def check_shell_status!
+  def check_user_input
+    print "Do you wish to execute the above irreversible changes? [y/N]"
+    input = STDIN.gets.strip
+    if input != "y"
+      raise "lineage database update aborted"
+    end
+  end
+
+  def check_shell_status
     raise "lineage database update failed" unless $CHILD_STATUS.success?
+  end
+
+  def check_affected(affected)
+    if affected != ids.count
+      raise "Wrong number of rows affected"
+    end
   end
 
   def setup
@@ -210,7 +196,7 @@ class LineageDatabaseImporter
      ## Check database connection
      mysql -h #{host} #{lp} -e "SELECT 1"
     `
-    check_shell_status!
+    check_shell_status
   end
 
   def aws_s3_cp(file_name, table_name)
@@ -223,7 +209,7 @@ class LineageDatabaseImporter
     cd #{@local_taxonomy_path}
     #{commands.join("\n")}
     `
-    check_shell_status!
+    check_shell_status
   end
 
   def mysql_query(sql)
@@ -316,13 +302,41 @@ class LineageDatabaseImporter
     ).pluck("taxid")
   end
 
+  def execute_upgrade(retire_ids, insert_ids, update_ids, unchanged_ids)
+    check_affected(TaxonLineage.connection.update("
+      UPDATE taxon_lineages
+      SET ended_at = '#{@ncbi_date}' version_end = #{@current_version}
+      WHERE id IN (#{retire_ids.join(', ')})
+    "), retire_ids)
+
+    check_affected(TaxonLineage.connection.update("
+      INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
+      SELECT #{@new_columns.join(', ')}
+      FROM #{@taxon_lineages_table}
+      WHERE id IN (#{insert_ids.join(', ')})
+    "), insert_ids)
+
+    check_affected(TaxonLineage.connection.update("
+      REPLACE INTO taxon_lineages(#{@new_columns.join(', ')})
+      SELECT #{@new_columns.join(', ')}
+      FROM #{@taxon_lineages_table}
+      WHERE id IN (#{update_ids.join(', ')})
+    "), update_ids)
+
+    check_affected(TaxonLineage.connection.update("
+      UPDATE taxon_lineages
+      SET version_end = #{@new_version}
+      WHERE id IN (#{unchanged_ids.join(', ')})
+    "), unchanged_ids)
+  end
+
   def clean_up
     `
      set -xe
      ## Clean up
      # rm -rf #{@local_taxonomy_path};
     `
-    check_shell_status!
+    check_shell_status
   end
 end
 
