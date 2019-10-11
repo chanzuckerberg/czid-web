@@ -20,7 +20,7 @@ class LocationsController < ApplicationController
       actions = [:geo_autocomplete, :geosearch]
       raw_results = {}
       actions.each do |action|
-        threads << Thread.new do
+        t = Thread.new do
           success, resp = Location.public_send(action, query, limit)
 
           if success && resp.is_a?(Array)
@@ -37,6 +37,8 @@ class LocationsController < ApplicationController
             raise msg
           end
         end
+        t.abort_on_exception = true
+        threads << t
       end
       threads.each(&:join)
 
