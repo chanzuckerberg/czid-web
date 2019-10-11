@@ -135,6 +135,13 @@ module LocationHelper
   # See config/initializers/location_name_aliases.rb and add important known
   # aliases there.
   def self.normalize_name_aliases(name, geo_level)
+    if name.include?(", ")
+      parts = name.split(", ")
+      if parts[1] == parts[0]
+        name = parts[0]
+      end
+    end
+
     if LOCATION_NAME_ALIASES.dig(geo_level, name)
       LOCATION_NAME_ALIASES[geo_level][name]
     else
