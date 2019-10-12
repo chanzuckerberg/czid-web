@@ -14,13 +14,13 @@ class LocationsController < ApplicationController
     results = []
     query = location_params[:query]
     limit = location_params[:limit].present? ? location_params[:limit] : 5
+
     if query.present?
       threads = []
-      puts "BEFORE THE THREADS 4:24pm"
       actions = [:geo_autocomplete, :geosearch]
       raw_results = {}
       actions.each do |action|
-        t = Thread.new do
+        threads << Thread.new do
           success, resp = Location.public_send(action, query, limit)
 
           if success && resp.is_a?(Array)
@@ -37,8 +37,6 @@ class LocationsController < ApplicationController
             raise msg
           end
         end
-        t.abort_on_exception = true
-        threads << t
       end
       threads.each(&:join)
 
@@ -51,6 +49,7 @@ class LocationsController < ApplicationController
         results = results.uniq { |r| [r[:name], r[:geo_level]] }
       end
     end
+
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]
     MetricUtil.log_analytics_event(event, current_user, { query: query }, request)
     render json: results
