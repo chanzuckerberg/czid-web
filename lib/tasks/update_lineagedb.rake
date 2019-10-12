@@ -186,7 +186,7 @@ class LineageDatabaseImporter
   private
 
   def check_user_input
-    puts "Do you wish to execute the above irreversible changes? [y/N]"
+    puts "\nDo you wish to execute the above irreversible changes? [y/N]"
     input = STDIN.gets.strip
     if input != "y"
       raise "lineage database update aborted"
@@ -269,7 +269,7 @@ class LineageDatabaseImporter
       else
         # need to escape table because of "order"
         # coerce NULLs to empty string '' for taxon_lineages
-        "COALSECE(`#{table}`.#{name_col}, '')"
+        "COALESCE(`#{table}`.#{name_col}, '')"
       end
     end
 
@@ -445,13 +445,14 @@ def example_names_csv
 2518203,Geosmithia sp. 22 YTH-2019,"
 end
 
-# Determined by random sample of full set
+# First row is for testing inserts
+# Second row is for testing updates
+# Third row is unknown values
+# 9 unchanged rows by random sample of full set
 def example_taxid_lineages_csv
-  # First row is for testing inserts
-  # Second row is for testing updates
-  # 9 unchanged rows
   "99999999,99999999,99999999,99999999,99999999,99999999,99999999,99999999,99999999
 1588501,99999998,99999998,99999998,99999998,99999998,99999998,99999998,99999998
+1,-700,-650,-600,-500,-400,-300,-200,-100
 2213681,2759,33208,6656,50557,7147,7366,305609,2213681
 2518203,2759,4751,4890,147550,5125,103887,241409,2518203
 620899,2759,33208,6231,119089,6236,70160,70161,620899
