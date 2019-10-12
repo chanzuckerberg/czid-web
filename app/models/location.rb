@@ -54,21 +54,23 @@ class Location < ApplicationRecord
 
   # Search request to Location IQ API by freeform query
   def self.geosearch(query, limit = nil)
-    raise ArgumentError, "No query for geosearch" if query.blank?
-    endpoint_query = "#{GEOSEARCH_BASE_QUERY}&q=#{query}"
-    endpoint_query += "&limit=#{limit}" if limit.present?
-    location_api_request(endpoint_query)
+    geo_search_request_base(:geosearch, query, limit)
   end
 
   def self.geo_autocomplete(query, limit = nil)
-    raise ArgumentError, "No query for geo autocomplete" if query.blank?
-    endpoint_query = "#{GEO_AUTOCOMPLETE_BASE_QUERY}&q=#{query}"
-    endpoint_query += "&limit=#{limit}" if limit.present?
-    location_api_request(endpoint_query)
+    geo_search_request_base(:geo_autocomplete, query, limit)
   end
 
-  def self.geo_combined_suggestions(query)
-    success, resp = Location.geosearch(query)
+  def self.geo_search_request_base(action, query, limit = nil)
+    raise ArgumentError, "No query for #{action}" if query.blank?
+    base_query = if action == :geo_autocomplete
+                   GEO_AUTOCOMPLETE_BASE_QUERY
+                 else
+                   GEOSEARCH_BASE_QUERY
+                 end
+    endpoint_query = "#{base_query}&q=#{query}"
+    endpoint_query += "&limit=#{limit}" if limit.present?
+    location_api_request(endpoint_query)
   end
 
   # Search request to Location IQ API by country, state, and subdivision (or left subset)

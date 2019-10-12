@@ -135,6 +135,8 @@ module LocationHelper
   # See config/initializers/location_name_aliases.rb and add important known
   # aliases there.
   def self.normalize_name_aliases(name, geo_level)
+    # HACK(jsheu): Provider v1/autocomplete endpoint often has repetitive
+    # country names such as "Cambodia, Cambodia". Dedupe them.
     if name.include?(", ")
       parts = name.split(", ")
       if parts[1] == parts[0]
