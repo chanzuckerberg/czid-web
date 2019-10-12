@@ -160,6 +160,10 @@ class LineageDatabaseImporter
     end
   end
 
+  def add_table_index(table_name, col = "taxid")
+    "ALTER TABLE #{table_name} ADD UNIQUE idx(#{col})"
+  end
+
   def import_new_names!
     # modified from original file "tax_id,name_txt,name_txt_common" for convenience
     names_cols = 'taxid,name,common_name'
@@ -169,15 +173,14 @@ class LineageDatabaseImporter
     shell_execute(
       mysql_import(names_cols, @names_table)
     )
-    TaxonLineage.connection.update(
-      "ALTER TABLE #{@names_table} ADD UNIQUE idx(taxid(255))"
-    )
+    TaxonLineage.connection.update(add_table_index(@names_table))
   end
 
   def import_new_taxid_lineages!
     column_names = "taxid,superkingdom_taxid,kingdom_taxid,phylum_taxid,class_taxid,order_taxid,family_taxid,genus_taxid,species_taxid"
     TaxonLineage.connection.update(create_table_sql(@taxid_table, column_names.split(',')))
     shell_execute(mysql_import(column_names, @taxid_table))
+    TaxonLineage.connection.update(add_table_index(@taxid_table))
   end
 
   private
@@ -194,8 +197,8 @@ class LineageDatabaseImporter
     raise "lineage database update failed" unless $CHILD_STATUS.success?
   end
 
-  def check_affected(affected)
-    if affected != ids.count
+  def check_affected(affected, ids_count)
+    if affected != ids_count
       raise "Wrong number of rows affected"
     end
   end
@@ -236,25 +239,41 @@ class LineageDatabaseImporter
   end
 
   def create_table_sql(table_name, cols)
-    col_defs = cols.map { |c| "#{c} text" }.join(', ')
+    col_defs = cols.map { |c| "#{c} VARCHAR(255) NOT NULL" }.join(', ')
     "CREATE TABLE #{table_name}(#{col_defs})"
   end
 
   def build_new_taxon_lineages!
+    taxid_table_count = TaxonLineage.connection.select_value("
+      SELECT COUNT(*) FROM #{@taxid_table}
+    ")
+    names_table_count = TaxonLineage.connection.select_value("
+      SELECT COUNT(*) FROM #{@names_table}
+    ")
+    if taxid_table_count > names_table_count
+      raise "Mismatch counts in input tables: #{taxid_table_count} and #{names_table_count}"
+    end
+
     TaxonLineage.connection.update(
       create_table_sql(@taxon_lineages_table, @new_columns)
     )
     TaxonLineage.connection.update(
-      "ALTER TABLE #{@taxon_lineages_table} ADD UNIQUE idx(taxid(255))"
+      add_table_index(@taxon_lineages_table)
     )
 
     col_expressions = @columns.map do |col|
       table, name_col = col.split('_', 2)
-      # need to escape because of "order"
-      "`#{table}`.#{name_col}"
+      if name_col == 'taxid'
+        # need to use taxid_table because it has negative taxids
+        col
+      else
+        # need to escape table because of "order"
+        # coerce NULLs to empty string '' for taxon_lineages
+        "COALSECE(`#{table}`.#{name_col}, '')"
+      end
     end
 
-    TaxonLineage.connection.update("
+    check_affected(TaxonLineage.connection.update("
       INSERT INTO #{@taxon_lineages_table}
       SELECT l.taxid,
       #{@ncbi_date},
@@ -262,21 +281,32 @@ class LineageDatabaseImporter
       #{new_version},
       #{col_expressions.join(', ')}
       FROM #{@taxid_table} l
-      JOIN #{@names_table} superkingdom ON l.superkingdom_taxid = superkingdom.taxid
-      JOIN #{@names_table} kingdom ON l.kingdom_taxid = kingdom.taxid
-      JOIN #{@names_table} phylum ON l.phylum_taxid = phylum.taxid
-      JOIN #{@names_table} class ON l.class_taxid = class.taxid
-      JOIN #{@names_table} `order` ON l.order_taxid = `order`.taxid
-      JOIN #{@names_table} family ON l.family_taxid = family.taxid
-      JOIN #{@names_table} genus ON l.genus_taxid = genus.taxid
-      JOIN #{@names_table} species ON l.species_taxid = species.taxid")
+      LEFT JOIN #{@names_table} superkingdom ON l.superkingdom_taxid = superkingdom.taxid
+      LEFT JOIN #{@names_table} kingdom ON l.kingdom_taxid = kingdom.taxid
+      LEFT JOIN #{@names_table} phylum ON l.phylum_taxid = phylum.taxid
+      LEFT JOIN #{@names_table} class ON l.class_taxid = class.taxid
+      LEFT JOIN #{@names_table} `order` ON l.order_taxid = `order`.taxid
+      LEFT JOIN #{@names_table} family ON l.family_taxid = family.taxid
+      LEFT JOIN #{@names_table} genus ON l.genus_taxid = genus.taxid
+      LEFT JOIN #{@names_table} species ON l.species_taxid = species.taxid
+      WHERE
+        -- missing taxon ranks should be represented by negative numbers
+        IF(superkingdom.taxid IS NULL, superkingdom_taxid < 0, 1)
+        AND IF(kingdom.taxid IS NULL, kingdom_taxid < 0, 1)
+        AND IF(phylum.taxid IS NULL, phylum_taxid < 0, 1)
+        AND IF(class.taxid IS NULL, class_taxid < 0, 1)
+        AND IF(`order`.taxid IS NULL, order_taxid < 0, 1)
+        AND IF(family.taxid IS NULL, family_taxid < 0, 1)
+        AND IF(genus.taxid IS NULL, genus_taxid < 0, 1)
+        AND IF(species.taxid IS NULL, species_taxid < 0, 1)
+      "), taxid_table_count)
   end
 
   def retire_records_ids
     TaxonLineage.connection.select_all(
       "SELECT old.taxid
       FROM taxon_lineages old
-      LEFT JOIN _new_taxon_lineages new USING(taxid)
+      LEFT JOIN #{@taxon_lineages_table} new USING(taxid)
       WHERE new.taxid IS NULL
         AND old.version_end = #{@current_version}"
     ).pluck("taxid")
@@ -286,7 +316,7 @@ class LineageDatabaseImporter
     TaxonLineage.connection.select_all(
       "SELECT new.taxid
       FROM taxon_lineages old
-      RIGHT JOIN _new_taxon_lineages new USING(taxid)
+      RIGHT JOIN #{@taxon_lineages_table} new USING(taxid)
       WHERE old.taxid IS NULL"
     ).pluck("taxid")
   end
@@ -299,7 +329,7 @@ class LineageDatabaseImporter
     TaxonLineage.connection.select_all(
       "SELECT old.taxid
       FROM taxon_lineages old
-      INNER JOIN _new_taxon_lineages new USING(taxid)
+      INNER JOIN #{@taxon_lineages_table} new USING(taxid)
       WHERE old.version_end = #{@current_version}
         AND (#{col_expressions.join("\n OR ")})"
     ).pluck("taxid")
@@ -312,7 +342,7 @@ class LineageDatabaseImporter
 
     TaxonLineage.connection.select_all(
       "SELECT old.taxid FROM taxon_lineages old
-      INNER JOIN _new_taxon_lineages new USING(taxid)
+      INNER JOIN #{@taxon_lineages_table} new USING(taxid)
       WHERE old.version_end = #{@current_version}
         AND #{col_expressions.join("\n AND ")}"
     ).pluck("taxid")
@@ -323,27 +353,27 @@ class LineageDatabaseImporter
       UPDATE taxon_lineages
       SET ended_at = '#{@ncbi_date}' version_end = #{@current_version}
       WHERE id IN (#{retire_ids.join(', ')})
-    "), retire_ids)
+    "), retire_ids.count)
 
     check_affected(TaxonLineage.connection.update("
       INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
       SELECT #{@new_columns.join(', ')}
       FROM #{@taxon_lineages_table}
       WHERE id IN (#{insert_ids.join(', ')})
-    "), insert_ids)
+    "), insert_ids.count)
 
     check_affected(TaxonLineage.connection.update("
       REPLACE INTO taxon_lineages(#{@new_columns.join(', ')})
       SELECT #{@new_columns.join(', ')}
       FROM #{@taxon_lineages_table}
       WHERE id IN (#{update_ids.join(', ')})
-    "), update_ids)
+    "), update_ids.count)
 
     check_affected(TaxonLineage.connection.update("
       UPDATE taxon_lineages
       SET version_end = #{@new_version}
       WHERE id IN (#{unchanged_ids.join(', ')})
-    "), unchanged_ids)
+    "), unchanged_ids.count)
   end
 
   def clean_up
