@@ -4,13 +4,13 @@ import { flatten } from "lodash/fp";
 import { scaleLinear } from "d3-scale";
 import { color } from "d3-color";
 
-import { CategoricalColormap } from "../utils/colormaps/CategoricalColormap";
+const DEFAULT_COLOR = "#3867FA";
 
 export default class GenomeViz {
   constructor(container, data, options) {
     this.g = null;
     this.container = select(container);
-    // Data is of the form [xStart, xEnd, colorIndex]
+    // Data is of the form [xStart, xEnd]
     this.data = data;
 
     this.margins = options.margins || {
@@ -27,7 +27,7 @@ export default class GenomeViz {
 
     this.options = Object.assign(
       {
-        colors: null,
+        color: DEFAULT_COLOR,
         hoverBuffer: 5,
         hoverDarkenFactor: 0.25,
       },
@@ -46,14 +46,6 @@ export default class GenomeViz {
       .attr("height", this.size.height);
     this.svg.remove;
   }
-
-  getColors = () => {
-    if (this.options.colors) {
-      return this.options.colors;
-    }
-
-    return new CategoricalColormap().getNScale(this.data.length + 1);
-  };
 
   getDomain = () => {
     if (this.options.domain) {
@@ -159,7 +151,8 @@ export default class GenomeViz {
     if (this.options.onGenomeVizBarClick) {
       if (closestDataIndex !== null) {
         const barBBox = this.svg
-          .select(`.bar-container .rect-${closestDataIndex}`)
+          .select(".bar-container")
+          .filter((_d, i) => i === closestDataIndex)
           .node()
           .getBoundingClientRect();
         this.options.onGenomeVizBarClick(
@@ -194,9 +187,7 @@ export default class GenomeViz {
         return;
       }
       const d = this.data[barIndex];
-      let colors = this.getColors();
-      let highlightColor = colors[d[2]];
-      highlightColor = color(highlightColor).darker(
+      const highlightColor = color(this.options.color).darker(
         this.options.hoverDarkenFactor
       );
 
@@ -224,7 +215,6 @@ export default class GenomeViz {
         return;
       }
       const d = this.data[barIndex];
-      let colors = this.getColors();
 
       // Shrink the rectangle by outlineBuffer so the border isn't partially cut off.
       const outlineBuffer = 1;
@@ -232,7 +222,7 @@ export default class GenomeViz {
       this.svg
         .select(".outline-container")
         .append("rect")
-        .attr("fill", colors[d[2]])
+        .attr("fill", this.options.color)
         .attr("x", this.x(d[0]) + outlineBuffer)
         .attr("width", this.x(d[1]) - this.x(d[0]) - outlineBuffer * 2)
         .attr("y", outlineBuffer)
@@ -245,7 +235,6 @@ export default class GenomeViz {
   update() {
     if (!this.data) return;
 
-    let colors = this.getColors();
     const domain = this.getDomain();
 
     let x = scaleLinear()
@@ -264,8 +253,7 @@ export default class GenomeViz {
       .data(this.data)
       .enter()
       .append("rect")
-      .attr("class", (_, index) => `rect-${index}`)
-      .attr("fill", d => colors[d[2]])
+      .attr("fill", this.options.color)
       .attr("x", d => x(d[0]))
       .attr("width", d => x(d[1]) - x(d[0]))
       .attr("y", () => 0)

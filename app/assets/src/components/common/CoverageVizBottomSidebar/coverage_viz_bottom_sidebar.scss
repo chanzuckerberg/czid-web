@@ -3,9 +3,11 @@
 @import "~styles/themes/elements";
 
 // These variables help to keep the loading and no data screens the same height as the viz screen.
-$body-height: 256px;
+$body-height: 248px;
 $accession-label-height: 22px;
 $accession-count-label-height: 20px;
+$genome-viz-height: 18px;
+$genome-viz-spacing: $space-xxs;
 
 .contents {
   margin-top: 30px;
@@ -94,6 +96,10 @@ $accession-count-label-height: 20px;
 .body {
   height: $body-height;
 
+  &.withReads {
+    height: $body-height + $genome-viz-height + $genome-viz-spacing;
+  }
+
   .metrics {
     display: flex;
     margin-bottom: 30px;
@@ -151,8 +157,8 @@ $accession-count-label-height: 20px;
   }
 
   .genomeVizRow {
-    height: 18px;
-    margin-top: 10px;
+    height: $genome-viz-height;
+    margin-top: $genome-viz-spacing;
     display: flex;
 
     .rowLabel {

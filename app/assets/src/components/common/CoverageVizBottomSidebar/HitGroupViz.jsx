@@ -19,8 +19,6 @@ import cs from "./coverage_viz_bottom_sidebar.scss";
 import { generateContigReadVizData, getGenomeVizTooltipData } from "./utils";
 
 const DEFAULT_CONTIG_COPY_MESSAGE = "Copy Contig Sequence to Clipboard";
-const READ_FILL_COLOR = "#A9BDFC";
-const CONTIG_FILL_COLOR = "#3867FA";
 
 const totalByterangeLength = byteranges =>
   sum(map(range => range[1], byteranges));
@@ -35,9 +33,9 @@ export default class HitGroupViz extends React.Component {
   };
 
   componentDidMount() {
-    const { accessionData } = this.props;
-    if (accessionData) {
-      this.renderGenomeViz(accessionData);
+    const { accessionData, hitGroups } = this.props;
+    if (accessionData && hitGroups) {
+      this.renderGenomeViz(accessionData, hitGroups);
     }
     document.addEventListener("mousedown", this.handleOutClick);
   }
@@ -47,9 +45,9 @@ export default class HitGroupViz extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { accessionData } = this.props;
-    if (!prevProps.accessionData && accessionData) {
-      this.renderGenomeViz(accessionData);
+    const { accessionData, hitGroups } = this.props;
+    if (!prevProps.accessionData && accessionData && hitGroups) {
+      this.renderGenomeViz(accessionData, hitGroups);
     }
   }
 
@@ -69,11 +67,11 @@ export default class HitGroupViz extends React.Component {
   };
 
   handleGenomeVizBarEnter = hoverData => {
-    const { accessionData } = this.props;
+    const { hitGroups } = this.props;
 
     if (hoverData !== null) {
       this.setState({
-        genomeVizTooltipData: getGenomeVizTooltipData(accessionData, hoverData),
+        genomeVizTooltipData: getGenomeVizTooltipData(hitGroups, hoverData),
       });
     }
   };
@@ -88,7 +86,7 @@ export default class HitGroupViz extends React.Component {
   };
 
   handleGenomeVizBarClick = (dataIndex, barRight, barTop) => {
-    const { accessionData } = this.props;
+    const { hitGroups } = this.props;
     if (dataIndex === null) {
       this.setState({
         contigDownloaderData: null,
@@ -96,7 +94,7 @@ export default class HitGroupViz extends React.Component {
       });
     } else {
       // Only open the contig downloader if there are contigs in this hitGroup.
-      const hitGroup = accessionData.hit_groups[dataIndex];
+      const hitGroup = hitGroups[dataIndex];
       if (hitGroup[0] > 0 && hitGroup[10].length > 0) {
         this.setState({
           contigDownloaderData: {
@@ -124,18 +122,18 @@ export default class HitGroupViz extends React.Component {
     });
   };
 
-  renderGenomeViz = data => {
+  renderGenomeViz = (accessionData, hitGroups) => {
     const hitGroupVizData = generateContigReadVizData(
-      data.hit_groups,
-      data.coverage_bin_size
+      hitGroups,
+      accessionData.coverage_bin_size
     );
 
     this.hitGroupViz = new GenomeViz(
       this.hitGroupVizContainer,
       hitGroupVizData,
       {
-        domain: [0, data.total_length],
-        colors: [READ_FILL_COLOR, CONTIG_FILL_COLOR],
+        domain: [0, accessionData.total_length],
+        color: this.props.color,
         onGenomeVizBarHover: this.handleGenomeVizBarHover,
         onGenomeVizBarEnter: this.handleGenomeVizBarEnter,
         onGenomeVizBarExit: this.handleGenomeVizBarExit,
@@ -272,6 +270,8 @@ export default class HitGroupViz extends React.Component {
   };
 
   render() {
+    const { label } = this.props;
+
     const {
       genomeVizTooltipLocation,
       genomeVizTooltipData,
@@ -281,7 +281,7 @@ export default class HitGroupViz extends React.Component {
 
     return (
       <div className={cs.genomeVizRow}>
-        <div className={cs.rowLabel}>Contigs and Reads</div>
+        <div className={cs.rowLabel}>{label}</div>
         <div
           className={cs.genomeViz}
           ref={hitGroupVizContainer => {
@@ -300,20 +300,21 @@ export default class HitGroupViz extends React.Component {
 }
 
 HitGroupViz.propTypes = {
+  label: PropTypes.string,
+  hitGroups: PropTypes.arrayOf(
+    PropTypes.arrayOf(
+      PropTypes.oneOfType([
+        PropTypes.number,
+        PropTypes.arrayOf(PropTypes.number),
+      ])
+    )
+  ),
   accessionData: PropTypes.shape({
     avg_prop_mismatch: PropTypes.number,
     coverage: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
     coverage_bin_size: PropTypes.number,
     coverage_breadth: PropTypes.number,
     coverage_depth: PropTypes.number,
-    hit_groups: PropTypes.arrayOf(
-      PropTypes.arrayOf(
-        PropTypes.oneOfType([
-          PropTypes.number,
-          PropTypes.arrayOf(PropTypes.number),
-        ])
-      )
-    ),
     id: PropTypes.number,
     max_aligned_length: PropTypes.number,
     name: PropTypes.string,
@@ -322,4 +323,5 @@ HitGroupViz.propTypes = {
   sampleId: PropTypes.number,
   taxonId: PropTypes.number,
   pipelineVersion: PropTypes.string,
+  color: PropTypes.string,
 };
