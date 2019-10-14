@@ -1,5 +1,6 @@
 class BulkDownloadsController < ApplicationController
   include BulkDownloadTypesHelper
+  include BulkDownloadsHelper
 
   before_action do
     allowed_feature_required("bulk_downloads")
@@ -12,30 +13,15 @@ class BulkDownloadsController < ApplicationController
 
   # POST /bulk_downloads
   def create
-    bulk_download_params = params.permit(:download_type, sample_ids: [], params: {})
-
     # Convert sample ids to pipeline run ids.
-    pipeline_run_ids = (
-      current_power.viewable_samples
-        .where(id: bulk_download_params[:sample_ids]).includes(:pipeline_runs)
-        .select do |sample|
-          # Check that the most recent pipeline run succeeded.
-          pr = sample.first_pipeline_run
-          !pr.nil? && pr.finalized && pr.job_status == PipelineRun::STATUS_CHECKED
-        end
-        .map do |sample|
-          # For each sample, get the most recent pipeline run.
-          sample.first_pipeline_run.id
-        end
-    )
-
-    # Throw an error if any sample doesn't have a valid pipeline run.
-    # The user should never see this error, because the validation step should catch any issues.
-    if pipeline_run_ids.length != bulk_download_params[:sample_ids].length
-      render json: {
-        error: BulkDownloadsHelper::GENERIC_SAMPLE_ERROR,
-      },
-             status: :unprocessable_entity
+    begin
+      # Access control for the samples is checked in this function.
+      pipeline_run_ids = get_pipeline_run_ids_for_samples(bulk_download_params[:sample_ids])
+    rescue => e
+      # Throw an error if any sample doesn't have a valid pipeline run.
+      # The user should never see this error, because the validation step should catch any issues.
+      LogUtil.log_err_and_airbrake("Unexpected issue creating bulk download: #{e}")
+      render json: { error: e }, status: :unprocessable_entity
       return
     end
 
@@ -53,4 +39,8 @@ class BulkDownloadsController < ApplicationController
       render json: @bulk_download.errors.full_messages, status: :unprocessable_entity
     end
   end
+end
+
+def bulk_download_params
+  params.permit(:download_type, sample_ids: [], params: {})
 end

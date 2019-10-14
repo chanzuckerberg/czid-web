@@ -5,8 +5,8 @@ import cx from "classnames";
 
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { createBulkDownload } from "~/api/bulk_downloads";
-import AlertIcon from "~ui/icons/AlertIcon";
-import CircleCheckmarkIcon from "~ui/icons/CircleCheckmarkIcon";
+import Notification from "~ui/notifications/Notification";
+import { openUrl } from "~utils/links";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 
 import cs from "./review_step.scss";
@@ -36,10 +36,7 @@ class ReviewStep extends React.Component {
       return;
     }
 
-    this.setState({
-      waitingForCreate: false,
-      createStatus: "success",
-    });
+    // TODO(mark): Re-direct the user to the bulk downloads list page.
   };
 
   backLinkEnabled = () =>
@@ -71,27 +68,7 @@ class ReviewStep extends React.Component {
     }
 
     if (createStatus === "error") {
-      return (
-        <div className={cs.errorMessage}>
-          <AlertIcon className={cs.icon} />
-          <div className={cs.text}> {createError}</div>
-        </div>
-      );
-    }
-
-    if (createStatus === "success") {
-      return (
-        <React.Fragment>
-          <div className={cs.successMessage}>
-            <CircleCheckmarkIcon className={cs.icon} />
-            <div className={cs.text}>
-              Your download was successfully submitted. We&apos;ll send you an
-              email when your files are ready.
-            </div>
-          </div>
-          <PrimaryButton text="View Your Past Downloads" />
-        </React.Fragment>
-      );
+      return <Notification type="error">{createError}</Notification>;
     }
 
     return (

@@ -55,12 +55,12 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(response).to have_http_status(422)
 
         json_response = JSON.parse(response.body)
-        expect(json_response["error"]).to eq(BulkDownloadsHelper::GENERIC_SAMPLE_ERROR)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::SAMPLE_STILL_RUNNING_ERROR)
       end
 
       it "should error if a requested sample failed" do
         @sample_one = create(:sample, project: @project,
-                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_FAILED }])
+                                      pipeline_runs_data: [{ finalized: 1, job_status: "1.Host Filtering-FAILED" }])
 
         bulk_download_params = {
           download_type: "sample_overview",
@@ -71,7 +71,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(response).to have_http_status(422)
 
         json_response = JSON.parse(response.body)
-        expect(json_response["error"]).to eq(BulkDownloadsHelper::GENERIC_SAMPLE_ERROR)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::SAMPLE_FAILED_ERROR)
       end
 
       it "should error if a requested sample is not viewable by the user" do
@@ -90,7 +90,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(response).to have_http_status(422)
 
         json_response = JSON.parse(response.body)
-        expect(json_response["error"]).to eq(BulkDownloadsHelper::GENERIC_SAMPLE_ERROR)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR)
       end
 
       it "checks and uses the most recent pipeline run for a sample" do
@@ -126,7 +126,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
     describe "POST #create" do
       it "does not call action" do
         @sample_one = create(:sample, project: @project,
-                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_FAILED }])
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
         bulk_download_params = {
           download_type: "sample_overview",
@@ -140,7 +140,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
       it "redirected to home page" do
         @sample_one = create(:sample, project: @project,
-                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_FAILED }])
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
         bulk_download_params = {
           download_type: "sample_overview",

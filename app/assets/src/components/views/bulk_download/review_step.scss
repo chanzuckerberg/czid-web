@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .reviewStep {
   .header {
@@ -63,7 +64,7 @@
     .downloadDisclaimer {
       @include font-body-xxs;
       color: $medium-grey;
-      margin-top: 6px;
+      margin-top: $space-xxs;
     }
 
     .loadingMessage {
@@ -73,37 +74,6 @@
 
       .icon {
         margin-right: 4px;
-      }
-
-      .text {
-        @include font-body-xxs;
-      }
-    }
-
-    .errorMessage {
-      display: flex;
-
-      .icon {
-        fill: $error;
-        width: 18px;
-        height: 18px;
-        margin-right: 6px;
-      }
-
-      .text {
-        @include font-body-xxs;
-      }
-    }
-
-    .successMessage {
-      margin-bottom: 40px;
-      display: flex;
-
-      .icon {
-        fill: $success;
-        width: 18px;
-        height: 18px;
-        margin-right: 6px;
       }
 
       .text {
