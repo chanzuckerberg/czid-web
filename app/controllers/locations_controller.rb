@@ -13,7 +13,7 @@ class LocationsController < ApplicationController
   def external_search
     results = []
     query = location_params[:query]
-    limit = location_params[:limit].present? ? location_params[:limit] : 5
+    limit = location_params[:limit]
 
     if query.present?
       threads = []
@@ -45,9 +45,14 @@ class LocationsController < ApplicationController
         geosearch_results = raw_results[actions[1]] || []
         results = autocomplete_results.zip(geosearch_results).flatten.compact
 
-        results = results.map { |r| LocationHelper.adapt_location_iq_response(r) }
-        results = results.select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
-        results = results.uniq { |r| [r[:name], r[:geo_level]] }
+        # NOTE(jsheu): We get much more relevant results from the 'relation' type, although we don't
+        # have an API parameter to only request those. OSM relations are used to model logical or
+        # geographic relationships between objects.
+        results = results
+                  .map { |r| LocationHelper.adapt_location_iq_response(r) }
+                  .select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
+                  .uniq { |r| [r[:name], r[:geo_level]] }
+                  .uniq { |r| r[:osm_id] }
       end
     end
 
