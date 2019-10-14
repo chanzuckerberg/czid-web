@@ -46,6 +46,7 @@ class LocationsController < ApplicationController
         results = autocomplete_results.zip(geosearch_results).flatten.compact
 
         results = results.map { |r| LocationHelper.adapt_location_iq_response(r) }
+        results = results.select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
         results = results.uniq { |r| [r[:name], r[:geo_level]] }
       end
     end
