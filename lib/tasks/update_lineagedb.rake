@@ -125,11 +125,11 @@ class LineageDatabaseImporter
 
     import_new_names!
     import_new_taxid_lineages!
-    build_new_taxon_lineages!
-    upgrade_taxon_lineages!
+    affected = build_new_taxon_lineages!
+    upgrade_taxon_lineages!(affected)
   end
 
-  def upgrade_taxon_lineages!
+  def upgrade_taxon_lineages!(new_count)
     puts "\nRetire records..."
     retire_ids = retire_records_ids
     puts "#{retire_ids.count} records"
@@ -145,6 +145,14 @@ class LineageDatabaseImporter
     puts "\nKeep same records..."
     unchanged_ids = unchanged_records_ids
     puts "#{unchanged_ids.count} records"
+
+    # TODO: (gdingle): check that
+    # retire_ids,
+    # insert_ids,
+    # update_ids,
+    # unchanged_ids
+    # adds up to the new_count
+
 
     check_user_input
 
@@ -201,6 +209,7 @@ class LineageDatabaseImporter
     if affected != ids_count
       raise "Wrong number of rows affected"
     end
+    affected
   end
 
   def setup
@@ -239,6 +248,7 @@ class LineageDatabaseImporter
   end
 
   def create_table_sql(table_name, cols)
+    # TODO: (gdingle): make taxid int(11) !!!
     col_defs = cols.map { |c| "#{c} VARCHAR(255) NOT NULL" }.join(', ')
     "CREATE TABLE #{table_name}(#{col_defs})"
   end
@@ -303,6 +313,7 @@ class LineageDatabaseImporter
   end
 
   def retire_records_ids
+    # TODO: (gdingle): change to retire
     TaxonLineage.connection.select_all(
       "SELECT old.taxid
       FROM taxon_lineages old
@@ -335,6 +346,7 @@ class LineageDatabaseImporter
     ).pluck("taxid")
   end
 
+  # TODO: (gdingle): this needs to change to UPDATE to avoid OOM in ruby or max len SQL
   def unchanged_records_ids
     col_expressions = @columns.map do |col|
       "old.#{col} = new.#{col}"
