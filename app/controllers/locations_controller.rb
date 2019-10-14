@@ -15,6 +15,8 @@ class LocationsController < ApplicationController
     query = location_params[:query]
     limit = location_params[:limit]
 
+    puts "THE KEY IS: ", ENV["LOCATION_IQ_API_KEY"]
+
     if query.present?
       threads = []
       actions = [:geo_autocomplete, :geosearch]
