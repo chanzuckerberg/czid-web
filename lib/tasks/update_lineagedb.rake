@@ -146,13 +146,10 @@ class LineageDatabaseImporter
     unchanged_ids = unchanged_records_ids
     puts "#{unchanged_ids.count} records"
 
-    # TODO: (gdingle): check that
-    # retire_ids,
-    # insert_ids,
-    # update_ids,
-    # unchanged_ids
-    # adds up to the new_count
-
+    upgrade_count = insert_ids.count + update_ids.count + unchanged_ids.count
+    if new_count != upgrade_count
+      raise "Mismatched upgrade counts: #{new_count} and #{upgrade_count}"
+    end
 
     check_user_input
 
@@ -249,7 +246,10 @@ class LineageDatabaseImporter
 
   def create_table_sql(table_name, cols)
     # TODO: (gdingle): make taxid int(11) !!!
-    col_defs = cols.map { |c| "#{c} VARCHAR(255) NOT NULL" }.join(', ')
+    col_defs = cols.map do |col|
+      col_type = col.end_with?('taxid') ? 'INT(11)' : 'VARCHAR(255)'
+      "#{col} #{col_type} NOT NULL"
+    end.join(', ')
     "CREATE TABLE #{table_name}(#{col_defs})"
   end
 
@@ -261,7 +261,7 @@ class LineageDatabaseImporter
       SELECT COUNT(*) FROM #{@names_table}
     ")
     if taxid_table_count > names_table_count
-      raise "Mismatch counts in input tables: #{taxid_table_count} and #{names_table_count}"
+      raise "Mismatched counts in input tables: #{taxid_table_count} and #{names_table_count}"
     end
 
     TaxonLineage.connection.update(
