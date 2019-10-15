@@ -17,18 +17,18 @@ class LocationsController < ApplicationController
     limit = location_params[:limit]
 
     if query.present?
-      raw_results = {}
+      responses = {}
       threads = []
       GEOSEARCH_ACTIONS.each do |action|
-        t = Thread.new { external_search_action(action, query, limit, raw_results) }
+        t = Thread.new { external_search_action(action, query, limit, responses) }
         # Suppress verbose backtrace on handled exceptions
         t.report_on_exception = false
         threads << t
       end
       threads.each(&:join)
 
-      if raw_results.present?
-        results = handle_external_search_results(raw_results)
+      if responses.present?
+        results = handle_external_search_results(responses)
       end
     end
 
@@ -150,12 +150,12 @@ class LocationsController < ApplicationController
     # Interpolate both lists (#1 from autocomplete, #1 from geosearch, #2 from autocomplete, #2
     # from geosearch, etc).
     autocomplete_results = results[GEOSEARCH_ACTIONS[0]] || []
-    geosearch_results = results[GEOSEARCH_ACTIONS[1]] || []
-    combined = autocomplete_results.zip(geosearch_results).flatten.compact
+    search_results = results[GEOSEARCH_ACTIONS[1]] || []
+    combined = autocomplete_results.zip(search_results).flatten.compact
 
     # - NOTE(jsheu): We get much more relevant results from the 'relation' type, although we don't
-    # have an API parameter to only request those. OSM relations are used to model logical or
-    # geographic relationships between objects.
+    # have a way to solely request those. OSM relations are used to model logical or geographic
+    # relationships between objects.
     # - De-dup by name/geo_level and also osm_id.
     combined
       .map { |r| LocationHelper.adapt_location_iq_response(r) }
