@@ -140,7 +140,7 @@ RSpec.describe LocationHelper, type: :helper do
   end
 
   describe "#handle_external_search_results" do
-    context "when receiving results from autocomplete and geosearch endpoints" do
+    context "more autocomplete results than search results" do
       before do
         autocomplete_results =
           API_GEOSEARCH_CALIFORNIA_RESPONSE +
@@ -175,7 +175,44 @@ RSpec.describe LocationHelper, type: :helper do
       end
     end
 
-    it "doesn't error on empty results" do
+    context "more search results than autocomplete results" do
+      before do
+        autocomplete_results = API_GEOSEARCH_CALIFORNIA_RESPONSE
+        search_results = API_GEOSEARCH_USA_RESPONSE +
+                         API_GEOSEARCH_UGANDA_RESPONSE +
+                         API_GEOSEARCH_DHAKA_RESPONSE
+        @raw_results = {
+          Location::GEOSEARCH_ACTIONS[0] => autocomplete_results,
+          Location::GEOSEARCH_ACTIONS[1] => search_results,
+        }
+      end
+
+      it "zips/interpolates autocomplete and geosearch results" do
+        actual = LocationHelper.handle_external_search_results(@raw_results)
+        expected = [
+          FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE,
+          FORMATTED_GEOSEARCH_USA_RESPONSE,
+          FORMATTED_GEOSEARCH_UGANDA_RESPONSE,
+          FORMATTED_GEOSEARCH_DHAKA_RESPONSE,
+        ].flatten
+
+        expected_names = expected.map { |r| r.symbolize_keys[:name] }
+        actual_names = actual.map { |r| r[:name] }
+        expect(actual_names).to eq(expected_names)
+      end
+    end
+
+    context "no results" do
+      it "displays no results" do
+        actual = LocationHelper.handle_external_search_results({})
+        expect(actual).to eq([])
+
+        actual = LocationHelper.handle_external_search_results(
+          Location::GEOSEARCH_ACTIONS[0] => [],
+          Location::GEOSEARCH_ACTIONS[1] => []
+        )
+        expect(actual).to eq([])
+      end
     end
   end
 end
