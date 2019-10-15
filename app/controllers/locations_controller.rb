@@ -7,6 +7,7 @@ class LocationsController < ApplicationController
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
 
   TOKEN_AUTH_ACTIONS = [:external_search].freeze
+  GEOSEARCH_ACTIONS = [:geo_autocomplete, :geosearch].freeze
 
   prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
@@ -15,46 +16,16 @@ class LocationsController < ApplicationController
     query = location_params[:query]
     limit = location_params[:limit]
 
-    puts "THE KEY IS: ", ENV["LOCATION_IQ_API_KEY"]
-
     if query.present?
-      threads = []
-      actions = [:geo_autocomplete, :geosearch]
       raw_results = {}
-      actions.each do |action|
-        threads << Thread.new do
-          success, resp = Location.public_send(action, query, limit)
-
-          if success && resp.is_a?(Array)
-            raw_results[action] = resp
-          elsif success && resp.is_a?(Hash) && resp["error"] == "Unable to geocode"
-            # Successful request but 0 results
-            Rails.logger.info("No #{action} results for: #{query}")
-          else
-            # Unsuccessful request. Likely Net::HTTPTooManyRequests.
-            # Monitor if users run up against geosearch API rate limits / record any other errs.
-            msg = GEOSEARCH_RATE_LIMIT_ERR
-            msg += ": #{resp}" if resp
-            LogUtil.log_err_and_airbrake(msg)
-            raise msg
-          end
-        end
+      threads = []
+      GEOSEARCH_ACTIONS.each do |action|
+        threads << Thread.new { external_search_action(action, query, limit, raw_results) }
       end
       threads.each(&:join)
 
       if raw_results.present?
-        autocomplete_results = raw_results[actions[0]] || []
-        geosearch_results = raw_results[actions[1]] || []
-        results = autocomplete_results.zip(geosearch_results).flatten.compact
-
-        # NOTE(jsheu): We get much more relevant results from the 'relation' type, although we don't
-        # have an API parameter to only request those. OSM relations are used to model logical or
-        # geographic relationships between objects.
-        results = results
-                  .map { |r| LocationHelper.adapt_location_iq_response(r) }
-                  .select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
-                  .uniq { |r| [r[:name], r[:geo_level]] }
-                  .uniq { |r| r[:osm_id] }
+        results = handle_external_search_results(raw_results)
       end
     end
 
@@ -147,5 +118,48 @@ class LocationsController < ApplicationController
 
   def location_params
     params.permit(:query, :limit)
+  end
+
+  def external_search_action(action, query, limit, results)
+    unless GEOSEARCH_ACTIONS.include?(action)
+      raise "Action not allowed"
+    end
+
+    success, resp = Location.public_send(action, query, limit)
+
+    if success && resp.is_a?(Array)
+      results[action] = resp
+    elsif success && resp.is_a?(Hash) && resp["error"] == "Unable to geocode"
+      # Successful request but 0 results
+      Rails.logger.info("No #{action} results for: #{query}")
+    else
+      # Unsuccessful request. Likely Net::HTTPTooManyRequests.
+      # Monitor if users run up against geosearch API rate limits / record any other errs.
+      msg = GEOSEARCH_RATE_LIMIT_ERR
+      msg += ": #{resp}" if resp
+      LogUtil.log_err_and_airbrake(msg)
+      raise msg
+    end
+  end
+
+  def handle_external_search_results(results)
+    # Combine results from provider autocomplete and geosearch endpoints for better results.
+    # Interpolate both lists (#1 from autocomplete, #1 from geosearch, #2 from autocomplete, #2
+    # from geosearch, etc).
+    autocomplete_results = results[GEOSEARCH_ACTIONS[0]] || []
+    puts "autocomplete_results: ", autocomplete_results
+    geosearch_results = results[GEOSEARCH_ACTIONS[1]] || []
+    puts "geosearch_results: ", geosearch_results
+    combined = autocomplete_results.zip(geosearch_results).flatten.compact
+
+    # - NOTE(jsheu): We get much more relevant results from the 'relation' type, although we don't
+    # have an API parameter to only request those. OSM relations are used to model logical or
+    # geographic relationships between objects.
+    # - De-dup by name/geo_level and also osm_id.
+    combined
+        .map { |r| LocationHelper.adapt_location_iq_response(r) }
+        .select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
+        .uniq { |r| [r[:name], r[:geo_level]] }
+        .uniq { |r| r[:osm_id] }
   end
 end

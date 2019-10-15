@@ -15,7 +15,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   test "user can geosearch with results" do
     post user_session_path, params: @user_params
 
-    Location.stub :geosearch, @api_response do
+    Location.stub :geo_search_request_base, @api_response do
       get external_search_locations_path, params: { query: "UCSF" }
       assert_response :success
       assert_equal JSON.dump(@our_results), @response.body
@@ -25,7 +25,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   test "user can geosearch without results" do
     post user_session_path, params: @user_params
 
-    Location.stub :geosearch, [true, []] do
+    Location.stub :geo_search_request_base, [true, []] do
       get external_search_locations_path, params: { query: "ahsdlfkjasfk" }
       assert_response :success
       assert_equal "[]", @response.body
@@ -39,7 +39,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
       assert_equal "[]", @response.body
     end
 
-    Location.stub :geosearch, [true, LocationTestHelper::API_NO_GEOCODE_RESPONSE] do
+    Location.stub :geo_search_request_base, [true, LocationTestHelper::API_NO_GEOCODE_RESPONSE] do
       get external_search_locations_path, params: { query: "ahsdlfkjasfk" }
       assert_response :success
       assert_equal "[]", @response.body
@@ -48,10 +48,8 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
   test "user can geosearch and see an API key error" do
     post user_session_path, params: @user_params
-    saved = ENV["LOCATION_IQ_API_KEY"]
     ENV["LOCATION_IQ_API_KEY"] = nil
     get external_search_locations_path, params: { query: "UCSF" }
-    ENV["LOCATION_IQ_API_KEY"] = saved
     assert_response :error
     assert_equal LocationsController::GEOSEARCH_ERR_MSG, JSON.parse(@response.body)["message"]
   end
@@ -59,7 +57,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   test "user can geosearch and see a service-side error" do
     post user_session_path, params: @user_params
 
-    Location.stub :geosearch, @api_rate_limit_response do
+    Location.stub :geo_search_request_base, @api_rate_limit_response do
       get external_search_locations_path, params: { query: "UCSF" }
       assert_response :error
       assert_equal LocationsController::GEOSEARCH_ERR_MSG, JSON.parse(@response.body)["message"]
