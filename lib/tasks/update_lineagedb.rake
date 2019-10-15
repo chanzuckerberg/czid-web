@@ -41,7 +41,10 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
                       end
 
   current_version = TaxonLineage.maximum('version_end')
-  if !current_version || current_version < TaxonLineage.maximum('version_start')
+  if current_version.nil?
+    puts "\n\nNO PREVIOUS VERSION FOUND - INITIAL IMPORT"
+    current_version = 1
+  else current_version < TaxonLineage.maximum('version_start')
     raise "Bad current_version: #{current_version}"
   end
 
@@ -151,7 +154,7 @@ class LineageDatabaseImporter
     update_ids = update_records_ids
     puts "#{update_ids.count} records"
 
-    puts "\nKeep same records..."
+    puts "\nKeep active records..."
     unchanged_ids = unchanged_records_ids
     puts "#{unchanged_ids.count} records"
 
@@ -366,6 +369,15 @@ class LineageDatabaseImporter
   end
 
   def execute_upgrade!(retire_ids, insert_ids, update_ids, unchanged_ids)
+    # special case initial population
+    if retire_ids + update_ids + unchanged_ids == 0
+      return check_affected(TaxonLineage.connection.update("
+        INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
+        SELECT #{@new_columns.join(', ')}
+        FROM #{@taxon_lineages_table}
+      "), insert_ids.count)
+    end
+
     check_affected(TaxonLineage.connection.update("
       UPDATE taxon_lineages
       SET ended_at = '#{@ncbi_date}' version_end = #{@current_version}
@@ -386,11 +398,21 @@ class LineageDatabaseImporter
       WHERE id IN (#{update_ids.join(', ')})
     "), update_ids.count)
 
-    check_affected(TaxonLineage.connection.update("
-      UPDATE taxon_lineages
-      SET version_end = #{@new_version}
-      WHERE id IN (#{unchanged_ids.join(', ')})
-    "), unchanged_ids.count)
+    # Avoid too large SQL IN clause
+    if unchanged_ids.count > 100_000
+      other_ids = retire_ids + insert_ids + update_ids
+      check_affected(TaxonLineage.connection.update("
+        UPDATE taxon_lineages
+        SET version_end = #{@new_version}
+        WHERE id NOT IN (#{other_ids.join(', ')})
+      "), unchanged_ids.count)
+    else
+      check_affected(TaxonLineage.connection.update("
+        UPDATE taxon_lineages
+        SET version_end = #{@new_version}
+        WHERE id IN (#{unchanged_ids.join(', ')})
+      "), unchanged_ids.count)
+    end
   end
 
   def clean_up
