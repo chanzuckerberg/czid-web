@@ -15,12 +15,18 @@ class BulkDownloadsController < ApplicationController
   def create
     # Convert sample ids to pipeline run ids.
     begin
-      # Access control for the samples is checked in this function.
-      pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(bulk_download_params[:sample_ids])
+      sample_ids = bulk_download_params[:sample_ids]
+      # Access control check.
+      viewable_samples = current_power.viewable_samples.where(id: sample_ids)
+      if viewable_samples.length != sample_ids.length
+        raise BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR
+      end
+
+      pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(viewable_samples)
     rescue => e
       # Throw an error if any sample doesn't have a valid pipeline run.
       # The user should never see this error, because the validation step should catch any issues.
-      LogUtil.log_err_and_airbrake("Unexpected issue creating bulk download: #{e}")
+      LogUtil.log_err_and_airbrake("BulkDownloadsFailedEvent: Unexpected issue creating bulk download: #{e}")
       render json: { error: e }, status: :unprocessable_entity
       return
     end

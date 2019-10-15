@@ -54,6 +54,9 @@ module PipelineRunsHelper
     },
   }.freeze
 
+  PIPELINE_RUN_STILL_RUNNING_ERROR = "PIPELINE_RUN_STILL_RUNNING_ERROR".freeze
+  PIPELINE_RUN_FAILED_ERROR = "PIPELINE_RUN_FAILED_ERROR".freeze
+
   def aegea_batch_submit_command(base_command,
                                  memory: Sample::DEFAULT_MEMORY_IN_MB,
                                  vcpus: Sample::DEFAULT_VCPUS,
@@ -220,5 +223,28 @@ module PipelineRunsHelper
       return [error_code, nil]
     end
     [nil, nil]
+  end
+
+  # Return all pipeline runs that have succeeded for given samples
+  # Only check the first pipeline run.
+  # samples should be an ActiveRecord relation
+  # If strict mode is turned on, error out even if one pipeline run did not succeed.
+  def get_succeeded_pipeline_runs_for_samples(samples, strict = false)
+    # Include the pipeline run for efficient queries.
+    samples = samples.includes(:pipeline_runs)
+
+    first_pipeline_runs = samples.map(&:first_pipeline_run)
+    valid_pipeline_runs = first_pipeline_runs.select { |pr| !pr.nil? && pr.finalized? }
+
+    if strict && valid_pipeline_runs.length != samples.length
+      raise PIPELINE_RUN_STILL_RUNNING_ERROR
+    end
+
+    valid_pipeline_runs = valid_pipeline_runs.select(&:succeeded?)
+    if strict && valid_pipeline_runs.length != samples.length
+      raise PIPELINE_RUN_FAILED_ERROR
+    end
+
+    return valid_pipeline_runs
   end
 end
