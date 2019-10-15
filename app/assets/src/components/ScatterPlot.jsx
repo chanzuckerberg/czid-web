@@ -5,7 +5,8 @@ class ScatterPlot extends React.Component {
   componentDidMount() {
     this.renderD3(this.props);
   }
-  componentWillReceiveProps(nextProps) {
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
     d3
       .select(this.container)
       .select("svg")

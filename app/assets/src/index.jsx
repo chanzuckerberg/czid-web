@@ -42,13 +42,14 @@ const react_component = (componentName, props, target, requestContext) => {
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
     ReactDOM.render(
-      <RequestContext.Provider value={requestContext}>
-        {React.createElement(matchedComponent, props)}
-      </RequestContext.Provider>,
+      <React.StrictMode>
+        <RequestContext.Provider value={requestContext}>
+          {React.createElement(matchedComponent, props)}
+        </RequestContext.Provider>
+      </React.StrictMode>,
       document.getElementById(target)
     );
   } else {
-    // TODO: do proper error processing
     // eslint-disable-next-line no-console
     console.error(
       "Couldn't find component for",
