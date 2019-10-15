@@ -2,7 +2,7 @@ module LocationTestHelper
   API_GEOSEARCH_RESPONSE = [
     {
       "place_id" => "89640023",
-      "osm_type" => "way",
+      "osm_type" => "relation",
       "osm_id" => "34324395",
       "lat" => 37.76,
       # LocationIQ uses 'lon'
@@ -32,7 +32,7 @@ module LocationTestHelper
       "lng" => -122.45,
       "country_code" => "us",
       "osm_id" => 34_324_395,
-      "osm_type" => "way",
+      "osm_type" => "relation",
       "locationiq_id" => 89_640_023,
     },
   ].freeze

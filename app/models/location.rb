@@ -43,8 +43,6 @@ class Location < ApplicationRecord
   def self.location_api_request(endpoint_query)
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
 
-    puts "DO NOT CALL"
-
     query_url = "#{LOCATION_IQ_BASE_URL}/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
     uri = URI.parse(URI.escape(query_url))
     request = Net::HTTP::Get.new(uri)

@@ -20,7 +20,10 @@ class LocationsController < ApplicationController
       raw_results = {}
       threads = []
       GEOSEARCH_ACTIONS.each do |action|
-        threads << Thread.new { external_search_action(action, query, limit, raw_results) }
+        t = Thread.new { external_search_action(action, query, limit, raw_results) }
+        # Suppress verbose backtrace on handled exceptions
+        t.report_on_exception = false
+        threads << t
       end
       threads.each(&:join)
 
@@ -147,9 +150,7 @@ class LocationsController < ApplicationController
     # Interpolate both lists (#1 from autocomplete, #1 from geosearch, #2 from autocomplete, #2
     # from geosearch, etc).
     autocomplete_results = results[GEOSEARCH_ACTIONS[0]] || []
-    puts "autocomplete_results: ", autocomplete_results
     geosearch_results = results[GEOSEARCH_ACTIONS[1]] || []
-    puts "geosearch_results: ", geosearch_results
     combined = autocomplete_results.zip(geosearch_results).flatten.compact
 
     # - NOTE(jsheu): We get much more relevant results from the 'relation' type, although we don't
