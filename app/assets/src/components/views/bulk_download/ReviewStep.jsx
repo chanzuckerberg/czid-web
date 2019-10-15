@@ -6,7 +6,6 @@ import cx from "classnames";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { createBulkDownload } from "~/api/bulk_downloads";
 import Notification from "~ui/notifications/Notification";
-import { openUrl } from "~utils/links";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 
 import cs from "./review_step.scss";

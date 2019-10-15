@@ -3,7 +3,10 @@ module BulkDownloadsHelper
   SAMPLE_STILL_RUNNING_ERROR = "Some selected samples have not finished running yet. Please remove these samples and try again.".freeze
   SAMPLE_FAILED_ERROR = "Some selected samples failed their most recent run. Please remove these samples and try again.".freeze
 
-  def get_pipeline_run_ids_for_samples(sample_ids)
+  # Check that all pipeline runs have succeeded for the provided sample ids
+  # and return the pipeline run ids.
+  # Raise an error if any pipeline runs have not succeeded.
+  def get_valid_pipeline_run_ids_for_samples(sample_ids)
     samples = current_power.viewable_samples
                            .where(id: sample_ids).includes(:pipeline_runs)
 

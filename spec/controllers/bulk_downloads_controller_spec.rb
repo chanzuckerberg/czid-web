@@ -37,7 +37,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(bulk_download.download_type).to eq("sample_overview")
         expect(bulk_download.pipeline_run_ids).to include(@sample_one.pipeline_runs.first.id)
         expect(bulk_download.pipeline_run_ids).to include(@sample_two.pipeline_runs.first.id)
-        expect(bulk_download.users).to include(@joe)
+        expect(bulk_download.user_id).to eq(@joe.id)
         expect(bulk_download.status).to eq(BulkDownload::STATUS_WAITING)
         expect(bulk_download.params_json).to eq({ foo: "bar" }.to_json)
       end

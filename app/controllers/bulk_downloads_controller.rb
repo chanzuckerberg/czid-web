@@ -16,7 +16,7 @@ class BulkDownloadsController < ApplicationController
     # Convert sample ids to pipeline run ids.
     begin
       # Access control for the samples is checked in this function.
-      pipeline_run_ids = get_pipeline_run_ids_for_samples(bulk_download_params[:sample_ids])
+      pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(bulk_download_params[:sample_ids])
     rescue => e
       # Throw an error if any sample doesn't have a valid pipeline run.
       # The user should never see this error, because the validation step should catch any issues.
@@ -30,8 +30,8 @@ class BulkDownloadsController < ApplicationController
     @bulk_download = BulkDownload.new(download_type: bulk_download_params[:download_type],
                                       pipeline_run_ids: pipeline_run_ids,
                                       params: bulk_download_params[:params],
-                                      user_ids: [current_user.id],
-                                      status: BulkDownload::STATUS_WAITING)
+                                      status: BulkDownload::STATUS_WAITING,
+                                      user_id: current_user.id)
 
     if @bulk_download.save
       render json: @bulk_download

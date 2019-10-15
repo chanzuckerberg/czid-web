@@ -1,6 +1,6 @@
 class BulkDownload < ApplicationRecord
   has_and_belongs_to_many :pipeline_runs
-  has_and_belongs_to_many :users
+  belongs_to :user
 
   STATUS_WAITING = "waiting".freeze
   STATUS_RUNNING = "running".freeze
