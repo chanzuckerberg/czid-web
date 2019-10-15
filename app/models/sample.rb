@@ -468,6 +468,10 @@ class Sample < ApplicationRecord
     !host_genome || host_genome.skip_deutero_filter == 1 ? 1 : 0
   end
 
+  def skip_cdhitdup
+    name.include? "PLEASE_SKIP_CDHITDUP" ? 1 : 0
+  end
+
   def sample_output_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
   end

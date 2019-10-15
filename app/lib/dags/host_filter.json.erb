@@ -123,7 +123,7 @@
       "class": "PipelineStepRunCDHitDup",
       "module": "idseq_dag.steps.run_cdhitdup",
       "additional_files": {},
-      "additional_attributes": {}
+      "additional_attributes": { "skip_cdhitdup": <%= @attribute_dict[:skip_cdhitdup] %> }
     },
     {
       "in": ["cdhitdup_out"],
@@ -156,7 +156,7 @@
       "additional_attributes": { "max_fragments": <%= @attribute_dict[:max_subsample_frag] %> }
     },
     <% if @host_genome != "human" %>
-    { 
+    {
       "in": ["subsampled_out", "validate_input_out"],
       "out": "star_human_out",
       "class": "PipelineStepRunStarDownstream",
@@ -164,7 +164,7 @@
       "additional_files": { "star_genome": "<%= @attribute_dict[:human_star_genome] %>" },
       "additional_attributes": {}
     },
-    { 
+    {
       "in": ["star_human_out"],
       "out": "bowtie2_human_out",
       "class": "PipelineStepRunBowtie2",
