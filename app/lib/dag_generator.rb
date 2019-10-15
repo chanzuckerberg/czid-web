@@ -22,18 +22,13 @@ class DagGenerator
 
   # See our dag templates in app/lib/dags.
   def render
-    # Interoperable between .jbuilder and .erb templates
-    if File.extname(@template_file) == ".jbuilder"
-      rendered = ActionController::Base.new.render_to_string(
-        file: @template_file,
-        locals: { attr: @attribute_dict }
-      )
-      # Couldn't find a more direct way to prettify from template
-      json_object = JSON.parse(rendered)
-      JSON.pretty_generate(json_object)
-    else
-      ERB.new(@template).result(binding)
-    end
+    rendered = ActionController::Base.new.render_to_string(
+      file: @template_file,
+      locals: { attr: @attribute_dict }
+    )
+    # Couldn't find a more direct way to prettify from template
+    json_object = JSON.parse(rendered)
+    JSON.pretty_generate(json_object)
   end
 
   def save(file)
