@@ -247,14 +247,7 @@ class PhyloTree < ApplicationRecord
   # See our dag templates in app/lib/dags.
   def prepare_dag(dag_name, attribute_dict)
     dag_s3 = "#{phylo_tree_output_s3_path}/#{dag_name}.json"
-
-    # Temp flag for rolling out jbuilder templates
-    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1"
-                "jbuilder"
-              else
-                "erb"
-              end
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.#{dag_ext}",
+    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.jbuilder",
                            project_id,
                            nil,
                            nil,
