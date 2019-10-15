@@ -106,7 +106,7 @@ class LineageDatabaseImporter
       "version_start",
       "version_end",
       "created_at",
-      "updated_at"
+      "updated_at",
     ] + @columns
   end
 
@@ -165,14 +165,18 @@ class LineageDatabaseImporter
       raise "Mismatched upgrade counts: #{new_count} and #{upgrade_count}"
     end
 
+    if upgrade_count == unchanged_ids.count
+      raise "No upgrades to make"
+    end
+
     if (insert_ids + update_ids + unchanged_ids + retire_ids).uniq.count != upgrade_count + retire_ids.count
       raise "Upgrade sets are not disjoint"
     end
 
     check_user_input
 
-    TaxonLineage.connection.transaction do # BEGIN
-      TaxonLineage.connection.transaction(requires_new: true) do # CREATE SAVEPOINT
+    TaxonLineage.connection.transaction do
+      TaxonLineage.connection.transaction do
         execute_upgrade!(retire_ids, insert_ids, update_ids, unchanged_ids)
       end
     end
@@ -217,7 +221,7 @@ class LineageDatabaseImporter
 
   def check_affected(affected, ids_count)
     if affected != ids_count
-      raise "Wrong number of rows affected"
+      raise "Wrong number of rows affected: #{affected} and #{ids_count}"
     end
     affected
   end
@@ -382,44 +386,30 @@ class LineageDatabaseImporter
       "), insert_ids.count)
     end
 
-    if retire_ids.count > 0
-      check_affected(TaxonLineage.connection.update("
-        UPDATE taxon_lineages
-        SET ended_at = '#{@ncbi_date}' version_end = #{@current_version}
-        WHERE id IN (#{retire_ids.join(', ')})
-      "), retire_ids.count)
-    end
     if insert_ids.count > 0
       check_affected(TaxonLineage.connection.update("
         INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
         SELECT #{@new_columns.join(', ')}
-        FROM #{@taxon_lineages_table}
-        WHERE id IN (#{insert_ids.join(', ')})
+        FROM #{@taxon_lineages_table} new
+        WHERE new.taxid IN (#{insert_ids.join(', ')})
       "), insert_ids.count)
     end
     if update_ids.count > 0
       check_affected(TaxonLineage.connection.update("
         REPLACE INTO taxon_lineages(#{@new_columns.join(', ')})
         SELECT #{@new_columns.join(', ')}
-        FROM #{@taxon_lineages_table}
-        WHERE id IN (#{update_ids.join(', ')})
+        FROM #{@taxon_lineages_table} new
+        WHERE new.taxid IN (#{update_ids.join(', ')})
       "), update_ids.count)
     end
     # Avoid too large SQL IN clause
-    if unchanged_ids.count > 100_000
-      other_ids = retire_ids + insert_ids + update_ids
-      check_affected(TaxonLineage.connection.update("
-        UPDATE taxon_lineages
-        SET version_end = #{@new_version}
-        WHERE id NOT IN (#{other_ids.join(', ')})
-      "), unchanged_ids.count)
-    elsif unchanged_ids.count > 0
-      check_affected(TaxonLineage.connection.update("
-        UPDATE taxon_lineages
-        SET version_end = #{@new_version}
-        WHERE id IN (#{unchanged_ids.join(', ')})
-      "), unchanged_ids.count)
-    end
+    other_ids = retire_ids + insert_ids + update_ids
+    check_affected(TaxonLineage.connection.update("
+      UPDATE taxon_lineages
+      SET version_end = #{@new_version}
+      WHERE taxid NOT IN (#{other_ids.join(', ')})
+        AND version_end = #{@current_version}
+    "), unchanged_ids.count)
   end
 
   def clean_up
