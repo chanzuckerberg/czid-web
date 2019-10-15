@@ -152,11 +152,17 @@ module LocationHelper
   end
 
   def self.handle_external_search_results(results)
-    # Combine results from provider autocomplete and geosearch endpoints for better results.
-    # Interpolate both lists (#1 from autocomplete, #1 from geosearch, #2 from autocomplete, #2
-    # from geosearch, etc).
     autocomplete_results = results[Location::GEOSEARCH_ACTIONS[0]] || []
     search_results = results[Location::GEOSEARCH_ACTIONS[1]] || []
+
+    # Combine results from provider autocomplete and geosearch endpoints for better results.
+    # Zip/interpolate both lists (#1 from autocomplete, #1 from geosearch, #2 from autocomplete, #2
+    # from geosearch, etc).
+    if search_results.size > autocomplete_results.size
+      # In 'A.zip(B)', we pad 'A' if 'B' is longer, so that we don't lose any entries.
+      diff = search_results.size - autocomplete_results.size
+      autocomplete_results += [nil] * diff
+    end
     combined = autocomplete_results.zip(search_results).flatten.compact
 
     # - NOTE(jsheu): We get much more relevant results from the 'relation' type, although we don't

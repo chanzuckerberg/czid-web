@@ -142,17 +142,30 @@ RSpec.describe LocationHelper, type: :helper do
   describe "#handle_external_search_results" do
     context "when receiving results from autocomplete and geosearch endpoints" do
       before do
+        autocomplete_results =
+          API_GEOSEARCH_CALIFORNIA_RESPONSE +
+          API_GEOSEARCH_SF_COUNTY_RESPONSE +
+          API_GEOSEARCH_DHAKA_RESPONSE
+        search_results = API_GEOSEARCH_USA_RESPONSE + API_GEOSEARCH_UGANDA_RESPONSE
         @raw_results = {
-          Location::GEOSEARCH_ACTIONS[0] => [],
-          Location::GEOSEARCH_ACTIONS[1] => [],
+          Location::GEOSEARCH_ACTIONS[0] => autocomplete_results,
+          Location::GEOSEARCH_ACTIONS[1] => search_results,
         }
       end
 
       it "zips/interpolates autocomplete and geosearch results" do
-        puts "yoyoyo"
-        raw_results = {}
-        res = LocationHelper.handle_external_search_results(raw_results)
-        puts res
+        actual = LocationHelper.handle_external_search_results(@raw_results)
+        expected = [
+          FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE,
+          FORMATTED_GEOSEARCH_USA_RESPONSE,
+          FORMATTED_GEOSEARCH_SF_COUNTY_RESPONSE,
+          FORMATTED_GEOSEARCH_UGANDA_RESPONSE,
+          FORMATTED_GEOSEARCH_DHAKA_RESPONSE,
+        ].flatten
+
+        expected_names = expected.map { |r| r.symbolize_keys[:name] }
+        actual_names = actual.map { |r| r[:name] }
+        expect(actual_names).to eq(expected_names)
       end
 
       it "filters by OSM search type" do

@@ -52,6 +52,22 @@ module LocationTestHelper
       },
     },
   ].freeze
+  FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE = [
+    {
+      "name" => "California, USA",
+      "geo_level" => "state",
+      "country_name" => "USA",
+      "state_name" => "California",
+      "subdivision_name" => "",
+      "city_name" => "",
+      "lat" => 36.7,
+      "lng" => -118.76,
+      "country_code" => "us",
+      "osm_id" => 165_475,
+      "osm_type" => "relation",
+      "locationiq_id" => 214_330_370,
+    },
+  ].freeze
   API_GEOSEARCH_SF_COUNTY_RESPONSE = [
     {
       "place_id" => "214379825",
@@ -69,10 +85,26 @@ module LocationTestHelper
       },
     },
   ].freeze
+  FORMATTED_GEOSEARCH_SF_COUNTY_RESPONSE = [
+    {
+      "name" => "San Francisco City and County, California, USA",
+      "geo_level" => "subdivision",
+      "country_name" => "USA",
+      "state_name" => "California",
+      "subdivision_name" => "San Francisco City and County",
+      "city_name" => "",
+      "lat" => 37.76,
+      "lng" => -122.46,
+      "country_code" => "us",
+      "osm_id" => 396_487,
+      "osm_type" => "relation",
+      "locationiq_id" => 214_379_825,
+    },
+  ].freeze
   API_GEOSEARCH_DHAKA_RESPONSE = [
     {
       "place_id" => "46003496",
-      "osm_type" => "node",
+      "osm_type" => "relation",
       "osm_id" => "3442474911",
       "lat" => 23.76,
       "lon" => 90.38,
@@ -99,6 +131,22 @@ module LocationTestHelper
       },
     },
   ].freeze
+  FORMATTED_GEOSEARCH_USA_RESPONSE = [
+    {
+      "name" => "USA",
+      "geo_level" => "country",
+      "country_name" => "USA",
+      "state_name" => "",
+      "subdivision_name" => "",
+      "city_name" => "",
+      "lat" => 39.78,
+      "lng" => -100.45,
+      "country_code" => "us",
+      "osm_id" => 148_838,
+      "osm_type" => "relation",
+      "locationiq_id" => 214_325_471,
+    },
+  ].freeze
   FORMATTED_GEOSEARCH_DHAKA_RESPONSE = [
     {
       "name" => "Dhaka, Dhaka Division, Bangladesh",
@@ -111,7 +159,7 @@ module LocationTestHelper
       "lng" => 90.38,
       "country_code" => "bd",
       "osm_id" => 3_442_474_911,
-      "osm_type" => "node",
+      "osm_type" => "relation",
       "locationiq_id" => 46_003_496,
     },
   ].freeze
