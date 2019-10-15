@@ -43,8 +43,8 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
   current_version = TaxonLineage.maximum('version_end')
   if current_version.nil?
     puts "\n\nNO PREVIOUS VERSION FOUND - INITIAL IMPORT"
-    current_version = 1
-  else current_version < TaxonLineage.maximum('version_start')
+    current_version = 0
+  elsif current_version < TaxonLineage.maximum('version_start')
     raise "Bad current_version: #{current_version}"
   end
 
@@ -105,6 +105,8 @@ class LineageDatabaseImporter
       "started_at",
       "version_start",
       "version_end",
+      "created_at",
+      "updated_at"
     ] + @columns
   end
 
@@ -296,9 +298,11 @@ class LineageDatabaseImporter
     check_affected(TaxonLineage.connection.update("
       INSERT INTO #{@taxon_lineages_table}
       SELECT l.taxid,
-      #{@ncbi_date},
+      '#{@ncbi_date}',
       #{new_version},
       #{new_version},
+      CURRENT_TIMESTAMP(),
+      CURRENT_TIMESTAMP(),
       #{col_expressions.join(', ')}
       FROM #{@taxid_table} l
       LEFT JOIN #{@names_table} superkingdom ON l.superkingdom_taxid = superkingdom.taxid
@@ -370,7 +374,7 @@ class LineageDatabaseImporter
 
   def execute_upgrade!(retire_ids, insert_ids, update_ids, unchanged_ids)
     # special case initial population
-    if retire_ids + update_ids + unchanged_ids == 0
+    if retire_ids.count + update_ids.count + unchanged_ids.count == 0
       return check_affected(TaxonLineage.connection.update("
         INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
         SELECT #{@new_columns.join(', ')}
@@ -378,26 +382,29 @@ class LineageDatabaseImporter
       "), insert_ids.count)
     end
 
-    check_affected(TaxonLineage.connection.update("
-      UPDATE taxon_lineages
-      SET ended_at = '#{@ncbi_date}' version_end = #{@current_version}
-      WHERE id IN (#{retire_ids.join(', ')})
-    "), retire_ids.count)
-
-    check_affected(TaxonLineage.connection.update("
-      INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
-      SELECT #{@new_columns.join(', ')}
-      FROM #{@taxon_lineages_table}
-      WHERE id IN (#{insert_ids.join(', ')})
-    "), insert_ids.count)
-
-    check_affected(TaxonLineage.connection.update("
-      REPLACE INTO taxon_lineages(#{@new_columns.join(', ')})
-      SELECT #{@new_columns.join(', ')}
-      FROM #{@taxon_lineages_table}
-      WHERE id IN (#{update_ids.join(', ')})
-    "), update_ids.count)
-
+    if retire_ids.count > 0
+      check_affected(TaxonLineage.connection.update("
+        UPDATE taxon_lineages
+        SET ended_at = '#{@ncbi_date}' version_end = #{@current_version}
+        WHERE id IN (#{retire_ids.join(', ')})
+      "), retire_ids.count)
+    end
+    if insert_ids.count > 0
+      check_affected(TaxonLineage.connection.update("
+        INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
+        SELECT #{@new_columns.join(', ')}
+        FROM #{@taxon_lineages_table}
+        WHERE id IN (#{insert_ids.join(', ')})
+      "), insert_ids.count)
+    end
+    if update_ids.count > 0
+      check_affected(TaxonLineage.connection.update("
+        REPLACE INTO taxon_lineages(#{@new_columns.join(', ')})
+        SELECT #{@new_columns.join(', ')}
+        FROM #{@taxon_lineages_table}
+        WHERE id IN (#{update_ids.join(', ')})
+      "), update_ids.count)
+    end
     # Avoid too large SQL IN clause
     if unchanged_ids.count > 100_000
       other_ids = retire_ids + insert_ids + update_ids
@@ -406,7 +413,7 @@ class LineageDatabaseImporter
         SET version_end = #{@new_version}
         WHERE id NOT IN (#{other_ids.join(', ')})
       "), unchanged_ids.count)
-    else
+    elsif unchanged_ids.count > 0
       check_affected(TaxonLineage.connection.update("
         UPDATE taxon_lineages
         SET version_end = #{@new_version}
