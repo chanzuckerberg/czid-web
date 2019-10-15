@@ -37,6 +37,7 @@ class Location < ApplicationRecord
   SUBDIVISION_NAMES = %w[county state_district district].freeze
   CITY_NAMES = %w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood suburb].freeze
 
+  GEOSEARCH_ACTIONS = [:geo_autocomplete, :geosearch].freeze
   OSM_SEARCH_TYPES_TO_USE = %w[relation].freeze
 
   # Base request to LocationIQ API

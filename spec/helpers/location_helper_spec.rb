@@ -138,4 +138,31 @@ RSpec.describe LocationHelper, type: :helper do
       expect(result).to eq(name)
     end
   end
+
+  describe "#handle_external_search_results" do
+    context "when receiving results from autocomplete and geosearch endpoints" do
+      before do
+        @raw_results = {
+          Location::GEOSEARCH_ACTIONS[0] => [],
+          Location::GEOSEARCH_ACTIONS[1] => [],
+        }
+      end
+
+      it "zips/interpolates autocomplete and geosearch results" do
+        puts "yoyoyo"
+        raw_results = {}
+        res = LocationHelper.handle_external_search_results(raw_results)
+        puts res
+      end
+
+      it "filters by OSM search type" do
+      end
+
+      it "de-duplicates by name/geo_level, and osm_id" do
+      end
+    end
+
+    it "doesn't error on empty results" do
+    end
+  end
 end

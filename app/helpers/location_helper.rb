@@ -150,4 +150,23 @@ module LocationHelper
       name
     end
   end
+
+  def self.handle_external_search_results(results)
+    # Combine results from provider autocomplete and geosearch endpoints for better results.
+    # Interpolate both lists (#1 from autocomplete, #1 from geosearch, #2 from autocomplete, #2
+    # from geosearch, etc).
+    autocomplete_results = results[Location::GEOSEARCH_ACTIONS[0]] || []
+    search_results = results[Location::GEOSEARCH_ACTIONS[1]] || []
+    combined = autocomplete_results.zip(search_results).flatten.compact
+
+    # - NOTE(jsheu): We get much more relevant results from the 'relation' type, although we don't
+    # have a way to solely request those. OSM relations are used to model logical or geographic
+    # relationships between objects.
+    # - De-dup by name/geo_level and also osm_id.
+    combined
+      .map { |r| adapt_location_iq_response(r) }
+      .select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
+      .uniq { |r| [r[:name], r[:geo_level]] }
+      .uniq { |r| r[:osm_id] }
+  end
 end
