@@ -16,9 +16,13 @@ desc 'Imports NCBI lineage data into IDseq'
 #
 # When our NCBI indexes are updated, we should run this script.
 # If a current lineage record is still valid, its version_end gets += 1.
-# If a current lineage record is absent, its version_end stays the same.
-# If a current lineage record is different, it is updated.
+# If a current lineage record is different in any column, it is updated.
 # If a new lineage record appears, it is inserted.
+# If a current lineage record is absent, its version_end stays the same.
+#
+# The script will check that the number of records in the first three groups is
+# equal to the number of records in the NCBI input files, and it will check
+# that all four groups are disjoint.
 task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
   ### Short Usage: NCBI_DATE=2018-12-01 rake update_lineage_db
   ### Full Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 rake update_lineage_db
@@ -93,7 +97,12 @@ class LineageDatabaseImporter
       "kingdom_name",
       "kingdom_common_name",
     ]
-    @new_columns = ["taxid", "started_at", "version_start", "version_end"] + @columns
+    @new_columns = [
+      "taxid",
+      "started_at",
+      "version_start",
+      "version_end",
+    ] + @columns
   end
 
   def new_version
@@ -151,16 +160,15 @@ class LineageDatabaseImporter
       raise "Mismatched upgrade counts: #{new_count} and #{upgrade_count}"
     end
 
+    if (insert_ids + update_ids + unchanged_ids + retire_ids).uniq.count != upgrade_count + retire_ids.count
+      raise "Upgrade sets are not disjoint"
+    end
+
     check_user_input
 
     TaxonLineage.connection.transaction do # BEGIN
       TaxonLineage.connection.transaction(requires_new: true) do # CREATE SAVEPOINT
-        execute_upgrade(
-          retire_ids,
-          insert_ids,
-          update_ids,
-          unchanged_ids
-        )
+        execute_upgrade!(retire_ids, insert_ids, update_ids, unchanged_ids)
       end
     end
   end
@@ -245,7 +253,6 @@ class LineageDatabaseImporter
   end
 
   def create_table_sql(table_name, cols)
-    # TODO: (gdingle): make taxid int(11) !!!
     col_defs = cols.map do |col|
       col_type = col.end_with?('taxid') ? 'INT(11)' : 'VARCHAR(255)'
       "#{col} #{col_type} NOT NULL"
@@ -313,7 +320,6 @@ class LineageDatabaseImporter
   end
 
   def retire_records_ids
-    # TODO: (gdingle): change to retire
     TaxonLineage.connection.select_all(
       "SELECT old.taxid
       FROM taxon_lineages old
@@ -346,7 +352,6 @@ class LineageDatabaseImporter
     ).pluck("taxid")
   end
 
-  # TODO: (gdingle): this needs to change to UPDATE to avoid OOM in ruby or max len SQL
   def unchanged_records_ids
     col_expressions = @columns.map do |col|
       "old.#{col} = new.#{col}"
@@ -360,7 +365,7 @@ class LineageDatabaseImporter
     ).pluck("taxid")
   end
 
-  def execute_upgrade(retire_ids, insert_ids, update_ids, unchanged_ids)
+  def execute_upgrade!(retire_ids, insert_ids, update_ids, unchanged_ids)
     check_affected(TaxonLineage.connection.update("
       UPDATE taxon_lineages
       SET ended_at = '#{@ncbi_date}' version_end = #{@current_version}
