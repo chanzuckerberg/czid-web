@@ -229,12 +229,14 @@ module PipelineRunsHelper
   # Only check the first pipeline run.
   # samples should be an ActiveRecord relation
   # If strict mode is turned on, error out even if one pipeline run did not succeed.
+  # Note: Does NOT do access control checks.
   def get_succeeded_pipeline_runs_for_samples(samples, strict = false)
-    # Include the pipeline run for efficient queries.
-    samples = samples.includes(:pipeline_runs)
-
-    first_pipeline_runs = samples.map(&:first_pipeline_run)
-    valid_pipeline_runs = first_pipeline_runs.select { |pr| !pr.nil? && pr.finalized? }
+    # Gets the first pipeline runs for multiple samples in an efficient way.
+    created_dates = PipelineRun.select("sample_id, MAX(created_at) as created_at").where(sample_id: samples.pluck(:id)).group(:sample_id)
+    valid_pipeline_runs = PipelineRun
+                          .select(:finalized, :id, :job_status)
+                          .where("(sample_id, created_at) IN (?)", created_dates)
+                          .where(finalized: 1)
 
     if strict && valid_pipeline_runs.length != samples.length
       raise PIPELINE_RUN_STILL_RUNNING_ERROR

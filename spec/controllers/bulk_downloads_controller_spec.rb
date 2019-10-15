@@ -94,11 +94,14 @@ RSpec.describe BulkDownloadsController, type: :controller do
       end
 
       it "checks and uses the most recent pipeline run for a sample" do
-        @sample_one = create(:sample, project: @project,
-                                      pipeline_runs_data: [
-                                        { finalized: 1, job_status: PipelineRun::STATUS_FAILED },
-                                        { finalized: 1, job_status: PipelineRun::STATUS_CHECKED },
-                                      ])
+        travel_to 1.day.ago do
+          @sample_one = create(:sample, project: @project,
+                                        pipeline_runs_data: [
+                                          { finalized: 1, job_status: PipelineRun::STATUS_FAILED },
+                                        ])
+        end
+
+        create(:pipeline_run, sample: @sample_one, finalized: 1, job_status: PipelineRun::STATUS_CHECKED)
 
         bulk_download_params = {
           download_type: "sample_overview",
