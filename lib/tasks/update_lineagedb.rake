@@ -3,7 +3,12 @@ require 'csv'
 require 'English'
 
 desc 'Imports NCBI lineage data into IDseq'
-
+# When our NCBI indexes are updated, we should run this script.
+#
+# NCBI publishes unversioned dumps of its taxonomy database. This script
+# imports a previously downloaded dump into MySQL, denormalizes it, and inserts
+# the rows into taxon_lineages. We insert only new records and update the rest.
+#
 # Lineage records have a [version_start, version_end] inclusive range. Each
 # pipline run has an AlignmentConfig that has a lineage_version. The pipeline
 # should only count lineages where:
@@ -14,7 +19,6 @@ desc 'Imports NCBI lineage data into IDseq'
 #
 # See PipelineRun#generate_aggregate_counts.
 #
-# When our NCBI indexes are updated, we should run this script.
 # If a current lineage record is still valid, its version_end gets += 1.
 # If a current lineage record is different in any column, it is updated.
 # If a new lineage record appears, it is inserted.
