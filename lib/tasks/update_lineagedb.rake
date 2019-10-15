@@ -9,16 +9,18 @@ desc 'Imports NCBI lineage data into IDseq'
 # imports a previously downloaded dump into MySQL, denormalizes it, and inserts
 # the rows into taxon_lineages. We insert only new records and update the rest.
 #
-# Lineage records have a [version_start, version_end] inclusive range. Each
-# pipline run has an AlignmentConfig that has a lineage_version. The pipeline
-# should only count lineages where:
+# Lineage records are assigned a [version_start, version_end] inclusive range.
+# Each pipline run has an AlignmentConfig that has a lineage_version. The
+# pipeline should only count lineages where:
 #
 #  lineage_version BETWEEN
 #   taxon_lineages.version_start
 #   AND taxon_lineages.version_end
 #
-# See PipelineRun#generate_aggregate_counts.
+# See PipelineRun#generate_aggregate_counts. The version filter is also applied
+# when loading the sample report page. See fetch_lineage_by_taxid.
 #
+# In summary:
 # If a current lineage record is still valid, its version_end gets += 1.
 # If a current lineage record is different in any column, it is updated.
 # If a new lineage record appears, it is inserted.
@@ -399,18 +401,20 @@ class LineageDatabaseImporter
       "), insert_ids.count)
     end
     if update_ids.count > 0
+      # mysql counts replace operations as affecting two rows each
+      update_affected = update_ids.count * 2
       check_affected(TaxonLineage.connection.update("
         REPLACE INTO taxon_lineages(#{@new_columns.join(', ')})
         SELECT #{@new_columns.join(', ')}
         FROM #{@taxon_lineages_table} new
         WHERE new.taxid IN (#{update_ids.join(', ')})
-      "), update_ids.count)
+      "), update_affected)
     end
-    # Avoid too large SQL IN clause
-    other_ids = retire_ids + insert_ids + update_ids
+    # Use NOT IN to avoid too large IN clause
+    other_ids = retire_ids + update_ids
     check_affected(TaxonLineage.connection.update("
       UPDATE taxon_lineages
-      SET version_end = #{@new_version}
+      SET version_end = #{new_version}
       WHERE taxid NOT IN (#{other_ids.join(', ')})
         AND version_end = #{@current_version}
     "), unchanged_ids.count)
