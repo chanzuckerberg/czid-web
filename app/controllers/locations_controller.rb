@@ -157,9 +157,9 @@ class LocationsController < ApplicationController
     # geographic relationships between objects.
     # - De-dup by name/geo_level and also osm_id.
     combined
-        .map { |r| LocationHelper.adapt_location_iq_response(r) }
-        .select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
-        .uniq { |r| [r[:name], r[:geo_level]] }
-        .uniq { |r| r[:osm_id] }
+      .map { |r| LocationHelper.adapt_location_iq_response(r) }
+      .select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
+      .uniq { |r| [r[:name], r[:geo_level]] }
+      .uniq { |r| r[:osm_id] }
   end
 end
