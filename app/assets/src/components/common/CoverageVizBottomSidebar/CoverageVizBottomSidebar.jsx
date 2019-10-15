@@ -1,5 +1,5 @@
 import React from "react";
-import { find, get } from "lodash/fp";
+import { sum, find, get, isEmpty } from "lodash/fp";
 import cx from "classnames";
 import ReactDOM from "react-dom";
 
@@ -25,6 +25,8 @@ import {
   getHistogramTooltipData,
   generateCoverageVizData,
   getSortedAccessionSummaries,
+  selectContigsFromHitGroups,
+  selectReadsFromHitGroups,
 } from "./utils";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 
@@ -237,7 +239,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       [[0, data.total_length, 0]],
       {
         domain: [0, data.total_length],
-        colors: [REF_ACC_COLOR],
+        color: REF_ACC_COLOR,
       }
     );
     this.refAccesssionViz.update();
@@ -459,9 +461,18 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }
 
     const metrics = this.getAccessionMetrics();
+    const contigHitGroups = selectContigsFromHitGroups(
+      currentAccessionData.hit_groups
+    );
+    const readHitGroups = selectReadsFromHitGroups(
+      currentAccessionData.hit_groups
+    );
+
+    const totalContigs = sum(contigHitGroups.map(hitGroup => hitGroup[0]));
+    const totalReads = sum(readHitGroups.map(hitGroup => hitGroup[1]));
 
     return (
-      <div className={cs.body}>
+      <div className={cx(cs.body, !isEmpty(readHitGroups) && cs.withReads)}>
         <div className={cs.metrics}>
           {METRIC_COLUMNS.map((col, index) => (
             <div className={cs.column} key={index}>
@@ -523,11 +534,27 @@ export default class CoverageVizBottomSidebar extends React.Component {
           />
         </div>
         <HitGroupViz
+          key="contigHitGroupViz"
+          label={`Contigs (${totalContigs})`}
+          color={CONTIG_FILL_COLOR}
           accessionData={currentAccessionData}
+          hitGroups={contigHitGroups}
           taxonId={params.taxonId}
           sampleId={sampleId}
           pipelineVersion={pipelineVersion}
         />
+        {!isEmpty(readHitGroups) && (
+          <HitGroupViz
+            key="readHitGroupViz"
+            label={`Loose Reads (${totalReads})`}
+            color={READ_FILL_COLOR}
+            accessionData={currentAccessionData}
+            hitGroups={readHitGroups}
+            taxonId={params.taxonId}
+            sampleId={sampleId}
+            pipelineVersion={pipelineVersion}
+          />
+        )}
       </div>
     );
   };
