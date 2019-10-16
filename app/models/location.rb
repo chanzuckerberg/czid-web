@@ -55,11 +55,15 @@ class Location < ApplicationRecord
     [success, JSON.parse(resp.body)]
   end
 
-  # Search request to Location IQ API by freeform query
+  # Search request to Location IQ API by freeform query.
+  # This endpoint is better for when the user has finished typing entirely and
+  # wants an exact match (e.g. "San Diego" -> "San Diego" and nothing more).
   def self.geosearch(query, limit = nil)
     geo_search_request_base(:geosearch, query, limit)
   end
 
+  # This endpoint is better for when the user is still typing, so it will return
+  # results with additional characters (e.g. "San" -> "San Francisco").
   def self.autocomplete(query, limit = nil)
     geo_search_request_base(:autocomplete, query, limit)
   end
