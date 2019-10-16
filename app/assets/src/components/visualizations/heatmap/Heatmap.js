@@ -765,11 +765,20 @@ export default class Heatmap {
 
   sortRows(direction) {
     this.rowClustering = null;
-    orderBy(this.rowLabels, label => label.label, direction).forEach(
-      (label, idx) => {
-        label.pos = idx;
-      }
+
+    this.rowLabels = orderBy(this.rowLabels, label => label.label, direction);
+    this.rowLabels.forEach((label, idx) => {
+      label.pos = idx;
+    });
+
+    this.filteredRowLabels = orderBy(
+      this.filteredRowLabels,
+      label => label.label,
+      direction
     );
+    this.filteredRowLabels.forEach((label, idx) => {
+      label.pos = idx;
+    });
   }
 
   range(n) {
@@ -964,7 +973,8 @@ export default class Heatmap {
 
     let rowLabel = this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
-      .data(this.filteredRowLabels, d => d.label);
+      .data(this.filteredRowLabels, d => d.label)
+      .order();
 
     rowLabel
       .exit()
@@ -983,6 +993,17 @@ export default class Heatmap {
       .enter()
       .append("g")
       .attr("class", cs.rowLabel)
+      .classed("genusBorder", (label, i, nodes) => {
+        const nextLabel = this.filteredRowLabels[i + 1];
+        // TODO (gdingle): remove
+        console.log(label.label, nextLabel, i);
+        if (nextLabel) {
+          // TODO (gdingle): update to use taxid
+          return label.label.split(" ")[0] !== nextLabel.label.split(" ")[0];
+        } else {
+          return false;
+        }
+      })
       .on("mousein", this.options.onRowLabelMouseIn)
       .on("mouseout", this.options.onRowLabelMouseOut);
 
