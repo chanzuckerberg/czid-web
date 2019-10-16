@@ -10,7 +10,7 @@ default: &default
 
 development:
   <<: *default
-  host: db
+  # host: db
 
 test:
   <<: *default
