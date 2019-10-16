@@ -2,6 +2,7 @@ import React from "react";
 import cx from "classnames";
 import { get, without, map, keyBy, flow, mapValues, omit } from "lodash/fp";
 
+import { getProjectMetadataFields } from "~/api/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -23,9 +24,18 @@ const processMetadataRows = metadataRows =>
 class ReviewStep extends React.Component {
   state = {
     consentChecked: false,
-    showUploadModal: false,
+    projectMetadataFields: null,
     showLessDescription: true,
+    showUploadModal: false,
   };
+
+  async componentDidMount() {
+    const { project } = this.props;
+    const projectMetadataFields = await getProjectMetadataFields(project.id);
+    this.setState({
+      projectMetadataFields: keyBy("key", projectMetadataFields),
+    });
+  }
 
   uploadSamplesAndMetadata = () => {
     const { onUploadStatusChange } = this.props;
@@ -46,6 +56,7 @@ class ReviewStep extends React.Component {
       ["Sample Name", "sample_name"],
       this.props.metadata.headers
     );
+    console.log("first: ", metadataHeaders);
     if (uploadType !== "basespace") {
       return ["Sample Name", "Input Files", "Host Genome", ...metadataHeaders];
     } else {
