@@ -218,14 +218,8 @@ class PipelineRunStage < ApplicationRecord
     attribute_dict[:dag_name] = dag_name
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
 
-    # Temp flag for rolling out jbuilder templates
-    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1"
-                "jbuilder"
-              else
-                "erb"
-              end
     # See our dag templates in app/lib/dags.
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.#{dag_ext}",
+    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.jbuilder",
                            sample.project_id,
                            sample.id,
                            sample.host_genome_name.downcase,
