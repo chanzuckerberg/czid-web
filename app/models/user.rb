@@ -23,6 +23,7 @@ class User < ApplicationRecord
   has_many :visualizations, dependent: :destroy
   has_many :phylo_trees, dependent: :destroy
   has_many :backgrounds, dependent: :destroy
+  has_many :bulk_downloads, dependent: :destroy
 
   validates :email, presence: true
   validates :name, presence: true, format: {

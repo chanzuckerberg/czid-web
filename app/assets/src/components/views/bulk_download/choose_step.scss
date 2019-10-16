@@ -20,7 +20,7 @@
 }
 
 .loadingMessage {
-  color: $dark-grey;
+  color: $medium-grey;
 
   .loadingIcon {
     margin-right: 4px;
@@ -70,10 +70,10 @@
   }
 }
 
-.options {
+.fields {
   margin-top: 12px;
 
-  .option {
+  .field {
     width: calc(50% - 20px);
 
     .label {

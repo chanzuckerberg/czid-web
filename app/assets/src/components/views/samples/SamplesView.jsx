@@ -287,12 +287,14 @@ class SamplesView extends React.Component {
   };
 
   renderBulkDownloadTrigger = () => {
+    const { selectedSampleIds } = this.props;
     const downloadIcon = <DownloadIcon className={cx(cs.icon, cs.download)} />;
     return (
       <ToolbarIcon
         className={cs.action}
         icon={downloadIcon}
         popupText="Download"
+        disabled={selectedSampleIds.size === 0}
         onClick={withAnalytics(
           this.handleBulkDownloadModalOpen,
           "SamplesView_bulk-download-modal-open_clicked"
@@ -473,7 +475,7 @@ class SamplesView extends React.Component {
   };
 
   render() {
-    const { currentDisplay, allowedFeatures } = this.props;
+    const { currentDisplay, allowedFeatures, selectedSampleIds } = this.props;
     const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
     return (
       <div className={cs.container}>
@@ -500,6 +502,7 @@ class SamplesView extends React.Component {
               this.handleBulkDownloadModalClose,
               "SamplesView_bulk-download-modal_closed"
             )}
+            selectedSampleIds={selectedSampleIds}
           />
         )}
       </div>

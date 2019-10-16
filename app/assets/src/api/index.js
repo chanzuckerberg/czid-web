@@ -341,8 +341,6 @@ const getSamplesLocations = ({ domain, filters, projectId, search }) =>
 const getSamplePipelineResults = id =>
   get(`/samples/${id}/results_folder.json`);
 
-const getBulkDownloadTypes = () => get("/bulk_downloads/types");
-
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -352,7 +350,6 @@ export {
   deleteSample,
   getAlignmentData,
   getAllHostGenomes,
-  getBulkDownloadTypes,
   getContigsSequencesByByteranges,
   getCoverageVizData,
   getCoverageVizSummary,

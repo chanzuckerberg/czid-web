@@ -9,7 +9,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
       name: "other_infections",
       display_name: "Other Infections",
       description: "Information about infections at other sites",
-      base_type: Metadatum::STRING_TYPE,
+      base_type: MetadataField::STRING_TYPE,
       group: "Infection",
       host_genomes: HostGenome.all
     )
@@ -20,7 +20,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "unique_id",
         display_name: "Unique ID",
         description: "ID for the specimen (in case of multiple samples from the same specimen)",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         group: "Sample",
         host_genomes: [mosquito_genome]
       )
@@ -29,7 +29,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "collection_lat",
         display_name: "Collection Latitude",
         description: "Latitude of the original collection location",
-        base_type: Metadatum::NUMBER_TYPE,
+        base_type: MetadataField::NUMBER_TYPE,
         group: "Sample",
         host_genomes: [mosquito_genome]
       )
@@ -38,7 +38,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "collection_long",
         display_name: "Collection Longitude",
         description: "Longitude of the original collection location",
-        base_type: Metadatum::NUMBER_TYPE,
+        base_type: MetadataField::NUMBER_TYPE,
         group: "Sample",
         host_genomes: [mosquito_genome]
       )
@@ -47,7 +47,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "comp_id_genus",
         display_name: "Computed Genus",
         description: "Computationally-determined genus of the specimen",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         group: "Host",
         host_genomes: [mosquito_genome]
       )
@@ -56,7 +56,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "comp_id_species",
         display_name: "Computed Species",
         description: "Computationally-determined species of the specimen",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         group: "Host",
         host_genomes: [mosquito_genome]
       )
@@ -65,7 +65,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "reported_id_genus",
         display_name: "Reported Genus",
         description: "Reported/expected/human-identified genus of the specimen",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         group: "Host",
         host_genomes: [mosquito_genome]
       )
@@ -74,7 +74,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "reported_id_species",
         display_name: "Reported Species",
         description: "Reported/expected/human-identified species of the specimen",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         group: "Host",
         host_genomes: [mosquito_genome]
       )
@@ -83,7 +83,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "reported_sex",
         display_name: "Reported Sex",
         description: "Reported/expected/human-identified species of the specimen",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         options: %w[Female Male],
         group: "Host",
         host_genomes: [mosquito_genome]
@@ -93,7 +93,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "comp_sex",
         display_name: "Computed Sex",
         description: "Computationally-determined sex of the specimen",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         options: %w[Female Male],
         group: "Host",
         host_genomes: [mosquito_genome]
@@ -103,7 +103,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "id_method",
         display_name: "Identification Method",
         description: "Identification method used",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         group: "Host",
         host_genomes: [mosquito_genome]
       )
@@ -112,7 +112,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "extraction_batch",
         display_name: "Extraction Batch",
         description: "Label for the extracted batch",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         group: "Sequencing",
         host_genomes: [mosquito_genome]
       )
@@ -121,7 +121,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         name: "library_prep_batch",
         display_name: "Library Prep Batch",
         description: "Number given to library preparation from a group of samples",
-        base_type: Metadatum::STRING_TYPE,
+        base_type: MetadataField::STRING_TYPE,
         group: "Sequencing",
         host_genomes: [mosquito_genome]
       )

@@ -27,6 +27,10 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && current_user.admin?
   end
 
+  # To use in before_action with parameters, do
+  # before_action do
+  #   allowed_feature_required(...)
+  # end
   def allowed_feature_required(allowed_feature, allow_admin = false)
     redirect_to root_path unless current_user && (
       current_user.allowed_feature_list.include?(allowed_feature) || (allow_admin && current_user.admin?)
