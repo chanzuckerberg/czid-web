@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .reviewStep {
   .header {
@@ -9,8 +10,12 @@
 
     .editLink {
       @include font-body-xs;
-      color: $primary-light;
-      cursor: pointer;
+      color: $light-grey;
+
+      &.enabled {
+        color: $primary-light;
+        cursor: pointer;
+      }
     }
   }
 
@@ -59,7 +64,21 @@
     .downloadDisclaimer {
       @include font-body-xxs;
       color: $medium-grey;
-      margin-top: 6px;
+      margin-top: $space-xxs;
+    }
+
+    .loadingMessage {
+      color: $medium-grey;
+      display: flex;
+      align-items: center;
+
+      .icon {
+        margin-right: 4px;
+      }
+
+      .text {
+        @include font-body-xxs;
+      }
     }
   }
 }
