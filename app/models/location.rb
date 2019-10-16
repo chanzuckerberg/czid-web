@@ -7,7 +7,7 @@ class Location < ApplicationRecord
 
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
   GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze
-  GEO_AUTOCOMPLETE_BASE_QUERY = "autocomplete.php?normalizecity=1".freeze
+  AUTOCOMPLETE_BASE_QUERY = "autocomplete.php?normalizecity=1".freeze
   DEFAULT_LOCATION_FIELDS = [
     :name,
     :geo_level,
@@ -37,7 +37,7 @@ class Location < ApplicationRecord
   SUBDIVISION_NAMES = %w[county state_district district].freeze
   CITY_NAMES = %w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood suburb].freeze
 
-  GEOSEARCH_ACTIONS = [:geo_autocomplete, :geosearch].freeze
+  GEOSEARCH_ACTIONS = [:autocomplete, :geosearch].freeze
   OSM_SEARCH_TYPES_TO_USE = %w[relation].freeze
 
   # Base request to LocationIQ API
@@ -60,14 +60,14 @@ class Location < ApplicationRecord
     geo_search_request_base(:geosearch, query, limit)
   end
 
-  def self.geo_autocomplete(query, limit = nil)
-    geo_search_request_base(:geo_autocomplete, query, limit)
+  def self.autocomplete(query, limit = nil)
+    geo_search_request_base(:autocomplete, query, limit)
   end
 
   def self.geo_search_request_base(action, query, limit = nil)
     raise ArgumentError, "No query for #{action}" if query.blank?
-    base_query = if action == :geo_autocomplete
-                   GEO_AUTOCOMPLETE_BASE_QUERY
+    base_query = if action == :autocomplete
+                   AUTOCOMPLETE_BASE_QUERY
                  else
                    GEOSEARCH_BASE_QUERY
                  end
