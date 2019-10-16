@@ -131,6 +131,34 @@ module LocationTestHelper
       },
     },
   ].freeze
+  API_GEOSEARCH_USA_ALTERNATIVE_RESPONSE = [
+    {
+      "place_id" => "322027963664",
+      "osm_type" => "relation",
+      "osm_id" => "148838",
+      "lat" => 39.78,
+      "lon" => -100.45,
+      "display_name" => "USA",
+      "address" => {
+        "country" => "USA",
+        "country_code" => "us",
+      },
+    },
+  ].freeze
+  API_GEOSEARCH_NODE_RESPONSE = [
+    {
+      "place_id" => "214325471",
+      "osm_type" => "node",
+      "osm_id" => "148838",
+      "lat" => 39.78,
+      "lon" => -100.45,
+      "display_name" => "USA",
+      "address" => {
+        "country" => "USA",
+        "country_code" => "us",
+      },
+    },
+  ].freeze
   FORMATTED_GEOSEARCH_USA_RESPONSE = [
     {
       "name" => "USA",

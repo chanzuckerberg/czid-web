@@ -169,9 +169,23 @@ RSpec.describe LocationHelper, type: :helper do
       end
 
       it "filters by OSM search type" do
+        raw_results = {
+          Location::GEOSEARCH_ACTIONS[0] => API_GEOSEARCH_NODE_RESPONSE +
+                                            API_GEOSEARCH_CALIFORNIA_RESPONSE,
+        }
+        actual = LocationHelper.handle_external_search_results(raw_results)
+        expected = [FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE[0].symbolize_keys]
+        expect(actual).to eq(expected)
       end
 
       it "de-duplicates by name/geo_level, and osm_id" do
+        raw_results = {
+          Location::GEOSEARCH_ACTIONS[0] => API_GEOSEARCH_CALIFORNIA_RESPONSE + API_GEOSEARCH_USA_RESPONSE,
+          Location::GEOSEARCH_ACTIONS[1] => API_GEOSEARCH_CALIFORNIA_RESPONSE + API_GEOSEARCH_USA_ALTERNATIVE_RESPONSE,
+        }
+        actual = LocationHelper.handle_external_search_results(raw_results)
+        expected = [FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE, FORMATTED_GEOSEARCH_USA_RESPONSE].flatten.map(&:symbolize_keys)
+        expect(actual).to eq(expected)
       end
     end
 
