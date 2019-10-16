@@ -157,16 +157,7 @@ module LocationHelper
   def self.handle_external_search_results(results)
     autocomplete_results = results[Location::GEOSEARCH_ACTIONS[0]] || []
     search_results = results[Location::GEOSEARCH_ACTIONS[1]] || []
-
-    # Zip/interpolate both lists (#1 from autocomplete, #1 from geosearch, #2
-    # from autocomplete, #2 from geosearch, etc).
-    if search_results.size > autocomplete_results.size
-      # In 'A.zip(B)', we pad 'A' if 'B' is longer, so that we don't lose any
-      # entries.
-      diff = search_results.size - autocomplete_results.size
-      autocomplete_results += [nil] * diff
-    end
-    combined = autocomplete_results.zip(search_results).flatten.compact
+    combined = zip_arrays(autocomplete_results, search_results)
 
     # - NOTE(jsheu): We get much more relevant results for our use cases from
     # the 'relation' type, although we don't have a way to solely request those.
@@ -178,5 +169,17 @@ module LocationHelper
       .select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
       .uniq { |r| [r[:name], r[:geo_level]] }
       .uniq { |r| r[:osm_id] }
+  end
+
+  # Zip/interpolate two arrays. #1 from A, #1 from B, #2 from A, #2 from B...
+  # If one list is longer than the other, extra entries will be appended to the
+  # end of the combined list.
+  def self.zip_arrays(list_a, list_b)
+    # Pad 'a' if 'b' is longer. Not needed if 'a' is longer.
+    if list_b.size > list_a.size
+      diff = list_b.size - list_a.size
+      list_a += [nil] * diff
+    end
+    list_a.zip(list_b).flatten.compact
   end
 end
