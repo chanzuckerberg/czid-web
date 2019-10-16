@@ -56,14 +56,20 @@ class Location < ApplicationRecord
   end
 
   # Search request to Location IQ API by freeform query.
-  # This endpoint is better for when the user has finished typing entirely and
+  # - This endpoint is better for when the user has finished typing entirely and
   # wants an exact match (e.g. "San Diego" -> "San Diego" and nothing more).
+  # - This endpoint is worse for when the user only typed a partial phrase. Ex:
+  # "San" may only return locations named "San" instead of suggesting "San
+  # Diego".
   def self.geosearch(query, limit = nil)
     geo_search_request_base(:geosearch, query, limit)
   end
 
-  # This endpoint is better for when the user is still typing, so it will return
+  # - This endpoint is better for when the user is still typing, so it will return
   # results with additional characters (e.g. "San" -> "San Francisco").
+  # - This endpoint is worse if the user is finished typing. Ex: "UCSF" may only
+  # return "UCSF Medical Center" (and not plain "UCSF") because it is trying to
+  # guess what the completed phrase will be.
   def self.autocomplete(query, limit = nil)
     geo_search_request_base(:autocomplete, query, limit)
   end
