@@ -119,22 +119,28 @@ RSpec.describe LocationHelper, type: :helper do
       result = LocationHelper.adapt_location_iq_response(LocationTestHelper::API_GEOSEARCH_UGANDA_RESPONSE[0])
       expect(result).to eq(expected)
     end
+
+    it "recognizes a matching 'type' field for determining geo level" do
+      expected = LocationTestHelper::FORMATTED_GEOSEARCH_RESPONSE_WITH_TYPE[0].symbolize_keys
+      actual = LocationHelper.adapt_location_iq_response(LocationTestHelper::API_GEOSEARCH_RESPONSE_WITH_TYPE[0])
+      expect(actual).to eq(expected)
+    end
   end
 
-  describe "#normalize_name_aliases" do
+  describe "#clean_location_name" do
     it "normalizes name aliases to a common name" do
       name = "United States of America"
       expected = "USA"
       stub_const("LOCATION_NAME_ALIASES", Location::COUNTRY_LEVEL => { name => expected })
 
-      result = LocationHelper.normalize_name_aliases(name, Location::COUNTRY_LEVEL)
+      result = LocationHelper.clean_location_name(name, Location::COUNTRY_LEVEL)
       expect(result).to eq(expected)
     end
 
     it "doesn't modify names without an alias" do
       name = "Nevada"
       stub_const("LOCATION_NAME_ALIASES", {})
-      result = LocationHelper.normalize_name_aliases(name, Location::STATE_LEVEL)
+      result = LocationHelper.clean_location_name(name, Location::STATE_LEVEL)
       expect(result).to eq(name)
     end
   end

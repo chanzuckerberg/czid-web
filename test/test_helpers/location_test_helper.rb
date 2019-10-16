@@ -227,4 +227,32 @@ module LocationTestHelper
   API_NO_GEOCODE_RESPONSE = {
     "error" => "Unable to geocode",
   }.freeze
+  API_GEOSEARCH_RESPONSE_WITH_TYPE = [
+    {
+      "place_id" => "223252784",
+      "osm_type" => "relation",
+      "osm_id" => "2835017",
+      "lat" => 37.54,
+      "lon" => -122.31,
+      "display_name" => "San Mateo, San Mateo County, California, USA",
+      "address" => {},
+      "type" => "city",
+    },
+  ].freeze
+  FORMATTED_GEOSEARCH_RESPONSE_WITH_TYPE = [
+    {
+      "name" => "San Mateo, San Mateo County, California, USA",
+      "geo_level" => "city",
+      "country_name" => "",
+      "state_name" => "",
+      "subdivision_name" => "",
+      "city_name" => "",
+      "lat" => 37.54,
+      "lng" => -122.31,
+      "country_code" => "",
+      "osm_id" => 2_835_017,
+      "osm_type" => "relation",
+      "locationiq_id" => 223_252_784,
+    },
+  ].freeze
 end
