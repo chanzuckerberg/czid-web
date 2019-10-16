@@ -23,11 +23,11 @@ module LocationHelper
                   ""
                 end
 
-    name = clean_location_name(body["display_name"], geo_level)
-    country_name = clean_location_name(address[country_key] || "", Location::COUNTRY_LEVEL)
-    state_name = clean_location_name(address[state_key] || "", Location::STATE_LEVEL)
-    subdivision_name = clean_location_name(address[subdivision_key] || "", Location::SUBDIVISION_LEVEL)
-    city_name = clean_location_name(address[city_key] || "", Location::CITY_LEVEL)
+    name = normalize_location_name(body["display_name"], geo_level)
+    country_name = normalize_location_name(address[country_key] || "", Location::COUNTRY_LEVEL)
+    state_name = normalize_location_name(address[state_key] || "", Location::STATE_LEVEL)
+    subdivision_name = normalize_location_name(address[subdivision_key] || "", Location::SUBDIVISION_LEVEL)
+    city_name = normalize_location_name(address[city_key] || "", Location::CITY_LEVEL)
 
     loc = {
       name: name,
@@ -136,7 +136,7 @@ module LocationHelper
   #
   # See config/initializers/location_name_aliases.rb and add important known
   # aliases there.
-  def self.clean_location_name(name, geo_level)
+  def self.normalize_location_name(name, geo_level)
     # NOTE(jsheu): Provider v1/autocomplete endpoint often has repetitive
     # country names such as "Cambodia, Cambodia". Dedupe them.
     if name.include?(", ")

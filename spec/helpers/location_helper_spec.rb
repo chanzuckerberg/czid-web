@@ -127,20 +127,20 @@ RSpec.describe LocationHelper, type: :helper do
     end
   end
 
-  describe "#clean_location_name" do
+  describe "#normalize_location_name" do
     it "normalizes name aliases to a common name" do
       name = "United States of America"
       expected = "USA"
       stub_const("LOCATION_NAME_ALIASES", Location::COUNTRY_LEVEL => { name => expected })
 
-      result = LocationHelper.clean_location_name(name, Location::COUNTRY_LEVEL)
+      result = LocationHelper.normalize_location_name(name, Location::COUNTRY_LEVEL)
       expect(result).to eq(expected)
     end
 
     it "doesn't modify names without an alias" do
       name = "Nevada"
       stub_const("LOCATION_NAME_ALIASES", {})
-      result = LocationHelper.clean_location_name(name, Location::STATE_LEVEL)
+      result = LocationHelper.normalize_location_name(name, Location::STATE_LEVEL)
       expect(result).to eq(name)
     end
   end
