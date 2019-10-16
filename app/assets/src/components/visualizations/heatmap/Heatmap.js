@@ -993,17 +993,6 @@ export default class Heatmap {
       .enter()
       .append("g")
       .attr("class", cs.rowLabel)
-      .classed("genusBorder", (label, i, nodes) => {
-        const nextLabel = this.filteredRowLabels[i + 1];
-        // TODO (gdingle): remove
-        console.log(label.label, nextLabel, i);
-        if (nextLabel) {
-          // TODO (gdingle): update to use taxid
-          return label.label.split(" ")[0] !== nextLabel.label.split(" ")[0];
-        } else {
-          return false;
-        }
-      })
       .on("mousein", this.options.onRowLabelMouseIn)
       .on("mouseout", this.options.onRowLabelMouseOut);
 
@@ -1030,6 +1019,27 @@ export default class Heatmap {
           this.options.onRowLabelClick &&
           this.options.onRowLabelClick(d.label, d3.event)
       );
+
+    rowLabelEnter
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", this.rowLabelsWidth)
+      .attr("y1", this.cell.height)
+      .attr("y2", this.cell.height)
+      // TODO (gdingle): adjust me
+      .style("stroke", "black")
+      .style("stroke-width", 1)
+      .classed(cs.hideGenusBorder, (label, i, nodes) => {
+        const nextLabel = this.filteredRowLabels[i + 1];
+        // TODO (gdingle): remove
+        console.log(label.label, nextLabel, i);
+        if (nextLabel) {
+          // TODO (gdingle): update to use taxid
+          return label.label.split(" ")[0] === nextLabel.label.split(" ")[0];
+        } else {
+          return false;
+        }
+      });
 
     rowLabelEnter
       .append("text")
