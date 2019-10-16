@@ -12,40 +12,6 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     @our_results = LocationTestHelper::FORMATTED_GEOSEARCH_RESPONSE
   end
 
-  test "user can geosearch with results" do
-    post user_session_path, params: @user_params
-
-    Location.stub :geo_search_request_base, @api_response do
-      get external_search_locations_path, params: { query: "UCSF" }
-      assert_response :success
-      assert_equal JSON.dump(@our_results), @response.body
-    end
-  end
-
-  test "user can geosearch without results" do
-    post user_session_path, params: @user_params
-
-    Location.stub :geo_search_request_base, [true, []] do
-      get external_search_locations_path, params: { query: "ahsdlfkjasfk" }
-      assert_response :success
-      assert_equal "[]", @response.body
-
-      get external_search_locations_path, params: { query: "" }
-      assert_response :success
-      assert_equal "[]", @response.body
-
-      get external_search_locations_path
-      assert_response :success
-      assert_equal "[]", @response.body
-    end
-
-    Location.stub :geo_search_request_base, [true, LocationTestHelper::API_NO_GEOCODE_RESPONSE] do
-      get external_search_locations_path, params: { query: "ahsdlfkjasfk" }
-      assert_response :success
-      assert_equal "[]", @response.body
-    end
-  end
-
   test "user can geosearch and see an API key error" do
     post user_session_path, params: @user_params
     ENV["LOCATION_IQ_API_KEY"] = nil

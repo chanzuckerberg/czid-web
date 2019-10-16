@@ -2,7 +2,8 @@ module LocationHelper
   # Adapter function to munge responses from Location IQ API to our format
   def self.adapt_location_iq_response(body)
     address = body["address"]
-    # Note(jsheu): 'type' field may contain a helpful exact name match.
+    # Note(jsheu): 'type' field may contain a helpful exact name match, but not
+    # necessarily. Ex: city, state, administrative, river, university, station..
     category = body["type"]
 
     country_key = Location::COUNTRY_NAMES.find { |k| address.include?(k) || k == category }
