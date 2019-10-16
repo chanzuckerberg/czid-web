@@ -4,17 +4,14 @@ class DagGenerator
 
   # http://www.stuartellis.name/articles/erb/
   def initialize(template_file, project_id, sample_id, host_genome, attribute_dict, dag_vars_dict)
-    @project_id = project_id
-    @sample_id = sample_id
-    @template = File.open(template_file, 'r').read
     @template_file = template_file
-    @host_genome = host_genome
 
     # Add to attribute_dict values for Jbuilder templates for portability
     attribute_dict[:host_genome] = host_genome
     attribute_dict[:project_id] = project_id
     attribute_dict[:sample_id] = sample_id
     attribute_dict[:rails_env] = Rails.env
+    attribute_dict[:dag_vars_dict] = dag_vars_dict
 
     @attribute_dict = attribute_dict
     @dag_vars_dict = dag_vars_dict
