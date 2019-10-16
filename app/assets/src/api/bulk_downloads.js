@@ -8,3 +8,8 @@ export const createBulkDownload = bulkDownload =>
     sample_ids: bulkDownload.sampleIds,
     params: bulkDownload.fields,
   });
+
+export const getBulkDownloads = () => get("/bulk_downloads.json");
+
+export const getBulkDownloadDetails = bulkDownloadId =>
+  get(`/bulk_downloads/${bulkDownloadId}.json`);

@@ -1,0 +1,51 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~styles/themes/colors";
+
+.downloadCell {
+  display: flex;
+  text-align: left;
+
+  .downloadIcon {
+    width: 30px;
+    height: 22px;
+    margin-right: $space-xs;
+    fill: $light-grey;
+  }
+
+  .downloadRightPane {
+    padding: $space-xxs 0;
+
+    .downloadName {
+      @include font-header-s-crop;
+      margin-bottom: $space-xxs;
+    }
+
+    .sampleCount {
+      @include font-body-xxs-crop;
+      color: $medium-grey;
+      cursor: pointer;
+
+      &:hover {
+        color: $black;
+      }
+    }
+  }
+}
+
+.statusCell {
+  display: flex;
+  align-items: center;
+  width: 200px;
+  margin-left: auto;
+
+  .loadingIcon {
+    color: $primary-light;
+    margin-right: $space-xxs;
+    @include font-body-m;
+  }
+
+  .message {
+    @include font-body-xxs;
+  }
+}

@@ -116,7 +116,7 @@ Rails.application.routes.draw do
 
   get 'samples/:sample_id/pipeline_viz(/:pipeline_version)', to: 'pipeline_viz#show',
                                                              constraints: { pipeline_version: /\d+\.\d+/ } # To allow period in pipeline version parameter
-  resource :bulk_downloads, only: [:create] do
+  resources :bulk_downloads, only: [:create, :index, :show] do
     get :types, on: :collection
   end
 

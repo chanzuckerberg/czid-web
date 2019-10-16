@@ -123,8 +123,10 @@ Header.propTypes = {
   userSignedIn: PropTypes.bool,
   disableNavigation: PropTypes.bool,
   showBlank: PropTypes.bool,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
 };
 
+// TODO(mark): Separate user dropdown into sections with dividers, to make it more readable.
 const UserMenuDropDown = ({
   adminUser,
   demoUser,
@@ -132,6 +134,7 @@ const UserMenuDropDown = ({
   signInEndpoint,
   signOutEndpoint,
   userName,
+  allowedFeatures,
 }) => {
   const signOut = () => {
     deleteAsync(`${signOutEndpoint}.json`, {
@@ -169,7 +172,27 @@ const UserMenuDropDown = ({
             Help Center
           </ExternalLink>
         }
-      />,
+      />
+    );
+
+    allowedFeatures.includes("bulk_downloads") &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="5"
+          text={
+            <a
+              className={cs.option}
+              href="/bulk_downloads"
+              onClick={() =>
+                logAnalyticsEvent("Header_dropdown-dropdowns-option_clicked")
+              }
+            >
+              Downloads
+            </a>
+          }
+        />
+      );
+    userDropdownItems.push(
       <BareDropdown.Item
         key="6"
         text={
@@ -247,6 +270,7 @@ UserMenuDropDown.propTypes = forbidExtraProps({
   signInEndpoint: PropTypes.string.isRequired,
   signOutEndpoint: PropTypes.string.isRequired,
   userName: PropTypes.string.isRequired,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
 });
 
 const MainMenu = ({ adminUser }) => {

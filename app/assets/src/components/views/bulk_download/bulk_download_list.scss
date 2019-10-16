@@ -1,0 +1,45 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/colors";
+
+.bulkDownloadList {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - #{$header-total-height});
+
+  .blankScreenContainer,
+  .tableContainer {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .largeDownloadIcon {
+    width: 140px;
+    height: 110px;
+    fill: $lightest-grey;
+  }
+
+  .loadingMessage {
+    margin: $space-xl auto 0;
+  }
+}
+
+.viewHeader {
+  margin-top: $space-xl;
+  margin-bottom: $space-xl;
+}
+
+.downloadNameHeader {
+  justify-content: flex-start;
+  // 10px for the margin-left react-virtualized provides
+  // 38px for the size of the DownloadIcon.
+  // Override react-virtualized default.
+  margin-left: 48px !important;
+}
+
+.tableContainer {
+  padding-top: $space-l;
+}
+
+.tableRow {
+  padding: 0 $space-l !important;
+}

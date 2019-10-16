@@ -45,8 +45,37 @@ class BulkDownloadsController < ApplicationController
       render json: @bulk_download.errors.full_messages, status: :unprocessable_entity
     end
   end
-end
 
-def bulk_download_params
-  params.permit(:download_type, sample_ids: [], params: {})
+  # GET /bulk_downloads
+  # GET /bulk_downloads.json
+  def index
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: current_power.viewable_bulk_downloads
+                                  .includes(:pipeline_runs)
+                                  .map { |bulk_download| format_bulk_download(bulk_download) }
+      end
+    end
+  end
+
+  # GET /bulk_downloads/:id.json
+  def show
+    bulk_download_id = params[:id]
+
+    bulk_download = current_power.viewable_bulk_downloads.find(bulk_download_id)
+
+    render json: {
+      bulk_download: format_bulk_download(bulk_download, true),
+      download_type: BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPES.find do |bulk_download_type|
+        bulk_download_type[:type] == bulk_download.download_type
+      end,
+    }
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: BulkDownloadsHelper::BULK_DOWNLOAD_NOT_FOUND }, status: :not_found
+  end
+
+  def bulk_download_params
+    params.permit(:download_type, sample_ids: [], params: {})
+  end
 end

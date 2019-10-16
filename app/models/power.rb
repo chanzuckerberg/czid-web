@@ -69,4 +69,8 @@ class Power
   power :visualizations do
     Visualization.viewable(@user)
   end
+
+  power :viewable_bulk_downloads do
+    BulkDownload.viewable(@user)
+  end
 end

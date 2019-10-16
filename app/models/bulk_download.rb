@@ -20,4 +20,9 @@ class BulkDownload < ApplicationRecord
       self.params_json = params.to_json
     end
   end
+
+  # Only bulk downloads created by the user
+  def self.viewable(user)
+    user.bulk_downloads
+  end
 end
