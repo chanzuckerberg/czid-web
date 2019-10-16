@@ -133,6 +133,7 @@ module LocationHelper
   # Normalize some location names from the provider for matching consistency.
   # Ex: Treat "United States of America" and "USA" as the same in cases where
   # the provider is not internally consistent.
+  # This is for matching names that should be the same.
   #
   # See config/initializers/location_name_aliases.rb and add important known
   # aliases there.
