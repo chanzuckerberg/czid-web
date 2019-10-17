@@ -17,16 +17,9 @@ class LocationsController < ApplicationController
 
     if query.present?
       responses = {}
-      threads = []
       Location::GEOSEARCH_ACTIONS.each do |action|
-        t = Thread.new { external_search_action(action, query, limit, responses) }
-        # Set this to false to avoid a backtrace even on handled exceptions.
-        # Errors will still be raised normally when thread.join is called.
-        t.report_on_exception = false
-        threads << t
+        external_search_action(action, query, limit, responses)
       end
-      threads.each(&:join)
-
       if responses.present?
         results = LocationHelper.handle_external_search_results(responses)
       end
