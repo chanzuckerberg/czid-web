@@ -84,6 +84,7 @@ class SamplesHeatmapView extends React.Component {
       sampleIds: compact(
         map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds)
       ),
+      hideFilters: false,
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
       selectedSampleId: null,
@@ -593,34 +594,46 @@ class SamplesHeatmapView extends React.Component {
           taxonFilterState={this.state.taxonFilterState}
           thresholdFilters={this.state.selectedOptions.thresholdFilters}
           sampleSortType={this.state.selectedOptions.sampleSortType}
+          fullScreen={this.state.hideFilters}
         />
       </ErrorBoundary>
     );
   }
 
+  toggleDisplayFilters = () => {
+    this.setState(prevState => ({ hideFilters: !prevState.hideFilters }));
+  };
+
   render() {
     return (
       <div className={cs.heatmap}>
-        <NarrowContainer>
-          <SamplesHeatmapHeader
-            sampleIds={this.state.sampleIds}
-            data={this.state.data}
-            onDownloadSvg={this.handleDownloadSvg}
-            onDownloadPng={this.handleDownloadPng}
-            onDownloadCsv={this.handleDownloadCsv}
-            onShareClick={this.handleShareClick}
-            onSaveClick={this.handleSaveClick}
-          />
-        </NarrowContainer>
-        <NarrowContainer>
-          <SamplesHeatmapControls
-            options={this.getControlOptions()}
-            selectedOptions={this.state.selectedOptions}
-            onSelectedOptionsChange={this.handleSelectedOptionsChange}
-            loading={this.state.loading}
-            data={this.state.data}
-          />
-        </NarrowContainer>
+        {!this.state.hideFilters && (
+          <div>
+            <NarrowContainer>
+              <SamplesHeatmapHeader
+                sampleIds={this.state.sampleIds}
+                data={this.state.data}
+                onDownloadSvg={this.handleDownloadSvg}
+                onDownloadPng={this.handleDownloadPng}
+                onDownloadCsv={this.handleDownloadCsv}
+                onShareClick={this.handleShareClick}
+                onSaveClick={this.handleSaveClick}
+              />
+            </NarrowContainer>
+            <NarrowContainer>
+              <SamplesHeatmapControls
+                options={this.getControlOptions()}
+                selectedOptions={this.state.selectedOptions}
+                onSelectedOptionsChange={this.handleSelectedOptionsChange}
+                loading={this.state.loading}
+                data={this.state.data}
+              />
+            </NarrowContainer>
+          </div>
+        )}
+        <div className={cs.showHide} onClick={this.toggleDisplayFilters}>
+          {this.state.hideFilters ? "Show Filters" : "Hide Filters"}
+        </div>
         {this.renderVisualization()}
         <DetailsSidebar
           visible={this.state.sidebarVisible}

@@ -163,6 +163,13 @@ class SamplesHeatmapVis extends React.Component {
         },
       });
     }
+    // Disable tooltip if currently shift+clicking to pan the heatmap.
+    if (currentEvent && currentEvent.shiftKey) {
+      this.setState({
+        tooltipLocation: null,
+        nodeHoverInfo: null,
+      });
+    }
   };
 
   handleNodeHover = node => {
@@ -368,7 +375,9 @@ class SamplesHeatmapVis extends React.Component {
           className={cs.plusMinusControl}
         />
         <div
-          className={cs.heatmapContainer}
+          className={cx(cs.heatmapContainer, {
+            [cs.fullScreen]: this.props.fullScreen,
+          })}
           ref={container => {
             this.heatmapContainer = container;
           }}
@@ -434,6 +443,7 @@ SamplesHeatmapVis.propTypes = {
   taxonIds: PropTypes.array,
   thresholdFilters: PropTypes.any,
   sampleSortType: PropTypes.string,
+  fullScreen: PropTypes.bool,
 };
 
 export default SamplesHeatmapVis;
