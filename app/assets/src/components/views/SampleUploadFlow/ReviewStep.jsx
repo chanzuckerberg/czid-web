@@ -1,14 +1,14 @@
 import React from "react";
 import cx from "classnames";
 import {
-  get,
-  without,
-  map,
-  keyBy,
   flow,
-  mapValues,
+  get,
+  keyBy,
+  map,
   mapKeys,
+  mapValues,
   omit,
+  without,
 } from "lodash/fp";
 
 import { getProjectMetadataFields } from "~/api/metadata";
@@ -63,11 +63,11 @@ class ReviewStep extends React.Component {
     const { projectMetadataFields } = this.state;
 
     // Omit sample name, which is the first header.
-    let metadataHeaders = without(
+    const metadataHeaders = without(
       ["Sample Name", "sample_name"],
       metadata.headers.map(
-        // Convert to use friendly name.
-        h => projectMetadataFields[h] && projectMetadataFields[h].name
+        // Convert to use friendly names.
+        h => (projectMetadataFields[h] ? projectMetadataFields[h].name : h)
       )
     );
 
@@ -89,9 +89,10 @@ class ReviewStep extends React.Component {
     const { uploadType, metadata } = this.props;
     const { projectMetadataFields } = this.state;
 
+    // Convert to use friendly names.
     const metadataRows = metadata.rows.map(r => {
       return mapKeys(
-        k => projectMetadataFields[k] && projectMetadataFields[k].name,
+        k => (projectMetadataFields[k] ? projectMetadataFields[k].name : k),
         r
       );
     });
