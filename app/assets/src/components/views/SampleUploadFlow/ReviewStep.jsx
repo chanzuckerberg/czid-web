@@ -181,6 +181,23 @@ class ReviewStep extends React.Component {
     return 0;
   };
 
+  renderReviewTable = () => {
+    const { projectMetadataFields } = this.state;
+
+    if (!projectMetadataFields) {
+      return <div className={cs.loadingMsg}>Loading...</div>;
+    } else {
+      return (
+        <DataTable
+          className={cs.metadataTable}
+          columns={this.getDataHeaders()}
+          data={this.getDataRows()}
+          getColumnWidth={this.getColumnWidth}
+        />
+      );
+    }
+  };
+
   render() {
     const { showUploadModal, showLessDescription } = this.state;
 
@@ -303,12 +320,7 @@ class ReviewStep extends React.Component {
               </div>
             </div>
             <div className={cs.tableScrollWrapper}>
-              <DataTable
-                className={cs.metadataTable}
-                columns={this.getDataHeaders()}
-                data={this.getDataRows()}
-                getColumnWidth={this.getColumnWidth}
-              />
+              {this.renderReviewTable()}
             </div>
           </div>
         </div>
