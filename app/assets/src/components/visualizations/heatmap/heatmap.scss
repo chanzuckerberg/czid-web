@@ -50,13 +50,19 @@
       }
     }
 
+    .genusBorder {
+      color: $light-grey;
+      stroke: black;
+      stroke-width: 1;
+    }
+
     .hideGenusBorder {
       display: none;
     }
   }
 
   // hides genus separators in cluster mode
-  .rowLabels.rowClustering line {
+  .rowLabels.rowClustering .genusBorder {
     display: none;
   }
 

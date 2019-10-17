@@ -1030,15 +1030,8 @@ export default class Heatmap {
       .attr("x2", this.rowLabelsWidth)
       .attr("y1", this.cell.height)
       .attr("y2", this.cell.height)
-      // TODO (gdingle): adjust me
-      .style("stroke", "black")
-      .style("stroke-width", 1)
+      .attr("class", cs.genusBorder)
       .classed(cs.hideGenusBorder, (label, i, nodes) => {
-        console.log(this.rowClustering, this.options.shouldSortRows);
-        if (this.rowClustering) {
-          return true;
-        }
-        // TODO (gdingle):  always hide if heatmap in genus mode?
         const nextLabel = this.filteredRowLabels[i + 1];
         if (nextLabel) {
           // TODO (gdingle): update to use taxid
