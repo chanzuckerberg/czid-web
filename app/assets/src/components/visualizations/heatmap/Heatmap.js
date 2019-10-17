@@ -287,7 +287,7 @@ export default class Heatmap {
     this.gCells = this.g.append("g").attr("class", cs.cells);
     this.gRowDendogram = this.g
       .append("g")
-      .attr("class", cx(cs.dendogram, "rowDendogram"));
+      .attr("class", cx(cs.dendogram, cs.rowDendogram));
     this.gColumnDendogram = this.g
       .append("g")
       .attr("class", cx(cs.dendogram, "columnDendogram"));
@@ -305,6 +305,7 @@ export default class Heatmap {
       .append("rect")
       .attr("class", "metadataLabelsBackground")
       .style("fill", "white");
+
     this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
     this.gCaption = this.g.append("g").attr("class", cs.captionContainer);
   }
@@ -740,6 +741,8 @@ export default class Heatmap {
   }
 
   clusterRows() {
+    this.gRowDendogram.classed(cs.shouldSortRows, false);
+
     let rows = this.getRows();
     this.rowClustering = Cluster.hcluster(rows);
 
@@ -748,6 +751,8 @@ export default class Heatmap {
   }
 
   clusterColumns() {
+    this.gColumnDendogram.classed(cs.shouldSortColumns, false);
+
     let columns = this.getColumns();
     this.columnClustering = Cluster.hcluster(columns);
     this.sortTree(this.columnClustering);
@@ -756,6 +761,7 @@ export default class Heatmap {
 
   sortColumns(direction) {
     this.columnClustering = null;
+    this.gColumnDendogram.classed(cs.shouldSortColumns, true);
     orderBy(this.columnLabels, label => label.label, direction).forEach(
       (label, idx) => {
         label.pos = idx;
@@ -766,7 +772,7 @@ export default class Heatmap {
   sortRows(direction) {
     // TODO (gdingle): sort unclassifieds to the bottom always
     this.rowClustering = null;
-
+    this.gRowDendogram.classed(cs.shouldSortRows, true);
     this.rowLabels = orderBy(this.rowLabels, label => label.label, direction);
     this.rowLabels.forEach((label, idx) => {
       label.pos = idx;

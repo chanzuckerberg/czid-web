@@ -86,6 +86,14 @@
     }
   }
 
+  .rowDendogram.shouldSortRows {
+    display: none;
+  }
+
+  .columnDendogram.shouldSortColumns {
+    display: none;
+  }
+
   .columnMetadata {
     pointer-events: bounding-box;
 
