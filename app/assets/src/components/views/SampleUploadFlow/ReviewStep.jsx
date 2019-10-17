@@ -1,7 +1,17 @@
 import React from "react";
 import cx from "classnames";
-import { get, without, map, keyBy, flow, mapValues, omit } from "lodash/fp";
+import {
+  flow,
+  get,
+  keyBy,
+  map,
+  mapKeys,
+  mapValues,
+  omit,
+  without,
+} from "lodash/fp";
 
+import { getProjectMetadataFields } from "~/api/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -23,8 +33,21 @@ const processMetadataRows = metadataRows =>
 class ReviewStep extends React.Component {
   state = {
     consentChecked: false,
-    showUploadModal: false,
+    projectMetadataFields: null,
     showLessDescription: true,
+    showUploadModal: false,
+  };
+
+  componentDidMount() {
+    this.loadProjectMetadataFields();
+  }
+
+  loadProjectMetadataFields = async () => {
+    const { project } = this.props;
+    const projectMetadataFields = await getProjectMetadataFields(project.id);
+    this.setState({
+      projectMetadataFields: keyBy("key", projectMetadataFields),
+    });
   };
 
   uploadSamplesAndMetadata = () => {
@@ -39,13 +62,20 @@ class ReviewStep extends React.Component {
     this.setState({});
   };
 
+  getFieldDisplayName = key => {
+    const { projectMetadataFields } = this.state;
+    return projectMetadataFields[key] ? projectMetadataFields[key].name : key;
+  };
+
   getDataHeaders = () => {
-    const { uploadType } = this.props;
+    const { uploadType, metadata } = this.props;
+
     // Omit sample name, which is the first header.
     const metadataHeaders = without(
       ["Sample Name", "sample_name"],
-      this.props.metadata.headers
+      metadata.headers.map(this.getFieldDisplayName)
     );
+
     if (uploadType !== "basespace") {
       return ["Sample Name", "Input Files", "Host Genome", ...metadataHeaders];
     } else {
@@ -61,11 +91,17 @@ class ReviewStep extends React.Component {
   };
 
   getDataRows = () => {
-    const { uploadType } = this.props;
+    const { uploadType, metadata } = this.props;
+
+    const metadataRows = metadata.rows.map(r =>
+      mapKeys(this.getFieldDisplayName, r)
+    );
+
     const metadataBySample = keyBy(
       row => row["Sample Name"] || row.sample_name,
-      this.props.metadata.rows
+      metadataRows
     );
+
     const hostGenomesById = keyBy("id", this.props.hostGenomes);
 
     const assembleDataForSample = sample => {
@@ -129,6 +165,23 @@ class ReviewStep extends React.Component {
       return text.split(/\r*\n/).length;
     }
     return 0;
+  };
+
+  renderReviewTable = () => {
+    const { projectMetadataFields } = this.state;
+
+    if (!projectMetadataFields) {
+      return <div className={cs.loadingMsg}>Loading...</div>;
+    } else {
+      return (
+        <DataTable
+          className={cs.metadataTable}
+          columns={this.getDataHeaders()}
+          data={this.getDataRows()}
+          getColumnWidth={this.getColumnWidth}
+        />
+      );
+    }
   };
 
   render() {
@@ -253,12 +306,7 @@ class ReviewStep extends React.Component {
               </div>
             </div>
             <div className={cs.tableScrollWrapper}>
-              <DataTable
-                className={cs.metadataTable}
-                columns={this.getDataHeaders()}
-                data={this.getDataRows()}
-                getColumnWidth={this.getColumnWidth}
-              />
+              {this.renderReviewTable()}
             </div>
           </div>
         </div>
