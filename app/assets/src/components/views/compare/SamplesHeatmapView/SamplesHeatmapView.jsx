@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 import axios from "axios";
 import queryString from "query-string";
 import {
@@ -607,32 +608,34 @@ class SamplesHeatmapView extends React.Component {
   render() {
     return (
       <div className={cs.heatmap}>
-        {!this.state.hideFilters && (
-          <div>
-            <NarrowContainer>
-              <SamplesHeatmapHeader
-                sampleIds={this.state.sampleIds}
-                data={this.state.data}
-                onDownloadSvg={this.handleDownloadSvg}
-                onDownloadPng={this.handleDownloadPng}
-                onDownloadCsv={this.handleDownloadCsv}
-                onShareClick={this.handleShareClick}
-                onSaveClick={this.handleSaveClick}
-              />
-            </NarrowContainer>
-            <NarrowContainer>
-              <SamplesHeatmapControls
-                options={this.getControlOptions()}
-                selectedOptions={this.state.selectedOptions}
-                onSelectedOptionsChange={this.handleSelectedOptionsChange}
-                loading={this.state.loading}
-                data={this.state.data}
-              />
-            </NarrowContainer>
+        <div
+          className={cx(cs.filters, this.state.hideFilters ? cs.hide : cs.show)}
+        >
+          <NarrowContainer>
+            <SamplesHeatmapHeader
+              sampleIds={this.state.sampleIds}
+              data={this.state.data}
+              onDownloadSvg={this.handleDownloadSvg}
+              onDownloadPng={this.handleDownloadPng}
+              onDownloadCsv={this.handleDownloadCsv}
+              onShareClick={this.handleShareClick}
+              onSaveClick={this.handleSaveClick}
+            />
+          </NarrowContainer>
+          <NarrowContainer>
+            <SamplesHeatmapControls
+              options={this.getControlOptions()}
+              selectedOptions={this.state.selectedOptions}
+              onSelectedOptionsChange={this.handleSelectedOptionsChange}
+              loading={this.state.loading}
+              data={this.state.data}
+            />
+          </NarrowContainer>
+        </div>
+        <div className={cs.hideFiltersContainer}>
+          <div className={cs.showHide} onClick={this.toggleDisplayFilters}>
+            {this.state.hideFilters ? "Show Filters" : "Hide Filters"}
           </div>
-        )}
-        <div className={cs.showHide} onClick={this.toggleDisplayFilters}>
-          {this.state.hideFilters ? "Show Filters" : "Hide Filters"}
         </div>
         {this.renderVisualization()}
         <DetailsSidebar

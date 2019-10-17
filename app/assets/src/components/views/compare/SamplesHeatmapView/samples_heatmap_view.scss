@@ -33,13 +33,31 @@
     }
   }
 
-  .showHide {
-    @include font-body-xxs;
-    text-transform: uppercase;
-    display: inline-block;
-    margin: $space-xxs 0 $space-default 0;
-    color: $primary-light;
-    cursor: pointer;
+  .filters {
+    margin-top: -10px;
+    overflow: hidden;
+    transition: height 0.5s ease;
+
+    &.show {
+      height: 284px;
+    }
+
+    &.hide {
+      height: 0px;
+    }
+  }
+
+  .hideFiltersContainer {
+    text-align: center;
+
+    .showHide {
+      @include font-body-xxs;
+      text-transform: uppercase;
+      display: inline-block;
+      margin: $space-xxs 0 $space-default 0;
+      color: $primary-light;
+      cursor: pointer;
+    }
   }
 
   .loadingIndicator,

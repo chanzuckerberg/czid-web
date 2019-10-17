@@ -88,6 +88,14 @@ class SamplesHeatmapVis extends React.Component {
       }
     );
     this.heatmap.start();
+
+    document.addEventListener("keydown", this.handleKeyDown, false);
+    document.addEventListener("keyup", this.handleKeyUp, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleKeyDown, false);
+    document.removeEventListener("keyup", this.handleKeyUp, false);
   }
 
   componentDidUpdate(prevProps) {
@@ -163,8 +171,8 @@ class SamplesHeatmapVis extends React.Component {
         },
       });
     }
-    // Disable tooltip if currently shift+clicking to pan the heatmap.
-    if (currentEvent && currentEvent.shiftKey) {
+    // Disable tooltip if currently spacebar is pressed to pan the heatmap.
+    if (this.state.spacePressed) {
       this.setState({
         tooltipLocation: null,
         nodeHoverInfo: null,
@@ -288,12 +296,27 @@ class SamplesHeatmapVis extends React.Component {
     };
   }
 
+  handleKeyDown = currentEvent => {
+    if (currentEvent.code === "Space") {
+      this.setState({ spacePressed: true });
+    }
+  };
+
+  handleKeyUp = currentEvent => {
+    if (currentEvent.code === "Space") {
+      this.setState({ spacePressed: false });
+    }
+  };
+
   handleCellClick = (cell, currentEvent) => {
-    const sampleId = this.props.sampleIds[cell.columnIndex];
-    openUrl(`/samples/${sampleId}`, currentEvent);
-    logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
-      sampleId,
-    });
+    // Disable cell click if spacebar is pressed to pan the heatmap.
+    if (!this.state.spacePressed) {
+      const sampleId = this.props.sampleIds[cell.columnIndex];
+      openUrl(`/samples/${sampleId}`, currentEvent);
+      logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
+        sampleId,
+      });
+    }
   };
 
   handleAddColumnMetadataClick = trigger => {
@@ -375,9 +398,10 @@ class SamplesHeatmapVis extends React.Component {
           className={cs.plusMinusControl}
         />
         <div
-          className={cx(cs.heatmapContainer, {
-            [cs.fullScreen]: this.props.fullScreen,
-          })}
+          className={cx(
+            cs.heatmapContainer,
+            this.props.fullScreen && cs.fullScreen
+          )}
           ref={container => {
             this.heatmapContainer = container;
           }}
@@ -414,6 +438,12 @@ class SamplesHeatmapVis extends React.Component {
             }}
           />
         )}
+        <div className={cs.bannerContainer}>
+          <div className={cs.banner}>
+            Use the mouse wheel or spacebar+click/drag to move around the
+            heatmap.
+          </div>
+        </div>
       </div>
     );
   }

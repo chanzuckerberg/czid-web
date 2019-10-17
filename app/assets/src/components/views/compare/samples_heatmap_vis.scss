@@ -21,15 +21,16 @@
   .heatmapContainer {
     overflow: hidden;
     height: calc(100vh - 334px - 34px);
+    transition: height 0.5s ease;
+
+    &.fullScreen {
+      height: calc(100vh - 50px - 34px);
+    }
 
     svg {
       display: block;
       margin: 0 auto;
     }
-  }
-
-  .fullScreen {
-    height: calc(100vh - 60px - 34px);
   }
 
   .tooltip {
@@ -59,6 +60,47 @@
         flex: 1 1 0;
         min-width: 0;
       }
+    }
+  }
+
+  .bannerContainer {
+    width: 500px;
+    bottom: 0;
+    left: 50%;
+    margin-left: -250px;
+    text-align: center;
+    position: fixed;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    animation: hideAnimation 5s ease;
+
+    @keyframes hideAnimation {
+      0% {
+        opacity: 1;
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .banner {
+      @include font-body-xxxs;
+
+      background: $white;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+      cursor: default;
+      display: inline-block;
+      margin: 8px auto auto;
+      padding: 6px 8px;
+      text-align: center;
     }
   }
 }

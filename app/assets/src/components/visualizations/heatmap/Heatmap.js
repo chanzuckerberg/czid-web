@@ -440,12 +440,26 @@ export default class Heatmap {
       )`
     );
 
-    // Set up shift+click to pan behavior.
-    this.g
+    // Set up space bar+click to pan behavior.
+    d3
+      .select("body")
+      .on("keydown", () => {
+        if (d3.event.code === "Space") {
+          this.spacePressed = true;
+        }
+      })
+      .on("keyup", () => {
+        if (d3.event.code === "Space") {
+          this.spacePressed = false;
+        }
+      });
+
+    this.svg
       .on("mousedown", () => {
-        if (d3.event.shiftKey) {
-          this.mouseDown = true;
-          (this.x = d3.event.clientX), (this.y = d3.event.clientY);
+        this.mouseDown = true;
+        if (this.spacePressed) {
+          this.mouseX = d3.event.clientX;
+          this.mouseY = d3.event.clientY;
           d3.event.preventDefault();
         }
       })
@@ -454,15 +468,15 @@ export default class Heatmap {
         this.mouseDown = false;
       });
 
-    // Set up scrolling behavior
+    // Set up scrolling behavior.
     this.gCells.on("wheel.zoom", this.scroll.bind(this));
   }
 
   drag() {
-    if (this.mouseDown && d3.event.shiftKey) {
-      this.pan(d3.event.clientX - this.x, d3.event.clientY - this.y);
-      this.x = d3.event.clientX;
-      this.y = d3.event.clientY;
+    if (this.mouseDown && this.spacePressed) {
+      this.pan(d3.event.clientX - this.mouseX, d3.event.clientY - this.mouseY);
+      this.mouseX = d3.event.clientX;
+      this.mouseY = d3.event.clientY;
     }
   }
 
