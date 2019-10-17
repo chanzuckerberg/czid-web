@@ -1,6 +1,15 @@
 import React from "react";
 import cx from "classnames";
-import { get, without, map, keyBy, flow, mapValues, omit } from "lodash/fp";
+import {
+  get,
+  without,
+  map,
+  keyBy,
+  flow,
+  mapValues,
+  mapKeys,
+  omit,
+} from "lodash/fp";
 
 import { getProjectMetadataFields } from "~/api/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
@@ -51,12 +60,21 @@ class ReviewStep extends React.Component {
 
   getDataHeaders = () => {
     const { uploadType } = this.props;
+    const { projectMetadataFields } = this.state;
+
     // Omit sample name, which is the first header.
-    const metadataHeaders = without(
+    let metadataHeaders = without(
       ["Sample Name", "sample_name"],
       this.props.metadata.headers
     );
+    if (projectMetadataFields) {
+      metadataHeaders = metadataHeaders.map(
+        h => (projectMetadataFields[h] ? projectMetadataFields[h].name : h)
+      );
+    }
+
     console.log("first: ", metadataHeaders);
+    console.log("fields: ", this.state.projectMetadataFields);
     if (uploadType !== "basespace") {
       return ["Sample Name", "Input Files", "Host Genome", ...metadataHeaders];
     } else {
@@ -73,10 +91,31 @@ class ReviewStep extends React.Component {
 
   getDataRows = () => {
     const { uploadType } = this.props;
-    const metadataBySample = keyBy(
+    const { projectMetadataFields } = this.state;
+
+    let metadataBySample = keyBy(
       row => row["Sample Name"] || row.sample_name,
       this.props.metadata.rows
     );
+    if (projectMetadataFields) {
+      console.log("rows: ", this.props.metadata.rows);
+      let newRows = this.props.metadata.rows.map(r => {
+        console.log("r: ", r);
+        let z = mapKeys(k => {
+          console.log("k: ", k);
+          return projectMetadataFields[k] ? projectMetadataFields[k].name : k;
+        }, r);
+        console.log("z: ", z);
+        return z;
+      });
+      console.log("new rows: ", newRows);
+      metadataBySample = keyBy(
+        row => row["Sample Name"] || row.sample_name,
+        newRows
+      );
+    }
+
+    console.log("metadataBySample: ", metadataBySample);
     const hostGenomesById = keyBy("id", this.props.hostGenomes);
 
     const assembleDataForSample = sample => {
