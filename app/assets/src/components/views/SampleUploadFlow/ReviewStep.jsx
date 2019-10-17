@@ -38,13 +38,17 @@ class ReviewStep extends React.Component {
     showUploadModal: false,
   };
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadProjectMetadataFields();
+  }
+
+  loadProjectMetadataFields = async () => {
     const { project } = this.props;
     const projectMetadataFields = await getProjectMetadataFields(project.id);
     this.setState({
       projectMetadataFields: keyBy("key", projectMetadataFields),
     });
-  }
+  };
 
   uploadSamplesAndMetadata = () => {
     const { onUploadStatusChange } = this.props;
