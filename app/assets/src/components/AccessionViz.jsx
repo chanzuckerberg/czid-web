@@ -15,7 +15,7 @@ class AccessionViz extends React.Component {
     };
   }
 
-  componentWillUpdate(nextProps, nextState) {
+  UNSAFE_componentWillUpdate(nextProps, nextState) {
     this.state.rendering = true;
   }
 

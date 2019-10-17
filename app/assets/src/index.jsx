@@ -48,7 +48,6 @@ const react_component = (componentName, props, target, requestContext) => {
       document.getElementById(target)
     );
   } else {
-    // TODO: do proper error processing
     // eslint-disable-next-line no-console
     console.error(
       "Couldn't find component for",
