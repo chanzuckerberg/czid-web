@@ -59,22 +59,18 @@ class ReviewStep extends React.Component {
   };
 
   getDataHeaders = () => {
-    const { uploadType } = this.props;
+    const { uploadType, metadata } = this.props;
     const { projectMetadataFields } = this.state;
 
     // Omit sample name, which is the first header.
     let metadataHeaders = without(
       ["Sample Name", "sample_name"],
-      this.props.metadata.headers
+      metadata.headers.map(
+        // Convert to use friendly name.
+        h => projectMetadataFields[h] && projectMetadataFields[h].name
+      )
     );
-    if (projectMetadataFields) {
-      metadataHeaders = metadataHeaders.map(
-        h => (projectMetadataFields[h] ? projectMetadataFields[h].name : h)
-      );
-    }
 
-    console.log("first: ", metadataHeaders);
-    console.log("fields: ", this.state.projectMetadataFields);
     if (uploadType !== "basespace") {
       return ["Sample Name", "Input Files", "Host Genome", ...metadataHeaders];
     } else {
@@ -90,32 +86,21 @@ class ReviewStep extends React.Component {
   };
 
   getDataRows = () => {
-    const { uploadType } = this.props;
+    const { uploadType, metadata } = this.props;
     const { projectMetadataFields } = this.state;
 
-    let metadataBySample = keyBy(
-      row => row["Sample Name"] || row.sample_name,
-      this.props.metadata.rows
-    );
-    if (projectMetadataFields) {
-      console.log("rows: ", this.props.metadata.rows);
-      let newRows = this.props.metadata.rows.map(r => {
-        console.log("r: ", r);
-        let z = mapKeys(k => {
-          console.log("k: ", k);
-          return projectMetadataFields[k] ? projectMetadataFields[k].name : k;
-        }, r);
-        console.log("z: ", z);
-        return z;
-      });
-      console.log("new rows: ", newRows);
-      metadataBySample = keyBy(
-        row => row["Sample Name"] || row.sample_name,
-        newRows
+    const metadataRows = metadata.rows.map(r => {
+      return mapKeys(
+        k => projectMetadataFields[k] && projectMetadataFields[k].name,
+        r
       );
-    }
+    });
 
-    console.log("metadataBySample: ", metadataBySample);
+    const metadataBySample = keyBy(
+      row => row["Sample Name"] || row.sample_name,
+      metadataRows
+    );
+
     const hostGenomesById = keyBy("id", this.props.hostGenomes);
 
     const assembleDataForSample = sample => {
