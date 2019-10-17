@@ -1040,10 +1040,10 @@ export default class Heatmap {
       .classed(cs.hideGenusBorder, (label, i, nodes) => {
         const nextLabel = this.filteredRowLabels[i + 1];
         if (nextLabel) {
-          // TODO (gdingle): update to use taxid
           return label.label.split(" ")[0] === nextLabel.label.split(" ")[0];
         } else {
-          return false;
+          // hide line at very bottom
+          return true;
         }
       });
 
