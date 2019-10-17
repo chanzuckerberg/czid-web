@@ -764,6 +764,7 @@ export default class Heatmap {
   }
 
   sortRows(direction) {
+    // TODO (gdingle): sort unclassifieds to the bottom always
     this.rowClustering = null;
 
     this.rowLabels = orderBy(this.rowLabels, label => label.label, direction);
@@ -971,6 +972,9 @@ export default class Heatmap {
       nodes.attr("transform", d => `translate(0, ${d.pos * this.cell.height})`);
     };
 
+    // hides genus separators in cluster mode
+    this.gRowLabels.classed(cs.rowClustering, this.rowClustering);
+
     let rowLabel = this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
       .data(this.filteredRowLabels, d => d.label)
@@ -1030,9 +1034,12 @@ export default class Heatmap {
       .style("stroke", "black")
       .style("stroke-width", 1)
       .classed(cs.hideGenusBorder, (label, i, nodes) => {
+        console.log(this.rowClustering, this.options.shouldSortRows);
+        if (this.rowClustering) {
+          return true;
+        }
+        // TODO (gdingle):  always hide if heatmap in genus mode?
         const nextLabel = this.filteredRowLabels[i + 1];
-        // TODO (gdingle): remove
-        console.log(label.label, nextLabel, i);
         if (nextLabel) {
           // TODO (gdingle): update to use taxid
           return label.label.split(" ")[0] === nextLabel.label.split(" ")[0];
