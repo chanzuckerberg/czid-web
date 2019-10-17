@@ -58,17 +58,18 @@ class ReviewStep extends React.Component {
     this.setState({});
   };
 
+  getFieldDisplayName = key => {
+    const { projectMetadataFields } = this.state;
+    return projectMetadataFields[key] ? projectMetadataFields[key].name : key;
+  };
+
   getDataHeaders = () => {
     const { uploadType, metadata } = this.props;
-    const { projectMetadataFields } = this.state;
 
     // Omit sample name, which is the first header.
     const metadataHeaders = without(
       ["Sample Name", "sample_name"],
-      metadata.headers.map(
-        // Convert to use friendly names.
-        h => (projectMetadataFields[h] ? projectMetadataFields[h].name : h)
-      )
+      metadata.headers.map(this.getFieldDisplayName)
     );
 
     if (uploadType !== "basespace") {
@@ -87,15 +88,10 @@ class ReviewStep extends React.Component {
 
   getDataRows = () => {
     const { uploadType, metadata } = this.props;
-    const { projectMetadataFields } = this.state;
 
-    // Convert to use friendly names.
-    const metadataRows = metadata.rows.map(r => {
-      return mapKeys(
-        k => (projectMetadataFields[k] ? projectMetadataFields[k].name : k),
-        r
-      );
-    });
+    const metadataRows = metadata.rows.map(r =>
+      mapKeys(this.getFieldDisplayName, r)
+    );
 
     const metadataBySample = keyBy(
       row => row["Sample Name"] || row.sample_name,
