@@ -438,6 +438,9 @@ module ReportHelper
     # This is a workaround for a bug we are fixing soon... but leaving
     # in the code lest that bug recurs.  A warning will be logged.
     #
+    # Two years ago, the above comment was written. It is not clear whether the
+    # bug was fixed.
+    #
     fake_genus_info = tax_info.clone
     fake_genus_info['name'] = "Ad hoc bucket for #{tax_info['name'].downcase}"
     fake_genus_id = FAKE_GENUS_BASE - tax_info['tax_id']
