@@ -140,8 +140,14 @@ class SamplesHeatmapVis extends React.Component {
 
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
+      const taxon = this.props.taxonDetails[id];
+      const sortKey =
+        taxon.parentId == -200 // MISSING_GENUS_ID
+          ? Number.MAX_SAFE_INTEGER
+          : taxon.parentId;
       return {
-        label: this.props.taxonDetails[id].name,
+        label: taxon.name,
+        sortKey: sortKey + "-" + taxon.name, // tie-break by name
       };
     });
   }

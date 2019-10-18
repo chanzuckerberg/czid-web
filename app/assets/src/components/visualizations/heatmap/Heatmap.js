@@ -773,14 +773,19 @@ export default class Heatmap {
     // TODO (gdingle): sort unclassifieds to the bottom always
     this.rowClustering = null;
     this.gRowDendogram.classed(cs.shouldSortRows, true);
-    this.rowLabels = orderBy(this.rowLabels, label => label.label, direction);
+    this.rowLabels = orderBy(
+      this.rowLabels,
+      label => label.sortKey || label.label,
+      direction
+    );
     this.rowLabels.forEach((label, idx) => {
       label.pos = idx;
     });
 
+    // Need to sort this array as well. It is created from rowLabels earlier.
     this.filteredRowLabels = orderBy(
       this.filteredRowLabels,
-      label => label.label,
+      label => label.sortKey || label.label,
       direction
     );
     this.filteredRowLabels.forEach((label, idx) => {
