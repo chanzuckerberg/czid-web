@@ -119,23 +119,80 @@ RSpec.describe LocationHelper, type: :helper do
       result = LocationHelper.adapt_location_iq_response(LocationTestHelper::API_GEOSEARCH_UGANDA_RESPONSE[0])
       expect(result).to eq(expected)
     end
+
+    it "recognizes a matching 'type' field for determining geo level" do
+      expected = LocationTestHelper::FORMATTED_GEOSEARCH_RESPONSE_WITH_TYPE[0].symbolize_keys
+      actual = LocationHelper.adapt_location_iq_response(LocationTestHelper::API_GEOSEARCH_RESPONSE_WITH_TYPE[0])
+      expect(actual).to eq(expected)
+    end
   end
 
-  describe "#normalize_name_aliases" do
+  describe "#normalize_location_name" do
     it "normalizes name aliases to a common name" do
       name = "United States of America"
       expected = "USA"
       stub_const("LOCATION_NAME_ALIASES", Location::COUNTRY_LEVEL => { name => expected })
 
-      result = LocationHelper.normalize_name_aliases(name, Location::COUNTRY_LEVEL)
+      result = LocationHelper.normalize_location_name(name, Location::COUNTRY_LEVEL)
       expect(result).to eq(expected)
     end
 
     it "doesn't modify names without an alias" do
       name = "Nevada"
       stub_const("LOCATION_NAME_ALIASES", {})
-      result = LocationHelper.normalize_name_aliases(name, Location::STATE_LEVEL)
+      result = LocationHelper.normalize_location_name(name, Location::STATE_LEVEL)
       expect(result).to eq(name)
+    end
+  end
+
+  describe "#handle_external_search_results" do
+    context "more autocomplete results than search results" do
+      before do
+        autocomplete_results =
+          API_GEOSEARCH_CALIFORNIA_RESPONSE +
+          API_GEOSEARCH_SF_COUNTY_RESPONSE +
+          API_GEOSEARCH_DHAKA_RESPONSE
+        search_results = API_GEOSEARCH_USA_RESPONSE + API_GEOSEARCH_UGANDA_RESPONSE
+        @raw_results = {
+          Location::GEOSEARCH_ACTIONS[0] => autocomplete_results,
+          Location::GEOSEARCH_ACTIONS[1] => search_results,
+        }
+      end
+
+      it "zips/interpolates autocomplete and geosearch results" do
+        actual = LocationHelper.handle_external_search_results(@raw_results)
+        expected = [
+          FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE,
+          FORMATTED_GEOSEARCH_USA_RESPONSE,
+          FORMATTED_GEOSEARCH_SF_COUNTY_RESPONSE,
+          FORMATTED_GEOSEARCH_UGANDA_RESPONSE,
+          FORMATTED_GEOSEARCH_DHAKA_RESPONSE,
+        ].flatten
+
+        expected_names = expected.map { |r| r.symbolize_keys[:name] }
+        actual_names = actual.map { |r| r[:name] }
+        expect(actual_names).to eq(expected_names)
+      end
+
+      it "filters by OSM search type" do
+        raw_results = {
+          Location::GEOSEARCH_ACTIONS[0] => API_GEOSEARCH_NODE_RESPONSE +
+                                            API_GEOSEARCH_CALIFORNIA_RESPONSE,
+        }
+        actual = LocationHelper.handle_external_search_results(raw_results)
+        expected = [FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE[0].symbolize_keys]
+        expect(actual).to eq(expected)
+      end
+
+      it "de-duplicates by name/geo_level, and osm_id" do
+        raw_results = {
+          Location::GEOSEARCH_ACTIONS[0] => API_GEOSEARCH_CALIFORNIA_RESPONSE + API_GEOSEARCH_USA_RESPONSE,
+          Location::GEOSEARCH_ACTIONS[1] => API_GEOSEARCH_CALIFORNIA_RESPONSE + API_GEOSEARCH_USA_ALTERNATIVE_RESPONSE,
+        }
+        actual = LocationHelper.handle_external_search_results(raw_results)
+        expected = [FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE, FORMATTED_GEOSEARCH_USA_RESPONSE].flatten.map(&:symbolize_keys)
+        expect(actual).to eq(expected)
+      end
     end
   end
 end
