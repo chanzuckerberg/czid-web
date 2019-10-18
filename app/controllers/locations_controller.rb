@@ -14,23 +14,17 @@ class LocationsController < ApplicationController
     results = []
     query = location_params[:query]
     limit = location_params[:limit]
+
     if query.present?
-      success, resp = Location.geosearch(query, limit)
-      if success && resp.is_a?(Array)
-        # Successful request with results. Just keep the first if you get duplicate locations.
-        results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
-        results = results.uniq { |r| [r[:name], r[:geo_level]] }
-      elsif success && resp.is_a?(Hash) && resp["error"] == "Unable to geocode"
-        # Successful request but 0 results
-        Rails.logger.info("No geosearch results for: #{query}")
-      else
-        # Unsuccessful request. Likely Net::HTTPTooManyRequests. Monitor if users run up against geosearch API rate limits / record any other errs.
-        msg = GEOSEARCH_RATE_LIMIT_ERR
-        msg += ": #{resp}" if resp
-        LogUtil.log_err_and_airbrake(msg)
-        raise msg
+      responses = {}
+      Location::GEOSEARCH_ACTIONS.each do |action|
+        external_search_action(action, query, limit, responses)
+      end
+      if responses.present?
+        results = LocationHelper.handle_external_search_results(responses)
       end
     end
+
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]
     MetricUtil.log_analytics_event(event, current_user, { query: query }, request)
     render json: results
@@ -120,5 +114,27 @@ class LocationsController < ApplicationController
 
   def location_params
     params.permit(:query, :limit)
+  end
+
+  def external_search_action(action, query, limit, results)
+    unless Location::GEOSEARCH_ACTIONS.include?(action)
+      raise "Action not allowed"
+    end
+
+    success, resp = Location.public_send(action, query, limit)
+
+    if success && resp.is_a?(Array)
+      results[action] = resp
+    elsif success && resp.is_a?(Hash) && resp["error"] == "Unable to geocode"
+      # Successful request but 0 results
+      Rails.logger.info("No #{action} results for: #{query}")
+    else
+      # Unsuccessful request. Likely Net::HTTPTooManyRequests.
+      # Monitor if users run up against geosearch API rate limits / record any other errs.
+      msg = GEOSEARCH_RATE_LIMIT_ERR
+      msg += ": #{resp}" if resp
+      LogUtil.log_err_and_airbrake(msg)
+      raise msg
+    end
   end
 end
