@@ -1,4 +1,4 @@
-require 'oj'
+# require 'oj'
 
 class SampleReportService
   FIELDS_TO_PLUCK = [
@@ -47,7 +47,7 @@ class SampleReportService
     end
 
     timer("get contig summary") do
-      pipeline_run.get_summary_contig_counts(PipelineRun::MIN_CONTIG_SIZE)
+      pipeline_run.get_taxid_list_with_contigs(PipelineRun::MIN_CONTIG_SIZE)
     end
 
     timer("query_counts_and_summaries (should be fast)") do
@@ -63,7 +63,8 @@ class SampleReportService
                                            tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
                                          )
                                          .where.not(
-                                           tax_id: [TaxonLineage::BLACKLIST_GENUS_ID, TaxonLineage::HOMO_SAPIENS_TAX_ID]
+                                           #  tax_id: [TaxonLineage::BLACKLIST_GENUS_ID, TaxonLineage::HOMO_SAPIENS_TAX_ID]
+                                           tax_id: [TaxonLineage::BLACKLIST_GENUS_ID, 9606]
                                          )
       # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
     end
@@ -304,6 +305,7 @@ def timer(name)
   ending = Process.clock_gettime(Process::CLOCK_MONOTONIC)
   elapsed = ending - starting
   Rails.logger.debug("TIMER[#{name}]: #{elapsed}")
+  puts "TIMER[#{name}]: #{elapsed}"
   result
 end
 
