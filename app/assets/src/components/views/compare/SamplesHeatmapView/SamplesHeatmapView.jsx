@@ -312,6 +312,8 @@ class SamplesHeatmapView extends React.Component {
     let data = {};
     let taxonFilterState = {};
 
+    console.log(rawData, "rawData");
+
     for (let i = 0; i < rawData.length; i++) {
       let sample = rawData[i];
       sampleIds.push(sample.sample_id);

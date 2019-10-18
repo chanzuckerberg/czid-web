@@ -69,6 +69,7 @@ class SamplesHeatmapVis extends React.Component {
         initialColumnMetadataSortAsc: metadataSortAsc,
         onNodeHover: this.handleNodeHover,
         onMetadataNodeHover: this.handleMetadataNodeHover,
+        onRowLabelHover: this.handleRowLabelHover,
         onNodeHoverMove: this.handleMouseHoverMove,
         onNodeHoverOut: this.handleNodeHoverOut,
         onColumnMetadataSortChange: onMetadataSortChange,
@@ -141,10 +142,12 @@ class SamplesHeatmapVis extends React.Component {
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
       const taxon = this.props.taxonDetails[id];
+      // TODO (gdingle): need to get parent genus label
+      console.log(taxon);
       const sortKey =
         taxon.parentId == -200 // MISSING_GENUS_ID
           ? Number.MAX_SAFE_INTEGER
-          : taxon.parentId;
+          : taxon.parentId; // parentId is false when taxon level is genus
       return {
         label: taxon.name,
         sortKey: sortKey,
@@ -208,6 +211,17 @@ class SamplesHeatmapVis extends React.Component {
       columnMetadataLegend: currentPair,
     });
     logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
+  };
+
+  handleRowLabelHover = (label, genusGroup) => {
+    // TODO (gdingle): need to get parent label!!!
+    console.log("handleRowLabelHover", label.label, label.sortKey, genusGroup);
+    // this.setState({
+    //   columnMetadataLegend: currentPair,
+    // });
+    logAnalyticsEvent("SamplesHeatmapVis_row-label_hovered", {
+      // TODO (gdingle):
+    });
   };
 
   handleNodeHoverOut = () => {
