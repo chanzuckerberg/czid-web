@@ -1,0 +1,31 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.blankScreenMessage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .content {
+    display: flex;
+    align-items: center;
+    // The content looks better if it is slightly higher than vertically center.
+    margin-bottom: 10%;
+  }
+
+  .text {
+    margin-right: $space-l;
+  }
+
+  .message {
+    @include font-header-l-crop;
+    margin-bottom: $space-s;
+  }
+
+  .tagline {
+    @include font-body-s-crop;
+  }
+}

@@ -20,42 +20,7 @@
   }
 
   .selectedDownload {
-    background-color: $off-white;
-    padding: 14px;
     margin-top: 20px;
-
-    .title {
-      display: flex;
-
-      .name {
-        @include font-header-xs;
-      }
-
-      .numSamples {
-        @include font-body-xs;
-        color: $medium-grey;
-      }
-    }
-
-    .fields {
-      display: flex;
-      margin: 10px 0 15px;
-
-      .field {
-        flex: 1 1 0;
-        min-width: 0;
-
-        .name {
-          @include font-body-xs;
-        }
-
-        .value {
-          @include font-body-xs;
-          color: $medium-grey;
-          margin-top: -2px;
-        }
-      }
-    }
   }
 
   .footer {
@@ -65,20 +30,6 @@
       @include font-body-xxs;
       color: $medium-grey;
       margin-top: $space-xxs;
-    }
-
-    .loadingMessage {
-      color: $medium-grey;
-      display: flex;
-      align-items: center;
-
-      .icon {
-        margin-right: 4px;
-      }
-
-      .text {
-        @include font-body-xxs;
-      }
     }
   }
 }

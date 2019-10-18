@@ -16,6 +16,7 @@ import HeatmapIcon from "./HeatmapIcon";
 import HumanIcon from "./HumanIcon";
 import InfoIcon from "./InfoIcon";
 import InsightIcon from "./InsightIcon";
+import LargeDownloadIcon from "./LargeDownloadIcon";
 import LoadingIcon from "./LoadingIcon";
 import LockIcon from "./LockIcon";
 import LogoIcon from "./LogoIcon";
@@ -55,6 +56,7 @@ export default {
     HeatmapIcon,
     HumanIcon,
     InfoIcon,
+    LargeDownloadIcon,
     LockIcon,
     MosquitoIcon,
     MouseIcon,

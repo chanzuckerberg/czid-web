@@ -1,0 +1,17 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.loadingMessage {
+  color: $medium-grey;
+  display: flex;
+  align-items: center;
+
+  .loadingIcon {
+    margin-right: $space-xxxs;
+  }
+
+  .text {
+    @include font-body-xxs-crop;
+  }
+}

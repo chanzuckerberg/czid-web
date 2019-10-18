@@ -4,7 +4,7 @@ import { find, filter, get, some, map, isUndefined } from "lodash/fp";
 import cx from "classnames";
 
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import LoadingIcon from "~ui/icons/LoadingIcon";
+import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
@@ -109,11 +109,7 @@ class ChooseStep extends React.Component {
     const { downloadTypes } = this.props;
 
     if (!downloadTypes) {
-      return (
-        <div className={cs.loadingMessage}>
-          <LoadingIcon className={cs.loadingIcon} />Loading download types...
-        </div>
-      );
+      return <LoadingMessage message="Loading download types..." />;
     }
 
     const reportTypes = filter(["category", "report"], downloadTypes);
