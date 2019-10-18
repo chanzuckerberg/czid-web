@@ -29,6 +29,11 @@ desc 'Imports NCBI lineage data into IDseq'
 # The script will check that the number of records in the first three groups is
 # equal to the number of records in the NCBI input files, and it will check
 # that all four groups are disjoint.
+#
+# A useful query for inspecting the table is:
+# SELECT created_at, started_at, version_start, ended_at,
+# version_end, count(*) FROM taxon_lineages GROUP BY created_at,
+# started_at, version_start, ended_at, version_end \G;
 task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
   ### Short Usage: NCBI_DATE=2018-12-01 rake update_lineage_db
   ### Full Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 rake update_lineage_db
@@ -225,9 +230,11 @@ class LineageDatabaseImporter
     raise "lineage database update failed" unless $CHILD_STATUS.success?
   end
 
-  def check_affected(affected, ids_count)
-    if affected != ids_count
-      raise "Wrong number of rows affected: #{affected} and #{ids_count}"
+  def check_affected(sql, expected)
+    puts "\n\nExecuting to affect #{expected} rows:\n#{sql}"
+    affected = TaxonLineage.connection.update(sql)
+    if affected != expected
+      raise "Wrong number of rows affected: #{affected} and #{expected}"
     end
     affected
   end
@@ -305,7 +312,7 @@ class LineageDatabaseImporter
       end
     end
 
-    check_affected(TaxonLineage.connection.update("
+    check_affected("
       INSERT INTO #{@taxon_lineages_table}
       SELECT l.taxid,
       '#{@ncbi_date}',
@@ -333,7 +340,7 @@ class LineageDatabaseImporter
         AND IF(family.taxid IS NULL, family_taxid < 0, 1)
         AND IF(genus.taxid IS NULL, genus_taxid < 0, 1)
         AND IF(species.taxid IS NULL, species_taxid < 0, 1)
-      "), taxid_table_count)
+      ", taxid_table_count)
   end
 
   def retire_records_ids
@@ -385,39 +392,52 @@ class LineageDatabaseImporter
   def execute_upgrade!(retire_ids, insert_ids, update_ids, unchanged_ids)
     # special case initial population
     if retire_ids.count + update_ids.count + unchanged_ids.count == 0
-      return check_affected(TaxonLineage.connection.update("
+      return check_affected("
         INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
         SELECT #{@new_columns.join(', ')}
         FROM #{@taxon_lineages_table}
-      "), insert_ids.count)
+      ", insert_ids.count)
+    end
+
+    if retire_ids.count > 0
+      check_affected("
+        UPDATE taxon_lineages
+        SET ended_at = '#{@ncbi_date}'
+        WHERE (taxid IN (#{retire_ids.join(', ')}))
+          AND version_end = #{@current_version}
+      ", retire_ids.count)
     end
 
     if insert_ids.count > 0
-      check_affected(TaxonLineage.connection.update("
+      check_affected("
         INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
         SELECT #{@new_columns.join(', ')}
         FROM #{@taxon_lineages_table} new
         WHERE new.taxid IN (#{insert_ids.join(', ')})
-      "), insert_ids.count)
+      ", insert_ids.count)
     end
+
     if update_ids.count > 0
-      # mysql counts replace operations as affecting two rows each
-      update_affected = update_ids.count * 2
-      check_affected(TaxonLineage.connection.update("
-        REPLACE INTO taxon_lineages(#{@new_columns.join(', ')})
+      check_affected("
+        DELETE FROM taxon_lineages
+        WHERE taxid IN (#{update_ids.join(', ')})
+          AND version_end = #{@current_version}
+      ", update_ids.count)
+      check_affected("
+        INSERT INTO taxon_lineages(#{@new_columns.join(', ')})
         SELECT #{@new_columns.join(', ')}
         FROM #{@taxon_lineages_table} new
         WHERE new.taxid IN (#{update_ids.join(', ')})
-      "), update_affected)
+      ", update_ids.count)
     end
+
     # Use NOT IN to avoid too large IN clause
-    other_ids = retire_ids + update_ids
-    check_affected(TaxonLineage.connection.update("
+    check_affected("
       UPDATE taxon_lineages
       SET version_end = #{new_version}
-      WHERE taxid NOT IN (#{other_ids.join(', ')})
+      WHERE (taxid NOT IN (#{retire_ids.join(', ')}))
         AND version_end = #{@current_version}
-    "), unchanged_ids.count)
+    ", unchanged_ids.count)
   end
 
   def clean_up
