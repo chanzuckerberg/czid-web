@@ -776,7 +776,6 @@ export default class Heatmap {
   // Re-sorts the rows. The rendered order of rows is determined solely by
   // the `pos` property of each filteredRowLabel.
   sortRows(direction) {
-    // TODO (gdingle): sort unclassifieds to the bottom always
     this.rowClustering = null;
 
     orderBy(
