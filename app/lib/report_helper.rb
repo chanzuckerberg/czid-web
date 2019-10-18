@@ -556,7 +556,8 @@ module ReportHelper
     taxids_with_missing_genera = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
       genus_taxid = tax_info['genus_taxid']
-      unless taxon_counts_2d[genus_taxid] || tax_info['tax_level'] != TaxonCount::TAX_LEVEL_SPECIES
+      unless taxon_counts_2d[genus_taxid] ||
+             tax_info['tax_level'] != TaxonCount::TAX_LEVEL_SPECIES
         taxids_with_missing_genera.add(tax_id)
         missing_genera.add(genus_taxid)
         fake_genera << fake_genus!(tax_info)
@@ -594,7 +595,6 @@ module ReportHelper
     tax_2d = convert_2d(taxon_counts)
     cleanup_genus_ids!(tax_2d)
     validate_names!(tax_2d)
-    cleanup_missing_genus_counts!(tax_2d)
     tax_2d
   end
 
@@ -732,6 +732,8 @@ module ReportHelper
     t0 = wall_clock_ms
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
     tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
+    cleanup_missing_genus_counts!(tax_2d)
+
     t1 = wall_clock_ms
 
     # These counts are shown in the UI on each genus line.
