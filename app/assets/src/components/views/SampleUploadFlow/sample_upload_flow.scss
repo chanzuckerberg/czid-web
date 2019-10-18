@@ -367,6 +367,11 @@
   .tableScrollWrapper {
     overflow: auto;
     max-height: 450px;
+
+    .loadingMsg {
+      @include font-body-s;
+      margin-top: 10px;
+    }
   }
 
   .sampleName {
