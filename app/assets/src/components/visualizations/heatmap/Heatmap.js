@@ -770,7 +770,6 @@ export default class Heatmap {
   }
 
   sortRows(direction) {
-    // TODO (gdingle): sort unclassifieds to the bottom always
     this.rowClustering = null;
     this.gRowDendogram.classed(cs.shouldSortRows, true);
     this.rowLabels = orderBy(
@@ -1045,7 +1044,7 @@ export default class Heatmap {
       .classed(cs.hideGenusBorder, (label, i, nodes) => {
         const nextLabel = this.filteredRowLabels[i + 1];
         if (nextLabel) {
-          return label.label.split(" ")[0] === nextLabel.label.split(" ")[0];
+          return label.sortKey === nextLabel.sortKey;
         } else {
           // hide line at very bottom
           return true;

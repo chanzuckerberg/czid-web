@@ -147,7 +147,7 @@ class SamplesHeatmapVis extends React.Component {
           : taxon.parentId;
       return {
         label: taxon.name,
-        sortKey: sortKey + "-" + taxon.name, // tie-break by name
+        sortKey: sortKey,
       };
     });
   }
