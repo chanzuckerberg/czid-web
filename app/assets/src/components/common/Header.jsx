@@ -4,6 +4,7 @@ import moment from "moment";
 import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 
+import { UserContext } from "~/components/common/UserContext";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import ToastContainer from "~ui/containers/ToastContainer";
@@ -83,6 +84,8 @@ class Header extends React.Component {
       ...userMenuProps
     } = this.props;
 
+    const { allowedFeatures } = this.context;
+
     if (showBlank) {
       return (
         <div className={cs.header}>
@@ -105,7 +108,11 @@ class Header extends React.Component {
             <div className={cs.fill} />
             {!disableNavigation && <MainMenu adminUser={adminUser} />}
             {!disableNavigation && (
-              <UserMenuDropDown adminUser={adminUser} {...userMenuProps} />
+              <UserMenuDropDown
+                adminUser={adminUser}
+                allowedFeatures={allowedFeatures}
+                {...userMenuProps}
+              />
             )}
           </div>
           {
@@ -123,10 +130,10 @@ Header.propTypes = {
   userSignedIn: PropTypes.bool,
   disableNavigation: PropTypes.bool,
   showBlank: PropTypes.bool,
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
 };
 
-// TODO(mark): Separate user dropdown into sections with dividers, to make it more readable.
+Header.contextType = UserContext;
+
 const UserMenuDropDown = ({
   adminUser,
   demoUser,

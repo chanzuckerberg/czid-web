@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { getBulkDownloadDetails } from "~/api/bulk_downloads";
+import { getBulkDownload } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 import LoadingMessage from "~/components/common/LoadingMessage";
 
@@ -21,12 +21,13 @@ class BulkDownloadDetailsModal extends React.Component {
     ) {
       this.setState({
         bulkDownloadDetails: null,
+        downloadType: null,
       });
 
       const {
         bulk_download: bulkDownloadDetails,
         download_type: downloadType,
-      } = await getBulkDownloadDetails(this.props.bulkDownload.id);
+      } = await getBulkDownload(this.props.bulkDownload.id);
 
       this.setState({
         bulkDownloadDetails,
@@ -74,7 +75,7 @@ class BulkDownloadDetailsModal extends React.Component {
     return (
       <Modal narrow open={open} tall onClose={onClose}>
         <div className={cs.title}>Download Details</div>
-        {this.renderDetails()}
+        {open && this.renderDetails()}
       </Modal>
     );
   }

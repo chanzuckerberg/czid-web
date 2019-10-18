@@ -1,5 +1,5 @@
 import React from "react";
 
-export const RequestContext = React.createContext({
+export const UserContext = React.createContext({
   allowedFeatures: new Set(),
 });

@@ -11,5 +11,5 @@ export const createBulkDownload = bulkDownload =>
 
 export const getBulkDownloads = () => get("/bulk_downloads.json");
 
-export const getBulkDownloadDetails = bulkDownloadId =>
+export const getBulkDownload = bulkDownloadId =>
   get(`/bulk_downloads/${bulkDownloadId}.json`);

@@ -7,6 +7,10 @@ import cs from "./bulk_download_table_renderers.scss";
 
 export default class BulkDownloadTableRenderers extends React.Component {
   static renderDownload = ({ rowData }) => {
+    if (!rowData) {
+      return null;
+    }
+
     return (
       <div className={cs.downloadCell}>
         <DownloadIcon className={cs.downloadIcon} />
