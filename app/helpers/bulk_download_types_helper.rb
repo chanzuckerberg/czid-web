@@ -62,4 +62,9 @@ module BulkDownloadTypesHelper
       category: "raw",
     },
   ].freeze
+
+  # A hash of type => display_name.
+  BULK_DOWNLOAD_TYPE_TO_DISPLAY_NAME = Hash[
+    BULK_DOWNLOAD_TYPES.pluck(:type).zip(BULK_DOWNLOAD_TYPES.pluck(:display_name))
+  ]
 end

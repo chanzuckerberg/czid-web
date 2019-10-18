@@ -4,34 +4,9 @@
 
 .maintenance {
   height: calc(100vh - #{$header-total-height});
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .content {
-    display: flex;
-    align-items: center;
-    // The content looks better if it is slightly higher than vertically center.
-    margin-bottom: 10vh;
-  }
-
-  .text {
-    width: 400px;
-    margin-right: 50px;
-  }
-
-  .message {
-    @include font-body-xl;
-    margin-bottom: 20px;
-  }
-
-  .tagline {
-    @include font-body-l;
-    color: $primary-light;
-  }
 
   .bacteriaIcon {
-    width: 150px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
   }
 }
