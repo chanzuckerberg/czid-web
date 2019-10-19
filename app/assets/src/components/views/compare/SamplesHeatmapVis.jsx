@@ -13,6 +13,7 @@ import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
+import CloseIcon from "~ui/icons/CloseIcon";
 
 import cs from "./samples_heatmap_vis.scss";
 
@@ -28,6 +29,7 @@ class SamplesHeatmapVis extends React.Component {
       columnMetadataLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
+      displayControlsBanner: true,
     };
 
     this.heatmap = null;
@@ -376,6 +378,10 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap.updateZoom(newZoom);
   }
 
+  hideControlsBanner = () => {
+    this.setState({ displayControlsBanner: false });
+  };
+
   render() {
     const {
       tooltipLocation,
@@ -438,10 +444,18 @@ class SamplesHeatmapVis extends React.Component {
             }}
           />
         )}
-        <div className={cs.bannerContainer}>
-          <div className={cs.banner}>
-            Use the mouse wheel or spacebar+click/drag to move around the
-            heatmap.
+        <div
+          className={cx(
+            cs.bannerContainer,
+            this.state.displayControlsBanner ? cs.show : cs.hide
+          )}
+        >
+          <div className={cs.bannerText}>
+            Hold SHIFT to scroll horizontally and SPACE BAR to pan.
+            <CloseIcon
+              className={cs.closeIcon}
+              onClick={this.hideControlsBanner}
+            />
           </div>
         </div>
       </div>

@@ -20,11 +20,13 @@
 
   .heatmapContainer {
     overflow: hidden;
+    // Set the height so the heatmap takes up the rest of the screen.
+    // 334px + 34px is the height of the elements above the heatmapContainer.
+    // It *will* need to change if the height of the elements above ever change.
     height: calc(100vh - 334px - 34px);
-    transition: height 0.5s ease;
 
     &.fullScreen {
-      height: calc(100vh - 50px - 34px);
+      height: calc(100vh - 50px - 35px);
     }
 
     svg {
@@ -65,34 +67,28 @@
 
   .bannerContainer {
     width: 500px;
-    bottom: 0;
+    bottom: $space-s;
     left: 50%;
     margin-left: -250px;
     text-align: center;
     position: fixed;
-    opacity: 0;
     transition: opacity 0.5s ease;
-    animation: hideAnimation 5s ease;
 
-    @keyframes hideAnimation {
-      0% {
-        opacity: 1;
-      }
-      80% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-      }
+    &.show {
+      opacity: 1;
+    }
+
+    &.hide {
+      opacity: 0;
     }
 
     &:hover {
       opacity: 1;
     }
 
-    .banner {
-      @include font-body-xxxs;
-
+    .bannerText {
+      @include font-body-xxs;
+      color: $medium-grey;
       background: $white;
       border-radius: 4px;
       box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
@@ -101,6 +97,13 @@
       margin: 8px auto auto;
       padding: 6px 8px;
       text-align: center;
+    }
+
+    .closeIcon {
+      cursor: pointer;
+      height: 15px;
+      margin-left: 5px;
+      vertical-align: top;
     }
   }
 }

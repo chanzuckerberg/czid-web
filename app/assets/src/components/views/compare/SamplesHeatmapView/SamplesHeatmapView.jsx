@@ -25,6 +25,8 @@ import { getSampleTaxons, saveVisualization } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
+import { Divider } from "~/components/layout";
+import SortIcon from "~ui/icons/SortIcon";
 
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
@@ -608,34 +610,39 @@ class SamplesHeatmapView extends React.Component {
   render() {
     return (
       <div className={cs.heatmap}>
-        <div
-          className={cx(cs.filters, this.state.hideFilters ? cs.hide : cs.show)}
-        >
-          <NarrowContainer>
-            <SamplesHeatmapHeader
-              sampleIds={this.state.sampleIds}
-              data={this.state.data}
-              onDownloadSvg={this.handleDownloadSvg}
-              onDownloadPng={this.handleDownloadPng}
-              onDownloadCsv={this.handleDownloadCsv}
-              onShareClick={this.handleShareClick}
-              onSaveClick={this.handleSaveClick}
-            />
-          </NarrowContainer>
-          <NarrowContainer>
-            <SamplesHeatmapControls
-              options={this.getControlOptions()}
-              selectedOptions={this.state.selectedOptions}
-              onSelectedOptionsChange={this.handleSelectedOptionsChange}
-              loading={this.state.loading}
-              data={this.state.data}
-            />
-          </NarrowContainer>
-        </div>
-        <div className={cs.hideFiltersContainer}>
-          <div className={cs.showHide} onClick={this.toggleDisplayFilters}>
-            {this.state.hideFilters ? "Show Filters" : "Hide Filters"}
+        {!this.state.hideFilters && (
+          <div>
+            <NarrowContainer>
+              <SamplesHeatmapHeader
+                sampleIds={this.state.sampleIds}
+                data={this.state.data}
+                onDownloadSvg={this.handleDownloadSvg}
+                onDownloadPng={this.handleDownloadPng}
+                onDownloadCsv={this.handleDownloadCsv}
+                onShareClick={this.handleShareClick}
+                onSaveClick={this.handleSaveClick}
+              />
+            </NarrowContainer>
+            <NarrowContainer>
+              <SamplesHeatmapControls
+                options={this.getControlOptions()}
+                selectedOptions={this.state.selectedOptions}
+                onSelectedOptionsChange={this.handleSelectedOptionsChange}
+                loading={this.state.loading}
+                data={this.state.data}
+              />
+            </NarrowContainer>
           </div>
+        )}
+        {this.state.hideFilters && <Divider />}
+        <div
+          className={cs.filterToggleContainer}
+          onClick={this.toggleDisplayFilters}
+        >
+          <SortIcon
+            className={cs.arrowIcon}
+            sortDirection={this.state.hideFilters ? "descending" : "ascending"}
+          />
         </div>
         {this.renderVisualization()}
         <DetailsSidebar

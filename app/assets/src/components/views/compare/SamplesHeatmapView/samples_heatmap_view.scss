@@ -20,8 +20,8 @@
     background-color: $white;
 
     .filterRow {
-      margin-top: 20px;
-      margin-bottom: 15px;
+      margin-top: $space-m;
+      margin-bottom: $space-m;
     }
 
     .filterTag {
@@ -33,30 +33,18 @@
     }
   }
 
-  .filters {
-    margin-top: -10px;
-    overflow: hidden;
-    transition: height 0.5s ease;
-
-    &.show {
-      height: 284px;
-    }
-
-    &.hide {
-      height: 0px;
-    }
-  }
-
-  .hideFiltersContainer {
+  .filterToggleContainer {
+    margin: auto;
+    width: 47px;
+    display: block;
     text-align: center;
 
-    .showHide {
-      @include font-body-xxs;
-      text-transform: uppercase;
-      display: inline-block;
-      margin: $space-xxs 0 $space-default 0;
-      color: $primary-light;
-      cursor: pointer;
+    .arrowIcon {
+      color: $dark-grey;
+      font-size: $font-size-h4;
+      padding: 0 18px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
     }
   }
 
