@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import cx from "classnames";
 import axios from "axios";
 import queryString from "query-string";
 import {
@@ -18,14 +17,13 @@ import DeepEqual from "fast-deep-equal";
 
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
-import { NarrowContainer } from "~/components/layout";
+import { NarrowContainer, Divider } from "~/components/layout";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { processMetadata } from "~utils/metadata";
 import { getSampleTaxons, saveVisualization } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
-import { Divider } from "~/components/layout";
 import SortIcon from "~ui/icons/SortIcon";
 
 import cs from "./samples_heatmap_view.scss";
