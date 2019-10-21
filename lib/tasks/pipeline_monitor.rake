@@ -1,20 +1,6 @@
 # Jos to check the status of pipeline runs
 require 'English'
 require 'json'
-require 'parallel'
-
-PROCESS_COUNT = 20
-
-Rails.application.config.after_initialize do
-  ActiveRecord::Base.connection_pool.disconnect!
-
-  ActiveSupport.on_load(:active_record) do
-    config = ActiveRecord::Base.configurations[Rails.env] ||
-             Rails.application.config.database_configuration[Rails.env]
-    config['pool'] = PROCESS_COUNT
-    ActiveRecord::Base.establish_connection(config)
-  end
-end
 
 # Benchmark status will not be updated faster than this.
 IDSEQ_BENCH_UPDATE_FREQUENCY_SECONDS = 600
@@ -30,6 +16,10 @@ IDSEQ_BENCH_KEY_CONFIG = "config.v2.json".freeze
 AWS_DEFAULT_REGION = ENV.fetch('AWS_DEFAULT_REGION') { "us-west-2" }
 
 class CheckPipelineRuns
+  # Concurrency allowed
+  MAX_SHARDS = 10
+  MIN_JOBS_PER_SHARD = 20
+
   @sleep_quantum = 5.0
 
   @shutdown_requested = false
@@ -38,26 +28,36 @@ class CheckPipelineRuns
     attr_accessor :shutdown_requested
   end
 
-  def self.update_pr(prid)
-    unless @shutdown_requested
+  def self.update_jobs(num_shards, shard_id, pr_ids, pt_ids)
+    ActiveRecord::Base.connection.reconnect! if shard_id > 0
+    num_pr = pr_ids.count
+    num_pt = pt_ids.count
+    Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr and #{num_pt} pt. shard #{shard_id} out of #{num_shards}")
+    pr_ids.each do |prid|
+      next unless prid % num_shards == shard_id
       pr = PipelineRun.find(prid)
-      Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
-      pr.update_job_status
+      begin
+        break if @shutdown_requested
+        Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
+        pr.update_job_status
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Updating pipeline run #{pr.id} failed with exception: #{exception.message}")
+        LogUtil.log_backtrace(exception)
+      end
     end
-  rescue => exception
-    LogUtil.log_err_and_airbrake("Updating pipeline run #{pr.id} failed with exception: #{exception.message}")
-    LogUtil.log_backtrace(exception)
-  end
 
-  def self.update_pt(ptid)
-    unless @shutdown_requested
+    pt_ids.each do |ptid|
+      next unless ptid % num_shards == shard_id
       pt = PhyloTree.find(ptid)
-      Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
-      pt.monitor_job
+      begin
+        break if @shutdown_requested
+        Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
+        pt.monitor_job
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Monitor job for phylo_tree #{pt.id} failed with exception: #{exception.message}")
+        LogUtil.log_backtrace(exception)
+      end
     end
-  rescue => exception
-    LogUtil.log_err_and_airbrake("Monitor job for phylo_tree #{pt.id} failed with exception: #{exception.message}")
-    LogUtil.log_backtrace(exception)
   end
 
   def self.forced_update_interval
@@ -317,15 +317,16 @@ class CheckPipelineRuns
       t_iter_start = t_now
       pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
-      Parallel.each(pr_ids, in_processes: PROCESS_COUNT) do |prid|
-        ActiveRecord::Base.connection.reconnect!
-        update_pr(prid)
+      num_shards = ((pr_ids.count + pt_ids.count) / MIN_JOBS_PER_SHARD).to_i
+      num_shards = [[num_shards, MAX_SHARDS].min, 1].max
+      fork_pids = []
+      shard_id = 0
+      while shard_id < num_shards
+        pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids) }
+        fork_pids << pid
+        shard_id += 1
       end
-      Parallel.each(pt_ids, in_processes: PROCESS_COUNT) do |ptid|
-        ActiveRecord::Base.connection.reconnect!
-        update_pt(ptid)
-      end
-      ActiveRecord::Base.connection.reconnect!
+      fork_pids.each { |p| Process.waitpid(p) }
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
@@ -337,6 +338,7 @@ class CheckPipelineRuns
         duration: (after_iter_timestamp - before_iter_timestamp),
         pr_id_count: pr_ids.count,
         pt_id_count: pt_ids.count,
+        num_shards: num_shards,
       }
       Rails.logger.info(JSON.generate(logger_iteration_data))
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
