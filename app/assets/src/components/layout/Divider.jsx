@@ -12,7 +12,7 @@ Divider.defaultProps = {
 };
 
 Divider.propTypes = {
-  style: PropTypes.oneOf(["thin", "medium", "shadow"]),
+  style: PropTypes.oneOf(["thin", "medium"]),
 };
 
 export default Divider;

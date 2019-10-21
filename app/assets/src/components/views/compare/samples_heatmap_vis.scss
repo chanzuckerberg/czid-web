@@ -91,18 +91,18 @@
       color: $medium-grey;
       background: $white;
       border-radius: 4px;
-      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+      box-shadow: $box-shadow-dropdown-menu;
       cursor: default;
       display: inline-block;
-      margin: 8px auto auto;
-      padding: 6px 8px;
+      margin: $space-xs auto auto;
+      padding: $space-xxs $space-xs;
       text-align: center;
     }
 
     .closeIcon {
       cursor: pointer;
       height: 15px;
-      margin-left: 5px;
+      margin-left: $space-xxs;
       vertical-align: -3px;
     }
   }

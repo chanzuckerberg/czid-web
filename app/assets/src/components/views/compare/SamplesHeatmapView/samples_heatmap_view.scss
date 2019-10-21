@@ -35,19 +35,24 @@
   }
 
   .filterToggleContainer {
-    margin: auto;
-    width: 47px;
-    display: block;
     text-align: center;
     position: relative;
 
+    .filterLine {
+      height: 0px;
+      border-bottom: 10px solid $white;
+      box-shadow: $box-shadow-dropdown-menu;
+    }
+
     .arrowIcon {
+      display: inline-block;
+      cursor: pointer;
       color: $dark-grey;
       background-color: $white;
       font-size: $font-size-h4;
-      padding: 0 18px;
+      padding: 0 $space-m;
       border-radius: 0 0 4px 4px;
-      box-shadow: 0 2px 2px 0 rgba(34, 36, 38, 0.2);
+      box-shadow: $box-shadow-tab-bottom;
     }
   }
 

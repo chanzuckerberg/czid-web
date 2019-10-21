@@ -17,7 +17,7 @@ import DeepEqual from "fast-deep-equal";
 
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
-import { NarrowContainer, Divider } from "~/components/layout";
+import { NarrowContainer } from "~/components/layout";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { processMetadata } from "~utils/metadata";
 import { getSampleTaxons, saveVisualization } from "~/api";
@@ -632,15 +632,15 @@ class SamplesHeatmapView extends React.Component {
             </NarrowContainer>
           </div>
         )}
-        {this.state.hideFilters && <Divider style="shadow" />}
-        <div
-          className={cs.filterToggleContainer}
-          onClick={this.toggleDisplayFilters}
-        >
-          <SortIcon
-            className={cs.arrowIcon}
-            sortDirection={this.state.hideFilters ? "descending" : "ascending"}
-          />
+        <div className={cs.filterToggleContainer}>
+          {this.state.hideFilters && <div className={cs.filterLine} />}
+          <div className={cs.arrowIcon} onClick={this.toggleDisplayFilters}>
+            <SortIcon
+              sortDirection={
+                this.state.hideFilters ? "descending" : "ascending"
+              }
+            />
+          </div>
         </div>
         {this.renderVisualization()}
         <DetailsSidebar

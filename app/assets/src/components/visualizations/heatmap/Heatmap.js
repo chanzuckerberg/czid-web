@@ -445,11 +445,15 @@ export default class Heatmap {
       .select("body")
       .on("keydown", () => {
         if (d3.event.code === "Space") {
+          this.svg.style("cursor", "move");
+          this.gCells.selectAll(`.${cs.cell}`).style("cursor", "move");
           this.spacePressed = true;
         }
       })
       .on("keyup", () => {
         if (d3.event.code === "Space") {
+          this.svg.style("cursor", "auto");
+          this.gCells.selectAll(`.${cs.cell}`).style("cursor", "auto");
           this.spacePressed = false;
         }
       });
@@ -469,7 +473,7 @@ export default class Heatmap {
       });
 
     // Set up scrolling behavior.
-    this.gCells.on("wheel.zoom", this.scroll.bind(this));
+    this.g.on("wheel.zoom", this.scroll.bind(this));
   }
 
   drag() {
@@ -1134,6 +1138,7 @@ export default class Heatmap {
       .append("rect")
       .attr("class", cs.hoverTarget)
       .attr("x", -this.options.marginLeft)
+      .attr("y", -1)
       .attr("width", d => {
         const xOffset =
           d.value === this.columnMetadataSortField
@@ -1141,7 +1146,7 @@ export default class Heatmap {
             : 0;
         return this.rowLabelsWidth + this.options.marginLeft + xOffset;
       })
-      .attr("height", this.options.minCellHeight)
+      .attr("height", this.options.minCellHeight + 1)
       .style("text-anchor", "end")
       .style("fill", "white");
 
