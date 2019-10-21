@@ -21,12 +21,12 @@
   .heatmapContainer {
     overflow: hidden;
     // Set the height so the heatmap takes up the rest of the screen.
-    // 334px + 34px is the height of the elements above the heatmapContainer.
+    // 358px is the height of the elements above the heatmapContainer.
     // It *will* need to change if the height of the elements above ever change.
-    height: calc(100vh - 334px - 34px);
+    height: calc(100vh - 358px);
 
     &.fullScreen {
-      height: calc(100vh - 50px - 35px);
+      height: calc(100vh - 85px);
     }
 
     svg {

@@ -632,7 +632,7 @@ class SamplesHeatmapView extends React.Component {
             </NarrowContainer>
           </div>
         )}
-        {this.state.hideFilters && <Divider />}
+        {this.state.hideFilters && <Divider style="shadow" />}
         <div
           className={cs.filterToggleContainer}
           onClick={this.toggleDisplayFilters}
