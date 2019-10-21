@@ -1,5 +1,6 @@
 # Jos to check the status of pipeline runs
 require 'English'
+require 'thread/pool'
 require 'json'
 
 # Benchmark status will not be updated faster than this.
