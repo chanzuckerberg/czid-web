@@ -142,8 +142,6 @@ class SamplesHeatmapVis extends React.Component {
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
       const taxon = this.props.taxonDetails[id];
-      // TODO (gdingle): need to get parent genus label
-      console.log(taxon);
       const sortKey =
         taxon.parentId == -200 // MISSING_GENUS_ID
           ? Number.MAX_SAFE_INTEGER
@@ -214,15 +212,18 @@ class SamplesHeatmapVis extends React.Component {
     logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
-  handleRowLabelHover = (label, genusGroup) => {
-    // TODO (gdingle): need to get parent label!!!
-    console.log("handleRowLabelHover", label.label, label.sortKey, genusGroup);
+  handleRowLabelHover = label => {
+    console.log(
+      "handleRowLabelHover",
+      label.label,
+      label.sortKey,
+      label.genusName
+    );
+    // TODO (gdingle): create a hover something
     // this.setState({
     //   columnMetadataLegend: currentPair,
     // });
-    logAnalyticsEvent("SamplesHeatmapVis_row-label_hovered", {
-      // TODO (gdingle):
-    });
+    logAnalyticsEvent("SamplesHeatmapVis_row-label_hovered", label);
   };
 
   handleNodeHoverOut = () => {

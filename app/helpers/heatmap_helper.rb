@@ -353,11 +353,6 @@ module HeatmapHelper
           (0.0 - taxon_counts.e_value),
           #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}
         )                                AS  neglogevalue
-
-        # TODO: (gdingle): need to get genus name here... from taxon_lineages?
-        genus_taxid
-
-
       FROM taxon_counts
       JOIN taxon_lineages ON taxon_counts.tax_id = taxon_lineages.taxid
       LEFT OUTER JOIN taxon_summaries ON
