@@ -36,7 +36,7 @@ module ReportHelper
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue aggregatescore maxzscore r_pct rpm_bg].freeze
   COUNT_TYPES = %w[NT NR].freeze
   # Note: no underscore in sortable column names. Add to here to protect from data cleaning.
-  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid family_taxid superkingdom_taxid category_name is_phage].freeze
+  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid genus_name family_taxid superkingdom_taxid category_name is_phage].freeze
   UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
 
   # This query takes 1.4 seconds and the results are static, so we hardcoded it

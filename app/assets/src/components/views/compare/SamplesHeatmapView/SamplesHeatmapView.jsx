@@ -339,6 +339,7 @@ class SamplesHeatmapView extends React.Component {
               parentId:
                 taxon.tax_id === taxon.species_taxid && taxon.genus_taxid,
               phage: !!taxon.is_phage,
+              genusName: taxon.genus_name,
             };
             taxonDetails[taxon.name] = taxonDetails[taxon.tax_id];
           } else {
