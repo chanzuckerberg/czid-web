@@ -1,7 +1,7 @@
 import d3 from "d3";
 import textWidth from "text-width";
 import Cluster from "clusterfck";
-import { mean } from "lodash/fp";
+import { clamp, mean } from "lodash/fp";
 import { orderBy, some } from "lodash";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
@@ -516,12 +516,10 @@ export default class Heatmap {
     // Translating the row labels in the opposite x direction of the svg.
     let rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
       .translate;
-    let labelsDx = Math.max(
+    let labelsDx = clamp(
       0,
-      Math.min(
-        rowLabelsCurrent[0] - deltaX,
-        -xScrollMax + this.options.marginLeft
-      )
+      -xScrollMax + this.options.marginLeft,
+      rowLabelsCurrent[0] - deltaX
     );
     this.gRowLabels.attr(
       "transform",
@@ -531,11 +529,8 @@ export default class Heatmap {
     // Translating the metadata labels in the opposite x direction of the svg (same as row labels).
     let applyFormat = nodes => {
       nodes.attr("transform", (d, idx) => {
-        const xOffset =
-          d.value === this.columnMetadataSortField
-            ? -this.options.metadataSortIconSize - this.options.spacing
-            : 0;
-        return `translate(${labelsDx + xOffset},
+        const xOffset = this.getColumnMetadataLabelOffset(d);
+        return `translate(${labelsDx - xOffset},
             ${idx * this.options.minCellHeight})`;
       });
     };
@@ -567,12 +562,10 @@ export default class Heatmap {
     // Translating the column labels in the opposite y direction of the svg.
     let columnLabelsCurrent = d3.transform(this.gColumnLabels.attr("transform"))
       .translate;
-    let labelsDy = Math.max(
+    let labelsDy = clamp(
       this.columnLabelsHeight,
-      Math.min(
-        columnLabelsCurrent[1] - deltaY,
-        this.columnLabelsHeight + this.options.marginTop - yScrollMax
-      )
+      this.columnLabelsHeight + this.options.marginTop - yScrollMax,
+      columnLabelsCurrent[1] - deltaY
     );
     this.gColumnLabels.attr(
       "transform",
@@ -1098,14 +1091,17 @@ export default class Heatmap {
     this.renderColumnMetadataLabels();
   }
 
+  getColumnMetadataLabelOffset(d) {
+    return d.value === this.columnMetadataSortField
+      ? this.options.metadataSortIconSize + this.options.spacing
+      : 0;
+  }
+
   renderColumnMetadataLabels() {
     let applyFormat = nodes => {
       nodes.attr("transform", (d, idx) => {
-        const xOffset =
-          d.value === this.columnMetadataSortField
-            ? -this.options.metadataSortIconSize - this.options.spacing
-            : 0;
-        return `translate(${xOffset}, ${idx * this.options.minCellHeight})`;
+        const xOffset = this.getColumnMetadataLabelOffset(d);
+        return `translate(${-xOffset}, ${idx * this.options.minCellHeight})`;
       });
     };
 
@@ -1140,10 +1136,7 @@ export default class Heatmap {
       .attr("x", -this.options.marginLeft)
       .attr("y", -1)
       .attr("width", d => {
-        const xOffset =
-          d.value === this.columnMetadataSortField
-            ? this.options.metadataSortIconSize + this.options.spacing
-            : 0;
+        const xOffset = this.getColumnMetadataLabelOffset(d);
         return this.rowLabelsWidth + this.options.marginLeft + xOffset;
       })
       .attr("height", this.options.minCellHeight + 1)
@@ -1156,10 +1149,7 @@ export default class Heatmap {
         : this.handleColumnMetadataLabelClick(d.value);
 
       columnMetadataLabelEnter.selectAll("rect").attr("width", d => {
-        const xOffset =
-          d.value === this.columnMetadataSortField
-            ? this.options.metadataSortIconSize + this.options.spacing
-            : 0;
+        const xOffset = this.getColumnMetadataLabelOffset(d);
         return this.rowLabelsWidth + this.options.marginLeft + xOffset;
       });
     };

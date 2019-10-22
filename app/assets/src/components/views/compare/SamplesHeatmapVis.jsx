@@ -307,6 +307,7 @@ class SamplesHeatmapVis extends React.Component {
   handleKeyUp = currentEvent => {
     if (currentEvent.code === "Space") {
       this.setState({ spacePressed: false });
+      currentEvent.preventDefault();
     }
   };
 

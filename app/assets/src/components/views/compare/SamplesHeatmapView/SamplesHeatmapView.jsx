@@ -634,7 +634,13 @@ class SamplesHeatmapView extends React.Component {
         )}
         <div className={cs.filterToggleContainer}>
           {this.state.hideFilters && <div className={cs.filterLine} />}
-          <div className={cs.arrowIcon} onClick={this.toggleDisplayFilters}>
+          <div
+            className={cs.arrowIcon}
+            onClick={withAnalytics(
+              this.toggleDisplayFilters,
+              "SamplesHeatmapFilters_toggle_clicked"
+            )}
+          >
             <SortIcon
               sortDirection={
                 this.state.hideFilters ? "descending" : "ascending"

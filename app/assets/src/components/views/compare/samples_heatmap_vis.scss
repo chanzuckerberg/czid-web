@@ -87,7 +87,7 @@
     }
 
     .bannerText {
-      @include font-body-xxs;
+      @include font-body-xxs-crop;
       color: $medium-grey;
       background: $white;
       border-radius: 4px;
