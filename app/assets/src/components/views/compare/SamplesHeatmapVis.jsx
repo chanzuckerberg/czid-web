@@ -13,7 +13,7 @@ import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
-import CloseIcon from "~ui/icons/CloseIcon";
+import RemoveIcon from "~ui/icons/RemoveIcon";
 
 import cs from "./samples_heatmap_vis.scss";
 
@@ -453,8 +453,8 @@ class SamplesHeatmapVis extends React.Component {
         >
           <div className={cs.bannerText}>
             Hold SHIFT to scroll horizontally and SPACE BAR to pan.
-            <CloseIcon
-              className={cs.closeIcon}
+            <RemoveIcon
+              className={cs.removeIcon}
               onClick={this.hideControlsBanner}
             />
           </div>
