@@ -839,6 +839,23 @@ export default class Heatmap {
     this.processData("filter");
   };
 
+  handleRowLabelMouseOver = rowEntered => {
+    if (this.rowClustering) return;
+    this.gRowLabels
+      .selectAll(`.${cs.rowLabel}`)
+      .classed(
+        cs.rowLabelHover,
+        row => row.sortKey && row.sortKey === rowEntered.sortKey
+      );
+  };
+
+  handleRowLabelMouseOut = d => {
+    if (this.rowClustering) return;
+    this.gRowLabels
+      .selectAll(`.${cs.rowLabel}`)
+      .classed(cs.rowLabelHover, false);
+  };
+
   handleColumnMetadataLabelClick(value) {
     const { onColumnMetadataSortChange } = this.options;
     if (this.columnMetadataSortField === value) {
@@ -1007,8 +1024,8 @@ export default class Heatmap {
       .enter()
       .append("g")
       .attr("class", cs.rowLabel)
-      .on("mousein", this.options.onRowLabelMouseIn)
-      .on("mouseout", this.options.onRowLabelMouseOut);
+      .on("mouseover", this.handleRowLabelMouseOver)
+      .on("mouseout", this.handleRowLabelMouseOut);
 
     rowLabelEnter
       .append("rect")
@@ -1032,19 +1049,7 @@ export default class Heatmap {
         d =>
           this.options.onRowLabelClick &&
           this.options.onRowLabelClick(d.label, d3.event)
-      )
-      .on("mouseover", d => {
-        this.options.onRowLabelHover && this.options.onRowLabelHover(d);
-      });
-    // TODO (gdingle):
-    // .on("mouseleave", d => {
-    //   this.options.onColumnMetadataLabelOut &&
-    //     this.options.onColumnMetadataLabelOut(d);
-    // })
-    // .on("mousemove", d => {
-    //   this.options.onColumnMetadataLabelMove &&
-    //     this.options.onColumnMetadataLabelMove(d, d3.event);
-    // });
+      );
 
     rowLabelEnter
       .append("line")
@@ -1067,7 +1072,7 @@ export default class Heatmap {
       .append("text")
       .attr("class", cs.removeIcon)
       .text("X")
-      .attr("transform", `translate(0, ${this.cell.height / 2})`)
+      .attr("transform", `translate(2, ${this.cell.height / 2})`)
       .style("dominant-baseline", "central")
       .on("click", this.removeRow);
 

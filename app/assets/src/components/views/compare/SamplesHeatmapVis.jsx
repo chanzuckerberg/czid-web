@@ -214,14 +214,12 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleRowLabelHover = label => {
-    const nodeHoverInfo = [label.genusName, <b>{label.genusName}</b>];
-
     this.setState({
-      rowLabelLegend: nodeHoverInfo,
+      rowLabelLegend: label.genusName,
     });
     console.log(
       "handleRowLabelHover",
-      nodeHoverInfo,
+      this.state.rowLabelLegend,
       this.state.tooltipLocation
     );
     logAnalyticsEvent("SamplesHeatmapVis_row-label_hovered", label);
@@ -464,20 +462,6 @@ class SamplesHeatmapVis extends React.Component {
               metadataColors={columnMetadataLegend}
               tooltipLocation={tooltipLocation}
             />
-          )}
-        {rowLabelLegend &&
-          tooltipLocation && (
-            <div
-              className={cx(cs.tooltip, rowLabelLegend && cs.visible)}
-              style={getTooltipStyle(tooltipLocation, {
-                buffer: 20,
-                below: true,
-                // so we can show the tooltip above the cursor if need be
-                height: nodeHoverInfo.nodeHasData ? 300 : 180,
-              })}
-            >
-              <DataTooltip {...rowLabelLegend} />
-            </div>
           )}
         {addMetadataTrigger && (
           <MetadataSelector
