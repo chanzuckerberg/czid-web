@@ -375,17 +375,10 @@ export default class Heatmap {
       `translate(${this.options.marginLeft},${this.options.marginTop})`
     );
     this.rowLabelsBackground
-      .attr("x", -this.options.marginLeft)
-      .attr("y", totalColumnLabelsHeight + totalMetadataHeight)
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
       .attr("height", totalCellHeight + totalColumnClusterHeight);
-    this.gRowLabels.attr(
-      "transform",
-      `translate(0, ${totalColumnLabelsHeight + totalMetadataHeight})`
-    );
+    this.placeRowLabels(0);
     this.columnLabelsBackground
-      .attr("x", this.rowLabelsWidth)
-      .attr("y", -totalColumnLabelsHeight)
       .attr(
         "width",
         this.rowLabelsWidth +
@@ -397,15 +390,10 @@ export default class Heatmap {
         "height",
         totalColumnLabelsHeight + totalMetadataHeight + this.options.marginTop
       );
-    this.gColumnLabels.attr(
-      "transform",
-      `translate(${this.rowLabelsWidth},${totalColumnLabelsHeight})`
-    );
     this.metadataLabelsBackground
-      .attr("x", -this.options.marginLeft)
-      .attr("y", -this.options.marginTop)
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
       .attr("height", totalColumnLabelsHeight + this.options.marginTop);
+    this.placeColumnAndMetadataLabels(this.columnLabelsHeight);
     this.gCells.attr(
       "transform",
       `translate(${this.rowLabelsWidth},
@@ -424,10 +412,6 @@ export default class Heatmap {
         ${this.rowLabelsWidth},
         ${totalColumnLabelsHeight + totalMetadataHeight + totalCellHeight}
       )`
-    );
-    this.gColumnMetadata.attr(
-      "transform",
-      `translate(0, ${totalColumnLabelsHeight})`
     );
     this.gCaption.attr(
       "transform",
@@ -521,45 +505,15 @@ export default class Heatmap {
       -xScrollMax + this.options.marginLeft,
       rowLabelsCurrent[0] - deltaX
     );
-    this.gRowLabels.attr(
-      "transform",
-      `translate(${[labelsDx, rowLabelsCurrent[1]]})`
-    );
+    this.placeRowLabels(labelsDx);
 
     // Translating the metadata labels in the opposite x direction of the svg (same as row labels).
-    let applyFormat = nodes => {
-      nodes.attr("transform", (d, idx) => {
-        const xOffset = this.getColumnMetadataLabelOffset(d);
-        return `translate(${labelsDx - xOffset},
-            ${idx * this.options.minCellHeight})`;
-      });
-    };
-    let columnMetadataLabels = this.gColumnMetadata
-      .selectAll(`.${cs.columnMetadataLabel}`)
-      .data(this.options.columnMetadata, d => d.value);
-    applyFormat(columnMetadataLabels);
-
+    // Don't include the transition animation while rendering.
+    this.renderColumnMetadataLabels(labelsDx, false);
     // Translate the "Add Metadata" link (same as row labels).
-    let metadataAddLink = this.gColumnMetadata.select(
-      `.${cs.columnMetadataAdd}`
-    );
-    let metadataAddLinkCurrent = d3.transform(metadataAddLink.attr("transform"))
-      .translate;
-    metadataAddLink.attr(
-      "transform",
-      `translate(${[labelsDx, metadataAddLinkCurrent[1]]})`
-    );
-    // Resize the add metadata line.
-    metadataAddLink
-      .select(`.${cs.metadataAddLine}`)
-      .attr(
-        "x2",
-        this.rowLabelsWidth +
-          this.columnLabels.length * this.cell.width -
-          labelsDx
-      );
+    this.renderColumnMetadataAddLink(labelsDx);
 
-    // Translating the column labels in the opposite y direction of the svg.
+    // Translating the column and metadata labels in the opposite y direction of the svg.
     let columnLabelsCurrent = d3.transform(this.gColumnLabels.attr("transform"))
       .translate;
     let labelsDy = clamp(
@@ -567,34 +521,42 @@ export default class Heatmap {
       this.columnLabelsHeight + this.options.marginTop - yScrollMax,
       columnLabelsCurrent[1] - deltaY
     );
-    this.gColumnLabels.attr(
-      "transform",
-      `translate(${[columnLabelsCurrent[0], labelsDy]})`
-    );
+    this.placeColumnAndMetadataLabels(labelsDy);
+  }
 
-    // Translating the column metadata in the opposite y direction of the svg (same as column labels).
-    let columnMetadataCurrent = d3.transform(
-      this.gColumnMetadata.attr("transform")
-    ).translate;
-    this.gColumnMetadata.attr(
-      "transform",
-      `translate(${[columnMetadataCurrent[0], labelsDy]})`
-    );
+  placeRowLabels(x) {
+    const totalMetadataHeight =
+      this.options.columnMetadata.length * this.options.minCellHeight +
+      this.options.metadataAddLinkHeight;
 
+    this.gRowLabels.attr(
+      "transform",
+      `translate(${x}, ${this.columnLabelsHeight + totalMetadataHeight})`
+    );
     // Placing the white background rectangle behind the row labels.
     this.rowLabelsBackground
-      .attr("x", labelsDx - this.options.marginLeft)
-      .attr("y", rowLabelsCurrent[1]);
-
-    // Placing the white background rectangle behind the column labels and metadata.
-    this.columnLabelsBackground
-      .attr("x", columnLabelsCurrent[0] - this.rowLabelsWidth)
-      .attr("y", labelsDy - this.columnLabelsHeight - this.options.marginTop);
-
+      .attr("x", x - this.options.marginLeft)
+      .attr("y", this.columnLabelsHeight + totalMetadataHeight);
     // Placing the white rectangle to hide column labels in the top left corner.
-    this.metadataLabelsBackground
-      .attr("x", labelsDx - this.options.marginLeft)
-      .attr("y", labelsDy - this.columnLabelsHeight - this.options.marginTop);
+    this.metadataLabelsBackground.attr("x", x - this.options.marginLeft);
+  }
+
+  placeColumnAndMetadataLabels(y) {
+    this.gColumnLabels.attr(
+      "transform",
+      `translate(${this.rowLabelsWidth},${y})`
+    );
+    this.gColumnMetadata.attr("transform", `translate(0, ${y})`);
+    // Placing the white background rectangle behind the column labels and metadata.
+    this.columnLabelsBackground.attr(
+      "y",
+      y - this.columnLabelsHeight - this.options.marginTop
+    );
+    // Placing the white rectangle to hide column labels in the top left corner.
+    this.metadataLabelsBackground.attr(
+      "y",
+      y - this.columnLabelsHeight - this.options.marginTop
+    );
   }
 
   processMetadata() {
@@ -1087,8 +1049,8 @@ export default class Heatmap {
 
   renderColumnMetadata() {
     this.renderColumnMetadataCells();
-    this.renderColumnMetadataAddLink();
-    this.renderColumnMetadataLabels();
+    this.renderColumnMetadataAddLink(0);
+    this.renderColumnMetadataLabels(0);
   }
 
   getColumnMetadataLabelOffset(d) {
@@ -1097,11 +1059,12 @@ export default class Heatmap {
       : 0;
   }
 
-  renderColumnMetadataLabels() {
+  renderColumnMetadataLabels(dx, transition = true) {
     let applyFormat = nodes => {
       nodes.attr("transform", (d, idx) => {
         const xOffset = this.getColumnMetadataLabelOffset(d);
-        return `translate(${-xOffset}, ${idx * this.options.minCellHeight})`;
+        return `translate(${dx - xOffset}, ${idx *
+          this.options.minCellHeight})`;
       });
     };
 
@@ -1121,7 +1084,11 @@ export default class Heatmap {
       .transition()
       .duration(this.options.transitionDuration);
 
-    applyFormat(columnMetadataLabelUpdate);
+    if (!transition) {
+      applyFormat(columnMetadataLabel);
+    } else {
+      applyFormat(columnMetadataLabelUpdate);
+    }
 
     let columnMetadataLabelEnter = columnMetadataLabel
       .enter()
@@ -1303,7 +1270,7 @@ export default class Heatmap {
     });
   }
 
-  renderColumnMetadataAddLink() {
+  renderColumnMetadataAddLink(dx) {
     if (this.options.onAddColumnMetadataClick) {
       const handleAddColumnMetadataClick = () => {
         this.options.onAddColumnMetadataClick(addMetadataTrigger.node(), {
@@ -1355,7 +1322,7 @@ export default class Heatmap {
       // update
       addLink.attr(
         "transform",
-        `translate(0, ${this.options.columnMetadata.length *
+        `translate(${dx}, ${this.options.columnMetadata.length *
           this.options.minCellHeight})`
       );
 
@@ -1372,7 +1339,7 @@ export default class Heatmap {
         .attr("x1", this.rowLabelsWidth)
         .attr(
           "x2",
-          this.rowLabelsWidth + this.columnLabels.length * this.cell.width
+          this.rowLabelsWidth + this.columnLabels.length * this.cell.width - dx
         )
         .attr("y1", yPos)
         .attr("y2", yPos);
