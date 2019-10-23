@@ -193,14 +193,14 @@ export default class SamplesHeatmapControls extends React.Component {
     );
   }
 
-  onSortSamplesChange = order => {
-    if (order === this.props.selectedOptions.sampleSortType) {
+  onSortSamplesChange = selectedSortType => {
+    if (selectedSortType === this.props.selectedOptions.sampleSortType) {
       return;
     }
 
-    this.props.onSelectedOptionsChange({ sampleSortType: order });
+    this.props.onSelectedOptionsChange({ sampleSortType: selectedSortType });
     logAnalyticsEvent("SamplesHeatmapControls_sort-samples-select_changed", {
-      sampleSortType: order,
+      sampleSortType: selectedSortType,
     });
   };
 
@@ -218,14 +218,14 @@ export default class SamplesHeatmapControls extends React.Component {
     );
   }
 
-  onSortTaxaChange = order => {
-    if (order === this.props.selectedOptions.taxaSortType) {
+  onSortTaxaChange = selectedSortType => {
+    if (selectedSortType === this.props.selectedOptions.taxaSortType) {
       return;
     }
 
-    this.props.onSelectedOptionsChange({ taxaSortType: order });
+    this.props.onSelectedOptionsChange({ taxaSortType: selectedSortType });
     logAnalyticsEvent("SamplesHeatmapControls_sort-taxa-select_changed", {
-      taxaSortType: order,
+      taxaSortType: selectedSortType,
     });
   };
 
