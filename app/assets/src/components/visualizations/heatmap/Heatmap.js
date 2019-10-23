@@ -82,6 +82,7 @@ export default class Heatmap {
         // The caption to add when the heatmap is saved as an SVG or PNG.
         printCaption: [],
         captionLineHeight: 18,
+        rowXoutPadding: 2,
       },
       options
     );
@@ -616,8 +617,8 @@ export default class Heatmap {
     this.renderColumnMetadata();
 
     if (this.options.clustering) {
-      this.options.shouldSortRows || this.renderRowDendrogram();
-      this.options.shouldSortColumns || this.renderColumnDendrogram();
+      this.renderRowDendrogram();
+      this.renderColumnDendrogram();
     }
 
     this.options.onUpdateFinished && this.options.onUpdateFinished();
@@ -741,8 +742,6 @@ export default class Heatmap {
   }
 
   clusterRows() {
-    this.gRowDendogram.classed(cs.shouldSortRows, false);
-
     let rows = this.getRows();
     this.rowClustering = Cluster.hcluster(rows);
 
@@ -751,17 +750,17 @@ export default class Heatmap {
   }
 
   clusterColumns() {
-    this.gColumnDendogram.classed(cs.shouldSortColumns, false);
-
     let columns = this.getColumns();
     this.columnClustering = Cluster.hcluster(columns);
     this.sortTree(this.columnClustering);
     this.setOrder(this.columnClustering, this.columnLabels);
   }
 
+  // Re-sorts the columns. The rendered order of columns is determined solely by
+  // the `pos` property of each columnLabel.
   sortColumns(direction) {
     this.columnClustering = null;
-    this.gColumnDendogram.classed(cs.shouldSortColumns, true);
+
     orderBy(this.columnLabels, label => label.label, direction).forEach(
       (label, idx) => {
         label.pos = idx;
@@ -770,19 +769,10 @@ export default class Heatmap {
   }
 
   // Re-sorts the rows. The rendered order of rows is determined solely by
-  // the `pos` property of each rowLabel and filteredRowLabel.
+  // the `pos` property of each filteredRowLabel.
   sortRows(direction) {
     this.rowClustering = null;
-    this.gRowDendogram.classed(cs.shouldSortRows, true);
-    orderBy(
-      this.rowLabels,
-      label => label.sortKey || label.label,
-      direction
-    ).forEach((label, idx) => {
-      label.pos = idx;
-    });
 
-    // Need to sort this array as well. It is created from rowLabels earlier.
     orderBy(
       this.filteredRowLabels,
       label => label.sortKey || label.label,
@@ -1073,7 +1063,11 @@ export default class Heatmap {
       .append("text")
       .attr("class", cs.removeIcon)
       .text("X")
-      .attr("transform", `translate(2, ${this.cell.height / 2})`)
+      .attr(
+        "transform",
+        `translate(${this.options.rowXoutPadding},
+        ${this.cell.height / 2})`
+      )
       .style("dominant-baseline", "central")
       .on("click", this.removeRow);
 
@@ -1441,6 +1435,9 @@ export default class Heatmap {
         "transform",
         `rotate(-90) translate(-${height + this.options.spacing},0)`
       );
+      this.gColumnDendogram.classed(cs.hidden, false);
+    } else {
+      this.gColumnDendogram.classed(cs.hidden, true);
     }
   }
 
@@ -1450,17 +1447,22 @@ export default class Heatmap {
 
     this.gRowDendogram.select("g").remove();
     let container = this.gRowDendogram.append("g");
-    this.renderDendrogram(
-      container,
-      this.rowClustering,
-      this.rowLabels,
-      width,
-      height
-    );
-    container.attr(
-      "transform",
-      `scale(-1,1) translate(-${this.rowClusterWidth},0)`
-    );
+    if (this.rowClustering) {
+      this.renderDendrogram(
+        container,
+        this.rowClustering,
+        this.rowLabels,
+        width,
+        height
+      );
+      container.attr(
+        "transform",
+        `scale(-1,1) translate(-${this.rowClusterWidth},0)`
+      );
+      this.gRowDendogram.classed(cs.hidden, false);
+    } else {
+      this.gRowDendogram.classed(cs.hidden, true);
+    }
   }
 
   renderCaption() {
