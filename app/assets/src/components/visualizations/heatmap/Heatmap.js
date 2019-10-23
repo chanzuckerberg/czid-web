@@ -1435,9 +1435,6 @@ export default class Heatmap {
         "transform",
         `rotate(-90) translate(-${height + this.options.spacing},0)`
       );
-      this.gColumnDendogram.classed(cs.hidden, false);
-    } else {
-      this.gColumnDendogram.classed(cs.hidden, true);
     }
   }
 
@@ -1459,9 +1456,6 @@ export default class Heatmap {
         "transform",
         `scale(-1,1) translate(-${this.rowClusterWidth},0)`
       );
-      this.gRowDendogram.classed(cs.hidden, false);
-    } else {
-      this.gRowDendogram.classed(cs.hidden, true);
     }
   }
 
