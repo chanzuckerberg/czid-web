@@ -850,7 +850,7 @@ export default class Heatmap {
       );
   };
 
-  handleRowLabelMouseOut = d => {
+  handleRowLabelMouseOut = () => {
     if (this.rowClustering) return;
     this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
@@ -935,9 +935,7 @@ export default class Heatmap {
 
     let cells = this.gCells
       .selectAll(`.${cs.cell}`)
-      .data(this.filteredCells, d => d.id)
-      // TODO (gdingle): need to reorder cells correctly
-      .order();
+      .data(this.filteredCells, d => d.id);
 
     cells
       .exit()
