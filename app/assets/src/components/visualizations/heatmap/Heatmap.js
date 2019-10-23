@@ -769,20 +769,21 @@ export default class Heatmap {
     );
   }
 
+  // Re-sorts the rows. The rendered order of rows is determined solely by
+  // the `pos` property of each rowLabel and filteredRowLabel.
   sortRows(direction) {
     this.rowClustering = null;
     this.gRowDendogram.classed(cs.shouldSortRows, true);
-    this.rowLabels = orderBy(
+    orderBy(
       this.rowLabels,
       label => label.sortKey || label.label,
       direction
-    );
-    this.rowLabels.forEach((label, idx) => {
+    ).forEach((label, idx) => {
       label.pos = idx;
     });
 
     // Need to sort this array as well. It is created from rowLabels earlier.
-    this.filteredRowLabels = orderBy(
+    orderBy(
       this.filteredRowLabels,
       label => label.sortKey || label.label,
       direction
@@ -934,7 +935,9 @@ export default class Heatmap {
 
     let cells = this.gCells
       .selectAll(`.${cs.cell}`)
-      .data(this.filteredCells, d => d.id);
+      .data(this.filteredCells, d => d.id)
+      // TODO (gdingle): need to reorder cells correctly
+      .order();
 
     cells
       .exit()

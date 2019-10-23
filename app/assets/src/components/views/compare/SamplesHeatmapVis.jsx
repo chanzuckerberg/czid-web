@@ -27,7 +27,6 @@ class SamplesHeatmapVis extends React.Component {
       addMetadataTrigger: null,
       nodeHoverInfo: null,
       columnMetadataLegend: null,
-      rowLabelLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
       displayControlsBanner: true,
@@ -70,7 +69,6 @@ class SamplesHeatmapVis extends React.Component {
         initialColumnMetadataSortAsc: metadataSortAsc,
         onNodeHover: this.handleNodeHover,
         onMetadataNodeHover: this.handleMetadataNodeHover,
-        onRowLabelHover: this.handleRowLabelHover,
         onNodeHoverMove: this.handleMouseHoverMove,
         onNodeHoverOut: this.handleNodeHoverOut,
         onColumnMetadataSortChange: onMetadataSortChange,
@@ -211,18 +209,6 @@ class SamplesHeatmapVis extends React.Component {
       columnMetadataLegend: currentPair,
     });
     logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
-  };
-
-  handleRowLabelHover = label => {
-    this.setState({
-      rowLabelLegend: label.genusName,
-    });
-    console.log(
-      "handleRowLabelHover",
-      this.state.rowLabelLegend,
-      this.state.tooltipLocation
-    );
-    logAnalyticsEvent("SamplesHeatmapVis_row-label_hovered", label);
   };
 
   handleNodeHoverOut = () => {
@@ -413,7 +399,6 @@ class SamplesHeatmapVis extends React.Component {
       tooltipLocation,
       nodeHoverInfo,
       columnMetadataLegend,
-      rowLabelLegend,
       addMetadataTrigger,
       selectedMetadata,
     } = this.state;
