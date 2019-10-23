@@ -377,7 +377,7 @@ export default class Heatmap {
     this.rowLabelsBackground
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
       .attr("height", totalCellHeight + totalColumnClusterHeight);
-    this.placeRowLabels(0);
+    this.placeRowLabelContainers(0);
     this.columnLabelsBackground
       .attr(
         "width",
@@ -393,7 +393,7 @@ export default class Heatmap {
     this.metadataLabelsBackground
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
       .attr("height", totalColumnLabelsHeight + this.options.marginTop);
-    this.placeColumnAndMetadataLabels(this.columnLabelsHeight);
+    this.placeColumnLabelAndMetadataContainers(this.columnLabelsHeight);
     this.gCells.attr(
       "transform",
       `translate(${this.rowLabelsWidth},
@@ -505,7 +505,7 @@ export default class Heatmap {
       -xScrollMax + this.options.marginLeft,
       rowLabelsCurrent[0] - deltaX
     );
-    this.placeRowLabels(labelsDx);
+    this.placeRowLabelContainers(labelsDx);
 
     // Translating the metadata labels in the opposite x direction of the svg (same as row labels).
     // Don't include the transition animation while rendering.
@@ -521,10 +521,10 @@ export default class Heatmap {
       this.columnLabelsHeight + this.options.marginTop - yScrollMax,
       columnLabelsCurrent[1] - deltaY
     );
-    this.placeColumnAndMetadataLabels(labelsDy);
+    this.placeColumnLabelAndMetadataContainers(labelsDy);
   }
 
-  placeRowLabels(x) {
+  placeRowLabelContainers(x) {
     const totalMetadataHeight =
       this.options.columnMetadata.length * this.options.minCellHeight +
       this.options.metadataAddLinkHeight;
@@ -541,7 +541,7 @@ export default class Heatmap {
     this.metadataLabelsBackground.attr("x", x - this.options.marginLeft);
   }
 
-  placeColumnAndMetadataLabels(y) {
+  placeColumnLabelAndMetadataContainers(y) {
     this.gColumnLabels.attr(
       "transform",
       `translate(${this.rowLabelsWidth},${y})`

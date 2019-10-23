@@ -591,6 +591,7 @@ class SamplesHeatmapView extends React.Component {
           sampleDetails={this.state.sampleDetails}
           scale={SCALE_OPTIONS[scaleIndex][1]}
           taxonIds={this.state.taxonIds}
+          taxonCategories={this.state.selectedOptions.categories}
           taxonDetails={this.state.taxonDetails}
           taxonFilterState={this.state.taxonFilterState}
           thresholdFilters={this.state.selectedOptions.thresholdFilters}

@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import { size, map, keyBy } from "lodash/fp";
+import { size, map, keyBy, isEmpty } from "lodash/fp";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { DataTooltip } from "~ui/containers";
@@ -407,6 +407,9 @@ class SamplesHeatmapVis extends React.Component {
         <div
           className={cx(
             cs.heatmapContainer,
+            (!isEmpty(this.props.thresholdFilters) ||
+              !isEmpty(this.props.taxonCategories)) &&
+              cs.filtersApplied,
             this.props.fullScreen && cs.fullScreen
           )}
           ref={container => {
@@ -484,6 +487,7 @@ SamplesHeatmapVis.propTypes = {
   sampleDetails: PropTypes.object,
   sampleIds: PropTypes.array,
   scale: PropTypes.string,
+  taxonCategories: PropTypes.array,
   taxonDetails: PropTypes.object,
   taxonIds: PropTypes.array,
   thresholdFilters: PropTypes.any,
