@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import { size, map, keyBy, isEmpty } from "lodash/fp";
+import { size, map, keyBy } from "lodash/fp";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { DataTooltip } from "~ui/containers";
@@ -13,7 +13,6 @@ import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
-import RemoveIcon from "~ui/icons/RemoveIcon";
 
 import cs from "./samples_heatmap_vis.scss";
 
@@ -27,10 +26,9 @@ class SamplesHeatmapVis extends React.Component {
       addMetadataTrigger: null,
       nodeHoverInfo: null,
       columnMetadataLegend: null,
-      rowLabelLegend: null,
+      rowGroupLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
-      displayControlsBanner: true,
     };
 
     this.heatmap = null;
@@ -70,13 +68,14 @@ class SamplesHeatmapVis extends React.Component {
         initialColumnMetadataSortAsc: metadataSortAsc,
         onNodeHover: this.handleNodeHover,
         onMetadataNodeHover: this.handleMetadataNodeHover,
-        onRowLabelHover: this.handleRowLabelHover,
         onNodeHoverMove: this.handleMouseHoverMove,
         onNodeHoverOut: this.handleNodeHoverOut,
         onColumnMetadataSortChange: onMetadataSortChange,
         onColumnMetadataLabelHover: this.handleColumnMetadataLabelHover,
         onColumnMetadataLabelMove: this.handleMouseHoverMove,
         onColumnMetadataLabelOut: this.handleColumnMetadataLabelOut,
+        onRowGroupHover: this.handleRowGroupHover,
+        onRowGroupOut: this.handleRowGroupOut,
         onRemoveRow: this.props.onRemoveTaxon,
         onCellClick: this.handleCellClick,
         onColumnLabelClick: this.props.onSampleLabelClick,
@@ -93,14 +92,6 @@ class SamplesHeatmapVis extends React.Component {
       }
     );
     this.heatmap.start();
-
-    document.addEventListener("keydown", this.handleKeyDown, false);
-    document.addEventListener("keyup", this.handleKeyUp, false);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener("keydown", this.handleKeyDown, false);
-    document.removeEventListener("keyup", this.handleKeyUp, false);
   }
 
   componentDidUpdate(prevProps) {
@@ -186,13 +177,6 @@ class SamplesHeatmapVis extends React.Component {
         },
       });
     }
-    // Disable tooltip if currently spacebar is pressed to pan the heatmap.
-    if (this.state.spacePressed) {
-      this.setState({
-        tooltipLocation: null,
-        nodeHoverInfo: null,
-      });
-    }
   };
 
   handleNodeHover = node => {
@@ -213,18 +197,13 @@ class SamplesHeatmapVis extends React.Component {
     logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
-  handleRowLabelHover = label => {
-    const nodeHoverInfo = [label.genusName, <b>{label.genusName}</b>];
-
-    this.setState({
-      rowLabelLegend: nodeHoverInfo,
+  handleRowGroupHover = (rowGroup, rect) => {
+    console.log("hover", rowGroup, rect);
+    this.setState({ rowGroupLegend: { left: rect.left, top: rect.top } });
+    logAnalyticsEvent("SamplesHeatmapVis_row-group_hovered", {
+      genusName: rowGroup.genusName,
+      genusId: rowGroup.sortKey,
     });
-    console.log(
-      "handleRowLabelHover",
-      nodeHoverInfo,
-      this.state.tooltipLocation
-    );
-    logAnalyticsEvent("SamplesHeatmapVis_row-label_hovered", label);
   };
 
   handleNodeHoverOut = () => {
@@ -244,6 +223,10 @@ class SamplesHeatmapVis extends React.Component {
 
   handleColumnMetadataLabelOut = () => {
     this.setState({ columnMetadataLegend: null });
+  };
+
+  handleRowGroupOut = () => {
+    this.setState({ rowGroupLegend: null });
   };
 
   download() {
@@ -325,28 +308,12 @@ class SamplesHeatmapVis extends React.Component {
     };
   }
 
-  handleKeyDown = currentEvent => {
-    if (currentEvent.code === "Space") {
-      this.setState({ spacePressed: true });
-    }
-  };
-
-  handleKeyUp = currentEvent => {
-    if (currentEvent.code === "Space") {
-      this.setState({ spacePressed: false });
-      currentEvent.preventDefault();
-    }
-  };
-
   handleCellClick = (cell, currentEvent) => {
-    // Disable cell click if spacebar is pressed to pan the heatmap.
-    if (!this.state.spacePressed) {
-      const sampleId = this.props.sampleIds[cell.columnIndex];
-      openUrl(`/samples/${sampleId}`, currentEvent);
-      logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
-        sampleId,
-      });
-    }
+    const sampleId = this.props.sampleIds[cell.columnIndex];
+    openUrl(`/samples/${sampleId}`, currentEvent);
+    logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
+      sampleId,
+    });
   };
 
   handleAddColumnMetadataClick = trigger => {
@@ -406,16 +373,12 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap.updateZoom(newZoom);
   }
 
-  hideControlsBanner = () => {
-    this.setState({ displayControlsBanner: false });
-  };
-
   render() {
     const {
       tooltipLocation,
       nodeHoverInfo,
       columnMetadataLegend,
-      rowLabelLegend,
+      rowGroupLegend,
       addMetadataTrigger,
       selectedMetadata,
     } = this.state;
@@ -433,13 +396,7 @@ class SamplesHeatmapVis extends React.Component {
           className={cs.plusMinusControl}
         />
         <div
-          className={cx(
-            cs.heatmapContainer,
-            (!isEmpty(this.props.thresholdFilters) ||
-              !isEmpty(this.props.taxonCategories)) &&
-              cs.filtersApplied,
-            this.props.fullScreen && cs.fullScreen
-          )}
+          className={cs.heatmapContainer}
           ref={container => {
             this.heatmapContainer = container;
           }}
@@ -465,20 +422,14 @@ class SamplesHeatmapVis extends React.Component {
               tooltipLocation={tooltipLocation}
             />
           )}
-        {rowLabelLegend &&
-          tooltipLocation && (
-            <div
-              className={cx(cs.tooltip, rowLabelLegend && cs.visible)}
-              style={getTooltipStyle(tooltipLocation, {
-                buffer: 20,
-                below: true,
-                // so we can show the tooltip above the cursor if need be
-                height: nodeHoverInfo.nodeHasData ? 300 : 180,
-              })}
-            >
-              <DataTooltip {...rowLabelLegend} />
-            </div>
-          )}
+        {rowGroupLegend && (
+          <div
+            className={cx(cs.tooltip, cs.visible)}
+            style={getTooltipStyle(rowGroupLegend)}
+          >
+            HELLL OWOOLRD
+          </div>
+        )}
         {addMetadataTrigger && (
           <MetadataSelector
             addMetadataTrigger={addMetadataTrigger}
@@ -490,20 +441,6 @@ class SamplesHeatmapVis extends React.Component {
             }}
           />
         )}
-        <div
-          className={cx(
-            cs.bannerContainer,
-            this.state.displayControlsBanner ? cs.show : cs.hide
-          )}
-        >
-          <div className={cs.bannerText}>
-            Hold SHIFT to scroll horizontally and SPACE BAR to pan.
-            <RemoveIcon
-              className={cs.removeIcon}
-              onClick={this.hideControlsBanner}
-            />
-          </div>
-        </div>
       </div>
     );
   }
@@ -529,12 +466,10 @@ SamplesHeatmapVis.propTypes = {
   sampleDetails: PropTypes.object,
   sampleIds: PropTypes.array,
   scale: PropTypes.string,
-  taxonCategories: PropTypes.array,
   taxonDetails: PropTypes.object,
   taxonIds: PropTypes.array,
   thresholdFilters: PropTypes.any,
   sampleSortType: PropTypes.string,
-  fullScreen: PropTypes.bool,
   taxaSortType: PropTypes.string,
 };
 

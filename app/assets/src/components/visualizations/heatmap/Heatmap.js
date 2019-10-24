@@ -837,19 +837,33 @@ export default class Heatmap {
 
   handleRowLabelMouseOver = rowEntered => {
     if (this.rowClustering) return;
+
     this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
       .classed(
         cs.rowLabelHover,
         row => row.sortKey && row.sortKey === rowEntered.sortKey
       );
+
+    const currenGroup = this.gRowLabels.selectAll(
+      `.${cs.rowLabel}.${cs.rowLabelHover}`
+    );
+    const firstElem = currenGroup[0][0];
+
+    this.options.onRowGroupHover &&
+      this.options.onRowGroupHover(
+        rowEntered,
+        firstElem.getBoundingClientRect()
+      );
   };
 
-  handleRowLabelMouseOut = () => {
+  handleRowLabelMouseOut = rowLeaved => {
     if (this.rowClustering) return;
     this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
       .classed(cs.rowLabelHover, false);
+
+    this.options.onRowGroupOut && this.options.onRowGroupOut(rowLeaved);
   };
 
   handleColumnMetadataLabelClick(value) {
@@ -889,6 +903,10 @@ export default class Heatmap {
   applyScale(scale, value, min, max) {
     value = Math.min(Math.max(value, min), max);
     return Math.round(scale(value));
+  }
+
+  verticalPosition(d) {
+    return d.pos * this.cell.height;
   }
 
   renderHeatmap() {
@@ -992,7 +1010,7 @@ export default class Heatmap {
 
   renderRowLabels() {
     let applyFormat = nodes => {
-      nodes.attr("transform", d => `translate(0, ${d.pos * this.cell.height})`);
+      nodes.attr("transform", d => `translate(0, ${this.verticalPosition(d)})`);
     };
 
     // hides genus separators in cluster mode
