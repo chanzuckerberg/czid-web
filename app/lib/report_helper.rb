@@ -598,6 +598,9 @@ module ReportHelper
     tax_2d = convert_2d(taxon_counts)
     cleanup_genus_ids!(tax_2d)
     validate_names!(tax_2d)
+    # Remove any rows that correspond to homo sapiens. These should be mostly
+    # filtered out in the pipeline but occassionally a few slip through.
+    remove_homo_sapiens_counts!(tax_2d)
     tax_2d
   end
 
@@ -750,9 +753,6 @@ module ReportHelper
 
     # Remove family level rows because the reports only display species/genus
     remove_family_level_counts!(tax_2d)
-
-    # Remove any rows that correspond to homo sapiens.
-    remove_homo_sapiens_counts!(tax_2d)
 
     # Add tax_info into output rows.
     rows = []
