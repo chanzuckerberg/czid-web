@@ -263,7 +263,12 @@ export default class Heatmap {
     this.filteredCells = this.cells.filter(
       cell => !this.rowLabels[cell.rowIndex].hidden
     );
-    this.filteredRowLabels = this.rowLabels.filter(row => !row.hidden);
+
+    // Initially sort so that genus seperators are placed correctly
+    this.filteredRowLabels = orderBy(
+      this.rowLabels.filter(row => !row.hidden),
+      label => label.sortKey || label.label
+    );
   }
 
   setupContainers() {
