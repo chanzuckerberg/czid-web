@@ -10,7 +10,14 @@ import cs from "./toolbar_icon.scss";
 
 class ToolbarIcon extends React.Component {
   render() {
-    const { className, popupText, disabled, onClick, icon } = this.props;
+    const {
+      className,
+      popupText,
+      popupSubtitle,
+      disabled,
+      onClick,
+      icon,
+    } = this.props;
 
     const iconWrapper = (
       <div
@@ -28,7 +35,12 @@ class ToolbarIcon extends React.Component {
     return (
       <BasicPopup
         trigger={iconWrapper}
-        content={popupText}
+        content={
+          <div className={cs.popupText}>
+            {popupText}
+            <div className={cs.popupSubtitle}>{popupSubtitle}</div>
+          </div>
+        }
         position="top center"
         basic={false}
       />
@@ -40,6 +52,7 @@ ToolbarIcon.propTypes = {
   className: PropTypes.string,
   icon: PropTypes.node,
   popupText: PropTypes.string,
+  popupSubtitle: PropTypes.string,
   disabled: PropTypes.bool,
   onClick: PropTypes.func,
 };

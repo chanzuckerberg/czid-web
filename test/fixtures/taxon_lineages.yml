@@ -1,5 +1,7 @@
 one:
   taxid: 1
+  version_start: 1
+  version_end: 1
 
 kleb_pneumo:
   version_start: 1
