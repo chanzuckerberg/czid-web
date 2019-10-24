@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import { size, map, keyBy } from "lodash/fp";
+import { size, map, keyBy, isEmpty } from "lodash/fp";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { DataTooltip } from "~ui/containers";
@@ -13,6 +13,7 @@ import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
+import RemoveIcon from "~ui/icons/RemoveIcon";
 
 import cs from "./samples_heatmap_vis.scss";
 
@@ -28,6 +29,7 @@ class SamplesHeatmapVis extends React.Component {
       columnMetadataLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
+      displayControlsBanner: true,
     };
 
     this.heatmap = null;
@@ -88,6 +90,14 @@ class SamplesHeatmapVis extends React.Component {
       }
     );
     this.heatmap.start();
+
+    document.addEventListener("keydown", this.handleKeyDown, false);
+    document.addEventListener("keyup", this.handleKeyUp, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleKeyDown, false);
+    document.removeEventListener("keyup", this.handleKeyUp, false);
   }
 
   componentDidUpdate(prevProps) {
@@ -161,6 +171,13 @@ class SamplesHeatmapVis extends React.Component {
           left: currentEvent.pageX,
           top: currentEvent.pageY,
         },
+      });
+    }
+    // Disable tooltip if currently spacebar is pressed to pan the heatmap.
+    if (this.state.spacePressed) {
+      this.setState({
+        tooltipLocation: null,
+        nodeHoverInfo: null,
       });
     }
   };
@@ -281,12 +298,28 @@ class SamplesHeatmapVis extends React.Component {
     };
   }
 
+  handleKeyDown = currentEvent => {
+    if (currentEvent.code === "Space") {
+      this.setState({ spacePressed: true });
+    }
+  };
+
+  handleKeyUp = currentEvent => {
+    if (currentEvent.code === "Space") {
+      this.setState({ spacePressed: false });
+      currentEvent.preventDefault();
+    }
+  };
+
   handleCellClick = (cell, currentEvent) => {
-    const sampleId = this.props.sampleIds[cell.columnIndex];
-    openUrl(`/samples/${sampleId}`, currentEvent);
-    logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
-      sampleId,
-    });
+    // Disable cell click if spacebar is pressed to pan the heatmap.
+    if (!this.state.spacePressed) {
+      const sampleId = this.props.sampleIds[cell.columnIndex];
+      openUrl(`/samples/${sampleId}`, currentEvent);
+      logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
+        sampleId,
+      });
+    }
   };
 
   handleAddColumnMetadataClick = trigger => {
@@ -346,6 +379,10 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap.updateZoom(newZoom);
   }
 
+  hideControlsBanner = () => {
+    this.setState({ displayControlsBanner: false });
+  };
+
   render() {
     const {
       tooltipLocation,
@@ -368,7 +405,13 @@ class SamplesHeatmapVis extends React.Component {
           className={cs.plusMinusControl}
         />
         <div
-          className={cs.heatmapContainer}
+          className={cx(
+            cs.heatmapContainer,
+            (!isEmpty(this.props.thresholdFilters) ||
+              !isEmpty(this.props.taxonCategories)) &&
+              cs.filtersApplied,
+            this.props.fullScreen && cs.fullScreen
+          )}
           ref={container => {
             this.heatmapContainer = container;
           }}
@@ -405,6 +448,20 @@ class SamplesHeatmapVis extends React.Component {
             }}
           />
         )}
+        <div
+          className={cx(
+            cs.bannerContainer,
+            this.state.displayControlsBanner ? cs.show : cs.hide
+          )}
+        >
+          <div className={cs.bannerText}>
+            Hold SHIFT to scroll horizontally and SPACE BAR to pan.
+            <RemoveIcon
+              className={cs.removeIcon}
+              onClick={this.hideControlsBanner}
+            />
+          </div>
+        </div>
       </div>
     );
   }
@@ -430,10 +487,12 @@ SamplesHeatmapVis.propTypes = {
   sampleDetails: PropTypes.object,
   sampleIds: PropTypes.array,
   scale: PropTypes.string,
+  taxonCategories: PropTypes.array,
   taxonDetails: PropTypes.object,
   taxonIds: PropTypes.array,
   thresholdFilters: PropTypes.any,
   sampleSortType: PropTypes.string,
+  fullScreen: PropTypes.bool,
 };
 
 export default SamplesHeatmapVis;

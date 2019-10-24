@@ -1,7 +1,7 @@
 import d3 from "d3";
 import textWidth from "text-width";
 import Cluster from "clusterfck";
-import { mean } from "lodash/fp";
+import { clamp, mean } from "lodash/fp";
 import { orderBy, some } from "lodash";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
@@ -28,6 +28,7 @@ d3.selection.prototype.lower = function() {
 
 export default class Heatmap {
   constructor(container, data, options) {
+    this.mouseDown = false;
     this.svg = null;
     this.g = null;
     this.container = d3.select(container);
@@ -142,7 +143,9 @@ export default class Heatmap {
 
   updateZoom(zoom) {
     this.options.zoom = zoom;
-    this.processData("placeContainers");
+    this.svg
+      .attr("width", this.width * this.options.zoom)
+      .attr("height", this.height * this.options.zoom);
   }
 
   updateScale(scale) {
@@ -275,8 +278,6 @@ export default class Heatmap {
     addSvgColorFilter(defs, "blue", COLOR_HOVER_LINK);
 
     this.g = this.svg.append("g");
-    this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
-    this.gColumnLabels = this.g.append("g").attr("class", cs.columnLabels);
     this.gCells = this.g.append("g").attr("class", cs.cells);
     this.gRowDendogram = this.g
       .append("g")
@@ -284,6 +285,20 @@ export default class Heatmap {
     this.gColumnDendogram = this.g
       .append("g")
       .attr("class", cx(cs.dendogram, "columnDendogram"));
+    this.rowLabelsBackground = this.g
+      .append("rect")
+      .attr("class", "rowLabelBackground")
+      .style("fill", "white");
+    this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
+    this.columnLabelsBackground = this.g
+      .append("rect")
+      .attr("class", "columnLabelBackground")
+      .style("fill", "white");
+    this.gColumnLabels = this.g.append("g").attr("class", cs.columnLabels);
+    this.metadataLabelsBackground = this.g
+      .append("rect")
+      .attr("class", "metadataLabelsBackground")
+      .style("fill", "white");
     this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
     this.gCaption = this.g.append("g").attr("class", cs.captionContainer);
   }
@@ -359,14 +374,26 @@ export default class Heatmap {
       "transform",
       `translate(${this.options.marginLeft},${this.options.marginTop})`
     );
-    this.gRowLabels.attr(
-      "transform",
-      `translate(0, ${totalColumnLabelsHeight + totalMetadataHeight})`
-    );
-    this.gColumnLabels.attr(
-      "transform",
-      `translate(${this.rowLabelsWidth},${totalColumnLabelsHeight})`
-    );
+    this.rowLabelsBackground
+      .attr("width", this.rowLabelsWidth + this.options.marginLeft)
+      .attr("height", totalCellHeight + totalColumnClusterHeight);
+    this.placeRowLabelContainers(0);
+    this.columnLabelsBackground
+      .attr(
+        "width",
+        this.rowLabelsWidth +
+          totalCellWidth +
+          totalRowClusterWidth +
+          this.options.marginRight
+      )
+      .attr(
+        "height",
+        totalColumnLabelsHeight + totalMetadataHeight + this.options.marginTop
+      );
+    this.metadataLabelsBackground
+      .attr("width", this.rowLabelsWidth + this.options.marginLeft)
+      .attr("height", totalColumnLabelsHeight + this.options.marginTop);
+    this.placeColumnLabelAndMetadataContainers(this.columnLabelsHeight);
     this.gCells.attr(
       "transform",
       `translate(${this.rowLabelsWidth},
@@ -386,10 +413,6 @@ export default class Heatmap {
         ${totalColumnLabelsHeight + totalMetadataHeight + totalCellHeight}
       )`
     );
-    this.gColumnMetadata.attr(
-      "transform",
-      `translate(0, ${totalColumnLabelsHeight})`
-    );
     this.gCaption.attr(
       "transform",
       `translate(${this.rowLabelsWidth},
@@ -399,6 +422,140 @@ export default class Heatmap {
           totalColumnClusterHeight +
           this.options.spacing}
       )`
+    );
+
+    // Set up space bar+click to pan behavior.
+    d3
+      .select("body")
+      .on("keydown", () => {
+        if (d3.event.code === "Space") {
+          this.svg.style("cursor", "move");
+          this.gCells.selectAll(`.${cs.cell}`).style("cursor", "move");
+          this.spacePressed = true;
+        }
+      })
+      .on("keyup", () => {
+        if (d3.event.code === "Space") {
+          this.svg.style("cursor", "auto");
+          this.gCells.selectAll(`.${cs.cell}`).style("cursor", "auto");
+          this.spacePressed = false;
+        }
+      });
+
+    this.svg
+      .on("mousedown", () => {
+        this.mouseDown = true;
+        if (this.spacePressed) {
+          this.mouseX = d3.event.clientX;
+          this.mouseY = d3.event.clientY;
+          d3.event.preventDefault();
+        }
+      })
+      .on("mousemove", this.drag.bind(this))
+      .on("mouseup", () => {
+        this.mouseDown = false;
+      });
+
+    // Set up scrolling behavior.
+    this.g.on("wheel.zoom", this.scroll.bind(this));
+  }
+
+  drag() {
+    if (this.mouseDown && this.spacePressed) {
+      this.pan(d3.event.clientX - this.mouseX, d3.event.clientY - this.mouseY);
+      this.mouseX = d3.event.clientX;
+      this.mouseY = d3.event.clientY;
+    }
+  }
+
+  scroll() {
+    this.pan(d3.event.wheelDeltaX, d3.event.wheelDeltaY);
+    d3.event.stopPropagation();
+  }
+
+  pan(deltaX, deltaY) {
+    // Define the scrolling boundaries for the svg.
+    // Upper limits are determined by the difference between the container and svg sizes,
+    // scaled by the zoom factor.
+    let containerWidth = this.container[0][0].offsetWidth,
+      containerHeight = this.container[0][0].offsetHeight;
+    let xScrollMax =
+        (containerWidth - this.svg.attr("width")) / this.options.zoom,
+      yScrollMax =
+        (containerHeight - this.svg.attr("height")) / this.options.zoom;
+
+    // Translating the svg:
+    let gCurrentTranslate = d3.transform(this.g.attr("transform")).translate;
+    // Limit translation by the boundaries set for the svg.
+    let dx = Math.min(
+      this.options.marginLeft,
+      Math.max(deltaX + gCurrentTranslate[0], xScrollMax)
+    );
+    let dy = Math.min(
+      this.options.marginTop,
+      Math.max(deltaY + gCurrentTranslate[1], yScrollMax)
+    );
+    this.g.attr("transform", `translate(${[dx, dy]})`);
+
+    // Translating the row labels in the opposite x direction of the svg.
+    let rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
+      .translate;
+    let labelsDx = clamp(
+      0,
+      -xScrollMax + this.options.marginLeft,
+      rowLabelsCurrent[0] - deltaX
+    );
+    this.placeRowLabelContainers(labelsDx);
+
+    // Translating the metadata labels in the opposite x direction of the svg (same as row labels).
+    // Don't include the transition animation while rendering.
+    this.renderColumnMetadataLabels(labelsDx, false);
+    // Translate the "Add Metadata" link (same as row labels).
+    this.renderColumnMetadataAddLink(labelsDx);
+
+    // Translating the column and metadata labels in the opposite y direction of the svg.
+    let columnLabelsCurrent = d3.transform(this.gColumnLabels.attr("transform"))
+      .translate;
+    let labelsDy = clamp(
+      this.columnLabelsHeight,
+      this.columnLabelsHeight + this.options.marginTop - yScrollMax,
+      columnLabelsCurrent[1] - deltaY
+    );
+    this.placeColumnLabelAndMetadataContainers(labelsDy);
+  }
+
+  placeRowLabelContainers(x) {
+    const totalMetadataHeight =
+      this.options.columnMetadata.length * this.options.minCellHeight +
+      this.options.metadataAddLinkHeight;
+
+    this.gRowLabels.attr(
+      "transform",
+      `translate(${x}, ${this.columnLabelsHeight + totalMetadataHeight})`
+    );
+    // Placing the white background rectangle behind the row labels.
+    this.rowLabelsBackground
+      .attr("x", x - this.options.marginLeft)
+      .attr("y", this.columnLabelsHeight + totalMetadataHeight);
+    // Placing the white rectangle to hide column labels in the top left corner.
+    this.metadataLabelsBackground.attr("x", x - this.options.marginLeft);
+  }
+
+  placeColumnLabelAndMetadataContainers(y) {
+    this.gColumnLabels.attr(
+      "transform",
+      `translate(${this.rowLabelsWidth},${y})`
+    );
+    this.gColumnMetadata.attr("transform", `translate(0, ${y})`);
+    // Placing the white background rectangle behind the column labels and metadata.
+    this.columnLabelsBackground.attr(
+      "y",
+      y - this.columnLabelsHeight - this.options.marginTop
+    );
+    // Placing the white rectangle to hide column labels in the top left corner.
+    this.metadataLabelsBackground.attr(
+      "y",
+      y - this.columnLabelsHeight - this.options.marginTop
     );
   }
 
@@ -891,19 +1048,23 @@ export default class Heatmap {
   }
 
   renderColumnMetadata() {
-    this.renderColumnMetadataLabels();
     this.renderColumnMetadataCells();
-    this.renderColumnMetadataAddLink();
+    this.renderColumnMetadataAddLink(0);
+    this.renderColumnMetadataLabels(0);
   }
 
-  renderColumnMetadataLabels() {
+  getColumnMetadataLabelOffset(d) {
+    return d.value === this.columnMetadataSortField
+      ? this.options.metadataSortIconSize + this.options.spacing
+      : 0;
+  }
+
+  renderColumnMetadataLabels(dx, transition = true) {
     let applyFormat = nodes => {
       nodes.attr("transform", (d, idx) => {
-        const xOffset =
-          d.value === this.columnMetadataSortField
-            ? -this.options.metadataSortIconSize - this.options.spacing
-            : 0;
-        return `translate(${xOffset}, ${idx * this.options.minCellHeight})`;
+        const xOffset = this.getColumnMetadataLabelOffset(d);
+        return `translate(${dx - xOffset}, ${idx *
+          this.options.minCellHeight})`;
       });
     };
 
@@ -923,7 +1084,11 @@ export default class Heatmap {
       .transition()
       .duration(this.options.transitionDuration);
 
-    applyFormat(columnMetadataLabelUpdate);
+    if (!transition) {
+      applyFormat(columnMetadataLabel);
+    } else {
+      applyFormat(columnMetadataLabelUpdate);
+    }
 
     let columnMetadataLabelEnter = columnMetadataLabel
       .enter()
@@ -935,14 +1100,25 @@ export default class Heatmap {
     columnMetadataLabelEnter
       .append("rect")
       .attr("class", cs.hoverTarget)
-      .attr("width", this.rowLabelsWidth)
-      .attr("height", this.options.minCellHeight)
-      .style("text-anchor", "end");
+      .attr("x", -this.options.marginLeft)
+      .attr("y", -1)
+      .attr("width", d => {
+        const xOffset = this.getColumnMetadataLabelOffset(d);
+        return this.rowLabelsWidth + this.options.marginLeft + xOffset;
+      })
+      .attr("height", this.options.minCellHeight + 1)
+      .style("text-anchor", "end")
+      .style("fill", "white");
 
     const handleColumnMetadataLabelClick = d => {
       this.options.onColumnMetadataLabelClick
         ? this.options.onColumnMetadataLabelClick(d.value, d3.event)
         : this.handleColumnMetadataLabelClick(d.value);
+
+      columnMetadataLabelEnter.selectAll("rect").attr("width", d => {
+        const xOffset = this.getColumnMetadataLabelOffset(d);
+        return this.rowLabelsWidth + this.options.marginLeft + xOffset;
+      });
     };
 
     columnMetadataLabelEnter
@@ -1094,7 +1270,7 @@ export default class Heatmap {
     });
   }
 
-  renderColumnMetadataAddLink() {
+  renderColumnMetadataAddLink(dx) {
     if (this.options.onAddColumnMetadataClick) {
       const handleAddColumnMetadataClick = () => {
         this.options.onAddColumnMetadataClick(addMetadataTrigger.node(), {
@@ -1146,7 +1322,7 @@ export default class Heatmap {
       // update
       addLink.attr(
         "transform",
-        `translate(0, ${this.options.columnMetadata.length *
+        `translate(${dx}, ${this.options.columnMetadata.length *
           this.options.minCellHeight})`
       );
 
@@ -1163,7 +1339,7 @@ export default class Heatmap {
         .attr("x1", this.rowLabelsWidth)
         .attr(
           "x2",
-          this.rowLabelsWidth + this.columnLabels.length * this.cell.width
+          this.rowLabelsWidth + this.columnLabels.length * this.cell.width - dx
         )
         .attr("y1", yPos)
         .attr("y2", yPos);

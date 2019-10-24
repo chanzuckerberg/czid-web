@@ -14,7 +14,6 @@ import {
   find,
 } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
-import { StickyContainer, Sticky } from "react-sticky";
 
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -25,6 +24,7 @@ import { getSampleTaxons, saveVisualization } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
+import SortIcon from "~ui/icons/SortIcon";
 
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
@@ -85,6 +85,7 @@ class SamplesHeatmapView extends React.Component {
       sampleIds: compact(
         map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds)
       ),
+      hideFilters: false,
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
       selectedSampleId: null,
@@ -590,47 +591,65 @@ class SamplesHeatmapView extends React.Component {
           sampleDetails={this.state.sampleDetails}
           scale={SCALE_OPTIONS[scaleIndex][1]}
           taxonIds={this.state.taxonIds}
+          taxonCategories={this.state.selectedOptions.categories}
           taxonDetails={this.state.taxonDetails}
           taxonFilterState={this.state.taxonFilterState}
           thresholdFilters={this.state.selectedOptions.thresholdFilters}
           sampleSortType={this.state.selectedOptions.sampleSortType}
+          fullScreen={this.state.hideFilters}
         />
       </ErrorBoundary>
     );
   }
 
+  toggleDisplayFilters = () => {
+    this.setState(prevState => ({ hideFilters: !prevState.hideFilters }));
+  };
+
   render() {
     return (
       <div className={cs.heatmap}>
-        <NarrowContainer>
-          <SamplesHeatmapHeader
-            sampleIds={this.state.sampleIds}
-            data={this.state.data}
-            onDownloadSvg={this.handleDownloadSvg}
-            onDownloadPng={this.handleDownloadPng}
-            onDownloadCsv={this.handleDownloadCsv}
-            onShareClick={this.handleShareClick}
-            onSaveClick={this.handleSaveClick}
-          />
-        </NarrowContainer>
-        <StickyContainer>
-          <Sticky>
-            {({ style }) => (
-              <div style={style}>
-                <NarrowContainer>
-                  <SamplesHeatmapControls
-                    options={this.getControlOptions()}
-                    selectedOptions={this.state.selectedOptions}
-                    onSelectedOptionsChange={this.handleSelectedOptionsChange}
-                    loading={this.state.loading}
-                    data={this.state.data}
-                  />
-                </NarrowContainer>
-              </div>
+        {!this.state.hideFilters && (
+          <div>
+            <NarrowContainer>
+              <SamplesHeatmapHeader
+                sampleIds={this.state.sampleIds}
+                data={this.state.data}
+                onDownloadSvg={this.handleDownloadSvg}
+                onDownloadPng={this.handleDownloadPng}
+                onDownloadCsv={this.handleDownloadCsv}
+                onShareClick={this.handleShareClick}
+                onSaveClick={this.handleSaveClick}
+              />
+            </NarrowContainer>
+            <NarrowContainer>
+              <SamplesHeatmapControls
+                options={this.getControlOptions()}
+                selectedOptions={this.state.selectedOptions}
+                onSelectedOptionsChange={this.handleSelectedOptionsChange}
+                loading={this.state.loading}
+                data={this.state.data}
+              />
+            </NarrowContainer>
+          </div>
+        )}
+        <div className={cs.filterToggleContainer}>
+          {this.state.hideFilters && <div className={cs.filterLine} />}
+          <div
+            className={cs.arrowIcon}
+            onClick={withAnalytics(
+              this.toggleDisplayFilters,
+              "SamplesHeatmapFilters_toggle_clicked"
             )}
-          </Sticky>
-          {this.renderVisualization()}
-        </StickyContainer>
+          >
+            <SortIcon
+              sortDirection={
+                this.state.hideFilters ? "descending" : "ascending"
+              }
+            />
+          </div>
+        </div>
+        {this.renderVisualization()}
         <DetailsSidebar
           visible={this.state.sidebarVisible}
           mode={this.state.sidebarMode}

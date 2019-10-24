@@ -1,6 +1,9 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .heatmap {
+  margin-top: -$header-margin-bottom;
   .viewHeader {
     margin-top: 40px;
     margin-bottom: 40px;
@@ -18,8 +21,8 @@
     background-color: $white;
 
     .filterRow {
-      margin-top: 20px;
-      margin-bottom: 15px;
+      margin-top: $space-m;
+      margin-bottom: $space-m;
     }
 
     .filterTag {
@@ -28,6 +31,28 @@
       &:last-child {
         margin-right: 0;
       }
+    }
+  }
+
+  .filterToggleContainer {
+    text-align: center;
+    position: relative;
+
+    .filterLine {
+      height: 0px;
+      border-bottom: 10px solid $white;
+      box-shadow: $box-shadow-dropdown-menu;
+    }
+
+    .arrowIcon {
+      display: inline-block;
+      cursor: pointer;
+      color: $dark-grey;
+      background-color: $white;
+      font-size: $font-size-h4;
+      padding: 0 $space-m;
+      border-radius: 0 0 4px 4px;
+      box-shadow: $box-shadow-tab-bottom;
     }
   }
 
