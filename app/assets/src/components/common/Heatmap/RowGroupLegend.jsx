@@ -13,7 +13,6 @@ import cs from "./metadata_legend.scss";
 export default class MetadataLegend extends React.Component {
   render() {
     const { tooltipLocation } = this.props;
-    // TODO (gdingle): handle genus unknown
     return (
       <div
         className={cx(cs.tooltip, cs.visible)}

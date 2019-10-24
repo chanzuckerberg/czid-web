@@ -201,7 +201,7 @@ class SamplesHeatmapVis extends React.Component {
   handleRowGroupHover = (rowGroup, rect) => {
     this.setState({
       rowGroupLegend: {
-        label: rowGroup.genusName,
+        label: `Genus: ${rowGroup.genusName || "Unknown"}`,
         tooltipLocation: { left: rect.left, top: rect.top },
       },
     });
