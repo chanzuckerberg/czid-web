@@ -9,6 +9,7 @@ import { openUrl } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
+import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
@@ -198,8 +199,12 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleRowGroupHover = (rowGroup, rect) => {
-    console.log("hover", rowGroup, rect);
-    this.setState({ rowGroupLegend: { left: rect.left, top: rect.top } });
+    this.setState({
+      rowGroupLegend: {
+        label: rowGroup.genusName,
+        tooltipLocation: { left: rect.left, top: rect.top },
+      },
+    });
     logAnalyticsEvent("SamplesHeatmapVis_row-group_hovered", {
       genusName: rowGroup.genusName,
       genusId: rowGroup.sortKey,
@@ -422,14 +427,7 @@ class SamplesHeatmapVis extends React.Component {
               tooltipLocation={tooltipLocation}
             />
           )}
-        {rowGroupLegend && (
-          <div
-            className={cx(cs.tooltip, cs.visible)}
-            style={getTooltipStyle(rowGroupLegend)}
-          >
-            HELLL OWOOLRD
-          </div>
-        )}
+        {rowGroupLegend && <RowGroupLegend {...rowGroupLegend} />}
         {addMetadataTrigger && (
           <MetadataSelector
             addMetadataTrigger={addMetadataTrigger}
