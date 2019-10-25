@@ -1063,19 +1063,7 @@ export default class Heatmap {
         d =>
           this.options.onRowLabelClick &&
           this.options.onRowLabelClick(d.label, d3.event)
-      )
-      .on("mouseover", d => {
-        this.options.onRowLabelHover && this.options.onRowLabelHover(d);
-      });
-    // TODO (gdingle):
-    // .on("mouseleave", d => {
-    //   this.options.onColumnMetadataLabelOut &&
-    //     this.options.onColumnMetadataLabelOut(d);
-    // })
-    // .on("mousemove", d => {
-    //   this.options.onColumnMetadataLabelMove &&
-    //     this.options.onColumnMetadataLabelMove(d, d3.event);
-    // });
+      );
 
     rowLabelEnter
       .append("line")
