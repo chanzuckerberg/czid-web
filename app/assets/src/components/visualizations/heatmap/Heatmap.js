@@ -854,7 +854,7 @@ export default class Heatmap {
       this.options.onRowGroupHover(
         rowLabelEntered,
         firstElem.getBoundingClientRect(),
-        this.gRowLabels.node().getBoundingClientRect().top
+        this.gColumnMetadata.node().getBoundingClientRect().bottom
       );
   };
 

@@ -216,19 +216,14 @@ class SamplesHeatmapVis extends React.Component {
     logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
-  handleRowGroupHover = (rowGroup, rect, offset) => {
-    if (rect.top < offset) {
-      // hide the tooltip if it would appear in empty space above the row labels
-      this.setState({ rowGroupLegend: null });
-      return;
-    }
+  handleRowGroupHover = (rowGroup, rect, minTop) => {
     const tooltipWidth = Math.max(MAX_ROW_GROUP_TOOLTIP_WIDTH, rect.width / 2);
     this.setState({
       rowGroupLegend: {
         label: `Genus: ${rowGroup.genusName || "Unknown"}`,
         tooltipLocation: {
           left: rect.left + rect.width / 2 - tooltipWidth / 2, // center
-          top: rect.top,
+          top: Math.max(minTop, rect.top),
           width: tooltipWidth,
         },
       },
