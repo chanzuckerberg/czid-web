@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { RequestContext } from "~/components/common/RequestContext";
+import { UserContext } from "~/components/common/UserContext";
 import "url-search-params-polyfill";
 import "materialize-css";
 import "materialize-css/dist/css/materialize.css";
@@ -38,17 +38,16 @@ contextKeys.forEach(key => {
 
 // Turn off camelcase rule
 /* eslint camelcase: 0 */
-const react_component = (componentName, props, target, requestContext) => {
+const react_component = (componentName, props, target, userContext) => {
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
     ReactDOM.render(
-      <RequestContext.Provider value={requestContext}>
+      <UserContext.Provider value={userContext}>
         {React.createElement(matchedComponent, props)}
-      </RequestContext.Provider>,
+      </UserContext.Provider>,
       document.getElementById(target)
     );
   } else {
-    // TODO: do proper error processing
     // eslint-disable-next-line no-console
     console.error(
       "Couldn't find component for",

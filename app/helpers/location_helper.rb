@@ -2,11 +2,14 @@ module LocationHelper
   # Adapter function to munge responses from Location IQ API to our format
   def self.adapt_location_iq_response(body)
     address = body["address"]
+    # Note(jsheu): 'type' field may contain a helpful exact name match, but not
+    # necessarily. Ex: city, state, administrative, river, university, station..
+    category = body["type"]
 
-    country_key = Location::COUNTRY_NAMES.find { |k| address.include?(k) }
-    state_key = Location::STATE_NAMES.find { |k| address.include?(k) }
-    subdivision_key = Location::SUBDIVISION_NAMES.find { |k| address.include?(k) }
-    city_key = Location::CITY_NAMES.find { |k| address.key?(k) }
+    country_key = Location::COUNTRY_NAMES.find { |k| address.include?(k) || k == category }
+    state_key = Location::STATE_NAMES.find { |k| address.include?(k) || k == category }
+    subdivision_key = Location::SUBDIVISION_NAMES.find { |k| address.include?(k) || k == category }
+    city_key = Location::CITY_NAMES.find { |k| address.key?(k) || k == category }
 
     geo_level = if city_key
                   Location::CITY_LEVEL
@@ -20,13 +23,19 @@ module LocationHelper
                   ""
                 end
 
+    name = normalize_location_name(body["display_name"], geo_level)
+    country_name = normalize_location_name(address[country_key] || "", Location::COUNTRY_LEVEL)
+    state_name = normalize_location_name(address[state_key] || "", Location::STATE_LEVEL)
+    subdivision_name = normalize_location_name(address[subdivision_key] || "", Location::SUBDIVISION_LEVEL)
+    city_name = normalize_location_name(address[city_key] || "", Location::CITY_LEVEL)
+
     loc = {
-      name: body["display_name"],
+      name: name,
       geo_level: geo_level,
-      country_name: address[country_key] || "",
-      state_name: address[state_key] || "",
-      subdivision_name: address[subdivision_key] || "",
-      city_name: address[city_key] || "",
+      country_name: country_name,
+      state_name: state_name,
+      subdivision_name: subdivision_name,
+      city_name: city_name,
       # Round coordinates to enhance privacy
       lat: body["lat"] ? body["lat"].to_f.round(2) : nil,
       # LocationIQ uses 'lon'
@@ -37,7 +46,7 @@ module LocationHelper
       locationiq_id: body["place_id"].to_i,
     }
 
-    if loc[:name].size > Location::DEFAULT_MAX_NAME_LENGTH
+    if loc[:name].size > Location::DEFAULT_MAX_NAME_LENGTH && address.present?
       # The first field in the address response may have a useful place name like 'university'
       parts = [address.first[1]]
       fields = [:city_name, :subdivision_name, :state_name, :country_name]
@@ -57,7 +66,7 @@ module LocationHelper
   def self.truncate_name(name)
     # Shorten long names so they look a little better downstream (e.g. in dropdown filters). Try to take the first 2 + last 2 parts, or just the first + last 2 parts.
     max_chars = Location::DEFAULT_MAX_NAME_LENGTH
-    if name.size > max_chars
+    if name && name.size > max_chars
       parts = name.split(", ")
       if parts.size >= 4
         last = parts[-2..-1]
@@ -119,5 +128,48 @@ module LocationHelper
     else
       samples.where("`metadata`.`string_validated_value` IN (?)", query)
     end
+  end
+
+  # Normalize some location names from the provider for matching consistency.
+  # Ex: Treat "United States of America" and "USA" as the same in cases where
+  # the provider is not internally consistent.
+  # This is for matching names that should be the same.
+  #
+  # See config/initializers/location_name_aliases.rb and add important known
+  # aliases there.
+  def self.normalize_location_name(name, geo_level)
+    # NOTE(jsheu): Provider v1/autocomplete endpoint often has repetitive
+    # country names such as "Cambodia, Cambodia". Dedupe them.
+    if name.include?(", ")
+      parts = name.split(", ")
+      if parts[1] == parts[0]
+        name = parts[0]
+      end
+    end
+
+    if LOCATION_NAME_ALIASES.dig(geo_level, name)
+      LOCATION_NAME_ALIASES[geo_level][name]
+    else
+      name
+    end
+  end
+
+  # Combine results from provider autocomplete and geosearch endpoints for
+  # better results.
+  def self.handle_external_search_results(results)
+    autocomplete_results = results[Location::GEOSEARCH_ACTIONS[0]] || []
+    search_results = results[Location::GEOSEARCH_ACTIONS[1]] || []
+    combined = ArrayUtil.merge_arrays(autocomplete_results, search_results)
+
+    # - NOTE(jsheu): We get much more relevant results for our use cases from
+    # the 'relation' type, although we don't have a way to solely request those.
+    # OSM relations are used to model logical or geographic relationships
+    # between objects.
+    # - De-dup by name/geo_level and also osm_id.
+    combined
+      .map { |r| adapt_location_iq_response(r) }
+      .select { |r| Location::OSM_SEARCH_TYPES_TO_USE.include?(r[:osm_type]) }
+      .uniq { |r| [r[:name], r[:geo_level]] }
+      .uniq { |r| r[:osm_id] }
   end
 end

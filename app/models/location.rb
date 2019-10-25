@@ -7,6 +7,7 @@ class Location < ApplicationRecord
 
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
   GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze
+  AUTOCOMPLETE_BASE_QUERY = "autocomplete.php?normalizecity=1".freeze
   DEFAULT_LOCATION_FIELDS = [
     :name,
     :geo_level,
@@ -36,6 +37,9 @@ class Location < ApplicationRecord
   SUBDIVISION_NAMES = %w[county state_district district].freeze
   CITY_NAMES = %w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood suburb].freeze
 
+  GEOSEARCH_ACTIONS = [:autocomplete, :geosearch].freeze
+  OSM_SEARCH_TYPES_TO_USE = %w[relation].freeze
+
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
@@ -51,10 +55,33 @@ class Location < ApplicationRecord
     [success, JSON.parse(resp.body)]
   end
 
-  # Search request to Location IQ API by freeform query
+  # Search request to Location IQ API by freeform query.
+  # - This endpoint is better for when the user has finished typing entirely and
+  # wants an exact match (e.g. "San Diego" -> "San Diego" and nothing more).
+  # - This endpoint is worse for when the user only typed a partial phrase. Ex:
+  # "San" may only return locations named "San" instead of suggesting "San
+  # Diego".
   def self.geosearch(query, limit = nil)
-    raise ArgumentError, "No query for geosearch" if query.blank?
-    endpoint_query = "#{GEOSEARCH_BASE_QUERY}&q=#{query}"
+    geo_search_request_base(:geosearch, query, limit)
+  end
+
+  # - This endpoint is better for when the user is still typing, so it will return
+  # results with additional characters (e.g. "San" -> "San Francisco").
+  # - This endpoint is worse if the user is finished typing. Ex: "UCSF" may only
+  # return "UCSF Medical Center" (and not plain "UCSF") because it is trying to
+  # guess what the completed phrase will be.
+  def self.autocomplete(query, limit = nil)
+    geo_search_request_base(:autocomplete, query, limit)
+  end
+
+  def self.geo_search_request_base(action, query, limit = nil)
+    raise ArgumentError, "No query for #{action}" if query.blank?
+    base_query = if action == :autocomplete
+                   AUTOCOMPLETE_BASE_QUERY
+                 else
+                   GEOSEARCH_BASE_QUERY
+                 end
+    endpoint_query = "#{base_query}&q=#{query}"
     endpoint_query += "&limit=#{limit}" if limit.present?
     location_api_request(endpoint_query)
   end
@@ -86,16 +113,16 @@ class Location < ApplicationRecord
     location_api_request(endpoint_query)
   end
 
-  # If we already have the location (via LocationIQ ID), return that. Otherwise fetch details via
-  # OSM ID/type. OSM IDs can change often but LocationIQ IDs should be stable. We can't geosearch
-  # by LocationIQ ID, so we need to use both.
-  def self.find_or_new_by_api_ids(loc)
-    existing = Location.find_by(locationiq_id: loc[:locationiq_id])
+  # If we already have the location (via matching fields), return that. Otherwise fetch details via
+  # OSM ID/type.
+  def self.find_or_new_by_fields(loc_info)
+    existing = Location.find_with_fields(loc_info)
     if existing
       existing
-    elsif loc[:osm_id].to_i > 0 && loc[:osm_type]
-      success, resp = geosearch_by_osm_id(loc[:osm_id], loc[:osm_type])
-      raise "Couldn't fetch OSM ID #{loc[:osm_id]} (#{loc[:osm_type]})" unless success
+    elsif loc_info[:osm_id].to_i > 0 && loc_info[:osm_type]
+      # Warning: OSM IDs may change, but it is OK to do a service lookup with them.
+      success, resp = geosearch_by_osm_id(loc_info[:osm_id], loc_info[:osm_type])
+      raise "Couldn't fetch OSM ID #{loc_info[:osm_id]} (#{loc_info[:osm_type]})" unless success
 
       resp = LocationHelper.adapt_location_iq_response(resp)
       # 'New' without saving so make sure caller saves.
@@ -103,8 +130,20 @@ class Location < ApplicationRecord
     else
       # If osm_id and osm_type are missing, just use the original params.
       # 'New' without saving so make sure caller saves.
-      new_from_params(loc)
+      new_from_params(loc_info)
     end
+  end
+
+  # Consider it a match if all fields to refer to the same place.
+  def self.find_with_fields(loc_info)
+    Location.find_by(
+      name: loc_info[:name] || "",
+      geo_level: loc_info[:geo_level] || "",
+      country_name: loc_info[:country_name] || "",
+      state_name: loc_info[:state_name] || "",
+      subdivision_name: loc_info[:subdivision_name] || "",
+      city_name: loc_info[:city_name] || ""
+    )
   end
 
   # Restrict Human location specificity to Subdivision, State, Country. Return new Location if
@@ -132,7 +171,7 @@ class Location < ApplicationRecord
       end
 
       result = LocationHelper.adapt_location_iq_response(resp[0])
-      return Location.find_by(locationiq_id: result[:locationiq_id]) || new_from_params(result)
+      return Location.find_with_fields(result) || new_from_params(result)
     end
 
     # Just return the input hash if no change

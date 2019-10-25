@@ -1,0 +1,86 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.chooseStep {
+  height: calc(85vh - 80px);
+  max-height: 700px;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  .title {
+    @include font-header-xxl;
+  }
+
+  .tagline {
+    @include font-header-xs;
+    color: $primary-light;
+  }
+}
+
+.downloadTypeContainer {
+  margin-top: 20px;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+
+  .category {
+    &:not(:first-child) {
+      margin-top: 40px;
+    }
+
+    .title {
+      @include font-label-s;
+      color: $medium-grey;
+    }
+  }
+}
+
+.downloadType {
+  padding: 10px 18px;
+  display: flex;
+  cursor: pointer;
+
+  &:hover,
+  &.selected {
+    background-color: $off-white;
+  }
+
+  .radioButton {
+    margin-right: 10px;
+    margin-top: 4px;
+  }
+
+  .name {
+    @include font-header-xs;
+  }
+
+  .description {
+    @include font-body-xxs;
+    color: $dark-grey;
+  }
+}
+
+.fields {
+  margin-top: 12px;
+
+  .field {
+    width: calc(50% - 20px);
+
+    .label {
+      @include font-body-xs;
+      margin-bottom: 2px;
+    }
+  }
+}
+
+.footer {
+  margin-top: 40px;
+
+  .downloadDisclaimer {
+    @include font-body-xxs;
+    color: $medium-grey;
+    margin-top: 6px;
+  }
+}

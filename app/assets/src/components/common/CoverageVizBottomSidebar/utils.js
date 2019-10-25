@@ -1,5 +1,5 @@
 import memoize from "memoize-one";
-import { sortBy } from "lodash/fp";
+import { sortBy, filter } from "lodash/fp";
 import { formatPercent } from "~/components/utils/format";
 
 // Gets called on every mouse move, so need to memoize.
@@ -32,11 +32,11 @@ export const getHistogramTooltipData = memoize(
 );
 
 // Gets called on every mouse move, so need to memoize.
-export const getGenomeVizTooltipData = memoize((accessionData, dataIndex) => {
+export const getGenomeVizTooltipData = memoize((hitGroups, dataIndex) => {
   // hitObj format:
   //   [numContigs, numReads, contigR, hitGroupStart, hitGroupEnd, alignmentLength,
   //    percentId, numMismatches, numGaps, binIndex]
-  const hitObj = accessionData.hit_groups[dataIndex];
+  const hitObj = hitGroups[dataIndex];
 
   const numContigs = hitObj[0];
   const numReads = hitObj[1];
@@ -88,6 +88,16 @@ export const getGenomeVizTooltipData = memoize((accessionData, dataIndex) => {
   ];
 });
 
+// Select all hit groups with at least one aggregated contig.
+export const selectContigsFromHitGroups = memoize(hitGroups =>
+  filter(hitGroup => hitGroup[0] > 0, hitGroups)
+);
+
+// Select all hit groups with at least one aggregated read.
+export const selectReadsFromHitGroups = memoize(hitGroups =>
+  filter(hitGroup => hitGroup[1] > 0, hitGroups)
+);
+
 export const generateCoverageVizData = (coverageData, coverageBinSize) =>
   coverageData.map(valueArr => ({
     x0: valueArr[0] * coverageBinSize,
@@ -99,23 +109,16 @@ export const generateContigReadVizData = (hitGroups, coverageBinSize) => {
   //   [numContigs, numReads, contigR, hitGroupStart, hitGroupEnd, alignmentLength,
   //    percentId, numMismatches, numGaps, binIndex, contigByteranges]
   const getDisplayNumbers = hitObj => {
-    // hasContig is used to pick the correct color in the GenomeViz
-    const hasContig = hitObj[0] > 0 ? 1 : 0;
-
     // If the hit range for a single hit is too small, display the bin that they're in instead.
     // If there are multiple hits, display the bin even if the hits extend outside the bin, to prevent overlapping.
     if (
       Math.abs(hitObj[4] - hitObj[3]) < coverageBinSize ||
       hitObj[0] + hitObj[1] > 1
     ) {
-      return [
-        hitObj[9] * coverageBinSize,
-        (hitObj[9] + 1) * coverageBinSize,
-        hasContig,
-      ];
+      return [hitObj[9] * coverageBinSize, (hitObj[9] + 1) * coverageBinSize];
     }
 
-    return [hitObj[3], hitObj[4], hasContig];
+    return [hitObj[3], hitObj[4]];
   };
 
   return hitGroups.map(hit => getDisplayNumbers(hit));

@@ -29,6 +29,9 @@ class PipelineRunStage < ApplicationRecord
   DAG_NAME_POSTPROCESS = "postprocess".freeze
   DAG_NAME_EXPERIMENTAL = "experimental".freeze
 
+  # Older alignment configs might not have an s3_nt_info_db_path field, so use a reasonable default in this case.
+  DEFAULT_S3_NT_INFO_DB_PATH = "s3://idseq-database/alignment_data/2019-09-17/nt_info.sqlite3".freeze
+
   STAGE_INFO = {
     1 => {
       name: HOST_FILTERING_STAGE_NAME,
@@ -215,21 +218,15 @@ class PipelineRunStage < ApplicationRecord
     attribute_dict[:dag_name] = dag_name
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
 
-    # Temp flag for rolling out jbuilder templates
-    dag_ext = if AppConfigHelper.get_app_config(AppConfig::USE_JBUILDER_TEMPLATES) == "1" && step_number == 1
-                "jbuilder"
-              else
-                "erb"
-              end
     # See our dag templates in app/lib/dags.
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.#{dag_ext}",
+    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.jbuilder",
                            sample.project_id,
                            sample.id,
                            sample.host_genome_name.downcase,
                            attribute_dict,
                            pipeline_run.parse_dag_vars)
     self.dag_json = dag.render
-    copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
+    copy_done_file = "echo done | aws s3 cp - #{Shellwords.escape(sample.sample_output_s3_path)}/\"$AWS_BATCH_JOB_ID\".#{JOB_SUCCEEDED_FILE_SUFFIX}"
     upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
   end
 
@@ -259,7 +256,7 @@ class PipelineRunStage < ApplicationRecord
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
 
     # Dispatch job. Use the himem settings for host filtering.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: DAG_NAME_HOST_FILTER, sample_id: sample.id)
   end
 
   def alignment_command
@@ -294,7 +291,7 @@ class PipelineRunStage < ApplicationRecord
     dag_commands = prepare_dag(attribute_dict, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Run it
-    aegea_batch_submit_command(batch_command)
+    aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_ALIGNMENT, sample_id: sample.id)
   end
 
   def postprocess_command
@@ -317,7 +314,7 @@ class PipelineRunStage < ApplicationRecord
     dag_commands = prepare_dag(attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: DAG_NAME_POSTPROCESS, sample_id: sample.id)
   end
 
   def experimental_command
@@ -336,12 +333,13 @@ class PipelineRunStage < ApplicationRecord
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
+      nt_info_db: alignment_config.s3_nt_info_db_path || DEFAULT_S3_NT_INFO_DB_PATH,
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     dag_commands = prepare_dag(attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
 
     # Dispatch job
-    aegea_batch_submit_command(batch_command)
+    aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_EXPERIMENTAL, sample_id: sample.id)
   end
 end

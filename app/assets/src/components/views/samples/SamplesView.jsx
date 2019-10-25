@@ -3,8 +3,10 @@ import { difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import DownloadIcon from "~ui/icons/DownloadIcon";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
@@ -20,8 +22,9 @@ import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
-import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 
+import ToolbarIcon from "./ToolbarIcon";
+import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
 
@@ -31,6 +34,7 @@ class SamplesView extends React.Component {
 
     this.state = {
       phyloTreeCreationModalOpen: false,
+      bulkDownloadModalOpen: false,
     };
 
     this.columns = [
@@ -187,12 +191,20 @@ class SamplesView extends React.Component {
       { text: "AMR Heatmap", value: "/amr_heatmap" },
     ];
 
+    const heatmapIcon = <HeatmapIcon className={cs.icon} />;
+
     return selectedSampleIds.size < 2 ? (
-      <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+      <ToolbarIcon
+        className={cx(cs.action, cs.heatmap)}
+        disabled
+        icon={heatmapIcon}
+        popupText="Heatmap"
+        popupSubtitle="Select at least 2 samples"
+      />
     ) : (
       <BareDropdown
         hideArrow
-        className={cx(cs.icon, cs.heatmapDropdown)}
+        className={cx(cs.action)}
         items={heatmapOptions.map(option => {
           const params = getURLParamString({
             sampleIds: Array.from(selectedSampleIds),
@@ -210,7 +222,30 @@ class SamplesView extends React.Component {
             />
           );
         })}
-        trigger={<HeatmapIcon className={cx(cs.icon, cs.heatmap)} />}
+        trigger={
+          <ToolbarIcon
+            className={cs.heatmap}
+            icon={heatmapIcon}
+            popupText="Heatmap"
+          />
+        }
+      />
+    );
+  };
+
+  renderPhyloTreeTrigger = () => {
+    const phyloTreeIcon = (
+      <PhyloTreeIcon className={cx(cs.icon, cs.phyloTree)} />
+    );
+    return (
+      <ToolbarIcon
+        className={cs.action}
+        icon={phyloTreeIcon}
+        popupText="Phylogenetic Tree"
+        onClick={withAnalytics(
+          this.handlePhyloModalOpen,
+          "SamplesView_phylo-tree-modal-open_clicked"
+        )}
       />
     );
   };
@@ -233,6 +268,7 @@ class SamplesView extends React.Component {
     }
     return (
       <DownloadIconDropdown
+        className={cs.action}
         iconClassName={cx(cs.icon, cs.download)}
         options={downloadOptions}
         onClick={downloadOption => {
@@ -251,28 +287,44 @@ class SamplesView extends React.Component {
     );
   };
 
-  renderCollectionTrigger = () => {
-    const {
-      currentDisplay,
-      mapPreviewedSamples,
-      samples,
-      selectedSampleIds,
-    } = this.props;
+  renderBulkDownloadTrigger = () => {
+    const { selectedSampleIds } = this.props;
+    const downloadIcon = <DownloadIcon className={cx(cs.icon, cs.download)} />;
+    return (
+      <ToolbarIcon
+        className={cs.action}
+        icon={downloadIcon}
+        popupText="Download"
+        disabled={selectedSampleIds.size === 0}
+        onClick={withAnalytics(
+          this.handleBulkDownloadModalOpen,
+          "SamplesView_bulk-download-modal-open_clicked"
+        )}
+      />
+    );
+  };
 
-    // NOTE(jsheu): For mapSidebar sample names to appear in CollectionModal,
-    // they need to be presently loaded/fetched. Otherwise the ids work but says "and more..." for un-fetched samples.
-    const targetSamples =
-      currentDisplay === "map" ? mapPreviewedSamples : samples.loaded;
+  renderCollectionTrigger = () => {
+    const { samples, selectedSampleIds } = this.props;
+
+    const targetSamples = samples.loaded;
+
+    const saveIcon = <SaveIcon className={cs.icon} />;
+
     return selectedSampleIds.size < 2 ? (
-      <SaveIcon
-        className={cx(cs.icon, cs.disabled, cs.save)}
+      <ToolbarIcon
+        className={cs.action}
+        disabled
+        icon={saveIcon}
         popupText={"Save a Collection"}
+        popupSubtitle="Select at least 2 samples"
       />
     ) : (
       <CollectionModal
         trigger={
-          <SaveIcon
-            className={cx(cs.icon, cs.save)}
+          <ToolbarIcon
+            className={cs.action}
+            icon={saveIcon}
             popupText={"Save a Collection"}
           />
         }
@@ -285,7 +337,7 @@ class SamplesView extends React.Component {
   };
 
   renderToolbar = () => {
-    const { selectedSampleIds } = this.props;
+    const { selectedSampleIds, allowedFeatures } = this.props;
     return (
       <div className={cs.samplesToolbar}>
         {this.renderDisplaySwitcher()}
@@ -304,18 +356,12 @@ class SamplesView extends React.Component {
         </div>
         <div className={cs.separator} />
         <div className={cs.actions}>
-          <div className={cs.action}>{this.renderCollectionTrigger()}</div>
-          <div className={cs.action}>{this.renderHeatmapTrigger()}</div>
-          <div
-            className={cs.action}
-            onClick={withAnalytics(
-              this.handlePhyloModalOpen,
-              "SamplesView_phylo-tree-modal-open_clicked"
-            )}
-          >
-            <PhyloTreeIcon className={cs.icon} />
-          </div>
-          <div className={cs.action}>{this.renderDownloadTrigger()}</div>
+          {this.renderCollectionTrigger()}
+          {this.renderHeatmapTrigger()}
+          {this.renderPhyloTreeTrigger()}
+          {this.renderDownloadTrigger()}
+          {allowedFeatures.includes("bulk_downloads") &&
+            this.renderBulkDownloadTrigger()}
         </div>
       </div>
     );
@@ -412,6 +458,14 @@ class SamplesView extends React.Component {
     this.setState({ phyloTreeCreationModalOpen: false });
   };
 
+  handleBulkDownloadModalOpen = () => {
+    this.setState({ bulkDownloadModalOpen: true });
+  };
+
+  handleBulkDownloadModalClose = () => {
+    this.setState({ bulkDownloadModalOpen: false });
+  };
+
   handleRowClick = ({ event, rowData }) => {
     const { onSampleSelected, samples } = this.props;
     const sample = samples.get(rowData.id);
@@ -423,8 +477,8 @@ class SamplesView extends React.Component {
   };
 
   render() {
-    const { currentDisplay } = this.props;
-    const { phyloTreeCreationModalOpen } = this.state;
+    const { currentDisplay, allowedFeatures, selectedSampleIds } = this.props;
+    const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
     return (
       <div className={cs.container}>
         {currentDisplay === "table" ? (
@@ -441,6 +495,16 @@ class SamplesView extends React.Component {
               this.handlePhyloModalClose,
               "SamplesView_phylo-tree-modal_closed"
             )}
+          />
+        )}
+        {allowedFeatures.includes("bulk_downloads") && (
+          <BulkDownloadModal
+            open={bulkDownloadModalOpen}
+            onClose={withAnalytics(
+              this.handleBulkDownloadModalClose,
+              "SamplesView_bulk-download-modal_closed"
+            )}
+            selectedSampleIds={selectedSampleIds}
           />
         )}
       </div>
@@ -470,7 +534,6 @@ SamplesView.propTypes = {
   mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
-  mapPreviewedSamples: PropTypes.array,
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onActiveColumnsChange: PropTypes.func,

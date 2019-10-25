@@ -4,14 +4,13 @@ import { flatten } from "lodash/fp";
 import { scaleLinear } from "d3-scale";
 import { color } from "d3-color";
 
-import ArrayUtils from "~/components/utils/ArrayUtils";
-import { CategoricalColormap } from "../utils/colormaps/CategoricalColormap";
+const DEFAULT_COLOR = "#3867FA";
 
 export default class GenomeViz {
   constructor(container, data, options) {
     this.g = null;
     this.container = select(container);
-    // Data is of the form [xStart, xEnd, colorIndex]
+    // Data is of the form [xStart, xEnd]
     this.data = data;
 
     this.margins = options.margins || {
@@ -28,7 +27,7 @@ export default class GenomeViz {
 
     this.options = Object.assign(
       {
-        colors: null,
+        color: DEFAULT_COLOR,
         hoverBuffer: 5,
         hoverDarkenFactor: 0.25,
       },
@@ -36,6 +35,7 @@ export default class GenomeViz {
     );
 
     this.lastHoveredDataIndex = null;
+    this.barEndpoints = null;
 
     // remove any previous charts
     this.container.selectAll("svg").remove();
@@ -46,14 +46,6 @@ export default class GenomeViz {
       .attr("height", this.size.height);
     this.svg.remove;
   }
-
-  getColors = () => {
-    if (this.options.colors) {
-      return this.options.colors;
-    }
-
-    return new CategoricalColormap().getNScale(this.data.length + 1);
-  };
 
   getDomain = () => {
     if (this.options.domain) {
@@ -71,57 +63,49 @@ export default class GenomeViz {
     return [min(mins), max(maxs)];
   };
 
-  // Find the bar that is closest to svgX, within hoverBuffer.
+  // Get the smallest bar that overlaps svgX. If none exist, get the closest one within hoverBuffer.
   // svgX is an x coordinate relative to the svg container.
   // All the bar "endpoints" are within this same coordinate space.
   getDataIndexForSvgX = svgX => {
-    const closestEndpoints = ArrayUtils.findClosestNeighbors(
-      this.sortedEndpoints,
-      svgX
-    );
+    // The smallest bar that overlaps svgX.
+    let smallestBarIndex = null;
+    let smallestBarSize = null;
+    // The closest bar within hoverBuffer of svgX.
+    let closestBufferBarIndex = null;
+    let closestBufferBarDistance = null;
 
-    let closestDataIndex = null;
-
-    if (closestEndpoints.length === 1) {
-      closestDataIndex =
-        Math.abs(closestEndpoints[0] - svgX) < this.options.hoverBuffer
-          ? this.endpointToDataIndex[closestEndpoints[0]][0]
-          : null;
-    } else {
-      const [dataIndexOne, otherEndpointOne] = this.endpointToDataIndex[
-        closestEndpoints[0]
-      ];
-      const [dataIndexTwo, otherEndpointTwo] = this.endpointToDataIndex[
-        closestEndpoints[1]
-      ];
-
-      // Check if the mouse is currently within either bar corresponding to the closest endpoints.
-      // This assumes that whenever the mouse is within a bar, one of the two closest endpoints will
-      // belong to the bar, which is not always true if there is one bar completely covered by another.
-      // For now, we assume this is never the case.
-      if (closestEndpoints[0] <= svgX && svgX <= otherEndpointOne) {
-        closestDataIndex = dataIndexOne;
-      } else if (otherEndpointTwo <= svgX && svgX <= closestEndpoints[1]) {
-        closestDataIndex = dataIndexTwo;
-      } else {
-        const closestX =
-          Math.abs(closestEndpoints[0] - svgX) <
-          Math.abs(closestEndpoints[1] - svgX)
-            ? closestEndpoints[0]
-            : closestEndpoints[1];
-
-        closestDataIndex =
-          Math.abs(closestX - svgX) < this.options.hoverBuffer
-            ? this.endpointToDataIndex[closestX][0]
-            : null;
+    this.barEndpoints.forEach(([start, end, dataIndex]) => {
+      if (
+        start <= svgX &&
+        svgX <= end &&
+        (smallestBarIndex === null || end - start < smallestBarSize)
+      ) {
+        smallestBarIndex = dataIndex;
+        smallestBarSize = end - start;
       }
-    }
 
-    return closestDataIndex;
+      if (
+        smallestBarIndex === null &&
+        start - this.options.hoverBuffer <= svgX &&
+        svgX <= end + this.options.hoverBuffer
+      ) {
+        const distance = Math.min(Math.abs(start - svgX), Math.abs(svgX - end));
+
+        if (
+          closestBufferBarIndex === null ||
+          distance < closestBufferBarDistance
+        ) {
+          closestBufferBarDistance = distance;
+          closestBufferBarIndex = dataIndex;
+        }
+      }
+    });
+
+    return smallestBarIndex !== null ? smallestBarIndex : closestBufferBarIndex;
   };
 
   onMouseMove = () => {
-    if (this.sortedEndpoints.length == 0 || !this.endpointToDataIndex) {
+    if (!this.barEndpoints || this.barEndpoints.length == 0) {
       return;
     }
 
@@ -136,7 +120,6 @@ export default class GenomeViz {
         this.options.onGenomeVizBarEnter(closestDataIndex);
       }
       this.highlightBar(closestDataIndex, true);
-      this.highlightBar(this.lastHoveredDataIndex, false);
       this.lastHoveredDataIndex = closestDataIndex;
     } else if (
       closestDataIndex === null &&
@@ -158,7 +141,7 @@ export default class GenomeViz {
   };
 
   onMouseClick = () => {
-    if (this.sortedEndpoints.length == 0 || !this.endpointToDataIndex) {
+    if (!this.barEndpoints || this.barEndpoints.length == 0) {
       return;
     }
 
@@ -168,7 +151,8 @@ export default class GenomeViz {
     if (this.options.onGenomeVizBarClick) {
       if (closestDataIndex !== null) {
         const barBBox = this.svg
-          .select(`.bar-container .rect-${closestDataIndex}`)
+          .select(".bar-container")
+          .filter((_d, i) => i === closestDataIndex)
           .node()
           .getBoundingClientRect();
         this.options.onGenomeVizBarClick(
@@ -193,23 +177,29 @@ export default class GenomeViz {
     this.lastHoveredDataIndex = null;
   };
 
+  // Re-draw the highlighted bar above all other bars, to ensure that it shows up at the top.
   highlightBar = (barIndex, shouldHighlight) => {
-    if (barIndex === null) {
-      return;
-    }
-    const colors = this.getColors();
-
-    let highlightColor = colors[this.data[barIndex][2]];
+    // Remove all previous highlight bars.
+    this.svg.selectAll(".highlight-container rect").remove();
 
     if (shouldHighlight) {
-      highlightColor = color(highlightColor).darker(
+      if (barIndex === null) {
+        return;
+      }
+      const d = this.data[barIndex];
+      const highlightColor = color(this.options.color).darker(
         this.options.hoverDarkenFactor
       );
-    }
 
-    this.svg
-      .select(`.bar-container .rect-${barIndex}`)
-      .attr("fill", highlightColor);
+      this.svg
+        .select(".highlight-container")
+        .append("rect")
+        .attr("fill", highlightColor)
+        .attr("x", this.x(d[0]))
+        .attr("width", this.x(d[1]) - this.x(d[0]))
+        .attr("y", 0)
+        .attr("height", this.size.height);
+    }
   };
 
   // We require a separate rectangle to show the black border when a bar is clicked because we need
@@ -225,7 +215,6 @@ export default class GenomeViz {
         return;
       }
       const d = this.data[barIndex];
-      let colors = this.getColors();
 
       // Shrink the rectangle by outlineBuffer so the border isn't partially cut off.
       const outlineBuffer = 1;
@@ -233,7 +222,7 @@ export default class GenomeViz {
       this.svg
         .select(".outline-container")
         .append("rect")
-        .attr("fill", colors[d[2]])
+        .attr("fill", this.options.color)
         .attr("x", this.x(d[0]) + outlineBuffer)
         .attr("width", this.x(d[1]) - this.x(d[0]) - outlineBuffer * 2)
         .attr("y", outlineBuffer)
@@ -246,7 +235,6 @@ export default class GenomeViz {
   update() {
     if (!this.data) return;
 
-    let colors = this.getColors();
     const domain = this.getDomain();
 
     let x = scaleLinear()
@@ -256,8 +244,7 @@ export default class GenomeViz {
 
     this.x = x;
 
-    const endpointToDataIndex = {};
-    const endpoints = [];
+    const barEndpoints = [];
 
     this.svg
       .append("g")
@@ -266,24 +253,19 @@ export default class GenomeViz {
       .data(this.data)
       .enter()
       .append("rect")
-      .attr("class", (_, index) => `rect-${index}`)
-      .attr("fill", d => colors[d[2]])
+      .attr("fill", this.options.color)
       .attr("x", d => x(d[0]))
       .attr("width", d => x(d[1]) - x(d[0]))
       .attr("y", () => 0)
       .attr("height", () => this.size.height);
 
     this.data.forEach((datum, dataIndex) => {
-      // Include the data index, and also the other endpoint.
-      endpointToDataIndex[x(datum[0])] = [dataIndex, x(datum[1])];
-      endpoints.push(x(datum[0]));
-      endpointToDataIndex[x(datum[1])] = [dataIndex, x(datum[0])];
-      endpoints.push(x(datum[1]));
+      barEndpoints.push([x(datum[0]), x(datum[1]), dataIndex]);
     });
 
-    this.endpointToDataIndex = endpointToDataIndex;
-    this.sortedEndpoints = endpoints.sort((a, b) => a - b);
+    this.barEndpoints = barEndpoints;
 
+    this.svg.append("g").attr("class", "highlight-container");
     this.svg.append("g").attr("class", "outline-container");
 
     this.svg

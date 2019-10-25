@@ -149,11 +149,9 @@ class DiscoveryView extends React.Component {
     this.mapPreviewSidebar = null;
 
     // preload first pages
-    const pageSize = 50;
-    const firstPageArgs = { startIndex: 0, stopIndex: pageSize - 1 };
-    this.projects.handleLoadObjectRows(firstPageArgs);
-    this.samples.handleLoadObjectRows(firstPageArgs);
-    this.visualizations.handleLoadObjectRows(firstPageArgs);
+    this.projects.loadPage(0);
+    this.samples.loadPage(0);
+    this.visualizations.loadPage(0);
 
     this.updateBrowsingHistory("replace");
   }
@@ -547,7 +545,9 @@ class DiscoveryView extends React.Component {
         break;
       }
       case "project": {
-        this.handleProjectSelected({ project: this.projects.get(value) });
+        this.handleProjectSelected({
+          project: this.projects.get(value) || { id: value },
+        });
         break;
       }
       default: {
@@ -628,16 +628,18 @@ class DiscoveryView extends React.Component {
 
   handleProjectSelected = ({ project }) => {
     const { mapSidebarTab } = this.state;
+
     this.setState(
       {
         currentDisplay: "table",
         currentTab: "samples",
         mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
-        project: project,
         projectId: project.id,
         search: null,
       },
       () => {
+        this.projects.reset({ conditions: this.getConditions() });
+        this.projects.loadPage(0);
         this.clearMapPreview();
         this.updateBrowsingHistory();
         this.refreshDataFromProjectChange();
@@ -869,7 +871,7 @@ class DiscoveryView extends React.Component {
 
     const addToAncestor = (entry, ancestorLevel) => {
       const ancestorId = entry[`${ancestorLevel}_id`];
-      if (ancestorId) {
+      if (ancestorId && rawMapLocationData[ancestorId]) {
         if (!clusteredData[ancestorId]) {
           clusteredData[ancestorId] = copyLocation(
             rawMapLocationData[ancestorId]
@@ -947,7 +949,6 @@ class DiscoveryView extends React.Component {
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
-      mapPreviewedSamples,
       sampleActiveColumns,
       selectedSampleIds,
       projectId,
@@ -1003,7 +1004,6 @@ class DiscoveryView extends React.Component {
                 mapLevel={mapLevel}
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
-                mapPreviewedSamples={mapPreviewedSamples}
                 mapTilerKey={mapTilerKey}
                 onActiveColumnsChange={this.handleSampleActiveColumnsChange}
                 onClearFilters={this.handleClearFilters}

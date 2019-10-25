@@ -4,6 +4,7 @@
 
 .samplesHeatmapVis {
   .plusMinusControl {
+    z-index: 1;
     position: absolute;
     // Offset from the viewport to line up with the filter controls. This will
     // need to be adjusted if the position of the controls changes.
@@ -18,13 +19,19 @@
   }
 
   .heatmapContainer {
-    overflow-x: auto;
-    // Set the height to force the horizontal scrollbar to appear at the bottom
-    // of the viewport instead of the bottom of the page. 334px is the height
-    // of the all the elements above the heatmapContainer. It *will* need to
-    // change if the height of the elements above ever change.
-    // TODO(mark): Use flexbox instead of hard-coding the offset.
-    height: calc(100vh - 334px);
+    overflow: hidden;
+    // Set the height so the heatmap takes up the rest of the screen.
+    // 358px is the height of the elements above the heatmapContainer.
+    // It *will* need to change if the height of the elements above ever change.
+    height: calc(100vh - #{$header-height} - 284px);
+
+    &.filtersApplied {
+      height: calc(100vh - #{$header-height} - 307px);
+    }
+
+    &.fullScreen {
+      height: calc(100vh - #{$header-height} - 33px);
+    }
 
     svg {
       display: block;
@@ -59,6 +66,47 @@
         flex: 1 1 0;
         min-width: 0;
       }
+    }
+  }
+
+  .bannerContainer {
+    width: 500px;
+    bottom: $space-s;
+    left: 50%;
+    margin-left: -250px;
+    text-align: center;
+    position: fixed;
+    transition: opacity 0.5s ease;
+
+    &.show {
+      opacity: 1;
+    }
+
+    &.hide {
+      opacity: 0;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .bannerText {
+      @include font-body-xxs-crop;
+      color: $medium-grey;
+      background: $white;
+      border-radius: 4px;
+      box-shadow: $box-shadow-dropdown-menu;
+      cursor: default;
+      display: inline-block;
+      margin: $space-xs auto auto;
+      padding: $space-xxs $space-xs;
+      text-align: center;
+    }
+
+    .removeIcon {
+      cursor: pointer;
+      height: 8px;
+      margin-left: $space-xxs;
     }
   }
 }

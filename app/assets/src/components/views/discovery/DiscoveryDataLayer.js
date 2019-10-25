@@ -22,12 +22,16 @@ class ObjectCollection {
 }
 
 class ObjectCollectionView {
-  constructor(collection, { conditions = {}, onViewChange = null }) {
+  constructor(
+    collection,
+    { conditions = {}, pageSize = 50, onViewChange = null }
+  ) {
     this._orderedIds = null;
     this._loading = true;
     this._collection = collection;
     this._conditions = conditions;
     this._activePromises = {};
+    this._pageSize = pageSize;
 
     this._onViewChange = onViewChange;
   }
@@ -51,6 +55,14 @@ class ObjectCollectionView {
     this._loading = true;
     this._conditions = conditions;
     this._activePromises = {};
+  };
+
+  loadPage = async pageNumber => {
+    const indices = {
+      startIndex: pageNumber,
+      stopIndex: this._pageSize * (1 + pageNumber) - 1,
+    };
+    return this.handleLoadObjectRows(indices);
   };
 
   handleLoadObjectRows = async ({ startIndex, stopIndex }) => {

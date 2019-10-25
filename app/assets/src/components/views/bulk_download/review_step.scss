@@ -1,0 +1,35 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.reviewStep {
+  .header {
+    .title {
+      @include font-header-xxl;
+    }
+
+    .editLink {
+      @include font-body-xs;
+      color: $light-grey;
+
+      &.enabled {
+        color: $primary-light;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .selectedDownload {
+    margin-top: 20px;
+  }
+
+  .footer {
+    margin-top: 40px;
+
+    .downloadDisclaimer {
+      @include font-body-xxs;
+      color: $medium-grey;
+      margin-top: $space-xxs;
+    }
+  }
+}

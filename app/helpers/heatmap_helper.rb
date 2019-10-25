@@ -67,7 +67,8 @@ module HeatmapHelper
       num_results,
       min_reads,
       sort_by,
-      threshold_filters
+      threshold_filters,
+      species_selected
     )
 
     details = top_taxons_details(
@@ -161,7 +162,8 @@ module HeatmapHelper
     num_results = 1_000_000,
     min_reads = MINIMUM_READ_THRESHOLD,
     sort_by = DEFAULT_TAXON_SORT_PARAM,
-    threshold_filters = []
+    threshold_filters = [],
+    species_selected = true
   )
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
@@ -181,6 +183,8 @@ module HeatmapHelper
     elsif include_phage && categories.blank?
       phage_clause = " AND is_phage = 1"
     end
+
+    tax_level = species_selected ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
 
     # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
     # fraction_subsampled = 1.0.
@@ -228,6 +232,7 @@ module HeatmapHelper
       AND count >= #{min_reads}
       -- We need both types of counts for threshold filters
       AND taxon_counts.count_type IN ('NT', 'NR')
+      AND taxon_counts.tax_level = #{tax_level}
       #{categories_clause}
       #{read_specificity_clause}
       #{phage_clause}"
@@ -335,6 +340,7 @@ module HeatmapHelper
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.family_taxid        AS  family_taxid,
         taxon_counts.name                AS  name,
+        taxon_lineages.genus_name        AS  genus_name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
         taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
@@ -348,6 +354,7 @@ module HeatmapHelper
           #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}
         )                                AS  neglogevalue
       FROM taxon_counts
+      JOIN taxon_lineages ON taxon_counts.tax_id = taxon_lineages.taxid
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id.to_i}   = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND

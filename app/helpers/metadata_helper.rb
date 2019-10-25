@@ -16,7 +16,7 @@ module MetadataHelper
     mf = MetadataField.new
     mf.name = name
     mf.display_name = name
-    mf.base_type = Metadatum::STRING_TYPE
+    mf.base_type = MetadataField::STRING_TYPE
     return mf
   end
 
@@ -30,7 +30,7 @@ module MetadataHelper
 
   # TODO(mark): Generate more realistic default values.
   def generate_metadata_default_value(field, host_genome_name)
-    if field.base_type == Metadatum::STRING_TYPE
+    if field.base_type == MetadataField::STRING_TYPE
       if field.options.present?
         options = JSON.parse(field.options)
         return options[Random.new.rand(options.length)]
@@ -39,11 +39,11 @@ module MetadataHelper
       return "Example " + field.display_name
     end
 
-    if field.base_type == Metadatum::NUMBER_TYPE
+    if field.base_type == MetadataField::NUMBER_TYPE
       return Random.new.rand(100)
     end
 
-    if field.base_type == Metadatum::DATE_TYPE
+    if field.base_type == MetadataField::DATE_TYPE
       return Time.zone.today.strftime(host_genome_name == "Human" ? "%Y-%m" : "%Y-%m-%d")
     end
   end
@@ -71,6 +71,13 @@ module MetadataHelper
                host_genome_ids = Sample.where(id: project.sample_ids).pluck(:host_genome_id).uniq
                project.metadata_fields.includes(:host_genomes).reject { |field| (field.host_genome_ids & host_genome_ids).empty? }
              end
+
+    # Show fields with is_required=1 first in the CSV, but otherwise keep the default order.
+    fields = fields.sort_by { |f| [-f.is_required, f.id] }
+
+    # Hide legacy collection_location (v1) field from CSV templates.
+    # TODO(jsheu): Remove legacy field and swap in collection_location_v2.
+    fields = fields.reject { |f| f.name == "collection_location" }
 
     field_names = ["Sample Name"] + (include_host_genome ? ["Host Genome"] : []) + fields.pluck(:display_name)
 
@@ -115,7 +122,7 @@ module MetadataHelper
             elsif project.nil?
               generate_metadata_default_value(field, sample[:host_genome_name])
             else
-              sample[:metadata][field.name] ? sample[:metadata][field.name].raw_value : nil
+              sample[:metadata][field.name]&.csv_template_value
             end
           end
         end

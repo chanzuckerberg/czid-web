@@ -420,7 +420,7 @@ class PipelineSampleReport extends React.Component {
           taxon.category_name == "Uncategorized" &&
           parseInt(taxon.tax_id) == -200
         ) {
-          // the 'All taxa without genus classification' taxon
+          // the 'all taxa without genus classification' taxon
           const uncat_taxon = taxon;
           const filtered_children = [];
           i++;

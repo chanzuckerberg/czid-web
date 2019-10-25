@@ -33,7 +33,7 @@ export const processLocationSelection = (result, isHuman) => {
     }
 
     warning = LOCATION_PRIVACY_WARNING;
-  } else if (!result.geo_level) {
+  } else if (!result || !result.geo_level) {
     warning = LOCATION_UNRESOLVED_WARNING;
   }
   return { result, warning };
@@ -139,7 +139,7 @@ class GeoSearchInputBox extends React.Component {
         onResultSelect={this.handleResultSelected}
         onSearchChange={this.handleSearchChange}
         onSearchTriggered={this.handleSearchTriggered}
-        placeholder="Enter a location"
+        placeholder="Enter a city, region, or country"
         rectangular
         value={isString(value) ? value : value.name}
       />

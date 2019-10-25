@@ -22,14 +22,11 @@ class ProjectsController < ApplicationController
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility, :upload_metadata, :validate_metadata_csv].freeze
   OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
+  TOKEN_AUTH_METHODS = [:index, :create].freeze
 
   # Required for token auth for CLI actions
-  skip_before_action :verify_authenticity_token, only: [:index, :create]
-  before_action :authenticate_user!, except: [:index, :create]
-  before_action :authenticate_user_from_token!, only: [:index, :create]
-  current_power do
-    Power.new(current_user)
-  end
+  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_METHODS
+  skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_METHODS
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
 
@@ -38,6 +35,8 @@ class ProjectsController < ApplicationController
   before_action :assert_access, only: OTHER_ACTIONS
   before_action :check_access
   before_action :no_demo_user, only: [:create, :new]
+
+  around_action :instrument_with_timer
 
   clear_respond_to
   respond_to :json
@@ -124,7 +123,7 @@ class ProjectsController < ApplicationController
               project_hash = names.zip(p).to_h
               project_hash["users"] = (project_hash["users"] || '').split('::').map { |u| ["name", "email"].zip(u.split('|')).to_h }
               project_hash["owner"] = (project_hash["uploaders"] || '').split('::')[0]
-              project_hash["editable"] = project_hash["editable"] == 1
+              project_hash["editable"] = current_user.admin? || project_hash["editable"] == 1
               project_hash.delete("uploaders")
               ["locations", "hosts", "tissues"].each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
               project_hash
@@ -137,6 +136,10 @@ class ProjectsController < ApplicationController
   end
 
   def dimensions
+    @timer.add_tags([
+                      "domain:#{params[:domain]}",
+                    ])
+
     # TODO(tiago): consider split into specific controllers / models
     domain = params[:domain]
 
@@ -149,8 +152,13 @@ class ProjectsController < ApplicationController
     projects = Project.where(id: project_ids)
     projects_count = projects.count
 
+    @timer.split("prep_projects")
+
     locations = LocationHelper.project_dimensions(sample_ids, "collection_location")
+    @timer.split("locations")
+
     locations_v2 = LocationHelper.project_dimensions(sample_ids, "collection_location_v2")
+    @timer.split("locations_v2")
 
     tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type")
                            .joins(:sample)
@@ -159,6 +167,7 @@ class ProjectsController < ApplicationController
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end
+    @timer.split("tissues")
 
     # visibility
     # TODO(tiago): should this be public projects or projects with public samples?
@@ -168,6 +177,7 @@ class ProjectsController < ApplicationController
       { value: "public", text: "Public", count: public_count },
       { value: "private", text: "Private", count: private_count },
     ]
+    @timer.split("visibility")
 
     times = [
       { value: "1_week", text: "Last Week",
@@ -181,6 +191,7 @@ class ProjectsController < ApplicationController
       { value: "1_year", text: "Last Year",
         count: projects.where("projects.created_at >= ?", 1.year.ago.utc).count, },
     ]
+    @timer.split("times")
 
     # TODO(tiago): move grouping to a helper function (similar code in samples_controller)
     time_bins = []
@@ -222,11 +233,13 @@ class ProjectsController < ApplicationController
         end
       end
     end
+    @timer.split("time_bins")
 
     hosts = samples.includes(:host_genome).group(:host_genome).distinct.count(:project_id)
     hosts = hosts.map do |host, count|
       { value: host.id, text: host.name, count: count }
     end
+    @timer.split("hosts")
 
     respond_to do |format|
       format.json do

@@ -4,6 +4,7 @@ import moment from "moment";
 import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 
+import { UserContext } from "~/components/common/UserContext";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import ToastContainer from "~ui/containers/ToastContainer";
@@ -17,6 +18,7 @@ import {
 import { openUrl } from "~utils/links";
 import { deleteAsync } from "~/api/core";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 
 import cs from "./header.scss";
 
@@ -82,6 +84,8 @@ class Header extends React.Component {
       ...userMenuProps
     } = this.props;
 
+    const { allowedFeatures } = this.context;
+
     if (showBlank) {
       return (
         <div className={cs.header}>
@@ -104,7 +108,11 @@ class Header extends React.Component {
             <div className={cs.fill} />
             {!disableNavigation && <MainMenu adminUser={adminUser} />}
             {!disableNavigation && (
-              <UserMenuDropDown adminUser={adminUser} {...userMenuProps} />
+              <UserMenuDropDown
+                adminUser={adminUser}
+                allowedFeatures={allowedFeatures}
+                {...userMenuProps}
+              />
             )}
           </div>
           {
@@ -124,6 +132,8 @@ Header.propTypes = {
   showBlank: PropTypes.bool,
 };
 
+Header.contextType = UserContext;
+
 const UserMenuDropDown = ({
   adminUser,
   demoUser,
@@ -131,6 +141,7 @@ const UserMenuDropDown = ({
   signInEndpoint,
   signOutEndpoint,
   userName,
+  allowedFeatures,
 }) => {
   const signOut = () => {
     deleteAsync(`${signOutEndpoint}.json`, {
@@ -158,21 +169,39 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="4"
         text={
-          <a
+          <ExternalLink
             className={cs.option}
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://github.com/chanzuckerberg/idseq-dag/wiki"
+            href="https://help.idseq.net"
             onClick={() =>
-              logAnalyticsEvent("Header_dropdown-wiki-option_clicked")
+              logAnalyticsEvent("Header_dropdown-help-option_clicked")
             }
           >
-            IDseq Wiki
-          </a>
+            Help Center
+          </ExternalLink>
         }
-      />,
+      />
+    );
+
+    allowedFeatures.includes("bulk_downloads") &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="5"
+          text={
+            <a
+              className={cs.option}
+              href="/bulk_downloads"
+              onClick={() =>
+                logAnalyticsEvent("Header_dropdown-dropdowns-option_clicked")
+              }
+            >
+              Downloads
+            </a>
+          }
+        />
+      );
+    userDropdownItems.push(
       <BareDropdown.Item
-        key="5"
+        key="6"
         text={
           <a
             className={cs.option}
@@ -186,7 +215,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="6"
+        key="7"
         text={
           <a
             className={cs.option}
@@ -202,7 +231,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="7"
+        key="8"
         text={
           <a
             className={cs.option}
@@ -218,7 +247,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="8"
+        key="9"
         text="Logout"
         onClick={withAnalytics(
           signOut,
@@ -248,6 +277,7 @@ UserMenuDropDown.propTypes = forbidExtraProps({
   signInEndpoint: PropTypes.string.isRequired,
   signOutEndpoint: PropTypes.string.isRequired,
   userName: PropTypes.string.isRequired,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
 });
 
 const MainMenu = ({ adminUser }) => {

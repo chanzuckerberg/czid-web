@@ -17,10 +17,6 @@ class Metadatum < ApplicationRecord
   belongs_to :sample
   belongs_to :metadata_field
   belongs_to :location, optional: true
-  STRING_TYPE = 0
-  NUMBER_TYPE = 1
-  DATE_TYPE = 2
-  LOCATION_TYPE = 3
 
   # Validations
   validates :string_validated_value, length: { maximum: 250 }
@@ -48,7 +44,7 @@ class Metadatum < ApplicationRecord
       return
     end
 
-    base = self.class.convert_type_to_string(metadata_field.base_type)
+    base = MetadataField.convert_type_to_string(metadata_field.base_type)
     public_send("check_and_set_#{base}_type")
   end
 
@@ -127,7 +123,7 @@ class Metadatum < ApplicationRecord
     # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     location = Location.check_and_restrict_specificity(loc, sample.host_genome_name)
     unless location.is_a?(Location)
-      location = Location.find_or_new_by_api_ids(loc)
+      location = Location.find_or_new_by_fields(loc)
     end
     unless location.id
       location = Location.check_and_fetch_parents(location)
@@ -280,19 +276,14 @@ class Metadatum < ApplicationRecord
 
   def validated_value
     # Special case for Location objects
-    if metadata_field.base_type == Metadatum::LOCATION_TYPE
+    if metadata_field.base_type == MetadataField::LOCATION_TYPE
       location_id ? Hash[Location::DEFAULT_LOCATION_FIELDS.map { |k| [k, location[k]] }] : string_validated_value
     else
-      base = self.class.convert_type_to_string(metadata_field.base_type)
+      base = MetadataField.convert_type_to_string(metadata_field.base_type)
       self["#{base}_validated_value"]
     end
   rescue
     ""
-  end
-
-  def validated_field
-    base = self.class.convert_type_to_string(metadata_field.base_type)
-    return "#{base}_validated_value"
   end
 
   def self.validated_value_multiget(metadata)
@@ -301,13 +292,25 @@ class Metadatum < ApplicationRecord
     metadata.each do |md|
       mdf = metadata_fields[md.metadata_field_id]
       if mdf
-        base = convert_type_to_string(mdf.base_type)
+        base = MetadataField.convert_type_to_string(mdf.base_type)
         validated_values[md.id] = md["#{base}_validated_value"]
       else
         validated_values[md.id] = ""
       end
     end
     validated_values
+  end
+
+  # CSV-friendly string value for filling metadata templates
+  def csv_template_value
+    # Special case for Location objects
+    if metadata_field.base_type == MetadataField::LOCATION_TYPE
+      location_id ? location.name : string_validated_value
+    else
+      # Use raw_value, the user's original string input, to avoid conversion errors with
+      # dates/numbers.
+      raw_value
+    end
   end
 
   def self.by_sample_ids(sample_ids)
@@ -317,18 +320,5 @@ class Metadatum < ApplicationRecord
       .map do |sample_id, sample_metadata|
         [sample_id, Hash[sample_metadata.map { |m| [m.key.to_sym, m.validated_value] }]]
       end.to_h
-  end
-
-  def self.convert_type_to_string(type)
-    if type == STRING_TYPE
-      return "string"
-    elsif type == NUMBER_TYPE
-      return "number"
-    elsif type == DATE_TYPE
-      return "date"
-    elsif type == LOCATION_TYPE
-      return "location"
-    end
-    ""
   end
 end

@@ -17,7 +17,6 @@ class SamplesController < ApplicationController
   #                access control should still be checked as neccessary through current_power
   #
   ##########################################
-  skip_before_action :verify_authenticity_token, only: [:create, :update, :bulk_upload_with_metadata]
 
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
@@ -31,18 +30,15 @@ class SamplesController < ApplicationController
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
+  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
   # For API-like access
-  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
-  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
-  before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
+  skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
+  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
-  current_power do # Put this here for CLI
-    Power.new(current_user)
-  end
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
   power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
 
@@ -50,6 +46,8 @@ class SamplesController < ApplicationController
   before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
   before_action :check_owner, only: OWNER_ACTIONS
   before_action :check_access
+
+  around_action :instrument_with_timer
 
   PAGE_SIZE = 30
   MAX_PAGE_SIZE_V2 = 100
@@ -187,10 +185,13 @@ class SamplesController < ApplicationController
   end
 
   def dimensions
+    @timer.add_tags([
+                      "domain:#{params[:domain]}",
+                    ])
+
     # TODO(tiago): consider split into specific controllers / models
     domain = params[:domain]
     param_sample_ids = (params[:sampleIds] || []).map(&:to_i)
-
     # Access control enforced within samples_by_domain
     samples = samples_by_domain(domain)
     unless param_sample_ids.empty?
@@ -200,9 +201,13 @@ class SamplesController < ApplicationController
 
     sample_ids = samples.pluck(:id)
     samples_count = samples.count
+    @timer.split("prep_samples")
 
     locations = LocationHelper.sample_dimensions(sample_ids, "collection_location", samples_count)
+    @timer.split("locations")
+
     locations_v2 = LocationHelper.sample_dimensions(sample_ids, "collection_location_v2", samples_count)
+    @timer.split("locations_v2")
 
     tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type").count
     tissues = tissues.map do |tissue, count|
@@ -212,6 +217,7 @@ class SamplesController < ApplicationController
     if not_set_count > 0
       tissues << { value: "not_set", text: "Unknown", count: not_set_count }
     end
+    @timer.split("tissues")
 
     # visibility
     public_count = samples.public_samples.count
@@ -220,6 +226,7 @@ class SamplesController < ApplicationController
       { value: "public", text: "Public", count: public_count },
       { value: "private", text: "Private", count: private_count },
     ]
+    @timer.split("visibility")
 
     times = [
       { value: "1_week", text: "Last Week", count: samples.where("samples.created_at >= ?", 1.week.ago.utc).count },
@@ -228,6 +235,7 @@ class SamplesController < ApplicationController
       { value: "6_month", text: "Last 6 Months", count: samples.where("samples.created_at >= ?", 6.months.ago.utc).count },
       { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count },
     ]
+    @timer.split("times")
 
     # TODO(tiago): move grouping to a helper function (similar code in projects_controller)
     time_bins = []
@@ -269,11 +277,13 @@ class SamplesController < ApplicationController
         end
       end
     end
+    @timer.split("time_bins")
 
     hosts = samples.joins(:host_genome).group(:host_genome).count
     hosts = hosts.map do |host, count|
       { value: host.id, text: host.name, count: count }
     end
+    @timer.split("hosts")
 
     respond_to do |format|
       format.json do
@@ -971,7 +981,7 @@ class SamplesController < ApplicationController
   def results_folder
     can_see_stage1_results = (current_user.id == @sample.user_id)
     @exposed_raw_results_url = can_see_stage1_results ? raw_results_folder_sample_url(@sample) : nil
-    @file_list = @sample.first_pipeline_run.outputs_by_step(can_see_stage1_results)
+    @file_list = @sample.first_pipeline_run ? @sample.first_pipeline_run.outputs_by_step(can_see_stage1_results) : []
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
       format.html do
