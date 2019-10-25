@@ -66,7 +66,12 @@ module PipelineRunsHelper
                                  stage_name: "misc")
     command = "aegea batch submit --command=#{Shellwords.escape(base_command)} "
     command += " --name=idseq-#{Rails.env}-#{sample_id}-#{stage_name} "
-    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image #{Shellwords.escape(docker_image)} --memory #{memory} --queue #{Shellwords.escape(job_queue)} --vcpus #{vcpus} --job-role idseq-pipeline "
+    command += " --ecr-image #{Shellwords.escape(docker_image)} --memory #{memory} --queue #{Shellwords.escape(job_queue)} --vcpus #{vcpus} --job-role idseq-pipeline "
+    if job_queue == Sample::DEFAULT_QUEUE_HIMEM
+      command += " --mount-instance-storage "
+    else
+      command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 "
+    end
     command
   end
 
@@ -129,7 +134,7 @@ module PipelineRunsHelper
 
   def install_pipeline(commit_or_branch)
     "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
-    "cd /mnt; " \
+    "cd /mnt; rm -rf *; " \
     "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
     "cd idseq-dag; " \
     "git checkout #{Shellwords.escape(commit_or_branch)}; " \
