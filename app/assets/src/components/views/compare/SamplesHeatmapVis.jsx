@@ -202,7 +202,10 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({
       rowGroupLegend: {
         label: `Genus: ${rowGroup.genusName || "Unknown"}`,
-        tooltipLocation: { left: rect.left, top: rect.top },
+        tooltipLocation: {
+          left: rect.left + rect.width / 2, // center
+          top: rect.top - 25, // depends on heights defined in CSS
+        },
       },
     });
     logAnalyticsEvent("SamplesHeatmapVis_row-group_hovered", {
@@ -428,14 +431,6 @@ class SamplesHeatmapVis extends React.Component {
             />
           )}
         {rowGroupLegend && <RowGroupLegend {...rowGroupLegend} />}
-        {
-          <RowGroupLegend
-            {...{
-              label: `Genus: Unknown`,
-              tooltipLocation: { left: 100, top: 400 },
-            }}
-          />
-        }
         {addMetadataTrigger && (
           <MetadataSelector
             addMetadataTrigger={addMetadataTrigger}
