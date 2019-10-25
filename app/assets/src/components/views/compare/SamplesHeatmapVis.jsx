@@ -428,6 +428,14 @@ class SamplesHeatmapVis extends React.Component {
             />
           )}
         {rowGroupLegend && <RowGroupLegend {...rowGroupLegend} />}
+        {
+          <RowGroupLegend
+            {...{
+              label: `Genus: Unknown`,
+              tooltipLocation: { left: 100, top: 400 },
+            }}
+          />
+        }
         {addMetadataTrigger && (
           <MetadataSelector
             addMetadataTrigger={addMetadataTrigger}

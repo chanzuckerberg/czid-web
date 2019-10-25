@@ -6,24 +6,22 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 
 import { getTooltipStyle } from "~/components/utils/tooltip";
-
-// TODO (gdingle): fix me
-import cs from "./metadata_legend.scss";
+import cs from "./row_group_legend.scss";
 
 export default class MetadataLegend extends React.Component {
   render() {
+    // TODO (gdingle): increase font size
     const { tooltipLocation } = this.props;
     return (
       <div
-        className={cx(cs.tooltip, cs.visible)}
+        className={cx(cs.tooltip)}
         style={getTooltipStyle(tooltipLocation, {
           buffer: 20,
           below: false,
         })}
       >
-        <div className={cs.legend}>
-          <div className={cs.legendRow}>{this.props.label}</div>
-        </div>
+        <div className={cs.legend}>{this.props.label}</div>
+        <div className={cs.arrow} />
       </div>
     );
   }
