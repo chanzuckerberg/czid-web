@@ -9,7 +9,6 @@ import cs from "./row_group_legend.scss";
 
 export default class MetadataLegend extends React.Component {
   render() {
-    // TODO (gdingle): increase font size
     const { tooltipLocation } = this.props;
     return (
       <div

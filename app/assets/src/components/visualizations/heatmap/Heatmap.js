@@ -923,7 +923,7 @@ export default class Heatmap {
           "x",
           d => this.columnLabels[d.columnIndex].pos * this.cell.width + 1
         )
-        .attr("y", d => this.rowLabels[d.rowIndex].pos * this.cell.height + 1)
+        .attr("y", d => this.verticalPosition(this.rowLabels[d.rowIndex]) + 1)
         .style("fill", d => {
           if (!d.value && d.value !== 0) {
             return this.options.colorNoValue;
