@@ -7,7 +7,7 @@ import cx from "classnames";
 
 import cs from "./row_group_legend.scss";
 
-export default class MetadataLegend extends React.Component {
+export default class RowGroupLegend extends React.Component {
   render() {
     const { tooltipLocation } = this.props;
     return (
@@ -26,7 +26,7 @@ export default class MetadataLegend extends React.Component {
   }
 }
 
-MetadataLegend.propTypes = {
+RowGroupLegend.propTypes = {
   tooltipLocation: PropTypes.object,
   label: PropTypes.string,
 };

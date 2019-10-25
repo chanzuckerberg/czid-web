@@ -835,14 +835,14 @@ export default class Heatmap {
     this.processData("filter");
   };
 
-  handleRowLabelMouseOver = rowEntered => {
+  handleRowLabelMouseOver = rowLabelEntered => {
     if (this.rowClustering) return;
 
     this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
       .classed(
         cs.rowLabelHover,
-        row => row.sortKey && row.sortKey === rowEntered.sortKey
+        row => row.sortKey && row.sortKey === rowLabelEntered.sortKey
       );
 
     const currentGroup = this.gRowLabels.selectAll(
@@ -852,19 +852,19 @@ export default class Heatmap {
 
     this.options.onRowGroupHover &&
       this.options.onRowGroupHover(
-        rowEntered,
+        rowLabelEntered,
         firstElem.getBoundingClientRect(),
-        this.columnLabelsHeight + this.totalMetadataHeight
+        this.gRowLabels.node().getBoundingClientRect().top
       );
   };
 
-  handleRowLabelMouseOut = rowLeaved => {
+  handleRowLabelMouseOut = rowLabelLeft => {
     if (this.rowClustering) return;
     this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
       .classed(cs.rowLabelHover, false);
 
-    this.options.onRowGroupOut && this.options.onRowGroupOut(rowLeaved);
+    this.options.onRowGroupOut && this.options.onRowGroupOut(rowLabelLeft);
   };
 
   handleColumnMetadataLabelClick(value) {
@@ -906,7 +906,7 @@ export default class Heatmap {
     return Math.round(scale(value));
   }
 
-  verticalPosition(d) {
+  cellYPosition(d) {
     return d.pos * this.cell.height;
   }
 
@@ -923,7 +923,7 @@ export default class Heatmap {
           "x",
           d => this.columnLabels[d.columnIndex].pos * this.cell.width + 1
         )
-        .attr("y", d => this.verticalPosition(this.rowLabels[d.rowIndex]) + 1)
+        .attr("y", d => this.cellYPosition(this.rowLabels[d.rowIndex]) + 1)
         .style("fill", d => {
           if (!d.value && d.value !== 0) {
             return this.options.colorNoValue;
@@ -1011,7 +1011,7 @@ export default class Heatmap {
 
   renderRowLabels() {
     let applyFormat = nodes => {
-      nodes.attr("transform", d => `translate(0, ${this.verticalPosition(d)})`);
+      nodes.attr("transform", d => `translate(0, ${this.cellYPosition(d)})`);
     };
 
     // hides genus separators in cluster mode

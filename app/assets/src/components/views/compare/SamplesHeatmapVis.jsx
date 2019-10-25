@@ -19,6 +19,7 @@ import RemoveIcon from "~ui/icons/RemoveIcon";
 import cs from "./samples_heatmap_vis.scss";
 
 const CAPTION_LINE_WIDTH = 180;
+const MAX_ROW_GROUP_TOOLTIP_WIDTH = 200;
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
@@ -216,13 +217,12 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleRowGroupHover = (rowGroup, rect, offset) => {
-    const heatmapTop = this.elem.getBoundingClientRect().top;
-    if (rect.top < heatmapTop + offset) {
-      // hide tooltip if it would appear above heatmap
+    if (rect.top < offset) {
+      // hide the tooltip if it would appear in empty space above the row labels
       this.setState({ rowGroupLegend: null });
       return;
     }
-    const tooltipWidth = Math.max(200, rect.width / 2);
+    const tooltipWidth = Math.max(MAX_ROW_GROUP_TOOLTIP_WIDTH, rect.width / 2);
     this.setState({
       rowGroupLegend: {
         label: `Genus: ${rowGroup.genusName || "Unknown"}`,
@@ -436,7 +436,7 @@ class SamplesHeatmapVis extends React.Component {
       selectedMetadata,
     } = this.state;
     return (
-      <div className={cs.samplesHeatmapVis} ref={elem => (this.elem = elem)}>
+      <div className={cs.samplesHeatmapVis}>
         <PlusMinusControl
           onPlusClick={withAnalytics(
             () => this.handleZoom(0.25),
