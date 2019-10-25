@@ -53,7 +53,8 @@ export default class Heatmap {
         zoom: null, // multiplier for zooming in and out
         minHeight: 500,
         clustering: true,
-        shouldSortColumns: true,
+        shouldSortColumns: false,
+        shouldSortRows: false,
         defaultClusterStep: 6,
         maxRowClusterWidth: 100,
         maxColumnClusterHeight: 100,
@@ -81,6 +82,7 @@ export default class Heatmap {
         // The caption to add when the heatmap is saved as an SVG or PNG.
         printCaption: [],
         captionLineHeight: 18,
+        rowXoutPadding: 2,
       },
       options
     );
@@ -156,6 +158,11 @@ export default class Heatmap {
 
   updateSortColumns(shouldSortColumns) {
     this.options.shouldSortColumns = shouldSortColumns;
+    this.processData("cluster");
+  }
+
+  updateSortRows(shouldSortRows) {
+    this.options.shouldSortRows = shouldSortRows;
     this.processData("cluster");
   }
 
@@ -256,7 +263,12 @@ export default class Heatmap {
     this.filteredCells = this.cells.filter(
       cell => !this.rowLabels[cell.rowIndex].hidden
     );
-    this.filteredRowLabels = this.rowLabels.filter(row => !row.hidden);
+
+    // Initially sort so that genus seperators are placed correctly
+    this.filteredRowLabels = orderBy(
+      this.rowLabels.filter(row => !row.hidden),
+      label => label.sortKey || label.label
+    );
   }
 
   setupContainers() {
@@ -281,7 +293,7 @@ export default class Heatmap {
     this.gCells = this.g.append("g").attr("class", cs.cells);
     this.gRowDendogram = this.g
       .append("g")
-      .attr("class", cx(cs.dendogram, "rowDendogram"));
+      .attr("class", cx(cs.dendogram, cs.rowDendogram));
     this.gColumnDendogram = this.g
       .append("g")
       .attr("class", cx(cs.dendogram, "columnDendogram"));
@@ -299,6 +311,7 @@ export default class Heatmap {
       .append("rect")
       .attr("class", "metadataLabelsBackground")
       .style("fill", "white");
+
     this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
     this.gCaption = this.g.append("g").attr("class", cs.captionContainer);
   }
@@ -587,7 +600,9 @@ export default class Heatmap {
   }
 
   cluster() {
-    if (this.options.clustering) {
+    if (this.options.shouldSortRows) {
+      this.sortRows("asc");
+    } else if (this.options.clustering) {
       this.clusterRows();
     }
 
@@ -746,13 +761,31 @@ export default class Heatmap {
     this.setOrder(this.columnClustering, this.columnLabels);
   }
 
+  // Re-sorts the columns. The rendered order of columns is determined solely by
+  // the `pos` property of each columnLabel.
   sortColumns(direction) {
     this.columnClustering = null;
+
     orderBy(this.columnLabels, label => label.label, direction).forEach(
       (label, idx) => {
         label.pos = idx;
       }
     );
+  }
+
+  // Re-sorts the rows. The rendered order of rows is determined solely by
+  // the `pos` property of each filteredRowLabel.
+  sortRows(direction) {
+    this.rowClustering = null;
+
+    orderBy(
+      this.filteredRowLabels,
+      label => label.sortKey || label.label,
+      direction
+    );
+    this.filteredRowLabels.forEach((label, idx) => {
+      label.pos = idx;
+    });
   }
 
   range(n) {
@@ -800,6 +833,23 @@ export default class Heatmap {
     delete row.pos;
     row.hidden = true;
     this.processData("filter");
+  };
+
+  handleRowLabelMouseOver = rowEntered => {
+    if (this.rowClustering) return;
+    this.gRowLabels
+      .selectAll(`.${cs.rowLabel}`)
+      .classed(
+        cs.rowLabelHover,
+        row => row.sortKey && row.sortKey === rowEntered.sortKey
+      );
+  };
+
+  handleRowLabelMouseOut = () => {
+    if (this.rowClustering) return;
+    this.gRowLabels
+      .selectAll(`.${cs.rowLabel}`)
+      .classed(cs.rowLabelHover, false);
   };
 
   handleColumnMetadataLabelClick(value) {
@@ -945,9 +995,13 @@ export default class Heatmap {
       nodes.attr("transform", d => `translate(0, ${d.pos * this.cell.height})`);
     };
 
+    // hides genus separators in cluster mode
+    this.gRowLabels.classed(cs.rowClustering, this.rowClustering);
+
     let rowLabel = this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
-      .data(this.filteredRowLabels, d => d.label);
+      .data(this.filteredRowLabels, d => d.label)
+      .order();
 
     rowLabel
       .exit()
@@ -966,8 +1020,8 @@ export default class Heatmap {
       .enter()
       .append("g")
       .attr("class", cs.rowLabel)
-      .on("mousein", this.options.onRowLabelMouseIn)
-      .on("mouseout", this.options.onRowLabelMouseOut);
+      .on("mouseover", this.handleRowLabelMouseOver)
+      .on("mouseout", this.handleRowLabelMouseOut);
 
     rowLabelEnter
       .append("rect")
@@ -994,10 +1048,31 @@ export default class Heatmap {
       );
 
     rowLabelEnter
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", this.rowLabelsWidth)
+      .attr("y1", this.cell.height)
+      .attr("y2", this.cell.height)
+      .attr("class", cs.genusBorder)
+      .classed(cs.hideGenusBorder, (label, i, nodes) => {
+        const nextLabel = this.filteredRowLabels[i + 1];
+        if (nextLabel) {
+          return label.sortKey === nextLabel.sortKey;
+        } else {
+          // hide line at very bottom
+          return true;
+        }
+      });
+
+    rowLabelEnter
       .append("text")
       .attr("class", cs.removeIcon)
       .text("X")
-      .attr("transform", `translate(0, ${this.cell.height / 2})`)
+      .attr(
+        "transform",
+        `translate(${this.options.rowXoutPadding},
+        ${this.cell.height / 2})`
+      )
       .style("dominant-baseline", "central")
       .on("click", this.removeRow);
 
@@ -1374,17 +1449,19 @@ export default class Heatmap {
 
     this.gRowDendogram.select("g").remove();
     let container = this.gRowDendogram.append("g");
-    this.renderDendrogram(
-      container,
-      this.rowClustering,
-      this.rowLabels,
-      width,
-      height
-    );
-    container.attr(
-      "transform",
-      `scale(-1,1) translate(-${this.rowClusterWidth},0)`
-    );
+    if (this.rowClustering) {
+      this.renderDendrogram(
+        container,
+        this.rowClustering,
+        this.rowLabels,
+        width,
+        height
+      );
+      container.attr(
+        "transform",
+        `scale(-1,1) translate(-${this.rowClusterWidth},0)`
+      );
+    }
   }
 
   renderCaption() {

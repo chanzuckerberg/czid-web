@@ -29,7 +29,6 @@
     .rowLabel,
     .columnLabel {
       font-size: 12px;
-      cursor: pointer;
 
       .removeIcon {
         visibility: hidden;
@@ -42,13 +41,33 @@
       &:hover {
         text {
           fill: $primary-light;
+          cursor: pointer;
         }
 
         .removeIcon {
           visibility: visible;
+          cursor: pointer;
         }
       }
     }
+
+    .genusBorder {
+      stroke: $light-grey;
+      stroke-width: 1;
+    }
+
+    .hideGenusBorder {
+      display: none;
+    }
+
+    .rowLabelHover rect {
+      fill: $lightest-grey;
+    }
+  }
+
+  // hides genus separators in cluster mode
+  .rowLabels.rowClustering .genusBorder {
+    display: none;
   }
 
   .hoverTarget {

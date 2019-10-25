@@ -85,6 +85,7 @@ class SamplesHeatmapVis extends React.Component {
         scaleMin: 0,
         printCaption: this.generateHeatmapCaptions(),
         shouldSortColumns: this.props.sampleSortType === "alpha", // else cluster
+        shouldSortRows: this.props.taxaSortType === "genus", // else cluster
         // Shrink to fit the viewport width
         maxWidth: this.heatmapContainer.offsetWidth,
       }
@@ -116,6 +117,9 @@ class SamplesHeatmapVis extends React.Component {
     if (this.props.sampleSortType !== prevProps.sampleSortType) {
       this.heatmap.updateSortColumns(this.props.sampleSortType === "alpha");
     }
+    if (this.props.taxaSortType !== prevProps.taxaSortType) {
+      this.heatmap.updateSortRows(this.props.taxaSortType === "genus");
+    }
   }
 
   extractSampleLabels() {
@@ -136,8 +140,15 @@ class SamplesHeatmapVis extends React.Component {
 
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
+      const taxon = this.props.taxonDetails[id];
+      const sortKey =
+        taxon.parentId == -200 // MISSING_GENUS_ID
+          ? Number.MAX_SAFE_INTEGER
+          : taxon.parentId; // parentId is false when taxon level is genus
       return {
-        label: this.props.taxonDetails[id].name,
+        label: taxon.name,
+        sortKey: sortKey,
+        genusName: taxon.genusName,
       };
     });
   }
@@ -493,6 +504,7 @@ SamplesHeatmapVis.propTypes = {
   thresholdFilters: PropTypes.any,
   sampleSortType: PropTypes.string,
   fullScreen: PropTypes.bool,
+  taxaSortType: PropTypes.string,
 };
 
 export default SamplesHeatmapVis;

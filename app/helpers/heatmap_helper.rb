@@ -340,6 +340,7 @@ module HeatmapHelper
         taxon_counts.genus_taxid         AS  genus_taxid,
         taxon_counts.family_taxid        AS  family_taxid,
         taxon_counts.name                AS  name,
+        taxon_lineages.genus_name        AS  genus_name,
         taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
         taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
@@ -353,6 +354,7 @@ module HeatmapHelper
           #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}
         )                                AS  neglogevalue
       FROM taxon_counts
+      JOIN taxon_lineages ON taxon_counts.tax_id = taxon_lineages.taxid
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id.to_i}   = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
