@@ -199,6 +199,12 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleRowGroupHover = (rowGroup, rect) => {
+    const heatmapTop = this.elem.getBoundingClientRect().top;
+    if (rect.top < heatmapTop) {
+      // hide tooltip if it would appear above heatmap
+      this.setState({ rowGroupLegend: null });
+      return;
+    }
     const tooltipWidth = Math.max(200, rect.width / 2);
     this.setState({
       rowGroupLegend: {
@@ -393,7 +399,7 @@ class SamplesHeatmapVis extends React.Component {
       selectedMetadata,
     } = this.state;
     return (
-      <div className={cs.samplesHeatmapVis}>
+      <div className={cs.samplesHeatmapVis} ref={elem => (this.elem = elem)}>
         <PlusMinusControl
           onPlusClick={withAnalytics(
             () => this.handleZoom(0.25),
