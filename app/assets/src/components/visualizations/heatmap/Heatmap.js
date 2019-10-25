@@ -845,10 +845,10 @@ export default class Heatmap {
         row => row.sortKey && row.sortKey === rowEntered.sortKey
       );
 
-    const currenGroup = this.gRowLabels.selectAll(
+    const currentGroup = this.gRowLabels.selectAll(
       `.${cs.rowLabel}.${cs.rowLabelHover}`
     );
-    const firstElem = currenGroup[0][0];
+    const firstElem = currentGroup[0][0];
 
     this.options.onRowGroupHover &&
       this.options.onRowGroupHover(
