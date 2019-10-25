@@ -199,12 +199,14 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleRowGroupHover = (rowGroup, rect) => {
+    const tooltipWidth = Math.max(200, rect.width / 2);
     this.setState({
       rowGroupLegend: {
         label: `Genus: ${rowGroup.genusName || "Unknown"}`,
         tooltipLocation: {
-          left: rect.left + rect.width / 2, // center
-          top: rect.top - 25, // depends on heights defined in CSS
+          left: rect.left + rect.width / 2 - tooltipWidth / 2, // center
+          top: rect.top,
+          width: tooltipWidth,
         },
       },
     });

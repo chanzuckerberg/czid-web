@@ -5,7 +5,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
-import { getTooltipStyle } from "~/components/utils/tooltip";
 import cs from "./row_group_legend.scss";
 
 export default class MetadataLegend extends React.Component {
@@ -15,10 +14,11 @@ export default class MetadataLegend extends React.Component {
     return (
       <div
         className={cx(cs.tooltip)}
-        style={getTooltipStyle(tooltipLocation, {
-          buffer: 20,
-          below: false,
-        })}
+        style={{
+          width: tooltipLocation.width,
+          left: tooltipLocation.left + 4, // offset because of right-alignment of labels
+          top: tooltipLocation.top - 44, // depends on heights defined in CSS
+        }}
       >
         <div className={cs.legend}>{this.props.label}</div>
         <div className={cs.arrow} />
