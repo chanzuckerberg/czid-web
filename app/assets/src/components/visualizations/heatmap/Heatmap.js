@@ -349,7 +349,7 @@ export default class Heatmap {
       : 0;
 
     const totalColumnLabelsHeight = this.columnLabelsHeight;
-    const totalMetadataHeight =
+    this.totalMetadataHeight =
       this.options.columnMetadata.length * this.options.minCellHeight +
       this.options.metadataAddLinkHeight;
     const totalCellHeight = this.cell.height * this.filteredRowLabels.length;
@@ -367,7 +367,7 @@ export default class Heatmap {
     this.height =
       this.options.marginTop +
       this.columnLabelsHeight +
-      totalMetadataHeight +
+      this.totalMetadataHeight +
       totalCellHeight +
       totalColumnClusterHeight +
       this.options.marginBottom +
@@ -401,7 +401,9 @@ export default class Heatmap {
       )
       .attr(
         "height",
-        totalColumnLabelsHeight + totalMetadataHeight + this.options.marginTop
+        totalColumnLabelsHeight +
+          this.totalMetadataHeight +
+          this.options.marginTop
       );
     this.metadataLabelsBackground
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
@@ -410,27 +412,27 @@ export default class Heatmap {
     this.gCells.attr(
       "transform",
       `translate(${this.rowLabelsWidth},
-        ${totalColumnLabelsHeight + totalMetadataHeight})`
+        ${totalColumnLabelsHeight + this.totalMetadataHeight})`
     );
     this.gRowDendogram.attr(
       "transform",
       `translate(
         ${this.rowLabelsWidth + totalCellWidth},
-        ${totalColumnLabelsHeight + totalMetadataHeight}
+        ${totalColumnLabelsHeight + this.totalMetadataHeight}
       )`
     );
     this.gColumnDendogram.attr(
       "transform",
       `translate(
         ${this.rowLabelsWidth},
-        ${totalColumnLabelsHeight + totalMetadataHeight + totalCellHeight}
+        ${totalColumnLabelsHeight + this.totalMetadataHeight + totalCellHeight}
       )`
     );
     this.gCaption.attr(
       "transform",
       `translate(${this.rowLabelsWidth},
         ${totalColumnLabelsHeight +
-          totalMetadataHeight +
+          this.totalMetadataHeight +
           totalCellHeight +
           totalColumnClusterHeight +
           this.options.spacing}
@@ -538,9 +540,7 @@ export default class Heatmap {
   }
 
   placeRowLabelContainers(x) {
-    const totalMetadataHeight =
-      this.options.columnMetadata.length * this.options.minCellHeight +
-      this.options.metadataAddLinkHeight;
+    const totalMetadataHeight = this.totalMetadataHeight;
 
     this.gRowLabels.attr(
       "transform",
@@ -853,7 +853,8 @@ export default class Heatmap {
     this.options.onRowGroupHover &&
       this.options.onRowGroupHover(
         rowEntered,
-        firstElem.getBoundingClientRect()
+        firstElem.getBoundingClientRect(),
+        this.columnLabelsHeight + this.totalMetadataHeight
       );
   };
 

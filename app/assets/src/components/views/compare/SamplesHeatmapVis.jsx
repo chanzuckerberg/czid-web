@@ -215,9 +215,9 @@ class SamplesHeatmapVis extends React.Component {
     logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
-  handleRowGroupHover = (rowGroup, rect) => {
+  handleRowGroupHover = (rowGroup, rect, offset) => {
     const heatmapTop = this.elem.getBoundingClientRect().top;
-    if (rect.top < heatmapTop) {
+    if (rect.top < heatmapTop + offset) {
       // hide tooltip if it would appear above heatmap
       this.setState({ rowGroupLegend: null });
       return;
