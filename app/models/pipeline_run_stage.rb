@@ -170,7 +170,6 @@ class PipelineRunStage < ApplicationRecord
         _job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
         save
       end
-      terminate_job
       return
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
@@ -199,10 +198,6 @@ class PipelineRunStage < ApplicationRecord
       return
     end
     run_job # this saves
-  end
-
-  def terminate_job
-    _stdout, _stderr, _status = Open3.capture3("aegea", "batch", "terminate", job_id.to_s)
   end
 
   def log_url
