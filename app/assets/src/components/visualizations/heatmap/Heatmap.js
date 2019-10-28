@@ -864,7 +864,7 @@ export default class Heatmap {
       .selectAll(`.${cs.rowLabel}`)
       .classed(cs.rowLabelHover, false);
 
-    this.options.onRowGroupOut && this.options.onRowGroupOut(rowLabelLeft);
+    this.options.onRowGroupLeave && this.options.onRowGroupLeave(rowLabelLeft);
   };
 
   handleColumnMetadataLabelClick(value) {

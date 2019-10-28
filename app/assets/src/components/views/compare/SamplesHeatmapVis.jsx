@@ -78,8 +78,8 @@ class SamplesHeatmapVis extends React.Component {
         onColumnMetadataLabelHover: this.handleColumnMetadataLabelHover,
         onColumnMetadataLabelMove: this.handleMouseHoverMove,
         onColumnMetadataLabelOut: this.handleColumnMetadataLabelOut,
-        onRowGroupHover: this.handleRowGroupHover,
-        onRowGroupOut: this.handleRowGroupOut,
+        onRowGroupEnter: this.handleRowGroupEnter,
+        onRowGroupLeave: this.handleRowGroupLeave,
         onRemoveRow: this.props.onRemoveTaxon,
         onCellClick: this.handleCellClick,
         onColumnLabelClick: this.props.onSampleLabelClick,
@@ -216,7 +216,7 @@ class SamplesHeatmapVis extends React.Component {
     logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
-  handleRowGroupHover = (rowGroup, rect, minTop) => {
+  handleRowGroupEnter = (rowGroup, rect, minTop) => {
     const tooltipWidth = Math.max(MAX_ROW_GROUP_TOOLTIP_WIDTH, rect.width / 2);
     this.setState({
       rowGroupLegend: {
@@ -253,7 +253,7 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ columnMetadataLegend: null });
   };
 
-  handleRowGroupOut = () => {
+  handleRowGroupLeave = () => {
     this.setState({ rowGroupLegend: null });
   };
 
