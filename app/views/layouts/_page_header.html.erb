@@ -24,7 +24,7 @@
     <%= javascript_tag do %>
       react_component('Header', {
         userSignedIn: false,
-        showBlank: <%= @show_blank_header || false %>
+        showBlank: <%= @show_blank_header.present? ? @show_blank_header:false %>
       }, 'page_header')
     <% end %>
   <% end %>
