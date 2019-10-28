@@ -27,6 +27,38 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && current_user.admin?
   end
 
+  def destroy_user_session_path
+    session.delete(:jwt_id_token)
+    super
+  end
+
+  # authenticate_user! is used for verifying if the user is already logged in
+  # and redirecting to the homepage in case it is not.
+  # This method overrides a default behavior from Devise to allow auth0
+  # authentication working simultaneously with legacy devise database mode,
+  # and should be refactored once we fully migrate to auth0.
+  def authenticate_user!
+    if current_user.nil?
+      begin
+        @auth_payload, @auth_header = auth_token
+        if @auth_payload.present?
+          auth_user = User.find_by(email: @auth_payload["email"])
+          if auth_user.present?
+            sign_in auth_user, store: false
+            return
+          end
+        end
+      rescue JWT::VerificationError, JWT::DecodeError
+        respond_to do |format|
+          format.html { redirect_to(new_user_session_path) }
+          format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
+        end
+        return
+      end
+    end
+    super
+  end
+
   # To use in before_action with parameters, do
   # before_action do
   #   allowed_feature_required(...)
@@ -81,25 +113,27 @@ class ApplicationController < ActionController::Base
     sample.default_background_id
   end
 
-  private
-
-  # Modified from https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
-  def authenticate_user_from_token!
+  # This method is only used to loging users using tokens
+  # It is not intended to replace the authenticate_user! method, which
+  # must be invoked regardless.
+  # authenticate_user! is used for verifying if the user is already logged in
+  # and redirecting to the homepage in case it is not.
+  def token_based_login_support
     user_email = request.headers['X-User-Email'] || params[:user_email]
     user_token = request.headers['X-User-Token'] || params[:user_token]
 
-    user = user_email && User.find_by(email: user_email)
+    if user_email.present? && user_token.present?
+      user = User.find_by(email: user_email)
 
-    # Notice how we use Devise.secure_compare to compare the token
-    # in the database with the token given in the params, mitigating
-    # timing attacks.
-    if user && Devise.secure_compare(user.authentication_token, user_token)
-      sign_in user, store: false
-    # Redirect if no current user by other auth
-    elsif !current_user
-      redirect_to(new_user_session_path)
+      # Devise.secure_compare is used to mitigate timing attacks.
+      if user && Devise.secure_compare(user.authentication_token, user_token)
+        sign_in user, store: false
+        return
+      end
     end
   end
+
+  private
 
   def check_browser
     browser = UserAgent.parse(request.user_agent).browser
@@ -139,5 +173,18 @@ class ApplicationController < ActionController::Base
     @timer = Timer.new("#{params[:controller]}.#{params[:action]}")
     yield
     @timer.publish
+  end
+
+  def http_token
+    if request.headers['Authorization'].present?
+      request.headers['Authorization'].split(' ').last
+    else
+      session[:jwt_id_token]
+    end
+  end
+
+  def auth_token
+    token = http_token
+    JsonWebToken.verify(token) if http_token
   end
 end
