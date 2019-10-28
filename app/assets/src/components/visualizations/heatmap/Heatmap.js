@@ -835,7 +835,7 @@ export default class Heatmap {
     this.processData("filter");
   };
 
-  handleRowLabelMouseOver = rowLabelEntered => {
+  handleRowLabelMouseEnter = rowLabelEntered => {
     if (this.rowClustering) return;
 
     this.gRowLabels
@@ -850,15 +850,15 @@ export default class Heatmap {
     );
     const firstElem = currentGroup[0][0];
 
-    this.options.onRowGroupHover &&
-      this.options.onRowGroupHover(
+    this.options.onRowGroupEnter &&
+      this.options.onRowGroupEnter(
         rowLabelEntered,
         firstElem.getBoundingClientRect(),
         this.gColumnMetadata.node().getBoundingClientRect().bottom
       );
   };
 
-  handleRowLabelMouseOut = rowLabelLeft => {
+  handleRowLabelMouseLeave = rowLabelLeft => {
     if (this.rowClustering) return;
     this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
@@ -1039,8 +1039,8 @@ export default class Heatmap {
       .enter()
       .append("g")
       .attr("class", cs.rowLabel)
-      .on("mouseover", this.handleRowLabelMouseOver)
-      .on("mouseout", this.handleRowLabelMouseOut);
+      .on("mouseenter", this.handleRowLabelMouseEnter)
+      .on("mouseleave", this.handleRowLabelMouseLeave);
 
     rowLabelEnter
       .append("rect")
