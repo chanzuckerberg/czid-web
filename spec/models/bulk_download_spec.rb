@@ -126,6 +126,7 @@ describe BulkDownload, type: :model do
       task_command = [
         "aegea", "ecs", "run", "--command=MOCK\\ SHELL\\ COMMAND",
         "--task-role", "idseq-downloads-prod",
+        "--task-name", "bulk_download_#{@bulk_download.id}",
         "--ecr-image", "idseq-s3-tar-writer:latest",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
@@ -142,6 +143,7 @@ describe BulkDownload, type: :model do
       task_command = [
         "aegea", "ecs", "run", "--command=MOCK\\ SHELL\\ COMMAND",
         "--task-role", "idseq-downloads-prod",
+        "--task-name", "bulk_download_#{@bulk_download.id}",
         "--ecr-image", "idseq-s3-tar-writer:v1.0",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",

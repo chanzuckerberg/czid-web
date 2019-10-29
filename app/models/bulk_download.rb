@@ -83,13 +83,13 @@ class BulkDownload < ApplicationRecord
       ecr_image = config_ecr_image
     end
     shell_command_escaped = shell_command.map { |s| Shellwords.escape(s) }.join(" ")
-    command = ["aegea", "ecs", "run"]
-    command += ["--command=#{shell_command_escaped}"]
-    command += ["--task-role", task_role]
-    command += ["--ecr-image", ecr_image]
-    command += ["--fargate-cpu", fargate_cpu]
-    command += ["--fargate-memory", fargate_memory]
-    command
+    ["aegea", "ecs", "run",
+     "--command=#{shell_command_escaped}",
+     "--task-role", task_role,
+     "--task-name", "bulk_download_#{id}",
+     "--ecr-image", ecr_image,
+     "--fargate-cpu", fargate_cpu,
+     "--fargate-memory", fargate_memory,]
   end
 
   # Returned as an array of strings
@@ -101,12 +101,10 @@ class BulkDownload < ApplicationRecord
     error_url: self.error_url,
     progress_url: self.progress_url
   )
-    command = ["python", "s3_tar_writer.py"]
-    command += ["--src-urls"]
-    command += src_urls
-    command += ["--tar-names"]
-    command += tar_names
-    command += ["--dest-url", dest_url]
+    command = ["python", "s3_tar_writer.py",
+               "--src-urls", *src_urls,
+               "--tar-names", *tar_names,
+               "--dest-url", dest_url,]
 
     # The success url is mandatory.
     if success_url
