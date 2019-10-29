@@ -14,22 +14,25 @@ class Input extends React.Component {
   };
 
   render() {
-    let { className, ...props } = this.props;
+    let { className, disableAutocomplete, ...props } = this.props;
     className = "idseq-ui " + className;
+    console.log("value: ", disableAutocomplete);
     return (
       <SemanticInput
+        autoComplete={disableAutocomplete ? "idseq-ui" : null}
         className={className}
-        {...props}
         onChange={this.handleChange}
+        {...props}
       />
     );
   }
 }
 
 Input.propTypes = {
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  onChange: PropTypes.func,
   className: PropTypes.string,
+  disableAutocomplete: PropTypes.bool,
+  onChange: PropTypes.func,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default Input;

@@ -126,6 +126,7 @@ class BareDropdown extends React.Component {
       children,
       onFilterChange,
       menuClassName,
+      disableAutocomplete,
       ...otherProps
     } = this.props;
 
@@ -187,6 +188,7 @@ class BareDropdown extends React.Component {
             className={cs.searchContainer}
           >
             <Input
+              disableAutocomplete={disableAutocomplete}
               fluid
               className={cs.searchInput}
               icon="search"
@@ -218,6 +220,7 @@ class BareDropdown extends React.Component {
           trigger={this.props.trigger}
           triggerClassName={className}
           withinModal={this.props.withinModal}
+          disableAutocomplete={disableAutocomplete}
         />
       );
     }
@@ -227,6 +230,7 @@ class BareDropdown extends React.Component {
         {...baseDropdownProps}
         className={dropdownClassName}
         onBlur={e => e.stopPropagation()}
+        disableAutocomplete={disableAutocomplete}
       >
         {menu}
       </BaseDropdown>
