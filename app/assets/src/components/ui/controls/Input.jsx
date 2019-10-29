@@ -21,6 +21,8 @@ class Input extends React.Component {
         className={className}
         {...props}
         onChange={this.handleChange}
+        // Chrome ignores autocomplete="off" on purpose, so use a non-standard
+        // label. See: https://stackoverflow.com/questions/15738259/disabling-chrome-autofill
         autoComplete={disableAutocomplete ? "idseq-ui" : null}
       />
     );
