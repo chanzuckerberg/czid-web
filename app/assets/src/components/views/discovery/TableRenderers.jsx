@@ -6,12 +6,13 @@ import moment from "moment";
 import BasicPopup from "~/components/BasicPopup";
 import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
 import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
+import StatusLabel from "~ui/labels/StatusLabel";
 import { numberWithCommas } from "~/helpers/strings";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./table_renderers.scss";
 
-const STATUS_COLOR = {
+const STATUS_TYPE = {
   complete: "success",
   failed: "error",
   "complete - issue": "warning",
@@ -106,11 +107,11 @@ class TableRenderers extends React.Component {
                 trigger={<div className={cs.sampleName}>{sample.name}</div>}
                 content={sample.name}
               />
-              <div
-                className={cx(cs.sampleStatus, cs[STATUS_COLOR[sample.status]])}
-              >
-                {sample.status}
-              </div>
+              <StatusLabel
+                className={cs.sampleStatus}
+                status={sample.status}
+                type={STATUS_TYPE[sample.status]}
+              />
             </div>
           ) : (
             <div className={cs.sampleNameAndStatus} />

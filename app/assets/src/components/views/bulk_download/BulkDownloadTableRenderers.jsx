@@ -1,14 +1,13 @@
 import React from "react";
-import cx from "classnames";
 
-import AlertIcon from "~ui/icons/AlertIcon";
-import CircleCheckmarkIcon from "~ui/icons/CircleCheckmarkIcon";
 import DownloadIcon from "~ui/icons/DownloadIcon";
-import LoadingIcon from "~ui/icons/LoadingIcon";
+import StatusLabel from "~ui/labels/StatusLabel";
 import BasicPopup from "~/components/BasicPopup";
 import LoadingBar from "~ui/controls/LoadingBar";
 
 import cs from "./bulk_download_table_renderers.scss";
+
+const PROGRESS_BAR_MINIMUM = 0.04;
 
 export default class BulkDownloadTableRenderers extends React.Component {
   static renderDownload = ({ rowData }) => {
@@ -20,7 +19,15 @@ export default class BulkDownloadTableRenderers extends React.Component {
       <div className={cs.downloadCell}>
         <DownloadIcon className={cs.downloadIcon} />
         <div className={cs.downloadRightPane}>
-          <div className={cs.downloadName}>{rowData.download_name}</div>
+          <div className={cs.downloadNameContainer}>
+            <div className={cs.downloadName}>{rowData.download_name}</div>
+            <StatusLabel
+              className={cs.downloadStatus}
+              status={rowData.statusDisplay}
+              type={rowData.statusType}
+              tooltipText={rowData.tooltipText}
+            />
+          </div>
           <div className={cs.sampleCount} onClick={rowData.onStatusClick}>
             {rowData.num_samples} Sample{rowData.num_samples === 1 ? "" : "s"}
           </div>
@@ -30,24 +37,11 @@ export default class BulkDownloadTableRenderers extends React.Component {
   };
 
   static renderStatus = ({ rowData }) => {
-    const { status, error_message, progress } = rowData;
+    const { status, progress } = rowData;
 
     if (status === "success") {
       return (
         <div className={cs.statusCell}>
-          <div className={cs.messageContainer}>
-            <CircleCheckmarkIcon
-              className={cx(cs.icon, error_message && cs.warning)}
-            />
-            <div className={cs.message}>Ready to download</div>
-            {error_message && (
-              <BasicPopup
-                trigger={<div className={cs.warningTooltip}>1 warning</div>}
-                content={error_message}
-                position="top right"
-              />
-            )}
-          </div>
           <div className={cs.links}>
             <div className={cs.link} onClick={rowData.onDownloadFileClick}>
               Download File
@@ -70,10 +64,6 @@ export default class BulkDownloadTableRenderers extends React.Component {
     if (status === "error") {
       return (
         <div className={cs.statusCell}>
-          <div className={cs.messageContainer}>
-            <AlertIcon className={cx(cs.icon, cs.error)} />
-            <div className={cs.message}>Failed to generate download</div>
-          </div>
           <div className={cs.links}>
             <a className={cs.link} href="mailto:help@idseq.net">
               Contact us for help
@@ -85,11 +75,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
 
     return (
       <div className={cs.statusCell}>
-        <div className={cs.messageContainer}>
-          <LoadingIcon className={cx(cs.icon, cs.loading)} />
-          <div className={cs.message}>Generating your download files...</div>
-        </div>
-        <LoadingBar percentage={progress || 0} />
+        <LoadingBar percentage={Math.max(progress, PROGRESS_BAR_MINIMUM)} />
       </div>
     );
   };

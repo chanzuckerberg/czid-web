@@ -35,10 +35,46 @@ const TABLE_COLUMNS = [
   {
     dataKey: "status",
     label: "",
-    width: 240,
+    width: 190,
     cellRenderer: BulkDownloadTableRenderers.renderStatus,
   },
 ];
+
+const STATUS_TYPES = {
+  waiting: null,
+  running: null,
+  success: "success",
+  error: "error",
+};
+
+const STATUS_DISPLAY = {
+  waiting: "in progress",
+  running: "in progress",
+  success: "complete",
+  error: "failed",
+};
+
+const getStatusType = bulkDownload => {
+  if (bulkDownload.status === "success" && bulkDownload.error_message) {
+    return "warning";
+  }
+  return STATUS_TYPES[bulkDownload.status];
+};
+
+const getStatusDisplay = bulkDownload => {
+  if (bulkDownload.status === "success" && bulkDownload.error_message) {
+    return "complete with issue";
+  }
+  return STATUS_DISPLAY[bulkDownload.status];
+};
+
+const getTooltipText = bulkDownload => {
+  if (bulkDownload.status === "success" && bulkDownload.error_message) {
+    return bulkDownload.error_message;
+  }
+
+  return null;
+};
 
 class BulkDownloadList extends React.Component {
   state = {
@@ -63,6 +99,9 @@ class BulkDownloadList extends React.Component {
       // Add callbacksto be used in renderStatus table renderer.
       onDownloadFileClick: () => this.onDownloadFileClick(bulkDownload),
       onCopyUrlClick: () => this.onCopyUrlClick(bulkDownload),
+      statusType: getStatusType(bulkDownload),
+      statusDisplay: getStatusDisplay(bulkDownload),
+      tooltipText: getTooltipText(bulkDownload),
     }));
 
   isLoading = () => this.state.bulkDownloads === null;

@@ -162,7 +162,7 @@ class BulkDownload < ApplicationRecord
         sample.input_files.map { |input_file| "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}" }
       end.flatten
 
-      # We use the sample name in the input name because it's what is visible to the user.
+      # We use the sample name in the output file names because the sample name is what's visible to the user.
       # Also, there might be duplicates in the original file name.
       download_tar_names = samples.map do |sample|
         # We assume that the first input file is R1 and the second input file is R2.

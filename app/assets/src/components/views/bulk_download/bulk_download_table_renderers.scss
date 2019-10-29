@@ -16,9 +16,18 @@
   .downloadRightPane {
     padding: $space-xxs 0;
 
+    .downloadNameContainer {
+      display: flex;
+      align-items: center;
+      margin-bottom: $space-xs;
+    }
+
     .downloadName {
       @include font-header-s-crop;
-      margin-bottom: $space-xxs;
+    }
+
+    .downloadStatus {
+      margin-left: $space-xxs;
     }
 
     .sampleCount {

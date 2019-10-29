@@ -51,6 +51,8 @@ class BulkDownloadsController < ApplicationController
         @bulk_download.kickoff
         render json: @bulk_download
       rescue => e
+        # If the kickoff failed, set to error.
+        @bulk_download.update(status: BulkDownload.STATUS_ERROR)
         LogUtil.log_err_and_airbrake("BulkDownloadsKickoffError: Unexpected issue kicking off bulk download: #{e}")
         render json: {
           error: BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE,

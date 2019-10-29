@@ -1,0 +1,27 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.statusLabel {
+  background-color: $lightest-grey;
+  border-radius: 13px;
+  color: $medium-grey;
+  margin-left: $space-xxs;
+  padding: $space-xxxs $space-xxs;
+  @include font-label-xxs-crop;
+
+  &.success {
+    background-color: $success-bg;
+    color: $success;
+  }
+
+  &.error {
+    background-color: $error-bg;
+    color: $error;
+  }
+
+  &.warning {
+    background-color: $warning-bg;
+    color: $warning;
+  }
+}
