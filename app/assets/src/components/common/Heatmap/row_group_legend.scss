@@ -2,6 +2,7 @@
 // See original design at:
 // https://chanzuckerberg.invisionapp.com/d/main#/console/18553478/385796250/inspect
 
+@import "~styles/themes/typography";
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 
@@ -15,10 +16,13 @@
 
   .legend {
     padding: 8px 12px;
-    font-size: 12px;
+    border-radius: 5px; // so that corners to do not cover parent corners
     background-color: $white;
     z-index: 1;
     text-align: center;
+    font-size: $font-size-small;
+    letter-spacing: 0.28px;
+    line-height: 18px;
   }
 
   // This tooltip arrow was adapted from semantic-ui popup.

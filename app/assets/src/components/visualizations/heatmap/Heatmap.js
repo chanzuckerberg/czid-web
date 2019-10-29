@@ -82,7 +82,6 @@ export default class Heatmap {
         // The caption to add when the heatmap is saved as an SVG or PNG.
         printCaption: [],
         captionLineHeight: 18,
-        rowXoutPadding: 2,
       },
       options
     );
@@ -1089,7 +1088,7 @@ export default class Heatmap {
       .text("X")
       .attr(
         "transform",
-        `translate(${this.options.rowXoutPadding},
+        `translate(${this.options.spacing},
         ${this.cell.height / 2})`
       )
       .style("dominant-baseline", "central")
