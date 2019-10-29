@@ -17,6 +17,10 @@ const STATUS_TYPE = {
   failed: "error",
   "complete - issue": "warning",
   "complete*": "warning",
+  "post processing": "default",
+  "host filtering": "default",
+  alignment: "default",
+  waiting: "default",
 };
 
 class TableRenderers extends React.Component {

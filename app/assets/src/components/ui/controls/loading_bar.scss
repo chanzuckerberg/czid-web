@@ -5,11 +5,16 @@
   height: 8px;
   margin-top: 5px;
   border-radius: 4px;
+  overflow: hidden;
 
   .loadingBar {
     background-color: $primary-lighter;
     height: 8px;
     width: 0px;
     border-radius: 4px;
+
+    &.showHint {
+      min-width: 4px;
+    }
   }
 }

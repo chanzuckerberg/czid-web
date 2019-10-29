@@ -3,12 +3,15 @@
 @import "~styles/themes/elements";
 
 .statusLabel {
-  background-color: $lightest-grey;
+  @include font-label-xxs-crop;
   border-radius: 13px;
-  color: $medium-grey;
   margin-left: $space-xxs;
   padding: $space-xxxs $space-xxs;
-  @include font-label-xxs-crop;
+
+  &.default {
+    background-color: $lightest-grey;
+    color: $medium-grey;
+  }
 
   &.success {
     background-color: $success-bg;

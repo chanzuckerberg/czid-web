@@ -91,8 +91,8 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "access_token", default: "", null: false
-    t.float "progress", limit: 24
+    t.string "access_token"
+    t.float "progress"
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
   end

@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
 import { clamp } from "lodash/fp";
 
@@ -7,12 +8,12 @@ import cs from "./loading_bar.scss";
 
 class LoadingBar extends React.Component {
   render() {
-    const { percentage } = this.props;
+    const { percentage, showHint } = this.props;
 
     return (
       <div className={cs.loadingBarBackground}>
         <div
-          className={cs.loadingBar}
+          className={cx(cs.loadingBar, showHint && cs.showHint)}
           style={{ width: `${clamp(0, 1, percentage) * 100}%` }}
         />
       </div>
@@ -22,6 +23,8 @@ class LoadingBar extends React.Component {
 
 LoadingBar.propTypes = {
   percentage: PropTypes.number,
+  // If true, we show a tiny sliver of loading bar even at 0%, to help users understand.
+  showHint: PropTypes.bool,
 };
 
 export default LoadingBar;

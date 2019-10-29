@@ -7,8 +7,6 @@ import LoadingBar from "~ui/controls/LoadingBar";
 
 import cs from "./bulk_download_table_renderers.scss";
 
-const PROGRESS_BAR_MINIMUM = 0.04;
-
 export default class BulkDownloadTableRenderers extends React.Component {
   static renderDownload = ({ rowData }) => {
     if (!rowData) {
@@ -53,7 +51,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
                   Copy Url
                 </div>
               }
-              content="Copy a signed URL for your file which expires in 24 hours. For advanced users."
+              content="Copy the file URL to your clipboard. This link will expire in 24 hours."
               position="top right"
             />
           </div>
@@ -75,7 +73,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
 
     return (
       <div className={cs.statusCell}>
-        <LoadingBar percentage={Math.max(progress, PROGRESS_BAR_MINIMUM)} />
+        <LoadingBar percentage={progress} showHint />
       </div>
     );
   };

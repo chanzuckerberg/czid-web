@@ -383,6 +383,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(response).to have_http_status(200)
 
         expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_SUCCESS)
+        expect(BulkDownload.find(@bulk_download_joe.id).access_token).to eq(nil)
       end
 
       it "should update error message if error_type is FailedSrcUrlError" do
@@ -398,6 +399,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_SUCCESS)
         expect(BulkDownload.find(@bulk_download_joe.id).error_message).to eq(BulkDownloadsHelper::FAILED_SRC_URL_ERROR_TEMPLATE % 2)
+        expect(BulkDownload.find(@bulk_download_joe.id).access_token).to eq(nil)
       end
     end
 
@@ -421,6 +423,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_ERROR)
         expect(BulkDownload.find(@bulk_download_joe.id).error_message).to eq("Test Error Message")
+        expect(BulkDownload.find(@bulk_download_joe.id).access_token).to eq(nil)
       end
     end
 
@@ -473,6 +476,19 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
           it "should return 404 if bulk download not found" do
             get :success_with_token, params: { format: "json", id: "FOOBAR", access_token: @bulk_download_joe.access_token }
+
+            expect(response).to have_http_status(404)
+            json_response = JSON.parse(response.body)
+            expect(json_response["error"]).to eq(BulkDownloadsHelper::BULK_DOWNLOAD_NOT_FOUND)
+
+            # Bulk download status should not be modified.
+            expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_RUNNING)
+          end
+
+          it "should return 401 if bulk download access token is nil" do
+            previous_access_token = @bulk_download_joe.access_token
+            @bulk_download_joe.update(access_token: nil)
+            get :success_with_token, params: { format: "json", id: "FOOBAR", access_token: previous_access_token }
 
             expect(response).to have_http_status(404)
             json_response = JSON.parse(response.body)

@@ -1,6 +1,7 @@
 require 'shellwords'
 
 class BulkDownload < ApplicationRecord
+  include AppConfigHelper
   include Rails.application.routes.url_helpers
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
@@ -77,6 +78,10 @@ class BulkDownload < ApplicationRecord
     fargate_cpu: "4096",
     fargate_memory: "8192"
   )
+    config_ecr_image = get_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE)
+    unless config_ecr_image.nil?
+      ecr_image = config_ecr_image
+    end
     shell_command_escaped = shell_command.map { |s| Shellwords.escape(s) }.join(" ")
     command = ["aegea", "ecs", "run"]
     command += ["--command=#{shell_command_escaped}"]

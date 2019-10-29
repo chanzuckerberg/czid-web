@@ -30,8 +30,12 @@ class StatusLabel extends React.Component {
 StatusLabel.propTypes = {
   className: PropTypes.string,
   status: PropTypes.node,
-  type: PropTypes.oneOf(["success", "warn", "error"]),
+  type: PropTypes.oneOf(["success", "warn", "error", "default"]),
   tooltipText: PropTypes.string,
+};
+
+StatusLabel.defaultProps = {
+  type: "default",
 };
 
 export default StatusLabel;

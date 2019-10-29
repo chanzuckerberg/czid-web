@@ -41,6 +41,8 @@ const TABLE_COLUMNS = [
 ];
 
 const STATUS_TYPES = {
+  waiting: "default",
+  running: "default",
   success: "success",
   error: "error",
 };

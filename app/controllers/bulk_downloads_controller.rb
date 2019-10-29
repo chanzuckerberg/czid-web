@@ -115,7 +115,8 @@ class BulkDownloadsController < ApplicationController
   # POST /bulk_downloads/:id/success/:access_token
   def success_with_token
     # set bulk download and validate access token in before_action
-    @bulk_download.update(status: BulkDownload::STATUS_SUCCESS)
+    # Clear the access token, so it can no longer be used.
+    @bulk_download.update(status: BulkDownload::STATUS_SUCCESS, access_token: nil)
 
     if params[:error_type] == "FailedSrcUrlError"
       LogUtil.log_err_and_airbrake("BulkDownloadFailedSrcUrlError: The following paths failed to process: #{params[:error_data]}")
@@ -128,7 +129,8 @@ class BulkDownloadsController < ApplicationController
   # POST /bulk_downloads/:id/error/:access_token
   def error_with_token
     # set bulk download and validate access token in before_action
-    @bulk_download.update(status: BulkDownload::STATUS_ERROR, error_message: params[:error_message])
+    # Clear the access token, so it can no longer be used.
+    @bulk_download.update(status: BulkDownload::STATUS_ERROR, error_message: params[:error_message], access_token: nil)
     LogUtil.log_err_and_airbrake("BulkDownloadFailedError: #{params[:error_message]}")
     render json: { status: "success" }
   end
