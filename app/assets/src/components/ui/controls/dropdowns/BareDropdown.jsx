@@ -229,7 +229,6 @@ class BareDropdown extends React.Component {
         {...baseDropdownProps}
         className={dropdownClassName}
         onBlur={e => e.stopPropagation()}
-        disableAutocomplete={disableAutocomplete}
       >
         {menu}
       </BaseDropdown>
