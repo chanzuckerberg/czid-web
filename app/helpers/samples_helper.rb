@@ -161,6 +161,9 @@ module SamplesHelper
     s3_prefix = parsed_uri.path.sub(%r{^/(.*?)/?$}, '\1/')
 
     begin
+      puts "foobar 11:30am"
+      puts S3_CLIENT.get_bucket_location(bucket: s3_bucket_name)
+      puts "END"
       entries = S3_CLIENT.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
       # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
       entries = entries.reject { |line| line.include? "Undetermined" }
