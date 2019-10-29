@@ -126,6 +126,7 @@ class BareDropdown extends React.Component {
       children,
       onFilterChange,
       menuClassName,
+      disableAutocomplete,
       ...otherProps
     } = this.props;
 
@@ -192,6 +193,7 @@ class BareDropdown extends React.Component {
               icon="search"
               placeholder="Search"
               onChange={this.handleFilterChange}
+              disableAutocomplete={disableAutocomplete}
             />
           </div>
         )}
@@ -289,6 +291,7 @@ BareDropdown.propTypes = forbidExtraProps({
   open: PropTypes.bool,
   selectOnBlur: PropTypes.bool,
   trigger: PropTypes.node.isRequired,
+  disableAutocomplete: PropTypes.bool,
 });
 
 BareDropdown.defaultProps = {

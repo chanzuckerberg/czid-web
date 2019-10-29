@@ -113,6 +113,7 @@ class LiveSearchPopBox extends React.Component {
         onChange={this.handleSearchChange}
         onKeyPress={this.handleKeyDown}
         value={value}
+        disableAutocomplete={true}
       />
     );
   };
@@ -179,6 +180,7 @@ class LiveSearchPopBox extends React.Component {
         trigger={this.renderSearchBox()}
         usePortal
         withinModal
+        disableAutocomplete={true}
       />
     );
   }
