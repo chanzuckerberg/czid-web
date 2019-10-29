@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     put :retry_pipeline, on: :member
     get :all, on: :collection
     get :pipeline_runs, on: :member
+    get :report_v2, on: :member
     get :report_info, on: :member
     get :report_csv, on: :member
     get :bulk_new, on: :collection
@@ -44,6 +45,7 @@ Rails.application.routes.draw do
     put :upload_heartbeat, on: :member
     get :coverage_viz_summary, on: :member
     get :coverage_viz_data, on: :member
+    get :show_v2, on: :member
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'

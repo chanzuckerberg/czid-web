@@ -2,7 +2,6 @@ class SamplesController < ApplicationController
   include ApplicationHelper
   include ElasticsearchHelper
   include ErrorHelper
-  include HeatmapHelper
   include LocationHelper
   include PipelineOutputsHelper
   include ReportHelper
@@ -19,7 +18,7 @@ class SamplesController < ApplicationController
   ##########################################
 
   # Read action meant for single samples with set_sample before_action
-  READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+  READ_ACTIONS = [:show, :show_v2, :report_v2, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
@@ -46,6 +45,9 @@ class SamplesController < ApplicationController
   before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
   before_action :check_owner, only: OWNER_ACTIONS
   before_action :check_access
+  before_action only: :show_v2 do
+    allowed_feature_required("report_v2")
+  end
 
   around_action :instrument_with_timer
 
@@ -712,6 +714,9 @@ class SamplesController < ApplicationController
     MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
+  def show_v2
+  end
+
   # TODO: (gdingle): remove this if we are not going to allow saving reports as visualizations
   def last_saved_visualization
     valid_viz_types = ['tree', 'table'] # See PipelineSampleReport.jsx
@@ -736,6 +741,12 @@ class SamplesController < ApplicationController
       params[:projectId] ? Project.find(params[:projectId]) : nil
     )
     render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
+  end
+
+  def report_v2
+    @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    background_id = get_background_id(@sample)
+    render json: SampleReportService.call(@pipeline_run.id, background_id)
   end
 
   # The json response here should be precached in PipelineRun.

@@ -1333,6 +1333,23 @@ class PipelineRun < ApplicationRecord
     output
   end
 
+  def get_summary_contig_counts_v2(min_contig_size)
+    summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
+    contig_lineages(min_contig_size).each do |c|
+      lineage = JSON.parse(c.lineage_json)
+      lineage.each do |count_type, taxid_arr|
+        taxids = taxid_arr[0..1]
+        taxids.each do |taxid|
+          summary_per_tax = summary_dict[taxid] ||= {}
+          summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= { contigs: 0, contig_reads: 0 }
+          summary_per_tax_and_type[:contigs] += 1
+          summary_per_tax_and_type[:contig_reads] += c.read_count
+        end
+      end
+    end
+    return summary_dict
+  end
+
   def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
     taxid_list = []
     contig_lineages(min_contig_size).each do |c|
