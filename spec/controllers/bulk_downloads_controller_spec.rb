@@ -19,7 +19,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_two = create(:sample, project: @project, name: "Test Sample Two",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        allow(Rails).to receive(:env).and_return("prod")
+        allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
         allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
         task_command = [
@@ -36,12 +36,11 @@ RSpec.describe BulkDownloadsController, type: :controller do
           # Tested further in the model spec.
         ].join(" ")
 
-        # Just the start of the aegea ecs command, for a sanity check. Tested further in the model spec.
-        aegea_command_start = "aegea ecs run --command=#{Shellwords.escape(task_command)}"
-
-        expect(Open3).to receive(:capture3).with(a_string_starting_with(aegea_command_start)).exactly(1).times.and_return(
-          [JSON.generate("taskArn": "ABC"), "", instance_double(Process::Status, exitstatus: 0)]
-        )
+        expect(Open3).to receive(:capture3)
+          .with("aegea", "ecs", "run", a_string_starting_with("--command=#{task_command}"), any_args)
+          .exactly(1).times.and_return(
+            [JSON.generate("taskArn": "ABC"), "", instance_double(Process::Status, exitstatus: 0)]
+          )
 
         bulk_download_params = {
           download_type: "original_input_file",
@@ -73,7 +72,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_two = create(:sample, project: @project, name: "Test Sample Two",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        allow(Rails).to receive(:env).and_return("prod")
+        allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
         allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
         expect(Open3).to receive(:capture3).exactly(1).times.and_return(
@@ -91,6 +90,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         post :create, params: bulk_download_params
         expect(response).to have_http_status(500)
         json_response = JSON.parse(response.body)
+        print(json_response)
         expect(json_response["error"]).to eq(BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE)
         bulk_download = BulkDownload.find(json_response["bulk_download"]["id"])
 

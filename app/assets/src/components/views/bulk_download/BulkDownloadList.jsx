@@ -41,8 +41,6 @@ const TABLE_COLUMNS = [
 ];
 
 const STATUS_TYPES = {
-  waiting: null,
-  running: null,
   success: "success",
   error: "error",
 };
@@ -54,6 +52,9 @@ const STATUS_DISPLAY = {
   error: "failed",
 };
 
+// It is possible for a bulk download to "complete with issues".
+// For example, a few of the source files could not be found, but the rest were compressed successfully.
+// In this case, the bulk download task will have status = success and also have an error message.
 const getStatusType = bulkDownload => {
   if (bulkDownload.status === "success" && bulkDownload.error_message) {
     return "warning";
@@ -96,7 +97,7 @@ class BulkDownloadList extends React.Component {
       ...bulkDownload,
       // Add callback to be used in renderDownload table renderer.
       onStatusClick: () => this.onStatusClick(bulkDownload),
-      // Add callbacksto be used in renderStatus table renderer.
+      // Add callbacks to be used in renderStatus table renderer.
       onDownloadFileClick: () => this.onDownloadFileClick(bulkDownload),
       onCopyUrlClick: () => this.onCopyUrlClick(bulkDownload),
       statusType: getStatusType(bulkDownload),

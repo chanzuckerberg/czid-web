@@ -32,7 +32,7 @@ class BulkDownload < ApplicationRecord
   end
 
   def validate_access_token(access_token)
-    return self.access_token == access_token
+    return self.access_token.present? && self.access_token == access_token
   end
 
   def output_file_presigned_url
@@ -48,15 +48,7 @@ class BulkDownload < ApplicationRecord
   end
 
   def server_host
-    if Rails.env == "prod"
-      "https://idseq.net"
-    elsif Rails.env == "staging"
-      "https://staging.idseq.net"
-    else
-      # You can use a tool like ngrok to test bulk downloads locally.
-      # DEVELOPMENT_TUNNEL_URL=https://abcdef.ngrok.io docker-compose up web.
-      ENV["DEVELOPMENT_TUNNEL_URL"]
-    end
+    ENV["SERVER_DOMAIN"]
   end
 
   # The Rails success url that the s3_tar_writer task can ping once it succeeds.
@@ -77,21 +69,25 @@ class BulkDownload < ApplicationRecord
     "#{server_host}#{bulk_downloads_progress_path(access_token: access_token, id: id)}"
   end
 
+  # Returned as an array of strings
   def aegea_ecs_submit_command(
     shell_command,
     task_role: "idseq-downloads-#{Rails.env}",
     ecr_image: "idseq-s3-tar-writer:latest",
-    fargate_cpu: 4096,
-    fargate_memory: 8192
+    fargate_cpu: "4096",
+    fargate_memory: "8192"
   )
-    command = "aegea ecs run --command=#{Shellwords.escape(shell_command)} "
-    command += "--task-role #{Shellwords.escape(task_role)} "
-    command += "--ecr-image #{Shellwords.escape(ecr_image)} "
-    command += "--fargate-cpu #{fargate_cpu} "
-    command += "--fargate-memory #{fargate_memory}"
+    shell_command_escaped = shell_command.map { |s| Shellwords.escape(s) }.join(" ")
+    command = ["aegea", "ecs", "run"]
+    command += ["--command=#{shell_command_escaped}"]
+    command += ["--task-role", task_role]
+    command += ["--ecr-image", ecr_image]
+    command += ["--fargate-cpu", fargate_cpu]
+    command += ["--fargate-memory", fargate_memory]
     command
   end
 
+  # Returned as an array of strings
   def s3_tar_writer_command(
     src_urls,
     tar_names,
@@ -100,26 +96,24 @@ class BulkDownload < ApplicationRecord
     error_url: self.error_url,
     progress_url: self.progress_url
   )
-    command = "python s3_tar_writer.py "
-    escaped_src_urls = src_urls.map { |url| Shellwords.escape(url) }.join(' ')
-    command += "--src-urls #{escaped_src_urls} "
-    escaped_tar_names = tar_names.map { |url| Shellwords.escape(url) }.join(' ')
-    command += "--tar-names #{escaped_tar_names} "
-    command += "--dest-url #{Shellwords.escape(dest_url)} "
+    command = ["python", "s3_tar_writer.py"]
+    command += ["--src-urls"]
+    command += src_urls
+    command += ["--tar-names"]
+    command += tar_names
+    command += ["--dest-url", dest_url]
 
     # The success url is mandatory.
     if success_url
-      command += "--success-url #{Shellwords.escape(success_url)} "
-    elsif Rails.env == "staging" || Rails.env == "prod"
-      raise BulkDownloadsHelper::SUCCESS_URL_REQUIRED
+      command += ["--success-url", success_url]
     else
-      raise BulkDownloadsHelper::SUCCESS_URL_REQUIRED_LOCAL
+      raise BulkDownloadsHelper::SUCCESS_URL_REQUIRED
     end
     if error_url
-      command += "--error-url #{Shellwords.escape(error_url)} "
+      command += ["--error-url", error_url]
     end
     if progress_url
-      command += "--progress-url #{Shellwords.escape(progress_url)}"
+      command += ["--progress-url", progress_url]
     end
     command
   end
@@ -138,7 +132,7 @@ class BulkDownload < ApplicationRecord
   )
     aegea_command = aegea_ecs_submit_command(shell_command)
 
-    command_stdout, command_stderr, status = Open3.capture3(aegea_command)
+    command_stdout, command_stderr, status = Open3.capture3(*aegea_command)
     if status.exitstatus.zero?
       output = JSON.parse(command_stdout)
       # Store the taskArn for debugging purposes.

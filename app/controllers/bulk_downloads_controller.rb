@@ -10,8 +10,7 @@ class BulkDownloadsController < ApplicationController
 
   skip_before_action :authenticate_user!, :verify_authenticity_token, only: UPDATE_WITH_TOKEN_ACTIONS
 
-  before_action :set_bulk_download_from_id, only: UPDATE_WITH_TOKEN_ACTIONS
-  before_action :validate_access_token, only: UPDATE_WITH_TOKEN_ACTIONS
+  before_action :set_bulk_download_and_validate_access_token, only: UPDATE_WITH_TOKEN_ACTIONS
 
   # GET /bulk_downloads/types
   def types
@@ -20,9 +19,10 @@ class BulkDownloadsController < ApplicationController
 
   # POST /bulk_downloads
   def create
+    create_params = bulk_download_create_params
     # Convert sample ids to pipeline run ids.
     begin
-      sample_ids = bulk_download_params[:sample_ids]
+      sample_ids = create_params[:sample_ids]
       # Access control check.
       viewable_samples = current_power.viewable_samples.where(id: sample_ids)
       if viewable_samples.length != sample_ids.length
@@ -40,27 +40,28 @@ class BulkDownloadsController < ApplicationController
 
     # TODO(mark): Additional validations for each download type.
     # Create and save the bulk download.
-    @bulk_download = BulkDownload.new(download_type: bulk_download_params[:download_type],
-                                      pipeline_run_ids: pipeline_run_ids,
-                                      params: bulk_download_params[:params],
-                                      status: BulkDownload::STATUS_WAITING,
-                                      user_id: current_user.id)
+    bulk_download = BulkDownload.new(download_type: create_params[:download_type],
+                                     pipeline_run_ids: pipeline_run_ids,
+                                     params: create_params[:params],
+                                     status: BulkDownload::STATUS_WAITING,
+                                     user_id: current_user.id)
 
-    if @bulk_download.save
+    if bulk_download.save
       begin
-        @bulk_download.kickoff
-        render json: @bulk_download
+        bulk_download.kickoff
+        render json: bulk_download
       rescue => e
         # If the kickoff failed, set to error.
-        @bulk_download.update(status: BulkDownload.STATUS_ERROR)
+        bulk_download.update(status: BulkDownload::STATUS_ERROR)
+        LogUtil.log_backtrace(e)
         LogUtil.log_err_and_airbrake("BulkDownloadsKickoffError: Unexpected issue kicking off bulk download: #{e}")
         render json: {
           error: BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE,
-          bulk_download: @bulk_download,
+          bulk_download: bulk_download,
         }, status: :internal_server_error
       end
     else
-      render json: @bulk_download.errors.full_messages, status: :unprocessable_entity
+      render json: bulk_download.errors.full_messages, status: :unprocessable_entity
     end
   end
 
@@ -79,9 +80,7 @@ class BulkDownloadsController < ApplicationController
 
   # GET /bulk_downloads/:id.json
   def show
-    bulk_download_id = params[:id]
-
-    bulk_download = current_power.viewable_bulk_downloads.find(bulk_download_id)
+    bulk_download = viewable_bulk_download_from_params
 
     render json: {
       bulk_download: format_bulk_download(bulk_download, true),
@@ -95,9 +94,7 @@ class BulkDownloadsController < ApplicationController
 
   # GET /bulk_downloads/:id/presigned_output_url
   def presigned_output_url
-    bulk_download_id = params[:id]
-
-    bulk_download = current_power.viewable_bulk_downloads.find(bulk_download_id)
+    bulk_download = viewable_bulk_download_from_params
 
     if bulk_download.status != BulkDownload::STATUS_SUCCESS
       render json: { error: BulkDownloadsHelper::OUTPUT_FILE_NOT_SUCCESSFUL }, status: :not_found
@@ -143,20 +140,21 @@ class BulkDownloadsController < ApplicationController
     render json: { status: "success" }
   end
 
-  def set_bulk_download_from_id
+  def set_bulk_download_and_validate_access_token
     @bulk_download = BulkDownload.find(params[:id])
+    unless @bulk_download.validate_access_token(params[:access_token])
+      render json: { error: BulkDownloadsHelper::INVALID_ACCESS_TOKEN }, status: :unauthorized
+    end
   rescue ActiveRecord::RecordNotFound
     render json: { error: BulkDownloadsHelper::BULK_DOWNLOAD_NOT_FOUND }, status: :not_found
     # Rendering halts the filter chain
   end
 
-  def validate_access_token
-    unless @bulk_download.validate_access_token(params[:access_token])
-      render json: { error: BulkDownloadsHelper::INVALID_ACCESS_TOKEN }, status: :unauthorized
-    end
+  def viewable_bulk_download_from_params
+    current_power.viewable_bulk_downloads.find(params[:id])
   end
 
-  def bulk_download_params
+  def bulk_download_create_params
     params.permit(:download_type, sample_ids: [], params: {})
   end
 end

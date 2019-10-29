@@ -9,9 +9,8 @@ module BulkDownloadsHelper
   INVALID_ACCESS_TOKEN = "The access token was invalid for this bulk download.".freeze
   KICKOFF_FAILURE = "Unexpected error kicking off bulk download.".freeze
   KICKOFF_FAILURE_HUMAN_READABLE = "Could not kick off bulk download. Please contact us for help.".freeze
-  PRESIGNED_URL_GENERATION_ERROR = "Could not generated a presigned url.".freeze
+  PRESIGNED_URL_GENERATION_ERROR = "Could not generate a presigned url.".freeze
   SUCCESS_URL_REQUIRED = "Success url required for bulk download.".freeze
-  SUCCESS_URL_REQUIRED_LOCAL = "Success url required for bulk download. Did you set DEVELOPMENT_TUNNEL_URL?".freeze
   FAILED_SRC_URL_ERROR_TEMPLATE = "%s samples could not be processed. Please contact us for help.".freeze
 
   # Check that all pipeline runs have succeeded for the provided samples
