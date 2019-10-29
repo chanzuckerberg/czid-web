@@ -6,7 +6,6 @@ git_source(:github) do |repo_name|
 end
 
 gem 'airbrake', '~> 9.5'
-gem 'airbrake-ruby', '~> 4.2.1' # 4.4 broke perf monitoring
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 gem 'brakeman'
