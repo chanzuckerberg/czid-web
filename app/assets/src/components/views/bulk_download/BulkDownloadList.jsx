@@ -1,14 +1,16 @@
 import React from "react";
 import cx from "classnames";
 import { SortDirection } from "react-virtualized";
+import copy from "copy-to-clipboard";
 
 import LargeDownloadIcon from "~ui/icons/LargeDownloadIcon";
 import LoadingMessage from "~/components/common/LoadingMessage";
-import { getBulkDownloads } from "~/api/bulk_downloads";
+import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
 import { ViewHeader, NarrowContainer, Divider } from "~/components/layout";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import { Table } from "~/components/visualizations/table";
+import { openUrl } from "~utils/links";
 
 import BulkDownloadTableRenderers from "./BulkDownloadTableRenderers";
 import BulkDownloadDetailsModal from "./BulkDownloadDetailsModal";
@@ -56,8 +58,11 @@ class BulkDownloadList extends React.Component {
   processBulkDownloads = bulkDownloads =>
     bulkDownloads.map(bulkDownload => ({
       ...bulkDownload,
-      // Add a callback for the cell. This is used in the renderDownload cell renderer.
+      // Add callback to be used in renderDownload table renderer.
       onStatusClick: () => this.onStatusClick(bulkDownload),
+      // Add callbacksto be used in renderStatus table renderer.
+      onDownloadFileClick: () => this.onDownloadFileClick(bulkDownload),
+      onCopyUrlClick: () => this.onCopyUrlClick(bulkDownload),
     }));
 
   isLoading = () => this.state.bulkDownloads === null;
@@ -69,6 +74,28 @@ class BulkDownloadList extends React.Component {
       selectedBulkDownload: bulkDownload,
       modalOpen: true,
     });
+  };
+
+  onDownloadFileClick = async bulkDownload => {
+    // This should only be clickable when the bulk download has succeeded
+    // TODO(mark): Handle error case.
+    if (bulkDownload.status === "success") {
+      const outputFilePresignedUrl = await getPresignedOutputUrl(
+        bulkDownload.id
+      );
+      openUrl(outputFilePresignedUrl);
+    }
+  };
+
+  onCopyUrlClick = async bulkDownload => {
+    // This should only be clickable when the bulk download has succeeded
+    // TODO(mark): Handle error case. Want to change popup text, which involves a forceUpdate on the table.
+    if (bulkDownload.status === "success") {
+      const outputFilePresignedUrl = await getPresignedOutputUrl(
+        bulkDownload.id
+      );
+      copy(outputFilePresignedUrl);
+    }
   };
 
   onModalClose = () => {

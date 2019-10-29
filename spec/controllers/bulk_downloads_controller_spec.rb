@@ -13,14 +13,38 @@ RSpec.describe BulkDownloadsController, type: :controller do
     end
 
     describe "POST #create" do
-      it "should create new bulk download" do
-        @sample_one = create(:sample, project: @project,
+      it "should create new bulk download and kickoff the aegea ecs task" do
+        @sample_one = create(:sample, project: @project, name: "Test Sample One",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
-        @sample_two = create(:sample, project: @project,
+        @sample_two = create(:sample, project: @project, name: "Test Sample Two",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
+        allow(Rails).to receive(:env).and_return("prod")
+        allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
+        task_command = [
+          "python s3_tar_writer.py",
+          "--src-urls s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[0].name}",
+          "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[1].name}",
+          "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
+          "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
+          "--tar-names Test\\ Sample\\ One__original_R1.fastq.gz",
+          "Test\\ Sample\\ One__original_R2.fastq.gz",
+          "Test\\ Sample\\ Two__original_R1.fastq.gz",
+          "Test\\ Sample\\ Two__original_R2.fastq.gz",
+          # Omit the dest-url, success-url, error-url, progress-url since they require the bulk download id.
+          # Tested further in the model spec.
+        ].join(" ")
+
+        # Just the start of the aegea ecs command, for a sanity check. Tested further in the model spec.
+        aegea_command_start = "aegea ecs run --command=#{Shellwords.escape(task_command)}"
+
+        expect(Open3).to receive(:capture3).with(a_string_starting_with(aegea_command_start)).exactly(1).times.and_return(
+          [JSON.generate("taskArn": "ABC"), "", instance_double(Process::Status, exitstatus: 0)]
+        )
+
         bulk_download_params = {
-          download_type: "sample_overview",
+          download_type: "original_input_file",
           sample_ids: [@sample_one, @sample_two],
           params: {
             foo: "bar",
@@ -34,12 +58,47 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         # Verify that bulk download was created correctly.
         expect(bulk_download).not_to eq(nil)
-        expect(bulk_download.download_type).to eq("sample_overview")
+        expect(bulk_download.download_type).to eq("original_input_file")
         expect(bulk_download.pipeline_run_ids).to include(@sample_one.pipeline_runs.first.id)
         expect(bulk_download.pipeline_run_ids).to include(@sample_two.pipeline_runs.first.id)
         expect(bulk_download.user_id).to eq(@joe.id)
-        expect(bulk_download.status).to eq(BulkDownload::STATUS_WAITING)
+        expect(bulk_download.status).to eq(BulkDownload::STATUS_RUNNING)
+        expect(bulk_download.ecs_task_arn).to eq("ABC")
         expect(bulk_download.params_json).to eq({ foo: "bar" }.to_json)
+      end
+
+      it "should return failure if aegea task failed to start" do
+        @sample_one = create(:sample, project: @project, name: "Test Sample One",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample_two = create(:sample, project: @project, name: "Test Sample Two",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        allow(Rails).to receive(:env).and_return("prod")
+        allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
+        expect(Open3).to receive(:capture3).exactly(1).times.and_return(
+          ["", "", instance_double(Process::Status, exitstatus: 1)]
+        )
+
+        bulk_download_params = {
+          download_type: "original_input_file",
+          sample_ids: [@sample_one, @sample_two],
+          params: {
+            foo: "bar",
+          },
+        }
+
+        post :create, params: bulk_download_params
+        expect(response).to have_http_status(500)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE)
+        bulk_download = BulkDownload.find(json_response["bulk_download"]["id"])
+
+        # Verify that bulk download was created and correctly updated to the "error" state.
+        expect(bulk_download).not_to eq(nil)
+        expect(bulk_download.download_type).to eq("original_input_file")
+        expect(bulk_download.status).to eq(BulkDownload::STATUS_ERROR)
+        expect(bulk_download.error_message).to eq(BulkDownloadsHelper::KICKOFF_FAILURE)
       end
 
       it "should error if a requested sample is not done running" do
@@ -179,6 +238,57 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(json_response["error"]).to eq(BulkDownloadsHelper::BULK_DOWNLOAD_NOT_FOUND)
       end
     end
+
+    describe "GET #presigned_output_url" do
+      let(:fake_presigned_url) { "https://fake-presigned-url" }
+
+      before do
+        @sample_one = create(:sample, project: @project, name: "Joes Sample",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_SUCCESS, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+      end
+
+      it "should return url in basic case" do
+        allow(S3_PRESIGNER).to receive(:presigned_url).and_return(fake_presigned_url)
+
+        get :presigned_output_url, params: { format: "json", id: @bulk_download_joe.id }
+
+        expect(response).to have_http_status(200)
+        expect(response.body).to eq(fake_presigned_url)
+      end
+
+      it "should return 500 status if url fails to generate" do
+        allow(S3_PRESIGNER).to receive(:presigned_url).and_raise(StandardError)
+
+        get :presigned_output_url, params: { format: "json", id: @bulk_download_joe.id }
+
+        expect(response).to have_http_status(500)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::PRESIGNED_URL_GENERATION_ERROR)
+      end
+
+      it "should return 404 if not found" do
+        get :presigned_output_url, params: { format: "json", id: 12_345 }
+
+        expect(response).to have_http_status(404)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::BULK_DOWNLOAD_NOT_FOUND)
+      end
+
+      it "should return 404 if bulk download not finished" do
+        @bulk_download_joe.update(status: BulkDownload::STATUS_RUNNING)
+
+        get :presigned_output_url, params: { format: "json", id: @bulk_download_joe.id }
+
+        expect(response).to have_http_status(404)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::OUTPUT_FILE_NOT_SUCCESSFUL)
+      end
+    end
   end
 
   context "Admin user without bulk_downloads flag" do
@@ -238,6 +348,140 @@ RSpec.describe BulkDownloadsController, type: :controller do
       it "redirected to home page" do
         get :show, params: { format: "json", id: "123" }
         expect(response).to redirect_to(root_path)
+      end
+    end
+
+    describe "GET #presigned_output_url" do
+      it "does not call action" do
+        get :presigned_output_url, params: { format: "json", id: "123" }
+        expect(controller).not_to receive(:show)
+      end
+
+      it "redirected to home page" do
+        get :presigned_output_url, params: { format: "json", id: "123" }
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
+  context "NO user logged in" do
+    before do
+      @project = create(:project, users: [@joe])
+    end
+
+    describe "GET #success_with_token" do
+      before do
+        @sample_one = create(:sample, project: @project, name: "Joes Sample",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+      end
+
+      it "should properly update bulk download on success" do
+        get :success_with_token, params: { format: "json", id: @bulk_download_joe.id, access_token: @bulk_download_joe.access_token }
+
+        expect(response).to have_http_status(200)
+
+        expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_SUCCESS)
+      end
+
+      it "should update error message if error_type is FailedSrcUrlError" do
+        get :success_with_token, params: {
+          format: "json",
+          id: @bulk_download_joe.id,
+          access_token: @bulk_download_joe.access_token,
+          error_type: "FailedSrcUrlError",
+          error_data: ["s3://path-to-file-one", "s3://path-to-file-two"],
+        }
+
+        expect(response).to have_http_status(200)
+
+        expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_SUCCESS)
+        expect(BulkDownload.find(@bulk_download_joe.id).error_message).to eq(BulkDownloadsHelper::FAILED_SRC_URL_ERROR_TEMPLATE % 2)
+      end
+    end
+
+    describe "GET #error_with_token" do
+      before do
+        @sample_one = create(:sample, project: @project, name: "Joes Sample",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+      end
+
+      it "should properly update bulk download on success" do
+        get :error_with_token, params: {
+          format: "json",
+          id: @bulk_download_joe.id,
+          access_token: @bulk_download_joe.access_token,
+          error_message: "Test Error Message",
+        }
+
+        expect(response).to have_http_status(200)
+
+        expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_ERROR)
+        expect(BulkDownload.find(@bulk_download_joe.id).error_message).to eq("Test Error Message")
+      end
+    end
+
+    describe "GET #progress_with_token" do
+      before do
+        @sample_one = create(:sample, project: @project, name: "Joes Sample",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+      end
+
+      it "should properly update bulk download on success" do
+        get :progress_with_token, params: {
+          format: "json",
+          id: @bulk_download_joe.id,
+          access_token: @bulk_download_joe.access_token,
+          progress: "0.5",
+        }
+
+        expect(response).to have_http_status(200)
+
+        expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_RUNNING)
+        expect(BulkDownload.find(@bulk_download_joe.id).progress).to eq(0.5)
+      end
+    end
+
+    # Test that all endpoints that use tokens pass these tests.
+    describe "Common token action tests" do
+      before do
+        @sample_one = create(:sample, project: @project, name: "Joes Sample",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+      end
+
+      actions = BulkDownloadsController::UPDATE_WITH_TOKEN_ACTIONS
+
+      actions.each do |action|
+        context action.to_s do
+          it "should return 401 if access token incorrect" do
+            get :success_with_token, params: { format: "json", id: @bulk_download_joe.id, access_token: "FOOBAR" }
+
+            expect(response).to have_http_status(401)
+            json_response = JSON.parse(response.body)
+            expect(json_response["error"]).to eq(BulkDownloadsHelper::INVALID_ACCESS_TOKEN)
+
+            # Bulk download status should not be modified.
+            expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_RUNNING)
+          end
+
+          it "should return 404 if bulk download not found" do
+            get :success_with_token, params: { format: "json", id: "FOOBAR", access_token: @bulk_download_joe.access_token }
+
+            expect(response).to have_http_status(404)
+            json_response = JSON.parse(response.body)
+            expect(json_response["error"]).to eq(BulkDownloadsHelper::BULK_DOWNLOAD_NOT_FOUND)
+
+            # Bulk download status should not be modified.
+            expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_RUNNING)
+          end
+        end
       end
     end
   end

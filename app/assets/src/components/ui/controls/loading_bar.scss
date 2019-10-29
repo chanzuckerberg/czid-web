@@ -1,0 +1,15 @@
+@import "~styles/themes/colors";
+
+.loadingBarBackground {
+  background-color: $lightest-grey;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 4px;
+
+  .loadingBar {
+    background-color: $primary-light;
+    height: 8px;
+    width: 0px;
+    border-radius: 4px;
+  }
+}

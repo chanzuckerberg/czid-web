@@ -34,18 +34,60 @@
 }
 
 .statusCell {
-  display: flex;
-  align-items: center;
-  width: 200px;
-  margin-left: auto;
+  margin-bottom: 2px;
 
-  .loadingIcon {
-    color: $primary-light;
+  .messageContainer,
+  .links {
+    display: flex;
+    align-items: center;
+  }
+
+  .messageContainer {
+    margin-bottom: $space-xs;
+  }
+
+  .icon {
+    width: 16px;
     margin-right: $space-xxs;
-    @include font-body-m;
+    fill: $success;
+
+    &.warning {
+      fill: $warning;
+    }
+
+    &.error {
+      fill: $error;
+      margin-bottom: 1px;
+    }
+
+    &.loading {
+      color: $primary-light;
+      margin-right: 4px;
+    }
+  }
+
+  .warningTooltip {
+    @include font-body-xxs-crop;
+    margin-left: $space-xxs;
+    color: $medium-grey;
+    text-decoration: underline;
+    text-decoration-style: dashed;
   }
 
   .message {
-    @include font-body-xxs;
+    @include font-body-xxs-crop;
+  }
+
+  .separator {
+    @include font-body-xxs-crop;
+    margin: 0 $space-xs;
+    color: $medium-grey;
+  }
+
+  .link {
+    @include font-label-s-crop;
+    /* overwrite header.scss */
+    color: $primary-light !important;
+    cursor: pointer;
   }
 }
