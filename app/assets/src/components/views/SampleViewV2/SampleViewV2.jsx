@@ -11,7 +11,6 @@ export default class SampleViewV2 extends React.Component {
     this.state = {
       data: [],
     };
-    console.log("SampleViewV2:constructor");
   }
 
   componentDidMount() {
@@ -22,7 +21,6 @@ export default class SampleViewV2 extends React.Component {
     const { sampleId } = this.props;
 
     const reportData = await getSampleReportData(sampleId);
-    console.log(reportData);
 
     // TODO : this should come from the client
     // TODO : tax level should come as a string
