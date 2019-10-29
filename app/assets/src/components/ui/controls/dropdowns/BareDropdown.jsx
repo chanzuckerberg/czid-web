@@ -220,7 +220,6 @@ class BareDropdown extends React.Component {
           trigger={this.props.trigger}
           triggerClassName={className}
           withinModal={this.props.withinModal}
-          disableAutocomplete={disableAutocomplete}
         />
       );
     }
