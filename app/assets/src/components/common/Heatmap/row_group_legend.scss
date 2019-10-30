@@ -15,14 +15,13 @@
   z-index: 0;
 
   .legend {
-    padding: 8px 12px;
+    padding: $space-m $space-l;
     border-radius: 5px; // so that corners to do not cover parent corners
     background-color: $white;
     z-index: 1;
     text-align: center;
-    font-size: $font-size-small;
-    letter-spacing: 0.28px;
-    line-height: 18px;
+
+    @include font-body-xs;
   }
 
   // This tooltip arrow was adapted from semantic-ui popup.
@@ -30,12 +29,13 @@
     position: absolute;
     left: 50%;
     background-color: $white;
-    width: 16px;
-    height: 16px;
-    margin-left: -8px;
-    margin-top: -8px;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    margin-top: -5px;
     transform: rotate(45deg);
     z-index: -1;
     box-shadow: $box-shadow-dropdown-menu;
+    border-radius: 0 0 2px 0; // this is different from semantic-ui
   }
 }
