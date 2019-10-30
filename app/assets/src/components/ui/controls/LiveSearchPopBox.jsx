@@ -94,9 +94,6 @@ class LiveSearchPopBox extends React.Component {
   renderSearchBox = () => {
     const { placeholder, rectangular, inputClassName } = this.props;
     const { isLoading, value } = this.state;
-    // TODO (gdingle): If still processing, display “Loading” in the drop down
-    // menu and show loading indicator instead of magnifying glass icon. (this
-    // should happen immediately so the user knows that things are happening)
 
     return (
       <div onFocus={this.handleFocus} onBlur={this.handleBlur}>
@@ -124,7 +121,9 @@ class LiveSearchPopBox extends React.Component {
   };
 
   handleBlur = _ => {
-    this.setState({ focus: false });
+    // Give a chance for handleResultSelect to happen. Otherwise, the dropdown
+    // will disappear before the item onClick fires.
+    setTimeout(() => this.setState({ focus: false }), 10);
   };
 
   buildItem = (categoryKey, result, index) => (
