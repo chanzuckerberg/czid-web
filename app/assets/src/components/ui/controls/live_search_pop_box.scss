@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .liveSearchPopBox {
   &:not(.rectangular) {
@@ -30,6 +31,12 @@
     color: $light-grey;
     padding: 0 14px;
     text-transform: uppercase;
+    border-top: 2px solid $lightest-grey;
+    margin-top: $space-xs; // 8px
+  }
+
+  .category:first-child {
+    border: none;
   }
 
   .entry {
