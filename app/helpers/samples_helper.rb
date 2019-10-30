@@ -6,8 +6,6 @@ module SamplesHelper
   include PipelineOutputsHelper
   include ErrorHelper
 
-  S3_CLIENT = Aws::S3::Client.new
-
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
@@ -162,9 +160,9 @@ module SamplesHelper
 
     begin
       puts "foobar 11:30am"
-      puts S3_CLIENT.get_bucket_location(bucket: s3_bucket_name)
+      s3_client_local = Aws::S3::Client.new(endpoint: S3_GLOBAL_ENDPOINT)
       puts "END"
-      entries = S3_CLIENT.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
+      entries = s3_client_local.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
       # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
       entries = entries.reject { |line| line.include? "Undetermined" }
     rescue Aws::S3::Errors::ServiceError => e # Covers all S3 access errors (AccessDenied/NoSuchBucket/AllAccessDisabled)
