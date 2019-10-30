@@ -94,6 +94,13 @@ class GeoSearchInputBox extends React.Component {
       });
     }
 
+    // TODO (gdingle): Horizontal Line Between Location Results and Plain Text Sections
+
+    // TODO (gdingle):
+    // If there are no results but the Plain Text option, still display dropdown
+    // menu with “No Results” under “Location Results”, as well as the Plain
+    // Text option
+
     // Let users select an unresolved plain text option
     let noMatchName = "Plain Text (No Location Match)";
     categories[noMatchName] = {

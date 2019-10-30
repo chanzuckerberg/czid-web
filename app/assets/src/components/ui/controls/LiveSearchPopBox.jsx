@@ -14,6 +14,9 @@ class LiveSearchPopBox extends React.Component {
       isLoading: false,
       results: [],
       value: this.props.initialValue,
+      // TODO (gdingle): First result in dropdown menu should be selected by
+      // default. Pressing return should select that result.
+
       selectedResult: null,
     };
 
@@ -31,6 +34,9 @@ class LiveSearchPopBox extends React.Component {
   }
 
   handleKeyDown = keyEvent => {
+    // TODO (gdingle):
+    // User can move through options in menu with the arrow keys
+
     const { onEnter, inputMode } = this.props;
     const { value, selectedResult } = this.state;
 
@@ -184,6 +190,9 @@ class LiveSearchPopBox extends React.Component {
       this.getResultsLength() &&
       this.state.focus &&
       this.state.value.trim().length >= this.props.minChars;
+
+    // TODO (gdingle): Dropdown should stay next to the input field and not
+    // float above it when the list gets smaller
     return (
       <BareDropdown
         className={cx(
