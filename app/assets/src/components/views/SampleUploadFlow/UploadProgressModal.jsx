@@ -21,6 +21,7 @@ import AlertIcon from "~ui/icons/AlertIcon";
 import CircleCheckmarkIcon from "~ui/icons/CircleCheckmarkIcon";
 import UploadIcon from "~ui/icons/UploadIcon";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import LoadingBar from "~/components/ui/controls/LoadingBar";
 import {
   bulkUploadLocalWithMetadata,
   bulkUploadRemote,
@@ -404,14 +405,7 @@ export default class UploadProgressModal extends React.Component {
   renderSampleLoadingBar = sample => {
     const uploadPercentage = this.getSampleUploadPercentage(sample);
 
-    return (
-      <div className={cs.loadingBarBackground}>
-        <div
-          className={cs.loadingBar}
-          style={{ width: `${uploadPercentage * 100}%` }}
-        />
-      </div>
-    );
+    return <LoadingBar percentage={uploadPercentage} />;
   };
 
   renderViewProjectButton = () => {
