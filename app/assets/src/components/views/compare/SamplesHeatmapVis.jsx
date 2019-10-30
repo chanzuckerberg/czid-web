@@ -9,6 +9,7 @@ import { openUrl } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
+import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
@@ -27,6 +28,7 @@ class SamplesHeatmapVis extends React.Component {
       addMetadataTrigger: null,
       nodeHoverInfo: null,
       columnMetadataLegend: null,
+      rowGroupLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
       displayControlsBanner: true,
@@ -75,6 +77,8 @@ class SamplesHeatmapVis extends React.Component {
         onColumnMetadataLabelHover: this.handleColumnMetadataLabelHover,
         onColumnMetadataLabelMove: this.handleMouseHoverMove,
         onColumnMetadataLabelOut: this.handleColumnMetadataLabelOut,
+        onRowGroupEnter: this.handleRowGroupEnter,
+        onRowGroupLeave: this.handleRowGroupLeave,
         onRemoveRow: this.props.onRemoveTaxon,
         onCellClick: this.handleCellClick,
         onColumnLabelClick: this.props.onSampleLabelClick,
@@ -211,6 +215,22 @@ class SamplesHeatmapVis extends React.Component {
     logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
+  handleRowGroupEnter = (rowGroup, rect, minTop) => {
+    this.setState({
+      rowGroupLegend: {
+        label: `Genus: ${rowGroup.genusName || "Unknown"}`,
+        tooltipLocation: {
+          left: rect.left + rect.width / 2,
+          top: Math.max(minTop, rect.top),
+        },
+      },
+    });
+    logAnalyticsEvent("SamplesHeatmapVis_row-group_hovered", {
+      genusName: rowGroup.genusName,
+      genusId: rowGroup.sortKey,
+    });
+  };
+
   handleNodeHoverOut = () => {
     this.setState({ nodeHoverInfo: null });
   };
@@ -228,6 +248,10 @@ class SamplesHeatmapVis extends React.Component {
 
   handleColumnMetadataLabelOut = () => {
     this.setState({ columnMetadataLegend: null });
+  };
+
+  handleRowGroupLeave = () => {
+    this.setState({ rowGroupLegend: null });
   };
 
   download() {
@@ -399,6 +423,7 @@ class SamplesHeatmapVis extends React.Component {
       tooltipLocation,
       nodeHoverInfo,
       columnMetadataLegend,
+      rowGroupLegend,
       addMetadataTrigger,
       selectedMetadata,
     } = this.state;
@@ -448,6 +473,7 @@ class SamplesHeatmapVis extends React.Component {
               tooltipLocation={tooltipLocation}
             />
           )}
+        {rowGroupLegend && <RowGroupLegend {...rowGroupLegend} />}
         {addMetadataTrigger && (
           <MetadataSelector
             addMetadataTrigger={addMetadataTrigger}
