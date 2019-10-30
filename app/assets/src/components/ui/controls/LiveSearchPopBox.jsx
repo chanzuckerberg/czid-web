@@ -43,16 +43,11 @@ class LiveSearchPopBox extends React.Component {
     }
   };
 
-  resetComponent = () => {
-    this.setState({
-      isLoading: false,
-      results: [],
-    });
-  };
-
   handleResultSelect = ({ currentEvent, result }) => {
     const { onResultSelect } = this.props;
-    this.resetComponent();
+    this.setState({
+      isLoading: false,
+    });
     onResultSelect && onResultSelect({ currentEvent, result });
   };
 
@@ -99,23 +94,36 @@ class LiveSearchPopBox extends React.Component {
   renderSearchBox = () => {
     const { placeholder, rectangular, inputClassName } = this.props;
     const { isLoading, value } = this.state;
+
     return (
-      <Input
-        fluid
-        className={cx(
-          cs.searchInput,
-          rectangular && cs.rectangular,
-          inputClassName
-        )}
-        icon="search"
-        loading={isLoading}
-        placeholder={placeholder}
-        onChange={this.handleSearchChange}
-        onKeyPress={this.handleKeyDown}
-        value={value}
-        disableAutocomplete={true}
-      />
+      <div onFocus={this.handleFocus} onBlur={this.handleBlur}>
+        <Input
+          fluid
+          className={cx(
+            cs.searchInput,
+            rectangular && cs.rectangular,
+            inputClassName
+          )}
+          icon="search"
+          loading={isLoading}
+          placeholder={placeholder}
+          onChange={this.handleSearchChange}
+          onKeyPress={this.handleKeyDown}
+          value={value}
+          disableAutocomplete={true}
+        />
+      </div>
     );
+  };
+
+  handleFocus = _ => {
+    this.setState({ focus: true });
+  };
+
+  handleBlur = _ => {
+    // Give a chance for handleResultSelect to happen. Otherwise, the dropdown
+    // will disappear before the item onClick fires.
+    setTimeout(() => this.setState({ focus: false }), 100);
   };
 
   buildItem = (categoryKey, result, index) => (
@@ -165,6 +173,10 @@ class LiveSearchPopBox extends React.Component {
   render() {
     const { className, rectangular } = this.props;
 
+    const shouldOpen =
+      this.getResultsLength() &&
+      this.state.focus &&
+      this.state.value.trim().length >= this.props.minChars;
     return (
       <BareDropdown
         className={cx(
@@ -176,7 +188,7 @@ class LiveSearchPopBox extends React.Component {
         hideArrow
         items={this.renderDropdownItems()}
         onChange={this.handleResultSelect}
-        open={this.getResultsLength() ? null : false}
+        open={shouldOpen ? true : false}
         trigger={this.renderSearchBox()}
         usePortal
         withinModal
@@ -187,7 +199,7 @@ class LiveSearchPopBox extends React.Component {
 }
 
 LiveSearchPopBox.defaultProps = {
-  delayTriggerSearch: 1000,
+  delayTriggerSearch: 200,
   initialValue: "",
   minChars: 2,
   placeholder: "Search",
