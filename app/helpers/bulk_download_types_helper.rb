@@ -2,13 +2,13 @@ module BulkDownloadTypesHelper
   BULK_DOWNLOAD_TYPES = [
     {
       type: "sample_overview",
-      display_name: "Sample Overview",
+      display_name: "Sample Overviews",
       description: "Sample metadata and QC metrics",
       category: "report",
     },
     {
       type: "sample_taxon_report",
-      display_name: "Sample Taxon Report",
+      display_name: "Sample Taxon Reports",
       description: "Metrics (e.g. total reads, rPM) and metadata for each taxon identified in the sample",
       category: "report",
     },
@@ -27,14 +27,14 @@ module BulkDownloadTypesHelper
     },
     {
       type: "contig_summary_report",
-      display_name: "Contig Summary Report",
+      display_name: "Contig Summary Reports",
       description: "Contig metadata and QC metrics",
       category: "report",
     },
     {
       type: "host_gene_counts",
       display_name: "Host Gene Counts",
-      description: "Host gene count output from STAR",
+      description: "Host gene count outputs from STAR",
       category: "report",
     },
     {
@@ -57,8 +57,8 @@ module BulkDownloadTypesHelper
     },
     {
       type: "original_input_file",
-      display_name: "Original Input File",
-      description: "Original file you submitted to IDseq",
+      display_name: "Original Input Files",
+      description: "Original files you submitted to IDseq",
       category: "raw",
     },
   ].freeze

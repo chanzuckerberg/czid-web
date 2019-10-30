@@ -122,7 +122,7 @@ class BulkDownload < ApplicationRecord
   end
 
   def download_output_key
-    "downloads/#{id}/#{download_type}.tar.gz"
+    "downloads/#{id}/#{BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPE_TO_DISPLAY_NAME[download_type]}.tar.gz"
   end
 
   # The s3 url that the tar.gz file will be uploaded to.
