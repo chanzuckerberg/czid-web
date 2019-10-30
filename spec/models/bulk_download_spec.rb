@@ -71,7 +71,7 @@ describe BulkDownload, type: :model do
   context "#bulk_download_ecs_task_command" do
     before do
       @joe = create(:joe)
-      @project = create(:project, users: [@joe])
+      @project = create(:project, users: [@joe], name: "Test Project")
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
@@ -95,12 +95,12 @@ describe BulkDownload, type: :model do
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
         "--tar-names",
-        "Test Sample One__original_R1.fastq.gz",
-        "Test Sample One__original_R2.fastq.gz",
-        "Test Sample Two__original_R1.fastq.gz",
-        "Test Sample Two__original_R2.fastq.gz",
+        "Test Sample One__project-test_project_#{@project.id}__original_R1.fastq.gz",
+        "Test Sample One__project-test_project_#{@project.id}__original_R2.fastq.gz",
+        "Test Sample Two__project-test_project_#{@project.id}__original_R1.fastq.gz",
+        "Test Sample Two__project-test_project_#{@project.id}__original_R2.fastq.gz",
         "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/original_input_file.tar.gz",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Original Input Files.tar.gz",
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",

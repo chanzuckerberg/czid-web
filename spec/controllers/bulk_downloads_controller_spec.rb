@@ -9,7 +9,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
     before do
       sign_in @joe
       @joe.add_allowed_feature("bulk_downloads")
-      @project = create(:project, users: [@joe])
+      @project = create(:project, users: [@joe], name: "Test Project")
     end
 
     describe "POST #create" do
@@ -28,10 +28,10 @@ RSpec.describe BulkDownloadsController, type: :controller do
           "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[1].name}",
           "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
           "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
-          "--tar-names Test\\ Sample\\ One__original_R1.fastq.gz",
-          "Test\\ Sample\\ One__original_R2.fastq.gz",
-          "Test\\ Sample\\ Two__original_R1.fastq.gz",
-          "Test\\ Sample\\ Two__original_R2.fastq.gz",
+          "--tar-names Test\\ Sample\\ One__project-test_project_#{@project.id}__original_R1.fastq.gz",
+          "Test\\ Sample\\ One__project-test_project_#{@project.id}__original_R2.fastq.gz",
+          "Test\\ Sample\\ Two__project-test_project_#{@project.id}__original_R1.fastq.gz",
+          "Test\\ Sample\\ Two__project-test_project_#{@project.id}__original_R2.fastq.gz",
           # Omit the dest-url, success-url, error-url, progress-url since they require the bulk download id.
           # Tested further in the model spec.
         ].join(" ")

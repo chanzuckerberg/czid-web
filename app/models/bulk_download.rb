@@ -159,12 +159,24 @@ class BulkDownload < ApplicationRecord
         sample.input_files.map { |input_file| "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}" }
       end.flatten
 
-      # We use the sample name in the output file names because the sample name is what's visible to the user.
-      # Also, there might be duplicates in the original file name.
+      projects = Project.where(id: samples.pluck(:project_id))
+
+      # Compute cleaned project name once instead of once per sample.
+      cleaned_project_names = {}
+      projects.each do |project|
+        cleaned_project_names[project.id] = project.cleaned_project_name
+      end
+
+      # We use the sample name in the output file names (instead of the original file name)
+      # because the sample name is what's visible to the user.
+      # Also, there might be duplicates between the original file names.
       download_tar_names = samples.map do |sample|
-        # We assume that the first input file is R1 and the second input file is R2.
+        # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
         sample.input_files.map.with_index do |input_file, input_file_index|
-          "#{input_file.sample.name}__original_R#{input_file_index + 1}.#{input_file.file_type}"
+          # Include the project id because the cleaned project names might have duplicates as well.
+          "#{input_file.sample.name}__" \
+            "#{cleaned_project_names[sample.project.id]}_#{sample.project.id}__" \
+            "original_R#{input_file_index + 1}.#{input_file.file_type}"
         end
       end.flatten
 
