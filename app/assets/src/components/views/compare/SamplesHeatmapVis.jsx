@@ -19,7 +19,6 @@ import RemoveIcon from "~ui/icons/RemoveIcon";
 import cs from "./samples_heatmap_vis.scss";
 
 const CAPTION_LINE_WIDTH = 180;
-const MAX_ROW_GROUP_TOOLTIP_WIDTH = 200;
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
@@ -217,14 +216,12 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleRowGroupEnter = (rowGroup, rect, minTop) => {
-    const tooltipWidth = Math.max(MAX_ROW_GROUP_TOOLTIP_WIDTH, rect.width / 2);
     this.setState({
       rowGroupLegend: {
         label: `Genus: ${rowGroup.genusName || "Unknown"}`,
         tooltipLocation: {
-          left: rect.left + rect.width / 2 - tooltipWidth / 2, // center
+          left: rect.left + rect.width / 2,
           top: Math.max(minTop, rect.top),
-          width: tooltipWidth,
         },
       },
     });

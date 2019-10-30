@@ -14,7 +14,7 @@ export default class RowGroupLegend extends React.Component {
       <div
         className={cx(cs.tooltip)}
         style={{
-          width: tooltipLocation.width,
+          transform: "translate(-50%)",
           left: tooltipLocation.left + 4, // offset because of right-alignment of labels
           top: tooltipLocation.top - 44, // depends on heights defined in CSS
         }}
