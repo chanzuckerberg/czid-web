@@ -159,9 +159,11 @@ module SamplesHelper
     s3_prefix = parsed_uri.path.sub(%r{^/(.*?)/?$}, '\1/')
 
     begin
-      puts "foobar 11:30am"
+      # We set S3_GLOBAL_ENDPOINT to enable cross-region listing in this case.
+      # By default S3::Client sets a regional endpoint such as
+      # s3.us-west-2.amazonaws.com and errors if you use a bucket in a different
+      # region.
       s3_client_local = Aws::S3::Client.new(endpoint: S3_GLOBAL_ENDPOINT)
-      puts "END"
       entries = s3_client_local.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
       # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
       entries = entries.reject { |line| line.include? "Undetermined" }
