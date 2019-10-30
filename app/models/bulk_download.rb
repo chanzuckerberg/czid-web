@@ -141,11 +141,11 @@ class BulkDownload < ApplicationRecord
       # Store the taskArn for debugging purposes.
       self.ecs_task_arn = output['taskArn']
       self.status = STATUS_RUNNING
-      save
+      save!
     else
       self.status = STATUS_ERROR
       self.error_message = BulkDownloadsHelper::KICKOFF_FAILURE
-      save
+      save!
       raise command_stderr
     end
   end
