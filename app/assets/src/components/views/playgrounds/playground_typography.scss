@@ -173,6 +173,10 @@
   @include font-label-xs-crop;
 }
 
+.font-label-xxs {
+  @include font-label-xxs-crop;
+}
+
 .font-tag-s {
   @include font-tag-s-crop;
 }

@@ -48,7 +48,7 @@ BulkDownloadSummary.propTypes = {
   className: PropTypes.string,
   downloadSummary: PropTypes.shape({
     params: PropTypes.object,
-    numSamples: PropTypes.arrayOf(PropTypes.number).isRequired,
+    numSamples: PropTypes.number,
   }).isRequired,
   downloadType: PropTypes.shape({
     display_name: PropTypes.string,

@@ -13,3 +13,6 @@ export const getBulkDownloads = () => get("/bulk_downloads.json");
 
 export const getBulkDownload = bulkDownloadId =>
   get(`/bulk_downloads/${bulkDownloadId}.json`);
+
+export const getPresignedOutputUrl = bulkDownloadId =>
+  get(`/bulk_downloads/${bulkDownloadId}/presigned_output_url`);
