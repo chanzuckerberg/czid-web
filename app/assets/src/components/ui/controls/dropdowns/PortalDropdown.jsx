@@ -59,6 +59,7 @@ class PortalDropdown extends React.Component {
 
   handleOutClick = () => {
     if (
+      !this.state.open &&
       !(this._triggerRef && this._triggerRef.contains(event.target)) &&
       !(this._menuRef && this._menuRef.contains(event.target))
     ) {
