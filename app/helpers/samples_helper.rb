@@ -6,6 +6,12 @@ module SamplesHelper
   include PipelineOutputsHelper
   include ErrorHelper
 
+  # We set S3_GLOBAL_ENDPOINT to enable cross-region listing in
+  # parsed_samples_for_s3_path. By default S3::Client sets a regional endpoint
+  # such as s3.us-west-2.amazonaws.com (from the config) and errs if you use a
+  # bucket in a different region.
+  S3_CLIENT = Aws::S3::Client.new(endpoint: S3_GLOBAL_ENDPOINT)
+
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
@@ -159,12 +165,7 @@ module SamplesHelper
     s3_prefix = parsed_uri.path.sub(%r{^/(.*?)/?$}, '\1/')
 
     begin
-      # We set S3_GLOBAL_ENDPOINT to enable cross-region listing in this case.
-      # By default S3::Client sets a regional endpoint such as
-      # s3.us-west-2.amazonaws.com (from the config) and errs if you use a
-      # bucket in a different region.
-      s3_client_local = Aws::S3::Client.new(endpoint: S3_GLOBAL_ENDPOINT)
-      entries = s3_client_local.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
+      entries = S3_CLIENT.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
       # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
       entries = entries.reject { |line| line.include? "Undetermined" }
     rescue Aws::S3::Errors::ServiceError => e # Covers all S3 access errors (AccessDenied/NoSuchBucket/AllAccessDisabled)
