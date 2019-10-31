@@ -81,6 +81,7 @@ class Dropdown extends React.Component {
         onChange={this.handleOnChange}
         trigger={this.renderTrigger()}
         usePortal={this.props.usePortal}
+        direction={this.props.direction}
         withinModal={this.props.withinModal}
         items={this.props.items}
         itemSearchStrings={this.props.itemSearchStrings}
@@ -117,6 +118,7 @@ Dropdown.propTypes = {
   search: PropTypes.bool,
   menuLabel: PropTypes.string,
   usePortal: PropTypes.bool,
+  direction: PropTypes.oneOf(["left", "right"]),
   withinModal: PropTypes.bool,
 };
 
