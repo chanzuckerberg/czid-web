@@ -168,7 +168,10 @@ module SamplesHelper
       entries = []
       S3_CLIENT_LOCAL.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).each do |response|
         entries += response.contents.map(&:key)
-        break if entries.length >= 10_000
+        if entries.length >= 10_000
+          Rails.logger.info("User tried to list more than 10,000 objects in #{s3_path}")
+          break
+        end
       end
       # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
       entries = entries.reject { |line| line.include? "Undetermined" }
