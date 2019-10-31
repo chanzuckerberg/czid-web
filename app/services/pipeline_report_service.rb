@@ -1,4 +1,4 @@
-class SampleReportService
+class PipelineReportService
   include Callable
 
   FIELDS_TO_PLUCK = [
@@ -30,7 +30,7 @@ class SampleReportService
   end
 
   def call
-    @timer = Timer.new("sample_report_service")
+    @timer = Timer.new("pipeline_report_service")
     report = generate
     @timer.publish
     return report
