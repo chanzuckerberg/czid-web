@@ -131,7 +131,9 @@ class Sample < ApplicationRecord
 
   def input_files_checks
     # validate that we have the correct number of input files
-    errors.add(:input_files, "invalid number") unless input_files.size.between?(1, 2) || uploaded_from_basespace?
+    errors.add(:input_files, "invalid number (#{input_files.size})") unless
+      input_files.size.between?(1, 2) || (uploaded_from_basespace? && input_files.empty?)
+
     # validate that both input files have the same source_type and file_type
     if input_files.length == 2
       errors.add(:input_files, "have different source types") unless input_files[0].source_type == input_files[1].source_type
