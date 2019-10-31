@@ -63,8 +63,9 @@ class GeoSearchInputBox extends React.Component {
   // Fetch geosearch results and format into categories for LiveSearchBox
   handleSearchTriggered = async query => {
     let categories = {};
+    let serverSideSuggestions = [];
     try {
-      const serverSideSuggestions = await getGeoSearchSuggestions(query);
+      serverSideSuggestions = await getGeoSearchSuggestions(query);
       // Semantic UI Search expects results as: `{ category: { name: '', results: [{ title: '', description: '' }] }`
       if (serverSideSuggestions.length > 0) {
         const locationsCategory = "Location Results";
@@ -95,7 +96,12 @@ class GeoSearchInputBox extends React.Component {
     }
 
     // Let users select an unresolved plain text option
-    let noMatchName = "Plain Text (No Location Match)";
+    let noMatchName = "";
+    if (serverSideSuggestions.length > 0) {
+      noMatchName = "Use Plain Text (No Location Match)";
+    } else {
+      noMatchName = "No Results (Use Plain Text)";
+    }
     categories[noMatchName] = {
       name: noMatchName,
       results: [{ title: query, name: query }],

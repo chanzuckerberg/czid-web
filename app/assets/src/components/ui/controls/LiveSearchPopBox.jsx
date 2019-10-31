@@ -121,16 +121,12 @@ class LiveSearchPopBox extends React.Component {
   };
 
   handleBlur = currentEvent => {
-    // Give a chance for handleResultSelect to happen. Otherwise, the dropdown
-    // will disappear before the item onClick fires.
-    setTimeout(() => {
-      this.setState({ focus: false });
-      // Give a chance for warnings to show
-      this.handleResultSelect({
-        currentEvent: currentEvent,
-        result: this.state.value,
-      });
-    }, 100);
+    this.setState({ focus: false });
+    // Give a chance for warnings to show
+    this.handleResultSelect({
+      currentEvent: currentEvent,
+      result: this.state.value,
+    });
   };
 
   buildItem = (categoryKey, result, index) => (
@@ -144,7 +140,8 @@ class LiveSearchPopBox extends React.Component {
           )}
         </div>
       }
-      onClick={currentEvent =>
+      onMouseDown={currentEvent =>
+        // use onMouseDown instead of onClick to work with handleBlur
         this.handleResultSelect({ currentEvent, result })
       }
       value={`${categoryKey}-${index}`}
@@ -184,6 +181,7 @@ class LiveSearchPopBox extends React.Component {
       this.getResultsLength() &&
       this.state.focus &&
       this.state.value.trim().length >= this.props.minChars;
+
     return (
       <BareDropdown
         className={cx(
