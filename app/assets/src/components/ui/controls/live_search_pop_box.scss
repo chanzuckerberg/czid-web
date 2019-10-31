@@ -29,13 +29,15 @@
 
     background-color: transparent;
     color: $light-grey;
-    margin: 0 14px;
+    margin: $space-m $space-m 0;
+    padding: $space-xxxs 0;
     text-transform: uppercase;
     border-top: 2px solid $lightest-grey;
-    margin-top: $space-m;
   }
 
+  // skip divider line
   .category:first-child {
+    margin-top: 0;
     border: none;
   }
 
