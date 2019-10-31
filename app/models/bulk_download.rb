@@ -14,6 +14,7 @@ class BulkDownload < ApplicationRecord
   OUTPUT_DOWNLOAD_EXPIRATION = 86_400 # seconds
 
   before_save :convert_params_to_json
+  after_find :set_params
 
   attr_accessor :params
 
@@ -24,6 +25,12 @@ class BulkDownload < ApplicationRecord
     # Convert params to JSON right before saving.
     if params
       self.params_json = params.to_json
+    end
+  end
+
+  def set_params
+    if params_json
+      self.params = JSON.parse(params_json)
     end
   end
 
@@ -150,36 +157,92 @@ class BulkDownload < ApplicationRecord
     end
   end
 
+  def get_param_value(key)
+    params[key]["value"]
+  end
+
+  # cleaned_project_names is a map from project id to cleaned project name
+  def get_output_file_prefix(sample, cleaned_project_names)
+    "#{sample.name}__" \
+      "#{cleaned_project_names[sample.project_id]}_#{sample.project_id}__"
+  end
+
   def bulk_download_ecs_task_command
+    samples = Sample.where(id: pipeline_runs.map(&:sample_id))
+    projects = Project.where(id: samples.pluck(:project_id))
+
+    # Compute cleaned project name once instead of once per sample.
+    cleaned_project_names = {}
+    projects.each do |project|
+      cleaned_project_names[project.id] = project.cleaned_project_name
+    end
+
+    download_src_urls = nil
+    download_tar_names = nil
+
     if download_type == "original_input_file"
-      samples = Sample.where(id: pipeline_runs.map(&:sample_id))
-                      .includes(:input_files)
+      samples = samples.includes(:input_files)
 
-      download_src_urls = samples.map do |sample|
-        sample.input_files.map { |input_file| "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}" }
-      end.flatten
+      download_src_urls = samples.map(&:input_file_s3_paths).flatten
 
-      projects = Project.where(id: samples.pluck(:project_id))
-
-      # Compute cleaned project name once instead of once per sample.
-      cleaned_project_names = {}
-      projects.each do |project|
-        cleaned_project_names[project.id] = project.cleaned_project_name
-      end
-
-      # We use the sample name in the output file names (instead of the original file name)
+      # We use the sample name in the output file names (instead of the original input file names)
       # because the sample name is what's visible to the user.
       # Also, there might be duplicates between the original file names.
       download_tar_names = samples.map do |sample|
         # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
         sample.input_files.map.with_index do |input_file, input_file_index|
           # Include the project id because the cleaned project names might have duplicates as well.
-          "#{input_file.sample.name}__" \
-            "#{cleaned_project_names[sample.project.id]}_#{sample.project.id}__" \
+          "#{get_output_file_prefix(sample, cleaned_project_names)}" \
             "original_R#{input_file_index + 1}.#{input_file.file_type}"
         end
       end.flatten
+    end
 
+    if download_type == "unmapped_reads"
+      download_src_urls = pipeline_runs.map(&:unidentified_fasta_s3_path)
+
+      download_tar_names = samples.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+          "unmapped.fasta"
+      end
+    end
+
+    if download_type == "reads_non_host" && get_param_value("file_format") == ".fasta"
+      download_src_urls = pipeline_runs.map(&:annotated_fasta_s3_path)
+
+      download_tar_names = samples.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+          "reads_nonhost_all.fasta"
+      end
+    end
+
+    if download_type == "reads_non_host" && get_param_value("file_format") == ".fastq"
+      pipeline_runs_with_assocs = pipeline_runs.includes(sample: [:input_files])
+
+      download_src_urls = pipeline_runs_with_assocs.map(&:nonhost_fastq_s3_paths).flatten
+
+      download_tar_names = pipeline_runs_with_assocs.map do |pipeline_run|
+        sample = pipeline_run.sample
+        file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+        # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
+        sample.input_files.map.with_index do |_input_file, input_file_index|
+          # Include the project id because the cleaned project names might have duplicates as well.
+          "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+            "reads_nonhost_all_R#{input_file_index + 1}.#{file_ext}"
+        end
+      end.flatten
+    end
+
+    if download_type == "contigs_non_host"
+      download_src_urls = pipeline_runs.map(&:contigs_fasta_s3_path)
+
+      download_tar_names = samples.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+            "contigs_nonhost_all.fasta"
+      end
+    end
+
+    if !download_src_urls.nil? && !download_tar_names.nil?
       return s3_tar_writer_command(
         download_src_urls,
         download_tar_names,

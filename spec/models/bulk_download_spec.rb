@@ -73,16 +73,16 @@ describe BulkDownload, type: :model do
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+    end
+
+    it "returns the correct task command for original_input_file download type" do
       @bulk_download = create(:bulk_download, user: @joe, download_type: "original_input_file", pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ])
-    end
-
-    it "returns the correct task command for original input file download type" do
       allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
       allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
@@ -101,6 +101,143 @@ describe BulkDownload, type: :model do
         "Test Sample Two__project-test_project_#{@project.id}__original_R2.fastq.gz",
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Original Input Files.tar.gz",
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
+
+    it "returns the correct task command for unmapped_reads download type" do
+      @bulk_download = create(:bulk_download, user: @joe, download_type: "unmapped_reads", pipeline_run_ids: [
+                                @sample_one.first_pipeline_run.id,
+                                @sample_two.first_pipeline_run.id,
+                              ])
+
+      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/assembly/refined_unidentified.fa",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/assembly/refined_unidentified.fa",
+        "--tar-names",
+        "Test Sample One__project-test_project_#{@project.id}__unmapped.fasta",
+        "Test Sample Two__project-test_project_#{@project.id}__unmapped.fasta",
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Unmapped Reads.tar.gz",
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
+
+    it "returns the correct task command for reads_non_host download type with fasta file format" do
+      @bulk_download = create(:bulk_download, user: @joe, download_type: "reads_non_host", pipeline_run_ids: [
+                                @sample_one.first_pipeline_run.id,
+                                @sample_two.first_pipeline_run.id,
+                              ], params: {
+                                "file_format" => {
+                                  "value" => ".fasta",
+                                  "displayName" => ".fasta",
+                                },
+                              })
+
+      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/assembly/refined_taxid_annot.fasta",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/assembly/refined_taxid_annot.fasta",
+        "--tar-names",
+        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_all.fasta",
+        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_all.fasta",
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
+
+    it "returns the correct task command for reads_non_host download type with fastq file format" do
+      @bulk_download = create(:bulk_download, user: @joe, download_type: "reads_non_host", pipeline_run_ids: [
+                                @sample_one.first_pipeline_run.id,
+                                @sample_two.first_pipeline_run.id,
+                              ], params: {
+                                "file_format" => {
+                                  "value" => ".fastq",
+                                  "displayName" => ".fastq",
+                                },
+                              })
+
+      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/nonhost_R2.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R2.fastq",
+        "--tar-names",
+        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_all_R1.fastq",
+        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_all_R2.fastq",
+        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_all_R1.fastq",
+        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_all_R2.fastq",
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
+
+    it "returns the correct task command for contigs_non_host download type with fasta file format" do
+      @bulk_download = create(:bulk_download, user: @joe, download_type: "contigs_non_host", pipeline_run_ids: [
+                                @sample_one.first_pipeline_run.id,
+                                @sample_two.first_pipeline_run.id,
+                              ])
+
+      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/assembly/contigs.fasta",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/assembly/contigs.fasta",
+        "--tar-names",
+        "Test Sample One__project-test_project_#{@project.id}__contigs_nonhost_all.fasta",
+        "Test Sample Two__project-test_project_#{@project.id}__contigs_nonhost_all.fasta",
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Contigs (Non-host).tar.gz",
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",

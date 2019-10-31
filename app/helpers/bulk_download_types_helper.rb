@@ -42,12 +42,29 @@ module BulkDownloadTypesHelper
       display_name: "Reads (Non-host)",
       description: "Reads with host data subtracted",
       category: "raw",
+      fields: [
+        {
+          display_name: "Taxa",
+          type: "taxon",
+        },
+        {
+          display_name: "File Format",
+          type: "file_format",
+          options: [".fasta", ".fastq"],
+        },
+      ],
     },
     {
       type: "contigs_non_host",
       display_name: "Contigs (Non-host)",
       description: "Contigs with host data subtracted",
       category: "raw",
+      fields: [
+        {
+          display_name: "Taxa",
+          type: "taxon",
+        },
+      ],
     },
     {
       type: "unmapped_reads",
