@@ -67,11 +67,7 @@ module PipelineRunsHelper
     command = "aegea batch submit --command=#{Shellwords.escape(base_command)} "
     command += " --name=idseq-#{Rails.env}-#{sample_id}-#{stage_name} "
     command += " --ecr-image #{Shellwords.escape(docker_image)} --memory #{memory} --queue #{Shellwords.escape(job_queue)} --vcpus #{vcpus} --job-role idseq-pipeline "
-    command += if job_queue == Sample::DEFAULT_QUEUE_HIMEM
-                 " --mount-instance-storage "
-               else
-                 " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 "
-               end
+    command += " --mount-instance-storage "
     command
   end
 
