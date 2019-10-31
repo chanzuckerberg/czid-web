@@ -120,10 +120,17 @@ class LiveSearchPopBox extends React.Component {
     this.setState({ focus: true });
   };
 
-  handleBlur = _ => {
+  handleBlur = currentEvent => {
     // Give a chance for handleResultSelect to happen. Otherwise, the dropdown
     // will disappear before the item onClick fires.
-    setTimeout(() => this.setState({ focus: false }), 100);
+    setTimeout(() => {
+      this.setState({ focus: false });
+      // Give a chance for warnings to show
+      this.handleResultSelect({
+        currentEvent: currentEvent,
+        result: this.state.value,
+      });
+    }, 100);
   };
 
   buildItem = (categoryKey, result, index) => (
