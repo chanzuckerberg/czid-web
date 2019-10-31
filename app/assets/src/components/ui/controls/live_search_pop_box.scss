@@ -29,10 +29,10 @@
 
     background-color: transparent;
     color: $light-grey;
-    padding: 0 14px;
+    margin: 0 14px;
     text-transform: uppercase;
     border-top: 2px solid $lightest-grey;
-    margin-top: $space-xs; // 8px
+    margin-top: $space-s; // 8px
   }
 
   .category:first-child {
