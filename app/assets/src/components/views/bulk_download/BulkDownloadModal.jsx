@@ -52,7 +52,7 @@ class BulkDownloadModal extends React.Component {
     // This is to be compatible with <Dropdowns>, which only accept a string or number as the value
     // (as opposed to an object).
     // However, after the selected download is "assembled", both the value and display name for each field are stored
-    // are stored in the params. This is also how the bulk download is stored in the database.
+    // in the params. This is also how the bulk download is stored in the database.
     selectedFieldsDisplay: {},
     selectedDownloadTypeName: null,
     currentStep: "choose",

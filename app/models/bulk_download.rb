@@ -14,7 +14,6 @@ class BulkDownload < ApplicationRecord
   OUTPUT_DOWNLOAD_EXPIRATION = 86_400 # seconds
 
   before_save :convert_params_to_json
-  after_find :set_params
 
   attr_accessor :params
 
@@ -158,7 +157,13 @@ class BulkDownload < ApplicationRecord
   end
 
   def get_param_value(key)
-    params[key]["value"]
+    # If params is nil, try to set it from params_json
+    if params.nil? && params_json.present?
+      self.params = JSON.parse(params_json)
+    end
+    if params.present?
+      return params.dig(key, "value")
+    end
   end
 
   # cleaned_project_names is a map from project id to cleaned project name
@@ -180,7 +185,7 @@ class BulkDownload < ApplicationRecord
     download_src_urls = nil
     download_tar_names = nil
 
-    if download_type == "original_input_file"
+    if download_type == BulkDownloadTypesHelper::ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE
       samples = samples.includes(:input_files)
 
       download_src_urls = samples.map(&:input_file_s3_paths).flatten
@@ -198,7 +203,7 @@ class BulkDownload < ApplicationRecord
       end.flatten
     end
 
-    if download_type == "unmapped_reads"
+    if download_type == BulkDownloadTypesHelper::UNMAPPED_READS_BULK_DOWNLOAD_TYPE
       download_src_urls = pipeline_runs.map(&:unidentified_fasta_s3_path)
 
       download_tar_names = samples.map do |sample|
@@ -207,7 +212,7 @@ class BulkDownload < ApplicationRecord
       end
     end
 
-    if download_type == "reads_non_host" && get_param_value("file_format") == ".fasta"
+    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fasta"
       download_src_urls = pipeline_runs.map(&:annotated_fasta_s3_path)
 
       download_tar_names = samples.map do |sample|
@@ -216,7 +221,7 @@ class BulkDownload < ApplicationRecord
       end
     end
 
-    if download_type == "reads_non_host" && get_param_value("file_format") == ".fastq"
+    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fastq"
       pipeline_runs_with_assocs = pipeline_runs.includes(sample: [:input_files])
 
       download_src_urls = pipeline_runs_with_assocs.map(&:nonhost_fastq_s3_paths).flatten
@@ -233,7 +238,7 @@ class BulkDownload < ApplicationRecord
       end.flatten
     end
 
-    if download_type == "contigs_non_host"
+    if download_type == BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
       download_src_urls = pipeline_runs.map(&:contigs_fasta_s3_path)
 
       download_tar_names = samples.map do |sample|

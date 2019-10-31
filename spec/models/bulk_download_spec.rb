@@ -79,7 +79,7 @@ describe BulkDownload, type: :model do
     end
 
     it "returns the correct task command for original_input_file download type" do
-      @bulk_download = create(:bulk_download, user: @joe, download_type: "original_input_file", pipeline_run_ids: [
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ])
@@ -113,7 +113,7 @@ describe BulkDownload, type: :model do
     end
 
     it "returns the correct task command for unmapped_reads download type" do
-      @bulk_download = create(:bulk_download, user: @joe, download_type: "unmapped_reads", pipeline_run_ids: [
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::UNMAPPED_READS_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ])
@@ -144,7 +144,7 @@ describe BulkDownload, type: :model do
     end
 
     it "returns the correct task command for reads_non_host download type with fasta file format" do
-      @bulk_download = create(:bulk_download, user: @joe, download_type: "reads_non_host", pipeline_run_ids: [
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ], params: {
@@ -180,7 +180,7 @@ describe BulkDownload, type: :model do
     end
 
     it "returns the correct task command for reads_non_host download type with fastq file format" do
-      @bulk_download = create(:bulk_download, user: @joe, download_type: "reads_non_host", pipeline_run_ids: [
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ], params: {
@@ -219,7 +219,7 @@ describe BulkDownload, type: :model do
     end
 
     it "returns the correct task command for contigs_non_host download type with fasta file format" do
-      @bulk_download = create(:bulk_download, user: @joe, download_type: "contigs_non_host", pipeline_run_ids: [
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ])
