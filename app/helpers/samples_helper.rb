@@ -168,6 +168,7 @@ module SamplesHelper
       entries = []
       S3_CLIENT_LOCAL.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).each do |response|
         entries += response.contents.map(&:key)
+        break if entries.length > 10_000
       end
       # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
       entries = entries.reject { |line| line.include? "Undetermined" }
