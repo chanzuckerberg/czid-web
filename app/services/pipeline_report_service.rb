@@ -39,33 +39,33 @@ class PipelineReportService
   def generate
     pipeline_run = PipelineRun.find(@pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
-    @timer.split("initialize and adjust reads")
+    @timer.split("initialize_and_adjust_reads")
 
     contigs = pipeline_run.get_summary_contig_counts_v2(MIN_CONTIG_SIZE)
-    @timer.split("get contig summary")
+    @timer.split("get_contig_summary")
 
     taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
-    @timer.split("fetch taxon counts and summaries")
+    @timer.split("fetch_taxon_counts_and_summaries")
 
     counts_by_tax_level = split_by_tax_level(taxon_counts_and_summaries)
-    @timer.split("split by tax level")
+    @timer.split("split_by_tax_level")
 
     counts_by_tax_level.transform_values! { |counts| hash_by_tax_id_and_count_type(counts) }
-    @timer.split("index by tax id and count type")
+    @timer.split("index_by_tax_id_and_count_type")
 
     merge_contigs(contigs, counts_by_tax_level)
-    @timer.split("merge contigs")
+    @timer.split("merge_contigs")
 
     counts_by_tax_level.each_value do |tax_level_taxa|
       compute_z_scores(tax_level_taxa, adjusted_total_reads)
     end
-    @timer.split("compute z scores")
+    @timer.split("compute_z_scores")
 
     compute_aggregate_scores(
       counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
       counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
     )
-    @timer.split("compute agg scores")
+    @timer.split("compute_agg_scores")
 
     # TODO: in theory we should use TaxonLineage::fetch_lineage_by_taxid
     lineage_version = PipelineRun
@@ -87,23 +87,23 @@ class PipelineReportService
                         .pluck(*required_columns)
                         .map { |r| [r[0], required_columns.zip(r).to_h] }
                         .to_h
-    @timer.split("fetch genus lineage")
+    @timer.split("fetch_genus_lineage")
 
     structured_lineage = {}
     encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
-    @timer.split("encode taxon lineage")
+    @timer.split("encode_taxon_lineage")
 
     sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
-    @timer.split("sort genus by aggregate score")
+    @timer.split("sort_genus_by_aggregate_score")
 
     counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
       genus[:children].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][:agg_score] }.reverse!
       genus
     end
-    @timer.split("sort species within each genus")
+    @timer.split("sort_species_within_each_genus")
 
     highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
-    @timer.split("find taxa to highlight")
+    @timer.split("find_taxa_to_highlight")
 
     json_dump =
       JSON.dump(
@@ -112,7 +112,7 @@ class PipelineReportService
         sortedGenus: sorted_genus_tax_ids,
         highlighted_tax_ids: highlighted_tax_ids
       )
-    @timer.split("convert to json with JSON")
+    @timer.split("convert_to_json_with_sJSON")
 
     return json_dump
   end

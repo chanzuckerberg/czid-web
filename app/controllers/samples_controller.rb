@@ -744,9 +744,9 @@ class SamplesController < ApplicationController
   end
 
   def report_v2
-    @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample)
-    render json: PipelineReportService.call(@pipeline_run.id, background_id)
+    render json: PipelineReportService.call(pipeline_run.id, background_id)
   end
 
   # The json response here should be precached in PipelineRun.
