@@ -157,7 +157,7 @@ class MetadataCSVLocationsMenu extends React.Component {
             warning={CSVLocationWarnings[sampleName]}
           />
           {applyToAllSample === sampleName &&
-            this.props.metadata.rows > 1 &&
+            this.props.metadata.rows.length > 1 &&
             this.renderApplyToAll()}
         </div>,
       ];
