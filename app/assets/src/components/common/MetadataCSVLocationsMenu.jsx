@@ -156,7 +156,9 @@ class MetadataCSVLocationsMenu extends React.Component {
             isHuman={isRowHuman(row)}
             warning={CSVLocationWarnings[sampleName]}
           />
-          {applyToAllSample === sampleName && this.renderApplyToAll()}
+          {applyToAllSample === sampleName &&
+            this.props.metadata.rows > 1 &&
+            this.renderApplyToAll()}
         </div>,
       ];
     });

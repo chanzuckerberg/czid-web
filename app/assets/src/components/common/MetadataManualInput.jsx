@@ -315,7 +315,8 @@ class MetadataManualInput extends React.Component {
                   usePortal
                   withinModal={this.props.withinModal}
                 />
-                {this.renderApplyToAll(sample, column)}
+                {this.props.samples.length > 1 &&
+                  this.renderApplyToAll(sample, column)}
               </div>
             );
           }
@@ -340,7 +341,8 @@ class MetadataManualInput extends React.Component {
                   withinModal={this.props.withinModal}
                   isHuman={sampleHostGenomeId === 1}
                 />
-                {this.renderApplyToAll(sample, column)}
+                {this.props.samples.length > 1 &&
+                  this.renderApplyToAll(sample, column)}
               </div>
             );
           }
