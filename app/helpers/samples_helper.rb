@@ -165,7 +165,12 @@ module SamplesHelper
     s3_prefix = parsed_uri.path.sub(%r{^/(.*?)/?$}, '\1/')
 
     begin
-      entries = S3_CLIENT_LOCAL.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
+      response = S3_CLIENT_LOCAL.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix)
+      entries = response.contents.map(&:key)
+      while response.next_page?
+        response = response.next_page
+        entries += response.contents.map(&:key)
+      end
       # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
       entries = entries.reject { |line| line.include? "Undetermined" }
     rescue Aws::S3::Errors::ServiceError => e # Covers all S3 access errors (AccessDenied/NoSuchBucket/AllAccessDisabled)
