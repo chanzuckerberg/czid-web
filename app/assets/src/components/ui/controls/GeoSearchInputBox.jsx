@@ -9,7 +9,8 @@ import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 export const LOCATION_PRIVACY_WARNING =
   "Changed to county/district level for personal privacy.";
 export const LOCATION_UNRESOLVED_WARNING =
-  "Unresolved plain text, not shown on maps.";
+  // this is the max length to appear on one line
+  "No match. Sample will not appear on maps.";
 
 // Process location selections and add warnings.
 export const processLocationSelection = (result, isHuman) => {
