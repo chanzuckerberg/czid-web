@@ -32,7 +32,12 @@
   .inputTable {
     margin-bottom: 20px;
 
+    td {
+      vertical-align: top !important;
+    }
+
     .sampleName {
+      padding: $space-m 0; // align vertically with inputs
       font-weight: $font-weight-semibold;
     }
 
@@ -43,10 +48,6 @@
     .input {
       margin: $space-xxs $space-m $space-xxs 0;
       width: 130px;
-
-      &.extraPadding {
-        margin-bottom: 22px;
-      }
 
       &.extraWidth {
         width: 240px;
