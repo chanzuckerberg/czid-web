@@ -11,6 +11,8 @@ module SamplesHelper
   # such as s3.us-west-2.amazonaws.com (from the config) and errs if you use a
   # bucket in a different region.
   S3_CLIENT_LOCAL = Aws::S3::Client.new(endpoint: S3_GLOBAL_ENDPOINT)
+  # Limit the number of objects we scan in a bucket to avoid timeouts and memory issues.
+  S3_OBJECT_LIMIT = 10_000
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
@@ -168,8 +170,8 @@ module SamplesHelper
       entries = []
       S3_CLIENT_LOCAL.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).each do |response|
         entries += response.contents.map(&:key)
-        if entries.length >= 10_000
-          Rails.logger.info("User tried to list more than 10,000 objects in #{s3_path}")
+        if entries.length >= S3_OBJECT_LIMIT
+          Rails.logger.info("User tried to list more than #{S3_OBJECT_LIMIT} objects in #{s3_path}")
           break
         end
       end
