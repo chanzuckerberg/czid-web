@@ -459,7 +459,7 @@ class Sample < ApplicationRecord
   end
 
   def sample_input_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs"
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/fastqs"
   end
 
   def filter_host_flag
@@ -471,7 +471,7 @@ class Sample < ApplicationRecord
   end
 
   def sample_output_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/results"
   end
 
   def sample_alignment_output_s3_path
@@ -494,14 +494,14 @@ class Sample < ApplicationRecord
   end
 
   def sample_postprocess_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/postprocess"
   end
 
   # This is for the "Experimental" pipeline run stage and path where results
   # for this stage are outputted. Currently, Antimicrobial Resistance
   # outputs are in this path.
   def sample_expt_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/expt"
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/expt"
   end
 
   def host_genome_name
@@ -916,5 +916,9 @@ class Sample < ApplicationRecord
   # error messages.
   def status_url
     UrlUtil.absolute_base_url + "/samples/#{id}/pipeline_runs"
+  end
+
+  def input_file_s3_paths
+    input_files.map { |input_file| "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}" }
   end
 end
