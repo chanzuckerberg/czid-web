@@ -11,6 +11,7 @@ json.targets do
 
   star_out = ["unmapped1.#{attr[:file_ext]}"]
   star_out << "unmapped2.#{attr[:file_ext]}" if attr[:fastq2]
+  star_out << 'alignments.bam' if attr[:fastq2]
   json.star_out star_out
 
   trimmomatic_out = ["trimmomatic1.#{attr[:file_ext]}"]
@@ -73,6 +74,16 @@ json.steps do
     additional_files: { star_genome: attr[:star_genome] },
     additional_attributes: { output_gene_file: 'reads_per_gene.star.tab' },
   }
+  if attr[:fastq2]
+    steps << {
+      in: ['star_out'],
+      out: 'insert_size_metrics_out',
+      class: 'GenerateInsertSizeMetrics',
+      module: 'idseq_dag.steps.generate_insert_size_metrics',
+      additional_files: {},
+      additional_attributes: {},
+    }
+  end
   steps << {
     in: ['star_out'],
     out: 'trimmomatic_out',
