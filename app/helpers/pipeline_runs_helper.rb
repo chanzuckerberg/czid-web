@@ -130,7 +130,7 @@ module PipelineRunsHelper
 
   def install_pipeline(commit_or_branch)
     "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
-    "cd /mnt; rm -rf *; df -h; " \
+    "cd /mnt; rm -rf idseq/results; df -h; " \
     "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
     "cd idseq-dag; " \
     "git checkout #{Shellwords.escape(commit_or_branch)}; " \
