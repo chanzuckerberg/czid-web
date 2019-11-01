@@ -11,6 +11,8 @@ module SamplesHelper
   # such as s3.us-west-2.amazonaws.com (from the config) and errs if you use a
   # bucket in a different region.
   S3_CLIENT_LOCAL = Aws::S3::Client.new(endpoint: S3_GLOBAL_ENDPOINT)
+  # Limit the number of objects we scan in a bucket to avoid timeouts and memory issues.
+  S3_OBJECT_LIMIT = 10_000
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
@@ -165,7 +167,12 @@ module SamplesHelper
     s3_prefix = parsed_uri.path.sub(%r{^/(.*?)/?$}, '\1/')
 
     begin
-      entries = S3_CLIENT_LOCAL.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
+      s3 = Aws::S3::Resource.new(client: S3_CLIENT_LOCAL)
+      bucket = s3.bucket(s3_bucket_name)
+      entries = bucket.objects(prefix: s3_prefix).limit(S3_OBJECT_LIMIT).map(&:key)
+      if entries.length >= S3_OBJECT_LIMIT
+        Rails.logger.info("User tried to list more than #{S3_OBJECT_LIMIT} objects in #{s3_path}")
+      end
       # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
       entries = entries.reject { |line| line.include? "Undetermined" }
     rescue Aws::S3::Errors::ServiceError => e # Covers all S3 access errors (AccessDenied/NoSuchBucket/AllAccessDisabled)
