@@ -16,6 +16,7 @@ export const LOCATION_UNRESOLVED_WARNING =
 export const processLocationSelection = (result, isHuman) => {
   let warning = "";
   if (isHuman && get("geo_level", result) === "city") {
+    result = Object.assign({}, result); // make a copy to avoid side effects
     // For human samples, drop the city part of the name and show a warning.
     // NOTE: The backend will redo the geosearch for confirmation and re-apply
     // this restriction.
