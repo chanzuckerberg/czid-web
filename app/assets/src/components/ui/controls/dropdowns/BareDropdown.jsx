@@ -12,7 +12,7 @@
 // redundant with props.items.customNode and props.children.
 import React from "react";
 import cx from "classnames";
-import { omit, zip, filter, map, nth, sortBy } from "lodash/fp";
+import { identity, omit, zip, filter, map, nth, sortBy } from "lodash/fp";
 import { forbidExtraProps } from "airbnb-prop-types";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import Input from "~ui/controls/Input";
@@ -224,11 +224,17 @@ class BareDropdown extends React.Component {
       );
     }
 
+    // When search is enabled, we need to tell semantic-ui that we are in search mode.
+    // Otherwise, pressing spacebar will cause the dropdown to close.
+    // See https://github.com/Semantic-Org/Semantic-UI-React/issues/3768
+    // This causes other issues. Specifically, now when you click on the trigger or any items,
+    // the dropdown no longer closes at all. You have to click outside the dropdown.
     return (
       <BaseDropdown
         {...baseDropdownProps}
         className={dropdownClassName}
         onBlur={e => e.stopPropagation()}
+        search={search ? identity : undefined}
       >
         {menu}
       </BaseDropdown>

@@ -60,6 +60,12 @@
     }
   }
 
+  // Since we have our own custom search input,
+  // hide the semantic-ui search input.
+  :global(.search) {
+    display: none;
+  }
+
   .item {
     cursor: pointer;
 
