@@ -15,12 +15,20 @@ module BulkDownloadTypesHelper
       display_name: "Sample Overviews",
       description: "Sample metadata and QC metrics",
       category: "report",
+      execution_type: "resque",
     },
     {
       type: SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Sample Taxon Reports",
       description: "Metrics (e.g. total reads, rPM) and metadata for each taxon identified in the sample",
       category: "report",
+      execution_type: "resque",
+      fields: [
+        {
+          display_name: "Background",
+          type: "background",
+        },
+      ],
     },
     {
       type: COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
@@ -34,18 +42,21 @@ module BulkDownloadTypesHelper
           options: [".csv", ".biom"],
         },
       ],
+      execution_type: "resque",
     },
     {
       type: CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Contig Summary Reports",
       description: "Contig metadata and QC metrics",
       category: "report",
+      execution_type: "resque",
     },
     {
       type: HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE,
       display_name: "Host Gene Counts",
       description: "Host gene count outputs from STAR",
       category: "report",
+      execution_type: "resque",
     },
     {
       type: READS_NON_HOST_BULK_DOWNLOAD_TYPE,
@@ -63,6 +74,7 @@ module BulkDownloadTypesHelper
           options: [".fasta", ".fastq"],
         },
       ],
+      execution_type: "variable",
     },
     {
       type: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,
@@ -75,23 +87,38 @@ module BulkDownloadTypesHelper
           type: "taxon",
         },
       ],
+      execution_type: "variable",
     },
     {
       type: UNMAPPED_READS_BULK_DOWNLOAD_TYPE,
       display_name: "Unmapped Reads",
       description: "Reads that didn’t map to any taxa",
       category: "raw",
+      execution_type: "ecs",
     },
     {
       type: ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE,
       display_name: "Original Input Files",
       description: "Original files you submitted to IDseq",
       category: "raw",
+      execution_type: "ecs",
     },
   ].freeze
 
-  # A hash of type => display_name.
-  BULK_DOWNLOAD_TYPE_TO_DISPLAY_NAME = Hash[
-    BULK_DOWNLOAD_TYPES.pluck(:type).zip(BULK_DOWNLOAD_TYPES.pluck(:display_name))
+  # A hash of type name => type object
+  BULK_DOWNLOAD_TYPE_NAME_TO_DATA = Hash[
+    BULK_DOWNLOAD_TYPES.pluck(:type).zip(BULK_DOWNLOAD_TYPES)
   ]
+
+  def self.bulk_download_types
+    BULK_DOWNLOAD_TYPES
+  end
+
+  def self.bulk_download_type(type_name)
+    BULK_DOWNLOAD_TYPE_NAME_TO_DATA[type_name]
+  end
+
+  def self.bulk_download_type_display_name(type_name)
+    BULK_DOWNLOAD_TYPE_NAME_TO_DATA[type_name][:display_name]
+  end
 end

@@ -128,7 +128,7 @@ class BulkDownload < ApplicationRecord
   end
 
   def download_output_key
-    "downloads/#{id}/#{BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPE_TO_DISPLAY_NAME[download_type]}.tar.gz"
+    "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}.tar.gz"
   end
 
   # The s3 url that the tar.gz file will be uploaded to.
@@ -258,10 +258,82 @@ class BulkDownload < ApplicationRecord
     return nil
   end
 
+  def generate_download_file
+    samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+    projects = Project.where(id: samples.pluck(:project_id))
+
+    # Compute cleaned project name once instead of once per sample.
+    cleaned_project_names = {}
+    projects.each do |project|
+      cleaned_project_names[project.id] = project.cleaned_project_name
+    end
+
+    failed_sample_ids = []
+
+    if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
+      s3_tar_writer = S3TarWriter.new(download_output_url)
+      s3_tar_writer.start_streaming
+
+      pipeline_runs.includes(sample: [:project]).map do |pipeline_run|
+        begin
+          tax_details = ReportHelper.taxonomy_details(pipeline_run.id, get_param_value("background"), TaxonScoringModel::DEFAULT_MODEL_NAME, ReportHelper::DEFAULT_SORT_PARAM)
+          report_csv = ReportHelper.generate_report_csv(tax_details)
+          s3_tar_writer.add_file_with_data(
+            "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
+              "taxon_report.csv",
+            report_csv
+          )
+        rescue
+          failed_sample_ids << pipeline_run.sample.id
+        end
+      end
+
+      s3_tar_writer.close
+
+      unless s3_tar_writer.process_status.success?
+        raise BulkDownloadsHelper::BULK_DOWNLOAD_GENERATION_FAILED
+      end
+
+      update(status: STATUS_SUCCESS)
+
+      unless failed_sample_ids.empty?
+        LogUtil.log_err_and_airbrake("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{failed_sample_ids}")
+        update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % failed_sample_ids.length)
+      end
+    end
+  rescue
+    update(status: STATUS_ERROR)
+    raise
+  end
+
+  def execution_type
+    execution_type = BulkDownloadTypesHelper.bulk_download_type(download_type)[:execution_type]
+    if ["resque", "ecs"].include?(execution_type)
+      return execution_type
+    end
+
+    if [BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, BulkDownloadTypesHelper:: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE].include?(download_type)
+      return get_param_value("taxon") == "all" ? "ecs" : "resque"
+    end
+
+    # Should never happen
+    raise BulkDownloadsHelper::UNKNOWN_EXECUTION_TYPE
+  end
+
+  def kickoff_resque_task
+    Resque.enqueue(GenerateBulkDownload, id)
+  end
+
   def kickoff
-    ecs_task_command = bulk_download_ecs_task_command
-    unless ecs_task_command.nil?
-      kickoff_ecs_task(ecs_task_command)
+    current_execution_type = execution_type
+    if current_execution_type == "ecs"
+      ecs_task_command = bulk_download_ecs_task_command
+      unless ecs_task_command.nil?
+        kickoff_ecs_task(ecs_task_command)
+      end
+    end
+    if current_execution_type == "resque"
+      kickoff_resque_task
     end
   end
 end

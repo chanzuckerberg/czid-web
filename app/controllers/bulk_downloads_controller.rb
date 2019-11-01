@@ -14,7 +14,7 @@ class BulkDownloadsController < ApplicationController
 
   # GET /bulk_downloads/types
   def types
-    render json: BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPES
+    render json: BulkDownloadTypesHelper.bulk_download_types
   end
 
   # POST /bulk_downloads
@@ -33,7 +33,7 @@ class BulkDownloadsController < ApplicationController
     rescue => e
       # Throw an error if any sample doesn't have a valid pipeline run.
       # The user should never see this error, because the validation step should catch any issues.
-      LogUtil.log_backtrace(e)
+      Rails.logger.error(e)
       LogUtil.log_err_and_airbrake("BulkDownloadsFailedEvent: Unexpected issue creating bulk download: #{e}")
       render json: { error: e }, status: :unprocessable_entity
       return
@@ -54,6 +54,7 @@ class BulkDownloadsController < ApplicationController
       rescue => e
         # If the kickoff failed, set to error.
         bulk_download.update(status: BulkDownload::STATUS_ERROR)
+        Rails.logger.error(e)
         LogUtil.log_err_and_airbrake("BulkDownloadsKickoffError: Unexpected issue kicking off bulk download: #{e}")
         render json: {
           error: BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE,
@@ -84,9 +85,7 @@ class BulkDownloadsController < ApplicationController
 
     render json: {
       bulk_download: format_bulk_download(bulk_download, true),
-      download_type: BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPES.find do |bulk_download_type|
-        bulk_download_type[:type] == bulk_download.download_type
-      end,
+      download_type: BulkDownloadTypesHelper.bulk_download_type(bulk_download.download_type),
     }
   rescue ActiveRecord::RecordNotFound
     render json: { error: BulkDownloadsHelper::BULK_DOWNLOAD_NOT_FOUND }, status: :not_found
@@ -119,8 +118,8 @@ class BulkDownloadsController < ApplicationController
     @bulk_download.update(status: BulkDownload::STATUS_SUCCESS, access_token: nil)
 
     if params[:error_type] == "FailedSrcUrlError"
-      LogUtil.log_err_and_airbrake("BulkDownloadFailedSrcUrlError: The following paths failed to process: #{params[:error_data]}")
-      @bulk_download.update(error_message: FAILED_SRC_URL_ERROR_TEMPLATE % params[:error_data].length)
+      LogUtil.log_err_and_airbrake("BulkDownloadFailedSrcUrlError (id #{@bulk_download.id}): The following paths failed to process: #{params[:error_data]}")
+      @bulk_download.update(error_message: FAILED_SAMPLES_ERROR_TEMPLATE % params[:error_data].length)
     end
 
     render json: { status: "success" }
@@ -131,7 +130,7 @@ class BulkDownloadsController < ApplicationController
     # set bulk download and validate access token in before_action
     # Clear the access token, so it can no longer be used.
     @bulk_download.update(status: BulkDownload::STATUS_ERROR, error_message: params[:error_message], access_token: nil)
-    LogUtil.log_err_and_airbrake("BulkDownloadFailedError: #{params[:error_message]}")
+    LogUtil.log_err_and_airbrake("BulkDownloadFailedError (id #{@bulk_download.id}), #{params[:error_message]}")
     render json: { status: "success" }
   end
 

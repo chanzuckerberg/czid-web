@@ -308,6 +308,11 @@ const createBackground = ({ description, name, sampleIds }) =>
     sample_ids: sampleIds,
   });
 
+const getBackgrounds = async () => {
+  const response = await get("/backgrounds.json");
+  return response.backgrounds;
+};
+
 const getCoverageVizSummary = sampleId =>
   get(`/samples/${sampleId}/coverage_viz_summary`);
 
@@ -384,4 +389,5 @@ export {
   validatePhyloTreeName,
   validateSampleFiles,
   validateSampleNames,
+  getBackgrounds,
 };
