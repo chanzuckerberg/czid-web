@@ -77,7 +77,7 @@ class MetadataInput extends React.Component {
           <GeoSearchInputBox
             className={className}
             // .warning reference in old .idseq-ui.input file
-            inputClassName={cx(warning && "warning")}
+            inputClassName={cx(warning && value && "warning")}
             // Calls save on selection
             onResultSelect={({ result: selection }) => {
               const { result, warning } = processLocationSelection(
@@ -89,14 +89,15 @@ class MetadataInput extends React.Component {
             }}
             value={value}
           />
-          {warning && (
-            <div className={cs.warning}>
-              <div className={cs.icon}>
-                <AlertIcon />
+          {warning &&
+            value && (
+              <div className={cs.warning}>
+                <div className={cs.icon}>
+                  <AlertIcon />
+                </div>
+                <div>{warning}</div>
               </div>
-              <div>{warning}</div>
-            </div>
-          )}
+            )}
         </React.Fragment>
       );
     } else {

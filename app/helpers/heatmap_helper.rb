@@ -84,7 +84,7 @@ module HeatmapHelper
 
     unless taxon_ids.empty?
       # Refetch at genus level using species level
-      parent_ids = species_selected ? [] : HeatmapHelper.fetch_parent_ids(taxon_ids, samples)
+      parent_ids = species_selected ? [] : details.pluck('genus_taxid').uniq
       results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     end
 
@@ -139,7 +139,7 @@ module HeatmapHelper
         taxon = if candidate_taxons[row["tax_id"]]
                   candidate_taxons[row["tax_id"]]
                 else
-                  { "tax_id" => row["tax_id"], "samples" => {} }
+                  { "tax_id" => row["tax_id"], "samples" => {}, "genus_taxid" => row["genus_taxid"] }
                 end
         taxon["max_aggregate_score"] = row[sort[:count_type]][sort[:metric]] if
           taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
@@ -486,15 +486,6 @@ module HeatmapHelper
       -- b) any post-SQL filtering
       WHERE rank <= #{num_results * 4}
     "
-  end
-
-  def self.fetch_parent_ids(taxon_ids, samples)
-    # Get parent (genus,family) ids for the taxon_ids based on the samples
-    TaxonCount.select("distinct genus_taxid, family_taxid")
-              .joins(:pipeline_run)
-              .where(pipeline_runs: { sample: samples })
-              .where(tax_id: taxon_ids)
-              .map { |u| u.attributes.values.compact }.flatten
   end
 
   # NOTE: This was extracted from a subquery because mysql was not using the

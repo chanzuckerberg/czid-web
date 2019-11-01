@@ -15,6 +15,7 @@ class LiveSearchPopBox extends React.Component {
       results: [],
       value: this.props.initialValue,
       selectedResult: null,
+      currentResult: null, // result set on click
     };
 
     this.lastestTimerId = null;
@@ -47,6 +48,8 @@ class LiveSearchPopBox extends React.Component {
     const { onResultSelect } = this.props;
     this.setState({
       isLoading: false,
+      currentResult: result,
+      focus: false, // close the dropdown
     });
     onResultSelect && onResultSelect({ currentEvent, result });
   };
@@ -55,7 +58,7 @@ class LiveSearchPopBox extends React.Component {
     const { onSearchTriggered } = this.props;
     const { value } = this.state;
 
-    this.setState({ isLoading: true, selectedResult: null });
+    this.setState({ isLoading: true, selectedResult: null, focus: true });
 
     const timerId = this.lastestTimerId;
     const results = await onSearchTriggered(value);
@@ -117,13 +120,15 @@ class LiveSearchPopBox extends React.Component {
   };
 
   handleFocus = _ => {
-    this.setState({ focus: true });
+    this.setState({ focus: true }); // open the dropdown
   };
 
-  handleBlur = _ => {
-    // Give a chance for handleResultSelect to happen. Otherwise, the dropdown
-    // will disappear before the item onClick fires.
-    setTimeout(() => this.setState({ focus: false }), 100);
+  handleBlur = currentEvent => {
+    // Give a chance for warnings to show
+    this.handleResultSelect({
+      currentEvent: currentEvent,
+      result: this.state.currentResult,
+    });
   };
 
   buildItem = (categoryKey, result, index) => (
@@ -137,9 +142,10 @@ class LiveSearchPopBox extends React.Component {
           )}
         </div>
       }
-      onClick={currentEvent =>
-        this.handleResultSelect({ currentEvent, result })
-      }
+      onMouseDown={currentEvent => {
+        // use onMouseDown instead of onClick to work with handleBlur
+        this.handleResultSelect({ currentEvent, result });
+      }}
       value={`${categoryKey}-${index}`}
     />
   );
@@ -177,6 +183,7 @@ class LiveSearchPopBox extends React.Component {
       this.getResultsLength() &&
       this.state.focus &&
       this.state.value.trim().length >= this.props.minChars;
+
     return (
       <BareDropdown
         className={cx(

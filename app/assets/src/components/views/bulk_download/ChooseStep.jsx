@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
+import PropTypes from "~/components/utils/propTypes";
 import { find, filter, get, some, map, isUndefined } from "lodash/fp";
 import cx from "classnames";
 
@@ -67,8 +67,30 @@ class ChooseStep extends React.Component {
             <Dropdown
               fluid
               options={dropdownOptions}
-              onChange={value =>
-                onFieldSelect(downloadType.type, field.type, value)
+              onChange={(value, displayName) =>
+                onFieldSelect(downloadType.type, field.type, value, displayName)
+              }
+              value={selectedField}
+            />
+          </div>
+        );
+      case "taxon":
+        // TODO(mark): Implement more sophisticated taxon dropdown. This is a placeholder for now.
+        dropdownOptions = [
+          {
+            text: "All Taxon",
+            value: "all",
+          },
+        ];
+
+        return (
+          <div className={cs.field} key={field.type}>
+            <div className={cs.label}>Taxon:</div>
+            <Dropdown
+              fluid
+              options={dropdownOptions}
+              onChange={(value, displayName) =>
+                onFieldSelect(downloadType.type, field.type, value, displayName)
               }
               value={selectedField}
             />
@@ -157,20 +179,7 @@ class ChooseStep extends React.Component {
 }
 
 ChooseStep.propTypes = {
-  downloadTypes: PropTypes.arrayOf(
-    PropTypes.shape({
-      type: PropTypes.string,
-      display_name: PropTypes.string,
-      description: PropTypes.string,
-      category: PropTypes.string,
-      fields: PropTypes.arrayOf(
-        PropTypes.shape({
-          type: PropTypes.string,
-          display_name: PropTypes.string,
-        })
-      ),
-    })
-  ),
+  downloadTypes: PropTypes.arrayOf(PropTypes.DownloadType),
   selectedDownloadTypeName: PropTypes.string,
   onSelect: PropTypes.func.isRequired,
   selectedFields: PropTypes.objectOf(PropTypes.objectOf(PropTypes.string)),

@@ -57,6 +57,7 @@ class PipelineRun < ApplicationRecord
   STATS_JSON_NAME = "stats.json".freeze
   INPUT_VALIDATION_NAME = "validate_input_summary.json".freeze
   INVALID_STEP_NAME = "invalid_step_input.json".freeze
+  NONHOST_FASTQ_OUTPUT_NAME = 'taxid_annot.fasta'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
@@ -407,6 +408,20 @@ class PipelineRun < ApplicationRecord
     return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
     multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
+  end
+
+  def nonhost_fastq_s3_paths
+    input_file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+
+    files = [
+      "#{postprocess_output_s3_path}/nonhost_R1.#{input_file_ext}",
+    ]
+
+    if sample.input_files.length == 2
+      files << "#{postprocess_output_s3_path}/nonhost_R2.#{input_file_ext}"
+    end
+
+    files
   end
 
   def unidentified_fasta_s3_path
@@ -1331,6 +1346,23 @@ class PipelineRun < ApplicationRecord
       output << info
     end
     output
+  end
+
+  def get_summary_contig_counts_v2(min_contig_size)
+    summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
+    contig_lineages(min_contig_size).each do |c|
+      lineage = JSON.parse(c.lineage_json)
+      lineage.each do |count_type, taxid_arr|
+        taxids = taxid_arr[0..1]
+        taxids.each do |taxid|
+          summary_per_tax = summary_dict[taxid] ||= {}
+          summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= { contigs: 0, contig_reads: 0 }
+          summary_per_tax_and_type[:contigs] += 1
+          summary_per_tax_and_type[:contig_reads] += c.read_count
+        end
+      end
+    end
+    return summary_dict
   end
 
   def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
