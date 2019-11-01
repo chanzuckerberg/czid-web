@@ -15,7 +15,7 @@ class LiveSearchPopBox extends React.Component {
       results: [],
       value: this.props.initialValue,
       selectedResult: null,
-      currentResult: null, // result set on click
+      currentResult: "", // either string or object
     };
 
     this.lastestTimerId = null;
@@ -124,11 +124,13 @@ class LiveSearchPopBox extends React.Component {
   };
 
   handleBlur = currentEvent => {
-    // Give a chance for warnings to show
-    this.handleResultSelect({
-      currentEvent: currentEvent,
-      result: this.state.currentResult,
-    });
+    // Call onResultSelect again to give a chance for warnings to show
+    const { onResultSelect } = this.props;
+    onResultSelect &&
+      onResultSelect({
+        currentEvent,
+        result: this.state.currentResult,
+      });
   };
 
   buildItem = (categoryKey, result, index) => (
