@@ -15,6 +15,7 @@ class LiveSearchPopBox extends React.Component {
       results: [],
       value: this.props.initialValue,
       selectedResult: null,
+      currentResult: null, // result set on click
     };
 
     this.lastestTimerId = null;
@@ -47,6 +48,8 @@ class LiveSearchPopBox extends React.Component {
     const { onResultSelect } = this.props;
     this.setState({
       isLoading: false,
+      currentResult: result,
+      focus: false, // close the dropdown
     });
     onResultSelect && onResultSelect({ currentEvent, result });
   };
@@ -55,7 +58,7 @@ class LiveSearchPopBox extends React.Component {
     const { onSearchTriggered } = this.props;
     const { value } = this.state;
 
-    this.setState({ isLoading: true, selectedResult: null });
+    this.setState({ isLoading: true, selectedResult: null, focus: true });
 
     const timerId = this.lastestTimerId;
     const results = await onSearchTriggered(value);
@@ -117,15 +120,14 @@ class LiveSearchPopBox extends React.Component {
   };
 
   handleFocus = _ => {
-    this.setState({ focus: true });
+    this.setState({ focus: true }); // open the dropdown
   };
 
   handleBlur = currentEvent => {
-    this.setState({ focus: false });
     // Give a chance for warnings to show
     this.handleResultSelect({
       currentEvent: currentEvent,
-      result: this.state.value,
+      result: this.state.currentResult,
     });
   };
 
@@ -140,10 +142,10 @@ class LiveSearchPopBox extends React.Component {
           )}
         </div>
       }
-      onMouseDown={currentEvent =>
+      onMouseDown={currentEvent => {
         // use onMouseDown instead of onClick to work with handleBlur
-        this.handleResultSelect({ currentEvent, result })
-      }
+        this.handleResultSelect({ currentEvent, result });
+      }}
       value={`${categoryKey}-${index}`}
     />
   );
