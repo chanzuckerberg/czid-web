@@ -276,7 +276,7 @@ BareDropdown.propTypes = forbidExtraProps({
   // Props directly passed to semantic-ui.
   children: PropTypes.node,
   className: PropTypes.string,
-  direction: PropTypes.string,
+  direction: PropTypes.oneOf(["left", "right"]),
   disabled: PropTypes.bool,
   floating: PropTypes.bool,
   fluid: PropTypes.bool,

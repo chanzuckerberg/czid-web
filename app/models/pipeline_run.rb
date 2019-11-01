@@ -57,6 +57,7 @@ class PipelineRun < ApplicationRecord
   STATS_JSON_NAME = "stats.json".freeze
   INPUT_VALIDATION_NAME = "validate_input_summary.json".freeze
   INVALID_STEP_NAME = "invalid_step_input.json".freeze
+  NONHOST_FASTQ_OUTPUT_NAME = 'taxid_annot.fasta'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
@@ -407,6 +408,20 @@ class PipelineRun < ApplicationRecord
     return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
     multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
+  end
+
+  def nonhost_fastq_s3_paths
+    input_file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+
+    files = [
+      "#{postprocess_output_s3_path}/nonhost_R1.#{input_file_ext}",
+    ]
+
+    if sample.input_files.length == 2
+      files << "#{postprocess_output_s3_path}/nonhost_R2.#{input_file_ext}"
+    end
+
+    files
   end
 
   def unidentified_fasta_s3_path

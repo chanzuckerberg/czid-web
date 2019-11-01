@@ -9,7 +9,8 @@ import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 export const LOCATION_PRIVACY_WARNING =
   "Changed to county/district level for personal privacy.";
 export const LOCATION_UNRESOLVED_WARNING =
-  "Unresolved plain text, not shown on maps.";
+  // this is the max length to appear on one line
+  "No match. Sample will not appear on maps.";
 
 // Process location selections and add warnings.
 export const processLocationSelection = (result, isHuman) => {
@@ -62,8 +63,9 @@ class GeoSearchInputBox extends React.Component {
   // Fetch geosearch results and format into categories for LiveSearchBox
   handleSearchTriggered = async query => {
     let categories = {};
+    let serverSideSuggestions = [];
     try {
-      const serverSideSuggestions = await getGeoSearchSuggestions(query);
+      serverSideSuggestions = await getGeoSearchSuggestions(query);
       // Semantic UI Search expects results as: `{ category: { name: '', results: [{ title: '', description: '' }] }`
       if (serverSideSuggestions.length > 0) {
         const locationsCategory = "Location Results";
@@ -94,7 +96,12 @@ class GeoSearchInputBox extends React.Component {
     }
 
     // Let users select an unresolved plain text option
-    let noMatchName = "Plain Text (No Location Match)";
+    let noMatchName = "";
+    if (serverSideSuggestions.length > 0) {
+      noMatchName = "Use Plain Text (No Location Match)";
+    } else {
+      noMatchName = "No Results (Use Plain Text)";
+    }
     categories[noMatchName] = {
       name: noMatchName,
       results: [{ title: query, name: query }],
