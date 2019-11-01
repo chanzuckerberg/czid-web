@@ -167,13 +167,11 @@ module SamplesHelper
     s3_prefix = parsed_uri.path.sub(%r{^/(.*?)/?$}, '\1/')
 
     begin
-      entries = []
-      S3_CLIENT_LOCAL.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).each do |response|
-        entries += response.contents.map(&:key)
-        if entries.length >= S3_OBJECT_LIMIT
-          Rails.logger.info("User tried to list more than #{S3_OBJECT_LIMIT} objects in #{s3_path}")
-          break
-        end
+      s3 = Aws::S3::Resource.new(client: S3_CLIENT_LOCAL)
+      bucket = s3.bucket(s3_bucket_name)
+      entries = bucket.objects(prefix: s3_prefix).limit(S3_OBJECT_LIMIT).map(&:key)
+      if entries.length >= S3_OBJECT_LIMIT
+        Rails.logger.info("User tried to list more than #{S3_OBJECT_LIMIT} objects in #{s3_path}")
       end
       # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
       entries = entries.reject { |line| line.include? "Undetermined" }
