@@ -31,7 +31,9 @@ task 'export_users_to_auth0' => :environment do |_t, _args|
     exit 2
   end
 
-  eua = ExportUsersAuth0.new(ENV["ENVIRONMENT"])
+  env = ENV["ENVIRONMENT"] || 'dev'
+
+  eua = ExportUsersAuth0.new(env)
 
   if options[:export_all]
     eua.export_all_users
