@@ -15,7 +15,7 @@ class LiveSearchPopBox extends React.Component {
       results: [],
       value: this.props.initialValue,
       selectedResult: null,
-      currentResult: null, // result set on click
+      currentResult: "", // either string or object
     };
 
     this.lastestTimerId = null;
