@@ -124,13 +124,11 @@ class LiveSearchPopBox extends React.Component {
   };
 
   handleBlur = currentEvent => {
-    // Call onResultSelect again to give a chance for warnings to show
-    const { onResultSelect } = this.props;
-    onResultSelect &&
-      onResultSelect({
-        currentEvent,
-        result: this.state.currentResult,
-      });
+    // Call handleResultSelect again to give a chance for warnings to show
+    this.handleResultSelect({
+      currentEvent,
+      result: this.state.currentResult,
+    });
   };
 
   buildItem = (categoryKey, result, index) => (
