@@ -41,10 +41,6 @@ class LiveSearchPopBox extends React.Component {
         this.handleResultSelect({ currentEvent: keyEvent, result: value });
       }
       onEnter && onEnter({ current: keyEvent, value });
-    } else {
-      // Set the currentResult to the plain text value so that if the user
-      // focuses out of the input, the value will be saved.
-      this.setState({ currentResult: value });
     }
   };
 
@@ -77,8 +73,12 @@ class LiveSearchPopBox extends React.Component {
 
   handleSearchChange = value => {
     const { delayTriggerSearch, minChars, onSearchChange } = this.props;
-
-    this.setState({ value });
+    this.setState({
+      value,
+      // Set the currentResult to the plain text value so that if the user
+      // focuses out of the input, the value will be saved.
+      currentResult: value,
+    });
     onSearchChange && onSearchChange(value);
     // check minimum requirements for value
     const parsedValue = value.trim();
