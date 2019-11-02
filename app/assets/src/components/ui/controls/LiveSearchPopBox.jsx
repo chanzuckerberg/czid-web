@@ -41,6 +41,10 @@ class LiveSearchPopBox extends React.Component {
         this.handleResultSelect({ currentEvent: keyEvent, result: value });
       }
       onEnter && onEnter({ current: keyEvent, value });
+    } else {
+      // Set the currentResult to the plain text value so that if the user
+      // focuses out of the input, the value will be saved.
+      this.setState({ currentResult: value });
     }
   };
 
