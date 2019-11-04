@@ -9,7 +9,8 @@ Rails.application.routes.draw do
 
   get 'users/auth0_sign_in' => 'auth0#pre_login'
   get 'auth/auth0/callback' => 'auth0#callback'
-  get 'auth/failure' => 'auth0#failure'
+  get 'auth/auth0/failure' => 'auth0#failure'
+  get 'auth/auth0/sign_out' => 'auth0#sign_out'
 
   resources :samples do
     put :reupload_source, on: :member

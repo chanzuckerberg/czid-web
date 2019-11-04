@@ -6,22 +6,26 @@ class Auth0Controller < ApplicationController
   include Auth0Helper
 
   def sign_in
+    # This route is automatic defined by OmniAuth
     redirect_to 'auth/auth0'
   end
 
   def sign_out
-    domain = Rails.application.secrets.auth0_domain
-    client_id = Rails.application.secrets.auth0_client_id
-    request_params = {
-      returnTo: root_url,
-      client_id: client_id,
-    }
-    URI::HTTPS.build(host: domain, path: '/v2/logout', query: request_params.to_query)
+    if auth0_session_present?
+      session.delete(:jwt_id_token)
+
+      domain = Rails.application.secrets.auth0_domain
+      client_id = Rails.application.secrets.auth0_client_id
+      qry_prms = { returnTo: root_url, client_id: client_id }
+      url = URI::HTTPS.build(host: domain, path: '/v2/logout', query: qry_prms.to_query)
+      redirect_to url.to_s
+    else
+      redirect_to root_path
+    end
   end
 
   def callback
-    # This stores all the user information that came from Auth0
-    # and the IdP
+    # Store the user token that came from Auth0 and the IdP
     assign_auth0_session(request.env['omniauth.auth'].credentials.id_token)
 
     # Redirect to the URL you want after successful auth
