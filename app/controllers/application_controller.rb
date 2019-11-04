@@ -17,12 +17,7 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_out_path_for(_resource_or_scope)
-    if session[:jwt_id_token].present?
-      session.delete(:jwt_id_token)
-      redirect_to auth0_logout_url.to_s
-    else
-      root_path
-    end
+    "auth/auth0/sign_out"
   end
 
   def login_required
