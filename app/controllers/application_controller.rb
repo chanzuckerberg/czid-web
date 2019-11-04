@@ -56,6 +56,7 @@ class ApplicationController < ActionController::Base
         return
       end
     end
+    # invoke devise if auth0 token is not present
     super
   end
 
@@ -185,6 +186,6 @@ class ApplicationController < ActionController::Base
 
   def auth_token
     token = http_token
-    JsonWebToken.verify(token) if http_token
+    JsonWebToken.verify(token) if token
   end
 end
