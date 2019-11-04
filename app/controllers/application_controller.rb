@@ -10,13 +10,19 @@ class ApplicationController < ActionController::Base
 
   include Consul::Controller
   include AppConfigHelper
+  include Auth0Helper
 
   current_power do
     Power.new(current_user)
   end
 
   def after_sign_out_path_for(_resource_or_scope)
-    root_path
+    if session[:jwt_id_token].present?
+      session.delete(:jwt_id_token)
+      redirect_to auth0_logout_url.to_s
+    else
+      root_path
+    end
   end
 
   def login_required
@@ -27,37 +33,32 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && current_user.admin?
   end
 
-  def destroy_user_session_path
-    session.delete(:jwt_id_token)
-    super
-  end
-
-  # authenticate_user! is used for verifying if the user is already logged in
-  # and redirecting to the homepage in case it is not.
+  # This method is used to verify if the user is already logged in,
+  # and will redirect it to the homepage in case it is not.
   # This method overrides a default behavior from Devise to allow auth0
   # authentication working simultaneously with legacy devise database mode,
   # and should be refactored once we fully migrate to auth0.
   def authenticate_user!
-    if current_user.nil?
-      begin
-        @auth_payload, @auth_header = auth_token
-        if @auth_payload.present?
-          auth_user = User.find_by(email: @auth_payload["email"])
-          if auth_user.present?
-            sign_in auth_user, store: false
-            return
-          end
+    resp = check_auth0_auth_token
+    if resp.nil?
+      # invoke devise if auth0 token is not present
+      super
+    else
+      if resp[:authenticated]
+        auth_payload = resp[:auth_payload]
+        return if current_user&.email == auth_payload["email"]
+        auth_user = User.find_by(email: auth_payload["email"])
+        if auth_user.present?
+          sign_in auth_user, store: false
+          return
         end
-      rescue JWT::VerificationError, JWT::DecodeError
-        respond_to do |format|
-          format.html { redirect_to(new_user_session_path) }
-          format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
-        end
-        return
+      end
+      # redirect user if auth0 token is invalid or expired
+      respond_to do |format|
+        format.html { redirect_to(new_user_session_path) }
+        format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
       end
     end
-    # invoke devise if auth0 token is not present
-    super
   end
 
   # To use in before_action with parameters, do
@@ -174,18 +175,5 @@ class ApplicationController < ActionController::Base
     @timer = Timer.new("#{params[:controller]}.#{params[:action]}")
     yield
     @timer.publish
-  end
-
-  def http_token
-    if request.headers['Authorization'].present?
-      request.headers['Authorization'].split(' ').last
-    else
-      session[:jwt_id_token]
-    end
-  end
-
-  def auth_token
-    token = http_token
-    JsonWebToken.verify(token) if token
   end
 end
