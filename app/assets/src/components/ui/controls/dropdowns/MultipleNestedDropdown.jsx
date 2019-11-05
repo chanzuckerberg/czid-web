@@ -253,6 +253,9 @@ class MultipleNestedDropdown extends React.Component {
         "rounded",
         "onChange",
         "options",
+        // This component needs to implement the itemSearchStrings prop before search will work.
+        // Manually disable the search prop for now.
+        "search",
       ],
       this.props
     );
@@ -265,6 +268,7 @@ class MultipleNestedDropdown extends React.Component {
         {...otherProps}
         trigger={this.renderLabel()}
         items={this.renderItems()}
+        closeOnClick={false}
       />
     );
   }
