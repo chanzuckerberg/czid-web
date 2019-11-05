@@ -131,9 +131,10 @@ class LiveSearchPopBox extends React.Component {
     const { onResultSelect } = this.props;
     const result = clone(this.state.currentResult);
     this.setState(
+      // Clear currentResult so that "apply to all" will work
       { focus: false, currentResult: "" },
       () =>
-        // Call handleResultSelect again to give a chance for warnings to show
+        // Call onResultSelect again to give a chance for warnings to show
         result && onResultSelect && onResultSelect({ currentEvent, result })
     );
   };
