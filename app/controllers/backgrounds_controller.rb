@@ -2,13 +2,18 @@ class BackgroundsController < ApplicationController
   include BackgroundsHelper
   before_action :login_required
   before_action :no_demo_user
-  before_action :admin_required, except: [:create, :show_taxon_dist]
+  before_action :admin_required, except: [:create, :show_taxon_dist, :index]
   before_action :set_background, only: [:show, :edit, :update, :destroy, :show_taxon_dist]
 
   # GET /backgrounds
   # GET /backgrounds.json
   def index
-    @backgrounds = Background.all
+    @backgrounds = current_power.backgrounds
+
+    respond_to do |format|
+      format.html { render :index }
+      format.json { render json: { backgrounds: @backgrounds } }
+    end
   end
 
   # GET /backgrounds/1

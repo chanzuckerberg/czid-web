@@ -50,9 +50,10 @@ class ChooseStep extends React.Component {
   };
 
   renderOption = (downloadType, field) => {
-    const { selectedFields, onFieldSelect } = this.props;
+    const { selectedFields, onFieldSelect, fieldOptions } = this.props;
     const selectedField = get([downloadType.type, field.type], selectedFields);
-    let dropdownOptions;
+    let dropdownOptions = [];
+    let loadingOptions = false;
 
     switch (field.type) {
       case "file_format":
@@ -63,7 +64,7 @@ class ChooseStep extends React.Component {
 
         return (
           <div className={cs.field} key={field.type}>
-            <div className={cs.label}>File Format:</div>
+            <div className={cs.label}>{field.display_name}:</div>
             <Dropdown
               fluid
               options={dropdownOptions}
@@ -85,10 +86,36 @@ class ChooseStep extends React.Component {
 
         return (
           <div className={cs.field} key={field.type}>
-            <div className={cs.label}>Taxon:</div>
+            <div className={cs.label}>{field.display_name}:</div>
             <Dropdown
               fluid
               options={dropdownOptions}
+              onChange={(value, displayName) =>
+                onFieldSelect(downloadType.type, field.type, value, displayName)
+              }
+              value={selectedField}
+            />
+          </div>
+        );
+      // TODO(mark): Consolidate this with the above fields once the set of fields is stable.
+      case "background":
+        if (fieldOptions.backgrounds) {
+          dropdownOptions = fieldOptions.backgrounds.map(background => ({
+            text: background.name,
+            value: background.id,
+          }));
+        } else {
+          loadingOptions = true;
+        }
+
+        return (
+          <div className={cs.field} key={field.type}>
+            <div className={cs.label}>{field.display_name}:</div>
+            <Dropdown
+              fluid
+              disabled={loadingOptions}
+              placeholder={loadingOptions && "Loading..."}
+              options={dropdownOptions || []}
               onChange={(value, displayName) =>
                 onFieldSelect(downloadType.type, field.type, value, displayName)
               }
@@ -185,6 +212,7 @@ ChooseStep.propTypes = {
   selectedFields: PropTypes.objectOf(PropTypes.objectOf(PropTypes.string)),
   onFieldSelect: PropTypes.func.isRequired,
   onContinue: PropTypes.func.isRequired,
+  fieldOptions: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.any)),
 };
 
 export default ChooseStep;
