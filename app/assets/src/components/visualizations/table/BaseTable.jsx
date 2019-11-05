@@ -189,6 +189,7 @@ class BaseTable extends React.Component {
 
   render() {
     const {
+      cellClassName,
       defaultCellRenderer,
       defaultHeaderHeight,
       defaultRowHeight,
@@ -255,7 +256,7 @@ class BaseTable extends React.Component {
                 const { cellRenderer, className, ...extraProps } = columnProps;
                 return (
                   <Column
-                    className={cx(cs.cell, className)}
+                    className={cx(cs.cell, cellClassName, className)}
                     columnData={columnProps.columnData}
                     key={columnProps.dataKey}
                     headerRenderer={
@@ -304,6 +305,7 @@ BaseTable.defaultProps = {
 };
 
 BaseTable.propTypes = {
+  cellClassName: PropTypes.string,
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       dataKey: PropTypes.string.isRequired,

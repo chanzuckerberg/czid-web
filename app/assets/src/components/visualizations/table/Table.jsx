@@ -49,21 +49,24 @@ class Table extends React.Component {
 
     const { sortBy, sortDirection } = this.state;
 
-    const columnSortFunction = (find({ dataKey: sortBy }, columns) || {})
-      .sortFunction;
-
-    const sortedData =
-      sortable && sortBy
-        ? orderBy(
-            [
-              columnSortFunction
-                ? row => columnSortFunction(row[sortBy])
-                : sortBy,
-            ],
-            [sortDirection === SortDirection.ASC ? "asc" : "desc"],
-            this.props.data
-          )
-        : data;
+    let sortedData = data;
+    if (sortable && sortBy) {
+      const sortColumn = find({ dataKey: sortBy }, columns) || {};
+      const sortDirectionStr =
+        sortDirection === SortDirection.ASC ? "asc" : "desc";
+      if (sortColumn.sortFunction) {
+        sortedData = sortColumn.sortFunction({
+          data,
+          sortDirection: sortDirectionStr,
+        });
+      } else {
+        sortedData = orderBy(
+          sortColumn.sortKey || sortBy,
+          [sortDirectionStr],
+          data
+        );
+      }
+    }
 
     const selectAllChecked = this.isSelectAllChecked();
     return (

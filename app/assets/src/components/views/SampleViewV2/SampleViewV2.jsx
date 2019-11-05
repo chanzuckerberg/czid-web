@@ -1,8 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { merge } from "lodash/fp";
 import { getSampleReportData } from "~/api";
 import ReportTableV2 from "./ReportTableV2";
-import { merge } from "lodash/fp";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import cs from "./sample_view_v2.scss";
 
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
@@ -27,14 +29,36 @@ export default class SampleViewV2 extends React.Component {
     // TODO : this should come from the client
     // TODO : tax level should come as a string
     const data = [];
+    const highlightedTaxIds = new Set(reportData.highlightedTaxIds);
     reportData.sortedGenus.forEach(genusTaxId => {
+      let hasHighlightedChildren = false;
       // console.log(genusTaxId, reportData.counts[2][genusTaxId]);
-      data.push(merge(reportData.counts[2][genusTaxId], { taxLevel: "genus" }));
-      reportData.counts[2][genusTaxId].children.forEach(speciesTaxId => {
-        data.push(
-          merge(reportData.counts[1][speciesTaxId], { taxLevel: "species" })
-        );
-      });
+      const speciesData = reportData.counts[2][genusTaxId].children.map(
+        speciesTaxId => {
+          console.log(
+            "check hl",
+            speciesTaxId,
+            highlightedTaxIds.has(speciesTaxId),
+            highlightedTaxIds
+          );
+          const isHighlighted = highlightedTaxIds.has(speciesTaxId);
+          hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
+          return merge(reportData.counts[1][speciesTaxId], {
+            highlighted: isHighlighted,
+            taxId: speciesTaxId,
+            taxLevel: "species",
+          });
+        }
+      );
+      data.push(
+        merge(reportData.counts[2][genusTaxId], {
+          highlighted:
+            hasHighlightedChildren || highlightedTaxIds.has(genusTaxId),
+          taxId: genusTaxId,
+          taxLevel: "genus",
+          species: speciesData,
+        })
+      );
     });
     this.setState({
       data,
@@ -45,12 +69,12 @@ export default class SampleViewV2 extends React.Component {
   render = () => {
     const { data } = this.state;
     return (
-      <div>
-        <div>Report page here</div>
-        <div style={{ height: 500 }}>
+      <NarrowContainer className={cs.reportContainer}>
+        <div className={cs.reportHeader}>Report header here</div>
+        <div className={cs.reportTable}>
           <ReportTableV2 data={data} />
         </div>
-      </div>
+      </NarrowContainer>
     );
   };
 }
