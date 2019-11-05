@@ -52,7 +52,8 @@ class ChooseStep extends React.Component {
   renderOption = (downloadType, field) => {
     const { selectedFields, onFieldSelect, fieldOptions } = this.props;
     const selectedField = get([downloadType.type, field.type], selectedFields);
-    let dropdownOptions, loadingOptions;
+    let dropdownOptions = [];
+    let loadingOptions = false;
 
     switch (field.type) {
       case "file_format":
