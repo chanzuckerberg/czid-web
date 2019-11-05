@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import Input from "~ui/controls/Input";
 import { BareDropdown } from "~ui/controls/dropdowns";
-import { forEach, sumBy, values } from "lodash/fp";
+import { forEach, sumBy, values, clone } from "lodash/fp";
 import cx from "classnames";
 import cs from "./live_search_pop_box.scss";
 
@@ -128,11 +128,15 @@ class LiveSearchPopBox extends React.Component {
   };
 
   handleBlur = currentEvent => {
-    // Call handleResultSelect again to give a chance for warnings to show
-    this.handleResultSelect({
-      currentEvent,
-      result: this.state.currentResult,
-    });
+    const { onResultSelect } = this.props;
+    const result = clone(this.state.currentResult);
+    this.setState(
+      // Clear currentResult so that "apply to all" will work
+      { focus: false, currentResult: "" },
+      () =>
+        // Call onResultSelect again to give a chance for warnings to show
+        result && onResultSelect && onResultSelect({ currentEvent, result })
+    );
   };
 
   buildItem = (categoryKey, result, index) => (
