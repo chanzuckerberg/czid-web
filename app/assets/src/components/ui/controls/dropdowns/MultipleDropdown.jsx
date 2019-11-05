@@ -143,6 +143,7 @@ class MultipleDropdown extends React.Component {
         items={renderedMenuItems}
         itemSearchStrings={searchStrings}
         onOpen={this.handleOpen}
+        closeOnClick={false}
       />
     );
   }
@@ -166,6 +167,7 @@ MultipleDropdown.propTypes = {
   trigger: PropTypes.node,
   value: PropTypes.array,
   className: PropTypes.string,
+  search: PropTypes.bool,
 };
 
 export default MultipleDropdown;
