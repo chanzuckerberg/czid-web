@@ -550,7 +550,6 @@ class PipelineRun < ApplicationRecord
         contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
       end
     end
-    # UPDATED HERE
     update(contigs_attributes: contig_array) unless contig_array.empty?
     update(assembled: 1)
   end

@@ -110,9 +110,7 @@ module ReportHelper
     report_info[:topScoringTaxa] = ReportHelper.label_top_scoring_taxa!(report_info[:taxonomy_details][2])
     report_info[:contig_taxid_list] = pipeline_run.get_taxid_list_with_contigs
 
-    json = JSON.dump(report_info)
-
-    json
+    JSON.dump(report_info)
   end
 
   def self.label_top_scoring_taxa!(tax_map)
@@ -741,7 +739,6 @@ module ReportHelper
     # Fetch and clean data.
     t0 = wall_clock_ms
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
-
     tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
     cleanup_missing_genus_counts!(tax_2d)
 
