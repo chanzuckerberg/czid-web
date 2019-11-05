@@ -130,7 +130,6 @@ class LiveSearchPopBox extends React.Component {
   handleBlur = currentEvent => {
     const result = clone(this.state.currentResult);
     this.setState({ focus: false, currentResult: "" }, () => {
-      console.log("handleBlur", result);
       // Call handleResultSelect again to give a chance for warnings to show
       result &&
         this.handleResultSelect({
