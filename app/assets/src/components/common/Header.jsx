@@ -4,6 +4,7 @@ import moment from "moment";
 import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 
+import { UserContext } from "~/components/common/UserContext";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import ToastContainer from "~ui/containers/ToastContainer";
@@ -83,6 +84,8 @@ class Header extends React.Component {
       ...userMenuProps
     } = this.props;
 
+    const { allowedFeatures } = this.context;
+
     if (showBlank) {
       return (
         <div className={cs.header}>
@@ -105,7 +108,11 @@ class Header extends React.Component {
             <div className={cs.fill} />
             {!disableNavigation && <MainMenu adminUser={adminUser} />}
             {!disableNavigation && (
-              <UserMenuDropDown adminUser={adminUser} {...userMenuProps} />
+              <UserMenuDropDown
+                adminUser={adminUser}
+                allowedFeatures={allowedFeatures}
+                {...userMenuProps}
+              />
             )}
           </div>
           {
@@ -125,6 +132,8 @@ Header.propTypes = {
   showBlank: PropTypes.bool,
 };
 
+Header.contextType = UserContext;
+
 const UserMenuDropDown = ({
   adminUser,
   demoUser,
@@ -132,6 +141,7 @@ const UserMenuDropDown = ({
   signInEndpoint,
   signOutEndpoint,
   userName,
+  allowedFeatures,
 }) => {
   const signOut = () => {
     deleteAsync(`${signOutEndpoint}.json`, {
@@ -169,7 +179,27 @@ const UserMenuDropDown = ({
             Help Center
           </ExternalLink>
         }
-      />,
+      />
+    );
+
+    allowedFeatures.includes("bulk_downloads") &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="5"
+          text={
+            <a
+              className={cs.option}
+              href="/bulk_downloads"
+              onClick={() =>
+                logAnalyticsEvent("Header_dropdown-dropdowns-option_clicked")
+              }
+            >
+              Downloads
+            </a>
+          }
+        />
+      );
+    userDropdownItems.push(
       <BareDropdown.Item
         key="6"
         text={
@@ -247,6 +277,7 @@ UserMenuDropDown.propTypes = forbidExtraProps({
   signInEndpoint: PropTypes.string.isRequired,
   signOutEndpoint: PropTypes.string.isRequired,
   userName: PropTypes.string.isRequired,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
 });
 
 const MainMenu = ({ adminUser }) => {

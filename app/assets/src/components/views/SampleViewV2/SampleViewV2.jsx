@@ -13,7 +13,6 @@ export default class SampleViewV2 extends React.Component {
     this.state = {
       data: [],
     };
-    console.log("SampleViewV2:constructor");
   }
 
   componentDidMount() {
@@ -24,7 +23,6 @@ export default class SampleViewV2 extends React.Component {
     const { sampleId } = this.props;
 
     const reportData = await getSampleReportData(sampleId);
-    console.log(reportData);
 
     // TODO : this should come from the client
     // TODO : tax level should come as a string
@@ -32,15 +30,8 @@ export default class SampleViewV2 extends React.Component {
     const highlightedTaxIds = new Set(reportData.highlightedTaxIds);
     reportData.sortedGenus.forEach(genusTaxId => {
       let hasHighlightedChildren = false;
-      // console.log(genusTaxId, reportData.counts[2][genusTaxId]);
       const speciesData = reportData.counts[2][genusTaxId].children.map(
         speciesTaxId => {
-          console.log(
-            "check hl",
-            speciesTaxId,
-            highlightedTaxIds.has(speciesTaxId),
-            highlightedTaxIds
-          );
           const isHighlighted = highlightedTaxIds.has(speciesTaxId);
           hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
           return merge(reportData.counts[1][speciesTaxId], {

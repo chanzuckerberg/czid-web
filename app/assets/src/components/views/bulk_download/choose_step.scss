@@ -19,14 +19,6 @@
   }
 }
 
-.loadingMessage {
-  color: $dark-grey;
-
-  .loadingIcon {
-    margin-right: 4px;
-  }
-}
-
 .downloadTypeContainer {
   margin-top: 20px;
   flex: 1 1 0;
@@ -60,6 +52,11 @@
     margin-top: 4px;
   }
 
+  .content {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
   .name {
     @include font-header-xs;
   }
@@ -72,9 +69,15 @@
 
 .fields {
   margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
 
   .field {
-    width: calc(50% - 20px);
+    width: calc(50% - 10px);
+
+    &:nth-child(odd) {
+      margin-right: 20px;
+    }
 
     .label {
       @include font-body-xs;

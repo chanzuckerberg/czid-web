@@ -57,8 +57,17 @@ class PortalDropdown extends React.Component {
     }
   };
 
+  // We use props.open if it's passed in, otherwise state.open.
+  // This allows the component to be controllable from the parent, but also
+  // work independently.
+  isOpen = () =>
+    this.props.open === undefined || this.props.open === null
+      ? this.state.open
+      : this.props.open;
+
   handleOutClick = () => {
     if (
+      this.isOpen() &&
       !(this._triggerRef && this._triggerRef.contains(event.target)) &&
       !(this._menuRef && this._menuRef.contains(event.target))
     ) {
@@ -67,10 +76,7 @@ class PortalDropdown extends React.Component {
   };
 
   render() {
-    const open =
-      this.props.open === undefined || this.props.open === null
-        ? this.state.open
-        : this.props.open;
+    const open = this.isOpen();
 
     return (
       <Manager>

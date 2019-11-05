@@ -12,7 +12,7 @@
 // redundant with props.items.customNode and props.children.
 import React from "react";
 import cx from "classnames";
-import { omit, zip, filter, map, nth, sortBy } from "lodash/fp";
+import { identity, omit, zip, filter, map, nth, sortBy } from "lodash/fp";
 import { forbidExtraProps } from "airbnb-prop-types";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import Input from "~ui/controls/Input";
@@ -23,6 +23,8 @@ import cs from "./bare_dropdown.scss";
 class BareDropdown extends React.Component {
   constructor(props) {
     super(props);
+
+    this.baseDropdownRef = React.createRef();
 
     this.state = {
       filterString: "",
@@ -111,6 +113,20 @@ class BareDropdown extends React.Component {
     }
   };
 
+  handleMenuClick = e => {
+    const { closeOnClick, search } = this.props;
+
+    if (!closeOnClick) {
+      // Ensure that the dropdown doesn't close when the menu is clicked
+      // if closeOnClick is false
+      e.stopPropagation();
+    } else if (search && this.baseDropdownRef.current) {
+      // When search is true, semantic-ui doesn't close the dropdown when the menu is clicked
+      // for some reason. Manually close it in this case.
+      this.baseDropdownRef.current.close();
+    }
+  };
+
   render() {
     const {
       arrowInsideTrigger,
@@ -126,6 +142,8 @@ class BareDropdown extends React.Component {
       children,
       onFilterChange,
       menuClassName,
+      disableAutocomplete,
+      trigger,
       ...otherProps
     } = this.props;
 
@@ -140,17 +158,43 @@ class BareDropdown extends React.Component {
 
     const { filterString } = this.state;
 
+    let wrappedTrigger = trigger;
+
+    // When search is true, semantic-ui doesn't close the dropdown when the trigger is clicked
+    // for some reason. Manually close it in this case.
+    if (this.props.search) {
+      // When search is true, inject an onClick handler onto the trigger element.
+      wrappedTrigger = React.cloneElement(trigger, {
+        onClick: () => {
+          // Manually close the base dropdown if it's open.
+          // NOTE: Accessing the state of a child component is generally bad practice.
+          // Doing it here only because it's a 3rd party component that doesn't support the behavior we want.
+          if (
+            this.props.search &&
+            this.baseDropdownRef.current &&
+            this.baseDropdownRef.current.state.open
+          ) {
+            this.baseDropdownRef.current.close();
+          }
+
+          // Make sure the trigger's original onClick handler is still called, if it was set.
+          if (trigger.props.onClick) {
+            trigger.props.onClick();
+          }
+        },
+      });
+    }
+
     // Allows you the flexibility to put stuff OTHER than a menu of options in the dropdown.
     if (!this.props.options && !this.props.items) {
       return (
         <BaseDropdown
           {...otherProps}
+          trigger={wrappedTrigger}
           className={dropdownClassName}
           onBlur={e => e.stopPropagation()}
         >
-          <BaseDropdown.Menu
-            onClick={!closeOnClick ? e => e.stopPropagation() : undefined}
-          >
+          <BaseDropdown.Menu onClick={this.handleMenuClick}>
             {children}
           </BaseDropdown.Menu>
         </BaseDropdown>
@@ -178,7 +222,7 @@ class BareDropdown extends React.Component {
           (menuLabel || search) && cs.extraPadding,
           menuClassName
         )}
-        onClick={!closeOnClick ? e => e.stopPropagation() : undefined}
+        onClick={this.handleMenuClick}
       >
         {menuLabel && <div className={cs.menuLabel}>{menuLabel}</div>}
         {search && (
@@ -192,6 +236,7 @@ class BareDropdown extends React.Component {
               icon="search"
               placeholder="Search"
               onChange={this.handleFilterChange}
+              disableAutocomplete={disableAutocomplete}
             />
           </div>
         )}
@@ -215,18 +260,26 @@ class BareDropdown extends React.Component {
           onOpen={this.props.onOpen}
           open={this.props.open}
           onClose={this.props.onClose}
-          trigger={this.props.trigger}
+          trigger={wrappedTrigger}
           triggerClassName={className}
           withinModal={this.props.withinModal}
         />
       );
     }
 
+    // When search is enabled, we need to tell semantic-ui that we are in search mode.
+    // Otherwise, pressing spacebar will cause the dropdown to close.
+    // See https://github.com/Semantic-Org/Semantic-UI-React/issues/3768
+    // This causes other issues. Specifically, now when you click on the trigger or any items,
+    // the dropdown no longer closes at all. You have to click outside the dropdown.
     return (
       <BaseDropdown
         {...baseDropdownProps}
+        trigger={wrappedTrigger}
         className={dropdownClassName}
         onBlur={e => e.stopPropagation()}
+        search={search ? identity : undefined}
+        ref={this.baseDropdownRef}
       >
         {menu}
       </BaseDropdown>
@@ -274,7 +327,7 @@ BareDropdown.propTypes = forbidExtraProps({
   // Props directly passed to semantic-ui.
   children: PropTypes.node,
   className: PropTypes.string,
-  direction: PropTypes.string,
+  direction: PropTypes.oneOf(["left", "right"]),
   disabled: PropTypes.bool,
   floating: PropTypes.bool,
   fluid: PropTypes.bool,
@@ -289,6 +342,7 @@ BareDropdown.propTypes = forbidExtraProps({
   open: PropTypes.bool,
   selectOnBlur: PropTypes.bool,
   trigger: PropTypes.node.isRequired,
+  disableAutocomplete: PropTypes.bool,
 });
 
 BareDropdown.defaultProps = {

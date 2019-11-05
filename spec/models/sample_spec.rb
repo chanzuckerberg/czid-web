@@ -9,6 +9,10 @@ describe Sample, type: :model do
   let(:file_two_href_content) { "https://basespace.amazonaws.com/abc123/sample_two.fastq.gz" }
   let(:file_two_href) { "https://api.basespace.illumina.com/v2/files/2" }
 
+  let(:file_three_name) { "sample_three.fastq.gz" }
+  let(:file_three_href_content) { "https://basespace.amazonaws.com/abc123/sample_three.fastq.gz" }
+  let(:file_three_href) { "https://api.basespace.illumina.com/v2/files/3" }
+
   let(:fake_dataset_id) { "fake_dataset_id" }
   let(:fake_access_token) { "fake_access_token" }
 
@@ -112,6 +116,39 @@ describe Sample, type: :model do
         # Check that the proper error message is logged.
         expect(LogUtil).to receive(:log_err_and_airbrake).with(
           "SampleUploadFailedEvent: Validation failed: Input files have identical read 1 source and read 2 source"
+        ).exactly(1).times
+
+        @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)
+
+        expect(@sample.status).to eq(Sample::STATUS_CHECKED)
+        expect(@sample.upload_error).to eq(Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED)
+        expect(@sample.input_files.length).to be 0
+      end
+
+      it "runs the input file checks and fails if Basespace returns more than two input files" do
+        expect(@sample).to receive(:files_for_basespace_dataset).exactly(1).times.and_return([
+                                                                                               {
+                                                                                                 name: file_one_name,
+                                                                                                 download_path: file_one_href_content,
+                                                                                                 source_path: file_one_href,
+                                                                                               },
+                                                                                               {
+                                                                                                 name: file_two_name,
+                                                                                                 download_path: file_two_href_content,
+                                                                                                 source_path: file_two_href,
+                                                                                               },
+                                                                                               {
+                                                                                                 name: file_three_name,
+                                                                                                 download_path: file_three_href_content,
+                                                                                                 source_path: file_three_href,
+                                                                                               },
+                                                                                             ])
+
+        expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(3).times.and_return(2)
+        expect(@sample).to receive(:kickoff_pipeline).exactly(0).times
+        # Check that the proper error message is logged.
+        expect(LogUtil).to receive(:log_err_and_airbrake).with(
+          "SampleUploadFailedEvent: Validation failed: Input files invalid number (3)"
         ).exactly(1).times
 
         @sample.transfer_basespace_files(fake_dataset_id, fake_access_token)

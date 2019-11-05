@@ -15,6 +15,7 @@ class LiveSearchPopBox extends React.Component {
       results: [],
       value: this.props.initialValue,
       selectedResult: null,
+      currentResult: "", // either string or object
     };
 
     this.lastestTimerId = null;
@@ -43,16 +44,13 @@ class LiveSearchPopBox extends React.Component {
     }
   };
 
-  resetComponent = () => {
-    this.setState({
-      isLoading: false,
-      results: [],
-    });
-  };
-
   handleResultSelect = ({ currentEvent, result }) => {
     const { onResultSelect } = this.props;
-    this.resetComponent();
+    this.setState({
+      isLoading: false,
+      currentResult: result,
+      focus: false, // close the dropdown
+    });
     onResultSelect && onResultSelect({ currentEvent, result });
   };
 
@@ -60,7 +58,7 @@ class LiveSearchPopBox extends React.Component {
     const { onSearchTriggered } = this.props;
     const { value } = this.state;
 
-    this.setState({ isLoading: true, selectedResult: null });
+    this.setState({ isLoading: true, selectedResult: null, focus: true });
 
     const timerId = this.lastestTimerId;
     const results = await onSearchTriggered(value);
@@ -75,8 +73,12 @@ class LiveSearchPopBox extends React.Component {
 
   handleSearchChange = value => {
     const { delayTriggerSearch, minChars, onSearchChange } = this.props;
-
-    this.setState({ value });
+    this.setState({
+      value,
+      // Set the currentResult to the plain text value so that if the user
+      // focuses out of the input, the value will be saved.
+      currentResult: value,
+    });
     onSearchChange && onSearchChange(value);
     // check minimum requirements for value
     const parsedValue = value.trim();
@@ -99,22 +101,38 @@ class LiveSearchPopBox extends React.Component {
   renderSearchBox = () => {
     const { placeholder, rectangular, inputClassName } = this.props;
     const { isLoading, value } = this.state;
+
     return (
-      <Input
-        fluid
-        className={cx(
-          cs.searchInput,
-          rectangular && cs.rectangular,
-          inputClassName
-        )}
-        icon="search"
-        loading={isLoading}
-        placeholder={placeholder}
-        onChange={this.handleSearchChange}
-        onKeyPress={this.handleKeyDown}
-        value={value}
-      />
+      <div onFocus={this.handleFocus} onBlur={this.handleBlur}>
+        <Input
+          fluid
+          className={cx(
+            cs.searchInput,
+            rectangular && cs.rectangular,
+            inputClassName
+          )}
+          icon="search"
+          loading={isLoading}
+          placeholder={placeholder}
+          onChange={this.handleSearchChange}
+          onKeyPress={this.handleKeyDown}
+          value={value}
+          disableAutocomplete={true}
+        />
+      </div>
     );
+  };
+
+  handleFocus = _ => {
+    this.setState({ focus: true }); // open the dropdown
+  };
+
+  handleBlur = currentEvent => {
+    // Call handleResultSelect again to give a chance for warnings to show
+    this.handleResultSelect({
+      currentEvent,
+      result: this.state.currentResult,
+    });
   };
 
   buildItem = (categoryKey, result, index) => (
@@ -128,9 +146,10 @@ class LiveSearchPopBox extends React.Component {
           )}
         </div>
       }
-      onClick={currentEvent =>
-        this.handleResultSelect({ currentEvent, result })
-      }
+      onMouseDown={currentEvent => {
+        // use onMouseDown instead of onClick to work with handleBlur
+        this.handleResultSelect({ currentEvent, result });
+      }}
       value={`${categoryKey}-${index}`}
     />
   );
@@ -164,6 +183,11 @@ class LiveSearchPopBox extends React.Component {
   render() {
     const { className, rectangular } = this.props;
 
+    const shouldOpen =
+      this.getResultsLength() &&
+      this.state.focus &&
+      this.state.value.trim().length >= this.props.minChars;
+
     return (
       <BareDropdown
         className={cx(
@@ -175,17 +199,18 @@ class LiveSearchPopBox extends React.Component {
         hideArrow
         items={this.renderDropdownItems()}
         onChange={this.handleResultSelect}
-        open={this.getResultsLength() ? null : false}
+        open={shouldOpen ? true : false}
         trigger={this.renderSearchBox()}
         usePortal
         withinModal
+        disableAutocomplete={true}
       />
     );
   }
 }
 
 LiveSearchPopBox.defaultProps = {
-  delayTriggerSearch: 1000,
+  delayTriggerSearch: 200,
   initialValue: "",
   minChars: 2,
   placeholder: "Search",

@@ -101,7 +101,7 @@
 
     .sampleNameAndStatus {
       display: flex;
-      justify-items: center;
+      align-items: center;
       margin-bottom: 1px;
 
       .sampleName {
@@ -116,32 +116,7 @@
       }
 
       .sampleStatus {
-        align-self: center;
-        background-color: $lightest-grey;
-        border-radius: 13px;
-        color: $medium-grey;
-        flex: 0 0 auto;
-        font-size: 9px;
-        line-height: 1;
-        margin-left: 6px;
-        padding: 3px 5px;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-
-        &.success {
-          background-color: $success-bg;
-          color: $success;
-        }
-
-        &.error {
-          background-color: $error-bg;
-          color: $error;
-        }
-
-        &.warning {
-          background-color: $warning-bg;
-          color: $warning;
-        }
+        margin-left: $space-xxs;
       }
     }
 

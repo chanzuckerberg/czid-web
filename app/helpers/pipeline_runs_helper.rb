@@ -54,6 +54,9 @@ module PipelineRunsHelper
     },
   }.freeze
 
+  PIPELINE_RUN_STILL_RUNNING_ERROR = "PIPELINE_RUN_STILL_RUNNING_ERROR".freeze
+  PIPELINE_RUN_FAILED_ERROR = "PIPELINE_RUN_FAILED_ERROR".freeze
+
   def aegea_batch_submit_command(base_command,
                                  memory: Sample::DEFAULT_MEMORY_IN_MB,
                                  vcpus: Sample::DEFAULT_VCPUS,
@@ -63,7 +66,8 @@ module PipelineRunsHelper
                                  stage_name: "misc")
     command = "aegea batch submit --command=#{Shellwords.escape(base_command)} "
     command += " --name=idseq-#{Rails.env}-#{sample_id}-#{stage_name} "
-    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image #{Shellwords.escape(docker_image)} --memory #{memory} --queue #{Shellwords.escape(job_queue)} --vcpus #{vcpus} --job-role idseq-pipeline "
+    command += " --ecr-image #{Shellwords.escape(docker_image)} --memory #{memory} --queue #{Shellwords.escape(job_queue)} --vcpus #{vcpus} --job-role idseq-pipeline "
+    command += " --mount-instance-storage "
     command
   end
 
@@ -126,7 +130,7 @@ module PipelineRunsHelper
 
   def install_pipeline(commit_or_branch)
     "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
-    "cd /mnt; " \
+    "cd /mnt; rm -rf idseq/results; df -h; " \
     "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
     "cd idseq-dag; " \
     "git checkout #{Shellwords.escape(commit_or_branch)}; " \
@@ -220,5 +224,30 @@ module PipelineRunsHelper
       return [error_code, nil]
     end
     [nil, nil]
+  end
+
+  # Return all pipeline runs that have succeeded for given samples
+  # Only check the first pipeline run.
+  # samples should be an ActiveRecord relation
+  # If strict mode is turned on, error out even if one pipeline run did not succeed.
+  # Note: Does NOT do access control checks.
+  def get_succeeded_pipeline_runs_for_samples(samples, strict = false)
+    # Gets the first pipeline runs for multiple samples in an efficient way.
+    created_dates = PipelineRun.select("sample_id, MAX(created_at) as created_at").where(sample_id: samples.pluck(:id)).group(:sample_id)
+    valid_pipeline_runs = PipelineRun
+                          .select(:finalized, :id, :job_status)
+                          .where("(sample_id, created_at) IN (?)", created_dates)
+                          .where(finalized: 1)
+
+    if strict && valid_pipeline_runs.length != samples.length
+      raise PIPELINE_RUN_STILL_RUNNING_ERROR
+    end
+
+    valid_pipeline_runs = valid_pipeline_runs.select(&:succeeded?)
+    if strict && valid_pipeline_runs.length != samples.length
+      raise PIPELINE_RUN_FAILED_ERROR
+    end
+
+    return valid_pipeline_runs
   end
 end

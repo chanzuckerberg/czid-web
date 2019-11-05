@@ -1,0 +1,41 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.bulkDownloadSummary {
+  background-color: $off-white;
+  padding: 14px;
+
+  .title {
+    display: flex;
+
+    .name {
+      @include font-header-xs-crop;
+    }
+
+    .numSamples {
+      @include font-body-xs-crop;
+      color: $medium-grey;
+    }
+  }
+
+  .params {
+    display: flex;
+    margin-top: $space-l;
+
+    .param {
+      flex: 1 1 0;
+      min-width: 0;
+
+      .name {
+        @include font-body-xs-crop;
+        margin-bottom: $space-xxxs;
+      }
+
+      .value {
+        @include font-body-xs-crop;
+        color: $medium-grey;
+      }
+    }
+  }
+}

@@ -60,6 +60,21 @@
     }
   }
 
+  // Since we have our own custom search input,
+  // hide the semantic-ui search input.
+  :global(.search) {
+    display: none;
+  }
+
+  // semantic-ui applies max-height when search is true.
+  // We have our max-height on .innerMenu, so override this max-height
+  // to prevent double scrollbars.
+  &:global(.search) {
+    .menu {
+      max-height: none;
+    }
+  }
+
   .item {
     cursor: pointer;
 

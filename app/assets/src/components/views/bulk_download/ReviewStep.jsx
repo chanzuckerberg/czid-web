@@ -1,23 +1,75 @@
 import React from "react";
-import PropTypes from "prop-types";
-import { get, find } from "lodash/fp";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import PropTypes from "~/components/utils/propTypes";
+import cx from "classnames";
 
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { createBulkDownload } from "~/api/bulk_downloads";
+import Notification from "~ui/notifications/Notification";
+import LoadingMessage from "~/components/common/LoadingMessage";
+import { openUrl } from "~utils/links";
+
+import BulkDownloadSummary from "./BulkDownloadSummary";
 import cs from "./review_step.scss";
 
 class ReviewStep extends React.Component {
-  renderDownloadField = (field, value) => {
-    const { downloadType } = this.props;
-    const fieldDisplayName =
-      get("display_name", find(["type", field], downloadType.fields)) || "";
+  state = {
+    // Whether we are waiting for the createBulkDownload call to complete.
+    waitingForCreate: false,
+    createStatus: null,
+    createError: "",
+  };
+
+  createBulkDownload = async () => {
+    const { selectedDownload } = this.props;
+    this.setState({
+      waitingForCreate: true,
+    });
+
+    try {
+      await createBulkDownload(selectedDownload);
+    } catch (e) {
+      this.setState({
+        waitingForCreate: false,
+        createStatus: "error",
+        createError: e.error,
+      });
+      return;
+    }
+
+    openUrl("/bulk_downloads");
+  };
+
+  backLinkEnabled = () =>
+    !this.state.waitingForCreate && this.state.createStatus === null;
+
+  renderFooter = () => {
+    const { waitingForCreate, createStatus, createError } = this.state;
+
+    if (waitingForCreate) {
+      return <LoadingMessage message="Starting your download..." />;
+    }
+
+    if (createStatus === "error") {
+      return <Notification type="error">{createError}</Notification>;
+    }
 
     return (
-      <div className={cs.field}>
-        <div className={cs.name}>{fieldDisplayName}</div>
-        <div className={cs.value}>{value}</div>
-      </div>
+      <React.Fragment>
+        <PrimaryButton
+          text="Start Generating Download"
+          onClick={this.createBulkDownload}
+        />
+        <div className={cs.downloadDisclaimer}>
+          Downloads for larger files can take multiple hours to generate.
+        </div>
+      </React.Fragment>
     );
   };
+
+  getDownloadSummary = selectedDownload => ({
+    params: selectedDownload.fields,
+    numSamples: selectedDownload.sampleIds.length,
+  });
 
   render() {
     const { selectedDownload, downloadType, onBackClick } = this.props;
@@ -26,31 +78,19 @@ class ReviewStep extends React.Component {
       <div className={cs.reviewStep}>
         <div className={cs.header}>
           <div className={cs.title}>Review Your Download</div>
-          <div className={cs.editLink} onClick={onBackClick}>
+          <div
+            className={cx(cs.editLink, this.backLinkEnabled() && cs.enabled)}
+            onClick={this.backLinkEnabled() ? onBackClick : undefined}
+          >
             Edit download
           </div>
         </div>
-        <div className={cs.selectedDownload}>
-          <div className={cs.title}>
-            <div className={cs.name}>{downloadType.display_name}</div>
-            <div className={cs.numSamples}>
-              &nbsp;for {selectedDownload.sampleIds.length} samples
-            </div>
-          </div>
-          {selectedDownload.fields && (
-            <div className={cs.fields}>
-              {Object.entries(selectedDownload.fields).map(([key, value]) =>
-                this.renderDownloadField(key, value)
-              )}
-            </div>
-          )}
-        </div>
-        <div className={cs.footer}>
-          <PrimaryButton text="Start Generating Download" />
-          <div className={cs.downloadDisclaimer}>
-            Downloads for larger files can take multiple hours to generate.
-          </div>
-        </div>
+        <BulkDownloadSummary
+          className={cs.selectedDownload}
+          downloadSummary={this.getDownloadSummary(selectedDownload)}
+          downloadType={downloadType}
+        />
+        <div className={cs.footer}>{this.renderFooter()}</div>
       </div>
     );
   }
@@ -58,22 +98,11 @@ class ReviewStep extends React.Component {
 
 ReviewStep.propTypes = {
   selectedDownload: PropTypes.shape({
-    type: PropTypes.string.isRequired,
-    fields: PropTypes.object,
+    downloadType: PropTypes.string.isRequired,
+    fields: PropTypes.objectOf(PropTypes.DownloadTypeParam),
     sampleIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   }).isRequired,
-  downloadType: PropTypes.shape({
-    type: PropTypes.string,
-    display_name: PropTypes.string,
-    description: PropTypes.string,
-    category: PropTypes.string,
-    fields: PropTypes.arrayOf(
-      PropTypes.shape({
-        type: PropTypes.string,
-        display_name: PropTypes.string,
-      })
-    ),
-  }),
+  downloadType: PropTypes.DownloadType,
   onBackClick: PropTypes.func.isRequired,
 };
 

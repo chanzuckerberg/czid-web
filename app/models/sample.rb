@@ -131,7 +131,9 @@ class Sample < ApplicationRecord
 
   def input_files_checks
     # validate that we have the correct number of input files
-    errors.add(:input_files, "invalid number") unless input_files.size.between?(1, 2) || uploaded_from_basespace?
+    errors.add(:input_files, "invalid number (#{input_files.size})") unless
+      input_files.size.between?(1, 2) || (uploaded_from_basespace? && input_files.empty?)
+
     # validate that both input files have the same source_type and file_type
     if input_files.length == 2
       errors.add(:input_files, "have different source types") unless input_files[0].source_type == input_files[1].source_type
@@ -457,7 +459,7 @@ class Sample < ApplicationRecord
   end
 
   def sample_input_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/fastqs"
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/fastqs"
   end
 
   def filter_host_flag
@@ -469,7 +471,7 @@ class Sample < ApplicationRecord
   end
 
   def sample_output_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/results"
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/results"
   end
 
   def sample_alignment_output_s3_path
@@ -492,14 +494,14 @@ class Sample < ApplicationRecord
   end
 
   def sample_postprocess_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/postprocess"
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/postprocess"
   end
 
   # This is for the "Experimental" pipeline run stage and path where results
   # for this stage are outputted. Currently, Antimicrobial Resistance
   # outputs are in this path.
   def sample_expt_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/expt"
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/expt"
   end
 
   def host_genome_name
@@ -914,5 +916,9 @@ class Sample < ApplicationRecord
   # error messages.
   def status_url
     UrlUtil.absolute_base_url + "/samples/#{id}/pipeline_runs"
+  end
+
+  def input_file_s3_paths
+    input_files.map { |input_file| "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}" }
   end
 end

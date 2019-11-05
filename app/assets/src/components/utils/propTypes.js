@@ -105,6 +105,25 @@ const Location = PropTypes.shape({
 
 const SampleUploadType = PropTypes.oneOf(["basespace", "local", "remote"]);
 
+// Bulk download types
+const DownloadType = PropTypes.shape({
+  type: PropTypes.string,
+  display_name: PropTypes.string,
+  description: PropTypes.string,
+  category: PropTypes.string,
+  fields: PropTypes.arrayOf(
+    PropTypes.shape({
+      type: PropTypes.string,
+      display_name: PropTypes.string,
+    })
+  ),
+});
+
+const DownloadTypeParam = PropTypes.shape({
+  displayName: PropTypes.string,
+  value: PropTypes.string,
+});
+
 export default {
   ReportDetails,
   Taxon,
@@ -118,5 +137,7 @@ export default {
   HostGenome,
   Location,
   SampleUploadType,
+  DownloadType,
+  DownloadTypeParam,
   ...PropTypes,
 };

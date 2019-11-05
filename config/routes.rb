@@ -118,7 +118,13 @@ Rails.application.routes.draw do
 
   get 'samples/:sample_id/pipeline_viz(/:pipeline_version)', to: 'pipeline_viz#show',
                                                              constraints: { pipeline_version: /\d+\.\d+/ } # To allow period in pipeline version parameter
-  get 'bulk_downloads/types', to: 'bulk_downloads#types'
+  resources :bulk_downloads, only: [:create, :index, :show] do
+    get :types, on: :collection
+    get :presigned_output_url, on: :member
+  end
+  post 'bulk_downloads/:id/success/:access_token', to: 'bulk_downloads#success_with_token', as: :bulk_downloads_success
+  post 'bulk_downloads/:id/error/:access_token', to: 'bulk_downloads#error_with_token', as: :bulk_downloads_error
+  post 'bulk_downloads/:id/progress/:access_token', to: 'bulk_downloads#progress_with_token', as: :bulk_downloads_progress
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

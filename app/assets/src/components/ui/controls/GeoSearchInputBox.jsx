@@ -9,12 +9,14 @@ import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 export const LOCATION_PRIVACY_WARNING =
   "Changed to county/district level for personal privacy.";
 export const LOCATION_UNRESOLVED_WARNING =
-  "Unresolved plain text, not shown on maps.";
+  // this is the max length to appear on one line
+  "No match. Sample will not appear on maps.";
 
 // Process location selections and add warnings.
 export const processLocationSelection = (result, isHuman) => {
   let warning = "";
   if (isHuman && get("geo_level", result) === "city") {
+    result = Object.assign({}, result); // make a copy to avoid side effects
     // For human samples, drop the city part of the name and show a warning.
     // NOTE: The backend will redo the geosearch for confirmation and re-apply
     // this restriction.
@@ -62,8 +64,9 @@ class GeoSearchInputBox extends React.Component {
   // Fetch geosearch results and format into categories for LiveSearchBox
   handleSearchTriggered = async query => {
     let categories = {};
+    let serverSideSuggestions = [];
     try {
-      const serverSideSuggestions = await getGeoSearchSuggestions(query);
+      serverSideSuggestions = await getGeoSearchSuggestions(query);
       // Semantic UI Search expects results as: `{ category: { name: '', results: [{ title: '', description: '' }] }`
       if (serverSideSuggestions.length > 0) {
         const locationsCategory = "Location Results";
@@ -94,7 +97,12 @@ class GeoSearchInputBox extends React.Component {
     }
 
     // Let users select an unresolved plain text option
-    let noMatchName = "Plain Text (No Location Match)";
+    let noMatchName = "";
+    if (serverSideSuggestions.length > 0) {
+      noMatchName = "Use Plain Text (No Location Match)";
+    } else {
+      noMatchName = "No Results (Use Plain Text)";
+    }
     categories[noMatchName] = {
       name: noMatchName,
       results: [{ title: query, name: query }],
@@ -139,7 +147,7 @@ class GeoSearchInputBox extends React.Component {
         onResultSelect={this.handleResultSelected}
         onSearchChange={this.handleSearchChange}
         onSearchTriggered={this.handleSearchTriggered}
-        placeholder="Enter a location"
+        placeholder="Enter a city, region, or country"
         rectangular
         value={isString(value) ? value : value.name}
       />

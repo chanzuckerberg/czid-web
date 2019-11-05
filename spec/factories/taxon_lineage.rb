@@ -7,6 +7,8 @@ FactoryBot.define do
       sequence(:tax_name) { |n| "species-#{n}" }
       species_taxid { taxid }
       species_name { tax_name }
+      version_start { 1 }
+      version_end { 1 }
     end
   end
 end

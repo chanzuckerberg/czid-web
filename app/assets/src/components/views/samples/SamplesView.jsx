@@ -199,6 +199,7 @@ class SamplesView extends React.Component {
         disabled
         icon={heatmapIcon}
         popupText="Heatmap"
+        popupSubtitle="Select at least 2 samples"
       />
     ) : (
       <BareDropdown
@@ -316,6 +317,7 @@ class SamplesView extends React.Component {
         disabled
         icon={saveIcon}
         popupText={"Save a Collection"}
+        popupSubtitle="Select at least 2 samples"
       />
     ) : (
       <CollectionModal

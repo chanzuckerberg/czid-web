@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .reviewStep {
   .header {
@@ -9,48 +10,17 @@
 
     .editLink {
       @include font-body-xs;
-      color: $primary-light;
-      cursor: pointer;
+      color: $light-grey;
+
+      &.enabled {
+        color: $primary-light;
+        cursor: pointer;
+      }
     }
   }
 
   .selectedDownload {
-    background-color: $off-white;
-    padding: 14px;
     margin-top: 20px;
-
-    .title {
-      display: flex;
-
-      .name {
-        @include font-header-xs;
-      }
-
-      .numSamples {
-        @include font-body-xs;
-        color: $medium-grey;
-      }
-    }
-
-    .fields {
-      display: flex;
-      margin: 10px 0 15px;
-
-      .field {
-        flex: 1 1 0;
-        min-width: 0;
-
-        .name {
-          @include font-body-xs;
-        }
-
-        .value {
-          @include font-body-xs;
-          color: $medium-grey;
-          margin-top: -2px;
-        }
-      }
-    }
   }
 
   .footer {
@@ -59,7 +29,7 @@
     .downloadDisclaimer {
       @include font-body-xxs;
       color: $medium-grey;
-      margin-top: 6px;
+      margin-top: $space-xxs;
     }
   }
 }

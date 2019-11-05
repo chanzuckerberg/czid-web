@@ -2,7 +2,6 @@ class SamplesController < ApplicationController
   include ApplicationHelper
   include ElasticsearchHelper
   include ErrorHelper
-  include HeatmapHelper
   include LocationHelper
   include PipelineOutputsHelper
   include ReportHelper
@@ -46,6 +45,9 @@ class SamplesController < ApplicationController
   before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
   before_action :check_owner, only: OWNER_ACTIONS
   before_action :check_access
+  before_action only: :show_v2 do
+    allowed_feature_required("report_v2")
+  end
 
   around_action :instrument_with_timer
 
@@ -760,9 +762,9 @@ class SamplesController < ApplicationController
   end
 
   def report_v2
-    @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample)
-    render json: SampleReportService.new(@pipeline_run.id, background_id).generate
+    render json: PipelineReportService.call(pipeline_run.id, background_id)
   end
 
   # The json response here should be precached in PipelineRun.

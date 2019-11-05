@@ -3,6 +3,7 @@
 $box-shadow-bottom-right: 0px 2px 8px $box-shadow-light;
 $box-shadow-dropdown-menu: 0 2px 4px 0 $box-shadow-lighter,
   0 2px 10px 0 $box-shadow-lighter;
+$box-shadow-tab-bottom: 0 2px 2px 0 $box-shadow-light;
 
 $narrow-container-width: 1280px;
 $narrow-container-margin: 14px;
@@ -11,12 +12,13 @@ $header-margin-bottom: 10px;
 $header-total-height: $header-height + $header-margin-bottom;
 
 $space-default: 10px;
+$space-xxxs: 4px;
 $space-xxs: 6px;
 $space-xs: 8px;
 $space-s: 10px;
 $space-m: 14px;
-$space-l: 26px;
-$space-xl: 40px;
+$space-l: 22px;
+$space-xl: 38px;
 
 // Customized scroll bar
 @mixin scrollable {

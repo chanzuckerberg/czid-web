@@ -1,3 +1,267 @@
+require 'shellwords'
+
 class BulkDownload < ApplicationRecord
+  include AppConfigHelper
+  include Rails.application.routes.url_helpers
   has_and_belongs_to_many :pipeline_runs
+  belongs_to :user
+  has_secure_token :access_token
+
+  STATUS_WAITING = "waiting".freeze
+  STATUS_RUNNING = "running".freeze
+  STATUS_ERROR = "error".freeze
+  STATUS_SUCCESS = "success".freeze
+  OUTPUT_DOWNLOAD_EXPIRATION = 86_400 # seconds
+
+  before_save :convert_params_to_json
+
+  attr_accessor :params
+
+  validates :status, presence: true, inclusion: { in: [STATUS_WAITING, STATUS_RUNNING, STATUS_ERROR, STATUS_SUCCESS] }
+
+  def convert_params_to_json
+    # We need the params in object form during validation.
+    # Convert params to JSON right before saving.
+    if params
+      self.params_json = params.to_json
+    end
+  end
+
+  def set_params
+    if params_json
+      self.params = JSON.parse(params_json)
+    end
+  end
+
+  # Only bulk downloads created by the user
+  def self.viewable(user)
+    user.bulk_downloads
+  end
+
+  def validate_access_token(access_token)
+    return self.access_token.present? && self.access_token == access_token
+  end
+
+  def output_file_presigned_url
+    begin
+      return S3_PRESIGNER.presigned_url(:get_object,
+                                        bucket: ENV['SAMPLES_BUCKET_NAME'],
+                                        key: download_output_key,
+                                        expires_in: OUTPUT_DOWNLOAD_EXPIRATION).to_s
+    rescue StandardError => e
+      LogUtil.log_err_and_airbrake("BulkDownloadPresignError: #{e.inspect}")
+    end
+    nil
+  end
+
+  def server_host
+    ENV["SERVER_DOMAIN"]
+  end
+
+  # The Rails success url that the s3_tar_writer task can ping once it succeeds.
+  def success_url
+    return nil if server_host.blank?
+    "#{server_host}#{bulk_downloads_success_path(access_token: access_token, id: id)}"
+  end
+
+  # The Rails error url that the s3_tar_writer task can ping if it fails.
+  def error_url
+    return nil if server_host.blank?
+    "#{server_host}#{bulk_downloads_error_path(access_token: access_token, id: id)}"
+  end
+
+  # The Rails progress url that the s3_tar_writer task can ping to update progress.
+  def progress_url
+    return nil if server_host.blank?
+    "#{server_host}#{bulk_downloads_progress_path(access_token: access_token, id: id)}"
+  end
+
+  # Returned as an array of strings
+  def aegea_ecs_submit_command(
+    shell_command,
+    task_role: "idseq-downloads-#{Rails.env}",
+    ecr_image: "idseq-s3-tar-writer:latest",
+    fargate_cpu: "4096",
+    fargate_memory: "8192"
+  )
+    config_ecr_image = get_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE)
+    unless config_ecr_image.nil?
+      ecr_image = config_ecr_image
+    end
+    shell_command_escaped = shell_command.map { |s| Shellwords.escape(s) }.join(" ")
+    ["aegea", "ecs", "run",
+     "--command=#{shell_command_escaped}",
+     "--task-role", task_role,
+     "--task-name", "bulk_download_#{id}",
+     "--ecr-image", ecr_image,
+     "--fargate-cpu", fargate_cpu,
+     "--fargate-memory", fargate_memory,]
+  end
+
+  # Returned as an array of strings
+  def s3_tar_writer_command(
+    src_urls,
+    tar_names,
+    dest_url,
+    success_url: self.success_url,
+    error_url: self.error_url,
+    progress_url: self.progress_url
+  )
+    command = ["python", "s3_tar_writer.py",
+               "--src-urls", *src_urls,
+               "--tar-names", *tar_names,
+               "--dest-url", dest_url,]
+
+    # The success url is mandatory.
+    if success_url
+      command += ["--success-url", success_url]
+    else
+      raise BulkDownloadsHelper::SUCCESS_URL_REQUIRED
+    end
+    if error_url
+      command += ["--error-url", error_url]
+    end
+    if progress_url
+      command += ["--progress-url", progress_url]
+    end
+    command
+  end
+
+  def download_output_key
+    "downloads/#{id}/#{BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPE_TO_DISPLAY_NAME[download_type]}.tar.gz"
+  end
+
+  # The s3 url that the tar.gz file will be uploaded to.
+  def download_output_url
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{download_output_key}"
+  end
+
+  def kickoff_ecs_task(
+    shell_command
+  )
+    aegea_command = aegea_ecs_submit_command(shell_command)
+
+    command_stdout, command_stderr, status = Open3.capture3(*aegea_command)
+    if status.exitstatus.zero?
+      output = JSON.parse(command_stdout)
+      # Store the taskArn for debugging purposes.
+      self.ecs_task_arn = output['taskArn']
+      self.status = STATUS_RUNNING
+      save!
+    else
+      self.status = STATUS_ERROR
+      self.error_message = BulkDownloadsHelper::KICKOFF_FAILURE
+      save!
+      raise command_stderr
+    end
+  end
+
+  def get_param_value(key)
+    # If params is nil, try to set it from params_json
+    if params.nil? && params_json.present?
+      self.params = JSON.parse(params_json)
+    end
+    if params.present?
+      return params.dig(key, "value")
+    end
+  end
+
+  # cleaned_project_names is a map from project id to cleaned project name
+  def get_output_file_prefix(sample, cleaned_project_names)
+    "#{sample.name}__" \
+      "#{cleaned_project_names[sample.project_id]}_#{sample.project_id}__"
+  end
+
+  def bulk_download_ecs_task_command
+    samples = Sample.where(id: pipeline_runs.map(&:sample_id))
+    projects = Project.where(id: samples.pluck(:project_id))
+
+    # Compute cleaned project name once instead of once per sample.
+    cleaned_project_names = {}
+    projects.each do |project|
+      cleaned_project_names[project.id] = project.cleaned_project_name
+    end
+
+    download_src_urls = nil
+    download_tar_names = nil
+
+    if download_type == BulkDownloadTypesHelper::ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE
+      samples = samples.includes(:input_files)
+
+      download_src_urls = samples.map(&:input_file_s3_paths).flatten
+
+      # We use the sample name in the output file names (instead of the original input file names)
+      # because the sample name is what's visible to the user.
+      # Also, there might be duplicates between the original file names.
+      download_tar_names = samples.map do |sample|
+        # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
+        sample.input_files.map.with_index do |input_file, input_file_index|
+          # Include the project id because the cleaned project names might have duplicates as well.
+          "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+            "original_R#{input_file_index + 1}.#{input_file.file_type}"
+        end
+      end.flatten
+    end
+
+    if download_type == BulkDownloadTypesHelper::UNMAPPED_READS_BULK_DOWNLOAD_TYPE
+      download_src_urls = pipeline_runs.map(&:unidentified_fasta_s3_path)
+
+      download_tar_names = samples.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+          "unmapped.fasta"
+      end
+    end
+
+    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fasta"
+      download_src_urls = pipeline_runs.map(&:annotated_fasta_s3_path)
+
+      download_tar_names = samples.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+          "reads_nonhost_all.fasta"
+      end
+    end
+
+    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fastq"
+      pipeline_runs_with_assocs = pipeline_runs.includes(sample: [:input_files])
+
+      download_src_urls = pipeline_runs_with_assocs.map(&:nonhost_fastq_s3_paths).flatten
+
+      download_tar_names = pipeline_runs_with_assocs.map do |pipeline_run|
+        sample = pipeline_run.sample
+        file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+        # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
+        sample.input_files.map.with_index do |_input_file, input_file_index|
+          # Include the project id because the cleaned project names might have duplicates as well.
+          "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+            "reads_nonhost_all_R#{input_file_index + 1}.#{file_ext}"
+        end
+      end.flatten
+    end
+
+    if download_type == BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
+      download_src_urls = pipeline_runs.map(&:contigs_fasta_s3_path)
+
+      download_tar_names = samples.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+            "contigs_nonhost_all.fasta"
+      end
+    end
+
+    if !download_src_urls.nil? && !download_tar_names.nil?
+      return s3_tar_writer_command(
+        download_src_urls,
+        download_tar_names,
+        download_output_url
+      )
+    end
+
+    return nil
+  end
+
+  def kickoff
+    ecs_task_command = bulk_download_ecs_task_command
+    unless ecs_task_command.nil?
+      kickoff_ecs_task(ecs_task_command)
+    end
+  end
 end

@@ -1,0 +1,102 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~styles/themes/colors";
+
+.downloadCell {
+  display: flex;
+  text-align: left;
+
+  .downloadIcon {
+    width: 30px;
+    height: 22px;
+    margin-right: $space-xs;
+    fill: $light-grey;
+  }
+
+  .downloadRightPane {
+    padding: $space-xxs 0;
+
+    .downloadNameContainer {
+      display: flex;
+      align-items: center;
+      margin-bottom: $space-xs;
+    }
+
+    .downloadName {
+      @include font-header-s-crop;
+    }
+
+    .downloadStatus {
+      margin-left: $space-xxs;
+    }
+
+    .sampleCount {
+      @include font-body-xxs-crop;
+      color: $medium-grey;
+      cursor: pointer;
+
+      &:hover {
+        color: $black;
+      }
+    }
+  }
+}
+
+.statusCell {
+  margin-bottom: 2px;
+
+  .messageContainer,
+  .links {
+    display: flex;
+    align-items: center;
+  }
+
+  .messageContainer {
+    margin-bottom: $space-xs;
+  }
+
+  .icon {
+    width: 16px;
+    margin-right: $space-xxs;
+    fill: $success;
+
+    &.warning {
+      fill: $warning;
+    }
+
+    &.error {
+      fill: $error;
+      margin-bottom: 1px;
+    }
+
+    &.loading {
+      color: $primary-light;
+      margin-right: 4px;
+    }
+  }
+
+  .warningTooltip {
+    @include font-body-xxs-crop;
+    margin-left: $space-xxs;
+    color: $medium-grey;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+  }
+
+  .message {
+    @include font-body-xxs-crop;
+  }
+
+  .separator {
+    @include font-body-xxs-crop;
+    margin: 0 $space-xs;
+    color: $medium-grey;
+  }
+
+  .link {
+    @include font-label-s-crop;
+    /* overwrite header.scss */
+    color: $primary-light !important;
+    cursor: pointer;
+  }
+}

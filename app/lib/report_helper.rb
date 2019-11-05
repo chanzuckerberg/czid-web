@@ -36,7 +36,7 @@ module ReportHelper
   METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue aggregatescore maxzscore r_pct rpm_bg].freeze
   COUNT_TYPES = %w[NT NR].freeze
   # Note: no underscore in sortable column names. Add to here to protect from data cleaning.
-  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid family_taxid superkingdom_taxid category_name is_phage].freeze
+  PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid genus_name family_taxid superkingdom_taxid category_name is_phage].freeze
   UNUSED_IN_UI_FIELDS = ['superkingdom_taxid', :sort_key].freeze
 
   # This query takes 1.4 seconds and the results are static, so we hardcoded it
@@ -440,6 +440,9 @@ module ReportHelper
     # This is a workaround for a bug we are fixing soon... but leaving
     # in the code lest that bug recurs.  A warning will be logged.
     #
+    # Two years ago, the above comment was written. It is not clear whether the
+    # bug was fixed.
+    #
     fake_genus_info = tax_info.clone
     fake_genus_info['name'] = "Ad hoc bucket for #{tax_info['name'].downcase}"
     fake_genus_id = FAKE_GENUS_BASE - tax_info['tax_id']
@@ -505,7 +508,8 @@ module ReportHelper
 
   def self.validate_names!(tax_2d)
     # This converts superkingdom_id to category_name and makes up
-    # suitable names for missing and blacklisted genera and species.
+    # suitable names for missing and blacklisted genera and species. Such
+    # made-up names should be lowercase so they are sorted below proper names.
     category = {}
     ALL_CATEGORIES.each do |c|
       category[c['taxid']] = c['name']
@@ -518,7 +522,8 @@ module ReportHelper
       if tax_id < 0
         # Usually -1 means accession number did not resolve to species.
         # TODO: Can we keep the accession numbers to show in these cases?
-        tax_info['name'] = "All taxa with neither family nor genus classification"
+        # NOTE: important to be lowercase for sorting below uppercase valid genuses
+        tax_info['name'] = "all taxa with neither family nor genus classification"
 
         if tax_id < TaxonLineage::INVALID_CALL_BASE_ID && species_or_genus(tax_info['tax_level'])
           parent_id = convert_neg_taxid(tax_id)
@@ -530,15 +535,15 @@ module ReportHelper
             parent_name = "taxon #{parent_id}"
             parent_level = ""
           end
-          tax_info['name'] = "Non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
+          tax_info['name'] = "non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
         elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
-          tax_info['name'] = "All artificial constructs"
+          tax_info['name'] = "all artificial constructs"
         elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
           tax_info['name'] += " #{tax_id}"
         end
       elsif !tax_info['name']
         missing_names.add(tax_id)
-        tax_info['name'] = "Unnamed #{level_str} taxon #{tax_id}"
+        tax_info['name'] = "unnamed #{level_str} taxon #{tax_id}"
       end
       category_id = tax_info.delete('superkingdom_taxid')
       tax_info['category_name'] = category[category_id] || 'Uncategorized'
@@ -558,7 +563,8 @@ module ReportHelper
     taxids_with_missing_genera = Set.new
     taxon_counts_2d.each do |tax_id, tax_info|
       genus_taxid = tax_info['genus_taxid']
-      unless taxon_counts_2d[genus_taxid] || tax_info['tax_level'] != TaxonCount::TAX_LEVEL_SPECIES
+      unless taxon_counts_2d[genus_taxid] ||
+             tax_info['tax_level'] != TaxonCount::TAX_LEVEL_SPECIES
         taxids_with_missing_genera.add(tax_id)
         missing_genera.add(genus_taxid)
         fake_genera << fake_genus!(tax_info)
@@ -596,7 +602,9 @@ module ReportHelper
     tax_2d = convert_2d(taxon_counts)
     cleanup_genus_ids!(tax_2d)
     validate_names!(tax_2d)
-    cleanup_missing_genus_counts!(tax_2d)
+    # Remove any rows that correspond to homo sapiens. These should be mostly
+    # filtered out in the pipeline but occassionally a few slip through.
+    remove_homo_sapiens_counts!(tax_2d)
     tax_2d
   end
 
@@ -735,6 +743,8 @@ module ReportHelper
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
 
     tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
+    cleanup_missing_genus_counts!(tax_2d)
+
     t1 = wall_clock_ms
 
     # These counts are shown in the UI on each genus line.
@@ -748,9 +758,6 @@ module ReportHelper
 
     # Remove family level rows because the reports only display species/genus
     remove_family_level_counts!(tax_2d)
-
-    # Remove any rows that correspond to homo sapiens.
-    remove_homo_sapiens_counts!(tax_2d)
 
     # Add tax_info into output rows.
     rows = []
