@@ -72,11 +72,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   # Backgrounds
 
-  test ' background -non admin shouldnt get index' do
-    get backgrounds_url
-    assert_redirected_to root_url
-  end
-
   test ' background -non admin shouldnt get new' do
     get new_background_url
     assert_redirected_to root_url

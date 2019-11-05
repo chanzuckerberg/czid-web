@@ -12,6 +12,7 @@ class BulkDownload < ApplicationRecord
   STATUS_ERROR = "error".freeze
   STATUS_SUCCESS = "success".freeze
   OUTPUT_DOWNLOAD_EXPIRATION = 86_400 # seconds
+  PROGRESS_UPDATE_DELAY = 15 # Minimum number of seconds between progress updates.
 
   before_save :convert_params_to_json
 
@@ -258,7 +259,17 @@ class BulkDownload < ApplicationRecord
     return nil
   end
 
+  # Wrapper function to make testing easier.
+  def progress_update_delay
+    PROGRESS_UPDATE_DELAY
+  end
+
   def generate_download_file
+    start_time = Time.now.to_f
+    # The last time since we updated the progress.
+    last_progress_time = Time.now.to_f
+
+    update(status: STATUS_RUNNING)
     samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
     projects = Project.where(id: samples.pluck(:project_id))
 
@@ -272,10 +283,12 @@ class BulkDownload < ApplicationRecord
 
     if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
       s3_tar_writer = S3TarWriter.new(download_output_url)
+      Rails.logger.info("Starting tarfile streaming to #{download_output_url}...")
       s3_tar_writer.start_streaming
 
-      pipeline_runs.includes(sample: [:project]).map do |pipeline_run|
+      pipeline_runs.includes(sample: [:project]).map.with_index do |pipeline_run, index|
         begin
+          Rails.logger.info("Processing pipeline run #{pipeline_run.id} (#{index + 1} of #{pipeline_runs.length})...")
           tax_details = ReportHelper.taxonomy_details(pipeline_run.id, get_param_value("background"), TaxonScoringModel::DEFAULT_MODEL_NAME, ReportHelper::DEFAULT_SORT_PARAM)
           report_csv = ReportHelper.generate_report_csv(tax_details)
           s3_tar_writer.add_file_with_data(
@@ -286,14 +299,24 @@ class BulkDownload < ApplicationRecord
         rescue
           failed_sample_ids << pipeline_run.sample.id
         end
+
+        if Time.now.to_f - last_progress_time > progress_update_delay
+          progress = (index + 1).to_f / pipeline_runs.length
+          update(progress: progress)
+          Rails.logger.info(format("Updated progress. %3.1f complete.", progress))
+        end
       end
 
+      Rails.logger.info("Closing s3 tar writer...")
       s3_tar_writer.close
 
+      Rails.logger.info("Waiting for streaming to complete...")
       unless s3_tar_writer.process_status.success?
         raise BulkDownloadsHelper::BULK_DOWNLOAD_GENERATION_FAILED
       end
 
+      Rails.logger.info("Success!")
+      Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", StringUtil.human_readable_file_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
       update(status: STATUS_SUCCESS)
 
       unless failed_sample_ids.empty?
@@ -308,12 +331,13 @@ class BulkDownload < ApplicationRecord
 
   def execution_type
     execution_type = BulkDownloadTypesHelper.bulk_download_type(download_type)[:execution_type]
-    if ["resque", "ecs"].include?(execution_type)
+    if [BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE, BulkDownloadTypesHelper::ECS_EXECUTION_TYPE]
+       .include?(execution_type)
       return execution_type
     end
 
     if [BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, BulkDownloadTypesHelper:: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE].include?(download_type)
-      return get_param_value("taxon") == "all" ? "ecs" : "resque"
+      return get_param_value("taxon") == "all" ? BulkDownloadTypesHelper::ECS_EXECUTION_TYPE : BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE
     end
 
     # Should never happen
@@ -326,13 +350,13 @@ class BulkDownload < ApplicationRecord
 
   def kickoff
     current_execution_type = execution_type
-    if current_execution_type == "ecs"
+    if current_execution_type == BulkDownloadTypesHelper::ECS_EXECUTION_TYPE
       ecs_task_command = bulk_download_ecs_task_command
       unless ecs_task_command.nil?
         kickoff_ecs_task(ecs_task_command)
       end
     end
-    if current_execution_type == "resque"
+    if current_execution_type == BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE
       kickoff_resque_task
     end
   end

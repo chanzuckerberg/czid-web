@@ -365,6 +365,45 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
     end
 
+    it "correctly updates the bulk_download status and progress as the process runs" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        download_type: BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,
+        pipeline_run_ids: [
+          @sample_one.first_pipeline_run.id,
+          @sample_two.first_pipeline_run.id,
+        ]
+      )
+
+      expect(ReportHelper).to receive(:taxonomy_details).exactly(2).times
+      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv")
+      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv_2")
+
+      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
+      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
+        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv",
+        "mock_report_csv"
+      )
+      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
+        "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv",
+        "mock_report_csv_2"
+      )
+      expect_any_instance_of(S3TarWriter).to receive(:close)
+      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
+        instance_double(Process::Status, exitstatus: 0, success?: true)
+      )
+
+      expect(bulk_download).to receive(:progress_update_delay).exactly(2).times.and_return(0)
+
+      expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_RUNNING).exactly(1).times
+      expect(bulk_download).to receive(:update).with(progress: 0.5).exactly(1).times
+      expect(bulk_download).to receive(:update).with(progress: 1).exactly(1).times
+      expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_SUCCESS).exactly(1).times
+
+      bulk_download.generate_download_file
+    end
+
     it "correctly handles individual sample failures" do
       bulk_download = create(
         :bulk_download,
@@ -452,7 +491,7 @@ describe BulkDownload, type: :model do
         display_name: "Sample Overviews",
         description: "Sample metadata and QC metrics",
         category: "report",
-        execution_type: "resque"
+        execution_type: BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE
       )
       bulk_download = create(
         :bulk_download,
@@ -461,7 +500,7 @@ describe BulkDownload, type: :model do
         pipeline_run_ids: [@sample_one.first_pipeline_run.id]
       )
 
-      expect(bulk_download.execution_type).to eq("resque")
+      expect(bulk_download.execution_type).to eq(BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE)
     end
 
     it "correctly throws error if execution type missing" do
@@ -523,7 +562,7 @@ describe BulkDownload, type: :model do
         pipeline_run_ids: [@sample_one.first_pipeline_run.id]
       )
 
-      expect(bulk_download).to receive(:execution_type).exactly(1).times.and_return("ecs")
+      expect(bulk_download).to receive(:execution_type).exactly(1).times.and_return(BulkDownloadTypesHelper::ECS_EXECUTION_TYPE)
       expect(bulk_download).to receive(:bulk_download_ecs_task_command).exactly(1).times.and_return("mock_ecs_command")
       expect(bulk_download).to receive(:kickoff_ecs_task).exactly(1).times.with("mock_ecs_command")
 
@@ -537,7 +576,7 @@ describe BulkDownload, type: :model do
         pipeline_run_ids: [@sample_one.first_pipeline_run.id]
       )
 
-      expect(bulk_download).to receive(:execution_type).exactly(1).times.and_return("resque")
+      expect(bulk_download).to receive(:execution_type).exactly(1).times.and_return(BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE)
       expect(bulk_download).to receive(:kickoff_resque_task).exactly(1).times
 
       bulk_download.kickoff

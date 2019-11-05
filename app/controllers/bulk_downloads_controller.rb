@@ -33,7 +33,7 @@ class BulkDownloadsController < ApplicationController
     rescue => e
       # Throw an error if any sample doesn't have a valid pipeline run.
       # The user should never see this error, because the validation step should catch any issues.
-      Rails.logger.error(e)
+      LogUtil.log_backtrace(e)
       LogUtil.log_err_and_airbrake("BulkDownloadsFailedEvent: Unexpected issue creating bulk download: #{e}")
       render json: { error: e }, status: :unprocessable_entity
       return
@@ -54,7 +54,7 @@ class BulkDownloadsController < ApplicationController
       rescue => e
         # If the kickoff failed, set to error.
         bulk_download.update(status: BulkDownload::STATUS_ERROR)
-        Rails.logger.error(e)
+        LogUtil.log_backtrace(e)
         LogUtil.log_err_and_airbrake("BulkDownloadsKickoffError: Unexpected issue kicking off bulk download: #{e}")
         render json: {
           error: BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE,
