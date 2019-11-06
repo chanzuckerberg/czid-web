@@ -1,15 +1,21 @@
 class SessionsController < Devise::SessionsController
   respond_to :json
-  prepend_before_action :verify_user, only: [:destroy]
+
   skip_before_action :verify_authenticity_token, only: [:destroy]
+  skip_before_action :verify_signed_out_user, only: [:destroy]
 
-  private
+  include Auth0Helper
 
-  ## This method intercepts SessionsController#destroy action
-  ## If a signed in user tries to sign out, it allows the user to sign out
-  ## If a signed out user tries to sign out again, it redirects them to sign in page
-  def verify_user
-    ## redirect to appropriate path
-    redirect_to(new_user_session_path, notice: 'You have already signed out. Please sign in again.') && return unless user_signed_in?
+  def after_sign_out_path_for(resource_name)
+    if @auth0_logout_result&.fetch(:using_auth0)
+      @auth0_logout_result[:auth0_logout_url]
+    else
+      super
+    end
+  end
+
+  def destroy
+    @auth0_logout_result = auth0_logout
+    super
   end
 end

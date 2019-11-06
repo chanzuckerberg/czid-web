@@ -1,4 +1,19 @@
 module Auth0Helper
+  def auth0_logout
+    # Check presence of Auth0Helper#auth0_session
+    if auth0_session.present?
+      session.delete(:jwt_id_token)
+
+      domain = ENV["AUTH0_DOMAIN"]
+      client_id = ENV["AUTH0_CLIENT_ID"]
+      qry_prms = { returnTo: root_url, client_id: client_id }
+      url = URI::HTTPS.build(host: domain, path: '/v2/logout', query: qry_prms.to_query)
+      { using_auth0: true, auth0_logout_url: url.to_s }
+    else
+      { using_auth0: false }
+    end
+  end
+
   def check_auth0_auth_token
     auth_payload, auth_header = auth_token
     if auth_payload.present?
