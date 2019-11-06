@@ -11,6 +11,6 @@ class Auth0Controller < ApplicationController
     self.auth0_session = request.env['omniauth.auth'].credentials.id_token
 
     # Redirect to the URL you want after successful auth
-    redirect_to "/home"
+    redirect_to home_path
   end
 end
