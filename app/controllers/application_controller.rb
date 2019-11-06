@@ -25,9 +25,9 @@ class ApplicationController < ActionController::Base
   end
 
   # This method is used to verify if the user is already logged in,
-  # and will redirect it to the homepage in case it is not.
+  # and will redirect it to the homepage in case they are not.
   # This method overrides a default behavior from Devise to allow auth0
-  # authentication working simultaneously with legacy devise database mode,
+  # authentication to work simultaneously with legacy devise database mode,
   # and should be refactored once we fully migrate to auth0.
   def authenticate_user!
     resp = check_auth0_auth_token
@@ -106,11 +106,11 @@ class ApplicationController < ActionController::Base
     sample.default_background_id
   end
 
-  # This method is only used to loging users using tokens
+  # This method is only used to login users using tokens
   # It is not intended to replace the authenticate_user! method, which
   # must be invoked regardless.
   # authenticate_user! is used for verifying if the user is already logged in
-  # and redirecting to the homepage in case it is not.
+  # and redirecting to the homepage in case they are not.
   def token_based_login_support
     user_email = request.headers['X-User-Email'] || params[:user_email]
     user_token = request.headers['X-User-Token'] || params[:user_token]
