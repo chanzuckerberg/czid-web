@@ -144,6 +144,9 @@ class BareDropdown extends React.Component {
       menuClassName,
       disableAutocomplete,
       trigger,
+      optionsHeader,
+      showNoResultsMessage,
+      loadingSearchOptions,
       ...otherProps
     } = this.props;
 
@@ -240,9 +243,17 @@ class BareDropdown extends React.Component {
             />
           </div>
         )}
+        {optionsHeader && (
+          <div className={cs.optionsHeader}>{optionsHeader}</div>
+        )}
         <BaseDropdown.Menu scrolling className={cs.innerMenu}>
           {filteredItems}
         </BaseDropdown.Menu>
+        {filteredItems.length === 0 &&
+          showNoResultsMessage &&
+          !loadingSearchOptions && (
+            <div className={cs.noResultsMessage}>No results found.</div>
+          )}
       </BaseDropdown.Menu>
     );
 
@@ -294,6 +305,8 @@ BareDropdown.propTypes = forbidExtraProps({
   hideArrow: PropTypes.bool,
   smallArrow: PropTypes.bool,
   menuLabel: PropTypes.string,
+  // Optional header that displays between the search box and the options.
+  optionsHeader: PropTypes.node,
   // whether the dropdown should close when you click on the menu. Useful for custom dropdown menus.
   closeOnClick: PropTypes.bool,
   search: PropTypes.bool,
@@ -303,6 +316,11 @@ BareDropdown.propTypes = forbidExtraProps({
   // If search is true, but you want to customize behavior of search function, e.g. async search,
   // you should provide your own handler
   onFilterChange: PropTypes.func,
+  showNoResultsMessage: PropTypes.bool,
+  // Don't show the no results message if search options are still loading.
+  // TODO(mark): Visually indicate that search options are loading even if
+  // there are old search results to display.
+  loadingSearchOptions: PropTypes.bool,
 
   // Custom props for rendering options
   options: PropTypes.arrayOf(

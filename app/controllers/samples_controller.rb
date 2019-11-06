@@ -4,6 +4,7 @@ class SamplesController < ApplicationController
   include ErrorHelper
   include LocationHelper
   include PipelineOutputsHelper
+  include PipelineRunsHelper
   include ReportHelper
   include SamplesHelper
 
@@ -27,7 +28,7 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :stats, :upload, :validate_sample_files,].freeze
+                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxon_with_reads_suggestions,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
@@ -1256,6 +1257,29 @@ class SamplesController < ApplicationController
     render json: {
       error: "There was an error fetching the coverage viz data file.",
     }
+  end
+
+  # GET /samples/taxon_with_reads_suggestions
+  # Get taxon search suggestions, where taxon are restricted to the provided sample ids.
+  # Also include, for each taxon, the number of samples that contain the taxon.
+  def taxon_with_reads_suggestions
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    query = params[:query]
+    samples = current_power.viewable_samples.where(id: sample_ids)
+
+    # User should not be querying for unviewable samples.
+    if samples.length != sample_ids.length
+      LogUtil.log_err_and_airbrake("Get taxons with reads error: Unauthorized access of samples")
+      render json: {
+        error: "There was an error fetching the taxons with reads for samples.",
+      }, status: :unauthorized
+      return
+    end
+
+    taxon_list = taxon_search(query, ["species", "genus"], samples: samples)
+    taxon_list = augment_taxon_list_with_sample_count(taxon_list, samples)
+
+    render json: taxon_list
   end
 
   # Use callbacks to share common setup or constraints between actions.

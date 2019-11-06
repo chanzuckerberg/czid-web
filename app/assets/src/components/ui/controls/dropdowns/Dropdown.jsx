@@ -85,6 +85,10 @@ class Dropdown extends React.Component {
         withinModal={this.props.withinModal}
         items={this.props.items}
         itemSearchStrings={this.props.itemSearchStrings}
+        onFilterChange={this.props.onFilterChange}
+        optionsHeader={this.props.optionsHeader}
+        showNoResultsMessage={this.props.showNoResultsMessage}
+        loadingSearchOptions={this.props.loadingSearchOptions}
       />
     );
   }
@@ -117,9 +121,17 @@ Dropdown.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   search: PropTypes.bool,
   menuLabel: PropTypes.string,
+  // Optional header that displays between the search box and the options.
+  optionsHeader: PropTypes.node,
   usePortal: PropTypes.bool,
   direction: PropTypes.oneOf(["left", "right"]),
   withinModal: PropTypes.bool,
+  onFilterChange: PropTypes.func,
+  showNoResultsMessage: PropTypes.bool,
+  // Don't show the no results message if search options are still loading.
+  // TODO(mark): Visually indicate that search options are loading even if
+  // there are old search results to display.
+  loadingSearchOptions: PropTypes.bool,
 };
 
 export default Dropdown;

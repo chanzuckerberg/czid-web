@@ -4,7 +4,6 @@ import { find, get, set } from "lodash/fp";
 import memoize from "memoize-one";
 
 import { getBulkDownloadTypes } from "~/api/bulk_downloads";
-import { getBackgrounds } from "~/api";
 import Modal from "~ui/containers/Modal";
 
 import ChooseStep from "./ChooseStep";
@@ -57,7 +56,6 @@ class BulkDownloadModal extends React.Component {
     selectedFieldsDisplay: {},
     selectedDownloadTypeName: null,
     currentStep: "choose",
-    fieldOptions: {},
   };
 
   componentDidMount() {
@@ -73,11 +71,6 @@ class BulkDownloadModal extends React.Component {
         selectedFields: {},
       });
     }
-
-    // When the modal is opened, fetch options for the bulk download fields.
-    if (!prevProps.open && this.props.open) {
-      this.fetchBackgrounds();
-    }
   }
 
   async fetchDownloadTypes() {
@@ -86,22 +79,6 @@ class BulkDownloadModal extends React.Component {
     this.setState({
       bulkDownloadTypes,
     });
-  }
-
-  // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
-  async fetchBackgrounds() {
-    if (this.state.fieldOptions.backgrounds) {
-      return;
-    }
-
-    const backgrounds = await getBackgrounds();
-
-    // Since multiple async functions might set fieldOptions, we use the function form
-    // of setState to prevent race conditions.
-    this.setState(prevState => ({
-      ...prevState,
-      fieldOptions: set("backgrounds", backgrounds, prevState.fieldOptions),
-    }));
   }
 
   handleSelectDownloadType = selectedDownloadTypeName => {
@@ -140,7 +117,6 @@ class BulkDownloadModal extends React.Component {
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
-      fieldOptions,
     } = this.state;
 
     if (currentStep === "choose") {
@@ -152,7 +128,7 @@ class BulkDownloadModal extends React.Component {
           selectedFields={selectedFields}
           onFieldSelect={this.handleFieldSelect}
           onContinue={this.handleChooseStepContinue}
-          fieldOptions={fieldOptions}
+          selectedSampleIds={selectedSampleIds}
         />
       );
     }

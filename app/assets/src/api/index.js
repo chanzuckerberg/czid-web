@@ -349,6 +349,15 @@ const getSamplesLocations = ({ domain, filters, projectId, search }) =>
 const getSamplePipelineResults = id =>
   get(`/samples/${id}/results_folder.json`);
 
+// Get autocomplete suggestions for "taxon that have reads" for a set of samples.
+const getTaxonWithReadsSuggestions = (query, sampleIds) =>
+  get("/samples/taxon_with_reads_suggestions.json", {
+    params: {
+      query,
+      sampleIds,
+    },
+  });
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -390,4 +399,5 @@ export {
   validateSampleFiles,
   validateSampleNames,
   getBackgrounds,
+  getTaxonWithReadsSuggestions,
 };
