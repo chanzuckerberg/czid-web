@@ -365,7 +365,7 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
     end
 
-    it "correctly updates the bulk_download status and progress as the process runs" do
+    it "correctly updates the bulk_download status and progress as the sample_taxon_report runs" do
       bulk_download = create(
         :bulk_download,
         user: @joe,
@@ -402,6 +402,35 @@ describe BulkDownload, type: :model do
       expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_SUCCESS).exactly(1).times
 
       bulk_download.generate_download_file
+    end
+
+    it "correctly generates download file for download type sample_overview" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        download_type: BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,
+        pipeline_run_ids: [
+          @sample_one.first_pipeline_run.id,
+          @sample_two.first_pipeline_run.id,
+        ]
+      )
+
+      expect(bulk_download).to receive(:format_samples).exactly(1).times
+      expect(bulk_download).to receive(:generate_sample_list_csv).exactly(1).times.and_return("mock_sample_overview_csv")
+
+      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
+      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
+        "sample_overviews.csv",
+        "mock_sample_overview_csv"
+      )
+      expect_any_instance_of(S3TarWriter).to receive(:close)
+      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
+        instance_double(Process::Status, exitstatus: 0, success?: true)
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
     end
 
     it "correctly handles individual sample failures" do
