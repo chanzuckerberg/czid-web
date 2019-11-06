@@ -3,12 +3,7 @@ module Auth0Helper
     # Check presence of Auth0Helper#auth0_session
     if auth0_session.present?
       session.delete(:jwt_id_token)
-
-      domain = ENV["AUTH0_DOMAIN"]
-      client_id = ENV["AUTH0_CLIENT_ID"]
-      qry_prms = { returnTo: root_url, client_id: client_id }
-      url = URI::HTTPS.build(host: domain, path: '/v2/logout', query: qry_prms.to_query)
-      { using_auth0: true, auth0_logout_url: url.to_s }
+      { using_auth0: true, auth0_logout_url: auth0_signout_url }
     else
       { using_auth0: false }
     end
@@ -36,13 +31,11 @@ module Auth0Helper
   protected
 
   def auth0_signout_url
-    domain = Rails.application.secrets.auth0_domain
-    client_id = Rails.application.secrets.auth0_client_id
-    request_params = {
-      returnTo: root_url,
-      client_id: client_id,
-    }
-    URI::HTTPS.build(host: domain, path: '/v2/logout', query: request_params.to_query)
+    domain = ENV["AUTH0_DOMAIN"]
+    client_id = ENV["AUTH0_CLIENT_ID"]
+    qry_prms = { returnTo: root_url, client_id: client_id }
+    url = URI::HTTPS.build(host: domain, path: '/v2/logout', query: qry_prms.to_query)
+    url.to_s
   end
 
   private
