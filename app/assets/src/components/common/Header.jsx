@@ -15,7 +15,7 @@ import {
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
 } from "~/components/views/discovery/discovery_api";
-import { openUrl } from "~utils/links";
+import { postToUrlWithCSRF } from "~utils/links";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 
@@ -142,13 +142,7 @@ const UserMenuDropDown = ({
   userName,
   allowedFeatures,
 }) => {
-  const signOut = () => {
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = signOutEndpoint;
-    document.body.appendChild(form);
-    form.submit();
-  };
+  const signOut = () => postToUrlWithCSRF(signOutEndpoint);
 
   const renderItems = (adminUser, demoUser) => {
     let userDropdownItems = [];
