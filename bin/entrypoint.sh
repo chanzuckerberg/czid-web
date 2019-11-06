@@ -11,6 +11,6 @@ then
     exec bundle exec "$@"
 else
     # Use Chamber to inject secrets via environment variables.
-    echo Chamber will reading entries from AWS SSM /idseq-$ENVIRONMENT-web/
+    echo Chamber will read entries from AWS SSM /idseq-$ENVIRONMENT-web/
     exec chamber exec idseq-$ENVIRONMENT-web -- bundle exec "$@"
 fi
