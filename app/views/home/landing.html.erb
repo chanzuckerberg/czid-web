@@ -8,7 +8,7 @@
         contactEmail: "accounts@idseq.net",
         showBulletin: <%= @show_bulletin %>,
         browserInfo: <%= @browser_info.to_json.html_safe %>,
-        signInStrategy: location.href.match(/auth0/) ? 'AUTH0' : 'DEVISE',
+        signInStrategy: <%= @sign_in_strategy.to_json.html_safe %>,
       },
       'landing_page'
       );
