@@ -35,10 +35,17 @@ export const processLocationSelection = (result, isHuman) => {
     }
 
     warning = LOCATION_PRIVACY_WARNING;
-  } else if (!result || !result.geo_level) {
-    warning = LOCATION_UNRESOLVED_WARNING;
+  } else {
+    warning = getLocationWarning(result);
   }
   return { result, warning };
+};
+
+export const getLocationWarning = result => {
+  if (!result || !result.geo_level) {
+    return LOCATION_UNRESOLVED_WARNING;
+  }
+  return "";
 };
 
 // An input box that fetches and shows geosearch suggestions for user input of locations.
