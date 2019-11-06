@@ -41,6 +41,8 @@ Rails.application.configure do
   # `config.assets.precompile` and `config.assets.version` have moved to config/initializers/assets.rb
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
+  # TODO: (gdingle): fix me
+
   # config.action_controller.asset_host = 'http://assets.example.com'
 
   # Specifies the header that your server uses for sending files.
@@ -83,6 +85,8 @@ Rails.application.configure do
     api_key: ENV['MAIL_GUN_API_KEY'],
     domain: 'mg.idseq.net',
   }
+
+  # TODO: (gdingle): fix me
 
   config.action_controller.asset_host = 'idseq.net'
   config.middleware.use Rack::HostRedirect, 'www.idseq.net' => 'idseq.net'
