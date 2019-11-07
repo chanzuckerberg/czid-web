@@ -383,13 +383,13 @@ module SamplesHelper
     end
   end
 
-  def format_samples(samples)
+  def format_samples(samples, pipeline_runs_by_sample_id = nil)
     formatted_samples = []
     return formatted_samples if samples.empty?
 
     # Do major SQL queries
     sample_ids = samples.map(&:id)
-    top_pipeline_run_by_sample_id = top_pipeline_runs_multiget(sample_ids)
+    top_pipeline_run_by_sample_id = pipeline_runs_by_sample_id || top_pipeline_runs_multiget(sample_ids)
     pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)

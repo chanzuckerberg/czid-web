@@ -2,6 +2,7 @@ require 'shellwords'
 
 class BulkDownload < ApplicationRecord
   include AppConfigHelper
+  include SamplesHelper
   include Rails.application.routes.url_helpers
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
@@ -264,27 +265,20 @@ class BulkDownload < ApplicationRecord
     PROGRESS_UPDATE_DELAY
   end
 
-  def generate_download_file
-    start_time = Time.now.to_f
+  def write_output_files_to_s3_tar_writer(s3_tar_writer)
+    failed_sample_ids = []
     # The last time since we updated the progress.
     last_progress_time = Time.now.to_f
 
-    update(status: STATUS_RUNNING)
-    samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
-    projects = Project.where(id: samples.pluck(:project_id))
-
-    # Compute cleaned project name once instead of once per sample.
-    cleaned_project_names = {}
-    projects.each do |project|
-      cleaned_project_names[project.id] = project.cleaned_project_name
-    end
-
-    failed_sample_ids = []
-
     if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
-      s3_tar_writer = S3TarWriter.new(download_output_url)
-      Rails.logger.info("Starting tarfile streaming to #{download_output_url}...")
-      s3_tar_writer.start_streaming
+      samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+      projects = Project.where(id: samples.pluck(:project_id))
+
+      # Compute cleaned project name once instead of once per sample.
+      cleaned_project_names = {}
+      projects.each do |project|
+        cleaned_project_names[project.id] = project.cleaned_project_name
+      end
 
       pipeline_runs.includes(sample: [:project]).map.with_index do |pipeline_run, index|
         begin
@@ -307,23 +301,45 @@ class BulkDownload < ApplicationRecord
         end
       end
 
-      Rails.logger.info("Closing s3 tar writer...")
-      s3_tar_writer.close
-
-      Rails.logger.info("Waiting for streaming to complete...")
-      unless s3_tar_writer.process_status.success?
-        raise BulkDownloadsHelper::BULK_DOWNLOAD_GENERATION_FAILED
-      end
-
-      Rails.logger.info("Success!")
-      Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", StringUtil.human_readable_file_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
-      update(status: STATUS_SUCCESS)
-
       unless failed_sample_ids.empty?
         LogUtil.log_err_and_airbrake("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{failed_sample_ids}")
         update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % failed_sample_ids.length)
       end
     end
+  end
+
+  def generate_download_file
+    start_time = Time.now.to_f
+
+    update(status: STATUS_RUNNING)
+
+    s3_tar_writer = S3TarWriter.new(download_output_url)
+    Rails.logger.info("Starting tarfile streaming to #{download_output_url}...")
+    s3_tar_writer.start_streaming
+
+    if download_type == BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+      Rails.logger.info("Generating sample overviews for #{pipeline_runs.length} samples...")
+      samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+      pipeline_runs_by_sample_id = pipeline_runs.map { |pr| [pr.sample_id, pr] }.to_h
+      formatted_samples = format_samples(samples, pipeline_runs_by_sample_id)
+      sample_overviews_csv = generate_sample_list_csv(formatted_samples)
+
+      s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
+    else
+      write_output_files_to_s3_tar_writer(s3_tar_writer)
+    end
+
+    Rails.logger.info("Closing s3 tar writer...")
+    s3_tar_writer.close
+
+    Rails.logger.info("Waiting for streaming to complete...")
+    unless s3_tar_writer.process_status.success?
+      raise BulkDownloadsHelper::BULK_DOWNLOAD_GENERATION_FAILED
+    end
+
+    Rails.logger.info("Success!")
+    Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", StringUtil.human_readable_file_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
+    update(status: STATUS_SUCCESS)
   rescue
     update(status: STATUS_ERROR)
     raise
