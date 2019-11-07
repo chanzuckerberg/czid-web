@@ -25,7 +25,7 @@ RSpec.describe SamplesController, type: :controller do
       end
     end
 
-    describe "GET #taxon_with_reads_suggestions" do
+    describe "GET #taxa_with_reads_suggestions" do
       before do
         @project = create(:project, users: [@joe])
         @sample_one = create(:sample, project: @project, name: "Test Sample One",
@@ -62,7 +62,7 @@ RSpec.describe SamplesController, type: :controller do
                                                                   },
                                                                 ])
 
-        get :taxon_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
+        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
 
         expect(response).to have_http_status :success
 
@@ -95,7 +95,7 @@ RSpec.describe SamplesController, type: :controller do
         create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_two.first_pipeline_run.id)
         create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_three.first_pipeline_run.id)
 
-        get :taxon_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, sample_admin.id], query: "MOCK_QUERY" }
+        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, sample_admin.id], query: "MOCK_QUERY" }
 
         expect(response).to have_http_status :unauthorized
       end

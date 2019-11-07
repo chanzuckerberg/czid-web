@@ -337,7 +337,7 @@ class BulkDownload < ApplicationRecord
     end
 
     if [BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, BulkDownloadTypesHelper:: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE].include?(download_type)
-      return get_param_value("taxon_with_reads") == "all" ? BulkDownloadTypesHelper::ECS_EXECUTION_TYPE : BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE
+      return get_param_value("taxa_with_reads") == "all" ? BulkDownloadTypesHelper::ECS_EXECUTION_TYPE : BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE
     end
 
     # Should never happen

@@ -70,7 +70,7 @@ module BulkDownloadTypesHelper
       fields: [
         {
           display_name: "Taxa",
-          type: "taxon_with_reads",
+          type: "taxa_with_reads",
         },
         {
           display_name: "File Format",
@@ -88,7 +88,7 @@ module BulkDownloadTypesHelper
       fields: [
         {
           display_name: "Taxa",
-          type: "taxon_with_contigs",
+          type: "taxa_with_contigs",
         },
       ],
       execution_type: VARIABLE_EXECUTION_TYPE,

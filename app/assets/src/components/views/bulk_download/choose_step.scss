@@ -38,10 +38,10 @@
   }
 }
 
-.taxonWithReadsDropdown {
+.taxaWithReadsDropdown {
   width: 300px;
 
-  .taxonWithReadsOptionsHeader {
+  .taxaWithReadsOptionsHeader {
     display: flex;
     padding: $space-s $space-m;
 
@@ -56,7 +56,7 @@
     }
   }
 
-  .taxonWithReadsOption {
+  .taxaWithReadsOption {
     display: flex;
     padding: $space-s $space-m;
 

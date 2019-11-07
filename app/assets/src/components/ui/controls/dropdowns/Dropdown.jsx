@@ -88,7 +88,7 @@ class Dropdown extends React.Component {
         onFilterChange={this.props.onFilterChange}
         optionsHeader={this.props.optionsHeader}
         showNoResultsMessage={this.props.showNoResultsMessage}
-        loadingSearchOptions={this.props.loadingSearchOptions}
+        isLoadingSearchOptions={this.props.isLoadingSearchOptions}
       />
     );
   }
@@ -131,7 +131,7 @@ Dropdown.propTypes = {
   // Don't show the no results message if search options are still loading.
   // TODO(mark): Visually indicate that search options are loading even if
   // there are old search results to display.
-  loadingSearchOptions: PropTypes.bool,
+  isLoadingSearchOptions: PropTypes.bool,
 };
 
 export default Dropdown;

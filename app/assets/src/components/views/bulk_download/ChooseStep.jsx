@@ -16,7 +16,7 @@ import memoize from "memoize-one";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
-import { getBackgrounds, getTaxonWithReadsSuggestions } from "~/api";
+import { getBackgrounds, getTaxaWithReadsSuggestions } from "~/api";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
 import cs from "./choose_step.scss";
@@ -26,11 +26,11 @@ const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 class ChooseStep extends React.Component {
   state = {
     backgroundOptions: null,
-    taxonWithReadsOptions: null,
-    loadingTaxonWithReadsOptions: false,
+    taxaWithReadsOptions: null,
+    isLoadingTaxaWithReadsOptionsOptions: false,
   };
 
-  _lastTaxonWithReadsQuery = "";
+  _lastTaxaWithReadsQuery = "";
 
   componentDidMount() {
     this.fetchBackgrounds();
@@ -88,36 +88,36 @@ class ChooseStep extends React.Component {
     return true;
   };
 
-  handleTaxonWithReadsSelectFilterChange = query => {
+  handleTaxaWithReadsSelectFilterChange = query => {
     this.setState({
-      loadingTaxonWithReadsOptions: true,
+      isLoadingTaxaWithReadsOptionsOptions: true,
     });
 
-    this.loadTaxonWithReadsOptionsForQuery(query);
+    this.loadTaxaWithReadsOptionsForQuery(query);
   };
 
   // Debounce this function, so it only runs after the user has not typed for a delay.
-  loadTaxonWithReadsOptionsForQuery = debounce(
+  loadTaxaWithReadsOptionsForQuery = debounce(
     AUTOCOMPLETE_DEBOUNCE_DELAY,
     async query => {
-      this._lastTaxonWithReadsQuery = query;
+      this._lastTaxaWithReadsQuery = query;
       const { selectedSampleIds } = this.props;
 
-      const searchResults = await getTaxonWithReadsSuggestions(
+      const searchResults = await getTaxaWithReadsSuggestions(
         query,
         Array.from(selectedSampleIds)
       );
 
       // If the query has since changed, discard the response.
-      if (query != this._lastTaxonWithReadsQuery) {
+      if (query != this._lastTaxaWithReadsQuery) {
         return;
       }
 
-      const taxonWithReadsOptions = searchResults.map(result => ({
+      const taxaWithReadsOptions = searchResults.map(result => ({
         value: result.taxid,
         text: result.title,
         customNode: (
-          <div className={cs.taxonWithReadsOption}>
+          <div className={cs.taxaWithReadsOption}>
             <div className={cs.taxonName}>{result.title}</div>
             <div className={cs.fill} />
             <div className={cs.sampleCount}>{result.sample_count}</div>
@@ -128,13 +128,13 @@ class ChooseStep extends React.Component {
       }));
 
       this.setState({
-        taxonWithReadsOptions,
-        loadingTaxonWithReadsOptions: false,
+        taxaWithReadsOptions,
+        isLoadingTaxaWithReadsOptionsOptions: false,
       });
     }
   );
 
-  sortTaxonWithReadsOptions = memoize(options =>
+  sortTaxaWithReadsOptions = memoize(options =>
     orderBy(["sampleCount", "text"], ["desc", "asc"], options)
   );
 
@@ -142,8 +142,8 @@ class ChooseStep extends React.Component {
     const { selectedFields, onFieldSelect, selectedSampleIds } = this.props;
     const {
       backgroundOptions,
-      taxonWithReadsOptions,
-      loadingTaxonWithReadsOptions,
+      taxaWithReadsOptions,
+      isLoadingTaxaWithReadsOptionsOptions,
     } = this.state;
 
     const selectedField = get([downloadType.type, field.type], selectedFields);
@@ -156,7 +156,7 @@ class ChooseStep extends React.Component {
     let search = false;
     let onFilterChange = null;
     let showNoResultsMessage = false;
-    let loadingSearchOptions = false;
+    let isLoadingSearchOptions = false;
 
     // Set different props for the dropdown depending on the field type.
     switch (field.type) {
@@ -168,13 +168,13 @@ class ChooseStep extends React.Component {
 
         placeholder = "Select file format";
         break;
-      case "taxon_with_reads":
+      case "taxa_with_reads":
         dropdownOptions = [
           {
             text: "All Taxon",
             value: "all",
             customNode: (
-              <div className={cs.taxonWithReadsOption}>
+              <div className={cs.taxaWithReadsOption}>
                 <div className={cs.taxonName}>All taxon</div>
                 <div className={cs.fill} />
                 <div className={cs.sampleCount}>{selectedSampleIds.size}</div>
@@ -183,19 +183,19 @@ class ChooseStep extends React.Component {
           },
           // Note: BareDropdown with search prioritizes prefix matches, so the final ordering of options
           // might not be the one provided here.
-          ...(this.sortTaxonWithReadsOptions(taxonWithReadsOptions) || []),
+          ...(this.sortTaxaWithReadsOptions(taxaWithReadsOptions) || []),
         ];
 
         placeholder = "Select taxa";
         menuLabel = "Select taxa";
         showNoResultsMessage = true;
         search = true;
-        onFilterChange = this.handleTaxonWithReadsSelectFilterChange;
-        className = cs.taxonWithReadsDropdown;
-        loadingSearchOptions = loadingTaxonWithReadsOptions;
+        onFilterChange = this.handleTaxaWithReadsSelectFilterChange;
+        className = cs.taxaWithReadsDropdown;
+        isLoadingSearchOptions = isLoadingTaxaWithReadsOptionsOptions;
 
         optionsHeader = (
-          <div className={cs.taxonWithReadsOptionsHeader}>
+          <div className={cs.taxaWithReadsOptionsHeader}>
             <div className={cs.header}>Taxa</div>
             <div className={cs.fill} />
             <div className={cs.header}>Samples</div>
@@ -232,7 +232,7 @@ class ChooseStep extends React.Component {
           search={search}
           onFilterChange={onFilterChange}
           showNoResultsMessage={showNoResultsMessage}
-          loadingSearchOptions={loadingSearchOptions}
+          isLoadingSearchOptions={isLoadingSearchOptions}
         />
       </div>
     );

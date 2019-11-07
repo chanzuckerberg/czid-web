@@ -146,7 +146,7 @@ class BareDropdown extends React.Component {
       trigger,
       optionsHeader,
       showNoResultsMessage,
-      loadingSearchOptions,
+      isLoadingSearchOptions,
       ...otherProps
     } = this.props;
 
@@ -251,7 +251,7 @@ class BareDropdown extends React.Component {
         </BaseDropdown.Menu>
         {filteredItems.length === 0 &&
           showNoResultsMessage &&
-          !loadingSearchOptions && (
+          !isLoadingSearchOptions && (
             <div className={cs.noResultsMessage}>No results found.</div>
           )}
       </BaseDropdown.Menu>
@@ -317,10 +317,10 @@ BareDropdown.propTypes = forbidExtraProps({
   // you should provide your own handler
   onFilterChange: PropTypes.func,
   showNoResultsMessage: PropTypes.bool,
-  // Don't show the no results message if search options are still loading.
+  // Don't show the no results message if search options are currently loading.
   // TODO(mark): Visually indicate that search options are loading even if
   // there are old search results to display.
-  loadingSearchOptions: PropTypes.bool,
+  isLoadingSearchOptions: PropTypes.bool,
 
   // Custom props for rendering options
   options: PropTypes.arrayOf(
