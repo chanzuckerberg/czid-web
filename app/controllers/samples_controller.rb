@@ -28,7 +28,7 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions,].freeze
+                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
@@ -1280,6 +1280,17 @@ class SamplesController < ApplicationController
     taxon_list = augment_taxon_list_with_sample_count(taxon_list, samples)
 
     render json: taxon_list
+  end
+
+  # GET /samples/uploaded_by_current_user
+  # Return whether all sampleIds were uploaded by the current user.
+  def uploaded_by_current_user
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    samples = Sample.where(user: current_user, id: sample_ids)
+
+    render json: {
+      uploaded_by_current_user: sample_ids.length == samples.length,
+    }
   end
 
   # Use callbacks to share common setup or constraints between actions.

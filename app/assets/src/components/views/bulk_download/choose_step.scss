@@ -90,6 +90,19 @@
     background-color: $off-white;
   }
 
+  &.disabled {
+    cursor: default;
+
+    &:hover {
+      background-color: white;
+    }
+
+    .name,
+    .description {
+      color: $light-grey;
+    }
+  }
+
   .radioButton {
     margin-right: 10px;
     margin-top: 4px;

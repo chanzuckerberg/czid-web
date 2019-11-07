@@ -248,6 +248,37 @@ describe BulkDownload, type: :model do
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
     end
+
+    it "returns the correct task command for host_gene_counts download type" do
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
+                                @sample_one.first_pipeline_run.id,
+                                @sample_two.first_pipeline_run.id,
+                              ])
+
+      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/results/3.12/reads_per_gene.star.tab",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/results/3.12/reads_per_gene.star.tab",
+        "--tar-names",
+        "Test Sample One__project-test_project_#{@project.id}__reads_per_gene.star.tab",
+        "Test Sample Two__project-test_project_#{@project.id}__reads_per_gene.star.tab",
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Host Gene Counts.tar.gz",
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
   end
 
   context "#aegea_ecs_submit_command" do

@@ -64,6 +64,7 @@ class PipelineRun < ApplicationRecord
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts.json'.freeze
   REFINED_TAXID_BYTERANGE_JSON_NAME = 'assembly/refined_taxid_locations_combined.json'.freeze
+  READS_PER_GENE_STAR_TAB_NAME = 'reads_per_gene.star.tab'.freeze
 
   ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
@@ -408,6 +409,10 @@ class PipelineRun < ApplicationRecord
     return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
     multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
+  end
+
+  def host_gene_count_s3_path
+    return "#{host_filter_output_s3_path}/#{READS_PER_GENE_STAR_TAB_NAME}"
   end
 
   def nonhost_fastq_s3_paths
