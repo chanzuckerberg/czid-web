@@ -265,6 +265,7 @@ class PlaygroundControls extends React.Component {
                 key={0}
                 fluid
                 rounded
+                search
                 options={this.dropdownOptions}
                 label="Options"
                 onChange={() =>
@@ -285,7 +286,7 @@ class PlaygroundControls extends React.Component {
             ]}
           />
           <ComponentCard
-            title="Multiple Tree Dropdown"
+            title="Multiple Nested Dropdown"
             width={4}
             components={[
               <MultipleNestedDropdown
@@ -293,7 +294,7 @@ class PlaygroundControls extends React.Component {
                 fluid
                 rounded
                 options={this.dropdownOptions}
-                label="Options: "
+                label="Options"
                 onChange={(a, b) => {
                   this.setState({ event: "MultipleDropdown:Change" });
                 }}

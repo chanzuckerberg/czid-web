@@ -16,6 +16,7 @@ export const LOCATION_UNRESOLVED_WARNING =
 export const processLocationSelection = (result, isHuman) => {
   let warning = "";
   if (isHuman && get("geo_level", result) === "city") {
+    result = Object.assign({}, result); // make a copy to avoid side effects
     // For human samples, drop the city part of the name and show a warning.
     // NOTE: The backend will redo the geosearch for confirmation and re-apply
     // this restriction.
@@ -34,32 +35,21 @@ export const processLocationSelection = (result, isHuman) => {
     }
 
     warning = LOCATION_PRIVACY_WARNING;
-  } else if (!result || !result.geo_level) {
-    warning = LOCATION_UNRESOLVED_WARNING;
+  } else {
+    warning = getLocationWarning(result);
   }
   return { result, warning };
 };
 
+export const getLocationWarning = result => {
+  if (!result || !result.geo_level) {
+    return LOCATION_UNRESOLVED_WARNING;
+  }
+  return "";
+};
+
 // An input box that fetches and shows geosearch suggestions for user input of locations.
 class GeoSearchInputBox extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      value: props.value,
-    };
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    if (props.value !== state.prevPropsValue) {
-      return {
-        value: props.value,
-        prevPropsValue: props.value,
-      };
-    }
-    return null;
-  }
-
   // Fetch geosearch results and format into categories for LiveSearchBox
   handleSearchTriggered = async query => {
     let categories = {};
@@ -109,21 +99,11 @@ class GeoSearchInputBox extends React.Component {
     return categories;
   };
 
-  handleSearchChange = value => {
-    // Let the inner search box change on edit
-    this.setState({ value }, () => {
-      // Handle the case when they clear the box and hit done/submit without pressing enter
-      if (value === "") this.handleResultSelected({ result: value });
-    });
-  };
-
   handleResultSelected = ({ result }) => {
     const { onResultSelect } = this.props;
 
     // Wrap plain text submission
     if (isString(result) && result !== "") result = { name: result };
-
-    this.setState({ value: result });
 
     logAnalyticsEvent("GeoSearchInputBox_result_selected", {
       selected: result.name,
@@ -135,8 +115,7 @@ class GeoSearchInputBox extends React.Component {
   };
 
   render() {
-    const { className, inputClassName } = this.props;
-    const { value } = this.state;
+    const { className, inputClassName, value } = this.props;
 
     return (
       <LiveSearchPopBox
@@ -144,7 +123,6 @@ class GeoSearchInputBox extends React.Component {
         inputClassName={inputClassName}
         inputMode
         onResultSelect={this.handleResultSelected}
-        onSearchChange={this.handleSearchChange}
         onSearchTriggered={this.handleSearchTriggered}
         placeholder="Enter a city, region, or country"
         rectangular

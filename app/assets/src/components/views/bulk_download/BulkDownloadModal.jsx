@@ -58,15 +58,11 @@ class BulkDownloadModal extends React.Component {
     currentStep: "choose",
   };
 
-  async componentDidMount() {
-    const bulkDownloadTypes = await getBulkDownloadTypes();
-
-    this.setState({
-      bulkDownloadTypes,
-    });
+  componentDidMount() {
+    this.fetchDownloadTypes();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     // If the user has just closed the modal, reset it.
     if (prevProps.open && !this.props.open) {
       this.setState({
@@ -75,6 +71,14 @@ class BulkDownloadModal extends React.Component {
         selectedFields: {},
       });
     }
+  }
+
+  async fetchDownloadTypes() {
+    const bulkDownloadTypes = await getBulkDownloadTypes();
+
+    this.setState({
+      bulkDownloadTypes,
+    });
   }
 
   handleSelectDownloadType = selectedDownloadTypeName => {
@@ -124,6 +128,7 @@ class BulkDownloadModal extends React.Component {
           selectedFields={selectedFields}
           onFieldSelect={this.handleFieldSelect}
           onContinue={this.handleChooseStepContinue}
+          selectedSampleIds={selectedSampleIds}
         />
       );
     }

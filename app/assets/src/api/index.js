@@ -308,6 +308,11 @@ const createBackground = ({ description, name, sampleIds }) =>
     sample_ids: sampleIds,
   });
 
+const getBackgrounds = async () => {
+  const response = await get("/backgrounds.json");
+  return response.backgrounds;
+};
+
 const getCoverageVizSummary = sampleId =>
   get(`/samples/${sampleId}/coverage_viz_summary`);
 
@@ -343,6 +348,15 @@ const getSamplesLocations = ({ domain, filters, projectId, search }) =>
 
 const getSamplePipelineResults = id =>
   get(`/samples/${id}/results_folder.json`);
+
+// Get autocomplete suggestions for "taxa that have reads" for a set of samples.
+const getTaxaWithReadsSuggestions = (query, sampleIds) =>
+  get("/samples/taxa_with_reads_suggestions.json", {
+    params: {
+      query,
+      sampleIds,
+    },
+  });
 
 export {
   bulkImportRemoteSamples,
@@ -384,4 +398,6 @@ export {
   validatePhyloTreeName,
   validateSampleFiles,
   validateSampleNames,
+  getBackgrounds,
+  getTaxaWithReadsSuggestions,
 };

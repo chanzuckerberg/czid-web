@@ -397,7 +397,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(response).to have_http_status(200)
 
         expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_SUCCESS)
-        expect(BulkDownload.find(@bulk_download_joe.id).error_message).to eq(BulkDownloadsHelper::FAILED_SRC_URL_ERROR_TEMPLATE % 2)
+        expect(BulkDownload.find(@bulk_download_joe.id).error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 2)
         expect(BulkDownload.find(@bulk_download_joe.id).access_token).to eq(nil)
       end
     end

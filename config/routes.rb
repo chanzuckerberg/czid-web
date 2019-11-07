@@ -46,6 +46,7 @@ Rails.application.routes.draw do
     get :coverage_viz_summary, on: :member
     get :coverage_viz_data, on: :member
     get :show_v2, on: :member
+    get :taxa_with_reads_suggestions, on: :collection
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
