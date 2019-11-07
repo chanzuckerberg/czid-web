@@ -10,10 +10,10 @@ class JsonWebToken
   JWT_JWKS_KEYS_URL = "https://#{AUTH0_DOMAIN}/.well-known/jwks.json"
   JWT_TOKEN_ISS = "https://#{AUTH0_DOMAIN}/"
 
-  def self.decode_without_verification(token)
-    JWT.decode(token, nil, false)
-  end
+  @jwks_hash_cache = {}
 
+  # Verify the signature of JWT token using jwks keys retrieved from Auth0
+  # https://auth0.com/docs/jwks
   def self.verify(token)
     JWT.decode(
       token, nil,
@@ -24,11 +24,22 @@ class JsonWebToken
       aud: AUTH0_CLIENT_ID,
       verify_aud: true
     ) do |header|
-      jwks_hash[header['kid']]
+      cached_jwks(header['kid'])
     end
   end
 
+  # Retrieve jwks key for a specific key id
+  # This method keeps a cached version of jwks and refreshes the jwks hash from auth0
+  # if the key id is not present on the cache
+  def self.cached_jwks(kid)
+    return @jwks_hash_cache[kid] if @jwks_hash_cache.key?(kid)
+    @jwks_hash_cache = jwks_hash
+    @jwks_hash_cache[kid]
+  end
+
+  # Fetches the jwks hash from auth0
   def self.jwks_hash
+    Rails.logger.info("Fetching jwks_hash at #{JWT_JWKS_KEYS_URL}")
     jwks_raw = Net::HTTP.get URI(JWT_JWKS_KEYS_URL)
     jwks_keys = Array(JSON.parse(jwks_raw)['keys'])
     Hash[
