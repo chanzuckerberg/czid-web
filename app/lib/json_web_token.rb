@@ -5,6 +5,8 @@ require 'uri'
 
 class JsonWebToken
   AUTH0_DOMAIN = ENV["AUTH0_DOMAIN"]
+  AUTH0_CLIENT_ID = ENV["AUTH0_CLIENT_ID"]
+
   JWT_JWKS_KEYS_URL = "https://#{AUTH0_DOMAIN}/.well-known/jwks.json"
   JWT_TOKEN_ISS = "https://#{AUTH0_DOMAIN}/"
 
@@ -19,7 +21,7 @@ class JsonWebToken
       algorithm: 'RS256',
       iss: JWT_TOKEN_ISS,
       verify_iss: true,
-      aud: Rails.application.secrets.auth0_api_audience,
+      aud: AUTH0_CLIENT_ID,
       verify_aud: true
     ) do |header|
       jwks_hash[header['kid']]
