@@ -4,7 +4,7 @@ class MetadataController < ApplicationController
   # Token auth needed for CLI uploads
   TOKEN_AUTH_METHODS = [:validate_csv_for_new_samples].freeze
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_METHODS
-  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_METHODS
+  prepend_before_action :token_based_login_support, only: TOKEN_AUTH_METHODS
 
   def dictionary
   end

@@ -6,6 +6,10 @@ Rails.application.routes.draw do
     sessions: 'sessions',
     registrations: 'registrations',
   }
+
+  get 'users/auth0_sign_in' => 'auth0#auth0_pre_login'
+  get 'auth/auth0/callback' => 'auth0#auth0_callback'
+
   resources :samples do
     put :reupload_source, on: :member
     put :resync_prod_data_to_staging, on: :member

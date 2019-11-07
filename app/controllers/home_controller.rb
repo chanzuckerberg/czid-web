@@ -25,6 +25,7 @@ class HomeController < ApplicationController
           @show_bulletin = true
         end
       end
+      @sign_in_strategy = params.key?(:auth0) ? 'AUTH0' : 'DEVISE'
       render 'landing'
     end
   end

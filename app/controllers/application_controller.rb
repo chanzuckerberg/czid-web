@@ -10,13 +10,10 @@ class ApplicationController < ActionController::Base
 
   include Consul::Controller
   include AppConfigHelper
+  include Auth0Helper
 
   current_power do
     Power.new(current_user)
-  end
-
-  def after_sign_out_path_for(_resource_or_scope)
-    root_path
   end
 
   def login_required
@@ -25,6 +22,34 @@ class ApplicationController < ActionController::Base
 
   def admin_required
     redirect_to root_path unless current_user && current_user.admin?
+  end
+
+  # This method is used to verify if the user is already logged in,
+  # and will redirect it to the homepage in case they are not.
+  # This method overrides a default behavior from Devise to allow auth0
+  # authentication to work simultaneously with legacy devise database mode,
+  # and should be refactored once we fully migrate to auth0.
+  def authenticate_user!
+    resp = check_auth0_auth_token
+    if resp.nil?
+      # invoke devise if auth0 token is not present
+      super
+    else
+      if resp[:authenticated]
+        auth_payload = resp[:auth_payload]
+        return if current_user&.email == auth_payload["email"]
+        auth_user = User.find_by(email: auth_payload["email"])
+        if auth_user.present?
+          sign_in auth_user, store: false
+          return
+        end
+      end
+      # redirect user if auth0 token is invalid or expired
+      respond_to do |format|
+        format.html { redirect_to(new_user_session_path) }
+        format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
+      end
+    end
   end
 
   # To use in before_action with parameters, do
@@ -81,25 +106,27 @@ class ApplicationController < ActionController::Base
     sample.default_background_id
   end
 
-  private
-
-  # Modified from https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
-  def authenticate_user_from_token!
+  # This method is only used to login users using tokens
+  # It is not intended to replace the authenticate_user! method, which
+  # must be invoked regardless.
+  # authenticate_user! is used for verifying if the user is already logged in
+  # and redirecting to the homepage in case they are not.
+  def token_based_login_support
     user_email = request.headers['X-User-Email'] || params[:user_email]
     user_token = request.headers['X-User-Token'] || params[:user_token]
 
-    user = user_email && User.find_by(email: user_email)
+    if user_email.present? && user_token.present?
+      user = User.find_by(email: user_email)
 
-    # Notice how we use Devise.secure_compare to compare the token
-    # in the database with the token given in the params, mitigating
-    # timing attacks.
-    if user && Devise.secure_compare(user.authentication_token, user_token)
-      sign_in user, store: false
-    # Redirect if no current user by other auth
-    elsif !current_user
-      redirect_to(new_user_session_path)
+      # Devise.secure_compare is used to mitigate timing attacks.
+      if user && Devise.secure_compare(user.authentication_token, user_token)
+        sign_in user, store: false
+        return
+      end
     end
   end
+
+  private
 
   def check_browser
     browser = UserAgent.parse(request.user_agent).browser
