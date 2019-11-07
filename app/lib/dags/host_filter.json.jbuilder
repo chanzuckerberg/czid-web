@@ -2,6 +2,10 @@ json.name attr[:dag_name]
 
 json.output_dir_s3 "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results"
 
+compute_insert_size_metrics = attr[:fastq2] and
+  attr[:host_genome] == 'human' and
+  attr[:sample_template] == 'DNA'
+
 json.targets do
   json.fastqs [attr[:fastq1], attr[:fastq2]].compact
 
@@ -10,7 +14,7 @@ json.targets do
   json.validate_input_out validate_input_out
 
   star_out = ["unmapped1.#{attr[:file_ext]}"]
-  star_out << "unmapped2.#{attr[:file_ext]}" if attr[:fastq2]
+  star_out << "unmapped2.#{attr[:file_ext]}" if compute_insert_size_metrics
   star_out << 'alignments.bam' if attr[:fastq2]
   json.star_out star_out
 
@@ -74,7 +78,7 @@ json.steps do
     additional_files: { star_genome: attr[:star_genome] },
     additional_attributes: { output_gene_file: 'reads_per_gene.star.tab' },
   }
-  if attr[:fastq2]
+  if compute_insert_size_metrics
     steps << {
       in: ['star_out'],
       out: 'insert_size_metrics_out',

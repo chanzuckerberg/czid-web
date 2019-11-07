@@ -240,6 +240,7 @@ class PipelineRunStage < ApplicationRecord
       bowtie2_genome: sample.s3_bowtie2_index_path,
       max_fragments: pipeline_run.max_input_fragments,
       max_subsample_frag: pipeline_run.subsample,
+      sample_template: pipeline_run.sample.sample_template,
     }
     human_host_genome = HostGenome.find_by(name: "Human")
     attribute_dict[:human_star_genome] = human_host_genome.s3_star_index_path
