@@ -1,16 +1,55 @@
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
-import { find, filter, get, some, map, isUndefined } from "lodash/fp";
+import {
+  debounce,
+  find,
+  filter,
+  get,
+  some,
+  map,
+  isUndefined,
+  orderBy,
+} from "lodash/fp";
 import cx from "classnames";
+import memoize from "memoize-one";
 
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
+import { getBackgrounds, getTaxaWithReadsSuggestions } from "~/api";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
 import cs from "./choose_step.scss";
 
+const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
+
 class ChooseStep extends React.Component {
+  state = {
+    backgroundOptions: null,
+    taxaWithReadsOptions: null,
+    isLoadingTaxaWithReadsOptionsOptions: false,
+  };
+
+  _lastTaxaWithReadsQuery = "";
+
+  componentDidMount() {
+    this.fetchBackgrounds();
+  }
+
+  // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
+  async fetchBackgrounds() {
+    const backgrounds = await getBackgrounds();
+
+    const backgroundOptions = backgrounds.map(background => ({
+      text: background.name,
+      value: background.id,
+    }));
+
+    this.setState({
+      backgroundOptions,
+    });
+  }
+
   isDownloadValid = () => {
     const {
       selectedDownloadTypeName,
@@ -49,12 +88,77 @@ class ChooseStep extends React.Component {
     return true;
   };
 
-  renderOption = (downloadType, field) => {
-    const { selectedFields, onFieldSelect, fieldOptions } = this.props;
-    const selectedField = get([downloadType.type, field.type], selectedFields);
-    let dropdownOptions = [];
-    let loadingOptions = false;
+  handleTaxaWithReadsSelectFilterChange = query => {
+    this.setState({
+      isLoadingTaxaWithReadsOptionsOptions: true,
+    });
 
+    this.loadTaxaWithReadsOptionsForQuery(query);
+  };
+
+  // Debounce this function, so it only runs after the user has not typed for a delay.
+  loadTaxaWithReadsOptionsForQuery = debounce(
+    AUTOCOMPLETE_DEBOUNCE_DELAY,
+    async query => {
+      this._lastTaxaWithReadsQuery = query;
+      const { selectedSampleIds } = this.props;
+
+      const searchResults = await getTaxaWithReadsSuggestions(
+        query,
+        Array.from(selectedSampleIds)
+      );
+
+      // If the query has since changed, discard the response.
+      if (query != this._lastTaxaWithReadsQuery) {
+        return;
+      }
+
+      const taxaWithReadsOptions = searchResults.map(result => ({
+        value: result.taxid,
+        text: result.title,
+        customNode: (
+          <div className={cs.taxaWithReadsOption}>
+            <div className={cs.taxonName}>{result.title}</div>
+            <div className={cs.fill} />
+            <div className={cs.sampleCount}>{result.sample_count}</div>
+          </div>
+        ),
+        // Ignored by the dropdown, used for sorting.
+        sampleCount: result.sample_count,
+      }));
+
+      this.setState({
+        taxaWithReadsOptions,
+        isLoadingTaxaWithReadsOptionsOptions: false,
+      });
+    }
+  );
+
+  sortTaxaWithReadsOptions = memoize(options =>
+    orderBy(["sampleCount", "text"], ["desc", "asc"], options)
+  );
+
+  renderOption = (downloadType, field) => {
+    const { selectedFields, onFieldSelect, selectedSampleIds } = this.props;
+    const {
+      backgroundOptions,
+      taxaWithReadsOptions,
+      isLoadingTaxaWithReadsOptionsOptions,
+    } = this.state;
+
+    const selectedField = get([downloadType.type, field.type], selectedFields);
+    let dropdownOptions = null;
+    let loadingOptions = false;
+    let optionsHeader = null;
+    let placeholder = "";
+    let menuLabel = "";
+    let className = "";
+    let search = false;
+    let onFilterChange = null;
+    let showNoResultsMessage = false;
+    let isLoadingSearchOptions = false;
+
+    // Set different props for the dropdown depending on the field type.
     switch (field.type) {
       case "file_format":
         dropdownOptions = field.options.map(option => ({
@@ -62,70 +166,76 @@ class ChooseStep extends React.Component {
           value: option,
         }));
 
-        return (
-          <div className={cs.field} key={field.type}>
-            <div className={cs.label}>{field.display_name}:</div>
-            <Dropdown
-              fluid
-              options={dropdownOptions}
-              onChange={(value, displayName) =>
-                onFieldSelect(downloadType.type, field.type, value, displayName)
-              }
-              value={selectedField}
-            />
-          </div>
-        );
-      case "taxon":
-        // TODO(mark): Implement more sophisticated taxon dropdown. This is a placeholder for now.
+        placeholder = "Select file format";
+        break;
+      case "taxa_with_reads":
         dropdownOptions = [
           {
             text: "All Taxon",
             value: "all",
+            customNode: (
+              <div className={cs.taxaWithReadsOption}>
+                <div className={cs.taxonName}>All taxon</div>
+                <div className={cs.fill} />
+                <div className={cs.sampleCount}>{selectedSampleIds.size}</div>
+              </div>
+            ),
           },
+          // Note: BareDropdown with search prioritizes prefix matches, so the final ordering of options
+          // might not be the one provided here.
+          ...(this.sortTaxaWithReadsOptions(taxaWithReadsOptions) || []),
         ];
 
-        return (
-          <div className={cs.field} key={field.type}>
-            <div className={cs.label}>{field.display_name}:</div>
-            <Dropdown
-              fluid
-              options={dropdownOptions}
-              onChange={(value, displayName) =>
-                onFieldSelect(downloadType.type, field.type, value, displayName)
-              }
-              value={selectedField}
-            />
-          </div>
-        );
-      // TODO(mark): Consolidate this with the above fields once the set of fields is stable.
-      case "background":
-        if (fieldOptions.backgrounds) {
-          dropdownOptions = fieldOptions.backgrounds.map(background => ({
-            text: background.name,
-            value: background.id,
-          }));
-        } else {
-          loadingOptions = true;
-        }
+        placeholder = "Select taxa";
+        menuLabel = "Select taxa";
+        showNoResultsMessage = true;
+        search = true;
+        onFilterChange = this.handleTaxaWithReadsSelectFilterChange;
+        className = cs.taxaWithReadsDropdown;
+        isLoadingSearchOptions = isLoadingTaxaWithReadsOptionsOptions;
 
-        return (
-          <div className={cs.field} key={field.type}>
-            <div className={cs.label}>{field.display_name}:</div>
-            <Dropdown
-              fluid
-              disabled={loadingOptions}
-              placeholder={loadingOptions && "Loading..."}
-              options={dropdownOptions || []}
-              onChange={(value, displayName) =>
-                onFieldSelect(downloadType.type, field.type, value, displayName)
-              }
-              value={selectedField}
-            />
+        optionsHeader = (
+          <div className={cs.taxaWithReadsOptionsHeader}>
+            <div className={cs.header}>Taxa</div>
+            <div className={cs.fill} />
+            <div className={cs.header}>Samples</div>
           </div>
         );
-      default:
-        return null;
+        break;
+      case "background":
+        dropdownOptions = backgroundOptions || [];
+        placeholder = backgroundOptions ? "Select background" : "Loading...";
+        break;
     }
+
+    if (!dropdownOptions) {
+      return null;
+    }
+
+    return (
+      <div className={cs.field} key={field.type}>
+        <div className={cs.label}>{field.display_name}:</div>
+        <Dropdown
+          fluid
+          disabled={loadingOptions}
+          placeholder={loadingOptions ? "Loading..." : placeholder}
+          options={dropdownOptions}
+          onChange={(value, displayName) =>
+            onFieldSelect(downloadType.type, field.type, value, displayName)
+          }
+          value={selectedField}
+          optionsHeader={optionsHeader}
+          menuLabel={menuLabel}
+          className={className}
+          usePortal
+          withinModal
+          search={search}
+          onFilterChange={onFilterChange}
+          showNoResultsMessage={showNoResultsMessage}
+          isLoadingSearchOptions={isLoadingSearchOptions}
+        />
+      </div>
+    );
   };
 
   renderDownloadType = downloadType => {
@@ -212,7 +322,7 @@ ChooseStep.propTypes = {
   selectedFields: PropTypes.objectOf(PropTypes.objectOf(PropTypes.string)),
   onFieldSelect: PropTypes.func.isRequired,
   onContinue: PropTypes.func.isRequired,
-  fieldOptions: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.any)),
+  selectedSampleIds: PropTypes.instanceOf(Set),
 };
 
 export default ChooseStep;
