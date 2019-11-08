@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
+  before_action :sign_in_auth0_token!
   before_action :authenticate_user!
   before_action :check_for_maintenance
   before_action :check_rack_mini_profiler
@@ -24,20 +25,15 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && current_user.admin?
   end
 
-  # This method is used to verify if the user is already logged in,
-  # and will redirect it to the homepage in case they are not.
-  # This method overrides a default behavior from Devise to allow auth0
-  # authentication to work simultaneously with legacy devise database mode,
-  # and should be refactored once we fully migrate to auth0.
-  def authenticate_user!
-    resp = check_auth0_auth_token
-    if resp.nil?
-      # invoke devise if auth0 token is not present
-      super
-    else
-      if resp[:authenticated]
-        auth_payload = resp[:auth_payload]
-        return if current_user&.email == auth_payload["email"]
+  # This method checks if auth0 token is present and sets the current user,
+  # or redirects to the homepage in case the token is not valid.
+  # This method allows auth0 authentication to work simultaneously
+  # with legacy devise database mode.
+  def sign_in_auth0_token!
+    @auth0_token = auth0_decode_auth_token
+    if @auth0_token
+      if @auth0_token[:authenticated]
+        auth_payload = @auth0_token[:auth_payload]
         auth_user = User.find_by(email: auth_payload["email"])
         if auth_user.present?
           sign_in auth_user, store: false
@@ -46,7 +42,7 @@ class ApplicationController < ActionController::Base
       end
       # redirect user if auth0 token is invalid or expired
       respond_to do |format|
-        format.html { redirect_to(new_user_session_path) }
+        format.html { redirect_to(auth0_signout_url) }
         format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
       end
     end
