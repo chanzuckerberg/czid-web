@@ -919,7 +919,7 @@ class SamplesController < ApplicationController
 
   def contigs_summary
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    local_file = pr.generate_contig_mapping_table
+    local_file = pr.generate_contig_mapping_table_file
 
     @contigs_summary = File.read(local_file)
     send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'

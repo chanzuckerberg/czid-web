@@ -463,33 +463,44 @@ class PipelineRun < ApplicationRecord
     output
   end
 
-  def generate_contig_mapping_table
+  # buffer can be a file or an array.
+  def write_contig_mapping_table_csv(buffer)
+    nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
+    nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
+    header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
+    header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
+    header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NT.#{M8_FIELDS[idx]}" }
+    header_row += TaxonLineage.names_a.map { |name| "NR.#{name}" }
+    header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NR.#{M8_FIELDS[idx]}" }
+    buffer << header_row
+    contigs.each do |c|
+      nt_m8 = nt_m8_map[c.name] || []
+      nr_m8 = nr_m8_map[c.name] || []
+      lineage = JSON.parse(c.lineage_json || "{}")
+      row = [c.name, c.read_count]
+      cfs = c.name.split("_")
+      row += [cfs[3], cfs[5]]
+      row += (lineage['NT'] || TaxonLineage.null_array)
+      row += M8_FIELDS_TO_EXTRACT.map { |idx| nt_m8[idx] }
+      row += (lineage['NR'] || TaxonLineage.null_array)
+      row += M8_FIELDS_TO_EXTRACT.map { |idx| nr_m8[idx] }
+      buffer << row
+    end
+  end
+
+  def generate_contig_mapping_table_csv
+    CSVSafe.generate(headers: true) do |csv|
+      write_contig_mapping_table_csv(csv)
+    end
+  end
+
+  def generate_contig_mapping_table_file
     # generate a csv file for contig mapping based on lineage_json and top m8
     local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}#{id}"
     Open3.capture3("mkdir -p #{File.dirname(local_file_name)}")
     # s3_file_name = contigs_summary_s3_path # TODO(yf): might turn back for s3 generation later
-    nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
-    nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
     CSVSafe.open(local_file_name, 'w') do |writer|
-      header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
-      header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
-      header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NT.#{M8_FIELDS[idx]}" }
-      header_row += TaxonLineage.names_a.map { |name| "NR.#{name}" }
-      header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NR.#{M8_FIELDS[idx]}" }
-      writer << header_row
-      contigs.each do |c|
-        nt_m8 = nt_m8_map[c.name] || []
-        nr_m8 = nr_m8_map[c.name] || []
-        lineage = JSON.parse(c.lineage_json || "{}")
-        row = [c.name, c.read_count]
-        cfs = c.name.split("_")
-        row += [cfs[3], cfs[5]]
-        row += (lineage['NT'] || TaxonLineage.null_array)
-        row += M8_FIELDS_TO_EXTRACT.map { |idx| nt_m8[idx] }
-        row += (lineage['NR'] || TaxonLineage.null_array)
-        row += M8_FIELDS_TO_EXTRACT.map { |idx| nr_m8[idx] }
-        writer << row
-      end
+      write_contig_mapping_table_csv(writer)
     end
     # Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
     local_file_name
