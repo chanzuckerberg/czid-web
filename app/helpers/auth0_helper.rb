@@ -2,20 +2,21 @@ module Auth0Helper
   def auth0_logout
     # Check presence of Auth0Helper#auth0_session
     if auth0_session.present?
-      session.delete(:jwt_id_token)
+      auth0_remove_session
       { using_auth0: true, auth0_logout_url: auth0_signout_url }
     else
       { using_auth0: false }
     end
   end
 
-  def check_auth0_auth_token
+  def auth0_decode_auth_token
     auth_payload, auth_header = auth_token
     if auth_payload.present?
       { authenticated: true, auth_payload: auth_payload, auth_header: auth_header }
     end
   rescue JWT::VerificationError, JWT::DecodeError
-    return { authenticated: false }
+    auth0_remove_session
+    { authenticated: false }
   end
 
   def auth0_session
@@ -29,6 +30,10 @@ module Auth0Helper
   end
 
   protected
+
+  def auth0_remove_session
+    session.delete(:jwt_id_token) if session
+  end
 
   def auth0_signout_url
     domain = ENV["AUTH0_DOMAIN"]
