@@ -358,6 +358,16 @@ const getTaxaWithReadsSuggestions = (query, sampleIds) =>
     },
   });
 
+const uploadedByCurrentUser = async sampleIds => {
+  const response = await get("samples/uploaded_by_current_user", {
+    params: {
+      sampleIds,
+    },
+  });
+
+  return response.uploaded_by_current_user;
+};
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -400,4 +410,5 @@ export {
   validateSampleNames,
   getBackgrounds,
   getTaxaWithReadsSuggestions,
+  uploadedByCurrentUser,
 };

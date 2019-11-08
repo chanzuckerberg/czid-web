@@ -249,6 +249,15 @@ class BulkDownload < ApplicationRecord
       end
     end
 
+    if download_type == BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE
+      download_src_urls = pipeline_runs.map(&:host_gene_count_s3_path)
+
+      download_tar_names = samples.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+          "reads_per_gene.star.tab"
+      end
+    end
+
     if !download_src_urls.nil? && !download_tar_names.nil?
       return s3_tar_writer_command(
         download_src_urls,
