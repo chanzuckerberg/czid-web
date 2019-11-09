@@ -464,6 +464,37 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
     end
 
+    it "correctly generates download file for download type contig_summary_report" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        download_type: BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE,
+        pipeline_run_ids: [
+          @sample_one.first_pipeline_run.id,
+          @sample_two.first_pipeline_run.id,
+        ]
+      )
+
+      allow_any_instance_of(PipelineRun).to receive(:generate_contig_mapping_table_csv).and_return("mock_contigs_summary_csv")
+      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
+      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
+        "Test Sample One__project-test_project_#{@project.id}__contig_summary_report.csv",
+        "mock_contigs_summary_csv"
+      )
+      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
+        "Test Sample Two__project-test_project_#{@project.id}__contig_summary_report.csv",
+        "mock_contigs_summary_csv"
+      )
+      expect_any_instance_of(S3TarWriter).to receive(:close)
+      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
+        instance_double(Process::Status, exitstatus: 0, success?: true)
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+    end
+
     it "correctly handles individual sample failures" do
       bulk_download = create(
         :bulk_download,
