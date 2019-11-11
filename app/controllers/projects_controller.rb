@@ -560,9 +560,9 @@ class ProjectsController < ApplicationController
       # Only returns the token sent to user
       @user.send_reset_password_instructions
     end
-  rescue => exception
-    LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}")
-    LogUtil.log_backtrace(exception)
+  # rescue => exception
+  #   LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}")
+  #   LogUtil.log_backtrace(exception)
   end
 
   def new_user_shared_project_email_arguments

@@ -1,4 +1,5 @@
 require 'elasticsearch/model'
+require 'auth0'
 
 class User < ApplicationRecord
   if ELASTICSEARCH_ON
@@ -178,17 +179,13 @@ class User < ApplicationRecord
     }
   end
 
-  def self.new_auth0_user(user_params_with_password)
-    puts "params: ", user_params_with_password
-    puts "client_id: ", ENV["AUTH0_MANAGEMENT_CLIENT_ID"], "client_secret: ", ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"]
+  def self.new_auth0_user(params)
+    name = params[:name]
+    options = { email_verified: false, name: params[:name], email: params[:email], password: params[:password], connection: "Username-Password-Authentication" }
+    puts "options 3:24pm: ", options
 
-    @auth0_client ||= Auth0Client.new(
-      client_id: ENV["AUTH0_MANAGEMENT_CLIENT_ID"],
-      client_secret: ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"],
-      domain: ENV["AUTH0_DOMAIN"],
-      api_version: 2
-    )
-    puts "client created: ", @auth0_client
+    # See: https://auth0.com/docs/api/management/v2#!/Users/post_users
+    auth0_management_client.create_user(name, options)
   end
 
   private
@@ -205,5 +202,16 @@ class User < ApplicationRecord
       token = Devise.friendly_token
       break token unless User.find_by(authentication_token: token)
     end
+  end
+
+  # Set up Auth0 management client for actions like adding users.
+  # See: https://github.com/auth0/ruby-auth0/blob/master/README.md#management-api-v2
+  def self.auth0_management_client
+    @auth0_management_client ||= Auth0Client.new(
+      client_id: ENV["AUTH0_MANAGEMENT_CLIENT_ID"],
+      client_secret: ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"],
+      domain: ENV["AUTH0_DOMAIN"],
+      api_version: 2
+    )
   end
 end
