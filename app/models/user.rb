@@ -181,8 +181,8 @@ class User < ApplicationRecord
 
   def self.new_auth0_user(params)
     name = params[:name]
-    options = { email_verified: false, name: params[:name], email: params[:email], password: params[:password], connection: "Username-Password-Authentication" }
-    puts "options 3:24pm: ", options
+    options = { email_verified: false, name: params[:name], email: params[:email], password: params[:password], connection: "jsheu-test" }
+    puts "options 3:49pm: ", options
 
     # See: https://auth0.com/docs/api/management/v2#!/Users/post_users
     auth0_management_client.create_user(name, options)

@@ -545,7 +545,7 @@ class ProjectsController < ApplicationController
   def create_new_user_random_password(name, email)
     Rails.logger.info("Going to create new user via project sharing: #{email}")
     user_params_with_password = { email: email, name: name }
-    random_password = SecureRandom.hex(10)
+    random_password = SecureRandom.base64(10)
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
 
