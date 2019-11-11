@@ -548,6 +548,12 @@ class ProjectsController < ApplicationController
     random_password = SecureRandom.hex(10)
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
+
+    puts "foobar 2:15pm"
+    User.new_auth0_user(user_params_with_password)
+    puts "after the call"
+    return
+
     @user ||= User.new(user_params_with_password)
     @user.email_arguments = new_user_shared_project_email_arguments()
     if @user.save!

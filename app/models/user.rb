@@ -178,6 +178,19 @@ class User < ApplicationRecord
     }
   end
 
+  def self.new_auth0_user(user_params_with_password)
+    puts "params: ", user_params_with_password
+    puts "client_id: ", ENV["AUTH0_MANAGEMENT_CLIENT_ID"], "client_secret: ", ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"]
+
+    @auth0_client ||= Auth0Client.new(
+      client_id: ENV["AUTH0_MANAGEMENT_CLIENT_ID"],
+      client_secret: ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"],
+      domain: ENV["AUTH0_DOMAIN"],
+      api_version: 2
+    )
+    puts "client created: ", @auth0_client
+  end
+
   private
 
   # Copied from https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
