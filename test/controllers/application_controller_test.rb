@@ -13,7 +13,7 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
 
   test 'should log out' do
     post user_session_path, params: @user_params
-    delete destroy_user_session_url
+    post destroy_user_session_url
     post projects_url, params: { project: { name: 'New Project' } }
     assert_redirected_to new_user_session_url
   end

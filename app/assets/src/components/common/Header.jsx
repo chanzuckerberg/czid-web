@@ -15,8 +15,7 @@ import {
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
 } from "~/components/views/discovery/discovery_api";
-import { openUrl } from "~utils/links";
-import { deleteAsync } from "~/api/core";
+import { postToUrlWithCSRF } from "~utils/links";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 
@@ -84,7 +83,7 @@ class Header extends React.Component {
       ...userMenuProps
     } = this.props;
 
-    const { allowedFeatures } = this.context;
+    const { allowedFeatures } = this.context || {};
 
     if (showBlank) {
       return (
@@ -143,13 +142,7 @@ const UserMenuDropDown = ({
   userName,
   allowedFeatures,
 }) => {
-  const signOut = () => {
-    deleteAsync(`${signOutEndpoint}.json`, {
-      withCredentials: true,
-    }).then(_ => {
-      openUrl(signInEndpoint);
-    });
-  };
+  const signOut = () => postToUrlWithCSRF(signOutEndpoint);
 
   const renderItems = (adminUser, demoUser) => {
     let userDropdownItems = [];

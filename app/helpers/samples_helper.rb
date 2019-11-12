@@ -4,6 +4,7 @@ require 'aws-sdk-s3'
 
 module SamplesHelper
   include PipelineOutputsHelper
+  include PipelineRunsHelper
   include ErrorHelper
 
   # We set S3_GLOBAL_ENDPOINT to enable cross-region listing in
@@ -382,13 +383,13 @@ module SamplesHelper
     end
   end
 
-  def format_samples(samples)
+  def format_samples(samples, pipeline_runs_by_sample_id = nil)
     formatted_samples = []
     return formatted_samples if samples.empty?
 
     # Do major SQL queries
     sample_ids = samples.map(&:id)
-    top_pipeline_run_by_sample_id = top_pipeline_runs_multiget(sample_ids)
+    top_pipeline_run_by_sample_id = pipeline_runs_by_sample_id || top_pipeline_runs_multiget(sample_ids)
     pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
@@ -604,6 +605,23 @@ module SamplesHelper
         .includes(:metadata_field)
         .group(metadata_field.validated_field)
     end
+  end
+
+  # For each taxon, count how many samples have taxon counts for that taxon.
+  # Add these counts to the taxon objects.
+  def augment_taxon_list_with_sample_count(taxon_list, samples)
+    tax_ids = taxon_list.map { |taxon| taxon["taxid"] }
+    pipeline_run_ids = get_succeeded_pipeline_runs_for_samples(samples).pluck(:id)
+    counts_by_taxid = TaxonCount
+                      .where(tax_id: tax_ids, pipeline_run_id: pipeline_run_ids)
+                      .group(:tax_id)
+                      .select("tax_id, COUNT(DISTINCT pipeline_run_id) as sample_count")
+                      .map { |r| [r.tax_id, r.sample_count] }
+                      .to_h
+    taxon_list.each do |taxon|
+      taxon["sample_count"] = counts_by_taxid[taxon["taxid"]]
+    end
+    taxon_list
   end
 
   private

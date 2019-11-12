@@ -32,6 +32,10 @@ x-aws-variables: &aws-variables
   ? AWS_ACCESS_KEY_ID
   ? AWS_SECRET_ACCESS_KEY
 
+x-env-variables: &env-variables
+  ? ENVIRONMENT
+  ? OFFLINE
+
 x-travis-variables: &travis-variables
   ? CI
   ? CONTINUOUS_INTEGRATION
@@ -146,6 +150,7 @@ services:
       <<: *travis-variables
       <<: *honeycomb-variables
       <<: *auth0-variables
+      <<: *env-variables
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
   resque:
     image: chanzuckerberg/idseq-web:compose
