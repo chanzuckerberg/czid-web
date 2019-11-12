@@ -92,7 +92,7 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "access_token"
-    t.float "progress"
+    t.float "progress", limit: 24
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
   end
@@ -104,7 +104,7 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.index ["pipeline_run_id"], name: "index_bulk_downloads_pipeline_runs_on_pipeline_run_id"
   end
 
-  create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.text "sequence", limit: 4_294_967_295
@@ -135,7 +135,7 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", null: false
+    t.string "name"
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
     t.bigint "default_background_id"
@@ -157,7 +157,7 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type", null: false
+    t.string "source_type"
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
@@ -165,7 +165,6 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
 
   create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "task"
-    t.integer "reads_before"
     t.integer "reads_after"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -201,7 +200,7 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false
+    t.string "key", null: false, collation: "latin1_swedish_ci"
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
@@ -337,6 +336,7 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.text "error_message"
     t.string "known_user_error"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
+    t.index ["job_status", "sample_id"], name: "index_status_samples"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
@@ -345,7 +345,7 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1
+    t.integer "public_access", limit: 1, default: 0
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
@@ -392,8 +392,8 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.integer "max_input_fragments"
     t.datetime "client_updated_at"
     t.integer "uploaded_from_basespace", limit: 1, default: 0
-    t.string "basespace_access_token"
     t.string "upload_error"
+    t.string "basespace_access_token"
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
@@ -463,6 +463,7 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.integer "family_taxid", default: -300, null: false
     t.integer "is_phage", limit: 1, default: 0, null: false
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
+    t.index ["pipeline_run_id"], name: "index_pipeline_run_id"
     t.index ["tax_id"], name: "index_taxon_counts_on_tax_id"
   end
 
@@ -470,8 +471,8 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.text "summary", limit: 16_777_215
+    t.text "description", limit: 16_777_215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -508,8 +509,8 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
     t.string "tax_name"
-    t.integer "version_start", limit: 1
-    t.integer "version_end", limit: 1
+    t.integer "version_start", limit: 2, null: false, comment: "The first version for which the taxon is active"
+    t.integer "version_end", limit: 2, null: false, comment: "The last version for which the taxon is active"
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
@@ -559,11 +560,11 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false
+    t.string "email"
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false
+    t.string "encrypted_password"
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
@@ -598,13 +599,12 @@ ActiveRecord::Schema.define(version: 20_191_023_235_303) do
   end
 
   add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
-  add_foreign_key "backgrounds_pipeline_runs", "backgrounds", name: "backgrounds_pipeline_runs_background_id_fk"
   add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
   add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
   add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
+  add_foreign_key "bulk_downloads", "users"
   add_foreign_key "bulk_downloads_pipeline_runs", "bulk_downloads", name: "bulk_downloads_pipeline_runs_bulk_download_id_fk"
   add_foreign_key "bulk_downloads_pipeline_runs", "pipeline_runs", name: "bulk_downloads_pipeline_runs_pipeline_run_id_fk"
-  add_foreign_key "bulk_downloads", "users"
   add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
   add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
   add_foreign_key "host_genomes_metadata_fields", "host_genomes", name: "host_genomes_metadata_fields_host_genome_id_fk"

@@ -835,6 +835,8 @@ GEM
       railties (>= 4.2.0)
     faraday (0.15.4)
       multipart-post (>= 1.2, < 3)
+    fast_jsonapi (1.5)
+      activesupport (>= 4.2)
     ffi (1.10.0)
     flamegraph (0.9.5)
     formatador (0.2.5)
@@ -1165,6 +1167,7 @@ DEPENDENCIES
   devise (>= 4.7.1)
   elasticsearch-model
   factory_bot_rails
+  fast_jsonapi
   flamegraph
   guard (~> 2.15)
   guard-rspec (~> 4.7)

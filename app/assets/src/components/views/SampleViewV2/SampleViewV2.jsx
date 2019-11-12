@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { merge } from "lodash/fp";
 import { getSampleReportData } from "~/api";
-import ReportTableV2 from "./ReportTableV2";
+import ReportTableV2 from "./ReportTable";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import cs from "./sample_view_v2.scss";
 

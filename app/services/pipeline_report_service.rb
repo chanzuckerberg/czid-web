@@ -112,7 +112,25 @@ class PipelineReportService
         sortedGenus: sorted_genus_tax_ids,
         highlighted_tax_ids: highlighted_tax_ids
       )
-    @timer.split("convert_to_json_with_sJSON")
+    @timer.split("convert_to_json_with_JSON")
+
+    FastJsonapi::MultiToJson.to_json(
+      counts: counts_by_tax_level,
+      lineage: structured_lineage,
+      sortedGenus: sorted_genus_tax_ids,
+      highlighted_tax_ids: highlighted_tax_ids
+    )
+
+    @timer.split("convert_to_json_with_FAST_JSON")
+
+    FastJsonapi::MultiToJson.to_json(
+      counts: counts_by_tax_level,
+      lineage: structured_lineage,
+      sortedGenus: sorted_genus_tax_ids,
+      highlighted_tax_ids: highlighted_tax_ids
+    )
+
+    @timer.split("convert_to_json_with_OJ")
 
     return json_dump
   end

@@ -7,15 +7,15 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { getOr, orderBy } from "lodash/fp";
 
-import cs from "./report_table_v2.scss";
-import InsightIcon from "../../ui/icons/InsightIcon";
+import cs from "./report_table.scss";
+import InsightIcon from "~ui/icons/InsightIcon";
 
 // Values for null values when sorting ascending and descending
 // for strings - HACK: In theory, there can be strings larger than this
 const STRING_NULL_VALUES = ["", "zzzzzzzzz"];
 const NUMBER_NULL_VALUES = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER];
 
-class ReportTableV2 extends React.Component {
+class ReportTable extends React.Component {
   constructor(props) {
     super(props);
 
@@ -393,18 +393,16 @@ class ReportTableV2 extends React.Component {
   };
 }
 
-ReportTableV2.defaultProps = {
+ReportTable.defaultProps = {
   data: [],
   initialDbType: "nt",
   rowHeight: 55,
 };
 
-ReportTableV2.propTypes = {
+ReportTable.propTypes = {
   data: PropTypes.array,
   initialDbType: PropTypes.oneOf(["nt", "nr"]),
   rowHeight: PropTypes.number,
 };
 
-export default ReportTableV2;
-
-// TODO: need tax id inside each cell
+export default ReportTable;
