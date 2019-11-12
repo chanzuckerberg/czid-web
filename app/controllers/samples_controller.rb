@@ -715,6 +715,7 @@ class SamplesController < ApplicationController
   end
 
   def show_v2
+    # TODO: move to fastjson_api serializer
     default_fields = [
       :name,
       :created_at,
@@ -724,10 +725,12 @@ class SamplesController < ApplicationController
       :host_genome_id,
     ]
     respond_to do |format|
+      format.html { render 'show_v2' }
       format.json do
         render json: {
           sample: @sample.as_json(
-            only: default_fields
+            only: default_fields,
+            methods: []
           ),
           pipeline_run: @sample.first_pipeline_run.as_json,
         }
