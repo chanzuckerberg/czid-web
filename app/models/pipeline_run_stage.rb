@@ -1,9 +1,4 @@
 class PipelineRunStage < ApplicationRecord
-  include ApplicationHelper
-  include PipelineRunsHelper
-  include PipelineOutputsHelper
-  belongs_to :pipeline_run
-
   JOB_TYPE_BATCH = 1
   COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
 
@@ -57,6 +52,11 @@ class PipelineRunStage < ApplicationRecord
 
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
+
+  include ApplicationHelper
+  include PipelineRunsHelper
+  include PipelineOutputsHelper
+  belongs_to :pipeline_run
 
   def started?
     job_command.present?
@@ -170,7 +170,6 @@ class PipelineRunStage < ApplicationRecord
         _job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
         save
       end
-      terminate_job
       return
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.

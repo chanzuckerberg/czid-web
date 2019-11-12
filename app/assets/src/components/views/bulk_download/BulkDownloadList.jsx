@@ -1,14 +1,16 @@
 import React from "react";
 import cx from "classnames";
 import { SortDirection } from "react-virtualized";
+import copy from "copy-to-clipboard";
 
 import LargeDownloadIcon from "~ui/icons/LargeDownloadIcon";
 import LoadingMessage from "~/components/common/LoadingMessage";
-import { getBulkDownloads } from "~/api/bulk_downloads";
+import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
 import { ViewHeader, NarrowContainer, Divider } from "~/components/layout";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import { Table } from "~/components/visualizations/table";
+import { openUrl } from "~utils/links";
 
 import BulkDownloadTableRenderers from "./BulkDownloadTableRenderers";
 import BulkDownloadDetailsModal from "./BulkDownloadDetailsModal";
@@ -33,10 +35,49 @@ const TABLE_COLUMNS = [
   {
     dataKey: "status",
     label: "",
-    width: 240,
+    width: 190,
     cellRenderer: BulkDownloadTableRenderers.renderStatus,
   },
 ];
+
+const STATUS_TYPES = {
+  waiting: "default",
+  running: "default",
+  success: "success",
+  error: "error",
+};
+
+const STATUS_DISPLAY = {
+  waiting: "in progress",
+  running: "in progress",
+  success: "complete",
+  error: "failed",
+};
+
+// It is possible for a bulk download to "complete with issues".
+// For example, a few of the source files could not be found, but the rest were compressed successfully.
+// In this case, the bulk download task will have status = success and also have an error message.
+const getStatusType = bulkDownload => {
+  if (bulkDownload.status === "success" && bulkDownload.error_message) {
+    return "warning";
+  }
+  return STATUS_TYPES[bulkDownload.status];
+};
+
+const getStatusDisplay = bulkDownload => {
+  if (bulkDownload.status === "success" && bulkDownload.error_message) {
+    return "complete with issue";
+  }
+  return STATUS_DISPLAY[bulkDownload.status];
+};
+
+const getTooltipText = bulkDownload => {
+  if (bulkDownload.status === "success" && bulkDownload.error_message) {
+    return bulkDownload.error_message;
+  }
+
+  return null;
+};
 
 class BulkDownloadList extends React.Component {
   state = {
@@ -56,8 +97,14 @@ class BulkDownloadList extends React.Component {
   processBulkDownloads = bulkDownloads =>
     bulkDownloads.map(bulkDownload => ({
       ...bulkDownload,
-      // Add a callback for the cell. This is used in the renderDownload cell renderer.
+      // Add callback to be used in renderDownload table renderer.
       onStatusClick: () => this.onStatusClick(bulkDownload),
+      // Add callbacks to be used in renderStatus table renderer.
+      onDownloadFileClick: () => this.onDownloadFileClick(bulkDownload),
+      onCopyUrlClick: () => this.onCopyUrlClick(bulkDownload),
+      statusType: getStatusType(bulkDownload),
+      statusDisplay: getStatusDisplay(bulkDownload),
+      tooltipText: getTooltipText(bulkDownload),
     }));
 
   isLoading = () => this.state.bulkDownloads === null;
@@ -69,6 +116,28 @@ class BulkDownloadList extends React.Component {
       selectedBulkDownload: bulkDownload,
       modalOpen: true,
     });
+  };
+
+  onDownloadFileClick = async bulkDownload => {
+    // This should only be clickable when the bulk download has succeeded
+    // TODO(mark): Handle error case.
+    if (bulkDownload.status === "success") {
+      const outputFilePresignedUrl = await getPresignedOutputUrl(
+        bulkDownload.id
+      );
+      openUrl(outputFilePresignedUrl);
+    }
+  };
+
+  onCopyUrlClick = async bulkDownload => {
+    // This should only be clickable when the bulk download has succeeded
+    // TODO(mark): Handle error case. Want to change popup text, which involves a forceUpdate on the table.
+    if (bulkDownload.status === "success") {
+      const outputFilePresignedUrl = await getPresignedOutputUrl(
+        bulkDownload.id
+      );
+      copy(outputFilePresignedUrl);
+    }
   };
 
   onModalClose = () => {

@@ -1,7 +1,7 @@
 # Shared variables using Docker x- extension and YAML merging syntax.
 
 x-web-variables: &web-variables
-  ? ALIGNMENT_CONFIG_DEFAULT_NAME=2018-12-01
+  ? ALIGNMENT_CONFIG_DEFAULT_NAME=2019-09-17
   ? SAMPLES_BUCKET_NAME=idseq-samples-development
   ? ES_ADDRESS=http://elasticsearch:9200
   ? AIRBRAKE_PROJECT_ID
@@ -13,6 +13,7 @@ x-web-variables: &web-variables
   ? BASESPACE_OAUTH_REDIRECT_URI
   ? DATADOG_API_KEY
   ? DATADOG_CLIENT_TOKEN
+  ? SERVER_DOMAIN
   ? ID_SEQ_ENVS_THAT_CAN_SCALE
   ? LOCATION_IQ_API_KEY
   ? MAIL_GUN_API_KEY
@@ -30,6 +31,10 @@ x-auth0-variables: &auth0-variables
 x-aws-variables: &aws-variables
   ? AWS_ACCESS_KEY_ID
   ? AWS_SECRET_ACCESS_KEY
+
+x-env-variables: &env-variables
+  ? ENVIRONMENT
+  ? OFFLINE
 
 x-travis-variables: &travis-variables
   ? CI
@@ -143,6 +148,7 @@ services:
       <<: *travis-variables
       <<: *honeycomb-variables
       <<: *auth0-variables
+      <<: *env-variables
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
   resque:
     image: chanzuckerberg/idseq-web:compose

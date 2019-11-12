@@ -2,9 +2,9 @@ class SamplesController < ApplicationController
   include ApplicationHelper
   include ElasticsearchHelper
   include ErrorHelper
-  include HeatmapHelper
   include LocationHelper
   include PipelineOutputsHelper
+  include PipelineRunsHelper
   include ReportHelper
   include SamplesHelper
 
@@ -19,7 +19,7 @@ class SamplesController < ApplicationController
   ##########################################
 
   # Read action meant for single samples with set_sample before_action
-  READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+  READ_ACTIONS = [:show, :show_v2, :report_v2, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
@@ -28,13 +28,13 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :stats, :upload, :validate_sample_files,].freeze
+                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
   # For API-like access
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
-  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
+  prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
@@ -46,6 +46,9 @@ class SamplesController < ApplicationController
   before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
   before_action :check_owner, only: OWNER_ACTIONS
   before_action :check_access
+  before_action only: :show_v2 do
+    allowed_feature_required("report_v2")
+  end
 
   around_action :instrument_with_timer
 
@@ -712,6 +715,9 @@ class SamplesController < ApplicationController
     MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
+  def show_v2
+  end
+
   # TODO: (gdingle): remove this if we are not going to allow saving reports as visualizations
   def last_saved_visualization
     valid_viz_types = ['tree', 'table'] # See PipelineSampleReport.jsx
@@ -736,6 +742,12 @@ class SamplesController < ApplicationController
       params[:projectId] ? Project.find(params[:projectId]) : nil
     )
     render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
+  end
+
+  def report_v2
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    background_id = get_background_id(@sample)
+    render json: PipelineReportService.call(pipeline_run.id, background_id)
   end
 
   # The json response here should be precached in PipelineRun.
@@ -907,7 +919,7 @@ class SamplesController < ApplicationController
 
   def contigs_summary
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    local_file = pr.generate_contig_mapping_table
+    local_file = pr.generate_contig_mapping_table_file
 
     @contigs_summary = File.read(local_file)
     send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
@@ -1244,6 +1256,40 @@ class SamplesController < ApplicationController
   rescue
     render json: {
       error: "There was an error fetching the coverage viz data file.",
+    }
+  end
+
+  # GET /samples/taxa_with_reads_suggestions
+  # Get taxon search suggestions, where taxa are restricted to the provided sample ids.
+  # Also include, for each taxon, the number of samples that contain the taxon.
+  def taxa_with_reads_suggestions
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    query = params[:query]
+    samples = current_power.viewable_samples.where(id: sample_ids)
+
+    # User should not be querying for unviewable samples.
+    if samples.length != sample_ids.length
+      LogUtil.log_err_and_airbrake("Get taxa with reads error: Unauthorized access of samples")
+      render json: {
+        error: "There was an error fetching the taxa with reads for samples.",
+      }, status: :unauthorized
+      return
+    end
+
+    taxon_list = taxon_search(query, ["species", "genus"], samples: samples)
+    taxon_list = augment_taxon_list_with_sample_count(taxon_list, samples)
+
+    render json: taxon_list
+  end
+
+  # GET /samples/uploaded_by_current_user
+  # Return whether all sampleIds were uploaded by the current user.
+  def uploaded_by_current_user
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    samples = Sample.where(user: current_user, id: sample_ids)
+
+    render json: {
+      uploaded_by_current_user: sample_ids.length == samples.length,
     }
   end
 

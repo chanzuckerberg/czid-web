@@ -28,6 +28,9 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
+const getSampleReportData = (id, params) =>
+  get(`/samples/${id}/report_v2`, { params });
+
 const getSampleReportInfo = (id, params) =>
   get(`/samples/${id}/report_info${params}`);
 
@@ -305,6 +308,11 @@ const createBackground = ({ description, name, sampleIds }) =>
     sample_ids: sampleIds,
   });
 
+const getBackgrounds = async () => {
+  const response = await get("/backgrounds.json");
+  return response.backgrounds;
+};
+
 const getCoverageVizSummary = sampleId =>
   get(`/samples/${sampleId}/coverage_viz_summary`);
 
@@ -341,6 +349,25 @@ const getSamplesLocations = ({ domain, filters, projectId, search }) =>
 const getSamplePipelineResults = id =>
   get(`/samples/${id}/results_folder.json`);
 
+// Get autocomplete suggestions for "taxa that have reads" for a set of samples.
+const getTaxaWithReadsSuggestions = (query, sampleIds) =>
+  get("/samples/taxa_with_reads_suggestions.json", {
+    params: {
+      query,
+      sampleIds,
+    },
+  });
+
+const uploadedByCurrentUser = async sampleIds => {
+  const response = await get("samples/uploaded_by_current_user", {
+    params: {
+      sampleIds,
+    },
+  });
+
+  return response.uploaded_by_current_user;
+};
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -357,6 +384,7 @@ export {
   getProjectDimensions,
   getProjects,
   getSampleDimensions,
+  getSampleReportData,
   getSampleReportInfo,
   getSamples,
   getSamplesLocations,
@@ -380,4 +408,7 @@ export {
   validatePhyloTreeName,
   validateSampleFiles,
   validateSampleNames,
+  getBackgrounds,
+  getTaxaWithReadsSuggestions,
+  uploadedByCurrentUser,
 };

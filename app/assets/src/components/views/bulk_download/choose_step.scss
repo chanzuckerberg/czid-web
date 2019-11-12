@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .chooseStep {
   height: calc(85vh - 80px);
@@ -37,6 +38,48 @@
   }
 }
 
+.taxaWithReadsDropdown {
+  width: 300px;
+
+  .taxaWithReadsOptionsHeader {
+    display: flex;
+    padding: $space-s $space-m;
+
+    .header {
+      @include font-header-xs-crop;
+      color: $dark-grey;
+    }
+
+    .fill {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  .taxaWithReadsOption {
+    display: flex;
+    padding: $space-s $space-m;
+
+    .taxonName {
+      @include font-body-xxs-crop;
+      flex-shrink: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .fill {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .sampleCount {
+      @include font-body-xxs-crop;
+      color: $medium-grey;
+    }
+  }
+}
+
 .downloadType {
   padding: 10px 18px;
   display: flex;
@@ -47,9 +90,27 @@
     background-color: $off-white;
   }
 
+  &.disabled {
+    cursor: default;
+
+    &:hover {
+      background-color: white;
+    }
+
+    .name,
+    .description {
+      color: $light-grey;
+    }
+  }
+
   .radioButton {
     margin-right: 10px;
     margin-top: 4px;
+  }
+
+  .content {
+    flex: 1 1 0;
+    min-width: 0;
   }
 
   .name {
@@ -64,9 +125,15 @@
 
 .fields {
   margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
 
   .field {
-    width: calc(50% - 20px);
+    width: calc(50% - 10px);
+
+    &:nth-child(odd) {
+      margin-right: 20px;
+    }
 
     .label {
       @include font-body-xs;

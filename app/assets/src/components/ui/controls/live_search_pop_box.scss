@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .liveSearchPopBox {
   &:not(.rectangular) {
@@ -28,8 +29,16 @@
 
     background-color: transparent;
     color: $light-grey;
-    padding: 0 14px;
+    margin: $space-m $space-m 0;
+    padding: $space-xxxs 0;
     text-transform: uppercase;
+    border-top: 2px solid $lightest-grey;
+  }
+
+  // skip divider line
+  .category:first-child {
+    margin-top: 0;
+    border: none;
   }
 
   .entry {

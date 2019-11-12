@@ -19,6 +19,7 @@ import DiscoverIcon from "../ui/icons/DiscoverIcon";
 import DetectIcon from "../ui/icons/DetectIcon";
 import DecipherIcon from "../ui/icons/DecipherIcon";
 import LogoIcon from "../ui/icons/LogoIcon";
+import { postToUrlWithCSRF } from "~utils/links";
 
 class Landing extends React.Component {
   constructor(props) {
@@ -75,7 +76,13 @@ class Landing extends React.Component {
   }
 
   render() {
-    const signInLink = () => (location.href = "/users/sign_in");
+    const signInLink = () => {
+      if (this.props.signInStrategy == "AUTH0") {
+        postToUrlWithCSRF("/auth/auth0");
+      } else {
+        location.href = "/users/sign_in";
+      }
+    };
     const header = (
       <div className="header-row row">
         <div className="site-header col s12">
@@ -330,6 +337,7 @@ Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
   showBulletin: PropTypes.bool,
   browserInfo: PropTypes.object,
+  signInStrategy: PropTypes.string,
 };
 
 export default Landing;

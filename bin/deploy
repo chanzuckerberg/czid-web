@@ -28,7 +28,8 @@ end
 puts "deploying #{image} to #{env}"
 
 def notify_slack(env, image, stage)
-  slack_hook = ENV["SLACK_HOOK"]
+  slack_secret = JSON.parse(`aws secretsmanager get-secret-value --secret-id idseq/slack_hook`)
+  slack_hook = slack_secret["SecretString"]
   if slack_hook
     if stage=="start"
       puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":ghost:", "text": "starting to deploy #{image} to #{env}"}' #{slack_hook}`
@@ -49,7 +50,7 @@ def notify_slack(env, image, stage)
       puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":sob:", "text": "deploy of #{image} to #{env} failed"}' #{slack_hook}`
     end
   else
-    puts "Not notifying Slack of this deploy because environment variable SLACK_HOOK is not set. Please add an appropriate webhook to ~/.bash_profile."
+    puts "Unable to get Slack hook from AWS Secrets Manager. Please check your configuration."
   end
 end
 

@@ -14,13 +14,16 @@ class Input extends React.Component {
   };
 
   render() {
-    let { className, ...props } = this.props;
+    let { className, disableAutocomplete, ...props } = this.props;
     className = "idseq-ui " + className;
     return (
       <SemanticInput
         className={className}
         {...props}
         onChange={this.handleChange}
+        // Chrome ignores autocomplete="off" on purpose, so use a non-standard
+        // label. See: https://stackoverflow.com/questions/15738259/disabling-chrome-autofill
+        autoComplete={disableAutocomplete ? "idseq-ui" : null}
       />
     );
   }
@@ -30,6 +33,7 @@ Input.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func,
   className: PropTypes.string,
+  disableAutocomplete: PropTypes.bool,
 };
 
 export default Input;

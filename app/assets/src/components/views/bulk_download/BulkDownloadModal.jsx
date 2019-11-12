@@ -10,8 +10,28 @@ import ChooseStep from "./ChooseStep";
 import ReviewStep from "./ReviewStep";
 
 const assembleSelectedDownload = memoize(
-  (selectedDownloadTypeName, allSelectedFields, sampleIds) => {
-    const fields = get(selectedDownloadTypeName, allSelectedFields);
+  (
+    selectedDownloadTypeName,
+    allSelectedFields,
+    allSelectedFieldsDisplay,
+    sampleIds
+  ) => {
+    const fieldValues = get(selectedDownloadTypeName, allSelectedFields);
+    const fieldDisplayNames = get(
+      selectedDownloadTypeName,
+      allSelectedFieldsDisplay
+    );
+
+    const fields = {};
+    if (fieldValues) {
+      for (let [fieldName, fieldValue] of Object.entries(fieldValues)) {
+        fields[fieldName] = {
+          value: fieldValue,
+          // Use the display name for the value if it exists. Otherwise, use the value.
+          displayName: fieldDisplayNames[fieldName] || fieldValue,
+        };
+      }
+    }
 
     return {
       downloadType: selectedDownloadTypeName,
@@ -27,19 +47,22 @@ class BulkDownloadModal extends React.Component {
     // We save the fields for ALL download types.
     // If the user clicks between different download types, all their selections are saved.
     selectedFields: {},
+    // For each selected field, we also save a human-readable "display name" for that field.
+    // While the user is in the choose step, we store a field's value and display name separately.
+    // This is to be compatible with <Dropdowns>, which only accept a string or number as the value
+    // (as opposed to an object).
+    // However, after the selected download is "assembled", both the value and display name for each field are stored
+    // in the params. This is also how the bulk download is stored in the database.
+    selectedFieldsDisplay: {},
     selectedDownloadTypeName: null,
     currentStep: "choose",
   };
 
-  async componentDidMount() {
-    const bulkDownloadTypes = await getBulkDownloadTypes();
-
-    this.setState({
-      bulkDownloadTypes,
-    });
+  componentDidMount() {
+    this.fetchDownloadTypes();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     // If the user has just closed the modal, reset it.
     if (prevProps.open && !this.props.open) {
       this.setState({
@@ -50,23 +73,36 @@ class BulkDownloadModal extends React.Component {
     }
   }
 
-  onSelectDownloadType = selectedDownloadTypeName => {
+  async fetchDownloadTypes() {
+    const bulkDownloadTypes = await getBulkDownloadTypes();
+
+    this.setState({
+      bulkDownloadTypes,
+    });
+  }
+
+  handleSelectDownloadType = selectedDownloadTypeName => {
     this.setState({
       selectedDownloadTypeName,
     });
   };
 
-  onFieldSelect = (downloadType, fieldType, value) => {
+  handleFieldSelect = (downloadType, fieldType, value, displayName) => {
     this.setState({
       selectedFields: set(
         [downloadType, fieldType],
         value,
         this.state.selectedFields
       ),
+      selectedFieldsDisplay: set(
+        [downloadType, fieldType],
+        displayName,
+        this.state.selectedFieldsDisplay
+      ),
     });
   };
 
-  onChooseStepContinue = () => {
+  handleChooseStepContinue = () => {
     this.setState({ currentStep: "review" });
   };
   handleBackClick = () => {
@@ -80,6 +116,7 @@ class BulkDownloadModal extends React.Component {
       bulkDownloadTypes,
       selectedDownloadTypeName,
       selectedFields,
+      selectedFieldsDisplay,
     } = this.state;
 
     if (currentStep === "choose") {
@@ -87,10 +124,11 @@ class BulkDownloadModal extends React.Component {
         <ChooseStep
           downloadTypes={bulkDownloadTypes}
           selectedDownloadTypeName={selectedDownloadTypeName}
-          onSelect={this.onSelectDownloadType}
+          onSelect={this.handleSelectDownloadType}
           selectedFields={selectedFields}
-          onFieldSelect={this.onFieldSelect}
-          onContinue={this.onChooseStepContinue}
+          onFieldSelect={this.handleFieldSelect}
+          onContinue={this.handleChooseStepContinue}
+          selectedSampleIds={selectedSampleIds}
         />
       );
     }
@@ -99,6 +137,7 @@ class BulkDownloadModal extends React.Component {
       const selectedDownload = assembleSelectedDownload(
         selectedDownloadTypeName,
         selectedFields,
+        selectedFieldsDisplay,
         selectedSampleIds
       );
 

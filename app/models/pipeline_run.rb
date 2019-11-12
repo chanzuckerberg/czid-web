@@ -57,12 +57,14 @@ class PipelineRun < ApplicationRecord
   STATS_JSON_NAME = "stats.json".freeze
   INPUT_VALIDATION_NAME = "validate_input_summary.json".freeze
   INVALID_STEP_NAME = "invalid_step_input.json".freeze
+  NONHOST_FASTQ_OUTPUT_NAME = 'taxid_annot.fasta'.freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts.json'.freeze
   REFINED_TAXID_BYTERANGE_JSON_NAME = 'assembly/refined_taxid_locations_combined.json'.freeze
+  READS_PER_GENE_STAR_TAB_NAME = 'reads_per_gene.star.tab'.freeze
 
   ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
@@ -409,6 +411,24 @@ class PipelineRun < ApplicationRecord
     multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
+  def host_gene_count_s3_path
+    return "#{host_filter_output_s3_path}/#{READS_PER_GENE_STAR_TAB_NAME}"
+  end
+
+  def nonhost_fastq_s3_paths
+    input_file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+
+    files = [
+      "#{postprocess_output_s3_path}/nonhost_R1.#{input_file_ext}",
+    ]
+
+    if sample.input_files.length == 2
+      files << "#{postprocess_output_s3_path}/nonhost_R2.#{input_file_ext}"
+    end
+
+    files
+  end
+
   def unidentified_fasta_s3_path
     return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
     return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
@@ -443,33 +463,44 @@ class PipelineRun < ApplicationRecord
     output
   end
 
-  def generate_contig_mapping_table
+  # buffer can be a file or an array.
+  def write_contig_mapping_table_csv(buffer)
+    nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
+    nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
+    header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
+    header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
+    header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NT.#{M8_FIELDS[idx]}" }
+    header_row += TaxonLineage.names_a.map { |name| "NR.#{name}" }
+    header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NR.#{M8_FIELDS[idx]}" }
+    buffer << header_row
+    contigs.each do |c|
+      nt_m8 = nt_m8_map[c.name] || []
+      nr_m8 = nr_m8_map[c.name] || []
+      lineage = JSON.parse(c.lineage_json || "{}")
+      row = [c.name, c.read_count]
+      cfs = c.name.split("_")
+      row += [cfs[3], cfs[5]]
+      row += (lineage['NT'] || TaxonLineage.null_array)
+      row += M8_FIELDS_TO_EXTRACT.map { |idx| nt_m8[idx] }
+      row += (lineage['NR'] || TaxonLineage.null_array)
+      row += M8_FIELDS_TO_EXTRACT.map { |idx| nr_m8[idx] }
+      buffer << row
+    end
+  end
+
+  def generate_contig_mapping_table_csv
+    CSVSafe.generate(headers: true) do |csv|
+      write_contig_mapping_table_csv(csv)
+    end
+  end
+
+  def generate_contig_mapping_table_file
     # generate a csv file for contig mapping based on lineage_json and top m8
     local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}#{id}"
     Open3.capture3("mkdir -p #{File.dirname(local_file_name)}")
     # s3_file_name = contigs_summary_s3_path # TODO(yf): might turn back for s3 generation later
-    nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
-    nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
     CSVSafe.open(local_file_name, 'w') do |writer|
-      header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
-      header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
-      header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NT.#{M8_FIELDS[idx]}" }
-      header_row += TaxonLineage.names_a.map { |name| "NR.#{name}" }
-      header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NR.#{M8_FIELDS[idx]}" }
-      writer << header_row
-      contigs.each do |c|
-        nt_m8 = nt_m8_map[c.name] || []
-        nr_m8 = nr_m8_map[c.name] || []
-        lineage = JSON.parse(c.lineage_json || "{}")
-        row = [c.name, c.read_count]
-        cfs = c.name.split("_")
-        row += [cfs[3], cfs[5]]
-        row += (lineage['NT'] || TaxonLineage.null_array)
-        row += M8_FIELDS_TO_EXTRACT.map { |idx| nt_m8[idx] }
-        row += (lineage['NR'] || TaxonLineage.null_array)
-        row += M8_FIELDS_TO_EXTRACT.map { |idx| nr_m8[idx] }
-        writer << row
-      end
+      write_contig_mapping_table_csv(writer)
     end
     # Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
     local_file_name
@@ -1331,6 +1362,23 @@ class PipelineRun < ApplicationRecord
       output << info
     end
     output
+  end
+
+  def get_summary_contig_counts_v2(min_contig_size)
+    summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
+    contig_lineages(min_contig_size).each do |c|
+      lineage = JSON.parse(c.lineage_json)
+      lineage.each do |count_type, taxid_arr|
+        taxids = taxid_arr[0..1]
+        taxids.each do |taxid|
+          summary_per_tax = summary_dict[taxid] ||= {}
+          summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= { contigs: 0, contig_reads: 0 }
+          summary_per_tax_and_type[:contigs] += 1
+          summary_per_tax_and_type[:contig_reads] += c.read_count
+        end
+      end
+    end
+    return summary_dict
   end
 
   def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)

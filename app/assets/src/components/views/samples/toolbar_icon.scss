@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .iconWrapper {
   display: flex;
@@ -24,5 +25,13 @@
     svg {
       fill: $primary-light;
     }
+  }
+}
+
+.popupText {
+  @include font-body-xxs-crop;
+
+  .popupSubtitle {
+    color: $medium-grey;
   }
 }

@@ -4,7 +4,16 @@ module BulkDownloadsHelper
   SAMPLE_NO_PERMISSION_ERROR = "You do not have permission to access all of the selected samples. Please contact us for help.".freeze
   SAMPLE_STILL_RUNNING_ERROR = "Some selected samples have not finished running yet. Please remove these samples and try again.".freeze
   SAMPLE_FAILED_ERROR = "Some selected samples failed their most recent run. Please remove these samples and try again.".freeze
-  BULK_DOWNLOAD_NOT_FOUND = "No bulk download was found with this id".freeze
+  BULK_DOWNLOAD_NOT_FOUND = "No bulk download was found with this id.".freeze
+  OUTPUT_FILE_NOT_SUCCESSFUL = "Bulk download has not succeeded. Can't get output file url.".freeze
+  INVALID_ACCESS_TOKEN = "The access token was invalid for this bulk download.".freeze
+  KICKOFF_FAILURE = "Unexpected error kicking off bulk download.".freeze
+  KICKOFF_FAILURE_HUMAN_READABLE = "Could not kick off bulk download. Please contact us for help.".freeze
+  PRESIGNED_URL_GENERATION_ERROR = "Could not generate a presigned url.".freeze
+  SUCCESS_URL_REQUIRED = "Success url required for bulk download.".freeze
+  FAILED_SAMPLES_ERROR_TEMPLATE = "%s samples could not be processed. Please contact us for help.".freeze
+  UNKNOWN_EXECUTION_TYPE = "Could not find execution type for bulk download".freeze
+  BULK_DOWNLOAD_GENERATION_FAILED = "Could not generate bulk download".freeze
 
   # Check that all pipeline runs have succeeded for the provided samples
   # and return the pipeline run ids.
@@ -28,9 +37,9 @@ module BulkDownloadsHelper
   end
 
   def format_bulk_download(bulk_download, with_pipeline_runs = false)
-    formatted_bulk_download = bulk_download.as_json
+    formatted_bulk_download = bulk_download.as_json(except: [:access_token])
     formatted_bulk_download[:num_samples] = bulk_download.pipeline_runs.length
-    formatted_bulk_download[:download_name] = BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPE_TO_DISPLAY_NAME[bulk_download.download_type]
+    formatted_bulk_download[:download_name] = BulkDownloadTypesHelper.bulk_download_type_display_name(bulk_download.download_type)
     unless bulk_download.params_json.nil?
       formatted_bulk_download[:params] = JSON.parse(bulk_download.params_json)
     end

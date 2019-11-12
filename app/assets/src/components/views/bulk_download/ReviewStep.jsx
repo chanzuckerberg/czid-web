@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
+import PropTypes from "~/components/utils/propTypes";
 import cx from "classnames";
 
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -99,21 +99,10 @@ class ReviewStep extends React.Component {
 ReviewStep.propTypes = {
   selectedDownload: PropTypes.shape({
     downloadType: PropTypes.string.isRequired,
-    fields: PropTypes.object,
+    fields: PropTypes.objectOf(PropTypes.DownloadTypeParam),
     sampleIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   }).isRequired,
-  downloadType: PropTypes.shape({
-    type: PropTypes.string,
-    display_name: PropTypes.string,
-    description: PropTypes.string,
-    category: PropTypes.string,
-    fields: PropTypes.arrayOf(
-      PropTypes.shape({
-        type: PropTypes.string,
-        display_name: PropTypes.string,
-      })
-    ),
-  }),
+  downloadType: PropTypes.DownloadType,
   onBackClick: PropTypes.func.isRequired,
 };
 

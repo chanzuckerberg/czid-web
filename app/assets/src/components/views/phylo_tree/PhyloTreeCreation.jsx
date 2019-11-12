@@ -420,7 +420,7 @@ class PhyloTreeCreation extends React.Component {
       return (
         <Notification type="error" displayStyle="flat">
           Phylogenetic Tree creation must have between{" "}
-          {PhyloTreeChecks.MIN_SAMPLES} and {PhyloTreeChecks.MIN_SAMPLES}{" "}
+          {PhyloTreeChecks.MIN_SAMPLES} and {PhyloTreeChecks.MAX_SAMPLES}{" "}
           samples.
         </Notification>
       );

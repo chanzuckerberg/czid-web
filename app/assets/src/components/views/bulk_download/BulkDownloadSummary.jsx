@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
+import PropTypes from "~/components/utils/propTypes";
 import { get, find } from "lodash/fp";
 import cx from "classnames";
 
@@ -14,7 +14,7 @@ class BulkDownloadSummary extends React.Component {
     return (
       <div className={cs.param} key={param}>
         <div className={cs.name}>{fieldDisplayName}</div>
-        <div className={cs.value}>{value}</div>
+        <div className={cs.value}>{value.displayName}</div>
       </div>
     );
   };
@@ -34,8 +34,8 @@ class BulkDownloadSummary extends React.Component {
         </div>
         {downloadSummary.params && (
           <div className={cs.params}>
-            {Object.entries(downloadSummary.params).map(([key, value]) =>
-              this.renderDownloadParam(key, value)
+            {Object.entries(downloadSummary.params).map(([key, param]) =>
+              this.renderDownloadParam(key, param)
             )}
           </div>
         )}
@@ -47,18 +47,10 @@ class BulkDownloadSummary extends React.Component {
 BulkDownloadSummary.propTypes = {
   className: PropTypes.string,
   downloadSummary: PropTypes.shape({
-    params: PropTypes.object,
-    numSamples: PropTypes.arrayOf(PropTypes.number).isRequired,
+    params: PropTypes.objectOf(PropTypes.DownloadTypeParam),
+    numSamples: PropTypes.number,
   }).isRequired,
-  downloadType: PropTypes.shape({
-    display_name: PropTypes.string,
-    fields: PropTypes.arrayOf(
-      PropTypes.shape({
-        type: PropTypes.string,
-        display_name: PropTypes.string,
-      })
-    ),
-  }).isRequired,
+  downloadType: PropTypes.DownloadType.isRequired,
 };
 
 export default BulkDownloadSummary;
