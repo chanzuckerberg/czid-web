@@ -24,6 +24,104 @@ RSpec.describe SamplesController, type: :controller do
         expect(response).to have_http_status :success
       end
     end
+
+    describe "GET #taxa_with_reads_suggestions" do
+      before do
+        @project = create(:project, users: [@joe])
+        @sample_one = create(:sample, project: @project, name: "Test Sample One",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+        @sample_two = create(:sample, project: @project, name: "Test Sample Two",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+        @sample_three = create(:sample, project: @project, name: "Test Sample Three",
+                                        pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+      end
+
+      it "should return taxon list with correct sample counts" do
+        create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_one.first_pipeline_run.id)
+        create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_two.first_pipeline_run.id)
+        create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_three.first_pipeline_run.id)
+        create(:taxon_count, tax_id: 200, pipeline_run_id: @sample_one.first_pipeline_run.id)
+        create(:taxon_count, tax_id: 200, pipeline_run_id: @sample_two.first_pipeline_run.id)
+        create(:taxon_count, tax_id: 300, pipeline_run_id: @sample_one.first_pipeline_run.id)
+
+        mock_query = "MOCK_QUERY"
+
+        expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
+                                                    .and_return([
+                                                                  {
+                                                                    "taxid" => 100,
+                                                                    "name" => "Mock Taxa 100",
+                                                                  },
+                                                                  {
+                                                                    "taxid" => 200,
+                                                                    "name" => "Mock Taxa 200",
+                                                                  },
+                                                                  {
+                                                                    "taxid" => 300,
+                                                                    "name" => "Mock Taxa 300",
+                                                                  },
+                                                                ])
+
+        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
+
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json([
+                                                {
+                                                  "taxid" => 100,
+                                                  "name" => "Mock Taxa 100",
+                                                  "sample_count" => 3,
+                                                },
+                                                {
+                                                  "taxid" => 200,
+                                                  "name" => "Mock Taxa 200",
+                                                  "sample_count" => 2,
+                                                },
+                                                {
+                                                  "taxid" => 300,
+                                                  "name" => "Mock Taxa 300",
+                                                  "sample_count" => 1,
+                                                },
+                                              ])
+      end
+
+      it "should return unauthorized if user doesn't have access to sample" do
+        project_admin = create(:project, users: [@admin])
+        sample_admin = create(:sample, project: project_admin, name: "Test Sample Admin",
+                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+
+        create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_one.first_pipeline_run.id)
+        create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_two.first_pipeline_run.id)
+        create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_three.first_pipeline_run.id)
+
+        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, sample_admin.id], query: "MOCK_QUERY" }
+
+        expect(response).to have_http_status :unauthorized
+      end
+    end
+  end
+
+  describe "GET #uploaded_by_current_user" do
+    before do
+      @project = create(:project, users: [@joe, @admin])
+      @sample_one = create(:sample, project: @project, name: "Test Sample One", user: @joe)
+      @sample_two = create(:sample, project: @project, name: "Test Sample Two", user: @joe)
+      @sample_three = create(:sample, project: @project, name: "Test Sample Three", user: @admin)
+      sign_in @joe
+    end
+
+    it "should return true if all samples were uploaded by user" do
+      get :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id] }
+      json_response = JSON.parse(response.body)
+      expect(json_response).to include_json(uploaded_by_current_user: true)
+    end
+
+    it "should return false if some samples were not uploaded by user, even if user belongs to the sample's project" do
+      get :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id] }
+      json_response = JSON.parse(response.body)
+      expect(json_response).to include_json(uploaded_by_current_user: false)
+    end
   end
 
   context "User with report_v2 flag" do

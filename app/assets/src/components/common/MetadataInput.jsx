@@ -7,6 +7,7 @@ import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
   processLocationSelection,
+  getLocationWarning,
 } from "~/components/ui/controls/GeoSearchInputBox";
 import AlertIcon from "~ui/icons/AlertIcon";
 
@@ -19,17 +20,31 @@ class MetadataInput extends React.Component {
     this.state = {
       // Small warning below the input. Only used for Locations currently.
       warning: props.warning,
+      // This stores the value that the current warning is associated with.
+      warnedValue: props.value,
     };
   }
 
   static getDerivedStateFromProps(props, state) {
+    const newState = {};
+
     if (props.warning !== state.prevPropsWarning) {
-      return {
-        warning: props.warning,
-        prevPropsWarning: props.warning,
-      };
+      newState.warning = props.warning;
+      newState.prevPropsWarning = props.warning;
+      newState.warnedValue = props.value;
     }
-    return null;
+    // If the currently passed value is not equal to the value we have a warning about,
+    // calculate the warning for this value.
+    else if (props.value !== state.warnedValue) {
+      newState.warnedValue = props.value;
+
+      // warnings passed in as props take precedence.
+      if (!props.warning) {
+        newState.warning = getLocationWarning(props.value);
+      }
+    }
+
+    return newState;
   }
 
   render() {
@@ -84,8 +99,12 @@ class MetadataInput extends React.Component {
                 selection,
                 isHuman
               );
+              // Set warnedValue, so that a LOCATION_PRIVACY_WARNING warning isn't overwritten when the result propagates back down
+              // as this.props.value.
+              // When the result comes back down, we won't be able to detect whether LOCATION_PRIVACY_WARNING applies,
+              // since we've modified the location object here in processLocationSelection.
+              this.setState({ warning, warnedValue: result });
               onChange(metadataType.key, result, true);
-              this.setState({ warning });
             }}
             value={value}
           />

@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~styles/themes/typography";
 
 :global(.ui):global(.dropdown).bareDropdown,
 .portalDropdown {
@@ -122,6 +123,12 @@
 
   .dropdownMenu {
     padding: 6px 0;
+  }
+
+  .noResultsMessage {
+    @include font-body-xxs-crop;
+    padding: $space-xxs $space-m;
+    color: $medium-grey;
   }
 
   .innerMenu {
