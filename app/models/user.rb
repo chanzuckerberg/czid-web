@@ -179,12 +179,17 @@ class User < ApplicationRecord
     }
   end
 
+  # Create a new user in the Auth0 database.
+  # See: https://auth0.com/docs/api/management/v2#!/Users/post_users
   def self.new_auth0_user(params)
     name = params[:name]
-    options = { email_verified: false, name: params[:name], email: params[:email], password: params[:password], connection: "jsheu-test" }
-    puts "options 3:49pm: ", options
-
-    # See: https://auth0.com/docs/api/management/v2#!/Users/post_users
+    options = {
+      connection: "jsheu-test",
+      email: params[:email],
+      email_verified: false,
+      name: params[:name],
+      password: params[:password],
+    }
     auth0_management_client.create_user(name, options)
   end
 
@@ -206,7 +211,7 @@ class User < ApplicationRecord
 
   # Set up Auth0 management client for actions like adding users.
   # See: https://github.com/auth0/ruby-auth0/blob/master/README.md#management-api-v2
-  def self.auth0_management_client
+  private_class_method def self.auth0_management_client
     @auth0_management_client ||= Auth0Client.new(
       client_id: ENV["AUTH0_MANAGEMENT_CLIENT_ID"],
       client_secret: ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"],

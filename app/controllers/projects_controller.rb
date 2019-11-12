@@ -549,10 +549,8 @@ class ProjectsController < ApplicationController
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
 
-    puts "foobar 2:15pm"
+    # All new user creation should use 'new_auth0_user', not 'User.new'
     User.new_auth0_user(user_params_with_password)
-    puts "after the call"
-    return
 
     @user ||= User.new(user_params_with_password)
     @user.email_arguments = new_user_shared_project_email_arguments()
@@ -560,9 +558,9 @@ class ProjectsController < ApplicationController
       # Only returns the token sent to user
       @user.send_reset_password_instructions
     end
-    # rescue => exception
-    #   LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}")
-    #   LogUtil.log_backtrace(exception)
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}")
+    LogUtil.log_backtrace(exception)
   end
 
   def new_user_shared_project_email_arguments
