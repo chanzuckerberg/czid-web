@@ -61,7 +61,6 @@ export default class SampleViewV2 extends React.Component {
     const { data } = this.state;
     return (
       <NarrowContainer className={cs.reportContainer}>
-        <div className={cs.reportHeader}>Report header here</div>
         <div className={cs.reportTable}>
           <ReportTableV2 data={data} />
         </div>
