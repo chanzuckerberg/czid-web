@@ -181,10 +181,10 @@ class User < ApplicationRecord
 
   # Create a new user in the Auth0 database.
   # See: https://auth0.com/docs/api/management/v2#!/Users/post_users
-  def self.new_auth0_user(params)
+  def self.create_auth0_user(params)
     name = params[:name]
     options = {
-      connection: "Username-Password-Authentication",
+      connection: ENV["AUTH0_CONNECTION"],
       email: params[:email],
       email_verified: false,
       name: params[:name],

@@ -549,17 +549,25 @@ class ProjectsController < ApplicationController
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
 
-    # All new user creation should use 'new_auth0_user', not 'User.new'
-    User.new_auth0_user(user_params_with_password)
-
     @user ||= User.new(user_params_with_password)
-    @user.email_arguments = new_user_shared_project_email_arguments()
-    if @user.save!
-      # Only returns the token sent to user
-      @user.send_reset_password_instructions
+
+    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
+      puts "I'm here"
+
+      create_response = User.create_auth0_user(user_params_with_password)
+
+      puts "create_response 1:27pm", create_response
+
+      # UserMailer.added_to_projects_email(@user.id, shared_project_email_arguments).deliver_now
+    else
+      @user.email_arguments = new_user_shared_project_email_arguments()
+      if @user.save!
+        # Only returns the token sent to user
+        @user.send_reset_password_instructions
+      end
     end
   rescue => exception
-    LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}")
+    LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}. #{exception.message}")
     LogUtil.log_backtrace(exception)
   end
 
