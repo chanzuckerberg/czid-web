@@ -24,8 +24,6 @@ export default class SampleViewV2 extends React.Component {
 
     const reportData = await getSampleReportData(sampleId);
 
-    // TODO : this should come from the client
-    // TODO : tax level should come as a string
     const data = [];
     const highlightedTaxIds = new Set(reportData.highlightedTaxIds);
     reportData.sortedGenus.forEach(genusTaxId => {

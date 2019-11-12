@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Table } from "~/components/visualizations/table";
 import { defaultTableRowRenderer } from "react-virtualized";
 import cx from "classnames";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { withAnalytics } from "~/api/analytics";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { getOr, orderBy } from "lodash/fp";
 
@@ -308,7 +308,6 @@ class ReportTableV2 extends React.Component {
   };
 
   handleNtNrChange = selectedDbType => {
-    console.log(selectedDbType);
     this.setState({
       dbType: selectedDbType,
     });
@@ -326,7 +325,6 @@ class ReportTableV2 extends React.Component {
 
   renderNtNrValues = ({ cellData, onClick }) => {
     const { dbType } = this.state;
-    // console.log("render some renderNtNrValues", dbType);
     return (
       <div className={cs.stack}>
         <div
@@ -347,7 +345,6 @@ class ReportTableV2 extends React.Component {
 
   rowRenderer = rowProps => {
     const data = rowProps.rowData;
-    console.log(data.name, data.highlighted);
     if (data) {
       rowProps.className = cx(
         rowProps.className,
@@ -378,7 +375,6 @@ class ReportTableV2 extends React.Component {
 
   render = () => {
     const { rowHeight } = this.props;
-    console.log("render table");
     return (
       <Table
         cellClassName={cs.cell}
@@ -406,5 +402,3 @@ ReportTableV2.propTypes = {
 };
 
 export default ReportTableV2;
-
-// TODO: need tax id inside each cell
