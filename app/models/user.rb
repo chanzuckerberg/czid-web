@@ -184,7 +184,7 @@ class User < ApplicationRecord
   def self.new_auth0_user(params)
     name = params[:name]
     options = {
-      connection: "jsheu-test",
+      connection: "Username-Password-Authentication",
       email: params[:email],
       email_verified: false,
       name: params[:name],
