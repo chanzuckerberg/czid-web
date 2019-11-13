@@ -184,9 +184,10 @@ class User < ApplicationRecord
   # - https://auth0.com/docs/api/management/v2#!/Users/post_users
   # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
   def self.create_auth0_user(params)
+    connection = ENV["AUTH0_CONNECTION"]
     name = params[:name]
     options = {
-      connection: ENV["AUTH0_CONNECTION"],
+      connection: connection,
       email: params[:email],
       name: params[:name],
       password: params[:password],
@@ -194,12 +195,16 @@ class User < ApplicationRecord
     auth0_management_client.create_user(name, options)
   end
 
+  # See: https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/tickets.rb
   def self.get_auth0_password_reset_token(auth0_id)
     auth0_management_client.post_password_change(user_id: auth0_id)
   end
 
+  # See: https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/authentication_endpoints.rb
   def self.send_auth0_password_reset_email(email)
-    auth0_management_client.change_password(email, "", ENV["AUTH0_CONNECTION"])
+    # Change with empty password triggers reset email.
+    connection = ENV["AUTH0_CONNECTION"]
+    auth0_management_client.change_password(email, "", connection)
   end
 
   private
