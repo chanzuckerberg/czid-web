@@ -28,13 +28,13 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions,].freeze
+                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
   # For API-like access
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
-  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
+  prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
@@ -919,7 +919,7 @@ class SamplesController < ApplicationController
 
   def contigs_summary
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    local_file = pr.generate_contig_mapping_table
+    local_file = pr.generate_contig_mapping_table_file
 
     @contigs_summary = File.read(local_file)
     send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
@@ -1280,6 +1280,17 @@ class SamplesController < ApplicationController
     taxon_list = augment_taxon_list_with_sample_count(taxon_list, samples)
 
     render json: taxon_list
+  end
+
+  # GET /samples/uploaded_by_current_user
+  # Return whether all sampleIds were uploaded by the current user.
+  def uploaded_by_current_user
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    samples = Sample.where(user: current_user, id: sample_ids)
+
+    render json: {
+      uploaded_by_current_user: sample_ids.length == samples.length,
+    }
   end
 
   # Use callbacks to share common setup or constraints between actions.

@@ -10,9 +10,10 @@ class RadioButton extends React.Component {
         className={cx(
           cs.radioButton,
           this.props.className,
-          this.props.selected && cs.selected
+          this.props.selected && cs.selected,
+          this.props.disabled && cs.disabled
         )}
-        onClick={this.props.onClick}
+        onClick={this.props.disabled ? undefined : this.props.onClick}
       >
         <div className={cs.inner} />
       </div>
@@ -22,6 +23,7 @@ class RadioButton extends React.Component {
 
 RadioButton.propTypes = {
   selected: PropTypes.bool,
+  disabled: PropTypes.bool,
   onClick: PropTypes.func,
   className: PropTypes.string,
 };

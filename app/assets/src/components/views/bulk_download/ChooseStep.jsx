@@ -16,7 +16,12 @@ import memoize from "memoize-one";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
-import { getBackgrounds, getTaxaWithReadsSuggestions } from "~/api";
+import BasicPopup from "~/components/BasicPopup";
+import {
+  getBackgrounds,
+  getTaxaWithReadsSuggestions,
+  uploadedByCurrentUser,
+} from "~/api";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
 import cs from "./choose_step.scss";
@@ -28,12 +33,14 @@ class ChooseStep extends React.Component {
     backgroundOptions: null,
     taxaWithReadsOptions: null,
     isLoadingTaxaWithReadsOptionsOptions: false,
+    allSamplesUploadedByCurrentUser: false,
   };
 
   _lastTaxaWithReadsQuery = "";
 
   componentDidMount() {
     this.fetchBackgrounds();
+    this.checkAllSamplesUploadedByCurrentUser();
   }
 
   // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
@@ -47,6 +54,16 @@ class ChooseStep extends React.Component {
 
     this.setState({
       backgroundOptions,
+    });
+  }
+
+  async checkAllSamplesUploadedByCurrentUser() {
+    const { selectedSampleIds } = this.props;
+    const allSamplesUploadedByCurrentUser = await uploadedByCurrentUser(
+      Array.from(selectedSampleIds)
+    );
+    this.setState({
+      allSamplesUploadedByCurrentUser,
     });
   }
 
@@ -240,14 +257,35 @@ class ChooseStep extends React.Component {
 
   renderDownloadType = downloadType => {
     const { selectedDownloadTypeName, onSelect } = this.props;
+    const { allSamplesUploadedByCurrentUser } = this.state;
     const selected = selectedDownloadTypeName === downloadType.type;
-    return (
+    let disabled = false;
+    let disabledMessage = "";
+
+    if (
+      downloadType.type === "host_gene_counts" &&
+      !allSamplesUploadedByCurrentUser
+    ) {
+      disabled = true;
+      disabledMessage =
+        "To download host gene counts, you must be the original uploader of all selected samples.";
+    }
+
+    const downloadTypeElement = (
       <div
-        className={cx(cs.downloadType, selected && cs.selected)}
+        className={cx(
+          cs.downloadType,
+          selected && cs.selected,
+          disabled && cs.disabled
+        )}
         key={downloadType.type}
-        onClick={() => onSelect(downloadType.type)}
+        onClick={() => !disabled && onSelect(downloadType.type)}
       >
-        <RadioButton className={cs.radioButton} selected={selected} />
+        <RadioButton
+          disabled={disabled}
+          className={cs.radioButton}
+          selected={selected}
+        />
         <div className={cs.content}>
           <div className={cs.name}>{downloadType.display_name}</div>
           <div className={cs.description}>{downloadType.description}</div>
@@ -262,6 +300,18 @@ class ChooseStep extends React.Component {
         </div>
       </div>
     );
+
+    if (disabled && disabledMessage) {
+      return (
+        <BasicPopup
+          key={downloadType.type}
+          trigger={downloadTypeElement}
+          content={disabledMessage}
+        />
+      );
+    } else {
+      return downloadTypeElement;
+    }
   };
 
   renderDownloadTypes = () => {

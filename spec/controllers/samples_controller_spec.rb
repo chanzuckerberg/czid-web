@@ -102,6 +102,28 @@ RSpec.describe SamplesController, type: :controller do
     end
   end
 
+  describe "GET #uploaded_by_current_user" do
+    before do
+      @project = create(:project, users: [@joe, @admin])
+      @sample_one = create(:sample, project: @project, name: "Test Sample One", user: @joe)
+      @sample_two = create(:sample, project: @project, name: "Test Sample Two", user: @joe)
+      @sample_three = create(:sample, project: @project, name: "Test Sample Three", user: @admin)
+      sign_in @joe
+    end
+
+    it "should return true if all samples were uploaded by user" do
+      get :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id] }
+      json_response = JSON.parse(response.body)
+      expect(json_response).to include_json(uploaded_by_current_user: true)
+    end
+
+    it "should return false if some samples were not uploaded by user, even if user belongs to the sample's project" do
+      get :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id] }
+      json_response = JSON.parse(response.body)
+      expect(json_response).to include_json(uploaded_by_current_user: false)
+    end
+  end
+
   context "User with report_v2 flag" do
     before do
       sign_in @joe

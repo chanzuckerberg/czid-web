@@ -248,6 +248,37 @@ describe BulkDownload, type: :model do
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
     end
+
+    it "returns the correct task command for host_gene_counts download type" do
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
+                                @sample_one.first_pipeline_run.id,
+                                @sample_two.first_pipeline_run.id,
+                              ])
+
+      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/results/3.12/reads_per_gene.star.tab",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/results/3.12/reads_per_gene.star.tab",
+        "--tar-names",
+        "Test Sample One__project-test_project_#{@project.id}__reads_per_gene.star.tab",
+        "Test Sample Two__project-test_project_#{@project.id}__reads_per_gene.star.tab",
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Host Gene Counts.tar.gz",
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
   end
 
   context "#aegea_ecs_submit_command" do
@@ -422,6 +453,37 @@ describe BulkDownload, type: :model do
       expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
         "sample_overviews.csv",
         "mock_sample_overview_csv"
+      )
+      expect_any_instance_of(S3TarWriter).to receive(:close)
+      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
+        instance_double(Process::Status, exitstatus: 0, success?: true)
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+    end
+
+    it "correctly generates download file for download type contig_summary_report" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        download_type: BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE,
+        pipeline_run_ids: [
+          @sample_one.first_pipeline_run.id,
+          @sample_two.first_pipeline_run.id,
+        ]
+      )
+
+      allow_any_instance_of(PipelineRun).to receive(:generate_contig_mapping_table_csv).and_return("mock_contigs_summary_csv")
+      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
+      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
+        "Test Sample One__project-test_project_#{@project.id}__contig_summary_report.csv",
+        "mock_contigs_summary_csv"
+      )
+      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
+        "Test Sample Two__project-test_project_#{@project.id}__contig_summary_report.csv",
+        "mock_contigs_summary_csv"
       )
       expect_any_instance_of(S3TarWriter).to receive(:close)
       expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(

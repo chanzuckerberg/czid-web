@@ -6,6 +6,10 @@ Rails.application.routes.draw do
     sessions: 'sessions',
     registrations: 'registrations',
   }
+
+  get 'users/auth0_sign_in' => 'auth0#auth0_pre_login'
+  get 'auth/auth0/callback' => 'auth0#auth0_callback'
+
   resources :samples do
     put :reupload_source, on: :member
     put :resync_prod_data_to_staging, on: :member
@@ -47,6 +51,7 @@ Rails.application.routes.draw do
     get :coverage_viz_data, on: :member
     get :show_v2, on: :member
     get :taxa_with_reads_suggestions, on: :collection
+    get :uploaded_by_current_user, on: :collection
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'

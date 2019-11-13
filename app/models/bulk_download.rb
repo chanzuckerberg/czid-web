@@ -249,6 +249,15 @@ class BulkDownload < ApplicationRecord
       end
     end
 
+    if download_type == BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE
+      download_src_urls = pipeline_runs.map(&:host_gene_count_s3_path)
+
+      download_tar_names = samples.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+          "reads_per_gene.star.tab"
+      end
+    end
+
     if !download_src_urls.nil? && !download_tar_names.nil?
       return s3_tar_writer_command(
         download_src_urls,
@@ -270,19 +279,28 @@ class BulkDownload < ApplicationRecord
     # The last time since we updated the progress.
     last_progress_time = Time.now.to_f
 
-    if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
-      samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
-      projects = Project.where(id: samples.pluck(:project_id))
+    samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+    projects = Project.where(id: samples.pluck(:project_id))
 
-      # Compute cleaned project name once instead of once per sample.
-      cleaned_project_names = {}
-      projects.each do |project|
-        cleaned_project_names[project.id] = project.cleaned_project_name
-      end
+    # Compute cleaned project name once instead of once per sample.
+    cleaned_project_names = {}
+    projects.each do |project|
+      cleaned_project_names[project.id] = project.cleaned_project_name
+    end
 
-      pipeline_runs.includes(sample: [:project]).map.with_index do |pipeline_run, index|
-        begin
-          Rails.logger.info("Processing pipeline run #{pipeline_run.id} (#{index + 1} of #{pipeline_runs.length})...")
+    # Bulk-include data for performance based on the download type.
+    pipeline_runs_with_includes = if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
+                                    pipeline_runs.includes(sample: [:project])
+                                  elsif download_type == BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE
+                                    pipeline_runs.includes(:contigs, :sample)
+                                  else
+                                    pipeline_runs
+                                  end
+
+    pipeline_runs_with_includes.map.with_index do |pipeline_run, index|
+      begin
+        Rails.logger.info("Processing pipeline run #{pipeline_run.id} (#{index + 1} of #{pipeline_runs.length})...")
+        if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
           tax_details = ReportHelper.taxonomy_details(pipeline_run.id, get_param_value("background"), TaxonScoringModel::DEFAULT_MODEL_NAME, ReportHelper::DEFAULT_SORT_PARAM)
           report_csv = ReportHelper.generate_report_csv(tax_details)
           s3_tar_writer.add_file_with_data(
@@ -290,21 +308,28 @@ class BulkDownload < ApplicationRecord
               "taxon_report.csv",
             report_csv
           )
-        rescue
-          failed_sample_ids << pipeline_run.sample.id
+        elsif download_type == BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE
+          contig_mapping_table_csv = pipeline_run.generate_contig_mapping_table_csv
+          s3_tar_writer.add_file_with_data(
+            "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
+              "contig_summary_report.csv",
+            contig_mapping_table_csv
+          )
         end
-
-        if Time.now.to_f - last_progress_time > progress_update_delay
-          progress = (index + 1).to_f / pipeline_runs.length
-          update(progress: progress)
-          Rails.logger.info(format("Updated progress. %3.1f complete.", progress))
-        end
+      rescue
+        failed_sample_ids << pipeline_run.sample.id
       end
 
-      unless failed_sample_ids.empty?
-        LogUtil.log_err_and_airbrake("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{failed_sample_ids}")
-        update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % failed_sample_ids.length)
+      if Time.now.to_f - last_progress_time > progress_update_delay
+        progress = (index + 1).to_f / pipeline_runs.length
+        update(progress: progress)
+        Rails.logger.info(format("Updated progress. %3.1f complete.", progress))
       end
+    end
+
+    unless failed_sample_ids.empty?
+      LogUtil.log_err_and_airbrake("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{failed_sample_ids}")
+      update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % failed_sample_ids.length)
     end
   end
 

@@ -60,7 +60,7 @@ module BulkDownloadTypesHelper
       display_name: "Host Gene Counts",
       description: "Host gene count outputs from STAR",
       category: "report",
-      execution_type: RESQUE_EXECUTION_TYPE,
+      execution_type: ECS_EXECUTION_TYPE,
     },
     {
       type: READS_NON_HOST_BULK_DOWNLOAD_TYPE,
