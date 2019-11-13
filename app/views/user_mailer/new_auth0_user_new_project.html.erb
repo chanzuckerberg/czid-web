@@ -1,8 +1,8 @@
 <p><b>Join IDseq!</b></p>
 <p></p>
-<p><%= @sharing_user.name %> (<%= @sharing_user.email %>) has invited you to IDseq project
+<p><%= @sharing_user_name %> (<%= @sharing_user_email %>) has invited you to IDseq project
   <b><a href="https://idseq.net/my_data?projectId=<%=(@shared_project_id)%>"><%= @shared_project_name %></a></b>.</p>
 <p></p>
-<p><b><%= link_to 'Activate your account', edit_password_url(@user, reset_password_token: @token) %></b></p>
+<p><b><%= link_to 'Activate your account', @reset_password_url %></b></p>
 <p>Please note that this activation link expires after 48 hours.</p>
 <p>If you missed that window, please <%= link_to 'request a new password reset email', root_url + "users/password/new" %>.</p>

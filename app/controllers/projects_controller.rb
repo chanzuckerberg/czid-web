@@ -551,14 +551,19 @@ class ProjectsController < ApplicationController
 
     @user ||= User.new(user_params_with_password)
 
-    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
+    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1" && @user.save!
       puts "I'm here"
 
       create_response = User.create_auth0_user(user_params_with_password)
+      auth0_id = create_response["user_id"]
 
-      puts "create_response 1:27pm", create_response
+      reset_response = User.get_auth0_user_password_reset(auth0_id)
+      reset_url = reset_response["ticket"]
 
-      # UserMailer.added_to_projects_email(@user.id, shared_project_email_arguments).deliver_now
+      UserMailer.new_auth0_user_new_project(current_user,
+                                            email,
+                                            @project.id,
+                                            reset_url).deliver_now
     else
       @user.email_arguments = new_user_shared_project_email_arguments()
       if @user.save!

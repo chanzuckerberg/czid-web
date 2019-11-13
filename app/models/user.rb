@@ -180,7 +180,9 @@ class User < ApplicationRecord
   end
 
   # Create a new user in the Auth0 database.
-  # See: https://auth0.com/docs/api/management/v2#!/Users/post_users
+  # See:
+  # - https://auth0.com/docs/api/management/v2#!/Users/post_users
+  # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
   def self.create_auth0_user(params)
     name = params[:name]
     options = {
@@ -191,6 +193,10 @@ class User < ApplicationRecord
       password: params[:password],
     }
     auth0_management_client.create_user(name, options)
+  end
+
+  def self.get_auth0_user_password_reset(auth0_id)
+    auth0_management_client.post_password_change(user_id: auth0_id)
   end
 
   private
