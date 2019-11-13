@@ -25,11 +25,11 @@ class UserMailer < ApplicationMailer
 
   # See: app/views/user_mailer/new_auth0_user_new_project.html.erb.
   def new_auth0_user_new_project(sharing_user, new_user_email, shared_project_id, reset_password_url)
-    @sharing_user_name = sharing_user.name
-    @sharing_user_email = sharing_user.email
+    @reset_password_url = reset_password_url
     @shared_project_id = shared_project_id
     @shared_project_name = Project.find(shared_project_id).name
-    @reset_password_url = reset_password_url
+    @sharing_user_email = sharing_user.email
+    @sharing_user_name = sharing_user.name
     mail(
       to: new_user_email,
       subject: "You have been invited to IDseq"
