@@ -1,6 +1,7 @@
 import React from "react";
 import FilePicker from "./FilePicker";
 import PropTypes from "prop-types";
+import { filter, some } from "lodash/fp";
 import { parseCSVBlob } from "~/components/utils/csv";
 
 class CSVUpload extends React.Component {
@@ -8,10 +9,22 @@ class CSVUpload extends React.Component {
     file: null,
   };
 
+  removeEmptyRowsFromCSV = csv => ({
+    headers: csv.headers,
+    rows: filter(row => some(val => val !== "", row), csv.rows),
+  });
+
   onChange = accepted => {
+    const { removeEmptyRows } = this.props;
+
     const fileReader = new FileReader();
     fileReader.onload = event => {
-      const csv = parseCSVBlob(event.target.result);
+      let csv = parseCSVBlob(event.target.result);
+
+      if (removeEmptyRows) {
+        csv = this.removeEmptyRowsFromCSV(csv);
+      }
+
       this.props.onCSV(csv);
     };
     fileReader.readAsText(accepted[0]);
@@ -38,6 +51,8 @@ CSVUpload.propTypes = {
   className: PropTypes.string,
   title: PropTypes.string,
   onCSV: PropTypes.func.isRequired,
+  // Deleting in Excel may leave a row of ""s in the CSV. This option lets you filter them out.
+  removeEmptyRows: PropTypes.bool,
 };
 
 export default CSVUpload;
