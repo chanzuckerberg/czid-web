@@ -552,20 +552,22 @@ class ProjectsController < ApplicationController
     @user ||= User.new(user_params_with_password)
 
     # New flow for account creation on Auth0.
-    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1" && @user.save!
-      # Create the user with Auth0.
-      create_response = User.create_auth0_user(user_params_with_password)
-      auth0_id = create_response["user_id"]
+    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
+      if @user.save!
+        # Create the user with Auth0.
+        create_response = User.create_auth0_user(user_params_with_password)
+        auth0_id = create_response["user_id"]
 
-      # Get their password reset link so they can set a password.
-      reset_response = User.get_auth0_password_reset_token(auth0_id)
-      reset_url = reset_response["ticket"]
+        # Get their password reset link so they can set a password.
+        reset_response = User.get_auth0_password_reset_token(auth0_id)
+        reset_url = reset_response["ticket"]
 
-      # Send them an invitation and account activation email.
-      UserMailer.new_auth0_user_new_project(current_user,
-                                            email,
-                                            @project.id,
-                                            reset_url).deliver_now
+        # Send them an invitation and account activation email.
+        UserMailer.new_auth0_user_new_project(current_user,
+                                              email,
+                                              @project.id,
+                                              reset_url).deliver_now
+      end
     else
       # DEPRECATED: Legacy flow with Devise. Remove block after migrating to Auth0.
       @user.email_arguments = new_user_shared_project_email_arguments()

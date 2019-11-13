@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+require "http"
+require 'auth0'
 
 class Auth0Controller < ApplicationController
   skip_before_action :authenticate_user!, :verify_authenticity_token
