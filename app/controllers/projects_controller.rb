@@ -569,7 +569,7 @@ class ProjectsController < ApplicationController
                                               reset_url).deliver_now
       end
     else
-      # DEPRECATED: Legacy flow with Devise. Remove block after migrating to Auth0.
+      # DEPRECATED: Legacy Devise flow. Remove block after migrating to Auth0.
       @user.email_arguments = new_user_shared_project_email_arguments()
       if @user.save!
         # Only returns the token sent to user

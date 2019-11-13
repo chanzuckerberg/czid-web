@@ -188,7 +188,6 @@ class User < ApplicationRecord
     options = {
       connection: ENV["AUTH0_CONNECTION"],
       email: params[:email],
-      email_verified: false,
       name: params[:name],
       password: params[:password],
     }
