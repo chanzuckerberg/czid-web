@@ -557,8 +557,8 @@ class ProjectsController < ApplicationController
       create_response = User.create_auth0_user(user_params_with_password)
       auth0_id = create_response["user_id"]
 
-      # Get their password reset link.
-      reset_response = User.get_auth0_user_password_reset(auth0_id)
+      # Get their password reset link so they can set a password.
+      reset_response = User.get_auth0_password_reset_token(auth0_id)
       reset_url = reset_response["ticket"]
 
       # Send them an invitation and account activation email.

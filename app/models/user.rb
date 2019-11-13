@@ -195,8 +195,12 @@ class User < ApplicationRecord
     auth0_management_client.create_user(name, options)
   end
 
-  def self.get_auth0_user_password_reset(auth0_id)
+  def self.get_auth0_password_reset_token(auth0_id)
     auth0_management_client.post_password_change(user_id: auth0_id)
+  end
+
+  def self.send_auth0_password_reset_email(email)
+    auth0_management_client.change_password(email, "", ENV["AUTH0_CONNECTION"])
   end
 
   private
