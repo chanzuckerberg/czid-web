@@ -308,7 +308,6 @@ class ReportTable extends React.Component {
   };
 
   handleNtNrChange = selectedDbType => {
-    console.log(selectedDbType);
     this.setState({
       dbType: selectedDbType,
     });
@@ -326,7 +325,6 @@ class ReportTable extends React.Component {
 
   renderNtNrValues = ({ cellData, onClick }) => {
     const { dbType } = this.state;
-    // console.log("render some renderNtNrValues", dbType);
     return (
       <div className={cs.stack}>
         <div
@@ -347,7 +345,6 @@ class ReportTable extends React.Component {
 
   rowRenderer = rowProps => {
     const data = rowProps.rowData;
-    console.log(data.name, data.highlighted);
     if (data) {
       rowProps.className = cx(
         rowProps.className,
@@ -378,7 +375,6 @@ class ReportTable extends React.Component {
 
   render = () => {
     const { rowHeight } = this.props;
-    console.log("render table");
     return (
       <Table
         cellClassName={cs.cell}

@@ -218,6 +218,8 @@ const getSampleStats = ({ domain, filters, projectId, search }) =>
     },
   });
 
+const getSample = ({ sampleId }) => get(`/samples/${sampleId}/show_v2.json`);
+
 const getProjectDimensions = ({ domain, filters, projectId, search }) =>
   get("/projects/dimensions.json", {
     params: {
@@ -229,6 +231,8 @@ const getProjectDimensions = ({ domain, filters, projectId, search }) =>
   });
 
 const getSamplesV1 = params => get("/samples.json", { params });
+
+const getProject = ({ projectId }) => get(`/projects/${projectId}.json`);
 
 const getProjects = ({
   basic,
@@ -381,8 +385,10 @@ export {
   getCoverageVizData,
   getCoverageVizSummary,
   getPhyloTree,
+  getProject,
   getProjectDimensions,
   getProjects,
+  getSample,
   getSampleDimensions,
   getSampleReportData,
   getSampleReportInfo,

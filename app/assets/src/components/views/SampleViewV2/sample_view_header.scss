@@ -1,8 +1,13 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/typography";
+
 .viewHeader {
   margin-bottom: 5px;
 
   .pipelineInfo {
     @include font-body-xxxs;
+
     color: $medium-grey;
     margin-top: 14px;
     margin-bottom: 18px;

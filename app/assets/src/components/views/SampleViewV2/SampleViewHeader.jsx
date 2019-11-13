@@ -1,16 +1,34 @@
 import React from "react";
-import PropTypes from "prop-types";
+import PropTypes from "~/components/utils/propTypes";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ViewHeader from "~/components/layout/ViewHeader";
+import PipelineVersionSelect from "../SampleView/PipelineVersionSelect";
+import { openUrl } from "~utils/links";
+import cs from "./sample_view_header.scss";
+import cx from "classnames";
+import { get, map, maxBy } from "lodash/fp";
+import moment from "moment";
 
 class SampleViewHeader extends React.Component {
+  renderVersion = () => {
+    const { pipelineRun } = this.props;
+    if (get("pipeline_version", pipelineRun)) {
+      const alignmentDBString = pipelineRun.alignment_db
+        ? `, NT/NR: ${pipelineRun.alignment_db}`
+        : "";
+      return `v${pipelineRun.pipeline_version}${alignmentDBString}`;
+    }
+    return "";
+  };
+
   render() {
     const {
-      // project,
       // sampleIdToNameMap,
       // pipelineVersions,
-      // sample,
-      // pipelineRun,
+      onPipelineVersionSelect,
+      pipelineRun,
+      project,
+      sample,
       // summaryStats,
       // amr,
       // reportPresent,
@@ -18,9 +36,6 @@ class SampleViewHeader extends React.Component {
       // reportPageParams,
     } = this.props;
 
-    const showAMR = amr;
-    const pipelineVersion =
-      pipelineRun && pipelineRun.version && pipelineRun.version.pipeline;
     return (
       <div>
         <NarrowContainer>
@@ -29,25 +44,40 @@ class SampleViewHeader extends React.Component {
               <div
                 className={cx(
                   cs.pipelineInfo,
-                  pipelineVersion && cs.linkToPipelineViz
+                  get("pipeline_version", pipelineRun) && cs.linkToPipelineViz
                 )}
                 onClick={() =>
-                  pipelineVersion &&
-                  window.open(
-                    `/samples/${sample.id}/pipeline_viz/${pipelineVersion}`
+                  get("pipeline_version", pipelineRun) &&
+                  openUrl(
+                    `/samples/${sample.id}/pipeline_viz/${get(
+                      "pipeline_version",
+                      pipelineRun
+                    )}`,
+                    event
                   )
                 }
               >
-                <span>PIPELINE {this.renderVersionDisplay()}</span>
+                <span className={cs.pipelineRunVersion}>
+                  Pipeline {this.renderVersion()}
+                </span>
                 <PipelineVersionSelect
                   pipelineRun={pipelineRun}
-                  pipelineVersions={pipelineVersions}
-                  lastProcessedAt={get("last_processed_at", summaryStats)}
-                  onPipelineVersionSelect={this.handlePipelineVersionSelect}
+                  pipelineVersions={map(
+                    "pipeline_version",
+                    get("pipeline_runs", sample)
+                  )}
+                  lastProcessedAt={get(
+                    "created_at",
+                    maxBy(
+                      pr => moment(pr.created_at),
+                      get("pipeline_runs", sample)
+                    )
+                  )}
+                  onPipelineVersionSelect={onPipelineVersionSelect}
                 />
-                {this.renderPipelineWarnings()}
+                {/* {this.renderPipelineWarnings()} */}
               </div>
-              <ViewHeader.Pretitle
+              {/* <ViewHeader.Pretitle
                 breadcrumbLink={`/home?project_id=${project.id}`}
               >
                 {project.name}
@@ -80,9 +110,9 @@ class SampleViewHeader extends React.Component {
                 >
                   Sample Details
                 </span>
-              </div>
+              </div> */}
             </ViewHeader.Content>
-            <ViewHeader.Controls>
+            {/* <ViewHeader.Controls>
               <BasicPopup
                 trigger={
                   <ShareButton
@@ -100,7 +130,6 @@ class SampleViewHeader extends React.Component {
                 on="click"
                 hideOnScroll
               />{" "}
-              {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
               {this.props.admin && (
                 <SaveButton
                   onClick={withAnalytics(
@@ -120,13 +149,13 @@ class SampleViewHeader extends React.Component {
                 pipelineRun={pipelineRun}
                 reportDetails={reportDetails}
                 reportPageParams={reportPageParams}
-                canEdit={this.props.canEdit}
+                canEdit={canEdit}
                 view={this.state.view}
               />
-            </ViewHeader.Controls>
+            </ViewHeader.Controls> */}
           </ViewHeader>
         </NarrowContainer>
-        <NarrowContainer>
+        {/* <NarrowContainer>
           {showAMR ? (
             <Tabs
               className={cs.tabs}
@@ -170,8 +199,21 @@ class SampleViewHeader extends React.Component {
             pipelineVersion={this.props.pipelineRun.pipeline_version}
             nameType={this.state.nameType}
           />
-        )}
+        )} */}
       </div>
     );
   }
 }
+
+SampleViewHeader.propTypes = {
+  onPipelineVersionSelect: PropTypes.func.isRequired,
+  pipelineRun: PropTypes.PipelineRun,
+  pipelineVersions: PropTypes.arrayOf(PropTypes.string),
+  project: PropTypes.Project,
+  sample: PropTypes.Sample,
+};
+// pipelineRun
+// - version
+//
+
+export default SampleViewHeader;

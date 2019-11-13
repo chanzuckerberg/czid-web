@@ -1507,7 +1507,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def rpm(raw_read_count)
-    raw_read_count /
-      ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
+    raw_read_count / ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
+  end
+
+  def alignment_db
+    alignment_config.name
   end
 end
