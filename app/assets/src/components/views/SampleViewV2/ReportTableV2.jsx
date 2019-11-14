@@ -1,14 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Table } from "~/components/visualizations/table";
 import { defaultTableRowRenderer } from "react-virtualized";
+import { getOr, orderBy } from "lodash/fp";
 import cx from "classnames";
+
 import { withAnalytics } from "~/api/analytics";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { getOr, orderBy } from "lodash/fp";
+import { Table } from "~/components/visualizations/table";
+import InsightIcon from "~ui/icons/InsightIcon";
 
 import cs from "./report_table_v2.scss";
-import InsightIcon from "../../ui/icons/InsightIcon";
 
 // Values for null values when sorting ascending and descending
 // for strings - HACK: In theory, there can be strings larger than this
@@ -57,12 +58,8 @@ class ReportTableV2 extends React.Component {
           }),
       },
       {
-        cellDataGetter: ({ rowData }) => {
-          return [
-            (rowData.nt || {}).z_score || 0,
-            (rowData.nr || {}).z_score || 0,
-          ];
-        },
+        cellDataGetter: ({ rowData }) =>
+          this.getNtNrFromDataRow(rowData, "z_score", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
         dataKey: "z_score",
@@ -77,9 +74,8 @@ class ReportTableV2 extends React.Component {
         width: 60,
       },
       {
-        cellDataGetter: ({ rowData }) => {
-          return [(rowData.nt || {}).rpm || 0, (rowData.nr || {}).rpm || 0];
-        },
+        cellDataGetter: ({ rowData }) =>
+          this.getNtNrFromDataRow(rowData, "rpm", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
         dataKey: "rpm",
@@ -95,9 +91,8 @@ class ReportTableV2 extends React.Component {
         width: 75,
       },
       {
-        cellDataGetter: ({ rowData }) => {
-          return [(rowData.nt || {}).count || 0, (rowData.nr || {}).count || 0];
-        },
+        cellDataGetter: ({ rowData }) =>
+          this.getNtNrFromDataRow(rowData, "count", 0),
         cellRenderer: this.renderNtNrDecimalValues,
         dataKey: "r",
         label: "r",
@@ -112,12 +107,8 @@ class ReportTableV2 extends React.Component {
         width: 75,
       },
       {
-        cellDataGetter: ({ rowData }) => {
-          return [
-            (rowData.nt || {}).contigs || 0,
-            (rowData.nr || {}).contigs || 0,
-          ];
-        },
+        cellDataGetter: ({ rowData }) =>
+          this.getNtNrFromDataRow(rowData, "contigs", 0),
         cellRenderer: this.renderNtNrDecimalValues,
         dataKey: "contigs",
         label: "contig",
@@ -132,12 +123,8 @@ class ReportTableV2 extends React.Component {
         width: 75,
       },
       {
-        cellDataGetter: ({ rowData }) => {
-          return [
-            (rowData.nt || {}).contig_reads || 0,
-            (rowData.nr || {}).contig_reads || 0,
-          ];
-        },
+        cellDataGetter: ({ rowData }) =>
+          this.getNtNrFromDataRow(rowData, "contig_reads", 0),
         cellRenderer: this.renderNtNrDecimalValues,
         dataKey: "contig_reads",
         label: "contig r",
@@ -152,12 +139,8 @@ class ReportTableV2 extends React.Component {
         width: 75,
       },
       {
-        cellDataGetter: ({ rowData }) => {
-          return [
-            (rowData.nt || {}).percent_identity || 0,
-            (rowData.nr || {}).percent_identity || 0,
-          ];
-        },
+        cellDataGetter: ({ rowData }) =>
+          this.getNtNrFromDataRow(rowData, "percent_identity", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
         dataKey: "percent_identity",
@@ -173,12 +156,8 @@ class ReportTableV2 extends React.Component {
         width: 60,
       },
       {
-        cellDataGetter: ({ rowData }) => {
-          return [
-            (rowData.nt || {}).alignment_length || 0,
-            (rowData.nr || {}).alignment_length || 0,
-          ];
-        },
+        cellDataGetter: ({ rowData }) =>
+          this.getNtNrFromDataRow(rowData, "alignment_length", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
         dataKey: "alignment_length",
@@ -194,12 +173,8 @@ class ReportTableV2 extends React.Component {
         width: 60,
       },
       {
-        cellDataGetter: ({ rowData }) => {
-          return [
-            (rowData.nt || {}).e_value || 0,
-            (rowData.nr || {}).e_value || 0,
-          ];
-        },
+        cellDataGetter: ({ rowData }) =>
+          this.getNtNrFromDataRow(rowData, "e_value", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
         dataKey: "e_value",
@@ -223,42 +198,6 @@ class ReportTableV2 extends React.Component {
       },
     ];
   }
-
-  nestedSortFunction = ({ data, path, sortDirection, nullValue, limits }) => {
-    // Uses lodash's orderBy function.
-    // It uses a sorting key that enables nested sorting of genus and species, while guaranteeing that
-    // genus is always on top of its children species
-    return orderBy(
-      [
-        rowData =>
-          rowData.genus
-            ? getOr(nullValue, ["genus"].concat(path), rowData)
-            : getOr(nullValue, path, rowData),
-        // this value guarantees that we keep species within their genus, even if the first value is duplicated
-        rowData => (rowData.genus ? rowData.genus.taxId : rowData.taxId),
-        rowData =>
-          rowData.genus
-            ? getOr(nullValue, path, rowData)
-            : sortDirection === "asc"
-              ? limits[0]
-              : limits[1],
-      ],
-      [sortDirection, sortDirection, sortDirection],
-      data
-    );
-  };
-
-  nestedNtNrSortFunction = ({ path, ...props }) => {
-    const { dbType } = this.state;
-    return this.nestedSortFunction({ path: [dbType].concat(path), ...props });
-  };
-
-  toggleExpandGenus = ({ taxId }) => {
-    const { expandedGenusIds } = this.state;
-    expandedGenusIds.delete(taxId) || expandedGenusIds.add(taxId);
-
-    this.setState({ expandedGenusIds: new Set(expandedGenusIds) });
-  };
 
   renderAggregateScore = ({ cellData, rowData }) => {
     return (
@@ -307,12 +246,6 @@ class ReportTableV2 extends React.Component {
     });
   };
 
-  handleNtNrChange = selectedDbType => {
-    this.setState({
-      dbType: selectedDbType,
-    });
-  };
-
   renderNtNrSelector = () => {
     return this.renderNtNrValues({
       cellData: ["NT", "NR"],
@@ -355,6 +288,67 @@ class ReportTableV2 extends React.Component {
     return defaultTableRowRenderer(rowProps);
   };
 
+  getNtNrFromDataRow(rowData, field, defaultValue) {
+    return [
+      getOr(defaultValue, ["nt", field], rowData),
+      getOr(defaultValue, ["nr", field], rowData),
+    ];
+  }
+
+  nestedSortFunction = ({ data, path, sortDirection, nullValue, limits }) => {
+    // Uses lodash's orderBy function.
+    // It uses a triple sorting key that enables nested sorting of genus and species, while guaranteeing that
+    // genus is always on top of its children species
+    return orderBy(
+      [
+        // 1st value: value defined by path for the genus (guarantees all genus together)
+        // note: a species row as a point .genus to their genus
+        rowData =>
+          rowData.genus
+            ? getOr(nullValue, ["genus"].concat(path), rowData)
+            : getOr(nullValue, path, rowData),
+        // 2nd value: the genus tax id
+        // this value guarantees that we keep species within their genus, even if the first value is duplicated
+        // e.g. if two genus have 2 reads they would be together on top and they species after them,
+        // adding tax id guarantees all the species are below their respective genus
+        rowData => (rowData.genus ? rowData.genus.taxId : rowData.taxId),
+        // 3rd value: value defined by path for the species if species row;
+        // using the limit value for genus based on direction guarantees that genus are always on top of their species.
+        // e.g.
+        //   genus A with tax id of 1001 has 2 reads and has species A1 with 1 read, and A2 with 1 read
+        //   genus B with tax id of 1002 has 2 reads and has species B1 with 2 reads
+        // without tax id, the ascending order would be A: [2, -], B: [2, -], A1: [2, 1], A2 [2, 1] B1: [2, 2]
+        // with tax id, the ascending order would be A: [2, 1001, -], A1: [2, 1001, 1], A2: [2, 1001, 1], B: [2, 1002, -], B1: [2, 1002, 2]
+        rowData =>
+          rowData.genus
+            ? getOr(nullValue, path, rowData)
+            : sortDirection === "asc"
+              ? limits[0]
+              : limits[1],
+      ],
+      [sortDirection, sortDirection, sortDirection],
+      data
+    );
+  };
+
+  nestedNtNrSortFunction = ({ path, ...props }) => {
+    const { dbType } = this.state;
+    return this.nestedSortFunction({ path: [dbType].concat(path), ...props });
+  };
+
+  toggleExpandGenus = ({ taxId }) => {
+    const { expandedGenusIds } = this.state;
+    expandedGenusIds.delete(taxId) || expandedGenusIds.add(taxId);
+
+    this.setState({ expandedGenusIds: new Set(expandedGenusIds) });
+  };
+
+  handleNtNrChange = selectedDbType => {
+    this.setState({
+      dbType: selectedDbType,
+    });
+  };
+
   getTableRows = () => {
     const { data } = this.props;
     const { expandedGenusIds } = this.state;
@@ -384,6 +378,7 @@ class ReportTableV2 extends React.Component {
         headerClassName={cs.header}
         rowRenderer={this.rowRenderer}
         sortable={true}
+        sortedHeaderClassName={cs.sortedHeader}
       />
     );
   };

@@ -97,6 +97,8 @@ Table.propTypes = {
   columns: PropTypes.arrayOf(
     PropTypes.shape({
       dataKey: PropTypes.string.isRequired,
+      // sortFunction should have the following signature: sortFunction({ data, sortDirection }) => sortedData
+      sortFunction: PropTypes.function,
     })
   ).isRequired,
   data: PropTypes.array,

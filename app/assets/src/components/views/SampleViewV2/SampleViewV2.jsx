@@ -52,7 +52,6 @@ export default class SampleViewV2 extends React.Component {
     this.setState({
       data,
     });
-    return data;
   };
 
   render = () => {
