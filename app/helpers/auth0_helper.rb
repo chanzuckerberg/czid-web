@@ -55,7 +55,7 @@ module Auth0Helper
     request_params = {
       client_id: client_id,
       connection: connection,
-      redirect_uri: root_url + 'auth/auth0/callback',
+      redirect_uri: URI.join(root_url, 'auth/auth0/callback').to_s,
       response_type: "code",
     }
     url = URI::HTTPS.build(host: domain,
