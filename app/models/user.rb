@@ -185,12 +185,14 @@ class User < ApplicationRecord
   # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
   def self.create_auth0_user(params)
     connection = ENV["AUTH0_CONNECTION"]
+    email = params[:email]
     name = params[:name]
+    password = params[:password]
     options = {
       connection: connection,
-      email: params[:email],
-      name: params[:name],
-      password: params[:password],
+      email: email,
+      name: name,
+      password: password,
     }
     auth0_management_client.create_user(name, options)
   end
