@@ -175,13 +175,13 @@ class UploadSampleStep extends React.Component {
   //*** Tab-related functions ***
 
   getUploadTabs = () => {
-    const { admin, biohubUser } = this.props;
+    const { admin, biohubS3UploadEnabled } = this.props;
     return compact([
       {
         value: LOCAL_UPLOAD,
         label: LOCAL_UPLOAD_LABEL,
       },
-      (admin || biohubUser) && {
+      (admin || biohubS3UploadEnabled) && {
         value: REMOTE_UPLOAD,
         label: REMOTE_UPLOAD_LABEL,
       },
@@ -805,7 +805,7 @@ UploadSampleStep.propTypes = {
   onDirty: PropTypes.func.isRequired,
   visible: PropTypes.bool,
   admin: PropTypes.bool,
-  biohubUser: PropTypes.bool,
+  biohubS3UploadEnabled: PropTypes.bool,
   basespaceClientId: PropTypes.string.isRequired,
   basespaceOauthRedirectUri: PropTypes.string.isRequired,
 };

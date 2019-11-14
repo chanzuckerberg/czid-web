@@ -1204,7 +1204,6 @@ DEPENDENCIES
   nokogiri
   omniauth-auth0 (~> 2.2)
   omniauth-rails_csrf_protection (~> 0.1.2)
-  parallel (~> 1.14)
   prometheus-client (= 0.7.1)
   puma (~> 3.7)
   rack-host-redirect
