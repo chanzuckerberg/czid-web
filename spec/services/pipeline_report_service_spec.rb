@@ -5,6 +5,8 @@ require 'pp'
 RSpec.describe PipelineReportService, type: :service do
   context "converted report test for species taxid 573" do
     before do
+      ResqueSpec.reset!
+
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
                              total_reads: 1122,

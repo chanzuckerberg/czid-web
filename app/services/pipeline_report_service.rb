@@ -247,6 +247,8 @@ class PipelineReportService
 
   def find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     ui_config = UiConfig.last
+    return unless ui_config
+
     highlighted_tax_ids = []
 
     meets_highlight_condition = lambda do |counts|
