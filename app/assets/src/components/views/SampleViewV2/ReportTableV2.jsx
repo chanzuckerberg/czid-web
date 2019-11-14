@@ -302,7 +302,7 @@ class ReportTableV2 extends React.Component {
     return orderBy(
       [
         // 1st value: value defined by path for the genus (guarantees all genus together)
-        // note: a species row as a field .genus that points to their genus
+        // note: a species row has a field .genus that points to their genus
         rowData =>
           rowData.genus
             ? getOr(nullValue, ["genus"].concat(path), rowData)
