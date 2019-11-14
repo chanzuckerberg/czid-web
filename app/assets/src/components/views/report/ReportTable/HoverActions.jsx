@@ -3,7 +3,6 @@ import React from "react";
 import cx from "classnames";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
 import CoverageIcon from "~ui/icons/CoverageIcon";
 import PropTypes from "~/components/utils/propTypes";
@@ -12,17 +11,14 @@ import { pipelineVersionHasCoverageViz } from "~/components/utils/sample";
 import cs from "./hover_actions.scss";
 
 class HoverActions extends React.Component {
-  state = {
-    phyloTreeCreationModalOpen: false,
-  };
-
   handlePhyloModalOpen = () => {
-    this.setState({ phyloTreeCreationModalOpen: true });
-    this.props.onPhyloTreeModalOpened && this.props.onPhyloTreeModalOpened();
-  };
+    const { taxId, taxName, onPhyloTreeModalOpened } = this.props;
 
-  handlePhyloModalClose = () => {
-    this.setState({ phyloTreeCreationModalOpen: false });
+    onPhyloTreeModalOpened &&
+      onPhyloTreeModalOpened({
+        taxId,
+        taxName,
+      });
   };
 
   // Metadata for each of the hover actions.
@@ -154,30 +150,11 @@ class HoverActions extends React.Component {
   };
 
   render() {
-    const {
-      admin,
-      csrf,
-      taxId,
-      taxName,
-      projectId,
-      projectName,
-      className,
-    } = this.props;
+    const { className } = this.props;
 
     return (
       <span className={cx(cs.hoverActions, className)}>
         {this.getHoverActions().map(this.renderHoverAction)}
-        {this.state.phyloTreeCreationModalOpen && (
-          <PhyloTreeCreationModal
-            admin={admin}
-            csrf={csrf}
-            taxonId={taxId}
-            taxonName={taxName}
-            projectId={projectId}
-            projectName={projectName}
-            onClose={this.handlePhyloModalClose}
-          />
-        )}
       </span>
     );
   }
@@ -185,10 +162,6 @@ class HoverActions extends React.Component {
 
 HoverActions.propTypes = {
   className: PropTypes.string,
-  admin: PropTypes.number,
-  csrf: PropTypes.string,
-  projectId: PropTypes.number,
-  projectName: PropTypes.string,
   taxId: PropTypes.number,
   taxLevel: PropTypes.number,
   taxName: PropTypes.string,
