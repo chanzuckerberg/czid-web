@@ -92,7 +92,7 @@ class User < ApplicationRecord
 
     # Don't allow any non-Biohub users to upload from czbiohub buckets
     if CZBIOHUB_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
-      unless biohub_user?
+      unless biohub_s3_upload_enabled?
         return false
       end
     end
@@ -103,6 +103,10 @@ class User < ApplicationRecord
   # This method is for tracking purposes only, not security.
   def biohub_user?
     ["czbiohub.org", "ucsf.edu"].include?(email.split("@").last)
+  end
+
+  def biohub_s3_upload_enabled?
+    biohub_user? || allowed_feature_list.include?("biohub_s3_upload_enabled") || admin?
   end
 
   # This method is for tracking purposes only, not security.
