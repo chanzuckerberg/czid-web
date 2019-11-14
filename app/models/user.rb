@@ -231,7 +231,7 @@ class User < ApplicationRecord
     @auth0_management_client ||= Auth0Client.new(
       client_id: ENV["AUTH0_MANAGEMENT_CLIENT_ID"],
       client_secret: ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"],
-      domain: ENV["AUTH0_DOMAIN"],
+      domain: ENV["AUTH0_MANAGEMENT_DOMAIN"],
       api_version: 2
     )
   end

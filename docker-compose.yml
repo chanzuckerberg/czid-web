@@ -30,6 +30,7 @@ x-auth0-variables: &auth0-variables
   ? AUTH0_DOMAIN
   ? AUTH0_MANAGEMENT_CLIENT_ID
   ? AUTH0_MANAGEMENT_CLIENT_SECRET
+  ? AUTH0_MANAGEMENT_DOMAIN
 
 x-aws-variables: &aws-variables
   ? AWS_ACCESS_KEY_ID
