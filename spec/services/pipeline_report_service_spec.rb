@@ -171,7 +171,7 @@ RSpec.describe PipelineReportService, type: :service do
                                tax_id: 28_037,
                                tax_level: 1,
                                nt: 4,
-                               name: "Streptococcus mitis",
+                               taxon_name: "Streptococcus mitis",
                                percent_identity: 95.65,
                                alignment_length: 149.75,
                                e_value: -81.478,
@@ -210,6 +210,18 @@ RSpec.describe PipelineReportService, type: :service do
                              tax_level: 2,
                              mean: 290.481,
                              stdev: 1482.97,
+                           }, {
+                             tax_id: 28_037,
+                             count_type: "NR",
+                             tax_level: 1,
+                             mean: 25.6849,
+                             stdev: 139.526,
+                           }, {
+                             tax_id: 28_037,
+                             count_type: "NT",
+                             tax_level: 1,
+                             mean: 65.9058,
+                             stdev: 374.243,
                            },])
 
       @report = PipelineReportService.call(@pipeline_run.id, @background.id)
@@ -252,7 +264,7 @@ RSpec.describe PipelineReportService, type: :service do
           "z_score" => 1.6768346926439197, # previously rounded to 1.6768345
           "e_value" => 9.3,
         },
-        "agg_score" => 73_603.777,
+        "agg_score" => 73_603.80226971892 # previously rounded to 73_603.777
       }
 
       expect(JSON.parse(@report)["counts"]["2"]["1301"]).to include_json(genus_result)
