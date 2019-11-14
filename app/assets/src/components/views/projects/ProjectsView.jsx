@@ -44,7 +44,7 @@ class ProjectsView extends React.Component {
             )
           ),
         headerClassName: cs.projectHeader,
-        sortFunction: p => (p.name || "").toLowerCase(),
+        sortKey: p => (p.name || "").toLowerCase(),
       },
       {
         dataKey: "created_at",

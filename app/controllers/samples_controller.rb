@@ -716,6 +716,27 @@ class SamplesController < ApplicationController
   end
 
   def show_v2
+    # TODO: move to fastjson_api serializer
+    default_fields = [
+      :name,
+      :created_at,
+      :updated_at,
+      :project_id,
+      :status,
+      :host_genome_id,
+    ]
+    respond_to do |format|
+      format.html { render 'show_v2' }
+      format.json do
+        render json: {
+          sample: @sample.as_json(
+            only: default_fields,
+            methods: []
+          ),
+          pipeline_run: @sample.first_pipeline_run.as_json,
+        }
+      end
+    end
   end
 
   # TODO: (gdingle): remove this if we are not going to allow saving reports as visualizations

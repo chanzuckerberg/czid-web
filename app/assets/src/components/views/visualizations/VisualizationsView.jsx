@@ -36,7 +36,7 @@ class VisualizationsView extends React.Component {
             )
           ),
         headerClassName: cs.visualizationHeader,
-        sortFunction: p => p.updated_at,
+        sortKey: p => p && p.updated_at,
       },
       {
         dataKey: "updated_at",

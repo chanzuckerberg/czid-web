@@ -110,7 +110,7 @@ class PipelineReportService
         counts: counts_by_tax_level,
         lineage: structured_lineage,
         sortedGenus: sorted_genus_tax_ids,
-        highlighted_tax_ids: highlighted_tax_ids
+        highlightedTaxIds: highlighted_tax_ids
       )
     @timer.split("convert_to_json_with_sJSON")
 
