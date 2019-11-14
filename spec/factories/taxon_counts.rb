@@ -4,6 +4,7 @@ FactoryBot.define do
       # The taxon name for the taxon count entry.
       # Will be loaded or created using species (taxon_lineages) factory.
       taxon_name { nil }
+      tax_id { nil }
       # NT or NR counts. NT will be used if defined. Otherwise, will use NR value.
       # Count type will be filled automaticlaly.
       nt { nil }
@@ -12,12 +13,12 @@ FactoryBot.define do
 
     initialize_with do
       if taxon_name
-        taxon_lineage = TaxonLineage.find_by(tax_name: taxon_name)
+        taxon_lineage = TaxonLineage.find_by(tax_name: taxon_name, taxid: tax_id)
         unless taxon_lineage
-          taxon_lineage = create(:species, tax_name: taxon_name)
+          taxon_lineage = create(:species, tax_name: taxon_name, taxid: tax_id)
         end
         # Unable to edit the original hash for some reason
-        new(**attributes.dup.merge(tax_id: taxon_lineage.id,
+        new(**attributes.dup.merge(tax_id: taxon_lineage.taxid,
                                    name: taxon_lineage.name))
       else
         new(attributes)
