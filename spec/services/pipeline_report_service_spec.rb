@@ -5,6 +5,8 @@ require 'pp'
 RSpec.describe PipelineReportService, type: :service do
   context "converted report test for species taxid 573" do
     before do
+      ResqueSpec.reset!
+
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
                              total_reads: 1122,
@@ -171,7 +173,7 @@ RSpec.describe PipelineReportService, type: :service do
                                tax_id: 28_037,
                                tax_level: 1,
                                nt: 4,
-                               name: "Streptococcus mitis",
+                               taxon_name: "Streptococcus mitis",
                                percent_identity: 95.65,
                                alignment_length: 149.75,
                                e_value: -81.478,
