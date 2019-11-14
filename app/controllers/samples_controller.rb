@@ -739,7 +739,10 @@ class SamplesController < ApplicationController
               only: [:id, :created_at, :job_status, :pipeline_version],
             },
           }
-        ).merge(last_pipeline_run: @sample.first_pipeline_run.id)
+        ).merge(
+          last_pipeline_run: @sample.first_pipeline_run && @sample.first_pipeline_run.id,
+          editable: current_power.updatable_sample?(@sample)
+        )
       end
     end
   end

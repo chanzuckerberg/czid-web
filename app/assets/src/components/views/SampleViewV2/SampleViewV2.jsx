@@ -1,11 +1,16 @@
 import React from "react";
 import { find, merge } from "lodash/fp";
 
-import { getSample, getSampleReportData } from "~/api";
+import { getSample, getSampleReportData, getSamples } from "~/api";
+import { UserContext } from "~/components/common/UserContext";
+import { AMR_TABLE_FEATURE } from "~/components/utils/features";
+import { logAnalyticsEvent } from "~/api/analytics";
+
+import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import ReportTableV2 from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
-import NarrowContainer from "~/components/layout/NarrowContainer";
+import Tabs from "~/components/ui/controls/Tabs";
 import cs from "./sample_view_v2.scss";
 
 const SPECIES_LEVEL_INDEX = 1;
@@ -16,10 +21,14 @@ export default class SampleViewV2 extends React.Component {
     super(props);
 
     this.state = {
+      backgroundId: null,
+      currentTab: "Report",
       pipelineRun: null,
       project: null,
+      projectSamples: [],
       reportData: [],
       sample: null,
+      view: "table",
     };
   }
 
@@ -28,19 +37,32 @@ export default class SampleViewV2 extends React.Component {
     this.fetchSampleReportData();
   };
 
-  // fetchData = () => {
-  //   this.fetchSample();
-  //   this.fetchSampleReportData();
-  // }
-
   fetchSample = async () => {
     const { sampleId } = this.props;
     const sample = await getSample({ sampleId });
-    this.setState({
-      sample: sample,
-      pipelineRun: find({ id: sample.last_pipeline_run }, sample.pipeline_runs),
-      project: sample.project,
-    });
+    this.setState(
+      {
+        sample: sample,
+        pipelineRun: find(
+          { id: sample.last_pipeline_run },
+          sample.pipeline_runs
+        ),
+        project: sample.project,
+      },
+      this.fetchProjectSamples
+    );
+  };
+
+  fetchProjectSamples = async () => {
+    const { project } = this.state;
+
+    if (project) {
+      const projectSamples = await getSamples({
+        projectId: project.id,
+      });
+
+      this.setState({ projectSamples: projectSamples.samples });
+    }
   };
 
   fetchSampleReportData = async () => {
@@ -54,9 +76,9 @@ export default class SampleViewV2 extends React.Component {
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     rawReportData.sortedGenus.forEach(genusTaxId => {
       let hasHighlightedChildren = false;
-      const speciesData = rawReportData.counts[GENUS_LEVEL_INDEX][
-        genusTaxId
-      ].children.map(speciesTaxId => {
+      const childrenSpecies =
+        rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].children;
+      const speciesData = childrenSpecies.map(speciesTaxId => {
         const isHighlighted = highlightedTaxIds.has(speciesTaxId);
         hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
         return merge(rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId], {
@@ -97,20 +119,78 @@ export default class SampleViewV2 extends React.Component {
     }
   };
 
+  handleTabChange = tab => {
+    this.setState({ currentTab: tab });
+    const name = tab.replace(/\W+/g, "-").toLowerCase();
+    logAnalyticsEvent(`SampleView_tab-${name}_clicked`, {
+      tab: tab,
+    });
+  };
+
+  toggleSampleDetailsSidebar = () => {
+    console.log("toggle sample details sidebar");
+    // if (
+    //   this.state.sidebarMode === "sampleDetails" &&
+    //   this.state.sidebarVisible
+    // ) {
+    //   this.setState({
+    //     sidebarVisible: false,
+    //   });
+    // } else {
+    //   this.setState({
+    //     sidebarMode: "sampleDetails",
+    //     sidebarVisible: true,
+    //   });
+    // }
+  };
+
   render = () => {
-    const { pipelineRun, project, reportData, sample } = this.state;
+    const {
+      backgroundId,
+      currentTab,
+      pipelineRun,
+      project,
+      projectSamples,
+      reportData,
+      sample,
+      view,
+    } = this.state;
 
     return (
-      <NarrowContainer className={cs.reportContainer}>
-        <div className={cs.reportHeader}>
+      <NarrowContainer className={cs.sampleViewContainer}>
+        <div className={cs.sampleViewHeader}>
           <SampleViewHeader
-            onPipelineVersionSelect={this.handlePipelineVersionSelect}
+            backgroundId={backgroundId}
+            editable={sample ? sample.editable : false}
+            onDetailsClick={this.toggleSampleDetailsSidebar}
+            onPipelineVersionChange={this.handlePipelineVersionSelect}
             pipelineRun={pipelineRun}
             project={project}
+            projectSamples={projectSamples}
             sample={sample}
+            view={view}
           />
         </div>
-        <div className={cs.reportTable}>
+        <div className={cs.tabsContainer}>
+          <UserContext.Consumer>
+            {currentUser =>
+              currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) ||
+              currentUser.admin ? (
+                <Tabs
+                  className={cs.tabs}
+                  tabs={["Report", "Antimicrobial Resistance"]}
+                  value={currentTab}
+                  onChange={this.handleTabChange}
+                />
+              ) : (
+                <div className={cs.dividerContainer}>
+                  <div className={cs.divider} />
+                </div>
+              )
+            }
+          </UserContext.Consumer>
+        </div>
+        <div className={cs.reportViewContainer}>
           <ReportTableV2 data={reportData} />
         </div>
       </NarrowContainer>
@@ -121,3 +201,36 @@ export default class SampleViewV2 extends React.Component {
 SampleViewV2.propTypes = {
   sampleId: PropTypes.number,
 };
+
+{
+  /* <DetailsSidebar
+visible={this.state.sidebarVisible}
+mode={this.state.sidebarMode}
+onClose={withAnalytics(
+  this.closeSidebar,
+  "SampleView_details-sidebar_closed",
+  {
+    sampleId: sample.id,
+    sampleName: sample.name,
+  }
+)}
+params={this.getSidebarParams()}
+/>
+{this.coverageVizEnabled() && (
+<CoverageVizBottomSidebar
+  visible={this.state.coverageVizVisible}
+  onClose={withAnalytics(
+    this.closeCoverageViz,
+    "SampleView_coverage-viz-sidebar_closed",
+    {
+      sampleId: sample.id,
+      sampleName: sample.name,
+    }
+  )}
+  params={this.getCoverageVizParams()}
+  sampleId={sample.id}
+  pipelineVersion={this.props.pipelineRun.pipeline_version}
+  nameType={this.state.nameType}
+/>
+)} */
+}
