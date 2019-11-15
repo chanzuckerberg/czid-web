@@ -3,7 +3,7 @@ class SessionsController < Devise::SessionsController
 
   include Auth0Helper
 
-  skip_before_action :verify_authenticity_token, only: [:destroy]
+  skip_before_action :verify_authenticity_token, :authenticate_user!, only: [:destroy]
 
   # Skip devise verify_signed_out_user when logging out an auth0 session
   # https://stackoverflow.com/questions/26241357/overriding-devise-sessionscontroller-destroy

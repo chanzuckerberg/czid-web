@@ -9,6 +9,7 @@ Rails.application.routes.draw do
 
   get 'auth/auth0/callback' => 'auth0#callback'
   post 'auth0/request_password_reset' => 'auth0#request_password_reset'
+  get 'auth0/refresh_token' => 'auth0#refresh_token'
 
   resources :samples do
     put :reupload_source, on: :member
