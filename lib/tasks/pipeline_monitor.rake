@@ -228,10 +228,22 @@ class CheckPipelineRuns
       s3_key = prop_get(bm_props, 'key', defaults)
       s3_path = "s3://#{s3_bucket}/#{s3_key}"
       bm_environments = prop_get(bm_props, 'environments', defaults)
+      unless bm_environments.include?(Rails.env)
+        Rails.logger.info("Benchmark not enabled for #{Rails.env} environment: #{s3_path}")
+        next
+      end
       bm_project_name = prop_get(bm_props, 'project_name', defaults)
       bm_proj = Project.find_by(name: bm_project_name)
+      unless bm_proj
+        Rails.logger.info("Benchmark requires non-existent project #{bm_project_name}: #{s3_path}")
+        next
+      end
       bm_frequency_hours = prop_get(bm_props, 'frequency_hours', defaults)
       bm_frequency_seconds = bm_frequency_hours * 3600
+      unless bm_frequency_hours >= IDSEQ_BENCH_MIN_FREQUENCY_HOURS
+        Rails.logger.info("Benchmark frequency under #{IDSEQ_BENCH_MIN_FREQUENCY_HOURS} hour: #{s3_path}")
+        next
+      end
       bm_name_prefix = benchmark_sample_name_prefix(s3_path)
       sql_query = "
         SELECT
@@ -256,6 +268,12 @@ class CheckPipelineRuns
         commit_filter += "-" + web_commit
       end
       sql_results = Sample.connection.select_all(sql_query).to_hash
+      unless sql_results.empty?
+        most_recent_submission = sql_results.pluck('unixtime_of_creation').max
+        hours_since_last_run = Integer((t_now - most_recent_submission) / 360) / 10.0
+        Rails.logger.info("Benchmark last ran #{hours_since_last_run} hours ago #{commit_filter}: #{s3_path}")
+        next
+      end
       Rails.logger.info("Submitting benchmark: #{s3_path}")
       bm_user_email = prop_get(bm_props, 'user_email', defaults)
       bm_user = User.find_by(email: bm_user_email)
@@ -272,7 +290,15 @@ class CheckPipelineRuns
   end
 
   def self.benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
-    benchmark_update(t_now)
+    unless benchmark_state && t_now - benchmark_state[:t_last] < IDSEQ_BENCH_UPDATE_FREQUENCY_SECONDS
+      benchmark_state = { t_last: t_now }
+      begin
+        benchmark_update(t_now)
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Updating benchmarks failed with error: #{exception.message}")
+        LogUtil.log_backtrace(exception)
+      end
+    end
     benchmark_state
   end
 
