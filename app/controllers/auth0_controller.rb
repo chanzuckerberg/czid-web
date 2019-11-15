@@ -18,4 +18,23 @@ class Auth0Controller < ApplicationController
     # Invalidate auth0 session (https://auth0.com/docs/sessions/concepts/session-layers)
     redirect_to auth0_signout_url
   end
+
+  def request_password_reset
+    email = params.dig("user", "email")
+    return if email.blank?
+
+    # Send them a password reset email via Auth0 if enabled or the legacy Devise flow.
+    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
+      User.send_auth0_password_reset_email(email)
+      redirect_to auth0_login_url
+    else
+      # DEPRECATED: Legacy Devise flow. Remove block after migrating to Auth0.
+      user = User.find_by(email: email)
+      if user
+        user.send_reset_password_instructions
+      end
+      # Old login page
+      redirect_to new_user_session_path
+    end
+  end
 end

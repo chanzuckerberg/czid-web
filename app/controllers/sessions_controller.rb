@@ -16,7 +16,7 @@ class SessionsController < Devise::SessionsController
   # from being authenticated using both strategies at once
   def new
     if auth0_logout
-      redirect_to after_sign_out_path_for
+      redirect_to after_sign_out_path_for(:user)
     else
       super
     end

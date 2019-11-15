@@ -89,6 +89,9 @@ gem 'immigrant'
 # Better CSV handling
 gem 'csv-safe', '~> 1.2'
 
+# For accessing Auth0 management APIs
+gem 'auth0'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'

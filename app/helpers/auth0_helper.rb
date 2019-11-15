@@ -47,6 +47,23 @@ module Auth0Helper
     url.to_s
   end
 
+  # See: https://auth0.com/docs/api/authentication#authorization-code-flow
+  def auth0_login_url
+    client_id = ENV["AUTH0_CLIENT_ID"]
+    connection = ENV["AUTH0_CONNECTION"]
+    domain = ENV["AUTH0_DOMAIN"]
+    request_params = {
+      client_id: client_id,
+      connection: connection,
+      redirect_uri: URI.join(root_url, 'auth/auth0/callback').to_s,
+      response_type: "code",
+    }
+    url = URI::HTTPS.build(host: domain,
+                           path: '/authorize',
+                           query: request_params.to_query)
+    url.to_s
+  end
+
   private
 
   def http_token
