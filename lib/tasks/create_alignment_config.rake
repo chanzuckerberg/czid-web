@@ -21,9 +21,7 @@ task create_alignment_config: :environment do
     s3_nt_loc_db_path: "#{bucket}/alignment_data/#{name}/nt_loc.#{db_file_ext}",
     s3_nr_db_path: "#{bucket}/alignment_data/#{name}/nr",
     s3_nr_loc_db_path: "#{bucket}/alignment_data/#{name}/nr_loc.#{db_file_ext}",
-    # TODO(mark): Convert nt_info to use BDB.
-    # Involves modifying generate_coverage_viz pipeline step to accept both formats.
-    s3_nt_info_db_path: "#{bucket}/alignment_data/#{name}/nt_info.sqlite3",
+    s3_nt_info_db_path: "#{bucket}/alignment_data/#{name}/nt_info.db",
     s3_accession2taxid_path: "#{bucket}/alignment_data/#{name}/accession2taxid.#{db_file_ext}",
 
     s3_lineage_path: "#{bucket}/taxonomy/#{name}/taxid-lineages.#{db_file_ext}",
