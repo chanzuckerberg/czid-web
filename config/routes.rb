@@ -7,8 +7,7 @@ Rails.application.routes.draw do
     registrations: 'registrations',
   }
 
-  get 'users/auth0_sign_in' => 'auth0#auth0_pre_login'
-  get 'auth/auth0/callback' => 'auth0#auth0_callback'
+  get 'auth/auth0/callback' => 'auth0#callback'
 
   resources :samples do
     put :reupload_source, on: :member
