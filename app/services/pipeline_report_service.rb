@@ -20,6 +20,7 @@ class PipelineReportService
   Z_SCORE_MIN = -99
   Z_SCORE_MAX =  99
   Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
+  Z_SCORE_WHEN_ABSENT_FROM_SAMPLE = -100
 
   DEFAULT_SORT_PARAM = :agg_score
   MIN_CONTIG_SIZE = 0
@@ -46,6 +47,16 @@ class PipelineReportService
 
     taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
     @timer.split("fetch_taxon_counts_and_summaries")
+
+    missing_taxons = fetch_missing_taxons(@pipeline_run_id, @background_id)
+    @timer.split("fetch_missing_taxons")
+
+    missing_taxon_summaries = []
+    missing_taxons.each do |taxon|
+      missing_taxon_summaries += [zero_metrics(*taxon)]
+    end
+    taxon_counts_and_summaries += missing_taxon_summaries
+    @timer.split("fill_zero_metrics")
 
     counts_by_tax_level = split_by_tax_level(taxon_counts_and_summaries)
     @timer.split("split_by_tax_level")
@@ -137,6 +148,43 @@ class PipelineReportService
     return taxon_counts_and_summaries_query.pluck(*FIELDS_TO_PLUCK)
   end
 
+  def zero_metrics(tax_id, tax_level, count_type, mean, stdev)
+    [
+      tax_id, # tax_id
+      nil, # genus_taxid
+      count_type, # count_type
+      tax_level, # tax_level
+      0, # count
+      0, # percent_identity
+      0, # alignment_length
+      0, # e_value
+      mean, # mean
+      stdev, # stdev
+      nil # name
+    ]
+  end
+
+  def fetch_missing_taxons(_pipeline_run_id, _background_id)
+    taxons_absent_from_sample = TaxonSummary
+                                .joins(
+                                  " LEFT JOIN taxon_counts ON ("\
+                                    " taxon_counts.count_type = taxon_summaries.count_type"\
+                                    " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
+                                    " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
+                                    " AND taxon_summaries.background_id = #{@background_id}"\
+                                    " AND taxon_counts.pipeline_run_id = #{@pipeline_run_id}"\
+                                  " )"\
+                                " WHERE"\
+                                  " taxon_summaries.background_id = #{@background_id}"\
+                                  " AND taxon_counts.count IS NULL"\
+                                  " AND taxon_summaries.tax_id IN"\
+                                    " (SELECT DISTINCT tax_id FROM taxon_counts"\
+                                    " WHERE taxon_counts.pipeline_run_id=#{@pipeline_run_id})"
+                                )
+
+    return taxons_absent_from_sample.pluck(:tax_id, :tax_level, :count_type, :mean, :stdev)
+  end
+
   def split_by_tax_level(counts_array)
     return counts_array.group_by { |entry| entry[FIELDS_INDEX[:tax_level]] }
   end
@@ -197,6 +245,8 @@ class PipelineReportService
       nr_z_score = compute_z_score(taxon_counts[:nr][:rpm], taxon_counts[:nr][:bg_mean], taxon_counts[:nr][:bg_stdev]) if taxon_counts[:nr].present?
       taxon_counts[:nt][:z_score] = nt_z_score if taxon_counts[:nt].present?
       taxon_counts[:nr][:z_score] = nr_z_score if taxon_counts[:nr].present?
+      taxon_counts[:nt][:z_score] = taxon_counts[:nt][:count] != 0 ? nt_z_score : Z_SCORE_WHEN_ABSENT_FROM_SAMPLE if taxon_counts[:nt].present?
+      taxon_counts[:nr][:z_score] = taxon_counts[:nr][:count] != 0 ? nr_z_score : Z_SCORE_WHEN_ABSENT_FROM_SAMPLE if taxon_counts[:nr].present?
       taxon_counts[:max_z_score] = nr_z_score.nil? || (nt_z_score && nt_z_score > nr_z_score) ? nt_z_score : nr_z_score
     end
   end
@@ -204,8 +254,8 @@ class PipelineReportService
   def compute_aggregate_scores(species_counts, genus_counts)
     species_counts.each do |tax_id, species|
       genus = genus_counts[species[:genus_tax_id]]
-      species[:agg_score] = (species[:nt].present? ? genus[:nt][:z_score].abs * species[:nt][:z_score] * species[:nt][:rpm] : 0) \
-        + (species[:nr].present? ? genus[:nr][:z_score].abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
+      species[:agg_score] = (species[:nt].present? && genus[:nt].present? ? genus[:nt][:z_score].abs * species[:nt][:z_score] * species[:nt][:rpm] : 0) \
+        + (species[:nr].present? && genus[:nr].present? ? genus[:nr][:z_score].abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
       genus[:agg_score] = species[:agg_score] if genus[:agg_score].nil? || genus[:agg_score] < species[:agg_score]
       # TODO : more this to a more logical place
       if !genus[:children]
