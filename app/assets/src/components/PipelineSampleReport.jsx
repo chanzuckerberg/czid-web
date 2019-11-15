@@ -21,6 +21,7 @@ import { parseUrlParams } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import FilterTag from "~ui/controls/FilterTag";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 
 import {
   computeThresholdedTaxons,
@@ -188,6 +189,7 @@ class PipelineSampleReport extends React.Component {
       contigTaxidList: [],
       minContigSize: cachedMinContigSize || DEFAULT_MIN_CONTIG_SIZE,
       hoverRowId: null,
+      phyloTreeModalParams: null,
     };
 
     this.state = {
@@ -822,6 +824,18 @@ class PipelineSampleReport extends React.Component {
     }
   };
 
+  handlePhyloTreeModalOpen = phyloTreeModalParams => {
+    this.setState({
+      phyloTreeModalParams,
+    });
+  };
+
+  handlePhyloTreeModalClose = () => {
+    this.setState({
+      phyloTreeModalParams: null,
+    });
+  };
+
   displayHoverActions = (taxInfo, reportDetails) => {
     const { reportPageParams } = this.props;
     const validTaxId =
@@ -854,10 +868,6 @@ class PipelineSampleReport extends React.Component {
     return (
       <HoverActions
         className="link-tag"
-        admin={parseInt(this.admin)}
-        csrf={this.csrf}
-        projectId={this.projectId}
-        projectName={this.projectName}
         taxId={taxInfo.tax_id}
         taxLevel={taxInfo.tax_level}
         taxName={taxInfo.name}
@@ -887,12 +897,11 @@ class PipelineSampleReport extends React.Component {
           analyticsContext
         )}
         phyloTreeEnabled={phyloTreeEnabled}
-        onPhyloTreeModalOpened={() =>
-          logAnalyticsEvent(
-            "PipelineSampleReport_phylotree-link_clicked",
-            analyticsContext
-          )
-        }
+        onPhyloTreeModalOpened={withAnalytics(
+          this.handlePhyloTreeModalOpen,
+          "PipelineSampleReport_phylotree-link_clicked",
+          analyticsContext
+        )}
         pipelineVersion={reportPageParams.pipeline_version}
       />
     );
@@ -1614,6 +1623,17 @@ class RenderMarkup extends React.Component {
                 <div className="loading-container">
                   <LoadingLabel />
                 </div>
+              )}
+              {parent.state.phyloTreeModalParams && (
+                <PhyloTreeCreationModal
+                  admin={parent.admin}
+                  csrf={parent.csrf}
+                  taxonId={parent.state.phyloTreeModalParams.taxId}
+                  taxonName={parent.state.phyloTreeModalParams.taxName}
+                  projectId={parent.projectId}
+                  projectName={parent.projectName}
+                  onClose={parent.handlePhyloTreeModalClose}
+                />
               )}
             </div>
           </div>
