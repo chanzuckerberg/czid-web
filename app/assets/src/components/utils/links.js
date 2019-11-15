@@ -47,13 +47,13 @@ const postToUrlWithCSRF = (url, params) => {
   const form = document.createElement("form");
   form.setAttribute("method", "POST");
   form.setAttribute("action", url);
-  const input = document.createElement("input");
   const csrf = document.getElementsByName("csrf-token")[0].content;
   params = params || {};
   for (const [key, value] of Object.entries({
     authenticity_token: csrf,
     ...params,
   })) {
+    const input = document.createElement("input");
     input.setAttribute("type", "HIDDEN");
     input.setAttribute("name", key);
     input.setAttribute("value", value);
