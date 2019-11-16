@@ -44,7 +44,7 @@ task 'export_users_auth0' => :environment do |_t, _args|
     exit 2
   end
 
-  eua = ExportUsersAuth0.new()
+  eua = ExportUsersAuth0.new
 
   if options[:export_all]
     eua.export_all_users
@@ -69,7 +69,7 @@ class ExportUsersAuth0
   attr_reader :auth0_domain, :auth0_api_bearer_token
   AUTH0_DB_CONNECTION_NAME = "idseq-legacy-users"
 
-  def initialize()
+  def initialize
     # Fetch auth0 management keys
     unless AUTH0_KEYS.all? { |k| ENV[k].present? }
       puts "!!! ERROR: missing environment variables #{AUTH0_KEYS}"
