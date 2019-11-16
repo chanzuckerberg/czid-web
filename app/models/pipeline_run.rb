@@ -1419,7 +1419,7 @@ class PipelineRun < ApplicationRecord
   def outputs_by_step(can_see_stage1_results = false)
     # Get map of s3 path to presigned URL and size.
     filename_to_info = {}
-    sample.results_folder_files.each do |entry|
+    sample.results_folder_files(pipeline_version).each do |entry|
       filename_to_info[entry[:key]] = entry
     end
     # Get read counts

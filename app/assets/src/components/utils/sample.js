@@ -77,7 +77,7 @@ export const joinServerError = response => {
 };
 
 export const sampleErrorInfo = (sample, pipelineRun) => {
-  let status, message, linkText, type, link;
+  let status, message, linkText, type, link, pipelineVersionUrlParam;
   switch (
     sample.upload_error || (pipelineRun && pipelineRun.known_user_error)
   ) {
@@ -126,7 +126,11 @@ export const sampleErrorInfo = (sample, pipelineRun) => {
         "Oh no! No matches were identified because there weren't any reads left after host and quality filtering.";
       linkText = "Check where your reads were filtered out.";
       type = "warning";
-      link = `/samples/${sample.id}/results_folder`;
+      pipelineVersionUrlParam =
+        pipelineRun && pipelineRun.pipeline_version
+          ? `?pipeline_version=${pipelineRun.pipeline_version}`
+          : "";
+      link = `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
       break;
     case "BROKEN_PAIRS":
       status = "COMPLETE - ISSUE";

@@ -61,7 +61,9 @@ const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
     newPage: false,
   },
   [RESULTS_FOLDER_LABEL]: {
-    path: `/samples/${sampleId}/results_folder`,
+    path: `/samples/${sampleId}/results_folder?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: true,
   },
   [PIPELINE_VIZ_LABEL]: {
