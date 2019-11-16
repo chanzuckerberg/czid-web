@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import Divider from "./layout/Divider";
 import { openUrl, downloadStringToFile } from "./utils/links";
 
@@ -143,7 +144,7 @@ class ResultsFolder extends React.Component {
             <span className="path">/</span>
             <span
               className="back"
-              onClick={this.gotoPath.bind(this, `/samples/${this.filePath[2]}`)}
+              onClick={this.gotoPath.bind(this, this.props.samplePath)}
             >
               {this.sampleName}
             </span>
@@ -198,5 +199,9 @@ class ResultsFolder extends React.Component {
     );
   }
 }
+
+ResultsFolder.propTypes = {
+  samplePath: PropTypes.string,
+};
 
 export default ResultsFolder;
