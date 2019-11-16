@@ -1006,15 +1006,23 @@ class SamplesController < ApplicationController
 
   def raw_results_folder
     # See access check in check_owner
-    @file_list = @sample.results_folder_files
+    @file_list = @sample.results_folder_files(params[:pipeline_version])
     @file_path = "#{@sample.sample_path}/results/"
+    pipeline_version_url_param = params[:pipeline_version] ? "?pipeline_version=#{params[:pipeline_version]}" : ""
+    @sample_path = "#{sample_path(@sample)}#{pipeline_version_url_param}"
     render template: "samples/raw_folder"
   end
 
   def results_folder
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     can_see_stage1_results = (current_user.id == @sample.user_id)
-    @exposed_raw_results_url = can_see_stage1_results ? raw_results_folder_sample_url(@sample) : nil
-    @file_list = @sample.first_pipeline_run ? @sample.first_pipeline_run.outputs_by_step(can_see_stage1_results) : []
+    pipeline_version_url_param = params[:pipeline_version] ? "?pipeline_version=#{params[:pipeline_version]}" : ""
+    @exposed_raw_results_url = can_see_stage1_results ? "#{raw_results_folder_sample_url(@sample)}#{pipeline_version_url_param}" : nil
+    @sample_path = "#{sample_path(@sample)}#{pipeline_version_url_param}"
+    @file_list = []
+    if pr
+      @file_list = pr.outputs_by_step(can_see_stage1_results)
+    end
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
       format.html do
