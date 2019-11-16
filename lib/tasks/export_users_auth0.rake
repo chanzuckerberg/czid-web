@@ -4,7 +4,9 @@ require 'aws-sdk-ssm'
 
 desc 'Export legacy users to Auth0'
 
-task 'export_users_to_auth0' => :environment do |_t, _args|
+task 'export_users_auth0' => :environment do |_t, _args|
+  AUTH0_KEYS = ["AUTH0_DOMAIN", "AUTH0_CLIENT_ID", "AUTH0_CLIENT_SECRET"].freeze
+
   ActiveRecord::Base.logger.level = :info
 
   options = { emails: [], export_all: false }
@@ -17,11 +19,22 @@ task 'export_users_to_auth0' => :environment do |_t, _args|
     o.on("--all", "Export all users from the database.") do
       options[:export_all] = true
     end
+    o.on("--print-envs", "Print auth0 environemnt variables to be set before running this tool") do
+      options[:print_envs] = true
+    end
   end
   args = op.order(ARGV) {}
   op.parse!(args)
 
-  if options[:emails].empty? && !options[:export_all]
+  env = ENV["ENVIRONMENT"] || 'dev'
+
+  if options[:print_envs]
+    prefix = "/idseq-#{env}-auth0/"
+    values = fetch_aws_param_store(AUTH0_KEYS.map { |k| prefix + k })
+    env_keys = AUTH0_KEYS.zip(values).map { |k, v| "export #{k}=#{v}" }
+    puts env_keys
+    exit 0
+  elsif options[:emails].empty? && !options[:export_all]
     puts 'ERROR: no users have been provided'
     op.parse!(%w[--help])
     exit 2
@@ -31,9 +44,7 @@ task 'export_users_to_auth0' => :environment do |_t, _args|
     exit 2
   end
 
-  env = ENV["ENVIRONMENT"] || 'dev'
-
-  eua = ExportUsersAuth0.new(env)
+  eua = ExportUsersAuth0.new()
 
   if options[:export_all]
     eua.export_all_users
@@ -42,27 +53,30 @@ task 'export_users_to_auth0' => :environment do |_t, _args|
   end
 end
 
+def fetch_aws_param_store(keys)
+  client = Aws::SSM::Client.new
+  resp = client.get_parameters(names: keys, with_decryption: true)
+  values_hash = (resp.parameters.map { |p| [p.name, p.value] }).to_h
+  missing_env_vars = keys.reject { |k| values_hash.key?(k) }
+  unless missing_env_vars.empty?
+    puts "The following parameters are missing in AWS Parameter Store: #{missing_env_vars}"
+    exit 2
+  end
+  values_hash.values_at(*keys)
+end
+
 class ExportUsersAuth0
   attr_reader :auth0_domain, :auth0_api_bearer_token
   AUTH0_DB_CONNECTION_NAME = "idseq-legacy-users"
 
-  def initialize(env)
+  def initialize()
     # Fetch auth0 management keys
-    prefix = "/idseq-#{env}-auth0/"
-    @auth0_domain, @auth0_client_id, @auth0_client_secret = fetch_aws_param_store(['AUTH0_DOMAIN', 'AUTH0_CLIENT_ID', 'AUTH0_CLIENT_SECRET'].map { |k| prefix + k })
-    @auth0_api_bearer_token = request_api_bearer_token
-  end
-
-  def fetch_aws_param_store(keys)
-    client = Aws::SSM::Client.new
-    resp = client.get_parameters(names: keys, with_decryption: true)
-    values_hash = (resp.parameters.map { |p| [p.name, p.value] }).to_h
-    missing_env_vars = keys.reject { |k| values_hash.key?(k) }
-    unless missing_env_vars.empty?
-      puts "The following parameters are missing in AWS Parameter Store: #{missing_env_vars}"
+    unless AUTH0_KEYS.all? { |k| ENV[k].present? }
+      puts "!!! ERROR: missing environment variables #{AUTH0_KEYS}"
       exit 2
     end
-    values_hash.values_at(*keys)
+    @auth0_domain, @auth0_client_id, @auth0_client_secret = AUTH0_KEYS.map { |k| ENV[k] }
+    @auth0_api_bearer_token = request_api_bearer_token
   end
 
   def export_all_users
