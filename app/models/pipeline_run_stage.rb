@@ -233,6 +233,8 @@ class PipelineRunStage < ApplicationRecord
     # Upload DAG to S3
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+    nucleotide_type = sample.metadata && sample.metadata[:nucleotide_type] ? sample.metadata[:nucleotide_type] : '',
+
     attribute_dict = {
       fastq1: sample.input_files[0].name,
       file_ext: file_ext,
@@ -240,6 +242,7 @@ class PipelineRunStage < ApplicationRecord
       bowtie2_genome: sample.s3_bowtie2_index_path,
       max_fragments: pipeline_run.max_input_fragments,
       max_subsample_frag: pipeline_run.subsample,
+      nucleotide_type: nucleotide_type,
     }
     human_host_genome = HostGenome.find_by(name: "Human")
     attribute_dict[:human_star_genome] = human_host_genome.s3_star_index_path
