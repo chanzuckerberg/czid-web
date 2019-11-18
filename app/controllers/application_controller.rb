@@ -51,7 +51,7 @@ class ApplicationController < ActionController::Base
           # we want to redirect user to auth0 login page in silent mode
           # if the user still have a valid SSO token in the auth0 session
           # the sliding session will be refreshed
-          redirect_to(auth0_login_url(true))
+          redirect_to "/auth0/refresh_token?mode=expired"
         end
         format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
       end
