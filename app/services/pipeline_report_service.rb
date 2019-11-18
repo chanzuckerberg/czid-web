@@ -257,9 +257,15 @@ class PipelineReportService
   def compute_aggregate_scores(species_counts, genus_counts)
     species_counts.each do |tax_id, species|
       genus = genus_counts[species[:genus_tax_id]]
-      # Workaround placeholder for bad data (species NR is present in TaxonSummary but genus NR isn't)
+      # Workaround placeholder for bad data (e.g. species counts present in TaxonSummary but genus counts aren't)
       genus_nt_zscore = genus[:nt].present? ? genus[:nt][:z_score] : 100
       genus_nr_zscore = genus[:nr].present? ? genus[:nr][:z_score] : 100
+      if species[:nt].present? && genus[:nt].blank?
+        Rails.logger.warn("NT data present for species #{tax_id} but missing for genus #{species[:genus_tax_id]}.")
+      end
+      if species[:nr].present? && genus[:nr].blank?
+        Rails.logger.warn("NR data present for species #{tax_id} but missing for genus #{species[:genus_tax_id]}.")
+      end
 
       species[:agg_score] = (species[:nt].present? ? genus_nt_zscore.abs * species[:nt][:z_score] * species[:nt][:rpm] : 0) \
         + (species[:nr].present? ? genus_nr_zscore.abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
