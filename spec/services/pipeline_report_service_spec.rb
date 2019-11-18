@@ -7,6 +7,12 @@ RSpec.describe PipelineReportService, type: :service do
     before do
       ResqueSpec.reset!
 
+      # This sample has reads in NT and NR for species taxid 573,
+      # which belongs to genus 570. It's compared to a background
+      # that also has reads in NT and NR for species taxid 573.
+      # This test checks that the report service calculates the
+      # expected values for aggregate score and z-score when taxons
+      # have NT and NR reads in both the sample and the background model.
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
                              total_reads: 1122,
@@ -90,7 +96,7 @@ RSpec.describe PipelineReportService, type: :service do
       @report = PipelineReportService.call(@pipeline_run.id, @background.id)
     end
 
-    it "should get correct species values" do
+    it "should get correct values for species 573" do
       species_result = {
         "genus_tax_id" => 570,
         "name" => "Klebsiella pneumoniae",
@@ -110,7 +116,7 @@ RSpec.describe PipelineReportService, type: :service do
       expect(JSON.parse(@report)["counts"]["1"]["573"]).to include_json(species_result)
     end
 
-    it "should get correct genus values" do
+    it "should get correct values for genus 570" do
       genus_result = {
         "genus_tax_id" => 570,
         "nt" => {
@@ -134,6 +140,16 @@ RSpec.describe PipelineReportService, type: :service do
 
   context "converted report test for species taxid 1313" do
     before do
+      ResqueSpec.reset!
+
+      # This sample only has NR reads for species taxid 1313, and
+      # only NT reads for species taxid 28037, both of which belong to
+      # genus 1301. It's compared to a background with both NT and NR reads
+      # for both 1313 and 28037.
+      # This test checks that the report service returns -100 for z-score
+      # when reads are present in the background but absent from the sample.
+      # This test also checks that the genus aggregate score is taken from
+      # the highest aggregate score of all the species within the genus.
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
                              total_reads: 1122,
@@ -229,7 +245,9 @@ RSpec.describe PipelineReportService, type: :service do
       @report = PipelineReportService.call(@pipeline_run.id, @background.id)
     end
 
-    it "should get correct species values" do
+    it "should get correct values for species 1313" do
+      # Since the sample only has NR reads for this species, but the background
+      # also has NT reads, we expect NT to have a z-score of -100.
       species_result = {
         "genus_tax_id" => 1301,
         "name" => "Streptococcus pneumoniae",
@@ -240,7 +258,7 @@ RSpec.describe PipelineReportService, type: :service do
           "e_value" => 0,
         },
         "nr" => {
-          "count" => 2,
+          "count" => 2.0,
           "rpm" => 1782.5311942959001, # previously rounded to 1782.531
           "z_score" => 4.209967170274651, # previously rounded to 4.2099668
           "e_value" => 9.3,
@@ -251,7 +269,27 @@ RSpec.describe PipelineReportService, type: :service do
       expect(JSON.parse(@report)["counts"]["1"]["1313"]).to include_json(species_result)
     end
 
-    it "should get correct genus values" do
+    it "should get correct values for species 28037" do
+      # Since the sample only has NT reads for this species, but the background
+      # also has NR reads, we expect NR to have a z-score of -100.
+      species_result = {
+        "genus_tax_id" => 1301,
+        "name" => "Streptococcus mitis",
+        "nr" => {
+          "count" => 0,
+          "rpm" => 0,
+          "z_score" => -100,
+          "e_value" => 0,
+        },
+        "agg_score" => 73_603.80226971892,
+      }
+
+      expect(JSON.parse(@report)["counts"]["1"]["28037"]).to include_json(species_result)
+    end
+
+    it "should get correct values for genus 1301" do
+      # We expect the aggregate score for genus 1301 to equal that of
+      # species 28037, since it is the higher than the aggregate score of species 1313.
       genus_result = {
         "genus_tax_id" => 1301,
         "nt" => {

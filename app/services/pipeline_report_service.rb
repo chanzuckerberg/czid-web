@@ -121,7 +121,7 @@ class PipelineReportService
         sortedGenus: sorted_genus_tax_ids,
         highlighted_tax_ids: highlighted_tax_ids
       )
-    @timer.split("convert_to_json_with_sJSON")
+    @timer.split("convert_to_json_with_JSON")
 
     return json_dump
   end
@@ -147,7 +147,11 @@ class PipelineReportService
   end
 
   def zero_metrics(tax_id, tax_level, count_type, mean, stdev)
-    # fill in default zero values for FIELDS_TO_PLUCK
+    # Fill in default zero values for FIELDS_TO_PLUCK.
+    # Necessary for taxons absent from sample to match the taxon_counts_and_summaries structure,
+    # since they're fetched from TaxonSummary, which doesn't have some columns listed in FIELDS_TO_PLUCK.
+    # The two nil values (genus_taxid and name) will be filled in when counts_by_tax_level is
+    # transformed to be indexed by taxid and count type.
     [
       tax_id,
       nil,
@@ -253,8 +257,12 @@ class PipelineReportService
   def compute_aggregate_scores(species_counts, genus_counts)
     species_counts.each do |tax_id, species|
       genus = genus_counts[species[:genus_tax_id]]
-      species[:agg_score] = (species[:nt].present? && genus[:nt].present? ? genus[:nt][:z_score].abs * species[:nt][:z_score] * species[:nt][:rpm] : 0) \
-        + (species[:nr].present? && genus[:nr].present? ? genus[:nr][:z_score].abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
+      # Workaround placeholder for bad data (species NR is present in TaxonSummary but genus NR isn't)
+      genus_nt_zscore = genus[:nt].present? ? genus[:nt][:z_score] : 100
+      genus_nr_zscore = genus[:nr].present? ? genus[:nr][:z_score] : 100
+
+      species[:agg_score] = (species[:nt].present? ? genus_nt_zscore.abs * species[:nt][:z_score] * species[:nt][:rpm] : 0) \
+        + (species[:nr].present? ? genus_nr_zscore.abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
       genus[:agg_score] = species[:agg_score] if genus[:agg_score].nil? || genus[:agg_score] < species[:agg_score]
       # TODO : more this to a more logical place
       if !genus[:children]
