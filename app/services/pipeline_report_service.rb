@@ -48,14 +48,12 @@ class PipelineReportService
     taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
     @timer.split("fetch_taxon_counts_and_summaries")
 
-    missing_taxons = fetch_missing_taxons(@pipeline_run_id, @background_id)
-    @timer.split("fetch_missing_taxons")
+    taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id)
+    @timer.split("fetch_taxons_absent_from_sample")
 
-    missing_taxon_summaries = []
-    missing_taxons.each do |taxon|
-      missing_taxon_summaries += [zero_metrics(*taxon)]
+    taxons_absent_from_sample.each do |taxon|
+      taxon_counts_and_summaries.concat([zero_metrics(*taxon)])
     end
-    taxon_counts_and_summaries += missing_taxon_summaries
     @timer.split("fill_zero_metrics")
 
     counts_by_tax_level = split_by_tax_level(taxon_counts_and_summaries)
@@ -149,22 +147,23 @@ class PipelineReportService
   end
 
   def zero_metrics(tax_id, tax_level, count_type, mean, stdev)
+    # fill in default zero values for FIELDS_TO_PLUCK
     [
-      tax_id, # tax_id
-      nil, # genus_taxid
-      count_type, # count_type
-      tax_level, # tax_level
-      0, # count
-      0, # percent_identity
-      0, # alignment_length
-      0, # e_value
-      mean, # mean
-      stdev, # stdev
-      nil # name
+      tax_id,
+      nil,
+      count_type,
+      tax_level,
+      0,
+      0,
+      0,
+      0,
+      mean,
+      stdev,
+      nil,
     ]
   end
 
-  def fetch_missing_taxons(_pipeline_run_id, _background_id)
+  def fetch_taxons_absent_from_sample(_pipeline_run_id, _background_id)
     taxons_absent_from_sample = TaxonSummary
                                 .joins(
                                   " LEFT JOIN taxon_counts ON ("\
