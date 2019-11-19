@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 class Auth0Controller < ApplicationController
-  skip_before_action :authenticate_user!, :verify_authenticity_token
+  skip_before_action :authenticate_user!, :verify_authenticity_token, :sign_in_auth0_token!
 
   include Auth0Helper
+
+  def refresh_token
+    redirect_to auth0_login_url(true)
+  end
 
   def callback
     # Store the user token that came from Auth0 and the IdP

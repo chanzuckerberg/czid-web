@@ -34,7 +34,7 @@ module Auth0Helper
   # Remove auth0 session from Application Session Layer
   # (see https://auth0.com/docs/sessions/concepts/session-layers)
   def auth0_remove_application_session
-    reset_session
+    session.delete(:jwt_id_token)
   end
 
   # URL used to remove auth0 session from Auth0 Session Layer
@@ -48,15 +48,20 @@ module Auth0Helper
   end
 
   # See: https://auth0.com/docs/api/authentication#authorization-code-flow
-  def auth0_login_url
+  def auth0_login_url(silent_login = false)
     client_id = ENV["AUTH0_CLIENT_ID"]
     connection = ENV["AUTH0_CONNECTION"]
     domain = ENV["AUTH0_DOMAIN"]
+    state = SecureRandom.hex(24)
+    session['omniauth.state'] = state # https://github.com/auth0/omniauth-auth0/issues/49
     request_params = {
       client_id: client_id,
       connection: connection,
       redirect_uri: URI.join(root_url, 'auth/auth0/callback').to_s,
       response_type: "code",
+      state: state,
+      scope: "openid email",
+      prompt: silent_login ? "none" : "login",
     }
     url = URI::HTTPS.build(host: domain,
                            path: '/authorize',

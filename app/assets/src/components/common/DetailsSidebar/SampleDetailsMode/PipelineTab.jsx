@@ -91,8 +91,11 @@ class PipelineTab extends React.Component {
   };
 
   getReadCounts = async () => {
-    const { sampleId } = this.props;
-    const pipelineResults = await getSamplePipelineResults(sampleId);
+    const { sampleId, pipelineRun } = this.props;
+    const pipelineResults = await getSamplePipelineResults(
+      sampleId,
+      pipelineRun && pipelineRun.pipeline_version
+    );
 
     if (pipelineResults && pipelineResults["displayed_data"]) {
       this.setState({

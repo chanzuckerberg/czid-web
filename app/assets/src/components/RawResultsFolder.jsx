@@ -1,6 +1,7 @@
 // This legacy component is intended to be developer-facing only.
 // The user-facing component has since evolved to ResultsFolder.jsx.
 import React from "react";
+import PropTypes from "prop-types";
 
 class RawResultsFolder extends React.Component {
   constructor(props, context) {
@@ -41,7 +42,7 @@ class RawResultsFolder extends React.Component {
             <span className="path">/</span>
             <span
               className="back"
-              onClick={this.gotoPath.bind(this, `/samples/${this.filePath[2]}`)}
+              onClick={this.gotoPath.bind(this, this.props.samplePath)}
             >
               {this.sampleName}
             </span>
@@ -87,5 +88,9 @@ class RawResultsFolder extends React.Component {
     );
   }
 }
+
+RawResultsFolder.propTypes = {
+  samplePath: PropTypes.string,
+};
 
 export default RawResultsFolder;
