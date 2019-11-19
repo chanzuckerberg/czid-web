@@ -26,14 +26,14 @@ RSpec.describe SamplesController, type: :controller do
     end
 
     describe "GET results_folder (nonadmin)" do
-      it "can see raw results on the user's own samples" do
+      it "can see results on the user's own samples" do
         project = create(:project, users: [@joe])
         sample = create(:sample, project: project, user: @joe)
         get :results_folder, params: { id: sample.id }
         expect(response).to have_http_status :success
       end
 
-      it "can see raw results on the user's own samples with previous pipeline version" do
+      it "can see results on the user's own samples with previous pipeline version" do
         project = create(:project, users: [@joe])
         sample_one = create(:sample, project: project, name: "Test Sample One", user: @joe,
                                      pipeline_runs_data: [
@@ -47,7 +47,7 @@ RSpec.describe SamplesController, type: :controller do
         expect(response).to have_http_status :success
       end
 
-      it "can see raw results on another user's sample (if part of that project)" do
+      it "can see results on another user's sample (if part of that project)" do
         project = create(:project, users: [@joe])
         sample = create(:sample, project: project)
         get :results_folder, params: { id: sample.id }
