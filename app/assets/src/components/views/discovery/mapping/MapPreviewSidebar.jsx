@@ -153,7 +153,7 @@ export default class MapPreviewSidebar extends React.Component {
         },
         headerClassName: cs.projectHeader,
         className: cs.project,
-        sortFunction: p => ((p && p.name) || "").toLowerCase(),
+        sortKey: p => ((p && p.name) || "").toLowerCase(),
       },
       {
         dataKey: "created_at",

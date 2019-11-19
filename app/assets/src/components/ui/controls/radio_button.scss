@@ -32,4 +32,15 @@
       }
     }
   }
+
+  &.disabled {
+    cursor: default;
+    border: 1px solid $light-grey;
+
+    &:hover {
+      .inner {
+        background-color: transparent;
+      }
+    }
+  }
 }

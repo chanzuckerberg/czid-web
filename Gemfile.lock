@@ -52,6 +52,8 @@ GEM
     analytics-ruby (2.0.13)
     arel (8.0.0)
     ast (2.4.0)
+    auth0 (4.9.0)
+      rest-client (~> 2.0.0)
     aws-eventstream (1.0.2)
     aws-partitions (1.144.0)
     aws-sdk (3.0.1)
@@ -796,7 +798,7 @@ GEM
       tins (~> 1.6)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
-    crass (1.0.4)
+    crass (1.0.5)
     csv-safe (1.2.0)
     deep_cloneable (2.4.0)
       activerecord (>= 3.1.0, < 6)
@@ -883,6 +885,7 @@ GEM
       multi_json (>= 1.2)
     jmespath (1.4.0)
     json (2.2.0)
+    jwt (2.2.1)
     libhoney (1.12.1)
       addressable (~> 2.0)
       http (>= 2.0, < 5.0)
@@ -904,7 +907,7 @@ GEM
     lograge-sql (0.3.0)
       activerecord (>= 4, < 6.0)
       lograge (~> 0.4)
-    loofah (2.2.3)
+    loofah (2.3.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     lumberjack (1.0.13)
@@ -925,6 +928,7 @@ GEM
     minitest (5.12.0)
     mono_logger (1.1.0)
     multi_json (1.13.1)
+    multi_xml (0.6.0)
     multipart-post (2.0.0)
     mustermann (1.0.3)
     mysql2 (0.5.2)
@@ -936,6 +940,23 @@ GEM
     notiffany (0.1.1)
       nenv (~> 0.1)
       shellany (~> 0.0)
+    oauth2 (1.4.2)
+      faraday (>= 0.8, < 2.0)
+      jwt (>= 1.0, < 3.0)
+      multi_json (~> 1.3)
+      multi_xml (~> 0.5)
+      rack (>= 1.2, < 3)
+    omniauth (1.9.0)
+      hashie (>= 3.4.6, < 3.7.0)
+      rack (>= 1.6.2, < 3)
+    omniauth-auth0 (2.2.0)
+      omniauth-oauth2 (~> 1.5)
+    omniauth-oauth2 (1.6.0)
+      oauth2 (~> 1.1)
+      omniauth (~> 1.9)
+    omniauth-rails_csrf_protection (0.1.2)
+      actionpack (>= 4.2)
+      omniauth (>= 1.3.1)
     orm_adapter (0.5.0)
     parallel (1.14.0)
     parser (2.6.0.0)
@@ -1153,6 +1174,7 @@ DEPENDENCIES
   activesupport
   airbrake (~> 9.5)
   analytics-ruby (~> 2.0.0)
+  auth0
   aws-sdk
   aws-sdk-ecs
   aws-sdk-resources
@@ -1178,6 +1200,7 @@ DEPENDENCIES
   http-2
   immigrant
   jbuilder (~> 2.5)
+  jwt (~> 2.2)
   listen (>= 3.0.5, < 3.2)
   logging-rails
   lograge
@@ -1187,7 +1210,8 @@ DEPENDENCIES
   multipart-post
   mysql2
   nokogiri
-  parallel (~> 1.14)
+  omniauth-auth0 (~> 2.2)
+  omniauth-rails_csrf_protection (~> 0.1.2)
   prometheus-client (= 0.7.1)
   puma (~> 3.7)
   rack-host-redirect

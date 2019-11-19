@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~styles/themes/typography";
 
 :global(.ui):global(.dropdown).bareDropdown,
 .portalDropdown {
@@ -66,6 +67,15 @@
     display: none;
   }
 
+  // semantic-ui applies max-height when search is true.
+  // We have our max-height on .innerMenu, so override this max-height
+  // to prevent double scrollbars.
+  &:global(.search) {
+    .menu {
+      max-height: none;
+    }
+  }
+
   .item {
     cursor: pointer;
 
@@ -113,6 +123,12 @@
 
   .dropdownMenu {
     padding: 6px 0;
+  }
+
+  .noResultsMessage {
+    @include font-body-xxs-crop;
+    padding: $space-xxs $space-m;
+    color: $medium-grey;
   }
 
   .innerMenu {

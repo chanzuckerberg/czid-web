@@ -89,6 +89,9 @@ gem 'immigrant'
 # Better CSV handling
 gem 'csv-safe', '~> 1.2'
 
+# For accessing Auth0 management APIs
+gem 'auth0'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'
@@ -120,6 +123,9 @@ end
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
-gem "parallel", "~> 1.14"
 # HTTP library with a simpler, better designed API than the native Net::HTTP
 gem 'http'
+gem "omniauth-auth0", "~> 2.2"
+gem "omniauth-rails_csrf_protection", "~> 0.1.2"
+
+gem "jwt", "~> 2.2"

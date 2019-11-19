@@ -2,6 +2,7 @@ require 'shellwords'
 
 class BulkDownload < ApplicationRecord
   include AppConfigHelper
+  include SamplesHelper
   include Rails.application.routes.url_helpers
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
@@ -12,6 +13,7 @@ class BulkDownload < ApplicationRecord
   STATUS_ERROR = "error".freeze
   STATUS_SUCCESS = "success".freeze
   OUTPUT_DOWNLOAD_EXPIRATION = 86_400 # seconds
+  PROGRESS_UPDATE_DELAY = 15 # Minimum number of seconds between progress updates.
 
   before_save :convert_params_to_json
 
@@ -128,7 +130,7 @@ class BulkDownload < ApplicationRecord
   end
 
   def download_output_key
-    "downloads/#{id}/#{BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPE_TO_DISPLAY_NAME[download_type]}.tar.gz"
+    "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}.tar.gz"
   end
 
   # The s3 url that the tar.gz file will be uploaded to.
@@ -247,6 +249,15 @@ class BulkDownload < ApplicationRecord
       end
     end
 
+    if download_type == BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE
+      download_src_urls = pipeline_runs.map(&:host_gene_count_s3_path)
+
+      download_tar_names = samples.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+          "reads_per_gene.star.tab"
+      end
+    end
+
     if !download_src_urls.nil? && !download_tar_names.nil?
       return s3_tar_writer_command(
         download_src_urls,
@@ -258,10 +269,136 @@ class BulkDownload < ApplicationRecord
     return nil
   end
 
+  # Wrapper function to make testing easier.
+  def progress_update_delay
+    PROGRESS_UPDATE_DELAY
+  end
+
+  def write_output_files_to_s3_tar_writer(s3_tar_writer)
+    failed_sample_ids = []
+    # The last time since we updated the progress.
+    last_progress_time = Time.now.to_f
+
+    samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+    projects = Project.where(id: samples.pluck(:project_id))
+
+    # Compute cleaned project name once instead of once per sample.
+    cleaned_project_names = {}
+    projects.each do |project|
+      cleaned_project_names[project.id] = project.cleaned_project_name
+    end
+
+    # Bulk-include data for performance based on the download type.
+    pipeline_runs_with_includes = if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
+                                    pipeline_runs.includes(sample: [:project])
+                                  elsif download_type == BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE
+                                    pipeline_runs.includes(:contigs, :sample)
+                                  else
+                                    pipeline_runs
+                                  end
+
+    pipeline_runs_with_includes.map.with_index do |pipeline_run, index|
+      begin
+        Rails.logger.info("Processing pipeline run #{pipeline_run.id} (#{index + 1} of #{pipeline_runs.length})...")
+        if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
+          tax_details = ReportHelper.taxonomy_details(pipeline_run.id, get_param_value("background"), TaxonScoringModel::DEFAULT_MODEL_NAME, ReportHelper::DEFAULT_SORT_PARAM)
+          report_csv = ReportHelper.generate_report_csv(tax_details)
+          s3_tar_writer.add_file_with_data(
+            "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
+              "taxon_report.csv",
+            report_csv
+          )
+        elsif download_type == BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE
+          contig_mapping_table_csv = pipeline_run.generate_contig_mapping_table_csv
+          s3_tar_writer.add_file_with_data(
+            "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
+              "contig_summary_report.csv",
+            contig_mapping_table_csv
+          )
+        end
+      rescue
+        failed_sample_ids << pipeline_run.sample.id
+      end
+
+      if Time.now.to_f - last_progress_time > progress_update_delay
+        progress = (index + 1).to_f / pipeline_runs.length
+        update(progress: progress)
+        Rails.logger.info(format("Updated progress. %3.1f complete.", progress))
+      end
+    end
+
+    unless failed_sample_ids.empty?
+      LogUtil.log_err_and_airbrake("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{failed_sample_ids}")
+      update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % failed_sample_ids.length)
+    end
+  end
+
+  def generate_download_file
+    start_time = Time.now.to_f
+
+    update(status: STATUS_RUNNING)
+
+    s3_tar_writer = S3TarWriter.new(download_output_url)
+    Rails.logger.info("Starting tarfile streaming to #{download_output_url}...")
+    s3_tar_writer.start_streaming
+
+    if download_type == BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+      Rails.logger.info("Generating sample overviews for #{pipeline_runs.length} samples...")
+      samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+      pipeline_runs_by_sample_id = pipeline_runs.map { |pr| [pr.sample_id, pr] }.to_h
+      formatted_samples = format_samples(samples, pipeline_runs_by_sample_id)
+      sample_overviews_csv = generate_sample_list_csv(formatted_samples)
+
+      s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
+    else
+      write_output_files_to_s3_tar_writer(s3_tar_writer)
+    end
+
+    Rails.logger.info("Closing s3 tar writer...")
+    s3_tar_writer.close
+
+    Rails.logger.info("Waiting for streaming to complete...")
+    unless s3_tar_writer.process_status.success?
+      raise BulkDownloadsHelper::BULK_DOWNLOAD_GENERATION_FAILED
+    end
+
+    Rails.logger.info("Success!")
+    Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", StringUtil.human_readable_file_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
+    update(status: STATUS_SUCCESS)
+  rescue
+    update(status: STATUS_ERROR)
+    raise
+  end
+
+  def execution_type
+    execution_type = BulkDownloadTypesHelper.bulk_download_type(download_type)[:execution_type]
+    if [BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE, BulkDownloadTypesHelper::ECS_EXECUTION_TYPE]
+       .include?(execution_type)
+      return execution_type
+    end
+
+    if [BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, BulkDownloadTypesHelper:: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE].include?(download_type)
+      return get_param_value("taxa_with_reads") == "all" ? BulkDownloadTypesHelper::ECS_EXECUTION_TYPE : BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE
+    end
+
+    # Should never happen
+    raise BulkDownloadsHelper::UNKNOWN_EXECUTION_TYPE
+  end
+
+  def kickoff_resque_task
+    Resque.enqueue(GenerateBulkDownload, id)
+  end
+
   def kickoff
-    ecs_task_command = bulk_download_ecs_task_command
-    unless ecs_task_command.nil?
-      kickoff_ecs_task(ecs_task_command)
+    current_execution_type = execution_type
+    if current_execution_type == BulkDownloadTypesHelper::ECS_EXECUTION_TYPE
+      ecs_task_command = bulk_download_ecs_task_command
+      unless ecs_task_command.nil?
+        kickoff_ecs_task(ecs_task_command)
+      end
+    end
+    if current_execution_type == BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE
+      kickoff_resque_task
     end
   end
 end

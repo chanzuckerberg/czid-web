@@ -61,6 +61,7 @@ class MetadataCSVUpload extends React.Component {
     if (this.props.onDirty) {
       this.props.onDirty();
     }
+
     this.setState({ metadata: csv });
     this.validateCSV(csv);
   };
@@ -112,6 +113,7 @@ class MetadataCSVUpload extends React.Component {
           title={hasMetadata ? "" : "Upload your metadata CSV"}
           onCSV={this.onCSV}
           className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
+          removeEmptyRows
         />
       </div>
     );

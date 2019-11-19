@@ -4,6 +4,7 @@ class SamplesController < ApplicationController
   include ErrorHelper
   include LocationHelper
   include PipelineOutputsHelper
+  include PipelineRunsHelper
   include ReportHelper
   include SamplesHelper
 
@@ -27,13 +28,13 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :stats, :upload, :validate_sample_files,].freeze
+                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
   # For API-like access
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
-  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
+  prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
@@ -715,6 +716,27 @@ class SamplesController < ApplicationController
   end
 
   def show_v2
+    # TODO: move to fastjson_api serializer
+    default_fields = [
+      :name,
+      :created_at,
+      :updated_at,
+      :project_id,
+      :status,
+      :host_genome_id,
+    ]
+    respond_to do |format|
+      format.html { render 'show_v2' }
+      format.json do
+        render json: {
+          sample: @sample.as_json(
+            only: default_fields,
+            methods: []
+          ),
+          pipeline_run: @sample.first_pipeline_run.as_json,
+        }
+      end
+    end
   end
 
   # TODO: (gdingle): remove this if we are not going to allow saving reports as visualizations
@@ -918,7 +940,7 @@ class SamplesController < ApplicationController
 
   def contigs_summary
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    local_file = pr.generate_contig_mapping_table
+    local_file = pr.generate_contig_mapping_table_file
 
     @contigs_summary = File.read(local_file)
     send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
@@ -984,15 +1006,23 @@ class SamplesController < ApplicationController
 
   def raw_results_folder
     # See access check in check_owner
-    @file_list = @sample.results_folder_files
+    @file_list = @sample.results_folder_files(params[:pipeline_version])
     @file_path = "#{@sample.sample_path}/results/"
+    pipeline_version_url_param = params[:pipeline_version] ? "?pipeline_version=#{params[:pipeline_version]}" : ""
+    @sample_path = "#{sample_path(@sample)}#{pipeline_version_url_param}"
     render template: "samples/raw_folder"
   end
 
   def results_folder
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     can_see_stage1_results = (current_user.id == @sample.user_id)
-    @exposed_raw_results_url = can_see_stage1_results ? raw_results_folder_sample_url(@sample) : nil
-    @file_list = @sample.first_pipeline_run ? @sample.first_pipeline_run.outputs_by_step(can_see_stage1_results) : []
+    pipeline_version_url_param = params[:pipeline_version] ? "?pipeline_version=#{params[:pipeline_version]}" : ""
+    @exposed_raw_results_url = can_see_stage1_results ? "#{raw_results_folder_sample_url(@sample)}#{pipeline_version_url_param}" : nil
+    @sample_path = "#{sample_path(@sample)}#{pipeline_version_url_param}"
+    @file_list = []
+    if pr
+      @file_list = pr.outputs_by_step(can_see_stage1_results)
+    end
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
       format.html do
@@ -1255,6 +1285,40 @@ class SamplesController < ApplicationController
   rescue
     render json: {
       error: "There was an error fetching the coverage viz data file.",
+    }
+  end
+
+  # GET /samples/taxa_with_reads_suggestions
+  # Get taxon search suggestions, where taxa are restricted to the provided sample ids.
+  # Also include, for each taxon, the number of samples that contain the taxon.
+  def taxa_with_reads_suggestions
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    query = params[:query]
+    samples = current_power.viewable_samples.where(id: sample_ids)
+
+    # User should not be querying for unviewable samples.
+    if samples.length != sample_ids.length
+      LogUtil.log_err_and_airbrake("Get taxa with reads error: Unauthorized access of samples")
+      render json: {
+        error: "There was an error fetching the taxa with reads for samples.",
+      }, status: :unauthorized
+      return
+    end
+
+    taxon_list = taxon_search(query, ["species", "genus"], samples: samples)
+    taxon_list = augment_taxon_list_with_sample_count(taxon_list, samples)
+
+    render json: taxon_list
+  end
+
+  # GET /samples/uploaded_by_current_user
+  # Return whether all sampleIds were uploaded by the current user.
+  def uploaded_by_current_user
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    samples = Sample.where(user: current_user, id: sample_ids)
+
+    render json: {
+      uploaded_by_current_user: sample_ids.length == samples.length,
     }
   end
 

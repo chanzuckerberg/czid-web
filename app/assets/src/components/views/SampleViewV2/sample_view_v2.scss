@@ -1,0 +1,15 @@
+@import "~styles/themes/elements";
+
+.reportContainer {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - #{$header-total-height});
+}
+
+.reportHeader {
+  flex: 0 0 auto;
+}
+
+.reportTable {
+  flex: 1 0 auto;
+}
