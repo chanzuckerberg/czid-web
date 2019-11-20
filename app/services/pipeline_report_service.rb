@@ -171,21 +171,18 @@ class PipelineReportService
   end
 
   def fetch_taxons_absent_from_sample(_pipeline_run_id, _background_id)
+    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: @pipeline_run_id).distinct.pluck(:tax_id)
+
     taxons_absent_from_sample = TaxonSummary
-                                .joins(
-                                  " LEFT JOIN taxon_counts ON ("\
-                                    " taxon_counts.count_type = taxon_summaries.count_type"\
-                                    " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
-                                    " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
-                                    " AND taxon_summaries.background_id = #{@background_id}"\
-                                    " AND taxon_counts.pipeline_run_id = #{@pipeline_run_id}"\
-                                  " )"\
-                                " WHERE"\
-                                  " taxon_summaries.background_id = #{@background_id}"\
-                                  " AND taxon_counts.count IS NULL"\
-                                  " AND taxon_summaries.tax_id IN"\
-                                    " (SELECT DISTINCT tax_id FROM taxon_counts"\
-                                    " WHERE taxon_counts.pipeline_run_id=#{@pipeline_run_id})"
+                                .joins("LEFT OUTER JOIN"\
+                                  " taxon_counts ON taxon_counts.count_type = taxon_summaries.count_type"\
+                                  " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
+                                  " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
+                                  " AND taxon_counts.pipeline_run_id = #{@pipeline_run_id}")
+                                .where(
+                                  "taxon_summaries.background_id": @background_id,
+                                  "taxon_counts.count": nil,
+                                  "taxon_summaries.tax_id": tax_ids
                                 )
 
     return taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)
@@ -261,6 +258,8 @@ class PipelineReportService
     species_counts.each do |tax_id, species|
       genus = genus_counts[species[:genus_tax_id]]
       # Workaround placeholder for bad data (e.g. species counts present in TaxonSummary but genus counts aren't)
+      # TODO: investigate why a count type appearing in species is missing in its genus. It's possible the data is
+      # only missing in local/staging and is present on prod.
       genus_nt_zscore = genus[:nt].present? ? genus[:nt][:z_score] : 100
       genus_nr_zscore = genus[:nr].present? ? genus[:nr][:z_score] : 100
       if species[:nt].present? && genus[:nt].blank?
