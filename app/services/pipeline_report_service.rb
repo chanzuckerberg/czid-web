@@ -15,6 +15,20 @@ class PipelineReportService
     :name # name needed for taxon scoring model?!
   ].freeze
 
+  FIELDS_DEFAULTS = {
+    tax_id: nil,
+    genus_taxid: nil,
+    count_type: nil,
+    tax_level: nil,
+    count: 0,
+    percent_identity: 0,
+    alignment_length: 0,
+    e_value: 0,
+    mean: nil,
+    stdev: nil,
+    name: nil,
+  }.freeze
+
   FIELDS_INDEX = Hash[FIELDS_TO_PLUCK.map.with_index { |field, i| [field, i] }]
 
   Z_SCORE_MIN = -99
@@ -52,7 +66,7 @@ class PipelineReportService
     @timer.split("fetch_taxons_absent_from_sample")
 
     taxons_absent_from_sample.each do |taxon|
-      taxon_counts_and_summaries.concat([zero_metrics(*taxon)])
+      taxon_counts_and_summaries.concat([zero_metrics(taxon)])
     end
     @timer.split("fill_zero_metrics")
 
@@ -146,25 +160,14 @@ class PipelineReportService
     return taxon_counts_and_summaries_query.pluck(*FIELDS_TO_PLUCK)
   end
 
-  def zero_metrics(tax_id, tax_level, count_type, mean, stdev)
-    # Fill in default zero values for FIELDS_TO_PLUCK.
+  def zero_metrics(taxon)
+    # Fill in default zero values if a taxon is missing fields.
     # Necessary for taxons absent from sample to match the taxon_counts_and_summaries structure,
     # since they're fetched from TaxonSummary, which doesn't have some columns listed in FIELDS_TO_PLUCK.
-    # The two nil values (genus_taxid and name) will be filled in when counts_by_tax_level is
-    # transformed to be indexed by taxid and count type.
-    [
-      tax_id,
-      nil,
-      count_type,
-      tax_level,
-      0,
-      0,
-      0,
-      0,
-      mean,
-      stdev,
-      nil,
-    ]
+    FIELDS_INDEX.each do |field, index|
+      taxon[index] = FIELDS_DEFAULTS[field] unless taxon[index]
+    end
+    return taxon
   end
 
   def fetch_taxons_absent_from_sample(_pipeline_run_id, _background_id)
@@ -185,7 +188,7 @@ class PipelineReportService
                                     " WHERE taxon_counts.pipeline_run_id=#{@pipeline_run_id})"
                                 )
 
-    return taxons_absent_from_sample.pluck(:tax_id, :tax_level, :count_type, :mean, :stdev)
+    return taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)
   end
 
   def split_by_tax_level(counts_array)

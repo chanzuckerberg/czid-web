@@ -1,6 +1,5 @@
 require 'rails_helper'
 require 'json'
-require 'pp'
 
 RSpec.describe PipelineReportService, type: :service do
   context "converted report test for species taxid 573" do
