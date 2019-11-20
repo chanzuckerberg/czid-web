@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <pre><%=@refresh_values.to_yaml%></pre>
+  <% if @refresh_values[:active] %>
+    <script language="javascript">(function () {
+      var rv = <%=raw @refresh_values.to_json%>;
+      var reload_wait_ms = rv.reload_wait_seconds * 1000;
+      if (rv.should_refresh) {
+        var now = new Date().getTime();
+        var uid = Math.random().toString();
+        var last = localStorage.getItem("background_refresh_last") || 0;
+        var elapsed = Math.abs(now - last);
+        if (elapsed > 60000) {
+          /* <%# Avoid simultaneous calls if multiple tabs are open %> */
+          localStorage.setItem("background_refresh_last", now);
+          localStorage.setItem("background_refresh_uid", uid);
+          setTimeout( function () {
+            if (localStorage.getItem("background_refresh_uid") == uid) {
+              location.href = rv.refresh_endpoint;
+            } else {
+              setTimeout(function () { location.reload(true) }, reload_wait_ms);
+            }
+          }, 1000);
+          return;
+        }
+      }
+      setTimeout(function () { location.reload(true) }, reload_wait_ms);
+    })();</script>
+  <% end %>
+</html>
