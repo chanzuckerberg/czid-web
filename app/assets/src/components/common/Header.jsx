@@ -118,7 +118,10 @@ class Header extends React.Component {
             // Initialize the toast container - can be done anywhere (has absolute positioning)
           }
           <ToastContainer />
-          <iframe style={{ display: "none" }} src="/auth0/background_refresh" />
+          <iframe
+            className={cs.backgroundRefreshFrame}
+            src="/auth0/background_refresh"
+          />
         </div>
       )
     );
