@@ -139,6 +139,17 @@
       @include font-body-xs;
       margin-bottom: 2px;
     }
+
+    .forcedOption {
+      height: 34px;
+      display: flex;
+      align-items: center;
+    }
+
+    .info {
+      @include font-body-xxs;
+      color: $dark-grey;
+    }
   }
 }
 

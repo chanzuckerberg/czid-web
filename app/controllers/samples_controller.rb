@@ -876,10 +876,10 @@ class SamplesController < ApplicationController
     return if HUMAN_TAX_IDS.include? params[:taxid].to_i
     pr = select_pipeline_run(@sample, params[:pipeline_version])
     if params[:hit_type] == "NT_or_NR"
-      nt_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
-      nr_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
-      @taxid_fasta = ">" + ((nt_array | nr_array) - ['']).join(">")
-      @taxid_fasta = "Coming soon" if @taxid_fasta == ">" # Temporary fix
+      @taxid_fasta = get_taxid_fasta_from_pipeline_run_combined_nt_nr(pr, params[:taxid], params[:tax_level].to_i)
+      if @taxid_fasta.nil?
+        @taxid_fasta = "Coming soon" # Temporary fix
+      end
     else
       @taxid_fasta = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end

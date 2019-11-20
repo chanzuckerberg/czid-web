@@ -140,6 +140,18 @@ module PipelineOutputsHelper
     taxon["#{tax_level}_name"] if taxon
   end
 
+  def get_taxid_fasta_from_pipeline_run_combined_nt_nr(pipeline_run, taxid, tax_level)
+    nt_array = get_taxid_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, 'NT').split(">")
+    nr_array = get_taxid_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, 'NR').split(">")
+    combined_array = ((nt_array | nr_array) - [''])
+
+    if combined_array.empty?
+      return nil
+    end
+
+    return ">" + combined_array.join(">")
+  end
+
   def get_taxid_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, hit_type)
     return '' unless pipeline_run
     uri = pipeline_run.s3_paths_for_taxon_byteranges[tax_level][hit_type]

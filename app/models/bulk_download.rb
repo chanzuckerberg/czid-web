@@ -3,6 +3,7 @@ require 'shellwords'
 class BulkDownload < ApplicationRecord
   include AppConfigHelper
   include SamplesHelper
+  include PipelineOutputsHelper
   include Rails.application.routes.url_helpers
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
@@ -158,14 +159,22 @@ class BulkDownload < ApplicationRecord
     end
   end
 
-  def get_param_value(key)
+  def get_param_field(key, field)
     # If params is nil, try to set it from params_json
     if params.nil? && params_json.present?
       self.params = JSON.parse(params_json)
     end
     if params.present?
-      return params.dig(key, "value")
+      return params.dig(key, field)
     end
+  end
+
+  def get_param_value(key)
+    get_param_field(key, "value")
+  end
+
+  def get_param_display_name(key)
+    get_param_field(key, "displayName")
   end
 
   # cleaned_project_names is a map from project id to cleaned project name
@@ -293,9 +302,30 @@ class BulkDownload < ApplicationRecord
                                     pipeline_runs.includes(sample: [:project])
                                   elsif download_type == BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE
                                     pipeline_runs.includes(:contigs, :sample)
+                                  elsif download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+                                    # We avoid pre-fetching "taxon_byteranges" here, even though it has to be fetched once per pipeline_run in the code below,
+                                    # because of the potentially large number of taxon_byteranges per pipeline_run.
+                                    pipeline_runs.includes(:sample)
                                   else
                                     pipeline_runs
                                   end
+
+    # Get the tax_level for the selected taxid by looking at the first available TaxonCount entry.
+    # Since TaxonCount isn't normalized, any TaxonCount entry would provide the same information.
+    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+      taxid = get_param_value("taxa_with_reads")
+      if taxid.nil?
+        raise BulkDownloadsHelper::READS_NON_HOST_TAXID_EXPECTED
+      end
+
+      taxon_count = TaxonCount.find_by(pipeline_run: pipeline_runs_with_includes, tax_id: taxid)
+
+      if taxon_count.nil?
+        raise BulkDownloadsHelper::READS_NON_HOST_TAXON_COUNT_EXPECTED_TEMPLATE % taxid
+      end
+
+      tax_level = taxon_count.tax_level
+    end
 
     pipeline_runs_with_includes.map.with_index do |pipeline_run, index|
       begin
@@ -314,6 +344,18 @@ class BulkDownload < ApplicationRecord
             "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
               "contig_summary_report.csv",
             contig_mapping_table_csv
+          )
+        elsif download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+          reads_nonhost_for_taxid_fasta = get_taxid_fasta_from_pipeline_run_combined_nt_nr(pipeline_run, taxid, tax_level)
+          # If there were no reads for a particular pipeline run, output an empty file.
+          if reads_nonhost_for_taxid_fasta.nil?
+            reads_nonhost_for_taxid_fasta = ""
+          end
+
+          s3_tar_writer.add_file_with_data(
+            "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
+              "reads_nonhost_#{get_param_display_name('taxa_with_reads')}.fasta",
+            reads_nonhost_for_taxid_fasta
           )
         end
       rescue

@@ -362,33 +362,43 @@ describe BulkDownload, type: :model do
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
     end
 
-    it "correctly generates download file for download type sample_taxon_report" do
-      bulk_download = create(
+    def create_bulk_download(type, params)
+      create(
         :bulk_download,
         user: @joe,
-        download_type: BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,
+        download_type: type,
         pipeline_run_ids: [
           @sample_one.first_pipeline_run.id,
           @sample_two.first_pipeline_run.id,
-        ]
+        ],
+        params: params
       )
+    end
+
+    def add_s3_tar_writer_expectations(file_data, exitstatus = 0, success = true)
+      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
+
+      file_data.each do |file_name, data|
+        expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
+          file_name, data
+        )
+      end
+      expect_any_instance_of(S3TarWriter).to receive(:close)
+      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
+        instance_double(Process::Status, exitstatus: exitstatus, success?: success)
+      )
+    end
+
+    it "correctly generates download file for download type sample_taxon_report" do
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {})
 
       expect(ReportHelper).to receive(:taxonomy_details).exactly(2).times
       expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv")
       expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv_2")
 
-      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv",
-        "mock_report_csv"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv",
-        "mock_report_csv_2"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:close)
-      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
-        instance_double(Process::Status, exitstatus: 0, success?: true)
+      add_s3_tar_writer_expectations(
+        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv",
+        "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv_2"
       )
 
       bulk_download.generate_download_file
@@ -397,32 +407,15 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly updates the bulk_download status and progress as the sample_taxon_report runs" do
-      bulk_download = create(
-        :bulk_download,
-        user: @joe,
-        download_type: BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,
-        pipeline_run_ids: [
-          @sample_one.first_pipeline_run.id,
-          @sample_two.first_pipeline_run.id,
-        ]
-      )
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {})
 
       expect(ReportHelper).to receive(:taxonomy_details).exactly(2).times
       expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv")
       expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv_2")
 
-      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv",
-        "mock_report_csv"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv",
-        "mock_report_csv_2"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:close)
-      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
-        instance_double(Process::Status, exitstatus: 0, success?: true)
+      add_s3_tar_writer_expectations(
+        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv",
+        "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv_2"
       )
 
       expect(bulk_download).to receive(:progress_update_delay).exactly(2).times.and_return(0)
@@ -436,27 +429,13 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly generates download file for download type sample_overview" do
-      bulk_download = create(
-        :bulk_download,
-        user: @joe,
-        download_type: BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,
-        pipeline_run_ids: [
-          @sample_one.first_pipeline_run.id,
-          @sample_two.first_pipeline_run.id,
-        ]
-      )
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE, {})
 
       expect(bulk_download).to receive(:format_samples).exactly(1).times
       expect(bulk_download).to receive(:generate_sample_list_csv).exactly(1).times.and_return("mock_sample_overview_csv")
 
-      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "sample_overviews.csv",
-        "mock_sample_overview_csv"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:close)
-      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
-        instance_double(Process::Status, exitstatus: 0, success?: true)
+      add_s3_tar_writer_expectations(
+        "sample_overviews.csv" => "mock_sample_overview_csv"
       )
 
       bulk_download.generate_download_file
@@ -465,29 +444,13 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly generates download file for download type contig_summary_report" do
-      bulk_download = create(
-        :bulk_download,
-        user: @joe,
-        download_type: BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE,
-        pipeline_run_ids: [
-          @sample_one.first_pipeline_run.id,
-          @sample_two.first_pipeline_run.id,
-        ]
-      )
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE, {})
 
       allow_any_instance_of(PipelineRun).to receive(:generate_contig_mapping_table_csv).and_return("mock_contigs_summary_csv")
-      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "Test Sample One__project-test_project_#{@project.id}__contig_summary_report.csv",
-        "mock_contigs_summary_csv"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "Test Sample Two__project-test_project_#{@project.id}__contig_summary_report.csv",
-        "mock_contigs_summary_csv"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:close)
-      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
-        instance_double(Process::Status, exitstatus: 0, success?: true)
+
+      add_s3_tar_writer_expectations(
+        "Test Sample One__project-test_project_#{@project.id}__contig_summary_report.csv" => "mock_contigs_summary_csv",
+        "Test Sample Two__project-test_project_#{@project.id}__contig_summary_report.csv" => "mock_contigs_summary_csv"
       )
 
       bulk_download.generate_download_file
@@ -495,31 +458,99 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
     end
 
-    it "correctly handles individual sample failures" do
-      bulk_download = create(
-        :bulk_download,
-        user: @joe,
-        download_type: BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,
-        pipeline_run_ids: [
-          @sample_one.first_pipeline_run.id,
-          @sample_two.first_pipeline_run.id,
-        ]
+    let(:mock_tax_id) { 28_901 }
+
+    it "correctly generates download file for download type reads_non_host for single taxa" do
+      create(
+        :taxon_count,
+        pipeline_run_id: @sample_one.first_pipeline_run.id,
+        tax_id: mock_tax_id
       )
+
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
+                                             "value" => mock_tax_id,
+                                             "displayName" => "Salmonella enterica",
+                                           })
+
+      allow_any_instance_of(BulkDownload).to receive(:get_taxid_fasta_from_pipeline_run_combined_nt_nr).and_return("mock_reads_nonhost_fasta")
+
+      add_s3_tar_writer_expectations(
+        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "mock_reads_nonhost_fasta",
+        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "mock_reads_nonhost_fasta"
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+    end
+
+    it "correctly handles empty fastas for download type reads_non_host for single taxa" do
+      create(
+        :taxon_count,
+        pipeline_run_id: @sample_one.first_pipeline_run.id,
+        tax_id: mock_tax_id
+      )
+
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
+                                             "value" => mock_tax_id,
+                                             "displayName" => "Salmonella enterica",
+                                           })
+
+      allow_any_instance_of(BulkDownload).to receive(:get_taxid_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
+
+      add_s3_tar_writer_expectations(
+        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "",
+        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => ""
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+    end
+
+    it "correctly throws exception if taxa_with_reads param not found for download type reads_non_host for single taxa" do
+      create(
+        :taxon_count,
+        pipeline_run_id: @sample_one.first_pipeline_run.id,
+        tax_id: mock_tax_id
+      )
+
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, {})
+
+      allow_any_instance_of(BulkDownload).to receive(:get_taxid_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
+
+      expect do
+        bulk_download.generate_download_file
+      end.to raise_error.with_message(BulkDownloadsHelper::READS_NON_HOST_TAXID_EXPECTED)
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_ERROR)
+    end
+
+    it "correctly throws exception if taxon count not found for download type reads_non_host for single taxa" do
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
+                                             "value" => mock_tax_id,
+                                             "displayName" => "Salmonella enterica",
+                                           })
+
+      allow_any_instance_of(BulkDownload).to receive(:get_taxid_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
+
+      expect do
+        bulk_download.generate_download_file
+      end.to raise_error.with_message(BulkDownloadsHelper::READS_NON_HOST_TAXON_COUNT_EXPECTED_TEMPLATE % mock_tax_id)
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_ERROR)
+    end
+
+    it "correctly handles individual sample failures" do
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {})
 
       expect(ReportHelper).to receive(:taxonomy_details).exactly(2).times
       expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv")
       # The second sample raises an error while generating.
       expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_raise("error")
 
-      # The samples that succeeded are still written to the s3 tar file.
-      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv",
-        "mock_report_csv"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:close)
-      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
-        instance_double(Process::Status, exitstatus: 0, success?: true)
+      add_s3_tar_writer_expectations(
+        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv"
       )
 
       bulk_download.generate_download_file
@@ -530,34 +561,19 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly handles s3 tar file upload error" do
-      bulk_download = create(
-        :bulk_download,
-        user: @joe,
-        download_type: BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,
-        pipeline_run_ids: [
-          @sample_one.first_pipeline_run.id,
-          @sample_two.first_pipeline_run.id,
-        ]
-      )
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {})
 
       expect(ReportHelper).to receive(:taxonomy_details).exactly(2).times
       expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv")
       expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv_2")
 
-      # The samples that succeeded are still written to the s3 tar file.
-      expect_any_instance_of(S3TarWriter).to receive(:start_streaming)
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv",
-        "mock_report_csv"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:add_file_with_data).with(
-        "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv",
-        "mock_report_csv_2"
-      )
-      expect_any_instance_of(S3TarWriter).to receive(:close)
-      # Mock a failure status for the aws s3 cp process.
-      expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
-        instance_double(Process::Status, exitstatus: 99, success?: false)
+      add_s3_tar_writer_expectations(
+        {
+          "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv",
+          "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv_2",
+        },
+        99,
+        false
       )
 
       expect do
