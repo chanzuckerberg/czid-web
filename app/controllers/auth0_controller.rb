@@ -12,6 +12,9 @@ class Auth0Controller < ApplicationController
     "reset_password", # Invoked after reseting password operation
   ].freeze
 
+  MIN_TOKEN_REFRESH_IN_SECONDS = 60.seconds.to_i
+  MAX_TOKEN_REFRESH_IN_SECONDS = (60.minutes / 1.second).to_i
+
   def refresh_token
     @mode = filter_value(params["mode"], SUPPORTED_MODES)
     render :refresh_token, layout: false
@@ -83,17 +86,27 @@ class Auth0Controller < ApplicationController
     @auth0_token = auth0_decode_auth_token
     if @auth0_token && @auth0_token[:auth_payload]
       exp = @auth0_token[:auth_payload]["exp"]
-      iat = @auth0_token[:auth_payload]["iat"] || (exp - 15.minutes.in_seconds)
+      # "iat" is not a mandatory JWT field. Auth0 sends this field, but adding a default in case it is missing
+      iat = @auth0_token[:auth_payload]["iat"] || (exp - MAX_TOKEN_REFRESH_IN_SECONDS)
       lifespan = exp - iat
       expires_in = exp - Time.now.to_i
-      should_refresh_in = expires_in - (lifespan * 0.2).to_i
-      should_refresh = should_refresh_in < 0
+      # We want to preemptively refresh the token before it expires.
+      # Half of lifespan or MAX_TOKEN_REFRESH_IN_SECONDS minutes, whatever is shorter.
+      should_refresh_in = [expires_in - (lifespan / 2), MAX_TOKEN_REFRESH_IN_SECONDS].min
+      should_refresh = should_refresh_in <= 0
       expired = expires_in <= 0
     else
       lifespan = 0
+      should_refresh_in = 0
       should_refresh = true
       expired = true
     end
+
+    # background_refresh.html.erb script will reload the page to check
+    # if the authentication token is due to a refresh based on this `reload_wait_seconds` parameter.
+    # Here we are adjusting this reload time to be at reasonable frequency.
+    reload_wait_seconds = [[lifespan / 4, MAX_TOKEN_REFRESH_IN_SECONDS].min, MIN_TOKEN_REFRESH_IN_SECONDS].max
+
     {
       active: auth0_session.present?,
       exp: exp || 0,
@@ -104,7 +117,7 @@ class Auth0Controller < ApplicationController
       should_refresh: should_refresh,
       expired: expired,
       refresh_endpoint: "/auth0/refresh_token?mode=background_refresh",
-      reload_wait_seconds: [lifespan / 2, (15.minutes / 1.second)].min,
+      reload_wait_seconds: reload_wait_seconds,
     }
   end
 end
