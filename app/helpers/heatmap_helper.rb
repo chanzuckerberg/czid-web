@@ -3,7 +3,9 @@
 # See selectedOptions in SamplesHeatmapView for client-side defaults, and
 # heatmap action in VisualizationsController.
 module HeatmapHelper
-  DEFAULT_MAX_NUM_TAXONS = 30
+  # Based on the trade-off between performance and information quantity, we
+  # decided on 10 as the best default number of taxons to show per sample.
+  DEFAULT_MAX_NUM_TAXONS = 10
   DEFAULT_TAXON_SORT_PARAM = 'highest_nt_rpm'.freeze
   READ_SPECIFICITY = true
   MINIMUM_READ_THRESHOLD = 5
