@@ -101,7 +101,7 @@
     "number-abbreviate": "^2.0.0",
     "papaparse": "^4.6.2",
     "prop-types": "^15.6.0",
-    "query-string": "^6.1.0",
+    "query-string": "^6.9.0",
     "rc-slider": "^8.7.1",
     "react": "^16.10.2",
     "react-autocomplete": "^1.7.2",
