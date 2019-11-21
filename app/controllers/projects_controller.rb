@@ -42,6 +42,7 @@ class ProjectsController < ApplicationController
   respond_to :json
 
   MAX_BINS = 34
+  FAR_FUTURE_DAYS = 100_000
 
   # GET /projects
   # GET /projects.json
@@ -399,6 +400,7 @@ class ProjectsController < ApplicationController
   # POST /projects.json
   def create
     @project = Project.new(project_params)
+    @project.days_to_keep_sample_private = FAR_FUTURE_DAYS if current_user.admin?
     @project.users << current_user
 
     respond_to do |format|
