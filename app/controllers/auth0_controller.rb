@@ -20,6 +20,10 @@ class Auth0Controller < ApplicationController
     render :refresh_token, layout: false
   end
 
+  def login
+    redirect_to auth0_signout_url(url_for(action: :refresh_token, only_path: false, params: { mode: "login" }))
+  end
+
   def background_refresh
     @mode = params["mode"]
     @refresh_values = background_refresh_values
