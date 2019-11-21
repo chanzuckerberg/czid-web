@@ -21,7 +21,13 @@ class Auth0Controller < ApplicationController
   end
 
   def login
-    redirect_to auth0_signout_url(url_for(action: :refresh_token, only_path: false, params: { mode: "login" }))
+    # This is a workaround to force auth0 to clean up SSO cookies from any previous sessions.
+    # Since these cookies are stored in a different subdomain, we first need to redirect
+    # user to the auth0 logout url. Auth0 sign out url accepts a return_to url, and instead of
+    # returning to idseq main page, we are redirecting the user to auth0 login page
+    # using the login token refresh url.
+    return_to_url = url_for(action: :refresh_token, only_path: false, params: { mode: "login" })
+    redirect_to auth0_signout_url(return_to_url)
   end
 
   def background_refresh
