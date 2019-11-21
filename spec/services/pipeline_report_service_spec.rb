@@ -309,4 +309,55 @@ RSpec.describe PipelineReportService, type: :service do
       expect(JSON.parse(@report)["counts"]["2"]["1301"]).to include_json(genus_result)
     end
   end
+
+  context "taxon missing from background" do
+    before do
+      ResqueSpec.reset!
+
+      @pipeline_run = create(:pipeline_run,
+                             sample: create(:sample, project: create(:project)),
+                             total_reads: 1125,
+                             adjusted_remaining_reads: 315,
+                             subsample: 1_000_000,
+                             taxon_counts_data: [{
+                               tax_id: 1,
+                               tax_level: 1,
+                               taxon_name: "species",
+                               nt: 200,
+                               e_value: -90,
+                               genus_taxid: 2,
+                             }, {
+                               tax_id: 2,
+                               tax_level: 2,
+                               taxon_name: "genus",
+                               nt: 220,
+                               e_value: -90,
+                               genus_taxid: 2,
+                             },])
+
+      @background = create(:background,
+                           pipeline_run_ids: [
+                             create(:pipeline_run,
+                                    sample: create(:sample, project: create(:project))).id,
+                             create(:pipeline_run,
+                                    sample: create(:sample, project: create(:project))).id,
+                           ])
+
+      @report = PipelineReportService.call(@pipeline_run.id, @background.id)
+    end
+
+    it "should return correct z-score values" do
+      # Since NT is present in the sample but missing from the background, expect a z-score of 100.
+      expected = {
+        "nt" => {
+          "z_score" => 100,
+        },
+      }
+      expect(JSON.parse(@report)["counts"]["1"]["1"]).to include_json(expected)
+
+      # Since NR is missing from both the sample and the background model, it won't be returned
+      # in the report service. The frontend should fill in the NR row with default 0 values.
+      expect(JSON.parse(@report)["counts"]["1"]["1"]).not_to include("nr")
+    end
+  end
 end
