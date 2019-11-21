@@ -357,8 +357,7 @@ RSpec.describe PipelineReportService, type: :service do
 
       # Since NR is missing from both the sample and the background model, it won't be returned
       # in the report service. The frontend should fill in the NR row with default 0 values.
-      unexpected = { "nr" => {} }
-      expect(JSON.parse(@report)["counts"]["1"]["1"]).not_to include_json(unexpected)
+      expect(JSON.parse(@report)["counts"]["1"]["1"]).not_to include("nr")
     end
   end
 end
