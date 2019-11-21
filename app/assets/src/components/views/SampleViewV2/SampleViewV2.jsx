@@ -9,6 +9,7 @@ import {
   keys,
   map,
   merge,
+  pull,
   some,
   values,
 } from "lodash/fp";
@@ -26,7 +27,7 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
-import ReportTableV2 from "./ReportTable";
+import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 
@@ -378,7 +379,7 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
-  handleOptionChange = ({ key, value }) => {
+  handleOptionChanged = ({ key, value }) => {
     const { reportData, selectedOptions } = this.state;
 
     if (deepEqual(selectedOptions[key], value)) {
@@ -434,6 +435,12 @@ export default class SampleViewV2 extends React.Component {
         this.persistReportOptions();
       }
     );
+  };
+
+  handleFilterRemoved = ({ key, value }) => {
+    const { selected } = this.state;
+    const newSelected = pull(value, selected[key]);
+    this.setState({ selected: newSelected });
   };
 
   toggleSidebar = ({ mode }) => {
@@ -589,15 +596,15 @@ export default class SampleViewV2 extends React.Component {
             <div className={cs.reportFilters}>
               <ReportFilters
                 backgrounds={backgrounds}
-                onFilterChange={this.handleOptionChange}
-                onTaxonSelected={this.handleTaxonSearchResultSelected}
+                onFilterChanged={this.handleOptionChanged}
+                onFilterRemoved={this.handleFilterRemoved}
                 sampleId={sample && sample.id}
                 selected={selectedOptions}
                 view={view}
               />
             </div>
             <div className={cs.reportTable}>
-              <ReportTableV2
+              <ReportTable
                 data={filteredReportData}
                 onTaxonNameClick={this.handleTaxonClick}
               />
