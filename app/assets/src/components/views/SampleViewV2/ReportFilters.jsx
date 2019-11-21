@@ -17,13 +17,13 @@ import cs from "./report_filters.scss";
 
 class ReportFilters extends React.Component {
   handleFilterChange = ({ key, value }) => {
-    const { onFilterChange } = this.props;
+    const { onFilterChanged } = this.props;
 
     logAnalyticsEvent("SampleView_filter_changed", {
       key,
       value,
     });
-    onFilterChange({ key, value });
+    onFilterChanged({ key, value });
   };
 
   render = () => {
@@ -166,7 +166,7 @@ class ReportFilters extends React.Component {
 
 ReportFilters.propTypes = {
   backgrounds: PropTypes.array,
-  onFilterChange: PropTypes.func,
+  onFilterChanged: PropTypes.func,
   sampleId: PropTypes.number,
   selected: PropTypes.object,
   view: PropTypes.oneOf(["tree", "table"]),
