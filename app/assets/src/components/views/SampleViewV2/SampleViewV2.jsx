@@ -27,7 +27,7 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
-import ReportTableV2 from "./ReportTable";
+import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 
@@ -604,7 +604,7 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
             <div className={cs.reportTable}>
-              <ReportTableV2
+              <ReportTable
                 data={filteredReportData}
                 onTaxonNameClick={this.handleTaxonClick}
               />
