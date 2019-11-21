@@ -32,11 +32,11 @@ class ApplicationController < ActionController::Base
   def sign_in_auth0_token!
     @auth0_token = auth0_decode_auth_token
     if @auth0_token
-      if @auth0_token[:authenticated]
+      if @auth0_token[:authenticated] && !user_signed_in?
         auth_payload = @auth0_token[:auth_payload]
         auth_user = User.find_by(email: auth_payload["email"])
         if auth_user.present?
-          sign_in auth_user, store: false
+          sign_in auth_user
           return
         end
       end

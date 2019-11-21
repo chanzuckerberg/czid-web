@@ -52,11 +52,6 @@ class Auth0Controller < ApplicationController
     end
   end
 
-  def remove_auth0_session
-    # Invalidate auth0 session (https://auth0.com/docs/sessions/concepts/session-layers)
-    redirect_to auth0_signout_url
-  end
-
   def request_password_reset
     email = params.dig("user", "email")
     return if email.blank?
