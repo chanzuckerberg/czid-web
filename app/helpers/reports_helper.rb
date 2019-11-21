@@ -33,15 +33,15 @@ module ReportsHelper
               parent_name = "taxon #{parent_tax_id}"
             end
             tax_info[:name] = "non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
-            Rails.logger.debug("Pipeline run #{pipeline_run_id} contains non-#{level_str}-specific reads in #{parent_level} #{parent_name}")
+            Rails.logger.info("Pipeline run #{pipeline_run_id} contains non-#{level_str}-specific reads in #{parent_level} #{parent_name}")
 
           elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
             tax_info[:name] = "all artificial constructs"
-            Rails.logger.debug("Blacklisted genus id appeared in report for pipeline run #{pipeline_run_id}.")
+            Rails.logger.info("Blacklisted genus id appeared in report for pipeline run #{pipeline_run_id}.")
 
           elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
             tax_info[:name] += " #{tax_id}"
-            Rails.logger.debug("Pipeline run #{pipeline_run_id} missing lineage for #{tax_id}.")
+            Rails.logger.info("Pipeline run #{pipeline_run_id} missing lineage for #{tax_id}.")
           end
 
         elsif !tax_info[:name]
