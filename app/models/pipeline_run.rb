@@ -1372,9 +1372,9 @@ class PipelineRun < ApplicationRecord
         taxids = taxid_arr[0..1]
         taxids.each do |taxid|
           summary_per_tax = summary_dict[taxid] ||= {}
-          summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= { contigs: 0, contig_reads: 0 }
-          summary_per_tax_and_type[:contigs] += 1
-          summary_per_tax_and_type[:contig_reads] += c.read_count
+          summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= {}
+          summary_per_tax_and_type[c.read_count] ||= 0
+          summary_per_tax_and_type[c.read_count] += 1
         end
       end
     end

@@ -1,16 +1,37 @@
 import React from "react";
-import { find, merge } from "lodash/fp";
+import {
+  entries,
+  every,
+  find,
+  flatten,
+  flow,
+  get,
+  keys,
+  map,
+  merge,
+  pick,
+  some,
+  values,
+} from "lodash/fp";
+import deepEqual from "fast-deep-equal";
 
-import { getSample, getSampleReportData, getSamples } from "~/api";
+import {
+  getBackgrounds,
+  getSample,
+  getSampleReportData,
+  getSamples,
+} from "~/api";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
-import { logAnalyticsEvent } from "~/api/analytics";
-
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import ReportTableV2 from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
+
+import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
 
 const SPECIES_LEVEL_INDEX = 1;
@@ -20,26 +41,59 @@ export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      backgroundId: null,
-      currentTab: "Report",
-      pipelineRun: null,
-      project: null,
-      projectSamples: [],
-      reportData: [],
-      sample: null,
-      view: "table",
-    };
+    let localState = this.loadState(localStorage, "SampleViewOptions");
+
+    this.state = Object.assign(
+      {
+        backgrounds: [],
+        currentTab: "Report",
+        filteredReportData: [],
+        pipelineRun: null,
+        project: null,
+        projectSamples: [],
+        reportData: [],
+        sample: null,
+        sidebarMode: null,
+        sidebarVisible: false,
+        sidebarTaxonData: null,
+        view: "table",
+        selectedOptions: this.defaultSelectedOptions(),
+      },
+      localState
+    );
   }
 
   componentDidMount = () => {
     this.fetchSample();
     this.fetchSampleReportData();
+    this.fetchBackgrounds();
+  };
+
+  loadState = (store, key) => {
+    try {
+      return JSON.parse(store.getItem(key)) || {};
+    } catch (e) {
+      // Avoid possible bad transient state related crash
+      // eslint-disable-next-line no-console
+      console.warn(`Bad state: ${e}`);
+    }
+    return {};
+  };
+
+  defaultSelectedOptions = () => {
+    return {
+      nameType: "Scientific name",
+      readSpecificity: 0,
+      minContigSize: 4,
+      categories: [],
+      thresholds: [],
+    };
   };
 
   fetchSample = async () => {
     const { sampleId } = this.props;
     const sample = await getSample({ sampleId });
+    sample.id = sampleId;
     this.setState(
       {
         sample: sample,
@@ -67,11 +121,13 @@ export default class SampleViewV2 extends React.Component {
 
   fetchSampleReportData = async () => {
     const { sampleId } = this.props;
+    const { selectedOptions } = this.state;
 
-    const rawReportData = await getSampleReportData(sampleId);
+    const rawReportData = await getSampleReportData({
+      sampleId,
+      background: selectedOptions.background,
+    });
 
-    // TODO : this should come from the client
-    // TODO : tax level should come as a string
     const reportData = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     rawReportData.sortedGenus.forEach(genusTaxId => {
@@ -97,10 +153,193 @@ export default class SampleViewV2 extends React.Component {
         })
       );
     });
+
+    this.setDisplayName({ reportData, ...selectedOptions });
+    this.computeContigStats({ reportData, ...selectedOptions });
+    const filteredReportData = this.filterReportData({
+      reportData,
+      filters: selectedOptions,
+    });
+
     this.setState({
       reportData,
+      filteredReportData,
+      selectedOptions: Object.assign({}, selectedOptions, {
+        background: rawReportData.backgroundId,
+      }),
     });
-    return reportData;
+  };
+
+  fetchBackgrounds = async () => {
+    const backgrounds = await getBackgrounds();
+    this.setState({ backgrounds });
+  };
+
+  applyFilters = ({
+    row,
+    categories,
+    subcategories,
+    thresholds,
+    readSpecificity,
+    taxon,
+  }) => {
+    // When adding filters consider their order based on filter complexity (more complex later)
+    // and effeciency (filters more likely to filter out more taxa earlier)
+    return (
+      this.filterTaxon({ row, taxon }) &&
+      this.filterCategories({ row, categories, subcategories }) &&
+      this.filterReadSpecificity({ row, readSpecificity }) &&
+      this.filterThresholds({ row, thresholds })
+    );
+  };
+
+  filterTaxon = ({ row, taxon }) => {
+    return !taxon || row.taxId === taxon || row.genus_tax_id === taxon;
+  };
+
+  filterCategories = ({ row, categories, subcategories }) => {
+    // no category have been chosen: all pass
+    if (categories.size === 0 && subcategories.size === 0) {
+      return true;
+    }
+
+    // at least one of taxon's subcategory was selected
+    if (
+      some(
+        subcategory => subcategories.has(subcategory),
+        row.subcategories || []
+      )
+    ) {
+      return true;
+    }
+
+    // taxon's category was selected and its subcategories were not excluded
+    if (
+      categories.has(row.category) &&
+      !some(
+        subcategory => subcategories.has(subcategory),
+        row.subcategories || []
+      )
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
+  getTaxonMetricValue = (row, metric) => {
+    return get(metric.split(":"), row);
+  };
+
+  filterThresholds = ({ row, thresholds }) => {
+    if (thresholds && thresholds.length) {
+      const res = every(threshold => {
+        const { metric, operator, value } = threshold;
+        const parsedThresholdValue = parseFloat(value);
+        const parsedValue = this.getTaxonMetricValue(row, metric);
+
+        switch (operator) {
+          case ">=":
+            return parsedValue < parsedThresholdValue;
+          case "<=":
+            return parsedValue > parsedThresholdValue;
+        }
+        return true;
+      }, thresholds);
+      return res;
+    }
+
+    return true;
+  };
+
+  filterReadSpecificity = ({ row, readSpecificity }) => {
+    // for read specificity, species filtering is determined by their genus
+    return (
+      !readSpecificity ||
+      (row.taxLevel === "genus" ? row.taxId > 0 : row.genus_tax_id > 0)
+    );
+  };
+
+  computeRowContigStats = ({ row, minContigSize }) => {
+    ["nr", "nt"].forEach(dbType => {
+      const contigDetails = get([dbType, "contigs"], row);
+      if (contigDetails && keys(contigDetails).length) {
+        const dbTypeRow = row[dbType];
+        dbTypeRow.contigCount = 0;
+        dbTypeRow.readsCount = 0;
+
+        flow(
+          entries,
+          map(([readsPerContig, count]) => {
+            if (readsPerContig >= minContigSize) {
+              dbTypeRow.contigCount += count;
+              dbTypeRow.readsCount += count * readsPerContig;
+            }
+          })
+        )(contigDetails);
+      }
+    });
+  };
+
+  computeContigStats = ({ reportData, minContigSize }) => {
+    reportData.forEach(genus => {
+      this.computeRowContigStats({ row: genus, minContigSize });
+      genus.species.forEach(species => {
+        this.computeRowContigStats({ row: species, minContigSize });
+      });
+    });
+  };
+
+  setDisplayName = ({ reportData, nameType }) => {
+    const useScientific = nameType === "Scientific name";
+    reportData.forEach(genus => {
+      genus.displayName = useScientific ? genus.name : genus.common_name;
+      genus.species.forEach(species => {
+        species.displayName = useScientific
+          ? species.name
+          : species.common_name;
+      });
+    });
+  };
+
+  filterReportData = ({
+    reportData,
+    filters: { categories, thresholds, readSpecificity, taxon },
+  }) => {
+    const categoriesSet = new Set(
+      map(c => c.toLowerCase(), categories.categories || [])
+    );
+    const subcategoriesSet = new Set(
+      map(sc => sc.toLowerCase(), flatten(values(categories.subcategories)))
+    );
+
+    const filteredData = [];
+    reportData.forEach(genusRow => {
+      genusRow.passedFilters = this.applyFilters({
+        row: genusRow,
+        categories: categoriesSet,
+        subcategories: subcategoriesSet,
+        thresholds,
+        readSpecificity,
+        taxon,
+      });
+
+      genusRow.filteredSpecies = genusRow.species.filter(speciesRow =>
+        this.applyFilters({
+          row: speciesRow,
+          categories: categoriesSet,
+          subcategories: subcategoriesSet,
+          thresholds,
+          readSpecificity,
+          taxon,
+        })
+      );
+      if (genusRow.passedFilters || genusRow.filteredSpecies.length) {
+        filteredData.push(genusRow);
+      }
+    });
+
+    return filteredData;
   };
 
   handlePipelineVersionSelect = newPipelineVersion => {
@@ -127,73 +366,261 @@ export default class SampleViewV2 extends React.Component {
     });
   };
 
+  persistReportOptions = () => {
+    // save new options to local storage
+    const { selectedOptions } = this.state;
+    // remove exceptions to persistent options
+    const { taxon, ...persistentReportOptions } = selectedOptions;
+    localStorage.setItem(
+      "SampleViewOptions",
+      JSON.stringify({
+        selectedOptions: persistentReportOptions,
+      })
+    );
+  };
+
+  handleOptionChange = ({ key, value }) => {
+    const { reportData, selectedOptions } = this.state;
+
+    if (deepEqual(selectedOptions[key], value)) {
+      return;
+    }
+
+    const newSelectedOptions = Object.assign({}, selectedOptions, {
+      [key]: value,
+    });
+    // different behavior given type of option
+    switch (key) {
+      // - min contig size: recompute contig statistics with new size and refresh display
+      case "minContigSize":
+        this.computeContigStats({ reportData, ...newSelectedOptions });
+        this.setState({ reportData: [...reportData] });
+        break;
+      // - name type: reset table to force a rerender
+      case "nameType":
+        this.setDisplayName({ reportData, ...selectedOptions });
+        this.setState({ reportData: [...reportData] });
+        break;
+
+      // - background: requires a new reload from server
+      case "background":
+        this.setState({ reportData: [] }, this.fetchSampleReportData);
+        break;
+
+      // - taxon: refresh filtered data
+      // - categories: refresh filtered data
+      // - threshold filters: refresh filtered data
+      // - read specificity: refresh filtered data
+      case "taxon":
+      case "categories":
+      case "thresholds":
+      case "readSpecificity":
+        this.setState({
+          filteredReportData: this.filterReportData({
+            reportData,
+            filters: newSelectedOptions,
+          }),
+        });
+        break;
+      default:
+        return;
+    }
+
+    // save options in state and persist in local storage
+    this.setState(
+      {
+        selectedOptions: newSelectedOptions,
+      },
+      () => {
+        this.persistReportOptions();
+      }
+    );
+  };
+
+  toggleSidebar = ({ mode }) => {
+    const { sidebarMode, sidebarVisible } = this.state;
+    if (sidebarVisible && sidebarMode === mode) {
+      this.setState({ sidebarVisible: false });
+    } else {
+      this.setState({
+        sidebarMode: mode,
+        sidebarVisible: true,
+      });
+    }
+  };
+
+  handleTaxonClick = clickedTaxonData => {
+    const { sidebarMode, sidebarVisible, sidebarTaxonData } = this.state;
+
+    if (!clickedTaxonData.taxId) {
+      this.setState({ sidebarVisible: false });
+      return;
+    }
+
+    if (
+      sidebarMode === "taxonDetails" &&
+      sidebarVisible &&
+      sidebarTaxonData &&
+      sidebarTaxonData.taxId === clickedTaxonData.taxId
+    ) {
+      this.setState({
+        sidebarVisible: false,
+      });
+    } else {
+      this.setState({
+        sidebarMode: "taxonDetails",
+        sidebarTaxonData: clickedTaxonData,
+        sidebarVisible: true,
+        coverageVizVisible: false,
+      });
+    }
+  };
+
   toggleSampleDetailsSidebar = () => {
-    console.log("toggle sample details sidebar");
-    // if (
-    //   this.state.sidebarMode === "sampleDetails" &&
-    //   this.state.sidebarVisible
-    // ) {
-    //   this.setState({
-    //     sidebarVisible: false,
-    //   });
-    // } else {
-    //   this.setState({
-    //     sidebarMode: "sampleDetails",
-    //     sidebarVisible: true,
-    //   });
-    // }
+    const { sidebarMode, sidebarVisible } = this.state;
+    if (sidebarVisible && sidebarMode === "sampleDetails") {
+      this.setState({ sidebarVisible: false });
+    } else {
+      this.setState({
+        sidebarMode: "sampleDetails",
+        sidebarVisible: true,
+      });
+    }
+  };
+
+  closeSidebar = () => {
+    this.setState({
+      sidebarVisible: false,
+    });
+  };
+
+  handleMetadataUpdate = (key, value) => {
+    const { sample } = this.state;
+    if (key === "name") {
+      this.setState({
+        sample: Object.assign({}, sample, { name: value }),
+      });
+    }
+  };
+
+  getSidebarParams = () => {
+    const {
+      backgrounds,
+      pipelineRun,
+      sample,
+      selectedOptions,
+      sidebarMode,
+      sidebarTaxonData,
+    } = this.state;
+
+    if (sidebarMode === "taxonDetails") {
+      return {
+        background: find({ id: selectedOptions.background }, backgrounds),
+        parentTaxonId: (sidebarTaxonData.genus || {}).taxId,
+        taxonId: sidebarTaxonData.taxId,
+        taxonName: sidebarTaxonData.name,
+        taxonValues: {
+          NT: { rpm: get("nt.rpm", sidebarTaxonData) || 0 },
+          NR: { rpm: get("nr.rpm", sidebarTaxonData) || 0 },
+        },
+      };
+    } else if (sidebarMode === "sampleDetails") {
+      return {
+        sampleId: sample.id,
+        pipelineVersion: pipelineRun.pipeline_version,
+        onMetadataUpdate: this.handleMetadataUpdate,
+      };
+    }
+    return {};
   };
 
   render = () => {
     const {
-      backgroundId,
+      backgrounds,
       currentTab,
+      filteredReportData,
       pipelineRun,
       project,
       projectSamples,
       reportData,
       sample,
+      selectedOptions,
+      sidebarVisible,
+      sidebarMode,
       view,
     } = this.state;
 
     return (
-      <NarrowContainer className={cs.sampleViewContainer}>
-        <div className={cs.sampleViewHeader}>
-          <SampleViewHeader
-            backgroundId={backgroundId}
-            editable={sample ? sample.editable : false}
-            onDetailsClick={this.toggleSampleDetailsSidebar}
-            onPipelineVersionChange={this.handlePipelineVersionSelect}
-            pipelineRun={pipelineRun}
-            project={project}
-            projectSamples={projectSamples}
-            sample={sample}
-            view={view}
+      <React.Fragment>
+        <NarrowContainer className={cs.sampleViewContainer}>
+          <div className={cs.sampleViewHeader}>
+            <SampleViewHeader
+              backgroundId={selectedOptions.background}
+              editable={sample ? sample.editable : false}
+              onDetailsClick={this.toggleSampleDetailsSidebar}
+              onPipelineVersionChange={this.handlePipelineVersionSelect}
+              pipelineRun={pipelineRun}
+              project={project}
+              projectSamples={projectSamples}
+              reportPresent={!!reportData.length}
+              sample={sample}
+              view={view}
+            />
+          </div>
+          <div className={cs.tabsContainer}>
+            <UserContext.Consumer>
+              {currentUser =>
+                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) ||
+                currentUser.admin ? (
+                  <Tabs
+                    className={cs.tabs}
+                    tabs={["Report", "Antimicrobial Resistance"]}
+                    value={currentTab}
+                    onChange={this.handleTabChange}
+                  />
+                ) : (
+                  <div className={cs.dividerContainer}>
+                    <div className={cs.divider} />
+                  </div>
+                )
+              }
+            </UserContext.Consumer>
+          </div>
+          <div className={cs.reportViewContainer}>
+            <div className={cs.reportFilters}>
+              <ReportFilters
+                backgrounds={backgrounds}
+                onFilterChange={this.handleOptionChange}
+                onTaxonSelected={this.handleTaxonSearchResultSelected}
+                sampleId={sample && sample.id}
+                selected={selectedOptions}
+                view={view}
+              />
+            </div>
+            <div className={cs.reportTable}>
+              <ReportTableV2
+                data={filteredReportData}
+                onTaxonNameClick={this.handleTaxonClick}
+              />
+            </div>
+          </div>
+        </NarrowContainer>
+        {sample && (
+          <DetailsSidebar
+            visible={sidebarVisible}
+            mode={sidebarMode}
+            onClose={withAnalytics(
+              this.closeSidebar,
+              "SampleView_details-sidebar_closed",
+              {
+                sampleId: sample.id,
+                sampleName: sample.name,
+              }
+            )}
+            params={this.getSidebarParams()}
           />
-        </div>
-        <div className={cs.tabsContainer}>
-          <UserContext.Consumer>
-            {currentUser =>
-              currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) ||
-              currentUser.admin ? (
-                <Tabs
-                  className={cs.tabs}
-                  tabs={["Report", "Antimicrobial Resistance"]}
-                  value={currentTab}
-                  onChange={this.handleTabChange}
-                />
-              ) : (
-                <div className={cs.dividerContainer}>
-                  <div className={cs.divider} />
-                </div>
-              )
-            }
-          </UserContext.Consumer>
-        </div>
-        <div className={cs.reportViewContainer}>
-          <ReportTableV2 data={reportData} />
-        </div>
-      </NarrowContainer>
+        )}
+      </React.Fragment>
     );
   };
 }
@@ -201,36 +628,3 @@ export default class SampleViewV2 extends React.Component {
 SampleViewV2.propTypes = {
   sampleId: PropTypes.number,
 };
-
-{
-  /* <DetailsSidebar
-visible={this.state.sidebarVisible}
-mode={this.state.sidebarMode}
-onClose={withAnalytics(
-  this.closeSidebar,
-  "SampleView_details-sidebar_closed",
-  {
-    sampleId: sample.id,
-    sampleName: sample.name,
-  }
-)}
-params={this.getSidebarParams()}
-/>
-{this.coverageVizEnabled() && (
-<CoverageVizBottomSidebar
-  visible={this.state.coverageVizVisible}
-  onClose={withAnalytics(
-    this.closeCoverageViz,
-    "SampleView_coverage-viz-sidebar_closed",
-    {
-      sampleId: sample.id,
-      sampleName: sample.name,
-    }
-  )}
-  params={this.getCoverageVizParams()}
-  sampleId={sample.id}
-  pipelineVersion={this.props.pipelineRun.pipeline_version}
-  nameType={this.state.nameType}
-/>
-)} */
-}

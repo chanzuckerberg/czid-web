@@ -28,8 +28,8 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
-const getSampleReportData = (id, params) =>
-  get(`/samples/${id}/report_v2`, { params });
+const getSampleReportData = ({ sampleId, background }) =>
+  get(`/samples/${sampleId}/report_v2.json?background=${background}`);
 
 const getSampleReportInfo = (id, params) =>
   get(`/samples/${id}/report_info${params}`);

@@ -52,7 +52,6 @@ const CategoryFilter = ({
 CategoryFilter.propTypes = {
   allCategories: PropTypes.arrayOf(
     PropTypes.shape({
-      taxid: PropTypes.number,
       name: PropTypes.string,
     })
   ).isRequired,

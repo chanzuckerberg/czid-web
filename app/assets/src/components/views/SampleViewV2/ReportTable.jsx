@@ -1,14 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { getOr, some, orderBy } from "lodash/fp";
+
 import { Table } from "~/components/visualizations/table";
 import { defaultTableRowRenderer } from "react-virtualized";
 import cx from "classnames";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { getOr, orderBy } from "lodash/fp";
+import InsightIcon from "~ui/icons/InsightIcon";
+import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 
 import cs from "./report_table.scss";
-import InsightIcon from "~ui/icons/InsightIcon";
 
 // Values for null values when sorting ascending and descending
 // for strings - HACK: In theory, there can be strings larger than this
@@ -28,7 +30,7 @@ class ReportTable extends React.Component {
       {
         cellRenderer: this.renderName,
         className: cs.nameCell,
-        dataKey: "name",
+        dataKey: "displayName",
         flexGrow: 1,
         headerClassName: cs.taxonHeader,
         label: "Taxon",
@@ -37,7 +39,7 @@ class ReportTable extends React.Component {
           this.nestedSortFunction({
             data,
             sortDirection,
-            path: ["name"],
+            path: ["displayName"],
             nullValue: "",
             limits: STRING_NULL_VALUES,
           }),
@@ -114,18 +116,18 @@ class ReportTable extends React.Component {
       {
         cellDataGetter: ({ rowData }) => {
           return [
-            (rowData.nt || {}).contigs || 0,
-            (rowData.nr || {}).contigs || 0,
+            (rowData.nt || {}).contigCount || 0,
+            (rowData.nr || {}).contigCount || 0,
           ];
         },
         cellRenderer: this.renderNtNrDecimalValues,
-        dataKey: "contigs",
+        dataKey: "contigCount",
         label: "contig",
         sortFunction: ({ data, sortDirection }) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
-            path: ["contigs"],
+            path: ["contigCount"],
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
@@ -134,18 +136,18 @@ class ReportTable extends React.Component {
       {
         cellDataGetter: ({ rowData }) => {
           return [
-            (rowData.nt || {}).contig_reads || 0,
-            (rowData.nr || {}).contig_reads || 0,
+            (rowData.nt || {}).readsCount || 0,
+            (rowData.nr || {}).readsCount || 0,
           ];
         },
         cellRenderer: this.renderNtNrDecimalValues,
-        dataKey: "contig_reads",
+        dataKey: "readsCount",
         label: "contig r",
         sortFunction: ({ data, sortDirection }) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
-            path: ["contig_reads"],
+            path: ["readsCount"],
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
@@ -240,8 +242,8 @@ class ReportTable extends React.Component {
           rowData.genus
             ? getOr(nullValue, path, rowData)
             : sortDirection === "asc"
-              ? limits[0]
-              : limits[1],
+            ? limits[0]
+            : limits[1],
       ],
       [sortDirection, sortDirection, sortDirection],
       data
@@ -272,6 +274,7 @@ class ReportTable extends React.Component {
   };
 
   renderName = ({ cellData, rowData }) => {
+    const { onTaxonNameClick } = this.props;
     return (
       rowData && (
         <React.Fragment>
@@ -290,7 +293,22 @@ class ReportTable extends React.Component {
             )}
           </div>
           <div className={cx(rowData.taxLevel == "species" && cs.speciesName)}>
-            {cellData}
+            <span
+              className={cx(cs.taxonName, cellData || cs.missingName)}
+              onClick={() => onTaxonNameClick({ ...rowData })}
+            >
+              {cellData || rowData.name}
+            </span>
+            {rowData.taxLevel == "genus" &&
+              (rowData.category ? (
+                <span className={cs.countInfo}>{`(${
+                  rowData.filteredSpecies.length
+                } ${getCategoryAdjective(rowData.category)} species)`}</span>
+              ) : (
+                <span
+                  className={cs.countInfo}
+                >{`(${rowData.filteredSpecies.length} species)`}</span>
+              ))}
           </div>
         </React.Fragment>
       )
@@ -359,11 +377,14 @@ class ReportTable extends React.Component {
     const { data } = this.props;
     const { expandedGenusIds } = this.state;
 
+    // flatten data for consumption of react virtualized table
+    // removes collapsed rows
     const tableRows = [];
     data.forEach(genusData => {
       tableRows.push(genusData);
+
       if (expandedGenusIds.has(genusData.taxId)) {
-        genusData.species.forEach(speciesData => {
+        genusData.filteredSpecies.forEach(speciesData => {
           // Add a pointer to the genus data for sorting purposes
           speciesData.genus = genusData;
           tableRows.push(speciesData);
@@ -398,6 +419,7 @@ ReportTable.defaultProps = {
 ReportTable.propTypes = {
   data: PropTypes.array,
   initialDbType: PropTypes.oneOf(["nt", "nr"]),
+  onTaxonNameClick: PropTypes.func,
   rowHeight: PropTypes.number,
 };
 

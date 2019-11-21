@@ -12,7 +12,10 @@ class PipelineReportService
     :e_value,
     :mean,
     :stdev,
-    :name # name needed for taxon scoring model?!
+    :name,
+    :common_name,
+    :superkingdom_taxid,
+    :is_phage,
   ].freeze
 
   FIELDS_INDEX = Hash[FIELDS_TO_PLUCK.map.with_index { |field, i| [field, i] }]
@@ -23,6 +26,15 @@ class PipelineReportService
 
   DEFAULT_SORT_PARAM = :agg_score
   MIN_CONTIG_SIZE = 0
+
+  CATEGORIES = {
+    2 => "bacteria",
+    2_157 => "archaea",
+    2_759 => "eukaryota",
+    10_239 => "viruses",
+    12_884 => "viroids",
+    nil => "uncategorized",
+  }.freeze
 
   def initialize(pipeline_run_id, background_id)
     @pipeline_run_id = pipeline_run_id
@@ -115,30 +127,32 @@ class PipelineReportService
       )
     @timer.split("convert_to_json_with_JSON")
 
-    # FastJsonapi::MultiToJson.to_json(
-    #   counts: counts_by_tax_level,
-    #   lineage: structured_lineage,
-    #   sortedGenus: sorted_genus_tax_ids,
-    #   highlighted_tax_ids: highlighted_tax_ids
-    # )
-
-    # @timer.split("convert_to_json_with_FAST_JSON")
-
-    # FastJsonapi::MultiToJson.to_json(
-    #   counts: counts_by_tax_level,
-    #   lineage: structured_lineage,
-    #   sortedGenus: sorted_genus_tax_ids,
-    #   highlighted_tax_ids: highlighted_tax_ids
-    # )
-
-    # @timer.split("convert_to_json_with_OJ")
-
     return json_dump
   end
 
   def fetch_taxon_counts(_pipeline_run_id, _background_id)
     taxon_counts_and_summaries_query = TaxonCount
                                        .joins("LEFT OUTER JOIN"\
+                                          " taxon_summaries ON taxon_counts.count_type = taxon_summaries.count_type"\
+                                          " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
+                                          " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
+                                          " AND taxon_summaries.background_id = #{@background_id}")
+                                       .where(
+                                         pipeline_run_id: @pipeline_run_id,
+                                         count_type: ['NT', 'NR'],
+                                         tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
+                                       )
+                                       .where.not(
+                                         tax_id: [TaxonLineage::BLACKLIST_GENUS_ID, TaxonLineage::HOMO_SAPIENS_TAX_ID]
+                                       )
+    # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
+
+    return taxon_counts_and_summaries_query.pluck(*FIELDS_TO_PLUCK)
+  end
+
+  def fetch_background_taxon_counts(_pipeline_run_id, _background_id)
+    taxon_counts_and_summaries_query = TaxonCount
+                                       .joins("RIGHT OUTER JOIN"\
                                           " taxon_summaries ON taxon_counts.count_type = taxon_summaries.count_type"\
                                           " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
                                           " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
@@ -167,7 +181,12 @@ class PipelineReportService
       counts_hash[tax_id] ||= {
         genus_tax_id: counts[FIELDS_INDEX[:genus_taxid]],
         name: counts[FIELDS_INDEX[:name]],
+        common_name: counts[FIELDS_INDEX[:common_name]],
+        category: CATEGORIES[counts[FIELDS_INDEX[:superkingdom_taxid]]],
       }
+      if counts[FIELDS_INDEX[:is_phage]] == 1
+        counts_hash[tax_id][:subcategories] = ["phage"]
+      end
       counts_hash[tax_id][counts[FIELDS_INDEX[:count_type]].downcase!.to_sym] = {
         count: counts[FIELDS_INDEX[:count]],
         percent_identity: counts[FIELDS_INDEX[:percent_identity]],
@@ -182,18 +201,18 @@ class PipelineReportService
 
   def merge_contigs(contigs, counts_by_tax_level)
     contigs.each do |tax_id, contigs_per_db_type|
-      contigs_per_db_type.each do |db_type, contig_stats|
+      contigs_per_db_type.each do |db_type, contigs_per_read_count|
         norm_count_type = db_type.downcase.to_sym
         counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_SPECIES, tax_id, norm_count_type)
-        if counts_per_db_type
-          counts_per_db_type[:contigs] = contig_stats[:contigs]
-          counts_per_db_type[:contig_reads] = contig_stats[:contig_reads]
+        unless counts_per_db_type
+          counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_GENUS, tax_id, norm_count_type)
         end
 
-        genus_counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_GENUS, tax_id, norm_count_type)
-        if genus_counts_per_db_type
-          genus_counts_per_db_type[:contigs] = genus_counts_per_db_type[:contigs].to_f + contig_stats[:contigs]
-          genus_counts_per_db_type[:contig_reads] = genus_counts_per_db_type[:contigs].to_f + contig_stats[:contig_reads]
+        if counts_per_db_type
+          counts_per_db_type[:contigs] = contigs_per_read_count
+        else
+          # TODO(tiago): not sure if this case ever happens
+          Rails.logger.warn("[PR=#{@pipeline_run_id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
         end
       end
     end
