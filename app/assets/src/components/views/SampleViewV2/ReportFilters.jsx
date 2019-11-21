@@ -11,162 +11,206 @@ import SearchBox from "~ui/controls/SearchBox";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
 import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 import { logAnalyticsEvent } from "~/api/analytics";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
+import FilterTag from "~ui/controls/FilterTag";
 
 import { CATEGORIES, THRESHOLDS, TREE_METRICS } from "./constants";
 import cs from "./report_filters.scss";
 
 class ReportFilters extends React.Component {
   handleFilterChange = ({ key, value }) => {
-    const { onFilterChange } = this.props;
+    const { onFilterChanged } = this.props;
 
     logAnalyticsEvent("SampleView_filter_changed", {
       key,
       value,
     });
-    onFilterChange({ key, value });
+    onFilterChanged({ key, value });
+  };
+
+  handleRemoveFilter = ({ key, value }) => {
+    const { onFilterRemoved } = this.props;
+    console.log("handleRemoveFilter", key, value);
+    logAnalyticsEvent("SampleView_filter_removed", {
+      key,
+      value,
+    });
+    onFilterRemoved({ key, value });
   };
 
   render = () => {
     const { backgrounds, sampleId, selected, view } = this.props;
 
     return (
-      <div className={cs.filterList}>
-        <div className={cs.filterListElement}>
-          <SearchBox
-            rounded
-            levelLabel
-            serverSearchAction="choose_taxon"
-            serverSearchActionArgs={{
-              // TODO (gdingle): change backend to support filter by sampleId
-              args: "species,genus",
-              sample_id: sampleId,
-            }}
-            onResultSelect={(_, { result }) =>
-              this.handleFilterChange({
-                key: "taxon",
-                value: result.taxid,
-              })
-            }
-            placeholder="Taxon name"
-          />
-        </div>
-        <div className={cs.filterListElement}>
-          <NameTypeFilter
-            value={selected.nameType}
-            onChange={value =>
-              this.handleFilterChange({
-                key: "nameType",
-                value,
-              })
-            }
-          />
-        </div>
-        {/* from server */}
-        <div className={cs.filterListElement}>
-          <BackgroundModelFilter
-            allBackgrounds={backgrounds}
-            value={selected.background}
-            onChange={value =>
-              this.handleFilterChange({
-                key: "background",
-                value,
-              })
-            }
-          />
-        </div>
-        {/* from server */}
-        <div className={cs.filterListElement}>
-          <CategoryFilter
-            allCategories={CATEGORIES}
-            categoryParentChild={transform((result, category) => {
-              if (category.children) result[category.name] = category.children;
-            }, {})(CATEGORIES)}
-            categoryChildParent={transform((result, category) => {
-              forEach(
-                subcat => (result[subcat] = category.name),
-                category.children || []
-              );
-            }, {})(CATEGORIES)}
-            selectedCategories={getOr(
-              [],
-              ["categories", "categories"],
-              selected
-            )}
-            selectedSubcategories={flatten(
-              values(getOr({}, ["categories", "subcategories"], selected))
-            )}
-            onChange={(categories, subcategories) =>
-              this.handleFilterChange({
-                key: "categories",
-                value: {
-                  categories,
-                  subcategories,
-                },
-              })
-            }
-          />
-        </div>
-        <div className={cs.filterListElement}>
-          <ThresholdFilterDropdown
-            options={{
-              targets: THRESHOLDS,
-              operators: [">=", "<="],
-            }}
-            thresholds={selected.thresholds}
-            onApply={value =>
-              this.handleFilterChange({
-                key: "thresholds",
-                value,
-              })
-            }
-          />
-        </div>
-        <div className={cs.filterListElement}>
-          <SpecificityFilter
-            value={selected.readSpecificity}
-            onChange={value =>
-              this.handleFilterChange({
-                key: "readSpecificity",
-                value,
-              })
-            }
-          />
-        </div>
-        {view == "tree" && (
+      <React.Fragment>
+        <div className={cs.filterList}>
           <div className={cs.filterListElement}>
-            <MetricPicker
-              options={TREE_METRICS}
-              value={selected.metric}
+            <SearchBox
+              rounded
+              levelLabel
+              serverSearchAction="choose_taxon"
+              serverSearchActionArgs={{
+                // TODO (gdingle): change backend to support filter by sampleId
+                args: "species,genus",
+                sample_id: sampleId,
+              }}
+              onResultSelect={(_, { result }) =>
+                this.handleFilterChange({
+                  key: "taxon",
+                  value: result.taxid,
+                })
+              }
+              placeholder="Taxon name"
+            />
+          </div>
+          <div className={cs.filterListElement}>
+            <NameTypeFilter
+              value={selected.nameType}
               onChange={value =>
                 this.handleFilterChange({
-                  key: "metric",
+                  key: "nameType",
                   value,
                 })
               }
             />
           </div>
-        )}
-        {view == "table" && (
+          {/* from server */}
           <div className={cs.filterListElement}>
-            <MinContigSizeFilter
-              value={selected.minContigSize}
+            <BackgroundModelFilter
+              allBackgrounds={backgrounds}
+              value={selected.background}
               onChange={value =>
                 this.handleFilterChange({
-                  key: "minContigSize",
+                  key: "background",
                   value,
                 })
               }
             />
           </div>
-        )}
-      </div>
+          {/* from server */}
+          <div className={cs.filterListElement}>
+            <CategoryFilter
+              allCategories={CATEGORIES}
+              categoryParentChild={transform((result, category) => {
+                if (category.children)
+                  result[category.name] = category.children;
+              }, {})(CATEGORIES)}
+              categoryChildParent={transform((result, category) => {
+                forEach(
+                  subcat => (result[subcat] = category.name),
+                  category.children || []
+                );
+              }, {})(CATEGORIES)}
+              selectedCategories={getOr(
+                [],
+                ["categories", "categories"],
+                selected
+              )}
+              selectedSubcategories={flatten(
+                values(getOr({}, ["categories", "subcategories"], selected))
+              )}
+              onChange={(categories, subcategories) =>
+                this.handleFilterChange({
+                  key: "categories",
+                  value: {
+                    categories,
+                    subcategories,
+                  },
+                })
+              }
+            />
+          </div>
+          <div className={cs.filterListElement}>
+            <ThresholdFilterDropdown
+              options={{
+                targets: THRESHOLDS,
+                operators: [">=", "<="],
+              }}
+              thresholds={selected.thresholds}
+              onApply={value =>
+                this.handleFilterChange({
+                  key: "thresholds",
+                  value,
+                })
+              }
+            />
+          </div>
+          <div className={cs.filterListElement}>
+            <SpecificityFilter
+              value={selected.readSpecificity}
+              onChange={value =>
+                this.handleFilterChange({
+                  key: "readSpecificity",
+                  value,
+                })
+              }
+            />
+          </div>
+          {view == "tree" && (
+            <div className={cs.filterListElement}>
+              <MetricPicker
+                options={TREE_METRICS}
+                value={selected.metric}
+                onChange={value =>
+                  this.handleFilterChange({
+                    key: "metric",
+                    value,
+                  })
+                }
+              />
+            </div>
+          )}
+          {view == "table" && (
+            <div className={cs.filterListElement}>
+              <MinContigSizeFilter
+                value={selected.minContigSize}
+                onChange={value =>
+                  this.handleFilterChange({
+                    key: "minContigSize",
+                    value,
+                  })
+                }
+              />
+            </div>
+          )}
+        </div>
+        <div className={cs.tagList}>
+          {selected.thresholds.map((threshold, i) => (
+            <ThresholdFilterTag
+              className={cs.filterTag}
+              key={`threshold_filter_tag_${i}`}
+              threshold={threshold}
+              onClose={() =>
+                this.handleRemoveFilter({
+                  key: "thresholds",
+                  value: threshold,
+                })
+              }
+            />
+          ))}
+          {selected.categories.map((category, i) => (
+            <FilterTag
+              className={cs.filterTag}
+              key={`category_filter_tag_${i}`}
+              text={category}
+              onClose={() =>
+                this.handleRemoveFilter({
+                  key: "categories",
+                  value: category,
+                })
+              }
+            />
+          ))}
+        </div>
+      </React.Fragment>
     );
   };
 }
 
 ReportFilters.propTypes = {
   backgrounds: PropTypes.array,
-  onFilterChange: PropTypes.func,
+  onFilterChanged: PropTypes.func,
+  onFilterRemoved: PropTypes.func,
   sampleId: PropTypes.number,
   selected: PropTypes.object,
   view: PropTypes.oneOf(["tree", "table"]),

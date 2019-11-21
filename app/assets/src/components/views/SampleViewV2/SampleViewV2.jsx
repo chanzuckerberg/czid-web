@@ -9,6 +9,7 @@ import {
   keys,
   map,
   merge,
+  pull,
   some,
   values,
 } from "lodash/fp";
@@ -378,7 +379,7 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
-  handleOptionChange = ({ key, value }) => {
+  handleOptionChanged = ({ key, value }) => {
     const { reportData, selectedOptions } = this.state;
 
     if (deepEqual(selectedOptions[key], value)) {
@@ -434,6 +435,12 @@ export default class SampleViewV2 extends React.Component {
         this.persistReportOptions();
       }
     );
+  };
+
+  handleFilterRemoved = ({ key, value }) => {
+    const { selected } = this.state;
+    const newSelected = pull(value, selected[key]);
+    this.setState({ selected: newSelected });
   };
 
   toggleSidebar = ({ mode }) => {
@@ -589,8 +596,8 @@ export default class SampleViewV2 extends React.Component {
             <div className={cs.reportFilters}>
               <ReportFilters
                 backgrounds={backgrounds}
-                onFilterChange={this.handleOptionChange}
-                onTaxonSelected={this.handleTaxonSearchResultSelected}
+                onFilterChanged={this.handleOptionChanged}
+                onFilterRemoved={this.handleFilterRemoved}
                 sampleId={sample && sample.id}
                 selected={selectedOptions}
                 view={view}
