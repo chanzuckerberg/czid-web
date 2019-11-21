@@ -171,7 +171,7 @@ class PipelineReportService
   end
 
   def fetch_taxons_absent_from_sample(_pipeline_run_id, _background_id)
-    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: @pipeline_run_id).distinct.pluck(:tax_id)
+    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: @pipeline_run_id).distinct
 
     taxons_absent_from_sample = TaxonSummary
                                 .joins("LEFT OUTER JOIN"\
@@ -258,8 +258,8 @@ class PipelineReportService
     species_counts.each do |tax_id, species|
       genus = genus_counts[species[:genus_tax_id]]
       # Workaround placeholder for bad data (e.g. species counts present in TaxonSummary but genus counts aren't)
-      # TODO: investigate why a count type appearing in species is missing in its genus. It's possible the data is
-      # only missing in local/staging and is present on prod.
+      # TODO: investigate why a count type appearing in species is missing in its genus.
+      # JIRA: https://jira.czi.team/browse/IDSEQ-1807
       genus_nt_zscore = genus[:nt].present? ? genus[:nt][:z_score] : 100
       genus_nr_zscore = genus[:nr].present? ? genus[:nr][:z_score] : 100
       if species[:nt].present? && genus[:nt].blank?
