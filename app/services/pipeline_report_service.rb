@@ -1,5 +1,6 @@
 class PipelineReportService
   include Callable
+  include ReportsHelper
 
   FIELDS_TO_PLUCK = [
     :tax_id,
@@ -15,11 +16,26 @@ class PipelineReportService
     :name # name needed for taxon scoring model?!
   ].freeze
 
+  FIELDS_DEFAULTS = {
+    tax_id: nil,
+    genus_taxid: nil,
+    count_type: nil,
+    tax_level: nil,
+    count: 0,
+    percent_identity: 0,
+    alignment_length: 0,
+    e_value: 0,
+    mean: nil,
+    stdev: nil,
+    name: nil,
+  }.freeze
+
   FIELDS_INDEX = Hash[FIELDS_TO_PLUCK.map.with_index { |field, i| [field, i] }]
 
   Z_SCORE_MIN = -99
   Z_SCORE_MAX =  99
   Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
+  Z_SCORE_WHEN_ABSENT_FROM_SAMPLE = -100
 
   DEFAULT_SORT_PARAM = :agg_score
   MIN_CONTIG_SIZE = 0
@@ -47,11 +63,27 @@ class PipelineReportService
     taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
     @timer.split("fetch_taxon_counts_and_summaries")
 
+    taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id)
+    @timer.split("fetch_taxons_absent_from_sample")
+
+    taxons_absent_from_sample.each do |taxon|
+      taxon_counts_and_summaries.concat([zero_metrics(taxon)])
+    end
+    @timer.split("fill_zero_metrics")
+
     counts_by_tax_level = split_by_tax_level(taxon_counts_and_summaries)
     @timer.split("split_by_tax_level")
 
     counts_by_tax_level.transform_values! { |counts| hash_by_tax_id_and_count_type(counts) }
     @timer.split("index_by_tax_id_and_count_type")
+
+    # TODO: this cleanup function is carried over from the previous version of the report,
+    # check if this is still necessary?
+    ReportsHelper.cleanup_missing_genus_counts(
+      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
+      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
+    )
+    @timer.split("cleanup_missing_genus_counts")
 
     merge_contigs(contigs, counts_by_tax_level)
     @timer.split("merge_contigs")
@@ -80,6 +112,14 @@ class PipelineReportService
     ]
 
     tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
+    # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
+    # species id rather than genus id, so select those species ids as well.
+    # TODO: check if this step is still necessary after the data has been cleaned up.
+    species_with_missing_genus = []
+    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
+      species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
+    end
+    tax_ids.concat(species_with_missing_genus)
 
     lineage_by_tax_id = TaxonLineage
                         .where(taxid: tax_ids)
@@ -87,7 +127,14 @@ class PipelineReportService
                         .pluck(*required_columns)
                         .map { |r| [r[0], required_columns.zip(r).to_h] }
                         .to_h
-    @timer.split("fetch_genus_lineage")
+    @timer.split("fetch_taxon_lineage")
+
+    ReportsHelper.validate_names(
+      counts_by_tax_level,
+      lineage_by_tax_id,
+      @pipeline_run_id
+    )
+    @timer.split("fill_missing_names")
 
     structured_lineage = {}
     encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
@@ -112,7 +159,7 @@ class PipelineReportService
         sortedGenus: sorted_genus_tax_ids,
         highlightedTaxIds: highlighted_tax_ids
       )
-    @timer.split("convert_to_json_with_sJSON")
+    @timer.split("convert_to_json_with_JSON")
 
     return json_dump
   end
@@ -135,6 +182,35 @@ class PipelineReportService
     # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
 
     return taxon_counts_and_summaries_query.pluck(*FIELDS_TO_PLUCK)
+  end
+
+  def zero_metrics(taxon)
+    # Fill in default zero values if a taxon is missing fields.
+    # Necessary for taxons absent from sample to match the taxon_counts_and_summaries structure,
+    # since they're fetched from TaxonSummary, which doesn't have some columns listed in FIELDS_TO_PLUCK.
+    FIELDS_INDEX.each do |field, index|
+      taxon[index] = FIELDS_DEFAULTS[field] unless taxon[index]
+    end
+    return taxon
+  end
+
+  def fetch_taxons_absent_from_sample(_pipeline_run_id, _background_id)
+    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: @pipeline_run_id).distinct
+
+    taxons_absent_from_sample = TaxonSummary
+                                .joins("LEFT OUTER JOIN"\
+                                  " taxon_counts ON taxon_counts.count_type = taxon_summaries.count_type"\
+                                  " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
+                                  " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
+                                  " AND taxon_counts.pipeline_run_id = #{@pipeline_run_id}")
+                                .where(
+                                  "taxon_summaries.background_id": @background_id,
+                                  "taxon_counts.count": nil,
+                                  "taxon_summaries.tax_id": tax_ids,
+                                  "taxon_summaries.tax_level": [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
+                                )
+
+    return taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)
   end
 
   def split_by_tax_level(counts_array)
@@ -197,6 +273,8 @@ class PipelineReportService
       nr_z_score = compute_z_score(taxon_counts[:nr][:rpm], taxon_counts[:nr][:bg_mean], taxon_counts[:nr][:bg_stdev]) if taxon_counts[:nr].present?
       taxon_counts[:nt][:z_score] = nt_z_score if taxon_counts[:nt].present?
       taxon_counts[:nr][:z_score] = nr_z_score if taxon_counts[:nr].present?
+      taxon_counts[:nt][:z_score] = taxon_counts[:nt][:count] != 0 ? nt_z_score : Z_SCORE_WHEN_ABSENT_FROM_SAMPLE if taxon_counts[:nt].present?
+      taxon_counts[:nr][:z_score] = taxon_counts[:nr][:count] != 0 ? nr_z_score : Z_SCORE_WHEN_ABSENT_FROM_SAMPLE if taxon_counts[:nr].present?
       taxon_counts[:max_z_score] = nr_z_score.nil? || (nt_z_score && nt_z_score > nr_z_score) ? nt_z_score : nr_z_score
     end
   end
@@ -204,8 +282,20 @@ class PipelineReportService
   def compute_aggregate_scores(species_counts, genus_counts)
     species_counts.each do |tax_id, species|
       genus = genus_counts[species[:genus_tax_id]]
-      species[:agg_score] = (species[:nt].present? ? genus[:nt][:z_score].abs * species[:nt][:z_score] * species[:nt][:rpm] : 0) \
-        + (species[:nr].present? ? genus[:nr][:z_score].abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
+      # Workaround placeholder for bad data (e.g. species counts present in TaxonSummary but genus counts aren't)
+      # TODO: investigate why a count type appearing in species is missing in its genus.
+      # JIRA: https://jira.czi.team/browse/IDSEQ-1807
+      genus_nt_zscore = genus[:nt].present? ? genus[:nt][:z_score] : 100
+      genus_nr_zscore = genus[:nr].present? ? genus[:nr][:z_score] : 100
+      if species[:nt].present? && genus[:nt].blank?
+        Rails.logger.warn("NT data present for species #{tax_id} but missing for genus #{species[:genus_tax_id]}.")
+      end
+      if species[:nr].present? && genus[:nr].blank?
+        Rails.logger.warn("NR data present for species #{tax_id} but missing for genus #{species[:genus_tax_id]}.")
+      end
+
+      species[:agg_score] = (species[:nt].present? ? genus_nt_zscore.abs * species[:nt][:z_score] * species[:nt][:rpm] : 0) \
+        + (species[:nr].present? ? genus_nr_zscore.abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
       genus[:agg_score] = species[:agg_score] if genus[:agg_score].nil? || genus[:agg_score] < species[:agg_score]
       # TODO : more this to a more logical place
       if !genus[:children]
@@ -247,6 +337,8 @@ class PipelineReportService
 
   def find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     ui_config = UiConfig.last
+    return unless ui_config
+
     highlighted_tax_ids = []
 
     meets_highlight_condition = lambda do |counts|

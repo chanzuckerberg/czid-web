@@ -115,6 +115,7 @@ group :development do
 end
 
 group :test do
+  gem 'resque_spec'
   gem 'rspec-json_expectations'
   gem 'webmock', '~> 3.6'
 end
