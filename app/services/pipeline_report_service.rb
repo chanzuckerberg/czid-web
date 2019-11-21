@@ -79,7 +79,7 @@ class PipelineReportService
 
     # TODO: this cleanup function is carried over from the previous version of the report,
     # check if this is still necessary?
-    ReportsHelper.cleanup_missing_genus_counts!(
+    ReportsHelper.cleanup_missing_genus_counts(
       counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
       counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
     )
@@ -99,6 +99,15 @@ class PipelineReportService
     )
     @timer.split("compute_agg_scores")
 
+    # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
+    # species id rather than genus id, so select those species ids as well.
+    # TODO: check if this step is still necessary after the data has been cleaned up.
+    species_with_missing_genus = []
+    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
+      species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
+    end
+    @timer.split("missing genus")
+
     # TODO: in theory we should use TaxonLineage::fetch_lineage_by_taxid
     lineage_version = PipelineRun
                       .select("alignment_configs.lineage_version")
@@ -112,14 +121,7 @@ class PipelineReportService
     ]
 
     tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
-    # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
-    # species id rather than genus id, so select those species ids as well.
-    species_with_missing_genus = []
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
-      species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
-    end
     tax_ids += species_with_missing_genus
-
     lineage_by_tax_id = TaxonLineage
                         .where(taxid: tax_ids)
                         .where('? BETWEEN version_start AND version_end', lineage_version)
@@ -128,9 +130,10 @@ class PipelineReportService
                         .to_h
     @timer.split("fetch_taxon_lineage")
 
-    ReportsHelper.validate_names!(
+    ReportsHelper.validate_names(
       counts_by_tax_level,
-      lineage_by_tax_id
+      lineage_by_tax_id,
+      @pipeline_run_id
     )
     @timer.split("fill_missing_names")
 
@@ -204,7 +207,8 @@ class PipelineReportService
                                 .where(
                                   "taxon_summaries.background_id": @background_id,
                                   "taxon_counts.count": nil,
-                                  "taxon_summaries.tax_id": tax_ids
+                                  "taxon_summaries.tax_id": tax_ids,
+                                  "taxon_summaries.tax_level": [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
                                 )
 
     return taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)
