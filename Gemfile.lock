@@ -1050,6 +1050,11 @@ GEM
       redis (>= 3.3, < 5)
       resque (~> 1.26)
       rufus-scheduler (~> 3.2)
+    resque_spec (0.18.1)
+      resque (>= 1.26.0)
+      rspec-core (>= 3.0.0)
+      rspec-expectations (>= 3.0.0)
+      rspec-mocks (>= 3.0.0)
     rest-client (2.0.2)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
@@ -1218,6 +1223,7 @@ DEPENDENCIES
   resque (>= 1.27.4)
   resque-lock
   resque-scheduler (>= 4.3.1)
+  resque_spec
   rspec-json_expectations
   rspec-rails (>= 3.7.2)
   rubocop (= 0.49.1)
