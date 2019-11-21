@@ -19,7 +19,6 @@ import DiscoverIcon from "../ui/icons/DiscoverIcon";
 import DetectIcon from "../ui/icons/DetectIcon";
 import DecipherIcon from "../ui/icons/DecipherIcon";
 import LogoIcon from "../ui/icons/LogoIcon";
-import { postToUrlWithCSRF } from "~utils/links";
 
 class Landing extends React.Component {
   constructor(props) {
