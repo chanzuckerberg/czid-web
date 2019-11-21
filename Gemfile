@@ -15,7 +15,6 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'consul', '>= 0.13.1'
 gem 'devise', '>= 4.7.1'
-gem 'fast_jsonapi'
 gem 'health_check', '>= 2.7.0'
 gem 'honeycomb-rails', '>= 0.8.1'
 gem 'mailgun_rails', '>= 0.9.0'
@@ -90,8 +89,6 @@ gem 'immigrant'
 # Better CSV handling
 gem 'csv-safe', '~> 1.2'
 
-# Speed up convertion to json
-gem 'oj'
 # For accessing Auth0 management APIs
 gem 'auth0'
 
