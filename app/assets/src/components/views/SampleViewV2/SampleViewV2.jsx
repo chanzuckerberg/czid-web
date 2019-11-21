@@ -85,7 +85,7 @@ export default class SampleViewV2 extends React.Component {
       nameType: "Scientific name",
       readSpecificity: 0,
       minContigSize: 4,
-      categories: [],
+      categories: {},
       thresholds: [],
     };
   };
@@ -438,9 +438,13 @@ export default class SampleViewV2 extends React.Component {
   };
 
   handleFilterRemoved = ({ key, value }) => {
-    const { selected } = this.state;
-    const newSelected = pull(value, selected[key]);
-    this.setState({ selected: newSelected });
+    const { selectedOptions } = this.state;
+
+    console.log(selectedOptions[key], value, pull(value, selectedOptions[key]));
+    const newSelectedOptions = Object.assign({}, selectedOptions, {
+      key: pull(value, selectedOptions[key]),
+    });
+    this.setState({ selectedOptions: newSelectedOptions });
   };
 
   toggleSidebar = ({ mode }) => {

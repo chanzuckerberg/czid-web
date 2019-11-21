@@ -38,9 +38,41 @@ class ReportFilters extends React.Component {
     onFilterRemoved({ key, value });
   };
 
+  renderFilterTag = ({ category, idx }) => {
+    return (
+      <FilterTag
+        className={cs.filterTag}
+        key={`category_filter_tag_${idx}`}
+        text={category}
+        onClose={() =>
+          this.handleRemoveFilter({
+            key: "categories",
+            value: category,
+          })
+        }
+      />
+    );
+  };
+
+  renderThresholdFilterTag = ({ threshold, idx }) => {
+    return (
+      <ThresholdFilterTag
+        className={cs.filterTag}
+        key={`threshold_filter_tag_${idx}`}
+        threshold={threshold}
+        onClose={() =>
+          this.handleRemoveFilter({
+            key: "thresholds",
+            value: threshold,
+          })
+        }
+      />
+    );
+  };
+
   render = () => {
     const { backgrounds, sampleId, selected, view } = this.props;
-
+    console.log(selected);
     return (
       <React.Fragment>
         <div className={cs.filterList}>
@@ -175,32 +207,31 @@ class ReportFilters extends React.Component {
           )}
         </div>
         <div className={cs.tagList}>
-          {selected.thresholds.map((threshold, i) => (
-            <ThresholdFilterTag
-              className={cs.filterTag}
-              key={`threshold_filter_tag_${i}`}
-              threshold={threshold}
-              onClose={() =>
-                this.handleRemoveFilter({
-                  key: "thresholds",
-                  value: threshold,
-                })
+          {selected.thresholds.map((threshold, i) =>
+            this.renderThresholdFilterTag({ threshold, idx: i })
+          )}
+          {flatten(
+            getOr([], ["categories", "categories"], selected).map(
+              (category, i) => {
+                const categoryTags = [
+                  this.renderFilterTag({ category, idx: i }),
+                ];
+                getOr(
+                  [],
+                  ["categories", "subcategories", category],
+                  selected
+                ).map((subcategory, j) => {
+                  categoryTags.push(
+                    this.renderFilterTag({
+                      category: subcategory,
+                      idx: `${i}.${j}`,
+                    })
+                  );
+                });
+                return categoryTags;
               }
-            />
-          ))}
-          {selected.categories.map((category, i) => (
-            <FilterTag
-              className={cs.filterTag}
-              key={`category_filter_tag_${i}`}
-              text={category}
-              onClose={() =>
-                this.handleRemoveFilter({
-                  key: "categories",
-                  value: category,
-                })
-              }
-            />
-          ))}
+            )
+          )}
         </div>
       </React.Fragment>
     );
