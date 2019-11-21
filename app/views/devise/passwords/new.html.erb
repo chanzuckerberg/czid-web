@@ -2,7 +2,7 @@
   <%= javascript_tag do %>
     react_component('ForgotPassword', {
       errors: `<%= raw devise_error_messages! %>`,
-      endpoint: '<%=  password_path(resource) %>',
+      endpoint: '/auth0/request_password_reset',
       emailLabel: 'user[email]',
       csrf: '<%= form_authenticity_token %>'  }, 'forgot_password_page');
   <% end %>

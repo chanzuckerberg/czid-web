@@ -4,7 +4,7 @@
       csrf: '<%= form_authenticity_token %>',
       hostGenomes: JSON.parse('<%= raw escape_json(@host_genomes) %>'),
       admin: JSON.parse('<%= raw escape_json(current_user.admin) %>'),
-      biohubUser: JSON.parse('<%= raw escape_json(current_user.biohub_user?) %>'),
+      biohubS3UploadEnabled: JSON.parse('<%= raw escape_json(current_user.biohub_s3_upload_enabled?) %>'),
       basespaceClientId: '<%= @basespace_client_id %>',
       basespaceOauthRedirectUri: '<%= @basespace_oauth_redirect_uri %>',
     }, 'upload_page', JSON.parse('<%= raw escape_json(user_context) %>'))

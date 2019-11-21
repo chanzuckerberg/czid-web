@@ -12,15 +12,45 @@ RSpec.describe SamplesController, type: :controller do
     describe "GET raw_results_folder (nonadmin)" do
       it "can see raw results on the user's own samples" do
         project = create(:project, users: [@joe])
-        sample = create(:sample, project: project)
+        sample = create(:sample, project: project, user: @joe)
         get :raw_results_folder, params: { id: sample.id }
-        expect(response).to have_http_status :unauthorized
+        expect(response).to have_http_status :success
       end
 
       it "cannot see raw results on another user's sample" do
         project = create(:project, users: [@joe])
-        sample = create(:sample, project: project, user: @joe)
+        sample = create(:sample, project: project)
         get :raw_results_folder, params: { id: sample.id }
+        expect(response).to have_http_status :unauthorized
+      end
+    end
+
+    describe "GET results_folder (nonadmin)" do
+      it "can see results on the user's own samples" do
+        project = create(:project, users: [@joe])
+        sample = create(:sample, project: project, user: @joe)
+        get :results_folder, params: { id: sample.id }
+        expect(response).to have_http_status :success
+      end
+
+      it "can see results on the user's own samples with previous pipeline version" do
+        project = create(:project, users: [@joe])
+        sample_one = create(:sample, project: project, name: "Test Sample One", user: @joe,
+                                     pipeline_runs_data: [
+                                       { finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.10" },
+                                       { finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" },
+                                     ])
+        expect_any_instance_of(Sample).to receive(:results_folder_files).with("3.10").exactly(1).times.and_return({})
+
+        get :results_folder, params: { id: sample_one.id, pipeline_version: "3.10" }
+
+        expect(response).to have_http_status :success
+      end
+
+      it "can see results on another user's sample (if part of that project)" do
+        project = create(:project, users: [@joe])
+        sample = create(:sample, project: project)
+        get :results_folder, params: { id: sample.id }
         expect(response).to have_http_status :success
       end
     end

@@ -545,17 +545,40 @@ class ProjectsController < ApplicationController
   def create_new_user_random_password(name, email)
     Rails.logger.info("Going to create new user via project sharing: #{email}")
     user_params_with_password = { email: email, name: name }
-    random_password = SecureRandom.hex(10)
+    # "aA1!" and 'squeeze' for no repeats to always satisfy complexity policy.
+    random_password = (SecureRandom.base64(15) + "aA1!").squeeze
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
+
     @user ||= User.new(user_params_with_password)
-    @user.email_arguments = new_user_shared_project_email_arguments()
-    if @user.save!
-      # Only returns the token sent to user
-      @user.send_reset_password_instructions
+
+    # New flow for account creation on Auth0.
+    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
+      if @user.save!
+        # Create the user with Auth0.
+        create_response = User.create_auth0_user(user_params_with_password)
+        auth0_id = create_response["user_id"]
+
+        # Get their password reset link so they can set a password.
+        reset_response = User.get_auth0_password_reset_token(auth0_id)
+        reset_url = reset_response["ticket"]
+
+        # Send them an invitation and account activation email.
+        UserMailer.new_auth0_user_new_project(current_user,
+                                              email,
+                                              @project.id,
+                                              reset_url).deliver_now
+      end
+    else
+      # DEPRECATED: Legacy Devise flow. Remove block after migrating to Auth0.
+      @user.email_arguments = new_user_shared_project_email_arguments()
+      if @user.save!
+        # Only returns the token sent to user
+        @user.send_reset_password_instructions
+      end
     end
   rescue => exception
-    LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}")
+    LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}. #{exception.message}")
     LogUtil.log_backtrace(exception)
   end
 

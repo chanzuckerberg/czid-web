@@ -1,4 +1,5 @@
 require 'elasticsearch/model'
+require 'auth0'
 
 class User < ApplicationRecord
   if ELASTICSEARCH_ON
@@ -92,7 +93,7 @@ class User < ApplicationRecord
 
     # Don't allow any non-Biohub users to upload from czbiohub buckets
     if CZBIOHUB_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
-      unless biohub_user?
+      unless biohub_s3_upload_enabled?
         return false
       end
     end
@@ -103,6 +104,10 @@ class User < ApplicationRecord
   # This method is for tracking purposes only, not security.
   def biohub_user?
     ["czbiohub.org", "ucsf.edu"].include?(email.split("@").last)
+  end
+
+  def biohub_s3_upload_enabled?
+    biohub_user? || allowed_feature_list.include?("biohub_s3_upload_enabled") || admin?
   end
 
   # This method is for tracking purposes only, not security.
@@ -174,6 +179,36 @@ class User < ApplicationRecord
     }
   end
 
+  # Create a new user in the Auth0 database.
+  # See:
+  # - https://auth0.com/docs/api/management/v2#!/Users/post_users
+  # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
+  def self.create_auth0_user(params)
+    connection = ENV["AUTH0_CONNECTION"]
+    email = params[:email]
+    name = params[:name]
+    password = params[:password]
+    options = {
+      connection: connection,
+      email: email,
+      name: name,
+      password: password,
+    }
+    auth0_management_client.create_user(name, options)
+  end
+
+  # See: https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/tickets.rb
+  def self.get_auth0_password_reset_token(auth0_id)
+    auth0_management_client.post_password_change(user_id: auth0_id)
+  end
+
+  # See: https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/authentication_endpoints.rb
+  def self.send_auth0_password_reset_email(email)
+    # Change with empty password triggers reset email.
+    connection = ENV["AUTH0_CONNECTION"]
+    auth0_management_client.change_password(email, "", connection)
+  end
+
   private
 
   # Copied from https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
@@ -188,5 +223,16 @@ class User < ApplicationRecord
       token = Devise.friendly_token
       break token unless User.find_by(authentication_token: token)
     end
+  end
+
+  # Set up Auth0 management client for actions like adding users.
+  # See: https://github.com/auth0/ruby-auth0/blob/master/README.md#management-api-v2
+  private_class_method def self.auth0_management_client
+    @auth0_management_client ||= Auth0Client.new(
+      client_id: ENV["AUTH0_MANAGEMENT_CLIENT_ID"],
+      client_secret: ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"],
+      domain: ENV["AUTH0_MANAGEMENT_DOMAIN"],
+      api_version: 2
+    )
   end
 end

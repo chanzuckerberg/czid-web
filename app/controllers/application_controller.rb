@@ -25,26 +25,38 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && current_user.admin?
   end
 
-  # This method checks if auth0 token is present and sets the current user,
-  # or redirects to the homepage in case the token is not valid.
+  # This method checks if auth0 token is present and valid
+  # and then sets the current user,
   # This method allows auth0 authentication to work simultaneously
   # with legacy devise database mode.
   def sign_in_auth0_token!
     @auth0_token = auth0_decode_auth_token
     if @auth0_token
-      if @auth0_token[:authenticated]
+      if @auth0_token[:authenticated] && !user_signed_in?
         auth_payload = @auth0_token[:auth_payload]
         auth_user = User.find_by(email: auth_payload["email"])
         if auth_user.present?
-          sign_in auth_user, store: false
+          sign_in auth_user
           return
         end
       end
+    end
+  end
+
+  def authenticate_user!
+    if @auth0_token && !@auth0_token[:authenticated]
       # redirect user if auth0 token is invalid or expired
       respond_to do |format|
-        format.html { redirect_to(auth0_signout_url) }
+        format.html do
+          # we want to redirect user to auth0 login page in silent mode
+          # if the user still have a valid SSO token in the auth0 session
+          # the sliding session will be refreshed
+          redirect_to "/auth0/refresh_token?mode=expired"
+        end
         format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
       end
+    else
+      super
     end
   end
 

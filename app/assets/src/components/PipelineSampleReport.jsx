@@ -21,6 +21,7 @@ import { parseUrlParams } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import FilterTag from "~ui/controls/FilterTag";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 
 import {
   computeThresholdedTaxons,
@@ -188,6 +189,7 @@ class PipelineSampleReport extends React.Component {
       contigTaxidList: [],
       minContigSize: cachedMinContigSize || DEFAULT_MIN_CONTIG_SIZE,
       hoverRowId: null,
+      phyloTreeModalParams: null,
     };
 
     this.state = {
@@ -783,27 +785,21 @@ class PipelineSampleReport extends React.Component {
   downloadFastaUrl = params => {
     const { taxLevel, taxId } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
-    location.href = `/samples/${
-      this.sampleId
-    }/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
+    location.href = `/samples/${this.sampleId}/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
   // download Contig
   downloadContigUrl = params => {
     const { taxId } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
-    location.href = `/samples/${
-      this.sampleId
-    }/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
+    location.href = `/samples/${this.sampleId}/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
   };
 
   handleCoverageVizClick = params => {
     const { taxId, taxLevel, taxName, taxCommonName } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
 
-    const alignmentVizUrl = `/samples/${
-      this.sampleId
-    }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
+    const alignmentVizUrl = `/samples/${this.sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
     const speciesTaxons =
       taxLevel === "genus" ? this.genusToSpeciesMap[taxId] : [];
@@ -820,6 +816,18 @@ class PipelineSampleReport extends React.Component {
     } else {
       window.open(alignmentVizUrl);
     }
+  };
+
+  handlePhyloTreeModalOpen = phyloTreeModalParams => {
+    this.setState({
+      phyloTreeModalParams,
+    });
+  };
+
+  handlePhyloTreeModalClose = () => {
+    this.setState({
+      phyloTreeModalParams: null,
+    });
   };
 
   displayHoverActions = (taxInfo, reportDetails) => {
@@ -854,10 +862,6 @@ class PipelineSampleReport extends React.Component {
     return (
       <HoverActions
         className="link-tag"
-        admin={parseInt(this.admin)}
-        csrf={this.csrf}
-        projectId={this.projectId}
-        projectName={this.projectName}
         taxId={taxInfo.tax_id}
         taxLevel={taxInfo.tax_level}
         taxName={taxInfo.name}
@@ -887,12 +891,11 @@ class PipelineSampleReport extends React.Component {
           analyticsContext
         )}
         phyloTreeEnabled={phyloTreeEnabled}
-        onPhyloTreeModalOpened={() =>
-          logAnalyticsEvent(
-            "PipelineSampleReport_phylotree-link_clicked",
-            analyticsContext
-          )
-        }
+        onPhyloTreeModalOpened={withAnalytics(
+          this.handlePhyloTreeModalOpen,
+          "PipelineSampleReport_phylotree-link_clicked",
+          analyticsContext
+        )}
         pipelineVersion={reportPageParams.pipeline_version}
       />
     );
@@ -1254,11 +1257,7 @@ class PipelineSampleReport extends React.Component {
   };
 
   render() {
-    const filter_stats = `${
-      this.state.rows_passing_filters
-    } rows passing the above filters, out of ${
-      this.state.rows_total
-    } total rows.`;
+    const filter_stats = `${this.state.rows_passing_filters} rows passing the above filters, out of ${this.state.rows_total} total rows.`;
 
     let truncation_stats =
       this.report_details && this.report_details.pipeline_info.truncated
@@ -1273,9 +1272,7 @@ class PipelineSampleReport extends React.Component {
       subsampled_reads &&
       subsampled_reads <
         this.report_details.pipeline_info.adjusted_remaining_reads
-        ? `Report values are computed from ${subsampled_reads} reads subsampled randomly from the ${
-            this.report_details.pipeline_info.adjusted_remaining_reads
-          } reads passing host and quality filters.`
+        ? `Report values are computed from ${subsampled_reads} reads subsampled randomly from the ${this.report_details.pipeline_info.adjusted_remaining_reads} reads passing host and quality filters.`
         : "";
     const disable_filter = this.anyFilterSet() ? (
       <span
@@ -1614,6 +1611,17 @@ class RenderMarkup extends React.Component {
                 <div className="loading-container">
                   <LoadingLabel />
                 </div>
+              )}
+              {parent.state.phyloTreeModalParams && (
+                <PhyloTreeCreationModal
+                  admin={parent.admin}
+                  csrf={parent.csrf}
+                  taxonId={parent.state.phyloTreeModalParams.taxId}
+                  taxonName={parent.state.phyloTreeModalParams.taxName}
+                  projectId={parent.projectId}
+                  projectName={parent.projectName}
+                  onClose={parent.handlePhyloTreeModalClose}
+                />
               )}
             </div>
           </div>

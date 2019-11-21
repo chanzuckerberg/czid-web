@@ -62,18 +62,17 @@ class PipelineTab extends React.Component {
     const { pipelineInfo } = this.props;
     const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
-    const metadataLink = linkLabel &&
-      link && (
-        <a
-          className={cs.vizLink}
-          href={link}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {linkLabel}
-          <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-        </a>
-      );
+    const metadataLink = linkLabel && link && (
+      <a
+        className={cs.vizLink}
+        href={link}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {linkLabel}
+        <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+      </a>
+    );
 
     return (
       <div className={cs.field} key={field.key}>
@@ -91,8 +90,11 @@ class PipelineTab extends React.Component {
   };
 
   getReadCounts = async () => {
-    const { sampleId } = this.props;
-    const pipelineResults = await getSamplePipelineResults(sampleId);
+    const { sampleId, pipelineRun } = this.props;
+    const pipelineResults = await getSamplePipelineResults(
+      sampleId,
+      pipelineRun && pipelineRun.pipeline_version
+    );
 
     if (pipelineResults && pipelineResults["displayed_data"]) {
       this.setState({
@@ -109,7 +111,7 @@ class PipelineTab extends React.Component {
 
     const totalReads = this.props.pipelineRun.total_reads;
     let readsAfter = step["reads_after"];
-    let percentReads = (readsAfter / totalReads * 100).toFixed(2);
+    let percentReads = ((readsAfter / totalReads) * 100).toFixed(2);
 
     return (
       <div className={cs.field}>

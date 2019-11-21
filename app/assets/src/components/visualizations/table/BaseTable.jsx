@@ -85,15 +85,21 @@ class BaseTable extends React.Component {
     );
   }
 
-  _sortableHeaderRenderer({
+  _sortableHeaderRenderer = ({
     columnData,
     dataKey,
     label,
     sortBy,
     sortDirection,
-  }) {
+  }) => {
+    const { sortedHeaderClassName } = this.props;
     return (
-      <div className={cs.sortableHeader}>
+      <div
+        className={cx(
+          cs.sortableHeader,
+          sortBy === dataKey && sortedHeaderClassName
+        )}
+      >
         {columnData ? (
           <ColumnHeaderTooltip
             trigger={<span className={cs.label}>{label}</span>}
@@ -113,7 +119,7 @@ class BaseTable extends React.Component {
         />
       </div>
     );
-  }
+  };
 
   handleColumnChange = selectedColumns => {
     const { onActiveColumnsChange, protectedColumns } = this.props;
@@ -335,6 +341,7 @@ BaseTable.propTypes = {
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
+  sortedHeaderClassName: PropTypes.string,
 
   selectableColumnClassName: PropTypes.string,
   // make the table selectable, by setting a selectable key

@@ -350,8 +350,12 @@ const getSamplesLocations = ({ domain, filters, projectId, search }) =>
     },
   });
 
-const getSamplePipelineResults = id =>
-  get(`/samples/${id}/results_folder.json`);
+const getSamplePipelineResults = (sampleId, pipelineVersion) =>
+  get(`/samples/${sampleId}/results_folder.json`, {
+    params: {
+      pipeline_version: pipelineVersion,
+    },
+  });
 
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
 const getTaxaWithReadsSuggestions = (query, sampleIds) =>

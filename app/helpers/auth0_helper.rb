@@ -2,10 +2,10 @@ module Auth0Helper
   def auth0_logout
     # Check presence of Auth0Helper#auth0_session
     if auth0_session.present?
-      auth0_remove_session
-      { using_auth0: true, auth0_logout_url: auth0_signout_url }
+      auth0_remove_application_session
+      true
     else
-      { using_auth0: false }
+      false
     end
   end
 
@@ -15,26 +15,29 @@ module Auth0Helper
       { authenticated: true, auth_payload: auth_payload, auth_header: auth_header }
     end
   rescue JWT::VerificationError, JWT::DecodeError
-    auth0_remove_session
     { authenticated: false }
   end
 
   def auth0_session
-    session[:jwt_id_token]
+    session[:auth0_credentials]
   end
 
   delegate :present?, to: :auth0_session, prefix: true
 
   def auth0_session=(value)
-    session[:jwt_id_token] = value
+    session[:auth0_credentials] = value.present? && value["id_token"].present? ? value : nil
   end
 
   protected
 
-  def auth0_remove_session
-    session.delete(:jwt_id_token) if session
+  # Remove auth0 session from Application Session Layer
+  # (see https://auth0.com/docs/sessions/concepts/session-layers)
+  def auth0_remove_application_session
+    session.delete(:auth0_credentials)
   end
 
+  # URL used to remove auth0 session from Auth0 Session Layer
+  # (see https://auth0.com/docs/sessions/concepts/session-layers)
   def auth0_signout_url
     domain = ENV["AUTH0_DOMAIN"]
     client_id = ENV["AUTH0_CLIENT_ID"]
@@ -48,8 +51,8 @@ module Auth0Helper
   def http_token
     if request.headers['Authorization'].present?
       request.headers['Authorization'].split(' ').last
-    else
-      session[:jwt_id_token]
+    elsif auth0_session.present?
+      auth0_session["id_token"]
     end
   end
 

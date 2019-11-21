@@ -9,7 +9,6 @@ import {
   keys,
   map,
   merge,
-  pick,
   some,
   values,
 } from "lodash/fp";
