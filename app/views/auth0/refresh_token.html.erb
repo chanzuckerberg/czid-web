@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
-  <form id="refresh_form" action="/auth/auth0?<%= {mode: @mode}.to_query %>" method="POST">
-    <input id="refresh_input" type="hidden" name="<%= request_forgery_protection_token %>" value="<%=form_authenticity_token%>">
+  <form id="refresh_form" action="/auth/auth0?<%={mode: @mode, prompt: @prompt, connection: @connection}.to_query%>" method="POST">
+    <input type="hidden" name="<%=request_forgery_protection_token %>" value="<%=form_authenticity_token%>">
+    <input type="hidden" name="prompt" value="<%=@prompt%>">
+    <input type="hidden" name="connection" value="<%=@connection%>">
   </form>
   <script>document.getElementById("refresh_form").submit();</script>
 </html>

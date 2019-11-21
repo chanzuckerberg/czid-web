@@ -15,7 +15,7 @@ class SessionsController < Devise::SessionsController
   # we need to logout user from auth0 first to prevent it
   # from being authenticated using both strategies at once
   def new
-    if auth0_logout
+    if auth0_logout || get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
       redirect_to after_sign_out_path_for(:user)
     else
       super
