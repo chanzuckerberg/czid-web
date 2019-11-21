@@ -99,15 +99,6 @@ class PipelineReportService
     )
     @timer.split("compute_agg_scores")
 
-    # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
-    # species id rather than genus id, so select those species ids as well.
-    # TODO: check if this step is still necessary after the data has been cleaned up.
-    species_with_missing_genus = []
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
-      species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
-    end
-    @timer.split("missing genus")
-
     # TODO: in theory we should use TaxonLineage::fetch_lineage_by_taxid
     lineage_version = PipelineRun
                       .select("alignment_configs.lineage_version")
@@ -121,7 +112,15 @@ class PipelineReportService
     ]
 
     tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
-    tax_ids += species_with_missing_genus
+    # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
+    # species id rather than genus id, so select those species ids as well.
+    # TODO: check if this step is still necessary after the data has been cleaned up.
+    species_with_missing_genus = []
+    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
+      species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
+    end
+    tax_ids.concat(species_with_missing_genus)
+
     lineage_by_tax_id = TaxonLineage
                         .where(taxid: tax_ids)
                         .where('? BETWEEN version_start AND version_end', lineage_version)
