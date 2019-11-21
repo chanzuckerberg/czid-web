@@ -7,9 +7,12 @@ Rails.application.routes.draw do
     registrations: 'registrations',
   }
 
-  get 'auth/auth0/callback' => 'auth0#callback'
-  post 'auth0/request_password_reset' => 'auth0#request_password_reset'
-  get 'auth0/refresh_token' => 'auth0#refresh_token'
+  get 'auth/auth0/callback/' => 'auth0#callback'
+  namespace :auth0 do
+    post :request_password_reset
+    get :refresh_token
+    get :background_refresh
+  end
 
   resources :samples do
     put :reupload_source, on: :member

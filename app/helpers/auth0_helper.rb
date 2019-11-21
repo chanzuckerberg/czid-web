@@ -15,18 +15,17 @@ module Auth0Helper
       { authenticated: true, auth_payload: auth_payload, auth_header: auth_header }
     end
   rescue JWT::VerificationError, JWT::DecodeError
-    auth0_remove_application_session
     { authenticated: false }
   end
 
   def auth0_session
-    session[:jwt_id_token]
+    session[:auth0_credentials]
   end
 
   delegate :present?, to: :auth0_session, prefix: true
 
   def auth0_session=(value)
-    session[:jwt_id_token] = value
+    session[:auth0_credentials] = value.present? && value["id_token"].present? ? value : nil
   end
 
   protected
@@ -34,7 +33,7 @@ module Auth0Helper
   # Remove auth0 session from Application Session Layer
   # (see https://auth0.com/docs/sessions/concepts/session-layers)
   def auth0_remove_application_session
-    session.delete(:jwt_id_token)
+    session.delete(:auth0_credentials)
   end
 
   # URL used to remove auth0 session from Auth0 Session Layer
@@ -47,35 +46,13 @@ module Auth0Helper
     url.to_s
   end
 
-  # See: https://auth0.com/docs/api/authentication#authorization-code-flow
-  def auth0_login_url(silent_login = false)
-    client_id = ENV["AUTH0_CLIENT_ID"]
-    connection = ENV["AUTH0_CONNECTION"]
-    domain = ENV["AUTH0_DOMAIN"]
-    state = SecureRandom.hex(24)
-    session['omniauth.state'] = state # https://github.com/auth0/omniauth-auth0/issues/49
-    request_params = {
-      client_id: client_id,
-      connection: connection,
-      redirect_uri: URI.join(root_url, 'auth/auth0/callback').to_s,
-      response_type: "code",
-      state: state,
-      scope: "openid email",
-      prompt: silent_login ? "none" : "login",
-    }
-    url = URI::HTTPS.build(host: domain,
-                           path: '/authorize',
-                           query: request_params.to_query)
-    url.to_s
-  end
-
   private
 
   def http_token
     if request.headers['Authorization'].present?
       request.headers['Authorization'].split(' ').last
-    else
-      session[:jwt_id_token]
+    elsif auth0_session.present?
+      auth0_session["id_token"]
     end
   end
 
