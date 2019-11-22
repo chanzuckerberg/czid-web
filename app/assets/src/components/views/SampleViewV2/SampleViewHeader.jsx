@@ -30,7 +30,6 @@ export default function SampleViewHeader({
   view,
 }) {
   const currentUser = useContext(UserContext);
-  console.log(currentUser);
 
   const renderVersion = () => {
     if (get("pipeline_version", pipelineRun)) {
