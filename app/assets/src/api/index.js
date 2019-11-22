@@ -28,8 +28,8 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
-const getSampleReportData = (id, params) =>
-  get(`/samples/${id}/report_v2`, { params });
+const getSampleReportData = ({ sampleId, background }) =>
+  get(`/samples/${sampleId}/report_v2.json?background=${background}`);
 
 const getSampleReportInfo = (id, params) =>
   get(`/samples/${id}/report_info${params}`);
@@ -218,6 +218,8 @@ const getSampleStats = ({ domain, filters, projectId, search }) =>
     },
   });
 
+const getSample = ({ sampleId }) => get(`/samples/${sampleId}/show_v2.json`);
+
 const getProjectDimensions = ({ domain, filters, projectId, search }) =>
   get("/projects/dimensions.json", {
     params: {
@@ -229,6 +231,8 @@ const getProjectDimensions = ({ domain, filters, projectId, search }) =>
   });
 
 const getSamplesV1 = params => get("/samples.json", { params });
+
+const getProject = ({ projectId }) => get(`/projects/${projectId}.json`);
 
 const getProjects = ({
   basic,
@@ -385,8 +389,10 @@ export {
   getCoverageVizData,
   getCoverageVizSummary,
   getPhyloTree,
+  getProject,
   getProjectDimensions,
   getProjects,
+  getSample,
   getSampleDimensions,
   getSampleReportData,
   getSampleReportInfo,

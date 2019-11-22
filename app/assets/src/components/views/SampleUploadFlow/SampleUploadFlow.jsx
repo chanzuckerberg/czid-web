@@ -148,21 +148,20 @@ class SampleUploadFlow extends React.Component {
             onDirty={this.metadataChanged}
           />
         )}
-        {this.state.samples &&
-          this.state.metadata && (
-            <ReviewStep
-              metadata={this.state.metadata}
-              samples={this.state.samples}
-              uploadType={this.state.uploadType}
-              project={this.state.project}
-              sampleNamesToFiles={this.state.sampleNamesToFiles}
-              hostGenomes={this.props.hostGenomes}
-              visible={this.state.currentStep === "review"}
-              onUploadStatusChange={this.onUploadStatusChange}
-              onStepSelect={this.handleStepSelect}
-              onUploadComplete={this.onUploadComplete}
-            />
-          )}
+        {this.state.samples && this.state.metadata && (
+          <ReviewStep
+            metadata={this.state.metadata}
+            samples={this.state.samples}
+            uploadType={this.state.uploadType}
+            project={this.state.project}
+            sampleNamesToFiles={this.state.sampleNamesToFiles}
+            hostGenomes={this.props.hostGenomes}
+            visible={this.state.currentStep === "review"}
+            onUploadStatusChange={this.onUploadStatusChange}
+            onStepSelect={this.handleStepSelect}
+            onUploadComplete={this.onUploadComplete}
+          />
+        )}
       </div>
     );
   };

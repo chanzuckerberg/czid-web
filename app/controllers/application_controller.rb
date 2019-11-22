@@ -103,8 +103,8 @@ class ApplicationController < ActionController::Base
     raise "action doesn't check against access control" unless @access_checked
   end
 
-  def get_background_id(sample)
-    background_id = params[:background_id].to_i
+  def get_background_id(sample, background_id = nil)
+    background_id = (background_id || params[:background_id]).to_i
     if background_id > 0
       viewable_background_ids = current_power.backgrounds.pluck(:id)
       if viewable_background_ids.include?(background_id)

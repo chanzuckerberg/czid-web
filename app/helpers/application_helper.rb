@@ -22,8 +22,9 @@ module ApplicationHelper
     str
   end
 
-  def request_context
+  def user_context
     {
+      admin: current_user ? current_user.role == 1 : false,
       allowedFeatures: current_user && current_user.allowed_feature_list,
     }
   end
