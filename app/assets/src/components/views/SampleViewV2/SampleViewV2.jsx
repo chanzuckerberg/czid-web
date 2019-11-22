@@ -10,6 +10,7 @@ import {
   map,
   merge,
   pull,
+  set,
   some,
   values,
 } from "lodash/fp";
@@ -194,7 +195,9 @@ export default class SampleViewV2 extends React.Component {
   };
 
   filterTaxon = ({ row, taxon }) => {
-    return !taxon || row.taxId === taxon || row.genus_tax_id === taxon;
+    return (
+      !taxon || row.taxId === taxon.taxId || row.genus_tax_id === taxon.taxId
+    );
   };
 
   filterCategories = ({ row, categories, subcategories }) => {
@@ -380,7 +383,7 @@ export default class SampleViewV2 extends React.Component {
   };
 
   handleOptionChanged = ({ key, value }) => {
-    const { reportData, selectedOptions } = this.state;
+    const { selectedOptions } = this.state;
 
     if (deepEqual(selectedOptions[key], value)) {
       return;
@@ -389,6 +392,32 @@ export default class SampleViewV2 extends React.Component {
     const newSelectedOptions = Object.assign({}, selectedOptions, {
       [key]: value,
     });
+
+    this.refreshDataFromOptionsChange({ key, newSelectedOptions });
+  };
+
+  handleFilterRemoved = ({ key, path, value }) => {
+    const { selectedOptions } = this.state;
+
+    // path is optional and used to access nested attributes
+    // if path is not defined use key to access the attribute
+    path = path || key;
+    const optionByPath = get(path, selectedOptions);
+
+    const newSelectedOptions = set(
+      path,
+      Array.isArray(optionByPath)
+        ? pull(value, get(path, newSelectedOptions))
+        : null,
+      selectedOptions
+    );
+
+    this.refreshDataFromOptionsChange({ key, newSelectedOptions });
+  };
+
+  refreshDataFromOptionsChange = ({ key, newSelectedOptions }) => {
+    const { reportData, selectedOptions } = this.state;
+
     // different behavior given type of option
     switch (key) {
       // - min contig size: recompute contig statistics with new size and refresh display
@@ -435,16 +464,6 @@ export default class SampleViewV2 extends React.Component {
         this.persistReportOptions();
       }
     );
-  };
-
-  handleFilterRemoved = ({ key, value }) => {
-    const { selectedOptions } = this.state;
-
-    console.log(selectedOptions[key], value, pull(value, selectedOptions[key]));
-    const newSelectedOptions = Object.assign({}, selectedOptions, {
-      key: pull(value, selectedOptions[key]),
-    });
-    this.setState({ selectedOptions: newSelectedOptions });
   };
 
   toggleSidebar = ({ mode }) => {

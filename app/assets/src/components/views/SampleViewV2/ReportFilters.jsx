@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { flatten, forEach, getOr, transform, values } from "lodash/fp";
+import { flatten, forEach, getOr, map, transform, values } from "lodash/fp";
 
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
@@ -28,26 +28,28 @@ class ReportFilters extends React.Component {
     onFilterChanged({ key, value });
   };
 
-  handleRemoveFilter = ({ key, value }) => {
+  handleRemoveFilter = ({ key, path, value }) => {
     const { onFilterRemoved } = this.props;
-    console.log("handleRemoveFilter", key, value);
     logAnalyticsEvent("SampleView_filter_removed", {
       key,
+      path,
       value,
     });
-    onFilterRemoved({ key, value });
+    onFilterRemoved({ key, path, value });
   };
 
-  renderFilterTag = ({ category, idx }) => {
+  renderFilterTag = ({ key, label, path, value, idx }) => {
+    label = label || value;
     return (
       <FilterTag
         className={cs.filterTag}
-        key={`category_filter_tag_${idx}`}
-        text={category}
+        key={`${label}_filter_tag_${idx}`}
+        text={label}
         onClose={() =>
           this.handleRemoveFilter({
-            key: "categories",
-            value: category,
+            key,
+            path,
+            value,
           })
         }
       />
@@ -70,14 +72,48 @@ class ReportFilters extends React.Component {
     );
   };
 
+  renderCategoryFilterTags = () => {
+    const { selected } = this.props;
+    return flatten(
+      map("name", CATEGORIES).map((category, i) => {
+        const categoryTags = [];
+        if (
+          getOr([], ["categories", "categories"], selected).includes(category)
+        ) {
+          categoryTags.push(
+            this.renderFilterTag({
+              key: "categories",
+              path: "categories.categories",
+              value: category,
+              idx: i,
+            })
+          );
+        }
+        getOr([], ["categories", "subcategories", category], selected).map(
+          (subcategory, j) => {
+            categoryTags.push(
+              this.renderFilterTag({
+                key: "categories",
+                path: `categories.subcategories.${category}`,
+                value: subcategory,
+                idx: `${i}.${j}`,
+              })
+            );
+          }
+        );
+        return categoryTags;
+      })
+    );
+  };
+
   render = () => {
     const { backgrounds, sampleId, selected, view } = this.props;
-    console.log(selected);
     return (
       <React.Fragment>
         <div className={cs.filterList}>
           <div className={cs.filterListElement}>
             <SearchBox
+              clearOnSelect
               rounded
               levelLabel
               serverSearchAction="choose_taxon"
@@ -86,12 +122,16 @@ class ReportFilters extends React.Component {
                 args: "species,genus",
                 sample_id: sampleId,
               }}
-              onResultSelect={(_, { result }) =>
-                this.handleFilterChange({
+              onResultSelect={(_, { result }) => {
+                return this.handleFilterChange({
                   key: "taxon",
-                  value: result.taxid,
-                })
-              }
+                  value: {
+                    taxId: result.taxid,
+                    taxLevel: result.level,
+                    name: result.title,
+                  },
+                });
+              }}
               placeholder="Taxon name"
             />
           </div>
@@ -207,31 +247,16 @@ class ReportFilters extends React.Component {
           )}
         </div>
         <div className={cs.tagList}>
+          {selected.taxon &&
+            this.renderFilterTag({
+              key: "taxon",
+              label: selected.taxon.name,
+              value: selected.taxon,
+            })}
           {selected.thresholds.map((threshold, i) =>
             this.renderThresholdFilterTag({ threshold, idx: i })
           )}
-          {flatten(
-            getOr([], ["categories", "categories"], selected).map(
-              (category, i) => {
-                const categoryTags = [
-                  this.renderFilterTag({ category, idx: i }),
-                ];
-                getOr(
-                  [],
-                  ["categories", "subcategories", category],
-                  selected
-                ).map((subcategory, j) => {
-                  categoryTags.push(
-                    this.renderFilterTag({
-                      category: subcategory,
-                      idx: `${i}.${j}`,
-                    })
-                  );
-                });
-                return categoryTags;
-              }
-            )
-          )}
+          {this.renderCategoryFilterTags()}
         </div>
       </React.Fragment>
     );
