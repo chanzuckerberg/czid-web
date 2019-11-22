@@ -312,7 +312,9 @@ class SampleView extends React.Component {
       type = "inProgress";
       if (pipelineRun && pipelineRun.version && pipelineRun.version.pipeline) {
         linkText = "View Pipeline Visualization";
-        link = `/samples/${sample.id}/pipeline_viz/${pipelineRun.version.pipeline}`;
+        link = `/samples/${sample.id}/pipeline_viz/${
+          pipelineRun.version.pipeline
+        }`;
       }
     } else {
       // Some kind of error or warning has occurred.
@@ -605,6 +607,7 @@ class SampleView extends React.Component {
                 reportDetails={reportDetails}
                 editable={this.props.canEdit}
                 view={this.state.view}
+                reportVersion={1}
               />
             </ViewHeader.Controls>
           </ViewHeader>

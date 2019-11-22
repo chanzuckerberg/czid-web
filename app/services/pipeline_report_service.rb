@@ -52,9 +52,10 @@ class PipelineReportService
     nil => "uncategorized",
   }.freeze
 
-  def initialize(pipeline_run_id, background_id)
+  def initialize(pipeline_run_id, background_id, sort_by = nil)
     @pipeline_run_id = pipeline_run_id
     @background_id = background_id
+    @sort_by = sort_by ? sort_by : DEFAULT_SORT_PARAM
   end
 
   def call
@@ -152,11 +153,11 @@ class PipelineReportService
     encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
     @timer.split("encode_taxon_lineage")
 
-    sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
+    sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, @sort_by)
     @timer.split("sort_genus_by_aggregate_score")
 
     counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
-      genus[:children].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][:agg_score] }.reverse!
+      genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][@sort_by] }.reverse!
       genus
     end
     @timer.split("sort_species_within_each_genus")
@@ -316,10 +317,10 @@ class PipelineReportService
         + (species[:nr].present? ? genus_nr_zscore.abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
       genus[:agg_score] = species[:agg_score] if genus[:agg_score].nil? || genus[:agg_score] < species[:agg_score]
       # TODO : more this to a more logical place
-      if !genus[:children]
-        genus[:children] = [tax_id]
+      if !genus[:species_tax_ids]
+        genus[:species_tax_ids] = [tax_id]
       else
-        genus[:children].append(tax_id)
+        genus[:species_tax_ids].append(tax_id)
       end
     end
   end
@@ -369,7 +370,7 @@ class PipelineReportService
     sorted_genus_tax_ids.each do |genus_tax_id|
       genus_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS][genus_tax_id]
       highlighted_children = false
-      genus_taxon[:children].each do |species_tax_id|
+      genus_taxon[:species_tax_ids].each do |species_tax_id|
         return highlighted_tax_ids if highlighted_tax_ids.length >= ui_config.top_n
 
         species_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_tax_id]

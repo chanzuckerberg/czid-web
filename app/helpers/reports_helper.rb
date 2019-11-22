@@ -67,7 +67,7 @@ module ReportsHelper
     if tax_level == TaxonCount::TAX_LEVEL_SPECIES
       parent_name = lineage_by_tax_id[tax_info[:genus_tax_id]]["genus_name"]
     else
-      lineage_id_by_species = lineage_by_tax_id.keys & tax_info[:children]
+      lineage_id_by_species = lineage_by_tax_id.keys & tax_info[:species_tax_ids]
       parent_name = if lineage_by_tax_id[tax_id]
                       lineage_by_tax_id[tax_id]["family_name"]
                     # If genus id is undefined, then find taxon lineage by species id instead.
@@ -107,5 +107,58 @@ module ReportsHelper
     fake_genus_info[:tax_level] = TaxonCount::TAX_LEVEL_GENUS
     tax_info[:genus_tax_id] = fake_genus_id
     fake_genus_info
+  end
+
+  def report_csv_from_params_v2(sample, params)
+    background_id = params[:background_id] || sample.default_background_id
+    background_id = background_id.to_i
+    pipeline_run = select_pipeline_run(sample, params[:pipeline_version])
+    pipeline_run_id = pipeline_run ? pipeline_run.id : nil
+    return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
+    # TODO: pass in sort_by to PipelineReportService from params
+    tax_details = JSON.parse(PipelineReportService.call(pipeline_run_id, background_id))
+
+    rows = []
+    tax_details["sortedGenus"].each do |genus_tax_id|
+      genus_info = tax_details["counts"]["2"][genus_tax_id.to_s]
+      # add the hash keys in order for csv generation
+      genus_flat_hash = {}
+      genus_flat_hash[["tax_id"]] = genus_tax_id
+      genus_flat_hash[["tax_level"]] = 2
+      genus_flat_hash = genus_flat_hash.merge(flat_hash(genus_info))
+      rows << genus_flat_hash
+
+      genus_info["species_tax_ids"].each do |species_tax_id|
+        species_info = tax_details["counts"]["1"][species_tax_id.to_s]
+        species_flat_hash = flat_hash(species_info)
+        species_flat_hash[["tax_id"]] = species_tax_id
+        species_flat_hash[["tax_level"]] = 1
+        rows << species_flat_hash
+      end
+    end
+
+    return generate_report_csv(rows)
+  end
+
+  def generate_report_csv(rows)
+    flat_keys = rows[0].keys
+    attribute_names = flat_keys.map { |k| k.map(&:to_s).join("_") }
+    CSVSafe.generate(headers: true) do |csv|
+      csv << attribute_names
+      rows.each do |tax_info|
+        csv << tax_info.values_at(*flat_keys)
+      end
+    end
+  end
+
+  def flat_hash(h, f = [], g = {})
+    return g.update(f => h) unless h.is_a? Hash
+    h.each { |k, r| flat_hash(r, f + [k], g) }
+    g
+    # example: turn    { :a => { :b => { :c => 1,
+    #                                    :d => 2 },
+    #                            :e => 3 },
+    #                    :f => 4 }
+    # into    {[:a, :b, :c] => 1, [:a, :b, :d] => 2, [:a, :e] => 3, [:f] => 4}
   end
 end

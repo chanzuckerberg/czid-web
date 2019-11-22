@@ -14,7 +14,7 @@ import {
 
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
-    const { backgroundId, pipelineRun, sample } = this.props;
+    const { backgroundId, pipelineRun, sample, reportVersion } = this.props;
 
     let resParams = {};
     const stringer = require("querystring");
@@ -27,7 +27,11 @@ class SampleViewControls extends React.Component {
     let v = pipelineRun && pipelineRun.pipeline_version;
     if (v) resParams["pipeline_version"] = v;
 
-    let res = `/samples/${sample.id}/report_csv`;
+    // Need to know what version of the report table we're looking at and request accordingly
+    let res =
+      reportVersion === 1
+        ? `/samples/${sample.id}/report_csv`
+        : `/samples/${sample.id}/report_csv_v2`;
     res += `?${stringer.stringify(resParams)}`;
     location.href = res;
   };
@@ -141,6 +145,7 @@ SampleViewControls.propTypes = {
   pipelineRun: PropTypes.PipelineRun,
   editable: PropTypes.bool,
   view: PropTypes.string,
+  reportVersion: PropTypes.number,
 };
 
 export default SampleViewControls;
