@@ -37,33 +37,23 @@ export const getDownloadDropdownOptions = pipelineRun => {
 // whether to open link in new page.
 const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
   [NON_HOST_READS_LABEL]: {
-    path: `/samples/${sampleId}/nonhost_fasta?pipeline_version=${
-      pipelineRun.pipeline_version
-    }`,
+    path: `/samples/${sampleId}/nonhost_fasta?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: false,
   },
   [NON_HOST_CONTIGS_LABEL]: {
-    path: `/samples/${sampleId}/contigs_fasta?pipeline_version=${
-      pipelineRun.pipeline_version
-    }`,
+    path: `/samples/${sampleId}/contigs_fasta?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: false,
   },
   [NON_HOST_CONTIGS_MAPPING_LABEL]: {
-    path: `/samples/${sampleId}/contigs_summary?pipeline_version=${
-      pipelineRun.pipeline_version
-    }`,
+    path: `/samples/${sampleId}/contigs_summary?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: false,
   },
   [UNMAPPED_READS_LABEL]: {
-    path: `/samples/${sampleId}/unidentified_fasta?pipeline_version=${
-      pipelineRun.pipeline_version
-    }`,
+    path: `/samples/${sampleId}/unidentified_fasta?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: false,
   },
   [RESULTS_FOLDER_LABEL]: {
-    path: `/samples/${sampleId}/results_folder?pipeline_version=${
-      pipelineRun.pipeline_version
-    }`,
+    path: `/samples/${sampleId}/results_folder?pipeline_version=${pipelineRun.pipeline_version}`,
     newPage: true,
   },
   [PIPELINE_VIZ_LABEL]: {

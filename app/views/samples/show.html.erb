@@ -24,6 +24,6 @@
       amr: JSON.parse('<%= raw escape_json(@amr_counts) %>'),
       allBackgrounds: JSON.parse('<%= raw escape_json(@background_models) %>'),
       savedParamValues: JSON.parse('<%= raw escape_json(@saved_param_values) %>'),
-    }, 'sample_view', JSON.parse('<%= raw escape_json(request_context)%>'));
+    }, 'sample_view', JSON.parse('<%= raw escape_json(user_context)%>'));
   <% end %>
 </div>

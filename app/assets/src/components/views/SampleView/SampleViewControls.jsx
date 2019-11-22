@@ -14,15 +14,14 @@ import {
 
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
-    const { reportPageParams, pipelineRun, sample } = this.props;
+    const { backgroundId, pipelineRun, sample } = this.props;
 
     let resParams = {};
     const stringer = require("querystring");
 
     // Set the right CSV background ID.
     // Should have background_id param in all cases now.
-    const givenBackgroundId = reportPageParams.background_id;
-    if (givenBackgroundId) resParams["background_id"] = givenBackgroundId;
+    if (backgroundId) resParams["background_id"] = backgroundId;
 
     // Set the right pipeline version.
     let v = pipelineRun && pipelineRun.pipeline_version;
@@ -107,7 +106,7 @@ class SampleViewControls extends React.Component {
   }
 
   render() {
-    const { reportPresent, pipelineRun, canEdit } = this.props;
+    const { reportPresent, pipelineRun, editable } = this.props;
 
     if (reportPresent) {
       const downloadOptions = [
@@ -126,7 +125,7 @@ class SampleViewControls extends React.Component {
           direction="left"
         />
       );
-    } else if (canEdit) {
+    } else if (editable) {
       return <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />;
     } else {
       return <div />;
@@ -135,17 +134,12 @@ class SampleViewControls extends React.Component {
 }
 
 SampleViewControls.propTypes = {
+  backgroundId: PropTypes.number,
   reportPresent: PropTypes.bool,
   sample: PropTypes.Sample,
   project: PropTypes.Project,
   pipelineRun: PropTypes.PipelineRun,
-  reportDetails: PropTypes.ReportDetails,
-  reportPageParams: PropTypes.shape({
-    pipeline_version: PropTypes.string,
-    // TODO (gdingle): standardize on string or number
-    background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  }),
-  canEdit: PropTypes.bool,
+  editable: PropTypes.bool,
   view: PropTypes.string,
 };
 

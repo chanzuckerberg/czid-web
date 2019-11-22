@@ -121,7 +121,10 @@ class PhyloTreesController < ApplicationController
   def choose_taxon
     taxon_search_args = [params[:query]]
     taxon_search_args << params[:args].split(",") if params[:args].present?
-    taxon_search_args << { project_id: params[:project_id] }
+    filters = {}
+    filters[:project_id] = params[:project_id]
+    filters[:samples] = Sample.where(id: params[:sample_id]) if params[:sample_id]
+    taxon_search_args << filters
     taxon_list = taxon_search(*taxon_search_args)
     render json: JSON.dump(taxon_list)
   end

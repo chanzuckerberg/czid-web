@@ -30,7 +30,10 @@ import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 
-const SCALE_OPTIONS = [["Log", "symlog"], ["Lin", "linear"]];
+const SCALE_OPTIONS = [
+  ["Log", "symlog"],
+  ["Lin", "linear"],
+];
 const SORT_SAMPLES_OPTIONS = [
   { text: "Alphabetical", value: "alpha" },
   { text: "Cluster", value: "cluster" },
@@ -563,10 +566,8 @@ class SamplesHeatmapView extends React.Component {
     return (
       <p className={cs.loadingIndicator}>
         <i className="fa fa-spinner fa-pulse fa-fw" />
-        Loading for {numSamples} samples. Please wait up to {estimate} second{estimate >
-        1
-          ? "s"
-          : ""}...
+        Loading for {numSamples} samples. Please wait up to {estimate} second
+        {estimate > 1 ? "s" : ""}...
       </p>
     );
   }
