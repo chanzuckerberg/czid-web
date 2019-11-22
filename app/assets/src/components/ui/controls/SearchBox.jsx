@@ -52,7 +52,8 @@ class SearchBox extends React.Component {
   };
 
   handleResultSelect(e, { result }) {
-    this.setState({ value: result.title });
+    const { clearOnSelect } = this.props;
+    this.setState({ value: clearOnSelect ? "" : result.title });
     this.props.onResultSelect(e, { result });
   }
 
@@ -123,6 +124,10 @@ class SearchBox extends React.Component {
   }
 }
 
+SearchBox.defaultProps = {
+  clearOnSelect: false,
+};
+
 SearchBox.propTypes = {
   // Provide either clientSearchSource or serverSearchAction.
   // If clientSearchSource is provided, query matching will happen on the client side (use for small data).
@@ -136,6 +141,8 @@ SearchBox.propTypes = {
   initialValue: PropTypes.string,
   onResultSelect: PropTypes.func,
   placeholder: PropTypes.string,
+  // indicates if field is cleared when user selects a result
+  clearOnSelect: PropTypes.bool,
 };
 
 export default SearchBox;

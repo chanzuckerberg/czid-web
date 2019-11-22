@@ -10,6 +10,7 @@ import {
   map,
   merge,
   pull,
+  set,
   some,
   values,
 } from "lodash/fp";
@@ -85,7 +86,7 @@ export default class SampleViewV2 extends React.Component {
       nameType: "Scientific name",
       readSpecificity: 0,
       minContigSize: 4,
-      categories: [],
+      categories: {},
       thresholds: [],
     };
   };
@@ -194,7 +195,9 @@ export default class SampleViewV2 extends React.Component {
   };
 
   filterTaxon = ({ row, taxon }) => {
-    return !taxon || row.taxId === taxon || row.genus_tax_id === taxon;
+    return (
+      !taxon || row.taxId === taxon.taxId || row.genus_tax_id === taxon.taxId
+    );
   };
 
   filterCategories = ({ row, categories, subcategories }) => {
@@ -240,9 +243,9 @@ export default class SampleViewV2 extends React.Component {
 
         switch (operator) {
           case ">=":
-            return parsedValue < parsedThresholdValue;
+            return parsedThresholdValue < parsedValue;
           case "<=":
-            return parsedValue > parsedThresholdValue;
+            return parsedThresholdValue > parsedValue;
         }
         return true;
       }, thresholds);
@@ -380,7 +383,7 @@ export default class SampleViewV2 extends React.Component {
   };
 
   handleOptionChanged = ({ key, value }) => {
-    const { reportData, selectedOptions } = this.state;
+    const { selectedOptions } = this.state;
 
     if (deepEqual(selectedOptions[key], value)) {
       return;
@@ -389,6 +392,41 @@ export default class SampleViewV2 extends React.Component {
     const newSelectedOptions = Object.assign({}, selectedOptions, {
       [key]: value,
     });
+
+    this.refreshDataFromOptionsChange({ key, newSelectedOptions });
+  };
+
+  handleFilterRemoved = ({ key, subpath, value }) => {
+    const { selectedOptions } = this.state;
+
+    let newSelectedOptions = { ...selectedOptions };
+    switch (key) {
+      case "categories":
+        newSelectedOptions.categories = set(
+          subpath,
+          pull(value, get(subpath, newSelectedOptions.categories)),
+          newSelectedOptions.categories
+        );
+        break;
+      case "taxon":
+        newSelectedOptions.taxon = null;
+        break;
+      case "thresholds":
+        newSelectedOptions.thresholds = pull(
+          value,
+          newSelectedOptions.thresholds
+        );
+        break;
+      default:
+        return;
+    }
+
+    this.refreshDataFromOptionsChange({ key, newSelectedOptions });
+  };
+
+  refreshDataFromOptionsChange = ({ key, newSelectedOptions }) => {
+    const { reportData } = this.state;
+
     // different behavior given type of option
     switch (key) {
       // - min contig size: recompute contig statistics with new size and refresh display
@@ -435,12 +473,6 @@ export default class SampleViewV2 extends React.Component {
         this.persistReportOptions();
       }
     );
-  };
-
-  handleFilterRemoved = ({ key, value }) => {
-    const { selected } = this.state;
-    const newSelected = pull(value, selected[key]);
-    this.setState({ selected: newSelected });
   };
 
   toggleSidebar = ({ mode }) => {
