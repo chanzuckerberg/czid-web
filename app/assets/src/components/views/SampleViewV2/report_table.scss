@@ -64,6 +64,7 @@
   .taxonContainer {
     .taxonName {
       text-transform: capitalize;
+      white-space: normal;
     }
 
     .missingName {
@@ -71,7 +72,6 @@
     }
 
     .countInfo {
-      // word-wrap: break-word;
       font-style: italic;
       font-weight: $font-weight-regular;
       margin-left: $space-s;
