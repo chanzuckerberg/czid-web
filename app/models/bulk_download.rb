@@ -4,6 +4,7 @@ class BulkDownload < ApplicationRecord
   include AppConfigHelper
   include SamplesHelper
   include PipelineOutputsHelper
+  include BulkDownloadTypesHelper
   include Rails.application.routes.url_helpers
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
@@ -196,7 +197,7 @@ class BulkDownload < ApplicationRecord
     download_src_urls = nil
     download_tar_names = nil
 
-    if download_type == BulkDownloadTypesHelper::ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE
+    if download_type == ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE
       samples = samples.includes(:input_files)
 
       download_src_urls = samples.map(&:input_file_s3_paths).flatten
@@ -214,7 +215,7 @@ class BulkDownload < ApplicationRecord
       end.flatten
     end
 
-    if download_type == BulkDownloadTypesHelper::UNMAPPED_READS_BULK_DOWNLOAD_TYPE
+    if download_type == UNMAPPED_READS_BULK_DOWNLOAD_TYPE
       download_src_urls = pipeline_runs.map(&:unidentified_fasta_s3_path)
 
       download_tar_names = samples.map do |sample|
@@ -223,7 +224,7 @@ class BulkDownload < ApplicationRecord
       end
     end
 
-    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fasta"
+    if download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fasta"
       download_src_urls = pipeline_runs.map(&:annotated_fasta_s3_path)
 
       download_tar_names = samples.map do |sample|
@@ -232,7 +233,7 @@ class BulkDownload < ApplicationRecord
       end
     end
 
-    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fastq"
+    if download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fastq"
       pipeline_runs_with_assocs = pipeline_runs.includes(sample: [:input_files])
 
       download_src_urls = pipeline_runs_with_assocs.map(&:nonhost_fastq_s3_paths).flatten
@@ -249,7 +250,7 @@ class BulkDownload < ApplicationRecord
       end.flatten
     end
 
-    if download_type == BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
+    if download_type == CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
       download_src_urls = pipeline_runs.map(&:contigs_fasta_s3_path)
 
       download_tar_names = samples.map do |sample|
@@ -258,7 +259,7 @@ class BulkDownload < ApplicationRecord
       end
     end
 
-    if download_type == BulkDownloadTypesHelper::HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE
+    if download_type == HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE
       download_src_urls = pipeline_runs.map(&:host_gene_count_s3_path)
 
       download_tar_names = samples.map do |sample|
@@ -298,11 +299,11 @@ class BulkDownload < ApplicationRecord
     end
 
     # Bulk-include data for performance based on the download type.
-    pipeline_runs_with_includes = if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
+    pipeline_runs_with_includes = if download_type == SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
                                     pipeline_runs.includes(sample: [:project])
-                                  elsif download_type == BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE
+                                  elsif download_type == CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE
                                     pipeline_runs.includes(:contigs, :sample)
-                                  elsif download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+                                  elsif download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE
                                     # We avoid pre-fetching "taxon_byteranges" here, even though it has to be fetched once per pipeline_run in the code below,
                                     # because of the potentially large number of taxon_byteranges per pipeline_run.
                                     pipeline_runs.includes(:sample)
@@ -312,7 +313,7 @@ class BulkDownload < ApplicationRecord
 
     # Get the tax_level for the selected taxid by looking at the first available TaxonCount entry.
     # Since TaxonCount isn't normalized, any TaxonCount entry would provide the same information.
-    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+    if download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE
       taxid = get_param_value("taxa_with_reads")
       if taxid.nil?
         raise BulkDownloadsHelper::READS_NON_HOST_TAXID_EXPECTED
@@ -330,7 +331,7 @@ class BulkDownload < ApplicationRecord
     pipeline_runs_with_includes.map.with_index do |pipeline_run, index|
       begin
         Rails.logger.info("Processing pipeline run #{pipeline_run.id} (#{index + 1} of #{pipeline_runs.length})...")
-        if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
+        if download_type == SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
           tax_details = ReportHelper.taxonomy_details(pipeline_run.id, get_param_value("background"), TaxonScoringModel::DEFAULT_MODEL_NAME, ReportHelper::DEFAULT_SORT_PARAM)
           report_csv = ReportHelper.generate_report_csv(tax_details)
           s3_tar_writer.add_file_with_data(
@@ -338,15 +339,15 @@ class BulkDownload < ApplicationRecord
               "taxon_report.csv",
             report_csv
           )
-        elsif download_type == BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE
+        elsif download_type == CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE
           contig_mapping_table_csv = pipeline_run.generate_contig_mapping_table_csv
           s3_tar_writer.add_file_with_data(
             "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
               "contig_summary_report.csv",
             contig_mapping_table_csv
           )
-        elsif download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
-          reads_nonhost_for_taxid_fasta = get_taxid_fasta_from_pipeline_run_combined_nt_nr(pipeline_run, taxid, tax_level)
+        elsif download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE
+          reads_nonhost_for_taxid_fasta = get_taxon_fasta_from_pipeline_run_combined_nt_nr(pipeline_run, taxid, tax_level)
           # If there were no reads for a particular pipeline run, output an empty file.
           if reads_nonhost_for_taxid_fasta.nil?
             reads_nonhost_for_taxid_fasta = ""
@@ -384,7 +385,7 @@ class BulkDownload < ApplicationRecord
     Rails.logger.info("Starting tarfile streaming to #{download_output_url}...")
     s3_tar_writer.start_streaming
 
-    if download_type == BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+    if download_type == SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
       Rails.logger.info("Generating sample overviews for #{pipeline_runs.length} samples...")
       samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
       pipeline_runs_by_sample_id = pipeline_runs.map { |pr| [pr.sample_id, pr] }.to_h
@@ -414,13 +415,13 @@ class BulkDownload < ApplicationRecord
 
   def execution_type
     execution_type = BulkDownloadTypesHelper.bulk_download_type(download_type)[:execution_type]
-    if [BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE, BulkDownloadTypesHelper::ECS_EXECUTION_TYPE]
+    if [RESQUE_EXECUTION_TYPE, ECS_EXECUTION_TYPE]
        .include?(execution_type)
       return execution_type
     end
 
-    if [BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, BulkDownloadTypesHelper:: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE].include?(download_type)
-      return get_param_value("taxa_with_reads") == "all" ? BulkDownloadTypesHelper::ECS_EXECUTION_TYPE : BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE
+    if [READS_NON_HOST_BULK_DOWNLOAD_TYPE, CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE].include?(download_type)
+      return get_param_value("taxa_with_reads") == "all" ? ECS_EXECUTION_TYPE : RESQUE_EXECUTION_TYPE
     end
 
     # Should never happen
@@ -433,13 +434,13 @@ class BulkDownload < ApplicationRecord
 
   def kickoff
     current_execution_type = execution_type
-    if current_execution_type == BulkDownloadTypesHelper::ECS_EXECUTION_TYPE
+    if current_execution_type == ECS_EXECUTION_TYPE
       ecs_task_command = bulk_download_ecs_task_command
       unless ecs_task_command.nil?
         kickoff_ecs_task(ecs_task_command)
       end
     end
-    if current_execution_type == BulkDownloadTypesHelper::RESQUE_EXECUTION_TYPE
+    if current_execution_type == RESQUE_EXECUTION_TYPE
       kickoff_resque_task
     end
   end

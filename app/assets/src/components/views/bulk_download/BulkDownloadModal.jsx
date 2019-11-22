@@ -89,6 +89,9 @@ class BulkDownloadModal extends React.Component {
 
   handleFieldSelect = (downloadType, fieldType, value, displayName) => {
     this.setState(prevState => {
+      // If the value is undefined, delete it from selectedFields.
+      // This allows us to support cases where certain fields are conditionally required;
+      // if the field becomes no longer required, we can unset it.
       const newSelectedFields =
         value !== undefined
           ? set([downloadType, fieldType], value, prevState.selectedFields)

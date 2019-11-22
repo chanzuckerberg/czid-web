@@ -472,7 +472,7 @@ describe BulkDownload, type: :model do
                                              "displayName" => "Salmonella enterica",
                                            })
 
-      allow_any_instance_of(BulkDownload).to receive(:get_taxid_fasta_from_pipeline_run_combined_nt_nr).and_return("mock_reads_nonhost_fasta")
+      allow_any_instance_of(BulkDownload).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).and_return("mock_reads_nonhost_fasta")
 
       add_s3_tar_writer_expectations(
         "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "mock_reads_nonhost_fasta",
@@ -496,7 +496,7 @@ describe BulkDownload, type: :model do
                                              "displayName" => "Salmonella enterica",
                                            })
 
-      allow_any_instance_of(BulkDownload).to receive(:get_taxid_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
+      allow_any_instance_of(BulkDownload).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
 
       add_s3_tar_writer_expectations(
         "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "",
@@ -517,7 +517,7 @@ describe BulkDownload, type: :model do
 
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, {})
 
-      allow_any_instance_of(BulkDownload).to receive(:get_taxid_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
+      allow_any_instance_of(BulkDownload).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
 
       expect do
         bulk_download.generate_download_file
@@ -532,7 +532,7 @@ describe BulkDownload, type: :model do
                                              "displayName" => "Salmonella enterica",
                                            })
 
-      allow_any_instance_of(BulkDownload).to receive(:get_taxid_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
+      allow_any_instance_of(BulkDownload).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
 
       expect do
         bulk_download.generate_download_file

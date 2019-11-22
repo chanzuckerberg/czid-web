@@ -90,7 +90,7 @@ class ChooseStep extends React.Component {
 
     let requiredFields = downloadType.fields;
 
-    // Don't require file_format field if single taxa selected for reads non-host download type.
+    // Don't require file_format field if a single taxa is selected for reads non-host download type.
     if (
       downloadType.type === READS_NON_HOST_DOWNLOAD_TYPE &&
       isNumber(get([downloadType.type, "taxa_with_reads"], selectedFields))
@@ -212,7 +212,7 @@ class ChooseStep extends React.Component {
               <div className={cs.label}>{field.display_name}:</div>
               <div className={cs.forcedOption}>.fasta</div>
               <div className={cs.info}>
-                Note: Only .fasta is available when selecting one taxa.
+                Note: Only .fasta is available when selecting one taxon.
               </div>
             </div>
           );

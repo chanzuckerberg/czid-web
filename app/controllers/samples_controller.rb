@@ -876,12 +876,12 @@ class SamplesController < ApplicationController
     return if HUMAN_TAX_IDS.include? params[:taxid].to_i
     pr = select_pipeline_run(@sample, params[:pipeline_version])
     if params[:hit_type] == "NT_or_NR"
-      @taxid_fasta = get_taxid_fasta_from_pipeline_run_combined_nt_nr(pr, params[:taxid], params[:tax_level].to_i)
+      @taxid_fasta = get_taxon_fasta_from_pipeline_run_combined_nt_nr(pr, params[:taxid], params[:tax_level].to_i)
       if @taxid_fasta.nil?
         @taxid_fasta = "Coming soon" # Temporary fix
       end
     else
-      @taxid_fasta = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
+      @taxid_fasta = get_taxon_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
     send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-hits.fasta'
   end
