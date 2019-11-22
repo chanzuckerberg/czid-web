@@ -243,9 +243,9 @@ class ReportTable extends React.Component {
                   rowData.filteredSpecies.length
                 } ${getCategoryAdjective(rowData.category)} species)`}</span>
               ) : (
-                <span className={cs.countInfo}>{`(${
-                  rowData.filteredSpecies.length
-                } species)`}</span>
+                <span className={cs.countInfo}>
+                  {`(${rowData.filteredSpecies.length} species)`}
+                </span>
               ))}
           </div>
         </React.Fragment>

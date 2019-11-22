@@ -11,3 +11,16 @@
     }
   }
 }
+
+.tagList {
+  margin-top: $space-m;
+  margin-bottom: $space-m;
+
+  .filterTag {
+    margin-right: $space-xxs;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
