@@ -232,7 +232,7 @@ class ReportTable extends React.Component {
           </div>
           <div className={cx(rowData.taxLevel == "species" && cs.speciesName)}>
             <span
-              className={cx(cs.taxonName, cellData || cs.missingName)}
+              className={cx(cs.taxonName, !!cellData || cs.missingName)}
               onClick={() => onTaxonNameClick({ ...rowData })}
             >
               {cellData || rowData.name}
@@ -243,9 +243,9 @@ class ReportTable extends React.Component {
                   rowData.filteredSpecies.length
                 } ${getCategoryAdjective(rowData.category)} species)`}</span>
               ) : (
-                <span
-                  className={cs.countInfo}
-                >{`(${rowData.filteredSpecies.length} species)`}</span>
+                <span className={cs.countInfo}>{`(${
+                  rowData.filteredSpecies.length
+                } species)`}</span>
               ))}
           </div>
         </React.Fragment>
@@ -340,8 +340,8 @@ class ReportTable extends React.Component {
           rowData.genus
             ? getOr(nullValue, path, rowData)
             : sortDirection === "asc"
-            ? limits[0]
-            : limits[1],
+              ? limits[0]
+              : limits[1],
       ],
       [sortDirection, sortDirection, sortDirection],
       data
