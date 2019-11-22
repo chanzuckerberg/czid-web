@@ -52,9 +52,7 @@ class PublicProjectConfirmationModal extends React.Component {
                 or{" "}
                 <span
                   className={cs.link}
-                  onClick={() =>
-                    window.open("https://assets.idseq.net/TermsOfService.pdf")
-                  }
+                  onClick={() => window.open("https://idseq.net/terms")}
                 >
                   terms of service
                 </span>

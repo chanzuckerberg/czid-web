@@ -15,9 +15,21 @@ class Auth0Controller < ApplicationController
   MIN_TOKEN_REFRESH_IN_SECONDS = 60.seconds.to_i
   MAX_TOKEN_REFRESH_IN_SECONDS = (60.minutes / 1.second).to_i
 
+  AUTH0_CONNECTION_NAME = "Username-Password-Authentication"
+
   def refresh_token
     @mode = filter_value(params["mode"], SUPPORTED_MODES)
+    @prompt = ["expired", "background_refresh"].include?(@mode) ? "none" : "login"
+    @connection = AUTH0_CONNECTION_NAME
     render :refresh_token, layout: false
+  end
+
+  def login
+    # Redirecting to the refresh token forcing a login operation
+    redirect_to url_for(
+      action: :refresh_token,
+      params: { mode: "login" }
+    )
   end
 
   def background_refresh
@@ -50,11 +62,6 @@ class Auth0Controller < ApplicationController
         redirect_to root_path
       end
     end
-  end
-
-  def remove_auth0_session
-    # Invalidate auth0 session (https://auth0.com/docs/sessions/concepts/session-layers)
-    redirect_to auth0_signout_url
   end
 
   def request_password_reset

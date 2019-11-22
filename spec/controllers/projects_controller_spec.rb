@@ -574,11 +574,12 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects = []
             create(:project, users: [@user])
             create(:project, :with_sample, users: [@user])
-            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsormidium", nt: 10 }], job_status: "CHECKED" }] }])
-            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 0 }], job_status: "CHECKED" }] }])
-            expected_projects << create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 10 }], job_status: "CHECKED" }] }])
+            KLEBSIELLA_TAX_ID = 2
+            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsormidium", nt: 10, tax_id: 1 }], job_status: "CHECKED" }] }])
+            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 0, tax_id: KLEBSIELLA_TAX_ID }], job_status: "CHECKED" }] }])
+            expected_projects << create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 10, tax_id: KLEBSIELLA_TAX_ID }], job_status: "CHECKED" }] }])
 
-            get :index, params: { format: "json", domain: domain, taxon: TaxonLineage.find_by(tax_name: "klebsiella").id }
+            get :index, params: { format: "json", domain: domain, taxon: KLEBSIELLA_TAX_ID }
 
             json_response = JSON.parse(response.body)
             expect(json_response["projects"].count).to eq(expected_projects.count)

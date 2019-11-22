@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     post :request_password_reset
     get :refresh_token
     get :background_refresh
+    get :login
   end
 
   resources :samples do

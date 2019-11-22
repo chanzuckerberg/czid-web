@@ -19,7 +19,6 @@ import DiscoverIcon from "../ui/icons/DiscoverIcon";
 import DetectIcon from "../ui/icons/DetectIcon";
 import DecipherIcon from "../ui/icons/DecipherIcon";
 import LogoIcon from "../ui/icons/LogoIcon";
-import { postToUrlWithCSRF } from "~utils/links";
 
 class Landing extends React.Component {
   constructor(props) {
@@ -78,7 +77,7 @@ class Landing extends React.Component {
   render() {
     const signInLink = () => {
       if (this.props.signInStrategy == "AUTH0") {
-        postToUrlWithCSRF("/auth/auth0");
+        location.href = "/auth0/login";
       } else {
         location.href = "/users/sign_in";
       }
