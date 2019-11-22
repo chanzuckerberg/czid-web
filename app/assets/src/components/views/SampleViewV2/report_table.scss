@@ -57,27 +57,37 @@
   font-weight: $font-weight-semibold;
   text-align: left;
 
-  .taxonName {
-    text-transform: capitalize;
-  }
-
   .expandIcon {
     flex: 0 0 20px;
   }
 
-  .missingName {
-    color: $medium-grey;
-  }
-}
+  .taxonContainer {
+    .taxonName {
+      text-transform: capitalize;
+    }
 
-.genusRow {
-  background-color: $off-white;
+    .missingName {
+      color: $medium-grey;
+    }
+
+    .countInfo {
+      // word-wrap: break-word;
+      font-style: italic;
+      font-weight: $font-weight-regular;
+      margin-left: $space-s;
+      color: $medium-grey;
+      white-space: normal;
+    }
+  }
 }
 
 .speciesRow {
   .nameCell {
     font-weight: $font-weight-regular;
   }
+}
+.genusRow {
+  background-color: $off-white;
 }
 
 .genusRow,
@@ -91,7 +101,6 @@
 
 .speciesRow {
   .nameCell {
-    // TODO review this spacing
     margin-left: $space-s;
   }
 }
@@ -110,12 +119,3 @@
     flex: 0 0 auto;
   }
 }
-
-.countInfo {
-  font-style: italic;
-  font-weight: $font-weight-regular;
-  margin-left: $space-s;
-  color: $medium-grey;
-}
-
-// TODO: $light-grey for negative z score

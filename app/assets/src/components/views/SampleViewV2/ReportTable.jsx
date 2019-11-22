@@ -230,7 +230,7 @@ class ReportTable extends React.Component {
               ""
             )}
           </div>
-          <div className={cx(rowData.taxLevel == "species" && cs.speciesName)}>
+          <div className={cs.taxonContainer}>
             <span
               className={cx(cs.taxonName, !!cellData || cs.missingName)}
               onClick={() => onTaxonNameClick({ ...rowData })}
