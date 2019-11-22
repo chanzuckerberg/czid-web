@@ -14,7 +14,13 @@ import {
 
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
-    const { backgroundId, pipelineRun, sample, reportVersion } = this.props;
+    const {
+      backgroundId,
+      pipelineRun,
+      sample,
+      reportVersion,
+      minContigSize,
+    } = this.props;
 
     let resParams = {};
     const stringer = require("querystring");
@@ -26,6 +32,9 @@ class SampleViewControls extends React.Component {
     // Set the right pipeline version.
     let v = pipelineRun && pipelineRun.pipeline_version;
     if (v) resParams["pipeline_version"] = v;
+
+    // Set the min contig size.
+    if (minContigSize) resParams["min_contig_size"] = minContigSize;
 
     // Need to know what version of the report table we're looking at and request accordingly
     let res =
@@ -146,6 +155,7 @@ SampleViewControls.propTypes = {
   editable: PropTypes.bool,
   view: PropTypes.string,
   reportVersion: PropTypes.number,
+  minContigSize: PropTypes.number,
 };
 
 export default SampleViewControls;

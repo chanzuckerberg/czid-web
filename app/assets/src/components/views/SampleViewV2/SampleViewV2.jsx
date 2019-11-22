@@ -603,6 +603,7 @@ export default class SampleViewV2 extends React.Component {
               reportPresent={!!reportData.length}
               sample={sample}
               view={view}
+              minContigSize={selectedOptions.minContigSize}
             />
           </div>
           <div className={cs.tabsContainer}>

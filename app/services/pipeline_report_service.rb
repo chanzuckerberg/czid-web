@@ -41,7 +41,7 @@ class PipelineReportService
   Z_SCORE_WHEN_ABSENT_FROM_SAMPLE = -100
 
   DEFAULT_SORT_PARAM = :agg_score
-  MIN_CONTIG_SIZE = 0
+  DEFAULT_MIN_CONTIG_SIZE = 0
 
   CATEGORIES = {
     2 => "bacteria",
@@ -52,10 +52,11 @@ class PipelineReportService
     nil => "uncategorized",
   }.freeze
 
-  def initialize(pipeline_run_id, background_id, sort_by = nil)
+  def initialize(pipeline_run_id, background_id, csv = false, min_contig_size = DEFAULT_MIN_CONTIG_SIZE)
     @pipeline_run_id = pipeline_run_id
     @background_id = background_id
-    @sort_by = sort_by ? sort_by : DEFAULT_SORT_PARAM
+    @csv = csv
+    @min_contig_size = min_contig_size
   end
 
   def call
@@ -70,7 +71,7 @@ class PipelineReportService
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
-    contigs = pipeline_run.get_summary_contig_counts_v2(MIN_CONTIG_SIZE)
+    contigs = pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
     @timer.split("get_contig_summary")
 
     taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
@@ -98,7 +99,11 @@ class PipelineReportService
     )
     @timer.split("cleanup_missing_genus_counts")
 
-    merge_contigs(contigs, counts_by_tax_level)
+    if @csv
+      merge_contigs_csv(contigs, counts_by_tax_level)
+    else
+      merge_contigs(contigs, counts_by_tax_level)
+    end
     @timer.split("merge_contigs")
 
     counts_by_tax_level.each_value do |tax_level_taxa|
@@ -153,11 +158,11 @@ class PipelineReportService
     encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
     @timer.split("encode_taxon_lineage")
 
-    sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, @sort_by)
+    sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
     @timer.split("sort_genus_by_aggregate_score")
 
     counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
-      genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][@sort_by] }.reverse!
+      genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][DEFAULT_SORT_PARAM] }.reverse!
       genus
     end
     @timer.split("sort_species_within_each_genus")
@@ -221,7 +226,8 @@ class PipelineReportService
                                   "taxon_summaries.background_id": @background_id,
                                   "taxon_counts.count": nil,
                                   "taxon_summaries.tax_id": tax_ids,
-                                  "taxon_summaries.tax_level": [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
+                                  "taxon_summaries.tax_level": [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS],
+                                  "taxon_summaries.count_type": ['NT', 'NR']
                                 )
 
     return taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)
@@ -267,6 +273,32 @@ class PipelineReportService
 
         if counts_per_db_type
           counts_per_db_type[:contigs] = contigs_per_read_count
+        else
+          # TODO(tiago): not sure if this case ever happens
+          Rails.logger.warn("[PR=#{@pipeline_run_id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
+        end
+      end
+    end
+  end
+
+  def merge_contigs_csv(contigs, counts_by_tax_level)
+    contigs.each do |tax_id, contigs_per_db_type|
+      contigs_per_db_type.each do |db_type, contigs_per_read_count|
+        norm_count_type = db_type.downcase.to_sym
+        counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_SPECIES, tax_id, norm_count_type)
+        unless counts_per_db_type
+          counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_GENUS, tax_id, norm_count_type)
+        end
+
+        if counts_per_db_type
+          contigs = 0
+          contig_r = 0
+          contigs_per_read_count.each do |reads, count|
+            contigs += count
+            contig_r += count * reads
+          end
+          counts_per_db_type[:contigs] = contigs
+          counts_per_db_type[:contig_r] = contig_r
         else
           # TODO(tiago): not sure if this case ever happens
           Rails.logger.warn("[PR=#{@pipeline_run_id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")

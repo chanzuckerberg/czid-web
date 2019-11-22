@@ -28,6 +28,7 @@ export default function SampleViewHeader({
   reportPresent,
   sample,
   view,
+  minContigSize,
 }) {
   const currentUser = useContext(UserContext);
 
@@ -159,6 +160,7 @@ export default function SampleViewHeader({
           editable={editable}
           view={view}
           reportVersion={2}
+          minContigSize={minContigSize}
         />
       </ViewHeader.Controls>
     </ViewHeader>
@@ -182,4 +184,5 @@ SampleViewHeader.propTypes = {
   reportPresent: PropTypes.bool,
   sample: PropTypes.Sample,
   view: PropTypes.string.isRequired,
+  minContigSize: PropTypes.number,
 };

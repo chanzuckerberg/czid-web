@@ -116,7 +116,7 @@ module ReportsHelper
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
     # TODO: pass in sort_by to PipelineReportService from params
-    tax_details = JSON.parse(PipelineReportService.call(pipeline_run_id, background_id))
+    tax_details = JSON.parse(PipelineReportService.call(pipeline_run_id, background_id, true, params[:min_contig_size]))
 
     rows = []
     tax_details["sortedGenus"].each do |genus_tax_id|
@@ -127,7 +127,6 @@ module ReportsHelper
       genus_flat_hash[["tax_level"]] = 2
       genus_flat_hash = genus_flat_hash.merge(flat_hash(genus_info))
       rows << genus_flat_hash
-
       genus_info["species_tax_ids"].each do |species_tax_id|
         species_info = tax_details["counts"]["1"][species_tax_id.to_s]
         species_flat_hash = flat_hash(species_info)
