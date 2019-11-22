@@ -38,10 +38,10 @@ module Auth0Helper
 
   # URL used to remove auth0 session from Auth0 Session Layer
   # (see https://auth0.com/docs/sessions/concepts/session-layers)
-  def auth0_signout_url
+  def auth0_signout_url(return_to = root_url)
     domain = ENV["AUTH0_DOMAIN"]
     client_id = ENV["AUTH0_CLIENT_ID"]
-    qry_prms = { returnTo: root_url, client_id: client_id }
+    qry_prms = { returnTo: return_to, client_id: client_id }
     url = URI::HTTPS.build(host: domain, path: '/v2/logout', query: qry_prms.to_query)
     url.to_s
   end
