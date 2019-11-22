@@ -71,6 +71,8 @@ Rails.application.configure do
   config.action_controller.asset_host = proc { |source|
     "http://localhost:8080" if source =~ /wp_bundle\.js$/i
   }
+  # Uncomment this line to test cloudfront CDN. Must be running staging branch.
+  # config.action_controller.asset_host = 'assets.staging.idseq.net'
 
   ActiveRecordQueryTrace.enabled = true
 

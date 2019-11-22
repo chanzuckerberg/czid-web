@@ -427,7 +427,7 @@ export default class SampleViewV2 extends React.Component {
         break;
       // - name type: reset table to force a rerender
       case "nameType":
-        this.setDisplayName({ reportData, ...selectedOptions });
+        this.setDisplayName({ reportData, ...newSelectedOptions });
         this.setState({ reportData: [...reportData] });
         break;
 
