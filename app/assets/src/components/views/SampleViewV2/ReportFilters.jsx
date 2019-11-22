@@ -28,17 +28,17 @@ class ReportFilters extends React.Component {
     onFilterChanged({ key, value });
   };
 
-  handleRemoveFilter = ({ key, path, value }) => {
+  handleRemoveFilter = ({ key, subpath, value }) => {
     const { onFilterRemoved } = this.props;
     logAnalyticsEvent("SampleView_filter_removed", {
       key,
-      path,
+      subpath,
       value,
     });
-    onFilterRemoved({ key, path, value });
+    onFilterRemoved({ key, subpath, value });
   };
 
-  renderFilterTag = ({ key, label, path, value, idx }) => {
+  renderFilterTag = ({ key, label, subpath, value, idx }) => {
     label = label || value;
     return (
       <FilterTag
@@ -48,7 +48,7 @@ class ReportFilters extends React.Component {
         onClose={() =>
           this.handleRemoveFilter({
             key,
-            path,
+            subpath,
             value,
           })
         }
@@ -83,7 +83,7 @@ class ReportFilters extends React.Component {
           categoryTags.push(
             this.renderFilterTag({
               key: "categories",
-              path: "categories.categories",
+              subpath: "categories",
               value: category,
               idx: i,
             })
@@ -94,7 +94,7 @@ class ReportFilters extends React.Component {
             categoryTags.push(
               this.renderFilterTag({
                 key: "categories",
-                path: `categories.subcategories.${category}`,
+                subpath: `subcategories.${category}`,
                 value: subcategory,
                 idx: `${i}.${j}`,
               })

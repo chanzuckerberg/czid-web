@@ -243,9 +243,9 @@ export default class SampleViewV2 extends React.Component {
 
         switch (operator) {
           case ">=":
-            return parsedValue < parsedThresholdValue;
+            return parsedThresholdValue < parsedValue;
           case "<=":
-            return parsedValue > parsedThresholdValue;
+            return parsedThresholdValue > parsedValue;
         }
         return true;
       }, thresholds);
@@ -396,27 +396,36 @@ export default class SampleViewV2 extends React.Component {
     this.refreshDataFromOptionsChange({ key, newSelectedOptions });
   };
 
-  handleFilterRemoved = ({ key, path, value }) => {
+  handleFilterRemoved = ({ key, subpath, value }) => {
     const { selectedOptions } = this.state;
 
-    // path is optional and used to access nested attributes
-    // if path is not defined use key to access the attribute
-    path = path || key;
-    const optionByPath = get(path, selectedOptions);
-
-    const newSelectedOptions = set(
-      path,
-      Array.isArray(optionByPath)
-        ? pull(value, get(path, newSelectedOptions))
-        : null,
-      selectedOptions
-    );
+    let newSelectedOptions = { ...selectedOptions };
+    switch (key) {
+      case "categories":
+        newSelectedOptions.categories = set(
+          subpath,
+          pull(value, get(subpath, newSelectedOptions.categories)),
+          newSelectedOptions.categories
+        );
+        break;
+      case "taxon":
+        newSelectedOptions.taxon = null;
+        break;
+      case "thresholds":
+        newSelectedOptions.thresholds = pull(
+          value,
+          newSelectedOptions.thresholds
+        );
+        break;
+      default:
+        return;
+    }
 
     this.refreshDataFromOptionsChange({ key, newSelectedOptions });
   };
 
   refreshDataFromOptionsChange = ({ key, newSelectedOptions }) => {
-    const { reportData, selectedOptions } = this.state;
+    const { reportData } = this.state;
 
     // different behavior given type of option
     switch (key) {
