@@ -238,6 +238,7 @@ class BareDropdown extends React.Component {
               className={cs.searchInput}
               icon="search"
               placeholder="Search"
+              value={filterString}
               onChange={this.handleFilterChange}
               disableAutocomplete={disableAutocomplete}
             />

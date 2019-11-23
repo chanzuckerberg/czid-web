@@ -14,6 +14,8 @@ module BulkDownloadsHelper
   FAILED_SAMPLES_ERROR_TEMPLATE = "%s samples could not be processed. Please contact us for help.".freeze
   UNKNOWN_EXECUTION_TYPE = "Could not find execution type for bulk download".freeze
   BULK_DOWNLOAD_GENERATION_FAILED = "Could not generate bulk download".freeze
+  READS_NON_HOST_TAXID_EXPECTED = "Expected taxid for reads non-host bulk download".freeze
+  READS_NON_HOST_TAXON_COUNT_EXPECTED_TEMPLATE = "Unexpected error. Could not find taxon count for taxid %s".freeze
 
   # Check that all pipeline runs have succeeded for the provided samples
   # and return the pipeline run ids.

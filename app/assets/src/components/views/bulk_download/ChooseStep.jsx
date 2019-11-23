@@ -9,6 +9,8 @@ import {
   map,
   isUndefined,
   orderBy,
+  isNumber,
+  reject,
 } from "lodash/fp";
 import cx from "classnames";
 import memoize from "memoize-one";
@@ -27,6 +29,8 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import cs from "./choose_step.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
+// Reads non-host download type has some special cases.
+const READS_NON_HOST_DOWNLOAD_TYPE = "reads_non_host";
 
 class ChooseStep extends React.Component {
   state = {
@@ -67,34 +71,55 @@ class ChooseStep extends React.Component {
     });
   }
 
-  isDownloadValid = () => {
-    const {
-      selectedDownloadTypeName,
-      downloadTypes,
-      selectedFields,
-    } = this.props;
+  getSelectedDownloadType = () => {
+    const { selectedDownloadTypeName, downloadTypes } = this.props;
 
     if (!selectedDownloadTypeName) {
-      return false;
+      return null;
     }
 
-    const downloadType = find(
-      ["type", selectedDownloadTypeName],
-      downloadTypes
-    );
+    return find(["type", selectedDownloadTypeName], downloadTypes);
+  };
+
+  // Get all the fields we need to validate for the selected download type.
+  getRequiredFieldsForSelectedType = () => {
+    const { selectedFields } = this.props;
+    const downloadType = this.getSelectedDownloadType();
+
+    if (!downloadType) return null;
+
+    let requiredFields = downloadType.fields;
+
+    // Don't require file_format field if a single taxa is selected for reads non-host download type.
+    if (
+      downloadType.type === READS_NON_HOST_DOWNLOAD_TYPE &&
+      isNumber(get([downloadType.type, "taxa_with_reads"], selectedFields))
+    ) {
+      requiredFields = reject(["type", "file_format"], requiredFields);
+    }
+
+    return requiredFields;
+  };
+
+  isDownloadValid = () => {
+    const { selectedFields } = this.props;
+
+    const downloadType = this.getSelectedDownloadType();
 
     if (!downloadType) {
       return false;
     }
 
-    if (downloadType.fields) {
+    const requiredFields = this.getRequiredFieldsForSelectedType();
+
+    if (requiredFields) {
       if (
         some(
           Boolean,
           map(
             field =>
               isUndefined(get([downloadType.type, field.type], selectedFields)),
-            downloadType.fields
+            requiredFields
           )
         )
       ) {
@@ -178,6 +203,20 @@ class ChooseStep extends React.Component {
     // Set different props for the dropdown depending on the field type.
     switch (field.type) {
       case "file_format":
+        if (
+          downloadType.type === READS_NON_HOST_DOWNLOAD_TYPE &&
+          isNumber(get([downloadType.type, "taxa_with_reads"], selectedFields))
+        ) {
+          return (
+            <div className={cs.field} key={field.type}>
+              <div className={cs.label}>{field.display_name}:</div>
+              <div className={cs.forcedOption}>.fasta</div>
+              <div className={cs.info}>
+                Note: Only .fasta is available when selecting one taxon.
+              </div>
+            </div>
+          );
+        }
         dropdownOptions = field.options.map(option => ({
           text: option,
           value: option,
@@ -237,9 +276,23 @@ class ChooseStep extends React.Component {
           disabled={loadingOptions}
           placeholder={loadingOptions ? "Loading..." : placeholder}
           options={dropdownOptions}
-          onChange={(value, displayName) =>
-            onFieldSelect(downloadType.type, field.type, value, displayName)
-          }
+          onChange={(value, displayName) => {
+            onFieldSelect(downloadType.type, field.type, value, displayName);
+
+            // If the user has selected a single taxa, reset the file format field.
+            if (
+              downloadType.type === READS_NON_HOST_DOWNLOAD_TYPE &&
+              field.type === "taxa_with_reads" &&
+              isNumber(value)
+            ) {
+              onFieldSelect(
+                READS_NON_HOST_DOWNLOAD_TYPE,
+                "file_format",
+                undefined,
+                undefined
+              );
+            }
+          }}
           value={selectedField}
           optionsHeader={optionsHeader}
           menuLabel={menuLabel}
