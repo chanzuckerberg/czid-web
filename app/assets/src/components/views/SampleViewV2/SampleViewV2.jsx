@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  compact,
   entries,
   every,
   find,
@@ -12,6 +13,7 @@ import {
   pull,
   set,
   some,
+  sum,
   values,
 } from "lodash/fp";
 import deepEqual from "fast-deep-equal";
@@ -53,6 +55,7 @@ export default class SampleViewV2 extends React.Component {
         project: null,
         projectSamples: [],
         reportData: [],
+        reportMetadata: {},
         sample: null,
         sidebarMode: null,
         sidebarVisible: false,
@@ -164,9 +167,10 @@ export default class SampleViewV2 extends React.Component {
 
     this.setState({
       reportData,
+      reportMetadata: rawReportData.metadata,
       filteredReportData,
       selectedOptions: Object.assign({}, selectedOptions, {
-        background: rawReportData.backgroundId,
+        background: rawReportData.metadata.backgroundId,
       }),
     });
   };
@@ -572,6 +576,93 @@ export default class SampleViewV2 extends React.Component {
     return {};
   };
 
+  countReportRows = () => {
+    const { filteredReportData, reportData } = this.state;
+    let total = reportData.length;
+    let filtered = filteredReportData.length;
+    reportData.forEach(genusRow => {
+      total += genusRow.species.length;
+      filtered += genusRow.filteredSpecies.length;
+    });
+    return { total, filtered };
+  };
+
+  filteredMessage = () => {
+    const { total, filtered } = this.countReportRows();
+    return (
+      filtered != total &&
+      `${filtered} rows passing the above filters, out of ${total} total rows.`
+    );
+  };
+
+  truncatedMessage = () => {
+    const {
+      reportMetadata: { truncatedReadsCount },
+    } = this.state;
+    return (
+      truncatedReadsCount &&
+      `Overly large input was truncated to ${truncatedReadsCount} reads.`
+    );
+  };
+
+  subsamplingMessage = () => {
+    const {
+      reportMetadata: { subsampledReadsCount, adjustedRemainingReadsCount },
+    } = this.state;
+    return (
+      subsampledReadsCount &&
+      adjustedRemainingReadsCount &&
+      subsampledReadsCount != adjustedRemainingReadsCount &&
+      `Report values are computed from ${subsampledReadsCount} reads subsampled \
+        randomly from the ${adjustedRemainingReadsCount} reads passing host and quality filters.`
+    );
+  };
+
+  renderReportInfo = () => {
+    return compact([
+      this.truncatedMessage(),
+      this.subsamplingMessage(),
+      this.filteredMessage(),
+    ]).map((msg, i) => (
+      <span className={cs.reportInfoMsg} key={`msg-${i}`}>
+        {msg}
+      </span>
+    ));
+  };
+
+  clearAllFilters = () => {
+    const { reportData, selectedOptions } = this.state;
+
+    const newSelectedOptions = { ...selectedOptions };
+    newSelectedOptions.thresholds = [];
+    newSelectedOptions.categories = {};
+
+    this.setState(
+      {
+        selectedOptions: newSelectedOptions,
+        filteredReportData: reportData,
+      },
+      () => {
+        this.persistReportOptions();
+      }
+    );
+    logAnalyticsEvent("PipelineSampleReport_clear-filters-link_clicked");
+  };
+
+  countFilters = () => {
+    const {
+      selectedOptions: { categories, thresholds, taxon },
+    } = this.state;
+
+    let numFilters = taxon ? 1 : 0;
+    numFilters += thresholds.length;
+    numFilters += (categories.categories || []).length;
+    numFilters += sum(
+      map(v => v.length, values(categories.subcategories || {}))
+    );
+    return numFilters;
+  };
+
   render = () => {
     const {
       backgrounds,
@@ -634,6 +725,17 @@ export default class SampleViewV2 extends React.Component {
                 selected={selectedOptions}
                 view={view}
               />
+            </div>
+            <div className={cs.statsRow}>
+              {this.renderReportInfo()}
+              {!!this.countFilters() && (
+                <span
+                  className={cs.clearAllFilters}
+                  onClick={this.clearAllFilters}
+                >
+                  Clear All Filters
+                </span>
+              )}
             </div>
             <div className={cs.reportTable}>
               <ReportTable
