@@ -607,7 +607,6 @@ class SampleView extends React.Component {
                 reportDetails={reportDetails}
                 editable={this.props.canEdit}
                 view={this.state.view}
-                reportVersion={1}
               />
             </ViewHeader.Controls>
           </ViewHeader>

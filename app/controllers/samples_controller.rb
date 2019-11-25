@@ -584,13 +584,20 @@ class SamplesController < ApplicationController
 
   # GET /samples/1/report_csv
   def report_csv
-    @report_csv = report_csv_from_params(@sample, params)
-    send_data @report_csv, filename: @sample.name + '_report.csv'
+    if current_user.allowed_feature?("report_v2")
+      report_csv_v2
+    else
+      @report_csv = report_csv_from_params(@sample, params)
+      send_data @report_csv, filename: @sample.name + '_report.csv'
+    end
   end
 
   # GET /samples/1/report_csv_v2
   def report_csv_v2
-    @report_csv = report_csv_from_params_v2(@sample, params)
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    background_id = get_background_id(@sample, params[:background])
+    min_contig_size = params[:min_contig_size]
+    @report_csv = PipelineReportService.call(pipeline_run.id, background_id, true, min_contig_size)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 

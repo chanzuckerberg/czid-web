@@ -14,13 +14,7 @@ import {
 
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
-    const {
-      backgroundId,
-      pipelineRun,
-      sample,
-      reportVersion,
-      minContigSize,
-    } = this.props;
+    const { backgroundId, pipelineRun, sample, minContigSize } = this.props;
 
     let resParams = {};
     const stringer = require("querystring");
@@ -36,11 +30,7 @@ class SampleViewControls extends React.Component {
     // Set the min contig size.
     if (minContigSize) resParams["min_contig_size"] = minContigSize;
 
-    // Need to know what version of the report table we're looking at and request accordingly
-    let res =
-      reportVersion === 1
-        ? `/samples/${sample.id}/report_csv`
-        : `/samples/${sample.id}/report_csv_v2`;
+    let res = `/samples/${sample.id}/report_csv`;
     res += `?${stringer.stringify(resParams)}`;
     location.href = res;
   };
@@ -154,7 +144,6 @@ SampleViewControls.propTypes = {
   pipelineRun: PropTypes.PipelineRun,
   editable: PropTypes.bool,
   view: PropTypes.string,
-  reportVersion: PropTypes.number,
   minContigSize: PropTypes.number,
 };
 

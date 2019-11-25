@@ -159,7 +159,6 @@ export default function SampleViewHeader({
           pipelineRun={pipelineRun}
           editable={editable}
           view={view}
-          reportVersion={2}
           minContigSize={minContigSize}
         />
       </ViewHeader.Controls>

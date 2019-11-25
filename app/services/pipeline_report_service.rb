@@ -68,6 +68,13 @@ class PipelineReportService
 
   def generate
     pipeline_run = PipelineRun.find(@pipeline_run_id)
+    if @pipeline_run_id.nil?
+      Rails.logger.error("Pipeline run doesn't exist.")
+      return ""
+    elsif pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
+      Rails.logger.error("Pipeline run #{@pipeline_run_id} has no reads.")
+      return ""
+    end
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
@@ -162,7 +169,7 @@ class PipelineReportService
     @timer.split("sort_genus_by_aggregate_score")
 
     counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
-      genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][DEFAULT_SORT_PARAM] }.reverse!
+      genus[:species_tax_ids] = genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][DEFAULT_SORT_PARAM] }.reverse!
       genus
     end
     @timer.split("sort_species_within_each_genus")
@@ -170,17 +177,21 @@ class PipelineReportService
     highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     @timer.split("find_taxa_to_highlight")
 
-    json_dump =
-      JSON.dump(
-        backgroundId: @background_id,
-        counts: counts_by_tax_level,
-        lineage: structured_lineage,
-        sortedGenus: sorted_genus_tax_ids,
-        highlightedTaxIds: highlighted_tax_ids
-      )
-    @timer.split("convert_to_json_with_JSON")
+    if @csv
+      return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
+    else
+      json_dump =
+        JSON.dump(
+          backgroundId: @background_id,
+          counts: counts_by_tax_level,
+          lineage: structured_lineage,
+          sortedGenus: sorted_genus_tax_ids,
+          highlightedTaxIds: highlighted_tax_ids
+        )
+      @timer.split("convert_to_json_with_JSON")
 
-    return json_dump
+      return json_dump
+    end
   end
 
   def fetch_taxon_counts(_pipeline_run_id, _background_id)
@@ -418,5 +429,36 @@ class PipelineReportService
       end
     end
     return highlighted_tax_ids
+  end
+
+  def report_csv(counts, sorted_genus_tax_ids)
+    rows = []
+    sorted_genus_tax_ids.each do |genus_tax_id|
+      genus_info = counts[2][genus_tax_id]
+      # add the hash keys in order for csv generation
+      genus_flat_hash = {}
+      genus_flat_hash[[:tax_id]] = genus_tax_id
+      genus_flat_hash[[:tax_level]] = 2
+      genus_flat_hash = genus_flat_hash.merge(flat_hash(genus_info))
+      rows << genus_flat_hash
+      genus_info[:species_tax_ids].each do |species_tax_id|
+        species_info = counts[1][species_tax_id]
+        species_flat_hash = flat_hash(species_info)
+        species_flat_hash[[:tax_id]] = species_tax_id
+        species_flat_hash[[:tax_level]] = 1
+        rows << species_flat_hash
+      end
+    end
+
+    flat_keys = rows[0].keys
+    flat_keys_symbols = flat_keys.map { |array_key| array_key.map(&:to_sym) }
+    attribute_names = flat_keys_symbols.map { |k| k.map(&:to_s).join("_") }
+    CSVSafe.generate(headers: true) do |csv|
+      csv << attribute_names
+      rows.each do |tax_info|
+        tax_info_by_symbols = tax_info.map { |k, v| [k.map(&:to_sym), v] }.to_h
+        csv << tax_info_by_symbols.values_at(*flat_keys_symbols)
+      end
+    end
   end
 end
