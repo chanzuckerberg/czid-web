@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { find, get, set } from "lodash/fp";
+import { unset, find, get, set } from "lodash/fp";
 import memoize from "memoize-one";
 
 import { getBulkDownloadTypes } from "~/api/bulk_downloads";
@@ -88,17 +88,28 @@ class BulkDownloadModal extends React.Component {
   };
 
   handleFieldSelect = (downloadType, fieldType, value, displayName) => {
-    this.setState({
-      selectedFields: set(
-        [downloadType, fieldType],
-        value,
-        this.state.selectedFields
-      ),
-      selectedFieldsDisplay: set(
-        [downloadType, fieldType],
-        displayName,
-        this.state.selectedFieldsDisplay
-      ),
+    this.setState(prevState => {
+      // If the value is undefined, delete it from selectedFields.
+      // This allows us to support cases where certain fields are conditionally required;
+      // if the field becomes no longer required, we can unset it.
+      const newSelectedFields =
+        value !== undefined
+          ? set([downloadType, fieldType], value, prevState.selectedFields)
+          : unset([downloadType, fieldType], prevState.selectedFields);
+
+      const newSelectedFieldsDisplay =
+        displayName !== undefined
+          ? set(
+              [downloadType, fieldType],
+              displayName,
+              prevState.selectedFieldsDisplay
+            )
+          : unset([downloadType, fieldType], prevState.selectedFieldsDisplay);
+
+      return {
+        selectedFields: newSelectedFields,
+        selectedFieldsDisplay: newSelectedFieldsDisplay,
+      };
     });
   };
 
