@@ -9,6 +9,7 @@ import {
   keys,
   map,
   merge,
+  pick,
   pull,
   set,
   some,
@@ -31,6 +32,7 @@ import PropTypes from "~/components/utils/propTypes";
 import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
@@ -42,7 +44,14 @@ export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
 
-    let localState = this.loadState(localStorage, "SampleViewOptions");
+    this.urlParser = new UrlQueryParser({
+      pipelineVersion: "string",
+      selectedOptions: "object",
+    });
+    this.urlOptions = this.urlParser.parse(location.search);
+
+    const urlState = pick("selectedOptions", this.urlOptions);
+    const localState = this.loadState(localStorage, "SampleViewOptions");
 
     this.state = Object.assign(
       {
@@ -60,7 +69,8 @@ export default class SampleViewV2 extends React.Component {
         view: "table",
         selectedOptions: this.defaultSelectedOptions(),
       },
-      localState
+      localState,
+      urlState
     );
   }
 
@@ -83,10 +93,10 @@ export default class SampleViewV2 extends React.Component {
 
   defaultSelectedOptions = () => {
     return {
+      categories: {},
+      minContigSize: 4,
       nameType: "Scientific name",
       readSpecificity: 0,
-      minContigSize: 4,
-      categories: {},
       thresholds: [],
     };
   };
@@ -369,15 +379,33 @@ export default class SampleViewV2 extends React.Component {
     });
   };
 
-  persistReportOptions = () => {
+  updateHistoryAndPersistOptions = (action = "push") => {
     // save new options to local storage
     const { selectedOptions } = this.state;
+
     // remove exceptions to persistent options
-    const { taxon, ...persistentReportOptions } = selectedOptions;
+    const { taxon, ...localStatePersistedOptions } = selectedOptions;
+
+    const urlState = pick(["view", "selectedOptions"], this.state);
+
+    // Saving on URL enables sharing current view with other users
+    let urlQuery = this.urlParser.stringify(urlState);
+    if (urlQuery) {
+      urlQuery = `?${urlQuery}`;
+    }
+
+    // History state may include some small fields that enable direct loading of previous pages
+    // from browser history without having to request those fields from server (e.g. project)
+    if (action === "push") {
+      history.pushState(urlState, `SampleView`, `${urlQuery}`);
+    } else {
+      history.replaceState(urlState, `SampleView`, `${urlQuery}`);
+    }
+
     localStorage.setItem(
       "SampleViewOptions",
       JSON.stringify({
-        selectedOptions: persistentReportOptions,
+        selectedOptions: localStatePersistedOptions,
       })
     );
   };
@@ -470,7 +498,7 @@ export default class SampleViewV2 extends React.Component {
         selectedOptions: newSelectedOptions,
       },
       () => {
-        this.persistReportOptions();
+        this.updateHistoryAndPersistOptions("replace");
       }
     );
   };
