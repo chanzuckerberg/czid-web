@@ -1,36 +1,44 @@
 <div class="outer-container">
-  <h2>Set your password</h2>
-
-  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: {method: :put}) do |f| %>
-    <%= f.hidden_field :reset_password_token %>
-
-    <div class="field new-pass-field">
-      <%= f.label :password, "New password" %><br/>
-      <% if @minimum_password_length %>
-        <em>(<%= @minimum_password_length %> characters minimum)</em><br/>
-      <% end %>
-      <%= f.password_field :password, autofocus: true, autocomplete: "off" %>
+  <% if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1" %>
+    <h2>Link Expired</h2>
+    <br/>
+    <div>
+      Sorry, this link has expired. Please click <a href="/auth0/login" target="_blank" rel="noopener noreferrer" class="terms-link">here</a> and go to "Forgot Password" to request a new link.
     </div>
+  <% else %>
+    <h2>Set your password</h2>
 
-    <div class="field">
-      <%= f.label :password_confirmation, "Confirm new password" %><br/>
-      <%= f.password_field :password_confirmation, autocomplete: "off" %>
-    </div>
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: {method: :put}) do |f| %>
+      <%= f.hidden_field :reset_password_token %>
 
-    <div class="terms">
-      By registering for IDseq, you agree to our
-      <a href="https://idseq.net/terms" target="_blank" rel="noopener noreferrer" class="terms-link">
-        Terms
-      </a> and
-      <a href="https://idseq.net/privacy" target="_blank" rel="noopener noreferrer" class="terms-link">
-        Data Privacy Notice.
-      </a>
-    </div>
+      <div class="field new-pass-field">
+        <%= f.label :password, "New password" %><br/>
+        <% if @minimum_password_length %>
+          <em>(<%= @minimum_password_length %> characters minimum)</em><br/>
+        <% end %>
+        <%= f.password_field :password, autofocus: true, autocomplete: "off" %>
+      </div>
 
-    <%= devise_error_messages! %>
+      <div class="field">
+        <%= f.label :password_confirmation, "Confirm new password" %><br/>
+        <%= f.password_field :password_confirmation, autocomplete: "off" %>
+      </div>
 
-    <div class="submit-btn">
-      <%= f.submit "Register", class: "ui primary button idseq-ui" %>
-    </div>
+      <div class="terms">
+        By registering for IDseq, you agree to our
+        <a href="https://idseq.net/terms" target="_blank" rel="noopener noreferrer" class="terms-link">
+          Terms
+        </a> and
+        <a href="https://idseq.net/privacy" target="_blank" rel="noopener noreferrer" class="terms-link">
+          Data Privacy Notice.
+        </a>
+      </div>
+
+      <%= devise_error_messages! %>
+
+      <div class="submit-btn">
+        <%= f.submit "Register", class: "ui primary button idseq-ui" %>
+      </div>
+    <% end %>
   <% end %>
 </div>
