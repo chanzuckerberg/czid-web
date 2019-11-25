@@ -84,9 +84,9 @@ Rails.application.configure do
   config.action_controller.asset_host = ENV['CLOUDFRONT_ENDPOINT'] || 'staging.idseq.net'
   # Custom config for idseq to enable CORS headers by environment. See rack_cors.rb.
   config.allowed_cors_origins = [
-    "https://idseq.net",
-    "https://www.idseq.net",
-    "https://assets.idseq.net",
+    "https://staging.idseq.net",
+    "https://www.staging.idseq.net",
+    "https://assets.staging.idseq.net",
   ]
 
   config.middleware.use Rack::HostRedirect, 'www.staging.idseq.net' => 'staging.idseq.net'
