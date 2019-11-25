@@ -106,11 +106,7 @@ class PipelineReportService
     )
     @timer.split("cleanup_missing_genus_counts")
 
-    if @csv
-      merge_contigs_csv(contigs, counts_by_tax_level)
-    else
-      merge_contigs(contigs, counts_by_tax_level)
-    end
+    merge_contigs(contigs, counts_by_tax_level, @csv)
     @timer.split("merge_contigs")
 
     counts_by_tax_level.each_value do |tax_level_taxa|
@@ -273,7 +269,7 @@ class PipelineReportService
     return counts_hash
   end
 
-  def merge_contigs(contigs, counts_by_tax_level)
+  def merge_contigs(contigs, counts_by_tax_level, csv)
     contigs.each do |tax_id, contigs_per_db_type|
       contigs_per_db_type.each do |db_type, contigs_per_read_count|
         norm_count_type = db_type.downcase.to_sym
@@ -283,33 +279,18 @@ class PipelineReportService
         end
 
         if counts_per_db_type
-          counts_per_db_type[:contigs] = contigs_per_read_count
-        else
-          # TODO(tiago): not sure if this case ever happens
-          Rails.logger.warn("[PR=#{@pipeline_run_id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
-        end
-      end
-    end
-  end
-
-  def merge_contigs_csv(contigs, counts_by_tax_level)
-    contigs.each do |tax_id, contigs_per_db_type|
-      contigs_per_db_type.each do |db_type, contigs_per_read_count|
-        norm_count_type = db_type.downcase.to_sym
-        counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_SPECIES, tax_id, norm_count_type)
-        unless counts_per_db_type
-          counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_GENUS, tax_id, norm_count_type)
-        end
-
-        if counts_per_db_type
-          contigs = 0
-          contig_r = 0
-          contigs_per_read_count.each do |reads, count|
-            contigs += count
-            contig_r += count * reads
+          if csv
+            contigs = 0
+            contig_r = 0
+            contigs_per_read_count.each do |reads, count|
+              contigs += count
+              contig_r += count * reads
+            end
+            counts_per_db_type[:contigs] = contigs
+            counts_per_db_type[:contig_r] = contig_r
+          else
+            counts_per_db_type[:contigs] = contigs_per_read_count
           end
-          counts_per_db_type[:contigs] = contigs
-          counts_per_db_type[:contig_r] = contig_r
         else
           # TODO(tiago): not sure if this case ever happens
           Rails.logger.warn("[PR=#{@pipeline_run_id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
@@ -439,11 +420,11 @@ class PipelineReportService
       genus_flat_hash = {}
       genus_flat_hash[[:tax_id]] = genus_tax_id
       genus_flat_hash[[:tax_level]] = 2
-      genus_flat_hash = genus_flat_hash.merge(flat_hash(genus_info))
+      genus_flat_hash = genus_flat_hash.merge(HashUtil.flat_hash(genus_info))
       rows << genus_flat_hash
       genus_info[:species_tax_ids].each do |species_tax_id|
         species_info = counts[1][species_tax_id]
-        species_flat_hash = flat_hash(species_info)
+        species_flat_hash = HashUtil.flat_hash(species_info)
         species_flat_hash[[:tax_id]] = species_tax_id
         species_flat_hash[[:tax_level]] = 1
         rows << species_flat_hash
