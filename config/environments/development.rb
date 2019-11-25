@@ -71,8 +71,15 @@ Rails.application.configure do
   config.action_controller.asset_host = proc { |source|
     "http://localhost:8080" if source =~ /wp_bundle\.js$/i
   }
-  # Uncomment this line to test cloudfront CDN. Must be running staging branch.
+  # Uncomment this line to test cloudfront CDN. Must be running staging branch,
+  # so that filename hashes match.
   # config.action_controller.asset_host = 'assets.staging.idseq.net'
+
+  # Custom config for idseq to enable CORS headers by environment. See rack_cors.rb.
+  config.allowed_cors_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ]
 
   ActiveRecordQueryTrace.enabled = true
 
