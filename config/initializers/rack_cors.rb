@@ -8,17 +8,8 @@ if defined? Rack::Cors
         # SERVER_DOMAIN should be set to the current env root web address
         # such as https://staging.idseq.net/
         ENV["SERVER_DOMAIN"] || "",
-        # Add all expected origins to be safe
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://idseq.net",
-        "https://www.idseq.net",
-        "https://staging.idseq.net",
-        "https://www.staging.idseq.net",
-        # Add CloudFront domains
-        "https://assets.idseq.net",
-        "https://assets.staging.idseq.net",
-      ]
+        # All other domains should be added in env config files such as prod.rb.
+      ] + (Rails.application.config.allowed_cors_origins || [])
       resource '/assets/*'
     end
   end
