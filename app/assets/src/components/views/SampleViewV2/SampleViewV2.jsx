@@ -8,7 +8,9 @@ import {
   get,
   keys,
   map,
+  mapValues,
   merge,
+  omit,
   pick,
   pull,
   set,
@@ -37,20 +39,28 @@ import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
 
+const mapValuesWithKey = mapValues.convert({ cap: false });
+
 const SPECIES_LEVEL_INDEX = 1;
 const GENUS_LEVEL_INDEX = 2;
+
+const URL_FIELDS = {
+  pipelineVersion: "string",
+  selectedOptions: "object",
+  view: "string",
+};
+
+const LOCAL_STORAGE_FIELDS = {
+  selectedOptions: { excludePaths: ["taxon"] },
+};
 
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
 
-    this.urlParser = new UrlQueryParser({
-      pipelineVersion: "string",
-      selectedOptions: "object",
-    });
-    this.urlOptions = this.urlParser.parse(location.search);
-
-    const urlState = pick("selectedOptions", this.urlOptions);
+    this.urlParser = new UrlQueryParser(URL_FIELDS);
+    const urlOptions = this.urlParser.parse(location.search);
+    const urlState = pick("selectedOptions", urlOptions);
     const localState = this.loadState(localStorage, "SampleViewOptions");
 
     this.state = Object.assign(
@@ -379,14 +389,17 @@ export default class SampleViewV2 extends React.Component {
     });
   };
 
-  updateHistoryAndPersistOptions = (action = "push") => {
+  updateHistoryAndPersistOptions = () => {
     // save new options to local storage
     const { selectedOptions } = this.state;
 
     // remove exceptions to persistent options
     const { taxon, ...localStatePersistedOptions } = selectedOptions;
 
-    const urlState = pick(["view", "selectedOptions"], this.state);
+    const urlState = pick(keys(URL_FIELDS), this.state);
+    let localState = mapValuesWithKey((options, key) => {
+      return omit(options.excludePaths || [], this.state[key]);
+    }, LOCAL_STORAGE_FIELDS);
 
     // Saving on URL enables sharing current view with other users
     let urlQuery = this.urlParser.stringify(urlState);
@@ -394,13 +407,7 @@ export default class SampleViewV2 extends React.Component {
       urlQuery = `?${urlQuery}`;
     }
 
-    // History state may include some small fields that enable direct loading of previous pages
-    // from browser history without having to request those fields from server (e.g. project)
-    if (action === "push") {
-      history.pushState(urlState, `SampleView`, `${urlQuery}`);
-    } else {
-      history.replaceState(urlState, `SampleView`, `${urlQuery}`);
-    }
+    history.replaceState(urlState, `SampleView`, `${urlQuery}`);
 
     localStorage.setItem(
       "SampleViewOptions",
@@ -498,7 +505,7 @@ export default class SampleViewV2 extends React.Component {
         selectedOptions: newSelectedOptions,
       },
       () => {
-        this.updateHistoryAndPersistOptions("replace");
+        this.updateHistoryAndPersistOptions();
       }
     );
   };
