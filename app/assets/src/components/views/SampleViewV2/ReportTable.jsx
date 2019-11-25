@@ -394,9 +394,12 @@ class ReportTable extends React.Component {
     const { expandedGenusIds, expandAllOpened } = this.state;
     expandedGenusIds.delete(taxId) || expandedGenusIds.add(taxId);
 
-    const newExpandedAllOpened =
-      expandedGenusIds.size === data.length ||
-      (!!expandedGenusIds.size && expandAllOpened);
+    let newExpandedAllOpened = expandAllOpened;
+    if (expandedGenusIds.size === data.length) {
+      newExpandedAllOpened = true;
+    } else if (!expandedGenusIds.size) {
+      newExpandedAllOpened = false;
+    }
 
     this.setState({
       expandedGenusIds: new Set(expandedGenusIds),
@@ -419,7 +422,6 @@ class ReportTable extends React.Component {
         expandAllOpened: true,
       });
     }
-    event.stopPropagation();
   };
 
   handleNtNrChange = selectedDbType => {
