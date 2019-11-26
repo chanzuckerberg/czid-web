@@ -25,6 +25,7 @@ import {
   getSampleReportData,
   getSamples,
 } from "~/api";
+import { getAmrData } from "~/api/amr";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -35,6 +36,7 @@ import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
+import AMRView from "~/components/AMRView";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
@@ -65,6 +67,7 @@ export default class SampleViewV2 extends React.Component {
 
     this.state = Object.assign(
       {
+        amrData: null,
         backgrounds: [],
         currentTab: "Report",
         filteredReportData: [],
@@ -86,9 +89,16 @@ export default class SampleViewV2 extends React.Component {
 
   componentDidMount = () => {
     this.fetchSample();
-    this.fetchSampleReportData();
     this.fetchBackgrounds();
+    this.fetchSampleReportData();
   };
+
+  componentDidUpdate() {
+    const { amrData, currentTab } = this.state;
+    if (currentTab === "Antimicrobial Resistance" && !amrData) {
+      this.fetchAmrData();
+    }
+  }
 
   loadState = (store, key) => {
     try {
@@ -189,6 +199,12 @@ export default class SampleViewV2 extends React.Component {
         background: rawReportData.backgroundId,
       }),
     });
+  };
+
+  fetchAmrData = async () => {
+    const { sample } = this.state;
+    const amrData = await getAmrData(sample.id);
+    this.setState({ amrData });
   };
 
   fetchBackgrounds = async () => {
@@ -601,6 +617,7 @@ export default class SampleViewV2 extends React.Component {
 
   render = () => {
     const {
+      amrData,
       backgrounds,
       currentTab,
       filteredReportData,
@@ -635,8 +652,7 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.tabsContainer}>
             <UserContext.Consumer>
               {currentUser =>
-                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) ||
-                currentUser.admin ? (
+                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) ? (
                   <Tabs
                     className={cs.tabs}
                     tabs={["Report", "Antimicrobial Resistance"]}
@@ -651,24 +667,28 @@ export default class SampleViewV2 extends React.Component {
               }
             </UserContext.Consumer>
           </div>
-          <div className={cs.reportViewContainer}>
-            <div className={cs.reportFilters}>
-              <ReportFilters
-                backgrounds={backgrounds}
-                onFilterChanged={this.handleOptionChanged}
-                onFilterRemoved={this.handleFilterRemoved}
-                sampleId={sample && sample.id}
-                selected={selectedOptions}
-                view={view}
-              />
+          {currentTab === "Report" && (
+            <div className={cs.reportViewContainer}>
+              <div className={cs.reportFilters}>
+                <ReportFilters
+                  backgrounds={backgrounds}
+                  onFilterChanged={this.handleOptionChanged}
+                  onFilterRemoved={this.handleFilterRemoved}
+                  sampleId={sample && sample.id}
+                  selected={selectedOptions}
+                  view={view}
+                />
+              </div>
+              <div className={cs.reportTable}>
+                <ReportTable
+                  data={filteredReportData}
+                  onTaxonNameClick={this.handleTaxonClick}
+                />
+              </div>
             </div>
-            <div className={cs.reportTable}>
-              <ReportTable
-                data={filteredReportData}
-                onTaxonNameClick={this.handleTaxonClick}
-              />
-            </div>
-          </div>
+          )}
+          {currentTab === "Antimicrobial Resistance" &&
+            amrData && <AMRView amr={amrData} />}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar
