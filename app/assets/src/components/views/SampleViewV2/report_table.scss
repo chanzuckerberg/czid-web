@@ -103,6 +103,12 @@
 .speciesRow,
 .row {
   padding-left: 5px;
+  // For some reason, react virtualized adds 8px padding to rows' style,
+  // when we expand a single column, from a previous value of 0.
+  // In theory is to make room for the scrollbar.
+  // We override it here to 0, specially since the last column - the NT/NR
+  // selector can be used for the scrollbar.
+  padding-right: 0px !important;
   &.highlighted {
     background-color: $primary-lightest;
     border-left: 5px solid $primary-lighter;

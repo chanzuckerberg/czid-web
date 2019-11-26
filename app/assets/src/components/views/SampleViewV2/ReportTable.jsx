@@ -32,6 +32,7 @@ class ReportTable extends React.Component {
         cellRenderer: this.renderExpandIcon,
         className: cs.expandHeader,
         dataKey: "expanded",
+        disableSort: true,
         headerClassName: cs.expandCell,
         headerRenderer: this.renderExpandIconHeader,
         width: 20,
@@ -43,7 +44,7 @@ class ReportTable extends React.Component {
         flexGrow: 1,
         headerClassName: cs.taxonHeader,
         label: "Taxon",
-        width: 350,
+        width: 170,
         sortFunction: ({ data, sortDirection }) =>
           this.nestedSortFunction({
             data,
