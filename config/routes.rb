@@ -8,11 +8,14 @@ Rails.application.routes.draw do
   }
 
   get 'auth/auth0/callback/' => 'auth0#callback'
+  get 'auth/failure/' => 'auth0#failure'
   namespace :auth0 do
     post :request_password_reset
     get :refresh_token
     get :background_refresh
     get :login
+    get :logout
+    get :failure
   end
 
   resources :samples do

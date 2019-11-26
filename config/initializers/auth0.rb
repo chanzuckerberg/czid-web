@@ -10,3 +10,5 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     }
   )
 end
+
+OmniAuth.config.failure_raise_out_environments = []
