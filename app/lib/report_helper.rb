@@ -256,7 +256,7 @@ module ReportHelper
   def self.generate_report_csv(tax_details)
     rows = tax_details[2]
     return if rows.blank?
-    flat_keys = flat_hash(rows[0]).keys
+    flat_keys = HashUtil.flat_hash(rows[0]).keys
     flat_keys_symbols = flat_keys.map { |array_key| array_key.map(&:to_sym) }
     attributes_as_symbols = flat_keys_symbols - IGNORE_IN_DOWNLOAD
     attribute_names = attributes_as_symbols.map { |k| k.map(&:to_s).join("_") }
@@ -264,7 +264,7 @@ module ReportHelper
     CSVSafe.generate(headers: true) do |csv|
       csv << attribute_names
       rows.each do |tax_info|
-        flat_tax_info = flat_hash(tax_info)
+        flat_tax_info = HashUtil.flat_hash(tax_info)
         flat_tax_info_by_symbols = flat_tax_info.map { |k, v| [k.map(&:to_sym), v] }.to_h
         csv << flat_tax_info_by_symbols.values_at(*attributes_as_symbols)
       end
@@ -795,16 +795,5 @@ module ReportHelper
     Rails.logger.info "Agg scoring took #{(t2 - t1).round(2)}s,  #{(t3 - t2).round(2)}s."
 
     [rows_passing_filters, rows_total, rows]
-  end
-
-  def self.flat_hash(h, f = [], g = {})
-    return g.update(f => h) unless h.is_a? Hash
-    h.each { |k, r| flat_hash(r, f + [k], g) }
-    g
-    # example: turn    { :a => { :b => { :c => 1,
-    #                                    :d => 2 },
-    #                            :e => 3 },
-    #                    :f => 4 }
-    # into    {[:a, :b, :c] => 1, [:a, :b, :d] => 2, [:a, :e] => 3, [:f] => 4}
   end
 end
