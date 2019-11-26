@@ -250,4 +250,9 @@ module PipelineRunsHelper
 
     return valid_pipeline_runs
   end
+
+  def aws_s3_read_json(path)
+    raw = Syscall.run("aws", "s3", "cp", path, "-")
+    JSON.parse(raw)
+  end
 end
