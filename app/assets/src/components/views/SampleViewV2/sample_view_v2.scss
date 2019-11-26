@@ -1,4 +1,6 @@
+@import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~styles/themes/typography";
 
 .sampleViewContainer {
   display: flex;
@@ -25,6 +27,25 @@
 
   .reportTable {
     flex: 1 0 auto;
+  }
+
+  .statsRow {
+    @include font-body-xxs;
+
+    color: $medium-grey;
+
+    .reportInfoMsg {
+      &:not(:first-child) {
+        margin-left: $space-xs;
+      }
+    }
+
+    .clearAllFilters {
+      margin-left: $space-s;
+      font-weight: $font-weight-semibold;
+      white-space: nowrap;
+      cursor: pointer;
+    }
   }
 }
 
