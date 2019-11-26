@@ -13,3 +13,5 @@ export const getOntology = geneName =>
       geneName,
     },
   });
+
+export const getAmrData = sampleId => get(`/samples/${sampleId}/amr.json`);

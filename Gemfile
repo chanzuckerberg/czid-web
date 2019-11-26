@@ -92,6 +92,9 @@ gem 'csv-safe', '~> 1.2'
 # For accessing Auth0 management APIs
 gem 'auth0'
 
+# For Access-Control-Allow-Origin and Cloudfront
+gem "rack-cors"
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'

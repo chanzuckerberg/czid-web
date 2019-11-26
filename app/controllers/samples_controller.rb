@@ -21,7 +21,7 @@ class SamplesController < ApplicationController
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :show_v2, :report_v2, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
-                  :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
+                  :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat,].freeze
@@ -48,6 +48,9 @@ class SamplesController < ApplicationController
   before_action :check_access
   before_action only: :show_v2 do
     allowed_feature_required("report_v2")
+  end
+  before_action only: :amr do
+    allowed_feature_required("AMR")
   end
 
   around_action :instrument_with_timer
@@ -777,6 +780,18 @@ class SamplesController < ApplicationController
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
     render json: PipelineReportService.call(pipeline_run.id, background_id)
+  end
+
+  def amr
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    amr_counts = nil
+    if pipeline_run
+      amr_state = pipeline_run.output_states.find_by(output: "amr_counts")
+      if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
+        amr_counts = pipeline_run.amr_counts
+      end
+    end
+    render json: amr_counts || []
   end
 
   # The json response here should be precached in PipelineRun.

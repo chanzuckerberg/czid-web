@@ -83,6 +83,13 @@ Rails.application.configure do
 
   # We configure IDseq to use cloudfront CDN when available.
   config.action_controller.asset_host = ENV['CLOUDFRONT_ENDPOINT'] || 'idseq.net'
+  # Custom config for idseq to enable CORS headers by environment. See rack_cors.rb.
+  config.allowed_cors_origins = [
+    "https://idseq.net",
+    "https://www.idseq.net",
+    "https://assets.idseq.net",
+  ]
+
   config.middleware.use Rack::HostRedirect, 'www.idseq.net' => 'idseq.net'
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
