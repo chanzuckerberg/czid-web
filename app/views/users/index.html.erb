@@ -1,4 +1,8 @@
-
+<script>
+  function confirmDeleteUser(user) {
+    return confirm("Do you want to delete user " + user + "?");
+  }
+</script>
 <div id='user_create_page'>
   <% if current_user && current_user.admin %>
    <p id="notice"><%= notice %></p>
@@ -31,8 +35,8 @@
                 <%= link_to user.projects.last.name, user.projects.last if user.projects.last %>
             </td>
             <td><%= user.created_at %></td>
-            <td><%= link_to 'Edit', edit_user_path(user) %></td>
-            <td><%= link_to 'Destroy', user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+            <td><%= button_to 'Edit', edit_user_path(user), method: :get %></td>
+            <td><%= button_to 'Destroy', user, method: :delete, onclick: "return confirmDeleteUser(#{user.name.to_json});" %></td>
           </tr>
         <% end %>
       </tbody>
