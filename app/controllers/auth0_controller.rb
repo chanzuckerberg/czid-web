@@ -32,6 +32,15 @@ class Auth0Controller < ApplicationController
     )
   end
 
+  def logout
+    auth0_logout
+    redirect_to auth0_signout_url
+  end
+
+  def failure
+    logout
+  end
+
   def background_refresh
     @mode = params["mode"]
     @refresh_values = background_refresh_values
