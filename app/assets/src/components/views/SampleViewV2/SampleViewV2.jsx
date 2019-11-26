@@ -406,9 +406,6 @@ export default class SampleViewV2 extends React.Component {
   };
 
   updateHistoryAndPersistOptions = () => {
-    // save new options to local storage
-    const { selectedOptions } = this.state;
-
     const urlState = pick(keys(URL_FIELDS), this.state);
     let localState = mapValuesWithKey((options, key) => {
       return omit(options.excludePaths || [], this.state[key]);
