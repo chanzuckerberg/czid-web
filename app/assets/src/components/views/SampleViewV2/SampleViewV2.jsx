@@ -578,21 +578,22 @@ export default class SampleViewV2 extends React.Component {
 
   countReportRows = () => {
     const { filteredReportData, reportData } = this.state;
+
     let total = reportData.length;
     let filtered = filteredReportData.length;
     reportData.forEach(genusRow => {
       total += genusRow.species.length;
       filtered += genusRow.filteredSpecies.length;
     });
+
     return { total, filtered };
   };
 
   filteredMessage = () => {
     const { total, filtered } = this.countReportRows();
-    return (
-      filtered != total &&
-      `${filtered} rows passing the above filters, out of ${total} total rows.`
-    );
+    return filtered != total
+      ? `${filtered} rows passing the above filters, out of ${total} total rows.`
+      : `${total} total rows.`;
   };
 
   truncatedMessage = () => {
@@ -601,7 +602,7 @@ export default class SampleViewV2 extends React.Component {
     } = this.state;
     return (
       truncatedReadsCount &&
-      `Overly large input was truncated to ${truncatedReadsCount} reads.`
+      `Initial input was truncated to ${truncatedReadsCount} reads.`
     );
   };
 
@@ -640,7 +641,10 @@ export default class SampleViewV2 extends React.Component {
     this.setState(
       {
         selectedOptions: newSelectedOptions,
-        filteredReportData: reportData,
+        filteredReportData: this.filterReportData({
+          reportData,
+          filters: newSelectedOptions,
+        }),
       },
       () => {
         this.persistReportOptions();
