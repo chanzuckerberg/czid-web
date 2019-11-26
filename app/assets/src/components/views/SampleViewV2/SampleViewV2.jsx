@@ -9,7 +9,10 @@ import {
   get,
   keys,
   map,
+  mapValues,
   merge,
+  omit,
+  pick,
   pull,
   set,
   some,
@@ -34,19 +37,35 @@ import PropTypes from "~/components/utils/propTypes";
 import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import AMRView from "~/components/AMRView";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
 
+const mapValuesWithKey = mapValues.convert({ cap: false });
+
 const SPECIES_LEVEL_INDEX = 1;
 const GENUS_LEVEL_INDEX = 2;
+
+const URL_FIELDS = {
+  pipelineVersion: "string",
+  selectedOptions: "object",
+  view: "string",
+};
+
+const LOCAL_STORAGE_FIELDS = {
+  selectedOptions: { excludePaths: ["taxon"] },
+};
 
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
 
-    let localState = this.loadState(localStorage, "SampleViewOptions");
+    this.urlParser = new UrlQueryParser(URL_FIELDS);
+    const urlOptions = this.urlParser.parse(location.search);
+    const urlState = pick("selectedOptions", urlOptions);
+    const localState = this.loadState(localStorage, "SampleViewOptions");
 
     this.state = Object.assign(
       {
@@ -66,7 +85,8 @@ export default class SampleViewV2 extends React.Component {
         view: "table",
         selectedOptions: this.defaultSelectedOptions(),
       },
-      localState
+      localState,
+      urlState
     );
   }
 
@@ -96,10 +116,10 @@ export default class SampleViewV2 extends React.Component {
 
   defaultSelectedOptions = () => {
     return {
+      categories: {},
+      minContigSize: 4,
       nameType: "Scientific name",
       readSpecificity: 0,
-      minContigSize: 4,
-      categories: {},
       thresholds: [],
     };
   };
@@ -389,17 +409,21 @@ export default class SampleViewV2 extends React.Component {
     });
   };
 
-  persistReportOptions = () => {
-    // save new options to local storage
-    const { selectedOptions } = this.state;
-    // remove exceptions to persistent options
-    const { taxon, ...persistentReportOptions } = selectedOptions;
-    localStorage.setItem(
-      "SampleViewOptions",
-      JSON.stringify({
-        selectedOptions: persistentReportOptions,
-      })
-    );
+  updateHistoryAndPersistOptions = () => {
+    const urlState = pick(keys(URL_FIELDS), this.state);
+    let localState = mapValuesWithKey((options, key) => {
+      return omit(options.excludePaths || [], this.state[key]);
+    }, LOCAL_STORAGE_FIELDS);
+
+    // Saving on URL enables sharing current view with other users
+    let urlQuery = this.urlParser.stringify(urlState);
+    if (urlQuery) {
+      urlQuery = `?${urlQuery}`;
+    }
+
+    history.replaceState(urlState, `SampleView`, `${urlQuery}`);
+
+    localStorage.setItem("SampleViewOptions", JSON.stringify(localState));
   };
 
   handleOptionChanged = ({ key, value }) => {
@@ -490,7 +514,7 @@ export default class SampleViewV2 extends React.Component {
         selectedOptions: newSelectedOptions,
       },
       () => {
-        this.persistReportOptions();
+        this.updateHistoryAndPersistOptions();
       }
     );
   };
