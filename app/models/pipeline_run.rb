@@ -1041,7 +1041,7 @@ class PipelineRun < ApplicationRecord
     end
 
     # Load unidentified reads
-    self.unmapped_reads = load_unmapped_reads(all_counts) || unmapped_reads
+    self.unmapped_reads = fetch_unmapped_reads(all_counts) || unmapped_reads
 
     # Write JSON to a file
     tmp = Tempfile.new
@@ -1060,19 +1060,23 @@ class PipelineRun < ApplicationRecord
   # Fetch the unmapped reads count from alignment stage then refined counts from
   # assembly stage, as each becomes available. Prior to Dec 2019, the count was
   # only fetched from alignment.
-  def load_unmapped_reads(all_counts)
+  def fetch_unmapped_reads(
+    all_counts,
+    s3_path = "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_COUNT_BASENAME}"
+  )
     unmapped_reads = nil
     unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
     if unidentified
       unmapped_reads = unidentified[:reads_after]
 
-      if supports_assembly?
+      if supports_assembly? && finalized?
         # see idseq_dag/steps/generate_annotated_fasta.py
-        refined_annotated_out = aws_s3_read_json(
-          "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_COUNT_BASENAME}"
-        )
-        if refined_annotated_out.present?
+        begin
+          Rails.logger.info("Fetching file: #{s3_path}")
+          refined_annotated_out = aws_s3_read_json(s3_path)
           unmapped_reads = refined_annotated_out["unidentified_fasta"]
+        rescue
+          Rails.logger.warn("Could not read file: #{s3_path}")
         end
       end
     end
