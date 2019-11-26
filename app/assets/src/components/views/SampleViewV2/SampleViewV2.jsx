@@ -393,9 +393,6 @@ export default class SampleViewV2 extends React.Component {
     // save new options to local storage
     const { selectedOptions } = this.state;
 
-    // remove exceptions to persistent options
-    const { taxon, ...localStatePersistedOptions } = selectedOptions;
-
     const urlState = pick(keys(URL_FIELDS), this.state);
     let localState = mapValuesWithKey((options, key) => {
       return omit(options.excludePaths || [], this.state[key]);
@@ -409,12 +406,7 @@ export default class SampleViewV2 extends React.Component {
 
     history.replaceState(urlState, `SampleView`, `${urlQuery}`);
 
-    localStorage.setItem(
-      "SampleViewOptions",
-      JSON.stringify({
-        selectedOptions: localStatePersistedOptions,
-      })
-    );
+    localStorage.setItem("SampleViewOptions", JSON.stringify(localState));
   };
 
   handleOptionChanged = ({ key, value }) => {
