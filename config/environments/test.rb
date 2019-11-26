@@ -47,5 +47,11 @@ Rails.application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
+  # Custom config for idseq to enable CORS headers by environment. See rack_cors.rb.
+  config.allowed_cors_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ]
+
   config.middleware.use ResqueMiddleware
 end

@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  compact,
   entries,
   every,
   find,
@@ -8,10 +9,14 @@ import {
   get,
   keys,
   map,
+  mapValues,
   merge,
+  omit,
+  pick,
   pull,
   set,
   some,
+  sum,
   values,
 } from "lodash/fp";
 import deepEqual from "fast-deep-equal";
@@ -22,6 +27,7 @@ import {
   getSampleReportData,
   getSamples,
 } from "~/api";
+import { getAmrData } from "~/api/amr";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -31,21 +37,39 @@ import PropTypes from "~/components/utils/propTypes";
 import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
+import AMRView from "~/components/AMRView";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
 
+const mapValuesWithKey = mapValues.convert({ cap: false });
+
 const SPECIES_LEVEL_INDEX = 1;
 const GENUS_LEVEL_INDEX = 2;
+
+const URL_FIELDS = {
+  pipelineVersion: "string",
+  selectedOptions: "object",
+  view: "string",
+};
+
+const LOCAL_STORAGE_FIELDS = {
+  selectedOptions: { excludePaths: ["taxon"] },
+};
 
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
 
-    let localState = this.loadState(localStorage, "SampleViewOptions");
+    this.urlParser = new UrlQueryParser(URL_FIELDS);
+    const urlOptions = this.urlParser.parse(location.search);
+    const urlState = pick("selectedOptions", urlOptions);
+    const localState = this.loadState(localStorage, "SampleViewOptions");
 
     this.state = Object.assign(
       {
+        amrData: null,
         backgrounds: [],
         currentTab: "Report",
         filteredReportData: [],
@@ -53,6 +77,7 @@ export default class SampleViewV2 extends React.Component {
         project: null,
         projectSamples: [],
         reportData: [],
+        reportMetadata: {},
         sample: null,
         sidebarMode: null,
         sidebarVisible: false,
@@ -60,15 +85,23 @@ export default class SampleViewV2 extends React.Component {
         view: "table",
         selectedOptions: this.defaultSelectedOptions(),
       },
-      localState
+      localState,
+      urlState
     );
   }
 
   componentDidMount = () => {
     this.fetchSample();
-    this.fetchSampleReportData();
     this.fetchBackgrounds();
+    this.fetchSampleReportData();
   };
+
+  componentDidUpdate() {
+    const { amrData, currentTab } = this.state;
+    if (currentTab === "Antimicrobial Resistance" && !amrData) {
+      this.fetchAmrData();
+    }
+  }
 
   loadState = (store, key) => {
     try {
@@ -83,10 +116,10 @@ export default class SampleViewV2 extends React.Component {
 
   defaultSelectedOptions = () => {
     return {
+      categories: {},
+      minContigSize: 4,
       nameType: "Scientific name",
       readSpecificity: 0,
-      minContigSize: 4,
-      categories: {},
       thresholds: [],
     };
   };
@@ -164,11 +197,18 @@ export default class SampleViewV2 extends React.Component {
 
     this.setState({
       reportData,
+      reportMetadata: rawReportData.metadata,
       filteredReportData,
       selectedOptions: Object.assign({}, selectedOptions, {
-        background: rawReportData.backgroundId,
+        background: rawReportData.metadata.backgroundId,
       }),
     });
+  };
+
+  fetchAmrData = async () => {
+    const { sample } = this.state;
+    const amrData = await getAmrData(sample.id);
+    this.setState({ amrData });
   };
 
   fetchBackgrounds = async () => {
@@ -369,17 +409,21 @@ export default class SampleViewV2 extends React.Component {
     });
   };
 
-  persistReportOptions = () => {
-    // save new options to local storage
-    const { selectedOptions } = this.state;
-    // remove exceptions to persistent options
-    const { taxon, ...persistentReportOptions } = selectedOptions;
-    localStorage.setItem(
-      "SampleViewOptions",
-      JSON.stringify({
-        selectedOptions: persistentReportOptions,
-      })
-    );
+  updateHistoryAndPersistOptions = () => {
+    const urlState = pick(keys(URL_FIELDS), this.state);
+    let localState = mapValuesWithKey((options, key) => {
+      return omit(options.excludePaths || [], this.state[key]);
+    }, LOCAL_STORAGE_FIELDS);
+
+    // Saving on URL enables sharing current view with other users
+    let urlQuery = this.urlParser.stringify(urlState);
+    if (urlQuery) {
+      urlQuery = `?${urlQuery}`;
+    }
+
+    history.replaceState(urlState, `SampleView`, `${urlQuery}`);
+
+    localStorage.setItem("SampleViewOptions", JSON.stringify(localState));
   };
 
   handleOptionChanged = ({ key, value }) => {
@@ -470,7 +514,7 @@ export default class SampleViewV2 extends React.Component {
         selectedOptions: newSelectedOptions,
       },
       () => {
-        this.persistReportOptions();
+        this.updateHistoryAndPersistOptions();
       }
     );
   };
@@ -572,8 +616,100 @@ export default class SampleViewV2 extends React.Component {
     return {};
   };
 
+  countReportRows = () => {
+    const { filteredReportData, reportData } = this.state;
+
+    let total = reportData.length;
+    let filtered = filteredReportData.length;
+    reportData.forEach(genusRow => {
+      total += genusRow.species.length;
+      filtered += genusRow.filteredSpecies.length;
+    });
+
+    return { total, filtered };
+  };
+
+  filteredMessage = () => {
+    const { total, filtered } = this.countReportRows();
+    return filtered != total
+      ? `${filtered} rows passing the above filters, out of ${total} total rows.`
+      : `${total} total rows.`;
+  };
+
+  truncatedMessage = () => {
+    const {
+      reportMetadata: { truncatedReadsCount },
+    } = this.state;
+    return (
+      truncatedReadsCount &&
+      `Initial input was truncated to ${truncatedReadsCount} reads.`
+    );
+  };
+
+  subsamplingMessage = () => {
+    const {
+      reportMetadata: { subsampledReadsCount, adjustedRemainingReadsCount },
+    } = this.state;
+    return (
+      subsampledReadsCount &&
+      adjustedRemainingReadsCount &&
+      subsampledReadsCount != adjustedRemainingReadsCount &&
+      `Report values are computed from ${subsampledReadsCount} reads subsampled \
+        randomly from the ${adjustedRemainingReadsCount} reads passing host and quality filters.`
+    );
+  };
+
+  renderReportInfo = () => {
+    return compact([
+      this.truncatedMessage(),
+      this.subsamplingMessage(),
+      this.filteredMessage(),
+    ]).map((msg, i) => (
+      <span className={cs.reportInfoMsg} key={`msg-${i}`}>
+        {msg}
+      </span>
+    ));
+  };
+
+  clearAllFilters = () => {
+    const { reportData, selectedOptions } = this.state;
+
+    const newSelectedOptions = { ...selectedOptions };
+    newSelectedOptions.thresholds = [];
+    newSelectedOptions.categories = {};
+
+    this.setState(
+      {
+        selectedOptions: newSelectedOptions,
+        filteredReportData: this.filterReportData({
+          reportData,
+          filters: newSelectedOptions,
+        }),
+      },
+      () => {
+        this.persistReportOptions();
+      }
+    );
+    logAnalyticsEvent("PipelineSampleReport_clear-filters-link_clicked");
+  };
+
+  countFilters = () => {
+    const {
+      selectedOptions: { categories, thresholds, taxon },
+    } = this.state;
+
+    let numFilters = taxon ? 1 : 0;
+    numFilters += thresholds.length;
+    numFilters += (categories.categories || []).length;
+    numFilters += sum(
+      map(v => v.length, values(categories.subcategories || {}))
+    );
+    return numFilters;
+  };
+
   render = () => {
     const {
+      amrData,
       backgrounds,
       currentTab,
       filteredReportData,
@@ -609,8 +745,7 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.tabsContainer}>
             <UserContext.Consumer>
               {currentUser =>
-                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) ||
-                currentUser.admin ? (
+                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) ? (
                   <Tabs
                     className={cs.tabs}
                     tabs={["Report", "Antimicrobial Resistance"]}
@@ -625,24 +760,39 @@ export default class SampleViewV2 extends React.Component {
               }
             </UserContext.Consumer>
           </div>
-          <div className={cs.reportViewContainer}>
-            <div className={cs.reportFilters}>
-              <ReportFilters
-                backgrounds={backgrounds}
-                onFilterChanged={this.handleOptionChanged}
-                onFilterRemoved={this.handleFilterRemoved}
-                sampleId={sample && sample.id}
-                selected={selectedOptions}
-                view={view}
-              />
+          {currentTab === "Report" && (
+            <div className={cs.reportViewContainer}>
+              <div className={cs.reportFilters}>
+                <ReportFilters
+                  backgrounds={backgrounds}
+                  onFilterChanged={this.handleOptionChanged}
+                  onFilterRemoved={this.handleFilterRemoved}
+                  sampleId={sample && sample.id}
+                  selected={selectedOptions}
+                  view={view}
+                />
+              </div>
+              <div className={cs.statsRow}>
+                {this.renderReportInfo()}
+                {!!this.countFilters() && (
+                  <span
+                    className={cs.clearAllFilters}
+                    onClick={this.clearAllFilters}
+                  >
+                    Clear All Filters
+                  </span>
+                )}
+              </div>
+              <div className={cs.reportTable}>
+                <ReportTable
+                  data={filteredReportData}
+                  onTaxonNameClick={this.handleTaxonClick}
+                />
+              </div>
             </div>
-            <div className={cs.reportTable}>
-              <ReportTable
-                data={filteredReportData}
-                onTaxonNameClick={this.handleTaxonClick}
-              />
-            </div>
-          </div>
+          )}
+          {currentTab === "Antimicrobial Resistance" &&
+            amrData && <AMRView amr={amrData} />}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar

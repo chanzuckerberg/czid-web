@@ -9,6 +9,7 @@ import { withAnalytics } from "~/api/analytics";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import InsightIcon from "~ui/icons/InsightIcon";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
+import { REPORT_TABLE_COLUMNS } from "../report/ReportTable/constants";
 
 import cs from "./report_table.scss";
 
@@ -46,6 +47,7 @@ class ReportTable extends React.Component {
       },
       {
         cellRenderer: this.renderAggregateScore,
+        columnData: REPORT_TABLE_COLUMNS["NT_aggregatescore"],
         dataKey: "agg_score",
         label: "Score",
         width: 130,
@@ -63,6 +65,7 @@ class ReportTable extends React.Component {
           this.getNtNrFromDataRow(rowData, "z_score", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
+        columnData: REPORT_TABLE_COLUMNS["zscore"],
         dataKey: "z_score",
         sortFunction: ({ data, sortDirection }) =>
           this.nestedNtNrSortFunction({
@@ -79,6 +82,7 @@ class ReportTable extends React.Component {
           this.getNtNrFromDataRow(rowData, "rpm", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
+        columnData: REPORT_TABLE_COLUMNS["rpm"],
         dataKey: "rpm",
         label: "rPM",
         sortFunction: ({ data, sortDirection }) =>
@@ -95,6 +99,7 @@ class ReportTable extends React.Component {
         cellDataGetter: ({ rowData }) =>
           this.getNtNrFromDataRow(rowData, "count", 0),
         cellRenderer: this.renderNtNrDecimalValues,
+        columnData: REPORT_TABLE_COLUMNS["r"],
         dataKey: "r",
         label: "r",
         sortFunction: ({ data, sortDirection }) =>
@@ -111,6 +116,7 @@ class ReportTable extends React.Component {
         cellDataGetter: ({ rowData }) =>
           this.getNtNrFromDataRow(rowData, "contigCount", 0),
         cellRenderer: this.renderNtNrDecimalValues,
+        columnData: REPORT_TABLE_COLUMNS["contigs"],
         dataKey: "contigCount",
         label: "contig",
         sortFunction: ({ data, sortDirection }) =>
@@ -127,6 +133,7 @@ class ReportTable extends React.Component {
         cellDataGetter: ({ rowData }) =>
           this.getNtNrFromDataRow(rowData, "readsCount", 0),
         cellRenderer: this.renderNtNrDecimalValues,
+        columnData: REPORT_TABLE_COLUMNS["contigreads"],
         dataKey: "readsCount",
         label: "contig r",
         sortFunction: ({ data, sortDirection }) =>
@@ -144,6 +151,7 @@ class ReportTable extends React.Component {
           this.getNtNrFromDataRow(rowData, "percent_identity", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
+        columnData: REPORT_TABLE_COLUMNS["percentidentity"],
         dataKey: "percent_identity",
         label: "%id",
         sortFunction: ({ data, sortDirection }) =>
@@ -161,6 +169,7 @@ class ReportTable extends React.Component {
           this.getNtNrFromDataRow(rowData, "alignment_length", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
+        columnData: REPORT_TABLE_COLUMNS["alignmentlength"],
         dataKey: "alignment_length",
         label: "L",
         sortFunction: ({ data, sortDirection }) =>
@@ -178,6 +187,7 @@ class ReportTable extends React.Component {
           this.getNtNrFromDataRow(rowData, "e_value", 0),
         cellRenderer: ({ cellData }) =>
           this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
+        columnData: REPORT_TABLE_COLUMNS["neglogevalue"],
         dataKey: "e_value",
         label: "log(1/E)",
         sortFunction: ({ data, sortDirection }) =>

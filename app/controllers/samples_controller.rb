@@ -22,7 +22,7 @@ class SamplesController < ApplicationController
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :show_v2, :report_v2, :report_info, :report_csv, :report_csv_v2, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
-                  :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
+                  :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat,].freeze
@@ -49,6 +49,9 @@ class SamplesController < ApplicationController
   before_action :check_access
   before_action only: :show_v2 do
     allowed_feature_required("report_v2")
+  end
+  before_action only: :amr do
+    allowed_feature_required("AMR")
   end
 
   around_action :instrument_with_timer
@@ -793,6 +796,18 @@ class SamplesController < ApplicationController
     render json: PipelineReportService.call(pipeline_run.id, background_id)
   end
 
+  def amr
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    amr_counts = nil
+    if pipeline_run
+      amr_state = pipeline_run.output_states.find_by(output: "amr_counts")
+      if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
+        amr_counts = pipeline_run.amr_counts
+      end
+    end
+    render json: amr_counts || []
+  end
+
   # The json response here should be precached in PipelineRun.
   def report_info
     skip_cache = params[:skip_cache] || false
@@ -890,12 +905,12 @@ class SamplesController < ApplicationController
     return if HUMAN_TAX_IDS.include? params[:taxid].to_i
     pr = select_pipeline_run(@sample, params[:pipeline_version])
     if params[:hit_type] == "NT_or_NR"
-      nt_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
-      nr_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
-      @taxid_fasta = ">" + ((nt_array | nr_array) - ['']).join(">")
-      @taxid_fasta = "Coming soon" if @taxid_fasta == ">" # Temporary fix
+      @taxid_fasta = get_taxon_fasta_from_pipeline_run_combined_nt_nr(pr, params[:taxid], params[:tax_level].to_i)
+      if @taxid_fasta.nil?
+        @taxid_fasta = "Coming soon" # Temporary fix
+      end
     else
-      @taxid_fasta = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
+      @taxid_fasta = get_taxon_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
     send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-hits.fasta'
   end

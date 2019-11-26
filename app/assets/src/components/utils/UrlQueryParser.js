@@ -41,10 +41,12 @@ class UrlQueryParser {
         return value === "true";
       case "number":
         return Number(value);
+      case "string":
+        return value;
       default:
         // eslint-disable-next-line no-console
-        console.error(
-          `UrlQueryParser - Type not supported (${type}). You might not need to specify this value`
+        console.warn(
+          `[UrlQueryParser] Type not supported (${type}). You might not need to specify this value`
         );
         return value;
     }

@@ -178,7 +178,12 @@ class PipelineReportService
     else
       json_dump =
         JSON.dump(
-          backgroundId: @background_id,
+          metadata: {
+            backgroundId: @background_id,
+            truncatedReadsCount: pipeline_run.truncated,
+            adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
+            subsampledReadsCount: pipeline_run.subsampled_reads,
+          }.compact,
           counts: counts_by_tax_level,
           lineage: structured_lineage,
           sortedGenus: sorted_genus_tax_ids,
