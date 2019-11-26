@@ -102,7 +102,7 @@ class Auth0Controller < ApplicationController
 
     # Send them a password reset email via Auth0 if enabled or the legacy Devise flow.
     if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
-      User.send_auth0_password_reset_email(email)
+      Auth0UserManagementHelper.send_auth0_password_reset_email(email)
       redirect_to auth0_login_url
     else
       # DEPRECATED: Legacy Devise flow. Remove block after migrating to Auth0.
