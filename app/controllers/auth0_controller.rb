@@ -73,6 +73,12 @@ class Auth0Controller < ApplicationController
     end
   end
 
+  def omniauth_failure
+    error = params["error"]
+    descrip = params["error_description"]
+    render json: "#{error}: #{descrip}"
+  end
+
   def request_password_reset
     email = params.dig("user", "email")
     return if email.blank?
