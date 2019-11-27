@@ -67,13 +67,39 @@ class PipelineReportService
   end
 
   def generate
-    pipeline_run = PipelineRun.find(@pipeline_run_id)
     if @pipeline_run_id.nil?
-      Rails.logger.error("Pipeline run doesn't exist.")
-      return ""
-    elsif pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
-      Rails.logger.error("Pipeline run #{@pipeline_run_id} has no reads.")
-      return ""
+      return JSON.dump(
+        pipelineRunInfo: {
+          pipelineRunComplete: false,
+          pipelineRunFailed: false,
+          sampleStatus: "Waiting to Start or Receive Files",
+          errorMessage: nil,
+          knownUserError: nil,
+        },
+        metadata: {},
+        counts: {},
+        lineage: {},
+        sortedGenus: [],
+        highlightedTaxIds: []
+      )
+    end
+
+    pipeline_run = PipelineRun.find(@pipeline_run_id)
+    if pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil? || !pipeline_run.completed?
+      return JSON.dump(
+        pipelineRunInfo: {
+          pipelineRunComplete: pipeline_run.completed?,
+          pipelineRunFailed: pipeline_run.failed?,
+          sampleStatus: pipeline_run.job_status_display,
+          errorMessage: pipeline_run.error_message,
+          knownUserError: pipeline_run.known_user_error,
+        },
+        metadata: {},
+        counts: {},
+        lineage: {},
+        sortedGenus: [],
+        highlightedTaxIds: []
+      )
     end
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
@@ -178,6 +204,13 @@ class PipelineReportService
     else
       json_dump =
         JSON.dump(
+          pipelineRunInfo: {
+            pipelineRunComplete: pipeline_run.completed?,
+            pipelineRunFailed: pipeline_run.failed?,
+            sampleStatus: pipeline_run.job_status_display,
+            errorMessage: pipeline_run.error_message,
+            knownUserError: pipeline_run.known_user_error,
+          },
           metadata: {
             backgroundId: @background_id,
             truncatedReadsCount: pipeline_run.truncated,

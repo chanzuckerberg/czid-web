@@ -20,6 +20,7 @@ import {
   values,
 } from "lodash/fp";
 import deepEqual from "fast-deep-equal";
+import cx from "classnames";
 
 import {
   getBackgrounds,
@@ -31,6 +32,7 @@ import { getAmrData } from "~/api/amr";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { sampleErrorInfo } from "~/components/utils/sample";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
@@ -39,6 +41,9 @@ import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import AMRView from "~/components/AMRView";
+import BacteriaIcon from "~ui/icons/BacteriaIcon";
+import AlertIcon from "~ui/icons/AlertIcon";
+import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
@@ -73,6 +78,7 @@ export default class SampleViewV2 extends React.Component {
         backgrounds: [],
         currentTab: "Report",
         filteredReportData: [],
+        pipelineRunInfo: {},
         pipelineRun: null,
         project: null,
         projectSamples: [],
@@ -202,6 +208,7 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions: Object.assign({}, selectedOptions, {
         background: rawReportData.metadata.backgroundId,
       }),
+      pipelineRunInfo: rawReportData.pipelineRunInfo,
     });
   };
 
@@ -707,13 +714,121 @@ export default class SampleViewV2 extends React.Component {
     return numFilters;
   };
 
-  render = () => {
+  renderSampleMessage = () => {
+    const { pipelineRun, pipelineRunInfo, sample } = this.state;
+    let {
+      errorMessage,
+      knownUserError,
+      pipelineRunComplete,
+      sampleStatus,
+    } = pipelineRunInfo;
+    let status, message, linkText, type, link, icon;
+    if (!pipelineRunComplete) {
+      status = "IN PROGRESS";
+      message = sampleStatus;
+      icon = <LoadingIcon className={cs.icon} />;
+      type = "inProgress";
+      if (pipelineRun && pipelineRun.pipeline_version) {
+        linkText = "View Pipeline Visualization";
+        link = `/samples/${sample.id}/pipeline_viz/${
+          pipelineRun.pipeline_version
+        }`;
+      }
+    } else {
+      // Some kind of error or warning has occurred.
+      if (sample) {
+        pipelineRun.known_user_error = knownUserError;
+        pipelineRun.error_message = errorMessage;
+        ({ status, message, linkText, type, link, icon } = sampleErrorInfo(
+          sample,
+          pipelineRun
+        ));
+      }
+      icon = <AlertIcon className={cs.icon} />;
+    }
+
+    return (
+      <div className={cs.sampleMessage}>
+        <div className={cs.textContainer}>
+          <div className={cx(cs.reportStatus, cs[type])}>
+            {icon}
+            <span className={cs.text}>{status}</span>
+          </div>
+          <div className={cs.message}>{message}</div>
+          <a className={cs.actionLink} href={link}>
+            {linkText}
+            {linkText && (
+              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+            )}
+          </a>
+        </div>
+        <BacteriaIcon className={cs.bacteriaIcon} />
+      </div>
+    );
+  };
+
+  renderTab = () => {
     const {
       amrData,
       backgrounds,
       currentTab,
       filteredReportData,
+      pipelineRunInfo,
+      sample,
+      selectedOptions,
+      view,
+    } = this.state;
+    let reportReady =
+      pipelineRunInfo.pipelineRunComplete && !pipelineRunInfo.pipelineRunFailed;
+
+    if (currentTab === "Report") {
+      if (reportReady) {
+        return (
+          <div className={cs.reportViewContainer}>
+            <div className={cs.reportFilters}>
+              <ReportFilters
+                backgrounds={backgrounds}
+                onFilterChanged={this.handleOptionChanged}
+                onFilterRemoved={this.handleFilterRemoved}
+                sampleId={sample && sample.id}
+                selected={selectedOptions}
+                view={view}
+              />
+            </div>
+            <div className={cs.statsRow}>
+              {this.renderReportInfo()}
+              {!!this.countFilters() && (
+                <span
+                  className={cs.clearAllFilters}
+                  onClick={this.clearAllFilters}
+                >
+                  Clear All Filters
+                </span>
+              )}
+            </div>
+            <div className={cs.reportTable}>
+              <ReportTable
+                data={filteredReportData}
+                onTaxonNameClick={this.handleTaxonClick}
+              />
+            </div>
+          </div>
+        );
+      } else {
+        // The report is either in progress or encountered an error.
+        return this.renderSampleMessage();
+      }
+    }
+    if (currentTab === "Antimicrobial Resistance" && amrData) {
+      return <AMRView amr={amrData} />;
+    }
+  };
+
+  render = () => {
+    const {
+      currentTab,
       pipelineRun,
+      pipelineRunInfo,
       project,
       projectSamples,
       reportData,
@@ -723,6 +838,8 @@ export default class SampleViewV2 extends React.Component {
       sidebarMode,
       view,
     } = this.state;
+    let reportReady =
+      pipelineRunInfo.pipelineRunComplete && !pipelineRunInfo.pipelineRunFailed;
 
     return (
       <React.Fragment>
@@ -745,7 +862,8 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.tabsContainer}>
             <UserContext.Consumer>
               {currentUser =>
-                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) ? (
+                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) &&
+                reportReady ? (
                   <Tabs
                     className={cs.tabs}
                     tabs={["Report", "Antimicrobial Resistance"]}
@@ -760,39 +878,7 @@ export default class SampleViewV2 extends React.Component {
               }
             </UserContext.Consumer>
           </div>
-          {currentTab === "Report" && (
-            <div className={cs.reportViewContainer}>
-              <div className={cs.reportFilters}>
-                <ReportFilters
-                  backgrounds={backgrounds}
-                  onFilterChanged={this.handleOptionChanged}
-                  onFilterRemoved={this.handleFilterRemoved}
-                  sampleId={sample && sample.id}
-                  selected={selectedOptions}
-                  view={view}
-                />
-              </div>
-              <div className={cs.statsRow}>
-                {this.renderReportInfo()}
-                {!!this.countFilters() && (
-                  <span
-                    className={cs.clearAllFilters}
-                    onClick={this.clearAllFilters}
-                  >
-                    Clear All Filters
-                  </span>
-                )}
-              </div>
-              <div className={cs.reportTable}>
-                <ReportTable
-                  data={filteredReportData}
-                  onTaxonNameClick={this.handleTaxonClick}
-                />
-              </div>
-            </div>
-          )}
-          {currentTab === "Antimicrobial Resistance" &&
-            amrData && <AMRView amr={amrData} />}
+          {this.renderTab()}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar
