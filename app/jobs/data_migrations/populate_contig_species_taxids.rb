@@ -5,8 +5,6 @@ class PopulateContigSpeciesTaxids
   @queue = :data_migration
   def self.perform
     start_time = Time.now.to_f
-    missing_species_id = TaxonLineage::MISSING_SPECIES_ID
-    missing_genus_id = TaxonLineage::MISSING_GENUS_ID
 
     # Just select the columns that we need. In particular, don't select the sequence column, which is very large.
     # The "lock" specifies that whenever you make a SELECT query,
@@ -32,10 +30,10 @@ class PopulateContigSpeciesTaxids
           begin
             if contig.lineage_json.present?
               lineage_json = JSON.parse(contig.lineage_json)
-              contig.species_taxid_nt = lineage_json.dig("NT", 0) || missing_species_id
-              contig.species_taxid_nr = lineage_json.dig("NR", 0) || missing_species_id
-              contig.genus_taxid_nt = lineage_json.dig("NT", 1) || missing_genus_id
-              contig.genus_taxid_nr = lineage_json.dig("NR", 1) || missing_genus_id
+              contig.species_taxid_nt = lineage_json.dig("NT", 0) || nil
+              contig.species_taxid_nr = lineage_json.dig("NR", 0) || nil
+              contig.genus_taxid_nt = lineage_json.dig("NT", 1) || nil
+              contig.genus_taxid_nr = lineage_json.dig("NR", 1) || nil
             end
           rescue => e
             Rails.logger.error(e)
@@ -45,7 +43,7 @@ class PopulateContigSpeciesTaxids
 
         # Use active-import to update multiple contigs in one query.
         # Just update the taxid fields.
-        results = Contig.import loaded_contigs, validate: false, on_duplicate_key_update: [:species_taxid_nt, :species_taxid_nr, :genus_taxid_nt, :genus_taxid_nr]
+        results = Contig.import(loaded_contigs, validate: false, on_duplicate_key_update: [:species_taxid_nt, :species_taxid_nr, :genus_taxid_nt, :genus_taxid_nr])
         results.failed_instances.each do |contig|
           Rails.logger.error("Contig ID #{contig.id} failed to save. species_taxid_nt #{contig.species_taxid_nt}, species_taxid_nr #{contig.species_taxid_nr}")
           failed_ids << contig.id

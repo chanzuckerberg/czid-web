@@ -558,10 +558,10 @@ class PipelineRun < ApplicationRecord
     get_contig_hash = lambda do |header, sequence|
       read_count = contig_stats_json[header] || 0
       lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
-      species_taxid_nt = lineage_json.dig("NT", 0) || TaxonLineage::MISSING_SPECIES_ID
-      species_taxid_nr = lineage_json.dig("NR", 0) || TaxonLineage::MISSING_SPECIES_ID
-      genus_taxid_nt = lineage_json.dig("NT", 1) || TaxonLineage::MISSING_GENUS_ID
-      genus_taxid_nr = lineage_json.dig("NR", 1) || TaxonLineage::MISSING_GENUS_ID
+      species_taxid_nt = lineage_json.dig("NT", 0) || nil
+      species_taxid_nr = lineage_json.dig("NR", 0) || nil
+      genus_taxid_nt = lineage_json.dig("NT", 1) || nil
+      genus_taxid_nr = lineage_json.dig("NR", 1) || nil
 
       {
         name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json,
