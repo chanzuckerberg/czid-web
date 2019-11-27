@@ -76,7 +76,7 @@ class Auth0Controller < ApplicationController
   def omniauth_failure
     error = params["error"]
     descrip = params["error_description"]
-    render json: "#{error}: #{descrip}"
+    render json: "#{error}: #{descrip} For assistance, contact us at help@idseq.net."
   end
 
   def request_password_reset
