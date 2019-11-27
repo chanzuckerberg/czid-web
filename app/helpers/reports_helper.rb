@@ -25,7 +25,7 @@ module ReportsHelper
 
           if tax_id < TaxonLineage::INVALID_CALL_BASE_ID
             parent_level = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? genus_str : family_str
-            parent_tax_id = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? tax_info[genus_tax_id] : convert_neg_taxid(tax_id)
+            parent_tax_id = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? tax_info[:genus_tax_id] : convert_neg_taxid(tax_id)
             parent_name = fetch_parent_name(tax_level, tax_id, tax_info, lineage_by_tax_id)
             # If no parent (genus/family) name was found, then use the parent id as the name.
             unless parent_name
@@ -65,7 +65,7 @@ module ReportsHelper
 
   def self.fetch_parent_name(tax_level, tax_id, tax_info, lineage_by_tax_id)
     if tax_level == TaxonCount::TAX_LEVEL_SPECIES
-      parent_name = lineage_by_tax_id[tax_info[:genus_tax_id]]["genus_name"]
+      parent_name = lineage_by_tax_id[tax_info[:genus_tax_id]]["genus_name"] if lineage_by_tax_id[tax_info[:genus_tax_id]]
     else
       lineage_id_by_species = lineage_by_tax_id.keys & tax_info[:species_tax_ids]
       parent_name = if lineage_by_tax_id[tax_id]
