@@ -1,6 +1,7 @@
 import React from "react";
 import SvgSaver from "svgsaver";
 import Nanobar from "nanobar";
+import querystring from "querystring";
 
 import { deleteSample } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -15,24 +16,21 @@ import {
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
     const { backgroundId, pipelineRun, sample, minContigSize } = this.props;
-
-    let resParams = {};
-    const stringer = require("querystring");
-
-    // Set the right CSV background ID.
-    // Should have background_id param in all cases now.
-    if (backgroundId) resParams["background_id"] = backgroundId;
-
-    // Set the right pipeline version.
-    let v = pipelineRun && pipelineRun.pipeline_version;
-    if (v) resParams["pipeline_version"] = v;
-
-    // Set the min contig size.
-    if (minContigSize) resParams["min_contig_size"] = minContigSize;
-
-    let res = `/samples/${sample.id}/report_csv`;
-    res += `?${stringer.stringify(resParams)}`;
-    location.href = res;
+    console.log({ backgroundId, pipelineRun, sample, minContigSize });
+    const resParams = {
+      ...(backgroundId && { background_id: backgroundId }),
+      ...(pipelineRun &&
+        pipelineRun.pipeline_version && {
+          pipeline_version: pipelineRun.pipeline_version,
+        }),
+      ...(minContigSize && { min_contig_size: minContigSize }),
+    };
+    console.log(
+      `/samples/${sample.id}/report_csv?${querystring.stringify(resParams)}`
+    );
+    location.href = `/samples/${sample.id}/report_csv?${querystring.stringify(
+      resParams
+    )}`;
   };
 
   deleteSample = async () => {

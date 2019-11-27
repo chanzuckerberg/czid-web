@@ -10,7 +10,7 @@ class UrlQueryParser {
   }
 
   parse(query) {
-    let params = QueryString.parse(query);
+    const params = QueryString.parse(query);
     Object.entries(this._types).forEach(([key, type]) => {
       if (params[key]) {
         params[key] = this.convertValue(params[key], type);

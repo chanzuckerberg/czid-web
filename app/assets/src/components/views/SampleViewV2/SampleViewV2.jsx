@@ -63,8 +63,8 @@ export default class SampleViewV2 extends React.Component {
     super(props);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);
-    const urlOptions = this.urlParser.parse(location.search);
-    const urlState = pick("selectedOptions", urlOptions);
+    const urlState = this.urlParser.parse(location.search);
+
     const localState = this.loadState(localStorage, "SampleViewOptions");
 
     this.state = Object.assign(
@@ -127,13 +127,16 @@ export default class SampleViewV2 extends React.Component {
 
   fetchSample = async () => {
     const { sampleId } = this.props;
+    const { pipelineVersion } = this.state;
     const sample = await getSample({ sampleId });
     sample.id = sampleId;
     this.setState(
       {
         sample: sample,
         pipelineRun: find(
-          { id: sample.default_pipeline_run_id },
+          pipelineVersion
+            ? { pipeline_version: pipelineVersion }
+            : { id: sample.default_pipeline_run_id },
           sample.pipeline_runs
         ),
         project: sample.project,
