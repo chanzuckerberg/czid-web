@@ -29,7 +29,7 @@ export default function SampleViewHeader({
   view,
   minContigSize,
 }) {
-  const currentUser = useContext(UserContext);
+  const userContext = useContext(UserContext);
 
   const renderVersion = () => {
     if (!pipelineRun) {
@@ -47,9 +47,11 @@ export default function SampleViewHeader({
   };
 
   const onSaveClick = async () => {
-    let params = parseUrlParams();
-    params.sampleIds = [sample.id];
-    await saveVisualization(params.view || "table", params);
+    if (view) {
+      const params = parseUrlParams();
+      params.sampleIds = [sample.id];
+      await saveVisualization(view, params);
+    }
   };
 
   return (
@@ -128,20 +130,19 @@ export default function SampleViewHeader({
         <BasicPopup
           trigger={
             <ShareButton
-              onClick={withAnalytics(
-                copyShortUrlToClipboard,
-                "SampleView_share-button_clicked",
-                {
+              onClick={() => {
+                copyShortUrlToClipboard();
+                logAnalyticsEvent("SampleView_share-button_clicked", {
                   sampleId: sample && sample.id,
-                }
-              )}
+                });
+              }}
             />
           }
           content="A shareable URL was copied to your clipboard!"
           on="click"
           hideOnScroll
         />{" "}
-        {currentUser.admin && (
+        {userContext.admin && (
           <SaveButton
             onClick={withAnalytics(
               onSaveClick,
