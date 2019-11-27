@@ -983,6 +983,7 @@ class PipelineRun < ApplicationRecord
   # ]
   #
   # IMPORTANT NOTE: This method ALSO sets attributes of pipeline run instance.
+  # For unmapped_reads, it will read a .count file from /postprocess s3 dir.
   def compile_stats_file!
     res_folder = output_s3_path_with_version
     stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
@@ -993,7 +994,7 @@ class PipelineRun < ApplicationRecord
     all_counts = []
     stdout.split("\n").each do |line|
       fname = line.split(" ")[3] # Last col in line
-      contents = aws_s3_read_json("#{res_folder}/#{fname}")
+      contents = Syscall.s3_read_json("#{res_folder}/#{fname}")
       # Ex: {"gsnap_filter_out": 194}
       contents.each do |key, count|
         all_counts << { task: key, reads_after: count }
@@ -1073,7 +1074,7 @@ class PipelineRun < ApplicationRecord
         # see idseq_dag/steps/generate_annotated_fasta.py
         begin
           Rails.logger.info("Fetching file: #{s3_path}")
-          refined_annotated_out = aws_s3_read_json(s3_path)
+          refined_annotated_out = Syscall.s3_read_json(s3_path)
           unmapped_reads = refined_annotated_out["unidentified_fasta"]
         rescue
           Rails.logger.warn("Could not read file: #{s3_path}")
