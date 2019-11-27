@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import cx from "classnames";
-import { get, map, maxBy } from "lodash/fp";
-import moment from "moment";
+import { get, map } from "lodash/fp";
 
 import BasicPopup from "~/components/BasicPopup";
 import PropTypes from "~/components/utils/propTypes";
@@ -33,13 +32,18 @@ export default function SampleViewHeader({
   const currentUser = useContext(UserContext);
 
   const renderVersion = () => {
-    if (get("pipeline_version", pipelineRun)) {
-      const alignmentDBString = pipelineRun.alignment_db
-        ? `, NT/NR: ${pipelineRun.alignment_db}`
-        : "";
-      return `v${pipelineRun.pipeline_version}${alignmentDBString}`;
+    if (!pipelineRun) {
+      return "";
     }
-    return "";
+
+    const pipelineRunVersionString = pipelineRun.pipeline_version
+      ? `v${pipelineRun.pipeline_version}`
+      : "N/A";
+    const alignmentConfigName = get("alignment_config_name", pipelineRun);
+    const alignmentConfigNameString = alignmentConfigName
+      ? `, NT/NR: ${alignmentConfigName}`
+      : "";
+    return `${pipelineRunVersionString}${alignmentConfigNameString}`;
   };
 
   const onSaveClick = async () => {
@@ -76,17 +80,14 @@ export default function SampleViewHeader({
               "pipeline_version",
               get("pipeline_runs", sample)
             )}
-            lastProcessedAt={get(
-              "created_at",
-              maxBy(pr => moment(pr.created_at), get("pipeline_runs", sample))
-            )}
-            onPipelineVersionSelect={withAnalytics(
-              onPipelineVersionChange,
-              "SampleView_pipeline-select_clicked",
-              {
-                sampleId: sample && sample.id,
-              }
-            )}
+            lastProcessedAt={get("created_at", pipelineRun)}
+            onPipelineVersionSelect={version => {
+              logAnalyticsEvent("SampleView_pipeline-select_clicked", {
+                sampleId: sample.id,
+                pipelineVersion: version,
+              });
+              onPipelineVersionChange(version);
+            }}
           />
         </div>
         <ViewHeader.Pretitle

@@ -104,11 +104,23 @@ class Sample < ApplicationRecord
 
   def pipeline_versions
     prvs = []
-    pipeline_runs.each do |pr|
-      next if pr.completed? && pr.taxon_counts.empty?
+    pipeline_runs.joins(:taxon_counts).distinct.each do |pr|
       prvs << (pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version)
     end
     prvs.uniq
+  end
+
+  def pipeline_runs_info
+    prvs = {}
+    pipeline_runs.joins(:taxon_counts, :alignment_config).order(created_at: :desc).distinct.each do |pr|
+      prvs[pr.pipeline_version] ||= {
+        id: pr.id,
+        pipeline_version: pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version,
+        created_at: pr.created_at,
+        alignment_config_name: pr.alignment_config.name,
+      }
+    end
+    prvs.values
   end
 
   def fasta_input?
