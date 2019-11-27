@@ -797,17 +797,12 @@ class SamplesController < ApplicationController
       render json: PipelineReportService.call(pipeline_run.id, background_id)
     else
       render json: {
-        pipelineRunInfo: {
+        metadata: {
           pipelineRunStatus: "WAITING",
           jobStatus: "Waiting to Start or Receive Files",
           errorMessage: nil,
           knownUserError: nil,
         },
-        metadata: {},
-        counts: {},
-        lineage: {},
-        sortedGenus: [],
-        highlightedTaxIds: [],
       }
     end
   end

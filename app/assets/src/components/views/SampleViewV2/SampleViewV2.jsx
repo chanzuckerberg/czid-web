@@ -78,7 +78,6 @@ export default class SampleViewV2 extends React.Component {
         backgrounds: [],
         currentTab: "Report",
         filteredReportData: [],
-        pipelineRunInfo: {},
         pipelineRun: null,
         project: null,
         projectSamples: [],
@@ -170,29 +169,34 @@ export default class SampleViewV2 extends React.Component {
 
     const reportData = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
-    rawReportData.sortedGenus.forEach(genusTaxId => {
-      let hasHighlightedChildren = false;
-      const childrenSpecies =
-        rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].species_tax_ids;
-      const speciesData = childrenSpecies.map(speciesTaxId => {
-        const isHighlighted = highlightedTaxIds.has(speciesTaxId);
-        hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
-        return merge(rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId], {
-          highlighted: isHighlighted,
-          taxId: speciesTaxId,
-          taxLevel: "species",
+    if (rawReportData.sortedGenus) {
+      rawReportData.sortedGenus.forEach(genusTaxId => {
+        let hasHighlightedChildren = false;
+        const childrenSpecies =
+          rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].species_tax_ids;
+        const speciesData = childrenSpecies.map(speciesTaxId => {
+          const isHighlighted = highlightedTaxIds.has(speciesTaxId);
+          hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
+          return merge(
+            rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId],
+            {
+              highlighted: isHighlighted,
+              taxId: speciesTaxId,
+              taxLevel: "species",
+            }
+          );
         });
+        reportData.push(
+          merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
+            highlighted:
+              hasHighlightedChildren || highlightedTaxIds.has(genusTaxId),
+            taxId: genusTaxId,
+            taxLevel: "genus",
+            species: speciesData,
+          })
+        );
       });
-      reportData.push(
-        merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
-          highlighted:
-            hasHighlightedChildren || highlightedTaxIds.has(genusTaxId),
-          taxId: genusTaxId,
-          taxLevel: "genus",
-          species: speciesData,
-        })
-      );
-    });
+    }
 
     this.setDisplayName({ reportData, ...selectedOptions });
     this.computeContigStats({ reportData, ...selectedOptions });
@@ -208,7 +212,6 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions: Object.assign({}, selectedOptions, {
         background: rawReportData.metadata.backgroundId,
       }),
-      pipelineRunInfo: rawReportData.pipelineRunInfo,
     });
   };
 
@@ -715,13 +718,13 @@ export default class SampleViewV2 extends React.Component {
   };
 
   renderSampleMessage = () => {
-    const { pipelineRun, pipelineRunInfo, sample } = this.state;
+    const { pipelineRun, reportMetadata, sample } = this.state;
     let {
       errorMessage,
       knownUserError,
       pipelineRunStatus,
       jobStatus,
-    } = pipelineRunInfo;
+    } = reportMetadata;
     let status, message, linkText, type, link, icon;
     if (pipelineRunStatus === "WAITING") {
       status = "IN PROGRESS";
@@ -771,13 +774,13 @@ export default class SampleViewV2 extends React.Component {
     const {
       backgrounds,
       filteredReportData,
-      pipelineRunInfo,
+      reportMetadata,
       sample,
       selectedOptions,
       view,
     } = this.state;
 
-    if (pipelineRunInfo.pipelineRunStatus === "COMPLETE") {
+    if (reportMetadata.pipelineRunStatus === "COMPLETE") {
       return (
         <div className={cs.reportViewContainer}>
           <div className={cs.reportFilters}>
@@ -820,10 +823,10 @@ export default class SampleViewV2 extends React.Component {
       amrData,
       currentTab,
       pipelineRun,
-      pipelineRunInfo,
       project,
       projectSamples,
       reportData,
+      reportMetadata,
       sample,
       selectedOptions,
       sidebarVisible,
@@ -853,7 +856,7 @@ export default class SampleViewV2 extends React.Component {
             <UserContext.Consumer>
               {currentUser =>
                 currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) &&
-                pipelineRunInfo.pipelineRunStatus === "COMPLETE" ? (
+                reportMetadata.pipelineRunStatus === "COMPLETE" ? (
                   <Tabs
                     className={cs.tabs}
                     tabs={["Report", "Antimicrobial Resistance"]}

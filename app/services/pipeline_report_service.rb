@@ -67,15 +67,10 @@ class PipelineReportService
   end
 
   def generate
-    pipeline_run, pipeline_run_info = get_pipeline_status(@pipeline_run_id)
+    pipeline_run, metadata = get_pipeline_status(@pipeline_run_id)
     if @pipeline_run_id.nil? || !pipeline_run.completed? || pipeline_run.failed?
       return JSON.dump(
-        pipelineRunInfo: pipeline_run_info,
-        metadata: {},
-        counts: {},
-        lineage: {},
-        sortedGenus: [],
-        highlightedTaxIds: []
+        metadata: metadata
       )
     end
 
@@ -180,15 +175,13 @@ class PipelineReportService
     if @csv
       return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
     else
+      metadata = metadata.merge(backgroundId: @background_id,
+                                truncatedReadsCount: pipeline_run.truncated,
+                                adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
+                                subsampledReadsCount: pipeline_run.subsampled_reads)
       json_dump =
         JSON.dump(
-          pipelineRunInfo: pipeline_run_info,
-          metadata: {
-            backgroundId: @background_id,
-            truncatedReadsCount: pipeline_run.truncated,
-            adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
-            subsampledReadsCount: pipeline_run.subsampled_reads,
-          }.compact,
+          metadata: metadata.compact,
           counts: counts_by_tax_level,
           lineage: structured_lineage,
           sortedGenus: sorted_genus_tax_ids,
