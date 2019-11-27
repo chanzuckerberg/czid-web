@@ -719,13 +719,13 @@ export default class SampleViewV2 extends React.Component {
     let {
       errorMessage,
       knownUserError,
-      pipelineRunComplete,
-      sampleStatus,
+      pipelineRunStatus,
+      jobStatus,
     } = pipelineRunInfo;
     let status, message, linkText, type, link, icon;
-    if (!pipelineRunComplete) {
+    if (pipelineRunStatus === "WAITING") {
       status = "IN PROGRESS";
-      message = sampleStatus;
+      message = jobStatus;
       icon = <LoadingIcon className={cs.icon} />;
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
@@ -767,60 +767,51 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
-  renderTab = () => {
+  renderReport = () => {
     const {
-      amrData,
       backgrounds,
-      currentTab,
       filteredReportData,
       pipelineRunInfo,
       sample,
       selectedOptions,
       view,
     } = this.state;
-    let reportReady =
-      pipelineRunInfo.pipelineRunComplete && !pipelineRunInfo.pipelineRunFailed;
 
-    if (currentTab === "Report") {
-      if (reportReady) {
-        return (
-          <div className={cs.reportViewContainer}>
-            <div className={cs.reportFilters}>
-              <ReportFilters
-                backgrounds={backgrounds}
-                onFilterChanged={this.handleOptionChanged}
-                onFilterRemoved={this.handleFilterRemoved}
-                sampleId={sample && sample.id}
-                selected={selectedOptions}
-                view={view}
-              />
-            </div>
-            <div className={cs.statsRow}>
-              {this.renderReportInfo()}
-              {!!this.countFilters() && (
-                <span
-                  className={cs.clearAllFilters}
-                  onClick={this.clearAllFilters}
-                >
-                  Clear All Filters
-                </span>
-              )}
-            </div>
-            <div className={cs.reportTable}>
-              <ReportTable
-                data={filteredReportData}
-                onTaxonNameClick={this.handleTaxonClick}
-              />
-            </div>
+    if (pipelineRunInfo.pipelineRunStatus === "COMPLETE") {
+      return (
+        <div className={cs.reportViewContainer}>
+          <div className={cs.reportFilters}>
+            <ReportFilters
+              backgrounds={backgrounds}
+              onFilterChanged={this.handleOptionChanged}
+              onFilterRemoved={this.handleFilterRemoved}
+              sampleId={sample && sample.id}
+              selected={selectedOptions}
+              view={view}
+            />
           </div>
-        );
-      } else {
-        // The report is either in progress or encountered an error.
-        return this.renderSampleMessage();
-      }
-    }
-    if (currentTab === "Antimicrobial Resistance" && amrData) {
-      return <AMRView amr={amrData} />;
+          <div className={cs.statsRow}>
+            {this.renderReportInfo()}
+            {!!this.countFilters() && (
+              <span
+                className={cs.clearAllFilters}
+                onClick={this.clearAllFilters}
+              >
+                Clear All Filters
+              </span>
+            )}
+          </div>
+          <div className={cs.reportTable}>
+            <ReportTable
+              data={filteredReportData}
+              onTaxonNameClick={this.handleTaxonClick}
+            />
+          </div>
+        </div>
+      );
+    } else {
+      // The report is either in progress or encountered an error.
+      return this.renderSampleMessage();
     }
   };
 
@@ -838,8 +829,6 @@ export default class SampleViewV2 extends React.Component {
       sidebarMode,
       view,
     } = this.state;
-    let reportReady =
-      pipelineRunInfo.pipelineRunComplete && !pipelineRunInfo.pipelineRunFailed;
 
     return (
       <React.Fragment>
@@ -863,7 +852,7 @@ export default class SampleViewV2 extends React.Component {
             <UserContext.Consumer>
               {currentUser =>
                 currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) &&
-                reportReady ? (
+                pipelineRunInfo.pipelineRunStatus === "COMPLETE" ? (
                   <Tabs
                     className={cs.tabs}
                     tabs={["Report", "Antimicrobial Resistance"]}
@@ -878,7 +867,9 @@ export default class SampleViewV2 extends React.Component {
               }
             </UserContext.Consumer>
           </div>
-          {this.renderTab()}
+          {currentTab === "Report" && this.renderReport()}
+          {currentTab === "Antimicrobial Resistance" &&
+            amrData && <AMRView amr={amrData} />}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar

@@ -798,9 +798,8 @@ class SamplesController < ApplicationController
     else
       render json: {
         pipelineRunInfo: {
-          pipelineRunComplete: false,
-          pipelineRunFailed: false,
-          sampleStatus: "Waiting to Start or Receive Files",
+          pipelineRunStatus: "WAITING",
+          jobStatus: "Waiting to Start or Receive Files",
           errorMessage: nil,
           knownUserError: nil,
         },

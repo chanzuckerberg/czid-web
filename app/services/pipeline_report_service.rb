@@ -67,15 +67,10 @@ class PipelineReportService
   end
 
   def generate
-    if @pipeline_run_id.nil?
+    pipeline_run, pipeline_run_info = get_pipeline_status(@pipeline_run_id)
+    if @pipeline_run_id.nil? || !pipeline_run.completed? || pipeline_run.failed?
       return JSON.dump(
-        pipelineRunInfo: {
-          pipelineRunComplete: false,
-          pipelineRunFailed: false,
-          sampleStatus: "Waiting to Start or Receive Files",
-          errorMessage: nil,
-          knownUserError: nil,
-        },
+        pipelineRunInfo: pipeline_run_info,
         metadata: {},
         counts: {},
         lineage: {},
@@ -84,23 +79,6 @@ class PipelineReportService
       )
     end
 
-    pipeline_run = PipelineRun.find(@pipeline_run_id)
-    if pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil? || !pipeline_run.completed?
-      return JSON.dump(
-        pipelineRunInfo: {
-          pipelineRunComplete: pipeline_run.completed?,
-          pipelineRunFailed: pipeline_run.failed?,
-          sampleStatus: pipeline_run.job_status_display,
-          errorMessage: pipeline_run.error_message,
-          knownUserError: pipeline_run.known_user_error,
-        },
-        metadata: {},
-        counts: {},
-        lineage: {},
-        sortedGenus: [],
-        highlightedTaxIds: []
-      )
-    end
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
@@ -204,13 +182,7 @@ class PipelineReportService
     else
       json_dump =
         JSON.dump(
-          pipelineRunInfo: {
-            pipelineRunComplete: pipeline_run.completed?,
-            pipelineRunFailed: pipeline_run.failed?,
-            sampleStatus: pipeline_run.job_status_display,
-            errorMessage: pipeline_run.error_message,
-            knownUserError: pipeline_run.known_user_error,
-          },
+          pipelineRunInfo: pipeline_run_info,
           metadata: {
             backgroundId: @background_id,
             truncatedReadsCount: pipeline_run.truncated,
@@ -226,6 +198,37 @@ class PipelineReportService
 
       return json_dump
     end
+  end
+
+  def get_pipeline_status(pipeline_run_id)
+    if pipeline_run_id.nil?
+      return [
+        nil,
+        {
+          pipelineRunStatus: "WAITING",
+          errorMessage: nil,
+          knownUserError: nil,
+          jobStatus: "Waiting to Start or Receive Files",
+        },
+      ]
+    end
+
+    pipeline_run = PipelineRun.find(pipeline_run_id)
+    pipeline_status = "WAITING"
+    if pipeline_run.failed?
+      pipeline_status = "FAILED"
+    elsif pipeline_run.completed?
+      pipeline_status = "COMPLETE"
+    end
+    return [
+      pipeline_run,
+      {
+        pipelineRunStatus: pipeline_status,
+        errorMessage: pipeline_run.error_message,
+        knownUserError: pipeline_run.known_user_error,
+        jobStatus: pipeline_run.job_status_display,
+      },
+    ]
   end
 
   def fetch_taxon_counts(_pipeline_run_id, _background_id)
