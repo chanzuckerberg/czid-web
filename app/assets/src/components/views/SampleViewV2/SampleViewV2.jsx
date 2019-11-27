@@ -817,6 +817,7 @@ export default class SampleViewV2 extends React.Component {
 
   render = () => {
     const {
+      amrData,
       currentTab,
       pipelineRun,
       pipelineRunInfo,
