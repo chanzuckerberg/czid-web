@@ -791,8 +791,19 @@ class SamplesController < ApplicationController
 
   def report_v2
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    background_id = get_background_id(@sample, params[:background])
-    render json: PipelineReportService.call(pipeline_run.id, background_id)
+    if pipeline_run
+      background_id = get_background_id(@sample, params[:background])
+      render json: PipelineReportService.call(pipeline_run.id, background_id)
+    else
+      render json: {
+        metadata: {
+          pipelineRunStatus: "WAITING",
+          jobStatus: "Waiting to Start or Receive Files",
+          errorMessage: nil,
+          knownUserError: nil,
+        },
+      }
+    end
   end
 
   def amr
