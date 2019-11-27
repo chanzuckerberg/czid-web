@@ -172,13 +172,17 @@ class PipelineReportService
     highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     @timer.split("find_taxa_to_highlight")
 
+    report_ready = pipeline_run.report_ready?
+    @timer.split("check_report_ready")
+
     if @csv
       return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
     else
       metadata = metadata.merge(backgroundId: @background_id,
                                 truncatedReadsCount: pipeline_run.truncated,
                                 adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
-                                subsampledReadsCount: pipeline_run.subsampled_reads)
+                                subsampledReadsCount: pipeline_run.subsampled_reads,
+                                report_ready: report_ready)
       json_dump =
         JSON.dump(
           metadata: metadata.compact,

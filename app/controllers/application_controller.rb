@@ -69,7 +69,7 @@ class ApplicationController < ActionController::Base
   # end
   def allowed_feature_required(allowed_feature, allow_admin = false)
     redirect_to root_path unless current_user && (
-      current_user.allowed_feature_list.include?(allowed_feature) || (allow_admin && current_user.admin?)
+      current_user.allowed_feature?(allowed_feature) || (allow_admin && current_user.admin?)
     )
   end
 

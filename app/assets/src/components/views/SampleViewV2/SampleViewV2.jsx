@@ -834,7 +834,6 @@ export default class SampleViewV2 extends React.Component {
       pipelineRun,
       project,
       projectSamples,
-      reportData,
       reportMetadata,
       sample,
       selectedOptions,
@@ -855,7 +854,7 @@ export default class SampleViewV2 extends React.Component {
               pipelineRun={pipelineRun}
               project={project}
               projectSamples={projectSamples}
-              reportPresent={!!reportData.length}
+              reportPresent={reportMetadata.report_ready !== false}
               sample={sample}
               view={view}
               minContigSize={selectedOptions.minContigSize}
