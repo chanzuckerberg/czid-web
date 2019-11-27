@@ -16,7 +16,7 @@ import {
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
     const { backgroundId, pipelineRun, sample, minContigSize } = this.props;
-    console.log({ backgroundId, pipelineRun, sample, minContigSize });
+
     const resParams = {
       ...(backgroundId && { background_id: backgroundId }),
       ...(pipelineRun &&
@@ -25,9 +25,6 @@ class SampleViewControls extends React.Component {
         }),
       ...(minContigSize && { min_contig_size: minContigSize }),
     };
-    console.log(
-      `/samples/${sample.id}/report_csv?${querystring.stringify(resParams)}`
-    );
     location.href = `/samples/${sample.id}/report_csv?${querystring.stringify(
       resParams
     )}`;
@@ -109,7 +106,7 @@ class SampleViewControls extends React.Component {
   render() {
     const { reportPresent, pipelineRun, editable } = this.props;
 
-    if (reportPresent) {
+    if (reportPresent && pipelineRun) {
       const downloadOptions = [
         {
           text: "Download Report Table (.csv)",
