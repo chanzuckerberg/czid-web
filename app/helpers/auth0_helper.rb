@@ -34,6 +34,7 @@ module Auth0Helper
   # (see https://auth0.com/docs/sessions/concepts/session-layers)
   def auth0_remove_application_session
     session.delete(:auth0_credentials)
+    sign_out_all_scopes
   end
 
   # URL used to remove auth0 session from Auth0 Session Layer

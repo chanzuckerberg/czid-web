@@ -356,10 +356,11 @@ describe BulkDownload, type: :model do
     before do
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
+      @alignment_config = create(:alignment_config, lineage_version: 3)
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12", alignment_config_id: @alignment_config.id }])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12", alignment_config_id: @alignment_config.id }])
     end
 
     def create_bulk_download(type, params)
@@ -387,6 +388,11 @@ describe BulkDownload, type: :model do
       expect_any_instance_of(S3TarWriter).to receive(:process_status).and_return(
         instance_double(Process::Status, exitstatus: exitstatus, success?: success)
       )
+    end
+
+    def create_taxon_lineage(taxid)
+      # Creates a taxon lineage with effective tax_level 2 (genus)
+      create(:taxon_lineage, taxid: taxid, genus_taxid: taxid, version_start: 3, version_end: 5)
     end
 
     it "correctly generates download file for download type sample_taxon_report" do
@@ -459,20 +465,17 @@ describe BulkDownload, type: :model do
     end
 
     let(:mock_tax_id) { 28_901 }
+    let(:mock_tax_level) { 2 }
 
     it "correctly generates download file for download type reads_non_host for single taxa" do
-      create(
-        :taxon_count,
-        pipeline_run_id: @sample_one.first_pipeline_run.id,
-        tax_id: mock_tax_id
-      )
+      create_taxon_lineage(mock_tax_id)
 
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
                                              "value" => mock_tax_id,
                                              "displayName" => "Salmonella enterica",
                                            })
 
-      allow_any_instance_of(BulkDownload).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).and_return("mock_reads_nonhost_fasta")
+      expect(bulk_download).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).with(anything, mock_tax_id, mock_tax_level).exactly(2).times.and_return("mock_reads_nonhost_fasta")
 
       add_s3_tar_writer_expectations(
         "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "mock_reads_nonhost_fasta",
@@ -485,18 +488,14 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly handles empty fastas for download type reads_non_host for single taxa" do
-      create(
-        :taxon_count,
-        pipeline_run_id: @sample_one.first_pipeline_run.id,
-        tax_id: mock_tax_id
-      )
+      create_taxon_lineage(mock_tax_id)
 
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
                                              "value" => mock_tax_id,
                                              "displayName" => "Salmonella enterica",
                                            })
 
-      allow_any_instance_of(BulkDownload).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
+      expect(bulk_download).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).with(anything, mock_tax_id, mock_tax_level).exactly(2).times.and_return(nil)
 
       add_s3_tar_writer_expectations(
         "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "",
@@ -509,15 +508,9 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly throws exception if taxa_with_reads param not found for download type reads_non_host for single taxa" do
-      create(
-        :taxon_count,
-        pipeline_run_id: @sample_one.first_pipeline_run.id,
-        tax_id: mock_tax_id
-      )
+      create_taxon_lineage(mock_tax_id)
 
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, {})
-
-      allow_any_instance_of(BulkDownload).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
 
       expect do
         bulk_download.generate_download_file
@@ -532,11 +525,9 @@ describe BulkDownload, type: :model do
                                              "displayName" => "Salmonella enterica",
                                            })
 
-      allow_any_instance_of(BulkDownload).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).and_return(nil)
-
       expect do
         bulk_download.generate_download_file
-      end.to raise_error.with_message(BulkDownloadsHelper::READS_NON_HOST_TAXON_COUNT_EXPECTED_TEMPLATE % mock_tax_id)
+      end.to raise_error.with_message(BulkDownloadsHelper::READS_NON_HOST_TAXON_LINEAGE_EXPECTED_TEMPLATE % mock_tax_id)
 
       expect(bulk_download.status).to eq(BulkDownload::STATUS_ERROR)
     end

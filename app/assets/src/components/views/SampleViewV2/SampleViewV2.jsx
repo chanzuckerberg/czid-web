@@ -169,7 +169,7 @@ export default class SampleViewV2 extends React.Component {
     rawReportData.sortedGenus.forEach(genusTaxId => {
       let hasHighlightedChildren = false;
       const childrenSpecies =
-        rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].children;
+        rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].species_tax_ids;
       const speciesData = childrenSpecies.map(speciesTaxId => {
         const isHighlighted = highlightedTaxIds.has(speciesTaxId);
         hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
@@ -746,6 +746,7 @@ export default class SampleViewV2 extends React.Component {
               reportPresent={!!reportData.length}
               sample={sample}
               view={view}
+              minContigSize={selectedOptions.minContigSize}
             />
           </div>
           <div className={cs.tabsContainer}>

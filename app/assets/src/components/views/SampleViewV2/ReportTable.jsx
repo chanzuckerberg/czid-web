@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { getOr, orderBy } from "lodash/fp";
+import { getOr, map, orderBy } from "lodash/fp";
 
 import { Table } from "~/components/visualizations/table";
 import { defaultTableRowRenderer } from "react-virtualized";
@@ -23,11 +23,21 @@ class ReportTable extends React.Component {
     super(props);
 
     this.state = {
+      expandAllOpened: false,
       expandedGenusIds: new Set(),
       dbType: this.props.initialDbType,
     };
 
     this.columns = [
+      {
+        cellRenderer: this.renderExpandIcon,
+        className: cs.expandHeader,
+        dataKey: "expanded",
+        disableSort: true,
+        headerClassName: cs.expandCell,
+        headerRenderer: this.renderExpandIconHeader,
+        width: 20,
+      },
       {
         cellRenderer: this.renderName,
         className: cs.nameCell,
@@ -35,7 +45,7 @@ class ReportTable extends React.Component {
         flexGrow: 1,
         headerClassName: cs.taxonHeader,
         label: "Taxon",
-        width: 350,
+        width: 170,
         sortFunction: ({ data, sortDirection }) =>
           this.nestedSortFunction({
             data,
@@ -225,41 +235,68 @@ class ReportTable extends React.Component {
     const { onTaxonNameClick } = this.props;
     return (
       rowData && (
-        <React.Fragment>
-          <div className={cs.expandIcon}>
-            {rowData.taxLevel == "genus" ? (
-              <i
-                className={cx("fa", "fa-angle-right")}
-                onClick={withAnalytics(
-                  () => this.toggleExpandGenus({ taxId: rowData.taxId }),
-                  "PipelineSampleReport_expand-genus_clicked",
-                  { tax_id: rowData.taxId }
-                )}
-              />
+        <div className={cs.taxonContainer}>
+          <span
+            className={cx(cs.taxonName, !!cellData || cs.missingName)}
+            onClick={() => onTaxonNameClick({ ...rowData })}
+          >
+            {cellData || rowData.name}
+          </span>
+          {rowData.taxLevel == "genus" &&
+            (rowData.category ? (
+              <span className={cs.countInfo}>{`(${
+                rowData.filteredSpecies.length
+              } ${getCategoryAdjective(rowData.category)} species)`}</span>
             ) : (
-              ""
-            )}
-          </div>
-          <div className={cs.taxonContainer}>
-            <span
-              className={cx(cs.taxonName, !!cellData || cs.missingName)}
-              onClick={() => onTaxonNameClick({ ...rowData })}
-            >
-              {cellData || rowData.name}
-            </span>
-            {rowData.taxLevel == "genus" &&
-              (rowData.category ? (
-                <span className={cs.countInfo}>{`(${
-                  rowData.filteredSpecies.length
-                } ${getCategoryAdjective(rowData.category)} species)`}</span>
-              ) : (
-                <span className={cs.countInfo}>
-                  {`(${rowData.filteredSpecies.length} species)`}
-                </span>
-              ))}
-          </div>
-        </React.Fragment>
+              <span className={cs.countInfo}>
+                {`(${rowData.filteredSpecies.length} species)`}
+              </span>
+            ))}
+        </div>
       )
+    );
+  };
+
+  renderExpandIcon = ({ rowData }) => {
+    const { expandedGenusIds } = this.state;
+    return (
+      <div className={cs.expandIcon}>
+        {rowData.taxLevel == "genus" ? (
+          <i
+            className={cx(
+              "fa",
+              expandedGenusIds.has(rowData.taxId)
+                ? "fa-angle-down"
+                : "fa-angle-right"
+            )}
+            onClick={withAnalytics(
+              () => this.toggleExpandGenus({ taxId: rowData.taxId }),
+              "PipelineSampleReport_expand-genus_clicked",
+              { tax_id: rowData.taxId }
+            )}
+          />
+        ) : (
+          ""
+        )}
+      </div>
+    );
+  };
+
+  renderExpandIconHeader = () => {
+    const { expandAllOpened } = this.state;
+    return (
+      <div className={cs.expandIcon}>
+        <i
+          className={cx(
+            "fa",
+            expandAllOpened ? "fa-angle-down" : "fa-angle-right"
+          )}
+          onClick={withAnalytics(
+            () => this.toggleExpandAll(),
+            "PipelineSampleReport_expand-all_clicked"
+          )}
+        />
+      </div>
     );
   };
 
@@ -364,10 +401,38 @@ class ReportTable extends React.Component {
   };
 
   toggleExpandGenus = ({ taxId }) => {
-    const { expandedGenusIds } = this.state;
+    const { data } = this.props;
+    const { expandedGenusIds, expandAllOpened } = this.state;
     expandedGenusIds.delete(taxId) || expandedGenusIds.add(taxId);
 
-    this.setState({ expandedGenusIds: new Set(expandedGenusIds) });
+    let newExpandedAllOpened = expandAllOpened;
+    if (expandedGenusIds.size === data.length) {
+      newExpandedAllOpened = true;
+    } else if (!expandedGenusIds.size) {
+      newExpandedAllOpened = false;
+    }
+
+    this.setState({
+      expandedGenusIds: new Set(expandedGenusIds),
+      expandAllOpened: newExpandedAllOpened,
+    });
+  };
+
+  toggleExpandAll = () => {
+    const { data } = this.props;
+    const { expandAllOpened } = this.state;
+
+    if (expandAllOpened) {
+      this.setState({
+        expandedGenusIds: new Set(),
+        expandAllOpened: false,
+      });
+    } else {
+      this.setState({
+        expandedGenusIds: new Set(map("taxId", data)),
+        expandAllOpened: true,
+      });
+    }
   };
 
   handleNtNrChange = selectedDbType => {
@@ -406,6 +471,7 @@ class ReportTable extends React.Component {
         data={this.getTableRows()}
         defaultRowHeight={rowHeight}
         headerClassName={cs.header}
+        rowClassName={cs.row}
         rowRenderer={this.rowRenderer}
         sortable={true}
         sortedHeaderClassName={cs.sortedHeader}

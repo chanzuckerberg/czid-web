@@ -41,7 +41,7 @@ class PipelineReportService
   Z_SCORE_WHEN_ABSENT_FROM_SAMPLE = -100
 
   DEFAULT_SORT_PARAM = :agg_score
-  MIN_CONTIG_SIZE = 0
+  DEFAULT_MIN_CONTIG_SIZE = 0
 
   CATEGORIES = {
     2 => "bacteria",
@@ -52,9 +52,11 @@ class PipelineReportService
     nil => "uncategorized",
   }.freeze
 
-  def initialize(pipeline_run_id, background_id)
+  def initialize(pipeline_run_id, background_id, csv = false, min_contig_size = DEFAULT_MIN_CONTIG_SIZE)
     @pipeline_run_id = pipeline_run_id
     @background_id = background_id
+    @csv = csv
+    @min_contig_size = min_contig_size
   end
 
   def call
@@ -66,10 +68,17 @@ class PipelineReportService
 
   def generate
     pipeline_run = PipelineRun.find(@pipeline_run_id)
+    if @pipeline_run_id.nil?
+      Rails.logger.error("Pipeline run doesn't exist.")
+      return ""
+    elsif pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
+      Rails.logger.error("Pipeline run #{@pipeline_run_id} has no reads.")
+      return ""
+    end
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
-    contigs = pipeline_run.get_summary_contig_counts_v2(MIN_CONTIG_SIZE)
+    contigs = pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
     @timer.split("get_contig_summary")
 
     taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
@@ -97,7 +106,7 @@ class PipelineReportService
     )
     @timer.split("cleanup_missing_genus_counts")
 
-    merge_contigs(contigs, counts_by_tax_level)
+    merge_contigs(contigs, counts_by_tax_level, @csv)
     @timer.split("merge_contigs")
 
     counts_by_tax_level.each_value do |tax_level_taxa|
@@ -156,7 +165,7 @@ class PipelineReportService
     @timer.split("sort_genus_by_aggregate_score")
 
     counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
-      genus[:children].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][:agg_score] }.reverse!
+      genus[:species_tax_ids] = genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][DEFAULT_SORT_PARAM] }.reverse!
       genus
     end
     @timer.split("sort_species_within_each_genus")
@@ -164,22 +173,26 @@ class PipelineReportService
     highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     @timer.split("find_taxa_to_highlight")
 
-    json_dump =
-      JSON.dump(
-        metadata: {
-          backgroundId: @background_id,
-          truncatedReadsCount: pipeline_run.truncated,
-          adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
-          subsampledReadsCount: pipeline_run.subsampled_reads,
-        }.compact,
-        counts: counts_by_tax_level,
-        lineage: structured_lineage,
-        sortedGenus: sorted_genus_tax_ids,
-        highlightedTaxIds: highlighted_tax_ids
-      )
-    @timer.split("convert_to_json_with_JSON")
+    if @csv
+      return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
+    else
+      json_dump =
+        JSON.dump(
+          metadata: {
+            backgroundId: @background_id,
+            truncatedReadsCount: pipeline_run.truncated,
+            adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
+            subsampledReadsCount: pipeline_run.subsampled_reads,
+          }.compact,
+          counts: counts_by_tax_level,
+          lineage: structured_lineage,
+          sortedGenus: sorted_genus_tax_ids,
+          highlightedTaxIds: highlighted_tax_ids
+        )
+      @timer.split("convert_to_json_with_JSON")
 
-    return json_dump
+      return json_dump
+    end
   end
 
   def fetch_taxon_counts(_pipeline_run_id, _background_id)
@@ -225,7 +238,8 @@ class PipelineReportService
                                   "taxon_summaries.background_id": @background_id,
                                   "taxon_counts.count": nil,
                                   "taxon_summaries.tax_id": tax_ids,
-                                  "taxon_summaries.tax_level": [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
+                                  "taxon_summaries.tax_level": [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS],
+                                  "taxon_summaries.count_type": ['NT', 'NR']
                                 )
 
     return taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)
@@ -260,7 +274,7 @@ class PipelineReportService
     return counts_hash
   end
 
-  def merge_contigs(contigs, counts_by_tax_level)
+  def merge_contigs(contigs, counts_by_tax_level, csv)
     contigs.each do |tax_id, contigs_per_db_type|
       contigs_per_db_type.each do |db_type, contigs_per_read_count|
         norm_count_type = db_type.downcase.to_sym
@@ -270,7 +284,18 @@ class PipelineReportService
         end
 
         if counts_per_db_type
-          counts_per_db_type[:contigs] = contigs_per_read_count
+          if csv
+            contigs = 0
+            contig_r = 0
+            contigs_per_read_count.each do |reads, count|
+              contigs += count
+              contig_r += count * reads
+            end
+            counts_per_db_type[:contigs] = contigs
+            counts_per_db_type[:contig_r] = contig_r
+          else
+            counts_per_db_type[:contigs] = contigs_per_read_count
+          end
         else
           # TODO(tiago): not sure if this case ever happens
           Rails.logger.warn("[PR=#{@pipeline_run_id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
@@ -321,10 +346,10 @@ class PipelineReportService
         + (species[:nr].present? ? genus_nr_zscore.abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
       genus[:agg_score] = species[:agg_score] if genus[:agg_score].nil? || genus[:agg_score] < species[:agg_score]
       # TODO : more this to a more logical place
-      if !genus[:children]
-        genus[:children] = [tax_id]
+      if !genus[:species_tax_ids]
+        genus[:species_tax_ids] = [tax_id]
       else
-        genus[:children].append(tax_id)
+        genus[:species_tax_ids].append(tax_id)
       end
     end
   end
@@ -374,7 +399,7 @@ class PipelineReportService
     sorted_genus_tax_ids.each do |genus_tax_id|
       genus_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS][genus_tax_id]
       highlighted_children = false
-      genus_taxon[:children].each do |species_tax_id|
+      genus_taxon[:species_tax_ids].each do |species_tax_id|
         return highlighted_tax_ids if highlighted_tax_ids.length >= ui_config.top_n
 
         species_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_tax_id]
@@ -390,5 +415,36 @@ class PipelineReportService
       end
     end
     return highlighted_tax_ids
+  end
+
+  def report_csv(counts, sorted_genus_tax_ids)
+    rows = []
+    sorted_genus_tax_ids.each do |genus_tax_id|
+      genus_info = counts[2][genus_tax_id]
+      # add the hash keys in order for csv generation
+      genus_flat_hash = {}
+      genus_flat_hash[[:tax_id]] = genus_tax_id
+      genus_flat_hash[[:tax_level]] = 2
+      genus_flat_hash = genus_flat_hash.merge(HashUtil.flat_hash(genus_info))
+      rows << genus_flat_hash
+      genus_info[:species_tax_ids].each do |species_tax_id|
+        species_info = counts[1][species_tax_id]
+        species_flat_hash = HashUtil.flat_hash(species_info)
+        species_flat_hash[[:tax_id]] = species_tax_id
+        species_flat_hash[[:tax_level]] = 1
+        rows << species_flat_hash
+      end
+    end
+
+    flat_keys = rows[0].keys
+    flat_keys_symbols = flat_keys.map { |array_key| array_key.map(&:to_sym) }
+    attribute_names = flat_keys_symbols.map { |k| k.map(&:to_s).join("_") }
+    CSVSafe.generate(headers: true) do |csv|
+      csv << attribute_names
+      rows.each do |tax_info|
+        tax_info_by_symbols = tax_info.map { |k, v| [k.map(&:to_sym), v] }.to_h
+        csv << tax_info_by_symbols.values_at(*flat_keys_symbols)
+      end
+    end
   end
 end

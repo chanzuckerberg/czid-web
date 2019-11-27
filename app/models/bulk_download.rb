@@ -319,13 +319,16 @@ class BulkDownload < ApplicationRecord
         raise BulkDownloadsHelper::READS_NON_HOST_TAXID_EXPECTED
       end
 
-      taxon_count = TaxonCount.find_by(pipeline_run: pipeline_runs_with_includes, tax_id: taxid)
+      # Get the corresonding TaxonLineage for this taxid.
+      alignment_config_ids = pipeline_runs_with_includes.pluck(:alignment_config_id).uniq
+      max_lineage_version  = AlignmentConfig.max_lineage_version(alignment_config_ids)
+      taxon_lineage = TaxonLineage.versioned_lineages(taxid, max_lineage_version).first
 
-      if taxon_count.nil?
-        raise BulkDownloadsHelper::READS_NON_HOST_TAXON_COUNT_EXPECTED_TEMPLATE % taxid
+      if taxon_lineage.nil?
+        raise BulkDownloadsHelper::READS_NON_HOST_TAXON_LINEAGE_EXPECTED_TEMPLATE % taxid
       end
 
-      tax_level = taxon_count.tax_level
+      tax_level = taxon_lineage.tax_level
     end
 
     pipeline_runs_with_includes.map.with_index do |pipeline_run, index|

@@ -67,7 +67,7 @@ module ReportsHelper
     if tax_level == TaxonCount::TAX_LEVEL_SPECIES
       parent_name = lineage_by_tax_id[tax_info[:genus_tax_id]]["genus_name"]
     else
-      lineage_id_by_species = lineage_by_tax_id.keys & tax_info[:children]
+      lineage_id_by_species = lineage_by_tax_id.keys & tax_info[:species_tax_ids]
       parent_name = if lineage_by_tax_id[tax_id]
                       lineage_by_tax_id[tax_id]["family_name"]
                     # If genus id is undefined, then find taxon lineage by species id instead.
