@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import cx from "classnames";
 import { get, map } from "lodash/fp";
-import moment from "moment";
 
 import BasicPopup from "~/components/BasicPopup";
 import PropTypes from "~/components/utils/propTypes";
