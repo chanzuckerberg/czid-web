@@ -745,21 +745,20 @@ class SamplesController < ApplicationController
     respond_to do |format|
       format.html { render 'show_v2' }
       format.json do
-        render json: @sample.as_json(
-          only: default_fields,
-          methods: [],
-          include: {
-            project: {
-              only: [:id, :name],
-            },
-            pipeline_runs: {
-              only: [:id, :created_at, :job_status, :pipeline_version],
-            },
-          }
-        ).merge(
-          last_pipeline_run: @sample.first_pipeline_run && @sample.first_pipeline_run.id,
-          editable: current_power.updatable_sample?(@sample)
-        )
+        render json: @sample
+          .as_json(
+            methods: [],
+            only: default_fields,
+            include: {
+              project: {
+                only: [:id, :name],
+              },
+            }
+          ).merge(
+            default_pipeline_run_id: @sample.first_pipeline_run.id,
+            pipeline_runs: @sample.pipeline_runs_info,
+            editable: current_power.updatable_sample?(@sample)
+          )
       end
     end
   end

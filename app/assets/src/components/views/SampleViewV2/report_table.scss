@@ -19,6 +19,19 @@
   text-align: left;
 }
 
+.expandIcon {
+  font-size: $font-size-h5;
+  padding-left: 5px;
+  text-align: center;
+  margin-bottom: 3px;
+}
+
+.header {
+  .expandIcon {
+    margin-bottom: 2px;
+  }
+}
+
 .ntnrSelectorHeader {
   color: $darkest-grey;
   text-align: center;
@@ -29,7 +42,6 @@
 
   color: $darkest-grey;
   font-weight: $font-weight-bold;
-  // TODO review this spacing
   padding: $space-s 0;
   text-align: right;
 }
@@ -56,10 +68,6 @@
   flex-direction: row;
   font-weight: $font-weight-semibold;
   text-align: left;
-
-  .expandIcon {
-    flex: 0 0 20px;
-  }
 
   .taxonContainer {
     .taxonName {
@@ -92,11 +100,19 @@
 }
 
 .genusRow,
-.speciesRow {
-  border-left: 5px solid transparent;
+.speciesRow,
+.row {
+  padding-left: 5px;
+  // For some reason, react virtualized adds 8px padding to rows' style,
+  // when we expand a single column, from a previous value of 0.
+  // In theory is to make room for the scrollbar.
+  // We override it here to 0, specially since the last column - the NT/NR
+  // selector can be used for the scrollbar.
+  padding-right: 0px !important;
   &.highlighted {
     background-color: $primary-lightest;
     border-left: 5px solid $primary-lighter;
+    padding-left: 0px;
   }
 }
 
