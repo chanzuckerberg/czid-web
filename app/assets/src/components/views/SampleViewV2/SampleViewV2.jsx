@@ -74,6 +74,7 @@ export default class SampleViewV2 extends React.Component {
         currentTab: "Report",
         filteredReportData: [],
         pipelineRun: null,
+        pipelineVersion: null,
         project: null,
         projectSamples: [],
         reportData: [],
@@ -132,7 +133,7 @@ export default class SampleViewV2 extends React.Component {
       {
         sample: sample,
         pipelineRun: find(
-          { id: sample.last_pipeline_run },
+          { id: sample.default_pipeline_run_id },
           sample.pipeline_runs
         ),
         project: sample.project,
@@ -155,11 +156,12 @@ export default class SampleViewV2 extends React.Component {
 
   fetchSampleReportData = async () => {
     const { sampleId } = this.props;
-    const { selectedOptions } = this.state;
+    const { pipelineVersion, selectedOptions } = this.state;
 
     const rawReportData = await getSampleReportData({
       sampleId,
       background: selectedOptions.background,
+      pipelineVersion,
     });
 
     const reportData = [];
@@ -391,12 +393,17 @@ export default class SampleViewV2 extends React.Component {
       this.setState(
         {
           pipelineRun: find(
-            { id: sample.last_pipeline_run },
+            { pipeline_version: newPipelineVersion },
             sample.pipeline_runs
           ),
+          pipelineVersion: newPipelineVersion,
+          filteredReportData: [],
           reportData: [],
         },
-        this.fetchSampleReportData()
+        () => {
+          this.updateHistoryAndPersistOptions();
+          this.fetchSampleReportData();
+        }
       );
     }
   };
