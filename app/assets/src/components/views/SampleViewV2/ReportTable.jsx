@@ -8,6 +8,8 @@ import cx from "classnames";
 import { withAnalytics } from "~/api/analytics";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import InsightIcon from "~ui/icons/InsightIcon";
+import PathogenLabel from "~/components/ui/labels/PathogenLabel";
+import PathogenPreview from "~/components/views/report/PathogenPreview";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { REPORT_TABLE_COLUMNS } from "../report/ReportTable/constants";
 
@@ -252,6 +254,10 @@ class ReportTable extends React.Component {
                 {`(${rowData.filteredSpecies.length} species)`}
               </span>
             ))}
+          {rowData.pathogens && (
+            <PathogenPreview tag2Count={rowData.pathogens} />
+          )}
+          {rowData.pathogenTag && <PathogenLabel type={rowData.pathogenTag} />}
         </div>
       )
     );
