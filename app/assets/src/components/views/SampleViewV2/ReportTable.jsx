@@ -377,14 +377,14 @@ class ReportTable extends React.Component {
   };
 
   handleCoverageVizClick = ({ taxId, taxLevel, taxName, taxCommonName }) => {
-    const { pipelineVersion, sampleId } = this.props;
+    const { onCoverageVizClick, pipelineVersion, sampleId } = this.props;
     const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
     const speciesTaxons =
       taxLevel === "genus" ? this.genusToSpeciesMap[taxId] : [];
 
     if (pipelineVersionHasCoverageViz(pipelineVersion)) {
-      this.props.onCoverageVizClick({
+      onCoverageVizClick({
         taxId,
         taxName,
         taxCommonName,
@@ -668,9 +668,10 @@ ReportTable.propTypes = {
   rowHeight: PropTypes.number,
 
   // Needed only for hover actions
-  // Condier moving adding hover actions to a callback
+  // Consider adding a callback to that render the hover actions
   alignVizAvailable: PropTypes.bool.isRequired,
   fastaDownloadEnabled: PropTypes.bool.isRequired,
+  onCoverageVizClick: PropTypes.func.isRequired,
   phyloTreeAllowed: PropTypes.bool.isRequired,
   pipelineVersion: PropTypes.string,
   projectId: PropTypes.number,

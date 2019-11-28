@@ -23,6 +23,7 @@ import deepEqual from "fast-deep-equal";
 
 import {
   getBackgrounds,
+  getCoverageVizSummary,
   getSample,
   getSampleReportData,
   getSamples,
@@ -31,6 +32,9 @@ import { getAmrData } from "~/api/amr";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { pipelineVersionHasCoverageViz } from "~/components/utils/sample";
+import AMRView from "~/components/AMRView";
+import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
@@ -38,7 +42,6 @@ import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import AMRView from "~/components/AMRView";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
@@ -70,6 +73,9 @@ export default class SampleViewV2 extends React.Component {
       {
         amrData: null,
         backgrounds: [],
+        coverageVizDataByTaxon: {},
+        coverageVizParams: {},
+        coverageVizVisible: false,
         currentTab: "Report",
         filteredReportData: [],
         pipelineRun: null,
@@ -94,6 +100,7 @@ export default class SampleViewV2 extends React.Component {
     this.fetchSample();
     this.fetchBackgrounds();
     this.fetchSampleReportData();
+    this.fetchCoverageVizData();
   };
 
   componentDidUpdate() {
@@ -218,6 +225,17 @@ export default class SampleViewV2 extends React.Component {
   fetchBackgrounds = async () => {
     const backgrounds = await getBackgrounds();
     this.setState({ backgrounds });
+  };
+
+  fetchCoverageVizData = async () => {
+    if (this.coverageVizEnabled()) {
+      const { sample } = this.props;
+      const coverageVizSummary = await getCoverageVizSummary(sample.id);
+
+      this.setState({
+        coverageVizDataByTaxon: coverageVizSummary,
+      });
+    }
   };
 
   applyFilters = ({
@@ -477,6 +495,114 @@ export default class SampleViewV2 extends React.Component {
     this.refreshDataFromOptionsChange({ key, newSelectedOptions });
   };
 
+  handleCoverageVizClick = newCoverageVizParams => {
+    const { coverageVizParams, coverageVizVisible } = this.state;
+
+    if (!newCoverageVizParams.taxId) {
+      this.setState({
+        coverageVizVisible: false,
+      });
+      return;
+    }
+
+    if (
+      coverageVizVisible &&
+      get("taxId", coverageVizParams) === newCoverageVizParams.taxId
+    ) {
+      this.setState({
+        coverageVizVisible: false,
+      });
+    } else {
+      this.setState({
+        coverageVizParams: newCoverageVizParams,
+        coverageVizVisible: true,
+        sidebarVisible: false,
+      });
+    }
+  };
+
+  closeCoverageViz = () => {
+    this.setState({
+      coverageVizVisible: false,
+    });
+  };
+
+  coverageVizEnabled = () => {
+    const { pipelineRun, selectedOptions } = this.state;
+    pipelineVersionHasCoverageViz(
+      get("pipeline_version", {
+        pipeline_versoin: pipelineRun.pipelineVersion,
+        background_id: selectedOptions.background,
+      })
+    );
+  };
+
+  // Aggregate the accessions from multiple species into a single data object.
+  // Used for coverage viz.
+  getCombinedAccessionDataForSpecies = speciesTaxons => {
+    const { coverageVizDataByTaxon } = this.state;
+
+    // This helper function gets the best accessions for a species taxon.
+    const getSpeciesBestAccessions = taxon => {
+      const speciesBestAccessions = get(
+        [taxon.taxonId, "best_accessions"],
+        coverageVizDataByTaxon
+      );
+      // Add the species taxon name to each accession.
+      return map(
+        accession => ({
+          ...accession,
+          // Use snake_case for consistency with other fields.
+          taxon_name: taxon.taxonName,
+          taxon_common_name: taxon.taxonCommonName,
+        }),
+        speciesBestAccessions
+      );
+    };
+
+    const speciesTaxIds = map("taxonId", speciesTaxons);
+
+    return {
+      best_accessions: flatten(
+        compact(map(getSpeciesBestAccessions, speciesTaxons))
+      ),
+      num_accessions: sum(
+        map(
+          taxId => get([taxId, "num_accessions"], coverageVizDataByTaxon),
+          speciesTaxIds
+        )
+      ),
+    };
+  };
+
+  getCoverageVizParams = () => {
+    const { coverageVizParams, coverageVizDataByTaxon } = this.state;
+
+    if (!coverageVizParams) {
+      return {};
+    }
+
+    let accessionData = null;
+
+    // For genus-level taxons, we aggregate all the available species-level taxons for that genus.
+    if (coverageVizParams.taxLevel === "genus") {
+      accessionData = this.getCombinedAccessionDataForSpecies(
+        coverageVizParams.speciesTaxons
+      );
+    } else {
+      accessionData = get(coverageVizParams.taxId, coverageVizDataByTaxon);
+    }
+
+    return {
+      taxonId: coverageVizParams.taxId,
+      taxonName: coverageVizParams.taxName,
+      taxonCommonName: coverageVizParams.taxCommonName,
+      taxonLevel: coverageVizParams.taxLevel,
+      alignmentVizUrl: coverageVizParams.alignmentVizUrl,
+      accessionData,
+    };
+  };
+
   refreshDataFromOptionsChange = ({ key, newSelectedOptions }) => {
     const { reportData } = this.state;
 
@@ -720,6 +846,7 @@ export default class SampleViewV2 extends React.Component {
     const {
       amrData,
       backgrounds,
+      coverageVizVisible,
       currentTab,
       filteredReportData,
       pipelineRun,
@@ -827,6 +954,23 @@ export default class SampleViewV2 extends React.Component {
               }
             )}
             params={this.getSidebarParams()}
+          />
+        )}
+        {this.coverageVizEnabled() && (
+          <CoverageVizBottomSidebar
+            visible={coverageVizVisible}
+            onClose={withAnalytics(
+              this.closeCoverageViz,
+              "SampleView_coverage-viz-sidebar_closed",
+              {
+                sampleId: sample.id,
+                sampleName: sample.name,
+              }
+            )}
+            params={this.getCoverageVizParams()}
+            sampleId={sample.id}
+            pipelineVersion={pipelineRun.pipeline_version}
+            nameType={selectedOptions.nameType}
           />
         )}
       </React.Fragment>
