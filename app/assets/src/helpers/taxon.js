@@ -25,7 +25,7 @@ export const getGeneraContainingTags = taxInfoArray => {
 
 export const getGeneraPathogenCounts = speciesCounts => {
   let generaPathogenCounts = {};
-  for (let [speciesId, speciesInfo] of Object.entries(speciesCounts)) {
+  for (let speciesInfo of Object.values(speciesCounts)) {
     if (speciesInfo.pathogenTag) {
       generaPathogenCounts[speciesInfo.genus_tax_id] =
         generaPathogenCounts[speciesInfo.genus_tax_id] || {};
