@@ -118,6 +118,8 @@ class Sample < ApplicationRecord
         pipeline_version: pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version,
         created_at: pr.created_at,
         alignment_config_name: pr.alignment_config.name,
+        assembled: pr.assembled.to_i,
+        adjusted_remaining_reads: pr.adjusted_remaining_reads,
       }
     end
     prvs.values

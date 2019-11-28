@@ -47,6 +47,12 @@ class Syscall
     run("aws", "s3", "cp", source_s3_path, destination_s3_path)
   end
 
+  # See also S3Util::s3_select_json
+  def self.s3_read_json(path)
+    raw = s3_cp(path, "-")
+    JSON.parse(raw)
+  end
+
   def self.pipe(*cmd)
     err_read, err_write = IO.pipe
 

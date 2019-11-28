@@ -67,14 +67,13 @@ class PipelineReportService
   end
 
   def generate
-    pipeline_run = PipelineRun.find(@pipeline_run_id)
-    if @pipeline_run_id.nil?
-      Rails.logger.error("Pipeline run doesn't exist.")
-      return ""
-    elsif pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
-      Rails.logger.error("Pipeline run #{@pipeline_run_id} has no reads.")
-      return ""
+    pipeline_run, metadata = get_pipeline_status(@pipeline_run_id)
+    if @pipeline_run_id.nil? || !pipeline_run.completed? || pipeline_run.failed?
+      return JSON.dump(
+        metadata: metadata
+      )
     end
+
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
@@ -175,22 +174,23 @@ class PipelineReportService
 
     has_byte_ranges = pipeline_run.taxon_byte_ranges_available?
     align_viz_available = pipeline_run.align_viz_available?
+    report_ready = pipeline_run.report_ready?
 
     @timer.split("compute_options_available_for_pipeline_run")
 
     if @csv
       return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
     else
+      metadata = metadata.merge(backgroundId: @background_id,
+                                truncatedReadsCount: pipeline_run.truncated,
+                                adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
+                                subsampledReadsCount: pipeline_run.subsampled_reads,
+                                hasByteRanges: has_byte_ranges,
+                                alignVizAvailable: align_viz_available,
+                                report_ready: report_ready)
       json_dump =
         JSON.dump(
-          metadata: {
-            backgroundId: @background_id,
-            truncatedReadsCount: pipeline_run.truncated,
-            adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
-            subsampledReadsCount: pipeline_run.subsampled_reads,
-            hasByteRanges: has_byte_ranges,
-            alignVizAvailable: align_viz_available,
-          }.compact,
+          metadata: metadata.compact,
           counts: counts_by_tax_level,
           lineage: structured_lineage,
           sortedGenus: sorted_genus_tax_ids,
@@ -200,6 +200,37 @@ class PipelineReportService
 
       return json_dump
     end
+  end
+
+  def get_pipeline_status(pipeline_run_id)
+    if pipeline_run_id.nil?
+      return [
+        nil,
+        {
+          pipelineRunStatus: "WAITING",
+          errorMessage: nil,
+          knownUserError: nil,
+          jobStatus: "Waiting to Start or Receive Files",
+        },
+      ]
+    end
+
+    pipeline_run = PipelineRun.find(pipeline_run_id)
+    pipeline_status = "WAITING"
+    if pipeline_run.failed?
+      pipeline_status = "FAILED"
+    elsif pipeline_run.completed?
+      pipeline_status = "COMPLETE"
+    end
+    return [
+      pipeline_run,
+      {
+        pipelineRunStatus: pipeline_status,
+        errorMessage: pipeline_run.error_message,
+        knownUserError: pipeline_run.known_user_error,
+        jobStatus: pipeline_run.job_status_display,
+      },
+    ]
   end
 
   def fetch_taxon_counts(_pipeline_run_id, _background_id)

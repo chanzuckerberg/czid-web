@@ -20,6 +20,7 @@ import {
   values,
 } from "lodash/fp";
 import deepEqual from "fast-deep-equal";
+import cx from "classnames";
 
 import {
   getBackgrounds,
@@ -33,6 +34,7 @@ import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { pipelineVersionHasCoverageViz } from "~/components/utils/sample";
+import { sampleErrorInfo } from "~/components/utils/sample";
 import AMRView from "~/components/AMRView";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -42,6 +44,8 @@ import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
+import AMRView from "~/components/AMRView";
+import { AlertIcon, BacteriaIcon, LoadingIcon } from "~ui/icons";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
@@ -175,29 +179,34 @@ export default class SampleViewV2 extends React.Component {
 
     const reportData = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
-    rawReportData.sortedGenus.forEach(genusTaxId => {
-      let hasHighlightedChildren = false;
-      const childrenSpecies =
-        rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].species_tax_ids;
-      const speciesData = childrenSpecies.map(speciesTaxId => {
-        const isHighlighted = highlightedTaxIds.has(speciesTaxId);
-        hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
-        return merge(rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId], {
-          highlighted: isHighlighted,
-          taxId: speciesTaxId,
-          taxLevel: "species",
+    if (rawReportData.sortedGenus) {
+      rawReportData.sortedGenus.forEach(genusTaxId => {
+        let hasHighlightedChildren = false;
+        const childrenSpecies =
+          rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].species_tax_ids;
+        const speciesData = childrenSpecies.map(speciesTaxId => {
+          const isHighlighted = highlightedTaxIds.has(speciesTaxId);
+          hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
+          return merge(
+            rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId],
+            {
+              highlighted: isHighlighted,
+              taxId: speciesTaxId,
+              taxLevel: "species",
+            }
+          );
         });
+        reportData.push(
+          merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
+            highlighted:
+              hasHighlightedChildren || highlightedTaxIds.has(genusTaxId),
+            taxId: genusTaxId,
+            taxLevel: "genus",
+            species: speciesData,
+          })
+        );
       });
-      reportData.push(
-        merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
-          highlighted:
-            hasHighlightedChildren || highlightedTaxIds.has(genusTaxId),
-          taxId: genusTaxId,
-          taxLevel: "genus",
-          species: speciesData,
-        })
-      );
-    });
+    }
 
     this.setDisplayName({ reportData, ...selectedOptions });
     this.computeContigStats({ reportData, ...selectedOptions });
@@ -842,17 +851,127 @@ export default class SampleViewV2 extends React.Component {
     return numFilters;
   };
 
-  render = () => {
+  renderSampleMessage = () => {
+    const { pipelineRun, reportMetadata, sample } = this.state;
+    let {
+      errorMessage,
+      knownUserError,
+      pipelineRunStatus,
+      jobStatus,
+    } = reportMetadata;
+    let status, message, linkText, type, link, icon;
+    if (pipelineRunStatus === "WAITING") {
+      status = "IN PROGRESS";
+      message = jobStatus;
+      icon = <LoadingIcon className={cs.icon} />;
+      type = "inProgress";
+      if (pipelineRun && pipelineRun.pipeline_version) {
+        linkText = "View Pipeline Visualization";
+        link = `/samples/${sample.id}/pipeline_viz/${
+          pipelineRun.pipeline_version
+        }`;
+      }
+    } else {
+      // Some kind of error or warning has occurred.
+      if (sample) {
+        pipelineRun.known_user_error = knownUserError;
+        pipelineRun.error_message = errorMessage;
+        ({ status, message, linkText, type, link, icon } = sampleErrorInfo(
+          sample,
+          pipelineRun
+        ));
+      }
+      icon = <AlertIcon className={cs.icon} />;
+    }
+
+    return (
+      <div className={cs.sampleMessage}>
+        <div className={cs.textContainer}>
+          <div className={cx(cs.reportStatus, cs[type])}>
+            {icon}
+            <span className={cs.text}>{status}</span>
+          </div>
+          <div className={cs.message}>{message}</div>
+          <a className={cs.actionLink} href={link}>
+            {linkText}
+            {linkText && (
+              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+            )}
+          </a>
+        </div>
+        <BacteriaIcon className={cs.bacteriaIcon} />
+      </div>
+    );
+  };
+
+  renderReport = () => {
     const {
-      amrData,
       backgrounds,
-      coverageVizVisible,
-      currentTab,
       filteredReportData,
       pipelineRun,
       project,
+      reportMetadata,
+      sample,
+      selectedOptions,
+      view,
+    } = this.state;
+
+    if (reportMetadata.pipelineRunStatus === "COMPLETE") {
+      return (
+        <div className={cs.reportViewContainer}>
+          <div className={cs.reportFilters}>
+            <ReportFilters
+              backgrounds={backgrounds}
+              onFilterChanged={this.handleOptionChanged}
+              onFilterRemoved={this.handleFilterRemoved}
+              sampleId={sample && sample.id}
+              selected={selectedOptions}
+              view={view}
+            />
+          </div>
+          <div className={cs.statsRow}>
+            {this.renderReportInfo()}
+            {!!this.countFilters() && (
+              <span
+                className={cs.clearAllFilters}
+                onClick={this.clearAllFilters}
+              >
+                Clear All Filters
+              </span>
+            )}
+          </div>
+          <div className={cs.reportTable}>
+            <ReportTable
+              alignVizAvailable={
+                !!(reportMetadata && reportMetadata.alignVizAvailable)
+              }
+              data={filteredReportData}
+              onTaxonNameClick={this.handleTaxonClick}
+              fastaDownloadEnabled={
+                !!(reportMetadata && reportMetadata.hasByteRanges)
+              }
+              phyloTreeAllowed={sample ? sample.editable : false}
+              pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
+              projectId={project && project.id}
+              sampleId={sample && sample.id}
+            />
+          </div>
+        </div>
+      );
+    } else {
+      // The report is either in progress or encountered an error.
+      return this.renderSampleMessage();
+    }
+  };
+
+  render = () => {
+    const {
+      amrData,
+      coverageVizVisible,
+      currentTab,
+      pipelineRun,
+      project,
       projectSamples,
-      reportData,
       reportMetadata,
       sample,
       selectedOptions,
@@ -873,7 +992,7 @@ export default class SampleViewV2 extends React.Component {
               pipelineRun={pipelineRun}
               project={project}
               projectSamples={projectSamples}
-              reportPresent={!!reportData.length}
+              reportPresent={reportMetadata.report_ready !== false}
               sample={sample}
               view={view}
               minContigSize={selectedOptions.minContigSize}
@@ -882,7 +1001,8 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.tabsContainer}>
             <UserContext.Consumer>
               {currentUser =>
-                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) ? (
+                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) &&
+                reportMetadata.pipelineRunStatus === "COMPLETE" ? (
                   <Tabs
                     className={cs.tabs}
                     tabs={["Report", "Antimicrobial Resistance"]}
@@ -897,47 +1017,7 @@ export default class SampleViewV2 extends React.Component {
               }
             </UserContext.Consumer>
           </div>
-          {currentTab === "Report" && (
-            <div className={cs.reportViewContainer}>
-              <div className={cs.reportFilters}>
-                <ReportFilters
-                  backgrounds={backgrounds}
-                  onFilterChanged={this.handleOptionChanged}
-                  onFilterRemoved={this.handleFilterRemoved}
-                  sampleId={sample && sample.id}
-                  selected={selectedOptions}
-                  view={view}
-                />
-              </div>
-              <div className={cs.statsRow}>
-                {this.renderReportInfo()}
-                {!!this.countFilters() && (
-                  <span
-                    className={cs.clearAllFilters}
-                    onClick={this.clearAllFilters}
-                  >
-                    Clear All Filters
-                  </span>
-                )}
-              </div>
-              <div className={cs.reportTable}>
-                <ReportTable
-                  alignVizAvailable={
-                    !!(reportMetadata && reportMetadata.alignVizAvailable)
-                  }
-                  data={filteredReportData}
-                  onTaxonNameClick={this.handleTaxonClick}
-                  fastaDownloadEnabled={
-                    !!(reportMetadata && reportMetadata.hasByteRanges)
-                  }
-                  phyloTreeAllowed={sample ? sample.editable : false}
-                  pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
-                  projectId={project && project.id}
-                  sampleId={sample && sample.id}
-                />
-              </div>
-            </div>
-          )}
+          {currentTab === "Report" && this.renderReport()}
           {currentTab === "Antimicrobial Resistance" &&
             amrData && <AMRView amr={amrData} />}
         </NarrowContainer>
