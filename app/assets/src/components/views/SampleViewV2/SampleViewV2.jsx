@@ -31,7 +31,11 @@ import {
 import { getAmrData } from "~/api/amr";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  logAnalyticsEvent,
+  withAnalytics,
+  ANALYTICS_EVENT_NAMES,
+} from "~/api/analytics";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -99,6 +103,14 @@ export default class SampleViewV2 extends React.Component {
     this.fetchSample();
     this.fetchBackgrounds();
     this.fetchSampleReportData();
+
+    logAnalyticsEvent("PipelineSampleReport_sample_viewed", {
+      sampleId: this.props.sampleId,
+    });
+    // DEPRECATED: kept for continuity
+    logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleViewed, {
+      sampleId: this.props.sampleId,
+    });
   };
 
   componentDidUpdate() {
@@ -816,7 +828,10 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.reportTable}>
             <ReportTable
               data={filteredReportData}
-              onTaxonNameClick={this.handleTaxonClick}
+              onTaxonNameClick={withAnalytics(
+                this.handleTaxonClick,
+                "PipelineSampleReport_taxon-sidebar-link_clicked"
+              )}
             />
           </div>
         </div>

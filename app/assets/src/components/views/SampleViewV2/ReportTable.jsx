@@ -5,7 +5,7 @@ import { getOr, map, orderBy } from "lodash/fp";
 import { Table } from "~/components/visualizations/table";
 import { defaultTableRowRenderer } from "react-virtualized";
 import cx from "classnames";
-import { withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import InsightIcon from "~ui/icons/InsightIcon";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
@@ -326,13 +326,29 @@ class ReportTable extends React.Component {
       <div className={cs.stack}>
         <div
           className={cx(cs.stackElement, dbType == "nt" || cs.lowlightValue)}
-          onClick={onClick ? () => onClick[0]("nt") : null}
+          onClick={
+            onClick
+              ? () =>
+                  withAnalytics(
+                    onClick[0]("nt"),
+                    "ReportTable_count-type-nt_clicked"
+                  )
+              : null
+          }
         >
           {cellData ? cellData[0] : "-"}
         </div>
         <div
           className={cx(cs.stackElement, dbType == "nr" || cs.lowlightValue)}
-          onClick={onClick ? () => onClick[1]("nr") : null}
+          onClick={
+            onClick
+              ? () =>
+                  withAnalytics(
+                    onClick[1]("nr"),
+                    "ReportTable_count-type-nr_clicked"
+                  )
+              : null
+          }
         >
           {cellData ? cellData[1] : "-"}
         </div>
@@ -363,6 +379,10 @@ class ReportTable extends React.Component {
     // Uses lodash's orderBy function.
     // It uses a triple sorting key that enables nested sorting of genus and species, while guaranteeing that
     // genus is always on top of its children species
+    logAnalyticsEvent("PipelineSampleReport_column-sort-arrow_clicked", {
+      path,
+      sortDirection,
+    });
     return orderBy(
       [
         // 1st value: value defined by path for the genus (guarantees all genus together)
