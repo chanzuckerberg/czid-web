@@ -173,6 +173,11 @@ class PipelineReportService
     highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     @timer.split("find_taxa_to_highlight")
 
+    has_byte_ranges = pipeline_run.taxon_byte_ranges_available?
+    align_viz_available = pipeline_run.align_viz_available?
+
+    @timer.split("compute_options_available_for_pipeline_run")
+
     if @csv
       return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
     else
@@ -183,6 +188,8 @@ class PipelineReportService
             truncatedReadsCount: pipeline_run.truncated,
             adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
             subsampledReadsCount: pipeline_run.subsampled_reads,
+            hasByteRanges: has_byte_ranges,
+            alignVizAvailable: align_viz_available,
           }.compact,
           counts: counts_by_tax_level,
           lineage: structured_lineage,
@@ -208,7 +215,11 @@ class PipelineReportService
                                          tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
                                        )
                                        .where.not(
-                                         tax_id: [TaxonLineage::BLACKLIST_GENUS_ID, TaxonLineage::HOMO_SAPIENS_TAX_ID]
+                                         tax_id: [
+                                           TaxonLineage::BLACKLIST_GENUS_ID,
+                                           TaxonLineage::HOMO_SAPIENS_TAX_ID,
+                                           ApplicationHelper::HUMAN_TAX_IDS,
+                                         ].flatten
                                        )
     # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
 
@@ -235,11 +246,24 @@ class PipelineReportService
                                   " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
                                   " AND taxon_counts.pipeline_run_id = #{@pipeline_run_id}")
                                 .where(
-                                  "taxon_summaries.background_id": @background_id,
-                                  "taxon_counts.count": nil,
-                                  "taxon_summaries.tax_id": tax_ids,
-                                  "taxon_summaries.tax_level": [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS],
-                                  "taxon_summaries.count_type": ['NT', 'NR']
+                                  taxon_summaries: {
+                                    background_id: @background_id,
+                                    tax_id: tax_ids,
+                                    tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS],
+                                    count_type: ['NT', 'NR'],
+                                  },
+                                  taxon_counts: {
+                                    count: nil,
+                                  }
+                                )
+                                .where.not(
+                                  taxon_summaries: {
+                                    tax_id: [
+                                      TaxonLineage::BLACKLIST_GENUS_ID,
+                                      TaxonLineage::HOMO_SAPIENS_TAX_ID,
+                                      ApplicationHelper::HUMAN_TAX_IDS,
+                                    ].flatten,
+                                  }
                                 )
 
     return taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)

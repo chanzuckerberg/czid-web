@@ -26,6 +26,14 @@ class HoverActions extends React.Component {
     const { pipelineVersion } = this.props;
     const hasCoverageViz = pipelineVersionHasCoverageViz(pipelineVersion);
 
+    const params = {
+      pipelineVersion,
+      taxCommonName: this.props.taxCommonName,
+      taxId: this.props.taxId,
+      taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
+      taxName: this.props.taxName,
+    };
+
     return [
       {
         message: "NCBI Taxonomy Browser",
@@ -33,9 +41,7 @@ class HoverActions extends React.Component {
         handleClick: this.props.onNcbiActionClick,
         enabled: this.props.ncbiEnabled,
         disabledMessage: "NCBI Taxonomy Not Found",
-        params: {
-          taxId: this.props.taxId,
-        },
+        params,
       },
       {
         message: "FASTA Download",
@@ -43,10 +49,7 @@ class HoverActions extends React.Component {
         handleClick: this.props.onFastaActionClick,
         enabled: this.props.fastaEnabled,
         disabledMessage: "FASTA Download Not Available",
-        params: {
-          taxId: this.props.taxId,
-          taxLevel: this.props.taxLevel,
-        },
+        params,
       },
       {
         message: "Contigs Download",
@@ -54,9 +57,7 @@ class HoverActions extends React.Component {
         handleClick: this.props.onContigVizClick,
         enabled: this.props.contigVizEnabled,
         disabledMessage: "No Contigs Available",
-        params: {
-          taxId: this.props.taxId,
-        },
+        params,
       },
       hasCoverageViz
         ? {
@@ -66,12 +67,7 @@ class HoverActions extends React.Component {
             enabled: this.props.coverageVizEnabled,
             disabledMessage:
               "Coverage Visualization Not Available - requires reads in NT",
-            params: {
-              taxId: this.props.taxId,
-              taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
-              taxName: this.props.taxName,
-              taxCommonName: this.props.taxCommonName,
-            },
+            params,
           }
         : {
             message: "Alignment Visualization",
@@ -80,11 +76,7 @@ class HoverActions extends React.Component {
             enabled: this.props.coverageVizEnabled,
             disabledMessage:
               "Alignment Visualization Not Available - requires reads in NT",
-            params: {
-              taxId: this.props.taxId,
-              taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
-              taxName: this.props.taxName,
-            },
+            params,
           },
       {
         message: (

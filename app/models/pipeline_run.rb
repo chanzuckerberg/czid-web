@@ -356,6 +356,16 @@ class PipelineRun < ApplicationRecord
     !os.nil? && os.state == STATUS_LOADED
   end
 
+  def taxon_byte_ranges_available?
+    return taxon_byteranges.empty?
+  end
+
+  def align_viz_available?
+    # TODO(tiago): we should not have to access aws
+    align_summary_file = "#{alignment_viz_output_s3_path}.summary"
+    return align_summary_file && get_s3_file(align_summary_file) ? true : false
+  end
+
   def report_failed?
     # The report failed if host filtering or alignment failed.
     host_filtering_status = output_states.find_by(output: "ercc_counts").state

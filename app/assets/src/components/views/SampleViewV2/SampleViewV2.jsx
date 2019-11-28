@@ -726,6 +726,7 @@ export default class SampleViewV2 extends React.Component {
       project,
       projectSamples,
       reportData,
+      reportMetadata,
       sample,
       selectedOptions,
       sidebarVisible,
@@ -794,8 +795,18 @@ export default class SampleViewV2 extends React.Component {
               </div>
               <div className={cs.reportTable}>
                 <ReportTable
+                  alignVizAvailable={
+                    !!(reportMetadata && reportMetadata.alignVizAvailable)
+                  }
                   data={filteredReportData}
                   onTaxonNameClick={this.handleTaxonClick}
+                  fastaDownloadEnabled={
+                    !!(reportMetadata && reportMetadata.hasByteRanges)
+                  }
+                  phyloTreeAllowed={sample ? sample.editable : false}
+                  pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
+                  projectId={project && project.id}
+                  sampleId={sample && sample.id}
                 />
               </div>
             </div>
