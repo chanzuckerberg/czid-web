@@ -32,10 +32,12 @@ class HoverActions extends React.Component {
       taxId: this.props.taxId,
       taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
       taxName: this.props.taxName,
+      taxSpecies: this.props.taxSpecies,
     };
 
     return [
       {
+        key: `taxonomy_browser_${params.taxId}`,
         message: "NCBI Taxonomy Browser",
         icon: "fa-link",
         handleClick: this.props.onNcbiActionClick,
@@ -44,6 +46,7 @@ class HoverActions extends React.Component {
         params,
       },
       {
+        key: `fasta_download_${params.taxId}`,
         message: "FASTA Download",
         icon: "fa-download",
         handleClick: this.props.onFastaActionClick,
@@ -52,6 +55,7 @@ class HoverActions extends React.Component {
         params,
       },
       {
+        key: `contigs_download_${params.taxId}`,
         message: "Contigs Download",
         icon: "fa-puzzle-piece",
         handleClick: this.props.onContigVizClick,
@@ -61,6 +65,7 @@ class HoverActions extends React.Component {
       },
       hasCoverageViz
         ? {
+            key: `coverage_viz_${params.taxId}`,
             message: "Coverage Visualization",
             iconComponentClass: CoverageIcon,
             handleClick: this.props.onCoverageVizClick,
@@ -70,6 +75,7 @@ class HoverActions extends React.Component {
             params,
           }
         : {
+            key: `alignment_viz_${params.taxId}`,
             message: "Alignment Visualization",
             icon: "fa-bars",
             handleClick: this.props.onCoverageVizClick,
@@ -79,6 +85,7 @@ class HoverActions extends React.Component {
             params,
           },
       {
+        key: `phylo_tree_${params.taxId}`,
         message: (
           <div>
             Phylogenetic Analysis <BetaLabel />
@@ -134,7 +141,7 @@ class HoverActions extends React.Component {
 
     return (
       <BasicPopup
-        key={hoverAction.icon}
+        key={hoverAction.key}
         trigger={trigger}
         content={tooltipMessage}
       />
@@ -154,21 +161,22 @@ class HoverActions extends React.Component {
 
 HoverActions.propTypes = {
   className: PropTypes.string,
+  contigVizEnabled: PropTypes.bool,
+  coverageVizEnabled: PropTypes.bool,
+  fastaEnabled: PropTypes.bool,
+  ncbiEnabled: PropTypes.bool,
+  onContigVizClick: PropTypes.func.isRequired,
+  onCoverageVizClick: PropTypes.func.isRequired,
+  onFastaActionClick: PropTypes.func.isRequired,
+  onNcbiActionClick: PropTypes.func.isRequired,
+  onPhyloTreeModalOpened: PropTypes.func,
+  phyloTreeEnabled: PropTypes.bool,
+  pipelineVersion: PropTypes.string,
+  taxCommonName: PropTypes.string,
   taxId: PropTypes.number,
   taxLevel: PropTypes.number,
   taxName: PropTypes.string,
-  taxCommonName: PropTypes.string,
-  ncbiEnabled: PropTypes.bool,
-  onNcbiActionClick: PropTypes.func.isRequired,
-  fastaEnabled: PropTypes.bool,
-  onFastaActionClick: PropTypes.func.isRequired,
-  coverageVizEnabled: PropTypes.bool,
-  onCoverageVizClick: PropTypes.func.isRequired,
-  contigVizEnabled: PropTypes.bool,
-  onContigVizClick: PropTypes.func.isRequired,
-  phyloTreeEnabled: PropTypes.bool,
-  onPhyloTreeModalOpened: PropTypes.func,
-  pipelineVersion: PropTypes.string,
+  taxSpecies: PropTypes.array,
 };
 
 export default HoverActions;

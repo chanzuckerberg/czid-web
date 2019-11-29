@@ -376,12 +376,15 @@ class ReportTable extends React.Component {
     location.href = `/samples/${sampleId}/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
   };
 
-  handleCoverageVizClick = ({ taxId, taxLevel, taxName, taxCommonName }) => {
+  handleCoverageVizClick = ({
+    taxId,
+    taxLevel,
+    taxName,
+    taxCommonName,
+    taxSpecies,
+  }) => {
     const { onCoverageVizClick, pipelineVersion, sampleId } = this.props;
     const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
-
-    const speciesTaxons =
-      taxLevel === "genus" ? this.genusToSpeciesMap[taxId] : [];
 
     if (pipelineVersionHasCoverageViz(pipelineVersion)) {
       onCoverageVizClick({
@@ -390,7 +393,7 @@ class ReportTable extends React.Component {
         taxCommonName,
         taxLevel,
         alignmentVizUrl,
-        speciesTaxons,
+        taxSpecies,
       });
     } else {
       window.open(alignmentVizUrl);
@@ -446,6 +449,7 @@ class ReportTable extends React.Component {
         taxLevel={rowData.taxLevel === "species" ? 1 : 0}
         taxName={rowData.name}
         taxCommonName={rowData.common_name}
+        taxSpecies={rowData.species}
         ncbiEnabled={validTaxId}
         onNcbiActionClick={withAnalytics(
           this.linkToNCBI,

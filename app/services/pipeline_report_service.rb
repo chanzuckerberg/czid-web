@@ -68,7 +68,7 @@ class PipelineReportService
 
   def generate
     pipeline_run, metadata = get_pipeline_status(@pipeline_run_id)
-    if @pipeline_run_id.nil? || !pipeline_run.completed? || pipeline_run.failed?
+    if @pipeline_run_id.nil? || !pipeline_run.completed?
       return JSON.dump(
         metadata: metadata
       )
@@ -217,15 +217,16 @@ class PipelineReportService
 
     pipeline_run = PipelineRun.find(pipeline_run_id)
     pipeline_status = "WAITING"
-    if pipeline_run.failed?
-      pipeline_status = "FAILED"
-    elsif pipeline_run.completed?
+    if pipeline_run.completed?
       pipeline_status = "COMPLETE"
+    elsif pipeline_run.failed?
+      pipeline_status = "FAILED"
     end
     return [
       pipeline_run,
       {
         pipelineRunStatus: pipeline_status,
+        hasErrors: pipeline_run.failed?,
         errorMessage: pipeline_run.error_message,
         knownUserError: pipeline_run.known_user_error,
         jobStatus: pipeline_run.job_status_display,

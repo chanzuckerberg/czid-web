@@ -33,19 +33,22 @@ import { getAmrData } from "~/api/amr";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { pipelineVersionHasCoverageViz } from "~/components/utils/sample";
-import { sampleErrorInfo } from "~/components/utils/sample";
+import {
+  pipelineVersionHasCoverageViz,
+  sampleErrorInfo,
+} from "~/components/utils/sample";
+import AlertIcon from "~ui/icons/AlertIcon";
 import AMRView from "~/components/AMRView";
+import BacteriaIcon from "~ui/icons/BacteriaIcon";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
+import LoadingIcon from "~ui/icons/LoadingIcon";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import AMRView from "~/components/AMRView";
-import { AlertIcon, BacteriaIcon, LoadingIcon } from "~ui/icons";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
@@ -82,6 +85,7 @@ export default class SampleViewV2 extends React.Component {
         coverageVizVisible: false,
         currentTab: "Report",
         filteredReportData: [],
+        loadingReport: false,
         pipelineRun: null,
         pipelineVersion: null,
         project: null,
@@ -104,7 +108,6 @@ export default class SampleViewV2 extends React.Component {
     this.fetchSample();
     this.fetchBackgrounds();
     this.fetchSampleReportData();
-    this.fetchCoverageVizData();
   };
 
   componentDidUpdate() {
@@ -151,7 +154,10 @@ export default class SampleViewV2 extends React.Component {
         ),
         project: sample.project,
       },
-      this.fetchProjectSamples
+      () => {
+        this.fetchProjectSamples();
+        this.fetchCoverageVizData();
+      }
     );
   };
 
@@ -171,6 +177,7 @@ export default class SampleViewV2 extends React.Component {
     const { sampleId } = this.props;
     const { pipelineVersion, selectedOptions } = this.state;
 
+    this.setState({ loadingReport: true });
     const rawReportData = await getSampleReportData({
       sampleId,
       background: selectedOptions.background,
@@ -216,9 +223,10 @@ export default class SampleViewV2 extends React.Component {
     });
 
     this.setState({
+      filteredReportData,
+      loadingReport: false,
       reportData,
       reportMetadata: rawReportData.metadata,
-      filteredReportData,
       selectedOptions: Object.assign({}, selectedOptions, {
         background: rawReportData.metadata.backgroundId,
       }),
@@ -237,8 +245,8 @@ export default class SampleViewV2 extends React.Component {
   };
 
   fetchCoverageVizData = async () => {
+    const { sample } = this.state;
     if (this.coverageVizEnabled()) {
-      const { sample } = this.props;
       const coverageVizSummary = await getCoverageVizSummary(sample.id);
 
       this.setState({
@@ -432,6 +440,7 @@ export default class SampleViewV2 extends React.Component {
         () => {
           this.updateHistoryAndPersistOptions();
           this.fetchSampleReportData();
+          this.fetchCoverageVizData();
         }
       );
     }
@@ -506,7 +515,6 @@ export default class SampleViewV2 extends React.Component {
 
   handleCoverageVizClick = newCoverageVizParams => {
     const { coverageVizParams, coverageVizVisible } = this.state;
-
     if (!newCoverageVizParams.taxId) {
       this.setState({
         coverageVizVisible: false,
@@ -537,24 +545,18 @@ export default class SampleViewV2 extends React.Component {
   };
 
   coverageVizEnabled = () => {
-    const { pipelineRun, selectedOptions } = this.state;
-    pipelineVersionHasCoverageViz(
-      get("pipeline_version", {
-        pipeline_versoin: pipelineRun.pipelineVersion,
-        background_id: selectedOptions.background,
-      })
-    );
+    const { pipelineRun } = this.state;
+    return pipelineVersionHasCoverageViz(get("pipeline_version", pipelineRun));
   };
 
   // Aggregate the accessions from multiple species into a single data object.
   // Used for coverage viz.
   getCombinedAccessionDataForSpecies = speciesTaxons => {
     const { coverageVizDataByTaxon } = this.state;
-
     // This helper function gets the best accessions for a species taxon.
     const getSpeciesBestAccessions = taxon => {
       const speciesBestAccessions = get(
-        [taxon.taxonId, "best_accessions"],
+        [taxon.taxId, "best_accessions"],
         coverageVizDataByTaxon
       );
       // Add the species taxon name to each accession.
@@ -562,14 +564,14 @@ export default class SampleViewV2 extends React.Component {
         accession => ({
           ...accession,
           // Use snake_case for consistency with other fields.
-          taxon_name: taxon.taxonName,
-          taxon_common_name: taxon.taxonCommonName,
+          taxon_name: taxon.name,
+          taxon_common_name: taxon.commonName,
         }),
         speciesBestAccessions
       );
     };
 
-    const speciesTaxIds = map("taxonId", speciesTaxons);
+    const speciesTaxIds = map("taxId", speciesTaxons);
 
     return {
       best_accessions: flatten(
@@ -596,12 +598,11 @@ export default class SampleViewV2 extends React.Component {
     // For genus-level taxons, we aggregate all the available species-level taxons for that genus.
     if (coverageVizParams.taxLevel === "genus") {
       accessionData = this.getCombinedAccessionDataForSpecies(
-        coverageVizParams.speciesTaxons
+        coverageVizParams.taxSpecies
       );
     } else {
       accessionData = get(coverageVizParams.taxId, coverageVizDataByTaxon);
     }
-
     return {
       taxonId: coverageVizParams.taxId,
       taxonName: coverageVizParams.taxName,
@@ -852,15 +853,21 @@ export default class SampleViewV2 extends React.Component {
   };
 
   renderSampleMessage = () => {
-    const { pipelineRun, reportMetadata, sample } = this.state;
-    let {
+    const { loadingReport, pipelineRun, reportMetadata, sample } = this.state;
+    const {
       errorMessage,
       knownUserError,
       pipelineRunStatus,
       jobStatus,
     } = reportMetadata;
     let status, message, linkText, type, link, icon;
-    if (pipelineRunStatus === "WAITING") {
+
+    if (loadingReport) {
+      status = "Loading";
+      message = "Loading report data.";
+      icon = <LoadingIcon className={cs.icon} />;
+      type = "inProgress";
+    } else if (pipelineRunStatus === "WAITING") {
       status = "IN PROGRESS";
       message = jobStatus;
       icon = <LoadingIcon className={cs.icon} />;
@@ -915,7 +922,6 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
-
     if (reportMetadata.pipelineRunStatus === "COMPLETE") {
       return (
         <div className={cs.reportViewContainer}>
@@ -946,6 +952,7 @@ export default class SampleViewV2 extends React.Component {
                 !!(reportMetadata && reportMetadata.alignVizAvailable)
               }
               data={filteredReportData}
+              onCoverageVizClick={this.handleCoverageVizClick}
               onTaxonNameClick={this.handleTaxonClick}
               fastaDownloadEnabled={
                 !!(reportMetadata && reportMetadata.hasByteRanges)

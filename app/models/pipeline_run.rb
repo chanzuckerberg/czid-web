@@ -358,7 +358,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def taxon_byte_ranges_available?
-    return taxon_byteranges.empty?
+    return !taxon_byteranges.empty?
   end
 
   def align_viz_available?
