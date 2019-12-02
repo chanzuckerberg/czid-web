@@ -6,6 +6,7 @@ import { Table } from "~/components/visualizations/table";
 import { defaultTableRowRenderer } from "react-virtualized";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { withAnalytics } from "~/api/analytics";
+import { getCsrfToken } from "~/api/utils";
 import {
   pipelineVersionHasAssembly,
   pipelineVersionHasCoverageViz,
@@ -37,7 +38,6 @@ class ReportTable extends React.Component {
       expandAllOpened: false,
       expandedGenusIds: new Set(),
       dbType: this.props.initialDbType,
-      // hover actions state
     };
 
     const assemblyEnabled = pipelineVersionHasAssembly(pipelineVersion);
@@ -607,22 +607,6 @@ class ReportTable extends React.Component {
     return tableRows;
   };
 
-  getCsrfCookie = () => {
-    if (!document.cookie) {
-      return null;
-    }
-
-    const xsrfCookies = document.cookie
-      .split(";")
-      .map(c => c.trim())
-      .filter(c => c.startsWith("X-CSRF-Token="));
-
-    if (xsrfCookies.length === 0) {
-      return null;
-    }
-    return decodeURIComponent(xsrfCookies[0].split("=")[1]);
-  };
-
   render = () => {
     const { projectId, projectName, rowHeight } = this.props;
     const { phyloTreeModalParams } = this.state;
@@ -643,8 +627,8 @@ class ReportTable extends React.Component {
           <UserContext.Consumer>
             {currentUser => (
               <PhyloTreeCreationModal
-                admin={currentUser.admin}
-                csrf={this.getCsrfCookie()}
+                admin={currentUser.admin ? 1 : 0}
+                csrf={getCsrfToken()}
                 taxonId={phyloTreeModalParams.taxId}
                 taxonName={phyloTreeModalParams.taxName}
                 projectId={projectId}

@@ -960,6 +960,7 @@ export default class SampleViewV2 extends React.Component {
               phyloTreeAllowed={sample ? sample.editable : false}
               pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
               projectId={project && project.id}
+              projectName={project && project.name}
               sampleId={sample && sample.id}
             />
           </div>
