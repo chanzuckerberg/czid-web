@@ -51,23 +51,21 @@ class TaxonTreeVis extends React.Component {
   }
 
   componentDidMount() {
-    this.treeVis = new TidyTree(
-      this.treeContainer,
-      this.createTree(this.taxa),
-      {
-        attribute: this.metric,
-        useCommonName: this.isCommonNameActive(),
-        onNodeHover: this.handleNodeHover,
-        onNodeLabelClick: this.handleNodeLabelClick,
-        onCreatedTree: this.fillNodeValues,
-        tooltipContainer: this.treeTooltip,
-        onCollapsedStateChange: withAnalytics(
-          this.persistCollapsedInUrl,
-          "TaxonTreeVis_node-collapsed-state_changed"
-        ),
-        collapsed: this.getCollapsedInUrl() || new Set(),
-      }
-    );
+    const tree = this.createTree(this.taxa);
+    console.log("Tree format: ", tree);
+    this.treeVis = new TidyTree(this.treeContainer, tree, {
+      attribute: this.metric,
+      useCommonName: this.isCommonNameActive(),
+      onNodeHover: this.handleNodeHover,
+      onNodeLabelClick: this.handleNodeLabelClick,
+      onCreatedTree: this.fillNodeValues,
+      tooltipContainer: this.treeTooltip,
+      onCollapsedStateChange: withAnalytics(
+        this.persistCollapsedInUrl,
+        "TaxonTreeVis_node-collapsed-state_changed"
+      ),
+      collapsed: this.getCollapsedInUrl() || new Set(),
+    });
     this.treeVis.update();
   }
 

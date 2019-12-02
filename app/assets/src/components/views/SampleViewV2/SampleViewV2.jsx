@@ -33,17 +33,18 @@ import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { sampleErrorInfo } from "~/components/utils/sample";
+import AlertIcon from "~ui/icons/AlertIcon";
+import AMRView from "~/components/AMRView";
+import BacteriaIcon from "~ui/icons/BacteriaIcon";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
+import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
+import TaxonTreeVis from "./views/TaxonTreeVis";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import AMRView from "~/components/AMRView";
-import BacteriaIcon from "~ui/icons/BacteriaIcon";
-import AlertIcon from "~ui/icons/AlertIcon";
-import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
@@ -212,6 +213,7 @@ export default class SampleViewV2 extends React.Component {
     this.setState({
       reportData,
       reportMetadata: rawReportData.metadata,
+
       filteredReportData,
       selectedOptions: Object.assign({}, selectedOptions, {
         background: rawReportData.metadata.backgroundId,
@@ -813,12 +815,27 @@ export default class SampleViewV2 extends React.Component {
               </span>
             )}
           </div>
-          <div className={cs.reportTable}>
-            <ReportTable
-              data={filteredReportData}
-              onTaxonNameClick={this.handleTaxonClick}
-            />
-          </div>
+          {view == "tree" && (
+            <div>
+              <TaxonTreeVis
+                taxa={filteredReportData}
+                topTaxa={topScoringTaxa}
+                sample={sample}
+                metric={selectedOptions.metric}
+                nameType={selectedOptions.nameType}
+                backgroundData={selectedOptions.background}
+                onTaxonClick={this.handleTaxonClick}
+              />
+            </div>
+          )}
+          {view == "table" && (
+            <div className={cs.reportTable}>
+              <ReportTable
+                data={filteredReportData}
+                onTaxonNameClick={this.handleTaxonClick}
+              />
+            </div>
+          )}
         </div>
       );
     } else {
