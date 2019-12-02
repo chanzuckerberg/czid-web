@@ -23,7 +23,7 @@ export const getGeneraContainingTags = taxInfoArray => {
   return generaContainingTags;
 };
 
-export const getGeneraPathogenCounts = speciesCounts => {
+export const generaPathogenCounts = speciesCounts => {
   let generaPathogenCounts = {};
   for (let speciesInfo of Object.values(speciesCounts)) {
     if (speciesInfo.pathogenTag) {

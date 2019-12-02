@@ -44,7 +44,7 @@ import AMRView from "~/components/AMRView";
 import BacteriaIcon from "~ui/icons/BacteriaIcon";
 import AlertIcon from "~ui/icons/AlertIcon";
 import LoadingIcon from "~/components/ui/icons/LoadingIcon";
-import { getGeneraPathogenCounts } from "~/helpers/taxon";
+import { generaPathogenCounts } from "~/helpers/taxon";
 
 import ReportFilters from "./ReportFilters";
 import cs from "./sample_view_v2.scss";
@@ -191,7 +191,7 @@ export default class SampleViewV2 extends React.Component {
             }
           );
         });
-        let generaPathogenCounts = getGeneraPathogenCounts(
+        const generaPathogenCounts = generaPathogenCounts(
           rawReportData.counts[SPECIES_LEVEL_INDEX]
         );
         reportData.push(
