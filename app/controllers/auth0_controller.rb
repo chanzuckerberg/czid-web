@@ -16,6 +16,7 @@ class Auth0Controller < ApplicationController
   MAX_TOKEN_REFRESH_IN_SECONDS = (60.minutes / 1.second).to_i
 
   AUTH0_CONNECTION_NAME = "Username-Password-Authentication"
+  AUTH0_UNAUTHORIZED = "unauthorized"
 
   def refresh_token
     @mode = filter_value(params["mode"], SUPPORTED_MODES)
@@ -38,11 +39,21 @@ class Auth0Controller < ApplicationController
   end
 
   def failure
-    message = params["message"]
-    if message == "unauthorized"
+    logout
+  end
 
+  # Handle omniauth errors coming from Auth0.
+  def omniauth_failure
+    error = params["error"]
+
+    # Display 'unauthorized' errors but go to `failure` endpoint for all others.
+    if error.present? && error == AUTH0_UNAUTHORIZED
+      description = params["error_description"]
+      @message = "#{error}: #{description}"
+      puts "foobar 11:34am ", @message
+      render :omniauth_failure
     else
-      logout
+      failure
     end
   end
 
@@ -76,12 +87,6 @@ class Auth0Controller < ApplicationController
         redirect_to root_path
       end
     end
-  end
-
-  def omniauth_failure
-    error = params["error"]
-    descrip = params["error_description"]
-    render json: "#{error}: #{descrip} For assistance, contact us at help@idseq.net."
   end
 
   def request_password_reset
