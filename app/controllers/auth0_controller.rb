@@ -4,6 +4,7 @@ class Auth0Controller < ApplicationController
   skip_before_action :authenticate_user!, :verify_authenticity_token, :sign_in_auth0_token!
 
   include Auth0Helper
+  include ParameterSanitization
 
   SUPPORTED_MODES = Set[
     "background_refresh", # Background token refresh in a hidden iframe
@@ -49,7 +50,7 @@ class Auth0Controller < ApplicationController
     # Display 'unauthorized' errors but go to `failure` endpoint for all others.
     if error.present? && error == AUTH0_UNAUTHORIZED
       description = params["error_description"]
-      @message = "#{error}: #{description}"
+      @message = sanitize_title_name("#{error}: #{description}")
       render :omniauth_failure
     else
       failure
