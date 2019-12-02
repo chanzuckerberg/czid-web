@@ -45,6 +45,7 @@ class PipelineRun < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
 
   DAG_ANNOTATED_FASTA_BASENAME = 'taxid_annot.fasta'.freeze
+  DAG_ANNOTATED_COUNT_BASENAME = 'annotated_out.count'.freeze
   DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
@@ -397,15 +398,15 @@ class PipelineRun < ApplicationRecord
   end
 
   def contigs_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if supports_assembly?
   end
 
   def contigs_summary_s3_path
-    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if supports_assembly?
   end
 
   def annotated_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if supports_assembly?
     return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
     multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
@@ -429,8 +430,9 @@ class PipelineRun < ApplicationRecord
     files
   end
 
+  # Unidentified is also referred to as "unmapped"
   def unidentified_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if supports_assembly?
     return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
     "#{alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
@@ -786,7 +788,7 @@ class PipelineRun < ApplicationRecord
     begin
       # TODO:  Make this less expensive while jobs are running, perhaps by doing it only sometimes, then again at end.
       # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
-      compile_stats_file
+      compile_stats_file!
       load_stats_file
       load_chunk_stats
     rescue
@@ -958,20 +960,41 @@ class PipelineRun < ApplicationRecord
     save
   end
 
-  def compile_stats_file
+  # Generate stats.json from all *.count files in results dir. Example:
+  # [
+  #   {
+  #     "reads_after": 8262,
+  #     "task": "unidentified_fasta"
+  #   },
+  #   {
+  #     "reads_after": 8558,
+  #     "task": "bowtie2_out"
+  #   },
+  #   ...
+  #   {
+  #     "total_reads": 10000
+  #   },
+  #   {
+  #     "fraction_subsampled": 1.0
+  #   },
+  #   {
+  #     "adjusted_remaining_reads": 8558
+  #   }
+  # ]
+  #
+  # IMPORTANT NOTE: This method ALSO sets attributes of pipeline run instance.
+  # For unmapped_reads, it will read a .count file from /postprocess s3 dir.
+  def compile_stats_file!
     res_folder = output_s3_path_with_version
     stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
     unless status.exitstatus.zero?
       return
     end
 
-    # Compile all counts
-    # Ex: [{"total_reads": 1122}, {"task": "star_out", "reads_after": 832}... {"adjusted_remaining_reads": 474}]
     all_counts = []
     stdout.split("\n").each do |line|
       fname = line.split(" ")[3] # Last col in line
-      raw = Syscall.run("aws", "s3", "cp", "#{res_folder}/#{fname}", "-")
-      contents = JSON.parse(raw)
+      contents = Syscall.s3_read_json("#{res_folder}/#{fname}")
       # Ex: {"gsnap_filter_out": 194}
       contents.each do |key, count|
         all_counts << { task: key, reads_after: count }
@@ -1019,10 +1042,7 @@ class PipelineRun < ApplicationRecord
     end
 
     # Load unidentified reads
-    unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
-    if unidentified
-      self.unmapped_reads = unidentified[:reads_after]
-    end
+    self.unmapped_reads = fetch_unmapped_reads(all_counts) || unmapped_reads
 
     # Write JSON to a file
     tmp = Tempfile.new
@@ -1036,6 +1056,32 @@ class PipelineRun < ApplicationRecord
     end
 
     save
+  end
+
+  # Fetch the unmapped reads count from alignment stage then refined counts from
+  # assembly stage, as each becomes available. Prior to Dec 2019, the count was
+  # only fetched from alignment.
+  def fetch_unmapped_reads(
+    all_counts,
+    s3_path = "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_COUNT_BASENAME}"
+  )
+    unmapped_reads = nil
+    unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
+    if unidentified
+      unmapped_reads = unidentified[:reads_after]
+
+      if supports_assembly? && finalized?
+        # see idseq_dag/steps/generate_annotated_fasta.py
+        begin
+          Rails.logger.info("Fetching file: #{s3_path}")
+          refined_annotated_out = Syscall.s3_read_json(s3_path)
+          unmapped_reads = refined_annotated_out["unidentified_fasta"]
+        rescue
+          Rails.logger.warn("Could not read file: #{s3_path}")
+        end
+      end
+    end
+    unmapped_reads
   end
 
   def local_json_path
@@ -1278,7 +1324,7 @@ class PipelineRun < ApplicationRecord
 
   def s3_paths_for_taxon_byteranges
     file_prefix = ''
-    file_prefix = ASSEMBLY_PREFIX if pipeline_version_has_assembly(pipeline_version)
+    file_prefix = ASSEMBLY_PREFIX if supports_assembly?
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
       'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
@@ -1512,5 +1558,9 @@ class PipelineRun < ApplicationRecord
 
   def alignment_db
     alignment_config.name
+  end
+
+  private def supports_assembly?
+    pipeline_version_has_assembly(pipeline_version)
   end
 end

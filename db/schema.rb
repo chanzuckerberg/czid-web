@@ -116,8 +116,12 @@ ActiveRecord::Schema.define(version: 20_191_126_004_333) do
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
     t.integer "genus_taxid_nr"
+    t.index ["pipeline_run_id", "genus_taxid_nr"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_nr"
+    t.index ["pipeline_run_id", "genus_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_nt"
     t.index ["pipeline_run_id", "name"], name: "index_contigs_on_pipeline_run_id_and_name", unique: true
     t.index ["pipeline_run_id", "read_count"], name: "index_contigs_on_pipeline_run_id_and_read_count"
+    t.index ["pipeline_run_id", "species_taxid_nr"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_nr"
+    t.index ["pipeline_run_id", "species_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_nt"
   end
 
   create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
