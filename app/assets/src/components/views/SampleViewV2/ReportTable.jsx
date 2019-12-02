@@ -301,7 +301,7 @@ class ReportTable extends React.Component {
   };
 
   renderNtNrDecimalValues = ({ cellData, decimalPlaces }) => {
-    return this.renderNtNrValues({
+    return this.renderNtNrStack({
       cellData: cellData.map(val =>
         TableRenderers.formatNumberWithCommas(
           Number(val).toFixed(decimalPlaces || 0)
@@ -311,44 +311,40 @@ class ReportTable extends React.Component {
   };
 
   renderNtNrSelector = () => {
-    return this.renderNtNrValues({
+    return this.renderNtNrStack({
       cellData: ["NT", "NR"],
       onClick: [
-        () => this.handleNtNrChange("nt"),
-        () => this.handleNtNrChange("nr"),
+        withAnalytics(
+          () => this.handleNtNrChange("nt"),
+          "ReportTable_count-type_clicked",
+          {
+            countType: "NT",
+          }
+        ),
+        withAnalytics(
+          () => this.handleNtNrChange("nr"),
+          "ReportTable_count-type_clicked",
+          {
+            countType: "NR",
+          }
+        ),
       ],
     });
   };
 
-  renderNtNrValues = ({ cellData, onClick }) => {
+  renderNtNrStack = ({ cellData, onClick }) => {
     const { dbType } = this.state;
     return (
       <div className={cs.stack}>
         <div
           className={cx(cs.stackElement, dbType == "nt" || cs.lowlightValue)}
-          onClick={
-            onClick
-              ? () =>
-                  withAnalytics(
-                    onClick[0]("nt"),
-                    "ReportTable_count-type-nt_clicked"
-                  )
-              : null
-          }
+          onClick={onClick ? () => onClick[0]("nt") : null}
         >
           {cellData ? cellData[0] : "-"}
         </div>
         <div
           className={cx(cs.stackElement, dbType == "nr" || cs.lowlightValue)}
-          onClick={
-            onClick
-              ? () =>
-                  withAnalytics(
-                    onClick[1]("nr"),
-                    "ReportTable_count-type-nr_clicked"
-                  )
-              : null
-          }
+          onClick={onClick ? () => onClick[1]("nr") : null}
         >
           {cellData ? cellData[1] : "-"}
         </div>
