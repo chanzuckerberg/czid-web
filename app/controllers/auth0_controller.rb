@@ -50,7 +50,7 @@ class Auth0Controller < ApplicationController
     # Display 'unauthorized' errors but go to `failure` endpoint for all others.
     if error.present? && error == AUTH0_UNAUTHORIZED
       description = params["error_description"]
-      @message = sanitize_title_name("#{error}: #{description}")
+      @message = sanitize_description("#{error}: #{description}")
       render :omniauth_failure
     else
       failure
