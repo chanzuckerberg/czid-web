@@ -1,4 +1,5 @@
 import React from "react";
+import { upperFirst } from "lodash/fp";
 
 import BacteriaIcon from "~ui/icons/BacteriaIcon";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
@@ -9,11 +10,10 @@ import cs from "./auth0_error.scss";
 class Auth0Error extends React.Component {
   render() {
     const { message } = this.props;
-    console.log("message 11:45am", message);
     return (
       <div className={cs.auth0Error}>
         <BlankScreenMessage
-          message={message}
+          message={upperFirst(message)}
           textWidth={300}
           tagline={
             <a className={cs.helpLink} href="mailto:help@idseq.net">
