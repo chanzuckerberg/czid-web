@@ -38,7 +38,12 @@ class Auth0Controller < ApplicationController
   end
 
   def failure
-    logout
+    message = params["message"]
+    if message == "unauthorized"
+
+    else
+      logout
+    end
   end
 
   def background_refresh
