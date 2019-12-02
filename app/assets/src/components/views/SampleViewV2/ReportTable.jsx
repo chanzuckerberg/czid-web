@@ -13,10 +13,12 @@ import {
 } from "~/components/utils/sample";
 import { UserContext } from "~/components/common/UserContext";
 import InsightIcon from "~ui/icons/InsightIcon";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
+import PathogenLabel from "~/components/ui/labels/PathogenLabel";
+import PathogenPreview from "~/components/views/report/PathogenPreview";
 import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
 import PropTypes from "~/components/utils/propTypes";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
 
 import { REPORT_TABLE_COLUMNS } from "../report/ReportTable/constants";
 import HoverActions from "../report/ReportTable/HoverActions";
@@ -265,6 +267,14 @@ class ReportTable extends React.Component {
                 {`(${rowData.filteredSpecies.length} species)`}
               </span>
             ))}
+          <span>
+            {rowData.pathogens && (
+              <PathogenPreview tag2Count={rowData.pathogens} />
+            )}
+            {rowData.pathogenTag && (
+              <PathogenLabel type={rowData.pathogenTag} />
+            )}
+          </span>
           <span>{this.renderHoverActions({ rowData })}</span>
         </div>
       )

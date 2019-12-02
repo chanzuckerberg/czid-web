@@ -37,6 +37,7 @@ import {
   pipelineVersionHasCoverageViz,
   sampleErrorInfo,
 } from "~/components/utils/sample";
+import { getGeneraPathogenCounts } from "~/helpers/taxon";
 import AlertIcon from "~ui/icons/AlertIcon";
 import AMRView from "~/components/AMRView";
 import BacteriaIcon from "~ui/icons/BacteriaIcon";
@@ -203,10 +204,14 @@ export default class SampleViewV2 extends React.Component {
             }
           );
         });
+        const generaPathogenCounts = getGeneraPathogenCounts(
+          rawReportData.counts[SPECIES_LEVEL_INDEX]
+        );
         reportData.push(
           merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
             highlighted:
               hasHighlightedChildren || highlightedTaxIds.has(genusTaxId),
+            pathogens: generaPathogenCounts[genusTaxId],
             taxId: genusTaxId,
             taxLevel: "genus",
             species: speciesData,
