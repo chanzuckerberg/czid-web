@@ -50,7 +50,6 @@ class Auth0Controller < ApplicationController
     if error.present? && error == AUTH0_UNAUTHORIZED
       description = params["error_description"]
       @message = "#{error}: #{description}"
-      puts "foobar 11:34am ", @message
       render :omniauth_failure
     else
       failure
