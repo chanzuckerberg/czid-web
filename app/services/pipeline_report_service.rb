@@ -450,13 +450,13 @@ class PipelineReportService
   end
 
   def tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
-    counts_by_tax_level[1].each do |species_tax_id, species_info|
+    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |species_tax_id, species_info|
       lineage = lineage_by_tax_id[species_tax_id] ? lineage_by_tax_id[species_tax_id] : lineage_by_tax_id[species_info[:genus_tax_id]]
       name_columns = lineage.keys.select { |cn| cn.include?("_name") }
       pathogen_tags = []
       TaxonLineage::PRIORITY_PATHOGENS.each do |category, pathogen_list|
         pathogen_tags |= [category] if pathogen_list.include?(species_info[:name])
-        genus_name = counts_by_tax_level[2][species_info[:genus_tax_id]][:name]
+        genus_name = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS][species_info[:genus_tax_id]][:name]
         pathogen_tags |= [category] if pathogen_list.include?(genus_name)
         name_columns.each do |col|
           pathogen_tags |= [category] if pathogen_list.include?(lineage[col])
