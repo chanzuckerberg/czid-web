@@ -619,7 +619,50 @@ module SamplesHelper
                       .map { |r| [r.tax_id, r.sample_count] }
                       .to_h
     taxon_list.each do |taxon|
-      taxon["sample_count"] = counts_by_taxid[taxon["taxid"]]
+      taxon["sample_count"] = counts_by_taxid[taxon["taxid"]] || 0
+    end
+    taxon_list
+  end
+
+  # For each taxon, count how many samples have contigs for that taxon.
+  # Add these counts to the taxon objects.
+  def augment_taxon_list_with_sample_count_contigs(taxon_list, samples)
+    get_tax_ids_by_level = lambda do |level|
+      taxon_list.select { |taxon| taxon["level"] == level }.map { |taxon| taxon["taxid"] }
+    end
+
+    # Separate genus and species taxids. We query them separately to try to get some extra performance.
+    species_tax_ids = get_tax_ids_by_level.call("species")
+    genus_tax_ids = get_tax_ids_by_level.call("genus")
+
+    pipeline_run_ids = get_succeeded_pipeline_runs_for_samples(samples).pluck(:id)
+
+    # We maintain a hash of taxid => array of pipeline run ids. We de-dupe the pipeline run ids at the very end.
+    pipeline_runs_by_taxid = Hash.new { |h, k| h[k] = [] } # Keys are auto-initialized to the empty array.
+
+    process_tax_ids = lambda do |level, type|
+      tax_id_field = "#{level}_taxid_#{type}"
+      tax_ids = level == "species" ? species_tax_ids : genus_tax_ids
+
+      if tax_ids.empty?
+        return
+      end
+
+      # We just need the distinct pairs to do our counting, not the individual contigs.
+      Contig
+        .where(pipeline_run_id: pipeline_run_ids, "#{tax_id_field}": tax_ids)
+        .select("DISTINCT pipeline_run_id, #{tax_id_field}")
+        .each { |contig| pipeline_runs_by_taxid[contig[tax_id_field]] << contig.pipeline_run_id }
+    end
+
+    process_tax_ids.call("species", "nr")
+    process_tax_ids.call("species", "nt")
+    process_tax_ids.call("genus", "nr")
+    process_tax_ids.call("genus", "nt")
+
+    taxon_list.each do |taxon|
+      # De-dupe the pipeline run ids before taking the length.
+      taxon["sample_count_contigs"] = pipeline_runs_by_taxid[taxon["taxid"]].uniq.length
     end
     taxon_list
   end
