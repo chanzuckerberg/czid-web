@@ -4,7 +4,6 @@ class Auth0Controller < ApplicationController
   skip_before_action :authenticate_user!, :verify_authenticity_token, :sign_in_auth0_token!
 
   include Auth0Helper
-  include ParameterSanitization
 
   SUPPORTED_MODES = Set[
     "background_refresh", # Background token refresh in a hidden iframe
