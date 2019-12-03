@@ -53,12 +53,11 @@ class Auth0Controller < ApplicationController
 
     # Display 'unauthorized' errors but go to `failure` endpoint for all others.
     if error_type.present? && error_type == AUTH0_UNAUTHORIZED.to_sym
-      description = if ERROR_EXPLANATIONS.key?(error_code)
-                      ERROR_EXPLANATIONS[error_code]
-                    else
-                      ERROR_EXPLANATIONS[:default]
-                    end
-      @message = ActionController::Base.helpers.sanitize(description)
+      @message = if ERROR_EXPLANATIONS.key?(error_code)
+                   ERROR_EXPLANATIONS[error_code]
+                 else
+                   ERROR_EXPLANATIONS[:default]
+                 end
       render :omniauth_failure
     else
       failure
