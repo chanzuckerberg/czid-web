@@ -4,8 +4,8 @@ import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
 import { defaultTableRowRenderer } from "react-virtualized";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
-import { withAnalytics } from "~/api/analytics";
 import { getCsrfToken } from "~/api/utils";
 import {
   pipelineVersionHasAssembly,
@@ -325,7 +325,7 @@ class ReportTable extends React.Component {
   };
 
   renderNtNrDecimalValues = ({ cellData, decimalPlaces }) => {
-    return this.renderNtNrValues({
+    return this.renderNtNrStack({
       cellData: cellData.map(val =>
         TableRenderers.formatNumberWithCommas(
           Number(val).toFixed(decimalPlaces || 0)
@@ -335,16 +335,28 @@ class ReportTable extends React.Component {
   };
 
   renderNtNrSelector = () => {
-    return this.renderNtNrValues({
+    return this.renderNtNrStack({
       cellData: ["NT", "NR"],
       onClick: [
-        () => this.handleNtNrChange("nt"),
-        () => this.handleNtNrChange("nr"),
+        withAnalytics(
+          () => this.handleNtNrChange("nt"),
+          "ReportTable_count-type_clicked",
+          {
+            countType: "nt",
+          }
+        ),
+        withAnalytics(
+          () => this.handleNtNrChange("nr"),
+          "ReportTable_count-type_clicked",
+          {
+            countType: "nr",
+          }
+        ),
       ],
     });
   };
 
-  renderNtNrValues = ({ cellData, onClick }) => {
+  renderNtNrStack = ({ cellData, onClick }) => {
     const { dbType } = this.state;
     return (
       <div className={cs.stack}>
@@ -518,6 +530,10 @@ class ReportTable extends React.Component {
     // Uses lodash's orderBy function.
     // It uses a triple sorting key that enables nested sorting of genus and species, while guaranteeing that
     // genus is always on top of its children species
+    logAnalyticsEvent("PipelineSampleReport_column-sort-arrow_clicked", {
+      path,
+      sortDirection,
+    });
     return orderBy(
       [
         // 1st value: value defined by path for the genus (guarantees all genus together)
