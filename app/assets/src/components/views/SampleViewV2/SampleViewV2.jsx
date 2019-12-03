@@ -40,13 +40,15 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
-import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
-import TaxonTreeVis from "./views/TaxonTreeVis";
+import TaxonTreeVis from "~/components/views/TaxonTreeVis";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 
+import { TREE_METRICS } from "./constants";
+import ReportViewSelector from "./ReportViewSelector";
 import ReportFilters from "./ReportFilters";
+import ReportTable from "./ReportTable";
 import cs from "./sample_view_v2.scss";
 
 const mapValuesWithKey = mapValues.convert({ cap: false });
@@ -78,6 +80,7 @@ export default class SampleViewV2 extends React.Component {
         backgrounds: [],
         currentTab: "Report",
         filteredReportData: [],
+        lineageData: {},
         pipelineRun: null,
         pipelineVersion: null,
         project: null,
@@ -94,6 +97,7 @@ export default class SampleViewV2 extends React.Component {
       localState,
       urlState
     );
+    console.log(this.state);
   }
 
   componentDidMount = () => {
@@ -123,6 +127,7 @@ export default class SampleViewV2 extends React.Component {
   defaultSelectedOptions = () => {
     return {
       categories: {},
+      metric: TREE_METRICS[0].value,
       minContigSize: 4,
       nameType: "Scientific name",
       readSpecificity: 0,
@@ -211,10 +216,10 @@ export default class SampleViewV2 extends React.Component {
     });
 
     this.setState({
+      filteredReportData,
+      lineageData: rawReportData.lineage,
       reportData,
       reportMetadata: rawReportData.metadata,
-
-      filteredReportData,
       selectedOptions: Object.assign({}, selectedOptions, {
         background: rawReportData.metadata.backgroundId,
       }),
@@ -441,7 +446,13 @@ export default class SampleViewV2 extends React.Component {
     if (urlQuery) {
       urlQuery = `?${urlQuery}`;
     }
-
+    console.log({
+      urlState,
+      localState,
+      URL_FIELDS,
+      state: this.state,
+      urlQuery,
+    });
     history.replaceState(urlState, `SampleView`, `${urlQuery}`);
 
     localStorage.setItem("SampleViewOptions", JSON.stringify(localState));
@@ -449,8 +460,9 @@ export default class SampleViewV2 extends React.Component {
 
   handleOptionChanged = ({ key, value }) => {
     const { selectedOptions } = this.state;
-
+    console.log("option changed", key, value);
     if (deepEqual(selectedOptions[key], value)) {
+      console.log("returned", selectedOptions[key], value);
       return;
     }
 
@@ -524,6 +536,9 @@ export default class SampleViewV2 extends React.Component {
             filters: newSelectedOptions,
           }),
         });
+        break;
+      // - metric: no need to update anything except for the option below
+      case "metric":
         break;
       default:
         return;
@@ -781,10 +796,18 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
+  handleViewClick = ({ view }) => {
+    console.log("view changed?", view);
+    this.setState({ view }, () => {
+      this.persistReportOptions();
+    });
+  };
+
   renderReport = () => {
     const {
       backgrounds,
       filteredReportData,
+      lineageData,
       reportMetadata,
       sample,
       selectedOptions,
@@ -804,27 +827,39 @@ export default class SampleViewV2 extends React.Component {
               view={view}
             />
           </div>
-          <div className={cs.statsRow}>
-            {this.renderReportInfo()}
-            {!!this.countFilters() && (
-              <span
-                className={cs.clearAllFilters}
-                onClick={this.clearAllFilters}
-              >
-                Clear All Filters
-              </span>
-            )}
+          <div className={cs.reportHeader}>
+            <div className={cs.statsRow}>
+              {this.renderReportInfo()}
+              {!!this.countFilters() && (
+                <span
+                  className={cs.clearAllFilters}
+                  onClick={this.clearAllFilters}
+                >
+                  Clear All Filters
+                </span>
+              )}
+            </div>
+            <div className={cs.reportViewSelector}>
+              <ReportViewSelector
+                view={view}
+                onViewClick={this.handleViewClick}
+              />
+            </div>
           </div>
           {view == "tree" && (
             <div>
               <TaxonTreeVis
-                taxa={filteredReportData}
-                topTaxa={topScoringTaxa}
-                sample={sample}
+                backgroundData={find(
+                  { id: selectedOptions.background },
+                  backgrounds
+                )}
+                lineage={lineageData}
                 metric={selectedOptions.metric}
                 nameType={selectedOptions.nameType}
-                backgroundData={selectedOptions.background}
                 onTaxonClick={this.handleTaxonClick}
+                sample={sample}
+                taxa={filteredReportData}
+                useReportV2Format={true}
               />
             </div>
           )}

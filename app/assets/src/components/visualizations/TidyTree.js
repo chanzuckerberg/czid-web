@@ -85,11 +85,27 @@ export default class TidyTree {
   }
 
   setTree(nodes) {
+    console.log("nodes", nodes);
     let stratifier = stratify()
       .id(node => node.id)
       .parentId(node => node.parentId);
 
+    // const a = nodes.filter(node => node.id === "_" || node.parentId === "_");
+    // a.forEach(node => {
+    //   if (node.parentId === a[0].id) {
+    //     console.log("vvv HERE vvv");
+    //     console.log("vvv HERE vvv");
+    //     console.log("vvv HERE vvv");
+    //   }
+    //   console.log(`id=${node.id}   parent=${node.parentId}`);
+    //   if (node.parentId === a[0].id) {
+    //     console.log("^^^ HERE ^^^");
+    //     console.log("^^^ HERE ^^^");
+    //     console.log("^^^ HERE ^^^");
+    //   }
+    // })
     this.root = stratifier(nodes);
+    console.log(this.root);
     this.options.onCreatedTree && this.options.onCreatedTree(this.root);
     this.sortAndScaleTree();
 
@@ -119,6 +135,11 @@ export default class TidyTree {
         a.data.values[this.options.attribute]
     );
 
+    console.log(
+      "computing range",
+      this.root,
+      this.root.data.values[this.options.attribute]
+    );
     this.range = [
       Math.min(
         ...this.root.leaves().map(l => l.data.values[this.options.attribute])
@@ -323,6 +344,12 @@ export default class TidyTree {
       this.initialize();
     }
 
+    if (!this.options.attribute) {
+      // eslint-disable-next-line no-console
+      console.error("TidyTree: Option 'attribute' is not defined.");
+      return;
+    }
+
     // adjust dimensions
     let width = this.options.minWidth;
     let height = Math.max(
@@ -342,6 +369,8 @@ export default class TidyTree {
       .attr("height", height + this.margins.top + this.margins.bottom);
 
     d3Tree().size([height, width])(this.root);
+    console.log("attribute", this.options.attribute);
+    console.log("range", this.range);
 
     source = source || this.root;
 
@@ -482,13 +511,16 @@ export default class TidyTree {
         d => (this.hasVisibleChildren(d) ? "baseline" : "middle")
       )
       .style("font-size", d => fontScale(d.data.values[this.options.attribute]))
-      .attr(
-        "dy",
-        d =>
-          this.hasVisibleChildren(d)
-            ? -4 - 1.3 * nodeScale(d.data.values[this.options.attribute])
-            : 0
-      )
+      .attr("dy", d => {
+        // console.log({
+        //   d,
+        //   attribute: this.options.attribute,
+        //   v: d.data.values[this.options.attribute],
+        //   sc: nodeScale(d.data.values[this.options.attribute])});
+        return this.hasVisibleChildren(d)
+          ? -4 - 1.3 * nodeScale(d.data.values[this.options.attribute])
+          : 0;
+      })
       .attr(
         "x",
         d =>

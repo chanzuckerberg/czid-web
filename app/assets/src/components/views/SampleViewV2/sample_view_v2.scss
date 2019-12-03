@@ -29,22 +29,31 @@
     flex: 1 0 auto;
   }
 
-  .statsRow {
-    @include font-body-xxs;
+  .reportHeader {
+    display: flex;
 
-    color: $medium-grey;
+    .statsRow {
+      @include font-body-xxs;
 
-    .reportInfoMsg {
-      &:not(:first-child) {
-        margin-left: $space-xs;
+      color: $medium-grey;
+      flex: 1 0 auto;
+
+      .reportInfoMsg {
+        &:not(:first-child) {
+          margin-left: $space-xs;
+        }
+      }
+
+      .clearAllFilters {
+        margin-left: $space-s;
+        font-weight: $font-weight-semibold;
+        white-space: nowrap;
+        cursor: pointer;
       }
     }
 
-    .clearAllFilters {
-      margin-left: $space-s;
-      font-weight: $font-weight-semibold;
-      white-space: nowrap;
-      cursor: pointer;
+    .reportViewSelector {
+      flex: 0 0 auto;
     }
   }
 }

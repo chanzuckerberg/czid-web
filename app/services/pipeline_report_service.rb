@@ -97,8 +97,7 @@ class PipelineReportService
     counts_by_tax_level.transform_values! { |counts| hash_by_tax_id_and_count_type(counts) }
     @timer.split("index_by_tax_id_and_count_type")
 
-    # TODO: this cleanup function is carried over from the previous version of the report,
-    # check if this is still necessary?
+    # TODO(tiago): check if still necessary and move out of reports helper
     ReportsHelper.cleanup_missing_genus_counts(
       counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
       counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
@@ -127,8 +126,8 @@ class PipelineReportService
 
     required_columns = %w[
       taxid
-      superkingdom_taxid kingdom_taxid phylum_taxid class_taxid order_taxid family_taxid
-      superkingdom_name kingdom_name phylum_name class_name order_name family_name
+      superkingdom_taxid kingdom_taxid phylum_taxid class_taxid order_taxid family_taxid genus_taxid species_taxid
+      superkingdom_name kingdom_name phylum_name class_name order_name family_name genus_name species_name
     ]
 
     tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
@@ -149,6 +148,7 @@ class PipelineReportService
                         .to_h
     @timer.split("fetch_taxon_lineage")
 
+    # TODO(tiago):move out of reports helper
     ReportsHelper.validate_names(
       counts_by_tax_level,
       lineage_by_tax_id,
@@ -156,8 +156,7 @@ class PipelineReportService
     )
     @timer.split("fill_missing_names")
 
-    structured_lineage = {}
-    encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
+    structured_lineage = encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
     @timer.split("encode_taxon_lineage")
 
     sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
@@ -388,24 +387,33 @@ class PipelineReportService
   end
 
   def encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
-    ranks = ["superkingdom", "kingdom", "phylum", "class", "order", "family"]
-
-    lineage_by_tax_id.each_value do |lineage|
+    structured_lineage = {}
+    ranks = ["superkingdom", "kingdom", "phylum", "class", "order", "family", "genus", "species"]
+    lineage_by_tax_id.each do |base_tax_id, lineage|
       tax_lineage_key = nil
       ranks.each do |rank|
         tax_id = lineage["#{rank}_taxid"]
-        new_tax_lineage_key = tax_lineage_key.nil? ? tax_id.to_s : "#{tax_lineage_key}:#{tax_id}"
+        new_tax_lineage_key = if tax_id < 0
+                                tax_lineage_key.nil? ? tax_id.to_s : "#{tax_lineage_key}_#{tax_id}"
+                              else
+                                tax_id
+                              end
 
-        next if structured_lineage.key?(new_tax_lineage_key)
-
-        structured_lineage[new_tax_lineage_key] = {
-          name: lineage["#{rank}_name"],
-          parent: tax_lineage_key,
-          rank: rank,
-        }
+        unless structured_lineage.key?(new_tax_lineage_key)
+          structured_lineage[new_tax_lineage_key] = {
+            name: lineage["#{rank}_name"],
+            parent: tax_lineage_key,
+            rank: rank,
+          }
+        end
         tax_lineage_key = new_tax_lineage_key
+
+        # do not process below the rank that this lineage start with
+        # necessary because we might have lineages for both species and genus
+        break if tax_id == base_tax_id
       end
     end
+    return structured_lineage
   end
 
   def sort_genus_tax_ids(counts_by_tax_level, field)

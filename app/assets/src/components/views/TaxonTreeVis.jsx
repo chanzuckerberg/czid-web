@@ -2,10 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { get, map } from "lodash/fp";
 
 import TidyTree from "../visualizations/TidyTree";
 import PathogenLabel from "../ui/labels/PathogenLabel";
 import { getTaxonName } from "../../helpers/taxon";
+
+const mapWithKeys = map.convert({ cap: false });
 
 const TaxonLevels = [
   "species",
@@ -27,7 +30,7 @@ class TaxonTreeVis extends React.Component {
     };
 
     this.nameType = this.props.nameType;
-    this.metric = this.props.metric || "aggregatescore";
+    this.metric = this.props.metric;
     this.taxa = this.props.taxa;
 
     this.tree = null;
@@ -43,16 +46,10 @@ class TaxonTreeVis extends React.Component {
       nr_r: { label: "NR r", agg: arr => arr.reduce((a, b) => a + b, 0) },
       nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
     };
-
-    this.handleNodeHover = this.handleNodeHover.bind(this);
-    this.handleNodeLabelClick = this.handleNodeLabelClick.bind(this);
-    this.fillNodeValues = this.fillNodeValues.bind(this);
-    this.renderTooltip = this.renderTooltip.bind(this);
   }
 
   componentDidMount() {
     const tree = this.createTree(this.taxa);
-    console.log("Tree format: ", tree);
     this.treeVis = new TidyTree(this.treeContainer, tree, {
       attribute: this.metric,
       useCommonName: this.isCommonNameActive(),
@@ -126,16 +123,16 @@ class TaxonTreeVis extends React.Component {
     }
   }
 
-  handleNodeHover(node) {
+  handleNodeHover = node => {
     this.setState({ nodeHover: node });
     logAnalyticsEvent("TaxonTreeVis_node_hovered", {
       id: node.id,
       scientificName: node.data.scientificName,
       commonName: node.data.commonName,
     });
-  }
+  };
 
-  handleNodeLabelClick(node) {
+  handleNodeLabelClick = node => {
     if (!node.data.modalData) {
       // TODO (gdingle): we should show a "no description" instead of no-op
       this.props.onTaxonClick(null);
@@ -164,7 +161,7 @@ class TaxonTreeVis extends React.Component {
       taxonName,
       taxLevel: taxInfo.tax_level,
     });
-  }
+  };
 
   getParentTaxId(taxon) {
     let originalTaxId = taxon.lineage[`${TaxonLevels[taxon.tax_level]}_taxid`];
@@ -177,7 +174,10 @@ class TaxonTreeVis extends React.Component {
     return this.nameType.toLowerCase() == "common name";
   }
 
-  fillNodeValues(root) {
+  fillNodeValues = root => {
+    // this function computes the aggregated metric values
+    // for higher levels of the tree (than species and genus)
+
     // cleaning up spurious nodes without children with data
     root.leaves().forEach(leaf => {
       if (!leaf.children && !leaf.data.values) {
@@ -197,10 +197,10 @@ class TaxonTreeVis extends React.Component {
     });
 
     let topTaxaIds = new Set(
-      this.props.topTaxa.map(taxon => taxon.tax_id.toString())
+      (this.props.topTaxa || []).map(taxon => taxon.tax_id.toString())
     );
     root.eachAfter(node => {
-      if (topTaxaIds.has(node.id)) {
+      if (topTaxaIds.has(node.id) || node.highlighted) {
         node.data.highlight = true;
         node.ancestors().forEach(ancestor => {
           ancestor.data.highlight = true;
@@ -221,9 +221,19 @@ class TaxonTreeVis extends React.Component {
         }
       }
     });
-  }
+  };
 
   createTree(taxa) {
+    const { useReportV2Format } = this.props;
+    if (useReportV2Format) {
+      return this.createTreeV2();
+    } else {
+      return this.createTreeLegacy(taxa);
+    }
+  }
+
+  createTreeLegacy = taxa => {
+    console.log("taxa", taxa);
     // this function assumes that genus are always seen first
     let nodes = [{ id: "_" }];
 
@@ -278,9 +288,70 @@ class TaxonTreeVis extends React.Component {
       seenNodes.add(nodeId);
     });
     return nodes;
-  }
+  };
 
-  renderTooltip() {
+  createTreeV2 = () => {
+    const { taxa, lineage } = this.props;
+    const ROOT_ID = "_";
+    const nodes = [{ id: ROOT_ID }];
+
+    const formatNode = ({ nodeData, parentId }) => ({
+      id: nodeData.taxId,
+      taxId: nodeData.taxId,
+      parentId: parentId,
+      scientificName: nodeData.name,
+      lineageRank: "genus",
+      commonName: nodeData.common_name,
+      highlight: nodeData.highlighted,
+      values: {
+        aggregatescore: nodeData.agg_score,
+        nt_r: get("nt.count", nodeData) || 0,
+        nt_rpm: get("nt.rpm", nodeData) || 0,
+        nt_zscore: get("nt.z_score", nodeData) || 0,
+        nr_r: get("nr.count", nodeData) || 0,
+        nr_rpm: get("nr.rpm", nodeData) || 0,
+        nr_zscore: get("nr.z_score", nodeData) || 0,
+      },
+    });
+
+    taxa.forEach(genusData => {
+      const genusLineage = lineage[genusData.taxId] || {};
+      nodes.push(
+        formatNode({
+          nodeData: genusData,
+          parentId: genusLineage.parent || ROOT_ID,
+        })
+      );
+
+      genusData.filteredSpecies.forEach(speciesData => {
+        const speciesLineage = lineage[genusData.taxId] || {};
+        nodes.push(
+          formatNode({
+            nodeData: speciesData,
+            parentId: genusData.taxId || speciesLineage.parent || ROOT_ID,
+          })
+        );
+      });
+    });
+
+    // add other lineage nodes
+    mapWithKeys((nodeLineage, taxId) => {
+      // console.log(`taxId=${taxId}`, {parent: nodeLineage.parent});
+      if (nodeLineage.rank != "genus" && nodeLineage.rank != "species") {
+        // console.log("pushed with parent", nodeLineage.parent || ROOT_ID);
+        nodes.push({
+          id: taxId,
+          taxId: parseInt(taxId),
+          parentId: nodeLineage.parent || ROOT_ID,
+          scientificName: nodeLineage.name,
+          lineageRank: nodeLineage.rank,
+        });
+      }
+    }, lineage);
+    return nodes;
+  };
+
+  renderTooltip = () => {
     let node = this.state.nodeHover;
     if (!node) {
       return null;
@@ -324,7 +395,7 @@ class TaxonTreeVis extends React.Component {
         </div>
       </div>
     );
-  }
+  };
 
   capitalize(str) {
     if (!str) return str;
@@ -366,7 +437,13 @@ class TaxonTreeVis extends React.Component {
   }
 }
 
+TaxonTreeVis.defaultProps = {
+  useReportV2Format: false,
+};
+
 TaxonTreeVis.propTypes = {
+  // hash of lineage parental realtionships per taxid
+  lineage: PropTypes.object,
   metric: PropTypes.string,
   nameType: PropTypes.string,
   taxa: PropTypes.array,
@@ -376,6 +453,7 @@ TaxonTreeVis.propTypes = {
     name: PropTypes.string,
   }),
   onTaxonClick: PropTypes.func.isRequired,
+  useReportV2Format: PropTypes.bool,
 };
 
 export default TaxonTreeVis;
