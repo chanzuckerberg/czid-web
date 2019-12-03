@@ -342,14 +342,14 @@ class ReportTable extends React.Component {
           () => this.handleNtNrChange("nt"),
           "ReportTable_count-type_clicked",
           {
-            countType: "NT",
+            countType: "nt",
           }
         ),
         withAnalytics(
           () => this.handleNtNrChange("nr"),
           "ReportTable_count-type_clicked",
           {
-            countType: "NR",
+            countType: "nr",
           }
         ),
       ],
