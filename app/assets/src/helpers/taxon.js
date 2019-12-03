@@ -22,3 +22,19 @@ export const getGeneraContainingTags = taxInfoArray => {
   }
   return generaContainingTags;
 };
+
+export const getGeneraPathogenCounts = speciesCounts => {
+  const generaPathogenCounts = {};
+  Object.values(speciesCounts).forEach(speciesInfo => {
+    if (speciesInfo.pathogenTag) {
+      generaPathogenCounts[speciesInfo.genus_tax_id] =
+        generaPathogenCounts[speciesInfo.genus_tax_id] || {};
+
+      generaPathogenCounts[speciesInfo.genus_tax_id][speciesInfo.pathogenTag] =
+        (generaPathogenCounts[speciesInfo.genus_tax_id][
+          speciesInfo.pathogenTag
+        ] || 0) + 1;
+    }
+  });
+  return generaPathogenCounts;
+};

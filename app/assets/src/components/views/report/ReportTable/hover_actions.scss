@@ -24,5 +24,9 @@
     &.disabled {
       fill: $light-grey;
     }
+
+    &:not(.disabled) {
+      cursor: pointer;
+    }
   }
 }
