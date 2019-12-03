@@ -57,7 +57,7 @@
     "import-glob-loader": "^1.1.0",
     "jest": "^24.8.0",
     "lint-staged": "^9.2.5",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.0",
     "prettier": "^1.12.1",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.20.2",
