@@ -71,7 +71,7 @@ class UsersController < ApplicationController
   def destroy
     @user.destroy!
 
-    # Deletion user from Auth0
+    # Delete user from Auth0
     Auth0UserManagementHelper.delete_auth0_user(email: @user.email)
 
     respond_to do |format|
