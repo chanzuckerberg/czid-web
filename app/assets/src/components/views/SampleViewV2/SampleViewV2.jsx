@@ -837,7 +837,7 @@ export default class SampleViewV2 extends React.Component {
         }),
       },
       () => {
-        this.persistReportOptions();
+        this.updateHistoryAndPersistOptions();
       }
     );
     logAnalyticsEvent("PipelineSampleReport_clear-filters-link_clicked");
