@@ -546,23 +546,18 @@ class ProjectsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def create_new_user_random_password(name, email)
     Rails.logger.info("Going to create new user via project sharing: #{email}")
-    user_params_with_password = { email: email, name: name }
-    # "aA1!" and 'squeeze' for no repeats to always satisfy complexity policy.
-    random_password = (SecureRandom.base64(15) + "aA1!").squeeze
-    user_params_with_password[:password] = random_password
-    user_params_with_password[:password_confirmation] = random_password
-
-    @user ||= User.new(user_params_with_password)
+    user_params_with_password = { email: email, name: name, password: UsersHelper.generate_random_password }
+    @user = User.new(user_params_with_password)
 
     # New flow for account creation on Auth0.
     if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
       if @user.save!
         # Create the user with Auth0.
-        create_response = User.create_auth0_user(user_params_with_password)
+        create_response = Auth0UserManagementHelper.create_auth0_user(user_params_with_password)
         auth0_id = create_response["user_id"]
 
         # Get their password reset link so they can set a password.
-        reset_response = User.get_auth0_password_reset_token(auth0_id)
+        reset_response = Auth0UserManagementHelper.get_auth0_password_reset_token(auth0_id)
         reset_url = reset_response["ticket"]
 
         # Send them an invitation and account activation email.

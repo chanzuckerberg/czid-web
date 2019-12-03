@@ -13,8 +13,6 @@ class CreateUser extends React.Component {
     this.handleUpdate = this.handleUpdate.bind(this);
     this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
-    this.handlePasswordChange = this.handlePasswordChange.bind(this);
-    this.handlePConfirmChange = this.handlePConfirmChange.bind(this);
     this.handleInstitutionChange = this.handleInstitutionChange.bind(this);
     this.clearError = this.clearError.bind(this);
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
@@ -22,9 +20,7 @@ class CreateUser extends React.Component {
       email: this.user ? this.user.email : "",
       name: this.user ? this.user.name : "",
       institution: this.user ? this.user.institution : "",
-      password: "",
       id: this.user ? this.user.id : null,
-      password_confirmation: "",
       adminStatus: this.user ? this.user.admin : null,
     };
     this.state = {
@@ -37,8 +33,6 @@ class CreateUser extends React.Component {
       serverErrors: [],
       email: this.selectedUser.email || "",
       name: this.selectedUser.name || "",
-      password: this.selectedUser.password || "",
-      pConfirm: this.selectedUser.password_confirmation || "",
       adminstatus: this.selectedUser.adminStatus,
       id: this.selectedUser.id,
     };
@@ -75,18 +69,6 @@ class CreateUser extends React.Component {
     });
   }
 
-  handlePasswordChange(e) {
-    this.setState({
-      password: e.target.value,
-    });
-  }
-
-  handlePConfirmChange(e) {
-    this.setState({
-      pConfirm: e.target.value,
-    });
-  }
-
   handleEmailChange(e) {
     this.setState({
       email: e.target.value,
@@ -106,30 +88,12 @@ class CreateUser extends React.Component {
   }
 
   isCreateFormInvalid() {
-    if (
-      this.state.email === "" &&
-      this.state.password === "" &&
-      this.state.password_confirmation === ""
-    ) {
+    if (this.state.email === "") {
       this.setState({
         showFailed: true,
         errorMessage: "Please fill all fields",
       });
       return true;
-    } else if (this.state.password === "") {
-      this.setState({
-        showFailed: true,
-        errorMessage: "Please enter password",
-      });
-      return true;
-    } else if (this.state.password_confirmation === "") {
-      this.setState({
-        showFailed: true,
-        errorMessage: "Please re-enter password",
-      });
-      return true;
-    } else {
-      return false;
     }
   }
 
@@ -140,8 +104,6 @@ class CreateUser extends React.Component {
         errorMessage: "Please enter valid email address",
       });
       return true;
-    } else {
-      return false;
     }
   }
 
@@ -155,8 +117,6 @@ class CreateUser extends React.Component {
             name: this.state.name,
             email: this.state.email,
             institution: this.state.institution,
-            password: this.state.password,
-            password_confirmation: this.state.password_confirmation,
             role: this.state.isAdmin ? 1 : 0,
           },
         },
@@ -193,8 +153,6 @@ class CreateUser extends React.Component {
             name: this.state.name,
             email: this.state.email,
             institution: this.state.institution,
-            password: this.state.password,
-            password_confirmation: this.state.pConfirm,
             role: this.state.adminstatus ? 1 : 0,
           },
         },
@@ -313,36 +271,6 @@ class CreateUser extends React.Component {
                   value={this.state.institution}
                 />
                 <label>Institution</label>
-              </div>
-              <div className="input-field">
-                <i className="fa fa-key" aria-hidden="true" />
-                <input
-                  type="password"
-                  onChange={withAnalytics(
-                    this.handlePasswordChange,
-                    "CreateUser_password_changed"
-                  )}
-                  className=""
-                  onFocus={this.clearError}
-                  value={this.state.password}
-                />
-                <label htmlFor="user_password">Password</label>
-              </div>
-              <div className="input-field">
-                <i className="fa fa-check-circle" aria-hidden="true" />
-                <input
-                  type="password"
-                  onChange={withAnalytics(
-                    this.handlePConfirmChange,
-                    "CreateUser_pconfirm_changed"
-                  )}
-                  className=""
-                  onFocus={this.clearError}
-                  value={this.state.pConfirm}
-                />
-                <label htmlFor="user_password_confirmation">
-                  Confirm Password
-                </label>
               </div>
               <p>
                 <input
