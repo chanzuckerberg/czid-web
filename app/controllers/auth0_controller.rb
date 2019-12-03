@@ -52,7 +52,7 @@ class Auth0Controller < ApplicationController
     Rails.logger.info("Auth0 omniauth_failure: #{error_type}: #{error_code}")
 
     # Display 'unauthorized' errors but go to `failure` endpoint for all others.
-    if error_type.present? && error_type == AUTH0_UNAUTHORIZED
+    if error_type.present? && error_type == AUTH0_UNAUTHORIZED.to_sym
       description = if ERROR_EXPLANATIONS.key?(error_code)
                       ERROR_EXPLANATIONS[error_code]
                     else
