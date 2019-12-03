@@ -46,14 +46,15 @@ class Auth0Controller < ApplicationController
 
   # Handle omniauth errors coming from Auth0.
   def omniauth_failure
-    Rails.logger.info("Auth0 omniauth_failure: #{params['error']}: #{params['error_description']}")
-    error = params["error"]
+    # Error and error_description come from Auth0. Ex: unauthorized and password_expired.
+    error_code = params["error"].to_sym
+    error_type = params["error_description"].to_sym
+    Rails.logger.info("Auth0 omniauth_failure: #{error_code}: #{error_type}")
 
     # Display 'unauthorized' errors but go to `failure` endpoint for all others.
-    if error.present? && error == AUTH0_UNAUTHORIZED
-      key = params["error_description"].to_sym
-      description = if ERROR_EXPLANATIONS.key?(key)
-                      ERROR_EXPLANATIONS[key]
+    if error_code.present? && error_code == AUTH0_UNAUTHORIZED
+      description = if ERROR_EXPLANATIONS.key?(error_type)
+                      ERROR_EXPLANATIONS[error_type]
                     else
                       ERROR_EXPLANATIONS[:default]
                     end
