@@ -7,6 +7,7 @@
 
   .pipelineInfo {
     @include font-body-xxxs;
+    display: inline-block;
 
     color: $medium-grey;
     margin-top: 14px;
@@ -25,6 +26,15 @@
   .linkToPipelineViz {
     cursor: pointer;
 
+    &:hover {
+      color: $primary-light;
+    }
+  }
+
+  .legacyLink {
+    @include font-body-xxxs;
+    color: $medium-grey;
+    padding-left: 2px;
     &:hover {
       color: $primary-light;
     }
