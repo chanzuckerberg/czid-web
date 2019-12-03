@@ -18,7 +18,7 @@ class Auth0Controller < ApplicationController
   AUTH0_CONNECTION_NAME = "Username-Password-Authentication"
   AUTH0_UNAUTHORIZED = "unauthorized"
   # Whitelist descriptions to prevent phishing attempts.
-  ERROR_DESCRIPTIONS = { password_expired: "Your password has expired. Please update it by clicking Forgot Password on the sign-in page.", default: "Sorry, something went wrong when signing in. Please try again." }.freeze
+  ERROR_EXPLANATIONS = { password_expired: "Your password has expired. Please update it by clicking Forgot Password on the sign-in page.", default: "Sorry, something went wrong when signing in. Please try again." }.freeze
 
   def refresh_token
     @mode = filter_value(params["mode"], SUPPORTED_MODES)
@@ -52,10 +52,10 @@ class Auth0Controller < ApplicationController
     # Display 'unauthorized' errors but go to `failure` endpoint for all others.
     if error.present? && error == AUTH0_UNAUTHORIZED
       key = params["error_description"].to_sym
-      description = if ERROR_DESCRIPTIONS.key?(key)
-                      ERROR_DESCRIPTIONS[key]
+      description = if ERROR_EXPLANATIONS.key?(key)
+                      ERROR_EXPLANATIONS[key]
                     else
-                      ERROR_DESCRIPTIONS[:default]
+                      ERROR_EXPLANATIONS[:default]
                     end
       @message = ActionController::Base.helpers.sanitize(description)
       render :omniauth_failure
