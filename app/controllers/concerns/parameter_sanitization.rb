@@ -15,9 +15,4 @@ module ParameterSanitization
     # Allow letters, numbers, underscores, dashes, and spaces
     return title.gsub(/[^A-Za-z0-9_\- ]/, ' ').strip
   end
-
-  def sanitize_description(description)
-    # Allow letters, numbers, underscores, dashes, spaces, colons, and periods.
-    description.gsub(/[^A-Za-z0-9_\-:. ]/, ' ').strip
-  end
 end
