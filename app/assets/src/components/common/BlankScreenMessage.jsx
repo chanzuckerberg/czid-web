@@ -22,9 +22,9 @@ class BlankScreenMessage extends React.Component {
 }
 
 BlankScreenMessage.propTypes = {
-  icon: PropTypes.string,
+  icon: PropTypes.object,
   message: PropTypes.string,
-  tagline: PropTypes.string,
+  tagline: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   textWidth: PropTypes.number,
 };
 

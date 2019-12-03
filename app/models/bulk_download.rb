@@ -362,7 +362,8 @@ class BulkDownload < ApplicationRecord
             reads_nonhost_for_taxid_fasta
           )
         end
-      rescue
+      rescue => e
+        Rails.logger.error(e)
         failed_sample_ids << pipeline_run.sample.id
       end
 

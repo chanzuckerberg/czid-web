@@ -1,4 +1,5 @@
 import AlertIcon from "./AlertIcon";
+import BacteriaIcon from "./BacteriaIcon";
 import BeeIcon from "./BeeIcon";
 import CatIcon from "./CatIcon";
 import CheckmarkIcon from "./CheckmarkIcon";
@@ -41,6 +42,7 @@ import WormIcon from "./WormIcon";
 export default {
   CUSTOM: {
     AlertIcon,
+    BacteriaIcon,
     BeeIcon,
     CatIcon,
     CompareIcon,

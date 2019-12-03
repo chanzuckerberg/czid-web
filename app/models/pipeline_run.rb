@@ -357,6 +357,16 @@ class PipelineRun < ApplicationRecord
     !os.nil? && os.state == STATUS_LOADED
   end
 
+  def taxon_byte_ranges_available?
+    return !taxon_byteranges.empty?
+  end
+
+  def align_viz_available?
+    # TODO(tiago): we should not have to access aws
+    align_summary_file = "#{alignment_viz_output_s3_path}.summary"
+    return align_summary_file && get_s3_file(align_summary_file) ? true : false
+  end
+
   def report_failed?
     # The report failed if host filtering or alignment failed.
     host_filtering_status = output_states.find_by(output: "ercc_counts").state
@@ -544,16 +554,31 @@ class PipelineRun < ApplicationRecord
     taxon_lineage_map = {}
     TaxonLineage.where(taxid: taxid_list.uniq).order(:id).each { |t| taxon_lineage_map[t.taxid.to_i] = t.to_a }
 
+    # A lambda allows us to access variables in the enclosing scope, such as contig2taxid.
+    get_contig_hash = lambda do |header, sequence|
+      read_count = contig_stats_json[header] || 0
+      lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
+      species_taxid_nt = lineage_json.dig("NT", 0) || nil
+      species_taxid_nr = lineage_json.dig("NR", 0) || nil
+      genus_taxid_nt = lineage_json.dig("NT", 1) || nil
+      genus_taxid_nr = lineage_json.dig("NR", 1) || nil
+
+      {
+        name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json,
+        species_taxid_nt: species_taxid_nt, species_taxid_nr: species_taxid_nr,
+        genus_taxid_nt: genus_taxid_nt, genus_taxid_nr: genus_taxid_nr,
+      }
+    end
+
     File.open(contig_fasta, 'r') do |cf|
       line = cf.gets
       header = ''
       sequence = ''
       while line
         if line[0] == '>'
-          read_count = contig_stats_json[header] || 0
-          lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
-          if read_count >= MIN_CONTIG_SIZE && header != ''
-            contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
+          contig_hash = get_contig_hash.call(header, sequence)
+          if contig_hash[:read_count] >= MIN_CONTIG_SIZE && header != ''
+            contig_array << contig_hash
           end
           header = line[1..line.size].rstrip
           sequence = ''
@@ -562,10 +587,9 @@ class PipelineRun < ApplicationRecord
         end
         line = cf.gets
       end
-      read_count = contig_stats_json[header] || 0
-      lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
-      if read_count >= MIN_CONTIG_SIZE
-        contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
+      contig_hash = get_contig_hash.call(header, sequence)
+      if contig_hash[:read_count] >= MIN_CONTIG_SIZE
+        contig_array << contig_hash
       end
     end
     update(contigs_attributes: contig_array) unless contig_array.empty?
