@@ -16,6 +16,9 @@ class Auth0Controller < ApplicationController
   MAX_TOKEN_REFRESH_IN_SECONDS = (60.minutes / 1.second).to_i
 
   AUTH0_CONNECTION_NAME = "Username-Password-Authentication"
+  AUTH0_UNAUTHORIZED = "unauthorized"
+  # Whitelist descriptions to prevent phishing attempts.
+  ERROR_EXPLANATIONS = { password_expired: "Your password has expired. Please update it by clicking Forgot Password on the sign-in page.", default: "Sorry, something went wrong when signing in. Please try again." }.freeze
 
   def refresh_token
     @mode = filter_value(params["mode"], SUPPORTED_MODES)
@@ -39,6 +42,26 @@ class Auth0Controller < ApplicationController
 
   def failure
     logout
+  end
+
+  # Handle omniauth errors coming from Auth0.
+  def omniauth_failure
+    # Error and error_description come from Auth0. Ex: unauthorized and password_expired.
+    error_type = params["error"].to_sym
+    error_code = params["error_description"].to_sym
+    Rails.logger.info("Auth0 omniauth_failure: #{error_type}: #{error_code}")
+
+    # Display 'unauthorized' errors but go to `failure` endpoint for all others.
+    if error_type.present? && error_type == AUTH0_UNAUTHORIZED.to_sym
+      @message = if ERROR_EXPLANATIONS.key?(error_code)
+                   ERROR_EXPLANATIONS[error_code]
+                 else
+                   ERROR_EXPLANATIONS[:default]
+                 end
+      render :omniauth_failure
+    else
+      failure
+    end
   end
 
   def background_refresh
