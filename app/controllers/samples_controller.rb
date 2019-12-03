@@ -48,7 +48,7 @@ class SamplesController < ApplicationController
   before_action :check_owner, only: OWNER_ACTIONS
   before_action :check_access
   before_action only: :show_v2 do
-    allowed_feature_required("report_v2", true)
+    allowed_feature_required("report_v2")
   end
   before_action only: :amr do
     allowed_feature_required("AMR")
@@ -688,7 +688,7 @@ class SamplesController < ApplicationController
   # GET /samples/1
   # GET /samples/1.json
   def show
-    if !params[:legacy] && (current_user.admin? || current_user.allowed_feature_list.include?("report_v2"))
+    if !params[:legacy] && current_user.allowed_feature_list.include?("report_v2")
       show_v2
     else
       @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])

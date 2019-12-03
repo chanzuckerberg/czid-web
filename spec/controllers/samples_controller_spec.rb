@@ -192,10 +192,10 @@ RSpec.describe SamplesController, type: :controller do
     end
 
     describe "GET show_v2" do
-      it "can see sample report_v2" do
+      it "redirected to home page" do
         sample = create(:sample, project: @project)
         get :show_v2, params: { id: sample.id }
-        expect(response).to have_http_status :success
+        expect(response).to redirect_to(root_path)
       end
     end
   end
