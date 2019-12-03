@@ -68,7 +68,7 @@ class PipelineReportService
 
   def generate
     pipeline_run, metadata = get_pipeline_status(@pipeline_run_id)
-    if @pipeline_run_id.nil? || !pipeline_run.completed? || pipeline_run.failed?
+    if @pipeline_run_id.nil? || !pipeline_run.completed?
       return JSON.dump(
         metadata: metadata
       )
@@ -156,6 +156,9 @@ class PipelineReportService
     )
     @timer.split("fill_missing_names")
 
+    tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
+    @timer.split("tag_pathogens")
+
     structured_lineage = {}
     encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
     @timer.split("encode_taxon_lineage")
@@ -172,8 +175,11 @@ class PipelineReportService
     highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     @timer.split("find_taxa_to_highlight")
 
+    has_byte_ranges = pipeline_run.taxon_byte_ranges_available?
+    align_viz_available = pipeline_run.align_viz_available?
     report_ready = pipeline_run.report_ready?
-    @timer.split("check_report_ready")
+
+    @timer.split("compute_options_available_for_pipeline_run")
 
     if @csv
       return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
@@ -182,6 +188,8 @@ class PipelineReportService
                                 truncatedReadsCount: pipeline_run.truncated,
                                 adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
                                 subsampledReadsCount: pipeline_run.subsampled_reads,
+                                hasByteRanges: has_byte_ranges,
+                                alignVizAvailable: align_viz_available,
                                 report_ready: report_ready)
       json_dump =
         JSON.dump(
@@ -212,15 +220,16 @@ class PipelineReportService
 
     pipeline_run = PipelineRun.find(pipeline_run_id)
     pipeline_status = "WAITING"
-    if pipeline_run.failed?
-      pipeline_status = "FAILED"
-    elsif pipeline_run.completed?
+    if pipeline_run.completed?
       pipeline_status = "COMPLETE"
+    elsif pipeline_run.failed?
+      pipeline_status = "FAILED"
     end
     return [
       pipeline_run,
       {
         pipelineRunStatus: pipeline_status,
+        hasErrors: pipeline_run.failed?,
         errorMessage: pipeline_run.error_message,
         knownUserError: pipeline_run.known_user_error,
         jobStatus: pipeline_run.job_status_display,
@@ -241,7 +250,10 @@ class PipelineReportService
                                          tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
                                        )
                                        .where.not(
-                                         tax_id: [TaxonLineage::BLACKLIST_GENUS_ID, TaxonLineage::HOMO_SAPIENS_TAX_ID]
+                                         tax_id: [
+                                           TaxonLineage::BLACKLIST_GENUS_ID,
+                                           TaxonLineage::HOMO_SAPIENS_TAX_ID,
+                                         ].flatten
                                        )
     # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
 
@@ -268,11 +280,23 @@ class PipelineReportService
                                   " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
                                   " AND taxon_counts.pipeline_run_id = #{@pipeline_run_id}")
                                 .where(
-                                  "taxon_summaries.background_id": @background_id,
-                                  "taxon_counts.count": nil,
-                                  "taxon_summaries.tax_id": tax_ids,
-                                  "taxon_summaries.tax_level": [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS],
-                                  "taxon_summaries.count_type": ['NT', 'NR']
+                                  taxon_summaries: {
+                                    background_id: @background_id,
+                                    tax_id: tax_ids,
+                                    tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS],
+                                    count_type: ['NT', 'NR'],
+                                  },
+                                  taxon_counts: {
+                                    count: nil,
+                                  }
+                                )
+                                .where.not(
+                                  taxon_summaries: {
+                                    tax_id: [
+                                      TaxonLineage::BLACKLIST_GENUS_ID,
+                                      TaxonLineage::HOMO_SAPIENS_TAX_ID,
+                                    ].flatten,
+                                  }
                                 )
 
     return taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)
@@ -448,6 +472,25 @@ class PipelineReportService
       end
     end
     return highlighted_tax_ids
+  end
+
+  def tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
+    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |species_tax_id, species_info|
+      lineage = lineage_by_tax_id[species_tax_id] ? lineage_by_tax_id[species_tax_id] : lineage_by_tax_id[species_info[:genus_tax_id]]
+      name_columns = lineage.keys.select { |cn| cn.include?("_name") }
+      pathogen_tags = []
+      TaxonLineage::PRIORITY_PATHOGENS.each do |category, pathogen_list|
+        pathogen_tags |= [category] if pathogen_list.include?(species_info[:name])
+        genus_name = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS][species_info[:genus_tax_id]][:name]
+        pathogen_tags |= [category] if pathogen_list.include?(genus_name)
+        name_columns.each do |col|
+          pathogen_tags |= [category] if pathogen_list.include?(lineage[col])
+        end
+      end
+      best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
+      species_info['pathogenTag'] = best_tag
+    end
+    counts_by_tax_level
   end
 
   def report_csv(counts, sorted_genus_tax_ids)
