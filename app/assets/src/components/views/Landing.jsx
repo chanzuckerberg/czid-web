@@ -182,7 +182,7 @@ class Landing extends React.Component {
           <div className="form-title">Learn more about IDseq</div>
           {this.props.browserInfo.supported && (
             <div className="form-description">
-              Already have an account? <a href="/users/sign_in">Sign in.</a>
+              Already have an account? <a href="/auth0/login">Sign in.</a>
             </div>
           )}
         </div>
