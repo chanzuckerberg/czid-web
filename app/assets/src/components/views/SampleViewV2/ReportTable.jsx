@@ -1,28 +1,40 @@
 import React from "react";
-import PropTypes from "prop-types";
-import { getOr, map, orderBy } from "lodash/fp";
+import { compact, getOr, keys, map, orderBy } from "lodash/fp";
+import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
 import { defaultTableRowRenderer } from "react-virtualized";
-import cx from "classnames";
+import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { withAnalytics } from "~/api/analytics";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { getCsrfToken } from "~/api/utils";
+import {
+  pipelineVersionHasAssembly,
+  pipelineVersionHasCoverageViz,
+} from "~/components/utils/sample";
+import { UserContext } from "~/components/common/UserContext";
 import InsightIcon from "~ui/icons/InsightIcon";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import PathogenPreview from "~/components/views/report/PathogenPreview";
-import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
-import { REPORT_TABLE_COLUMNS } from "../report/ReportTable/constants";
+import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
+import PropTypes from "~/components/utils/propTypes";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
 
+import { REPORT_TABLE_COLUMNS } from "../report/ReportTable/constants";
+import HoverActions from "../report/ReportTable/HoverActions";
 import cs from "./report_table.scss";
 
 // Values for null values when sorting ascending and descending
 // for strings - HACK: In theory, there can be strings larger than this
 const STRING_NULL_VALUES = ["", "zzzzzzzzz"];
 const NUMBER_NULL_VALUES = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER];
+const INVALID_CALL_BASE_TAXID = -1e8;
 
 class ReportTable extends React.Component {
   constructor(props) {
     super(props);
+
+    const { pipelineVersion } = props;
 
     this.state = {
       expandAllOpened: false,
@@ -30,7 +42,8 @@ class ReportTable extends React.Component {
       dbType: this.props.initialDbType,
     };
 
-    this.columns = [
+    const assemblyEnabled = pipelineVersionHasAssembly(pipelineVersion);
+    this.columns = compact([
       {
         cellRenderer: this.renderExpandIcon,
         className: cs.expandHeader,
@@ -124,7 +137,7 @@ class ReportTable extends React.Component {
           }),
         width: 75,
       },
-      {
+      assemblyEnabled && {
         cellDataGetter: ({ rowData }) =>
           this.getNtNrFromDataRow(rowData, "contigCount", 0),
         cellRenderer: this.renderNtNrDecimalValues,
@@ -141,7 +154,7 @@ class ReportTable extends React.Component {
           }),
         width: 75,
       },
-      {
+      assemblyEnabled && {
         cellDataGetter: ({ rowData }) =>
           this.getNtNrFromDataRow(rowData, "readsCount", 0),
         cellRenderer: this.renderNtNrDecimalValues,
@@ -219,7 +232,7 @@ class ReportTable extends React.Component {
         headerRenderer: this.renderNtNrSelector,
         width: 40,
       },
-    ];
+    ]);
   }
 
   renderAggregateScore = ({ cellData, rowData }) => {
@@ -254,10 +267,15 @@ class ReportTable extends React.Component {
                 {`(${rowData.filteredSpecies.length} species)`}
               </span>
             ))}
-          {rowData.pathogens && (
-            <PathogenPreview tag2Count={rowData.pathogens} />
-          )}
-          {rowData.pathogenTag && <PathogenLabel type={rowData.pathogenTag} />}
+          <span>
+            {rowData.pathogens && (
+              <PathogenPreview tag2Count={rowData.pathogens} />
+            )}
+            {rowData.pathogenTag && (
+              <PathogenLabel type={rowData.pathogenTag} />
+            )}
+          </span>
+          <span>{this.renderHoverActions({ rowData })}</span>
         </div>
       )
     );
@@ -343,6 +361,137 @@ class ReportTable extends React.Component {
           {cellData ? cellData[1] : "-"}
         </div>
       </div>
+    );
+  };
+
+  // Hover actions
+  // TODO(tiago): consider moving the action inside HoverActions
+  linkToNCBI = ({ taxId }) => {
+    let num = parseInt(taxId);
+    if (num < -1e8) {
+      num = -num % -1e8;
+    }
+    num = num.toString();
+    const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${num}`;
+    window.open(ncbiLink, "hide_referrer");
+  };
+
+  downloadFastaUrl = ({ taxLevel, taxId }) => {
+    const { pipelineVersion, sampleId } = this.props;
+    location.href = `/samples/${sampleId}/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
+  };
+
+  downloadContigUrl = ({ taxId }) => {
+    const { pipelineVersion, sampleId } = this.props;
+    location.href = `/samples/${sampleId}/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
+  };
+
+  handleCoverageVizClick = ({
+    taxId,
+    taxLevel,
+    taxName,
+    taxCommonName,
+    taxSpecies,
+  }) => {
+    const { onCoverageVizClick, pipelineVersion, sampleId } = this.props;
+    const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
+
+    if (pipelineVersionHasCoverageViz(pipelineVersion)) {
+      onCoverageVizClick({
+        taxId,
+        taxName,
+        taxCommonName,
+        taxLevel,
+        alignmentVizUrl,
+        taxSpecies,
+      });
+    } else {
+      window.open(alignmentVizUrl);
+    }
+  };
+
+  handlePhyloTreeModalOpen = phyloTreeModalParams => {
+    this.setState({
+      phyloTreeModalParams,
+    });
+  };
+
+  handlePhyloTreeModalClose = () => {
+    this.setState({
+      phyloTreeModalParams: null,
+    });
+  };
+
+  renderHoverActions = ({ rowData }) => {
+    const {
+      alignVizAvailable,
+      fastaDownloadEnabled,
+      phyloTreeAllowed,
+      pipelineVersion,
+      projectId,
+      sampleId,
+    } = this.props;
+
+    const validTaxId =
+      rowData.taxId < INVALID_CALL_BASE_TAXID || rowData.taxId > 0;
+    const contigVizEnabled = !!keys(getOr({}, "nt.contigs", rowData)).length;
+    const coverageVizEnabled =
+      alignVizAvailable && validTaxId && getOr(0, "nt.count", rowData) > 0;
+    const phyloTreeEnabled =
+      phyloTreeAllowed &&
+      rowData.taxId > 0 &&
+      PhyloTreeChecks.passesCreateCondition(
+        getOr(0, "nt.count", rowData),
+        getOr(0, "nr.count", rowData)
+      );
+
+    const analyticsContext = {
+      projectId: projectId,
+      sampleId: sampleId,
+      taxId: rowData.taxId,
+      taxLevel: rowData.taxLevel,
+      taxName: rowData.name,
+    };
+    return (
+      <HoverActions
+        className={cs.hoverActions}
+        taxId={rowData.taxId}
+        taxLevel={rowData.taxLevel === "species" ? 1 : 0}
+        taxName={rowData.name}
+        taxCommonName={rowData.common_name}
+        taxSpecies={rowData.species}
+        ncbiEnabled={validTaxId}
+        onNcbiActionClick={withAnalytics(
+          this.linkToNCBI,
+          "PipelineSampleReport_ncbi-link_clicked",
+          analyticsContext
+        )}
+        fastaEnabled={fastaDownloadEnabled}
+        onFastaActionClick={withAnalytics(
+          this.downloadFastaUrl,
+          "PipelineSampleReport_taxon-fasta-link_clicked",
+          analyticsContext
+        )}
+        coverageVizEnabled={coverageVizEnabled}
+        onCoverageVizClick={withAnalytics(
+          this.handleCoverageVizClick,
+          "PipelineSampleReport_coverage-viz-link_clicked",
+          analyticsContext
+        )}
+        contigVizEnabled={contigVizEnabled}
+        onContigVizClick={withAnalytics(
+          this.downloadContigUrl,
+          "PipelineSampleReport_contig-download-link_clicked",
+          analyticsContext
+        )}
+        phyloTreeEnabled={phyloTreeEnabled}
+        onPhyloTreeModalOpened={withAnalytics(
+          this.handlePhyloTreeModalOpen,
+          "PipelineSampleReport_phylotree-link_clicked",
+          analyticsContext
+        )}
+        pipelineVersion={pipelineVersion}
+      />
     );
   };
 
@@ -469,19 +618,37 @@ class ReportTable extends React.Component {
   };
 
   render = () => {
-    const { rowHeight } = this.props;
+    const { projectId, projectName, rowHeight } = this.props;
+    const { phyloTreeModalParams } = this.state;
     return (
-      <Table
-        cellClassName={cs.cell}
-        columns={this.columns}
-        data={this.getTableRows()}
-        defaultRowHeight={rowHeight}
-        headerClassName={cs.header}
-        rowClassName={cs.row}
-        rowRenderer={this.rowRenderer}
-        sortable={true}
-        sortedHeaderClassName={cs.sortedHeader}
-      />
+      <React.Fragment>
+        <Table
+          cellClassName={cs.cell}
+          columns={this.columns}
+          data={this.getTableRows()}
+          defaultRowHeight={rowHeight}
+          headerClassName={cs.header}
+          rowClassName={cs.row}
+          rowRenderer={this.rowRenderer}
+          sortable={true}
+          sortedHeaderClassName={cs.sortedHeader}
+        />
+        {phyloTreeModalParams && (
+          <UserContext.Consumer>
+            {currentUser => (
+              <PhyloTreeCreationModal
+                admin={currentUser.admin ? 1 : 0}
+                csrf={getCsrfToken()}
+                taxonId={phyloTreeModalParams.taxId}
+                taxonName={phyloTreeModalParams.taxName}
+                projectId={projectId}
+                projectName={projectName}
+                onClose={this.handlePhyloTreeModalClose}
+              />
+            )}
+          </UserContext.Consumer>
+        )}
+      </React.Fragment>
     );
   };
 }
@@ -497,6 +664,17 @@ ReportTable.propTypes = {
   initialDbType: PropTypes.oneOf(["nt", "nr"]),
   onTaxonNameClick: PropTypes.func,
   rowHeight: PropTypes.number,
+
+  // Needed only for hover actions
+  // Consider adding a callback to that render the hover actions
+  alignVizAvailable: PropTypes.bool.isRequired,
+  fastaDownloadEnabled: PropTypes.bool.isRequired,
+  onCoverageVizClick: PropTypes.func.isRequired,
+  phyloTreeAllowed: PropTypes.bool.isRequired,
+  pipelineVersion: PropTypes.string,
+  projectId: PropTypes.number,
+  projectName: PropTypes.string,
+  sampleId: PropTypes.number,
 };
 
 export default ReportTable;
