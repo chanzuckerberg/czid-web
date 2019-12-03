@@ -107,7 +107,8 @@ export default class SampleViewV2 extends React.Component {
     logAnalyticsEvent("PipelineSampleReport_sample_viewed", {
       sampleId: this.props.sampleId,
     });
-    // DEPRECATED: kept for continuity
+    // DEPRECATED: kept temporarily for continuity
+    // TODO (written 12/2/19): remove after v2 of the report page has been active for 3 months.
     logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleViewed, {
       sampleId: this.props.sampleId,
     });
