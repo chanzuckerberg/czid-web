@@ -85,27 +85,11 @@ export default class TidyTree {
   }
 
   setTree(nodes) {
-    console.log("nodes", nodes);
     let stratifier = stratify()
       .id(node => node.id)
       .parentId(node => node.parentId);
 
-    // const a = nodes.filter(node => node.id === "_" || node.parentId === "_");
-    // a.forEach(node => {
-    //   if (node.parentId === a[0].id) {
-    //     console.log("vvv HERE vvv");
-    //     console.log("vvv HERE vvv");
-    //     console.log("vvv HERE vvv");
-    //   }
-    //   console.log(`id=${node.id}   parent=${node.parentId}`);
-    //   if (node.parentId === a[0].id) {
-    //     console.log("^^^ HERE ^^^");
-    //     console.log("^^^ HERE ^^^");
-    //     console.log("^^^ HERE ^^^");
-    //   }
-    // })
     this.root = stratifier(nodes);
-    console.log(this.root);
     this.options.onCreatedTree && this.options.onCreatedTree(this.root);
     this.sortAndScaleTree();
 
@@ -135,11 +119,6 @@ export default class TidyTree {
         a.data.values[this.options.attribute]
     );
 
-    console.log(
-      "computing range",
-      this.root,
-      this.root.data.values[this.options.attribute]
-    );
     this.range = [
       Math.min(
         ...this.root.leaves().map(l => l.data.values[this.options.attribute])
@@ -233,7 +212,7 @@ export default class TidyTree {
 
     if (updatedNode.children) {
       updatedNode.children.forEach(child => {
-        this.expandCollapsedWithFewChildren(child);
+        this.expandCollapsedWithFewChildrenOrNoName(child);
       });
     }
     this.update(
@@ -246,16 +225,19 @@ export default class TidyTree {
       this.options.onCollapsedStateChange(node);
   }
 
-  expandCollapsedWithFewChildren(node) {
+  expandCollapsedWithFewChildrenOrNoName(node) {
+    if (!node) return;
+
     if (
-      node.collapsedChildren &&
-      node.collapsedChildren.length <= this.options.minNonCollapsableChildren
+      !(node.data || {}).name ||
+      (node.collapsedChildren &&
+        node.collapsedChildren.length <= this.options.minNonCollapsableChildren)
     ) {
       node.children = (node.children || []).concat(node.collapsedChildren);
       node.collapsedChildren = null;
 
       node.children.forEach(child => {
-        this.expandCollapsedWithFewChildren(child);
+        this.expandCollapsedWithFewChildrenOrNoName(child);
       });
     }
   }
@@ -369,8 +351,6 @@ export default class TidyTree {
       .attr("height", height + this.margins.top + this.margins.bottom);
 
     d3Tree().size([height, width])(this.root);
-    console.log("attribute", this.options.attribute);
-    console.log("range", this.range);
 
     source = source || this.root;
 
@@ -511,16 +491,13 @@ export default class TidyTree {
         d => (this.hasVisibleChildren(d) ? "baseline" : "middle")
       )
       .style("font-size", d => fontScale(d.data.values[this.options.attribute]))
-      .attr("dy", d => {
-        // console.log({
-        //   d,
-        //   attribute: this.options.attribute,
-        //   v: d.data.values[this.options.attribute],
-        //   sc: nodeScale(d.data.values[this.options.attribute])});
-        return this.hasVisibleChildren(d)
-          ? -4 - 1.3 * nodeScale(d.data.values[this.options.attribute])
-          : 0;
-      })
+      .attr(
+        "dy",
+        d =>
+          this.hasVisibleChildren(d)
+            ? -4 - 1.3 * nodeScale(d.data.values[this.options.attribute])
+            : 0
+      )
       .attr(
         "x",
         d =>
@@ -546,7 +523,13 @@ export default class TidyTree {
 
     nodeUpdate
       .select("circle")
-      .attr("r", d => nodeScale(d.data.values[this.options.attribute]));
+      .attr(
+        "r",
+        d =>
+          d.data.scientificName || this.hasChildren(d) || d.isAggregated
+            ? nodeScale(d.data.values[this.options.attribute])
+            : 0
+      );
 
     nodeUpdate.select("path.cross").attr("d", d => {
       let r = nodeScale(d.data.values[this.options.attribute]) * 0.9;

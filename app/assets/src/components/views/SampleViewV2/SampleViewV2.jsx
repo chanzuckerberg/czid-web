@@ -48,13 +48,13 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
-import TaxonTreeVis from "~/components/views/TaxonTreeVis";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 
 import { TREE_METRICS } from "./constants";
 import ReportViewSelector from "./ReportViewSelector";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
+import TaxonTreeVis from "./TaxonTreeVis";
 import cs from "./sample_view_v2.scss";
 
 const mapValuesWithKey = mapValues.convert({ cap: false });
@@ -106,7 +106,6 @@ export default class SampleViewV2 extends React.Component {
       localState,
       urlState
     );
-    console.log(this.state);
   }
 
   componentDidMount = () => {
@@ -476,13 +475,6 @@ export default class SampleViewV2 extends React.Component {
     if (urlQuery) {
       urlQuery = `?${urlQuery}`;
     }
-    console.log({
-      urlState,
-      localState,
-      URL_FIELDS,
-      state: this.state,
-      urlQuery,
-    });
     history.replaceState(urlState, `SampleView`, `${urlQuery}`);
 
     localStorage.setItem("SampleViewOptions", JSON.stringify(localState));
@@ -490,9 +482,7 @@ export default class SampleViewV2 extends React.Component {
 
   handleOptionChanged = ({ key, value }) => {
     const { selectedOptions } = this.state;
-    console.log("option changed", key, value);
     if (deepEqual(selectedOptions[key], value)) {
-      console.log("returned", selectedOptions[key], value);
       return;
     }
 
@@ -933,7 +923,6 @@ export default class SampleViewV2 extends React.Component {
   };
 
   handleViewClick = ({ view }) => {
-    console.log("view changed?", view);
     this.setState({ view }, () => {
       this.updateHistoryAndPersistOptions();
     });
@@ -983,31 +972,29 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
           </div>
-          <div className={cs.reportTable}>
-            <ReportTable
-              alignVizAvailable={
-                !!(reportMetadata && reportMetadata.alignVizAvailable)
-              }
-              data={filteredReportData}
-              onCoverageVizClick={this.handleCoverageVizClick}
-              onTaxonNameClick={this.handleTaxonClick}
-              fastaDownloadEnabled={
-                !!(reportMetadata && reportMetadata.hasByteRanges)
-              }
-              phyloTreeAllowed={sample ? sample.editable : false}
-              pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
-              projectId={project && project.id}
-              projectName={project && project.name}
-              sampleId={sample && sample.id}
-            />
-          </div>
+          {view == "table" && (
+            <div className={cs.reportTable}>
+              <ReportTable
+                alignVizAvailable={
+                  !!(reportMetadata && reportMetadata.alignVizAvailable)
+                }
+                data={filteredReportData}
+                onCoverageVizClick={this.handleCoverageVizClick}
+                onTaxonNameClick={this.handleTaxonClick}
+                fastaDownloadEnabled={
+                  !!(reportMetadata && reportMetadata.hasByteRanges)
+                }
+                phyloTreeAllowed={sample ? sample.editable : false}
+                pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
+                projectId={project && project.id}
+                projectName={project && project.name}
+                sampleId={sample && sample.id}
+              />
+            </div>
+          )}
           {view == "tree" && (
             <div>
               <TaxonTreeVis
-                backgroundData={find(
-                  { id: selectedOptions.background },
-                  backgrounds
-                )}
                 lineage={lineageData}
                 metric={selectedOptions.metric}
                 nameType={selectedOptions.nameType}

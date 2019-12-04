@@ -2,21 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { get, getOr, map } from "lodash/fp";
+import PathogenLabel from "~/components/ui/labels/PathogenLabel";
+import TidyTree from "~/components/visualizations/TidyTree";
 
-import TidyTree from "../visualizations/TidyTree";
-import PathogenLabel from "../ui/labels/PathogenLabel";
-import { getTaxonName } from "../../helpers/taxon";
+const mapWithKeys = map.convert({ cap: false });
 
-const TaxonLevels = [
-  "species",
-  "genus",
-  "family",
-  "order",
-  "class",
-  "phylum",
-  "kingdom",
-  "superkingdom",
-];
 class TaxonTreeVis extends React.Component {
   constructor(props) {
     super(props);
@@ -27,7 +18,7 @@ class TaxonTreeVis extends React.Component {
     };
 
     this.nameType = this.props.nameType;
-    this.metric = this.props.metric || "aggregatescore";
+    this.metric = this.props.metric;
     this.taxa = this.props.taxa;
 
     this.tree = null;
@@ -43,31 +34,23 @@ class TaxonTreeVis extends React.Component {
       nr_r: { label: "NR r", agg: arr => arr.reduce((a, b) => a + b, 0) },
       nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
     };
-
-    this.handleNodeHover = this.handleNodeHover.bind(this);
-    this.handleNodeLabelClick = this.handleNodeLabelClick.bind(this);
-    this.fillNodeValues = this.fillNodeValues.bind(this);
-    this.renderTooltip = this.renderTooltip.bind(this);
   }
 
   componentDidMount() {
-    this.treeVis = new TidyTree(
-      this.treeContainer,
-      this.createTree(this.taxa),
-      {
-        attribute: this.metric,
-        useCommonName: this.isCommonNameActive(),
-        onNodeHover: this.handleNodeHover,
-        onNodeLabelClick: this.handleNodeLabelClick,
-        onCreatedTree: this.fillNodeValues,
-        tooltipContainer: this.treeTooltip,
-        onCollapsedStateChange: withAnalytics(
-          this.persistCollapsedInUrl,
-          "TaxonTreeVis_node-collapsed-state_changed"
-        ),
-        collapsed: this.getCollapsedInUrl() || new Set(),
-      }
-    );
+    const tree = this.createTree(this.taxa);
+    this.treeVis = new TidyTree(this.treeContainer, tree, {
+      attribute: this.metric,
+      useCommonName: this.isCommonNameActive(),
+      onNodeHover: this.handleNodeHover,
+      onNodeLabelClick: this.handleNodeLabelClick,
+      onCreatedTree: this.fillNodeValues,
+      tooltipContainer: this.treeTooltip,
+      onCollapsedStateChange: withAnalytics(
+        this.persistCollapsedInUrl,
+        "TaxonTreeVis_node-collapsed-state_changed"
+      ),
+      collapsed: this.getCollapsedInUrl() || new Set(),
+    });
     this.treeVis.update();
   }
 
@@ -82,7 +65,6 @@ class TaxonTreeVis extends React.Component {
       } else {
         href.searchParams.delete(node.id);
       }
-      // TODO (gdingle): make back button load previous vis state
       history.replaceState(window.history.state, document.title, href);
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -90,7 +72,7 @@ class TaxonTreeVis extends React.Component {
     }
   }
 
-  getCollapsedInUrl() {
+  getCollapsedInUrl = () => {
     try {
       const href = new URL(window.location.href);
       const collapsed = [];
@@ -104,7 +86,7 @@ class TaxonTreeVis extends React.Component {
       // eslint-disable-next-line no-console
       console.error(e);
     }
-  }
+  };
 
   componentDidUpdate() {
     let options = {};
@@ -128,58 +110,35 @@ class TaxonTreeVis extends React.Component {
     }
   }
 
-  handleNodeHover(node) {
+  handleNodeHover = node => {
     this.setState({ nodeHover: node });
     logAnalyticsEvent("TaxonTreeVis_node_hovered", {
       id: node.id,
       scientificName: node.data.scientificName,
       commonName: node.data.commonName,
     });
-  }
+  };
 
-  handleNodeLabelClick(node) {
-    if (!node.data.modalData) {
-      // TODO (gdingle): we should show a "no description" instead of no-op
-      this.props.onTaxonClick(null);
-      return;
+  handleNodeLabelClick = node => {
+    const { onTaxonClick } = this.props;
+    if (["genus", "species"].includes(node.data.lineageRank)) {
+      onTaxonClick(node.data);
     }
-
-    const { taxInfo } = node.data.modalData;
-    const taxonName = getTaxonName(
-      taxInfo["name"],
-      taxInfo["common_name"],
-      this.props.nameType
-    );
-    // Pass config for taxon details sidebar.
-    this.props.onTaxonClick({
-      background: this.props.backgroundData,
-      parentTaxonId: taxInfo.tax_level === 1 ? taxInfo.genus_taxid : undefined,
-      taxonId: taxInfo.tax_id,
-      taxonName,
-      taxonValues: {
-        NT: taxInfo.NT,
-        NR: taxInfo.NR,
-      },
-    });
     logAnalyticsEvent("TaxonTreeVis_node-label_clicked", {
-      taxonId: taxInfo.tax_id,
-      taxonName,
-      taxLevel: taxInfo.tax_level,
+      taxonId: node.data.taxId,
+      taxonName: node.data.name,
+      taxLevel: node.data.lineageRank,
     });
-  }
+  };
 
-  getParentTaxId(taxon) {
-    let originalTaxId = taxon.lineage[`${TaxonLevels[taxon.tax_level]}_taxid`];
-    return originalTaxId > 0
-      ? originalTaxId
-      : `_${TaxonLevels[taxon.tax_level]}`;
-  }
-
-  isCommonNameActive() {
+  isCommonNameActive = () => {
     return this.nameType.toLowerCase() == "common name";
-  }
+  };
 
-  fillNodeValues(root) {
+  fillNodeValues = root => {
+    // this function computes the aggregated metric values
+    // for higher levels of the tree (than species and genus)
+
     // cleaning up spurious nodes without children with data
     root.leaves().forEach(leaf => {
       if (!leaf.children && !leaf.data.values) {
@@ -198,11 +157,8 @@ class TaxonTreeVis extends React.Component {
       }
     });
 
-    let topTaxaIds = new Set(
-      this.props.topTaxa.map(taxon => taxon.tax_id.toString())
-    );
     root.eachAfter(node => {
-      if (topTaxaIds.has(node.id)) {
+      if (node.data.highlight) {
         node.data.highlight = true;
         node.ancestors().forEach(ancestor => {
           ancestor.data.highlight = true;
@@ -223,66 +179,80 @@ class TaxonTreeVis extends React.Component {
         }
       }
     });
-  }
+  };
 
-  createTree(taxa) {
-    // this function assumes that genus are always seen first
-    let nodes = [{ id: "_" }];
+  createTree = () => {
+    const { taxa, lineage } = this.props;
+    const ROOT_ID = "_";
+    const nodes = [{ id: ROOT_ID }];
+    const addedNodesIds = new Set();
 
-    let seenNodes = new Set();
-    taxa.forEach(taxon => {
-      let parentId = nodes[0].id;
-      for (let i = TaxonLevels.length - 1; i >= taxon.tax_level; i--) {
-        let taxId = taxon.lineage[`${TaxonLevels[i]}_taxid`];
-        let nodeId = taxId > 0 ? taxId : `${parentId}_${taxId}`;
-        if (!seenNodes.has(nodeId)) {
-          nodes.push({
-            id: nodeId,
-            taxId: taxId,
-            parentId: parentId,
-            scientificName:
-              taxon.lineage[`${TaxonLevels[i]}_name`] ||
-              `Uncategorized ${this.capitalize(TaxonLevels[i])}`,
-            lineageRank: TaxonLevels[i],
-          });
-          seenNodes.add(nodeId);
-        }
-        parentId = nodeId;
-      }
-
-      let nodeId =
-        taxon.tax_id > 0 ? taxon.tax_id : `${parentId}_${taxon.tax_id}`;
-      nodes.push({
-        id: nodeId,
-        taxId: taxon.tax_id,
-        commonName: this.capitalize(taxon.common_name),
-        scientificName:
-          taxon.tax_id > 0
-            ? taxon.name
-            : `Uncategorized ${this.capitalize(
-                TaxonLevels[taxon.tax_level - 1]
-              )}`,
-        lineageRank: TaxonLevels[taxon.tax_level - 1],
-        parentId: parentId,
+    const formatAndAddNode = ({ nodeData, parentId, fixedId }) => {
+      const formattedNode = {
+        id: `${fixedId || nodeData.taxId}`,
+        taxId: nodeData.taxId,
+        parentId: `${parentId}`,
+        name: nodeData.name,
+        scientificName: nodeData.name,
+        lineageRank: nodeData.taxLevel,
+        commonName: nodeData.common_name,
+        highlight: nodeData.highlighted,
         values: {
-          aggregatescore: taxon.NT.aggregatescore,
-          nt_r: taxon.NT.r,
-          nt_rpm: parseFloat(taxon.NT.rpm),
-          nt_zscore: taxon.NT.zscore,
-          nr_r: taxon.NR.r,
-          nr_rpm: parseFloat(taxon.NR.rpm),
-          nr_zscore: taxon.NR.zscore,
+          aggregatescore: nodeData.agg_score,
+          nt_r: get("nt.count", nodeData) || 0,
+          nt_rpm: get("nt.rpm", nodeData) || 0,
+          nt_zscore: get("nt.z_score", nodeData) || 0,
+          nr_r: get("nr.count", nodeData) || 0,
+          nr_rpm: get("nr.rpm", nodeData) || 0,
+          nr_zscore: get("nr.z_score", nodeData) || 0,
         },
-        modalData: {
-          taxInfo: taxon,
-        },
-      });
-      seenNodes.add(nodeId);
-    });
-    return nodes;
-  }
+      };
+      addedNodesIds.add(formattedNode.id);
+      nodes.push(formattedNode);
+    };
 
-  renderTooltip() {
+    taxa.forEach(genusData => {
+      // loading the genus id from the species lineage handles
+      // cases where genus id is negative
+      let genusIdFromLineage = null;
+      genusData.filteredSpecies.forEach(speciesData => {
+        const speciesLineage = lineage[speciesData.taxId] || {};
+        if (
+          !genusIdFromLineage &&
+          getOr(genusData.taxId, "parent", speciesLineage) != genusData.taxId
+        ) {
+          genusIdFromLineage = speciesLineage.parent;
+        }
+        formatAndAddNode({
+          nodeData: speciesData,
+          parentId: speciesLineage.parent || genusData.taxId || ROOT_ID,
+        });
+      });
+
+      const genusLineage =
+        lineage[genusData.taxId] || lineage[genusIdFromLineage] || {};
+      formatAndAddNode({
+        nodeData: genusData,
+        parentId: genusLineage.parent || ROOT_ID,
+        fixedId: genusIdFromLineage,
+      });
+    });
+    // add remaining lineage nodes (above genus or negative genus)
+    mapWithKeys((nodeLineage, taxId) => {
+      if (!addedNodesIds.has(taxId)) {
+        nodes.push({
+          id: `${taxId}`,
+          taxId: parseInt(taxId),
+          parentId: `${nodeLineage.parent || ROOT_ID}`,
+          scientificName: nodeLineage.name,
+          lineageRank: nodeLineage.rank,
+        });
+      }
+    }, lineage);
+    return nodes;
+  };
+
+  renderTooltip = () => {
     let node = this.state.nodeHover;
     if (!node) {
       return null;
@@ -326,23 +296,40 @@ class TaxonTreeVis extends React.Component {
         </div>
       </div>
     );
-  }
+  };
 
   capitalize(str) {
     if (!str) return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
-
-  renderPathogenLabels() {
-    return this.taxa.filter(taxon => taxon.pathogenTag).map(taxon => (
+  renderPathogenLabel = (taxId, tagType) => {
+    return (
       <div
-        className={`node-overlay node-overlay__${taxon.tax_id}`}
-        key={`label-${taxon.tax_id}`}
+        className={`node-overlay node-overlay__${taxId}`}
+        key={`label-${taxId}`}
       >
-        <PathogenLabel type={taxon.pathogenTag} />
+        <PathogenLabel type={tagType} />
       </div>
-    ));
-  }
+    );
+  };
+
+  renderPathogenLabels = () => {
+    const { taxa } = this.props;
+    const labels = [];
+    taxa.forEach(genusData => {
+      if (genusData.pathogenTag)
+        labels.push(
+          this.renderPathogenLabel(genusData.taxId, genusData.pathogenTag)
+        );
+      genusData.filteredSpecies.forEach(speciesData => {
+        if (speciesData.pathogenTag)
+          labels.push(
+            this.renderPathogenLabel(speciesData.taxId, speciesData.pathogenTag)
+          );
+      });
+    });
+    return labels;
+  };
 
   render() {
     return (
@@ -368,15 +355,16 @@ class TaxonTreeVis extends React.Component {
   }
 }
 
+TaxonTreeVis.defaultProps = {
+  useReportV2Format: false,
+};
+
 TaxonTreeVis.propTypes = {
+  // hash of lineage parental realtionships per taxid
+  lineage: PropTypes.object,
   metric: PropTypes.string,
   nameType: PropTypes.string,
   taxa: PropTypes.array,
-  topTaxa: PropTypes.array,
-  backgroundData: PropTypes.shape({
-    id: PropTypes.number,
-    name: PropTypes.string,
-  }),
   onTaxonClick: PropTypes.func.isRequired,
 };
 
