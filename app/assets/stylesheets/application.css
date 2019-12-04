@@ -2,5 +2,5 @@
 // should contain idseq-written CSS and the second file should contain CSS from
 // node_modules.
 
-//= require bundle.min
-//= require 1.bundle.min
+//= require main.bundle.min.css
+//= require vendors~main.bundle.min.css
