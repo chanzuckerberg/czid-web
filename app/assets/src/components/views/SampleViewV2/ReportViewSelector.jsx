@@ -2,8 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Menu, Icon, Popup } from "semantic-ui-react";
 
-import cs from "./report_view_selector.scss";
-
 const ReportViewSelector = ({ view, onViewClick }) => {
   return (
     <Menu icon floated="right" className={cs.tableTreeSelector}>
