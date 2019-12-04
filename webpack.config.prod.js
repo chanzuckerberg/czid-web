@@ -19,7 +19,9 @@ module.exports = merge(commonConfig, {
     minimizer: [
       new UglifyJsPlugin({
         uglifyOptions: {
-          mangle: false,
+          mangle: true,
+          // We need this option for rails react_component.
+          keep_fnames: true,
         },
         parallel: true,
         sourceMap: true,
