@@ -8,7 +8,7 @@ const config = {
   entry: `${path.resolve(__dirname, "app/assets/src/")}/index.jsx`,
   output: {
     path: path.resolve(__dirname, "app/assets/"),
-    filename: "dist/bundle.min.js",
+    filename: "dist/[name].bundle.min.js",
   },
   resolve: {
     extensions: [".js", ".jsx"],
@@ -21,7 +21,7 @@ const config = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: "dist/bundle.min.css",
+      filename: "dist/[name].bundle.min.css",
     }),
   ],
   devtool: "source-map",

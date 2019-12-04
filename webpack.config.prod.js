@@ -6,14 +6,24 @@ module.exports = merge(commonConfig, {
   devtool: "source-map",
   mode: "production",
   optimization: {
+    splitChunks: {
+      cacheGroups: {
+        default: false, // disable default cache group
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          chunks: "all",
+          enforce: true, // always create a chunk
+        },
+      },
+    },
     minimizer: [
       new UglifyJsPlugin({
         uglifyOptions: {
-          mangle: false
+          mangle: false,
         },
         parallel: true,
-        sourceMap: true
-      })
-    ]
-  }
+        sourceMap: true,
+      }),
+    ],
+  },
 });
