@@ -4,7 +4,6 @@
       react_component('Header', {
         adminUser: <%= current_user.admin %>,
         email: "help@idseq.net",
-        demoUser: <%= current_user.demo_user? %>,
         signInEndpoint: '<%=new_user_session_path%>',
         signOutEndpoint: '<%=destroy_user_session_path%>',
         userName: '<%= current_user.name %>',
