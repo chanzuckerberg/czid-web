@@ -30,7 +30,6 @@ Rails.application.configure do
 
   # Don't add an asset compressor here because we already minimize with webpack.
   # Check out webpack.config.prod.js.
-
   config.assets.debug = true
   # Suppress logger output for asset requests.
   config.assets.quiet = true

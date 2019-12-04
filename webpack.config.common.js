@@ -1,5 +1,6 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 // modules that are not compatible with IE11
 const includedNodeModules = ["query-string", "strict-uri-encode"];
@@ -8,7 +9,7 @@ const config = {
   entry: `${path.resolve(__dirname, "app/assets/src/")}/index.jsx`,
   output: {
     path: path.resolve(__dirname, "app/assets/"),
-    filename: "dist/bundle.min.js",
+    filename: "dist/[name].bundle.min.js",
   },
   resolve: {
     extensions: [".js", ".jsx"],
@@ -21,7 +22,7 @@ const config = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: "dist/bundle.min.css",
+      filename: "dist/[name].bundle.min.css",
     }),
   ],
   devtool: "source-map",
@@ -120,6 +121,29 @@ const config = {
           },
         },
       },
+    ],
+  },
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        default: false, // disable default cache group
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          chunks: "all",
+          enforce: true, // always create a chunk
+        },
+      },
+    },
+    minimizer: [
+      new UglifyJsPlugin({
+        uglifyOptions: {
+          mangle: true,
+          // We need this option for rails react_component.
+          keep_fnames: true,
+        },
+        parallel: true,
+        sourceMap: true,
+      }),
     ],
   },
 };
