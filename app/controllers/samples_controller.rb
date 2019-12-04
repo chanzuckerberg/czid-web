@@ -1378,9 +1378,9 @@ class SamplesController < ApplicationController
 
     # User should not be querying for unviewable samples.
     if samples.length != sample_ids.length
-      LogUtil.log_err_and_airbrake("Get taxa with reads error: Unauthorized access of samples")
+      LogUtil.log_err_and_airbrake("Get taxa with contigs error: Unauthorized access of samples")
       render json: {
-        error: "There was an error fetching the taxa with reads for samples.",
+        error: "There was an error fetching the taxa with contigs for samples.",
       }, status: :unauthorized
       return
     end

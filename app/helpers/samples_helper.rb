@@ -631,14 +631,10 @@ module SamplesHelper
       taxon_list.select { |taxon| taxon["level"] == level }.map { |taxon| taxon["taxid"] }
     end
 
-    # Separate genus and species taxids. We query them separately to try to get some extra performance.
-    species_tax_ids = get_tax_ids_by_level.call("species")
-    genus_tax_ids = get_tax_ids_by_level.call("genus")
-
-    pipeline_run_ids = get_succeeded_pipeline_runs_for_samples(samples).pluck(:id)
-
-    # We maintain a hash of taxid => array of pipeline run ids. We de-dupe the pipeline run ids at the very end.
-    pipeline_runs_by_taxid = Hash.new { |h, k| h[k] = [] } # Keys are auto-initialized to the empty array.
+    species_tax_ids = nil
+    genus_tax_ids = nil
+    pipeline_run_ids = nil
+    pipeline_runs_by_taxid = nil
 
     process_tax_ids = lambda do |level, type|
       tax_id_field = "#{level}_taxid_#{type}"
@@ -654,6 +650,15 @@ module SamplesHelper
         .select("DISTINCT pipeline_run_id, #{tax_id_field}")
         .each { |contig| pipeline_runs_by_taxid[contig[tax_id_field]] << contig.pipeline_run_id }
     end
+
+    # Separate genus and species taxids. We query them separately to try to get some extra performance.
+    species_tax_ids = get_tax_ids_by_level.call("species")
+    genus_tax_ids = get_tax_ids_by_level.call("genus")
+
+    pipeline_run_ids = get_succeeded_pipeline_runs_for_samples(samples).pluck(:id)
+
+    # We maintain a hash of taxid => array of pipeline run ids. We de-dupe the pipeline run ids at the very end.
+    pipeline_runs_by_taxid = Hash.new { |h, k| h[k] = [] } # Keys are auto-initialized to the empty array.
 
     process_tax_ids.call("species", "nr")
     process_tax_ids.call("species", "nt")
