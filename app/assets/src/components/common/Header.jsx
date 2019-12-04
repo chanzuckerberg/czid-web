@@ -139,7 +139,6 @@ Header.contextType = UserContext;
 
 const UserMenuDropDown = ({
   adminUser,
-  demoUser,
   email,
   signInEndpoint,
   signOutEndpoint,
@@ -148,7 +147,7 @@ const UserMenuDropDown = ({
 }) => {
   const signOut = () => postToUrlWithCSRF(signOutEndpoint);
 
-  const renderItems = (adminUser, demoUser) => {
+  const renderItems = adminUser => {
     let userDropdownItems = [];
     adminUser &&
       userDropdownItems.push(
@@ -260,7 +259,7 @@ const UserMenuDropDown = ({
       <BareDropdown
         trigger={<div className={cs.userName}>{userName}</div>}
         className={cs.userDropdown}
-        items={renderItems(adminUser, demoUser)}
+        items={renderItems(adminUser)}
         direction="left"
       />
     </div>
@@ -268,7 +267,6 @@ const UserMenuDropDown = ({
 };
 
 UserMenuDropDown.propTypes = forbidExtraProps({
-  demoUser: PropTypes.bool,
   adminUser: PropTypes.bool,
   email: PropTypes.string.isRequired,
   signInEndpoint: PropTypes.string.isRequired,
