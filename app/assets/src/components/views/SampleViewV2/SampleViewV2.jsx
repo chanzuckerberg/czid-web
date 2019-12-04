@@ -32,7 +32,11 @@ import {
 import { getAmrData } from "~/api/amr";
 import { UserContext } from "~/components/common/UserContext";
 import { AMR_TABLE_FEATURE } from "~/components/utils/features";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  logAnalyticsEvent,
+  withAnalytics,
+  ANALYTICS_EVENT_NAMES,
+} from "~/api/analytics";
 import {
   pipelineVersionHasCoverageViz,
   sampleErrorInfo,
@@ -112,6 +116,15 @@ export default class SampleViewV2 extends React.Component {
     this.fetchSample();
     this.fetchBackgrounds();
     this.fetchSampleReportData();
+
+    logAnalyticsEvent("PipelineSampleReport_sample_viewed", {
+      sampleId: this.props.sampleId,
+    });
+    // DEPRECATED: kept temporarily for continuity
+    // TODO (written 12/2/19): remove after v2 of the report page has been active for 3 months.
+    logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleViewed, {
+      sampleId: this.props.sampleId,
+    });
   };
 
   componentDidUpdate() {
@@ -980,7 +993,10 @@ export default class SampleViewV2 extends React.Component {
                 }
                 data={filteredReportData}
                 onCoverageVizClick={this.handleCoverageVizClick}
-                onTaxonNameClick={this.handleTaxonClick}
+                onTaxonNameClick={withAnalytics(
+                  this.handleTaxonClick,
+                  "PipelineSampleReport_taxon-sidebar-link_clicked"
+                )}
                 fastaDownloadEnabled={
                   !!(reportMetadata && reportMetadata.hasByteRanges)
                 }
