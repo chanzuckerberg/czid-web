@@ -8,9 +8,11 @@ module.exports = merge(commonConfig, {
   optimization: {
     splitChunks: {
       cacheGroups: {
+        default: false, // disable default cache group
         vendors: {
           test: /[\\/]node_modules[\\/]/,
           chunks: "all",
+          enforce: true, // always create a chunk
         },
       },
     },
