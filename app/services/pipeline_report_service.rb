@@ -475,23 +475,20 @@ class PipelineReportService
   end
 
   def tag_pathogens(counts_by_tax_level)
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |_species_tax_id, species_info|
-      pathogen_tags = []
-      TaxonLineage::PRIORITY_PATHOGENS.each do |category, pathogen_list|
-        pathogen_tags |= [category] if pathogen_list.include?(species_info[:name])
-      end
-      best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
-      species_info['pathogenTag'] = best_tag
-    end
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].each do |_genus_tax_id, genus_info|
-      pathogen_tags = []
-      TaxonLineage::PRIORITY_PATHOGENS.each do |category, pathogen_list|
-        pathogen_tags |= [category] if pathogen_list.include?(genus_info[:name])
-      end
-      best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
-      genus_info['pathogenTag'] = best_tag
-    end
+    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES])
+    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS])
     counts_by_tax_level
+  end
+
+  def get_best_pathogen_tag(tax_map)
+    tax_map.each do |_tax_id, tax_info|
+      pathogen_tags = []
+      TaxonLineage::PRIORITY_PATHOGENS.each do |category, pathogen_list|
+        pathogen_tags |= [category] if pathogen_list.include?(tax_info[:name])
+      end
+      best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
+      tax_info['pathogenTag'] = best_tag
+    end
   end
 
   def report_csv(counts, sorted_genus_tax_ids)
