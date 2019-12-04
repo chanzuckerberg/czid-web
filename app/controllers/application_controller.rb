@@ -79,11 +79,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def no_demo_user
-    login_required
-    redirect_to root_path if current_user.demo_user?
-  end
-
   # Rails method for adding to logging
   def append_info_to_payload(payload)
     super

@@ -5,7 +5,7 @@ class PhyloTreesController < ApplicationController
   include ElasticsearchHelper
   include ParameterSanitization
 
-  before_action :no_demo_user, only: :create
+  before_action :login_required, only: :create
 
   ########################################
   # Current logic for phylo_tree permissions:

@@ -101,7 +101,7 @@ module ReportsHelper
 
   def self.fake_genus(tax_id, tax_info)
     fake_genus_info = tax_info.clone
-    fake_genus_info[:name] = "Ad hoc bucket for #{tax_info[:name].downcase}"
+    fake_genus_info[:name] = tax_info[:name] ? "Ad hoc bucket for #{tax_info[:name].downcase}" : "Ad hoc bucket for #{tax_id}"
     fake_genus_id = FAKE_GENUS_BASE - tax_id
     fake_genus_info[:genus_tax_id] = fake_genus_id
     fake_genus_info[:tax_level] = TaxonCount::TAX_LEVEL_GENUS

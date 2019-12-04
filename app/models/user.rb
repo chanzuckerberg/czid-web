@@ -34,7 +34,6 @@ class User < ApplicationRecord
   }
   attr_accessor :email_arguments
   ROLE_ADMIN = 1
-  DEMO_USER_EMAILS = ['idseq.guest@chanzuckerberg.com'].freeze
   IDSEQ_BUCKET_PREFIXES = ['idseq-'].freeze
   CZBIOHUB_BUCKET_PREFIXES = ['czb-', 'czbiohub-'].freeze
 
@@ -76,11 +75,6 @@ class User < ApplicationRecord
     if parsed_allowed_features.include?(feature)
       update(allowed_features: parsed_allowed_features - [feature])
     end
-  end
-
-  # This method is for tracking purposes only, not security.
-  def demo_user?
-    DEMO_USER_EMAILS.include?(email)
   end
 
   def can_upload(s3_path)
@@ -145,7 +139,6 @@ class User < ApplicationRecord
       institution: institution,
       # Derived fields
       admin: admin?,
-      demo_user: demo_user?,
       biohub_user: biohub_user?,
       czi_user: czi_user?,
       # Counts (should be cached in the users table for perf)
