@@ -35,6 +35,7 @@ class CreateUser extends React.Component {
       name: this.selectedUser.name || "",
       adminstatus: this.selectedUser.adminStatus,
       id: this.selectedUser.id,
+      sendWelcomeEmail: true,
     };
   }
 
@@ -205,6 +206,7 @@ class CreateUser extends React.Component {
   }
 
   renderUserForm(submitFunc, funcName) {
+    const { sendWelcomeEmail } = this.state;
     return (
       <div className="user-form">
         <div className="row">
@@ -285,6 +287,19 @@ class CreateUser extends React.Component {
                   value={this.state.isAdmin}
                 />
                 <label htmlFor="admin">Admin</label>
+              </p>
+              <p>
+                <input
+                  type="checkbox"
+                  id="welcome"
+                  className="filled-in"
+                  checked={sendWelcomeEmail ? "checked" : ""}
+                  onChange={withAnalytics(() => {
+                    this.setState({ sendWelcomeEmail: !sendWelcomeEmail });
+                  }, "CreateUser_send-welcome_changed")}
+                  value={sendWelcomeEmail}
+                />
+                <label htmlFor="welcome">Send welcome email</label>
               </p>
             </div>
             <input className="hidden" type="submit" />
