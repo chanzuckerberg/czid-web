@@ -96,4 +96,78 @@ RSpec.describe SamplesHelper, type: :helper do
       end
     end
   end
+
+  describe "#augment_taxon_list_with_sample_count_contigs" do
+    let(:taxon_list) do
+      [
+        {
+          "title" => "Taxon 1",
+          "description" => "Description for Taxon 1",
+          "taxid" => 1,
+          "level" => "species",
+        },
+        {
+          "title" => "Taxon 2",
+          "description" => "Description for Taxon 2",
+          "taxid" => 2,
+          "level" => "species",
+        },
+        {
+          "title" => "Taxon 3",
+          "description" => "Description for Taxon 3",
+          "taxid" => 101,
+          "level" => "genus",
+        },
+        {
+          "title" => "Taxon 4",
+          "description" => "Description for Taxon 4",
+          "taxid" => 102,
+          "level" => "genus",
+        },
+      ]
+    end
+
+    before do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe])
+      @sample_one = create(:sample, project: @project, name: "Test Sample One",
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+      @sample_two = create(:sample, project: @project, name: "Test Sample Two",
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+      @sample_three = create(:sample, project: @project, name: "Test Sample Three",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+
+      # A taxid can either by genus or species level, but not both.
+      create(:contig, pipeline_run_id: @sample_one.first_pipeline_run.id, species_taxid_nt: 1, species_taxid_nr: 2, genus_taxid_nt: 101, genus_taxid_nr: 101)
+      create(:contig, pipeline_run_id: @sample_two.first_pipeline_run.id, species_taxid_nt: 1, species_taxid_nr: 1, genus_taxid_nt: 102, genus_taxid_nr: 103)
+      create(:contig, pipeline_run_id: @sample_three.first_pipeline_run.id, species_taxid_nt: 2, species_taxid_nr: 1, genus_taxid_nt: 101, genus_taxid_nr: 101)
+      create(:contig, pipeline_run_id: @sample_three.first_pipeline_run.id, species_taxid_nt: 2, species_taxid_nr: 3, genus_taxid_nt: 102, genus_taxid_nr: 104)
+    end
+
+    it "returns correct counts in the basic case" do
+      response = helper.augment_taxon_list_with_sample_count_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id]))
+
+      expect(response[0]["taxid"]).to be 1
+      expect(response[0]["sample_count_contigs"]).to be 3
+      expect(response[1]["taxid"]).to be 2
+      expect(response[1]["sample_count_contigs"]).to be 2
+      expect(response[2]["taxid"]).to be 101
+      expect(response[2]["sample_count_contigs"]).to be 2
+      expect(response[3]["taxid"]).to be 102
+      expect(response[3]["sample_count_contigs"]).to be 2
+    end
+
+    it "doesn't count samples that weren't passed in" do
+      response = helper.augment_taxon_list_with_sample_count_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id]))
+
+      expect(response[0]["taxid"]).to be 1
+      expect(response[0]["sample_count_contigs"]).to be 2
+      expect(response[1]["taxid"]).to be 2
+      expect(response[1]["sample_count_contigs"]).to be 1
+      expect(response[2]["taxid"]).to be 101
+      expect(response[2]["sample_count_contigs"]).to be 1
+      expect(response[3]["taxid"]).to be 102
+      expect(response[3]["sample_count_contigs"]).to be 1
+    end
+  end
 end

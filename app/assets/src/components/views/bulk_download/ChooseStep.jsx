@@ -26,6 +26,7 @@ import {
 } from "~/api";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
+import TaxonContigSelect from "./TaxonContigSelect";
 import cs from "./choose_step.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
@@ -101,7 +102,7 @@ class ChooseStep extends React.Component {
     return requiredFields;
   };
 
-  isDownloadValid = () => {
+  isSelectedDownloadValid = () => {
     const { selectedFields } = this.props;
 
     const downloadType = this.getSelectedDownloadType();
@@ -258,6 +259,24 @@ class ChooseStep extends React.Component {
           </div>
         );
         break;
+      case "taxa_with_contigs":
+        return (
+          <div className={cs.field} key={field.type}>
+            <div className={cs.label}>{field.display_name}:</div>
+            <TaxonContigSelect
+              sampleIds={selectedSampleIds}
+              onChange={(value, displayName) => {
+                onFieldSelect(
+                  downloadType.type,
+                  field.type,
+                  value,
+                  displayName
+                );
+              }}
+              value={selectedField}
+            />
+          </div>
+        );
       case "background":
         dropdownOptions = backgroundOptions || [];
         placeholder = backgroundOptions ? "Select background" : "Loading...";
@@ -405,7 +424,7 @@ class ChooseStep extends React.Component {
         </div>
         <div className={cs.footer}>
           <PrimaryButton
-            disabled={!this.isDownloadValid()}
+            disabled={!this.isSelectedDownloadValid()}
             text="Continue"
             onClick={onContinue}
           />
