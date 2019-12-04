@@ -1,5 +1,4 @@
 const merge = require("webpack-merge");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const commonConfig = require("./webpack.config.common.js");
 
 module.exports = merge(commonConfig, {
