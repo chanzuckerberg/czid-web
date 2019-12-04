@@ -81,8 +81,15 @@ export default class SampleViewV2 extends React.Component {
     super(props);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);
-    const urlState = this.urlParser.parse(location.search);
-    const localState = this.loadState(localStorage, "SampleViewOptions");
+    // remove nested options to be merge separately
+    const {
+      selectedOptions: selectedOptionsFromUrl,
+      ...nonNestedUrlState
+    } = this.urlParser.parse(location.search);
+    const {
+      selectedOptions: selectedOptionsFromLocal,
+      ...nonNestedLocalState
+    } = this.loadState(localStorage, "SampleViewOptions");
 
     this.state = Object.assign(
       {
@@ -105,10 +112,14 @@ export default class SampleViewV2 extends React.Component {
         sidebarVisible: false,
         sidebarTaxonData: null,
         view: "table",
-        selectedOptions: this.defaultSelectedOptions(),
+        selectedOptions: Object.assign(
+          this.defaultSelectedOptions(),
+          selectedOptionsFromLocal,
+          selectedOptionsFromUrl
+        ),
       },
-      localState,
-      urlState
+      nonNestedLocalState,
+      nonNestedUrlState
     );
   }
 

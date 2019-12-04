@@ -4,7 +4,7 @@ import { Menu, Icon, Popup } from "semantic-ui-react";
 
 const ReportViewSelector = ({ view, onViewClick }) => {
   return (
-    <Menu icon floated="right" className={cs.tableTreeSelector}>
+    <Menu icon floated="right">
       <Popup
         trigger={
           <Menu.Item
