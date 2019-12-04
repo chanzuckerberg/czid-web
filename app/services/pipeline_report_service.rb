@@ -496,7 +496,9 @@ class PipelineReportService
         end
       end
       best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
-      species_info['pathogenTag'] = best_tag
+      if best_tag
+        species_info['pathogenTag'] = best_tag
+      end
     end
     counts_by_tax_level
   end

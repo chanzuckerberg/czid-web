@@ -12,7 +12,7 @@ const ReportViewSelector = ({ view, onViewClick }) => {
           <Menu.Item
             name="table"
             active={view === "table"}
-            onClick={() => onViewClick({ view: "tree" })}
+            onClick={() => onViewClick({ view: "table" })}
           >
             <Icon name="table" />
           </Menu.Item>

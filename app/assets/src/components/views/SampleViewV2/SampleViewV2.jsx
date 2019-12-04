@@ -935,7 +935,7 @@ export default class SampleViewV2 extends React.Component {
   handleViewClick = ({ view }) => {
     console.log("view changed?", view);
     this.setState({ view }, () => {
-      this.persistReportOptions();
+      this.updateHistoryAndPersistOptions();
     });
   };
 

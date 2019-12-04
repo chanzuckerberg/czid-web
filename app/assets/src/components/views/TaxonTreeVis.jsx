@@ -300,7 +300,7 @@ class TaxonTreeVis extends React.Component {
       taxId: nodeData.taxId,
       parentId: parentId,
       scientificName: nodeData.name,
-      lineageRank: "genus",
+      lineageRank: nodeData.taxLevel,
       commonName: nodeData.common_name,
       highlight: nodeData.highlighted,
       values: {
@@ -325,6 +325,9 @@ class TaxonTreeVis extends React.Component {
 
       genusData.filteredSpecies.forEach(speciesData => {
         const speciesLineage = lineage[genusData.taxId] || {};
+        if (speciesData.name === "Hubei mosquito virus 2") {
+          console.log(speciesData.name, speciesData);
+        }
         nodes.push(
           formatNode({
             nodeData: speciesData,
@@ -403,6 +406,7 @@ class TaxonTreeVis extends React.Component {
   }
 
   renderPathogenLabels() {
+    console.log("rendering pathogens", this.taxa);
     return this.taxa.filter(taxon => taxon.pathogenTag).map(taxon => (
       <div
         className={`node-overlay node-overlay__${taxon.tax_id}`}
@@ -422,7 +426,9 @@ class TaxonTreeVis extends React.Component {
             this.treeContainer = container;
           }}
         >
-          <div className="pathogen-labels">{this.renderPathogenLabels()}</div>
+          {this.tree && (
+            <div className="pathogen-labels">{this.renderPathogenLabels()}</div>
+          )}
         </div>
         <div
           className="taxon-tree-vis__tooltip"
