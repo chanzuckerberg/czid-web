@@ -41,9 +41,12 @@ module BulkDownloadTypesHelper
       category: "report",
       fields: [
         {
-          display_name: "File Format",
-          type: "file_format",
-          options: [".csv", ".biom"],
+          display_name: "Metric",
+          type: "metric",
+        },
+        {
+          display_name: "Background",
+          type: "background",
         },
       ],
       execution_type: RESQUE_EXECUTION_TYPE,

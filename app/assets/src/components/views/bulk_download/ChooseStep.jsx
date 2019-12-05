@@ -9,7 +9,6 @@ import {
   map,
   isUndefined,
   orderBy,
-  isNumber,
   reject,
 } from "lodash/fp";
 import cx from "classnames";
@@ -23,6 +22,7 @@ import {
   getBackgrounds,
   getTaxaWithReadsSuggestions,
   uploadedByCurrentUser,
+  getHeatmapMetrics,
 } from "~/api";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
@@ -30,12 +30,32 @@ import TaxonContigSelect from "./TaxonContigSelect";
 import cs from "./choose_step.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
-// Reads non-host download type has some special cases.
-const READS_NON_HOST_DOWNLOAD_TYPE = "reads_non_host";
+
+// Stores information about conditional fields for bulk downloads.
+const CONDITIONAL_FIELDS = [
+  // Note: This first field is referenced directly in renderOption, as
+  // it needs to display a placeholder component. Be careful when modifying.
+  {
+    field: "file_format",
+    // The download type this conditional field applies to.
+    downloadType: "reads_non_host",
+    // The field this conditional field depends on.
+    dependentField: "taxa_with_reads",
+    // The values of the dependent field that trigger the conditional field.
+    triggerValues: ["all", undefined],
+  },
+  {
+    field: "background",
+    downloadType: "combined_sample_taxon_results",
+    dependentField: "metric",
+    triggerValues: ["NR.zscore", "NT.zscore"],
+  },
+];
 
 class ChooseStep extends React.Component {
   state = {
     backgroundOptions: null,
+    metricsOptions: null,
     taxaWithReadsOptions: null,
     isLoadingTaxaWithReadsOptionsOptions: false,
     allSamplesUploadedByCurrentUser: false,
@@ -45,6 +65,7 @@ class ChooseStep extends React.Component {
 
   componentDidMount() {
     this.fetchBackgrounds();
+    this.fetchHeatmapMetrics();
     this.checkAllSamplesUploadedByCurrentUser();
   }
 
@@ -59,6 +80,15 @@ class ChooseStep extends React.Component {
 
     this.setState({
       backgroundOptions,
+    });
+  }
+
+  // We use the heatmap metrics as the valid metrics for bulk downloads.
+  async fetchHeatmapMetrics() {
+    const heatmapMetrics = await getHeatmapMetrics();
+
+    this.setState({
+      metricsOptions: heatmapMetrics,
     });
   }
 
@@ -91,13 +121,17 @@ class ChooseStep extends React.Component {
 
     let requiredFields = downloadType.fields;
 
-    // Don't require file_format field if a single taxa is selected for reads non-host download type.
-    if (
-      downloadType.type === READS_NON_HOST_DOWNLOAD_TYPE &&
-      isNumber(get([downloadType.type, "taxa_with_reads"], selectedFields))
-    ) {
-      requiredFields = reject(["type", "file_format"], requiredFields);
-    }
+    // Remove any conditional fields if they don't meet the criteria.
+    CONDITIONAL_FIELDS.forEach(field => {
+      if (
+        downloadType.type === field.downloadType &&
+        !field.triggerValues.includes(
+          get([downloadType.type, field.dependentField], selectedFields)
+        )
+      ) {
+        requiredFields = reject(["type", field.field], requiredFields);
+      }
+    });
 
     return requiredFields;
   };
@@ -187,6 +221,7 @@ class ChooseStep extends React.Component {
       backgroundOptions,
       taxaWithReadsOptions,
       isLoadingTaxaWithReadsOptionsOptions,
+      metricsOptions,
     } = this.state;
 
     const selectedField = get([downloadType.type, field.type], selectedFields);
@@ -201,23 +236,54 @@ class ChooseStep extends React.Component {
     let showNoResultsMessage = false;
     let isLoadingSearchOptions = false;
 
+    // Handle rendering conditional fields.
+
+    // For the file format field, render a placeholder. This is a special case.
+    const fileFormatConditionalField = CONDITIONAL_FIELDS[0];
+    if (
+      field.type === fileFormatConditionalField.field &&
+      downloadType.type === fileFormatConditionalField.downloadType &&
+      !fileFormatConditionalField.triggerValues.includes(
+        get(
+          [downloadType.type, fileFormatConditionalField.dependentField],
+          selectedFields
+        )
+      )
+    ) {
+      return (
+        <div className={cs.field} key={field.type}>
+          <div className={cs.label}>{field.display_name}:</div>
+          <div className={cs.forcedOption}>.fasta</div>
+          <div className={cs.info}>
+            Note: Only .fasta is available when selecting one taxon.
+          </div>
+        </div>
+      );
+      // For other conditional fields, render nothing.
+    } else {
+      let abortRenderOption = false;
+
+      CONDITIONAL_FIELDS.forEach(conditionalField => {
+        if (
+          field.type === conditionalField.field &&
+          downloadType.type === conditionalField.downloadType &&
+          !conditionalField.triggerValues.includes(
+            get(
+              [downloadType.type, conditionalField.dependentField],
+              selectedFields
+            )
+          )
+        ) {
+          abortRenderOption = true;
+        }
+      });
+
+      if (abortRenderOption) return;
+    }
+
     // Set different props for the dropdown depending on the field type.
     switch (field.type) {
       case "file_format":
-        if (
-          downloadType.type === READS_NON_HOST_DOWNLOAD_TYPE &&
-          isNumber(get([downloadType.type, "taxa_with_reads"], selectedFields))
-        ) {
-          return (
-            <div className={cs.field} key={field.type}>
-              <div className={cs.label}>{field.display_name}:</div>
-              <div className={cs.forcedOption}>.fasta</div>
-              <div className={cs.info}>
-                Note: Only .fasta is available when selecting one taxon.
-              </div>
-            </div>
-          );
-        }
         dropdownOptions = field.options.map(option => ({
           text: option,
           value: option,
@@ -281,6 +347,10 @@ class ChooseStep extends React.Component {
         dropdownOptions = backgroundOptions || [];
         placeholder = backgroundOptions ? "Select background" : "Loading...";
         break;
+      case "metric":
+        dropdownOptions = metricsOptions || [];
+        placeholder = metricsOptions ? "Select metric" : "Loading...";
+        break;
     }
 
     if (!dropdownOptions) {
@@ -298,19 +368,21 @@ class ChooseStep extends React.Component {
           onChange={(value, displayName) => {
             onFieldSelect(downloadType.type, field.type, value, displayName);
 
-            // If the user has selected a single taxa, reset the file format field.
-            if (
-              downloadType.type === READS_NON_HOST_DOWNLOAD_TYPE &&
-              field.type === "taxa_with_reads" &&
-              isNumber(value)
-            ) {
-              onFieldSelect(
-                READS_NON_HOST_DOWNLOAD_TYPE,
-                "file_format",
-                undefined,
-                undefined
-              );
-            }
+            // Reset conditional fields if they are no longer needed.
+            CONDITIONAL_FIELDS.forEach(conditionalField => {
+              if (
+                field.type === conditionalField.dependentField &&
+                downloadType.type === conditionalField.downloadType &&
+                !conditionalField.triggerValues.includes(value)
+              ) {
+                onFieldSelect(
+                  downloadType.type,
+                  conditionalField.field,
+                  undefined,
+                  undefined
+                );
+              }
+            });
           }}
           value={selectedField}
           optionsHeader={optionsHeader}

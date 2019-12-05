@@ -387,6 +387,8 @@ const uploadedByCurrentUser = async sampleIds => {
   return response.uploaded_by_current_user;
 };
 
+const getHeatmapMetrics = () => get("/visualizations/heatmap_metrics.json");
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -399,6 +401,7 @@ export {
   getContigsSequencesByByteranges,
   getCoverageVizData,
   getCoverageVizSummary,
+  getHeatmapMetrics,
   getPhyloTree,
   getProject,
   getProjectDimensions,

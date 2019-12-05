@@ -56,4 +56,82 @@ module BulkDownloadsHelper
     end
     formatted_bulk_download
   end
+
+  # This method models HeatmapHelper.sample_taxons_dict when fetching metrics. It uses the necessary logic from that function.
+  def self.generate_combined_sample_taxon_results_csv(samples, background_id, metric)
+    # First, fetch all the data.
+
+    # By default, fetches top 1,000,000 taxons for each sample.
+    results_by_pr = HeatmapHelper.fetch_top_taxons(
+      samples,
+      background_id,
+      nil, # categories
+      HeatmapHelper::READ_SPECIFICITY,
+      HeatmapHelper::INCLUDE_PHAGE,
+      HeatmapHelper::DEFAULT_NUM_RESULTS,
+      0 # minimum read threshold
+    )
+
+    metric_values = {}
+    # metric is a string like NT.rpm. Convert it to ["NT", "rpm"]
+    metric_path = metric.split(".")
+
+    # Maintain a hash of all the taxons we've founded, so that we can generate the csv rows.
+    all_fetched_taxids_to_name = {}
+
+    # Build up the metric_value matrix.
+    results_by_pr.each do |_pr_id, results|
+      # results contains taxon counts, plus the pipeline run object and sample id.
+      results_taxon_counts = results["taxon_counts"]
+      sample_id = results["sample_id"]
+
+      # Importantly, remove any homo sapiens counts.
+      taxid_to_taxon_counts = ReportHelper.taxon_counts_cleanup(results_taxon_counts)
+      # Only consider species level counts.
+      HeatmapHelper.only_species_level_counts!(taxid_to_taxon_counts)
+
+      sample_metric_values = {}
+
+      taxid_to_taxon_counts.each do |taxid, taxon_counts|
+        metric_value = taxon_counts.dig(*metric_path)
+
+        # Don't include 0 values for reads or rPM metrics.
+        # Include ALL values for zscore metrics for now, because it's less clear what to omit,
+        # since zscore can be nonzero even if the corresponding read count was zero.
+        if metric_value > 0 || metric == "NT.zscore" || metric == "NR.zscore"
+          sample_metric_values[taxid] = metric_value
+          all_fetched_taxids_to_name[taxid] = taxon_counts["name"]
+        end
+      end
+
+      metric_values[sample_id] = sample_metric_values
+    end
+
+    # Filter out any samples which could not be fetched or had no valid columns.
+    successful_samples, failed_samples = samples.to_a.partition { |sample| metric_values[sample.id].present? }
+
+    # Generate the CSV.
+    csv_str = CSVSafe.generate(headers: true) do |csv|
+      # Add the headers.
+      csv << ["Taxon Name"] + successful_samples.pluck(:name)
+
+      # Add the rows.
+      all_fetched_taxids_to_name.each do |taxid, taxon_name|
+        row = []
+        row << taxon_name
+
+        successful_samples.each do |sample|
+          # Default to empty string for taxa that weren't found.
+          row << metric_values[sample.id][taxid] || nil
+        end
+
+        csv << row
+      end
+    end
+
+    {
+      csv_str: csv_str,
+      failed_sample_ids: failed_samples.pluck(:id),
+    }
+  end
 end
