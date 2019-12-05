@@ -35,4 +35,13 @@ class UserMailer < ApplicationMailer
       subject: "You have been invited to IDseq"
     )
   end
+
+  # See: app/views/user_mailer/account_activation.html.erb.
+  def account_activation(new_user_email, reset_password_url)
+    @reset_password_url = reset_password_url
+    mail(
+      to: new_user_email,
+      subject: "You have been invited to IDseq"
+    )
+  end
 end

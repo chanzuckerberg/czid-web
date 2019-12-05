@@ -20,18 +20,24 @@ class UsersController < ApplicationController
   def create
     random_password = UsersHelper.generate_random_password
     new_user_params = user_params.to_h.symbolize_keys.merge(password: random_password)
+    send_activation = new_user_params.delete(:send_activation)
     new_user(new_user_params)
 
     respond_to do |format|
       if @user.save
-        # Send event to Datadog (DEPRECATED) and Segment
-        # TODO: Remove Datadog once Segment pipeline is set up
-        MetricUtil.put_metric_now("users.created", 1, ["user_id:#{@user.id}"])
-
         # Create the user with Auth0.
-        Auth0UserManagementHelper.create_auth0_user(new_user_params.slice(:email, :name, :password))
+        create_response = Auth0UserManagementHelper.create_auth0_user(new_user_params.slice(:email, :name, :password))
 
-        # TODO: IDSEQ-1769 - Improve new user flow by sending an "Activate your account" email
+        if send_activation
+          # Get their password reset link so they can set a password.
+          auth0_id = create_response["user_id"]
+          reset_response = Auth0UserManagementHelper.get_auth0_password_reset_token(auth0_id)
+          reset_url = reset_response["ticket"]
+
+          # Send them an invitation and account activation email.
+          email = new_user_params[:email]
+          UserMailer.account_activation(email, reset_url).deliver_now
+        end
 
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
         format.json { render :show, status: :created, location: root_path }
@@ -93,6 +99,6 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.require(:user).permit(:role, :email, :institution, :name, project_ids: [])
+    params.require(:user).permit(:role, :email, :institution, :name, :send_activation, project_ids: [])
   end
 end
