@@ -84,6 +84,14 @@ module ReportHelper
     path + "?" + kvs.to_param
   end
 
+  def self.instrumented_report_info_json(pipeline_run, background_id)
+    @timer = Timer.new("report_info")
+    report_info = ReportHelper.report_info_json(pipeline_run, background_id)
+    @timer.split("last")
+    @timer.publish
+    return report_info
+  end
+
   # This was originally the report_info action but it was too slow, more than
   # 10s for some samples, so we wrapped it in a cache layer.
   def self.report_info_json(pipeline_run, background_id)
@@ -94,6 +102,7 @@ module ReportHelper
     if pipeline_run && (((pipeline_run.adjusted_remaining_reads.to_i > 0 || pipeline_run.finalized?) && !pipeline_run.failed?) || pipeline_run.report_ready?)
       pipeline_run_id = pipeline_run.id
     end
+    @timer.split("adjust_background")
 
     report_info = ReportHelper.external_report_info(
       pipeline_run_id,
@@ -101,16 +110,22 @@ module ReportHelper
       TaxonScoringModel::DEFAULT_MODEL_NAME,
       ReportHelper::DEFAULT_SORT_PARAM
     )
+    @timer.split("end_external_call")
 
     # Fill lineage details into report info.
     # report_info[:taxonomy_details][2] is the array of taxon rows (which are hashes with keys like tax_id, name, NT, etc)
     report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(report_info[:taxonomy_details][2], pipeline_run_id)
+    @timer.split("fill_lineage_details")
 
     # Label top-scoring hits for the executive summary
     report_info[:topScoringTaxa] = ReportHelper.label_top_scoring_taxa!(report_info[:taxonomy_details][2])
+    @timer.split("label_top_scorers")
     report_info[:contig_taxid_list] = pipeline_run.get_taxid_list_with_contigs
+    @timer.split("contigs")
 
-    JSON.dump(report_info)
+    json = JSON.dump(report_info)
+    @timer.split("dump_json")
+    json
   end
 
   def self.label_top_scoring_taxa!(tax_map)
@@ -164,8 +179,10 @@ module ReportHelper
       data[:background_info][:name] = bg.name
       data[:background_info][:id] = bg.id
     end
+    @timer.split("loaded_bg")
 
     data[:taxonomy_details] = ReportHelper.taxonomy_details(pipeline_run_id, background_id, scoring_model, sort_by)
+    @timer.split("end_taxonomy_details")
     data
   end
 
@@ -739,35 +756,43 @@ module ReportHelper
     # Fetch and clean data.
     t0 = wall_clock_ms
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
+    @timer.split("fetch_taxon_counts")
+
     tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
     cleanup_missing_genus_counts!(tax_2d)
-
+    @timer.split("taxon_counts_cleanup")
     t1 = wall_clock_ms
 
     # These counts are shown in the UI on each genus line.
     count_species_per_genus!(tax_2d)
+    @timer.split("count_species_per_genus")
 
     # Generate lineage info.
     unfiltered_ids = []
     tax_2d.each do |tid, _|
       unfiltered_ids << tid if tid > 0
     end
+    @timer.split("reformating")
 
     # Remove family level rows because the reports only display species/genus
     remove_family_level_counts!(tax_2d)
+    @timer.split("remove_family_level_counts")
 
     # Add tax_info into output rows.
     rows = []
     tax_2d.each do |_tax_id, tax_info|
       rows << tax_info
     end
+    @timer.split("add_taxon_info")
 
     # Compute all species aggregate scores.  These are used in filtering.
     compute_species_aggregate_scores!(rows, tax_2d, scoring_model)
+    @timer.split("compute_species_aggregate_scores")
     t2 = wall_clock_ms
 
     # Compute all genus aggregate scores.  These are used only in sorting.
     compute_genera_aggregate_scores!(rows, tax_2d)
+    @timer.split("compute_genera_aggregate_scores")
     t3 = wall_clock_ms
 
     # Total number of rows for view level, before application of filters.
@@ -782,6 +807,7 @@ module ReportHelper
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
     end
     rows.sort_by! { |tax_info| tax_info[:sort_key] }
+    @timer.split("sort")
 
     # Delete fields that are unused in the UI.
     rows.each do |tax_info|
@@ -789,6 +815,7 @@ module ReportHelper
         tax_info.delete(unused_field)
       end
     end
+    @timer.split("delete_some_fields")
 
     t5 = wall_clock_ms
     Rails.logger.info "Data processing took #{(t5 - t1).round(2)}s (#{(t5 - t0).round(2)}s with I/O)."
