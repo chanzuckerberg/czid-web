@@ -46,7 +46,7 @@ class PipelineRun < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
 
   DAG_ANNOTATED_FASTA_BASENAME = 'taxid_annot.fasta'.freeze
-  DAG_ANNOTATED_COUNT_BASENAME = 'annotated_out.count'.freeze
+  DAG_ANNOTATED_COUNT_BASENAME = 'refined_annotated_out.count'.freeze
   DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
@@ -1088,7 +1088,7 @@ class PipelineRun < ApplicationRecord
   # only fetched from alignment.
   def fetch_unmapped_reads(
     all_counts,
-    s3_path = "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_COUNT_BASENAME}"
+    s3_path = "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_COUNT_BASENAME}"
   )
     unmapped_reads = nil
     unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
