@@ -968,7 +968,7 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
     public_suffix (3.0.3)
-    puma (3.12.0)
+    puma (3.12.2)
     quantile (0.2.1)
     raabro (1.1.6)
     rack (2.0.7)
@@ -1215,7 +1215,7 @@ DEPENDENCIES
   omniauth-auth0 (~> 2.2)
   omniauth-rails_csrf_protection (~> 0.1.2)
   prometheus-client (= 0.7.1)
-  puma (~> 3.7)
+  puma (~> 3.12)
   rack-cors
   rack-host-redirect
   rack-mini-profiler
