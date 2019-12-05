@@ -44,4 +44,12 @@ class UserMailer < ApplicationMailer
       subject: "You have been invited to IDseq"
     )
   end
+
+  # See: app/views/user_mailer/no_account_found.html.erb.
+  def no_account_found(email)
+    mail(
+      to: email,
+      subject: "IDseq | Could not locate an account with this email"
+    )
+  end
 end
