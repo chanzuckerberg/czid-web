@@ -84,17 +84,10 @@ module ReportHelper
     path + "?" + kvs.to_param
   end
 
-  def self.instrumented_report_info_json(pipeline_run, background_id)
-    @timer = Timer.new("report_info")
-    report_info = ReportHelper.report_info_json(pipeline_run, background_id)
-    @timer.split("last")
-    @timer.publish
-    return report_info
-  end
-
   # This was originally the report_info action but it was too slow, more than
   # 10s for some samples, so we wrapped it in a cache layer.
   def self.report_info_json(pipeline_run, background_id)
+    @timer = Timer.new("report_info")
     ##################################################
     ## Duct tape for changing background id dynamically
     ## TODO(yf): clean the following up.
@@ -125,6 +118,7 @@ module ReportHelper
 
     json = JSON.dump(report_info)
     @timer.split("dump_json")
+    @timer.publish
     json
   end
 
@@ -772,7 +766,7 @@ module ReportHelper
     tax_2d.each do |tid, _|
       unfiltered_ids << tid if tid > 0
     end
-    @timer.split("reformating")
+    @timer.split("reformatting")
 
     # Remove family level rows because the reports only display species/genus
     remove_family_level_counts!(tax_2d)
