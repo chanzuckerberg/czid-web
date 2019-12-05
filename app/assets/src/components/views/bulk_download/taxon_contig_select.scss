@@ -1,0 +1,45 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.taxaWithContigsDropdown {
+  width: 300px;
+
+  .optionsHeader {
+    display: flex;
+    padding: $space-s $space-m;
+
+    .header {
+      @include font-header-xs-crop;
+      color: $dark-grey;
+    }
+
+    .fill {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  .option {
+    display: flex;
+    padding: $space-s $space-m;
+
+    .taxonName {
+      @include font-body-xxs-crop;
+      flex-shrink: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .fill {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .sampleCount {
+      @include font-body-xxs-crop;
+      color: $medium-grey;
+    }
+  }
+}
