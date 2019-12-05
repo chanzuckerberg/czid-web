@@ -105,7 +105,8 @@ class Auth0Controller < ApplicationController
       Auth0UserManagementHelper.send_auth0_password_reset_email(email)
     else
       # If no account found, send an informative email to reduce confusion.
-      # This is good security practice to avoid revealing account existence.
+      # This is good security practice to avoid revealing account existence on
+      # a public endpoint.
       UserMailer.no_account_found(email).deliver_now
     end
     redirect_to auth0_login_url
