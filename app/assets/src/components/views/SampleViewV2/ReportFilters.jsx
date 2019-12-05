@@ -222,7 +222,7 @@ class ReportFilters extends React.Component {
             <div className={cs.filterListElement}>
               <MetricPicker
                 options={TREE_METRICS}
-                value={selected.metric}
+                value={selected.metric || TREE_METRICS[0].value}
                 onChange={value =>
                   this.handleFilterChange({
                     key: "metric",

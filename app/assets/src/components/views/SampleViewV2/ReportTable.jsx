@@ -682,7 +682,7 @@ ReportTable.propTypes = {
   rowHeight: PropTypes.number,
 
   // Needed only for hover actions
-  // Consider adding a callback to that render the hover actions
+  // Consider adding a callback to render the hover actions
   alignVizAvailable: PropTypes.bool.isRequired,
   fastaDownloadEnabled: PropTypes.bool.isRequired,
   onCoverageVizClick: PropTypes.func.isRequired,

@@ -64,39 +64,43 @@ RSpec.describe SamplesController, type: :controller do
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
         @sample_three = create(:sample, project: @project, name: "Test Sample Three",
                                         pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
-      end
-
-      it "should return taxon list with correct sample counts" do
         create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_one.first_pipeline_run.id)
         create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_two.first_pipeline_run.id)
         create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_three.first_pipeline_run.id)
         create(:taxon_count, tax_id: 200, pipeline_run_id: @sample_one.first_pipeline_run.id)
         create(:taxon_count, tax_id: 200, pipeline_run_id: @sample_two.first_pipeline_run.id)
         create(:taxon_count, tax_id: 300, pipeline_run_id: @sample_one.first_pipeline_run.id)
+      end
 
+      let(:taxon_search_results) do
+        [
+          {
+            "taxid" => 100,
+            "name" => "Mock Taxa 100",
+          },
+          {
+            "taxid" => 200,
+            "name" => "Mock Taxa 200",
+          },
+          {
+            "taxid" => 300,
+            "name" => "Mock Taxa 300",
+          },
+        ]
+      end
+
+      it "should return taxon list with correct sample counts" do
         mock_query = "MOCK_QUERY"
 
         expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
-                                                    .and_return([
-                                                                  {
-                                                                    "taxid" => 100,
-                                                                    "name" => "Mock Taxa 100",
-                                                                  },
-                                                                  {
-                                                                    "taxid" => 200,
-                                                                    "name" => "Mock Taxa 200",
-                                                                  },
-                                                                  {
-                                                                    "taxid" => 300,
-                                                                    "name" => "Mock Taxa 300",
-                                                                  },
-                                                                ])
+                                                    .and_return(taxon_search_results)
 
         get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
 
         expect(response).to have_http_status :success
 
         json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(3)
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 100,
@@ -121,13 +125,241 @@ RSpec.describe SamplesController, type: :controller do
         sample_admin = create(:sample, project: project_admin, name: "Test Sample Admin",
                                        pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
 
-        create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_one.first_pipeline_run.id)
-        create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_two.first_pipeline_run.id)
-        create(:taxon_count, tax_id: 100, pipeline_run_id: @sample_three.first_pipeline_run.id)
-
         get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, sample_admin.id], query: "MOCK_QUERY" }
 
         expect(response).to have_http_status :unauthorized
+      end
+
+      it "doesn't count samples that weren't passed in" do
+        mock_query = "MOCK_QUERY"
+
+        expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
+                                                    .and_return(taxon_search_results)
+
+        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id], query: mock_query }
+
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(3)
+        expect(json_response).to include_json([
+                                                {
+                                                  "taxid" => 100,
+                                                  "name" => "Mock Taxa 100",
+                                                  "sample_count" => 2,
+                                                },
+                                                {
+                                                  "taxid" => 200,
+                                                  "name" => "Mock Taxa 200",
+                                                  "sample_count" => 2,
+                                                },
+                                                {
+                                                  "taxid" => 300,
+                                                  "name" => "Mock Taxa 300",
+                                                  "sample_count" => 1,
+                                                },
+                                              ])
+      end
+
+      it "should omit taxons with no samples that were returned from search" do
+        mock_query = "MOCK_QUERY"
+
+        modified_search_results = taxon_search_results + [
+          {
+            "taxid" => 400,
+            "name" => "Mock Taxa 400",
+          },
+        ]
+
+        expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
+                                                    .and_return(modified_search_results)
+
+        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
+
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(3)
+        expect(json_response).to include_json([
+                                                {
+                                                  "taxid" => 100,
+                                                  "name" => "Mock Taxa 100",
+                                                  "sample_count" => 3,
+                                                },
+                                                {
+                                                  "taxid" => 200,
+                                                  "name" => "Mock Taxa 200",
+                                                  "sample_count" => 2,
+                                                },
+                                                {
+                                                  "taxid" => 300,
+                                                  "name" => "Mock Taxa 300",
+                                                  "sample_count" => 1,
+                                                },
+                                              ])
+      end
+    end
+
+    describe "GET #taxa_with_contigs_suggestions" do
+      before do
+        @project = create(:project, users: [@joe])
+        @sample_one = create(:sample, project: @project, name: "Test Sample One",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+        @sample_two = create(:sample, project: @project, name: "Test Sample Two",
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+        @sample_three = create(:sample, project: @project, name: "Test Sample Three",
+                                        pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+
+        # A taxid can either by genus or species level, but not both.
+        create(:contig, pipeline_run_id: @sample_one.first_pipeline_run.id, species_taxid_nt: 1, species_taxid_nr: 2, genus_taxid_nt: 101, genus_taxid_nr: 101)
+        create(:contig, pipeline_run_id: @sample_two.first_pipeline_run.id, species_taxid_nt: 1, species_taxid_nr: 1, genus_taxid_nt: 102, genus_taxid_nr: 103)
+        create(:contig, pipeline_run_id: @sample_three.first_pipeline_run.id, species_taxid_nt: 2, species_taxid_nr: 1, genus_taxid_nt: 101, genus_taxid_nr: 101)
+        create(:contig, pipeline_run_id: @sample_three.first_pipeline_run.id, species_taxid_nt: 2, species_taxid_nr: 3, genus_taxid_nt: 102, genus_taxid_nr: 104)
+      end
+
+      let(:taxon_search_results) do
+        [
+          {
+            "title" => "Taxon 1",
+            "description" => "Description for Taxon 1",
+            "taxid" => 1,
+            "level" => "species",
+          },
+          {
+            "title" => "Taxon 2",
+            "description" => "Description for Taxon 2",
+            "taxid" => 2,
+            "level" => "species",
+          },
+          {
+            "title" => "Taxon 3",
+            "description" => "Description for Taxon 3",
+            "taxid" => 101,
+            "level" => "genus",
+          },
+          {
+            "title" => "Taxon 4",
+            "description" => "Description for Taxon 4",
+            "taxid" => 102,
+            "level" => "genus",
+          },
+        ]
+      end
+
+      it "should return taxon list with correct sample counts" do
+        mock_query = "MOCK_QUERY"
+
+        expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
+                                                    .and_return(taxon_search_results)
+
+        get :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
+
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(4)
+        expect(json_response).to include_json([
+                                                {
+                                                  "taxid" => 1,
+                                                  "sample_count_contigs" => 3,
+                                                },
+                                                {
+                                                  "taxid" => 2,
+                                                  "sample_count_contigs" => 2,
+                                                },
+                                                {
+                                                  "taxid" => 101,
+                                                  "sample_count_contigs" => 2,
+                                                },
+                                                {
+                                                  "taxid" => 102,
+                                                  "sample_count_contigs" => 2,
+                                                },
+                                              ])
+      end
+
+      it "should return unauthorized if user doesn't have access to sample" do
+        project_admin = create(:project, users: [@admin])
+        sample_admin = create(:sample, project: project_admin, name: "Test Sample Admin",
+                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+
+        get :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, sample_admin.id], query: "MOCK_QUERY" }
+
+        expect(response).to have_http_status :unauthorized
+      end
+
+      it "doesn't count samples that weren't passed in" do
+        mock_query = "MOCK_QUERY"
+
+        expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
+                                                    .and_return(taxon_search_results)
+
+        get :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id], query: mock_query }
+
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(4)
+        expect(json_response).to include_json([
+                                                {
+                                                  "taxid" => 1,
+                                                  "sample_count_contigs" => 2,
+                                                },
+                                                {
+                                                  "taxid" => 2,
+                                                  "sample_count_contigs" => 1,
+                                                },
+                                                {
+                                                  "taxid" => 101,
+                                                  "sample_count_contigs" => 1,
+                                                },
+                                                {
+                                                  "taxid" => 102,
+                                                  "sample_count_contigs" => 1,
+                                                },
+                                              ])
+      end
+
+      it "omits taxa returned from search with no sample count" do
+        mock_query = "MOCK_QUERY"
+
+        modified_search_results = taxon_search_results + [
+          {
+            "title" => "Taxon 5",
+            "description" => "Description for Taxon 5",
+            "taxid" => 1000,
+            "level" => "genus",
+          },
+        ]
+
+        expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
+                                                    .and_return(modified_search_results)
+
+        get :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id], query: mock_query }
+
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        print(json_response)
+        expect(json_response.length).to eq(4)
+        expect(json_response).to include_json([
+                                                {
+                                                  "taxid" => 1,
+                                                  "sample_count_contigs" => 2,
+                                                },
+                                                {
+                                                  "taxid" => 2,
+                                                  "sample_count_contigs" => 1,
+                                                },
+                                                {
+                                                  "taxid" => 101,
+                                                  "sample_count_contigs" => 1,
+                                                },
+                                                {
+                                                  "taxid" => 102,
+                                                  "sample_count_contigs" => 1,
+                                                },
+                                              ])
       end
     end
   end

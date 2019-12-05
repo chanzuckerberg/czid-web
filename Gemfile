@@ -32,7 +32,7 @@ gem 'elasticsearch-model'
 gem 'mysql2'
 gem 'prometheus-client', '0.7.1'
 # Use Puma as the app server
-gem 'puma', '~> 3.7'
+gem 'puma', '~> 3.12'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'

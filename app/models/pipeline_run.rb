@@ -11,6 +11,7 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :pipeline_run_stages
   has_and_belongs_to_many :backgrounds
   has_and_belongs_to_many :phylo_trees
+  has_and_belongs_to_many :bulk_downloads
 
   has_many :output_states, dependent: :destroy
   has_many :taxon_counts, dependent: :destroy

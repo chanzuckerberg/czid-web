@@ -368,6 +368,15 @@ const getTaxaWithReadsSuggestions = (query, sampleIds) =>
     },
   });
 
+// Get autocomplete suggestions for "taxa that have contigs" for a set of samples.
+const getTaxaWithContigsSuggestions = (query, sampleIds) =>
+  get("/samples/taxa_with_contigs_suggestions.json", {
+    params: {
+      query,
+      sampleIds,
+    },
+  });
+
 const uploadedByCurrentUser = async sampleIds => {
   const response = await get("samples/uploaded_by_current_user", {
     params: {
@@ -422,5 +431,6 @@ export {
   validateSampleNames,
   getBackgrounds,
   getTaxaWithReadsSuggestions,
+  getTaxaWithContigsSuggestions,
   uploadedByCurrentUser,
 };
