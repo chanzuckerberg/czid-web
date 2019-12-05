@@ -212,7 +212,7 @@ export default class TidyTree {
 
     if (updatedNode.children) {
       updatedNode.children.forEach(child => {
-        this.expandCollapsedWithFewChildren(child);
+        this.expandCollapsedWithFewChildrenOrNoName(child);
       });
     }
     this.update(
@@ -225,16 +225,21 @@ export default class TidyTree {
       this.options.onCollapsedStateChange(node);
   }
 
-  expandCollapsedWithFewChildren(node) {
+  expandCollapsedWithFewChildrenOrNoName(node) {
+    if (!node) return;
+
+    // keep expanding nodes with children that have either (a) few children or (b) no name
     if (
       node.collapsedChildren &&
-      node.collapsedChildren.length <= this.options.minNonCollapsableChildren
+      (node.collapsedChildren.length <=
+        this.options.minNonCollapsableChildren ||
+        !(node.data || {}).name)
     ) {
       node.children = (node.children || []).concat(node.collapsedChildren);
       node.collapsedChildren = null;
 
       node.children.forEach(child => {
-        this.expandCollapsedWithFewChildren(child);
+        this.expandCollapsedWithFewChildrenOrNoName(child);
       });
     }
   }
@@ -321,6 +326,12 @@ export default class TidyTree {
   update(source) {
     if (!this.svg) {
       this.initialize();
+    }
+
+    if (!this.options.attribute) {
+      // eslint-disable-next-line no-console
+      console.error("TidyTree: Option 'attribute' is not defined.");
+      return;
     }
 
     // adjust dimensions
@@ -512,9 +523,14 @@ export default class TidyTree {
       .select(".clickable")
       .on("click", d => this.toggleCollapseNode(d));
 
-    nodeUpdate
-      .select("circle")
-      .attr("r", d => nodeScale(d.data.values[this.options.attribute]));
+    nodeUpdate.select("circle").attr(
+      "r",
+      // hide nodes (except root) that do not have name (typically ranks not assigned)
+      d =>
+        !d.parent || d.data.scientificName || this.hasHiddenChildren(d)
+          ? nodeScale(d.data.values[this.options.attribute])
+          : 0
+    );
 
     nodeUpdate.select("path.cross").attr("d", d => {
       let r = nodeScale(d.data.values[this.options.attribute]) * 0.9;

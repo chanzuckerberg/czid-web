@@ -785,21 +785,27 @@ class PipelineSampleReport extends React.Component {
   downloadFastaUrl = params => {
     const { taxLevel, taxId } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
-    location.href = `/samples/${this.sampleId}/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
+    location.href = `/samples/${
+      this.sampleId
+    }/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
   // download Contig
   downloadContigUrl = params => {
     const { taxId } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
-    location.href = `/samples/${this.sampleId}/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
+    location.href = `/samples/${
+      this.sampleId
+    }/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
   };
 
   handleCoverageVizClick = params => {
     const { taxId, taxLevel, taxName, taxCommonName } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
 
-    const alignmentVizUrl = `/samples/${this.sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
+    const alignmentVizUrl = `/samples/${
+      this.sampleId
+    }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
     const speciesTaxons =
       taxLevel === "genus" ? this.genusToSpeciesMap[taxId] : [];
@@ -1257,7 +1263,11 @@ class PipelineSampleReport extends React.Component {
   };
 
   render() {
-    const filter_stats = `${this.state.rows_passing_filters} rows passing the above filters, out of ${this.state.rows_total} total rows.`;
+    const filter_stats = `${
+      this.state.rows_passing_filters
+    } rows passing the above filters, out of ${
+      this.state.rows_total
+    } total rows.`;
 
     let truncation_stats =
       this.report_details && this.report_details.pipeline_info.truncated
@@ -1272,7 +1282,9 @@ class PipelineSampleReport extends React.Component {
       subsampled_reads &&
       subsampled_reads <
         this.report_details.pipeline_info.adjusted_remaining_reads
-        ? `Report values are computed from ${subsampled_reads} reads subsampled randomly from the ${this.report_details.pipeline_info.adjusted_remaining_reads} reads passing host and quality filters.`
+        ? `Report values are computed from ${subsampled_reads} reads subsampled randomly from the ${
+            this.report_details.pipeline_info.adjusted_remaining_reads
+          } reads passing host and quality filters.`
         : "";
     const disable_filter = this.anyFilterSet() ? (
       <span
@@ -1459,7 +1471,7 @@ class RenderMarkup extends React.Component {
           taxa={parent.state.selected_taxons}
           topTaxa={parent.state.topScoringTaxa}
           sample={parent.report_details.sample_info}
-          metric={parent.state.treeMetric}
+          metric={parent.state.treeMetric || "aggregatescore"}
           nameType={parent.props.nameType}
           backgroundData={parent.state.backgroundData}
           onTaxonClick={parent.props.onTaxonClick}

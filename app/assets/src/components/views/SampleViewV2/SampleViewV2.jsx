@@ -50,12 +50,15 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
-import ReportTable from "./ReportTable";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 
+import { TREE_METRICS } from "./constants";
+import ReportViewSelector from "./ReportViewSelector";
 import ReportFilters from "./ReportFilters";
+import ReportTable from "./ReportTable";
+import TaxonTreeVis from "./TaxonTreeVis";
 import cs from "./sample_view_v2.scss";
 
 const mapValuesWithKey = mapValues.convert({ cap: false });
@@ -78,8 +81,15 @@ export default class SampleViewV2 extends React.Component {
     super(props);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);
-    const urlState = this.urlParser.parse(location.search);
-    const localState = this.loadState(localStorage, "SampleViewOptions");
+    // remove nested options to be merge separately
+    const {
+      selectedOptions: selectedOptionsFromUrl,
+      ...nonNestedUrlState
+    } = this.urlParser.parse(location.search);
+    const {
+      selectedOptions: selectedOptionsFromLocal,
+      ...nonNestedLocalState
+    } = this.loadState(localStorage, "SampleViewOptions");
 
     this.state = Object.assign(
       {
@@ -102,10 +112,14 @@ export default class SampleViewV2 extends React.Component {
         sidebarVisible: false,
         sidebarTaxonData: null,
         view: "table",
-        selectedOptions: this.defaultSelectedOptions(),
+        selectedOptions: Object.assign(
+          this.defaultSelectedOptions(),
+          selectedOptionsFromLocal,
+          selectedOptionsFromUrl
+        ),
       },
-      localState,
-      urlState
+      nonNestedLocalState,
+      nonNestedUrlState
     );
   }
 
@@ -145,6 +159,7 @@ export default class SampleViewV2 extends React.Component {
   defaultSelectedOptions = () => {
     return {
       categories: {},
+      metric: TREE_METRICS[0].value,
       minContigSize: 4,
       nameType: "Scientific name",
       readSpecificity: 0,
@@ -242,6 +257,7 @@ export default class SampleViewV2 extends React.Component {
 
     this.setState({
       filteredReportData,
+      lineageData: rawReportData.lineage,
       loadingReport: false,
       reportData,
       reportMetadata: rawReportData.metadata,
@@ -483,7 +499,6 @@ export default class SampleViewV2 extends React.Component {
     if (urlQuery) {
       urlQuery = `?${urlQuery}`;
     }
-
     history.replaceState(urlState, `SampleView`, `${urlQuery}`);
 
     localStorage.setItem("SampleViewOptions", JSON.stringify(localState));
@@ -491,7 +506,6 @@ export default class SampleViewV2 extends React.Component {
 
   handleOptionChanged = ({ key, value }) => {
     const { selectedOptions } = this.state;
-
     if (deepEqual(selectedOptions[key], value)) {
       return;
     }
@@ -666,6 +680,9 @@ export default class SampleViewV2 extends React.Component {
             filters: newSelectedOptions,
           }),
         });
+        break;
+      // - metric: no need to update anything except for the option below
+      case "metric":
         break;
       default:
         return;
@@ -929,10 +946,18 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
+  handleViewClick = ({ view }) => {
+    logAnalyticsEvent(`PipelineSampleReport_${view}-view-menu_clicked`);
+    this.setState({ view }, () => {
+      this.updateHistoryAndPersistOptions();
+    });
+  };
+
   renderReport = () => {
     const {
       backgrounds,
       filteredReportData,
+      lineageData,
       pipelineRun,
       project,
       reportMetadata,
@@ -953,38 +978,61 @@ export default class SampleViewV2 extends React.Component {
               view={view}
             />
           </div>
-          <div className={cs.statsRow}>
-            {this.renderReportInfo()}
-            {!!this.countFilters() && (
-              <span
-                className={cs.clearAllFilters}
-                onClick={this.clearAllFilters}
-              >
-                Clear All Filters
-              </span>
-            )}
-          </div>
-          <div className={cs.reportTable}>
-            <ReportTable
-              alignVizAvailable={
-                !!(reportMetadata && reportMetadata.alignVizAvailable)
-              }
-              data={filteredReportData}
-              onCoverageVizClick={this.handleCoverageVizClick}
-              onTaxonNameClick={withAnalytics(
-                this.handleTaxonClick,
-                "PipelineSampleReport_taxon-sidebar-link_clicked"
+          <div className={cs.reportHeader}>
+            <div className={cs.statsRow}>
+              {this.renderReportInfo()}
+              {!!this.countFilters() && (
+                <span
+                  className={cs.clearAllFilters}
+                  onClick={this.clearAllFilters}
+                >
+                  Clear All Filters
+                </span>
               )}
-              fastaDownloadEnabled={
-                !!(reportMetadata && reportMetadata.hasByteRanges)
-              }
-              phyloTreeAllowed={sample ? sample.editable : false}
-              pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
-              projectId={project && project.id}
-              projectName={project && project.name}
-              sampleId={sample && sample.id}
-            />
+            </div>
+            <div className={cs.reportViewSelector}>
+              <ReportViewSelector
+                view={view}
+                onViewClick={this.handleViewClick}
+              />
+            </div>
           </div>
+          {view == "table" && (
+            <div className={cs.reportTable}>
+              <ReportTable
+                alignVizAvailable={
+                  !!(reportMetadata && reportMetadata.alignVizAvailable)
+                }
+                data={filteredReportData}
+                onCoverageVizClick={this.handleCoverageVizClick}
+                onTaxonNameClick={withAnalytics(
+                  this.handleTaxonClick,
+                  "PipelineSampleReport_taxon-sidebar-link_clicked"
+                )}
+                fastaDownloadEnabled={
+                  !!(reportMetadata && reportMetadata.hasByteRanges)
+                }
+                phyloTreeAllowed={sample ? sample.editable : false}
+                pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
+                projectId={project && project.id}
+                projectName={project && project.name}
+                sampleId={sample && sample.id}
+              />
+            </div>
+          )}
+          {view == "tree" && (
+            <div>
+              <TaxonTreeVis
+                lineage={lineageData}
+                metric={selectedOptions.metric}
+                nameType={selectedOptions.nameType}
+                onTaxonClick={this.handleTaxonClick}
+                sample={sample}
+                taxa={filteredReportData}
+                useReportV2Format={true}
+              />
+            </div>
+          )}
         </div>
       );
     } else {
