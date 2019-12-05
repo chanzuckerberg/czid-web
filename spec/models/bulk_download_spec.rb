@@ -532,6 +532,23 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_ERROR)
     end
 
+    it "correctly generates download file for download type contigs_non_host for single taxa" do
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_contigs" => {
+                                             "value" => mock_tax_id,
+                                             "displayName" => "Salmonella enterica",
+                                           })
+      allow_any_instance_of(PipelineRun).to receive(:get_contigs_for_taxid).and_return([object_double(Contig.new, to_fa: "mock_contigs_nonhost_fasta")])
+
+      add_s3_tar_writer_expectations(
+        "Test Sample One__project-test_project_#{@project.id}__contigs_nonhost_Salmonella enterica.fasta" => "mock_contigs_nonhost_fasta",
+        "Test Sample Two__project-test_project_#{@project.id}__contigs_nonhost_Salmonella enterica.fasta" => "mock_contigs_nonhost_fasta"
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+    end
+
     it "correctly handles individual sample failures" do
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {})
 
