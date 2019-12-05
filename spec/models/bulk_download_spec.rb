@@ -467,7 +467,7 @@ describe BulkDownload, type: :model do
     let(:mock_tax_id) { 28_901 }
     let(:mock_tax_level) { 2 }
 
-    it "correctly generates download file for download type reads_non_host for single taxa" do
+    it "correctly generates download file for download type reads_non_host for single taxon" do
       create_taxon_lineage(mock_tax_id)
 
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
@@ -487,7 +487,7 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
     end
 
-    it "correctly handles empty fastas for download type reads_non_host for single taxa" do
+    it "correctly handles empty fastas for download type reads_non_host for single taxon" do
       create_taxon_lineage(mock_tax_id)
 
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
@@ -507,7 +507,7 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
     end
 
-    it "correctly throws exception if taxa_with_reads param not found for download type reads_non_host for single taxa" do
+    it "correctly throws exception if taxa_with_reads param not found for download type reads_non_host for single taxon" do
       create_taxon_lineage(mock_tax_id)
 
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, {})
@@ -519,7 +519,7 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_ERROR)
     end
 
-    it "correctly throws exception if taxon count not found for download type reads_non_host for single taxa" do
+    it "correctly throws exception if taxon count not found for download type reads_non_host for single taxon" do
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
                                              "value" => mock_tax_id,
                                              "displayName" => "Salmonella enterica",
@@ -532,7 +532,7 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_ERROR)
     end
 
-    it "correctly generates download file for download type contigs_non_host for single taxa" do
+    it "correctly generates download file for download type contigs_non_host for single taxon" do
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_contigs" => {
                                              "value" => mock_tax_id,
                                              "displayName" => "Salmonella enterica",
