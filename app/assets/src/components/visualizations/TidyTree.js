@@ -228,10 +228,12 @@ export default class TidyTree {
   expandCollapsedWithFewChildrenOrNoName(node) {
     if (!node) return;
 
+    // keep expanding nodes with children that have either (a) few children or (b) no name
     if (
-      !(node.data || {}).name ||
-      (node.collapsedChildren &&
-        node.collapsedChildren.length <= this.options.minNonCollapsableChildren)
+      node.collapsedChildren &&
+      (node.collapsedChildren.length <=
+        this.options.minNonCollapsableChildren ||
+        !(node.data || {}).name)
     ) {
       node.children = (node.children || []).concat(node.collapsedChildren);
       node.collapsedChildren = null;
@@ -521,15 +523,14 @@ export default class TidyTree {
       .select(".clickable")
       .on("click", d => this.toggleCollapseNode(d));
 
-    nodeUpdate
-      .select("circle")
-      .attr(
-        "r",
-        d =>
-          d.data.scientificName || this.hasChildren(d) || d.isAggregated
-            ? nodeScale(d.data.values[this.options.attribute])
-            : 0
-      );
+    nodeUpdate.select("circle").attr(
+      "r",
+      // hide nodes (except root) that do not have name (typically ranks not assigned)
+      d =>
+        !d.parent || d.data.scientificName || this.hasHiddenChildren(d)
+          ? nodeScale(d.data.values[this.options.attribute])
+          : 0
+    );
 
     nodeUpdate.select("path.cross").attr("d", d => {
       let r = nodeScale(d.data.values[this.options.attribute]) * 0.9;

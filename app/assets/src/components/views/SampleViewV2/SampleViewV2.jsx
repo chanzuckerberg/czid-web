@@ -947,6 +947,7 @@ export default class SampleViewV2 extends React.Component {
   };
 
   handleViewClick = ({ view }) => {
+    logAnalyticsEvent(`PipelineSampleReport_${view}-view-menu_clicked`);
     this.setState({ view }, () => {
       this.updateHistoryAndPersistOptions();
     });
