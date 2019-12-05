@@ -307,6 +307,10 @@ class BulkDownload < ApplicationRecord
                                     # We avoid pre-fetching "taxon_byteranges" here, even though it has to be fetched once per pipeline_run in the code below,
                                     # because of the potentially large number of taxon_byteranges per pipeline_run.
                                     pipeline_runs.includes(:sample)
+                                  elsif download_type == CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
+                                    # Pre-fetching contigs here doesn't prevent multiple queries for contig in get_contigs_for_taxid.
+                                    # TODO(mark): Investigate why, if performance of this bulk download ever becomes an issue.
+                                    pipeline_runs.includes(:sample)
                                   else
                                     pipeline_runs
                                   end
@@ -360,6 +364,16 @@ class BulkDownload < ApplicationRecord
             "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
               "reads_nonhost_#{get_param_display_name('taxa_with_reads')}.fasta",
             reads_nonhost_for_taxid_fasta
+          )
+        elsif download_type == CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
+          contigs = pipeline_run.get_contigs_for_taxid(get_param_value("taxa_with_contigs").to_i)
+          contigs_nonhost_for_taxid_fasta = ''
+          contigs.each { |contig| contigs_nonhost_for_taxid_fasta += contig.to_fa }
+
+          s3_tar_writer.add_file_with_data(
+            "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
+              "contigs_nonhost_#{get_param_display_name('taxa_with_contigs')}.fasta",
+            contigs_nonhost_for_taxid_fasta
           )
         end
       rescue => e
@@ -424,8 +438,12 @@ class BulkDownload < ApplicationRecord
       return execution_type
     end
 
-    if [READS_NON_HOST_BULK_DOWNLOAD_TYPE, CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE].include?(download_type)
+    if download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE
       return get_param_value("taxa_with_reads") == "all" ? ECS_EXECUTION_TYPE : RESQUE_EXECUTION_TYPE
+    end
+
+    if download_type == CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
+      return get_param_value("taxa_with_contigs") == "all" ? ECS_EXECUTION_TYPE : RESQUE_EXECUTION_TYPE
     end
 
     # Should never happen
