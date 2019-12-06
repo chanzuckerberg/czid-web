@@ -55,7 +55,7 @@ RSpec.describe SamplesController, type: :controller do
       end
     end
 
-    describe "GET #taxa_with_reads_suggestions" do
+    describe "POST #taxa_with_reads_suggestions" do
       before do
         @project = create(:project, users: [@joe])
         @sample_one = create(:sample, project: @project, name: "Test Sample One",
@@ -95,7 +95,7 @@ RSpec.describe SamplesController, type: :controller do
         expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
                                                     .and_return(taxon_search_results)
 
-        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
+        post :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
 
         expect(response).to have_http_status :success
 
@@ -125,7 +125,7 @@ RSpec.describe SamplesController, type: :controller do
         sample_admin = create(:sample, project: project_admin, name: "Test Sample Admin",
                                        pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
 
-        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, sample_admin.id], query: "MOCK_QUERY" }
+        post :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, sample_admin.id], query: "MOCK_QUERY" }
 
         expect(response).to have_http_status :unauthorized
       end
@@ -136,7 +136,7 @@ RSpec.describe SamplesController, type: :controller do
         expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
                                                     .and_return(taxon_search_results)
 
-        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id], query: mock_query }
+        post :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id], query: mock_query }
 
         expect(response).to have_http_status :success
 
@@ -174,7 +174,7 @@ RSpec.describe SamplesController, type: :controller do
         expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
                                                     .and_return(modified_search_results)
 
-        get :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
+        post :taxa_with_reads_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
 
         expect(response).to have_http_status :success
 
@@ -200,7 +200,7 @@ RSpec.describe SamplesController, type: :controller do
       end
     end
 
-    describe "GET #taxa_with_contigs_suggestions" do
+    describe "POST #taxa_with_contigs_suggestions" do
       before do
         @project = create(:project, users: [@joe])
         @sample_one = create(:sample, project: @project, name: "Test Sample One",
@@ -252,7 +252,7 @@ RSpec.describe SamplesController, type: :controller do
         expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
                                                     .and_return(taxon_search_results)
 
-        get :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
+        post :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id], query: mock_query }
 
         expect(response).to have_http_status :success
 
@@ -283,7 +283,7 @@ RSpec.describe SamplesController, type: :controller do
         sample_admin = create(:sample, project: project_admin, name: "Test Sample Admin",
                                        pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
 
-        get :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, sample_admin.id], query: "MOCK_QUERY" }
+        post :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, sample_admin.id], query: "MOCK_QUERY" }
 
         expect(response).to have_http_status :unauthorized
       end
@@ -294,7 +294,7 @@ RSpec.describe SamplesController, type: :controller do
         expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
                                                     .and_return(taxon_search_results)
 
-        get :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id], query: mock_query }
+        post :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id], query: mock_query }
 
         expect(response).to have_http_status :success
 
@@ -335,12 +335,11 @@ RSpec.describe SamplesController, type: :controller do
         expect(controller).to receive(:taxon_search).with(mock_query, ["species", "genus"], any_args).exactly(1).times
                                                     .and_return(modified_search_results)
 
-        get :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id], query: mock_query }
+        post :taxa_with_contigs_suggestions, params: { format: "json", sampleIds: [@sample_one.id, @sample_two.id], query: mock_query }
 
         expect(response).to have_http_status :success
 
         json_response = JSON.parse(response.body)
-        print(json_response)
         expect(json_response.length).to eq(4)
         expect(json_response).to include_json([
                                                 {
@@ -364,7 +363,7 @@ RSpec.describe SamplesController, type: :controller do
     end
   end
 
-  describe "GET #uploaded_by_current_user" do
+  describe "POST #uploaded_by_current_user" do
     before do
       @project = create(:project, users: [@joe, @admin])
       @sample_one = create(:sample, project: @project, name: "Test Sample One", user: @joe)
@@ -374,13 +373,13 @@ RSpec.describe SamplesController, type: :controller do
     end
 
     it "should return true if all samples were uploaded by user" do
-      get :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id] }
+      post :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id] }
       json_response = JSON.parse(response.body)
       expect(json_response).to include_json(uploaded_by_current_user: true)
     end
 
     it "should return false if some samples were not uploaded by user, even if user belongs to the sample's project" do
-      get :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id] }
+      post :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id] }
       json_response = JSON.parse(response.body)
       expect(json_response).to include_json(uploaded_by_current_user: false)
     end

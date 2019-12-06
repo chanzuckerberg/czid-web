@@ -361,27 +361,21 @@ const getSamplePipelineResults = (sampleId, pipelineVersion) =>
 
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
 const getTaxaWithReadsSuggestions = (query, sampleIds) =>
-  get("/samples/taxa_with_reads_suggestions.json", {
-    params: {
-      query,
-      sampleIds,
-    },
+  postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
+    query,
+    sampleIds,
   });
 
 // Get autocomplete suggestions for "taxa that have contigs" for a set of samples.
 const getTaxaWithContigsSuggestions = (query, sampleIds) =>
-  get("/samples/taxa_with_contigs_suggestions.json", {
-    params: {
-      query,
-      sampleIds,
-    },
+  postWithCSRF("/samples/taxa_with_contigs_suggestions.json", {
+    query,
+    sampleIds,
   });
 
 const uploadedByCurrentUser = async sampleIds => {
-  const response = await get("samples/uploaded_by_current_user", {
-    params: {
-      sampleIds,
-    },
+  const response = await postWithCSRF("samples/uploaded_by_current_user", {
+    sampleIds,
   });
 
   return response.uploaded_by_current_user;
