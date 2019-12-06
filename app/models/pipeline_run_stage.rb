@@ -68,6 +68,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def dag_name
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     STAGE_INFO[step_number][:dag_name]
   end
 
