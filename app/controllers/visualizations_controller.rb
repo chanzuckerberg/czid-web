@@ -172,6 +172,10 @@ class VisualizationsController < ApplicationController
     }
   end
 
+  def heatmap_metrics
+    render json: HeatmapHelper::ALL_METRICS
+  end
+
   def download_heatmap
     @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
       params,

@@ -120,6 +120,7 @@ Rails.application.routes.draw do
   get 'phylo_trees/validate_name', to: 'phylo_trees#validate_name'
 
   get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
+  get 'visualizations/heatmap_metrics.json', to: 'visualizations#heatmap_metrics'
   get 'visualizations/download_heatmap', to: 'visualizations#download_heatmap'
   post 'visualizations/:type/save', to: 'visualizations#save'
   get 'visualizations/:type(/:id)', to: 'visualizations#visualization'

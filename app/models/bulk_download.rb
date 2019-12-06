@@ -411,6 +411,22 @@ class BulkDownload < ApplicationRecord
       sample_overviews_csv = generate_sample_list_csv(formatted_samples)
 
       s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
+    elsif download_type == COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
+      metric = get_param_value("metric")
+      Rails.logger.info("Generating combined sample taxon results for #{metric} for #{pipeline_runs.length} samples...")
+      samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+      # If the metric is NT.zscore or NR.zscore, the background param is required.
+      # For other metrics, it doesn't affect the metric calculation, so we set it to a default.
+      # Note that we are using heatmap helper functions to calculate all the metrics at once, so the background id is required even if we don't need it.
+      background_id = get_param_value("background") || samples.first.default_background_id
+      result = BulkDownloadsHelper.generate_combined_sample_taxon_results_csv(samples, background_id, metric)
+
+      s3_tar_writer.add_file_with_data("combined_sample_taxon_results_#{metric}.csv", result[:csv_str])
+
+      unless result[:failed_sample_ids].empty?
+        LogUtil.log_err_and_airbrake("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{result[:failed_sample_ids]}")
+        update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % result[:failed_sample_ids].length)
+      end
     else
       write_output_files_to_s3_tar_writer(s3_tar_writer)
     end
