@@ -4,6 +4,7 @@ module BulkDownloadsHelper
   SAMPLE_NO_PERMISSION_ERROR = "You do not have permission to access all of the selected samples. Please contact us for help.".freeze
   SAMPLE_STILL_RUNNING_ERROR = "Some selected samples have not finished running yet. Please remove these samples and try again.".freeze
   SAMPLE_FAILED_ERROR = "Some selected samples failed their most recent run. Please remove these samples and try again.".freeze
+  MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE = "No more than %s samples allowed in one download.".freeze
   BULK_DOWNLOAD_NOT_FOUND = "No bulk download was found with this id.".freeze
   OUTPUT_FILE_NOT_SUCCESSFUL = "Bulk download has not succeeded. Can't get output file url.".freeze
   INVALID_ACCESS_TOKEN = "The access token was invalid for this bulk download.".freeze

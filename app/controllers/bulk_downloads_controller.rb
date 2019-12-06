@@ -1,6 +1,7 @@
 class BulkDownloadsController < ApplicationController
   include BulkDownloadTypesHelper
   include BulkDownloadsHelper
+  include AppConfigHelper
 
   UPDATE_WITH_TOKEN_ACTIONS = [:success_with_token, :error_with_token, :progress_with_token].freeze
 
@@ -23,6 +24,19 @@ class BulkDownloadsController < ApplicationController
     # Convert sample ids to pipeline run ids.
     begin
       sample_ids = create_params[:sample_ids]
+
+      # Max samples check.
+      max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
+
+      # Max samples should be string containing an integer, but just in case.
+      if max_samples_allowed.nil?
+        raise KICKOFF_FAILURE_HUMAN_READABLE
+      end
+
+      if sample_ids.length > Integer(max_samples_allowed)
+        raise BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
+      end
+
       # Access control check.
       viewable_samples = current_power.viewable_samples.where(id: sample_ids)
       if viewable_samples.length != sample_ids.length

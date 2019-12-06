@@ -22,6 +22,7 @@ import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
+import { UserContext } from "~/components/common/UserContext";
 
 import ToolbarIcon from "./ToolbarIcon";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
@@ -35,6 +36,8 @@ class SamplesView extends React.Component {
     this.state = {
       phyloTreeCreationModalOpen: false,
       bulkDownloadModalOpen: false,
+      // This tooltip is reset whenever the selectedSampleIds changes.
+      bulkDownloadButtonTempTooltip: null,
     };
 
     this.columns = [
@@ -139,6 +142,15 @@ class SamplesView extends React.Component {
 
     for (let column of this.columns) {
       column["columnData"] = SAMPLE_TABLE_COLUMNS_V2[column["dataKey"]];
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    // Reset the tooltip whenever the selected samples changes.
+    if (this.props.selectedSampleIds !== prevProps.selectedSampleIds) {
+      this.setState({
+        bulkDownloadButtonTempTooltip: null,
+      });
     }
   }
 
@@ -289,12 +301,14 @@ class SamplesView extends React.Component {
 
   renderBulkDownloadTrigger = () => {
     const { selectedSampleIds } = this.props;
+    const { bulkDownloadButtonTempTooltip } = this.state;
     const downloadIcon = <DownloadIcon className={cx(cs.icon, cs.download)} />;
     return (
       <ToolbarIcon
         className={cs.action}
         icon={downloadIcon}
-        popupText="Download"
+        popperDependencies={[bulkDownloadButtonTempTooltip]}
+        popupText={bulkDownloadButtonTempTooltip || "Download"}
         disabled={selectedSampleIds.size === 0}
         onClick={withAnalytics(
           this.handleBulkDownloadModalOpen,
@@ -359,9 +373,9 @@ class SamplesView extends React.Component {
           {this.renderCollectionTrigger()}
           {this.renderHeatmapTrigger()}
           {this.renderPhyloTreeTrigger()}
-          {this.renderDownloadTrigger()}
-          {allowedFeatures.includes("bulk_downloads") &&
-            this.renderBulkDownloadTrigger()}
+          {allowedFeatures.includes("bulk_downloads")
+            ? this.renderBulkDownloadTrigger()
+            : this.renderDownloadTrigger()}
         </div>
       </div>
     );
@@ -459,7 +473,21 @@ class SamplesView extends React.Component {
   };
 
   handleBulkDownloadModalOpen = () => {
-    this.setState({ bulkDownloadModalOpen: true });
+    const { maxSamplesBulkDownload } = this.context || {};
+    if (!maxSamplesBulkDownload) {
+      this.setState({
+        bulkDownloadButtonTempTooltip:
+          "Unexpected issue. Please contact us for help.",
+      });
+    } else if (
+      this.props.selectedSampleIds.size > parseInt(maxSamplesBulkDownload)
+    ) {
+      this.setState({
+        bulkDownloadButtonTempTooltip: `No more than ${maxSamplesBulkDownload} samples allowed in one download.`,
+      });
+    } else {
+      this.setState({ bulkDownloadModalOpen: true });
+    }
   };
 
   handleBulkDownloadModalClose = () => {
@@ -551,5 +579,7 @@ SamplesView.propTypes = {
   selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };
+
+SamplesView.contextType = UserContext;
 
 export default SamplesView;
