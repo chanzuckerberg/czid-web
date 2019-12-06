@@ -4,7 +4,7 @@
       project: JSON.parse('<%= raw escape_json(@project) %>'),
       taxon: JSON.parse('<%= raw escape_json(@taxon) %>'),
       phyloTrees: JSON.parse('<%= raw escape_json(@phylo_trees) %>'),
-      allowedFeatures: JSON.parse('<%= raw escape_json(@current_user.allowed_feature_list) %>'),
+      allowedFeatures: JSON.parse('<%= raw escape_json(current_user.allowed_feature_list) %>'),
     }, 'PhyloTreeListView_page',
     JSON.parse('<%= raw escape_json(user_context)%>'));
   <% end %>

@@ -7,12 +7,8 @@ class User < ApplicationRecord
     include Elasticsearch::Model::Callbacks
   end
 
-  before_save :ensure_authentication_token
-
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable and :omniauthable, :registerable
-  devise :database_authenticatable, :recoverable,
-         :rememberable, :trackable, :validatable
+  # https://api.rubyonrails.org/classes/ActiveRecord/SecureToken/ClassMethods.html#method-i-has_secure_token
+  has_secure_token :authentication_token
 
   # NOTE: counter_cache is not supported for has_and_belongs_to_many.
   has_and_belongs_to_many :projects
@@ -170,21 +166,5 @@ class User < ApplicationRecord
       # TODO: (gdingle): get more useful data on signup
       # title, phone, website, address, company
     }
-  end
-
-  private
-
-  # Copied from https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
-  def ensure_authentication_token
-    if authentication_token.blank?
-      self.authentication_token = generate_authentication_token
-    end
-  end
-
-  def generate_authentication_token
-    loop do
-      token = Devise.friendly_token
-      break token unless User.find_by(authentication_token: token)
-    end
   end
 end

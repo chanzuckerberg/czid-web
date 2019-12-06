@@ -6,6 +6,14 @@ module ApplicationHelper
     Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   end
 
+  def warden
+    request.env['warden']
+  end
+
+  def current_user
+    warden&.user(:user)
+  end
+
   def hash_array_json2csv(input_file, output_file, keys)
     CSV.open(output_file, "w") do |csv|
       JSON.parse(File.open(input_file).read).each do |hash|

@@ -3,23 +3,19 @@
 admin_one:
   email: email@example.com
   name: Admin User One
-  encrypted_password: <%= Devise::Encryptor.digest(User, "Admin User One password") %>
   role: 1
   allowed_features: "[\"pipeline_viz\"]"
 
 regular_user:
   email: email2@example.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "User Two password") %>
   name: User Two
 
 joe:
   email: joe@gmail.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "User Three password") %>
   name: User Three
   allowed_features: "[\"pipeline_viz\"]"
   
 admin:
   email: admin@example.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "Admin User password") %>
   name: Admin User
   role: 1

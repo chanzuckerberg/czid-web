@@ -80,7 +80,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert :success
   end
 
-  test 'kick off pipeline redirect' do
+  test 'kick off pipeline without authentication' do
     put kickoff_pipeline_sample_url(@sample)
     assert_redirected_to new_user_session_url
   end

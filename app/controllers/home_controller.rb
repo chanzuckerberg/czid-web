@@ -25,18 +25,7 @@ class HomeController < ApplicationController
           @show_bulletin = true
         end
       end
-      @sign_in_strategy = sign_in_strategy
       render 'landing'
-    end
-  end
-
-  private def sign_in_strategy
-    auth0_default_for_new_users = get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
-    if !params.key?(:devise) &&
-       (auth0_default_for_new_users || params.key?(:auth0))
-      'AUTH0'
-    else
-      'DEVISE'
     end
   end
 
