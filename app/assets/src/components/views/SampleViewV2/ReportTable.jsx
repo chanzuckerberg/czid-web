@@ -29,6 +29,10 @@ import cs from "./report_table.scss";
 const STRING_NULL_VALUES = ["", "zzzzzzzzz"];
 const NUMBER_NULL_VALUES = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER];
 const INVALID_CALL_BASE_TAXID = -1e8;
+const TAX_LEVEL_INDICES = {
+  species: 1,
+  genus: 2,
+};
 
 class ReportTable extends React.Component {
   constructor(props) {
@@ -390,7 +394,13 @@ class ReportTable extends React.Component {
 
   downloadFastaUrl = ({ taxLevel, taxId }) => {
     const { pipelineVersion, sampleId } = this.props;
-    location.href = `/samples/${sampleId}/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
+    const taxLevelIndex = TAX_LEVEL_INDICES[taxLevel];
+    if (!taxLevelIndex) {
+      // eslint-disable-next-line no-console
+      console.error("Unknown taxLevel:", taxLevel);
+      return;
+    }
+    location.href = `/samples/${sampleId}/fasta/${taxLevelIndex}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
   downloadContigUrl = ({ taxId }) => {
@@ -468,7 +478,7 @@ class ReportTable extends React.Component {
       <HoverActions
         className={cs.hoverActions}
         taxId={rowData.taxId}
-        taxLevel={rowData.taxLevel === "species" ? 1 : 0}
+        taxLevel={rowData.taxLevel === "species" ? 1 : 2}
         taxName={rowData.name}
         taxCommonName={rowData.common_name}
         taxSpecies={rowData.species}
