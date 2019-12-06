@@ -287,12 +287,31 @@ describe BulkDownload, type: :model do
       @bulk_download = create(:bulk_download, user: @joe)
     end
 
+    let(:mock_shell_command) { "MOCK\\ SHELL\\ COMMAND" }
+    let(:mock_executable_file_path) { "/tmp/mock_path" }
+
     it "returns the correct aegea ecs submit command" do
       allow(Rails).to receive(:env).and_return("prod")
       allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
       task_command = [
-        "aegea", "ecs", "run", "--command=MOCK\\ SHELL\\ COMMAND",
+        "aegea", "ecs", "run", "--command=#{mock_shell_command}",
+        "--task-role", "idseq-downloads-prod",
+        "--task-name", "bulk_download_#{@bulk_download.id}",
+        "--ecr-image", "idseq-s3-tar-writer:latest",
+        "--fargate-cpu", "4096",
+        "--fargate-memory", "8192",
+      ]
+
+      expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
+    end
+
+    it "uses executable file path correctly" do
+      allow(Rails).to receive(:env).and_return("prod")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
+      task_command = [
+        "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
         "--task-role", "idseq-downloads-prod",
         "--task-name", BulkDownload::ECS_TASK_NAME,
         "--ecr-image", "idseq-s3-tar-writer:latest",
@@ -300,7 +319,7 @@ describe BulkDownload, type: :model do
         "--fargate-memory", "8192",
       ]
 
-      expect(@bulk_download.aegea_ecs_submit_command(["MOCK SHELL COMMAND"])).to eq(task_command)
+      expect(@bulk_download.aegea_ecs_submit_command(executable_file_path: mock_executable_file_path)).to eq(task_command)
     end
 
     it "allows override of ecr image via AppConfig" do
@@ -309,7 +328,7 @@ describe BulkDownload, type: :model do
       allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
       task_command = [
-        "aegea", "ecs", "run", "--command=MOCK\\ SHELL\\ COMMAND",
+        "aegea", "ecs", "run", "--command=#{mock_shell_command}",
         "--task-role", "idseq-downloads-prod",
         "--task-name", BulkDownload::ECS_TASK_NAME,
         "--ecr-image", "idseq-s3-tar-writer:v1.0",
@@ -317,7 +336,7 @@ describe BulkDownload, type: :model do
         "--fargate-memory", "8192",
       ]
 
-      expect(@bulk_download.aegea_ecs_submit_command(["MOCK SHELL COMMAND"])).to eq(task_command)
+      expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
     end
   end
 
@@ -327,14 +346,43 @@ describe BulkDownload, type: :model do
       @bulk_download = create(:bulk_download, user: @joe)
     end
 
-    it "correctly updates bulk download on aegea ecs success" do
-      expect(Open3).to receive(:capture3).exactly(1).times.and_return(
-        [JSON.generate("taskArn": "ABC"), "", instance_double(Process::Status, exitstatus: 0)]
+    let(:mock_shell_command) { "SHELL COMMAND" }
+    let(:mock_aegea_ecs_submit_command) { "AEGEA ECS SUBMIT COMMAND" }
+    let(:mock_task_arn) { "ABC" }
+
+    it "runs correctly in basic case" do
+      expect(@bulk_download).to receive(:aegea_ecs_submit_command).exactly(1).times.with(hash_including(shell_command: Shellwords.escape(mock_shell_command))).and_return(
+        [mock_aegea_ecs_submit_command]
       )
 
-      @bulk_download.kickoff_ecs_task(["SHELL_COMMAND"])
+      expect(Open3).to receive(:capture3).exactly(1).times.with(mock_aegea_ecs_submit_command).and_return(
+        [JSON.generate("taskArn": mock_task_arn), "", instance_double(Process::Status, exitstatus: 0)]
+      )
 
-      expect(@bulk_download.ecs_task_arn).to eq("ABC")
+      @bulk_download.kickoff_ecs_task([mock_shell_command])
+
+      expect(@bulk_download.ecs_task_arn).to eq(mock_task_arn)
+      expect(@bulk_download.status).to eq(BulkDownload::STATUS_RUNNING)
+    end
+
+    it "uses executable when number of pipeline runs is over threshold" do
+      # stub pipeline runs length to be larger than the min threshold.
+      expect(@bulk_download).to receive(:pipeline_runs).exactly(1).times.and_return(
+        double("Fake pipeline runs array", length: BulkDownload::EXECUTABLE_MIN_THRESHOLD)
+      )
+      expect(@bulk_download).to receive(:aegea_ecs_submit_command).exactly(1).times.with(hash_including(executable_file_path: anything)).and_return(
+        [mock_aegea_ecs_submit_command]
+      )
+
+      expect(Open3).to receive(:capture3).exactly(1).times.with(mock_aegea_ecs_submit_command).and_return(
+        [JSON.generate("taskArn": mock_task_arn), "", instance_double(Process::Status, exitstatus: 0)]
+      )
+
+      expect_any_instance_of(Tempfile).to receive(:unlink).exactly(1).times
+
+      @bulk_download.kickoff_ecs_task([mock_shell_command])
+
+      expect(@bulk_download.ecs_task_arn).to eq(mock_task_arn)
       expect(@bulk_download.status).to eq(BulkDownload::STATUS_RUNNING)
     end
 

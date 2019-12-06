@@ -17,6 +17,7 @@ class BulkDownload < ApplicationRecord
   OUTPUT_DOWNLOAD_EXPIRATION = 86_400 # seconds
   PROGRESS_UPDATE_DELAY = 15 # Minimum number of seconds between progress updates.
   ECS_TASK_NAME = "bulk_downloads".freeze
+  EXECUTABLE_MIN_THRESHOLD = 100
 
   before_save :convert_params_to_json
 
@@ -87,7 +88,8 @@ class BulkDownload < ApplicationRecord
 
   # Returned as an array of strings
   def aegea_ecs_submit_command(
-    shell_command,
+    shell_command: nil,
+    executable_file_path: nil,
     task_role: "idseq-downloads-#{Rails.env}",
     ecr_image: "idseq-s3-tar-writer:latest",
     fargate_cpu: "4096",
@@ -97,9 +99,11 @@ class BulkDownload < ApplicationRecord
     unless config_ecr_image.nil?
       ecr_image = config_ecr_image
     end
-    shell_command_escaped = shell_command.map { |s| Shellwords.escape(s) }.join(" ")
+
+    command_flag = shell_command.present? ? "--command=#{shell_command}" : "--execute=#{executable_file_path}"
+
     ["aegea", "ecs", "run",
-     "--command=#{shell_command_escaped}",
+     command_flag,
      "--task-role", task_role,
      "--task-name", ECS_TASK_NAME,
      "--ecr-image", ecr_image,
@@ -145,10 +149,27 @@ class BulkDownload < ApplicationRecord
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{download_output_key}"
   end
 
+  def create_local_exec_file(shell_command)
+    executable_file = Tempfile.new
+    executable_file.write(shell_command)
+    executable_file.close
+    executable_file
+  end
+
   def kickoff_ecs_task(
-    shell_command
+    shell_command_array
   )
-    aegea_command = aegea_ecs_submit_command(shell_command)
+    executable_file = nil
+    aegea_command = ""
+    shell_command_escaped = shell_command_array.map { |s| Shellwords.escape(s) }.join(" ")
+
+    if pipeline_runs.length >= EXECUTABLE_MIN_THRESHOLD
+      # If there are too many samples in this bulk download, upload the command as a file instead.
+      executable_file = create_local_exec_file(shell_command_escaped)
+      aegea_command = aegea_ecs_submit_command(executable_file_path: executable_file.path.to_s)
+    else
+      aegea_command = aegea_ecs_submit_command(shell_command: shell_command_escaped)
+    end
 
     command_stdout, command_stderr, status = Open3.capture3(*aegea_command)
     if status.exitstatus.zero?
@@ -162,6 +183,10 @@ class BulkDownload < ApplicationRecord
       self.error_message = BulkDownloadsHelper::KICKOFF_FAILURE
       save!
       raise command_stderr
+    end
+  ensure
+    if executable_file.present?
+      executable_file.unlink
     end
   end
 
