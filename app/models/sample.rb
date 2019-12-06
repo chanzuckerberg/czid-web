@@ -112,7 +112,7 @@ class Sample < ApplicationRecord
 
   def pipeline_runs_info
     prvs = {}
-    pipeline_runs.joins(:taxon_counts, :alignment_config).order(created_at: :desc).distinct.each do |pr|
+    pipeline_runs.left_joins(:taxon_counts, :alignment_config).order(created_at: :desc).distinct.each do |pr|
       prvs[pr.pipeline_version] ||= {
         id: pr.id,
         pipeline_version: pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version,
