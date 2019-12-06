@@ -13,14 +13,14 @@ admin_visualization:
   samples: [one, two]
 
 private_visualization:
-  user: one
+  user: admin_one
   public_access: 0
   visualization_type: heatmap
   name: private_visualization
   samples: [one, two]
 
 public_visualization:
-  user: one
+  user: admin_one
   public_access: 1
   visualization_type: heatmap
   name: public_visualization

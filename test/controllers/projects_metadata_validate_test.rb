@@ -9,14 +9,12 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     @metadata_validation_project = projects(:metadata_validation_project)
     @public_project = projects(:public_project)
     @joe_project = projects(:joe_project)
-    @user = users(:one)
-    @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    @user = users(:admin_one)
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'metadata validate basic' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -35,7 +33,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
 
   # Test that using the display name for metadata fields also works.
   test 'metadata validate with display name' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -53,7 +51,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate sample name exists' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -75,7 +73,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate row length valid' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -99,7 +97,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate sample names valid' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -128,7 +126,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate values valid' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -161,7 +159,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate overwrite warning' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -188,7 +186,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate core and custom fields' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -213,7 +211,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate invalid field for host genome throws error' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -233,7 +231,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate duplicate columns throws error' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -255,7 +253,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot validate new metadata against existing project in a public project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       post validate_metadata_csv_project_url(@public_project), params: {
@@ -271,7 +269,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot validate new metadata against existing samples in another private project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       post validate_metadata_csv_project_url(@metadata_validation_project), params: {
@@ -287,7 +285,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can validate new metadata for existing samples in a private project he is a member of' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     post validate_metadata_csv_project_url(@joe_project), params: {
       metadata: {
