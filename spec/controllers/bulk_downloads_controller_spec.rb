@@ -13,6 +13,10 @@ RSpec.describe BulkDownloadsController, type: :controller do
     end
 
     describe "POST #create" do
+      before do
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+      end
+
       it "should create new bulk download and kickoff the aegea ecs task" do
         @sample_one = create(:sample, project: @project, name: "Test Sample One",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
@@ -149,6 +153,27 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         json_response = JSON.parse(response.body)
         expect(json_response["error"]).to eq(BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR)
+      end
+
+      it "should error if too many samples are requested in the bulk download" do
+        @sample_one = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample_two = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        # Set MAX_SAMPLES_BULK_DOWNLOAD to 1
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 1)
+
+        bulk_download_params = {
+          download_type: "sample_overview",
+          sample_ids: [@sample_one, @sample_two],
+        }
+
+        post :create, params: bulk_download_params
+        expect(response).to have_http_status(422)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % 1)
       end
 
       it "checks and uses the most recent pipeline run for a sample" do
