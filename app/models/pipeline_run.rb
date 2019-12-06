@@ -1095,7 +1095,7 @@ class PipelineRun < ApplicationRecord
     if unidentified
       unmapped_reads = unidentified[:reads_after]
 
-      if supports_assembly? && finalized?
+      if supports_assembly?
         # see idseq_dag/steps/generate_annotated_fasta.py
         begin
           Rails.logger.info("Fetching file: #{s3_path}")
