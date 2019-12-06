@@ -100,19 +100,16 @@ class Auth0Controller < ApplicationController
     email = params.dig("user", "email")
     return if email.blank?
 
-    # Send them a password reset email via Auth0 if enabled or the legacy Devise flow.
-    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
+    user = User.find_by(email: email)
+    if user
       Auth0UserManagementHelper.send_auth0_password_reset_email(email)
-      redirect_to auth0_login_url
     else
-      # DEPRECATED: Legacy Devise flow. Remove block after migrating to Auth0.
-      user = User.find_by(email: email)
-      if user
-        user.send_reset_password_instructions
-      end
-      # Old login page
-      redirect_to new_user_session_path
+      # If no account found, send an informative email to reduce confusion.
+      # This is good security practice to avoid revealing account existence on
+      # a public endpoint.
+      UserMailer.no_account_found(email).deliver_now
     end
+    redirect_to auth0_login_url
   end
 
   private
