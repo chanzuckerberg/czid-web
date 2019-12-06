@@ -764,7 +764,7 @@ class SamplesController < ApplicationController
               },
             }
           ).merge(
-            default_pipeline_run_id: @sample.first_pipeline_run.id,
+            default_pipeline_run_id: @sample.first_pipeline_run.present? ? @sample.first_pipeline_run.id : nil,
             pipeline_runs: @sample.pipeline_runs_info,
             editable: current_power.updatable_sample?(@sample)
           )
