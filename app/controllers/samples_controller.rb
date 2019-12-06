@@ -1344,9 +1344,10 @@ class SamplesController < ApplicationController
     }
   end
 
-  # GET /samples/taxa_with_reads_suggestions
+  # POST /samples/taxa_with_reads_suggestions
   # Get taxon search suggestions, where taxa are restricted to the provided sample ids.
   # Also include, for each taxon, the number of samples that contain reads for the taxon.
+  # This method uses POST because hundreds of sampleIds params can be passed.
   def taxa_with_reads_suggestions
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     query = params[:query]
@@ -1368,9 +1369,10 @@ class SamplesController < ApplicationController
     render json: taxon_list
   end
 
-  # GET /samples/taxa_with_contigs_suggestions
+  # POST /samples/taxa_with_contigs_suggestions
   # Get taxon search suggestions, where taxa are restricted to the provided sample ids.
   # Also include, for each taxon, the number of samples that contain contigs for the taxon.
+  # This method uses POST because hundreds of sampleIds params can be passed.
   def taxa_with_contigs_suggestions
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     query = params[:query]
@@ -1392,8 +1394,9 @@ class SamplesController < ApplicationController
     render json: taxon_list
   end
 
-  # GET /samples/uploaded_by_current_user
+  # POST /samples/uploaded_by_current_user
   # Return whether all sampleIds were uploaded by the current user.
+  # This method uses POST because hundreds of sampleIds params can be passed.
   def uploaded_by_current_user
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     samples = Sample.where(user: current_user, id: sample_ids)
