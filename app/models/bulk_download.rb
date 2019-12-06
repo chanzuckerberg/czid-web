@@ -16,6 +16,7 @@ class BulkDownload < ApplicationRecord
   STATUS_SUCCESS = "success".freeze
   OUTPUT_DOWNLOAD_EXPIRATION = 86_400 # seconds
   PROGRESS_UPDATE_DELAY = 15 # Minimum number of seconds between progress updates.
+  ECS_TASK_NAME = "bulk_downloads".freeze
 
   before_save :convert_params_to_json
 
@@ -62,6 +63,10 @@ class BulkDownload < ApplicationRecord
     ENV["SERVER_DOMAIN"]
   end
 
+  def log_stream_name
+    "#{ECS_TASK_NAME}/#{ECS_TASK_NAME}/#{ecs_task_arn.split('/')[-1]}"
+  end
+
   # The Rails success url that the s3_tar_writer task can ping once it succeeds.
   def success_url
     return nil if server_host.blank?
@@ -96,7 +101,7 @@ class BulkDownload < ApplicationRecord
     ["aegea", "ecs", "run",
      "--command=#{shell_command_escaped}",
      "--task-role", task_role,
-     "--task-name", "bulk_download_#{id}",
+     "--task-name", ECS_TASK_NAME,
      "--ecr-image", ecr_image,
      "--fargate-cpu", fargate_cpu,
      "--fargate-memory", fargate_memory,]
