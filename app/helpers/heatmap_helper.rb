@@ -27,6 +27,7 @@ module HeatmapHelper
 
   # Samples and background are assumed here to be vieweable.
   def self.sample_taxons_dict(params, samples, background_id)
+    @timer = Timer.new("#{params[:controller]}.#{params[:action]}:sample_taxons_dict")
     return {} if samples.empty?
 
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
@@ -60,6 +61,7 @@ module HeatmapHelper
 
     background_id = background_id && background_id > 0 ? background_id : samples.first.default_background_id
 
+    @timer.split("prepare_for_fetching_data")
     results_by_pr = fetch_top_taxons(
       samples,
       background_id,
@@ -72,6 +74,7 @@ module HeatmapHelper
       threshold_filters,
       species_selected
     )
+    @timer.split("fetch_top_taxa")
 
     details = top_taxons_details(
       results_by_pr,
@@ -80,6 +83,7 @@ module HeatmapHelper
       species_selected,
       threshold_filters
     )
+    @timer.split("fetch_top_taxa_details")
 
     taxon_ids = details.pluck('tax_id')
     taxon_ids -= removed_taxon_ids
@@ -89,14 +93,18 @@ module HeatmapHelper
       parent_ids = species_selected ? [] : details.pluck('genus_taxid').uniq
       results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     end
+    @timer.split("fetch_taxa_counts")
 
-    HeatmapHelper.samples_taxons_details(
+    sample_taxa_details = HeatmapHelper.samples_taxons_details(
       results_by_pr,
       samples,
       taxon_ids,
       species_selected,
       threshold_filters
     )
+    @timer.split("fetch_sample_taxa_details")
+    @timer.publish
+    sample_taxa_details
   end
 
   def self.top_taxons_details(
@@ -167,6 +175,7 @@ module HeatmapHelper
     threshold_filters = [],
     species_selected = true
   )
+    timer = Timer.new("fetch_top_taxons")
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
     if categories.present?
@@ -239,10 +248,19 @@ module HeatmapHelper
       #{read_specificity_clause}
       #{phage_clause}"
 
+    ActiveRecord::Base.connection.query_cache.clear
+    timer.split("prepared_query")
+
+    # ActiveRecord::Base.connection.clear_query_cache
+
     # TODO: (gdingle): how do we protect against SQL injection?
-    sql_results = TaxonCount.connection.select_all(
+    result = ActiveRecord::Base.connection.exec_query(
       top_n_query(query, sort_by, num_results, threshold_filters)
-    ).to_hash
+    )
+    timer.split("executed_query")
+
+    sql_results = result.to_hash
+    timer.split("to_hash")
 
     # organizing the results by pipeline_run_id
     result_hash = {}
@@ -268,6 +286,9 @@ module HeatmapHelper
         result_hash[pipeline_run_id]["taxon_counts"] << row
       end
     end
+    timer.split("finalize_results")
+    timer.publish
+
     result_hash
   end
 

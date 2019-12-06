@@ -2,6 +2,8 @@ class VisualizationsController < ApplicationController
   include ReportHelper
   include HeatmapHelper
 
+  around_action :instrument_with_timer
+
   clear_respond_to
   respond_to :json
 
@@ -220,10 +222,12 @@ class VisualizationsController < ApplicationController
                            .compact
                            .map(&:updated_at)
                            .compact
+    @timer.split("fetch_last_update_ts_prs")
     metadata_updated_ats = samples_for_heatmap
                            .map(&:metadata)
                            .map { |ms| ms.map(&:updated_at) }
                            .flatten
+    @timer.split("fetch_last_update_ts_metadata")
     [pipeline_updated_ats.max, metadata_updated_ats.max].compact.max.to_i
   end
 end
