@@ -9,21 +9,6 @@ class UserMailerPreview < ActionMailer::Preview
     )
   end
 
-  def new_user_new_project
-    sender = User.second
-    sender.email_arguments = {
-      email_subject: 'You have been invited to IDseq',
-      email_template: 'new_user_new_project',
-      sharing_user_id: User.first.id,
-      shared_project_id: Project.first.id,
-    }
-    CustomDeviseMailer.reset_password_instructions(sender, "fake_token", {})
-  end
-
-  def reset_password_instructions
-    CustomDeviseMailer.reset_password_instructions(User.first, "fake_token", {})
-  end
-
   def account_request_reply
     UserMailer.account_request_reply(User.first.email)
   end
