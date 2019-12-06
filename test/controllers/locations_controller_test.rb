@@ -13,7 +13,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "user can geosearch and see an API key error" do
-    post user_session_path, params: @user_params
+    sign_in @user
     ENV["LOCATION_IQ_API_KEY"] = nil
     get external_search_locations_path, params: { query: "UCSF" }
     assert_response :error
@@ -21,7 +21,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "user can geosearch and see a service-side error" do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     Location.stub :geo_search_request_base, @api_rate_limit_response do
       get external_search_locations_path, params: { query: "UCSF" }
@@ -33,7 +33,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
   test "user can see their map playground results" do
     # TODO: Use non-admin user once released
-    post user_session_path, params: @user_params
+    sign_in @user
     get map_playground_locations_path, as: :json
 
     assert_response :success
@@ -43,7 +43,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "user can see a map playground error" do
-    post user_session_path, params: @user_params
+    sign_in @user
     MetadataField.stub :find_by, nil do
       get map_playground_locations_path, as: :json
       assert_response :error
@@ -53,7 +53,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
   # TODO: Add a test like this for non-admin users once released
   test "user can load location data for the map for a set of samples" do
-    post user_session_path, params: @user_params
+    sign_in @user
     get sample_locations_locations_path, as: :json
     assert_response :success
 
@@ -66,7 +66,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "user can load location data including Country and State parent levels" do
-    post user_session_path, params: @user_params
+    sign_in @user
     get sample_locations_locations_path, as: :json
     assert_response :success
 
@@ -79,7 +79,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
   # TODO: Uncomment and use non-admin user once released
   # test "joe cannot see someone else's private map playground results" do
-  #   post user_session_path, params: @user_params
+  #   sign_in @user
   #   get map_playground_locations_path, as: :json
   #
   #   assert_response :success

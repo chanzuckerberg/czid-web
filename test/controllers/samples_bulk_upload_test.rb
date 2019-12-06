@@ -8,17 +8,15 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     @metadata_validation_project = projects(:metadata_validation_project)
     @joe_project = projects(:joe_project)
     @public_project = projects(:public_project)
-    @user = users(:one)
+    @user = users(:admin_one)
     @host_genome_human = host_genomes(:human)
     @host_genome_mosquito = host_genomes(:mosquito)
     @core_field = metadata_fields(:core_field)
-    @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'bulk upload basic remote' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "web",
@@ -91,7 +89,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'bulk upload basic local' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "web",
@@ -163,7 +161,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
 
   # Test that using the display name for metadata fields also works.
   test 'bulk upload with display names for metadata' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "web",
@@ -208,7 +206,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'bulk upload old client' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "0.4.0",
@@ -248,7 +246,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'bulk upload new client' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "0.8.0",
@@ -292,7 +290,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'bulk upload missing required metadata' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "0.8.0",
@@ -337,7 +335,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
 
   # If the metadata field isn't supported by the sample's host genome, throw an error.
   test 'bulk upload invalid key for host genome' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "web",
@@ -386,7 +384,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'bulk upload core and custom fields' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     # Prior to upload, the custom fields shouldn't exist.
     assert_equal 0, MetadataField.where(name: "Custom Field").length
@@ -494,7 +492,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
   # Test that when samples with different host genomes all need a custom field,
   # only one custom field is created.
   test 'bulk upload custom field on multiple host genomes' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     # Prior to upload, the custom field shouldn't exist.
     assert_equal 0, MetadataField.where(name: "Custom Field").length
@@ -575,7 +573,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
 
   # Test that a nonadmin user cannot upload to a private project he is not a member of.
   test 'joe cannot bulk upload to a private project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "0.8.0",
@@ -619,7 +617,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
 
   # Test that a nonadmin user cannot upload to a public project
   test 'joe cannot bulk upload to a public project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "0.8.0",
@@ -663,7 +661,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
 
   # Test that a nonadmin user can upload to a project he is a member of.
   test 'joe can bulk upload to projects he is a member of' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "0.8.0",

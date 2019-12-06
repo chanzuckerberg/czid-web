@@ -7,26 +7,24 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     @joe_project = projects(:joe_project)
     @public_project = projects(:public_project)
     @deletable_project = projects(:deletable_project)
-    @user = users(:one)
-    @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    @user = users(:admin_one)
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'should get index' do
-    post user_session_path, params: @user_params
+    sign_in @user
     get projects_url
     assert_response :success
   end
 
   test 'should get new' do
-    post user_session_path, params: @user_params
+    sign_in @user
     get new_project_url
     assert_response :success
   end
 
   test 'should create project' do
-    post user_session_path, params: @user_params
+    sign_in @user
     assert_difference('Project.count') do
       post projects_url, params: { project: { name: 'New Project' } }
     end
@@ -35,25 +33,25 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show project' do
-    post user_session_path, params: @user_params
+    sign_in @user
     get project_url(@project)
     assert_response :success
   end
 
   test 'should get edit' do
-    post user_session_path, params: @user_params
+    sign_in @user
     get edit_project_url(@project)
     assert_response :success
   end
 
   test 'should update project' do
-    post user_session_path, params: @user_params
+    sign_in @user
     patch project_url(@project), params: { project: { name: @project.name } }
     assert_redirected_to project_url(@project)
   end
 
   test 'should destroy project' do
-    post user_session_path, params: @user_params
+    sign_in @user
     assert_difference('Project.count', -1) do
       delete project_url(@deletable_project)
     end
@@ -62,7 +60,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'validate_sample_names basic' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_sample_names_project_url(@metadata_validation_project), params: {
       sample_names: ['Test One', 'Test Two', 'metadata_validation_sample_mosquito'],
@@ -74,7 +72,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'validate_sample_names weird edge case' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_sample_names_project_url(@metadata_validation_project), params: {
       sample_names: ['Test One', 'Test One', 'Test One_1'],
@@ -86,7 +84,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can query the metadata fields that belong to a public project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_fields_projects_url, params: {
       projectIds: [@public_project.id],
@@ -97,7 +95,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can query the metadata fields that belong to a private project he is a part of' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_fields_projects_url, params: {
       projectIds: [@joe_project.id],
@@ -108,7 +106,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot query the metadata fields that belong to another private project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       get metadata_fields_projects_url, params: {
@@ -119,7 +117,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
   # If multiple samples, merge the fields.
   test 'joe can query the metadata fields that belong to multiple projects' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_fields_projects_url, params: {
       projectIds: [@public_project.id, @joe_project.id],
@@ -131,7 +129,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
   # If multiple samples but one is invalid, return fields for the valid ones.
   test 'joe can query the metadata fields that belong to multiple projects, and invalid projects will be omitted.' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_fields_projects_url, params: {
       projectIds: [@public_project.id, @metadata_validation_project.id],

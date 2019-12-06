@@ -2,8 +2,7 @@ require 'test_helper'
 
 class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
-    post user_session_path, params: { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    sign_in :admin_one
     @project = projects(:one)
   end
 

@@ -3,8 +3,8 @@ require 'test_helper'
 class BackgroundsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @background = backgrounds(:one)
-    @user = users(:one)
-    post user_session_path, params: { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    @user = users(:admin_one)
+    sign_in @user
   end
 
   test "should get index" do

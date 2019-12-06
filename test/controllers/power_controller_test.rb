@@ -572,8 +572,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'admin can see all visualizations by default' do
     sign_in(:admin)
-    @admin = users(:admin)
-    post user_session_path, params: { 'user[email]' => @admin.email, 'user[password]' => "password" }
 
     @admin_visualizations = visualizations(:joe_visualization, :admin_visualization, :public_visualization, :private_visualization)
     get "/visualizations.json"
@@ -586,8 +584,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'admin can see all visualizations on all data domain' do
     sign_in(:admin)
-    @admin = users(:admin)
-    post user_session_path, params: { 'user[email]' => @admin.email, 'user[password]' => "password" }
 
     @admin_visualizations = visualizations(:joe_visualization, :admin_visualization, :public_visualization, :private_visualization)
     get "/visualizations.json?domain=all_data"
