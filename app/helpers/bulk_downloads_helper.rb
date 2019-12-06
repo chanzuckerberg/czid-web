@@ -57,30 +57,17 @@ module BulkDownloadsHelper
     formatted_bulk_download
   end
 
-  # This method models HeatmapHelper.sample_taxons_dict when fetching metrics. It uses the necessary logic from that function.
-  def self.generate_combined_sample_taxon_results_csv(samples, background_id, metric)
-    # First, fetch all the data.
-
-    # By default, fetches top 1,000,000 taxons for each sample.
-    results_by_pr = HeatmapHelper.fetch_top_taxons(
-      samples,
-      background_id,
-      nil, # categories
-      HeatmapHelper::READ_SPECIFICITY,
-      HeatmapHelper::INCLUDE_PHAGE,
-      HeatmapHelper::DEFAULT_NUM_RESULTS,
-      0 # minimum read threshold
-    )
-
+  # Generate the metric values matrix.
+  def self.generate_metric_values(taxon_counts_by_pr, _samples, metric)
     metric_values = {}
+    # Maintain a hash of all the taxons we've encountered.
+    taxids_to_name = {}
+
     # metric is a string like NT.rpm. Convert it to ["NT", "rpm"]
     metric_path = metric.split(".")
 
-    # Maintain a hash of all the taxons we've founded, so that we can generate the csv rows.
-    all_fetched_taxids_to_name = {}
-
     # Build up the metric_value matrix.
-    results_by_pr.each do |_pr_id, results|
+    taxon_counts_by_pr.each do |_pr_id, results|
       # results contains taxon counts, plus the pipeline run object and sample id.
       results_taxon_counts = results["taxon_counts"]
       sample_id = results["sample_id"]
@@ -100,12 +87,39 @@ module BulkDownloadsHelper
         # since zscore can be nonzero even if the corresponding read count was zero.
         if metric_value > 0 || metric == "NT.zscore" || metric == "NR.zscore"
           sample_metric_values[taxid] = metric_value
-          all_fetched_taxids_to_name[taxid] = taxon_counts["name"]
+          taxids_to_name[taxid] = taxon_counts["name"]
         end
       end
 
       metric_values[sample_id] = sample_metric_values
     end
+
+    {
+      metric_values: metric_values,
+      taxids_to_name: taxids_to_name,
+    }
+  end
+
+  # This method models HeatmapHelper.sample_taxons_dict when fetching metrics. It uses the necessary logic from that function.
+  def self.generate_combined_sample_taxon_results_csv(samples, background_id, metric)
+    # First, fetch all the data.
+
+    # For each sample, fetch taxon counts for that sample.
+    # By default, fetches top 1,000,000 taxons for each sample.
+    taxon_counts_by_pr = HeatmapHelper.fetch_top_taxons(
+      samples,
+      background_id,
+      nil, # categories
+      HeatmapHelper::READ_SPECIFICITY,
+      HeatmapHelper::INCLUDE_PHAGE,
+      HeatmapHelper::DEFAULT_NUM_RESULTS,
+      0 # minimum read threshold
+    )
+
+    # Generate the metric values matrix.
+    # Also generate a hash of all encountered taxids to their taxonomy name.
+    metric_values, taxids_to_name = BulkDownloadsHelper.generate_metric_values(taxon_counts_by_pr, samples, metric)
+                                                       .values_at(:metric_values, :taxids_to_name)
 
     # Filter out any samples which could not be fetched or had no valid columns.
     successful_samples, failed_samples = samples.to_a.partition { |sample| metric_values[sample.id].present? }
@@ -116,7 +130,7 @@ module BulkDownloadsHelper
       csv << ["Taxon Name"] + successful_samples.pluck(:name)
 
       # Add the rows.
-      all_fetched_taxids_to_name.each do |taxid, taxon_name|
+      taxids_to_name.each do |taxid, taxon_name|
         row = []
         row << taxon_name
 

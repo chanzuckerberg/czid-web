@@ -52,6 +52,11 @@ const CONDITIONAL_FIELDS = [
   },
 ];
 
+const triggersConditionalField = (conditionalField, selectedFields) =>
+  conditionalField.triggerValues.includes(
+    get(conditionalField.dependentField, selectedFields)
+  );
+
 class ChooseStep extends React.Component {
   state = {
     backgroundOptions: null,
@@ -125,9 +130,7 @@ class ChooseStep extends React.Component {
     CONDITIONAL_FIELDS.forEach(field => {
       if (
         downloadType.type === field.downloadType &&
-        !field.triggerValues.includes(
-          get([downloadType.type, field.dependentField], selectedFields)
-        )
+        !triggersConditionalField(field, selectedFields)
       ) {
         requiredFields = reject(["type", field.field], requiredFields);
       }
@@ -152,8 +155,7 @@ class ChooseStep extends React.Component {
         some(
           Boolean,
           map(
-            field =>
-              isUndefined(get([downloadType.type, field.type], selectedFields)),
+            field => isUndefined(get(field.type, selectedFields)),
             requiredFields
           )
         )
@@ -224,7 +226,7 @@ class ChooseStep extends React.Component {
       metricsOptions,
     } = this.state;
 
-    const selectedField = get([downloadType.type, field.type], selectedFields);
+    const selectedField = get(field.type, selectedFields);
     let dropdownOptions = null;
     let loadingOptions = false;
     let optionsHeader = null;
@@ -243,12 +245,7 @@ class ChooseStep extends React.Component {
     if (
       field.type === fileFormatConditionalField.field &&
       downloadType.type === fileFormatConditionalField.downloadType &&
-      !fileFormatConditionalField.triggerValues.includes(
-        get(
-          [downloadType.type, fileFormatConditionalField.dependentField],
-          selectedFields
-        )
-      )
+      !triggersConditionalField(fileFormatConditionalField, selectedFields)
     ) {
       return (
         <div className={cs.field} key={field.type}>
@@ -260,26 +257,15 @@ class ChooseStep extends React.Component {
         </div>
       );
       // For other conditional fields, render nothing.
-    } else {
-      let abortRenderOption = false;
-
-      CONDITIONAL_FIELDS.forEach(conditionalField => {
-        if (
+    } else if (
+      CONDITIONAL_FIELDS.some(
+        conditionalField =>
           field.type === conditionalField.field &&
           downloadType.type === conditionalField.downloadType &&
-          !conditionalField.triggerValues.includes(
-            get(
-              [downloadType.type, conditionalField.dependentField],
-              selectedFields
-            )
-          )
-        ) {
-          abortRenderOption = true;
-        }
-      });
-
-      if (abortRenderOption) return;
-    }
+          !triggersConditionalField(conditionalField, selectedFields)
+      )
+    )
+      return;
 
     // Set different props for the dropdown depending on the field type.
     switch (field.type) {
@@ -513,7 +499,8 @@ ChooseStep.propTypes = {
   downloadTypes: PropTypes.arrayOf(PropTypes.DownloadType),
   selectedDownloadTypeName: PropTypes.string,
   onSelect: PropTypes.func.isRequired,
-  selectedFields: PropTypes.objectOf(PropTypes.objectOf(PropTypes.string)),
+  // The selected fields of the currently selected download type.
+  selectedFields: PropTypes.objectOf(PropTypes.string),
   onFieldSelect: PropTypes.func.isRequired,
   onContinue: PropTypes.func.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
