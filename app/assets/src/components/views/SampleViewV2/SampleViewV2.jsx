@@ -965,7 +965,10 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
-    if (reportMetadata.pipelineRunStatus === "COMPLETE") {
+    if (
+      reportMetadata.pipelineRunStatus === "COMPLETE" &&
+      !reportMetadata.hasErrors
+    ) {
       return (
         <div className={cs.reportViewContainer}>
           <div className={cs.reportFilters}>

@@ -68,7 +68,7 @@ class PipelineReportService
 
   def generate
     pipeline_run, metadata = get_pipeline_status(@pipeline_run_id)
-    if @pipeline_run_id.nil? || !pipeline_run.completed?
+    unless pipeline_run_succeeded?(pipeline_run)
       return JSON.dump(
         metadata: metadata
       )
@@ -234,6 +234,13 @@ class PipelineReportService
         jobStatus: pipeline_run.job_status_display,
       },
     ]
+  end
+
+  def pipeline_run_succeeded?(pipeline_run)
+    # This condition is carried over from the previous version of the report page (report_helper.rb ln95).
+    # TODO: review this condition and clean up the implementation of pipeline_run statuses.
+    # JIRA: https://jira.czi.team/browse/IDSEQ-1890
+    return pipeline_run && (((pipeline_run.adjusted_remaining_reads.to_i > 0 || pipeline_run.finalized?) && !pipeline_run.failed?) || pipeline_run.report_ready?)
   end
 
   def fetch_taxon_counts(_pipeline_run_id, _background_id)
