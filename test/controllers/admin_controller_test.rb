@@ -2,8 +2,8 @@ require 'test_helper'
 
 class AdminControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
-    post user_session_path, params: { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    @user_to_modify = users(:regular_user)
+    sign_in :admin_one
   end
 
   test 'should get index' do
@@ -17,13 +17,13 @@ class AdminControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should get edit' do
-    get edit_user_url(@user)
+    get edit_user_url(@user_to_modify)
     assert_response :success
   end
 
   test 'should destroy user' do
     assert_difference('User.count', -1) do
-      delete user_url(@user)
+      delete user_url(@user_to_modify)
     end
 
     assert_redirected_to users_url

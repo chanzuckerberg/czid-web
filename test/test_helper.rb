@@ -15,7 +15,9 @@ class ActiveSupport::TestCase
   end
 
   def sign_in(user)
-    @user = users(user)
-    post user_session_path, params: { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    unless user.instance_of? User
+      user = users(user)
+    end
+    post user_session_path, params: { 'user[email]' => user.email, 'user[password]' => "#{user.name} password" }
   end
 end
