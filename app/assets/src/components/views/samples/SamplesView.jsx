@@ -474,7 +474,14 @@ class SamplesView extends React.Component {
 
   handleBulkDownloadModalOpen = () => {
     const { maxSamplesBulkDownload } = this.context || {};
-    if (this.props.selectedSampleIds.size > parseInt(maxSamplesBulkDownload)) {
+    if (!maxSamplesBulkDownload) {
+      this.setState({
+        bulkDownloadButtonTempTooltip:
+          "Unexpected issue. Please contact us for help.",
+      });
+    } else if (
+      this.props.selectedSampleIds.size > parseInt(maxSamplesBulkDownload)
+    ) {
       this.setState({
         bulkDownloadButtonTempTooltip: `No more than ${maxSamplesBulkDownload} samples allowed in one download.`,
       });

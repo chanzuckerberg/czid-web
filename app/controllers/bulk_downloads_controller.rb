@@ -28,6 +28,11 @@ class BulkDownloadsController < ApplicationController
       # Max samples check.
       max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
 
+      # Max samples should be string containing an integer, but just in case.
+      if max_samples_allowed.nil?
+        raise KICKOFF_FAILURE_HUMAN_READABLE
+      end
+
       if sample_ids.length > Integer(max_samples_allowed)
         raise BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
       end
