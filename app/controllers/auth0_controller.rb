@@ -47,6 +47,9 @@ class Auth0Controller < ApplicationController
   # Handle omniauth errors coming from Auth0.
   def omniauth_failure
     # Error and error_description come from Auth0. Ex: unauthorized and password_expired.
+    unless params["error"] && params["error_description"]
+      LogUtil.log_err_and_airbrake("omniauth_failure called with missing error or error_description")
+    end
     error_type = (params["error"] || "").to_sym
     error_code = (params["error_description"] || "").to_sym
     Rails.logger.info("Auth0 omniauth_failure: #{error_type}: #{error_code}")
