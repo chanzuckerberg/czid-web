@@ -1098,7 +1098,7 @@ class PipelineRun < ApplicationRecord
       unmapped_reads = unidentified[:reads_after]
 
       # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
-      if supports_assembly? && active_stage.step_number == 3 # assembly
+      if supports_assembly? && active_stage && active_stage.step_number == 3 # assembly
         # see idseq_dag/steps/generate_annotated_fasta.py
         begin
           Rails.logger.info("Fetching file: #{s3_path}")
