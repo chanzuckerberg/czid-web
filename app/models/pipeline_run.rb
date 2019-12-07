@@ -334,7 +334,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def active_stage
-    # TODO: (gdingle):
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     pipeline_run_stages.order(:step_number).each do |prs|
       return prs unless prs.succeeded?
     end
