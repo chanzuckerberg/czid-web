@@ -246,7 +246,7 @@ export default class FAQPage extends React.Component {
             <li>
               <span className={cs.listItemLabel}>Persistent cookies</span>{" "}
               remember certain information about your preferences for viewing
-              Meta and allow us to recognise you each time you return.
+              IDseq and allow us to recognize you each time you return.
               Persistent cookies are stored on your browser cache or mobile
               device until you choose to delete them, and otherwise delete
               themselves in a standard period of time.
