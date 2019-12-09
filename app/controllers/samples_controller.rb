@@ -1432,11 +1432,9 @@ class SamplesController < ApplicationController
   def sample_params
     permitted_params = [:name, :project_name, :project_id, :status,
                         :s3_star_index_path, :s3_bowtie2_index_path,
-                        :host_genome_id, :host_genome_name, :sample_location, :sample_date, :sample_tissue,
-                        :sample_template, :sample_library, :sample_sequencer,
+                        :host_genome_id, :host_genome_name,
                         :sample_notes, :search, :subsample, :max_input_fragments,
-                        :basespace_dataset_id, :basespace_access_token,
-                        :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
+                        :basespace_dataset_id, :basespace_access_token, :client,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)

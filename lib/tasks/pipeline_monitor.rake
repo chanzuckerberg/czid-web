@@ -197,7 +197,6 @@ class CheckPipelineRuns
       project_id: bm_project.id,
       user_id: bm_user.id,
       input_files_attributes: input_files_attributes,
-      sample_organism: known_organisms,
       web_commit: web_commit,
       pipeline_commit: pipeline_commit,
       pipeline_branch: bm_pipeline_branch,
