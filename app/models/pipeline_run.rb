@@ -1590,7 +1590,7 @@ class PipelineRun < ApplicationRecord
         PipelineReportService.call(self, background_id)
       end
 
-      MetricUtil.log_analytics_event("samples.cache.precached", current_user)
+      MetricUtil.log_analytics_event("pipeline_run_precached", nil)
     end
   end
 
