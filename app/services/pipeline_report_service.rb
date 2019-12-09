@@ -52,8 +52,8 @@ class PipelineReportService
     nil => "uncategorized",
   }.freeze
 
-  def initialize(pipeline_run_id, background_id, csv = false, min_contig_size = DEFAULT_MIN_CONTIG_SIZE)
-    @pipeline_run_id = pipeline_run_id
+  def initialize(pipeline_run, background_id, csv = false, min_contig_size = DEFAULT_MIN_CONTIG_SIZE)
+    @pipeline_run = pipeline_run
     @background_id = background_id
     @csv = csv
     @min_contig_size = min_contig_size
@@ -67,12 +67,13 @@ class PipelineReportService
   end
 
   def generate
-    pipeline_run, metadata = get_pipeline_status(@pipeline_run_id)
+    pipeline_run, metadata = get_pipeline_status(@pipeline_run)
     unless pipeline_run_report_available?(pipeline_run)
       return JSON.dump(
         metadata: metadata
       )
     end
+    @pipeline_run_id = pipeline_run.id
 
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
@@ -204,8 +205,8 @@ class PipelineReportService
     end
   end
 
-  def get_pipeline_status(pipeline_run_id)
-    if pipeline_run_id.nil?
+  def get_pipeline_status(pipeline_run)
+    if pipeline_run.nil?
       return [
         nil,
         {
@@ -218,7 +219,6 @@ class PipelineReportService
       ]
     end
 
-    pipeline_run = PipelineRun.find(pipeline_run_id)
     pipeline_status = "WAITING"
     if pipeline_run.completed?
       pipeline_status = "COMPLETE"
@@ -539,5 +539,14 @@ class PipelineReportService
         csv << tax_info_by_symbols.values_at(*flat_keys_symbols)
       end
     end
+  end
+
+  # Example cache key:
+  # /samples/12303/report_v2?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990&pipeline_run_id=39185
+  def self.report_info_cache_key(path, kvs)
+    kvs = kvs.to_h.sort.to_h
+    # Increment this if you ever change the response structure of report_info
+    kvs["_cache_key_version"] = 2
+    path + "?" + kvs.to_param
   end
 end

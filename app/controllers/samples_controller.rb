@@ -800,19 +800,39 @@ class SamplesController < ApplicationController
 
   def report_v2
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    if pipeline_run
-      background_id = get_background_id(@sample, params[:background])
-      render json: PipelineReportService.call(pipeline_run.id, background_id)
-    else
-      render json: {
-        metadata: {
-          pipelineRunStatus: "WAITING",
-          jobStatus: "Waiting to Start or Receive Files",
-          errorMessage: nil,
-          knownUserError: nil,
-        },
-      }
-    end
+    background_id = get_background_id(@sample, params[:background])
+
+    skip_cache = params[:skip_cache] || false
+    MetricUtil.log_analytics_event("samples.cache.requested", current_user) unless skip_cache
+    report_info_params = pipeline_run.report_info_params
+
+    cache_key = PipelineReportService.report_info_cache_key(
+      request.path,
+      params
+        .permit(report_info_params.keys)
+        .merge(pipeline_run_id: pipeline_run.id)
+    )
+
+    json =
+      if skip_cache
+        PipelineReportService.call(pipeline_run, background_id)
+      else
+        # This allows 304 Not Modified to be returned so that the client can use its
+        # local cache and avoid the large download.
+        httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+        response.headers["Last-Modified"] = httpdate
+        # This is a custom header for testing and debugging
+        response.headers["X-IDseq-Cache"] = 'requested'
+        response.headers["X-IDseq-Cache-Key"] = cache_key
+        Rails.logger.info("Requesting report_info #{cache_key}")
+
+        Rails.cache.fetch(cache_key, expires_in: 30.days) do
+          MetricUtil.log_analytics_event("samples.cache.miss", current_user)
+          response.headers["X-IDseq-Cache"] = 'missed'
+          PipelineReportService.call(pipeline_run, background_id)
+        end
+      end
+    render json: json
   end
 
   def amr
