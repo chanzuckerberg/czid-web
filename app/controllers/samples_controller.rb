@@ -813,7 +813,7 @@ class SamplesController < ApplicationController
     httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
 
     json =
-      fetch_from_cache(skip_cache, cache_key, httpdate, "pipeline_report") do
+      fetch_from_cache(skip_cache, cache_key, httpdate, "PipelineReport") do
         PipelineReportService.call(pipeline_run, background_id)
       end
     render json: json

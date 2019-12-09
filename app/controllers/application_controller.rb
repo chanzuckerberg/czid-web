@@ -178,7 +178,7 @@ class ApplicationController < ActionController::Base
     if skip_cache
       yield
     else
-      MetricUtil.log_analytics_event(event_name + "_cache_requested", current_user) unless skip_cache
+      MetricUtil.log_analytics_event(event_name + "_cache-requested", current_user) unless skip_cache
       # This allows 304 Not Modified to be returned so that the client can use its
       # local cache and avoid the large download.
       response.headers["Last-Modified"] = httpdate
@@ -188,7 +188,7 @@ class ApplicationController < ActionController::Base
       Rails.logger.info("Requesting #{cache_key}")
 
       Rails.cache.fetch(cache_key, expires_in: 30.days) do
-        MetricUtil.log_analytics_event(event_name + "_cache_missed", current_user)
+        MetricUtil.log_analytics_event(event_name + "_cache-missed", current_user)
         response.headers["X-IDseq-Cache"] = 'missed'
         yield
       end
