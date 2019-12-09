@@ -600,7 +600,7 @@ class SamplesController < ApplicationController
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
     min_contig_size = params[:min_contig_size]
-    @report_csv = PipelineReportService.call(pipeline_run.id, background_id, true, min_contig_size)
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, true, min_contig_size)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
