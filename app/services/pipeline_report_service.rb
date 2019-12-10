@@ -67,18 +67,18 @@ class PipelineReportService
   end
 
   def generate
-    pipeline_run, metadata = get_pipeline_status(@pipeline_run)
-    unless pipeline_run_report_available?(pipeline_run)
+    metadata = get_pipeline_status(@pipeline_run)
+    unless pipeline_run_report_available?(@pipeline_run)
       return JSON.dump(
         metadata: metadata
       )
     end
-    @pipeline_run_id = pipeline_run.id
+    @pipeline_run_id = @pipeline_run.id
 
-    adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
+    adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
-    contigs = pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
+    contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
     @timer.split("get_contig_summary")
 
     taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
@@ -175,9 +175,9 @@ class PipelineReportService
     highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     @timer.split("find_taxa_to_highlight")
 
-    has_byte_ranges = pipeline_run.taxon_byte_ranges_available?
-    align_viz_available = pipeline_run.align_viz_available?
-    report_ready = pipeline_run.report_ready?
+    has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
+    align_viz_available = @pipeline_run.align_viz_available?
+    report_ready = @pipeline_run.report_ready?
 
     @timer.split("compute_options_available_for_pipeline_run")
 
@@ -185,9 +185,9 @@ class PipelineReportService
       return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
     else
       metadata = metadata.merge(backgroundId: @background_id,
-                                truncatedReadsCount: pipeline_run.truncated,
-                                adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
-                                subsampledReadsCount: pipeline_run.subsampled_reads,
+                                truncatedReadsCount: @pipeline_run.truncated,
+                                adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
+                                subsampledReadsCount: @pipeline_run.subsampled_reads,
                                 hasByteRanges: has_byte_ranges,
                                 alignVizAvailable: align_viz_available,
                                 report_ready: report_ready)
@@ -207,16 +207,13 @@ class PipelineReportService
 
   def get_pipeline_status(pipeline_run)
     if pipeline_run.nil?
-      return [
-        nil,
-        {
-          pipelineRunStatus: "WAITING",
-          errorMessage: nil,
-          knownUserError: nil,
-          jobStatus: "Waiting to Start or Receive Files",
-          pipelineRunReportAvailable: false,
-        },
-      ]
+      return {
+        pipelineRunStatus: "WAITING",
+        errorMessage: nil,
+        knownUserError: nil,
+        jobStatus: "Waiting to Start or Receive Files",
+        pipelineRunReportAvailable: false,
+      }
     end
 
     pipeline_status = "WAITING"
@@ -225,17 +222,14 @@ class PipelineReportService
     elsif pipeline_run.failed?
       pipeline_status = "FAILED"
     end
-    return [
-      pipeline_run,
-      {
-        pipelineRunStatus: pipeline_status,
-        hasErrors: pipeline_run.failed?,
-        errorMessage: pipeline_run.error_message,
-        knownUserError: pipeline_run.known_user_error,
-        jobStatus: pipeline_run.job_status_display,
-        pipelineRunReportAvailable: pipeline_run_report_available?(pipeline_run),
-      },
-    ]
+    return {
+      pipelineRunStatus: pipeline_status,
+      hasErrors: pipeline_run.failed?,
+      errorMessage: pipeline_run.error_message,
+      knownUserError: pipeline_run.known_user_error,
+      jobStatus: pipeline_run.job_status_display,
+      pipelineRunReportAvailable: pipeline_run_report_available?(pipeline_run),
+    }
   end
 
   def pipeline_run_report_available?(pipeline_run)
