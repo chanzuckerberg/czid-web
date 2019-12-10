@@ -52,8 +52,8 @@ class PipelineReportService
     nil => "uncategorized",
   }.freeze
 
-  def initialize(pipeline_run_id, background_id, csv = false, min_contig_size = DEFAULT_MIN_CONTIG_SIZE)
-    @pipeline_run_id = pipeline_run_id
+  def initialize(pipeline_run, background_id, csv = false, min_contig_size = DEFAULT_MIN_CONTIG_SIZE)
+    @pipeline_run = pipeline_run
     @background_id = background_id
     @csv = csv
     @min_contig_size = min_contig_size
@@ -67,17 +67,18 @@ class PipelineReportService
   end
 
   def generate
-    pipeline_run, metadata = get_pipeline_status(@pipeline_run_id)
-    unless pipeline_run_report_available?(pipeline_run)
+    metadata = get_pipeline_status(@pipeline_run)
+    unless pipeline_run_report_available?(@pipeline_run)
       return JSON.dump(
         metadata: metadata
       )
     end
+    @pipeline_run_id = @pipeline_run.id
 
-    adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
+    adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
-    contigs = pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
+    contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
     @timer.split("get_contig_summary")
 
     taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
@@ -174,9 +175,9 @@ class PipelineReportService
     highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     @timer.split("find_taxa_to_highlight")
 
-    has_byte_ranges = pipeline_run.taxon_byte_ranges_available?
-    align_viz_available = pipeline_run.align_viz_available?
-    report_ready = pipeline_run.report_ready?
+    has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
+    align_viz_available = @pipeline_run.align_viz_available?
+    report_ready = @pipeline_run.report_ready?
 
     @timer.split("compute_options_available_for_pipeline_run")
 
@@ -184,9 +185,9 @@ class PipelineReportService
       return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
     else
       metadata = metadata.merge(backgroundId: @background_id,
-                                truncatedReadsCount: pipeline_run.truncated,
-                                adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
-                                subsampledReadsCount: pipeline_run.subsampled_reads,
+                                truncatedReadsCount: @pipeline_run.truncated,
+                                adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
+                                subsampledReadsCount: @pipeline_run.subsampled_reads,
                                 hasByteRanges: has_byte_ranges,
                                 alignVizAvailable: align_viz_available,
                                 report_ready: report_ready)
@@ -204,38 +205,31 @@ class PipelineReportService
     end
   end
 
-  def get_pipeline_status(pipeline_run_id)
-    if pipeline_run_id.nil?
-      return [
-        nil,
-        {
-          pipelineRunStatus: "WAITING",
-          errorMessage: nil,
-          knownUserError: nil,
-          jobStatus: "Waiting to Start or Receive Files",
-          pipelineRunReportAvailable: false,
-        },
-      ]
+  def get_pipeline_status(pipeline_run)
+    if pipeline_run.nil?
+      return {
+        pipelineRunStatus: "WAITING",
+        errorMessage: nil,
+        knownUserError: nil,
+        jobStatus: "Waiting to Start or Receive Files",
+        pipelineRunReportAvailable: false,
+      }
     end
 
-    pipeline_run = PipelineRun.find(pipeline_run_id)
     pipeline_status = "WAITING"
     if pipeline_run.completed?
       pipeline_status = "COMPLETE"
     elsif pipeline_run.failed?
       pipeline_status = "FAILED"
     end
-    return [
-      pipeline_run,
-      {
-        pipelineRunStatus: pipeline_status,
-        hasErrors: pipeline_run.failed?,
-        errorMessage: pipeline_run.error_message,
-        knownUserError: pipeline_run.known_user_error,
-        jobStatus: pipeline_run.job_status_display,
-        pipelineRunReportAvailable: pipeline_run_report_available?(pipeline_run),
-      },
-    ]
+    return {
+      pipelineRunStatus: pipeline_status,
+      hasErrors: pipeline_run.failed?,
+      errorMessage: pipeline_run.error_message,
+      knownUserError: pipeline_run.known_user_error,
+      jobStatus: pipeline_run.job_status_display,
+      pipelineRunReportAvailable: pipeline_run_report_available?(pipeline_run),
+    }
   end
 
   def pipeline_run_report_available?(pipeline_run)
@@ -245,15 +239,15 @@ class PipelineReportService
     return pipeline_run && (((pipeline_run.adjusted_remaining_reads.to_i > 0 || pipeline_run.finalized?) && !pipeline_run.failed?) || pipeline_run.report_ready?)
   end
 
-  def fetch_taxon_counts(_pipeline_run_id, _background_id)
+  def fetch_taxon_counts(pipeline_run_id, background_id)
     taxon_counts_and_summaries_query = TaxonCount
                                        .joins("LEFT OUTER JOIN"\
                                           " taxon_summaries ON taxon_counts.count_type = taxon_summaries.count_type"\
                                           " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
                                           " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
-                                          " AND taxon_summaries.background_id = #{@background_id}")
+                                          " AND taxon_summaries.background_id = #{background_id}")
                                        .where(
-                                         pipeline_run_id: @pipeline_run_id,
+                                         pipeline_run_id: pipeline_run_id,
                                          count_type: ['NT', 'NR'],
                                          tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
                                        )
@@ -278,7 +272,7 @@ class PipelineReportService
     return taxon
   end
 
-  def fetch_taxons_absent_from_sample(_pipeline_run_id, _background_id)
+  def fetch_taxons_absent_from_sample(pipeline_run_id, background_id)
     tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: @pipeline_run_id).distinct
 
     taxons_absent_from_sample = TaxonSummary
@@ -286,10 +280,10 @@ class PipelineReportService
                                   " taxon_counts ON taxon_counts.count_type = taxon_summaries.count_type"\
                                   " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
                                   " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
-                                  " AND taxon_counts.pipeline_run_id = #{@pipeline_run_id}")
+                                  " AND taxon_counts.pipeline_run_id = #{pipeline_run_id}")
                                 .where(
                                   taxon_summaries: {
-                                    background_id: @background_id,
+                                    background_id: background_id,
                                     tax_id: tax_ids,
                                     tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS],
                                     count_type: ['NT', 'NR'],
@@ -539,5 +533,14 @@ class PipelineReportService
         csv << tax_info_by_symbols.values_at(*flat_keys_symbols)
       end
     end
+  end
+
+  # Example cache key:
+  # /samples/12303/report_v2?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990&pipeline_run_id=39185
+  def self.report_info_cache_key(path, kvs)
+    kvs = kvs.to_h.sort.to_h
+    # Increment this if you ever change the response structure of report_info
+    kvs["_cache_key_version"] = 2
+    path + "?" + kvs.to_param
   end
 end
