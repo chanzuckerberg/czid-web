@@ -85,12 +85,14 @@ module ReportsHelper
     fake_genera = []
     missing_genera = Set.new
     taxids_with_missing_genera = Set.new
-    species_counts.each do |tax_id, tax_info|
-      genus_tax_id = tax_info[:genus_tax_id]
-      unless genus_counts[genus_tax_id]
-        taxids_with_missing_genera.add(tax_id)
-        missing_genera.add(genus_tax_id)
-        fake_genera << fake_genus(tax_id, tax_info)
+    if species_counts
+      species_counts.each do |tax_id, tax_info|
+        genus_tax_id = tax_info[:genus_tax_id]
+        unless genus_counts[genus_tax_id]
+          taxids_with_missing_genera.add(tax_id)
+          missing_genera.add(genus_tax_id)
+          fake_genera << fake_genus(tax_id, tax_info)
+        end
       end
     end
     Rails.logger.warn "Missing taxon_counts for genus ids #{missing_genera.to_a} corresponding to taxon ids #{taxids_with_missing_genera.to_a}." unless missing_genera.empty?
