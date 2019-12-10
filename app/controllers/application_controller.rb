@@ -173,4 +173,30 @@ class ApplicationController < ActionController::Base
     yield
     @timer.publish
   end
+
+  # This should wrap a code block whose output should be cached.
+  # If caching is enabled, attempts to fetch the cached response corresponding to the
+  # given cache_key and fills out custom response headers.
+  # If the attempt results in a cache miss, then the response is generated normally and
+  # will be stored in the cache.
+  def fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, event_name)
+    if skip_cache
+      yield
+    else
+      MetricUtil.log_analytics_event(event_name + "_cache-requested", current_user) unless skip_cache
+      # This allows 304 Not Modified to be returned so that the client can use its
+      # local cache and avoid the large download.
+      response.headers["Last-Modified"] = httpdate
+      # This is a custom header for testing and debugging
+      response.headers["X-IDseq-Cache"] = 'requested'
+      response.headers["X-IDseq-Cache-Key"] = cache_key
+      Rails.logger.info("Requesting #{cache_key}")
+
+      Rails.cache.fetch(cache_key, expires_in: 30.days) do
+        MetricUtil.log_analytics_event(event_name + "_cache-missed", current_user)
+        response.headers["X-IDseq-Cache"] = 'missed'
+        yield
+      end
+    end
+  end
 end
