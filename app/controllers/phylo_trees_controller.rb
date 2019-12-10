@@ -288,7 +288,7 @@ class PhyloTreesController < ApplicationController
       end
       if metadata_by_sample_id[sp["sample_id"]]
         sp["sample_type"] = metadata_by_sample_id[sp["sample_id"]][:sample_type]
-        sp["collection_location"] = metadata_by_sample_id[sp["sample_id"]][:collection_location_v2] || metadata_by_sample_id[sp["sample_id"]][:collection_location]
+        sp["collection_location"] = metadata_by_sample_id[sp["sample_id"]][:collection_location_v2]
       end
     end
 
