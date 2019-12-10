@@ -148,8 +148,8 @@ class SamplesController < ApplicationController
 
   def index_v2
     # this method is going to replace 'index' once we fully migrate to the
-    # discovery views (old one was kept to avoid breaking the current interface
-    # without sacrificing speed of development)
+    # discovery views (old one was kept to avoid breaking the current inteface
+    # without sacrificing speed of development and avoid breaking the current interface)
     domain = params[:domain]
     order_by = params[:orderBy] || :id
     order_dir = params[:orderDir] || :desc
@@ -600,7 +600,7 @@ class SamplesController < ApplicationController
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
     min_contig_size = params[:min_contig_size]
-    @report_csv = PipelineReportService.call(pipeline_run.id, background_id, true, min_contig_size)
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, true, min_contig_size)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -800,19 +800,23 @@ class SamplesController < ApplicationController
 
   def report_v2
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    if pipeline_run
-      background_id = get_background_id(@sample, params[:background])
-      render json: PipelineReportService.call(pipeline_run.id, background_id)
-    else
-      render json: {
-        metadata: {
-          pipelineRunStatus: "WAITING",
-          jobStatus: "Waiting to Start or Receive Files",
-          errorMessage: nil,
-          knownUserError: nil,
-        },
-      }
-    end
+    background_id = get_background_id(@sample, params[:background])
+
+    skip_cache = params[:skip_cache] || false
+    report_info_params = pipeline_run.report_info_params
+    cache_key = PipelineReportService.report_info_cache_key(
+      request.path,
+      params
+        .permit(report_info_params.keys)
+        .merge(pipeline_run_id: pipeline_run.id)
+    )
+    httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+
+    json =
+      fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "PipelineReport") do
+        PipelineReportService.call(pipeline_run, background_id)
+      end
+    render json: json
   end
 
   def amr
