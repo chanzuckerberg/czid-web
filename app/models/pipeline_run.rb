@@ -316,6 +316,7 @@ class PipelineRun < ApplicationRecord
 
   def create_run_stages
     run_stages = []
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     PipelineRunStage::STAGE_INFO.each do |step_number, info|
       run_stages << PipelineRunStage.new(
         step_number: step_number,
@@ -333,6 +334,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def active_stage
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     pipeline_run_stages.order(:step_number).each do |prs|
       return prs unless prs.succeeded?
     end
@@ -1096,7 +1098,8 @@ class PipelineRun < ApplicationRecord
     if unidentified
       unmapped_reads = unidentified[:reads_after]
 
-      if supports_assembly?
+      # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
+      if supports_assembly? && active_stage && active_stage.step_number == 3 # assembly
         # see idseq_dag/steps/generate_annotated_fasta.py
         begin
           Rails.logger.info("Fetching file: #{s3_path}")
