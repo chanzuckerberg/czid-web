@@ -149,7 +149,7 @@ class SamplesController < ApplicationController
   def index_v2
     # this method is going to replace 'index' once we fully migrate to the
     # discovery views (old one was kept to avoid breaking the current interface
-    # without sacrificing speed of development)
+    # without sacrificing speed of development and avoid breaking the current interface)
     domain = params[:domain]
     order_by = params[:orderBy] || :id
     order_dir = params[:orderDir] || :desc
