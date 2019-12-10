@@ -239,15 +239,15 @@ class PipelineReportService
     return pipeline_run && (((pipeline_run.adjusted_remaining_reads.to_i > 0 || pipeline_run.finalized?) && !pipeline_run.failed?) || pipeline_run.report_ready?)
   end
 
-  def fetch_taxon_counts(_pipeline_run_id, _background_id)
+  def fetch_taxon_counts(pipeline_run_id, background_id)
     taxon_counts_and_summaries_query = TaxonCount
                                        .joins("LEFT OUTER JOIN"\
                                           " taxon_summaries ON taxon_counts.count_type = taxon_summaries.count_type"\
                                           " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
                                           " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
-                                          " AND taxon_summaries.background_id = #{@background_id}")
+                                          " AND taxon_summaries.background_id = #{background_id}")
                                        .where(
-                                         pipeline_run_id: @pipeline_run_id,
+                                         pipeline_run_id: pipeline_run_id,
                                          count_type: ['NT', 'NR'],
                                          tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
                                        )
@@ -272,7 +272,7 @@ class PipelineReportService
     return taxon
   end
 
-  def fetch_taxons_absent_from_sample(_pipeline_run_id, _background_id)
+  def fetch_taxons_absent_from_sample(pipeline_run_id, background_id)
     tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: @pipeline_run_id).distinct
 
     taxons_absent_from_sample = TaxonSummary
@@ -280,10 +280,10 @@ class PipelineReportService
                                   " taxon_counts ON taxon_counts.count_type = taxon_summaries.count_type"\
                                   " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
                                   " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
-                                  " AND taxon_counts.pipeline_run_id = #{@pipeline_run_id}")
+                                  " AND taxon_counts.pipeline_run_id = #{pipeline_run_id}")
                                 .where(
                                   taxon_summaries: {
-                                    background_id: @background_id,
+                                    background_id: background_id,
                                     tax_id: tax_ids,
                                     tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS],
                                     count_type: ['NT', 'NR'],
