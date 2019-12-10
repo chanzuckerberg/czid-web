@@ -91,6 +91,7 @@ class BulkDownload < ApplicationRecord
     shell_command: nil,
     executable_file_path: nil,
     task_role: "idseq-downloads-#{Rails.env}",
+    ecs_cluster: "idseq-fargate-tasks-#{Rails.env}",
     ecr_image: "idseq-s3-tar-writer:latest",
     fargate_cpu: "4096",
     fargate_memory: "8192"
@@ -98,6 +99,11 @@ class BulkDownload < ApplicationRecord
     config_ecr_image = get_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE)
     unless config_ecr_image.nil?
       ecr_image = config_ecr_image
+    end
+
+    # Use the staging ecs cluster for development.
+    if Rails.env == "development"
+      ecs_cluster = "idseq-fargate-tasks-staging"
     end
 
     command_flag = shell_command.present? ? "--command=#{shell_command}" : "--execute=#{executable_file_path}"
@@ -108,7 +114,8 @@ class BulkDownload < ApplicationRecord
      "--task-name", ECS_TASK_NAME,
      "--ecr-image", ecr_image,
      "--fargate-cpu", fargate_cpu,
-     "--fargate-memory", fargate_memory,]
+     "--fargate-memory", fargate_memory,
+     "--cluster", ecs_cluster,]
   end
 
   # Returned as an array of strings
