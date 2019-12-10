@@ -301,6 +301,7 @@ describe BulkDownload, type: :model do
         "--ecr-image", "idseq-s3-tar-writer:latest",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
+        "--cluster", "idseq-fargate-tasks-prod",
       ]
 
       expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
@@ -317,6 +318,7 @@ describe BulkDownload, type: :model do
         "--ecr-image", "idseq-s3-tar-writer:latest",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
+        "--cluster", "idseq-fargate-tasks-prod",
       ]
 
       expect(@bulk_download.aegea_ecs_submit_command(executable_file_path: mock_executable_file_path)).to eq(task_command)
@@ -334,6 +336,43 @@ describe BulkDownload, type: :model do
         "--ecr-image", "idseq-s3-tar-writer:v1.0",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
+        "--cluster", "idseq-fargate-tasks-prod",
+      ]
+
+      expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
+    end
+
+    it "outputs correct command in staging" do
+      AppConfigHelper.set_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE, "idseq-s3-tar-writer:v1.0")
+      allow(Rails).to receive(:env).and_return("staging")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-staging")
+
+      task_command = [
+        "aegea", "ecs", "run", "--command=#{mock_shell_command}",
+        "--task-role", "idseq-downloads-staging",
+        "--task-name", BulkDownload::ECS_TASK_NAME,
+        "--ecr-image", "idseq-s3-tar-writer:v1.0",
+        "--fargate-cpu", "4096",
+        "--fargate-memory", "8192",
+        "--cluster", "idseq-fargate-tasks-staging",
+      ]
+
+      expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
+    end
+
+    it "outputs correct command in development" do
+      AppConfigHelper.set_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE, "idseq-s3-tar-writer:v1.0")
+      allow(Rails).to receive(:env).and_return("development")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-development")
+
+      task_command = [
+        "aegea", "ecs", "run", "--command=#{mock_shell_command}",
+        "--task-role", "idseq-downloads-development",
+        "--task-name", BulkDownload::ECS_TASK_NAME,
+        "--ecr-image", "idseq-s3-tar-writer:v1.0",
+        "--fargate-cpu", "4096",
+        "--fargate-memory", "8192",
+        "--cluster", "idseq-fargate-tasks-staging",
       ]
 
       expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
