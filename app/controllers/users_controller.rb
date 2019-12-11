@@ -1,7 +1,6 @@
 class UsersController < ApplicationController
-  clear_respond_to
-  respond_to :json
-  before_action :admin_required
+  skip_before_action :authenticate_user!, only: [:password_new]
+  before_action :admin_required, except: [:password_new]
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
   # GET /users
@@ -84,6 +83,11 @@ class UsersController < ApplicationController
       format.html { redirect_to users_url, notice: 'User was successfully destroyed.' }
       format.json { head :no_content }
     end
+  end
+
+  # GET /users/password/new
+  def password_new
+    render 'password_new'
   end
 
   private

@@ -76,11 +76,7 @@ class Landing extends React.Component {
 
   render() {
     const signInLink = () => {
-      if (this.props.signInStrategy == "AUTH0") {
-        location.href = "/auth0/login";
-      } else {
-        location.href = "/users/sign_in";
-      }
+      location.href = "/auth0/login";
     };
     const header = (
       <div className="header-row row">
@@ -336,7 +332,6 @@ Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
   showBulletin: PropTypes.bool,
   browserInfo: PropTypes.object,
-  signInStrategy: PropTypes.string,
 };
 
 export default Landing;

@@ -91,6 +91,7 @@ class BulkDownload < ApplicationRecord
     shell_command: nil,
     executable_file_path: nil,
     task_role: "idseq-downloads-#{Rails.env}",
+    ecs_cluster: "idseq-fargate-tasks-#{Rails.env}",
     ecr_image: "idseq-s3-tar-writer:latest",
     fargate_cpu: "4096",
     fargate_memory: "8192"
@@ -98,6 +99,11 @@ class BulkDownload < ApplicationRecord
     config_ecr_image = get_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE)
     unless config_ecr_image.nil?
       ecr_image = config_ecr_image
+    end
+
+    # Use the staging ecs cluster for development.
+    if Rails.env == "development"
+      ecs_cluster = "idseq-fargate-tasks-staging"
     end
 
     command_flag = shell_command.present? ? "--command=#{shell_command}" : "--execute=#{executable_file_path}"
@@ -108,7 +114,8 @@ class BulkDownload < ApplicationRecord
      "--task-name", ECS_TASK_NAME,
      "--ecr-image", ecr_image,
      "--fargate-cpu", fargate_cpu,
-     "--fargate-memory", fargate_memory,]
+     "--fargate-memory", fargate_memory,
+     "--cluster", ecs_cluster,]
   end
 
   # Returned as an array of strings
@@ -369,8 +376,7 @@ class BulkDownload < ApplicationRecord
       begin
         Rails.logger.info("Processing pipeline run #{pipeline_run.id} (#{index + 1} of #{pipeline_runs.length})...")
         if download_type == SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
-          tax_details = ReportHelper.taxonomy_details(pipeline_run.id, get_param_value("background"), TaxonScoringModel::DEFAULT_MODEL_NAME, ReportHelper::DEFAULT_SORT_PARAM)
-          report_csv = ReportHelper.generate_report_csv(tax_details)
+          report_csv = PipelineReportService.call(pipeline_run, get_param_value("background"), true)
           s3_tar_writer.add_file_with_data(
             "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
               "taxon_report.csv",

@@ -54,4 +54,12 @@ Rails.application.configure do
   ]
 
   config.middleware.use ResqueMiddleware
+
+  ENV["AUTH0_DOMAIN"] = "czi-idseq-fake.idseq.net"
+  ENV["AUTH0_CLIENT_ID"] = "FakeAuth0ClientId"
+  ENV["AUTH0_CLIENT_SECRET"] = "FakeAuth0ClientSecret"
+  ENV["AUTH0_MANAGEMENT_DOMAIN"] = "czi-idseq-fake.idseq.net"
+  ENV["AUTH0_MANAGEMENT_CLIENT_ID"] = "FakeAuth0ClientId"
+  ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"] = "FakeAuth0ClientSecret"
+  ENV["AUTH0_CONNECTION"] = "Username-Password-Authentication"
 end

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class Auth0Controller < ApplicationController
-  skip_before_action :authenticate_user!, :verify_authenticity_token, :sign_in_auth0_token!
+  skip_before_action :authenticate_user!, :verify_authenticity_token
+  skip_before_action :check_for_maintenance, only: :background_refresh
 
   include Auth0Helper
 
@@ -36,7 +37,7 @@ class Auth0Controller < ApplicationController
   end
 
   def logout
-    auth0_logout
+    auth0_invalidate_application_session
     redirect_to auth0_signout_url
   end
 
@@ -76,15 +77,19 @@ class Auth0Controller < ApplicationController
   def callback
     # Store the user token that came from Auth0 and the IdP
     # Auth0Helper#auth0_session
-    self.auth0_session = request.env['omniauth.auth']&.credentials.to_h
+    bearer_token = request.env['omniauth.auth']&.credentials.to_h
 
-    if auth0_session.nil?
-      redirect_to auth0_signout_url
-    else
+    user_was_not_present = current_user.nil?
+
+    authenticated = auth0_authenticate_with_bearer_token(bearer_token)
+    if authenticated
       # https://github.com/omniauth/omniauth-oauth2/issues/31#issuecomment-23806447
       mode = filter_value(request.env['omniauth.params']['mode'], SUPPORTED_MODES)
 
-      @auth0_token = auth0_decode_auth_token
+      # Update login counters if this is a new login
+      if (mode == "login") || user_was_not_present
+        current_user.update_tracked_fields!(request)
+      end
 
       case mode
       when "background_refresh"
@@ -96,6 +101,8 @@ class Auth0Controller < ApplicationController
       else
         redirect_to root_path
       end
+    else
+      logout
     end
   end
 
@@ -122,11 +129,11 @@ class Auth0Controller < ApplicationController
   end
 
   def background_refresh_values
-    @auth0_token = auth0_decode_auth_token
-    if @auth0_token && @auth0_token[:auth_payload]
-      exp = @auth0_token[:auth_payload]["exp"]
+    auth0_token = auth0_decode_auth_token
+    if auth0_token && auth0_token[:auth_payload]
+      exp = auth0_token[:auth_payload]["exp"]
       # "iat" is not a mandatory JWT field. Auth0 sends this field, but adding a default in case it is missing
-      iat = @auth0_token[:auth_payload]["iat"] || (exp - MAX_TOKEN_REFRESH_IN_SECONDS)
+      iat = auth0_token[:auth_payload]["iat"] || (exp - MAX_TOKEN_REFRESH_IN_SECONDS)
       lifespan = exp - iat
       expires_in = exp - Time.now.to_i
       # We want to preemptively refresh the token before it expires.

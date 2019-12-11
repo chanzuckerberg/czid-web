@@ -2,9 +2,6 @@ class VisualizationsController < ApplicationController
   include ReportHelper
   include HeatmapHelper
 
-  clear_respond_to
-  respond_to :json
-
   # This action takes up to 10s for 50 samples so we cache it.
   caches_action(
     :samples_taxons,

@@ -833,6 +833,7 @@ class PipelineRun < ApplicationRecord
 
         # Precache reports for all backgrounds
         Resque.enqueue(PrecacheReportInfo, id)
+        Resque.enqueue(PrecacheReportInfoV2, id)
 
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]
@@ -1581,6 +1582,22 @@ class PipelineRun < ApplicationRecord
       end
 
       MetricUtil.put_metric_now("samples.cache.precached", 1)
+    end
+  end
+
+  def precache_report_info_v2!
+    params = report_info_params
+    Background.top_for_sample(sample).pluck(:id).each do |background_id|
+      cache_key = PipelineReportService.report_info_cache_key(
+        "/samples/#{sample.id}/report_v2",
+        params.merge(background_id: background_id)
+      )
+      Rails.logger.info("Precaching #{cache_key} with background #{background_id}")
+      Rails.cache.fetch(cache_key, expires_in: 30.days) do
+        PipelineReportService.call(self, background_id)
+      end
+
+      MetricUtil.log_analytics_event("PipelineReport_precached", nil)
     end
   end
 

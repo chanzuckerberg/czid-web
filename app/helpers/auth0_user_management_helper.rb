@@ -80,7 +80,7 @@ module Auth0UserManagementHelper
   end
 
   # Set up Auth0 management client for actions like adding users.
-  private_class_method def self.auth0_management_client
+  def self.auth0_management_client
     # See: https://github.com/auth0/ruby-auth0/blob/master/README.md#management-api-v2
     @auth0_management_client ||= Auth0Client.new(
       client_id: ENV["AUTH0_MANAGEMENT_CLIENT_ID"],

@@ -148,8 +148,8 @@ class SamplesController < ApplicationController
 
   def index_v2
     # this method is going to replace 'index' once we fully migrate to the
-    # discovery views (old one was kept to avoid breaking the current inteface
-    # without sacrificing speed of development and avoid breaking the current interface)
+    # discovery views (old one was kept to avoid breaking the current interface
+    # without sacrificing speed of development)
     domain = params[:domain]
     order_by = params[:orderBy] || :id
     order_dir = params[:orderDir] || :desc
@@ -600,7 +600,7 @@ class SamplesController < ApplicationController
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
     min_contig_size = params[:min_contig_size]
-    @report_csv = PipelineReportService.call(pipeline_run.id, background_id, true, min_contig_size)
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, true, min_contig_size)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -800,19 +800,23 @@ class SamplesController < ApplicationController
 
   def report_v2
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    if pipeline_run
-      background_id = get_background_id(@sample, params[:background])
-      render json: PipelineReportService.call(pipeline_run.id, background_id)
-    else
-      render json: {
-        metadata: {
-          pipelineRunStatus: "WAITING",
-          jobStatus: "Waiting to Start or Receive Files",
-          errorMessage: nil,
-          knownUserError: nil,
-        },
-      }
-    end
+    background_id = get_background_id(@sample, params[:background])
+
+    skip_cache = params[:skip_cache] || false
+    report_info_params = pipeline_run.report_info_params
+    cache_key = PipelineReportService.report_info_cache_key(
+      request.path,
+      params
+        .permit(report_info_params.keys)
+        .merge(pipeline_run_id: pipeline_run.id)
+    )
+    httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+
+    json =
+      fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "PipelineReport") do
+        PipelineReportService.call(pipeline_run, background_id)
+      end
+    render json: json
   end
 
   def amr
@@ -1432,11 +1436,9 @@ class SamplesController < ApplicationController
   def sample_params
     permitted_params = [:name, :project_name, :project_id, :status,
                         :s3_star_index_path, :s3_bowtie2_index_path,
-                        :host_genome_id, :host_genome_name, :sample_location, :sample_date, :sample_tissue,
-                        :sample_template, :sample_library, :sample_sequencer,
+                        :host_genome_id, :host_genome_name,
                         :sample_notes, :search, :subsample, :max_input_fragments,
-                        :basespace_dataset_id, :basespace_access_token,
-                        :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
+                        :basespace_dataset_id, :basespace_access_token, :client,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)

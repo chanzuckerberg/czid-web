@@ -93,7 +93,7 @@ RSpec.describe PipelineReportService, type: :service do
                              stdev: 64.2056,
                            },])
 
-      @report = PipelineReportService.call(@pipeline_run.id, @background.id)
+      @report = PipelineReportService.call(@pipeline_run, @background.id)
     end
 
     it "should get correct values for species 573" do
@@ -243,7 +243,7 @@ RSpec.describe PipelineReportService, type: :service do
                              stdev: 374.243,
                            },])
 
-      @report = PipelineReportService.call(@pipeline_run.id, @background.id)
+      @report = PipelineReportService.call(@pipeline_run, @background.id)
     end
 
     it "should get correct values for species 1313" do
@@ -346,7 +346,7 @@ RSpec.describe PipelineReportService, type: :service do
                                     sample: create(:sample, project: create(:project))).id,
                            ])
 
-      @report = PipelineReportService.call(@pipeline_run.id, @background.id)
+      @report = PipelineReportService.call(@pipeline_run, @background.id)
     end
 
     it "should return correct z-score values" do

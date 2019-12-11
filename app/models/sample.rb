@@ -54,10 +54,7 @@ class Sample < ApplicationRecord
   DEFAULT_QUEUE_HIMEM = (Rails.env == 'prod' ? 'idseq-prod-himem' : 'idseq-staging-himem').freeze
   DEFAULT_VCPUS_HIMEM = 32
 
-  METADATA_FIELDS = [:sample_unique_id, # 'Unique ID' (e.g. in human case, patient ID)
-                     :sample_location, :sample_date, :sample_tissue,
-                     :sample_template, # this refers to nucleotide type (RNA or DNA)
-                     :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection,].freeze
+  METADATA_FIELDS = [:sample_notes].freeze
 
   SLEEP_SECONDS_BETWEEN_RETRIES = 10
 
@@ -88,9 +85,6 @@ class Sample < ApplicationRecord
 
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
-
-  # Error on trying to save string values to float
-  validates :sample_input_pg, :sample_batch, numericality: true, allow_nil: true
 
   # getter
   attr_reader :bulk_mode
@@ -195,8 +189,7 @@ class Sample < ApplicationRecord
     if search
       search = search.strip
       results = where('samples.name LIKE :search
-        OR samples.sample_notes LIKE :search
-        OR samples.sample_unique_id LIKE :search', search: "%#{search}%")
+        OR samples.sample_notes LIKE :search', search: "%#{search}%")
 
       unless eligible_pr_ids.empty?
         # Require scope of eligible pipeline runs for pathogen search
