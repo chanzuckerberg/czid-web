@@ -802,15 +802,25 @@ class SamplesController < ApplicationController
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
 
-    # If the pipeline run hasn't completed yet, don't cache the report
-    pipeline_run_completed = pipeline_run.all_output_states_terminal? && pipeline_run.all_output_states_loaded?
-    skip_cache = params[:skip_cache] || !pipeline_run_completed || false
+    # Don't cache the response until the pipeline run is report-ready
+    # so the displayed pipeline run status will be updated correctly.
+    skip_cache = pipeline_run.report_ready? || params[:skip_cache] || false
+
     report_info_params = pipeline_run.report_info_params
+    # If the pipeline_version wasn't passed in from the client-side,
+    # then set it to version for the selected default pipeline run.
+    if params[:pipeline_verison].nil?
+      params[:pipeline_version] = pipeline_run.pipeline_version
+    end
     cache_key = PipelineReportService.report_info_cache_key(
       request.path,
       params
         .permit(report_info_params.keys)
-        .merge(pipeline_run_id: pipeline_run.id)
+        .merge(
+          pipeline_run_id: pipeline_run.id,
+          background_id: background_id,
+          report_ts: report_info_params[:report_ts]
+        )
     )
     httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
 
