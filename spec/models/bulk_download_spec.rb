@@ -483,11 +483,13 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly generates download file for download type sample_taxon_report" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {})
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background" => {
+                                             "value" => mock_background_id,
+                                             "displayName" => "Mock Background",
+                                           })
 
-      expect(ReportHelper).to receive(:taxonomy_details).exactly(2).times
-      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv")
-      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv_2")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_return("mock_report_csv")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_return("mock_report_csv_2")
 
       add_s3_tar_writer_expectations(
         "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv",
@@ -500,11 +502,13 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly updates the bulk_download status and progress as the sample_taxon_report runs" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {})
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background" => {
+                                             "value" => mock_background_id,
+                                             "displayName" => "Mock Background",
+                                           })
 
-      expect(ReportHelper).to receive(:taxonomy_details).exactly(2).times
-      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv")
-      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv_2")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_return("mock_report_csv")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_return("mock_report_csv_2")
 
       add_s3_tar_writer_expectations(
         "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv",
@@ -689,12 +693,14 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly handles individual sample failures" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {})
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background" => {
+                                             "value" => mock_background_id,
+                                             "displayName" => "Mock Background",
+                                           })
 
-      expect(ReportHelper).to receive(:taxonomy_details).exactly(2).times
-      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_return("mock_report_csv")
       # The second sample raises an error while generating.
-      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_raise("error")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_raise("error")
 
       add_s3_tar_writer_expectations(
         "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv"
@@ -708,11 +714,13 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly handles s3 tar file upload error" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, {})
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background" => {
+                                             "value" => mock_background_id,
+                                             "displayName" => "Mock Background",
+                                           })
 
-      expect(ReportHelper).to receive(:taxonomy_details).exactly(2).times
-      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv")
-      expect(ReportHelper).to receive(:generate_report_csv).exactly(1).times.and_return("mock_report_csv_2")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_return("mock_report_csv")
+      expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_return("mock_report_csv_2")
 
       add_s3_tar_writer_expectations(
         {
