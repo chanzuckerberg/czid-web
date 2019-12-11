@@ -233,7 +233,9 @@ module PipelineRunsHelper
   # Note: Does NOT do access control checks.
   def get_succeeded_pipeline_runs_for_samples(samples, strict = false)
     # Gets the first pipeline runs for multiple samples in an efficient way.
-    created_dates = PipelineRun.select("sample_id, MAX(created_at) as created_at").where(sample_id: samples.pluck(:id)).group(:sample_id)
+    created_dates = PipelineRun
+                    .select(:sample_id, "MAX(created_at) as created_at")
+                    .where(sample_id: samples).group(:sample_id)
     valid_pipeline_runs = PipelineRun
                           .select(:finalized, :id, :job_status)
                           .where("(sample_id, created_at) IN (?)", created_dates)

@@ -171,6 +171,8 @@ Rails.application.routes.draw do
     get :sample_locations, on: :collection
   end
 
+  get 'heatmaps/project/:id', to: 'heatmaps#project'
+
   authenticate :user, ->(u) { u.admin? } do
     mount RESQUE_SERVER, at: "/resque"
   end

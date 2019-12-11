@@ -36,4 +36,20 @@ class Timer
       MetricUtil.put_metric_now("#{@prefix}.timer.splits", (end_timestamp - previous_timestamp).round(6), @tags.to_a + ["split:last"])
     end
   end
+
+  def results
+    results = {}
+    end_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    results["#{@prefix}.timer"] = end_timestamp - @start_timestamp
+
+    previous_timestamp = @start_timestamp
+    @splits.each do |name, split_timestamp|
+      diff = split_timestamp - previous_timestamp
+      results["#{@prefix}.timer.#{name}"] = diff.round(6)
+      previous_timestamp = split_timestamp
+    end
+
+    results["#{@prefix}.timer.last"] = (end_timestamp - previous_timestamp).round(6) unless @splits.empty?
+    results
+  end
 end
