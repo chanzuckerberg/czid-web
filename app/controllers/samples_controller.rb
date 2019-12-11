@@ -804,7 +804,7 @@ class SamplesController < ApplicationController
 
     # Don't cache the response until the pipeline run is report-ready
     # so the displayed pipeline run status will be updated correctly.
-    skip_cache = pipeline_run.report_ready? || params[:skip_cache] || false
+    skip_cache = !pipeline_run.report_ready? || params[:skip_cache] || false
 
     report_info_params = pipeline_run.report_info_params
     # If the pipeline_version wasn't passed in from the client-side,
