@@ -38,9 +38,6 @@ class ProjectsController < ApplicationController
 
   around_action :instrument_with_timer
 
-  clear_respond_to
-  respond_to :json
-
   MAX_BINS = 34
   FAR_FUTURE_DAYS = 100_000
 
@@ -547,45 +544,27 @@ class ProjectsController < ApplicationController
   def create_new_user_random_password(name, email)
     Rails.logger.info("Going to create new user via project sharing: #{email}")
     user_params_with_password = { email: email, name: name, password: UsersHelper.generate_random_password }
-    @user = User.new(user_params_with_password)
+    @user = User.new(user_params_with_password.slice(:email, :name))
 
     # New flow for account creation on Auth0.
-    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
-      if @user.save!
-        # Create the user with Auth0.
-        create_response = Auth0UserManagementHelper.create_auth0_user(user_params_with_password)
-        auth0_id = create_response["user_id"]
+    if @user.save!
+      # Create the user with Auth0.
+      create_response = Auth0UserManagementHelper.create_auth0_user(user_params_with_password)
+      auth0_id = create_response["user_id"]
 
-        # Get their password reset link so they can set a password.
-        reset_response = Auth0UserManagementHelper.get_auth0_password_reset_token(auth0_id)
-        reset_url = reset_response["ticket"]
+      # Get their password reset link so they can set a password.
+      reset_response = Auth0UserManagementHelper.get_auth0_password_reset_token(auth0_id)
+      reset_url = reset_response["ticket"]
 
-        # Send them an invitation and account activation email.
-        UserMailer.new_auth0_user_new_project(current_user,
-                                              email,
-                                              @project.id,
-                                              reset_url).deliver_now
-      end
-    else
-      # DEPRECATED: Legacy Devise flow. Remove block after migrating to Auth0.
-      @user.email_arguments = new_user_shared_project_email_arguments()
-      if @user.save!
-        # Only returns the token sent to user
-        @user.send_reset_password_instructions
-      end
+      # Send them an invitation and account activation email.
+      UserMailer.new_auth0_user_new_project(current_user,
+                                            email,
+                                            @project.id,
+                                            reset_url).deliver_now
     end
   rescue => exception
     LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}. #{exception.message}")
     LogUtil.log_backtrace(exception)
-  end
-
-  def new_user_shared_project_email_arguments
-    {
-      email_subject: 'You have been invited to IDseq',
-      email_template: 'new_user_new_project',
-      sharing_user_id: current_user.id,
-      shared_project_id: @project.id,
-    }
   end
 
   def shared_project_email_arguments

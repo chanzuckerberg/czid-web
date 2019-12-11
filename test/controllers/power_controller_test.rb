@@ -12,7 +12,24 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe can add users to joe_project ' do
     sign_in(:joe)
     @joe_project = projects(:joe_project)
-    put add_user_project_url(@joe_project), params: { user_email_to_add: "abc@xyz.com" }
+    expect(@auth0_management_client_double)
+      .to(receive(:create_user)
+          .with(
+            "User invited from Power Controller test",
+            connection: "Username-Password-Authentication",
+            email: "help@idseq.net",
+            name: "User invited from Power Controller test",
+            password: instance_of(String)
+          )
+          .and_return("user_id" => "auth0|FAKE_AUTH0_USER_ID"))
+
+    expect(@auth0_management_client_double)
+      .to(receive(:post_password_change)
+          .with(user_id: "auth0|FAKE_AUTH0_USER_ID")
+          .and_return(
+            "ticket" => "https://fake_idseq_test.idseq.net/fake_auth0_response_ticket_url?"
+          ))
+    put add_user_project_url(@joe_project), params: { user_email_to_add: "help@idseq.net", user_name_to_add: "User invited from Power Controller test" }
     assert_response :success
   end
 
