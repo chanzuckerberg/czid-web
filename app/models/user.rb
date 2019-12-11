@@ -120,6 +120,27 @@ class User < ApplicationRecord
     projects.exists?(project_id)
   end
 
+  # Update login trackable fields
+  def update_tracked_fields!(request)
+    # This method has been adapted from Devise trackable module to keep previous behavior (IDSEQ-1558 / IDSEQ-1720)
+    # See: https://github.com/plataformatec/devise/blob/715192a7709a4c02127afb067e66230061b82cf2/lib/devise/models/trackable.rb#L20
+    return if new_record?
+
+    old_current = current_sign_in_at
+    new_current = Time.now.utc
+    self.last_sign_in_at     = old_current || new_current
+    self.current_sign_in_at  = new_current
+
+    old_current = current_sign_in_ip
+    new_current = request.remote_ip
+    self.last_sign_in_ip     = old_current || new_current
+    self.current_sign_in_ip  = new_current
+
+    self.sign_in_count ||= 0
+    self.sign_in_count += 1
+    save(validate: false)
+  end
+
   # This returns a hash of interesting optional data for Segment user tracking.
   # Make sure you use any reserved names as intended by Segment!
   # See https://segment.com/docs/spec/identify/#traits .
@@ -157,7 +178,7 @@ class User < ApplicationRecord
       createdAt: created_at.iso8601, # currently same as created_at
       firstName: first_name,
       lastName: last_name,
-      # Devise fields
+      # Login trackable fields (see User#update_tracked_fields!)
       sign_in_count: sign_in_count,
       current_sign_in_at: current_sign_in_at,
       last_sign_in_at: last_sign_in_at,

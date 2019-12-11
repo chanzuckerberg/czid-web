@@ -28,4 +28,11 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
     post projects_url, params: { project: { name: 'New Project' } }
     assert_redirected_to new_user_session_url
   end
+
+  test 'should increment login counter' do
+    previous_count = User.find(@user.id).sign_in_count
+    sign_in @user
+    new_count = User.find(@user.id).sign_in_count
+    assert_equal previous_count + 1, new_count
+  end
 end
