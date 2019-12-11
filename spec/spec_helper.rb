@@ -100,3 +100,14 @@ end
 require "rspec/json_expectations"
 require "webmock/rspec"
 WebMock.disable_net_connect!(allow_localhost: true)
+
+RSpec.configure do |_config|
+  # sign_in method to be used in rspec tests
+  def sign_in(user)
+    unless user.instance_of? User
+      user = users(user)
+    end
+    allow_any_instance_of(ApplicationController).to receive(:current_user) { user }
+    allow_any_instance_of(ApplicationController).to receive(:authenticate_user!) { true }
+  end
+end

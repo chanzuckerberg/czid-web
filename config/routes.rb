@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     post :logout
     get :failure
   end
+  get 'users/password/new' => 'users#password_new'
 
   resources :samples do
     put :reupload_source, on: :member
