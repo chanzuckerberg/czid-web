@@ -7,7 +7,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     @background = backgrounds(:one)
     sign_in @user
   end
-  
+
   test 'non admin shouldnt get index' do
     get users_url
     assert_redirected_to root_url
