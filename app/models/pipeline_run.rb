@@ -1589,7 +1589,7 @@ class PipelineRun < ApplicationRecord
     params = report_info_params
     Background.top_for_sample(sample).pluck(:id).each do |background_id|
       cache_key = PipelineReportService.report_info_cache_key(
-        "/samples/#{sample.id}/report_v2",
+        "/samples/#{sample.id}/report_v2.json",
         params.merge(background_id: background_id)
       )
       Rails.logger.info("Precaching #{cache_key} with background #{background_id}")
