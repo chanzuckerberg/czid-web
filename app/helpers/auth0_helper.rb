@@ -37,7 +37,7 @@ module Auth0Helper
   # (see https://auth0.com/docs/sessions/concepts/session-layers)
   def auth0_invalidate_application_session
     session.delete(:auth0_credentials)
-    warden.logout(:user)
+    warden&.logout(:user)
   end
 
   # URL used to remove auth0 session from Auth0 Session Layer

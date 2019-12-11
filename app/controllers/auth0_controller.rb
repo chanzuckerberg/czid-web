@@ -79,10 +79,17 @@ class Auth0Controller < ApplicationController
     # Auth0Helper#auth0_session
     bearer_token = request.env['omniauth.auth']&.credentials.to_h
 
+    user_was_not_present = current_user.nil?
+
     authenticated = auth0_authenticate_with_bearer_token(bearer_token)
     if authenticated
       # https://github.com/omniauth/omniauth-oauth2/issues/31#issuecomment-23806447
       mode = filter_value(request.env['omniauth.params']['mode'], SUPPORTED_MODES)
+
+      # Update login counters if this is a new login
+      if (mode == "login") || user_was_not_present
+        current_user.update_tracked_fields!(request)
+      end
 
       case mode
       when "background_refresh"
