@@ -9,6 +9,7 @@ import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import AlertIcon from "~ui/icons/AlertIcon";
 import LogoIcon from "~ui/icons/LogoIcon";
 import {
   DISCOVERY_DOMAIN_MY_DATA,
@@ -98,6 +99,7 @@ class Header extends React.Component {
     return (
       userSignedIn && (
         <div>
+          <AnnouncementBanner />
           <div className={cs.header}>
             <div className={cs.logo}>
               <a href="/">
@@ -136,6 +138,14 @@ Header.propTypes = {
 };
 
 Header.contextType = UserContext;
+
+const AnnouncementBanner = () => {
+  return (
+    <div className={cs.announcementBanner}>
+      <AlertIcon className={cs.icon} />
+    </div>
+  );
+};
 
 const UserMenuDropDown = ({
   adminUser,

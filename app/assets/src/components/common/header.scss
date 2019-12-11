@@ -75,3 +75,12 @@
 .backgroundRefreshFrame {
   display: none;
 }
+
+.announcementBanner {
+  height: 40px;
+  background: $primary-lightest;
+
+  .icon {
+    height: 100%;
+  }
+}
