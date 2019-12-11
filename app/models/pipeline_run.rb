@@ -815,6 +815,8 @@ class PipelineRun < ApplicationRecord
     begin
       # TODO:  Make this less expensive while jobs are running, perhaps by doing it only sometimes, then again at end.
       # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
+      # TODO: (gdingle): compile_stats_file! will fetch s3 files 1000s of times unnecessarily in a typical run.
+      # See
       compile_stats_file!
       load_stats_file
       load_chunk_stats
@@ -1097,8 +1099,10 @@ class PipelineRun < ApplicationRecord
     if unidentified
       unmapped_reads = unidentified[:reads_after]
 
-      # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
-      if supports_assembly? && active_stage && active_stage.step_number == 3 # assembly
+      # This will fetch unconditionally on every iteration of the results
+      # monitor. My attempts to restrict fetching with "finalized?" and
+      # "step_number == 3" both failed to work in production.
+      if supports_assembly?
         # see idseq_dag/steps/generate_annotated_fasta.py
         begin
           Rails.logger.info("Fetching file: #{s3_path}")
