@@ -12,9 +12,12 @@ Warden::Manager.serialize_into_session do |user|
 end
 
 Warden::Manager.serialize_from_session do |warden_session_obj|
-  user = User.find_by(id: warden_session_obj["id"],
-                      role: warden_session_obj["role"])
-  return user if user && warden_session_obj["authentication_token_hash"] == user.authentication_token.hash
+  return nil unless warden_session_obj.instance_of?(Hash)
+  id, role, authentication_token_hash = warden_session_obj.values_at("id", "role", "authentication_token_hash")
+  user = User.find_by(id: id, role: role)
+  if user && authentication_token_hash == user.authentication_token.hash
+    user
+  end
 end
 
 # This code provides routing mapper to authenticate routes
