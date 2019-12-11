@@ -98,82 +98,85 @@ class PipelineReportService
     counts_by_tax_level.transform_values! { |counts| hash_by_tax_id_and_count_type(counts) }
     @timer.split("index_by_tax_id_and_count_type")
 
-    # TODO(tiago): check if still necessary and move out of reports helper
-    ReportsHelper.cleanup_missing_genus_counts(
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
-    )
-    @timer.split("cleanup_missing_genus_counts")
+    # In the edge case where there are no matching species found, skip all this processing.
+    if counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES]
+      # TODO(tiago): check if still necessary and move out of reports helper
+      ReportsHelper.cleanup_missing_genus_counts(
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
+      )
+      @timer.split("cleanup_missing_genus_counts")
 
-    merge_contigs(contigs, counts_by_tax_level, @csv)
-    @timer.split("merge_contigs")
+      merge_contigs(contigs, counts_by_tax_level, @csv)
+      @timer.split("merge_contigs")
 
-    counts_by_tax_level.each_value do |tax_level_taxa|
-      compute_z_scores(tax_level_taxa, adjusted_total_reads)
+      counts_by_tax_level.each_value do |tax_level_taxa|
+        compute_z_scores(tax_level_taxa, adjusted_total_reads)
+      end
+      @timer.split("compute_z_scores")
+
+      compute_aggregate_scores(
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
+      )
+      @timer.split("compute_agg_scores")
+
+      # TODO: we should try to use TaxonLineage::fetch_lineage_by_taxid
+      lineage_version = PipelineRun
+                        .select("alignment_configs.lineage_version")
+                        .joins(:alignment_config)
+                        .find(@pipeline_run_id)[:lineage_version]
+
+      required_columns = %w[
+        taxid
+        superkingdom_taxid kingdom_taxid phylum_taxid class_taxid order_taxid family_taxid genus_taxid species_taxid
+        superkingdom_name kingdom_name phylum_name class_name order_name family_name genus_name species_name
+      ]
+
+      tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
+      # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
+      # species id rather than genus id, so select those species ids as well.
+      # TODO: check if this step is still necessary after the data has been cleaned up.
+      species_with_missing_genus = []
+      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
+        species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
+      end
+      tax_ids.concat(species_with_missing_genus)
+
+      lineage_by_tax_id = TaxonLineage
+                          .where(taxid: tax_ids)
+                          .where('? BETWEEN version_start AND version_end', lineage_version)
+                          .pluck(*required_columns)
+                          .map { |r| [r[0], required_columns.zip(r).to_h] }
+                          .to_h
+      @timer.split("fetch_taxon_lineage")
+
+      # TODO(tiago):move out of reports helper
+      ReportsHelper.validate_names(
+        counts_by_tax_level,
+        lineage_by_tax_id,
+        @pipeline_run_id
+      )
+      @timer.split("fill_missing_names")
+
+      tag_pathogens(counts_by_tax_level)
+      @timer.split("tag_pathogens")
+
+      structured_lineage = encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
+      @timer.split("encode_taxon_lineage")
+
+      sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
+      @timer.split("sort_genus_by_aggregate_score")
+
+      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
+        genus[:species_tax_ids] = genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][DEFAULT_SORT_PARAM] }.reverse!
+        genus
+      end
+      @timer.split("sort_species_within_each_genus")
+
+      highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+      @timer.split("find_taxa_to_highlight")
     end
-    @timer.split("compute_z_scores")
-
-    compute_aggregate_scores(
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
-    )
-    @timer.split("compute_agg_scores")
-
-    # TODO: we should try to use TaxonLineage::fetch_lineage_by_taxid
-    lineage_version = PipelineRun
-                      .select("alignment_configs.lineage_version")
-                      .joins(:alignment_config)
-                      .find(@pipeline_run_id)[:lineage_version]
-
-    required_columns = %w[
-      taxid
-      superkingdom_taxid kingdom_taxid phylum_taxid class_taxid order_taxid family_taxid genus_taxid species_taxid
-      superkingdom_name kingdom_name phylum_name class_name order_name family_name genus_name species_name
-    ]
-
-    tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
-    # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
-    # species id rather than genus id, so select those species ids as well.
-    # TODO: check if this step is still necessary after the data has been cleaned up.
-    species_with_missing_genus = []
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
-      species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
-    end
-    tax_ids.concat(species_with_missing_genus)
-
-    lineage_by_tax_id = TaxonLineage
-                        .where(taxid: tax_ids)
-                        .where('? BETWEEN version_start AND version_end', lineage_version)
-                        .pluck(*required_columns)
-                        .map { |r| [r[0], required_columns.zip(r).to_h] }
-                        .to_h
-    @timer.split("fetch_taxon_lineage")
-
-    # TODO(tiago):move out of reports helper
-    ReportsHelper.validate_names(
-      counts_by_tax_level,
-      lineage_by_tax_id,
-      @pipeline_run_id
-    )
-    @timer.split("fill_missing_names")
-
-    tag_pathogens(counts_by_tax_level)
-    @timer.split("tag_pathogens")
-
-    structured_lineage = encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
-    @timer.split("encode_taxon_lineage")
-
-    sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
-    @timer.split("sort_genus_by_aggregate_score")
-
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
-      genus[:species_tax_ids] = genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][DEFAULT_SORT_PARAM] }.reverse!
-      genus
-    end
-    @timer.split("sort_species_within_each_genus")
-
-    highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
-    @timer.split("find_taxa_to_highlight")
 
     has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
     align_viz_available = @pipeline_run.align_viz_available?
