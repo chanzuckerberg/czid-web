@@ -815,8 +815,8 @@ class PipelineRun < ApplicationRecord
     begin
       # TODO:  Make this less expensive while jobs are running, perhaps by doing it only sometimes, then again at end.
       # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
-      # TODO: (gdingle): compile_stats_file! will fetch s3 files 1000s of times unnecessarily in a typical run.
-      # See
+      # TODO: (gdingle): compile_stats_file! will fetch s3 files 100s of times unnecessarily in a typical run.
+      # See https://jira.czi.team/browse/IDSEQ-1924.
       compile_stats_file!
       load_stats_file
       load_chunk_stats
