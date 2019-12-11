@@ -169,10 +169,9 @@ Rails.application.routes.draw do
     get :sample_locations, on: :collection
   end
 
-  # TODO: - David - Check how to do that without devise
-  # authenticate :user, ->(u) { u.admin? } do
-  #   mount RESQUE_SERVER, at: "/resque"
-  # end
+  authenticate :user, ->(u) { u.admin? } do
+    mount RESQUE_SERVER, at: "/resque"
+  end
 
   # See health_check gem
   get 'health_check' => "health_check/health_check#index"

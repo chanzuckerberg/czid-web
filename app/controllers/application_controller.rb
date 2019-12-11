@@ -112,6 +112,7 @@ class ApplicationController < ActionController::Base
     if user_email.present? && user_token.present?
       user = User.find_by(email: user_email)
 
+      # secure_compare is used to mitigate timing attacks
       if user && ActiveSupport::SecurityUtils.secure_compare(user.authentication_token, user_token)
         warden.set_user(user, scope: :user)
         @token_based_login_request = true
