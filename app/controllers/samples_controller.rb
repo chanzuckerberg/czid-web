@@ -803,7 +803,7 @@ class SamplesController < ApplicationController
     background_id = get_background_id(@sample, params[:background])
 
     # If the pipeline run hasn't completed yet, don't cache the report
-    pipeline_run_completed = pipeline_run.all_output_states_terminal? && pipeline_run.all_output_states_loaded? && !pipeline_run.compiling_stats_failed
+    pipeline_run_completed = pipeline_run.all_output_states_terminal? && pipeline_run.all_output_states_loaded?
     skip_cache = params[:skip_cache] || !pipeline_run_completed || false
     report_info_params = pipeline_run.report_info_params
     cache_key = PipelineReportService.report_info_cache_key(
