@@ -966,7 +966,7 @@ export default class SampleViewV2 extends React.Component {
       view,
     } = this.state;
     // pipelineRunReportAvailable is true if:
-    // the pipeline run did not fail AND has finished running
+    // the pipeline run has finished running AND did not fail
     // OR if the pipeline run is report-ready (might still be running Experimental,
     // but at least taxon_counts has been loaded).
     if (reportMetadata.pipelineRunReportAvailable) {
