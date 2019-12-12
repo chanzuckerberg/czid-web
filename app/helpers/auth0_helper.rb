@@ -1,5 +1,38 @@
+# frozen_string_literal: true
+
 module Auth0Helper
   NOT_AUTHENTICATED = { authenticated: false }.freeze
+
+  AUTH_INVALID_USER = 'AUTH_INVALID_USER'
+  AUTH_TOKEN_EXPIRED = 'AUTH_TOKEN_EXPIRED'
+  AUTH_VALID = 'AUTH_VALID'
+
+  # This is just a unique namespace for custom claims and it is not linked to any specific environment
+  CUSTOM_CLAIMS_NAMESPACE = "https://idseq.net"
+  ROLES_CUSTOM_CLAIM = "#{CUSTOM_CLAIMS_NAMESPACE}/roles"
+
+  def auth0_check_user_auth(current_user)
+    if current_user.blank?
+      return AUTH_INVALID_USER
+    else
+      # regular request, check auth0 token to see if it is expired
+      auth_token = auth0_decode_auth_token
+
+      wrong_email = auth_token.dig(:auth_payload, "email") != current_user.email
+      expired = !auth_token[:authenticated]
+
+      # for admin users, ensure that auth0 JWT token matches the local database.
+      # this field is a custom claim set in "Add roles custom claims to JWT" rule in auth0
+      wrong_role = current_user.admin? && !(auth_token.dig(:auth_payload, ROLES_CUSTOM_CLAIM) || []).include?('admin')
+      if wrong_role && !expired && !wrong_email
+        LogUtil.log_err_and_airbrake("Wrong auth0 role for admin user #{current_user.email}")
+      end
+
+      return AUTH_TOKEN_EXPIRED if expired
+      return AUTH_INVALID_USER if wrong_email || wrong_role
+    end
+    AUTH_VALID
+  end
 
   def auth0_authenticate_with_bearer_token(bearer_token)
     self.auth0_session = bearer_token
