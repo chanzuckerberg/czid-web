@@ -376,8 +376,7 @@ class BulkDownload < ApplicationRecord
       begin
         Rails.logger.info("Processing pipeline run #{pipeline_run.id} (#{index + 1} of #{pipeline_runs.length})...")
         if download_type == SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
-          tax_details = ReportHelper.taxonomy_details(pipeline_run.id, get_param_value("background"), TaxonScoringModel::DEFAULT_MODEL_NAME, ReportHelper::DEFAULT_SORT_PARAM)
-          report_csv = ReportHelper.generate_report_csv(tax_details)
+          report_csv = PipelineReportService.call(pipeline_run, get_param_value("background"), true)
           s3_tar_writer.add_file_with_data(
             "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
               "taxon_report.csv",
