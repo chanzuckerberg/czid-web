@@ -61,7 +61,7 @@ class Project < ApplicationRecord
   end
 
   def cleaned_project_name
-    "project-#{name.downcase.split(' ').join('_')}"
+    name.downcase.split(' ').join('_').to_s
   end
 
   def host_gene_counts_from_params(params)

@@ -68,6 +68,10 @@ describe BulkDownload, type: :model do
     end
   end
 
+  def get_expected_tar_name(project, sample, suffix)
+    "#{project.cleaned_project_name[0...100]}_#{project.id}/#{sample.name[0...65]}_#{sample.id}_#{suffix}"
+  end
+
   context "#bulk_download_ecs_task_command" do
     before do
       @joe = create(:joe)
@@ -95,10 +99,10 @@ describe BulkDownload, type: :model do
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
         "--tar-names",
-        "Test Sample One__project-test_project_#{@project.id}__original_R1.fastq.gz",
-        "Test Sample One__project-test_project_#{@project.id}__original_R2.fastq.gz",
-        "Test Sample Two__project-test_project_#{@project.id}__original_R1.fastq.gz",
-        "Test Sample Two__project-test_project_#{@project.id}__original_R2.fastq.gz",
+        get_expected_tar_name(@project, @sample_one, "original_R1.fastq.gz"),
+        get_expected_tar_name(@project, @sample_one, "original_R2.fastq.gz"),
+        get_expected_tar_name(@project, @sample_two, "original_R1.fastq.gz"),
+        get_expected_tar_name(@project, @sample_two, "original_R2.fastq.gz"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Original Input Files.tar.gz",
         "--success-url",
@@ -128,8 +132,8 @@ describe BulkDownload, type: :model do
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/assembly/refined_unidentified.fa",
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/assembly/refined_unidentified.fa",
         "--tar-names",
-        "Test Sample One__project-test_project_#{@project.id}__unmapped.fasta",
-        "Test Sample Two__project-test_project_#{@project.id}__unmapped.fasta",
+        get_expected_tar_name(@project, @sample_one, "unmapped.fasta"),
+        get_expected_tar_name(@project, @sample_two, "unmapped.fasta"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Unmapped Reads.tar.gz",
         "--success-url",
@@ -164,8 +168,8 @@ describe BulkDownload, type: :model do
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/assembly/refined_taxid_annot.fasta",
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/assembly/refined_taxid_annot.fasta",
         "--tar-names",
-        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_all.fasta",
-        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_all.fasta",
+        get_expected_tar_name(@project, @sample_one, "reads_nh.fasta"),
+        get_expected_tar_name(@project, @sample_two, "reads_nh.fasta"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--success-url",
@@ -202,10 +206,10 @@ describe BulkDownload, type: :model do
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R1.fastq",
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R2.fastq",
         "--tar-names",
-        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_all_R1.fastq",
-        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_all_R2.fastq",
-        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_all_R1.fastq",
-        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_all_R2.fastq",
+        get_expected_tar_name(@project, @sample_one, "reads_nh_R1.fastq"),
+        get_expected_tar_name(@project, @sample_one, "reads_nh_R2.fastq"),
+        get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
+        get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
         "--success-url",
@@ -234,8 +238,8 @@ describe BulkDownload, type: :model do
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/assembly/contigs.fasta",
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/assembly/contigs.fasta",
         "--tar-names",
-        "Test Sample One__project-test_project_#{@project.id}__contigs_nonhost_all.fasta",
-        "Test Sample Two__project-test_project_#{@project.id}__contigs_nonhost_all.fasta",
+        get_expected_tar_name(@project, @sample_one, "contigs_nh.fasta"),
+        get_expected_tar_name(@project, @sample_two, "contigs_nh.fasta"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Contigs (Non-host).tar.gz",
         "--success-url",
@@ -265,8 +269,8 @@ describe BulkDownload, type: :model do
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/results/3.12/reads_per_gene.star.tab",
         "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/results/3.12/reads_per_gene.star.tab",
         "--tar-names",
-        "Test Sample One__project-test_project_#{@project.id}__reads_per_gene.star.tab",
-        "Test Sample Two__project-test_project_#{@project.id}__reads_per_gene.star.tab",
+        get_expected_tar_name(@project, @sample_one, "reads_per_gene.star.tab"),
+        get_expected_tar_name(@project, @sample_two, "reads_per_gene.star.tab"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Host Gene Counts.tar.gz",
         "--success-url",
@@ -492,8 +496,8 @@ describe BulkDownload, type: :model do
       expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_return("mock_report_csv_2")
 
       add_s3_tar_writer_expectations(
-        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv",
-        "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv_2"
+        get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
+        get_expected_tar_name(@project, @sample_two, "taxon_report.csv") => "mock_report_csv_2"
       )
 
       bulk_download.generate_download_file
@@ -511,8 +515,8 @@ describe BulkDownload, type: :model do
       expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_return("mock_report_csv_2")
 
       add_s3_tar_writer_expectations(
-        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv",
-        "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv_2"
+        get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
+        get_expected_tar_name(@project, @sample_two, "taxon_report.csv") => "mock_report_csv_2"
       )
 
       expect(bulk_download).to receive(:progress_update_delay).exactly(2).times.and_return(0)
@@ -546,8 +550,8 @@ describe BulkDownload, type: :model do
       allow_any_instance_of(PipelineRun).to receive(:generate_contig_mapping_table_csv).and_return("mock_contigs_summary_csv")
 
       add_s3_tar_writer_expectations(
-        "Test Sample One__project-test_project_#{@project.id}__contig_summary_report.csv" => "mock_contigs_summary_csv",
-        "Test Sample Two__project-test_project_#{@project.id}__contig_summary_report.csv" => "mock_contigs_summary_csv"
+        get_expected_tar_name(@project, @sample_one, "contig_summary_report.csv") => "mock_contigs_summary_csv",
+        get_expected_tar_name(@project, @sample_two, "contig_summary_report.csv") => "mock_contigs_summary_csv"
       )
 
       bulk_download.generate_download_file
@@ -569,8 +573,8 @@ describe BulkDownload, type: :model do
       expect(bulk_download).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).with(anything, mock_tax_id, mock_tax_level).exactly(2).times.and_return("mock_reads_nonhost_fasta")
 
       add_s3_tar_writer_expectations(
-        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "mock_reads_nonhost_fasta",
-        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "mock_reads_nonhost_fasta"
+        get_expected_tar_name(@project, @sample_one, "reads_nh_Salmonella.fasta") => "mock_reads_nonhost_fasta",
+        get_expected_tar_name(@project, @sample_two, "reads_nh_Salmonella.fasta") => "mock_reads_nonhost_fasta"
       )
 
       bulk_download.generate_download_file
@@ -589,8 +593,8 @@ describe BulkDownload, type: :model do
       expect(bulk_download).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).with(anything, mock_tax_id, mock_tax_level).exactly(2).times.and_return(nil)
 
       add_s3_tar_writer_expectations(
-        "Test Sample One__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => "",
-        "Test Sample Two__project-test_project_#{@project.id}__reads_nonhost_Salmonella enterica.fasta" => ""
+        get_expected_tar_name(@project, @sample_one, "reads_nh_Salmonella.fasta") => "",
+        get_expected_tar_name(@project, @sample_two, "reads_nh_Salmonella.fasta") => ""
       )
 
       bulk_download.generate_download_file
@@ -683,8 +687,8 @@ describe BulkDownload, type: :model do
       allow_any_instance_of(PipelineRun).to receive(:get_contigs_for_taxid).and_return([object_double(Contig.new, to_fa: "mock_contigs_nonhost_fasta")])
 
       add_s3_tar_writer_expectations(
-        "Test Sample One__project-test_project_#{@project.id}__contigs_nonhost_Salmonella enterica.fasta" => "mock_contigs_nonhost_fasta",
-        "Test Sample Two__project-test_project_#{@project.id}__contigs_nonhost_Salmonella enterica.fasta" => "mock_contigs_nonhost_fasta"
+        get_expected_tar_name(@project, @sample_one, "contigs_nh_Salmonel.fasta") => "mock_contigs_nonhost_fasta",
+        get_expected_tar_name(@project, @sample_two, "contigs_nh_Salmonel.fasta") => "mock_contigs_nonhost_fasta"
       )
 
       bulk_download.generate_download_file
@@ -703,7 +707,7 @@ describe BulkDownload, type: :model do
       expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, true).exactly(1).times.and_raise("error")
 
       add_s3_tar_writer_expectations(
-        "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv"
+        get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv"
       )
 
       bulk_download.generate_download_file
@@ -724,8 +728,8 @@ describe BulkDownload, type: :model do
 
       add_s3_tar_writer_expectations(
         {
-          "Test Sample One__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv",
-          "Test Sample Two__project-test_project_#{@project.id}__taxon_report.csv" => "mock_report_csv_2",
+          get_expected_tar_name(@project, @sample_one, "taxon_report.csv") => "mock_report_csv",
+          get_expected_tar_name(@project, @sample_two, "taxon_report.csv") => "mock_report_csv_2",
         },
         99,
         false
