@@ -90,12 +90,12 @@ class TaxonTreeVis extends React.Component {
 
   componentDidUpdate() {
     let options = {};
-    if (this.nameType != this.props.nameType) {
+    if (this.nameType !== this.props.nameType) {
       this.nameType = this.props.nameType;
       options.useCommonName = this.isCommonNameActive();
     }
 
-    if (this.metric != this.props.metric) {
+    if (this.metric !== this.props.metric) {
       this.metric = this.props.metric;
       options.attribute = this.props.metric;
     }
@@ -104,7 +104,7 @@ class TaxonTreeVis extends React.Component {
       this.treeVis.setOptions(options);
     }
 
-    if (this.taxa != this.props.taxa) {
+    if (this.taxa !== this.props.taxa) {
       this.taxa = this.props.taxa;
       this.treeVis.setTree(this.createTree(this.props.taxa));
     }
@@ -132,7 +132,7 @@ class TaxonTreeVis extends React.Component {
   };
 
   isCommonNameActive = () => {
-    return this.nameType.toLowerCase() == "common name";
+    return this.nameType.toLowerCase() === "common name";
   };
 
   fillNodeValues = root => {
@@ -215,17 +215,35 @@ class TaxonTreeVis extends React.Component {
       // loading the genus id from the species lineage handles
       // cases where genus id is negative
       let genusIdFromLineage = null;
+
       genusData.filteredSpecies.forEach(speciesData => {
         const speciesLineage = lineage[speciesData.taxId] || {};
+        // due to data inconsistencies, we try to infer the genus from the underlying species
+        // lineage this value will be used if there is no lineage for the genus
         if (
           !genusIdFromLineage &&
-          getOr(genusData.taxId, "parent", speciesLineage) != genusData.taxId
+          getOr(genusData.taxId, "parent", speciesLineage) !== genusData.taxId
         ) {
           genusIdFromLineage = speciesLineage.parent;
         }
+      });
+
+      genusData.filteredSpecies.forEach(speciesData => {
+        const speciesLineage = lineage[speciesData.taxId] || {};
         formatAndAddNode({
           nodeData: speciesData,
-          parentId: speciesLineage.parent || genusData.taxId || ROOT_ID,
+          // due to data inconsistencies or to handle negative fake genus,
+          // we try to get the parent tax id from:
+          // 1) the species lineage info
+          // 2) the parent genus if there is lineage defined for it
+          // 3) the genus id inferred from all the children species' lineage
+          // 4) the root id
+          // this guarantees that lineage is defined for the genus node
+          parentId:
+            speciesLineage.parent ||
+            (lineage[genusData.taxId] && genusData.taxId) ||
+            genusIdFromLineage ||
+            ROOT_ID,
         });
       });
 
@@ -264,7 +282,7 @@ class TaxonTreeVis extends React.Component {
           <li
             key={`tt_${metric}`}
             className={`taxon_tooltip__row ${
-              this.props.metric == metric ? "taxon_tooltip__row--active" : ""
+              this.props.metric === metric ? "taxon_tooltip__row--active" : ""
             }`}
           >
             <div className="taxon_tooltip__row__label">
