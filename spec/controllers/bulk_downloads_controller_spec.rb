@@ -17,6 +17,12 @@ RSpec.describe BulkDownloadsController, type: :controller do
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
       end
 
+      def get_expected_tar_name(project, sample, suffix)
+        Shellwords.escape(
+          "#{project.cleaned_project_name[0...100]}_#{project.id}/#{sample.name[0...65]}_#{sample.id}_#{suffix}"
+        )
+      end
+
       it "should create new bulk download and kickoff the aegea ecs task" do
         @sample_one = create(:sample, project: @project, name: "Test Sample One",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
@@ -32,10 +38,10 @@ RSpec.describe BulkDownloadsController, type: :controller do
           "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/fastqs/#{@sample_one.input_files[1].name}",
           "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[0].name}",
           "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/fastqs/#{@sample_two.input_files[1].name}",
-          "--tar-names Test\\ Sample\\ One__project-test_project_#{@project.id}__original_R1.fastq.gz",
-          "Test\\ Sample\\ One__project-test_project_#{@project.id}__original_R2.fastq.gz",
-          "Test\\ Sample\\ Two__project-test_project_#{@project.id}__original_R1.fastq.gz",
-          "Test\\ Sample\\ Two__project-test_project_#{@project.id}__original_R2.fastq.gz",
+          "--tar-names #{get_expected_tar_name(@project, @sample_one, 'original_R1.fastq.gz')}",
+          get_expected_tar_name(@project, @sample_one, "original_R2.fastq.gz"),
+          get_expected_tar_name(@project, @sample_two, "original_R1.fastq.gz"),
+          get_expected_tar_name(@project, @sample_two, "original_R2.fastq.gz"),
           # Omit the dest-url, success-url, error-url, progress-url since they require the bulk download id.
           # Tested further in the model spec.
         ].join(" ")
