@@ -1445,10 +1445,15 @@ class PipelineRun < ApplicationRecord
 
   def get_summary_contig_counts_v2(min_contig_size)
     summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
-    contig_lineages(min_contig_size).each do |c|
-      lineage = JSON.parse(c.lineage_json)
-      lineage.each do |count_type, taxid_arr|
-        taxids = taxid_arr[0..1]
+    contig_taxids = contigs.select("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
+                           .where("read_count >= ?", min_contig_size)
+                           .where("lineage_json IS NOT NULL")
+    contig_taxids.each do |c|
+      count_types_to_taxids = {
+        "nt": [c.species_taxid_nt, c.genus_taxid_nt].compact,
+        "nr": [c.species_taxid_nr, c.genus_taxid_nr].compact,
+      }
+      count_types_to_taxids.each do |count_type, taxids|
         taxids.each do |taxid|
           summary_per_tax = summary_dict[taxid] ||= {}
           summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= {}
