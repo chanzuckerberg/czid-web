@@ -1001,7 +1001,7 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
           </div>
-          {view == "table" && (
+          {view === "table" && (
             <div className={cs.reportTable}>
               <ReportTable
                 alignVizAvailable={
