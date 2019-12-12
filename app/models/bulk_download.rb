@@ -216,9 +216,19 @@ class BulkDownload < ApplicationRecord
   end
 
   # cleaned_project_names is a map from project id to cleaned project name
+  # The prefix is designed to be <= 75 chars.
+  # Bulk downloads should ensure that the suffix they add (e.g. contigs_nh.fasta, reads_per_gene.star.tab)
+  # is <= 25 chars, so that the total file name is <= 100 chars.
   def get_output_file_prefix(sample, cleaned_project_names)
-    "#{sample.name}__" \
-      "#{cleaned_project_names[sample.project_id]}_#{sample.project_id}__"
+    # Truncate the project name to 100 chars.
+    project_name_truncated = cleaned_project_names[sample.project_id][0...100]
+    sample_id_str = "_#{sample.id}_"
+    # Truncate the sample name to 65 chars (we keep the truncation fixed so users can parse the file name easier)
+    # However, if we ever get to 100M samples, we will need to truncate further.
+    max_sample_name_length = [65, 75 - sample_id_str.length].min
+    sample_name_truncated = sample.name[0...max_sample_name_length]
+
+    "#{project_name_truncated}_#{sample.project_id}/#{sample_name_truncated}#{sample_id_str}"
   end
 
   def bulk_download_ecs_task_command
@@ -266,7 +276,7 @@ class BulkDownload < ApplicationRecord
 
       download_tar_names = samples.map do |sample|
         "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-          "reads_nonhost_all.fasta"
+          "reads_nh.fasta"
       end
     end
 
@@ -282,7 +292,7 @@ class BulkDownload < ApplicationRecord
         sample.input_files.map.with_index do |_input_file, input_file_index|
           # Include the project id because the cleaned project names might have duplicates as well.
           "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-            "reads_nonhost_all_R#{input_file_index + 1}.#{file_ext}"
+            "reads_nh_R#{input_file_index + 1}.#{file_ext}"
         end
       end.flatten
     end
@@ -292,7 +302,7 @@ class BulkDownload < ApplicationRecord
 
       download_tar_names = samples.map do |sample|
         "#{get_output_file_prefix(sample, cleaned_project_names)}" \
-            "contigs_nonhost_all.fasta"
+            "contigs_nh.fasta"
       end
     end
 
@@ -396,9 +406,12 @@ class BulkDownload < ApplicationRecord
             reads_nonhost_for_taxid_fasta = ""
           end
 
+          # Truncate the taxon so that the total size of the file suffix is 25 characters max.
+          taxon_truncated = get_param_display_name('taxa_with_reads')[0...10]
+
           s3_tar_writer.add_file_with_data(
             "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
-              "reads_nonhost_#{get_param_display_name('taxa_with_reads')}.fasta",
+              "reads_nh_#{taxon_truncated}.fasta",
             reads_nonhost_for_taxid_fasta
           )
         elsif download_type == CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
@@ -406,9 +419,12 @@ class BulkDownload < ApplicationRecord
           contigs_nonhost_for_taxid_fasta = ''
           contigs.each { |contig| contigs_nonhost_for_taxid_fasta += contig.to_fa }
 
+          # Truncate the taxon so that the total size of the file suffix is 25 characters max.
+          taxon_truncated = get_param_display_name('taxa_with_contigs')[0...8]
+
           s3_tar_writer.add_file_with_data(
             "#{get_output_file_prefix(pipeline_run.sample, cleaned_project_names)}" \
-              "contigs_nonhost_#{get_param_display_name('taxa_with_contigs')}.fasta",
+              "contigs_nh_#{taxon_truncated}.fasta",
             contigs_nonhost_for_taxid_fasta
           )
         end
