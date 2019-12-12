@@ -77,10 +77,37 @@
 }
 
 .announcementBanner {
+  @include font-body-xs;
   height: 40px;
   background: $primary-lightest;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 
-  .icon {
-    height: 100%;
+  .content {
+    display: flex;
+
+    .icon {
+      height: 20px;
+      fill: $primary-light;
+      margin-right: $space-xs;
+    }
+
+    .title {
+      @include font-header-xs;
+      margin-right: $space-xxxs;
+    }
+
+    .link {
+      margin-left: 3px;
+      text-decoration: underline;
+    }
+  }
+
+  .close {
+    position: absolute;
+    right: $space-s;
   }
 }

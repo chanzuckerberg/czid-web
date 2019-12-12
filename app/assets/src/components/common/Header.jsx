@@ -11,6 +11,7 @@ import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import AlertIcon from "~ui/icons/AlertIcon";
 import LogoIcon from "~ui/icons/LogoIcon";
+import RemoveIcon from "~ui/icons/RemoveIcon";
 import {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
@@ -142,7 +143,20 @@ Header.contextType = UserContext;
 const AnnouncementBanner = () => {
   return (
     <div className={cs.announcementBanner}>
-      <AlertIcon className={cs.icon} />
+      <span className={cs.content}>
+        <AlertIcon className={cs.icon} />
+        <span className={cs.title}>Low-Support Mode:</span>
+        We will only be responding to highly urgent issues from 12/21–12/29. For
+        now, check out our
+        <ExternalLink
+          className={cs.link}
+          href="https://help.idseq.net"
+          onClick={() => logAnalyticsEvent("AnnouncementBanner_link_clicked")}
+        >
+          Help Center
+        </ExternalLink>. Happy Holidays!
+      </span>
+      <RemoveIcon className={cs.close} />
     </div>
   );
 };
