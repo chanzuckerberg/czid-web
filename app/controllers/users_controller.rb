@@ -25,7 +25,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       if @user.save
         # Create the user with Auth0.
-        create_response = Auth0UserManagementHelper.create_auth0_user(new_user_params.slice(:email, :name, :password))
+        create_response = Auth0UserManagementHelper.create_auth0_user(**new_user_params.slice(:email, :name, :password, :role))
 
         if send_activation
           # Get their password reset link so they can set a password.
