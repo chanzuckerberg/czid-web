@@ -114,5 +114,11 @@
     position: absolute;
     right: $space-m;
     top: $space-m;
+    fill: $dark-grey;
+    cursor: pointer;
+
+    &:hover {
+      fill: $black;
+    }
   }
 }

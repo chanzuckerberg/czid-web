@@ -4,6 +4,7 @@ import moment from "moment";
 import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 
+import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
@@ -143,20 +144,37 @@ Header.contextType = UserContext;
 const AnnouncementBanner = () => {
   return (
     <div className={cs.announcementBanner}>
-      <span className={cs.content}>
-        <AlertIcon className={cs.icon} />
-        <span className={cs.title}>Low-Support Mode:</span>
-        We will only be responding to highly urgent issues from 12/21–12/29. For
-        now, check out our
-        <ExternalLink
-          className={cs.link}
-          href="https://help.idseq.net"
-          onClick={() => logAnalyticsEvent("AnnouncementBanner_link_clicked")}
-        >
-          Help Center
-        </ExternalLink>. Happy Holidays!
-      </span>
-      <RemoveIcon className={cs.close} />
+      <BasicPopup
+        content={
+          "Low-Support Mode: We will only be responding to highly urgent issues from 12/21–12/29. For now, check out our Help Center. Happy Holidays!"
+        }
+        position="bottom center"
+        wide="very"
+        trigger={
+          <span className={cs.content}>
+            <AlertIcon className={cs.icon} />
+            <span className={cs.title}>Low-Support Mode:</span>
+            We will only be responding to highly urgent issues from 12/21–12/29.
+            For now, check out our
+            <ExternalLink
+              className={cs.link}
+              href="https://help.idseq.net"
+              onClick={() =>
+                logAnalyticsEvent("AnnouncementBanner_link_clicked")
+              }
+            >
+              Help Center
+            </ExternalLink>. Happy Holidays!
+          </span>
+        }
+      />
+      <RemoveIcon
+        className={cs.close}
+        onClick={() => {
+          logAnalyticsEvent("AnnouncementBanner_close_clicked");
+          console.log("clicked");
+        }}
+      />
     </div>
   );
 };
