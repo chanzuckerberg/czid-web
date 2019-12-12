@@ -965,10 +965,11 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
-    if (
-      reportMetadata.pipelineRunStatus === "COMPLETE" &&
-      reportMetadata.pipelineRunReportAvailable
-    ) {
+    // pipelineRunReportAvailable is true if:
+    // the pipeline run has finished running AND did not fail
+    // OR if the pipeline run is report-ready (might still be running Experimental,
+    // but at least taxon_counts has been loaded).
+    if (reportMetadata.pipelineRunReportAvailable) {
       return (
         <div className={cs.reportViewContainer}>
           <div className={cs.reportFilters}>
