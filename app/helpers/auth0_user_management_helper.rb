@@ -3,12 +3,12 @@ module Auth0UserManagementHelper
 
   # Create a new user in the Auth0 user database.
   # This method creates the user only in the main user database (Username-Password-Authentication)
-  def self.create_auth0_user(email:, name:, password:, role: User::ROLE_REGULAR_USER)
+  def self.create_auth0_user(email:, name:, role: User::ROLE_REGULAR_USER)
     options = {
       connection: AUTH0_CONNECTION_NAME,
       email: email,
       name: name,
-      password: password,
+      password: UsersHelper.generate_random_password,
       app_metadata: { roles: role == User::ROLE_ADMIN ? ['admin'] : [] },
     }
     # See:
@@ -64,15 +64,18 @@ module Auth0UserManagementHelper
   # This method will patch users that match this email in all auth0 connections
   def self.patch_auth0_user(email:, name:, role:)
     auth0_user_ids = get_auth0_user_ids_by_email(email)
-    auth0_user_ids.each do |auth0_user_id|
-      if name.present?
+    if auth0_user_ids.empty?
+      # Creates a user in auth0 if it is not already there (may have had a problem during legacy user migration)
+      create_auth0_user(email: email, name: name, role: role)
+    else
+      auth0_user_ids.each do |auth0_user_id|
         body = { name: name, app_metadata: { roles: role == User::ROLE_ADMIN ? ['admin'] : [] } }
         # See:
         # - https://auth0.com/docs/api/management/v2#!/Users/patch_users_by_id
         # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
         auth0_management_client.patch_user(auth0_user_id, body)
+        change_auth0_user_role(auth0_user_id: auth0_user_id, role: role)
       end
-      change_auth0_user_role(auth0_user_id: auth0_user_id, role: role)
     end
   end
 

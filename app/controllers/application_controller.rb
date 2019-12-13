@@ -114,7 +114,7 @@ class ApplicationController < ActionController::Base
 
       # secure_compare is used to mitigate timing attacks
       if user && ActiveSupport::SecurityUtils.secure_compare(user.authentication_token, user_token)
-        warden.set_user(user, scope: :user)
+        warden.set_user(user, scope: :auth0_user)
         @token_based_login_request = true
         return
       end
