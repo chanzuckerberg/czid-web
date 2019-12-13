@@ -27,42 +27,12 @@ $font-weight-semibold: 600;
 $font-weight-bold: 700;
 $font-weight-heavy: 800;
 
-// Adapted from http://text-crop.eightshapes.com/
-// There isn't an easy formula for calculating the distance between the font-size box
-// and the cap height (top of text) and baseline (bottom of text).
-// All the top-crop and bottom-crop values are manually determined.
-@mixin text-crop($top-crop, $bottom-crop) {
-  &::before,
-  &::after {
-    content: "";
-    display: block;
-    height: 0;
-    width: 0;
-  }
-
-  &::before {
-    margin-bottom: -#{$top-crop}px;
-  }
-
-  &::after {
-    margin-top: -#{$bottom-crop}px;
-  }
-}
-
 // Font mixins. Use the cropped versions whenever possible.
 @mixin font-header-xxl {
   font-size: 26px;
   line-height: 34px;
   font-weight: $font-weight-semibold;
   letter-spacing: 0.3px;
-}
-
-// Apply this to the immediate container of your text.
-// This gets rid of the extra space above and below a block of text due to line-height.
-// TODO(mark): Once the cropped versions are stable, refactor everything to use them and delete the old mixins.
-@mixin font-header-xxl-crop {
-  @include font-header-xxl;
-  @include text-crop(8, 7);
 }
 
 @mixin font-header-xl {
@@ -72,21 +42,11 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
-@mixin font-header-xl-crop {
-  @include font-header-xl;
-  @include text-crop(8, 6);
-}
-
 @mixin font-header-l {
   font-size: 18px;
   line-height: 24px;
   font-weight: $font-weight-semibold;
   letter-spacing: 0.3px;
-}
-
-@mixin font-header-l-crop {
-  @include font-header-l;
-  @include text-crop(6, 5);
 }
 
 @mixin font-header-m {
@@ -96,21 +56,11 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
-@mixin font-header-m-crop {
-  @include font-header-m;
-  @include text-crop(5, 5);
-}
-
 @mixin font-header-s {
   font-size: 14px;
   line-height: 24px;
   font-weight: $font-weight-semibold;
   letter-spacing: 0.3px;
-}
-
-@mixin font-header-s-crop {
-  @include font-header-s;
-  @include text-crop(7, 7);
 }
 
 @mixin font-header-xs {
@@ -120,11 +70,6 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
-@mixin font-header-xs-crop {
-  @include font-header-xs;
-  @include text-crop(5, 5);
-}
-
 @mixin font-header-xxs {
   font-size: 12px;
   line-height: 18px;
@@ -132,21 +77,11 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
-@mixin font-header-xxs-crop {
-  @include font-header-xxs;
-  @include text-crop(4, 4);
-}
-
 @mixin font-header-xxxs {
   font-size: 11px;
   line-height: 16px;
   font-weight: $font-weight-semibold;
   letter-spacing: 0.3px;
-}
-
-@mixin font-header-xxxs-crop {
-  @include font-header-xxxs;
-  @include text-crop(4, 4);
 }
 
 @mixin font-header-accordion {
@@ -157,22 +92,12 @@ $font-weight-heavy: 800;
   text-transform: uppercase;
 }
 
-@mixin font-header-accordion-crop {
-  @include font-header-accordion;
-  @include text-crop(15, 16);
-}
-
 @mixin font-header-node-l {
   font-size: 12px;
   line-height: 13px;
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-}
-
-@mixin font-header-node-l-crop {
-  @include font-header-node-l;
-  @include text-crop(2, 2);
 }
 
 @mixin font-header-node-s {
@@ -182,21 +107,11 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
-@mixin font-header-node-s-crop {
-  @include font-header-node-s;
-  @include text-crop(3, 3);
-}
-
 @mixin font-body-xl {
   font-size: 22px;
   line-height: 30px;
   letter-spacing: 0.3px;
   font-weight: $font-weight-regular;
-}
-
-@mixin font-body-xl-crop {
-  @include font-body-xl;
-  @include text-crop(8, 7);
 }
 
 @mixin font-body-l {
@@ -206,21 +121,11 @@ $font-weight-heavy: 800;
   font-weight: $font-weight-regular;
 }
 
-@mixin font-body-l-crop {
-  @include font-body-l;
-  @include text-crop(8, 7);
-}
-
 @mixin font-body-m {
   font-size: 16px;
   line-height: 26px;
   letter-spacing: 0.3px;
   font-weight: $font-weight-regular;
-}
-
-@mixin font-body-m-crop {
-  @include font-body-m;
-  @include text-crop(7, 7);
 }
 
 @mixin font-body-s {
@@ -230,21 +135,11 @@ $font-weight-heavy: 800;
   font-weight: $font-weight-regular;
 }
 
-@mixin font-body-s-crop {
-  @include font-body-s;
-  @include text-crop(7, 7);
-}
-
 @mixin font-body-xs {
   font-size: 13px;
   line-height: 20px;
   letter-spacing: 0.3px;
   font-weight: $font-weight-regular;
-}
-
-@mixin font-body-xs-crop {
-  @include font-body-xs;
-  @include text-crop(5, 5);
 }
 
 @mixin font-body-xxs {
@@ -254,21 +149,11 @@ $font-weight-heavy: 800;
   font-weight: $font-weight-regular;
 }
 
-@mixin font-body-xxs-crop {
-  @include font-body-xxs;
-  @include text-crop(4, 5);
-}
-
 @mixin font-body-xxxs {
   font-size: 11px;
   line-height: 16px;
   letter-spacing: 0.3px;
   font-weight: $font-weight-regular;
-}
-
-@mixin font-body-xxxs-crop {
-  @include font-body-xxxs;
-  @include text-crop(4, 4);
 }
 
 @mixin font-label-s {
@@ -279,21 +164,11 @@ $font-weight-heavy: 800;
   font-weight: $font-weight-semibold;
 }
 
-@mixin font-label-s-crop {
-  @include font-label-s;
-  @include text-crop(8, 8);
-}
-
 @mixin font-label-xs {
   font-size: 10px;
   line-height: 24px;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-}
-
-@mixin font-label-xs-crop {
-  @include font-label-xs;
-  @include text-crop(9, 8);
 }
 
 @mixin font-label-xxs {
@@ -303,11 +178,6 @@ $font-weight-heavy: 800;
   text-transform: uppercase;
 }
 
-@mixin font-label-xxs-crop {
-  @include font-label-xxs;
-  @include text-crop(8, 9);
-}
-
 @mixin font-tag-s {
   font-size: 11px;
   line-height: 11px;
@@ -315,20 +185,10 @@ $font-weight-heavy: 800;
   font-weight: 400;
 }
 
-@mixin font-tag-s-crop {
-  @include font-tag-s;
-  @include text-crop(2, 1);
-}
-
 @mixin viz-label {
   font-size: 9px;
   line-height: 13px;
   font-weight: $font-weight-semibold;
-}
-
-@mixin font-viz-label-crop {
-  @include viz-label;
-  @include text-crop(3, 3);
 }
 
 @mixin font-search-result-title {
@@ -338,29 +198,14 @@ $font-weight-heavy: 800;
   font-weight: $font-weight-semibold;
 }
 
-@mixin font-search-result-title-crop {
-  @include font-search-result-title;
-  @include text-crop(7, 7);
-}
-
 @mixin font-search-result-description {
   font-size: 10px;
   line-height: 14px;
   letter-spacing: 1px;
 }
 
-@mixin font-search-result-description-crop {
-  @include font-search-result-description;
-  @include text-crop(3, 3);
-}
-
 @mixin font-code {
   font-face: $font-family-monospace;
   font-size: 13px;
   line-height: 16px;
-}
-
-@mixin font-code-crop {
-  @include font-code;
-  @include text-crop(3, 3);
 }
