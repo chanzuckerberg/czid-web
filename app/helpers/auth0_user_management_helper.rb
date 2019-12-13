@@ -15,7 +15,10 @@ module Auth0UserManagementHelper
     # - https://auth0.com/docs/api/management/v2#!/Users/post_users
     # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
     create_response = auth0_management_client.create_user(name, options)
-    add_role_to_auth0_user(auth0_user_id: create_response["user_id"], role: role)
+    if role == User::ROLE_ADMIN
+      # We only need to add a role to this user if it is an admin
+      change_auth0_user_role(auth0_user_id: create_response["user_id"], role: role)
+    end
     create_response
   end
 
@@ -41,7 +44,7 @@ module Auth0UserManagementHelper
     (auth0_users.map { |u| u["identities"].map { |i| i.values_at("provider", "user_id").join("|") } }).flatten
   end
 
-  private_class_method def self.add_role_to_auth0_user(auth0_user_id:, role: User::ROLE_REGULAR_USER)
+  private_class_method def self.change_auth0_user_role(auth0_user_id:, role: User::ROLE_REGULAR_USER)
     auth0_roles = auth0_management_client.get_roles
     auth0_admin_role = (auth0_roles.find { |r| r["name"] == "Admin" })["id"]
     if role == User::ROLE_ADMIN
@@ -69,7 +72,7 @@ module Auth0UserManagementHelper
         # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
         auth0_management_client.patch_user(auth0_user_id, body)
       end
-      add_role_to_auth0_user(auth0_user_id: auth0_user_id, role: role)
+      change_auth0_user_role(auth0_user_id: auth0_user_id, role: role)
     end
   end
 
