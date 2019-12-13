@@ -1447,9 +1447,9 @@ class PipelineRun < ApplicationRecord
     # key: taxid:count_type, value: read_counts: count
     # Create and store default values for the hash if the key doesn't exist yet
     summary_dict = Hash.new do |summary, taxid|
-      summary[taxid] = Hash.new do |tax_id, count_type| # rubocop forces different variable names
-        tax_id[count_type] = Hash.new do |counttype, read_count|
-          counttype[read_count] = 0
+      summary[taxid] = Hash.new do |taxid_, count_type| # rubocop forces different variable names
+        taxid_[count_type] = Hash.new do |count_type_, read_count|
+          count_type_[read_count] = 0
         end
       end
     end
