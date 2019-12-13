@@ -1444,23 +1444,25 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_summary_contig_counts_v2(min_contig_size)
-    summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
-    contig_taxids = contigs.select("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
-                           .where("read_count >= ?", min_contig_size)
-                           .where("lineage_json IS NOT NULL")
-    contig_taxids.each do |c|
-      count_types_to_taxids = {
-        "nt": [c.species_taxid_nt, c.genus_taxid_nt].compact,
-        "nr": [c.species_taxid_nr, c.genus_taxid_nr].compact,
-      }
-      count_types_to_taxids.each do |count_type, taxids|
-        taxids.each do |taxid|
-          summary_per_tax = summary_dict[taxid] ||= {}
-          summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= {}
-          summary_per_tax_and_type[c.read_count] ||= 0
-          summary_per_tax_and_type[c.read_count] += 1
+    # key: taxid:count_type, value: read_counts: count
+    # Create and store default values for the hash if the key doesn't exist yet
+    summary_dict = Hash.new do |summary, taxid|
+      summary[taxid] = Hash.new do |tax_id, count_type| # rubocop forces different variable names
+        tax_id[count_type] = Hash.new do |counttype, read_count|
+          counttype[read_count] = 0
         end
       end
+    end
+    contig_taxids = contigs.where("read_count >= ?", min_contig_size)
+                           .where("lineage_json IS NOT NULL")
+                           .pluck("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
+    contig_taxids.each do |c|
+      read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr = c
+
+      summary_dict[species_taxid_nt]["nt"][read_count] += 1 if species_taxid_nt
+      summary_dict[species_taxid_nr]["nr"][read_count] += 1 if species_taxid_nr
+      summary_dict[genus_taxid_nt]["nt"][read_count] += 1 if genus_taxid_nt
+      summary_dict[genus_taxid_nr]["nr"][read_count] += 1 if genus_taxid_nr
     end
     return summary_dict
   end
