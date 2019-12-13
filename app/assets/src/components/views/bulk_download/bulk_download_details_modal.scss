@@ -2,19 +2,19 @@
 @import "~styles/themes/elements";
 
 .title {
-  @include font-header-xl-crop;
+  @include font-header-xl;
 }
 
 .loadingContainer {
-  margin-top: $space-s;
+  margin-top: $space-m;
 }
 
 .details {
-  margin-top: $space-l;
+  margin-top: $space-m;
 
   .samplesHeader {
-    @include font-header-xs-crop;
-    padding: $space-l $space-m $space-xs;
+    @include font-header-xs;
+    padding: $space-m $space-m $space-xxxs;
   }
 
   .samplesList {
@@ -23,8 +23,8 @@
     padding: 0 $space-m;
 
     .sampleName {
-      @include font-body-xs-crop;
-      padding: $space-xs 0;
+      @include font-body-xs;
+      padding: $space-xxxs 0;
     }
   }
 }

@@ -29,6 +29,7 @@ class User < ApplicationRecord
     with: /\A[- 'a-zA-ZÀ-ÖØ-öø-ÿ]+\z/, message: "Name must contain only letters, apostrophes, dashes or spaces",
   }
   attr_accessor :email_arguments
+  ROLE_REGULAR_USER = 0
   ROLE_ADMIN = 1
   IDSEQ_BUCKET_PREFIXES = ['idseq-'].freeze
   CZBIOHUB_BUCKET_PREFIXES = ['czb-', 'czbiohub-'].freeze

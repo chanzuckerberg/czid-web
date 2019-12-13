@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_191_126_004_333) do
+ActiveRecord::Schema.define(version: 20_191_212_204_812) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -373,13 +373,6 @@ ActiveRecord::Schema.define(version: 20_191_126_004_333) do
     t.datetime "updated_at", null: false
     t.bigint "project_id"
     t.string "status"
-    t.string "sample_unique_id"
-    t.string "sample_location"
-    t.string "sample_date"
-    t.string "sample_tissue"
-    t.string "sample_template"
-    t.string "sample_library"
-    t.string "sample_sequencer"
     t.text "sample_notes"
     t.text "s3_preload_result_path"
     t.text "s3_star_index_path"
@@ -388,11 +381,6 @@ ActiveRecord::Schema.define(version: 20_191_126_004_333) do
     t.bigint "user_id"
     t.integer "subsample"
     t.string "pipeline_branch"
-    t.float "sample_input_pg", limit: 24
-    t.integer "sample_batch"
-    t.text "sample_diagnosis"
-    t.string "sample_organism"
-    t.string "sample_detection"
     t.string "alignment_config_name"
     t.string "web_commit", default: ""
     t.string "pipeline_commit", default: ""

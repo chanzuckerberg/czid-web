@@ -802,33 +802,37 @@ class SamplesController < ApplicationController
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
 
-    # Don't cache the response until the pipeline run is report-ready
-    # so the displayed pipeline run status will be updated correctly.
-    skip_cache = !pipeline_run.report_ready? || params[:skip_cache] || false
+    if pipeline_run
+      # Don't cache the response until the pipeline run is report-ready
+      # so the displayed pipeline run status will be updated correctly.
+      skip_cache = !pipeline_run.report_ready? || params[:skip_cache] || false
 
-    report_info_params = pipeline_run.report_info_params
-    # If the pipeline_version wasn't passed in from the client-side,
-    # then set it to version for the selected default pipeline run.
-    if params[:pipeline_version].nil?
-      params[:pipeline_version] = pipeline_run.pipeline_version
-    end
-    cache_key = PipelineReportService.report_info_cache_key(
-      request.path,
-      report_info_params
-        .merge(
-          params
-            .reject { |_, v| v.blank? }
-            .permit(report_info_params.keys)
-        ).merge(
-          background_id: background_id
-        ).symbolize_keys
-    )
-    httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
-
-    json =
-      fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "PipelineReport") do
-        PipelineReportService.call(pipeline_run, background_id)
+      report_info_params = pipeline_run.report_info_params
+      # If the pipeline_version wasn't passed in from the client-side,
+      # then set it to version for the selected default pipeline run.
+      if params[:pipeline_version].nil?
+        params[:pipeline_version] = pipeline_run.pipeline_version
       end
+      cache_key = PipelineReportService.report_info_cache_key(
+        request.path,
+        report_info_params
+          .merge(
+            params
+              .reject { |_, v| v.blank? }
+              .permit(report_info_params.keys)
+          ).merge(
+            background_id: background_id
+          ).symbolize_keys
+      )
+      httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+
+      json =
+        fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "PipelineReport") do
+          PipelineReportService.call(pipeline_run, background_id)
+        end
+    else
+      json = PipelineReportService.call(pipeline_run, background_id)
+    end
     render json: json
   end
 

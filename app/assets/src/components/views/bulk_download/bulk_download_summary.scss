@@ -4,36 +4,35 @@
 
 .bulkDownloadSummary {
   background-color: $off-white;
-  padding: 14px;
+  padding: $space-s $space-m;
 
   .title {
     display: flex;
 
     .name {
-      @include font-header-xs-crop;
+      @include font-header-xs;
     }
 
     .numSamples {
-      @include font-body-xs-crop;
+      @include font-body-xs;
       color: $medium-grey;
     }
   }
 
   .params {
     display: flex;
-    margin-top: $space-l;
+    margin-top: $space-m;
 
     .param {
       flex: 1 1 0;
       min-width: 0;
 
       .name {
-        @include font-body-xs-crop;
-        margin-bottom: $space-xxxs;
+        @include font-body-xs;
       }
 
       .value {
-        @include font-body-xs-crop;
+        @include font-body-xs;
         color: $medium-grey;
       }
     }

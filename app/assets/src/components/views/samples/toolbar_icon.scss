@@ -29,7 +29,7 @@
 }
 
 .popupText {
-  @include font-body-xxs-crop;
+  @include font-body-xxs;
 
   .popupSubtitle {
     color: $medium-grey;

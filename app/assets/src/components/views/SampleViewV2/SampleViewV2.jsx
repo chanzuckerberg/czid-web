@@ -216,6 +216,10 @@ export default class SampleViewV2 extends React.Component {
     const reportData = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     if (rawReportData.sortedGenus) {
+      const generaPathogenCounts = getGeneraPathogenCounts(
+        rawReportData.counts[SPECIES_LEVEL_INDEX]
+      );
+
       rawReportData.sortedGenus.forEach(genusTaxId => {
         let hasHighlightedChildren = false;
         const childrenSpecies =
@@ -232,9 +236,6 @@ export default class SampleViewV2 extends React.Component {
             }
           );
         });
-        const generaPathogenCounts = getGeneraPathogenCounts(
-          rawReportData.counts[SPECIES_LEVEL_INDEX]
-        );
         reportData.push(
           merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
             highlighted:

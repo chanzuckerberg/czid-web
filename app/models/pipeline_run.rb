@@ -1570,7 +1570,7 @@ class PipelineRun < ApplicationRecord
   # Gets last update time of all has_many relations and current pipeline run
   def max_updated_at
     assocs = PipelineRun.reflect_on_all_associations(:has_many)
-    assocs_max = assocs.map { |assoc| send(assoc.name).pluck(:updated_at).max }
+    assocs_max = assocs.map { |assoc| send(assoc.name).maximum(:updated_at) }
     [updated_at, assocs_max.compact.max].compact.max
   end
 

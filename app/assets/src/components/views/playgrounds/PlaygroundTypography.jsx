@@ -9,14 +9,7 @@ import cs from "./playground_typography.scss";
 
 class PlaygroundTypography extends React.Component {
   state = {
-    highlightBorder: false,
     upperCase: false,
-  };
-
-  toggleHighlightBorder = () => {
-    this.setState({
-      highlightBorder: !this.state.highlightBorder,
-    });
   };
 
   toggleUpperCase = () => {
@@ -26,7 +19,7 @@ class PlaygroundTypography extends React.Component {
   };
 
   render() {
-    const { highlightBorder, upperCase } = this.state;
+    const { upperCase } = this.state;
 
     // Display all the CSS classes starting with "font".
     const fontClasses = filter(
@@ -57,28 +50,10 @@ class PlaygroundTypography extends React.Component {
           <div className={cs.controls}>
             <Checkbox
               className={cs.checkbox}
-              checked={highlightBorder}
-              label="Show borders"
-              onChange={this.toggleHighlightBorder}
-            />
-            <Checkbox
-              className={cs.checkbox}
               checked={upperCase}
               label="Upper case"
               onChange={this.toggleUpperCase}
             />
-          </div>
-        </div>
-        <div
-          className={cx(
-            cs.multilineText,
-            cs.borderContainer,
-            highlightBorder && cs.highlight
-          )}
-        >
-          <div className={cs.container}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.
           </div>
         </div>
         <div className={cs.playgroundTypography}>
@@ -86,13 +61,7 @@ class PlaygroundTypography extends React.Component {
             (classes, index) => (
               <div className={cs.column} key={index}>
                 {classes.map(fontClass => (
-                  <div
-                    className={cx(
-                      cs.borderContainer,
-                      highlightBorder && cs.highlight
-                    )}
-                    key={fontClass}
-                  >
+                  <div className={cx(cs.borderContainer)} key={fontClass}>
                     <div
                       className={cx(
                         cs.container,

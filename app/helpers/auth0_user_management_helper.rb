@@ -3,17 +3,23 @@ module Auth0UserManagementHelper
 
   # Create a new user in the Auth0 user database.
   # This method creates the user only in the main user database (Username-Password-Authentication)
-  def self.create_auth0_user(email:, name:, password:)
+  def self.create_auth0_user(email:, name:, role: User::ROLE_REGULAR_USER)
     options = {
       connection: AUTH0_CONNECTION_NAME,
       email: email,
       name: name,
-      password: password,
+      password: UsersHelper.generate_random_password,
+      app_metadata: { roles: role == User::ROLE_ADMIN ? ['admin'] : [] },
     }
     # See:
     # - https://auth0.com/docs/api/management/v2#!/Users/post_users
     # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
-    auth0_management_client.create_user(name, options)
+    create_response = auth0_management_client.create_user(name, options)
+    if role == User::ROLE_ADMIN
+      # We only need to add a role to this user if it is an admin
+      change_auth0_user_role(auth0_user_id: create_response["user_id"], role: role)
+    end
+    create_response
   end
 
   # Delete users from Auth0 database based on the email.
@@ -38,32 +44,37 @@ module Auth0UserManagementHelper
     (auth0_users.map { |u| u["identities"].map { |i| i.values_at("provider", "user_id").join("|") } }).flatten
   end
 
+  private_class_method def self.change_auth0_user_role(auth0_user_id:, role: User::ROLE_REGULAR_USER)
+    auth0_roles = auth0_management_client.get_roles
+    auth0_admin_role = (auth0_roles.find { |r| r["name"] == "Admin" })["id"]
+    if role == User::ROLE_ADMIN
+      # See:
+      # - https://auth0.com/docs/api/management/v2#!/Users/post_user_roles
+      # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
+      auth0_management_client.add_user_roles(auth0_user_id, [auth0_admin_role])
+    else
+      # See:
+      # - https://auth0.com/docs/api/management/v2#!/Users/delete_user_roles
+      # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
+      auth0_management_client.remove_user_roles(auth0_user_id, [auth0_admin_role])
+    end
+  end
+
   # Patch user fields in Auth0 database.
   # This method will patch users that match this email in all auth0 connections
   def self.patch_auth0_user(email:, name:, role:)
     auth0_user_ids = get_auth0_user_ids_by_email(email)
-    auth0_user_ids.each do |auth0_user_id|
-      if name.present?
+    if auth0_user_ids.empty?
+      # Creates a user in auth0 if it is not already there (may have had a problem during legacy user migration)
+      create_auth0_user(email: email, name: name, role: role)
+    else
+      auth0_user_ids.each do |auth0_user_id|
         body = { name: name, app_metadata: { roles: role == User::ROLE_ADMIN ? ['admin'] : [] } }
         # See:
         # - https://auth0.com/docs/api/management/v2#!/Users/patch_users_by_id
         # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
         auth0_management_client.patch_user(auth0_user_id, body)
-      end
-
-      auth0_roles = auth0_management_client.get_roles
-      auth0_admin_role = (auth0_roles.find { |r| r["name"] == "Admin" })["id"]
-
-      if role == User::ROLE_ADMIN
-        # See:
-        # - https://auth0.com/docs/api/management/v2#!/Users/post_user_roles
-        # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
-        auth0_management_client.add_user_roles(auth0_user_id, [auth0_admin_role])
-      else
-        # See:
-        # - https://auth0.com/docs/api/management/v2#!/Users/delete_user_roles
-        # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
-        auth0_management_client.remove_user_roles(auth0_user_id, [auth0_admin_role])
+        change_auth0_user_role(auth0_user_id: auth0_user_id, role: role)
       end
     end
   end
