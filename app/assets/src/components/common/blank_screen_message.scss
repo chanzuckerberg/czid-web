@@ -21,11 +21,11 @@
   }
 
   .message {
-    @include font-header-l-crop;
-    margin-bottom: $space-s;
+    @include font-header-l;
+    margin-bottom: $space-xxxs;
   }
 
   .tagline {
-    @include font-body-s-crop;
+    @include font-body-s;
   }
 }
