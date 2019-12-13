@@ -40,7 +40,7 @@ module Auth0Helper
     if access_token[:authenticated]
       auth_payload = access_token[:auth_payload]
       auth_user = User.find_by(email: auth_payload["email"])
-      warden.set_user(auth_user, scope: :user)
+      warden.set_user(auth_user, scope: :auth0_user)
       true
     else
       auth0_invalidate_application_session
@@ -70,7 +70,7 @@ module Auth0Helper
   # (see https://auth0.com/docs/sessions/concepts/session-layers)
   def auth0_invalidate_application_session
     session.delete(:auth0_credentials)
-    warden&.logout(:user)
+    warden&.logout(:auth0_user)
   end
 
   # URL used to remove auth0 session from Auth0 Session Layer
