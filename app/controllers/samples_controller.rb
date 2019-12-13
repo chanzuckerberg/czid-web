@@ -810,7 +810,7 @@ class SamplesController < ApplicationController
       report_info_params = pipeline_run.report_info_params
       # If the pipeline_version wasn't passed in from the client-side,
       # then set it to version for the selected default pipeline run.
-      if params[:pipeline_verison].nil?
+      if params[:pipeline_version].nil?
         params[:pipeline_version] = pipeline_run.pipeline_version
       end
       cache_key = PipelineReportService.report_info_cache_key(
