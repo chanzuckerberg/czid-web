@@ -3,7 +3,7 @@ module Auth0UserManagementHelper
 
   # Create a new user in the Auth0 user database.
   # This method creates the user only in the main user database (Username-Password-Authentication)
-  def self.create_auth0_user(email:, name:, role: User::ROLE_REGULAR_USER)
+  def self.create_auth0_user(email:, name:, password:, role: User::ROLE_REGULAR_USER)
     options = {
       connection: AUTH0_CONNECTION_NAME,
       email: email,
