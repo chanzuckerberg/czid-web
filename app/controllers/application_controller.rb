@@ -195,8 +195,8 @@ class ApplicationController < ActionController::Base
     if get_app_config(AppConfig::SHOW_ANNOUNCEMENT_BANNER) == "1"
       time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
       now = time_zone.now
-      start_time = time_zone.parse("2019-12-13 11:00:00")
-      end_time = time_zone.parse("2019-12-13 15:00:00")
+      start_time = time_zone.parse("2019-12-20 18:00:00")
+      end_time = time_zone.parse("2019-12-30 9:00:00")
 
       if start_time < now && now < end_time
         return true

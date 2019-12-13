@@ -92,7 +92,7 @@ class Landing extends React.Component {
           <div className="hiring-ad">
             {"Join our team! We're hiring "}
             <ExternalLink
-              // Specific position was filled.
+              // No number because specific position was filled.
               href="https://boards.greenhouse.io/chanzuckerberginitiative"
               analyticsEventName="Landing_engineer-job-link_clicked"
             >
