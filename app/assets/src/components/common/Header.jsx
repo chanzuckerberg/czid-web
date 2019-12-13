@@ -59,10 +59,6 @@ const showPrivacyUpdateNotification = () => {
   }
 };
 
-const setAnnouncementBannerViewed = () => {
-  localStorage.setItem("dismissedAnnouncementBanner", "true");
-};
-
 class Header extends React.Component {
   constructor(props) {
     super(props);
@@ -96,12 +92,18 @@ class Header extends React.Component {
     }
   };
 
+  handleAnnouncementBannerClose = () => {
+    this.setState({ showAnnouncementBanner: false });
+    localStorage.setItem("dismissedAnnouncementBanner", "true");
+  };
+
   render() {
     const {
       adminUser,
-      userSignedIn,
-      showBlank,
+      announcementBannerEnabled,
       disableNavigation,
+      showBlank,
+      userSignedIn,
       ...userMenuProps
     } = this.props;
     const { showAnnouncementBanner } = this.state;
@@ -121,7 +123,14 @@ class Header extends React.Component {
     return (
       userSignedIn && (
         <div>
-          {showAnnouncementBanner && <AnnouncementBanner />}
+          {showAnnouncementBanner && (
+            <AnnouncementBanner
+              onClose={withAnalytics(
+                this.handleAnnouncementBannerClose,
+                "AnnouncementBanner_close_clicked"
+              )}
+            />
+          )}
           <div className={cs.header}>
             <div className={cs.logo}>
               <a href="/">
@@ -162,7 +171,7 @@ Header.propTypes = {
 
 Header.contextType = UserContext;
 
-const AnnouncementBanner = () => {
+const AnnouncementBanner = ({ onClose }) => {
   return (
     <div className={cs.announcementBanner}>
       <BasicPopup
@@ -189,15 +198,13 @@ const AnnouncementBanner = () => {
           </span>
         }
       />
-      <RemoveIcon
-        className={cs.close}
-        onClick={() => {
-          logAnalyticsEvent("AnnouncementBanner_close_clicked");
-          console.log("clicked");
-        }}
-      />
+      <RemoveIcon className={cs.close} onClick={() => onClose && onClose()} />
     </div>
   );
+};
+
+AnnouncementBanner.propTypes = {
+  onClose: PropTypes.func,
 };
 
 const UserMenuDropDown = ({
