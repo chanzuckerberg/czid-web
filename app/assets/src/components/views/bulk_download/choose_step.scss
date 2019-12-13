@@ -43,10 +43,10 @@
 
   .taxaWithReadsOptionsHeader {
     display: flex;
-    padding: $space-s $space-m;
+    padding: $space-xxs $space-m;
 
     .header {
-      @include font-header-xs-crop;
+      @include font-header-xs;
       color: $dark-grey;
     }
 
@@ -58,10 +58,10 @@
 
   .taxaWithReadsOption {
     display: flex;
-    padding: $space-s $space-m;
+    padding: $space-xxs $space-m;
 
     .taxonName {
-      @include font-body-xxs-crop;
+      @include font-body-xxs;
       flex-shrink: 1;
       text-overflow: ellipsis;
       overflow: hidden;
@@ -74,7 +74,7 @@
     }
 
     .sampleCount {
-      @include font-body-xxs-crop;
+      @include font-body-xxs;
       color: $medium-grey;
     }
   }

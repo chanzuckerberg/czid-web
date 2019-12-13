@@ -3,7 +3,7 @@
 @import "~styles/themes/typography";
 
 .header {
-  @include font-body-xxs-crop;
+  @include font-body-xxs;
 
   color: $medium-grey;
   justify-content: flex-end;
@@ -38,7 +38,7 @@
 }
 
 .cell {
-  @include font-body-s-crop;
+  @include font-body-s;
 
   color: $darkest-grey;
   font-weight: $font-weight-bold;
@@ -50,13 +50,12 @@
   display: inline-block;
 
   .stackElement {
-    @include font-body-s-crop;
+    @include font-body-s;
 
     font-weight: $font-weight-bold;
-    padding: $space-xxs 0;
 
     &.lowlightValue {
-      @include font-body-xxs-crop;
+      @include font-body-xxs;
 
       color: $medium-grey;
     }
