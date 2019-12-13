@@ -159,7 +159,7 @@ const UserMenuDropDown = ({
               className={cs.option}
               href="/bulk_downloads"
               onClick={() =>
-                logAnalyticsEvent("Header_dropdown-dropdowns-option_clicked")
+                logAnalyticsEvent("Header_dropdown-downloads-option_clicked")
               }
             >
               Downloads
