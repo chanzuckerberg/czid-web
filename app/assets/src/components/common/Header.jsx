@@ -59,11 +59,30 @@ const showPrivacyUpdateNotification = () => {
   }
 };
 
+const setAnnouncementBannerViewed = () => {
+  localStorage.setItem("dismissedAnnouncementBanner", "true");
+};
+
 class Header extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showAnnouncementBanner: false,
+    };
+  }
+
   componentDidMount() {
-    const { userSignedIn } = this.props;
+    const { userSignedIn, announcementBannerEnabled } = this.props;
     if (userSignedIn) {
       this.displayPrivacyUpdateNotification();
+    }
+    if (announcementBannerEnabled) {
+      const dismissedAnnouncementBanner = localStorage.getItem(
+        "dismissedAnnouncementBanner"
+      );
+      if (dismissedAnnouncementBanner !== "true") {
+        this.setState({ showAnnouncementBanner: true });
+      }
     }
   }
 
@@ -85,6 +104,7 @@ class Header extends React.Component {
       disableNavigation,
       ...userMenuProps
     } = this.props;
+    const { showAnnouncementBanner } = this.state;
 
     const { allowedFeatures } = this.context || {};
 
@@ -101,7 +121,7 @@ class Header extends React.Component {
     return (
       userSignedIn && (
         <div>
-          <AnnouncementBanner />
+          {showAnnouncementBanner && <AnnouncementBanner />}
           <div className={cs.header}>
             <div className={cs.logo}>
               <a href="/">
@@ -134,9 +154,10 @@ class Header extends React.Component {
 
 Header.propTypes = {
   adminUser: PropTypes.bool,
-  userSignedIn: PropTypes.bool,
+  announcementBannerEnabled: PropTypes.bool,
   disableNavigation: PropTypes.bool,
   showBlank: PropTypes.bool,
+  userSignedIn: PropTypes.bool,
 };
 
 Header.contextType = UserContext;

@@ -141,6 +141,7 @@ class ApplicationController < ActionController::Base
 
   def set_application_view_variables
     @disable_header_navigation = false
+    @announcement_banner_enabled = announcement_banner_enabled
   end
 
   # Set current user and request to global for use in logging in ActiveRecord.
@@ -185,6 +186,17 @@ class ApplicationController < ActionController::Base
         MetricUtil.log_analytics_event(event_name + "_cache-missed", current_user)
         response.headers["X-IDseq-Cache"] = 'missed'
         yield
+      end
+    end
+  end
+
+  def announcement_banner_enabled
+    if get_app_config(AppConfig::SHOW_ANNOUNCEMENT_BANNER) == "1"
+      time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
+      start_time = time_zone.parse("2018-10-16 05:00:00")
+      end_time = time_zone.parse("2018-12-05 11:30:00")
+      if start_time < Time.now.utc && Time.now.utc < end_time
+        @show_bulletin = true
       end
     end
   end
