@@ -1444,12 +1444,12 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_summary_contig_counts_v2(min_contig_size)
-    # key: taxid:count_type, value: read_counts: count
+    # Stores the number of contigs that match a given taxid, count_type (nt or nr), and read_count (number of reads aligned to that contig).
     # Create and store default values for the hash if the key doesn't exist yet
     summary_dict = Hash.new do |summary, taxid|
-      summary[taxid] = Hash.new do |taxid_, count_type| # rubocop forces different variable names
-        taxid_[count_type] = Hash.new do |count_type_, read_count|
-          count_type_[read_count] = 0
+      summary[taxid] = Hash.new do |taxid_hash, count_type| # rubocop forces different variable names
+        taxid_hash[count_type] = Hash.new do |count_type_hash, read_count|
+          count_type_hash[read_count] = 0
         end
       end
     end
