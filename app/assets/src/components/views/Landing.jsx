@@ -91,13 +91,20 @@ class Landing extends React.Component {
           <div className="fill" />
           <div className="hiring-ad">
             {"Join our team! We're hiring "}
-            <a
-              href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1620152"
-              target="_blank"
-              rel="noopener noreferrer"
+            <ExternalLink
+              // Specific position was filled.
+              href="https://boards.greenhouse.io/chanzuckerberginitiative"
+              analyticsEventName="Landing_engineer-job-link_clicked"
             >
               engineers
-            </a>
+            </ExternalLink>
+            {` and `}
+            <ExternalLink
+              href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1919743"
+              analyticsEventName="Landing_scientist-job-link_clicked"
+            >
+              scientists
+            </ExternalLink>
             !
           </div>
           {this.props.browserInfo.supported ? (
