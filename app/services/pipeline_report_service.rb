@@ -52,11 +52,12 @@ class PipelineReportService
     nil => "uncategorized",
   }.freeze
 
-  def initialize(pipeline_run, background_id, csv = false, min_contig_size = DEFAULT_MIN_CONTIG_SIZE)
+  def initialize(pipeline_run, background_id, csv: false, min_contig_size: DEFAULT_MIN_CONTIG_SIZE, parallel: true)
     @pipeline_run = pipeline_run
     @background_id = background_id
     @csv = csv
     @min_contig_size = min_contig_size
+    @parallel = parallel
   end
 
   def call
@@ -78,14 +79,34 @@ class PipelineReportService
     adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
-    contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
-    @timer.split("get_contig_summary")
+    if @parallel
+      parallel_steps = [
+        -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_size) },
+        -> { fetch_taxon_counts(@pipeline_run_id, @background_id) },
+        -> { fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id) },
+      ]
+      results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
+        begin
+          ActiveRecord::Base.connection_pool.with_connection do
+            lambda.call()
+          end
+        rescue => e
+          LogUtil.log_err_and_airbrake("Parallel fetch failed")
+          raise e
+        end
+      end
+      @timer.split("parallel_fetch_report_data")
+      contigs, taxon_counts_and_summaries, taxons_absent_from_sample = *results
+    else
+      contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
+      @timer.split("get_contig_summary")
 
-    taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
-    @timer.split("fetch_taxon_counts_and_summaries")
+      taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
+      @timer.split("fetch_taxon_counts_and_summaries")
 
-    taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id)
-    @timer.split("fetch_taxons_absent_from_sample")
+      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id)
+      @timer.split("fetch_taxons_absent_from_sample")
+    end
 
     taxons_absent_from_sample.each do |taxon|
       taxon_counts_and_summaries.concat([zero_metrics(taxon)])
@@ -261,7 +282,6 @@ class PipelineReportService
                                          ].flatten
                                        )
     # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
-
     return taxon_counts_and_summaries_query.pluck(*FIELDS_TO_PLUCK)
   end
 
