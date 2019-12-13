@@ -370,5 +370,6 @@ BareDropdown.defaultProps = {
 
 BareDropdown.Header = BaseDropdown.Header;
 BareDropdown.Item = BaseDropdown.Item;
+BareDropdown.Divider = BaseDropdown.Divider;
 
 export default BareDropdown;
