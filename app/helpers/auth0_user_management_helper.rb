@@ -3,7 +3,7 @@ module Auth0UserManagementHelper
 
   # Create a new user in the Auth0 user database.
   # This method creates the user only in the main user database (Username-Password-Authentication)
-  def self.create_auth0_user(email:, name:, password:, role: User::ROLE_REGULAR_USER)
+  def self.create_auth0_user(email:, name:, role: User::ROLE_REGULAR_USER)
     options = {
       connection: AUTH0_CONNECTION_NAME,
       email: email,
@@ -41,7 +41,7 @@ module Auth0UserManagementHelper
     (auth0_users.map { |u| u["identities"].map { |i| i.values_at("provider", "user_id").join("|") } }).flatten
   end
 
-  private_class_method def add_role_to_auth0_user(auth0_user_id:, role: User::ROLE_REGULAR_USER)
+  private_class_method def self.add_role_to_auth0_user(auth0_user_id:, role: User::ROLE_REGULAR_USER)
     auth0_roles = auth0_management_client.get_roles
     auth0_admin_role = (auth0_roles.find { |r| r["name"] == "Admin" })["id"]
     if role == User::ROLE_ADMIN
