@@ -149,39 +149,11 @@ const UserMenuDropDown = ({
 
   const renderItems = adminUser => {
     let userDropdownItems = [];
-    adminUser &&
-      userDropdownItems.push(
-        <BareDropdown.Item
-          key="3"
-          text={
-            <a className={cs.option} href="/users/new">
-              Create User
-            </a>
-          }
-        />
-      );
-
-    userDropdownItems.push(
-      <BareDropdown.Item
-        key="4"
-        text={
-          <ExternalLink
-            className={cs.option}
-            href="https://help.idseq.net"
-            onClick={() =>
-              logAnalyticsEvent("Header_dropdown-help-option_clicked")
-            }
-          >
-            Help Center
-          </ExternalLink>
-        }
-      />
-    );
 
     allowedFeatures.includes("bulk_downloads") &&
       userDropdownItems.push(
         <BareDropdown.Item
-          key="5"
+          key="1"
           text={
             <a
               className={cs.option}
@@ -195,9 +167,24 @@ const UserMenuDropDown = ({
           }
         />
       );
+
     userDropdownItems.push(
       <BareDropdown.Item
-        key="6"
+        key="2"
+        text={
+          <ExternalLink
+            className={cs.option}
+            href="https://help.idseq.net"
+            onClick={() =>
+              logAnalyticsEvent("Header_dropdown-help-option_clicked")
+            }
+          >
+            Help Center
+          </ExternalLink>
+        }
+      />,
+      <BareDropdown.Item
+        key="3"
         text={
           <a
             className={cs.option}
@@ -206,12 +193,28 @@ const UserMenuDropDown = ({
               logAnalyticsEvent("Header_dropdown-feedback-option_clicked")
             }
           >
-            Report Feedback
+            Contact Us
           </a>
         }
-      />,
+      />
+    );
+
+    adminUser &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="4"
+          text={
+            <a className={cs.option} href="/users/new">
+              Create User
+            </a>
+          }
+        />
+      );
+
+    userDropdownItems.push(
+      <BareDropdown.Divider key="5" />,
       <BareDropdown.Item
-        key="7"
+        key="6"
         text={
           <a
             className={cs.option}
@@ -227,7 +230,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="8"
+        key="7"
         text={
           <a
             className={cs.option}
@@ -242,6 +245,7 @@ const UserMenuDropDown = ({
           </a>
         }
       />,
+      <BareDropdown.Divider key="8" />,
       <BareDropdown.Item
         key="9"
         text="Logout"
