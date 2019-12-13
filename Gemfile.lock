@@ -1205,6 +1205,7 @@ DEPENDENCIES
   oj
   omniauth-auth0 (~> 2.2)
   omniauth-rails_csrf_protection (~> 0.1.2)
+  parallel (= 1.14.0)
   prometheus-client (= 0.7.1)
   puma (~> 3.12)
   rack-cors
