@@ -30,6 +30,7 @@ gem 'elasticsearch-model'
 # Use mysql as the database for Active Record
 gem 'mysql2'
 gem 'parallel', '1.14.0'
+gem 'oj'
 gem 'prometheus-client', '0.7.1'
 # Use Puma as the app server
 gem 'puma', '~> 3.12'

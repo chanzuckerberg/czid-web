@@ -215,15 +215,19 @@ class PipelineReportService
                                 hasByteRanges: has_byte_ranges,
                                 alignVizAvailable: align_viz_available,
                                 report_ready: report_ready)
+
       json_dump =
-        JSON.dump(
-          metadata: metadata.compact,
-          counts: counts_by_tax_level,
-          lineage: structured_lineage,
-          sortedGenus: sorted_genus_tax_ids,
-          highlightedTaxIds: highlighted_tax_ids
+        Oj.dump(
+          {
+            metadata: metadata.compact,
+            counts: counts_by_tax_level,
+            lineage: structured_lineage,
+            sortedGenus: sorted_genus_tax_ids,
+            highlightedTaxIds: highlighted_tax_ids,
+          },
+          mode: :compat
         )
-      @timer.split("convert_to_json_with_JSON")
+      @timer.split("convert_to_json_with_OJ")
 
       return json_dump
     end
