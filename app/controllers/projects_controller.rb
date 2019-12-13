@@ -549,7 +549,6 @@ class ProjectsController < ApplicationController
     # New flow for account creation on Auth0.
     if @user.save!
       # Create the user with Auth0.
-      user_params[:password] = UsersHelper.generate_random_password
       create_response = Auth0UserManagementHelper.create_auth0_user(user_params)
       auth0_id = create_response["user_id"]
 
