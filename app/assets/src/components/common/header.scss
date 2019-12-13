@@ -80,7 +80,9 @@
   @include font-body-xs;
   background: $primary-lightest;
   height: 40px;
+  position: relative;
   text-align: center;
+  z-index: 900;
 
   .content {
     display: block;
@@ -111,11 +113,11 @@
   }
 
   .close {
+    cursor: pointer;
+    fill: $dark-grey;
     position: absolute;
     right: $space-m;
     top: $space-m;
-    fill: $dark-grey;
-    cursor: pointer;
 
     &:hover {
       fill: $black;
