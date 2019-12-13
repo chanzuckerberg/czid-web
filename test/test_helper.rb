@@ -23,7 +23,8 @@ class ActiveSupport::TestCase
     end
 
     # this is emulating a successfully decoded and valid auth0 bearer token
-    decoded_auth0_token = { authenticated: true, auth_payload: { "email" => user.email, "exp" => DateTime.now.to_i + 10.hours } }
+    roles = user.admin? ? ["admin"] : []
+    decoded_auth0_token = { authenticated: true, auth_payload: { "email" => user.email, "exp" => DateTime.now.to_i + 10.hours, Auth0Helper::ROLES_CUSTOM_CLAIM => roles } }
     allow_any_instance_of(Auth0Helper).to receive(:auth0_decode_auth_token) { decoded_auth0_token }
 
     OmniAuth.config.test_mode = true

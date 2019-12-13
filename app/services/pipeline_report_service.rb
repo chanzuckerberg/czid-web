@@ -241,6 +241,9 @@ class PipelineReportService
     end
 
     pipeline_status = "WAITING"
+    # pipeline_run.completed? and pipeline_run.finalized? both indicate if the pipeline run
+    # is no longer being checked by the pipeline monitor (i.e. the run has completed),
+    # but .completed? includes extra logic for an old version of pipeline without run stages.
     if pipeline_run.completed?
       pipeline_status = "COMPLETE"
     elsif pipeline_run.failed?
@@ -257,9 +260,15 @@ class PipelineReportService
   end
 
   def pipeline_run_report_available?(pipeline_run)
-    # This condition is carried over from the previous version of the report page (report_helper.rb).
-    # TODO: review this condition and clean up the implementation of pipeline_run statuses.
+    # TODO: clean up the implementation of pipeline_run statuses.
     # JIRA: https://jira.czi.team/browse/IDSEQ-1890
+
+    # This condition is carried over from the previous version of the report page (report_helper.rb).
+    # If the pipeline run exists
+    # AND the pipeline run has remaining reads OR is finalized (no longer checked by the pipeline monitor)
+    # AND the pipeline run did not fail (none of the jobs or final stats compilation failed)
+    # OR the pipeline run is report-ready (at least taxon_counts has been loaded)
+    # then the report can be generated.
     return pipeline_run && (((pipeline_run.adjusted_remaining_reads.to_i > 0 || pipeline_run.finalized?) && !pipeline_run.failed?) || pipeline_run.report_ready?)
   end
 
@@ -559,7 +568,7 @@ class PipelineReportService
   end
 
   # Example cache key:
-  # /samples/12303/report_v2?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990&pipeline_run_id=39185
+  # /samples/12303/report_v2.json?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990&pipeline_run_id=39185
   def self.report_info_cache_key(path, kvs)
     kvs = kvs.to_h.sort.to_h
     # Increment this if you ever change the response structure of report_info

@@ -19,7 +19,8 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
             connection: "Username-Password-Authentication",
             email: "help@idseq.net",
             name: "User invited from Power Controller test",
-            password: instance_of(String)
+            password: instance_of(String),
+            app_metadata: { roles: [] }
           )
           .and_return("user_id" => "auth0|FAKE_AUTH0_USER_ID"))
 

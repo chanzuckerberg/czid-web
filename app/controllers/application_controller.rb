@@ -26,27 +26,27 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate_user!
-    if current_user.blank?
+    if @token_based_login_request
+      # in token based requests there is no auth0 token to validate, and the user is already validated
+      return true
+    end
+
+    auth_check = auth0_check_user_auth(current_user)
+
+    case auth_check
+    when AUTH_INVALID_USER
       respond_to do |format|
         format.html { redirect_to  controller: :auth0, action: :login }
         format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
       end
-    elsif @token_based_login_request
-      # this is a token based request, and there is no auth0 token to validate
-      true
-    else
-      # regular regular request, check auth0 token to see if it is expired
-      auth_token = auth0_decode_auth_token
-      token_expired = !auth_token[:authenticated]
-      token_invalid_user = auth_token.dig(:auth_payload, "email") != current_user.email
-      if token_expired || token_invalid_user
-        respond_to do |format|
-          # we want to redirect user to auth0 login page in silent mode
-          # if the user still have a valid SSO token in the auth0 session
-          # the sliding session will be refreshed
-          format.html { redirect_to controller: :auth0, action: :refresh_token, params: { mode: "expired" } }
-          format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
-        end
+    when AUTH_TOKEN_EXPIRED
+      respond_to do |format|
+        # we want to redirect user to auth0 login page in silent mode
+        # because the user may still have a valid SSO token in the auth0 session.
+        # in this case the sliding session will be refreshed, otherwise user will be
+        # required to enter email and password
+        format.html { redirect_to controller: :auth0, action: :refresh_token, params: { mode: "expired" } }
+        format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
       end
     end
   end
