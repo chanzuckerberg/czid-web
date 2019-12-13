@@ -1444,18 +1444,25 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_summary_contig_counts_v2(min_contig_size)
-    summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
-    contig_lineages(min_contig_size).each do |c|
-      lineage = JSON.parse(c.lineage_json)
-      lineage.each do |count_type, taxid_arr|
-        taxids = taxid_arr[0..1]
-        taxids.each do |taxid|
-          summary_per_tax = summary_dict[taxid] ||= {}
-          summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= {}
-          summary_per_tax_and_type[c.read_count] ||= 0
-          summary_per_tax_and_type[c.read_count] += 1
+    # Stores the number of contigs that match a given taxid, count_type (nt or nr), and read_count (number of reads aligned to that contig).
+    # Create and store default values for the hash if the key doesn't exist yet
+    summary_dict = Hash.new do |summary, taxid|
+      summary[taxid] = Hash.new do |taxid_hash, count_type| # rubocop forces different variable names
+        taxid_hash[count_type] = Hash.new do |count_type_hash, read_count|
+          count_type_hash[read_count] = 0
         end
       end
+    end
+    contig_taxids = contigs.where("read_count >= ?", min_contig_size)
+                           .where("lineage_json IS NOT NULL")
+                           .pluck("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
+    contig_taxids.each do |c|
+      read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr = c
+
+      summary_dict[species_taxid_nt]["nt"][read_count] += 1 if species_taxid_nt
+      summary_dict[species_taxid_nr]["nr"][read_count] += 1 if species_taxid_nr
+      summary_dict[genus_taxid_nt]["nt"][read_count] += 1 if genus_taxid_nt
+      summary_dict[genus_taxid_nr]["nr"][read_count] += 1 if genus_taxid_nr
     end
     return summary_dict
   end
