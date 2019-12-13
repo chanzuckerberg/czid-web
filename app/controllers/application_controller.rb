@@ -191,13 +191,18 @@ class ApplicationController < ActionController::Base
   end
 
   def announcement_banner_enabled
+    # Enabled if the flag is enabled AND it's in the active time range.
     if get_app_config(AppConfig::SHOW_ANNOUNCEMENT_BANNER) == "1"
       time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
-      start_time = time_zone.parse("2018-10-16 05:00:00")
-      end_time = time_zone.parse("2018-12-05 11:30:00")
-      if start_time < Time.now.utc && Time.now.utc < end_time
-        @show_bulletin = true
+      now = time_zone.now
+      start_time = time_zone.parse("2019-12-20 18:00:00")
+      end_time = time_zone.parse("2019-12-30 9:00:00")
+
+      if start_time < now && now < end_time
+        return true
       end
     end
+
+    false
   end
 end
