@@ -785,9 +785,10 @@ class PipelineSampleReport extends React.Component {
   downloadFastaUrl = params => {
     const { taxLevel, taxId } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
+    const taxLevelIdx = taxLevel === "species" ? 1 : 2;
     location.href = `/samples/${
       this.sampleId
-    }/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
+    }/fasta/${taxLevelIdx}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
   // download Contig
