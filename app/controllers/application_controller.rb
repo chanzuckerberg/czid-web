@@ -141,6 +141,7 @@ class ApplicationController < ActionController::Base
 
   def set_application_view_variables
     @disable_header_navigation = false
+    @announcement_banner_enabled = announcement_banner_enabled
   end
 
   # Set current user and request to global for use in logging in ActiveRecord.
@@ -187,5 +188,21 @@ class ApplicationController < ActionController::Base
         yield
       end
     end
+  end
+
+  def announcement_banner_enabled
+    # Enabled if the flag is enabled AND it's in the active time range.
+    if get_app_config(AppConfig::SHOW_ANNOUNCEMENT_BANNER) == "1"
+      time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
+      now = time_zone.now
+      start_time = time_zone.parse("2019-12-20 18:00:00")
+      end_time = time_zone.parse("2019-12-30 9:00:00")
+
+      if start_time < now && now < end_time
+        return true
+      end
+    end
+
+    false
   end
 end
