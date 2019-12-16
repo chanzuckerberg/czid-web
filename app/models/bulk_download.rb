@@ -159,6 +159,14 @@ class BulkDownload < ApplicationRecord
     "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}.tar.gz"
   end
 
+  def fetch_output_file_size
+    s3_response = S3_CLIENT.head_object(bucket: ENV["SAMPLES_BUCKET_NAME"], key: download_output_key)
+    return s3_response.content_length
+  rescue => e
+    LogUtil.log_backtrace(e)
+    LogUtil.log_err_and_airbrake("BulkDownloadsFileSizeError: Failed to get file size for bulk download id #{id}: #{e}")
+  end
+
   # The s3 url that the tar.gz file will be uploaded to.
   def download_output_url
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{download_output_key}"
@@ -501,10 +509,20 @@ class BulkDownload < ApplicationRecord
 
     Rails.logger.info("Success!")
     Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", StringUtil.human_readable_file_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
-    update(status: STATUS_SUCCESS)
+    mark_success
   rescue
     update(status: STATUS_ERROR)
     raise
+  end
+
+  def mark_success
+    update(status: STATUS_SUCCESS)
+
+    output_file_size = fetch_output_file_size
+
+    if output_file_size
+      update(output_file_size: output_file_size)
+    end
   end
 
   def execution_type

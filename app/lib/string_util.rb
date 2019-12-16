@@ -1,15 +1,22 @@
 class StringUtil
+  FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB"].freeze
+  FILE_SIZE_UNIT_FACTOR = 1024.0
   def self.human_readable_file_size(size, decimal_places: 1)
-    file_unit = ""
+    if size.nil?
+      return nil
+    end
+
+    file_unit_index = 0
     file_size = size
 
-    ["B", "KiB", "MiB", "GiB", "TiB"].each do |unit|
-      file_unit = unit
-      if file_size < 1024.0
-        break
-      end
-      file_size /= 1024.0
+    while file_unit_index < FILE_SIZE_UNITS.length - 1 && file_size >= FILE_SIZE_UNIT_FACTOR
+      file_size /= FILE_SIZE_UNIT_FACTOR
+      file_unit_index += 1
     end
-    return format("%3.#{decimal_places}f#{file_unit}", file_size)
+
+    formatted_file_size = ActiveSupport::NumberHelper.number_to_rounded(
+      file_size, precision: decimal_places, strip_insignificant_zeros: true
+    )
+    return "#{formatted_file_size} #{FILE_SIZE_UNITS[file_unit_index]}"
   end
 end
