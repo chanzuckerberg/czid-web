@@ -92,6 +92,7 @@ class BulkDownload < ApplicationRecord
     executable_file_path: nil,
     task_role: "idseq-downloads-#{Rails.env}",
     ecs_cluster: "idseq-fargate-tasks-#{Rails.env}",
+    executable_s3_bucket: "aegea-ecs-execute-#{Rails.env}",
     ecr_image: "idseq-s3-tar-writer:latest",
     fargate_cpu: "4096",
     fargate_memory: "8192"
@@ -101,21 +102,28 @@ class BulkDownload < ApplicationRecord
       ecr_image = config_ecr_image
     end
 
-    # Use the staging ecs cluster for development.
+    # Use the staging ecs cluster and executable s3 bucket for development.
     if Rails.env == "development"
       ecs_cluster = "idseq-fargate-tasks-staging"
+      executable_s3_bucket = "aegea-ecs-execute-staging"
     end
 
     command_flag = shell_command.present? ? "--command=#{shell_command}" : "--execute=#{executable_file_path}"
 
-    ["aegea", "ecs", "run",
-     command_flag,
-     "--task-role", task_role,
-     "--task-name", ECS_TASK_NAME,
-     "--ecr-image", ecr_image,
-     "--fargate-cpu", fargate_cpu,
-     "--fargate-memory", fargate_memory,
-     "--cluster", ecs_cluster,]
+    command = ["aegea", "ecs", "run",
+               command_flag,
+               "--task-role", task_role,
+               "--task-name", ECS_TASK_NAME,
+               "--ecr-image", ecr_image,
+               "--fargate-cpu", fargate_cpu,
+               "--fargate-memory", fargate_memory,
+               "--cluster", ecs_cluster,]
+
+    if executable_file_path.present?
+      command += ["--staging-s3-bucket", executable_s3_bucket]
+    end
+
+    command
   end
 
   # Returned as an array of strings

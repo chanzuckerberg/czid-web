@@ -323,6 +323,7 @@ describe BulkDownload, type: :model do
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
         "--cluster", "idseq-fargate-tasks-prod",
+        "--staging-s3-bucket", "aegea-ecs-execute-prod",
       ]
 
       expect(@bulk_download.aegea_ecs_submit_command(executable_file_path: mock_executable_file_path)).to eq(task_command)
