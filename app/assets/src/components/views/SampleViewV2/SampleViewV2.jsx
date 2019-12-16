@@ -910,9 +910,7 @@ export default class SampleViewV2 extends React.Component {
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
         linkText = "View Pipeline Visualization";
-        link = `/samples/${sample.id}/pipeline_viz/${
-          pipelineRun.pipeline_version
-        }`;
+        link = `/samples/${sample.id}/pipeline_viz/${pipelineRun.pipeline_version}`;
       }
     } else {
       // Some kind of error or warning has occurred.
@@ -966,11 +964,9 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
-    // pipelineRunReportAvailable is true if:
-    // the pipeline run has finished running AND did not fail
-    // OR if the pipeline run is report-ready (might still be running Experimental,
+    // reportAvailable is true if the pipeline run is report-ready (might still be running Experimental,
     // but at least taxon_counts has been loaded).
-    if (reportMetadata.pipelineRunReportAvailable) {
+    if (reportMetadata.reportAvailable) {
       return (
         <div className={cs.reportViewContainer}>
           <div className={cs.reportFilters}>
@@ -1074,7 +1070,7 @@ export default class SampleViewV2 extends React.Component {
               pipelineRun={pipelineRun}
               project={project}
               projectSamples={projectSamples}
-              reportPresent={reportMetadata.report_ready !== false}
+              reportPresent={reportMetadata.reportAvailable !== false}
               sample={sample}
               view={view}
               minContigSize={selectedOptions.minContigSize}
@@ -1100,8 +1096,9 @@ export default class SampleViewV2 extends React.Component {
             </UserContext.Consumer>
           </div>
           {currentTab === "Report" && this.renderReport()}
-          {currentTab === "Antimicrobial Resistance" &&
-            amrData && <AMRView amr={amrData} />}
+          {currentTab === "Antimicrobial Resistance" && amrData && (
+            <AMRView amr={amrData} />
+          )}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar
