@@ -966,7 +966,13 @@ export default class SampleViewV2 extends React.Component {
     } = this.state;
     // reportReady is true if the pipeline run is report-ready (might still be running Experimental,
     // but at least taxon_counts has been loaded).
-    if (reportMetadata.reportReady) {
+    // pipelineRunReportAvailable was renamed to reportReady, but we check both in case the old variable
+    // name was cached.
+    // TODO(julie): remove pipelinRunReportAvailable during cleanup.
+    if (
+      reportMetadata.reportReady ||
+      reportMetadata.pipelineRunReportAvailable
+    ) {
       return (
         <div className={cs.reportViewContainer}>
           <div className={cs.reportFilters}>
@@ -1070,7 +1076,13 @@ export default class SampleViewV2 extends React.Component {
               pipelineRun={pipelineRun}
               project={project}
               projectSamples={projectSamples}
-              reportPresent={reportMetadata.reportReady === true}
+              // report_ready was consolidated with reportReady but we check both in case
+              // the old variable name was cached.
+              // TODO(julie): remove report_ready during cleanup.
+              reportPresent={
+                reportMetadata.reportReady === true ||
+                reportMetadata.report_ready === true
+              }
               sample={sample}
               view={view}
               minContigSize={selectedOptions.minContigSize}
