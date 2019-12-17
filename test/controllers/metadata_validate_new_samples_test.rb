@@ -4,11 +4,19 @@ require 'test_helper'
 class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   include ErrorHelper
 
+  HEADERS_1 = ['sample_name', 'host_genome', 'sample_type', 'blood_fed'].freeze
+  HEADERS_2 = ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type'].freeze
+  ROW_1 = ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'].freeze
+  ROW_2 = ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Partially Blood Fed'].freeze
+  ROW_3 = ['Test Sample', 'Human', 'Whole Blood', 'DNA'].freeze
+
   setup do
     @user = users(:admin_one)
     @mosquito_host_genome = host_genomes(:mosquito)
     @human_host_genome = host_genomes(:human)
     @metadata_validation_project = projects(:metadata_validation_project)
+    @metadata_validation_project_with_water_control =
+      projects(:metadata_validation_project_with_water_control)
     @public_project = projects(:public_project)
     @joe_project = projects(:joe_project)
     @user_nonadmin = users(:joe)
@@ -19,10 +27,10 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'blood_fed'],
+        headers: HEADERS_1,
         rows: [
-          ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'],
-          ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Partially Blood Fed'],
+          ROW_1,
+          ROW_2,
         ],
       },
       samples: [
@@ -51,8 +59,8 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         # Use display_name for sample type so we test that the endpoint accepts display name.
         headers: ['sample_name', 'host_genome', 'Sample Type', 'Blood Fed'],
         rows: [
-          ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'],
-          ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Partially Blood Fed'],
+          ROW_1,
+          ROW_2,
         ],
       },
       samples: [
@@ -78,9 +86,9 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'blood_fed'],
+        headers: HEADERS_1,
         rows: [
-          ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'],
+          ROW_1,
           ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Blood Fed'],
         ],
       },
@@ -108,9 +116,9 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'blood_fed'],
+        headers: HEADERS_1,
         rows: [
-          ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'],
+          ROW_1,
         ],
       },
       samples: [
@@ -173,7 +181,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'blood_fed'],
+        headers: HEADERS_2 + ['blood_fed'],
         rows: [
           ['Test Sample', 'Fake Genome', 'Whole Blood', 'RNA', 'Blood Fed'],
           ['Test Sample 2', '', 'Whole Blood', 'DNA', 'Blood Fed'],
@@ -213,10 +221,10 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'water_control'],
+        headers: HEADERS_2,
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Yes'],
-          ['Test Sample 2', 'Human', '', '', ''],
+          ROW_3,
+          ['Test Sample 2', 'Human', '', ''],
         ],
       },
       samples: [
@@ -237,9 +245,44 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     # Error should throw if row is missing required metadata.
     assert @response.parsed_body['issues']['errors'][0]['isGroup']
     assert_equal ErrorAggregator::ERRORS[:row_missing_required_metadata][:title].call(1, nil), @response.parsed_body['issues']['errors'][0]['caption']
-    assert_equal [[2, "Test Sample 2", "Nucleotide Type, Water Control, Sample Type"]], @response.parsed_body['issues']['errors'][0]['rows']
+    assert_equal [[2, "Test Sample 2", "Nucleotide Type, Sample Type"]], @response.parsed_body['issues']['errors'][0]['rows']
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
+  end
+
+  test 'required fields with water_control' do
+    sign_in @user
+
+    post validate_csv_for_new_samples_metadata_url, params: {
+      metadata: {
+        headers: HEADERS_2 + ['water_control'],
+        rows: [
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Yes'],
+          ['Test Sample 2', 'Human', '', '', ''],
+        ],
+      },
+      samples: [
+        {
+          name: "Test Sample",
+          project_id: @metadata_validation_project_with_water_control.id,
+        },
+        {
+          name: "Test Sample 2",
+          project_id: @metadata_validation_project_with_water_control.id,
+        },
+      ],
+    }, as: :json
+
+    assert_response :success
+
+    issues = @response.parsed_body['issues']
+    assert_equal 1, issues['errors'].length
+    # Error should throw if row is missing required metadata.
+    assert issues['errors'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:row_missing_required_metadata][:title].call(1, nil), issues['errors'][0]['caption']
+    assert_equal [[2, "Test Sample 2", "Nucleotide Type, Water Control, Sample Type"]], issues['errors'][0]['rows']
+
+    assert_equal 0, issues['warnings'].length
   end
 
   test 'duplicate samples' do
@@ -277,7 +320,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'age', 'blood_fed', 'custom field'],
+        headers: HEADERS_2 + ['age', 'blood_fed', 'custom field'],
         rows: [
           ['Human Sample', 'Human', 'Foobar', 'DNA', '5', 'Foobar', 'Foobar'],
           ['Mosquito Sample', 'Mosquito', 'Foobar', 'DNA', '10', 'Foobar', 'Foobar'],
@@ -339,9 +382,9 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        headers: HEADERS_2 + ['example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+          ROW_3 + ['Foobar', 'Foobar', 'Foobar'],
         ],
       },
       samples: [
@@ -370,9 +413,9 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        headers: HEADERS_2 + ['example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+          ROW_3 + ['Foobar', 'Foobar', 'Foobar'],
         ],
       },
       samples: [
@@ -541,9 +584,9 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        headers: HEADERS_2 + ['example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+          ROW_3 + ['Foobar', 'Foobar', 'Foobar'],
         ],
       },
       samples: [
@@ -568,9 +611,9 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        headers: HEADERS_2 + ['example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+          ROW_3 + ['Foobar', 'Foobar', 'Foobar'],
         ],
       },
       samples: [
@@ -595,9 +638,9 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        headers: HEADERS_2 + ['example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+          ROW_3 + ['Foobar', 'Foobar', 'Foobar'],
         ],
       },
       samples: [
