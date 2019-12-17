@@ -3,7 +3,8 @@ require 'csv'
 
 module TestHelper
   # Consider this a fixture for tests. Needs to integrate with dag_json for public_sample_run_stage.
-  TEST_RESULT_FOLDER = %w[
+  # Avoid "warning: already initialized constant" by conditional assignment
+  TEST_RESULT_FOLDER ||= %w[
     unmapped1.fq
     trimmomatic1.fq
     priceseq1.fa
