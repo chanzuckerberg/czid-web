@@ -94,7 +94,7 @@ ActiveRecord::Schema.define(version: 20_191_216_200_333) do
     t.string "access_token"
     t.float "progress"
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
-    t.integer "output_file_size"
+    t.integer "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
   end
 

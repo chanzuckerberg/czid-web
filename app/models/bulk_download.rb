@@ -508,7 +508,7 @@ class BulkDownload < ApplicationRecord
     end
 
     Rails.logger.info("Success!")
-    Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", StringUtil.human_readable_file_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
+    Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", ActiveSupport::NumberHelper.number_to_human_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
     mark_success
   rescue
     update(status: STATUS_ERROR)
