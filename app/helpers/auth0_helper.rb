@@ -72,9 +72,16 @@ module Auth0Helper
   # (see https://auth0.com/docs/sessions/concepts/session-layers)
   def auth0_invalidate_application_session
     session.delete(:auth0_credentials)
-    warden&.logout(:auth0_user)
-    # logout users from previous Devise scope
-    warden&.logout(:user)
+    begin
+      warden.logout(:auth0_user)
+      # logout users from previous Devise scope
+      warden.logout(:user)
+    rescue
+      # if warden middleware is not present for any reason
+      # we want to ensure we removed everything from current session
+      # to prevent infinite redirects
+      reset_session
+    end
   end
 
   # URL used to remove auth0 session from Auth0 Session Layer
