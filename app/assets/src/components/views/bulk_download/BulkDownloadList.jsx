@@ -28,9 +28,14 @@ const TABLE_COLUMNS = [
   {
     dataKey: "created_at",
     label: "Created On",
-    width: 120,
-    flexGrow: 1,
+    width: 200,
     cellRenderer: TableRenderers.renderDateWithElapsed,
+  },
+  {
+    dataKey: "file_size",
+    label: "File Size",
+    width: 200,
+    className: cs.lightCell,
   },
   {
     dataKey: "status",
