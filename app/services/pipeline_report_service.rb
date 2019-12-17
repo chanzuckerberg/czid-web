@@ -69,7 +69,7 @@ class PipelineReportService
 
   def generate
     metadata = get_pipeline_status(@pipeline_run)
-    unless @pipeline_run && @pipeline_run.report_ready?
+    unless @pipeline_run && (@pipeline_run.finalized? || @pipeline_run.report_ready?)
       return JSON.dump(
         metadata: metadata
       )
