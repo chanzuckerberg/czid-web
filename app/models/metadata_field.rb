@@ -3,10 +3,24 @@ class MetadataField < ApplicationRecord
   has_and_belongs_to_many :projects
   has_many :metadata, dependent: :destroy
 
+  validate :metadata_field_subsets
+
   STRING_TYPE = 0
   NUMBER_TYPE = 1
   DATE_TYPE = 2
   LOCATION_TYPE = 3
+  validates :base_type, presence: true, inclusion: { in: [
+    STRING_TYPE,
+    NUMBER_TYPE,
+    DATE_TYPE,
+    LOCATION_TYPE,
+  ], }
+
+  # NOTE: not sure why these columns were not created as booleans
+  validates :force_options, inclusion: { in: [0, 1] }
+  validates :is_core, inclusion: { in: [0, 1] }
+  validates :is_default, inclusion: { in: [0, 1] }
+  validates :is_required, inclusion: { in: [0, 1] }
 
   # ActiveRecord documentation summary
 
@@ -85,6 +99,15 @@ class MetadataField < ApplicationRecord
 
   # Whether this metadata field should be added automatically to new host genomes.
   # t.integer :default_for_new_host_genome, limit: 1, default: 0
+
+  def metadata_field_subsets
+    if is_default == 1 && is_core == 0
+      errors[:name] << 'Default field must also be core field'
+    end
+    if is_required == 1 && is_default == 0
+      errors[:name] << 'Required field must also be default field'
+    end
+  end
 
   # Important attributes for the frontend
   def field_info
