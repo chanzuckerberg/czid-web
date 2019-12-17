@@ -964,9 +964,9 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
-    // reportAvailable is true if the pipeline run is report-ready (might still be running Experimental,
+    // reportReady is true if the pipeline run is report-ready (might still be running Experimental,
     // but at least taxon_counts has been loaded).
-    if (reportMetadata.reportAvailable) {
+    if (reportMetadata.reportReady) {
       return (
         <div className={cs.reportViewContainer}>
           <div className={cs.reportFilters}>
@@ -1070,7 +1070,7 @@ export default class SampleViewV2 extends React.Component {
               pipelineRun={pipelineRun}
               project={project}
               projectSamples={projectSamples}
-              reportPresent={reportMetadata.reportAvailable !== false}
+              reportPresent={reportMetadata.reportReady === true}
               sample={sample}
               view={view}
               minContigSize={selectedOptions.minContigSize}

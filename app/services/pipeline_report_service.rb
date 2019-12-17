@@ -238,7 +238,7 @@ class PipelineReportService
         errorMessage: nil,
         knownUserError: nil,
         jobStatus: "Waiting to Start or Receive Files",
-        reportAvailable: false,
+        reportReady: false,
       }
     end
 
@@ -257,7 +257,7 @@ class PipelineReportService
       errorMessage: pipeline_run.error_message,
       knownUserError: pipeline_run.known_user_error,
       jobStatus: pipeline_run.job_status_display,
-      reportAvailable: pipeline_run && pipeline_run.report_ready?,
+      reportReady: pipeline_run && pipeline_run.report_ready?,
     }
   end
 
