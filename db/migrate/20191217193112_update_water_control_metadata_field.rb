@@ -4,6 +4,8 @@ class UpdateWaterControlMetadataField < ActiveRecord::Migration[5.1]
   def up
     water_control = MetadataField.find_by(name: "water_control")
     if water_control
+      # default_for_new_host_genome should already equal 1.
+      # See AddNewHostGenomeDefaultToMetadataFields.
       water_control.update(is_required: 1)
     end
   end

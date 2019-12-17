@@ -206,15 +206,17 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
+  # NOTE: is_required is defined in test/fixtures/metadata_fields.yml, not in
+  # migrations as in prod. Another reason to use seeds.rb.
   test 'required fields' do
     sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type'],
+        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'water_control'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA'],
-          ['Test Sample 2', 'Human', '', ''],
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Yes'],
+          ['Test Sample 2', 'Human', '', '', ''],
         ],
       },
       samples: [
@@ -235,7 +237,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     # Error should throw if row is missing required metadata.
     assert @response.parsed_body['issues']['errors'][0]['isGroup']
     assert_equal ErrorAggregator::ERRORS[:row_missing_required_metadata][:title].call(1, nil), @response.parsed_body['issues']['errors'][0]['caption']
-    assert_equal [[2, "Test Sample 2", "Nucleotide Type, Sample Type"]], @response.parsed_body['issues']['errors'][0]['rows']
+    assert_equal [[2, "Test Sample 2", "Nucleotide Type, Water Control, Sample Type"]], @response.parsed_body['issues']['errors'][0]['rows']
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
