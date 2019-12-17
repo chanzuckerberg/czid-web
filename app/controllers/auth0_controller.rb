@@ -18,6 +18,7 @@ class Auth0Controller < ApplicationController
 
   AUTH0_CONNECTION_NAME = "Username-Password-Authentication"
   AUTH0_UNAUTHORIZED = "unauthorized"
+  AUTH0_LOGIN_REQUIRED = "login_required"
   # Whitelist descriptions to prevent phishing attempts.
   ERROR_EXPLANATIONS = { password_expired: "Your password has expired. Please update it by clicking Forgot Password on the sign-in page.", default: "Sorry, something went wrong when signing in. Please try again." }.freeze
 
@@ -55,8 +56,11 @@ class Auth0Controller < ApplicationController
     end
     Rails.logger.info("Auth0 omniauth_failure: #{error_type}: #{error_code}")
 
-    # Display 'unauthorized' errors but go to `failure` endpoint for all others.
-    if error_type.present? && error_type == AUTH0_UNAUTHORIZED.to_sym
+    if error_type.present? && error_type == AUTH0_LOGIN_REQUIRED.to_sym
+      # Silent login is expired, we need to logout current user
+      logout
+    elsif error_type.present? && error_type == AUTH0_UNAUTHORIZED.to_sym
+      # Display 'unauthorized' errors but go to `failure` endpoint for all others.
       @message = if ERROR_EXPLANATIONS.key?(error_code)
                    ERROR_EXPLANATIONS[error_code]
                  else
