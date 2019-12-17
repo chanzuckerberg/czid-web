@@ -76,7 +76,8 @@ module Auth0Helper
       warden.logout(:auth0_user)
       # logout users from previous Devise scope
       warden.logout(:user)
-    rescue
+    rescue => e
+      Rails.logger.error("Warden failed to logout session: #{e}")
       # if warden middleware is not present for any reason
       # we want to ensure we removed everything from current session
       # to prevent infinite redirects
