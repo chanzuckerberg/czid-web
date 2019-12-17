@@ -76,6 +76,7 @@ class MetadataField < ApplicationRecord
 
   # Default fields are a subset of the core fields that will appear on a project when someone
   # creates a project. These can be removed from a project.
+  # See add_default_metadata_fields in project.rb.
   # t.integer :is_default
 
   # Required fields are a subset of the core/default fields that cannot be removed from the
@@ -98,6 +99,7 @@ class MetadataField < ApplicationRecord
   # create_join_table :projects, :metadata_fields
 
   # Whether this metadata field should be added automatically to new host genomes.
+  # See add_default_metadata_fields in host_genome.rb.
   # t.integer :default_for_new_host_genome, limit: 1, default: 0
 
   def metadata_field_subsets
