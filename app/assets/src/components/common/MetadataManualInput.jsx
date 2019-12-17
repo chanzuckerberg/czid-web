@@ -295,10 +295,7 @@ class MetadataManualInput extends React.Component {
           const inputClasses = cx(
             cs.input,
             // Add extra width to location inputs for long names.
-            column.startsWith("collection_location") && cs.extraWidth,
-            // Remove extra width for short names.
-            column.startsWith("water_control") && cs.lessWidth,
-            column.startsWith("nucleotide_type") && cs.lessWidth
+            column.startsWith("collection_location") && cs.extraWidth
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
