@@ -968,7 +968,7 @@ export default class SampleViewV2 extends React.Component {
     // but at least taxon_counts has been loaded).
     // pipelineRunReportAvailable was renamed to reportReady, but we check both in case the old variable
     // name was cached.
-    // TODO(julie): remove pipelinRunReportAvailable during cleanup.
+    // TODO(julie): remove pipelineRunReportAvailable during cleanup.
     if (
       reportMetadata.reportReady ||
       reportMetadata.pipelineRunReportAvailable
