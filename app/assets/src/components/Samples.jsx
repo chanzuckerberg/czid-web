@@ -240,7 +240,11 @@ class Samples extends React.Component {
       this.handleProjectSelection(result.id);
     } else if (result.category == "Sample") {
       this.applySuggestFilter(result, "sampleIdsParams", "sample_ids");
-    } else if (result.category == "Tissue") {
+    } else if (
+      result.category == "Sample Type" ||
+      result.category == "Tissue"
+    ) {
+      // Tissue is legacy. Check both to be safe.
       this.applySuggestFilter(result, "selectedTissueFilters", "id");
     } else if (result.category == "Host") {
       this.applySuggestFilter(result, "selectedHostIndices", "id");
