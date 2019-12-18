@@ -72,7 +72,7 @@ class SamplesController < ApplicationController
     name_search_query = params[:search]
     filter_query = params[:filter]
     page = params[:page]
-    tissue_type_query = params[:tissue].split(',') if params[:tissue].present?
+    sample_type_query = params[:sample_type].split(',') if params[:sample_type].present?
     host_query = params[:host].split(',') if params[:host].present?
     samples_query = params[:ids].split(',') if params[:ids].present?
     sort = params[:sort_by]
@@ -89,11 +89,11 @@ class SamplesController < ApplicationController
 
     @count_project = results.size
 
-    # Get tissue types and host genomes that are present in the sample list
-    # TODO(yf) : the following tissue_types, host_genomes have performance
+    # Get sample types and host genomes that are present in the sample list
+    # TODO(yf) : the following sample_types, host_genomes have performance
     # impact that it should be moved to different dedicated functions. Not
     # parsing the whole results.
-    @tissue_types = get_distinct_sample_types(results)
+    @sample_types = get_distinct_sample_types(results)
 
     host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
     @host_genomes = HostGenome.find(host_genome_ids)
@@ -106,7 +106,7 @@ class SamplesController < ApplicationController
     end
 
     results = filter_by_status(results, filter_query) if filter_query.present?
-    results = filter_by_metadatum(results, "sample_type", tissue_type_query) if tissue_type_query.present?
+    results = filter_by_metadatum(results, "sample_type", sample_type_query) if sample_type_query.present?
     results = filter_by_metadatum(results, "collection_location", params[:location].split(',')) if params[:location].present?
     results = filter_by_host(results, host_query) if host_query.present?
 
@@ -132,7 +132,7 @@ class SamplesController < ApplicationController
         samples: @samples_formatted,
         # Number of samples in the current query.
         count: @samples_count,
-        tissue_types: @tissue_types,
+        sample_types: @sample_types,
         host_genomes: @host_genomes,
         # Total number of samples in the project
         count_project: @count_project,
@@ -216,15 +216,15 @@ class SamplesController < ApplicationController
     locations_v2 = LocationHelper.sample_dimensions(sample_ids, "collection_location_v2", samples_count)
     @timer.split("locations_v2")
 
-    tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type").count
-    tissues = tissues.map do |tissue, count|
-      { value: tissue, text: tissue, count: count }
+    sample_types = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type").count
+    sample_types = sample_types.map do |sample_type, count|
+      { value: sample_type, text: sample_type, count: count }
     end
-    not_set_count = samples_count - tissues.sum { |l| l[:count] }
+    not_set_count = samples_count - sample_types.sum { |l| l[:count] }
     if not_set_count > 0
-      tissues << { value: "not_set", text: "Unknown", count: not_set_count }
+      sample_types << { value: "not_set", text: "Unknown", count: not_set_count }
     end
-    @timer.split("tissues")
+    @timer.split("sample_types")
 
     # visibility
     public_count = samples.public_samples.count
@@ -301,7 +301,7 @@ class SamplesController < ApplicationController
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
-          { dimension: "tissue", values: tissues },
+          { dimension: "sample_type", values: sample_types },
         ]
       end
     end
@@ -358,7 +358,7 @@ class SamplesController < ApplicationController
     results = {}
 
     # Need users
-    if !categories || ["project", "sample", "location", "tissue", "uploader"].any? { |i| categories.include? i }
+    if !categories || ["project", "sample", "location", "sample_type", "uploader"].any? { |i| categories.include? i }
       # Admin-only for now: needs permissions scoping
       users = current_user.admin ? prefix_match(User, "name", query, {}) : []
     end
@@ -386,7 +386,7 @@ class SamplesController < ApplicationController
     end
 
     # Permission-dependent
-    if !categories || ["sample", "location", "tissue", "taxon"].any? { |i| categories.include? i }
+    if !categories || ["sample", "location", "sample_type", "taxon"].any? { |i| categories.include? i }
       constrained_samples = samples_by_domain(domain)
       constrained_samples = filter_samples(constrained_samples, params)
       constrained_sample_ids = constrained_samples.pluck(:id)
@@ -432,13 +432,13 @@ class SamplesController < ApplicationController
       end
     end
 
-    if !categories || categories.include?("tissue")
-      tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "sample_type")
-      unless tissues.empty?
-        results["Tissue"] = {
-          "name" => "Tissue",
-          "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
-            { "category" => "Tissue", "title" => val, "id" => val }
+    if !categories || categories.include?("sample_type")
+      sample_types = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "sample_type")
+      unless sample_types.empty?
+        results["Sample Type"] = {
+          "name" => "Sample Type",
+          "results" => sample_types.pluck(:string_validated_value).uniq.map do |val|
+            { "category" => "Sample Type", "title" => val, "id" => val }
           end,
         }
       end

@@ -187,7 +187,7 @@ module SamplesHelper
     location_v2 = params[:locationV2]
     taxon = params[:taxon]
     time = params[:time]
-    tissue = params[:tissue]
+    sample_type = params[:sample_type]
     visibility = params[:visibility]
     project_id = params[:projectId]
     search_string = params[:search]
@@ -199,7 +199,7 @@ module SamplesHelper
     samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
     samples = filter_by_metadata_key(samples, "collection_location_v2", location_v2) if location_v2.present?
     samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
-    samples = filter_by_metadata_key(samples, "sample_type", tissue) if tissue.present?
+    samples = filter_by_metadata_key(samples, "sample_type", sample_type) if sample_type.present?
     samples = filter_by_visibility(samples, visibility) if visibility.present?
     samples = filter_by_search_string(samples, search_string) if search_string.present?
     samples = filter_by_sample_ids(samples, requested_sample_ids) if requested_sample_ids.present?
