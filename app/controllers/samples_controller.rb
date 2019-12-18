@@ -72,7 +72,9 @@ class SamplesController < ApplicationController
     name_search_query = params[:search]
     filter_query = params[:filter]
     page = params[:page]
-    sample_type_query = params[:sample_type].split(',') if params[:sample_type].present?
+    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+    # instances to "sample_type".
+    sample_type_query = params[:tissue].split(',') if params[:tissue].present?
     host_query = params[:host].split(',') if params[:host].present?
     samples_query = params[:ids].split(',') if params[:ids].present?
     sort = params[:sort_by]
@@ -132,7 +134,9 @@ class SamplesController < ApplicationController
         samples: @samples_formatted,
         # Number of samples in the current query.
         count: @samples_count,
-        sample_types: @sample_types,
+        # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+        # instances to "sample_type"
+        tissues: @sample_types,
         host_genomes: @host_genomes,
         # Total number of samples in the project
         count_project: @count_project,
@@ -301,7 +305,9 @@ class SamplesController < ApplicationController
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
-          { dimension: "sample_type", values: sample_types },
+          # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+          # instances to "sample_type"
+          { dimension: "tissue", values: sample_types },
         ]
       end
     end
@@ -356,6 +362,10 @@ class SamplesController < ApplicationController
     # Generate structure required by CategorySearchBox
     # Not permission-dependent
     results = {}
+
+    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+    # instances to "sample_type"
+    categories = categories.map { |c| c == "tissue" ? "sample_type" : c }
 
     # Need users
     if !categories || ["project", "sample", "location", "sample_type", "uploader"].any? { |i| categories.include? i }

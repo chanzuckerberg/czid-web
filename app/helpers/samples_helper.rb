@@ -187,7 +187,9 @@ module SamplesHelper
     location_v2 = params[:locationV2]
     taxon = params[:taxon]
     time = params[:time]
-    sample_type = params[:sample_type]
+    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+    # instances to "sample_type"
+    sample_type = params[:tissue]
     visibility = params[:visibility]
     project_id = params[:projectId]
     search_string = params[:search]
