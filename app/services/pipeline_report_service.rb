@@ -69,7 +69,10 @@ class PipelineReportService
 
   def generate
     metadata = get_pipeline_status(@pipeline_run)
-    unless @pipeline_run && (@pipeline_run.finalized? || @pipeline_run.report_ready?)
+    # Only generate the report if the pipeline has initialized and has loaded
+    # taxon_counts (is report_ready), or if its results are finalized without errors.
+    # Otherwise just return the metadata, which includes statuses and error messages to display.
+    unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?))
       return JSON.dump(
         metadata: metadata
       )

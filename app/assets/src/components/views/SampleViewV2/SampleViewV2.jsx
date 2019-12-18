@@ -910,7 +910,9 @@ export default class SampleViewV2 extends React.Component {
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
         linkText = "View Pipeline Visualization";
-        link = `/samples/${sample.id}/pipeline_viz/${pipelineRun.pipeline_version}`;
+        link = `/samples/${sample.id}/pipeline_viz/${
+          pipelineRun.pipeline_version
+        }`;
       }
     } else {
       // Some kind of error or warning has occurred.
@@ -964,8 +966,8 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
-    // reportReady is true if the pipeline run is report-ready (might still be running Experimental,
-    // but at least taxon_counts has been loaded).
+    // reportReady is true if the pipeline run hasn't failed and is report-ready
+    // (might still be running Experimental, but at least taxon_counts has been loaded).
     // pipelineRunReportAvailable was renamed to reportReady, but we check both in case the old variable
     // name was cached.
     // TODO(julie): remove pipelineRunReportAvailable during cleanup.
@@ -1108,9 +1110,8 @@ export default class SampleViewV2 extends React.Component {
             </UserContext.Consumer>
           </div>
           {currentTab === "Report" && this.renderReport()}
-          {currentTab === "Antimicrobial Resistance" && amrData && (
-            <AMRView amr={amrData} />
-          )}
+          {currentTab === "Antimicrobial Resistance" &&
+            amrData && <AMRView amr={amrData} />}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar
