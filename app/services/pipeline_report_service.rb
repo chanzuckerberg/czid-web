@@ -72,6 +72,7 @@ class PipelineReportService
     # Only generate the report if the pipeline has initialized and has loaded
     # taxon_counts (is report_ready), or if its results are finalized without errors.
     # Otherwise just return the metadata, which includes statuses and error messages to display.
+    # TODO(julie): refactor + clarify pipeline run statuses (JIRA: https://jira.czi.team/browse/IDSEQ-1890)
     unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?))
       return JSON.dump(
         metadata: metadata
