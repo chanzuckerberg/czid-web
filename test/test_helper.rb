@@ -12,6 +12,8 @@ class ActiveSupport::TestCase
 
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
+  # Rollback database after tests
+  self.use_transactional_tests = true
 
   def access_sample_with_background(background, sample)
     get "/samples/#{sample.id}?background_id=#{background.id}"
