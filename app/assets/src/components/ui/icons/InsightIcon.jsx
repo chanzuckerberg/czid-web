@@ -10,7 +10,7 @@ const InsightIcon = ({ tooltip }) => {
       </span>
     </span>
   );
-  return <BasicPopup trigger={icon} content={tooltip} />;
+  return <BasicPopup trigger={icon} content={tooltip} basic={false} />;
 };
 
 export default InsightIcon;

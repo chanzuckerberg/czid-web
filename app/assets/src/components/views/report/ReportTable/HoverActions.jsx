@@ -141,6 +141,8 @@ class HoverActions extends React.Component {
 
     return (
       <BasicPopup
+        basic={false}
+        position="top center"
         key={hoverAction.key}
         trigger={trigger}
         content={tooltipMessage}

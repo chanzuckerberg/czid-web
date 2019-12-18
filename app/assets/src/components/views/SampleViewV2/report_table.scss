@@ -3,7 +3,7 @@
 @import "~styles/themes/typography";
 
 .header {
-  @include font-body-xxs;
+  @include font-header-xs;
 
   color: $medium-grey;
   justify-content: flex-end;
@@ -19,8 +19,22 @@
   text-align: left;
 }
 
+.expandHeader {
+  // reactVirtualized sets margin-left to 10px for the first column by default,
+  // so we need to override it.
+  margin-left: 0px !important;
+  margin-right: 2px;
+}
+
+.expandCell {
+  // reactVirtualized sets margin-left to 10px for the first column by default,
+  // so we need to override it.
+  margin-left: 0px !important;
+  margin-right: 2px;
+}
+
 .expandIcon {
-  font-size: $font-size-h5;
+  font-size: 18px;
   padding-left: 5px;
   text-align: center;
   margin-bottom: 3px;
@@ -35,6 +49,7 @@
 .ntnrSelectorHeader {
   color: $darkest-grey;
   text-align: center;
+  cursor: pointer;
 }
 
 .cell {
@@ -51,7 +66,7 @@
 
   .stackElement {
     @include font-body-s;
-
+    line-height: $space-l;
     font-weight: $font-weight-bold;
 
     &.lowlightValue {
@@ -72,6 +87,9 @@
     .taxonName {
       text-transform: capitalize;
       white-space: normal;
+      &:hover {
+        cursor: pointer;
+      }
     }
 
     .missingName {
@@ -81,9 +99,15 @@
     .countInfo {
       font-style: italic;
       font-weight: $font-weight-regular;
-      margin-left: $space-s;
+      margin-left: $space-xxs;
       color: $medium-grey;
       white-space: normal;
+    }
+  }
+
+  &:hover {
+    .taxonName {
+      color: $primary-light;
     }
   }
 }
@@ -110,7 +134,7 @@
   padding-right: 0px !important;
   &.highlighted {
     background-color: $primary-lightest;
-    border-left: 5px solid $primary-lighter;
+    border-left: 5px solid $primary-light;
     padding-left: 0px;
   }
 
@@ -135,6 +159,7 @@
   display: inline-flex;
   flex-direction: row;
   align-items: center;
+  vertical-align: middle;
 
   .icon {
     flex: 0 0 auto;
