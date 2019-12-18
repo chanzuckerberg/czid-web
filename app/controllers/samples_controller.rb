@@ -363,12 +363,8 @@ class SamplesController < ApplicationController
     # Not permission-dependent
     results = {}
 
-    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
-    # instances to "sample_type"
-    categories = categories.map { |c| c == "tissue" ? "sample_type" : c }
-
     # Need users
-    if !categories || ["project", "sample", "location", "sample_type", "uploader"].any? { |i| categories.include? i }
+    if !categories || ["project", "sample", "location", "tissue", "uploader"].any? { |i| categories.include? i }
       # Admin-only for now: needs permissions scoping
       users = current_user.admin ? prefix_match(User, "name", query, {}) : []
     end
@@ -396,7 +392,7 @@ class SamplesController < ApplicationController
     end
 
     # Permission-dependent
-    if !categories || ["sample", "location", "sample_type", "taxon"].any? { |i| categories.include? i }
+    if !categories || ["sample", "location", "tissue", "taxon"].any? { |i| categories.include? i }
       constrained_samples = samples_by_domain(domain)
       constrained_samples = filter_samples(constrained_samples, params)
       constrained_sample_ids = constrained_samples.pluck(:id)
@@ -442,13 +438,15 @@ class SamplesController < ApplicationController
       end
     end
 
-    if !categories || categories.include?("sample_type")
+    if !categories || categories.include?("tissue")
       sample_types = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "sample_type")
       unless sample_types.empty?
-        results["Sample Type"] = {
-          "name" => "Sample Type",
+        # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+        # instances to "sample_type".
+        results["Tissue"] = {
+          "name" => "Tissue",
           "results" => sample_types.pluck(:string_validated_value).uniq.map do |val|
-            { "category" => "Sample Type", "title" => val, "id" => val }
+            { "category" => "Tissue", "title" => val, "id" => val }
           end,
         }
       end

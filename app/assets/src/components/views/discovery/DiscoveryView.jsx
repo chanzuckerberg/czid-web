@@ -710,6 +710,7 @@ class DiscoveryView extends React.Component {
     const { domain } = this.props;
 
     let results = await getSearchSuggestions({
+      // NOTE: backend also supports "tissue", "location", "host" and more
       categories: ["sample", "project", "taxon"],
       query,
       domain,
