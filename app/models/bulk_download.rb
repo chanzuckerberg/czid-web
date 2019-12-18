@@ -525,6 +525,21 @@ class BulkDownload < ApplicationRecord
     end
   end
 
+  def download_display_name
+    display_name = BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)
+
+    # For reads non-host and contigs non-host for a single taxon, add the name of the taxon.
+    if download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("taxa_with_reads") != "all"
+      display_name += " - #{get_param_display_name('taxa_with_reads')}"
+    end
+
+    if download_type == CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("taxa_with_contigs") != "all"
+      display_name += " - #{get_param_display_name('taxa_with_contigs')}"
+    end
+
+    display_name
+  end
+
   def execution_type
     execution_type = BulkDownloadTypesHelper.bulk_download_type(download_type)[:execution_type]
     if [RESQUE_EXECUTION_TYPE, ECS_EXECUTION_TYPE]

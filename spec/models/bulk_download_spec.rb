@@ -891,4 +891,79 @@ describe BulkDownload, type: :model do
       bulk_download.kickoff
     end
   end
+
+  context "#download_display_name" do
+    before do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe], name: "Test Project")
+      @sample_one = create(:sample, project: @project, name: "Test Sample One",
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+    end
+
+    it "returns the download type display name in basic case" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        pipeline_run_ids: [@sample_one.first_pipeline_run.id],
+        download_type: BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+      )
+
+      expect(bulk_download.download_display_name).to eq("Sample Overviews")
+    end
+
+    it "includes taxon for single-taxon reads non host download" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        pipeline_run_ids: [@sample_one.first_pipeline_run.id],
+        download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE,
+        params: {
+          "taxa_with_reads" => {
+            "value" => 100,
+            "displayName" => "Mock Taxon",
+          },
+        }
+      )
+
+      expect(bulk_download.download_display_name).to eq("Reads (Non-host) - Mock Taxon")
+    end
+
+    it "includes taxon for single-taxon contigs non host download" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        pipeline_run_ids: [@sample_one.first_pipeline_run.id],
+        download_type: BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,
+        params: {
+          "taxa_with_contigs" => {
+            "value" => 200,
+            "displayName" => "Mock Taxon 2",
+          },
+        }
+      )
+
+      expect(bulk_download.download_display_name).to eq("Contigs (Non-host) - Mock Taxon 2")
+    end
+
+    it "returns expected display name for all-taxon contigs non host download" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        pipeline_run_ids: [@sample_one.first_pipeline_run.id],
+        download_type: BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,
+        params: {
+          "taxa_with_contigs" => {
+            "value" => "all",
+            "displayName" => "All Taxon",
+          },
+          "file_format" => {
+            "value" => ".fastq",
+            "displayName" => ".fastq",
+          },
+        }
+      )
+
+      expect(bulk_download.download_display_name).to eq("Contigs (Non-host)")
+    end
+  end
 end
