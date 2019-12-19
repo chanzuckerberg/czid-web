@@ -47,10 +47,12 @@
 
     .input {
       margin: $space-xxs $space-m $space-xxs 0;
-      width: 110px; // see also getColumnWidth
+      // The width of the input needs to be about 15px smaller than the width of
+      // the column to maintain some padding. See also getColumnWidth.
+      width: 95px;
 
       &.extraWidth {
-        width: 240px;
+        width: 225px;
       }
     }
 
