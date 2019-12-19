@@ -346,7 +346,27 @@ export default class SampleViewV2 extends React.Component {
   };
 
   getTaxonMetricValue = (row, metric) => {
-    return get(metric.split(":"), row);
+    let parsedMetric = metric.split(":");
+    let parsedValue = get(parsedMetric, row);
+
+    // Contigs/contig_reads are stored in the format {length of contig: count},
+    // so some extra processing is needed to extract the value.
+    if (parsedMetric.includes("contigs") && parsedValue) {
+      // To get the total number of contigs, sum up all the values (counts) in the object.
+      parsedValue = sum(Object.values(parsedValue));
+    } else if (parsedMetric.includes("contig_reads")) {
+      // If the metric is contig_reads, need to extract the contig data.
+      parsedValue = get([parsedMetric[0], "contigs"], row);
+      // To get the total number of contig reads, multiply the keys (length of each contig) by
+      // the values (number of times a contig of that length appears) and sum them all up.
+      // Default to 0 if there are no contigs.
+      parsedValue = parsedValue
+        ? sum(
+            Object.entries(parsedValue).map(([reads, count]) => reads * count)
+          )
+        : 0;
+    }
+    return parsedValue;
   };
 
   filterThresholds = ({ row, thresholds }) => {
@@ -358,9 +378,9 @@ export default class SampleViewV2 extends React.Component {
 
         switch (operator) {
           case ">=":
-            return parsedThresholdValue < parsedValue;
+            return parsedThresholdValue <= parsedValue;
           case "<=":
-            return parsedThresholdValue > parsedValue;
+            return parsedThresholdValue >= parsedValue;
         }
         return true;
       }, thresholds);
