@@ -685,7 +685,7 @@ class DiscoveryView extends React.Component {
 
         if (results.length) {
           suggestions[category] = {
-            name: category === "locationV2" ? "location" : capitalize(category),
+            name: this.getName(category),
             results,
           };
         }
@@ -695,10 +695,22 @@ class DiscoveryView extends React.Component {
     return suggestions;
   };
 
+  getName = category => {
+    if (category === "locationV2") {
+      return "location";
+    } else if (category === "tissue") {
+      // It's too hard to rename all JS so we just rename here
+      return "Sample Type";
+    } else {
+      return capitalize(category);
+    }
+  };
+
   getServerSideSuggestions = async query => {
     const { domain } = this.props;
 
     let results = await getSearchSuggestions({
+      // NOTE: backend also supports "tissue", "location", "host" and more
       categories: ["sample", "project", "taxon"],
       query,
       domain,

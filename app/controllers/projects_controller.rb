@@ -104,7 +104,7 @@ class ProjectsController < ApplicationController
                              .references(:samples)
           # get aggregated lists of association values in string by using MySQL's GROUP_CONCAT (should update to JSON_ARRAYAGG when possible)
           group_concat_host = "GROUP_CONCAT(DISTINCT host_genomes.name SEPARATOR '::') AS hosts"
-          group_concat_sample_type = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'sample_type' THEN metadata.string_validated_value ELSE NULL END SEPARATOR '::') AS tissues"
+          group_concat_sample_type = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'sample_type' THEN metadata.string_validated_value ELSE NULL END SEPARATOR '::') AS sample_types"
           group_concat_location = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'collection_location' THEN IFNULL(locations.name, metadata.string_validated_value) ELSE NULL END SEPARATOR '::') AS locations"
           group_concat_users = "GROUP_CONCAT(DISTINCT CONCAT(users.name,'|',users.email) ORDER BY users.name SEPARATOR '::') AS users"
           editable = "BIT_OR(IF(users.id=#{current_user.id}, 1, 0)) AS editable"
@@ -123,7 +123,11 @@ class ProjectsController < ApplicationController
               project_hash["owner"] = (project_hash["uploaders"] || '').split('::')[0]
               project_hash["editable"] = current_user.admin? || project_hash["editable"] == 1
               project_hash.delete("uploaders")
-              ["locations", "hosts", "tissues"].each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
+              ["locations", "hosts", "sample_types"].each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
+              # Return as "tissue" for legacy compatibility. It's too hard to
+              # rename all JS instances of "tissue".
+              project_hash["tissues"] = project_hash["sample_types"]
+              project_hash.delete("sample_types")
               project_hash
             end),
             all_projects_ids: (projects.pluck(:id).uniq if list_all_project_ids),
@@ -158,14 +162,14 @@ class ProjectsController < ApplicationController
     locations_v2 = LocationHelper.project_dimensions(sample_ids, "collection_location_v2")
     @timer.split("locations_v2")
 
-    tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type")
-                           .joins(:sample)
-                           .distinct
-                           .count(:project_id)
-    tissues = tissues.map do |tissue, count|
-      { value: tissue, text: tissue, count: count }
+    sample_types = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type")
+                                .joins(:sample)
+                                .distinct
+                                .count(:project_id)
+    sample_types = sample_types.map do |sample_type, count|
+      { value: sample_type, text: sample_type, count: count }
     end
-    @timer.split("tissues")
+    @timer.split("sample_types")
 
     # visibility
     # TODO(tiago): should this be public projects or projects with public samples?
@@ -248,7 +252,9 @@ class ProjectsController < ApplicationController
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
-          { dimension: "tissue", values: tissues },
+          # Return as "tissue" for legacy compatibility. It's too hard to
+          # rename all JS instances of "tissue".
+          { dimension: "tissue", values: sample_types },
         ]
       end
     end
