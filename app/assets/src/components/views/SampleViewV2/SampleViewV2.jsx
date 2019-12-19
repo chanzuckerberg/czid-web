@@ -332,11 +332,12 @@ export default class SampleViewV2 extends React.Component {
 
     // taxon's category was selected and its subcategories were not excluded
     if (
-      categories.has(row.category) &&
-      !some(
-        subcategory => subcategories.has(subcategory),
-        row.subcategories || []
-      )
+      (categories.has(row.category) &&
+        !some(
+          subcategory => subcategories.has(subcategory),
+          row.subcategories || []
+        )) ||
+      (categories.has("uncategorized") && row.category === null)
     ) {
       return true;
     }
@@ -1029,19 +1030,20 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
           )}
-          {view == "tree" && (
-            <div>
-              <TaxonTreeVis
-                lineage={lineageData}
-                metric={selectedOptions.metric}
-                nameType={selectedOptions.nameType}
-                onTaxonClick={this.handleTaxonClick}
-                sample={sample}
-                taxa={filteredReportData}
-                useReportV2Format={true}
-              />
-            </div>
-          )}
+          {view == "tree" &&
+            filteredReportData.length > 0 && (
+              <div>
+                <TaxonTreeVis
+                  lineage={lineageData}
+                  metric={selectedOptions.metric}
+                  nameType={selectedOptions.nameType}
+                  onTaxonClick={this.handleTaxonClick}
+                  sample={sample}
+                  taxa={filteredReportData}
+                  useReportV2Format={true}
+                />
+              </div>
+            )}
         </div>
       );
     } else {
