@@ -354,7 +354,7 @@ class MetadataManualInput extends React.Component {
 
   getColumnWidth = column => {
     if (["Sample Name", "collection_location_v2"].includes(column)) {
-      return 230;
+      return 240;
     } else {
       return 110;
     }
