@@ -4,7 +4,7 @@ import { Menu, Icon, Popup } from "semantic-ui-react";
 
 const ReportViewSelector = ({ view, onViewClick }) => {
   return (
-    <Menu icon floated="right">
+    <Menu icon floated="right" size="mini">
       <Popup
         trigger={
           <Menu.Item
@@ -12,7 +12,7 @@ const ReportViewSelector = ({ view, onViewClick }) => {
             active={view === "table"}
             onClick={() => onViewClick({ view: "table" })}
           >
-            <Icon name="table" />
+            <Icon name="table" size="large" />
           </Menu.Item>
         }
         content="Table View"
@@ -26,7 +26,7 @@ const ReportViewSelector = ({ view, onViewClick }) => {
             active={view === "tree"}
             onClick={() => onViewClick({ view: "tree" })}
           >
-            <Icon name="fork" />
+            <Icon name="fork" size="large" />
           </Menu.Item>
         }
         content={<div>Taxonomic Tree View</div>}
