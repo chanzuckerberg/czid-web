@@ -342,31 +342,32 @@ class ReportTable extends React.Component {
   };
 
   renderNtNrSelector = () => {
+    let selector = (
+      <div>
+        {this.renderNtNrStack({
+          cellData: ["NT", "NR"],
+          onClick: [
+            withAnalytics(
+              () => this.handleNtNrChange("nt"),
+              "ReportTable_count-type_clicked",
+              {
+                countType: "nt",
+              }
+            ),
+            withAnalytics(
+              () => this.handleNtNrChange("nr"),
+              "ReportTable_count-type_clicked",
+              {
+                countType: "nr",
+              }
+            ),
+          ],
+        })}
+      </div>
+    );
     return (
       <BasicPopup
-        trigger={
-          <div>
-            {this.renderNtNrStack({
-              cellData: ["NT", "NR"],
-              onClick: [
-                withAnalytics(
-                  () => this.handleNtNrChange("nt"),
-                  "ReportTable_count-type_clicked",
-                  {
-                    countType: "nt",
-                  }
-                ),
-                withAnalytics(
-                  () => this.handleNtNrChange("nr"),
-                  "ReportTable_count-type_clicked",
-                  {
-                    countType: "nr",
-                  }
-                ),
-              ],
-            })}
-          </div>
-        }
+        trigger={selector}
         position="top right"
         content="Switch count type"
         inverted
