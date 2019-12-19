@@ -449,10 +449,12 @@ class BulkDownload < ApplicationRecord
         failed_sample_ids << pipeline_run.sample.id
       end
 
-      if Time.now.to_f - last_progress_time > progress_update_delay
+      cur_time = Time.now.to_f
+      if cur_time - last_progress_time > progress_update_delay
         progress = (index + 1).to_f / pipeline_runs.length
         update(progress: progress)
         Rails.logger.info(format("Updated progress. %3.1f complete.", progress))
+        last_progress_time = cur_time
       end
     end
 
