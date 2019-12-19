@@ -41,7 +41,11 @@ class BulkDownload < ApplicationRecord
 
   # Only bulk downloads created by the user
   def self.viewable(user)
-    user.bulk_downloads
+    if user.admin?
+      all
+    else
+      user.bulk_downloads
+    end
   end
 
   def validate_access_token(access_token)
@@ -65,7 +69,17 @@ class BulkDownload < ApplicationRecord
   end
 
   def log_stream_name
-    "#{ECS_TASK_NAME}/#{ECS_TASK_NAME}/#{ecs_task_arn.split('/')[-1]}"
+    if ecs_task_arn.nil?
+      nil
+    else
+      "#{ECS_TASK_NAME}/#{ECS_TASK_NAME}/#{ecs_task_arn.split('/')[-1]}"
+    end
+  end
+
+  def log_url
+    if execution_type == BulkDownloadTypesHelper::ECS_EXECUTION_TYPE && log_stream_name
+      AwsUtil.get_cloudwatch_url("bulk_downloads", log_stream_name)
+    end
   end
 
   # The Rails success url that the s3_tar_writer task can ping once it succeeds.

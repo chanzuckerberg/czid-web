@@ -207,8 +207,7 @@ class PipelineRunStage < ApplicationRecord
 
   def log_url
     return nil unless job_log_id
-    "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
-      "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
+    AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
   end
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############

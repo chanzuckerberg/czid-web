@@ -216,7 +216,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_two = create(:sample, project: @project_admin,
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+        bulk_download_joe = create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
         create(:bulk_download, user: @admin, pipeline_run_ids: [@sample_two.first_pipeline_run.id])
 
         get :index, format: :json
@@ -225,11 +225,16 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_downloads = JSON.parse(response.body)
 
         expect(bulk_downloads.length).to eq(1)
+        expect(bulk_downloads[0]["id"]).to eq(bulk_download_joe.id)
         expect(bulk_downloads[0]["user_id"]).to eq(@joe.id)
         expect(bulk_downloads[0]["download_type"]).to eq("reads_non_host")
         expect(bulk_downloads[0]["num_samples"]).to eq(1)
         # Should not return pipeline runs.
         expect(bulk_downloads[0]["pipeline_runs"]).to eq(nil)
+        # Should not return admin-only fields.
+        expect(bulk_downloads[0]["user_name"]).to eq(nil)
+        expect(bulk_downloads[0]["execution_type"]).to eq(nil)
+        expect(bulk_downloads[0]["log_url"]).to eq(nil)
       end
     end
 
@@ -390,6 +395,83 @@ RSpec.describe BulkDownloadsController, type: :controller do
       it "redirected to home page" do
         get :presigned_output_url, params: { format: "json", id: "123" }
         expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
+  context "Admin user with bulk_downloads flag" do
+    # create_users
+    before do
+      sign_in @admin
+      @admin.add_allowed_feature("bulk_downloads")
+      @project = create(:project, users: [@admin], name: "Test Project")
+    end
+
+    describe "GET #index" do
+      it "should see ALL bulk downloads" do
+        @sample_one = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @project_admin = create(:project, users: [@admin])
+        @sample_two = create(:sample, project: @project_admin,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+        create(:bulk_download, user: @admin, pipeline_run_ids: [@sample_two.first_pipeline_run.id], download_type: "contigs_non_host")
+
+        get :index, format: :json
+
+        expect(response).to have_http_status(200)
+        bulk_downloads = JSON.parse(response.body)
+
+        expect(bulk_downloads.length).to eq(2)
+        expect(bulk_downloads[0]["user_id"]).to eq(@joe.id)
+        expect(bulk_downloads[0]["download_type"]).to eq("reads_non_host")
+        expect(bulk_downloads[0]["num_samples"]).to eq(1)
+        expect(bulk_downloads[1]["user_id"]).to eq(@admin.id)
+        expect(bulk_downloads[1]["download_type"]).to eq("contigs_non_host")
+        expect(bulk_downloads[1]["num_samples"]).to eq(1)
+      end
+
+      it "should see admin-only fields for bulk downloads" do
+        @sample_one = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        bulk_download = create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "original_input_file", ecs_task_arn: "MOCK_TASK_ARN")
+
+        get :index, format: :json
+
+        expect(response).to have_http_status(200)
+        bulk_downloads = JSON.parse(response.body)
+
+        expect(bulk_downloads.length).to eq(1)
+        expect(bulk_downloads[0]["id"]).to eq(bulk_download.id)
+        expect(bulk_downloads[0]["user_id"]).to eq(@joe.id)
+        expect(bulk_downloads[0]["download_type"]).to eq("original_input_file")
+        expect(bulk_downloads[0]["num_samples"]).to eq(1)
+        expect(bulk_downloads[0]["user_name"]).to eq("Joe")
+        expect(bulk_downloads[0]["execution_type"]).to eq("ecs")
+        expect(bulk_downloads[0]["log_url"]).to match("MOCK_TASK_ARN")
+      end
+    end
+
+    describe "POST #create" do
+      it "should ignore max samples limit if admin" do
+        @sample_one = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample_two = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        # Set MAX_SAMPLES_BULK_DOWNLOAD to 1
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 1)
+
+        bulk_download_params = {
+          download_type: "sample_overview",
+          sample_ids: [@sample_one, @sample_two],
+        }
+
+        post :create, params: bulk_download_params
+        # succeeds
+        expect(response).to have_http_status(200)
       end
     end
   end
