@@ -31,6 +31,7 @@ const ReportViewSelector = ({ view, onViewClick }) => {
         }
         content={<div>Taxonomic Tree View</div>}
         inverted
+        position="top right"
       />
     </Menu>
   );
