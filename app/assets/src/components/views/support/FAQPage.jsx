@@ -353,7 +353,7 @@ export default class FAQPage extends React.Component {
         <Accordion
           className={cs.question}
           header={
-            <h3>Which Third Party Vendors Will Get Access to My Data?</h3>
+            <h3>Which Third Party Vendors will get access to my data?</h3>
           }
         >
           <p>
@@ -365,6 +365,79 @@ export default class FAQPage extends React.Component {
             services that we use. If you have more questions about our service
             providers, please contact us at{" "}
             <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
+          </p>
+        </Accordion>
+        <Accordion
+          className={cs.question}
+          header={
+            <h3>
+              I’m a California resident - can you tell me more about the CCPA?
+            </h3>
+          }
+        >
+          <p>
+            The California Consumer Privacy Act (“CCPA”) gives consumers who are
+            residents of California the right to request information about the
+            personal information that a business has collected in the past 12
+            months, such as:
+            <ul>
+              <li>
+                <b>Information about Data Collection.</b>
+                <li className={cs.innerListItem}>
+                  (1) The categories of personal information that have been
+                  collected.
+                </li>
+                <li className={cs.innerListItem}>
+                  (2) The specific pieces of personal information that have been
+                  collected about you.
+                </li>
+                <li className={cs.innerListItem}>
+                  (3) The categories of sources that have collected it.
+                </li>
+                <li className={cs.innerListItem}>
+                  (4) The business purpose for collecting personal information.
+                </li>
+              </li>
+              <li>
+                <b>Information about Data Disclosure.</b>
+                <li className={cs.innerListItem}>
+                  (1) The categories of third parties with whom personal
+                  information has been shared.
+                </li>
+                <li className={cs.innerListItem}>
+                  (2) The categories of personal information that we have
+                  disclosed for a business purpose.
+                </li>
+              </li>
+            </ul>
+          </p>
+          <p>
+            We have described in fuller detail in our{" "}
+            <a href="/privacy">Privacy Policy</a> our collection and use of
+            personal information in connection with IDseq, including: (a){" "}
+            <b>Information we collect</b> (e.g. uploaded data, user profile
+            information, etc.); (b) <b>Sources of information</b> (e.g. data you
+            upload to IDseq and your use of IDseq), and (c){" "}
+            <b>Purposes of disclosure of this information</b> (e.g. with service
+            providers to help operate and improve the service as described in
+            detail in the IDseq Privacy Policy). To request any of your
+            information described above, email{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. Please
+            include in your request sufficient information that allows us to
+            reasonably verify that you are the person about whom we collected
+            personal information.
+          </p>
+          <p>
+            <b>Please note</b>: (1) CZI does not sell your personal data, and
+            CZI will not discriminate against you in any way based on your
+            exercise of the rights described above, and (2) this{" "}
+            <b>notice relates only to the IDseq services</b> and not other
+            services or programs offered, or supported, by CZI. Contact{" "}
+            <a href="mailto:privacy@chanzuckerberg.com">
+              privacy@chanzuckerberg.com
+            </a>{" "}
+            if you have questions about the use of personal information in any
+            other services or programs offered, or supported, by CZI.
           </p>
         </Accordion>
       </NarrowContainer>
