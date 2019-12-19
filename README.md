@@ -17,4 +17,4 @@ Check out our repositories:
 - [idseq-cli](https://github.com/chanzuckerberg/idseq-cli) - Command line upload interface
 - [idseq-bench](https://github.com/chanzuckerberg/idseq-bench) - Pipeline benchmarking tools
 
-Check out our [user wiki](https://github.com/chanzuckerberg/idseq-web/wiki) for getting started as a user. Check out our [dev wiki](https://github.com/chanzuckerberg/idseq-web/wiki/Developer-info) to get started as a developer.
+Check out our [wiki](https://github.com/chanzuckerberg/idseq-web/wiki) for getting started with development in this repository and in IDseq in general.
