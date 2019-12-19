@@ -2,6 +2,15 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 
+// NOTE: Omit px so value can be exported for parseInt
+$metadata-input-width: 95;
+$metadata-input-extra-width: 225;
+
+:export {
+  metadataInputWidth: $metadata-input-width;
+  metadataInputExtraWidth: $metadata-input-extra-width;
+}
+
 .metadataManualInput {
   .columnPicker {
     /* Override semantic ui */
@@ -47,12 +56,10 @@
 
     .input {
       margin: $space-xxs $space-m $space-xxs 0;
-      // The width of the input needs to be about 15px smaller than the width of
-      // the column to maintain some padding. See also getColumnWidth.
-      width: 95px;
+      width: $metadata-input-width + 0px;
 
       &.extraWidth {
-        width: 225px;
+        width: $metadata-input-extra-width + 0px;
       }
     }
 
