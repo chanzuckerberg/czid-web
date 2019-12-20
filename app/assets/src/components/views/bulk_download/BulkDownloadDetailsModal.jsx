@@ -4,6 +4,8 @@ import PropTypes from "prop-types";
 import { getBulkDownload } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 import LoadingMessage from "~/components/common/LoadingMessage";
+import { UserContext } from "~/components/common/UserContext";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 
 import cs from "./bulk_download_details_modal.scss";
 import BulkDownloadSummary from "./BulkDownloadSummary";
@@ -43,6 +45,7 @@ class BulkDownloadDetailsModal extends React.Component {
 
   renderDetails = () => {
     const { bulkDownloadDetails, downloadType } = this.state;
+    const { admin } = this.context || {};
 
     if (bulkDownloadDetails === null) {
       return (
@@ -53,20 +56,39 @@ class BulkDownloadDetailsModal extends React.Component {
     }
 
     return (
-      <div className={cs.details}>
-        <BulkDownloadSummary
-          downloadType={downloadType}
-          downloadSummary={this.getDownloadSummary(bulkDownloadDetails)}
-        />
-        <div className={cs.samplesHeader}>Samples in this download</div>
-        <div className={cs.samplesList}>
-          {bulkDownloadDetails.pipeline_runs.map(pipelineRun => (
-            <div key={pipelineRun.id} className={cs.sampleName}>
-              {pipelineRun.sample_name}
-            </div>
-          ))}
+      <React.Fragment>
+        {admin && (
+          <div className={cs.adminDetails}>
+            ID: {bulkDownloadDetails.id}, run in:{" "}
+            {bulkDownloadDetails.execution_type}
+            {bulkDownloadDetails.log_url && (
+              <span>
+                ,{" "}
+                <ExternalLink
+                  className={cs.logUrl}
+                  href={bulkDownloadDetails.log_url}
+                >
+                  log url
+                </ExternalLink>
+              </span>
+            )}
+          </div>
+        )}
+        <div className={cs.details}>
+          <BulkDownloadSummary
+            downloadType={downloadType}
+            downloadSummary={this.getDownloadSummary(bulkDownloadDetails)}
+          />
+          <div className={cs.samplesHeader}>Samples in this download</div>
+          <div className={cs.samplesList}>
+            {bulkDownloadDetails.pipeline_runs.map(pipelineRun => (
+              <div key={pipelineRun.id} className={cs.sampleName}>
+                {pipelineRun.sample_name}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </React.Fragment>
     );
   };
 
@@ -88,5 +110,7 @@ BulkDownloadDetailsModal.propTypes = {
     id: PropTypes.number,
   }),
 };
+
+BulkDownloadDetailsModal.contextType = UserContext;
 
 export default BulkDownloadDetailsModal;

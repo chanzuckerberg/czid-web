@@ -33,7 +33,7 @@ class BulkDownloadsController < ApplicationController
         raise KICKOFF_FAILURE_HUMAN_READABLE
       end
 
-      if sample_ids.length > Integer(max_samples_allowed)
+      if sample_ids.length > Integer(max_samples_allowed) && !current_user.admin?
         raise BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
       end
 
@@ -87,8 +87,8 @@ class BulkDownloadsController < ApplicationController
       format.html
       format.json do
         render json: current_power.viewable_bulk_downloads
-                                  .includes(:pipeline_runs)
-                                  .map { |bulk_download| format_bulk_download(bulk_download) }
+                                  .includes(:pipeline_runs, :user)
+                                  .map { |bulk_download| format_bulk_download(bulk_download, admin: current_user.admin?) }
       end
     end
   end
@@ -98,7 +98,7 @@ class BulkDownloadsController < ApplicationController
     bulk_download = viewable_bulk_download_from_params
 
     render json: {
-      bulk_download: format_bulk_download(bulk_download, true),
+      bulk_download: format_bulk_download(bulk_download, with_pipeline_runs: true, admin: current_user.admin?),
       download_type: BulkDownloadTypesHelper.bulk_download_type(bulk_download.download_type),
     }
   rescue ActiveRecord::RecordNotFound
