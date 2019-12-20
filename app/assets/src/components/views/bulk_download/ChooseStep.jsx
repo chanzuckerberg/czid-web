@@ -280,11 +280,11 @@ class ChooseStep extends React.Component {
       case "taxa_with_reads":
         dropdownOptions = [
           {
-            text: "All Taxon",
+            text: "All Taxa",
             value: "all",
             customNode: (
               <div className={cs.taxaWithReadsOption}>
-                <div className={cs.taxonName}>All taxon</div>
+                <div className={cs.taxonName}>All taxa</div>
                 <div className={cs.fill} />
                 <div className={cs.sampleCount}>{selectedSampleIds.size}</div>
               </div>
@@ -295,8 +295,8 @@ class ChooseStep extends React.Component {
           ...(this.sortTaxaWithReadsOptions(taxaWithReadsOptions) || []),
         ];
 
-        placeholder = "Select taxa";
-        menuLabel = "Select taxa";
+        placeholder = "Select taxon";
+        menuLabel = "Select taxon";
         showNoResultsMessage = true;
         search = true;
         onFilterChange = this.handleTaxaWithReadsSelectFilterChange;
@@ -305,7 +305,7 @@ class ChooseStep extends React.Component {
 
         optionsHeader = (
           <div className={cs.taxaWithReadsOptionsHeader}>
-            <div className={cs.header}>Taxa</div>
+            <div className={cs.header}>Taxon</div>
             <div className={cs.fill} />
             <div className={cs.header}>Samples</div>
           </div>

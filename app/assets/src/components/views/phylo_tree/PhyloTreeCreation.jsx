@@ -54,7 +54,7 @@ class PhyloTreeCreation extends React.Component {
     this.projectSamplesHeaders = {
       name: "Name",
       host: "Host",
-      tissue: "Tissue",
+      tissue: "Sample Type",
       location: "Location",
       date: "Date",
       reads: "Read Count\n(NT | NR)",
@@ -64,7 +64,7 @@ class PhyloTreeCreation extends React.Component {
       name: "Name",
       project: "Project",
       host: "Host",
-      tissue: "Tissue",
+      tissue: "Sample Type",
       location: "Location",
       date: "Date",
       reads: "Read Count\n(NT | NR)",

@@ -332,11 +332,12 @@ export default class SampleViewV2 extends React.Component {
 
     // taxon's category was selected and its subcategories were not excluded
     if (
-      categories.has(row.category) &&
-      !some(
-        subcategory => subcategories.has(subcategory),
-        row.subcategories || []
-      )
+      (categories.has(row.category) &&
+        !some(
+          subcategory => subcategories.has(subcategory),
+          row.subcategories || []
+        )) ||
+      (categories.has("uncategorized") && row.category === null)
     ) {
       return true;
     }
@@ -345,7 +346,27 @@ export default class SampleViewV2 extends React.Component {
   };
 
   getTaxonMetricValue = (row, metric) => {
-    return get(metric.split(":"), row);
+    let parsedMetric = metric.split(":");
+    let parsedValue = get(parsedMetric, row);
+
+    // Contigs/contig_reads are stored in the format {length of contig: count},
+    // so some extra processing is needed to extract the value.
+    if (parsedMetric.includes("contigs") && parsedValue) {
+      // To get the total number of contigs, sum up all the values (counts) in the object.
+      parsedValue = sum(Object.values(parsedValue));
+    } else if (parsedMetric.includes("contig_reads")) {
+      // If the metric is contig_reads, need to extract the contig data.
+      parsedValue = get([parsedMetric[0], "contigs"], row);
+      // To get the total number of contig reads, multiply the keys (length of each contig) by
+      // the values (number of times a contig of that length appears) and sum them all up.
+      // Default to 0 if there are no contigs.
+      parsedValue = parsedValue
+        ? sum(
+            Object.entries(parsedValue).map(([reads, count]) => reads * count)
+          )
+        : 0;
+    }
+    return parsedValue;
   };
 
   filterThresholds = ({ row, thresholds }) => {
@@ -357,9 +378,9 @@ export default class SampleViewV2 extends React.Component {
 
         switch (operator) {
           case ">=":
-            return parsedThresholdValue < parsedValue;
+            return parsedThresholdValue <= parsedValue;
           case "<=":
-            return parsedThresholdValue > parsedValue;
+            return parsedThresholdValue >= parsedValue;
         }
         return true;
       }, thresholds);
@@ -910,7 +931,9 @@ export default class SampleViewV2 extends React.Component {
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
         linkText = "View Pipeline Visualization";
-        link = `/samples/${sample.id}/pipeline_viz/${pipelineRun.pipeline_version}`;
+        link = `/samples/${sample.id}/pipeline_viz/${
+          pipelineRun.pipeline_version
+        }`;
       }
     } else {
       // Some kind of error or warning has occurred.
@@ -964,8 +987,8 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
-    // reportReady is true if the pipeline run is report-ready (might still be running Experimental,
-    // but at least taxon_counts has been loaded).
+    // reportReady is true if the pipeline run hasn't failed and is report-ready
+    // (might still be running Experimental, but at least taxon_counts has been loaded).
     // pipelineRunReportAvailable was renamed to reportReady, but we check both in case the old variable
     // name was cached.
     // TODO(julie): remove pipelineRunReportAvailable during cleanup.
@@ -1027,19 +1050,20 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
           )}
-          {view == "tree" && (
-            <div>
-              <TaxonTreeVis
-                lineage={lineageData}
-                metric={selectedOptions.metric}
-                nameType={selectedOptions.nameType}
-                onTaxonClick={this.handleTaxonClick}
-                sample={sample}
-                taxa={filteredReportData}
-                useReportV2Format={true}
-              />
-            </div>
-          )}
+          {view == "tree" &&
+            filteredReportData.length > 0 && (
+              <div>
+                <TaxonTreeVis
+                  lineage={lineageData}
+                  metric={selectedOptions.metric}
+                  nameType={selectedOptions.nameType}
+                  onTaxonClick={this.handleTaxonClick}
+                  sample={sample}
+                  taxa={filteredReportData}
+                  useReportV2Format={true}
+                />
+              </div>
+            )}
         </div>
       );
     } else {
@@ -1108,9 +1132,8 @@ export default class SampleViewV2 extends React.Component {
             </UserContext.Consumer>
           </div>
           {currentTab === "Report" && this.renderReport()}
-          {currentTab === "Antimicrobial Resistance" && amrData && (
-            <AMRView amr={amrData} />
-          )}
+          {currentTab === "Antimicrobial Resistance" &&
+            amrData && <AMRView amr={amrData} />}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar

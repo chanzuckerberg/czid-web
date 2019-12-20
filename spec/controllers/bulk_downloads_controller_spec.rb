@@ -407,16 +407,27 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
       end
 
+      let(:mock_file_size) { 1000 }
+
       it "should properly update bulk download on success" do
+        expect(S3_CLIENT).to receive(:head_object).exactly(1).times.and_return(
+          instance_double(Aws::S3::Types::HeadObjectOutput, content_length: mock_file_size)
+        )
+
         get :success_with_token, params: { format: "json", id: @bulk_download_joe.id, access_token: @bulk_download_joe.access_token }
 
         expect(response).to have_http_status(200)
 
         expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_SUCCESS)
         expect(BulkDownload.find(@bulk_download_joe.id).access_token).to eq(nil)
+        expect(BulkDownload.find(@bulk_download_joe.id).output_file_size).to eq(mock_file_size)
       end
 
       it "should update error message if error_type is FailedSrcUrlError" do
+        expect(S3_CLIENT).to receive(:head_object).exactly(1).times.and_return(
+          instance_double(Aws::S3::Types::HeadObjectOutput, content_length: 1000)
+        )
+
         get :success_with_token, params: {
           format: "json",
           id: @bulk_download_joe.id,
@@ -430,6 +441,26 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_SUCCESS)
         expect(BulkDownload.find(@bulk_download_joe.id).error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 2)
         expect(BulkDownload.find(@bulk_download_joe.id).access_token).to eq(nil)
+        expect(BulkDownload.find(@bulk_download_joe.id).output_file_size).to eq(mock_file_size)
+      end
+
+      it "should be resilient to s3 HEAD failures" do
+        expect(S3_CLIENT).to receive(:head_object).exactly(1).times.and_raise("Error")
+
+        get :success_with_token, params: {
+          format: "json",
+          id: @bulk_download_joe.id,
+          access_token: @bulk_download_joe.access_token,
+          error_type: "FailedSrcUrlError",
+          error_data: ["s3://path-to-file-one", "s3://path-to-file-two"],
+        }
+
+        expect(response).to have_http_status(200)
+
+        expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_SUCCESS)
+        expect(BulkDownload.find(@bulk_download_joe.id).error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 2)
+        expect(BulkDownload.find(@bulk_download_joe.id).access_token).to eq(nil)
+        expect(BulkDownload.find(@bulk_download_joe.id).output_file_size).to eq(nil)
       end
     end
 

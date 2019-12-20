@@ -37,7 +37,7 @@ module BulkDownloadTypesHelper
     {
       type: COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
       display_name: "Combined Sample Taxon Results",
-      description: "The value of a particular metric (e.g. total reads, rPM) for all taxons in all selected samples, in a single data table",
+      description: "The value of a particular metric (e.g. total reads, rPM) for all taxa in all selected samples, in a single data table",
       category: "report",
       fields: [
         {
@@ -72,7 +72,7 @@ module BulkDownloadTypesHelper
       category: "raw",
       fields: [
         {
-          display_name: "Taxa",
+          display_name: "Taxon",
           type: "taxa_with_reads",
         },
         {
@@ -90,7 +90,7 @@ module BulkDownloadTypesHelper
       category: "raw",
       fields: [
         {
-          display_name: "Taxa",
+          display_name: "Taxon",
           type: "taxa_with_contigs",
         },
       ],

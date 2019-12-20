@@ -3,6 +3,8 @@ require 'rails_helper'
 WebMock.allow_net_connect!
 
 RSpec.describe ProjectsController, type: :controller do
+  KLEBSIELLA_TAX_ID = 2
+
   create_users
 
   # Admin specific behavior
@@ -574,7 +576,6 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects = []
             create(:project, users: [@user])
             create(:project, :with_sample, users: [@user])
-            KLEBSIELLA_TAX_ID = 2
             create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsormidium", nt: 10, tax_id: 1 }], job_status: "CHECKED" }] }])
             create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 0, tax_id: KLEBSIELLA_TAX_ID }], job_status: "CHECKED" }] }])
             expected_projects << create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 10, tax_id: KLEBSIELLA_TAX_ID }], job_status: "CHECKED" }] }])

@@ -445,7 +445,9 @@ describe BulkDownload, type: :model do
   end
 
   context "#generate_download_file" do
-    before do
+    let(:mock_file_size) { 1000 }
+
+    before do |example|
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
       @alignment_config = create(:alignment_config, lineage_version: 3)
@@ -453,6 +455,11 @@ describe BulkDownload, type: :model do
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12", alignment_config_id: @alignment_config.id }])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12", alignment_config_id: @alignment_config.id }])
+      unless example.metadata[:skip_s3_client_setup]
+        allow(S3_CLIENT).to receive(:head_object).and_return(
+          instance_double(Aws::S3::Types::HeadObjectOutput, content_length: mock_file_size)
+        )
+      end
     end
 
     def create_bulk_download(type, params)
@@ -526,6 +533,7 @@ describe BulkDownload, type: :model do
       expect(bulk_download).to receive(:update).with(progress: 0.5).exactly(1).times
       expect(bulk_download).to receive(:update).with(progress: 1).exactly(1).times
       expect(bulk_download).to receive(:update).with(status: BulkDownload::STATUS_SUCCESS).exactly(1).times
+      expect(bulk_download).to receive(:update).with(output_file_size: mock_file_size).exactly(1).times
 
       bulk_download.generate_download_file
     end
@@ -742,6 +750,40 @@ describe BulkDownload, type: :model do
 
       expect(bulk_download.status).to eq(BulkDownload::STATUS_ERROR)
     end
+
+    it "correctly fetches output file size after download completes" do
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE, {})
+
+      expect(bulk_download).to receive(:format_samples).exactly(1).times
+      expect(bulk_download).to receive(:generate_sample_list_csv).exactly(1).times.and_return("mock_sample_overview_csv")
+
+      add_s3_tar_writer_expectations(
+        "sample_overviews.csv" => "mock_sample_overview_csv"
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+      expect(bulk_download.output_file_size).to eq(mock_file_size)
+    end
+
+    it "correctly handles case where fetching output file size fails", :skip_s3_client_setup do
+      allow(S3_CLIENT).to receive(:head_object).and_raise("mock_error")
+
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE, {})
+
+      expect(bulk_download).to receive(:format_samples).exactly(1).times
+      expect(bulk_download).to receive(:generate_sample_list_csv).exactly(1).times.and_return("mock_sample_overview_csv")
+
+      add_s3_tar_writer_expectations(
+        "sample_overviews.csv" => "mock_sample_overview_csv"
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+      expect(bulk_download.output_file_size).to eq(nil)
+    end
   end
 
   context "#execution_type" do
@@ -847,6 +889,81 @@ describe BulkDownload, type: :model do
       expect(bulk_download).to receive(:kickoff_resque_task).exactly(1).times
 
       bulk_download.kickoff
+    end
+  end
+
+  context "#download_display_name" do
+    before do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe], name: "Test Project")
+      @sample_one = create(:sample, project: @project, name: "Test Sample One",
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+    end
+
+    it "returns the download type display name in basic case" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        pipeline_run_ids: [@sample_one.first_pipeline_run.id],
+        download_type: BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+      )
+
+      expect(bulk_download.download_display_name).to eq("Sample Overviews")
+    end
+
+    it "includes taxon for single-taxon reads non host download" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        pipeline_run_ids: [@sample_one.first_pipeline_run.id],
+        download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE,
+        params: {
+          "taxa_with_reads" => {
+            "value" => 100,
+            "displayName" => "Mock Taxon",
+          },
+        }
+      )
+
+      expect(bulk_download.download_display_name).to eq("Reads (Non-host) - Mock Taxon")
+    end
+
+    it "includes taxon for single-taxon contigs non host download" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        pipeline_run_ids: [@sample_one.first_pipeline_run.id],
+        download_type: BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,
+        params: {
+          "taxa_with_contigs" => {
+            "value" => 200,
+            "displayName" => "Mock Taxon 2",
+          },
+        }
+      )
+
+      expect(bulk_download.download_display_name).to eq("Contigs (Non-host) - Mock Taxon 2")
+    end
+
+    it "returns expected display name for all-taxon contigs non host download" do
+      bulk_download = create(
+        :bulk_download,
+        user: @joe,
+        pipeline_run_ids: [@sample_one.first_pipeline_run.id],
+        download_type: BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,
+        params: {
+          "taxa_with_contigs" => {
+            "value" => "all",
+            "displayName" => "All Taxon",
+          },
+          "file_format" => {
+            "value" => ".fastq",
+            "displayName" => ".fastq",
+          },
+        }
+      )
+
+      expect(bulk_download.download_display_name).to eq("Contigs (Non-host)")
     end
   end
 end
