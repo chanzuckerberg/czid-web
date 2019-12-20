@@ -9,6 +9,8 @@
   justify-content: flex-end;
   text-align: right;
   margin-right: $space-m;
+  // Push all the headers down except nt/nr selector so the text is aligned.
+  margin-top: $space-m;
 }
 
 .sortedHeader {
@@ -51,6 +53,8 @@
   color: $darkest-grey;
   text-align: center;
   cursor: pointer;
+  // Don't push down the text so "NR" is aligned with the other headers.
+  margin-top: 0;
 }
 
 .cell {
