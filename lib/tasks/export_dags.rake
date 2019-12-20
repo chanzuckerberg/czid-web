@@ -16,7 +16,7 @@ task :export_dags, [:sample_id] => :environment do |_, args|
   end
 
   if args.sample_id?
-    Sample.where(id: args.sample_id).first.pipeline_runs.each do |pipeline_run|
+    Sample.find_by(id: args.sample_id).pipeline_runs.each do |pipeline_run|
       PipelineRunStage::STAGE_INFO.each do |step_number, stage_info|
         puts "Exporting DAG #{step_number} for pipeline run #{pipeline_run.id} (sample #{pipeline_run.sample.id})"
         exporter = DAGExporter.new(
