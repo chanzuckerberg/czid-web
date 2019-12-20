@@ -7,7 +7,8 @@ task :export_dags, [:sample_id] => :environment do |_, args|
       puts "Exported #{dag_name}.json"
     end
 
-    def aegea_batch_submit_command(*) end
+    def aegea_batch_submit_command(*)
+    end
 
     def extract_dag
       send(job_command_func)
