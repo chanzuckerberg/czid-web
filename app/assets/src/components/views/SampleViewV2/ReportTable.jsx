@@ -12,7 +12,8 @@ import {
   pipelineVersionHasCoverageViz,
 } from "~/components/utils/sample";
 import { UserContext } from "~/components/common/UserContext";
-import InsightIcon from "~ui/icons/InsightIcon";
+import BasicPopup from "~/components/BasicPopup";
+import ReportInsightIcon from "../report/ReportInsightIcon";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import PathogenPreview from "~/components/views/report/PathogenPreview";
 import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
@@ -64,7 +65,7 @@ class ReportTable extends React.Component {
         flexGrow: 1,
         headerClassName: cs.taxonHeader,
         label: "Taxon",
-        width: 170,
+        minWidth: 300,
         sortFunction: ({ data, sortDirection }) =>
           this.nestedSortFunction({
             data,
@@ -104,7 +105,7 @@ class ReportTable extends React.Component {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 60,
+        width: 65,
       },
       {
         cellDataGetter: ({ rowData }) =>
@@ -227,7 +228,7 @@ class ReportTable extends React.Component {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 60,
+        width: 65,
       },
       {
         dataKey: "ntnrSelector",
@@ -242,7 +243,9 @@ class ReportTable extends React.Component {
   renderAggregateScore = ({ cellData, rowData }) => {
     return (
       <div className={cs.annotatedData}>
-        <div className={cs.icon}>{rowData.highlighted && <InsightIcon />}</div>
+        <div className={cs.icon}>
+          {rowData.highlighted && <ReportInsightIcon />}
+        </div>
         <div className={cs.data}>
           {TableRenderers.formatNumberWithCommas(Number(cellData).toFixed(0))}
         </div>
@@ -339,25 +342,39 @@ class ReportTable extends React.Component {
   };
 
   renderNtNrSelector = () => {
-    return this.renderNtNrStack({
-      cellData: ["NT", "NR"],
-      onClick: [
-        withAnalytics(
-          () => this.handleNtNrChange("nt"),
-          "ReportTable_count-type_clicked",
-          {
-            countType: "nt",
-          }
-        ),
-        withAnalytics(
-          () => this.handleNtNrChange("nr"),
-          "ReportTable_count-type_clicked",
-          {
-            countType: "nr",
-          }
-        ),
-      ],
-    });
+    let selector = (
+      <div>
+        {this.renderNtNrStack({
+          cellData: ["NT", "NR"],
+          onClick: [
+            withAnalytics(
+              () => this.handleNtNrChange("nt"),
+              "ReportTable_count-type_clicked",
+              {
+                countType: "nt",
+              }
+            ),
+            withAnalytics(
+              () => this.handleNtNrChange("nr"),
+              "ReportTable_count-type_clicked",
+              {
+                countType: "nr",
+              }
+            ),
+          ],
+        })}
+      </div>
+    );
+    return (
+      <BasicPopup
+        trigger={selector}
+        position="top right"
+        content="Switch count type"
+        inverted
+        basic={false}
+        size="small"
+      />
+    );
   };
 
   renderNtNrStack = ({ cellData, onClick }) => {
@@ -682,7 +699,7 @@ class ReportTable extends React.Component {
 ReportTable.defaultProps = {
   data: [],
   initialDbType: "nt",
-  rowHeight: 55,
+  rowHeight: 54,
 };
 
 ReportTable.propTypes = {
