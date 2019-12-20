@@ -1,4 +1,4 @@
-task :export_dags, [:sample_id] => :environment do |t, args|
+task :export_dags, [:sample_id] => :environment do |_, args|
   class DAGExporter < PipelineRunStage
     def upload_dag_json_and_return_job_command(dag_json, *)
       File.open("#{dag_name}.json", "w") do |f|
@@ -7,10 +7,9 @@ task :export_dags, [:sample_id] => :environment do |t, args|
       puts "Exported #{dag_name}.json"
     end
 
-    def aegea_batch_submit_command(*)
-    end
+    def aegea_batch_submit_command(*) end
 
-    def extract_dag()
+    def extract_dag
       send(job_command_func)
     end
   end
@@ -25,10 +24,10 @@ task :export_dags, [:sample_id] => :environment do |t, args|
           job_command_func: stage_info[:job_command_func],
           pipeline_run: pipeline_run
         )
-        exporter.extract_dag()
+        exporter.extract_dag
       end
     end
   else
-    puts "Usage: rake export_dags[12345] (where 12345 is the sample ID)"
+    puts 'Usage: rake export_dags[12345] (where 12345 is the sample ID)'
   end
 end
