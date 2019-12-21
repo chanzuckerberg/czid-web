@@ -1,0 +1,27 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.viewHeader {
+  margin-top: $space-xl;
+  margin-bottom: $space-xl;
+}
+
+.error {
+  color: $error;
+  margin-bottom: $space-s;
+}
+
+.noResultsMessage {
+  color: $medium-grey;
+}
+
+.category {
+  .title {
+    @include font-header-m;
+  }
+
+  .field {
+    padding: $space-s;
+  }
+}

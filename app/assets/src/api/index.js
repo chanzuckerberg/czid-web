@@ -383,6 +383,15 @@ const uploadedByCurrentUser = async sampleIds => {
 
 const getHeatmapMetrics = () => get("/visualizations/heatmap_metrics.json");
 
+const getUserSettingMetadataByCategory = () =>
+  get("/user_settings/metadata_by_category");
+
+const updateUserSetting = (key, value) =>
+  postWithCSRF("user_settings/update", {
+    key,
+    value,
+  });
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -414,6 +423,7 @@ export {
   getSummaryContigCounts,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
+  getUserSettingMetadataByCategory,
   getVisualizations,
   markSampleUploaded,
   saveProjectDescription,
@@ -430,4 +440,5 @@ export {
   getTaxaWithReadsSuggestions,
   getTaxaWithContigsSuggestions,
   uploadedByCurrentUser,
+  updateUserSetting,
 };

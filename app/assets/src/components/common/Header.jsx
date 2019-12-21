@@ -223,7 +223,7 @@ const UserMenuDropDown = ({
     allowedFeatures.includes("bulk_downloads") &&
       userDropdownItems.push(
         <BareDropdown.Item
-          key="1"
+          key="downloads"
           text={
             <a
               className={cs.option}
@@ -238,9 +238,29 @@ const UserMenuDropDown = ({
         />
       );
 
+    adminUser &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="user_settings"
+          text={
+            <a
+              className={cs.option}
+              href="/user_settings"
+              onClick={() =>
+                logAnalyticsEvent(
+                  "Header_dropdown-user-settings-option_clicked"
+                )
+              }
+            >
+              Settings
+            </a>
+          }
+        />
+      );
+
     userDropdownItems.push(
       <BareDropdown.Item
-        key="2"
+        key="help"
         text={
           <ExternalLink
             className={cs.option}
@@ -254,7 +274,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="3"
+        key="feedback"
         text={
           <a
             className={cs.option}
@@ -272,7 +292,7 @@ const UserMenuDropDown = ({
     adminUser &&
       userDropdownItems.push(
         <BareDropdown.Item
-          key="4"
+          key="create_user"
           text={
             <a className={cs.option} href="/users/new">
               Create User
@@ -282,9 +302,9 @@ const UserMenuDropDown = ({
       );
 
     userDropdownItems.push(
-      <BareDropdown.Divider key="5" />,
+      <BareDropdown.Divider key="divider_one" />,
       <BareDropdown.Item
-        key="6"
+        key="terms_of_service"
         text={
           <a
             className={cs.option}
@@ -300,7 +320,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="7"
+        key="privacy_policy"
         text={
           <a
             className={cs.option}
@@ -315,9 +335,9 @@ const UserMenuDropDown = ({
           </a>
         }
       />,
-      <BareDropdown.Divider key="8" />,
+      <BareDropdown.Divider key="divider_two" />,
       <BareDropdown.Item
-        key="9"
+        key="logout"
         text="Logout"
         onClick={withAnalytics(
           signOut,

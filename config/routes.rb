@@ -143,6 +143,10 @@ Rails.application.routes.draw do
   post 'bulk_downloads/:id/error/:access_token', to: 'bulk_downloads#error_with_token', as: :bulk_downloads_error
   post 'bulk_downloads/:id/progress/:access_token', to: 'bulk_downloads#progress_with_token', as: :bulk_downloads_progress
 
+  get 'user_settings/metadata_by_category', to: 'user_settings#metadata_by_category'
+  post 'user_settings/update', to: 'user_settings#update'
+  get 'user_settings', to: 'user_settings#index'
+
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 

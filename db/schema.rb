@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_191_216_200_333) do
+ActiveRecord::Schema.define(version: 20_191_218_220_321) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -553,6 +553,14 @@ ActiveRecord::Schema.define(version: 20_191_216_200_333) do
     t.integer "top_n"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "user_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "user_id"
+    t.string "key", comment: "The name of the user setting, e.g. receives_bulk_download_success_emails"
+    t.string "value", comment: "The value of the user setting, e.g. true. The schema of this value (e.g. boolean, number) is determined by the hard-coded data type associated with the key."
+    t.index ["user_id", "key"], name: "index_user_settings_on_user_id_and_key", unique: true
+    t.index ["user_id"], name: "index_user_settings_on_user_id"
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
