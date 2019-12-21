@@ -64,6 +64,7 @@ module BulkDownloadTypesHelper
       description: "Host gene count outputs from STAR",
       category: "report",
       execution_type: ECS_EXECUTION_TYPE,
+      admin_only: true,
     },
     {
       type: READS_NON_HOST_BULK_DOWNLOAD_TYPE,
@@ -109,6 +110,7 @@ module BulkDownloadTypesHelper
       description: "Original files you submitted to IDseq",
       category: "raw",
       execution_type: ECS_EXECUTION_TYPE,
+      uploader_only: true,
     },
   ].freeze
 

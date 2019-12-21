@@ -14,6 +14,7 @@ import {
 import cx from "classnames";
 import memoize from "memoize-one";
 
+import StatusLabel from "~ui/labels/StatusLabel";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
@@ -25,6 +26,7 @@ import {
   getHeatmapMetrics,
 } from "~/api";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { UserContext } from "~/components/common/UserContext";
 
 import TaxonContigSelect from "./TaxonContigSelect";
 import cs from "./choose_step.scss";
@@ -388,17 +390,21 @@ class ChooseStep extends React.Component {
   renderDownloadType = downloadType => {
     const { selectedDownloadTypeName, onSelect } = this.props;
     const { allSamplesUploadedByCurrentUser } = this.state;
+    const { admin } = this.context || {};
+
     const selected = selectedDownloadTypeName === downloadType.type;
     let disabled = false;
     let disabledMessage = "";
 
     if (
-      downloadType.type === "host_gene_counts" &&
-      !allSamplesUploadedByCurrentUser
+      downloadType.uploader_only &&
+      !allSamplesUploadedByCurrentUser &&
+      !admin
     ) {
       disabled = true;
-      disabledMessage =
-        "To download host gene counts, you must be the original uploader of all selected samples.";
+      disabledMessage = `To download ${
+        downloadType.display_name
+      }, you must be the original uploader of all selected samples.`;
     }
 
     const downloadTypeElement = (
@@ -417,7 +423,12 @@ class ChooseStep extends React.Component {
           selected={selected}
         />
         <div className={cs.content}>
-          <div className={cs.name}>{downloadType.display_name}</div>
+          <div className={cs.name}>
+            {downloadType.display_name}
+            {downloadType.admin_only && (
+              <StatusLabel inline status="Admin Only" />
+            )}
+          </div>
           <div className={cs.description}>{downloadType.description}</div>
           {downloadType.fields &&
             selected && (
@@ -505,5 +516,7 @@ ChooseStep.propTypes = {
   onContinue: PropTypes.func.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };
+
+ChooseStep.contextType = UserContext;
 
 export default ChooseStep;

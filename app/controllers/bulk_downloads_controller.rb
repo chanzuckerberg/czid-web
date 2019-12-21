@@ -15,7 +15,16 @@ class BulkDownloadsController < ApplicationController
 
   # GET /bulk_downloads/types
   def types
-    render json: BulkDownloadTypesHelper.bulk_download_types
+    download_types = BulkDownloadTypesHelper.bulk_download_types
+
+    # Filter out all types that are admin-only.
+    unless current_user.admin?
+      download_types = download_types.reject do |type|
+        type[:admin_only]
+      end
+    end
+
+    render json: download_types
   end
 
   # POST /bulk_downloads
@@ -23,27 +32,7 @@ class BulkDownloadsController < ApplicationController
     create_params = bulk_download_create_params
     # Convert sample ids to pipeline run ids.
     begin
-      sample_ids = create_params[:sample_ids]
-
-      # Max samples check.
-      max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
-
-      # Max samples should be string containing an integer, but just in case.
-      if max_samples_allowed.nil?
-        raise KICKOFF_FAILURE_HUMAN_READABLE
-      end
-
-      if sample_ids.length > Integer(max_samples_allowed) && !current_user.admin?
-        raise BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
-      end
-
-      # Access control check.
-      viewable_samples = current_power.viewable_samples.where(id: sample_ids)
-      if viewable_samples.length != sample_ids.length
-        raise BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR
-      end
-
-      pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(viewable_samples)
+      pipeline_run_ids = validate_bulk_download_create_params(create_params, current_user)
     rescue => e
       # Throw an error if any sample doesn't have a valid pipeline run.
       # The user should never see this error, because the validation step should catch any issues.
