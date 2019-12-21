@@ -35,6 +35,7 @@ module ApplicationHelper
       admin: current_user ? current_user.role == 1 : false,
       allowedFeatures: current_user && current_user.allowed_feature_list,
       maxSamplesBulkDownload: get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD),
+      userSettings: current_user && current_user.viewable_user_settings,
     }
   end
 
