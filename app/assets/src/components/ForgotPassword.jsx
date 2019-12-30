@@ -12,6 +12,12 @@ const ForgotPassword = props => {
             <div className="form-title">Forgot your password?</div>
           </div>
           <div className="row content-wrapper">
+            <div>
+              Please enter your email address. We will send you an email to
+              reset your password.
+            </div>
+          </div>
+          <div className="row content-wrapper">
             <div className="input-field">
               <i className="sample fa fa-envelope" aria-hidden="true" />
               <input type="hidden" name="authenticity_token" value={csrf} />
@@ -26,7 +32,7 @@ const ForgotPassword = props => {
             </div>
           </div>
           <button type="submit" className="center-align col s12 login-wrapper">
-            Recover password
+            Send Email
           </button>
         </form>
       </div>
