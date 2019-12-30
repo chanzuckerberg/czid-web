@@ -44,6 +44,8 @@ class UsersController < ApplicationController
         format.json { render json: @user.errors.full_messages, status: :unprocessable_entity }
       end
     end
+  rescue => err
+    render json: [err], status: :unprocessable_entity
   end
 
   # GET /users/1/edit

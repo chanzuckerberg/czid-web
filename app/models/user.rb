@@ -23,7 +23,9 @@ class User < ApplicationRecord
   has_many :bulk_downloads, dependent: :destroy
   has_many :user_settings, dependent: :destroy
 
-  validates :email, presence: true, uniqueness: true
+  validates :email, presence: true, uniqueness: true, format: {
+    with: /\A(?~[A-Z])\z/, message: "may not contain capital letters",
+  }
   validates :name, presence: true, format: {
     # See https://www.ascii-code.com/. These were the ranges that captured the
     # common accented chars I knew from experience, leaving out pure symbols.
