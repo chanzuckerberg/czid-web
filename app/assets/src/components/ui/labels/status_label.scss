@@ -28,4 +28,8 @@
     background-color: $warning-bg;
     color: $warning;
   }
+
+  &.inline {
+    display: inline-block;
+  }
 }
