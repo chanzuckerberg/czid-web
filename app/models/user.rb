@@ -23,6 +23,8 @@ class User < ApplicationRecord
   has_many :bulk_downloads, dependent: :destroy
   has_many :user_settings, dependent: :destroy
 
+  # Auth0 converts all emails to lowercase. Let's raise at creation time instead
+  # of automatically converting to all lowercase.
   validates :email, presence: true, uniqueness: true, format: {
     with: /\A(?~[A-Z])\z/, message: "may not contain capital letters",
   }
