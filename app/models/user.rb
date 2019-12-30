@@ -23,7 +23,7 @@ class User < ApplicationRecord
   has_many :bulk_downloads, dependent: :destroy
   has_many :user_settings, dependent: :destroy
 
-  validates :email, presence: true
+  validates :email, presence: true, uniqueness: true
   validates :name, presence: true, format: {
     # See https://www.ascii-code.com/. These were the ranges that captured the
     # common accented chars I knew from experience, leaving out pure symbols.
