@@ -23,7 +23,7 @@ class ToolbarIcon extends React.Component {
     const iconWrapper = (
       <div
         className={cx(className, cs.iconWrapper, disabled && cs.disabled)}
-        onClick={onClick}
+        onClick={disabled ? undefined : onClick}
       >
         {icon}
       </div>

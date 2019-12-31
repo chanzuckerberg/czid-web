@@ -39,6 +39,7 @@
     .sampleName {
       @include font-body-xs;
       padding: $space-xxxs 0;
+      word-break: break-word;
     }
   }
 }
