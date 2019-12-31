@@ -23,7 +23,11 @@ class User < ApplicationRecord
   has_many :bulk_downloads, dependent: :destroy
   has_many :user_settings, dependent: :destroy
 
-  validates :email, presence: true
+  validates :email, presence: true, uniqueness: true, format: {
+    # Auth0 converts all emails to lowercase. Let's raise this at creation time
+    # instead of automatically lower-casing.
+    with: /\A(?~[A-Z])\z/, message: "may not contain capital letters",
+  }
   validates :name, presence: true, format: {
     # See https://www.ascii-code.com/. These were the ranges that captured the
     # common accented chars I knew from experience, leaving out pure symbols.
