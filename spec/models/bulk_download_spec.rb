@@ -8,12 +8,12 @@ describe BulkDownload, type: :model do
     end
 
     it "returns correct success url for prod" do
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net"))
       expect(@bulk_download.success_url).to eq("https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}")
     end
 
     it "returns correct success url for staging" do
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://staging.idseq.net")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://staging.idseq.net"))
       expect(@bulk_download.success_url).to eq("https://staging.idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}")
     end
 
@@ -29,12 +29,12 @@ describe BulkDownload, type: :model do
     end
 
     it "returns correct error url for prod" do
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net"))
       expect(@bulk_download.error_url).to eq("https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}")
     end
 
     it "returns correct error url for staging" do
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://staging.idseq.net")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://staging.idseq.net"))
       expect(@bulk_download.error_url).to eq("https://staging.idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}")
     end
 
@@ -52,12 +52,12 @@ describe BulkDownload, type: :model do
     end
 
     it "returns correct progress url for prod" do
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net"))
       expect(@bulk_download.progress_url).to eq("https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}")
     end
 
     it "returns correct progress url for staging" do
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://staging.idseq.net")
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://staging.idseq.net"))
       expect(@bulk_download.progress_url).to eq("https://staging.idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}")
     end
 
@@ -80,6 +80,9 @@ describe BulkDownload, type: :model do
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+
+      stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net",
+                                          "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
     end
 
     it "returns the correct task command for original_input_file download type" do
@@ -87,8 +90,6 @@ describe BulkDownload, type: :model do
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ])
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
       task_command = [
         "python",
@@ -121,9 +122,6 @@ describe BulkDownload, type: :model do
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ])
-
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
       task_command = [
         "python",
@@ -158,9 +156,6 @@ describe BulkDownload, type: :model do
                                 },
                               })
 
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
-
       task_command = [
         "python",
         "s3_tar_writer.py",
@@ -194,9 +189,6 @@ describe BulkDownload, type: :model do
                                 },
                               })
 
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
-
       task_command = [
         "python",
         "s3_tar_writer.py",
@@ -228,9 +220,6 @@ describe BulkDownload, type: :model do
                                 @sample_two.first_pipeline_run.id,
                               ])
 
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
-
       task_command = [
         "python",
         "s3_tar_writer.py",
@@ -258,9 +247,6 @@ describe BulkDownload, type: :model do
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ])
-
-      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
       task_command = [
         "python",
@@ -291,29 +277,11 @@ describe BulkDownload, type: :model do
       @bulk_download = create(:bulk_download, user: @joe)
     end
 
-    let(:mock_shell_command) { "MOCK\\ SHELL\\ COMMAND" }
     let(:mock_executable_file_path) { "/tmp/mock_path" }
 
     it "returns the correct aegea ecs submit command" do
       allow(Rails).to receive(:env).and_return("prod")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
-
-      task_command = [
-        "aegea", "ecs", "run", "--command=#{mock_shell_command}",
-        "--task-role", "idseq-downloads-prod",
-        "--task-name", BulkDownload::ECS_TASK_NAME,
-        "--ecr-image", "idseq-s3-tar-writer:latest",
-        "--fargate-cpu", "4096",
-        "--fargate-memory", "8192",
-        "--cluster", "idseq-fargate-tasks-prod",
-      ]
-
-      expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
-    end
-
-    it "uses executable file path correctly" do
-      allow(Rails).to receive(:env).and_return("prod")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
 
       task_command = [
         "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
@@ -332,55 +300,56 @@ describe BulkDownload, type: :model do
     it "allows override of ecr image via AppConfig" do
       AppConfigHelper.set_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE, "idseq-s3-tar-writer:v1.0")
       allow(Rails).to receive(:env).and_return("prod")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
 
       task_command = [
-        "aegea", "ecs", "run", "--command=#{mock_shell_command}",
+        "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
         "--task-role", "idseq-downloads-prod",
         "--task-name", BulkDownload::ECS_TASK_NAME,
         "--ecr-image", "idseq-s3-tar-writer:v1.0",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
         "--cluster", "idseq-fargate-tasks-prod",
+        "--staging-s3-bucket", "aegea-ecs-execute-prod",
       ]
 
-      expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
+      expect(@bulk_download.aegea_ecs_submit_command(executable_file_path: mock_executable_file_path)).to eq(task_command)
     end
 
     it "outputs correct command in staging" do
-      AppConfigHelper.set_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE, "idseq-s3-tar-writer:v1.0")
       allow(Rails).to receive(:env).and_return("staging")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-staging")
+      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-staging"))
 
       task_command = [
-        "aegea", "ecs", "run", "--command=#{mock_shell_command}",
+        "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
         "--task-role", "idseq-downloads-staging",
         "--task-name", BulkDownload::ECS_TASK_NAME,
-        "--ecr-image", "idseq-s3-tar-writer:v1.0",
+        "--ecr-image", "idseq-s3-tar-writer:latest",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
         "--cluster", "idseq-fargate-tasks-staging",
+        "--staging-s3-bucket", "aegea-ecs-execute-staging",
       ]
 
-      expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
+      expect(@bulk_download.aegea_ecs_submit_command(executable_file_path: mock_executable_file_path)).to eq(task_command)
     end
 
     it "outputs correct command in development" do
-      AppConfigHelper.set_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE, "idseq-s3-tar-writer:v1.0")
       allow(Rails).to receive(:env).and_return("development")
-      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-development")
+      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-development"))
 
       task_command = [
-        "aegea", "ecs", "run", "--command=#{mock_shell_command}",
+        "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
         "--task-role", "idseq-downloads-development",
         "--task-name", BulkDownload::ECS_TASK_NAME,
-        "--ecr-image", "idseq-s3-tar-writer:v1.0",
+        "--ecr-image", "idseq-s3-tar-writer:latest",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
         "--cluster", "idseq-fargate-tasks-staging",
+        "--staging-s3-bucket", "aegea-ecs-execute-staging",
       ]
 
-      expect(@bulk_download.aegea_ecs_submit_command(shell_command: mock_shell_command)).to eq(task_command)
+      expect(@bulk_download.aegea_ecs_submit_command(executable_file_path: mock_executable_file_path)).to eq(task_command)
     end
   end
 
@@ -390,30 +359,10 @@ describe BulkDownload, type: :model do
       @bulk_download = create(:bulk_download, user: @joe)
     end
 
-    let(:mock_shell_command) { "SHELL COMMAND" }
     let(:mock_aegea_ecs_submit_command) { "AEGEA ECS SUBMIT COMMAND" }
     let(:mock_task_arn) { "ABC" }
 
     it "runs correctly in basic case" do
-      expect(@bulk_download).to receive(:aegea_ecs_submit_command).exactly(1).times.with(hash_including(shell_command: Shellwords.escape(mock_shell_command))).and_return(
-        [mock_aegea_ecs_submit_command]
-      )
-
-      expect(Open3).to receive(:capture3).exactly(1).times.with(mock_aegea_ecs_submit_command).and_return(
-        [JSON.generate("taskArn": mock_task_arn), "", instance_double(Process::Status, exitstatus: 0)]
-      )
-
-      @bulk_download.kickoff_ecs_task([mock_shell_command])
-
-      expect(@bulk_download.ecs_task_arn).to eq(mock_task_arn)
-      expect(@bulk_download.status).to eq(BulkDownload::STATUS_RUNNING)
-    end
-
-    it "uses executable when number of pipeline runs is over threshold" do
-      # stub pipeline runs length to be larger than the min threshold.
-      expect(@bulk_download).to receive(:pipeline_runs).exactly(1).times.and_return(
-        double("Fake pipeline runs array", length: BulkDownload::EXECUTABLE_MIN_THRESHOLD)
-      )
       expect(@bulk_download).to receive(:aegea_ecs_submit_command).exactly(1).times.with(hash_including(executable_file_path: anything)).and_return(
         [mock_aegea_ecs_submit_command]
       )
@@ -424,7 +373,7 @@ describe BulkDownload, type: :model do
 
       expect_any_instance_of(Tempfile).to receive(:unlink).exactly(1).times
 
-      @bulk_download.kickoff_ecs_task([mock_shell_command])
+      @bulk_download.kickoff_ecs_task(["SHELL_COMMAND"])
 
       expect(@bulk_download.ecs_task_arn).to eq(mock_task_arn)
       expect(@bulk_download.status).to eq(BulkDownload::STATUS_RUNNING)

@@ -15,8 +15,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
     describe "POST #create" do
       before do
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
-        allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
-        allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+        stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
+                                            "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
       end
 
       def get_expected_tar_name(project, sample, suffix)
@@ -31,15 +31,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_two = create(:sample, project: @project, name: "Test Sample Two",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        mock_task_command = ["python", "mock_command.py"]
-
-        # s3_tar_writer_command is tested extensively in the model_spec.
-        expect_any_instance_of(BulkDownload).to receive(:s3_tar_writer_command).and_return(
-          mock_task_command
-        )
-
         expect(Open3).to receive(:capture3)
-          .with("aegea", "ecs", "run", a_string_starting_with("--command=#{mock_task_command.join(' ')}"), any_args)
+          .with("aegea", "ecs", "run", a_string_starting_with("--execute"), any_args)
           .exactly(1).times.and_return(
             [JSON.generate("taskArn": "ABC"), "", instance_double(Process::Status, exitstatus: 0)]
           )
@@ -74,9 +67,6 @@ RSpec.describe BulkDownloadsController, type: :controller do
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
         @sample_two = create(:sample, project: @project, name: "Test Sample Two",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
-
-        allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
-        allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
         expect(Open3).to receive(:capture3).exactly(1).times.and_return(
           ["", "", instance_double(Process::Status, exitstatus: 1)]
@@ -506,8 +496,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
     describe "POST #create" do
       before do
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
-        allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
-        allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+        stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
+                                            "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
       end
 
       it "should ignore max samples limit if admin" do

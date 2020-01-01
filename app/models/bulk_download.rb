@@ -17,7 +17,6 @@ class BulkDownload < ApplicationRecord
   OUTPUT_DOWNLOAD_EXPIRATION = 86_400 # seconds
   PROGRESS_UPDATE_DELAY = 15 # Minimum number of seconds between progress updates.
   ECS_TASK_NAME = "bulk_downloads".freeze
-  EXECUTABLE_MIN_THRESHOLD = 100
 
   before_save :convert_params_to_json
 
@@ -102,7 +101,6 @@ class BulkDownload < ApplicationRecord
 
   # Returned as an array of strings
   def aegea_ecs_submit_command(
-    shell_command: nil,
     executable_file_path: nil,
     task_role: "idseq-downloads-#{Rails.env}",
     ecs_cluster: "idseq-fargate-tasks-#{Rails.env}",
@@ -122,7 +120,7 @@ class BulkDownload < ApplicationRecord
       executable_s3_bucket = "aegea-ecs-execute-staging"
     end
 
-    command_flag = shell_command.present? ? "--command=#{shell_command}" : "--execute=#{executable_file_path}"
+    command_flag = "--execute=#{executable_file_path}"
 
     command = ["aegea", "ecs", "run",
                command_flag,
@@ -197,16 +195,9 @@ class BulkDownload < ApplicationRecord
     shell_command_array
   )
     executable_file = nil
-    aegea_command = ""
     shell_command_escaped = shell_command_array.map { |s| Shellwords.escape(s) }.join(" ")
-
-    if pipeline_runs.length >= EXECUTABLE_MIN_THRESHOLD
-      # If there are too many samples in this bulk download, upload the command as a file instead.
-      executable_file = create_local_exec_file(shell_command_escaped)
-      aegea_command = aegea_ecs_submit_command(executable_file_path: executable_file.path.to_s)
-    else
-      aegea_command = aegea_ecs_submit_command(shell_command: shell_command_escaped)
-    end
+    executable_file = create_local_exec_file(shell_command_escaped)
+    aegea_command = aegea_ecs_submit_command(executable_file_path: executable_file.path.to_s)
 
     command_stdout, command_stderr, status = Open3.capture3(*aegea_command)
     if status.exitstatus.zero?
