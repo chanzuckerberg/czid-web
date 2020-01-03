@@ -14,6 +14,7 @@ class MetadataField < ApplicationRecord
     NUMBER_TYPE,
     DATE_TYPE,
     LOCATION_TYPE,
+    # see also boolean? method
   ], }
 
   # NOTE: not sure why these columns were not created as booleans
@@ -124,6 +125,7 @@ class MetadataField < ApplicationRecord
       is_required: is_required,
       examples: examples && JSON.parse(examples),
       default_for_new_host_genome: default_for_new_host_genome,
+      isBoolean: boolean?,
     }
   end
 
@@ -165,6 +167,13 @@ class MetadataField < ApplicationRecord
       return "location"
     end
     ""
+  end
+
+  # If the field has exactly two forced options, it is effectively a boolean.
+  def boolean?
+    return false unless options && force_options == 1
+
+    return JSON.parse(options).length == 2
   end
 
   private
