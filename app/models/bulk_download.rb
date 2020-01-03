@@ -248,8 +248,12 @@ class BulkDownload < ApplicationRecord
   end
 
   def bulk_download_ecs_task_command
-    samples = Sample.where(id: pipeline_runs.map(&:sample_id))
-    projects = Project.where(id: samples.pluck(:project_id))
+    # Order both pipeline runs and samples by ascending sample id.
+    # This ensures that the download src-urls and tar-names have the same order which is critical to
+    # mapping the file content to the correct file name.
+    pipeline_runs_ordered = pipeline_runs.order(:sample_id)
+    samples_ordered = Sample.where(id: pipeline_runs.map(&:sample_id)).order(:id)
+    projects = Project.where(id: samples_ordered.pluck(:project_id))
 
     # Compute cleaned project name once instead of once per sample.
     cleaned_project_names = {}
@@ -261,14 +265,14 @@ class BulkDownload < ApplicationRecord
     download_tar_names = nil
 
     if download_type == ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE
-      samples = samples.includes(:input_files)
+      samples_ordered = samples_ordered.includes(:input_files)
 
-      download_src_urls = samples.map(&:input_file_s3_paths).flatten
+      download_src_urls = samples_ordered.map(&:input_file_s3_paths).flatten
 
       # We use the sample name in the output file names (instead of the original input file names)
       # because the sample name is what's visible to the user.
       # Also, there might be duplicates between the original file names.
-      download_tar_names = samples.map do |sample|
+      download_tar_names = samples_ordered.map do |sample|
         # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
         sample.input_files.map.with_index do |input_file, input_file_index|
           # Include the project id because the cleaned project names might have duplicates as well.
@@ -279,29 +283,29 @@ class BulkDownload < ApplicationRecord
     end
 
     if download_type == UNMAPPED_READS_BULK_DOWNLOAD_TYPE
-      download_src_urls = pipeline_runs.map(&:unidentified_fasta_s3_path)
+      download_src_urls = pipeline_runs_ordered.map(&:unidentified_fasta_s3_path)
 
-      download_tar_names = samples.map do |sample|
+      download_tar_names = samples_ordered.map do |sample|
         "#{get_output_file_prefix(sample, cleaned_project_names)}" \
           "unmapped.fasta"
       end
     end
 
     if download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fasta"
-      download_src_urls = pipeline_runs.map(&:annotated_fasta_s3_path)
+      download_src_urls = pipeline_runs_ordered.map(&:annotated_fasta_s3_path)
 
-      download_tar_names = samples.map do |sample|
+      download_tar_names = samples_ordered.map do |sample|
         "#{get_output_file_prefix(sample, cleaned_project_names)}" \
           "reads_nh.fasta"
       end
     end
 
     if download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE && get_param_value("file_format") == ".fastq"
-      pipeline_runs_with_assocs = pipeline_runs.includes(sample: [:input_files])
+      pipeline_runs_ordered = pipeline_runs_ordered.includes(sample: [:input_files])
 
-      download_src_urls = pipeline_runs_with_assocs.map(&:nonhost_fastq_s3_paths).flatten
+      download_src_urls = pipeline_runs_ordered.map(&:nonhost_fastq_s3_paths).flatten
 
-      download_tar_names = pipeline_runs_with_assocs.map do |pipeline_run|
+      download_tar_names = pipeline_runs_ordered.map do |pipeline_run|
         sample = pipeline_run.sample
         file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
         # We assume that the first input file is R1 and the second input file is R2. This is the convention that the pipeline follows.
@@ -314,18 +318,18 @@ class BulkDownload < ApplicationRecord
     end
 
     if download_type == CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
-      download_src_urls = pipeline_runs.map(&:contigs_fasta_s3_path)
+      download_src_urls = pipeline_runs_ordered.map(&:contigs_fasta_s3_path)
 
-      download_tar_names = samples.map do |sample|
+      download_tar_names = samples_ordered.map do |sample|
         "#{get_output_file_prefix(sample, cleaned_project_names)}" \
             "contigs_nh.fasta"
       end
     end
 
     if download_type == HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE
-      download_src_urls = pipeline_runs.map(&:host_gene_count_s3_path)
+      download_src_urls = pipeline_runs_ordered.map(&:host_gene_count_s3_path)
 
-      download_tar_names = samples.map do |sample|
+      download_tar_names = samples_ordered.map do |sample|
         "#{get_output_file_prefix(sample, cleaned_project_names)}" \
           "reads_per_gene.star.tab"
       end

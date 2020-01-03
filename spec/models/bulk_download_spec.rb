@@ -283,6 +283,122 @@ describe BulkDownload, type: :model do
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
     end
+
+    it "returns the correct task command regardless of the order in which pipeline runs are passed in" do
+      # Here, we pass in sample_two's pipeline BEFORE sample_one's.
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
+                                @sample_two.first_pipeline_run.id,
+                                @sample_one.first_pipeline_run.id,
+                              ], params: {
+                                "file_format" => {
+                                  "value" => ".fastq",
+                                  "displayName" => ".fastq",
+                                },
+                              })
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/nonhost_R2.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R2.fastq",
+        "--tar-names",
+        get_expected_tar_name(@project, @sample_one, "reads_nh_R1.fastq"),
+        get_expected_tar_name(@project, @sample_one, "reads_nh_R2.fastq"),
+        get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
+        get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
+
+    it "returns the correct task command regardless of the ordering of pipeline run ids" do
+      # Here, sample_one.id < sample_two.id, but sample_one.first_pipeline_run.id > sample_two.first_pipeline_run.id
+      # This simulates a situation where subsequent pipeline runs are run "out of order".
+      create(:pipeline_run, sample: @sample_two, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12")
+      create(:pipeline_run, sample: @sample_one, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12")
+
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
+                                @sample_one.first_pipeline_run.id,
+                                @sample_two.first_pipeline_run.id,
+                              ], params: {
+                                "file_format" => {
+                                  "value" => ".fastq",
+                                  "displayName" => ".fastq",
+                                },
+                              })
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/nonhost_R2.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R2.fastq",
+        "--tar-names",
+        get_expected_tar_name(@project, @sample_one, "reads_nh_R1.fastq"),
+        get_expected_tar_name(@project, @sample_one, "reads_nh_R2.fastq"),
+        get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
+        get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+
+      # Here, we pass in sample_two's pipeline BEFORE sample_one's.
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
+                                @sample_two.first_pipeline_run.id,
+                                @sample_one.first_pipeline_run.id,
+                              ], params: {
+                                "file_format" => {
+                                  "value" => ".fastq",
+                                  "displayName" => ".fastq",
+                                },
+                              })
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/nonhost_R2.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/nonhost_R2.fastq",
+        "--tar-names",
+        get_expected_tar_name(@project, @sample_one, "reads_nh_R1.fastq"),
+        get_expected_tar_name(@project, @sample_one, "reads_nh_R2.fastq"),
+        get_expected_tar_name(@project, @sample_two, "reads_nh_R1.fastq"),
+        get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
   end
 
   context "#aegea_ecs_submit_command" do
