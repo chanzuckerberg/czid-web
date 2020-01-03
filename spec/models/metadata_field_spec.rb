@@ -1,5 +1,7 @@
 require 'rails_helper'
 
+# TODO: (gdingle): change this to yes/no only
+
 # This spec was created well after MetadataField, for the boolean? method.
 describe MetadataField, type: :model do
   it 'not be boolean if not force_options' do

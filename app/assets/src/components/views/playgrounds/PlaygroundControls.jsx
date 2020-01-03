@@ -1,18 +1,20 @@
-import CompareButton from "../../ui/controls/buttons/CompareButton";
-import DownloadButton from "../../ui/controls/buttons/DownloadButton";
-import Dropdown from "../../ui/controls/dropdowns/Dropdown";
-import ButtonDropdown from "../../ui/controls/dropdowns/ButtonDropdown";
-import BetaLabel from "../../ui/labels/BetaLabel";
-import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
-import MultipleDropdown from "../../ui/controls/dropdowns/MultipleDropdown";
-import ThresholdFilterDropdown from "../../ui/controls/dropdowns/ThresholdFilterDropdown";
-import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
 import React from "react";
-import SecondaryButton from "../../ui/controls/buttons/SecondaryButton";
-import Slider from "../../ui/controls/Slider";
-import Checkbox from "../../ui/controls/Checkbox";
-import MultipleNestedDropdown from "../../ui/controls/dropdowns/MultipleNestedDropdown";
+
+import CompareButton from "~ui/controls/buttons/CompareButton";
+import DownloadButton from "~ui/controls/buttons/DownloadButton";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import ButtonDropdown from "~ui/controls/dropdowns/ButtonDropdown";
+import BetaLabel from "~ui/labels/BetaLabel";
+import DownloadButtonDropdown from "~ui/controls/dropdowns/DownloadButtonDropdown";
+import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
+import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
+import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
+import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
+import Slider from "~ui/controls/Slider";
+import Checkbox from "~ui/controls/Checkbox";
+import MultipleNestedDropdown from "~ui/controls/dropdowns/MultipleNestedDropdown";
+import Toggle from "~ui/controls/Toggle";
 
 class PlaygroundControls extends React.Component {
   constructor(props) {
@@ -163,8 +165,6 @@ class PlaygroundControls extends React.Component {
             components={[
               <DownloadButton
                 key={0}
-                fluid
-                options={this.dropdownOptions}
                 text="Download"
                 onClick={option =>
                   this.setState({ event: "DropdownButton:Clicked", option })
@@ -172,9 +172,7 @@ class PlaygroundControls extends React.Component {
               />,
               <DownloadButton
                 key={1}
-                fluid
                 disabled
-                options={this.dropdownOptions}
                 text="Download"
                 onClick={option =>
                   this.setState({ event: "DropdownButton:Clicked", option })
@@ -188,19 +186,15 @@ class PlaygroundControls extends React.Component {
             components={[
               <DownloadButtonDropdown
                 key={0}
-                fluid
                 options={this.dropdownOptions}
-                text="Download"
                 onClick={option =>
                   this.setState({ event: "DropdownButton:Clicked", option })
                 }
               />,
               <DownloadButtonDropdown
                 key={1}
-                fluid
                 disabled
                 options={this.dropdownOptions}
-                text="Download"
                 onClick={option =>
                   this.setState({ event: "DropdownButton:Clicked", option })
                 }
@@ -348,6 +342,24 @@ class PlaygroundControls extends React.Component {
                 label="Checkbox"
                 onChange={() => this.setState({ event: "Checkbox:Change" })}
                 value={1}
+              />,
+            ]}
+          />
+          <ComponentCard
+            title="Toggle"
+            width={3}
+            components={[
+              <Toggle
+                key={1}
+                onLabel="Yes"
+                offLabel="No"
+                initialChecked={true}
+              />,
+              <Toggle
+                key={2}
+                onLabel="Yes"
+                offLabel="No"
+                initialChecked={false}
               />,
             ]}
           />
