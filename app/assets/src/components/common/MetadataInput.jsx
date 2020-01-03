@@ -60,11 +60,13 @@ class MetadataInput extends React.Component {
     const { warning } = this.state;
 
     if (metadataType.isBoolean) {
+      const onLabel = metadataType.options[0];
+      const offLabel = metadataType.options[1];
       return (
         <Toggle
-          initialChecked={false}
-          onLabel={metadataType.options[0]}
-          offLabel={metadataType.options[1]}
+          initialChecked={value === onLabel ? true : false}
+          onLabel={onLabel}
+          offLabel={offLabel}
           onChange={label => onChange(metadataType.key, label, true)}
         />
       );
