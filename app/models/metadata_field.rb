@@ -170,10 +170,15 @@ class MetadataField < ApplicationRecord
   end
 
   # If the field has exactly two forced options, it is effectively a boolean.
+  # For now, we only support Yes/No, in that order.
   def boolean?
     return false unless options && force_options == 1
 
-    return JSON.parse(options).length == 2
+    parsed = JSON.parse(options)
+
+    return false unless parsed.length == 2
+
+    return parsed[0] == "Yes" && parsed[1] == "No"
   end
 
   private
