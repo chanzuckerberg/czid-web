@@ -296,6 +296,9 @@ describe BulkDownload, type: :model do
                                 },
                               })
 
+      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
+
       task_command = [
         "python",
         "s3_tar_writer.py",
@@ -337,6 +340,9 @@ describe BulkDownload, type: :model do
                                   "displayName" => ".fastq",
                                 },
                               })
+
+      allow(ENV).to receive(:[]).with("SERVER_DOMAIN").and_return("https://idseq.net")
+      allow(ENV).to receive(:[]).with("SAMPLES_BUCKET_NAME").and_return("idseq-samples-prod")
 
       task_command = [
         "python",
