@@ -941,8 +941,12 @@ export default class SampleViewV2 extends React.Component {
     } else {
       // Some kind of error or warning has occurred.
       if (sample) {
-        pipelineRun.known_user_error = knownUserError;
-        pipelineRun.error_message = errorMessage;
+        // If an upload error occurred, the pipeline run might not exist so
+        // only try to set these fields if the pipeline run started.
+        if (pipelineRun) {
+          pipelineRun.known_user_error = knownUserError;
+          pipelineRun.error_message = errorMessage;
+        }
         ({ status, message, linkText, type, link, icon } = sampleErrorInfo(
           sample,
           pipelineRun
