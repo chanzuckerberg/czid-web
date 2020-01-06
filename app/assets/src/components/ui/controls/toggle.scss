@@ -6,3 +6,16 @@
 .toggle label:after {
   transform: scale(1) !important;
 }
+
+// Repeat classname to increase specificity and override semantic-ui !important.
+.toggle.toggle.toggle input:checked ~ label:before {
+  background-color: transparent !important; // override semantic-ui
+  // TODO (gdingle): change to idseq color
+  border: 2px solid #2185d0 !important;
+}
+
+.toggle.toggle.toggle input:indeterminate ~ label:before {
+  background-color: transparent !important; // override semantic-ui
+  // TODO (gdingle): change to idseq color
+  border: 2px solid gray !important;
+}
