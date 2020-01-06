@@ -4,7 +4,7 @@ class Background < ApplicationRecord
   has_many :taxon_summaries, dependent: :destroy
   belongs_to :user, optional: true
   validate :validate_size
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true, uniqueness: { case_sensitive: false }
   after_save :submit_store_summary_job
   attr_accessor :just_updated
 
