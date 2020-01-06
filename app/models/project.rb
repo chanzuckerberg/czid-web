@@ -11,7 +11,7 @@ class Project < ApplicationRecord
   has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :restrict_with_exception
   has_one :background
   has_and_belongs_to_many :metadata_fields
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true, uniqueness: { case_sensitive: false }
   include ReportHelper
 
   before_create :add_default_metadata_fields
