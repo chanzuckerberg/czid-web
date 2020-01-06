@@ -1,9 +1,9 @@
 import React from "react";
 import { Radio } from "semantic-ui-react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
-// TODO (gdingle):
-// import cs from './toggle.scss'
+import cs from "./toggle.scss";
 
 /**
  * Extension of semantic-ui radio toggle that shows on/off labels. The current
@@ -43,7 +43,7 @@ class Toggle extends React.PureComponent {
           this.setState({ checked: checked });
           onChange && onChange(checked ? onLabel : offLabel);
         }}
-        className={this.props.className}
+        className={cx(this.props.className, cs.toggle)}
       />
     );
   }

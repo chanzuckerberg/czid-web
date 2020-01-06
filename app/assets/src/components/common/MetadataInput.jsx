@@ -68,6 +68,7 @@ class MetadataInput extends React.Component {
           onLabel={onLabel}
           offLabel={offLabel}
           onChange={label => onChange(metadataType.key, label, true)}
+          className={className}
         />
       );
     } else if (isArray(metadataType.options)) {
