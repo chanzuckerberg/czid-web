@@ -34,19 +34,17 @@ class Toggle extends React.PureComponent {
   render() {
     const { onLabel, offLabel, onChange } = this.props;
     return (
-      <div>
-        <Radio
-          toggle
-          checked={this.state.checked}
-          label={this.state.checked ? onLabel : offLabel}
-          onChange={(_, inputProps) => {
-            const checked = inputProps.checked;
-            this.setState({ checked: checked });
-            onChange && onChange(checked ? onLabel : offLabel);
-          }}
-          className={this.props.className}
-        />
-      </div>
+      <Radio
+        toggle
+        checked={this.state.checked}
+        label={this.state.checked ? onLabel : offLabel}
+        onChange={(_, inputProps) => {
+          const checked = inputProps.checked;
+          this.setState({ checked: checked });
+          onChange && onChange(checked ? onLabel : offLabel);
+        }}
+        className={this.props.className}
+      />
     );
   }
 }
