@@ -811,7 +811,7 @@ export default class SampleViewV2 extends React.Component {
     } else if (sidebarMode === "sampleDetails") {
       return {
         sampleId: sample.id,
-        pipelineVersion: pipelineRun.pipeline_version,
+        pipelineVersion: pipelineRun ? pipelineRun.pipeline_version : null,
         onMetadataUpdate: this.handleMetadataUpdate,
       };
     }
