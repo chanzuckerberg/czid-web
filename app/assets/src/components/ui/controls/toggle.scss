@@ -11,7 +11,7 @@
 .toggle.toggle.toggle input:checked ~ label:before {
   background-color: transparent !important; // override semantic-ui
   // TODO (gdingle): change to idseq color
-  border: 2px solid #2185d0;
+  border: 2px solid blue;
   height: 2rem;
   line-height: 2rem;
   width: 4rem;
@@ -28,4 +28,14 @@
 
 .toggle.toggle.toggle label:after {
   top: 3px; // vertically align the circle in the height of the container
+}
+
+.toggle.toggle.toggle input:checked ~ label:after {
+  // TODO (gdingle): change to idseq color
+  background-color: blue;
+}
+
+.toggle.toggle.toggle input:indeterminate ~ label:after {
+  // TODO (gdingle): change to idseq color
+  background-color: gray;
 }
