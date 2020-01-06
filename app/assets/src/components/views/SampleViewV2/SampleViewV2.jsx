@@ -924,7 +924,10 @@ export default class SampleViewV2 extends React.Component {
       message = "Loading report data.";
       icon = <LoadingIcon className={cs.icon} />;
       type = "inProgress";
-    } else if (pipelineRunStatus === "WAITING" && !sample.upload_error) {
+    } else if (
+      pipelineRunStatus === "WAITING" &&
+      (sample && !sample.upload_error)
+    ) {
       status = "IN PROGRESS";
       message = jobStatus;
       icon = <LoadingIcon className={cs.icon} />;
