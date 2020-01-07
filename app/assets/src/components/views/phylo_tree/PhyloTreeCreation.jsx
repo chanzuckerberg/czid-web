@@ -54,7 +54,7 @@ class PhyloTreeCreation extends React.Component {
     this.projectSamplesHeaders = {
       name: "Name",
       host: "Host",
-      tissue: "Tissue",
+      tissue: "Sample Type",
       location: "Location",
       date: "Date",
       reads: "Read Count\n(NT | NR)",
@@ -64,7 +64,7 @@ class PhyloTreeCreation extends React.Component {
       name: "Name",
       project: "Project",
       host: "Host",
-      tissue: "Tissue",
+      tissue: "Sample Type",
       location: "Location",
       date: "Date",
       reads: "Read Count\n(NT | NR)",
@@ -240,8 +240,8 @@ class PhyloTreeCreation extends React.Component {
         let entry = {
           name: row.name,
           host: row.host,
-          tissue: row.sample_tissue,
-          location: row.sample_location,
+          tissue: row.sample_type,
+          location: row.collection_location,
           date: <Moment fromNow date={row.created_at} />,
           reads: `${(row.taxid_reads || {}).NT} | ${
             (row.taxid_reads || {}).NR

@@ -126,7 +126,7 @@
   }
 
   .noResultsMessage {
-    @include font-body-xxs-crop;
+    @include font-body-xxs;
     padding: $space-xxs $space-m;
     color: $medium-grey;
   }

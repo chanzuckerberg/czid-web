@@ -12,17 +12,15 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     @metadata_validation_sample_human = samples(:metadata_validation_sample_human)
     @metadata_validation_sample_mosquito = samples(:metadata_validation_sample_mosquito)
     @joe_project_sample_a = samples(:joe_project_sampleA)
-    @user = users(:one)
+    @user = users(:admin_one)
     @core_field = metadata_fields(:core_field)
-    @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
     @host_genome_human = host_genomes(:human)
     @host_genome_mosquito = host_genomes(:mosquito)
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'metadata upload basic' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post upload_metadata_project_url(@metadata_validation_project), params: {
       metadata: {
@@ -42,7 +40,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata upload invalid sample name' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     assert_no_difference('Metadatum.where(sample_id: @metadata_validation_sample_human.id).length') do
       post upload_metadata_project_url(@metadata_validation_project), params: {
@@ -63,7 +61,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata upload invalid values' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     assert_no_difference('Metadatum.where(sample_id: @metadata_validation_sample_human.id).length') do
       post upload_metadata_project_url(@metadata_validation_project), params: {
@@ -87,7 +85,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
 
   # If the metadata field isn't supported by the sample's host genome, throw an error.
   test 'metadata upload invalid key for host genome' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     assert_no_difference('Metadatum.where(sample_id: @metadata_validation_sample_human.id).length') do
       post upload_metadata_project_url(@metadata_validation_project), params: {
@@ -106,7 +104,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata upload core and custom fields' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     # Prior to upload, the custom fields shouldn't exist.
     assert_equal 0, MetadataField.where(name: "Custom Field").length
@@ -148,7 +146,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
   # When samples with different host genomes all upload the same custom field,
   # only one custom field is created.
   test 'metadata upload custom field on multiple host genomes' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     # Prior to upload, the custom field shouldn't exist.
     assert_equal 0, MetadataField.where(name: "Custom Field").length
@@ -183,7 +181,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot upload metadata to a public project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       post upload_metadata_project_url(@public_project), params: {
@@ -199,7 +197,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot upload metadata to another private project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       post upload_metadata_project_url(@metadata_validation_project), params: {
@@ -215,7 +213,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can upload metadata to a private project he is a member of' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     post upload_metadata_project_url(@joe_project), params: {
       metadata: {

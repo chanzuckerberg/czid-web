@@ -42,7 +42,7 @@ const react_component = (componentName, props, target, userContext) => {
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
     ReactDOM.render(
-      <UserContext.Provider value={userContext}>
+      <UserContext.Provider value={userContext || {}}>
         {React.createElement(matchedComponent, props)}
       </UserContext.Provider>,
       document.getElementById(target)

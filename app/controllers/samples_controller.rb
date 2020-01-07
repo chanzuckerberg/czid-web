@@ -7,6 +7,7 @@ class SamplesController < ApplicationController
   include PipelineRunsHelper
   include ReportHelper
   include SamplesHelper
+  include ReportsHelper
 
   ########################################
   # Note to developers:
@@ -19,16 +20,16 @@ class SamplesController < ApplicationController
   ##########################################
 
   # Read action meant for single samples with set_sample before_action
-  READ_ACTIONS = [:show, :show_v2, :report_v2, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+  READ_ACTIONS = [:show, :show_v2, :report_v2, :legacy, :report_info, :report_csv, :report_csv_v2, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
-                  :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
+                  :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat,].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,].freeze
+                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user, :taxa_with_contigs_suggestions,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
@@ -37,7 +38,7 @@ class SamplesController < ApplicationController
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
-  before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
+  before_action :login_required, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
   power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
@@ -48,6 +49,9 @@ class SamplesController < ApplicationController
   before_action :check_access
   before_action only: :show_v2 do
     allowed_feature_required("report_v2")
+  end
+  before_action only: :amr do
+    allowed_feature_required("AMR")
   end
 
   around_action :instrument_with_timer
@@ -68,7 +72,9 @@ class SamplesController < ApplicationController
     name_search_query = params[:search]
     filter_query = params[:filter]
     page = params[:page]
-    tissue_type_query = params[:tissue].split(',') if params[:tissue].present?
+    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+    # instances to "sample_type".
+    sample_type_query = params[:tissue].split(',') if params[:tissue].present?
     host_query = params[:host].split(',') if params[:host].present?
     samples_query = params[:ids].split(',') if params[:ids].present?
     sort = params[:sort_by]
@@ -85,11 +91,11 @@ class SamplesController < ApplicationController
 
     @count_project = results.size
 
-    # Get tissue types and host genomes that are present in the sample list
-    # TODO(yf) : the following tissue_types, host_genomes have performance
+    # Get sample types and host genomes that are present in the sample list
+    # TODO(yf) : the following sample_types, host_genomes have performance
     # impact that it should be moved to different dedicated functions. Not
     # parsing the whole results.
-    @tissue_types = get_distinct_sample_types(results)
+    @sample_types = get_distinct_sample_types(results)
 
     host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
     @host_genomes = HostGenome.find(host_genome_ids)
@@ -102,7 +108,7 @@ class SamplesController < ApplicationController
     end
 
     results = filter_by_status(results, filter_query) if filter_query.present?
-    results = filter_by_metadatum(results, "sample_type", tissue_type_query) if tissue_type_query.present?
+    results = filter_by_metadatum(results, "sample_type", sample_type_query) if sample_type_query.present?
     results = filter_by_metadatum(results, "collection_location", params[:location].split(',')) if params[:location].present?
     results = filter_by_host(results, host_query) if host_query.present?
 
@@ -128,7 +134,9 @@ class SamplesController < ApplicationController
         samples: @samples_formatted,
         # Number of samples in the current query.
         count: @samples_count,
-        tissue_types: @tissue_types,
+        # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+        # instances to "sample_type"
+        tissues: @sample_types,
         host_genomes: @host_genomes,
         # Total number of samples in the project
         count_project: @count_project,
@@ -144,8 +152,8 @@ class SamplesController < ApplicationController
 
   def index_v2
     # this method is going to replace 'index' once we fully migrate to the
-    # discovery views (old one was kept to avoid breaking the current inteface
-    # without sacrificing speed of development and avoid breaking the current interface)
+    # discovery views (old one was kept to avoid breaking the current interface
+    # without sacrificing speed of development)
     domain = params[:domain]
     order_by = params[:orderBy] || :id
     order_dir = params[:orderDir] || :desc
@@ -212,15 +220,15 @@ class SamplesController < ApplicationController
     locations_v2 = LocationHelper.sample_dimensions(sample_ids, "collection_location_v2", samples_count)
     @timer.split("locations_v2")
 
-    tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type").count
-    tissues = tissues.map do |tissue, count|
-      { value: tissue, text: tissue, count: count }
+    sample_types = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type").count
+    sample_types = sample_types.map do |sample_type, count|
+      { value: sample_type, text: sample_type, count: count }
     end
-    not_set_count = samples_count - tissues.sum { |l| l[:count] }
+    not_set_count = samples_count - sample_types.sum { |l| l[:count] }
     if not_set_count > 0
-      tissues << { value: "not_set", text: "Unknown", count: not_set_count }
+      sample_types << { value: "not_set", text: "Unknown", count: not_set_count }
     end
-    @timer.split("tissues")
+    @timer.split("sample_types")
 
     # visibility
     public_count = samples.public_samples.count
@@ -297,7 +305,9 @@ class SamplesController < ApplicationController
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
-          { dimension: "tissue", values: tissues },
+          # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+          # instances to "sample_type"
+          { dimension: "tissue", values: sample_types },
         ]
       end
     end
@@ -429,11 +439,13 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("tissue")
-      tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "sample_type")
-      unless tissues.empty?
+      sample_types = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "sample_type")
+      unless sample_types.empty?
+        # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+        # instances to "sample_type".
         results["Tissue"] = {
           "name" => "Tissue",
-          "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
+          "results" => sample_types.pluck(:string_validated_value).uniq.map do |val|
             { "category" => "Tissue", "title" => val, "id" => val }
           end,
         }
@@ -583,7 +595,20 @@ class SamplesController < ApplicationController
 
   # GET /samples/1/report_csv
   def report_csv
-    @report_csv = report_csv_from_params(@sample, params)
+    if current_user.allowed_feature?("report_v2")
+      report_csv_v2
+    else
+      @report_csv = report_csv_from_params(@sample, params)
+      send_data @report_csv, filename: @sample.name + '_report.csv'
+    end
+  end
+
+  # GET /samples/1/report_csv_v2
+  def report_csv_v2
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    background_id = get_background_id(@sample, params[:background])
+    min_contig_size = params[:min_contig_size]
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_size: min_contig_size)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -663,56 +688,65 @@ class SamplesController < ApplicationController
     end
   end
 
+  # GET /samples/1/legacy
+  def legacy
+    redirect_to action: "show", legacy: true
+  end
+
   # GET /samples/1
   # GET /samples/1.json
   def show
-    @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    @amr_counts = nil
-    can_see_amr = (current_user.admin? || current_user.allowed_feature_list.include?("AMR"))
-    if can_see_amr && @pipeline_run
-      amr_state = @pipeline_run.output_states.find_by(output: "amr_counts")
-      if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
-        @amr_counts = @pipeline_run.amr_counts
+    if !params[:legacy] && current_user.allowed_feature_list.include?("report_v2")
+      show_v2
+    else
+      @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+      @amr_counts = nil
+      can_see_amr = (current_user.admin? || current_user.allowed_feature_list.include?("AMR"))
+      if can_see_amr && @pipeline_run
+        amr_state = @pipeline_run.output_states.find_by(output: "amr_counts")
+        if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
+          @amr_counts = @pipeline_run.amr_counts
+        end
       end
+      @pipeline_version = @pipeline_run.report_info_params[:pipeline_version] if @pipeline_run
+      @pipeline_versions = @sample.pipeline_versions
+
+      @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
+      @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start or Receive Files'
+      pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
+      job_stats_hash = job_stats_get(pipeline_run_id)
+      @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
+      @project_info = @sample.project ? @sample.project : nil
+      @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
+      @host_genome = @sample.host_genome ? @sample.host_genome : nil
+      @background_models = current_power.backgrounds.where(ready: 1)
+      @can_edit = current_power.updatable_sample?(@sample)
+      @git_version = ENV['GIT_VERSION'] || ""
+
+      @align_viz = false
+      align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
+      @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
+
+      background_id = get_background_id(@sample)
+      @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
+      @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
+
+      # Check if the report table should actually show
+      if background_id && @pipeline_run && @pipeline_run.report_ready?
+        @report_present = true
+        @report_ts = @pipeline_run.report_info_params[:report_ts]
+        @all_categories = ReportHelper::ALL_CATEGORIES
+        @report_details = ReportHelper.report_details(@pipeline_run, current_user.id)
+        @ercc_comparison = @pipeline_run.compare_ercc_counts
+      end
+
+      viz = last_saved_visualization
+      @saved_param_values = viz ? viz.data : {}
+
+      tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
+      # DEPRECATED. Use log_analytics_event.
+      MetricUtil.put_metric_now("samples.showed", 1, tags)
     end
-    @pipeline_version = @pipeline_run.report_info_params[:pipeline_version] if @pipeline_run
-    @pipeline_versions = @sample.pipeline_versions
-
-    @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
-    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start or Receive Files'
-    pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
-    job_stats_hash = job_stats_get(pipeline_run_id)
-    @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
-    @project_info = @sample.project ? @sample.project : nil
-    @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
-    @host_genome = @sample.host_genome ? @sample.host_genome : nil
-    @background_models = current_power.backgrounds.where(ready: 1)
-    @can_edit = current_power.updatable_sample?(@sample)
-    @git_version = ENV['GIT_VERSION'] || ""
-
-    @align_viz = false
-    align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
-    @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
-
-    background_id = get_background_id(@sample)
-    @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
-    @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
-
-    # Check if the report table should actually show
-    if background_id && @pipeline_run && @pipeline_run.report_ready?
-      @report_present = true
-      @report_ts = @pipeline_run.report_info_params[:report_ts]
-      @all_categories = ReportHelper::ALL_CATEGORIES
-      @report_details = ReportHelper.report_details(@pipeline_run, current_user.id)
-      @ercc_comparison = @pipeline_run.compare_ercc_counts
-    end
-
-    viz = last_saved_visualization
-    @saved_param_values = viz ? viz.data : {}
-
-    tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
-    # DEPRECATED. Use log_analytics_event.
-    MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
   def show_v2
@@ -724,17 +758,25 @@ class SamplesController < ApplicationController
       :project_id,
       :status,
       :host_genome_id,
+      :upload_error,
     ]
     respond_to do |format|
       format.html { render 'show_v2' }
       format.json do
-        render json: {
-          sample: @sample.as_json(
+        render json: @sample
+          .as_json(
+            methods: [],
             only: default_fields,
-            methods: []
-          ),
-          pipeline_run: @sample.first_pipeline_run.as_json,
-        }
+            include: {
+              project: {
+                only: [:id, :name],
+              },
+            }
+          ).merge(
+            default_pipeline_run_id: @sample.first_pipeline_run.present? ? @sample.first_pipeline_run.id : nil,
+            pipeline_runs: @sample.pipeline_runs_info,
+            editable: current_power.updatable_sample?(@sample)
+          )
       end
     end
   end
@@ -767,8 +809,52 @@ class SamplesController < ApplicationController
 
   def report_v2
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    background_id = get_background_id(@sample)
-    render json: PipelineReportService.call(pipeline_run.id, background_id)
+    background_id = get_background_id(@sample, params[:background])
+
+    if pipeline_run
+      # Don't cache the response until the pipeline run is report-ready
+      # so the displayed pipeline run status will be updated correctly.
+      skip_cache = !pipeline_run.report_ready? || params[:skip_cache] || false
+
+      report_info_params = pipeline_run.report_info_params
+      # If the pipeline_version wasn't passed in from the client-side,
+      # then set it to version for the selected default pipeline run.
+      if params[:pipeline_version].nil?
+        params[:pipeline_version] = pipeline_run.pipeline_version
+      end
+      cache_key = PipelineReportService.report_info_cache_key(
+        request.path,
+        report_info_params
+          .merge(
+            params
+              .reject { |_, v| v.blank? }
+              .permit(report_info_params.keys)
+          ).merge(
+            background_id: background_id
+          ).symbolize_keys
+      )
+      httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+
+      json =
+        fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "PipelineReport") do
+          PipelineReportService.call(pipeline_run, background_id)
+        end
+    else
+      json = PipelineReportService.call(pipeline_run, background_id)
+    end
+    render json: json
+  end
+
+  def amr
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    amr_counts = nil
+    if pipeline_run
+      amr_state = pipeline_run.output_states.find_by(output: "amr_counts")
+      if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
+        amr_counts = pipeline_run.amr_counts
+      end
+    end
+    render json: amr_counts || []
   end
 
   # The json response here should be precached in PipelineRun.
@@ -868,12 +954,12 @@ class SamplesController < ApplicationController
     return if HUMAN_TAX_IDS.include? params[:taxid].to_i
     pr = select_pipeline_run(@sample, params[:pipeline_version])
     if params[:hit_type] == "NT_or_NR"
-      nt_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
-      nr_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
-      @taxid_fasta = ">" + ((nt_array | nr_array) - ['']).join(">")
-      @taxid_fasta = "Coming soon" if @taxid_fasta == ">" # Temporary fix
+      @taxid_fasta = get_taxon_fasta_from_pipeline_run_combined_nt_nr(pr, params[:taxid], params[:tax_level].to_i)
+      if @taxid_fasta.nil?
+        @taxid_fasta = "Coming soon" # Temporary fix
+      end
     else
-      @taxid_fasta = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
+      @taxid_fasta = get_taxon_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
     send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-hits.fasta'
   end
@@ -1288,9 +1374,10 @@ class SamplesController < ApplicationController
     }
   end
 
-  # GET /samples/taxa_with_reads_suggestions
+  # POST /samples/taxa_with_reads_suggestions
   # Get taxon search suggestions, where taxa are restricted to the provided sample ids.
-  # Also include, for each taxon, the number of samples that contain the taxon.
+  # Also include, for each taxon, the number of samples that contain reads for the taxon.
+  # This method uses POST because hundreds of sampleIds params can be passed.
   def taxa_with_reads_suggestions
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     query = params[:query]
@@ -1305,14 +1392,41 @@ class SamplesController < ApplicationController
       return
     end
 
-    taxon_list = taxon_search(query, ["species", "genus"], samples: samples)
+    taxon_list = taxon_search(query, ["species", "genus"])
     taxon_list = augment_taxon_list_with_sample_count(taxon_list, samples)
+    taxon_list = taxon_list.select { |taxon| taxon["sample_count"] > 0 }
 
     render json: taxon_list
   end
 
-  # GET /samples/uploaded_by_current_user
+  # POST /samples/taxa_with_contigs_suggestions
+  # Get taxon search suggestions, where taxa are restricted to the provided sample ids.
+  # Also include, for each taxon, the number of samples that contain contigs for the taxon.
+  # This method uses POST because hundreds of sampleIds params can be passed.
+  def taxa_with_contigs_suggestions
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    query = params[:query]
+    samples = current_power.viewable_samples.where(id: sample_ids)
+
+    # User should not be querying for unviewable samples.
+    if samples.length != sample_ids.length
+      LogUtil.log_err_and_airbrake("Get taxa with contigs error: Unauthorized access of samples")
+      render json: {
+        error: "There was an error fetching the taxa with contigs for samples.",
+      }, status: :unauthorized
+      return
+    end
+
+    taxon_list = taxon_search(query, ["species", "genus"])
+    taxon_list = augment_taxon_list_with_sample_count_contigs(taxon_list, samples)
+    taxon_list = taxon_list.select { |taxon| taxon["sample_count_contigs"] > 0 }
+
+    render json: taxon_list
+  end
+
+  # POST /samples/uploaded_by_current_user
   # Return whether all sampleIds were uploaded by the current user.
+  # This method uses POST because hundreds of sampleIds params can be passed.
   def uploaded_by_current_user
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     samples = Sample.where(user: current_user, id: sample_ids)
@@ -1348,11 +1462,9 @@ class SamplesController < ApplicationController
   def sample_params
     permitted_params = [:name, :project_name, :project_id, :status,
                         :s3_star_index_path, :s3_bowtie2_index_path,
-                        :host_genome_id, :host_genome_name, :sample_location, :sample_date, :sample_tissue,
-                        :sample_template, :sample_library, :sample_sequencer,
+                        :host_genome_id, :host_genome_name,
                         :sample_notes, :search, :subsample, :max_input_fragments,
-                        :basespace_dataset_id, :basespace_access_token,
-                        :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
+                        :basespace_dataset_id, :basespace_access_token, :client,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)

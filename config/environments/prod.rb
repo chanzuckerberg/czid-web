@@ -30,7 +30,6 @@ Rails.application.configure do
 
   # Don't add an asset compressor here because we already minimize with webpack.
   # Check out webpack.config.prod.js.
-
   config.assets.debug = true
   # Suppress logger output for asset requests.
   config.assets.quiet = true
@@ -39,9 +38,6 @@ Rails.application.configure do
   # config.assets.compile = true
 
   # `config.assets.precompile` and `config.assets.version` have moved to config/initializers/assets.rb
-
-  # Enable serving of images, stylesheets, and JavaScripts from an asset server.
-  # config.action_controller.asset_host = 'http://assets.example.com'
 
   # Specifies the header that your server uses for sending files.
   # config.action_dispatch.x_sendfile_header = 'X-Sendfile' # for Apache
@@ -84,7 +80,15 @@ Rails.application.configure do
     domain: 'mg.idseq.net',
   }
 
-  config.action_controller.asset_host = 'idseq.net'
+  # We configure IDseq to use cloudfront CDN when available.
+  config.action_controller.asset_host = ENV['CLOUDFRONT_ENDPOINT'] || 'idseq.net'
+  # Custom config for idseq to enable CORS headers by environment. See rack_cors.rb.
+  config.allowed_cors_origins = [
+    "https://idseq.net",
+    "https://www.idseq.net",
+    "https://assets.idseq.net",
+  ]
+
   config.middleware.use Rack::HostRedirect, 'www.idseq.net' => 'idseq.net'
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to

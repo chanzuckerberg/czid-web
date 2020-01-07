@@ -2,10 +2,10 @@ require 'test_helper'
 
 class UsersControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:two)
+    @user = users(:regular_user)
     @host_genome = host_genomes(:one)
     @background = backgrounds(:one)
-    post user_session_path, params: { 'user[email]' => @user.email, 'user[password]' => 'password2' }
+    sign_in @user
   end
 
   test 'non admin shouldnt get index' do

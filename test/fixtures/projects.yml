@@ -31,5 +31,5 @@ admin_project:
 
 metadata_validation_project:
   name: Metadata Project
-  users: [one]
+  users: [admin_one]
   metadata_fields: [sample_type, nucleotide_type, collection_date, age, admission_date, blood_fed, reported_sex, sex]

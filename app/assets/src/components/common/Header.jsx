@@ -4,12 +4,15 @@ import moment from "moment";
 import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 
+import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import AlertIcon from "~ui/icons/AlertIcon";
 import LogoIcon from "~ui/icons/LogoIcon";
+import RemoveIcon from "~ui/icons/RemoveIcon";
 import {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
@@ -57,10 +60,25 @@ const showPrivacyUpdateNotification = () => {
 };
 
 class Header extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showAnnouncementBanner: false,
+    };
+  }
+
   componentDidMount() {
-    const { userSignedIn } = this.props;
+    const { userSignedIn, announcementBannerEnabled } = this.props;
     if (userSignedIn) {
       this.displayPrivacyUpdateNotification();
+    }
+    if (announcementBannerEnabled) {
+      const dismissedAnnouncementBanner = localStorage.getItem(
+        "dismissedAnnouncementBanner"
+      );
+      if (dismissedAnnouncementBanner !== "true") {
+        this.setState({ showAnnouncementBanner: true });
+      }
     }
   }
 
@@ -74,14 +92,21 @@ class Header extends React.Component {
     }
   };
 
+  handleAnnouncementBannerClose = () => {
+    this.setState({ showAnnouncementBanner: false });
+    localStorage.setItem("dismissedAnnouncementBanner", "true");
+  };
+
   render() {
     const {
       adminUser,
-      userSignedIn,
-      showBlank,
+      announcementBannerEnabled,
       disableNavigation,
+      showBlank,
+      userSignedIn,
       ...userMenuProps
     } = this.props;
+    const { showAnnouncementBanner } = this.state;
 
     const { allowedFeatures } = this.context || {};
 
@@ -98,6 +123,14 @@ class Header extends React.Component {
     return (
       userSignedIn && (
         <div>
+          {showAnnouncementBanner && (
+            <AnnouncementBanner
+              onClose={withAnalytics(
+                this.handleAnnouncementBannerClose,
+                "AnnouncementBanner_close_clicked"
+              )}
+            />
+          )}
           <div className={cs.header}>
             <div className={cs.logo}>
               <a href="/">
@@ -118,6 +151,10 @@ class Header extends React.Component {
             // Initialize the toast container - can be done anywhere (has absolute positioning)
           }
           <ToastContainer />
+          <iframe
+            className={cs.backgroundRefreshFrame}
+            src="/auth0/background_refresh"
+          />
         </div>
       )
     );
@@ -126,16 +163,52 @@ class Header extends React.Component {
 
 Header.propTypes = {
   adminUser: PropTypes.bool,
-  userSignedIn: PropTypes.bool,
+  announcementBannerEnabled: PropTypes.bool,
   disableNavigation: PropTypes.bool,
   showBlank: PropTypes.bool,
+  userSignedIn: PropTypes.bool,
 };
 
 Header.contextType = UserContext;
 
+const AnnouncementBanner = ({ onClose }) => {
+  return (
+    <div className={cs.announcementBanner}>
+      <BasicPopup
+        content={
+          "Low-Support Mode: We will only be responding to highly urgent issues from 12/21–12/29. For now, check out our Help Center. Happy Holidays!"
+        }
+        position="bottom center"
+        wide="very"
+        trigger={
+          <span className={cs.content}>
+            <AlertIcon className={cs.icon} />
+            <span className={cs.title}>Low-Support Mode:</span>
+            We will only be responding to highly urgent issues from 12/21–12/29.
+            For now, check out our
+            <ExternalLink
+              className={cs.link}
+              href="https://help.idseq.net"
+              onClick={() =>
+                logAnalyticsEvent("AnnouncementBanner_link_clicked")
+              }
+            >
+              Help Center
+            </ExternalLink>. Happy Holidays!
+          </span>
+        }
+      />
+      <RemoveIcon className={cs.close} onClick={() => onClose && onClose()} />
+    </div>
+  );
+};
+
+AnnouncementBanner.propTypes = {
+  onClose: PropTypes.func,
+};
+
 const UserMenuDropDown = ({
   adminUser,
-  demoUser,
   email,
   signInEndpoint,
   signOutEndpoint,
@@ -144,15 +217,42 @@ const UserMenuDropDown = ({
 }) => {
   const signOut = () => postToUrlWithCSRF(signOutEndpoint);
 
-  const renderItems = (adminUser, demoUser) => {
+  const renderItems = adminUser => {
     let userDropdownItems = [];
+
+    allowedFeatures.includes("bulk_downloads") &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="downloads"
+          text={
+            <a
+              className={cs.option}
+              href="/bulk_downloads"
+              onClick={() =>
+                logAnalyticsEvent("Header_dropdown-downloads-option_clicked")
+              }
+            >
+              Downloads
+            </a>
+          }
+        />
+      );
+
     adminUser &&
       userDropdownItems.push(
         <BareDropdown.Item
-          key="3"
+          key="user_settings"
           text={
-            <a className={cs.option} href="/users/new">
-              Create User
+            <a
+              className={cs.option}
+              href="/user_settings"
+              onClick={() =>
+                logAnalyticsEvent(
+                  "Header_dropdown-user-settings-option_clicked"
+                )
+              }
+            >
+              Settings
             </a>
           }
         />
@@ -160,7 +260,7 @@ const UserMenuDropDown = ({
 
     userDropdownItems.push(
       <BareDropdown.Item
-        key="4"
+        key="help"
         text={
           <ExternalLink
             className={cs.option}
@@ -172,29 +272,9 @@ const UserMenuDropDown = ({
             Help Center
           </ExternalLink>
         }
-      />
-    );
-
-    allowedFeatures.includes("bulk_downloads") &&
-      userDropdownItems.push(
-        <BareDropdown.Item
-          key="5"
-          text={
-            <a
-              className={cs.option}
-              href="/bulk_downloads"
-              onClick={() =>
-                logAnalyticsEvent("Header_dropdown-dropdowns-option_clicked")
-              }
-            >
-              Downloads
-            </a>
-          }
-        />
-      );
-    userDropdownItems.push(
+      />,
       <BareDropdown.Item
-        key="6"
+        key="feedback"
         text={
           <a
             className={cs.option}
@@ -203,12 +283,28 @@ const UserMenuDropDown = ({
               logAnalyticsEvent("Header_dropdown-feedback-option_clicked")
             }
           >
-            Report Feedback
+            Contact Us
           </a>
         }
-      />,
+      />
+    );
+
+    adminUser &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="create_user"
+          text={
+            <a className={cs.option} href="/users/new">
+              Create User
+            </a>
+          }
+        />
+      );
+
+    userDropdownItems.push(
+      <BareDropdown.Divider key="divider_one" />,
       <BareDropdown.Item
-        key="7"
+        key="terms_of_service"
         text={
           <a
             className={cs.option}
@@ -224,7 +320,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="8"
+        key="privacy_policy"
         text={
           <a
             className={cs.option}
@@ -239,8 +335,9 @@ const UserMenuDropDown = ({
           </a>
         }
       />,
+      <BareDropdown.Divider key="divider_two" />,
       <BareDropdown.Item
-        key="9"
+        key="logout"
         text="Logout"
         onClick={withAnalytics(
           signOut,
@@ -256,7 +353,7 @@ const UserMenuDropDown = ({
       <BareDropdown
         trigger={<div className={cs.userName}>{userName}</div>}
         className={cs.userDropdown}
-        items={renderItems(adminUser, demoUser)}
+        items={renderItems(adminUser)}
         direction="left"
       />
     </div>
@@ -264,7 +361,6 @@ const UserMenuDropDown = ({
 };
 
 UserMenuDropDown.propTypes = forbidExtraProps({
-  demoUser: PropTypes.bool,
   adminUser: PropTypes.bool,
   email: PropTypes.string.isRequired,
   signInEndpoint: PropTypes.string.isRequired,

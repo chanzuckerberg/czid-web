@@ -1,0 +1,26 @@
+@import "~styles/themes/elements";
+
+.filterList {
+  .filterListElement {
+    display: inline-block;
+    margin: $space-xxxs 0;
+    vertical-align: top;
+
+    &:not(:last-child) {
+      margin-right: $space-s;
+    }
+  }
+}
+
+.tagList {
+  margin-top: $space-m;
+  margin-bottom: $space-m;
+
+  .filterTag {
+    margin-right: $space-xxs;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}

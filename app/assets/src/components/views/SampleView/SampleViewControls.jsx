@@ -1,6 +1,7 @@
 import React from "react";
 import SvgSaver from "svgsaver";
 import Nanobar from "nanobar";
+import querystring from "querystring";
 
 import { deleteSample } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -14,23 +15,19 @@ import {
 
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
-    const { reportPageParams, pipelineRun, sample } = this.props;
+    const { backgroundId, pipelineRun, sample, minContigSize } = this.props;
 
-    let resParams = {};
-    const stringer = require("querystring");
-
-    // Set the right CSV background ID.
-    // Should have background_id param in all cases now.
-    const givenBackgroundId = reportPageParams.background_id;
-    if (givenBackgroundId) resParams["background_id"] = givenBackgroundId;
-
-    // Set the right pipeline version.
-    let v = pipelineRun && pipelineRun.pipeline_version;
-    if (v) resParams["pipeline_version"] = v;
-
-    let res = `/samples/${sample.id}/report_csv`;
-    res += `?${stringer.stringify(resParams)}`;
-    location.href = res;
+    const resParams = {
+      ...(backgroundId && { background_id: backgroundId }),
+      ...(pipelineRun &&
+        pipelineRun.pipeline_version && {
+          pipeline_version: pipelineRun.pipeline_version,
+        }),
+      ...(minContigSize && { min_contig_size: minContigSize }),
+    };
+    location.href = `/samples/${sample.id}/report_csv?${querystring.stringify(
+      resParams
+    )}`;
   };
 
   deleteSample = async () => {
@@ -107,9 +104,9 @@ class SampleViewControls extends React.Component {
   }
 
   render() {
-    const { reportPresent, pipelineRun, canEdit } = this.props;
+    const { reportPresent, pipelineRun, editable } = this.props;
 
-    if (reportPresent) {
+    if (reportPresent && pipelineRun) {
       const downloadOptions = [
         {
           text: "Download Report Table (.csv)",
@@ -126,7 +123,7 @@ class SampleViewControls extends React.Component {
           direction="left"
         />
       );
-    } else if (canEdit) {
+    } else if (editable) {
       return <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />;
     } else {
       return <div />;
@@ -135,18 +132,14 @@ class SampleViewControls extends React.Component {
 }
 
 SampleViewControls.propTypes = {
+  backgroundId: PropTypes.number,
   reportPresent: PropTypes.bool,
   sample: PropTypes.Sample,
   project: PropTypes.Project,
   pipelineRun: PropTypes.PipelineRun,
-  reportDetails: PropTypes.ReportDetails,
-  reportPageParams: PropTypes.shape({
-    pipeline_version: PropTypes.string,
-    // TODO (gdingle): standardize on string or number
-    background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  }),
-  canEdit: PropTypes.bool,
+  editable: PropTypes.bool,
   view: PropTypes.string,
+  minContigSize: PropTypes.number,
 };
 
 export default SampleViewControls;

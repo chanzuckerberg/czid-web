@@ -1,0 +1,61 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/typography";
+
+.viewHeader {
+  margin-bottom: 5px;
+
+  .pipelineInfo {
+    @include font-body-xxxs;
+    display: inline-block;
+
+    color: $medium-grey;
+    margin-top: 14px;
+    margin-bottom: 18px;
+
+    .warning {
+      text-align: left;
+      margin-bottom: 20px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .linkToPipelineViz {
+    cursor: pointer;
+
+    &:hover {
+      color: $primary-light;
+    }
+  }
+
+  .legacyLink {
+    @include font-body-xxxs;
+    color: $medium-grey;
+    padding-left: 2px;
+    &:hover {
+      color: $primary-light;
+    }
+  }
+
+  .sampleDetailsLinkContainer {
+    margin-top: 5px;
+  }
+
+  .sampleDetailsLink {
+    color: $primary-light;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.5;
+    }
+  }
+
+  .warningIcon {
+    margin-left: 2px;
+    transform: translateY(1px);
+  }
+}

@@ -3,10 +3,13 @@
 # See selectedOptions in SamplesHeatmapView for client-side defaults, and
 # heatmap action in VisualizationsController.
 module HeatmapHelper
-  DEFAULT_MAX_NUM_TAXONS = 30
+  # Based on the trade-off between performance and information quantity, we
+  # decided on 10 as the best default number of taxons to show per sample.
+  DEFAULT_MAX_NUM_TAXONS = 10
   DEFAULT_TAXON_SORT_PARAM = 'highest_nt_rpm'.freeze
   READ_SPECIFICITY = true
   MINIMUM_READ_THRESHOLD = 5
+  DEFAULT_NUM_RESULTS = 1_000_000
   # Note: this is activated from the heatmap page by selecting "Viruses -
   # Phages". The default categories are all BUT phages, though the UI does not
   # indicate this.
@@ -159,7 +162,7 @@ module HeatmapHelper
     categories,
     read_specificity = READ_SPECIFICITY,
     include_phage = INCLUDE_PHAGE,
-    num_results = 1_000_000,
+    num_results = DEFAULT_NUM_RESULTS,
     min_reads = MINIMUM_READ_THRESHOLD,
     sort_by = DEFAULT_TAXON_SORT_PARAM,
     threshold_filters = [],
@@ -199,6 +202,8 @@ module HeatmapHelper
         )),
         #{ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND})"
 
+    pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples)
+
     query = "
     SELECT
       pipeline_run_id,
@@ -227,7 +232,7 @@ module HeatmapHelper
       taxon_counts.tax_level  = taxon_summaries.tax_level       AND
       taxon_counts.tax_id     = taxon_summaries.tax_id
     WHERE
-      pipeline_run_id IN (#{HeatmapHelper.latest_pipeline_runs_query(samples).join(', ')})
+      pipeline_run_id IN (#{pr_id_to_sample_id.keys.join(',')})
       AND genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
       AND count >= #{min_reads}
       -- We need both types of counts for threshold filters
@@ -255,7 +260,11 @@ module HeatmapHelper
         pr = result_hash[pipeline_run_id]["pr"]
       else
         pr = pipeline_runs_by_id[pipeline_run_id]
-        result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
+        result_hash[pipeline_run_id] = {
+          "pr" => pr,
+          "taxon_counts" => [],
+          "sample_id" => pr_id_to_sample_id[pipeline_run_id],
+        }
       end
       if pr.total_reads
         z_max = ReportHelper::ZSCORE_MAX
@@ -326,6 +335,8 @@ module HeatmapHelper
     parent_ids = parent_ids.to_a
     parent_ids_clause = parent_ids.empty? ? "" : " OR taxon_counts.tax_id in (#{parent_ids.join(',')}) "
 
+    pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples)
+
     # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
     # Note: stdev is never 0
     # Note: connection.select_all is TWICE faster than TaxonCount.select
@@ -361,7 +372,7 @@ module HeatmapHelper
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
         taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
-        pipeline_run_id IN (#{HeatmapHelper.latest_pipeline_runs_query(samples).join(', ')})
+        pipeline_run_id IN (#{pr_id_to_sample_id.keys.join(',')})
         AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
         AND taxon_counts.count_type IN ('NT', 'NR')
         AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
@@ -490,14 +501,17 @@ module HeatmapHelper
 
   # NOTE: This was extracted from a subquery because mysql was not using the
   # the resulting IDs for an indexed query.
-  def self.latest_pipeline_runs_query(samples)
+  # Return a map of pipeline run id to sample id.
+  def self.get_latest_pipeline_runs_for_samples(samples)
     # not the ideal way to get the current pipeline but it is consistent with
     # current logic elsewhere.
     TaxonCount.connection.select_all(
-      "SELECT MAX(id) AS id
+      "SELECT MAX(id) AS id, sample_id
         FROM pipeline_runs
         WHERE sample_id IN (#{samples.pluck(:id).to_set.to_a.join(',')})
         GROUP BY sample_id"
-    ).pluck("id")
+    )
+              .map { |r| [r["id"], r["sample_id"]] }
+              .to_h
   end
 end

@@ -28,8 +28,10 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
-const getSampleReportData = (id, params) =>
-  get(`/samples/${id}/report_v2`, { params });
+const getSampleReportData = ({ sampleId, background, pipelineVersion }) =>
+  get(
+    `/samples/${sampleId}/report_v2.json?background=${background}&pipeline_version=${pipelineVersion}`
+  );
 
 const getSampleReportInfo = (id, params) =>
   get(`/samples/${id}/report_info${params}`);
@@ -218,6 +220,8 @@ const getSampleStats = ({ domain, filters, projectId, search }) =>
     },
   });
 
+const getSample = ({ sampleId }) => get(`/samples/${sampleId}/show_v2.json`);
+
 const getProjectDimensions = ({ domain, filters, projectId, search }) =>
   get("/projects/dimensions.json", {
     params: {
@@ -229,6 +233,8 @@ const getProjectDimensions = ({ domain, filters, projectId, search }) =>
   });
 
 const getSamplesV1 = params => get("/samples.json", { params });
+
+const getProject = ({ projectId }) => get(`/projects/${projectId}.json`);
 
 const getProjects = ({
   basic,
@@ -355,22 +361,36 @@ const getSamplePipelineResults = (sampleId, pipelineVersion) =>
 
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
 const getTaxaWithReadsSuggestions = (query, sampleIds) =>
-  get("/samples/taxa_with_reads_suggestions.json", {
-    params: {
-      query,
-      sampleIds,
-    },
+  postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
+    query,
+    sampleIds,
+  });
+
+// Get autocomplete suggestions for "taxa that have contigs" for a set of samples.
+const getTaxaWithContigsSuggestions = (query, sampleIds) =>
+  postWithCSRF("/samples/taxa_with_contigs_suggestions.json", {
+    query,
+    sampleIds,
   });
 
 const uploadedByCurrentUser = async sampleIds => {
-  const response = await get("samples/uploaded_by_current_user", {
-    params: {
-      sampleIds,
-    },
+  const response = await postWithCSRF("samples/uploaded_by_current_user", {
+    sampleIds,
   });
 
   return response.uploaded_by_current_user;
 };
+
+const getHeatmapMetrics = () => get("/visualizations/heatmap_metrics.json");
+
+const getUserSettingMetadataByCategory = () =>
+  get("/user_settings/metadata_by_category");
+
+const updateUserSetting = (key, value) =>
+  postWithCSRF("user_settings/update", {
+    key,
+    value,
+  });
 
 export {
   bulkImportRemoteSamples,
@@ -384,9 +404,12 @@ export {
   getContigsSequencesByByteranges,
   getCoverageVizData,
   getCoverageVizSummary,
+  getHeatmapMetrics,
   getPhyloTree,
+  getProject,
   getProjectDimensions,
   getProjects,
+  getSample,
   getSampleDimensions,
   getSampleReportData,
   getSampleReportInfo,
@@ -400,6 +423,7 @@ export {
   getSummaryContigCounts,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
+  getUserSettingMetadataByCategory,
   getVisualizations,
   markSampleUploaded,
   saveProjectDescription,
@@ -414,5 +438,7 @@ export {
   validateSampleNames,
   getBackgrounds,
   getTaxaWithReadsSuggestions,
+  getTaxaWithContigsSuggestions,
   uploadedByCurrentUser,
+  updateUserSetting,
 };

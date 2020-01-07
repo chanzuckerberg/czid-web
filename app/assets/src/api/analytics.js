@@ -26,7 +26,6 @@ export const logAnalyticsEvent = async (eventName, eventData = {}) => {
         admin: traits.admin,
         biohub_user: traits.biohub_user,
         czi_user: traits.czi_user,
-        demo_user: traits.demo_user,
         has_samples: traits.has_samples,
         git_version: window.GIT_VERSION,
         // label and category are for Google Analytics. See

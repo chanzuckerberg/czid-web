@@ -9,10 +9,12 @@ import {
   map,
   isUndefined,
   orderBy,
+  reject,
 } from "lodash/fp";
 import cx from "classnames";
 import memoize from "memoize-one";
 
+import StatusLabel from "~ui/labels/StatusLabel";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
@@ -21,16 +23,46 @@ import {
   getBackgrounds,
   getTaxaWithReadsSuggestions,
   uploadedByCurrentUser,
+  getHeatmapMetrics,
 } from "~/api";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { UserContext } from "~/components/common/UserContext";
 
+import TaxonContigSelect from "./TaxonContigSelect";
 import cs from "./choose_step.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 
+// Stores information about conditional fields for bulk downloads.
+const CONDITIONAL_FIELDS = [
+  // Note: This first field is referenced directly in renderOption, as
+  // it needs to display a placeholder component. Be careful when modifying.
+  {
+    field: "file_format",
+    // The download type this conditional field applies to.
+    downloadType: "reads_non_host",
+    // The field this conditional field depends on.
+    dependentField: "taxa_with_reads",
+    // The values of the dependent field that trigger the conditional field.
+    triggerValues: ["all", undefined],
+  },
+  {
+    field: "background",
+    downloadType: "combined_sample_taxon_results",
+    dependentField: "metric",
+    triggerValues: ["NR.zscore", "NT.zscore"],
+  },
+];
+
+const triggersConditionalField = (conditionalField, selectedFields) =>
+  conditionalField.triggerValues.includes(
+    get(conditionalField.dependentField, selectedFields)
+  );
+
 class ChooseStep extends React.Component {
   state = {
     backgroundOptions: null,
+    metricsOptions: null,
     taxaWithReadsOptions: null,
     isLoadingTaxaWithReadsOptionsOptions: false,
     allSamplesUploadedByCurrentUser: false,
@@ -40,6 +72,7 @@ class ChooseStep extends React.Component {
 
   componentDidMount() {
     this.fetchBackgrounds();
+    this.fetchHeatmapMetrics();
     this.checkAllSamplesUploadedByCurrentUser();
   }
 
@@ -57,6 +90,15 @@ class ChooseStep extends React.Component {
     });
   }
 
+  // We use the heatmap metrics as the valid metrics for bulk downloads.
+  async fetchHeatmapMetrics() {
+    const heatmapMetrics = await getHeatmapMetrics();
+
+    this.setState({
+      metricsOptions: heatmapMetrics,
+    });
+  }
+
   async checkAllSamplesUploadedByCurrentUser() {
     const { selectedSampleIds } = this.props;
     const allSamplesUploadedByCurrentUser = await uploadedByCurrentUser(
@@ -67,34 +109,56 @@ class ChooseStep extends React.Component {
     });
   }
 
-  isDownloadValid = () => {
-    const {
-      selectedDownloadTypeName,
-      downloadTypes,
-      selectedFields,
-    } = this.props;
+  getSelectedDownloadType = () => {
+    const { selectedDownloadTypeName, downloadTypes } = this.props;
 
     if (!selectedDownloadTypeName) {
-      return false;
+      return null;
     }
 
-    const downloadType = find(
-      ["type", selectedDownloadTypeName],
-      downloadTypes
-    );
+    return find(["type", selectedDownloadTypeName], downloadTypes);
+  };
+
+  // Get all the fields we need to validate for the selected download type.
+  getRequiredFieldsForSelectedType = () => {
+    const { selectedFields } = this.props;
+    const downloadType = this.getSelectedDownloadType();
+
+    if (!downloadType) return null;
+
+    let requiredFields = downloadType.fields;
+
+    // Remove any conditional fields if they don't meet the criteria.
+    CONDITIONAL_FIELDS.forEach(field => {
+      if (
+        downloadType.type === field.downloadType &&
+        !triggersConditionalField(field, selectedFields)
+      ) {
+        requiredFields = reject(["type", field.field], requiredFields);
+      }
+    });
+
+    return requiredFields;
+  };
+
+  isSelectedDownloadValid = () => {
+    const { selectedFields } = this.props;
+
+    const downloadType = this.getSelectedDownloadType();
 
     if (!downloadType) {
       return false;
     }
 
-    if (downloadType.fields) {
+    const requiredFields = this.getRequiredFieldsForSelectedType();
+
+    if (requiredFields) {
       if (
         some(
           Boolean,
           map(
-            field =>
-              isUndefined(get([downloadType.type, field.type], selectedFields)),
-            downloadType.fields
+            field => isUndefined(get(field.type, selectedFields)),
+            requiredFields
           )
         )
       ) {
@@ -161,9 +225,10 @@ class ChooseStep extends React.Component {
       backgroundOptions,
       taxaWithReadsOptions,
       isLoadingTaxaWithReadsOptionsOptions,
+      metricsOptions,
     } = this.state;
 
-    const selectedField = get([downloadType.type, field.type], selectedFields);
+    const selectedField = get(field.type, selectedFields);
     let dropdownOptions = null;
     let loadingOptions = false;
     let optionsHeader = null;
@@ -174,6 +239,35 @@ class ChooseStep extends React.Component {
     let onFilterChange = null;
     let showNoResultsMessage = false;
     let isLoadingSearchOptions = false;
+
+    // Handle rendering conditional fields.
+
+    // For the file format field, render a placeholder. This is a special case.
+    const fileFormatConditionalField = CONDITIONAL_FIELDS[0];
+    if (
+      field.type === fileFormatConditionalField.field &&
+      downloadType.type === fileFormatConditionalField.downloadType &&
+      !triggersConditionalField(fileFormatConditionalField, selectedFields)
+    ) {
+      return (
+        <div className={cs.field} key={field.type}>
+          <div className={cs.label}>{field.display_name}:</div>
+          <div className={cs.forcedOption}>.fasta</div>
+          <div className={cs.info}>
+            Note: Only .fasta is available when selecting one taxon.
+          </div>
+        </div>
+      );
+      // For other conditional fields, render nothing.
+    } else if (
+      CONDITIONAL_FIELDS.some(
+        conditionalField =>
+          field.type === conditionalField.field &&
+          downloadType.type === conditionalField.downloadType &&
+          !triggersConditionalField(conditionalField, selectedFields)
+      )
+    )
+      return;
 
     // Set different props for the dropdown depending on the field type.
     switch (field.type) {
@@ -188,11 +282,11 @@ class ChooseStep extends React.Component {
       case "taxa_with_reads":
         dropdownOptions = [
           {
-            text: "All Taxon",
+            text: "All Taxa",
             value: "all",
             customNode: (
               <div className={cs.taxaWithReadsOption}>
-                <div className={cs.taxonName}>All taxon</div>
+                <div className={cs.taxonName}>All taxa</div>
                 <div className={cs.fill} />
                 <div className={cs.sampleCount}>{selectedSampleIds.size}</div>
               </div>
@@ -203,8 +297,8 @@ class ChooseStep extends React.Component {
           ...(this.sortTaxaWithReadsOptions(taxaWithReadsOptions) || []),
         ];
 
-        placeholder = "Select taxa";
-        menuLabel = "Select taxa";
+        placeholder = "Select taxon";
+        menuLabel = "Select taxon";
         showNoResultsMessage = true;
         search = true;
         onFilterChange = this.handleTaxaWithReadsSelectFilterChange;
@@ -213,15 +307,37 @@ class ChooseStep extends React.Component {
 
         optionsHeader = (
           <div className={cs.taxaWithReadsOptionsHeader}>
-            <div className={cs.header}>Taxa</div>
+            <div className={cs.header}>Taxon</div>
             <div className={cs.fill} />
             <div className={cs.header}>Samples</div>
           </div>
         );
         break;
+      case "taxa_with_contigs":
+        return (
+          <div className={cs.field} key={field.type}>
+            <div className={cs.label}>{field.display_name}:</div>
+            <TaxonContigSelect
+              sampleIds={selectedSampleIds}
+              onChange={(value, displayName) => {
+                onFieldSelect(
+                  downloadType.type,
+                  field.type,
+                  value,
+                  displayName
+                );
+              }}
+              value={selectedField}
+            />
+          </div>
+        );
       case "background":
         dropdownOptions = backgroundOptions || [];
         placeholder = backgroundOptions ? "Select background" : "Loading...";
+        break;
+      case "metric":
+        dropdownOptions = metricsOptions || [];
+        placeholder = metricsOptions ? "Select metric" : "Loading...";
         break;
     }
 
@@ -237,9 +353,25 @@ class ChooseStep extends React.Component {
           disabled={loadingOptions}
           placeholder={loadingOptions ? "Loading..." : placeholder}
           options={dropdownOptions}
-          onChange={(value, displayName) =>
-            onFieldSelect(downloadType.type, field.type, value, displayName)
-          }
+          onChange={(value, displayName) => {
+            onFieldSelect(downloadType.type, field.type, value, displayName);
+
+            // Reset conditional fields if they are no longer needed.
+            CONDITIONAL_FIELDS.forEach(conditionalField => {
+              if (
+                field.type === conditionalField.dependentField &&
+                downloadType.type === conditionalField.downloadType &&
+                !conditionalField.triggerValues.includes(value)
+              ) {
+                onFieldSelect(
+                  downloadType.type,
+                  conditionalField.field,
+                  undefined,
+                  undefined
+                );
+              }
+            });
+          }}
           value={selectedField}
           optionsHeader={optionsHeader}
           menuLabel={menuLabel}
@@ -258,17 +390,21 @@ class ChooseStep extends React.Component {
   renderDownloadType = downloadType => {
     const { selectedDownloadTypeName, onSelect } = this.props;
     const { allSamplesUploadedByCurrentUser } = this.state;
+    const { admin } = this.context || {};
+
     const selected = selectedDownloadTypeName === downloadType.type;
     let disabled = false;
     let disabledMessage = "";
 
     if (
-      downloadType.type === "host_gene_counts" &&
-      !allSamplesUploadedByCurrentUser
+      downloadType.uploader_only &&
+      !allSamplesUploadedByCurrentUser &&
+      !admin
     ) {
       disabled = true;
-      disabledMessage =
-        "To download host gene counts, you must be the original uploader of all selected samples.";
+      disabledMessage = `To download ${
+        downloadType.display_name
+      }, you must be the original uploader of all selected samples.`;
     }
 
     const downloadTypeElement = (
@@ -287,7 +423,12 @@ class ChooseStep extends React.Component {
           selected={selected}
         />
         <div className={cs.content}>
-          <div className={cs.name}>{downloadType.display_name}</div>
+          <div className={cs.name}>
+            {downloadType.display_name}
+            {downloadType.admin_only && (
+              <StatusLabel inline status="Admin Only" />
+            )}
+          </div>
           <div className={cs.description}>{downloadType.description}</div>
           {downloadType.fields &&
             selected && (
@@ -352,7 +493,7 @@ class ChooseStep extends React.Component {
         </div>
         <div className={cs.footer}>
           <PrimaryButton
-            disabled={!this.isDownloadValid()}
+            disabled={!this.isSelectedDownloadValid()}
             text="Continue"
             onClick={onContinue}
           />
@@ -369,10 +510,13 @@ ChooseStep.propTypes = {
   downloadTypes: PropTypes.arrayOf(PropTypes.DownloadType),
   selectedDownloadTypeName: PropTypes.string,
   onSelect: PropTypes.func.isRequired,
-  selectedFields: PropTypes.objectOf(PropTypes.objectOf(PropTypes.string)),
+  // The selected fields of the currently selected download type.
+  selectedFields: PropTypes.objectOf(PropTypes.string),
   onFieldSelect: PropTypes.func.isRequired,
   onContinue: PropTypes.func.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };
+
+ChooseStep.contextType = UserContext;
 
 export default ChooseStep;

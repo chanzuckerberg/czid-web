@@ -54,10 +54,7 @@ class Sample < ApplicationRecord
   DEFAULT_QUEUE_HIMEM = (Rails.env == 'prod' ? 'idseq-prod-himem' : 'idseq-staging-himem').freeze
   DEFAULT_VCPUS_HIMEM = 32
 
-  METADATA_FIELDS = [:sample_unique_id, # 'Unique ID' (e.g. in human case, patient ID)
-                     :sample_location, :sample_date, :sample_tissue,
-                     :sample_template, # this refers to nucleotide type (RNA or DNA)
-                     :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection,].freeze
+  METADATA_FIELDS = [:sample_notes].freeze
 
   SLEEP_SECONDS_BETWEEN_RETRIES = 10
 
@@ -84,13 +81,10 @@ class Sample < ApplicationRecord
 
   validate :input_files_checks
   after_create :initiate_input_file_upload
-  validates :name, uniqueness: { scope: :project_id }
+  validates :name, uniqueness: { scope: :project_id, case_sensitive: false }
 
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
-
-  # Error on trying to save string values to float
-  validates :sample_input_pg, :sample_batch, numericality: true, allow_nil: true
 
   # getter
   attr_reader :bulk_mode
@@ -104,11 +98,25 @@ class Sample < ApplicationRecord
 
   def pipeline_versions
     prvs = []
-    pipeline_runs.each do |pr|
-      next if pr.completed? && pr.taxon_counts.empty?
+    pipeline_runs.joins(:taxon_counts).distinct.each do |pr|
       prvs << (pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version)
     end
     prvs.uniq
+  end
+
+  def pipeline_runs_info
+    prvs = {}
+    pipeline_runs.left_joins(:taxon_counts, :alignment_config).order(created_at: :desc).distinct.each do |pr|
+      prvs[pr.pipeline_version] ||= {
+        id: pr.id,
+        pipeline_version: pr.pipeline_version.nil? ? PipelineRun::PIPELINE_VERSION_WHEN_NULL : pr.pipeline_version,
+        created_at: pr.created_at,
+        alignment_config_name: pr.alignment_config.name,
+        assembled: pr.assembled.to_i,
+        adjusted_remaining_reads: pr.adjusted_remaining_reads,
+      }
+    end
+    prvs.values
   end
 
   def fasta_input?
@@ -181,8 +189,7 @@ class Sample < ApplicationRecord
     if search
       search = search.strip
       results = where('samples.name LIKE :search
-        OR samples.sample_notes LIKE :search
-        OR samples.sample_unique_id LIKE :search', search: "%#{search}%")
+        OR samples.sample_notes LIKE :search', search: "%#{search}%")
 
       unless eligible_pr_ids.empty?
         # Require scope of eligible pipeline runs for pathogen search

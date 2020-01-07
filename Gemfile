@@ -14,7 +14,6 @@ gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'consul', '>= 0.13.1'
-gem 'devise', '>= 4.7.1'
 gem 'health_check', '>= 2.7.0'
 gem 'honeycomb-rails', '>= 0.8.1'
 gem 'mailgun_rails', '>= 0.9.0'
@@ -30,9 +29,11 @@ gem 'silencer'
 gem 'elasticsearch-model'
 # Use mysql as the database for Active Record
 gem 'mysql2'
+gem 'oj'
+gem 'parallel', '1.14.0'
 gem 'prometheus-client', '0.7.1'
 # Use Puma as the app server
-gem 'puma', '~> 3.7'
+gem 'puma', '~> 3.12'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
@@ -91,6 +92,10 @@ gem 'csv-safe', '~> 1.2'
 
 # For accessing Auth0 management APIs
 gem 'auth0'
+gem 'warden', '~> 1.2'
+
+# For Access-Control-Allow-Origin and Cloudfront
+gem "rack-cors"
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -115,6 +120,7 @@ group :development do
 end
 
 group :test do
+  gem 'resque_spec'
   gem 'rspec-json_expectations'
   gem 'webmock', '~> 3.6'
 end

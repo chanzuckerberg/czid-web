@@ -79,7 +79,8 @@ export const joinServerError = response => {
 export const sampleErrorInfo = (sample, pipelineRun) => {
   let status, message, linkText, type, link, pipelineVersionUrlParam;
   switch (
-    sample.upload_error || (pipelineRun && pipelineRun.known_user_error)
+    sample.upload_error ||
+    (pipelineRun && pipelineRun.known_user_error)
   ) {
     case "BASESPACE_UPLOAD_FAILED":
       status = "SAMPLE FAILED";
@@ -113,9 +114,7 @@ export const sampleErrorInfo = (sample, pipelineRun) => {
       break;
     case "FAULTY_INPUT":
       status = "COMPLETE - ISSUE";
-      message = `Sorry, something was wrong with your input file. ${
-        pipelineRun.error_message
-      }.`;
+      message = `Sorry, something was wrong with your input file. ${pipelineRun.error_message}.`;
       linkText = "Please check your file format and reupload your file.";
       type = "warning";
       link = "/samples/upload";

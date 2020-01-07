@@ -15,8 +15,8 @@ class PipelineRunStage < ApplicationRecord
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
   ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
-  POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze
-  EXPT_STAGE_NAME = "Experimental".freeze
+  POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze # also known as "assembly"
+  EXPT_STAGE_NAME = "Experimental".freeze # Not actually experimental anymore!
 
   # Dag Json names
   DAG_NAME_HOST_FILTER = "host_filter".freeze
@@ -68,6 +68,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def dag_name
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     STAGE_INFO[step_number][:dag_name]
   end
 
@@ -206,8 +207,7 @@ class PipelineRunStage < ApplicationRecord
 
   def log_url
     return nil unless job_log_id
-    "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
-      "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
+    AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
   end
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############

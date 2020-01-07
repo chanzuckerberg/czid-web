@@ -238,6 +238,7 @@ class BareDropdown extends React.Component {
               className={cs.searchInput}
               icon="search"
               placeholder="Search"
+              value={filterString}
               onChange={this.handleFilterChange}
               disableAutocomplete={disableAutocomplete}
             />
@@ -369,5 +370,6 @@ BareDropdown.defaultProps = {
 
 BareDropdown.Header = BaseDropdown.Header;
 BareDropdown.Item = BaseDropdown.Item;
+BareDropdown.Divider = BaseDropdown.Divider;
 
 export default BareDropdown;

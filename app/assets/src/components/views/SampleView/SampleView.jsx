@@ -599,13 +599,13 @@ class SampleView extends React.Component {
                 />
               )}{" "}
               <SampleViewControls
+                backgroundId={reportPageParams.background_id}
                 reportPresent={reportPresent}
                 sample={sample}
                 project={project}
                 pipelineRun={pipelineRun}
                 reportDetails={reportDetails}
-                reportPageParams={reportPageParams}
-                canEdit={this.props.canEdit}
+                editable={this.props.canEdit}
                 view={this.state.view}
               />
             </ViewHeader.Controls>

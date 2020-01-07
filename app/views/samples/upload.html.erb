@@ -7,6 +7,6 @@
       biohubS3UploadEnabled: JSON.parse('<%= raw escape_json(current_user.biohub_s3_upload_enabled?) %>'),
       basespaceClientId: '<%= @basespace_client_id %>',
       basespaceOauthRedirectUri: '<%= @basespace_oauth_redirect_uri %>',
-    }, 'upload_page', JSON.parse('<%= raw escape_json(request_context) %>'))
+    }, 'upload_page', JSON.parse('<%= raw escape_json(user_context) %>'))
   <% end %>
 </div>

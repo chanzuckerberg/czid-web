@@ -5,7 +5,7 @@ class PhyloTreesController < ApplicationController
   include ElasticsearchHelper
   include ParameterSanitization
 
-  before_action :no_demo_user, only: :create
+  before_action :login_required, only: :create
 
   ########################################
   # Current logic for phylo_tree permissions:
@@ -121,7 +121,10 @@ class PhyloTreesController < ApplicationController
   def choose_taxon
     taxon_search_args = [params[:query]]
     taxon_search_args << params[:args].split(",") if params[:args].present?
-    taxon_search_args << { project_id: params[:project_id] }
+    filters = {}
+    filters[:project_id] = params[:project_id]
+    filters[:samples] = Sample.where(id: params[:sample_id]) if params[:sample_id]
+    taxon_search_args << filters
     taxon_list = taxon_search(*taxon_search_args)
     render json: JSON.dump(taxon_list)
   end
@@ -256,12 +259,11 @@ class PhyloTreesController < ApplicationController
       select
         samples.name,
         samples.project_id,
-        samples.sample_tissue,
-        samples.sample_location,
         samples.created_at,
         host_genomes.name as host,
         projects.name as project_name,
-        pipeline_runs.id as pipeline_run_id
+        pipeline_runs.id as pipeline_run_id,
+        samples.id as sample_id
       from pipeline_runs, projects, samples, host_genomes
       where
         pipeline_runs.id in (#{pipeline_run_ids.join(',')}) and
@@ -275,11 +277,18 @@ class PhyloTreesController < ApplicationController
     # Do not include the query on taxon_counts in the previous query above using a join,
     # because the taxon_counts table is large.
     taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).index_by { |tc| "#{tc.pipeline_run_id},#{tc.count_type}" }
+
+    metadata_by_sample_id = Metadatum.by_sample_ids(samples_projects.pluck("sample_id"))
+
     samples_projects.each do |sp|
       sp["taxid_reads"] ||= {}
       %w[NT NR].each do |count_type|
         key = "#{sp['pipeline_run_id']},#{count_type}"
         sp["taxid_reads"][count_type] = (taxon_counts[key] || []).count # count is a column of taxon_counts indicating number of reads
+      end
+      if metadata_by_sample_id[sp["sample_id"]]
+        sp["sample_type"] = metadata_by_sample_id[sp["sample_id"]][:sample_type]
+        sp["collection_location"] = metadata_by_sample_id[sp["sample_id"]][:collection_location_v2]
       end
     end
 

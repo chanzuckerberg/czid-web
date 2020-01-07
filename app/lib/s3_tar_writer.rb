@@ -14,12 +14,14 @@ class S3TarWriter
     @tar = Gem::Package::TarWriter.new(@gz)
   end
 
+  # The Ruby Tarwriter requires the file name to be 100 chars max (including file extension) and
+  # the complete file path to be 256 chars or less.
   def add_file_with_data(file_path, data)
     # 600 is the default permission the file will have. Readable/writable by owner only.
-    @tar.add_file_simple(file_path, 0o600, data.length) do |io|
+    @tar.add_file_simple(file_path, 0o600, data.bytesize) do |io|
       io.write(data)
     end
-    @total_size_processed += data.length
+    @total_size_processed += data.bytesize
   end
 
   def close

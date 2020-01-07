@@ -785,9 +785,10 @@ class PipelineSampleReport extends React.Component {
   downloadFastaUrl = params => {
     const { taxLevel, taxId } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
+    const taxLevelIdx = taxLevel === "species" ? 1 : 2;
     location.href = `/samples/${
       this.sampleId
-    }/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
+    }/fasta/${taxLevelIdx}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
   // download Contig
@@ -1471,7 +1472,7 @@ class RenderMarkup extends React.Component {
           taxa={parent.state.selected_taxons}
           topTaxa={parent.state.topScoringTaxa}
           sample={parent.report_details.sample_info}
-          metric={parent.state.treeMetric}
+          metric={parent.state.treeMetric || "aggregatescore"}
           nameType={parent.props.nameType}
           backgroundData={parent.state.backgroundData}
           onTaxonClick={parent.props.onTaxonClick}

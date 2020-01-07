@@ -85,21 +85,4 @@ $break-large: 1460px;
     margin-top: 9px;
     text-align: left;
   }
-  .devise-errors {
-    h2 {
-      display: none;
-    }
-    ul {
-      li {
-        background: $error-lightest;
-        border-radius: 5px;
-        color: $error;
-        margin: 0 auto;
-        padding: 10px 5px;
-        border: 1px solid $error;
-        font-size: 12px;
-        transition: width 0.2s ease-out;
-      }
-    }
-  }
 }

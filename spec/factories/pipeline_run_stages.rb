@@ -3,6 +3,7 @@ FactoryBot.define do
     # Should be one of the four stages:
     # Host Filtering, GSNAPLgcRAPSEARCH alignment,
     # Post Processing, Experimental
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     step_number { 1 }
     name { PipelineRunStage::HOST_FILTERING_STAGE_NAME }
     job_status { PipelineRunStage::STATUS_SUCCEEDED }

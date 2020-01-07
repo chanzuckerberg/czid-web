@@ -32,7 +32,7 @@ class TaxonLineage < ApplicationRecord
     superkingdom: MISSING_SUPERKINGDOM_ID,
   }.freeze
 
-  HOMO_SAPIENS_TAX_ID = 9606
+  HOMO_SAPIENS_TAX_ID = [9605, 9606].freeze
 
   # From https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens
   # Accessed 9/18/2018.
@@ -170,6 +170,12 @@ class TaxonLineage < ApplicationRecord
     level_str
   end
 
+  def self.versioned_lineages(tax_ids, lineage_version)
+    TaxonLineage
+      .where(taxid: tax_ids)
+      .where('? BETWEEN version_start AND version_end', lineage_version)
+  end
+
   def self.fetch_lineage_by_taxid(tax_map, pipeline_run_id)
     t0 = Time.now.to_f
     # Get list of tax_ids to look up in TaxonLineage rows. Include family_taxids.
@@ -193,9 +199,7 @@ class TaxonLineage < ApplicationRecord
       class_common_name order_common_name family_common_name genus_common_name
       species_common_name kingdom_taxid kingdom_name kingdom_common_name tax_name
     ]
-    lineage_by_taxid = TaxonLineage
-                       .where(taxid: tax_ids)
-                       .where('? BETWEEN version_start AND version_end', lineage_version)
+    lineage_by_taxid = versioned_lineages(tax_ids, lineage_version)
                        .pluck(*required_columns)
                        .map { |r| [r[0], required_columns.zip(r).to_h] }
                        .to_h

@@ -34,14 +34,12 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: READ_ACTIONS + EDIT_ACTIONS
   before_action :assert_access, only: OTHER_ACTIONS
   before_action :check_access
-  before_action :no_demo_user, only: [:create, :new]
+  before_action :login_required, only: [:create, :new]
 
   around_action :instrument_with_timer
 
-  clear_respond_to
-  respond_to :json
-
   MAX_BINS = 34
+  FAR_FUTURE_DAYS = 100_000
 
   # GET /projects
   # GET /projects.json
@@ -106,7 +104,7 @@ class ProjectsController < ApplicationController
                              .references(:samples)
           # get aggregated lists of association values in string by using MySQL's GROUP_CONCAT (should update to JSON_ARRAYAGG when possible)
           group_concat_host = "GROUP_CONCAT(DISTINCT host_genomes.name SEPARATOR '::') AS hosts"
-          group_concat_sample_type = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'sample_type' THEN metadata.string_validated_value ELSE NULL END SEPARATOR '::') AS tissues"
+          group_concat_sample_type = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'sample_type' THEN metadata.string_validated_value ELSE NULL END SEPARATOR '::') AS sample_types"
           group_concat_location = "GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'collection_location' THEN IFNULL(locations.name, metadata.string_validated_value) ELSE NULL END SEPARATOR '::') AS locations"
           group_concat_users = "GROUP_CONCAT(DISTINCT CONCAT(users.name,'|',users.email) ORDER BY users.name SEPARATOR '::') AS users"
           editable = "BIT_OR(IF(users.id=#{current_user.id}, 1, 0)) AS editable"
@@ -125,7 +123,11 @@ class ProjectsController < ApplicationController
               project_hash["owner"] = (project_hash["uploaders"] || '').split('::')[0]
               project_hash["editable"] = current_user.admin? || project_hash["editable"] == 1
               project_hash.delete("uploaders")
-              ["locations", "hosts", "tissues"].each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
+              ["locations", "hosts", "sample_types"].each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
+              # Return as "tissue" for legacy compatibility. It's too hard to
+              # rename all JS instances of "tissue".
+              project_hash["tissues"] = project_hash["sample_types"]
+              project_hash.delete("sample_types")
               project_hash
             end),
             all_projects_ids: (projects.pluck(:id).uniq if list_all_project_ids),
@@ -160,14 +162,14 @@ class ProjectsController < ApplicationController
     locations_v2 = LocationHelper.project_dimensions(sample_ids, "collection_location_v2")
     @timer.split("locations_v2")
 
-    tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type")
-                           .joins(:sample)
-                           .distinct
-                           .count(:project_id)
-    tissues = tissues.map do |tissue, count|
-      { value: tissue, text: tissue, count: count }
+    sample_types = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type")
+                                .joins(:sample)
+                                .distinct
+                                .count(:project_id)
+    sample_types = sample_types.map do |sample_type, count|
+      { value: sample_type, text: sample_type, count: count }
     end
-    @timer.split("tissues")
+    @timer.split("sample_types")
 
     # visibility
     # TODO(tiago): should this be public projects or projects with public samples?
@@ -250,7 +252,9 @@ class ProjectsController < ApplicationController
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
-          { dimension: "tissue", values: tissues },
+          # Return as "tissue" for legacy compatibility. It's too hard to
+          # rename all JS instances of "tissue".
+          { dimension: "tissue", values: sample_types },
         ]
       end
     end
@@ -399,6 +403,7 @@ class ProjectsController < ApplicationController
   # POST /projects.json
   def create
     @project = Project.new(project_params)
+    @project.days_to_keep_sample_private = FAR_FUTURE_DAYS if current_user.admin?
     @project.users << current_user
 
     respond_to do |format|
@@ -544,51 +549,28 @@ class ProjectsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def create_new_user_random_password(name, email)
     Rails.logger.info("Going to create new user via project sharing: #{email}")
-    user_params_with_password = { email: email, name: name }
-    # "aA1!" and 'squeeze' for no repeats to always satisfy complexity policy.
-    random_password = (SecureRandom.base64(15) + "aA1!").squeeze
-    user_params_with_password[:password] = random_password
-    user_params_with_password[:password_confirmation] = random_password
-
-    @user ||= User.new(user_params_with_password)
+    user_params = { email: email, name: name }
+    @user = User.new(user_params)
 
     # New flow for account creation on Auth0.
-    if get_app_config(AppConfig::USE_AUTH0_FOR_NEW_USERS) == "1"
-      if @user.save!
-        # Create the user with Auth0.
-        create_response = User.create_auth0_user(user_params_with_password)
-        auth0_id = create_response["user_id"]
+    if @user.save!
+      # Create the user with Auth0.
+      create_response = Auth0UserManagementHelper.create_auth0_user(user_params)
+      auth0_id = create_response["user_id"]
 
-        # Get their password reset link so they can set a password.
-        reset_response = User.get_auth0_password_reset_token(auth0_id)
-        reset_url = reset_response["ticket"]
+      # Get their password reset link so they can set a password.
+      reset_response = Auth0UserManagementHelper.get_auth0_password_reset_token(auth0_id)
+      reset_url = reset_response["ticket"]
 
-        # Send them an invitation and account activation email.
-        UserMailer.new_auth0_user_new_project(current_user,
-                                              email,
-                                              @project.id,
-                                              reset_url).deliver_now
-      end
-    else
-      # DEPRECATED: Legacy Devise flow. Remove block after migrating to Auth0.
-      @user.email_arguments = new_user_shared_project_email_arguments()
-      if @user.save!
-        # Only returns the token sent to user
-        @user.send_reset_password_instructions
-      end
+      # Send them an invitation and account activation email.
+      UserMailer.new_auth0_user_new_project(current_user,
+                                            email,
+                                            @project.id,
+                                            reset_url).deliver_now
     end
   rescue => exception
     LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}. #{exception.message}")
     LogUtil.log_backtrace(exception)
-  end
-
-  def new_user_shared_project_email_arguments
-    {
-      email_subject: 'You have been invited to IDseq',
-      email_template: 'new_user_new_project',
-      sharing_user_id: current_user.id,
-      shared_project_id: @project.id,
-    }
   end
 
   def shared_project_email_arguments

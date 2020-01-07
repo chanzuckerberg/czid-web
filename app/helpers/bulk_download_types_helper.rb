@@ -37,13 +37,16 @@ module BulkDownloadTypesHelper
     {
       type: COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
       display_name: "Combined Sample Taxon Results",
-      description: "The value of a particular metric (e.g. total reads, rPM) for all taxons in all selected samples, in a single data table",
+      description: "The value of a particular metric (e.g. total reads, rPM) for all taxa in all selected samples, in a single data table",
       category: "report",
       fields: [
         {
-          display_name: "File Format",
-          type: "file_format",
-          options: [".csv", ".biom"],
+          display_name: "Metric",
+          type: "metric",
+        },
+        {
+          display_name: "Background",
+          type: "background",
         },
       ],
       execution_type: RESQUE_EXECUTION_TYPE,
@@ -61,6 +64,7 @@ module BulkDownloadTypesHelper
       description: "Host gene count outputs from STAR",
       category: "report",
       execution_type: ECS_EXECUTION_TYPE,
+      admin_only: true,
     },
     {
       type: READS_NON_HOST_BULK_DOWNLOAD_TYPE,
@@ -69,7 +73,7 @@ module BulkDownloadTypesHelper
       category: "raw",
       fields: [
         {
-          display_name: "Taxa",
+          display_name: "Taxon",
           type: "taxa_with_reads",
         },
         {
@@ -87,7 +91,7 @@ module BulkDownloadTypesHelper
       category: "raw",
       fields: [
         {
-          display_name: "Taxa",
+          display_name: "Taxon",
           type: "taxa_with_contigs",
         },
       ],
@@ -106,6 +110,7 @@ module BulkDownloadTypesHelper
       description: "Original files you submitted to IDseq",
       category: "raw",
       execution_type: ECS_EXECUTION_TYPE,
+      uploader_only: true,
     },
   ].freeze
 

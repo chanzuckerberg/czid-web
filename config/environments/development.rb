@@ -56,6 +56,7 @@ Rails.application.configure do
   # Debug mode disables concatenation and preprocessing of assets.
   # This option may cause significant delays in view rendering with a large
   # number of complex assets.
+  # NOTE: webpack already pre-processes assets so we don't want to rails to.
   config.assets.debug = true
 
   # Suppress logger output for asset requests.
@@ -71,6 +72,15 @@ Rails.application.configure do
   config.action_controller.asset_host = proc { |source|
     "http://localhost:8080" if source =~ /wp_bundle\.js$/i
   }
+  # Uncomment this line to test cloudfront CDN. Must be running staging branch,
+  # so that filename hashes match.
+  # config.action_controller.asset_host = 'assets.staging.idseq.net'
+
+  # Custom config for idseq to enable CORS headers by environment. See rack_cors.rb.
+  config.allowed_cors_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ]
 
   ActiveRecordQueryTrace.enabled = true
 

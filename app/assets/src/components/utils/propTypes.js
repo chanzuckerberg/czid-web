@@ -109,6 +109,7 @@ const SampleUploadType = PropTypes.oneOf(["basespace", "local", "remote"]);
 const DownloadType = PropTypes.shape({
   type: PropTypes.string,
   display_name: PropTypes.string,
+  admin_only: PropTypes.bool,
   description: PropTypes.string,
   category: PropTypes.string,
   fields: PropTypes.arrayOf(
@@ -117,6 +118,7 @@ const DownloadType = PropTypes.shape({
       display_name: PropTypes.string,
     })
   ),
+  uploader_only: PropTypes.bool,
 });
 
 const DownloadTypeParam = PropTypes.shape({

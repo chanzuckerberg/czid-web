@@ -26,67 +26,66 @@ class HoverActions extends React.Component {
     const { pipelineVersion } = this.props;
     const hasCoverageViz = pipelineVersionHasCoverageViz(pipelineVersion);
 
+    const params = {
+      pipelineVersion,
+      taxCommonName: this.props.taxCommonName,
+      taxId: this.props.taxId,
+      taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
+      taxName: this.props.taxName,
+      taxSpecies: this.props.taxSpecies,
+    };
+
     return [
       {
+        key: `taxonomy_browser_${params.taxId}`,
         message: "NCBI Taxonomy Browser",
         icon: "fa-link",
         handleClick: this.props.onNcbiActionClick,
         enabled: this.props.ncbiEnabled,
         disabledMessage: "NCBI Taxonomy Not Found",
-        params: {
-          taxId: this.props.taxId,
-        },
+        params,
       },
       {
+        key: `fasta_download_${params.taxId}`,
         message: "FASTA Download",
         icon: "fa-download",
         handleClick: this.props.onFastaActionClick,
         enabled: this.props.fastaEnabled,
         disabledMessage: "FASTA Download Not Available",
-        params: {
-          taxId: this.props.taxId,
-          taxLevel: this.props.taxLevel,
-        },
+        params,
       },
       {
+        key: `contigs_download_${params.taxId}`,
         message: "Contigs Download",
         icon: "fa-puzzle-piece",
         handleClick: this.props.onContigVizClick,
         enabled: this.props.contigVizEnabled,
         disabledMessage: "No Contigs Available",
-        params: {
-          taxId: this.props.taxId,
-        },
+        params,
       },
       hasCoverageViz
         ? {
+            key: `coverage_viz_${params.taxId}`,
             message: "Coverage Visualization",
             iconComponentClass: CoverageIcon,
             handleClick: this.props.onCoverageVizClick,
             enabled: this.props.coverageVizEnabled,
             disabledMessage:
               "Coverage Visualization Not Available - requires reads in NT",
-            params: {
-              taxId: this.props.taxId,
-              taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
-              taxName: this.props.taxName,
-              taxCommonName: this.props.taxCommonName,
-            },
+            params,
           }
         : {
+            key: `alignment_viz_${params.taxId}`,
             message: "Alignment Visualization",
             icon: "fa-bars",
             handleClick: this.props.onCoverageVizClick,
             enabled: this.props.coverageVizEnabled,
             disabledMessage:
               "Alignment Visualization Not Available - requires reads in NT",
-            params: {
-              taxId: this.props.taxId,
-              taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
-              taxName: this.props.taxName,
-            },
+            params,
           },
       {
+        key: `phylo_tree_${params.taxId}`,
         message: (
           <div>
             Phylogenetic Analysis <BetaLabel />
@@ -142,7 +141,9 @@ class HoverActions extends React.Component {
 
     return (
       <BasicPopup
-        key={hoverAction.icon}
+        basic={false}
+        position="top center"
+        key={hoverAction.key}
         trigger={trigger}
         content={tooltipMessage}
       />
@@ -162,21 +163,22 @@ class HoverActions extends React.Component {
 
 HoverActions.propTypes = {
   className: PropTypes.string,
+  contigVizEnabled: PropTypes.bool,
+  coverageVizEnabled: PropTypes.bool,
+  fastaEnabled: PropTypes.bool,
+  ncbiEnabled: PropTypes.bool,
+  onContigVizClick: PropTypes.func.isRequired,
+  onCoverageVizClick: PropTypes.func.isRequired,
+  onFastaActionClick: PropTypes.func.isRequired,
+  onNcbiActionClick: PropTypes.func.isRequired,
+  onPhyloTreeModalOpened: PropTypes.func,
+  phyloTreeEnabled: PropTypes.bool,
+  pipelineVersion: PropTypes.string,
+  taxCommonName: PropTypes.string,
   taxId: PropTypes.number,
   taxLevel: PropTypes.number,
   taxName: PropTypes.string,
-  taxCommonName: PropTypes.string,
-  ncbiEnabled: PropTypes.bool,
-  onNcbiActionClick: PropTypes.func.isRequired,
-  fastaEnabled: PropTypes.bool,
-  onFastaActionClick: PropTypes.func.isRequired,
-  coverageVizEnabled: PropTypes.bool,
-  onCoverageVizClick: PropTypes.func.isRequired,
-  contigVizEnabled: PropTypes.bool,
-  onContigVizClick: PropTypes.func.isRequired,
-  phyloTreeEnabled: PropTypes.bool,
-  onPhyloTreeModalOpened: PropTypes.func,
-  pipelineVersion: PropTypes.string,
+  taxSpecies: PropTypes.array,
 };
 
 export default HoverActions;

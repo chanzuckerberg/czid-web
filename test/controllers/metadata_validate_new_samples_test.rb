@@ -5,19 +5,17 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   include ErrorHelper
 
   setup do
-    @user = users(:one)
-    @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    @user = users(:admin_one)
     @mosquito_host_genome = host_genomes(:mosquito)
     @human_host_genome = host_genomes(:human)
     @metadata_validation_project = projects(:metadata_validation_project)
     @public_project = projects(:public_project)
     @joe_project = projects(:joe_project)
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'basic' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -46,7 +44,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'basic with display names' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -76,7 +74,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'sample names valid' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -106,7 +104,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'missing metadata for sample' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -139,7 +137,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'missing host genome column' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -171,7 +169,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'missing or invalid host genome' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -209,7 +207,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'required fields' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -243,7 +241,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'duplicate samples' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -273,7 +271,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'invalid metadata fields for host genome' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -307,7 +305,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'duplicate columns' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -335,7 +333,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'core and custom fields' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -366,7 +364,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'invalid project' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -393,7 +391,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate values valid' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url(@metadata_validation_project), params: {
       metadata: {
@@ -439,7 +437,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'metadata validate accepts various date formats' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     post validate_csv_for_new_samples_metadata_url(@metadata_validation_project), params: {
       metadata: {
@@ -537,7 +535,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot vaidate metadata for new samples against a public project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -564,7 +562,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot validate metadata for new samples against a private project' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -591,7 +589,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can validate metadata for new samples against a project that he is a member of' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {

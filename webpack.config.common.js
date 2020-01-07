@@ -1,5 +1,6 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 // modules that are not compatible with IE11
 const includedNodeModules = ["query-string", "strict-uri-encode"];
@@ -8,7 +9,7 @@ const config = {
   entry: `${path.resolve(__dirname, "app/assets/src/")}/index.jsx`,
   output: {
     path: path.resolve(__dirname, "app/assets/"),
-    filename: "dist/bundle.min.js"
+    filename: "dist/[name].bundle.min.js",
   },
   resolve: {
     extensions: [".js", ".jsx"],
@@ -16,13 +17,13 @@ const config = {
       "~": path.resolve(__dirname, "app/assets/src"),
       "~ui": path.resolve(__dirname, "app/assets/src/components/ui"),
       "~utils": path.resolve(__dirname, "app/assets/src/components/utils"),
-      styles: path.resolve(__dirname, "app/assets/src/styles")
-    }
+      styles: path.resolve(__dirname, "app/assets/src/styles"),
+    },
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: "dist/bundle.min.css"
-    })
+      filename: "dist/[name].bundle.min.css",
+    }),
   ],
   devtool: "source-map",
   target: "web",
@@ -33,14 +34,14 @@ const config = {
         exclude: new RegExp(
           `/node_modules/(?!(${includedNodeModules.join("|")})/).*/`
         ),
-        loader: "babel-loader"
+        loader: "babel-loader",
       },
       {
         test: /.jsx$/,
         exclude: new RegExp(
           `/node_modules/(?!(${includedNodeModules.join("|")})/).*/`
         ),
-        loader: "babel-loader"
+        loader: "babel-loader",
       },
       {
         // Use CSS modules for new files.
@@ -48,7 +49,7 @@ const config = {
         exclude: [
           path.resolve(__dirname, "node_modules/"),
           path.resolve(__dirname, "app/assets/src/styles"),
-          path.resolve(__dirname, "app/assets/src/loader.scss")
+          path.resolve(__dirname, "app/assets/src/loader.scss"),
         ],
         use: [
           MiniCssExtractPlugin.loader,
@@ -58,17 +59,17 @@ const config = {
               minimize: true,
               sourceMap: true,
               modules: true,
-              localIdentName: "[local]-[hash:base64:5]"
-            }
+              localIdentName: "[local]-[hash:base64:5]",
+            },
           },
           {
             loader: "sass-loader",
             options: {
               minimize: true,
-              sourceMap: true
-            }
-          }
-        ]
+              sourceMap: true,
+            },
+          },
+        ],
       },
       {
         // Sass / Scss loader for legacy files in assets/src/styles.
@@ -76,7 +77,7 @@ const config = {
         include: [
           path.resolve(__dirname, "node_modules/"),
           path.resolve(__dirname, "app/assets/src/styles"),
-          path.resolve(__dirname, "app/assets/src/loader.scss")
+          path.resolve(__dirname, "app/assets/src/loader.scss"),
         ],
         use: [
           MiniCssExtractPlugin.loader,
@@ -84,17 +85,17 @@ const config = {
             loader: "css-loader",
             options: {
               minimize: true,
-              sourceMap: true
-            }
+              sourceMap: true,
+            },
           },
           {
             loader: "sass-loader",
             options: {
               minimize: true,
-              sourceMap: true
-            }
-          }
-        ]
+              sourceMap: true,
+            },
+          },
+        ],
       },
       {
         test: /\.(png|eot|ttf|svg)$/,
@@ -104,9 +105,9 @@ const config = {
           name: "fonts/[name].[ext]",
           mimetype: "application/font-woff",
           publicPath: url => {
-            return `/assets/${url.replace(/fonts/, "")}`;
-          }
-        }
+            return `/assets${url.replace(/fonts/, "")}`;
+          },
+        },
       },
       {
         test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
@@ -116,12 +117,35 @@ const config = {
           name: "fonts/[name].[ext]",
           mimetype: "application/font-woff",
           publicPath: url => {
-            return `/assets/${url.replace(/fonts/, "")}`;
-          }
-        }
-      }
-    ]
-  }
+            return `/assets${url.replace(/fonts/, "")}`;
+          },
+        },
+      },
+    ],
+  },
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        default: false, // disable default cache group
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          chunks: "all",
+          enforce: true, // always create a chunk
+        },
+      },
+    },
+    minimizer: [
+      new UglifyJsPlugin({
+        uglifyOptions: {
+          mangle: true,
+          // We need this option for rails react_component.
+          keep_fnames: true,
+        },
+        parallel: true,
+        sourceMap: true,
+      }),
+    ],
+  },
 };
 
 module.exports = config;

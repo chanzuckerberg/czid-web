@@ -1,6 +1,6 @@
 # [IDseq](https://idseq.net/) &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/chanzuckerberg/idseq-web/blob/master/LICENSE) [![Build Status](https://travis-ci.org/chanzuckerberg/idseq-web.svg?branch=master)](https://travis-ci.org/chanzuckerberg/idseq-web) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-![logo](https://assets.idseq.net/Logo_Black.png)
+![logo](https://assets.idseq.net/assets/Logo_Black.png)
 
 #### Infectious Disease Sequencing Platform
 IDseq is a hypothesis-free global software platform that helps scientists identify pathogens in metagenomic sequencing data.
@@ -15,6 +15,6 @@ Check out our repositories:
 - [idseq-web](https://github.com/chanzuckerberg/idseq-web) - Frontend portal (here)
 - [idseq-dag](https://github.com/chanzuckerberg/idseq-dag) - Bioinformatics pipeline and workflow engine
 - [idseq-cli](https://github.com/chanzuckerberg/idseq-cli) - Command line upload interface
-- [idseq-bench](https://github.com/chanzuckerberg/idseq-bench) - Pipeline benchmarking tools 
+- [idseq-bench](https://github.com/chanzuckerberg/idseq-bench) - Pipeline benchmarking tools
 
-Check out our [user wiki](https://github.com/chanzuckerberg/idseq-web/wiki) for getting started as a user. Check out our [dev wiki](https://github.com/chanzuckerberg/idseq-web/wiki/Developer-info) to get started as a developer.
+Check out our [wiki](https://github.com/chanzuckerberg/idseq-web/wiki) for getting started with development in this repository and in IDseq in general.

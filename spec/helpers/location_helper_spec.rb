@@ -87,7 +87,7 @@ RSpec.describe LocationHelper, type: :helper do
 
       expect(Location).to receive_message_chain(:where, :pluck, :group_by, :map, :to_h).and_return(country: [147], state: [153], city: [188])
       expect(samples).to receive(:includes).with(metadata: :location).and_return(samples)
-      expect(samples).to receive(:where).with("`metadata`.`string_validated_value` IN (?) OR `locations`.`country_id` IN (?) OR `locations`.`state_id` IN (?) OR `locations`.`city_id` IN (?)", query_text, [147], [153], [188]).and_return(expected)
+      expect(samples).to receive(:where).with("`metadata`.`string_validated_value` IN (BINARY ?) OR `locations`.`country_id` IN (?) OR `locations`.`state_id` IN (?) OR `locations`.`city_id` IN (?)", query_text, [147], [153], [188]).and_return(expected)
 
       result = LocationHelper.filter_by_name(samples, query_text)
       expect(result).to eq(expected)
@@ -100,7 +100,7 @@ RSpec.describe LocationHelper, type: :helper do
 
       expect(Location).to receive(:where).and_return([])
       expect(samples).to receive(:includes).with(metadata: :location).and_return(samples)
-      expect(samples).to receive(:where).with("`metadata`.`string_validated_value` IN (?)", query_text).and_return(expected)
+      expect(samples).to receive(:where).with("`metadata`.`string_validated_value` IN (BINARY ?)", query_text).and_return(expected)
 
       result = LocationHelper.filter_by_name(samples, query_text)
       expect(result).to eq(expected)

@@ -11,6 +11,7 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :pipeline_run_stages
   has_and_belongs_to_many :backgrounds
   has_and_belongs_to_many :phylo_trees
+  has_and_belongs_to_many :bulk_downloads
 
   has_many :output_states, dependent: :destroy
   has_many :taxon_counts, dependent: :destroy
@@ -45,6 +46,7 @@ class PipelineRun < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
 
   DAG_ANNOTATED_FASTA_BASENAME = 'taxid_annot.fasta'.freeze
+  DAG_ANNOTATED_COUNT_BASENAME = 'refined_annotated_out.count'.freeze
   DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
@@ -314,6 +316,7 @@ class PipelineRun < ApplicationRecord
 
   def create_run_stages
     run_stages = []
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     PipelineRunStage::STAGE_INFO.each do |step_number, info|
       run_stages << PipelineRunStage.new(
         step_number: step_number,
@@ -331,6 +334,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def active_stage
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     pipeline_run_stages.order(:step_number).each do |prs|
       return prs unless prs.succeeded?
     end
@@ -354,6 +358,16 @@ class PipelineRun < ApplicationRecord
   def report_ready?
     os = output_states.find_by(output: REPORT_READY_OUTPUT)
     !os.nil? && os.state == STATUS_LOADED
+  end
+
+  def taxon_byte_ranges_available?
+    return !taxon_byteranges.empty?
+  end
+
+  def align_viz_available?
+    # TODO(tiago): we should not have to access aws
+    align_summary_file = "#{alignment_viz_output_s3_path}.summary"
+    return align_summary_file && get_s3_file(align_summary_file) ? true : false
   end
 
   def report_failed?
@@ -397,15 +411,15 @@ class PipelineRun < ApplicationRecord
   end
 
   def contigs_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if supports_assembly?
   end
 
   def contigs_summary_s3_path
-    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if supports_assembly?
   end
 
   def annotated_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if supports_assembly?
     return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
     multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
@@ -429,8 +443,9 @@ class PipelineRun < ApplicationRecord
     files
   end
 
+  # Unidentified is also referred to as "unmapped"
   def unidentified_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if supports_assembly?
     return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
     "#{alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
@@ -542,16 +557,31 @@ class PipelineRun < ApplicationRecord
     taxon_lineage_map = {}
     TaxonLineage.where(taxid: taxid_list.uniq).order(:id).each { |t| taxon_lineage_map[t.taxid.to_i] = t.to_a }
 
+    # A lambda allows us to access variables in the enclosing scope, such as contig2taxid.
+    get_contig_hash = lambda do |header, sequence|
+      read_count = contig_stats_json[header] || 0
+      lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
+      species_taxid_nt = lineage_json.dig("NT", 0) || nil
+      species_taxid_nr = lineage_json.dig("NR", 0) || nil
+      genus_taxid_nt = lineage_json.dig("NT", 1) || nil
+      genus_taxid_nr = lineage_json.dig("NR", 1) || nil
+
+      {
+        name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json,
+        species_taxid_nt: species_taxid_nt, species_taxid_nr: species_taxid_nr,
+        genus_taxid_nt: genus_taxid_nt, genus_taxid_nr: genus_taxid_nr,
+      }
+    end
+
     File.open(contig_fasta, 'r') do |cf|
       line = cf.gets
       header = ''
       sequence = ''
       while line
         if line[0] == '>'
-          read_count = contig_stats_json[header] || 0
-          lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
-          if read_count >= MIN_CONTIG_SIZE && header != ''
-            contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
+          contig_hash = get_contig_hash.call(header, sequence)
+          if contig_hash[:read_count] >= MIN_CONTIG_SIZE && header != ''
+            contig_array << contig_hash
           end
           header = line[1..line.size].rstrip
           sequence = ''
@@ -560,10 +590,9 @@ class PipelineRun < ApplicationRecord
         end
         line = cf.gets
       end
-      read_count = contig_stats_json[header] || 0
-      lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
-      if read_count >= MIN_CONTIG_SIZE
-        contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
+      contig_hash = get_contig_hash.call(header, sequence)
+      if contig_hash[:read_count] >= MIN_CONTIG_SIZE
+        contig_array << contig_hash
       end
     end
     update(contigs_attributes: contig_array) unless contig_array.empty?
@@ -786,7 +815,9 @@ class PipelineRun < ApplicationRecord
     begin
       # TODO:  Make this less expensive while jobs are running, perhaps by doing it only sometimes, then again at end.
       # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
-      compile_stats_file
+      # TODO: (gdingle): compile_stats_file! will fetch s3 files 100s of times unnecessarily in a typical run.
+      # See https://jira.czi.team/browse/IDSEQ-1924.
+      compile_stats_file!
       load_stats_file
       load_chunk_stats
     rescue
@@ -802,6 +833,7 @@ class PipelineRun < ApplicationRecord
 
         # Precache reports for all backgrounds
         Resque.enqueue(PrecacheReportInfo, id)
+        Resque.enqueue(PrecacheReportInfoV2, id)
 
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]
@@ -958,20 +990,41 @@ class PipelineRun < ApplicationRecord
     save
   end
 
-  def compile_stats_file
+  # Generate stats.json from all *.count files in results dir. Example:
+  # [
+  #   {
+  #     "reads_after": 8262,
+  #     "task": "unidentified_fasta"
+  #   },
+  #   {
+  #     "reads_after": 8558,
+  #     "task": "bowtie2_out"
+  #   },
+  #   ...
+  #   {
+  #     "total_reads": 10000
+  #   },
+  #   {
+  #     "fraction_subsampled": 1.0
+  #   },
+  #   {
+  #     "adjusted_remaining_reads": 8558
+  #   }
+  # ]
+  #
+  # IMPORTANT NOTE: This method ALSO sets attributes of pipeline run instance.
+  # For unmapped_reads, it will read a .count file from /postprocess s3 dir.
+  def compile_stats_file!
     res_folder = output_s3_path_with_version
     stdout, _stderr, status = Open3.capture3("aws s3 ls #{res_folder}/ | grep count$")
     unless status.exitstatus.zero?
       return
     end
 
-    # Compile all counts
-    # Ex: [{"total_reads": 1122}, {"task": "star_out", "reads_after": 832}... {"adjusted_remaining_reads": 474}]
     all_counts = []
     stdout.split("\n").each do |line|
       fname = line.split(" ")[3] # Last col in line
-      raw = Syscall.run("aws", "s3", "cp", "#{res_folder}/#{fname}", "-")
-      contents = JSON.parse(raw)
+      contents = Syscall.s3_read_json("#{res_folder}/#{fname}")
       # Ex: {"gsnap_filter_out": 194}
       contents.each do |key, count|
         all_counts << { task: key, reads_after: count }
@@ -1019,10 +1072,7 @@ class PipelineRun < ApplicationRecord
     end
 
     # Load unidentified reads
-    unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
-    if unidentified
-      self.unmapped_reads = unidentified[:reads_after]
-    end
+    self.unmapped_reads = fetch_unmapped_reads(all_counts) || unmapped_reads
 
     # Write JSON to a file
     tmp = Tempfile.new
@@ -1036,6 +1086,35 @@ class PipelineRun < ApplicationRecord
     end
 
     save
+  end
+
+  # Fetch the unmapped reads count from alignment stage then refined counts from
+  # assembly stage, as each becomes available. Prior to Dec 2019, the count was
+  # only fetched from alignment.
+  def fetch_unmapped_reads(
+    all_counts,
+    s3_path = "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_COUNT_BASENAME}"
+  )
+    unmapped_reads = nil
+    unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
+    if unidentified
+      unmapped_reads = unidentified[:reads_after]
+
+      # This will fetch unconditionally on every iteration of the results
+      # monitor. My attempts to restrict fetching with "finalized?" and
+      # "step_number == 3" both failed to work in production.
+      if supports_assembly?
+        # see idseq_dag/steps/generate_annotated_fasta.py
+        begin
+          Rails.logger.info("Fetching file: #{s3_path}")
+          refined_annotated_out = Syscall.s3_read_json(s3_path)
+          unmapped_reads = refined_annotated_out["unidentified_fasta"]
+        rescue
+          Rails.logger.warn("Could not read file: #{s3_path}")
+        end
+      end
+    end
+    unmapped_reads
   end
 
   def local_json_path
@@ -1278,7 +1357,7 @@ class PipelineRun < ApplicationRecord
 
   def s3_paths_for_taxon_byteranges
     file_prefix = ''
-    file_prefix = ASSEMBLY_PREFIX if pipeline_version_has_assembly(pipeline_version)
+    file_prefix = ASSEMBLY_PREFIX if supports_assembly?
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
       'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
@@ -1365,18 +1444,25 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_summary_contig_counts_v2(min_contig_size)
-    summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
-    contig_lineages(min_contig_size).each do |c|
-      lineage = JSON.parse(c.lineage_json)
-      lineage.each do |count_type, taxid_arr|
-        taxids = taxid_arr[0..1]
-        taxids.each do |taxid|
-          summary_per_tax = summary_dict[taxid] ||= {}
-          summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= { contigs: 0, contig_reads: 0 }
-          summary_per_tax_and_type[:contigs] += 1
-          summary_per_tax_and_type[:contig_reads] += c.read_count
+    # Stores the number of contigs that match a given taxid, count_type (nt or nr), and read_count (number of reads aligned to that contig).
+    # Create and store default values for the hash if the key doesn't exist yet
+    summary_dict = Hash.new do |summary, taxid|
+      summary[taxid] = Hash.new do |taxid_hash, count_type| # rubocop forces different variable names
+        taxid_hash[count_type] = Hash.new do |count_type_hash, read_count|
+          count_type_hash[read_count] = 0
         end
       end
+    end
+    contig_taxids = contigs.where("read_count >= ?", min_contig_size)
+                           .where("lineage_json IS NOT NULL")
+                           .pluck("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
+    contig_taxids.each do |c|
+      read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr = c
+
+      summary_dict[species_taxid_nt]["nt"][read_count] += 1 if species_taxid_nt
+      summary_dict[species_taxid_nr]["nr"][read_count] += 1 if species_taxid_nr
+      summary_dict[genus_taxid_nt]["nt"][read_count] += 1 if genus_taxid_nt
+      summary_dict[genus_taxid_nr]["nr"][read_count] += 1 if genus_taxid_nr
     end
     return summary_dict
   end
@@ -1484,7 +1570,7 @@ class PipelineRun < ApplicationRecord
   # Gets last update time of all has_many relations and current pipeline run
   def max_updated_at
     assocs = PipelineRun.reflect_on_all_associations(:has_many)
-    assocs_max = assocs.map { |assoc| send(assoc.name).pluck(:updated_at).max }
+    assocs_max = assocs.map { |assoc| send(assoc.name).maximum(:updated_at) }
     [updated_at, assocs_max.compact.max].compact.max
   end
 
@@ -1506,8 +1592,31 @@ class PipelineRun < ApplicationRecord
     end
   end
 
+  def precache_report_info_v2!
+    params = report_info_params
+    Background.top_for_sample(sample).pluck(:id).each do |background_id|
+      cache_key = PipelineReportService.report_info_cache_key(
+        "/samples/#{sample.id}/report_v2.json",
+        params.merge(background_id: background_id)
+      )
+      Rails.logger.info("Precaching #{cache_key} with background #{background_id}")
+      Rails.cache.fetch(cache_key, expires_in: 30.days) do
+        PipelineReportService.call(self, background_id)
+      end
+
+      MetricUtil.log_analytics_event("PipelineReport_precached", nil)
+    end
+  end
+
   def rpm(raw_read_count)
-    raw_read_count /
-      ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
+    raw_read_count / ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
+  end
+
+  def alignment_db
+    alignment_config.name
+  end
+
+  private def supports_assembly?
+    pipeline_version_has_assembly(pipeline_version)
   end
 end

@@ -2,9 +2,6 @@ class VisualizationsController < ApplicationController
   include ReportHelper
   include HeatmapHelper
 
-  clear_respond_to
-  respond_to :json
-
   # This action takes up to 10s for 50 samples so we cache it.
   caches_action(
     :samples_taxons,
@@ -60,7 +57,8 @@ class VisualizationsController < ApplicationController
     # Redirects until we support standalone visualizations for these types
     if @type == "table" || @type == "tree"
       sample_id = vis.sample_ids[0]
-      return redirect_to "/samples/#{sample_id}?" + vis.data.to_query
+      path = current_user.allowed_feature?("report_v2") ? "/show_v2" : ""
+      return redirect_to "/samples/#{sample_id}#{path}?" + vis.data.to_query
     elsif @type == "phylo_tree"
       return redirect_to "/phylo_trees/index?" + vis.data.to_query
     end
@@ -169,6 +167,10 @@ class VisualizationsController < ApplicationController
       allowedFeatures: current_user.allowed_feature_list,
       heatmapTs: heatmap_ts,
     }
+  end
+
+  def heatmap_metrics
+    render json: HeatmapHelper::ALL_METRICS
   end
 
   def download_heatmap

@@ -17,12 +17,13 @@ class ToolbarIcon extends React.Component {
       disabled,
       onClick,
       icon,
+      popperDependencies,
     } = this.props;
 
     const iconWrapper = (
       <div
         className={cx(className, cs.iconWrapper, disabled && cs.disabled)}
-        onClick={onClick}
+        onClick={disabled ? undefined : onClick}
       >
         {icon}
       </div>
@@ -43,6 +44,7 @@ class ToolbarIcon extends React.Component {
         }
         position="top center"
         basic={false}
+        popperDependencies={popperDependencies}
       />
     );
   }
@@ -55,6 +57,9 @@ ToolbarIcon.propTypes = {
   popupSubtitle: PropTypes.string,
   disabled: PropTypes.bool,
   onClick: PropTypes.func,
+  // The popup will re-render and re-position whenever any value in this array changes.
+  // Allows us to gracefully handle popups with changing content.
+  popperDependencies: PropTypes.arrayOf(PropTypes.any),
 };
 
 export default ToolbarIcon;

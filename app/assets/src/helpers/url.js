@@ -26,10 +26,16 @@ export const parseUrlParams = () => {
     arrayFormat: "bracket",
   });
   for (var key in urlParams) {
-    try {
-      urlParams[key] = JSON.parse(urlParams[key]);
-    } catch (e) {
-      // pass
+    // Don't parse pipeline_version even though it looks like a number.
+    // 3.10 is different from 3.1
+    // TODO(mark): Switch to using UrlQueryParser instead.
+    if (key !== "pipeline_version") {
+      try {
+        // This parses booleans and numbers.
+        urlParams[key] = JSON.parse(urlParams[key]);
+      } catch (e) {
+        // pass
+      }
     }
   }
   return urlParams;

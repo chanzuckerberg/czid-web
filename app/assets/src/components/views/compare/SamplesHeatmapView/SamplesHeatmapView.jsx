@@ -30,7 +30,10 @@ import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 
-const SCALE_OPTIONS = [["Log", "symlog"], ["Lin", "linear"]];
+const SCALE_OPTIONS = [
+  ["Log", "symlog"],
+  ["Lin", "linear"],
+];
 const SORT_SAMPLES_OPTIONS = [
   { text: "Alphabetical", value: "alpha" },
   { text: "Cluster", value: "cluster" },
@@ -40,7 +43,7 @@ const SORT_TAXA_OPTIONS = [
   { text: "Cluster", value: "cluster" },
 ];
 const TAXONS_PER_SAMPLE_RANGE = {
-  min: 0,
+  min: 1,
   max: 100,
 };
 const SPECIFICITY_OPTIONS = [
@@ -66,6 +69,8 @@ class SamplesHeatmapView extends React.Component {
 
     this.initOnBeforeUnload(props.savedParamValues);
 
+    // IMPORTANT NOTE: These default values should be kept in sync with the
+    // backend defaults in HeatmapHelper for sanity.
     this.state = {
       selectedOptions: {
         metric: this.getSelectedMetric(),
@@ -80,7 +85,9 @@ class SamplesHeatmapView extends React.Component {
         taxaSortType: this.urlParams.taxaSortType || "cluster",
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
-        taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 30),
+        // Based on the trade-off between performance and information quantity, we
+        // decided on 10 as the best default number of taxons to show per sample.
+        taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 10),
         readSpecificity: parseAndCheckInt(this.urlParams.readSpecificity, 1),
       },
       loading: false,
@@ -559,10 +566,8 @@ class SamplesHeatmapView extends React.Component {
     return (
       <p className={cs.loadingIndicator}>
         <i className="fa fa-spinner fa-pulse fa-fw" />
-        Loading for {numSamples} samples. Please wait up to {estimate} second{estimate >
-        1
-          ? "s"
-          : ""}...
+        Loading for {numSamples} samples. Please wait up to {estimate} second
+        {estimate > 1 ? "s" : ""}...
       </p>
     );
   }

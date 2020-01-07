@@ -187,17 +187,12 @@ class CheckPipelineRuns
       next if k == "ORIGIN"
       new_metadata[k] = v
     end
-    # HACK: for benchmark 5 this string is always too long for the DB
-    #   depending on the connection type you are using it may be truncated or throw an error
-    #   truncating manually prevents an error
-    known_organisms = metadata['verified_contents'].pluck('genome').join(", ")[0..254]
     bm_sample_params = {
       name: bm_sample_name,
       host_genome_id: bm_host.id,
       project_id: bm_project.id,
       user_id: bm_user.id,
       input_files_attributes: input_files_attributes,
-      sample_organism: known_organisms,
       web_commit: web_commit,
       pipeline_commit: pipeline_commit,
       pipeline_branch: bm_pipeline_branch,

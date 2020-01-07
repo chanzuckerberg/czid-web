@@ -4,13 +4,13 @@
       react_component('Header', {
         adminUser: <%= current_user.admin %>,
         email: "help@idseq.net",
-        demoUser: <%= current_user.demo_user? %>,
         signInEndpoint: '<%=new_user_session_path%>',
         signOutEndpoint: '<%=destroy_user_session_path%>',
         userName: '<%= current_user.name %>',
         userSignedIn: true,
         disableNavigation: <%= @disable_header_navigation %>,
-      }, 'page_header', JSON.parse('<%= raw escape_json(request_context)%>'))
+        announcementBannerEnabled: <%= @announcement_banner_enabled %>,
+      }, 'page_header', JSON.parse('<%= raw escape_json(user_context)%>'))
 
 
       <% if ENV["SEGMENT_JS_ID"] %>

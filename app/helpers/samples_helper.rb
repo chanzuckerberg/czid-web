@@ -62,38 +62,6 @@ module SamplesHelper
     end
   end
 
-  # Load bulk metadata from a CSV file
-  # NOTE: Succeeded by Metadatum#load_csv_from_s3 for new Metadatum objects.
-  def populate_metadata_bulk(csv_s3_path)
-    # Load the CSV data. CSV should have columns "sample_name", "project_name", and any desired columns from Sample::METADATA_FIELDS.
-    csv_data = get_s3_file(csv_s3_path)
-    csv_data.delete!("\uFEFF") # Remove BOM if present (file likely comes from Excel)
-    CSV.parse(csv_data, headers: true) do |row|
-      # Find the right project and sample
-      row_details = row.to_h
-      proj = Project.find_by(name: row_details['project_name'])
-      next unless proj
-      sampl = Sample.find_by(project_id: proj, name: row_details['sample_name'])
-      next unless sampl
-
-      # Format the new details. Append to existing notes.
-      new_details = {}
-      new_details['sample_notes'] = sampl.sample_notes || ''
-      row_details.each do |key, value|
-        if !key || !value || key == 'sample_name' || key == 'project_name'
-          next
-        end
-        if Sample::METADATA_FIELDS.include?(key.to_sym)
-          new_details[key] = value
-        else # Otherwise throw in notes
-          new_details['sample_notes'] << format("\n- %s: %s", key, value)
-        end
-      end
-      new_details['sample_notes'].strip!
-      sampl.update_attributes!(new_details)
-    end
-  end
-
   def host_genomes_list
     HostGenome.all.map { |h| h.slice('name', 'id') }
   end
@@ -219,7 +187,9 @@ module SamplesHelper
     location_v2 = params[:locationV2]
     taxon = params[:taxon]
     time = params[:time]
-    tissue = params[:tissue]
+    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+    # instances to "sample_type"
+    sample_type = params[:tissue]
     visibility = params[:visibility]
     project_id = params[:projectId]
     search_string = params[:search]
@@ -231,7 +201,7 @@ module SamplesHelper
     samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
     samples = filter_by_metadata_key(samples, "collection_location_v2", location_v2) if location_v2.present?
     samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
-    samples = filter_by_metadata_key(samples, "sample_type", tissue) if tissue.present?
+    samples = filter_by_metadata_key(samples, "sample_type", sample_type) if sample_type.present?
     samples = filter_by_visibility(samples, visibility) if visibility.present?
     samples = filter_by_search_string(samples, search_string) if search_string.present?
     samples = filter_by_sample_ids(samples, requested_sample_ids) if requested_sample_ids.present?
@@ -619,7 +589,55 @@ module SamplesHelper
                       .map { |r| [r.tax_id, r.sample_count] }
                       .to_h
     taxon_list.each do |taxon|
-      taxon["sample_count"] = counts_by_taxid[taxon["taxid"]]
+      taxon["sample_count"] = counts_by_taxid[taxon["taxid"]] || 0
+    end
+    taxon_list
+  end
+
+  # For each taxon, count how many samples have contigs for that taxon.
+  # Add these counts to the taxon objects.
+  def augment_taxon_list_with_sample_count_contigs(taxon_list, samples)
+    get_tax_ids_by_level = lambda do |level|
+      taxon_list.select { |taxon| taxon["level"] == level }.map { |taxon| taxon["taxid"] }
+    end
+
+    species_tax_ids = nil
+    genus_tax_ids = nil
+    pipeline_run_ids = nil
+    pipeline_runs_by_taxid = nil
+
+    process_tax_ids = lambda do |level, type|
+      tax_id_field = "#{level}_taxid_#{type}"
+      tax_ids = level == "species" ? species_tax_ids : genus_tax_ids
+
+      if tax_ids.empty?
+        return
+      end
+
+      # We just need the distinct pairs to do our counting, not the individual contigs.
+      Contig
+        .where(pipeline_run_id: pipeline_run_ids, "#{tax_id_field}": tax_ids)
+        .select("DISTINCT pipeline_run_id, #{tax_id_field}")
+        .each { |contig| pipeline_runs_by_taxid[contig[tax_id_field]] << contig.pipeline_run_id }
+    end
+
+    # Separate genus and species taxids. We query them separately to try to get some extra performance.
+    species_tax_ids = get_tax_ids_by_level.call("species")
+    genus_tax_ids = get_tax_ids_by_level.call("genus")
+
+    pipeline_run_ids = get_succeeded_pipeline_runs_for_samples(samples).pluck(:id)
+
+    # We maintain a hash of taxid => array of pipeline run ids. We de-dupe the pipeline run ids at the very end.
+    pipeline_runs_by_taxid = Hash.new { |h, k| h[k] = [] } # Keys are auto-initialized to the empty array.
+
+    process_tax_ids.call("species", "nr")
+    process_tax_ids.call("species", "nt")
+    process_tax_ids.call("genus", "nr")
+    process_tax_ids.call("genus", "nt")
+
+    taxon_list.each do |taxon|
+      # De-dupe the pipeline run ids before taking the length.
+      taxon["sample_count_contigs"] = pipeline_runs_by_taxid[taxon["taxid"]].uniq.length
     end
     taxon_list
   end
