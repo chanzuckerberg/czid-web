@@ -51,7 +51,8 @@ class MetadataUpload extends React.Component {
       getAllHostGenomes(),
     ]);
     const sorted = sortBy(
-      metadataField => this.ordering[metadataField.key],
+      metadataField =>
+        this.ordering[metadataField.key] || Number.MAX_SAFE_INTEGER,
       projectMetadataFields
     );
     this.setState({
