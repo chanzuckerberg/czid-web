@@ -481,6 +481,7 @@ class PipelineReportService
     return unless ui_config
 
     highlighted_tax_ids = []
+    top_taxa_count = 0
 
     meets_highlight_condition = lambda do |counts|
       return (counts.dig(:nt, :rpm) || 0) > ui_config.min_nt_rpm \
@@ -493,19 +494,22 @@ class PipelineReportService
       genus_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS][genus_tax_id]
       highlighted_children = false
       genus_taxon[:species_tax_ids].each do |species_tax_id|
-        return highlighted_tax_ids if highlighted_tax_ids.length >= ui_config.top_n
+        break if top_taxa_count >= ui_config.top_n
 
         species_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_tax_id]
-        if meets_highlight_condition.call(species_taxon)
+        if meets_highlight_condition.call(species_taxon) && species_tax_id > 0
           highlighted_tax_ids << species_tax_id
           highlighted_children = true
+          top_taxa_count += 1
         end
       end
 
-      # if children species were not highlighted check genus
-      if meets_highlight_condition.call(genus_taxon)
+      if meets_highlight_condition.call(genus_taxon) && genus_tax_id > 0
         highlighted_tax_ids << genus_tax_id
+        # if children species were highlighted, don't count the genus towards the 3 top taxa
+        top_taxa_count += 1 unless highlighted_children
       end
+      return highlighted_tax_ids if top_taxa_count >= ui_config.top_n
     end
     return highlighted_tax_ids
   end
