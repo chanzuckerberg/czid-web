@@ -1,6 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import _fp, { filter, keyBy, concat, find } from "lodash/fp";
+import _fp, { filter, keyBy, concat, find, sortBy } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import MetadataCSVLocationsMenu, {
@@ -34,13 +34,28 @@ class MetadataUpload extends React.Component {
     CSVLocationWarnings: {},
   };
 
+  // Define the order in which metadata fields should be render in the upload
+  // grid. The order was defined by the perceived affinity of fields.
+  ordering = {
+    host_genome: 1, // currently, this is not a MetadataField technically
+    sample_type: 2,
+    nucleotide_type: 3,
+    water_control: 4,
+    collection_date: 5, // legacy
+    collection_location_v2: 6,
+  };
+
   async componentDidMount() {
     const [projectMetadataFields, hostGenomes] = await Promise.all([
       getProjectMetadataFields(this.props.project.id),
       getAllHostGenomes(),
     ]);
+    const sorted = sortBy(
+      metadataField => this.ordering[metadataField.key],
+      projectMetadataFields
+    );
     this.setState({
-      projectMetadataFields: keyBy("key", projectMetadataFields),
+      projectMetadataFields: keyBy("key", sorted),
       hostGenomes,
     });
   }
