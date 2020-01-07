@@ -473,7 +473,9 @@ class ReportTable extends React.Component {
 
     const validTaxId =
       rowData.taxId < INVALID_CALL_BASE_TAXID || rowData.taxId > 0;
-    const contigVizEnabled = !!keys(getOr({}, "nt.contigs", rowData)).length;
+    const contigVizEnabled =
+      !!keys(getOr({}, "nt.contigs", rowData)).length ||
+      !!keys(getOr({}, "nr.contigs", rowData)).length;
     const coverageVizEnabled =
       alignVizAvailable && validTaxId && getOr(0, "nt.count", rowData) > 0;
     const phyloTreeEnabled =
