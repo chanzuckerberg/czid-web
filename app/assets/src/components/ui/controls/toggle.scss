@@ -7,35 +7,56 @@
   transform: scale(1) !important;
 }
 
+.toggle.toggle.toggle label:before {
+  height: 2rem;
+  line-height: 2rem;
+  width: 68px;
+}
+
+// This aligns the text in the container above.
+.toggle.toggle.toggle label {
+  // padding-top: 0;
+  // padding-left: 0;
+}
+
+.toggle.toggle.toggle input:checked ~ label {
+  // padding-left: 0.5rem;
+}
+
+.toggle.toggle.toggle input:indeterminate ~ label {
+  // padding-left: 3.5rem;
+}
+
 // Repeat classname to increase specificity and override semantic-ui !important.
 .toggle.toggle.toggle input:checked ~ label:before {
   background-color: transparent !important; // override semantic-ui
   // TODO (gdingle): change to idseq color
   border: 2px solid blue;
-  height: 2rem;
-  line-height: 2rem;
-  width: 4rem;
+  padding-left: 0.5rem;
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:before {
   background-color: transparent !important; // override semantic-ui
   // TODO (gdingle): change to idseq color
   border: 2px solid gray;
-  height: 2rem;
-  line-height: 2rem;
-  width: 4rem;
 }
 
 .toggle.toggle.toggle label:after {
   top: 3px; // vertically align the circle in the height of the container
+  height: 1.5rem;
+  width: 1.5rem;
 }
 
 .toggle.toggle.toggle input:checked ~ label:after {
   // TODO (gdingle): change to idseq color
   background-color: blue;
+  left: calc(
+    68px - 4px - 1.5rem
+  ); // inner width of toggle minus inner padding minus width of
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:after {
   // TODO (gdingle): change to idseq color
   background-color: gray;
+  left: 4px; // should be same as 'top' above
 }
