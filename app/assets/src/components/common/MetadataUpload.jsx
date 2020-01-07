@@ -42,8 +42,9 @@ class MetadataUpload extends React.Component {
     sample_type: 2,
     nucleotide_type: 3,
     water_control: 4,
-    collection_date: 5, // legacy
-    collection_location_v2: 6,
+    collection_date: 5,
+    collection_location: 6, // legacy, code for both cases to be safe
+    collection_location_v2: 7,
   };
 
   async componentDidMount() {
