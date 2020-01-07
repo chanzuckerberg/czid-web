@@ -1,3 +1,5 @@
+@import "~styles/themes/colors";
+
 // For unknown reasons, semantic-ui is adding the rule
 //  [type=radio]:not(:checked)+label:after { transform: scale(0); }
 // which has the effect of hiding the circle part of the toggle when off.
@@ -8,55 +10,53 @@
 }
 
 .toggle.toggle.toggle label:before {
-  height: 2rem;
-  line-height: 2rem;
+  height: 28px;
+  line-height: 28px;
   width: 68px;
 }
 
-// This aligns the text in the container above.
 .toggle.toggle.toggle label {
-  // padding-top: 0;
-  // padding-left: 0;
+  padding-top: 5px; // vertical align text
+  min-width: 58px; // enough space for text
 }
 
+// Place text to the left
 .toggle.toggle.toggle input:checked ~ label {
-  // padding-left: 0.5rem;
+  padding-left: 17px;
+  padding-right: 17px;
 }
 
+// Place text to the right
 .toggle.toggle.toggle input:indeterminate ~ label {
-  // padding-left: 3.5rem;
+  padding-left: 34px;
 }
 
 // Repeat classname to increase specificity and override semantic-ui !important.
 .toggle.toggle.toggle input:checked ~ label:before {
   background-color: transparent !important; // override semantic-ui
-  // TODO (gdingle): change to idseq color
-  border: 2px solid blue;
-  padding-left: 0.5rem;
+  border: 1px solid $primary-light;
+  padding-left: 4px;
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:before {
   background-color: transparent !important; // override semantic-ui
-  // TODO (gdingle): change to idseq color
-  border: 2px solid gray;
+  border: 1px solid $light-grey;
 }
 
 .toggle.toggle.toggle label:after {
-  top: 3px; // vertically align the circle in the height of the container
-  height: 1.5rem;
-  width: 1.5rem;
+  top: 5px; // vertically align the circle in the height of the container
+  height: 18px;
+  width: 18px;
 }
 
 .toggle.toggle.toggle input:checked ~ label:after {
-  // TODO (gdingle): change to idseq color
-  background-color: blue;
+  background-color: $primary-light;
   left: calc(
-    68px - 4px - 1.5rem
-  ); // inner width of toggle minus inner padding minus width of
+    68px - 6px - 18px
+  ); // inner width of toggle minus inner padding minus width of circle
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:after {
-  // TODO (gdingle): change to idseq color
-  background-color: gray;
-  left: 4px; // should be same as 'top' above
+  background-color: $lightest-grey;
+  left: 6px; // should be same as 'top' above plus one
 }
