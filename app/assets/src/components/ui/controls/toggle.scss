@@ -14,6 +14,8 @@
 }
 
 .toggle.toggle.toggle label:before {
+  margin-left: 0px; // remove 4px margin
+  margin-right: 0px; // remove 4px margin
   height: 28px;
   line-height: 28px;
   width: 68px;
@@ -21,6 +23,7 @@
 
 .toggle.toggle.toggle label {
   padding-top: 6px; // vertical align text
+  min-height: 34px;
   min-width: 58px; // enough space for text
   font-size: $font-size-small;
 }
@@ -29,7 +32,6 @@
 .toggle.toggle.toggle input:checked ~ label {
   padding-left: 17px;
   padding-right: 17px;
-  color: $dark-grey !important;
 }
 
 // Place text to the right
@@ -53,16 +55,19 @@
   top: 5px; // vertically align the circle in the height of the container
   height: 18px;
   width: 18px;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+  transition-duration: 0.2s, 0.2s; // down from 0.3s
 }
 
 .toggle.toggle.toggle input:checked ~ label:after {
   background-color: $primary-light;
   left: calc(
-    68px - 6px - 18px
+    68px - 9px - 18px
   ); // inner width of toggle minus inner padding minus width of circle
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:after {
   background-color: $lightest-grey;
-  left: 6px; // should be same as 'top' above plus one
+  left: 2px;
 }
