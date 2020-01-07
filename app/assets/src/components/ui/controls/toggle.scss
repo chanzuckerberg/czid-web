@@ -1,11 +1,15 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+// NOTE: Classname .toggle is repeated here as .toggle.toggle.toggle to increase
+// specificity and always override semantic-ui.
 
 // For unknown reasons, semantic-ui is adding the rule
 //  [type=radio]:not(:checked)+label:after { transform: scale(0); }
 // which has the effect of hiding the circle part of the toggle when off.
 // The circle is always visible on the official example page at:
 // https://react.semantic-ui.com/modules/checkbox/#types-toggle
-.toggle label:after {
+.toggle.toggle.toggle label:after {
   transform: scale(1) !important;
 }
 
@@ -16,22 +20,24 @@
 }
 
 .toggle.toggle.toggle label {
-  padding-top: 5px; // vertical align text
+  padding-top: 6px; // vertical align text
   min-width: 58px; // enough space for text
+  font-size: $font-size-small;
 }
 
 // Place text to the left
 .toggle.toggle.toggle input:checked ~ label {
   padding-left: 17px;
   padding-right: 17px;
+  color: $dark-grey !important;
 }
 
 // Place text to the right
 .toggle.toggle.toggle input:indeterminate ~ label {
   padding-left: 34px;
+  color: $dark-grey !important;
 }
 
-// Repeat classname to increase specificity and override semantic-ui !important.
 .toggle.toggle.toggle input:checked ~ label:before {
   background-color: transparent !important; // override semantic-ui
   border: 1px solid $primary-light;
