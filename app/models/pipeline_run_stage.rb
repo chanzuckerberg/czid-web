@@ -233,7 +233,8 @@ class PipelineRunStage < ApplicationRecord
     # Upload DAG to S3
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
-    nucleotide_type = sample.metadata && sample.metadata[:nucleotide_type] ? sample.metadata[:nucleotide_type] : ''
+    nucleotide_type_metadatum = sample.metadata.find_by(key: "nucleotide_type")
+    nucleotide_type = nucleotide_type_metadatum ? nucleotide_type_metadatum.string_validated_value : ''
 
     attribute_dict = {
       fastq1: sample.input_files[0].name,
