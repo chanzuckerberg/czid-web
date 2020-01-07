@@ -3,12 +3,13 @@ import PropTypes from "prop-types";
 import { isArray } from "lodash/fp";
 import cx from "classnames";
 
-import Input from "~/components/ui/controls/Input";
-import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
+import Input from "~ui/controls/Input";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
-} from "~/components/ui/controls/GeoSearchInputBox";
+} from "~ui/controls/GeoSearchInputBox";
+import SampleTypeSearchBox from "~ui/controls/SampleTypeSearchBox";
 import AlertIcon from "~ui/icons/AlertIcon";
 
 import cs from "./metadata_input.scss";
@@ -58,7 +59,10 @@ class MetadataInput extends React.Component {
     } = this.props;
     const { warning } = this.state;
 
-    if (isArray(metadataType.options)) {
+    if (metadataType.dataType === "sample_type") {
+      console.log(metadataType.dataType);
+      return <SampleTypeSearchBox />;
+    } else if (isArray(metadataType.options)) {
       const options = metadataType.options.map(option => ({
         text: option,
         value: option,
