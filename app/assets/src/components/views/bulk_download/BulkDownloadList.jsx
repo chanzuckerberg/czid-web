@@ -2,6 +2,7 @@ import React from "react";
 import cx from "classnames";
 import { SortDirection } from "react-virtualized";
 import copy from "copy-to-clipboard";
+import { some } from "lodash/fp";
 
 import LargeDownloadIcon from "~ui/icons/LargeDownloadIcon";
 import LoadingMessage from "~/components/common/LoadingMessage";
@@ -12,10 +13,17 @@ import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import { Table } from "~/components/visualizations/table";
 import { openUrl } from "~utils/links";
 import { UserContext } from "~/components/common/UserContext";
+import Notification from "~ui/notifications/Notification";
 
 import BulkDownloadTableRenderers from "./BulkDownloadTableRenderers";
 import BulkDownloadDetailsModal from "./BulkDownloadDetailsModal";
 import cs from "./bulk_download_list.scss";
+
+// The number of times we automatically update the bulk downloads on the page before prompting the user.
+const AUTO_UPDATE_MAX_COUNT = 15;
+
+// Slightly larger than PROGRESS_UPDATE_DELAY on the back-end.
+const AUTO_UPDATE_DELAY = 20000;
 
 const STATUS_TYPES = {
   waiting: "default",
@@ -61,15 +69,37 @@ class BulkDownloadList extends React.Component {
     bulkDownloads: null,
     modalOpen: false,
     selectedBulkDownload: null,
+    autoUpdateCount: 0,
   };
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.autoUpdateBulkDownloads();
+  }
+
+  initiateAutoUpdate = () => {
+    this.setState({
+      autoUpdateCount: 0,
+    });
+
+    this.autoUpdateBulkDownloads();
+  };
+
+  autoUpdateBulkDownloads = async () => {
     const bulkDownloads = await getBulkDownloads();
+    const newAutoUpdateCount = this.state.autoUpdateCount + 1;
 
     this.setState({
       bulkDownloads: this.processBulkDownloads(bulkDownloads),
+      autoUpdateCount: newAutoUpdateCount,
     });
-  }
+
+    if (
+      newAutoUpdateCount < AUTO_UPDATE_MAX_COUNT &&
+      this.hasInProgressBulkDownloads()
+    ) {
+      setTimeout(this.autoUpdateBulkDownloads, AUTO_UPDATE_DELAY);
+    }
+  };
 
   getTableColumns = () => {
     const { admin } = this.context || {};
@@ -104,6 +134,9 @@ class BulkDownloadList extends React.Component {
       },
     ];
   };
+
+  hasInProgressBulkDownloads = () =>
+    some(["status", "running"], this.state.bulkDownloads);
 
   processBulkDownloads = bulkDownloads =>
     bulkDownloads.map(bulkDownload => ({
@@ -158,6 +191,8 @@ class BulkDownloadList extends React.Component {
   };
 
   renderBody() {
+    const { autoUpdateCount } = this.state;
+
     if (this.isLoading()) {
       return (
         <LoadingMessage
@@ -182,6 +217,19 @@ class BulkDownloadList extends React.Component {
 
     return (
       <NarrowContainer className={cs.tableContainer}>
+        {autoUpdateCount >= AUTO_UPDATE_MAX_COUNT &&
+          this.hasInProgressBulkDownloads() && (
+            <Notification
+              type="warn"
+              displayStyle="flat"
+              className={cs.autoUpdateWarning}
+            >
+              This page is no longer auto-updating.{" "}
+              <span onClick={this.initiateAutoUpdate} className={cs.link}>
+                Click here to see additional updates.
+              </span>
+            </Notification>
+          )}
         <Table
           rowClassName={cs.tableRow}
           headerClassName={cs.tableHeader}

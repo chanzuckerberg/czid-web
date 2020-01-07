@@ -106,6 +106,8 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "original_R2.fastq.gz"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Original Input Files.tar.gz",
+        "--progress-delay",
+        15,
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
@@ -113,6 +115,10 @@ describe BulkDownload, type: :model do
         "--progress-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
+      print("\n")
+      print(@bulk_download.bulk_download_ecs_task_command.join(" "))
+      print("\n")
+      print(task_command.join(" "))
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
     end
@@ -134,6 +140,8 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "unmapped.fasta"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Unmapped Reads.tar.gz",
+        "--progress-delay",
+        15,
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
@@ -167,6 +175,8 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh.fasta"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--progress-delay",
+        15,
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
@@ -204,6 +214,8 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--progress-delay",
+        15,
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
@@ -231,6 +243,8 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "contigs_nh.fasta"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Contigs (Non-host).tar.gz",
+        "--progress-delay",
+        15,
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
@@ -259,6 +273,8 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_per_gene.star.tab"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Host Gene Counts.tar.gz",
+        "--progress-delay",
+        15,
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
@@ -297,6 +313,8 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--progress-delay",
+        15,
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
@@ -339,6 +357,8 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--progress-delay",
+        15,
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
@@ -375,6 +395,8 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--progress-delay",
+        15,
         "--success-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
         "--error-url",
