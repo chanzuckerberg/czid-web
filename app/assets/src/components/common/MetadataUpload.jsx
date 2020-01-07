@@ -36,6 +36,7 @@ class MetadataUpload extends React.Component {
 
   // Define the order in which metadata fields should be render in the upload
   // grid. The order was defined by the perceived affinity of fields.
+  // Any field not defined will appear after in the pre-existing order.
   ordering = {
     host_genome: 1, // currently, this is not a MetadataField technically
     sample_type: 2,
