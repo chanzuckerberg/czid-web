@@ -758,6 +758,7 @@ class SamplesController < ApplicationController
       :project_id,
       :status,
       :host_genome_id,
+      :upload_error,
     ]
     respond_to do |format|
       format.html { render 'show_v2' }
