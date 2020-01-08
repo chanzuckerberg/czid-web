@@ -147,7 +147,7 @@ Rails.application.routes.draw do
   post 'user_settings/update', to: 'user_settings#update'
   get 'user_settings', to: 'user_settings#index'
 
-  get 'sample_types', to: 'sample_types#index'
+  get 'sample_types.json', to: 'sample_types#index'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
