@@ -425,6 +425,11 @@ class ChooseStep extends React.Component {
         <div className={cs.content}>
           <div className={cs.name}>
             {downloadType.display_name}
+            {downloadType.file_type_display && (
+              <span className={cs.fileType}>
+                &nbsp;({downloadType.file_type_display})
+              </span>
+            )}
             {downloadType.admin_only && (
               <StatusLabel inline status="Admin Only" />
             )}
@@ -480,13 +485,17 @@ class ChooseStep extends React.Component {
   };
 
   render() {
-    const { onContinue } = this.props;
+    const { onContinue, selectedSampleIds } = this.props;
+
+    const numSamples = selectedSampleIds.size;
 
     return (
       <div className={cs.chooseStep}>
         <div className={cs.header}>
           <div className={cs.title}>Choose a Download</div>
-          <div className={cs.tagline}>Learn More</div>
+          <div className={cs.tagline}>
+            {numSamples} sample{numSamples != 1 ? "s" : ""} selected
+          </div>
         </div>
         <div className={cs.downloadTypeContainer}>
           {this.renderDownloadTypes()}

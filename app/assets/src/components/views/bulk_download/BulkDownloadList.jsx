@@ -131,6 +131,7 @@ class BulkDownloadList extends React.Component {
         label: "",
         width: 190,
         cellRenderer: BulkDownloadTableRenderers.renderStatus,
+        disableSort: true,
       },
     ];
   };
