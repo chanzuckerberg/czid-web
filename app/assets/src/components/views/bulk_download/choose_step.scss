@@ -15,8 +15,8 @@
   }
 
   .tagline {
-    @include font-header-xs;
-    color: $primary-light;
+    @include font-body-xs;
+    color: $medium-grey;
   }
 }
 
@@ -28,7 +28,7 @@
 
   .category {
     &:not(:first-child) {
-      margin-top: 40px;
+      margin-top: $space-l;
     }
 
     .title {
@@ -120,6 +120,10 @@
   .description {
     @include font-body-xxs;
     color: $dark-grey;
+  }
+
+  .fileType {
+    color: $medium-grey;
   }
 }
 
