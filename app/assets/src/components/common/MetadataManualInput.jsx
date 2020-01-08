@@ -29,6 +29,13 @@ import MetadataInput from "./MetadataInput";
 const map = _fp.map.convert({ cap: false });
 
 class MetadataManualInput extends React.Component {
+  // List as of 2020-01-08.
+  INSECT_GENOME_IDS = [
+    2, // Mosquito
+    6, // Tick
+    16, // Bee
+  ];
+
   state = {
     selectedFieldNames: [],
     projectMetadataFields: null,
@@ -336,6 +343,8 @@ class MetadataManualInput extends React.Component {
                   }}
                   withinModal={this.props.withinModal}
                   isHuman={sampleHostGenomeId === 1}
+                  isInsect={this.INSECT_GENOME_IDS.includes(sampleHostGenomeId)}
+                  sampleTypes={this.state.sampleTypes}
                 />
                 {this.props.samples.length > 1 &&
                   this.renderApplyToAll(sample, column)}

@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { SampleTypeType } from "~/components/utils/propTypes";
+
 import LiveSearchPopBox from "./LiveSearchPopBox";
 
 class SampleTypeSearchBox extends React.Component {
@@ -71,6 +73,9 @@ SampleTypeSearchBox.propTypes = {
   className: PropTypes.string,
   onResultSelect: PropTypes.func.isRequired,
   value: PropTypes.string,
+  sampleTypes: PropTypes.arrayOf(SampleTypeType).isRequired,
+  isHuman: PropTypes.bool.isRequired,
+  isInsect: PropTypes.bool.isRequired,
 };
 
 export default SampleTypeSearchBox;

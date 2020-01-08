@@ -126,6 +126,13 @@ const DownloadTypeParam = PropTypes.shape({
   value: PropTypes.string,
 });
 
+const SampleTypeType = PropTypes.shape({
+  name: PropTypes.string,
+  group: PropTypes.string,
+  insect_only: PropTypes.string,
+  human_only: PropTypes.string,
+});
+
 export default {
   ReportDetails,
   Taxon,
@@ -141,5 +148,6 @@ export default {
   SampleUploadType,
   DownloadType,
   DownloadTypeParam,
+  SampleTypeType,
   ...PropTypes,
 };

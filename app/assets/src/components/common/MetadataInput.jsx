@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { isArray } from "lodash/fp";
 import cx from "classnames";
 
+import { SampleTypeType } from "~/components/utils/propTypes";
 import Input from "~ui/controls/Input";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
@@ -56,6 +57,8 @@ class MetadataInput extends React.Component {
       metadataType,
       className,
       isHuman,
+      isInsect,
+      sampleTypes,
     } = this.props;
     const { warning } = this.state;
 
@@ -68,6 +71,9 @@ class MetadataInput extends React.Component {
             // Result can be plain text or a match. We treat them the same.
             onChange(metadataType.key, result.name);
           }}
+          isHuman={isHuman}
+          isInsect={isInsect}
+          sampleTypes={sampleTypes}
         />
       );
     } else if (isArray(metadataType.options)) {
@@ -163,7 +169,9 @@ MetadataInput.propTypes = {
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
   isHuman: PropTypes.bool,
+  isInsect: PropTypes.bool,
   warning: PropTypes.string,
+  sampleTypes: PropTypes.arrayOf(SampleTypeType).isRequired,
 };
 
 export default MetadataInput;
