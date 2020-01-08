@@ -7,9 +7,27 @@ class SampleTypeSearchBox extends React.Component {
   handleSearchTriggered = query => {
     const categories = {};
 
+    // From https://docs.google.com/spreadsheets/d/1_hPkQe5LI0Zw_C0Ls4HVCEDsc_FNNVOaU_aAfoaiZRE/
     const results = [
-      // TODO (gdingle):
-      { title: "TODO MATCH", name: "TODO MATCH" },
+      { title: "Plasma", name: "plasma", description: "Systemic Inflammation" },
+      { title: "Serum", name: "serum", description: "Systemic Inflammation" },
+      {
+        title: "Whole Blood",
+        name: "whole blood",
+        description: "Systemic Inflammation",
+      },
+
+      { title: "Brain", name: "brain", description: "CNS Infections" },
+      {
+        title: "Cerebrospinal Fluid (CSF)",
+        name: "Cerebrospinal Fluid (CSF)",
+        description: "CNS Infections",
+      },
+      {
+        title: "Ocular Fluid",
+        name: "Ocular Fluid",
+        description: "CNS Infections",
+      },
     ];
 
     categories["ALL"] = {
@@ -19,6 +37,7 @@ class SampleTypeSearchBox extends React.Component {
 
     categories["NO_MATCH"] = {
       name: "Use Plain Text (No Match)",
+      // TODO (gdingle): lowercase plain text to distinguish?
       results: [{ title: query, name: query }],
     };
 
@@ -40,8 +59,8 @@ class SampleTypeSearchBox extends React.Component {
 
 SampleTypeSearchBox.propTypes = {
   className: PropTypes.string,
-  onResultSelect: PropTypes.func,
-  value: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  onResultSelect: PropTypes.func.isRequired,
+  value: PropTypes.string,
 };
 
 export default SampleTypeSearchBox;
