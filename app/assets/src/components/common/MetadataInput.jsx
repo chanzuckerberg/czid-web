@@ -59,9 +59,14 @@ class MetadataInput extends React.Component {
     } = this.props;
     const { warning } = this.state;
 
-    if (metadataType.dataType === "sample_type") {
-      console.log(metadataType.dataType);
-      return <SampleTypeSearchBox />;
+    if (metadataType.key === "sample_type") {
+      return (
+        <SampleTypeSearchBox
+          className={className}
+          value={value}
+          onResultSelect={val => onChange(metadataType.key, val)}
+        />
+      );
     } else if (isArray(metadataType.options)) {
       const options = metadataType.options.map(option => ({
         text: option,
