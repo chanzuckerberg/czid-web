@@ -1,0 +1,2 @@
+class SampleType < ApplicationRecord
+end
