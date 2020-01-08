@@ -14,7 +14,8 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
     populate_sample_types!
   end
 
-  # From https://docs.google.com/spreadsheets/d/1_hPkQe5LI0Zw_C0Ls4HVCEDsc_FNNVOaU_aAfoaiZRE/
+  # From "Sample Type Groupings" at
+  # https://docs.google.com/spreadsheets/d/1_hPkQe5LI0Zw_C0Ls4HVCEDsc_FNNVOaU_aAfoaiZRE/
   def populate_sample_types!
     initial_data = {
       'Systemic Inflammation': [

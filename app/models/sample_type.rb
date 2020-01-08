@@ -1,4 +1,5 @@
-# From https://docs.google.com/spreadsheets/d/1_hPkQe5LI0Zw_C0Ls4HVCEDsc_FNNVOaU_aAfoaiZRE/
+# From "Sample Type Groupings" at
+# https://docs.google.com/spreadsheets/d/1_hPkQe5LI0Zw_C0Ls4HVCEDsc_FNNVOaU_aAfoaiZRE/
 # Each sample type represents a canonical, mutually-exclusive type supported by IDseq.
 class SampleType < ApplicationRecord
   validates :name, :group, presence: true
