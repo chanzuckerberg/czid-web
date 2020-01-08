@@ -7,6 +7,11 @@ class SampleTypeSearchBox extends React.Component {
   handleSearchTriggered = query => {
     const categories = {};
 
+    // TODO (gdingle): add server side data
+    // TODO (gdingle): fetch data on ComponentDidMount
+    // TODO (gdingle): filter results by exact substring match
+    // TODO: ignore special chars?
+
     // From https://docs.google.com/spreadsheets/d/1_hPkQe5LI0Zw_C0Ls4HVCEDsc_FNNVOaU_aAfoaiZRE/
     const results = [
       { title: "Plasma", name: "plasma", description: "Systemic Inflammation" },
@@ -29,6 +34,11 @@ class SampleTypeSearchBox extends React.Component {
         description: "CNS Infections",
       },
     ];
+
+    categories["SUGGESTED"] = {
+      name: "SUGGESTED",
+      results,
+    };
 
     categories["ALL"] = {
       name: "ALL",
