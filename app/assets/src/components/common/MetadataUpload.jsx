@@ -9,7 +9,7 @@ import MetadataCSVLocationsMenu, {
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
-import { getAllHostGenomes } from "~/api";
+import { getAllHostGenomes, getAllSampleTypes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import LoadingIcon from "~ui/icons/LoadingIcon";
@@ -30,18 +30,23 @@ class MetadataUpload extends React.Component {
     },
     projectMetadataFields: null,
     hostGenomes: [],
+    sampleTypes: [],
     validatingCSV: false,
     CSVLocationWarnings: {},
   };
 
   async componentDidMount() {
-    const [projectMetadataFields, hostGenomes] = await Promise.all([
-      getProjectMetadataFields(this.props.project.id),
-      getAllHostGenomes(),
-    ]);
+    const [projectMetadataFields, hostGenomes, sampleTypes] = await Promise.all(
+      [
+        getProjectMetadataFields(this.props.project.id),
+        getAllHostGenomes(),
+        getAllSampleTypes(),
+      ]
+    );
     this.setState({
       projectMetadataFields: keyBy("key", projectMetadataFields),
       hostGenomes,
+      sampleTypes,
     });
   }
 

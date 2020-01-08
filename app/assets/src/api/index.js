@@ -92,6 +92,8 @@ const createSample = (
 
 const getAllHostGenomes = () => get("/host_genomes.json");
 
+const getAllSampleTypes = () => get("/sample_types.json");
+
 // TODO(mark): Remove this method once we launch the new sample upload flow.
 const bulkUploadRemoteSamples = samples =>
   postWithCSRF(`/samples/bulk_upload.json`, {
@@ -401,6 +403,7 @@ export {
   deleteSample,
   getAlignmentData,
   getAllHostGenomes,
+  getAllSampleTypes,
   getContigsSequencesByByteranges,
   getCoverageVizData,
   getCoverageVizSummary,
