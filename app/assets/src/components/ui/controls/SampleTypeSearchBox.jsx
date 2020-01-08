@@ -5,18 +5,15 @@ import LiveSearchPopBox from "./LiveSearchPopBox";
 
 class SampleTypeSearchBox extends React.Component {
   handleSearchTriggered = query => {
-    console.log("handleSearchTriggered", query);
+    const categories = {};
 
     const results = [
-      // TODO (gdingle): or use name/title?
-      { title: "TODO", description: "TODO", key: "TODO" },
+      // TODO (gdingle):
+      { title: "TODO MATCH", name: "TODO MATCH" },
     ];
-
-    const categories = {};
 
     categories["ALL"] = {
       name: "ALL",
-      // Format title/description for the text box.
       results,
     };
 
@@ -24,18 +21,18 @@ class SampleTypeSearchBox extends React.Component {
       name: "Use Plain Text (No Match)",
       results: [{ title: query, name: query }],
     };
-    console.log(categories);
 
     return categories;
   };
 
   render() {
-    const { className, value } = this.props;
+    const { className, value, onResultSelect } = this.props;
     return (
       <LiveSearchPopBox
         className={className}
         value={value}
         onSearchTriggered={this.handleSearchTriggered}
+        onResultSelect={onResultSelect}
       />
     );
   }

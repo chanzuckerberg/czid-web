@@ -64,7 +64,10 @@ class MetadataInput extends React.Component {
         <SampleTypeSearchBox
           className={className}
           value={value}
-          onResultSelect={val => onChange(metadataType.key, val)}
+          onResultSelect={({ result }) => {
+            // Result can be plain text or a match. We treat them the same.
+            onChange(metadataType.key, result.name);
+          }}
         />
       );
     } else if (isArray(metadataType.options)) {
