@@ -154,6 +154,7 @@ class MetadataUpload extends React.Component {
             withinModal={this.props.withinModal}
             projectMetadataFields={this.state.projectMetadataFields}
             hostGenomes={this.state.hostGenomes}
+            sampleTypes={this.state.sampleTypes}
           />
         );
       }

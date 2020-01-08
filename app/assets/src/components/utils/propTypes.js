@@ -129,8 +129,8 @@ const DownloadTypeParam = PropTypes.shape({
 const SampleTypeType = PropTypes.shape({
   name: PropTypes.string,
   group: PropTypes.string,
-  insect_only: PropTypes.string,
-  human_only: PropTypes.string,
+  insect_only: PropTypes.bool,
+  human_only: PropTypes.bool,
 });
 
 export default {

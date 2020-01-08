@@ -1,9 +1,8 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { isArray } from "lodash/fp";
 import cx from "classnames";
 
-import { SampleTypeType } from "~/components/utils/propTypes";
+import PropTypes from "~/components/utils/propTypes";
 import Input from "~ui/controls/Input";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
@@ -171,7 +170,7 @@ MetadataInput.propTypes = {
   isHuman: PropTypes.bool,
   isInsect: PropTypes.bool,
   warning: PropTypes.string,
-  sampleTypes: PropTypes.arrayOf(SampleTypeType).isRequired,
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeType).isRequired,
 };
 
 export default MetadataInput;

@@ -344,7 +344,7 @@ class MetadataManualInput extends React.Component {
                   withinModal={this.props.withinModal}
                   isHuman={sampleHostGenomeId === 1}
                   isInsect={this.INSECT_GENOME_IDS.includes(sampleHostGenomeId)}
-                  sampleTypes={this.state.sampleTypes}
+                  sampleTypes={this.props.sampleTypes}
                 />
                 {this.props.samples.length > 1 &&
                   this.renderApplyToAll(sample, column)}
@@ -398,6 +398,7 @@ MetadataManualInput.propTypes = {
   withinModal: PropTypes.bool,
   projectMetadataFields: PropTypes.object,
   hostGenomes: PropTypes.array,
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeType).isRequired,
 };
 
 export default MetadataManualInput;
