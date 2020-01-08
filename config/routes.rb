@@ -148,6 +148,7 @@ Rails.application.routes.draw do
   get 'user_settings', to: 'user_settings#index'
 
   resources :host_genomes
+  resources :sample_types
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 
   resources :benchmarks, only: [:index]
