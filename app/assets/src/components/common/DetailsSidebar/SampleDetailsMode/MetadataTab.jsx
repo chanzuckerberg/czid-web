@@ -96,8 +96,8 @@ class MetadataTab extends React.Component {
       onMetadataSave,
       metadataErrors,
       additionalInfo,
+      sampleTypes,
     } = this.props;
-
     return (
       <div className={cs.inputWrapper}>
         <MetadataInput
@@ -107,6 +107,7 @@ class MetadataTab extends React.Component {
           onChange={onMetadataChange}
           onSave={onMetadataSave}
           isHuman={additionalInfo.host_genome_name === "Human"}
+          sampleTypes={sampleTypes}
         />
         {metadataErrors[metadataType.key] && (
           <div className={cs.error}>{metadataErrors[metadataType.key]}</div>
@@ -236,6 +237,7 @@ MetadataTab.propTypes = {
     editable: PropTypes.bool,
   }).isRequired,
   metadataErrors: PropTypes.objectOf(PropTypes.string),
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
 
 export default MetadataTab;
