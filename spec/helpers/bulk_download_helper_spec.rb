@@ -185,4 +185,45 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       expect(response[:failed_sample_ids]).to eq([])
     end
   end
+
+  describe "#validate_bulk_download_field_params" do
+    it "should pass for bulk downloads without field params" do
+      helper.validate_bulk_download_field_params(
+        nil, BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+      )
+    end
+
+    it "should pass for valid parameters" do
+      params = ActionController::Parameters.new(taxa_with_reads: ActionController::Parameters.new(value: 1,
+                                                                                                  displayName: "Mock Taxon"))
+
+      helper.validate_bulk_download_field_params(
+        params, BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+      )
+    end
+
+    it "should pass for extraneous parameters" do
+      params = ActionController::Parameters.new(taxa_with_reads: ActionController::Parameters.new(value: 1,
+                                                                                                  displayName: "Mock Taxon"),
+                                                extra_param: ActionController::Parameters.new(value: "foo",
+                                                                                              displayName: "bar"))
+
+      helper.validate_bulk_download_field_params(
+        params, BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+      )
+    end
+
+    it "should throw error if parameters are invalid" do
+      params = ActionController::Parameters.new(taxa_with_reads: ActionController::Parameters.new( # value should be an integer
+        value: "abc",
+        displayName: "Mock Taxon"
+      ))
+
+      expect do
+        helper.validate_bulk_download_field_params(
+          params, BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+        )
+      end.to raise_error(StandardError, BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE)
+    end
+  end
 end
