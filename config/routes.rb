@@ -150,7 +150,6 @@ Rails.application.routes.draw do
   get 'sample_types.json', to: 'sample_types#index'
 
   resources :host_genomes
-  resources :sample_types
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 
   resources :benchmarks, only: [:index]

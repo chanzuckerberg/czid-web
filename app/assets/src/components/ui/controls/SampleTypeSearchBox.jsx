@@ -37,15 +37,15 @@ class SampleTypeSearchBox extends React.Component {
       // Non-human animals get suggested a subset
       return sampleType.human_only ? ALL : SUGGESTED;
     };
-    const suggestedSampleTypes = groupBy(
+    const sampleTypesByCategory = groupBy(
       getSampleTypeCategory,
       matchedSampleTypes
     );
 
-    return this.buildResults(suggestedSampleTypes, query);
+    return this.buildResults(sampleTypesByCategory, query);
   };
 
-  buildResults(suggestedSampleTypes, query) {
+  buildResults(sampleTypesByCategory, query) {
     const formatResult = result => {
       return {
         title: result.name,
@@ -54,16 +54,16 @@ class SampleTypeSearchBox extends React.Component {
       };
     };
     const results = {};
-    if (suggestedSampleTypes.suggested) {
+    if (sampleTypesByCategory[SUGGESTED]) {
       results.suggested = {
         name: SUGGESTED,
-        results: suggestedSampleTypes.suggested.map(formatResult),
+        results: sampleTypesByCategory[SUGGESTED].map(formatResult),
       };
     }
-    if (suggestedSampleTypes.all) {
+    if (sampleTypesByCategory[ALL]) {
       results.all = {
         name: ALL,
-        results: suggestedSampleTypes.all.map(formatResult),
+        results: sampleTypesByCategory[ALL].map(formatResult),
       };
     }
     return {
