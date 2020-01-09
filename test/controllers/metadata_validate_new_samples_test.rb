@@ -1,7 +1,7 @@
 require 'test_helper'
 
 # Tests MetadataController validate_csv_for_new_samples endpoint
-class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
+class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
   include ErrorHelper
 
   HEADERS_1 = ['sample_name', 'host_genome', 'sample_type', 'blood_fed'].freeze
