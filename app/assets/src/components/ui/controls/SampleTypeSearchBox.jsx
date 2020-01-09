@@ -55,15 +55,11 @@ class SampleTypeSearchBox extends React.Component {
         results: suggestedSampleTypes.all.map(formatResult),
       };
     }
-    // Always lowercase plain text input to distinguish it from Title Case
-    // offical sample types, which are enforced in SampleType.rb.
-    // TODO (gdingle): enforce lowercasing in CSV upload as well.
-    const lowered = query.toLowerCase();
     return {
       ...results,
       noMatch: {
         name: "Use Plain Text (No Match)",
-        results: [{ title: lowered, name: lowered }],
+        results: [{ title: query, name: query }],
       },
     };
   }
