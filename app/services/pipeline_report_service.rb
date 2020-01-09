@@ -73,13 +73,13 @@ class PipelineReportService
     # taxon_counts (is report_ready), or if its results are finalized without errors.
     # Otherwise just return the metadata, which includes statuses and error messages to display.
     # TODO(julie): refactor + clarify pipeline run statuses (JIRA: https://jira.czi.team/browse/IDSEQ-1890)
-    unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?))
+    unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?)) && @pipeline_run.total_reads
       return JSON.dump(
         metadata: metadata
       )
     end
 
-    adjusted_total_reads = (@pipeline_run.total_reads.to_i - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction.to_i
+    adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
     if @parallel
