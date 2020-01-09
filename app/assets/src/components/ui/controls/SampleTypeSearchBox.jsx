@@ -12,8 +12,9 @@ class SampleTypeSearchBox extends React.Component {
 
   handleSearchTriggered = query => {
     const matchSampleTypes = sampleType => {
-      // Match chars in any position. Good for acronyms.
-      const regex = new RegExp(query.split("").join(".*"), "gi");
+      // Match chars in any position. Good for acronyms. Ignore spaces.
+      const noSpaces = query.replace(/\s*/gi, "");
+      const regex = new RegExp(noSpaces.split("").join(".*"), "gi");
       if (regex.test(sampleType.name)) {
         return true;
       }
