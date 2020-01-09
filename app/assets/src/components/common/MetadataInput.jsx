@@ -11,6 +11,7 @@ import GeoSearchInputBox, {
 } from "~ui/controls/GeoSearchInputBox";
 import SampleTypeSearchBox from "~ui/controls/SampleTypeSearchBox";
 import AlertIcon from "~ui/icons/AlertIcon";
+import Toggle from "~ui/controls/Toggle";
 
 import cs from "./metadata_input.scss";
 
@@ -73,6 +74,16 @@ class MetadataInput extends React.Component {
           isHuman={isHuman}
           isInsect={isInsect}
           sampleTypes={sampleTypes}
+    } else if (metadataType.isBoolean) {
+      const onLabel = metadataType.options[0];
+      const offLabel = metadataType.options[1];
+      return (
+        <Toggle
+          initialChecked={value === onLabel ? true : false}
+          onLabel={onLabel}
+          offLabel={offLabel}
+          onChange={label => onChange(metadataType.key, label, true)}
+          className={className}
         />
       );
     } else if (isArray(metadataType.options)) {
@@ -161,6 +172,7 @@ MetadataInput.propTypes = {
     key: PropTypes.string,
     dataType: PropTypes.oneOf(["number", "string", "date", "location"]),
     options: PropTypes.arrayOf(PropTypes.string),
+    isBoolean: PropTypes.bool,
   }),
   // Third optional parameter signals to the parent whether to immediately save. false means "wait for onSave to fire".
   // This is useful for the text input, where the parent wants to save onBlur, not onChange.
