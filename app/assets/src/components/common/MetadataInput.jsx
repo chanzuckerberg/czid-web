@@ -74,6 +74,8 @@ class MetadataInput extends React.Component {
           isHuman={isHuman}
           isInsect={isInsect}
           sampleTypes={sampleTypes}
+        />
+      );
     } else if (metadataType.isBoolean) {
       const onLabel = metadataType.options[0];
       const offLabel = metadataType.options[1];
