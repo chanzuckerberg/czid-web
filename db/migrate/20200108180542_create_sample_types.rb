@@ -31,7 +31,7 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
         { name: 'Ocular Fluid', human_only: true },
       ],
 
-      'Respiratory Infections': [
+      'Respiratory Tract': [
         { name: 'Lung' },
         { name: 'Bronchoalveolar Lavage', human_only: true },
         { name: 'Nasopharyngeal Swab', human_only: true },
@@ -42,7 +42,7 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
         { name: 'Tracheal Aspirate', human_only: true },
       ],
 
-      'Reproductive': [
+      'Reproductive Tract': [
         { name: 'Amniotic Fluid', human_only: true },
         { name: 'Placenta', human_only: true },
         { name: 'Cervicovaginal Swab', human_only: true },
