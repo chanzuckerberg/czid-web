@@ -1,4 +1,5 @@
 import React from "react";
+import { groupBy } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 
@@ -8,45 +9,39 @@ class SampleTypeSearchBox extends React.Component {
   handleSearchTriggered = query => {
     const categories = {};
 
-    // TODO (gdingle): add server side data
-    // TODO (gdingle): fetch data on ComponentDidMount
+    const isSuggested = sampleType => {
+      if (this.props.isInsect && sampleType.insect_only) return "suggested";
+      if (this.props.isHuman && sampleType.human_only) return "suggested";
+      if (!(sampleType.insect_only || sampleType.human_only))
+        return "suggested";
+      return "all";
+    };
+    const suggestedSampleTypes = groupBy(isSuggested, this.props.sampleTypes);
+
     // TODO (gdingle): filter results by exact substring match
     // TODO: ignore special chars?
 
-    // From https://docs.google.com/spreadsheets/d/1_hPkQe5LI0Zw_C0Ls4HVCEDsc_FNNVOaU_aAfoaiZRE/
-    const results = [
-      { title: "Plasma", name: "plasma", description: "Systemic Inflammation" },
-      { title: "Serum", name: "serum", description: "Systemic Inflammation" },
-      {
-        title: "Whole Blood",
-        name: "whole blood",
-        description: "Systemic Inflammation",
-      },
+    const formatResult = result => {
+      return {
+        title: result.name,
+        name: result.name,
+        description: result.group,
+      };
+    };
 
-      { title: "Brain", name: "brain", description: "CNS Infections" },
-      {
-        title: "Cerebrospinal Fluid (CSF)",
-        name: "Cerebrospinal Fluid (CSF)",
-        description: "CNS Infections",
-      },
-      {
-        title: "Ocular Fluid",
-        name: "Ocular Fluid",
-        description: "CNS Infections",
-      },
-    ];
-
-    categories["SUGGESTED"] = {
+    categories.suggested = {
       name: "SUGGESTED",
-      results,
+      results: suggestedSampleTypes.suggested.map(formatResult),
     };
 
-    categories["ALL"] = {
+    // NOTE: "OTHER" would be a more accurate description, but "all" was the
+    // word in the design at https://chanzuckerberg.invisionapp.com/share/A6V572ZSBU5#/screens/396544828 .
+    categories.all = {
       name: "ALL",
-      results,
+      results: suggestedSampleTypes.all.map(formatResult),
     };
 
-    categories["NO_MATCH"] = {
+    categories.noMatch = {
       name: "Use Plain Text (No Match)",
       // TODO (gdingle): lowercase plain text to distinguish?
       results: [{ title: query, name: query }],
