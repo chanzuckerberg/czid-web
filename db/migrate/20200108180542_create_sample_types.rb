@@ -27,6 +27,7 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
       'CNS Infections': [
         { name: 'Brain' },
         { name: 'Cerebrospinal Fluid', human_only: true },
+        { name: 'Central Nervous System' },
         { name: 'Ocular Fluid', human_only: true },
       ],
 
@@ -76,7 +77,7 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
 
       'Other': [
         { name: 'Mixed Tissue' },
-        { name: 'Simulation', human_only: true },
+        { name: 'Simulation' },
         { name: 'Cell Line' },
         { name: 'Cultured Isolate' },
         { name: 'Unknown' },
