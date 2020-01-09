@@ -124,7 +124,8 @@ class BulkDownloadsController < ApplicationController
 
     if params[:error_type] == "FailedSrcUrlError"
       LogUtil.log_err_and_airbrake("BulkDownloadFailedSrcUrlError (id #{@bulk_download.id}): The following paths failed to process: #{params[:error_data]}")
-      update_params[:error_message] = FAILED_SAMPLES_ERROR_TEMPLATE % params[:error_data].length
+      sample_count = SamplesHelper.get_sample_count_from_sample_paths(params[:error_data])
+      update_params[:error_message] = FAILED_SAMPLES_ERROR_TEMPLATE % sample_count
     end
 
     @bulk_download.update(update_params)
