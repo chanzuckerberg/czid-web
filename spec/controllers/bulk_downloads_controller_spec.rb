@@ -603,7 +603,11 @@ RSpec.describe BulkDownloadsController, type: :controller do
           id: @bulk_download_joe.id,
           access_token: @bulk_download_joe.access_token,
           error_type: "FailedSrcUrlError",
-          error_data: ["s3://path-to-file-one", "s3://path-to-file-two"],
+          # Should count this as 2 samples even though it's 4 files.
+          error_data: [
+            "s3://idseq-samples-test/samples/1/100/path-to-file", "s3://idseq-samples-test/samples/1/100/path-to-file-2",
+            "s3://idseq-samples-test/samples/1/101/path-to-file", "s3://idseq-samples-test/samples/1/101/path-to-file-2",
+          ],
         }
 
         expect(response).to have_http_status(200)
@@ -615,21 +619,20 @@ RSpec.describe BulkDownloadsController, type: :controller do
       end
 
       it "should be resilient to s3 HEAD failures" do
+        # s3 HEAD is called to get the output_file_size
         expect(S3_CLIENT).to receive(:head_object).exactly(1).times.and_raise("Error")
 
         get :success_with_token, params: {
           format: "json",
           id: @bulk_download_joe.id,
           access_token: @bulk_download_joe.access_token,
-          error_type: "FailedSrcUrlError",
-          error_data: ["s3://path-to-file-one", "s3://path-to-file-two"],
         }
 
         expect(response).to have_http_status(200)
 
         expect(BulkDownload.find(@bulk_download_joe.id).status).to eq(BulkDownload::STATUS_SUCCESS)
-        expect(BulkDownload.find(@bulk_download_joe.id).error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 2)
         expect(BulkDownload.find(@bulk_download_joe.id).access_token).to eq(nil)
+        # The output_file_size could not be fetched, so it is set to nil.
         expect(BulkDownload.find(@bulk_download_joe.id).output_file_size).to eq(nil)
       end
     end

@@ -15,6 +15,10 @@ module SamplesHelper
   # Limit the number of objects we scan in a bucket to avoid timeouts and memory issues.
   S3_OBJECT_LIMIT = 10_000
 
+  # Sample files stored in S3 have paths like s3://idseq-samples-prod/samples/{project_id}/{sample_id}/{path_to_file}
+  # This regex extracts the sample_id from sample S3 paths.
+  SAMPLE_PATH_ID_MATCHER = %r{\A.*samples\/\d*\/(\d*)\/.*\z}
+
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
@@ -640,6 +644,19 @@ module SamplesHelper
       taxon["sample_count_contigs"] = pipeline_runs_by_taxid[taxon["taxid"]].uniq.length
     end
     taxon_list
+  end
+
+  def self.get_sample_count_from_sample_paths(urls)
+    sample_ids = Set.new
+
+    urls.each do |url|
+      if (matches = SAMPLE_PATH_ID_MATCHER.match(url))
+        sample_id = matches[1]
+        sample_ids.add(sample_id)
+      end
+    end
+
+    sample_ids.size
   end
 
   private
