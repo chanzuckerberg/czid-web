@@ -121,6 +121,8 @@
 .speciesRow {
   .nameCell {
     font-weight: $font-weight-regular;
+    margin-left: $space-s;
+    margin-right: $space-xxxs;
   }
 }
 
@@ -152,12 +154,6 @@
     .hoverActions {
       display: inline-block;
     }
-  }
-}
-
-.speciesRow {
-  .nameCell {
-    margin-left: $space-s;
   }
 }
 
