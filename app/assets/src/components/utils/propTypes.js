@@ -126,7 +126,7 @@ const DownloadTypeParam = PropTypes.shape({
   value: PropTypes.string,
 });
 
-const SampleTypeType = PropTypes.shape({
+const SampleTypeProps = PropTypes.shape({
   name: PropTypes.string,
   group: PropTypes.string,
   insect_only: PropTypes.bool,
@@ -148,6 +148,6 @@ export default {
   SampleUploadType,
   DownloadType,
   DownloadTypeParam,
-  SampleTypeType,
+  SampleTypeProps,
   ...PropTypes,
 };
