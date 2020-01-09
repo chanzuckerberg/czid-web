@@ -18,11 +18,16 @@ class SampleTypeSearchBox extends React.Component {
     const matchedSampleTypes = this.props.sampleTypes.filter(matchSampleTypes);
 
     const isSuggested = sampleType => {
-      if (this.props.isInsect && sampleType.insect_only) return "suggested";
-      if (this.props.isHuman && sampleType.human_only) return "suggested";
-      if (!(sampleType.insect_only || sampleType.human_only))
+      // Insects only get their own types
+      if (this.props.isInsect) {
+        return sampleType.insect_only ? "suggested" : "donotshow";
+      }
+      // Humans get any type
+      if (this.props.isHuman) {
         return "suggested";
-      return "all";
+      }
+      // Non-human animals get suggested a subset
+      return sampleType.human_only ? "all" : "suggested";
     };
     const suggestedSampleTypes = groupBy(isSuggested, matchedSampleTypes);
 
@@ -44,8 +49,7 @@ class SampleTypeSearchBox extends React.Component {
         results: suggestedSampleTypes.suggested.map(formatResult),
       };
     }
-    // Insects are in a category all to themselves.
-    if (suggestedSampleTypes.all && !this.props.isInsect) {
+    if (suggestedSampleTypes.all) {
       results.all = {
         name: "ALL",
         results: suggestedSampleTypes.all.map(formatResult),
