@@ -44,9 +44,8 @@ class SampleTypeSearchBox extends React.Component {
         results: suggestedSampleTypes.suggested.map(formatResult),
       };
     }
-    // NOTE: "OTHER" would be a more accurate description, but "all" was the
-    // word in the design at https://chanzuckerberg.invisionapp.com/share/A6V572ZSBU5#/screens/396544828 .
-    if (suggestedSampleTypes.all) {
+    // Insects are in a category all to themselves.
+    if (suggestedSampleTypes.all && !this.props.isInsect) {
       results.all = {
         name: "ALL",
         results: suggestedSampleTypes.all.map(formatResult),

@@ -98,7 +98,6 @@ class MetadataTab extends React.Component {
       additionalInfo,
     } = this.props;
 
-    // TODO (gdingle): put in here also
     return (
       <div className={cs.inputWrapper}>
         <MetadataInput
