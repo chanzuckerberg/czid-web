@@ -22,7 +22,10 @@ class SampleTypeSearchBox extends React.Component {
     };
     const matchedSampleTypes = this.props.sampleTypes.filter(matchSampleTypes);
 
-    const isSuggested = sampleType => {
+    // Sample types are grouped differently based on whether the current
+    // sample's host genome is an insect, a human, or neither. The "suggested"
+    // group is shown first, then the "all" group.
+    const getSampleTypeCategory = sampleType => {
       // Insects only get their own types
       if (this.props.isInsect) {
         return sampleType.insect_only ? SUGGESTED : DONOTSHOW;
@@ -34,7 +37,10 @@ class SampleTypeSearchBox extends React.Component {
       // Non-human animals get suggested a subset
       return sampleType.human_only ? ALL : SUGGESTED;
     };
-    const suggestedSampleTypes = groupBy(isSuggested, matchedSampleTypes);
+    const suggestedSampleTypes = groupBy(
+      getSampleTypeCategory,
+      matchedSampleTypes
+    );
 
     return this.buildResults(suggestedSampleTypes, query);
   };
