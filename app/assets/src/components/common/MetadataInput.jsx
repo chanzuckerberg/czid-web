@@ -170,7 +170,7 @@ MetadataInput.propTypes = {
   isHuman: PropTypes.bool,
   isInsect: PropTypes.bool,
   warning: PropTypes.string,
-  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeType).isRequired,
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
 
 export default MetadataInput;

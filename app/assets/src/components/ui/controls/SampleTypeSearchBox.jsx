@@ -86,7 +86,7 @@ SampleTypeSearchBox.propTypes = {
   className: PropTypes.string,
   onResultSelect: PropTypes.func.isRequired,
   value: PropTypes.string,
-  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeType).isRequired,
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
   isHuman: PropTypes.bool.isRequired,
   isInsect: PropTypes.bool.isRequired,
 };

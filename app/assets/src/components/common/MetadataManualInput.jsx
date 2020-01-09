@@ -398,7 +398,7 @@ MetadataManualInput.propTypes = {
   withinModal: PropTypes.bool,
   projectMetadataFields: PropTypes.object,
   hostGenomes: PropTypes.array,
-  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeType).isRequired,
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
 
 export default MetadataManualInput;
