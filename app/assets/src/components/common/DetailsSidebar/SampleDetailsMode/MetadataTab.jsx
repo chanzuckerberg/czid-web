@@ -106,7 +106,8 @@ class MetadataTab extends React.Component {
           metadataType={metadataType}
           onChange={onMetadataChange}
           onSave={onMetadataSave}
-          isHuman={additionalInfo.host_genome_name === "Human"}
+          isHuman={additionalInfo.host_genome_taxa_category === "human"}
+          isInsect={additionalInfo.host_genome_taxa_category === "insect"}
           sampleTypes={sampleTypes}
         />
         {metadataErrors[metadataType.key] && (
