@@ -7,7 +7,15 @@ import LiveSearchPopBox from "./LiveSearchPopBox";
 
 class SampleTypeSearchBox extends React.Component {
   handleSearchTriggered = query => {
-    const categories = {};
+    const matchSampleTypes = sampleType => {
+      // Match chars in any position. Good for acronyms.
+      const regex = new RegExp(query.split("").join(".*"), "gi");
+      if (regex.test(sampleType.name)) {
+        return true;
+      }
+      return false;
+    };
+    const matchedSampleTypes = this.props.sampleTypes.filter(matchSampleTypes);
 
     const isSuggested = sampleType => {
       if (this.props.isInsect && sampleType.insect_only) return "suggested";
@@ -16,11 +24,12 @@ class SampleTypeSearchBox extends React.Component {
         return "suggested";
       return "all";
     };
-    const suggestedSampleTypes = groupBy(isSuggested, this.props.sampleTypes);
+    const suggestedSampleTypes = groupBy(isSuggested, matchedSampleTypes);
 
-    // TODO (gdingle): filter results by exact substring match
-    // TODO: ignore special chars?
+    return this.buildResults(suggestedSampleTypes, query);
+  };
 
+  buildResults(suggestedSampleTypes, query) {
     const formatResult = result => {
       return {
         title: result.name,
@@ -28,27 +37,33 @@ class SampleTypeSearchBox extends React.Component {
         description: result.group,
       };
     };
-
-    categories.suggested = {
-      name: "SUGGESTED",
-      results: suggestedSampleTypes.suggested.map(formatResult),
-    };
-
+    const results = {};
+    if (suggestedSampleTypes.suggested) {
+      results.suggested = {
+        name: "SUGGESTED",
+        results: suggestedSampleTypes.suggested.map(formatResult),
+      };
+    }
     // NOTE: "OTHER" would be a more accurate description, but "all" was the
     // word in the design at https://chanzuckerberg.invisionapp.com/share/A6V572ZSBU5#/screens/396544828 .
-    categories.all = {
-      name: "ALL",
-      results: suggestedSampleTypes.all.map(formatResult),
+    if (suggestedSampleTypes.all) {
+      results.all = {
+        name: "ALL",
+        results: suggestedSampleTypes.all.map(formatResult),
+      };
+    }
+    // Always lowercase plain text input to distinguish it from Title Case
+    // offical sample types, which are enforced in SampleType.rb.
+    // TODO (gdingle): enforce lowercasing in CSV upload as well.
+    const lowered = query.toLowerCase();
+    return {
+      ...results,
+      noMatch: {
+        name: "Use Plain Text (No Match)",
+        results: [{ title: lowered, name: lowered }],
+      },
     };
-
-    categories.noMatch = {
-      name: "Use Plain Text (No Match)",
-      // TODO (gdingle): lowercase plain text to distinguish?
-      results: [{ title: query, name: query }],
-    };
-
-    return categories;
-  };
+  }
 
   render() {
     const { className, value, onResultSelect } = this.props;
