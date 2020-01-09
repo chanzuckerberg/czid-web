@@ -30,7 +30,11 @@ class SampleTypeSearchBox extends React.Component {
       if (this.props.isInsect) {
         return sampleType.insect_only ? SUGGESTED : DONOTSHOW;
       }
-      // Humans get any type
+      // Other categories do not get insect types
+      if (sampleType.insect_only) {
+        return DONOTSHOW;
+      }
+      // Humans get any type except those for insects
       if (this.props.isHuman) {
         return SUGGESTED;
       }

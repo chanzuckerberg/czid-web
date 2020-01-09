@@ -5,10 +5,10 @@ class AddTaxaCategoryToHostGenome < ActiveRecord::Migration[5.1]
   end
 
   def update_existing!
-    HostGenome.find_by(name: "Human").update(taxa_category: "human")
+    HostGenome.find_by(name: "Human").update!(taxa_category: "human")
 
-    HostGenome.find_by(name: "Mosquito").update(taxa_category: "insect")
-    HostGenome.find_by(name: "Tick").update(taxa_category: "insect")
-    HostGenome.find_by(name: "Bee").update(taxa_category: "insect")
+    HostGenome.find_by(name: "Mosquito").update!(taxa_category: "insect")
+    HostGenome.find_by(name: "Tick").update!(taxa_category: "insect")
+    HostGenome.find_by(name: "Bee").update!(taxa_category: "insect")
   end
 end

@@ -29,13 +29,6 @@ import MetadataInput from "./MetadataInput";
 const map = _fp.map.convert({ cap: false });
 
 class MetadataManualInput extends React.Component {
-  // List as of 2020-01-08.
-  INSECT_GENOME_IDS = [
-    2, // Mosquito
-    6, // Tick
-    16, // Bee
-  ];
-
   state = {
     selectedFieldNames: [],
     projectMetadataFields: null,
@@ -271,6 +264,9 @@ class MetadataManualInput extends React.Component {
         )
       : sample.host_genome_id;
 
+  getSampleHostGenome = sample =>
+    find(["id", this.getSampleHostGenomeId(sample)], this.state.hostGenomes);
+
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
     // Special-case 'Host Genome' (the field that lets you change the Host Genome)
     field === "Host Genome" ||
@@ -326,6 +322,7 @@ class MetadataManualInput extends React.Component {
 
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
           if (this.isHostGenomeIdValidForField(sampleHostGenomeId, column)) {
+            const hostGenome = this.getSampleHostGenome(sample);
             return (
               <div>
                 <MetadataInput
@@ -342,8 +339,8 @@ class MetadataManualInput extends React.Component {
                     });
                   }}
                   withinModal={this.props.withinModal}
-                  isHuman={sampleHostGenomeId === 1}
-                  isInsect={this.INSECT_GENOME_IDS.includes(sampleHostGenomeId)}
+                  isHuman={hostGenome.taxa_category === "human"}
+                  isInsect={hostGenome.taxa_category === "insect"}
                   sampleTypes={this.props.sampleTypes}
                 />
                 {this.props.samples.length > 1 &&
