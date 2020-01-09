@@ -6,6 +6,10 @@ import PropTypes from "~/components/utils/propTypes";
 import LiveSearchPopBox from "./LiveSearchPopBox";
 
 class SampleTypeSearchBox extends React.Component {
+  SUGGESTED = "SUGGESTED";
+  DONOTSHOW = "DONOTSHOW";
+  ALL = "ALL";
+
   handleSearchTriggered = query => {
     const matchSampleTypes = sampleType => {
       // Match chars in any position. Good for acronyms.
@@ -20,14 +24,14 @@ class SampleTypeSearchBox extends React.Component {
     const isSuggested = sampleType => {
       // Insects only get their own types
       if (this.props.isInsect) {
-        return sampleType.insect_only ? "suggested" : "donotshow";
+        return sampleType.insect_only ? this.SUGGESTED : this.DONOTSHOW;
       }
       // Humans get any type
       if (this.props.isHuman) {
-        return "suggested";
+        return this.SUGGESTED;
       }
       // Non-human animals get suggested a subset
-      return sampleType.human_only ? "all" : "suggested";
+      return sampleType.human_only ? this.ALL : this.SUGGESTED;
     };
     const suggestedSampleTypes = groupBy(isSuggested, matchedSampleTypes);
 
@@ -45,13 +49,13 @@ class SampleTypeSearchBox extends React.Component {
     const results = {};
     if (suggestedSampleTypes.suggested) {
       results.suggested = {
-        name: "SUGGESTED",
+        name: this.SUGGESTED,
         results: suggestedSampleTypes.suggested.map(formatResult),
       };
     }
     if (suggestedSampleTypes.all) {
       results.all = {
-        name: "ALL",
+        name: this.ALL,
         results: suggestedSampleTypes.all.map(formatResult),
       };
     }
