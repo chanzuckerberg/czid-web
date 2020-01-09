@@ -24,10 +24,10 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
         { name: 'Whole Blood' },
       ],
 
-      'CNS Infections': [
+      'Central Nervous System': [
         { name: 'Brain' },
         { name: 'Cerebrospinal Fluid', human_only: true },
-        { name: 'Central Nervous System' },
+        { name: 'CNS Tissue' },
         { name: 'Ocular Fluid', human_only: true },
       ],
 
