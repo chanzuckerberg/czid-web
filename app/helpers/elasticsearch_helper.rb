@@ -1,4 +1,9 @@
 module ElasticsearchHelper
+  # Limit maximum number of results for performance
+  # Since we currently might filter by sample and/or project only after the ElasticSearch,
+  # it should be large enough to avoid filtering everything out
+  # TODO(tiago): Eventually, this filtering should be moved to ElasticSearch, at which point we should reduce the max value
+  # (We can also move it to a parameter that clients of this functions can set)
   MAX_SEARCH_RESULTS = 50
 
   def prefix_match(model, field, prefix, condition)
