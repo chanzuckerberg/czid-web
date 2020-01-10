@@ -653,7 +653,7 @@ class Samples extends React.Component {
         this.setState(prevState => ({
           fetchedSamples: keyBy(res.data.samples, "db_sample.id"),
           fetchedSampleIds: map(res.data.samples, "db_sample.id"),
-          tissueTypes: this.allTissueTypes(res.data.tissue_types),
+          tissueTypes: this.allTissueTypes(res.data.tissues),
           selectedTissueFilters:
             resetFilters || prevState.resetTissues
               ? []
