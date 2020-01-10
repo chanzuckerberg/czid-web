@@ -30,22 +30,25 @@ module ElasticsearchHelper
       search_params = {
         size: ElasticsearchHelper::MAX_SEARCH_RESULTS,
         query: {
-          query_string: {
-            query: "*#{query}*",
-            fields: ["#{level}_name"],
+          match: {
+            "#{level}_name": {
+              query: "*#{query}*",
+              fuzziness: "auto",
+              operator: "and",
+            },
           },
         },
         aggs: {
           distinct_taxa: {
             terms: {
               field: "#{level}_taxid",
+              size: ElasticsearchHelper::MAX_SEARCH_RESULTS,
             },
           },
         },
       }
       search_response = TaxonLineage.search(search_params)
       search_taxon_ids = search_response.aggregations.distinct_taxa.buckets.pluck(:key)
-
       taxon_data = TaxonLineage
                    .where("#{level}_taxid" => search_taxon_ids)
                    .order(id: :desc)
