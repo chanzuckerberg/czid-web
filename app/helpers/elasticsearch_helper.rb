@@ -27,6 +27,9 @@ module ElasticsearchHelper
     matching_taxa = []
     taxon_ids = []
     tax_levels.each do |level|
+      # ElasticSearch `match` query matching multiple strings in a fuzzy way (supports a few typos based
+      # on the size of the query)according to the operator specified (`and` in this case).
+      # `match` is the query type recommended by ElasticSearch for full-text search.
       search_params = {
         size: ElasticsearchHelper::MAX_SEARCH_RESULTS,
         query: {
