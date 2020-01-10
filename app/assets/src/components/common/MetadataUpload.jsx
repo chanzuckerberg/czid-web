@@ -41,8 +41,8 @@ class MetadataUpload extends React.Component {
   ordering = {
     host_genome: 1, // currently, this is not a MetadataField technically
     sample_type: 2,
-    nucleotide_type: 3,
-    water_control: 4,
+    water_control: 3,
+    nucleotide_type: 4,
     collection_date: 5,
     collection_location: 6, // legacy, code for both cases to be safe
     collection_location_v2: 7,
