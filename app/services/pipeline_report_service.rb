@@ -254,11 +254,10 @@ class PipelineReportService
     # pipeline_run.report_ready? indicates if taxon_counts output is loaded and available to use in report generation.
     # This is only true if no errors have occurred for taxon_counts.
     pipeline_status = "WAITING"
-    if pipeline_run.results_finalized?
-      pipeline_status = "COMPLETE"
-    end
     if pipeline_run.failed?
       pipeline_status = "FAILED"
+    elsif pipeline_run.results_finalized?
+      pipeline_status = "COMPLETE"
     end
     return {
       pipelineRunStatus: pipeline_status,
