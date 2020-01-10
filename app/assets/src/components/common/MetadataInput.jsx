@@ -1,14 +1,15 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { isArray } from "lodash/fp";
 import cx from "classnames";
 
-import Input from "~/components/ui/controls/Input";
-import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
+import PropTypes from "~/components/utils/propTypes";
+import Input from "~ui/controls/Input";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
-} from "~/components/ui/controls/GeoSearchInputBox";
+} from "~ui/controls/GeoSearchInputBox";
+import SampleTypeSearchBox from "~ui/controls/SampleTypeSearchBox";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Toggle from "~ui/controls/Toggle";
 
@@ -56,10 +57,26 @@ class MetadataInput extends React.Component {
       metadataType,
       className,
       isHuman,
+      isInsect,
+      sampleTypes,
     } = this.props;
     const { warning } = this.state;
 
-    if (metadataType.isBoolean) {
+    if (metadataType.key === "sample_type") {
+      return (
+        <SampleTypeSearchBox
+          className={className}
+          value={value}
+          onResultSelect={({ result }) => {
+            // Result can be plain text or a match. We treat them the same.
+            onChange(metadataType.key, result.name || result);
+          }}
+          isHuman={isHuman}
+          isInsect={isInsect}
+          sampleTypes={sampleTypes}
+        />
+      );
+    } else if (metadataType.isBoolean) {
       const onLabel = metadataType.options[0];
       const offLabel = metadataType.options[1];
       return (
@@ -165,7 +182,9 @@ MetadataInput.propTypes = {
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
   isHuman: PropTypes.bool,
+  isInsect: PropTypes.bool,
   warning: PropTypes.string,
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
 
 export default MetadataInput;

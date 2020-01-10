@@ -640,6 +640,7 @@ class SamplesController < ApplicationController
         name: @sample.name,
         editable: editable,
         host_genome_name: @sample.host_genome_name,
+        host_genome_taxa_category: @sample.host_genome.taxa_category,
         upload_date: @sample.created_at,
         project_name: @sample.project.name,
         project_id: @sample.project_id,
