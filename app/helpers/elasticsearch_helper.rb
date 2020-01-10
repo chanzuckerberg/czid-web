@@ -49,6 +49,7 @@ module ElasticsearchHelper
       }
       search_response = TaxonLineage.search(search_params)
       search_taxon_ids = search_response.aggregations.distinct_taxa.buckets.pluck(:key)
+
       taxon_data = TaxonLineage
                    .where("#{level}_taxid" => search_taxon_ids)
                    .order(id: :desc)
