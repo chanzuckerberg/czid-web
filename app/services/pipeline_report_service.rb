@@ -186,7 +186,7 @@ class PipelineReportService
       )
       @timer.split("fill_missing_names")
 
-      tag_pathogens(counts_by_tax_level)
+      tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
       @timer.split("tag_pathogens")
 
       structured_lineage = encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
@@ -512,18 +512,31 @@ class PipelineReportService
     return highlighted_tax_ids
   end
 
-  def tag_pathogens(counts_by_tax_level)
-    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES])
-    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS])
+  def tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
+    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES], lineage_by_tax_id)
+    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS], lineage_by_tax_id)
     counts_by_tax_level
   end
 
-  def get_best_pathogen_tag(tax_map)
-    tax_map.each do |_tax_id, tax_info|
+  def get_best_pathogen_tag(tax_map, lineage_by_tax_id)
+    tax_map.each do |tax_id, tax_info|
       pathogen_tags = []
+      if lineage_by_tax_id[tax_id]
+        lineage = lineage_by_tax_id[tax_id]
+      elsif lineage_by_tax_id[tax_info[:genus_tax_id]]
+        lineage = lineage_by_tax_id[tax_info[:genus_tax_id]]
+      end
+
       TaxonLineage::PRIORITY_PATHOGENS.each do |category, pathogen_list|
+        if lineage
+          name_columns = lineage.keys.select { |cn| cn.include?("_name") }
+          name_columns.each do |col|
+            pathogen_tags |= [category] if pathogen_list.include?(lineage[col])
+          end
+        end
         pathogen_tags |= [category] if pathogen_list.include?(tax_info[:name])
       end
+
       best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
       if best_tag
         tax_info['pathogenTag'] = best_tag
