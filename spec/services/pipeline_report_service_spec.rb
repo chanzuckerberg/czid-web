@@ -418,14 +418,23 @@ RSpec.describe PipelineReportService, type: :service do
       @report = PipelineReportService.call(@pipeline_run, @background.id)
     end
 
-    it "should tag pathogenic genera correctly" do
+    it "should not tag nonpathogenic genera" do
       expect(JSON.parse(@report)["counts"]["2"]["1"]).not_to include("pathogenTag")
+    end
+
+    it "should tag pathogenic genera" do
       expect(JSON.parse(@report)["counts"]["2"]["4"]).to include_json("pathogenTag" => "categoryB")
     end
 
-    it "should tag pathogenic species correctly" do
+    it "should not tag nonpathogenic species" do
       expect(JSON.parse(@report)["counts"]["1"]["2"]).not_to include("pathogenTag")
+    end
+
+    it "should tag pathogenic species" do
       expect(JSON.parse(@report)["counts"]["1"]["3"]).to include_json("pathogenTag" => "categoryB")
+    end
+
+    it "should tag species belonging to a pathogenic genus" do
       expect(JSON.parse(@report)["counts"]["1"]["5"]).to include_json("pathogenTag" => "categoryB")
     end
   end
