@@ -42,7 +42,6 @@ class BulkDownloadsController < ApplicationController
       return
     end
 
-    # TODO(mark): Additional validations for each download type.
     # Create and save the bulk download.
     bulk_download = BulkDownload.new(download_type: create_params[:download_type],
                                      pipeline_run_ids: pipeline_run_ids,
@@ -65,7 +64,11 @@ class BulkDownloadsController < ApplicationController
         }, status: :internal_server_error
       end
     else
-      render json: bulk_download.errors.full_messages, status: :unprocessable_entity
+      LogUtil.log_err_and_airbrake(
+        "BulkDownloadsFailedEvent: Failed to save bulk download for type #{create_params[:download_type]} with #{pipeline_run_ids.length} samples.
+        #{bulk_download.errors.full_messages} #{create_params[:params]}"
+      )
+      render json: { error: KICKOFF_FAILURE_HUMAN_READABLE }, status: :unprocessable_entity
     end
   end
 

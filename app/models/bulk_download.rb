@@ -23,6 +23,47 @@ class BulkDownload < ApplicationRecord
   attr_accessor :params
 
   validates :status, presence: true, inclusion: { in: [STATUS_WAITING, STATUS_RUNNING, STATUS_ERROR, STATUS_SUCCESS] }
+  validate :params_checks
+
+  def params_checks
+    set_params
+    params = self.params
+
+    params_value = lambda do |key|
+      return nil if params.nil?
+      # Each field param should be structured as
+      # { displayName: "FOO", value: "BAR" }
+      # field_params[key] should be ActionController::Parameters object that responds to :keys
+      params[key].respond_to?(:keys) ? params[key]["value"] : nil
+    end
+
+    if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
+      errors.add(:params, "background value must be an integer") unless params_value.call("background").is_a? Integer
+    end
+
+    if download_type == BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
+      metric = params_value.call("metric")
+      errors.add(:params, "metrics value is invalid") unless HeatmapHelper::ALL_METRICS.pluck(:value).include?(metric)
+
+      if ["NT.zscore", "NR.zscore"].include?(metric)
+        errors.add(:params, "background value must be an integer") unless params_value.call("background").is_a? Integer
+      end
+    end
+
+    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+      taxa_with_reads = params_value.call("taxa_with_reads")
+      errors.add(:params, "taxa_with_reads must be all or an integer") unless taxa_with_reads.is_a?(Integer) || taxa_with_reads == "all"
+
+      if taxa_with_reads == "all"
+        errors.add(:params, "file_format must be .fasta or .fastq") unless [".fasta", ".fastq"].include?(params_value.call("file_format"))
+      end
+    end
+
+    if download_type == BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
+      taxa_with_contigs = params_value.call("taxa_with_contigs")
+      errors.add(:params, "taxa_with_contigs must be all or an integer") unless taxa_with_contigs.is_a?(Integer) || taxa_with_contigs == "all"
+    end
+  end
 
   def convert_params_to_json
     # We need the params in object form during validation.
@@ -396,9 +437,6 @@ class BulkDownload < ApplicationRecord
     # Since TaxonCount isn't normalized, any TaxonCount entry would provide the same information.
     if download_type == READS_NON_HOST_BULK_DOWNLOAD_TYPE
       taxid = get_param_value("taxa_with_reads")
-      if taxid.nil?
-        raise BulkDownloadsHelper::READS_NON_HOST_TAXID_EXPECTED
-      end
 
       # Get the corresonding TaxonLineage for this taxid.
       alignment_config_ids = pipeline_runs_with_includes.pluck(:alignment_config_id).uniq

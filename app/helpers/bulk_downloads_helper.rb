@@ -18,7 +18,6 @@ module BulkDownloadsHelper
   ADMIN_ONLY_DOWNLOAD_TYPE = "You must be an admin to initiate this download type.".freeze
   UPLOADER_ONLY_DOWNLOAD_TYPE = "You must be the uploader of all selected samples to initiate this download type.".freeze
   BULK_DOWNLOAD_GENERATION_FAILED = "Could not generate bulk download".freeze
-  READS_NON_HOST_TAXID_EXPECTED = "Expected taxid for reads non-host bulk download".freeze
   READS_NON_HOST_TAXON_LINEAGE_EXPECTED_TEMPLATE = "Unexpected error. Could not find valid taxon lineage for taxid %s".freeze
 
   # Check that all pipeline runs have succeeded for the provided samples
@@ -103,8 +102,6 @@ module BulkDownloadsHelper
       raise BulkDownloadsHelper::ADMIN_ONLY_DOWNLOAD_TYPE
     end
 
-    validate_bulk_download_field_params(create_params[:params], create_params[:download_type])
-
     if type_data[:uploader_only] && !user.admin?
       samples = Sample.where(user: user, id: sample_ids)
 
@@ -114,49 +111,6 @@ module BulkDownloadsHelper
     end
 
     get_valid_pipeline_run_ids_for_samples(viewable_samples)
-  end
-
-  # Validate the field params that the user selected for this bulk download.
-  def validate_bulk_download_field_params(field_params, download_type)
-    field_value = lambda do |key|
-      # Each field param should be structured as
-      # { displayName: "FOO", value: "BAR" }
-      # field_params[key] should be ActionController::Parameters object that responds to :keys
-      field_params[key].respond_to?(:keys) ? field_params[key][:value] : nil
-    end
-    is_valid = true
-
-    if download_type == BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE
-      is_valid = false unless field_value.call(:background).is_a? Integer
-    end
-
-    if download_type == BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
-      metric = field_value.call(:metric)
-      is_valid = false unless HeatmapHelper::ALL_METRICS.pluck(:value).include?(metric)
-
-      if ["NT.zscore", "NR.zscore"].include?(metric)
-        is_valid = false unless field_value.call(:background).is_a? Integer
-      end
-    end
-
-    if download_type == BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
-      taxa_with_reads = field_value.call(:taxa_with_reads)
-      is_valid = false unless taxa_with_reads.is_a?(Integer) || taxa_with_reads == "all"
-
-      if taxa_with_reads == "all"
-        is_valid = false unless [".fasta", ".fastq"].include?(field_value.call(:file_format))
-      end
-    end
-
-    if download_type == BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
-      taxa_with_contigs = field_value.call(:taxa_with_contigs)
-      is_valid = false unless taxa_with_contigs.is_a?(Integer) || taxa_with_contigs == "all"
-    end
-
-    unless is_valid
-      LogUtil.log_err_and_airbrake("BulkDownloadsFailedEvent: Invalid field params provided for type #{download_type}: #{field_params}")
-      raise BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE
-    end
   end
 
   # Generate the metric values matrix.
