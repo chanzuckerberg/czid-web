@@ -32,7 +32,7 @@ module ElasticsearchHelper
         query: {
           match: {
             "#{level}_name": {
-              query: "*#{query}*",
+              query: query,
               fuzziness: "auto",
               operator: "and",
             },
