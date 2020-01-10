@@ -208,6 +208,7 @@ class CreateUser extends React.Component {
   }
 
   renderUserForm(submitFunc, funcName) {
+    const { selectedUser } = this.props;
     const { sendActivation } = this.state;
     return (
       <div className="user-form">
@@ -290,19 +291,21 @@ class CreateUser extends React.Component {
                 />
                 <label htmlFor="admin">Admin</label>
               </p>
-              <p>
-                <input
-                  type="checkbox"
-                  id="sendActivation"
-                  className="filled-in"
-                  checked={sendActivation ? "checked" : ""}
-                  onChange={withAnalytics(() => {
-                    this.setState({ sendActivation: !sendActivation });
-                  }, "CreateUser_send-activation_changed")}
-                  value={sendActivation}
-                />
-                <label htmlFor="sendActivation">Send activation email</label>
-              </p>
+              {!selectedUser && (
+                <p>
+                  <input
+                    type="checkbox"
+                    id="sendActivation"
+                    className="filled-in"
+                    checked={sendActivation ? "checked" : ""}
+                    onChange={withAnalytics(() => {
+                      this.setState({ sendActivation: !sendActivation });
+                    }, "CreateUser_send-activation_changed")}
+                    value={sendActivation}
+                  />
+                  <label htmlFor="sendActivation">Send activation email</label>
+                </p>
+              )}
             </div>
             <input className="hidden" type="submit" />
             {this.state.submitting ? (

@@ -14,6 +14,9 @@ module BulkDownloadsHelper
   SUCCESS_URL_REQUIRED = "Success url required for bulk download.".freeze
   FAILED_SAMPLES_ERROR_TEMPLATE = "%s samples could not be processed. Please contact us for help.".freeze
   UNKNOWN_EXECUTION_TYPE = "Could not find execution type for bulk download".freeze
+  UNKNOWN_DOWNLOAD_TYPE = "Could not find download type for bulk download".freeze
+  ADMIN_ONLY_DOWNLOAD_TYPE = "You must be an admin to initiate this download type.".freeze
+  UPLOADER_ONLY_DOWNLOAD_TYPE = "You must be the uploader of all selected samples to initiate this download type.".freeze
   BULK_DOWNLOAD_GENERATION_FAILED = "Could not generate bulk download".freeze
   READS_NON_HOST_TAXID_EXPECTED = "Expected taxid for reads non-host bulk download".freeze
   READS_NON_HOST_TAXON_LINEAGE_EXPECTED_TEMPLATE = "Unexpected error. Could not find valid taxon lineage for taxid %s".freeze
@@ -39,10 +42,17 @@ module BulkDownloadsHelper
     return pipeline_runs.map(&:id)
   end
 
-  def format_bulk_download(bulk_download, with_pipeline_runs = false)
+  def format_bulk_download(bulk_download, with_pipeline_runs: false, admin: false)
     formatted_bulk_download = bulk_download.as_json(except: [:access_token])
     formatted_bulk_download[:num_samples] = bulk_download.pipeline_runs.length
-    formatted_bulk_download[:download_name] = BulkDownloadTypesHelper.bulk_download_type_display_name(bulk_download.download_type)
+    formatted_bulk_download[:download_name] = bulk_download.download_display_name
+    formatted_bulk_download[:file_size] = ActiveSupport::NumberHelper.number_to_human_size(bulk_download.output_file_size)
+    if admin
+      formatted_bulk_download[:user_name] = bulk_download.user.name
+      formatted_bulk_download[:execution_type] = bulk_download.execution_type
+      formatted_bulk_download[:log_url] = bulk_download.log_url
+    end
+
     unless bulk_download.params_json.nil?
       formatted_bulk_download[:params] = JSON.parse(bulk_download.params_json)
     end
@@ -56,6 +66,50 @@ module BulkDownloadsHelper
       end
     end
     formatted_bulk_download
+  end
+
+  # Will raise errors if any validation fails.
+  # Returns pipeline_run_ids for the samples in the bulk download.
+  def validate_bulk_download_create_params(create_params, user)
+    sample_ids = create_params[:sample_ids]
+
+    # Max samples check.
+    max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
+
+    # Max samples should be string containing an integer, but just in case.
+    if max_samples_allowed.nil?
+      raise KICKOFF_FAILURE_HUMAN_READABLE
+    end
+
+    if sample_ids.length > Integer(max_samples_allowed) && !current_user.admin?
+      raise BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
+    end
+
+    # Access control check.
+    viewable_samples = current_power.viewable_samples.where(id: sample_ids)
+    if viewable_samples.length != sample_ids.length
+      raise BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR
+    end
+
+    type_data = BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPE_NAME_TO_DATA[create_params[:download_type]]
+
+    if type_data.nil?
+      raise BulkDownloadsHelper::UNKNOWN_DOWNLOAD_TYPE
+    end
+
+    if type_data[:admin_only] && !user.admin?
+      raise BulkDownloadsHelper::ADMIN_ONLY_DOWNLOAD_TYPE
+    end
+
+    if type_data[:uploader_only] && !user.admin?
+      samples = Sample.where(user: user, id: sample_ids)
+
+      if sample_ids.length != samples.length
+        raise BulkDownloadsHelper::UPLOADER_ONLY_DOWNLOAD_TYPE
+      end
+    end
+
+    get_valid_pipeline_run_ids_for_samples(viewable_samples)
   end
 
   # Generate the metric values matrix.

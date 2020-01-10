@@ -69,12 +69,15 @@ class PipelineReportService
 
   def generate
     metadata = get_pipeline_status(@pipeline_run)
-    unless pipeline_run_report_available?(@pipeline_run)
+    # Only generate the report if the pipeline has initialized and has loaded
+    # taxon_counts (is report_ready), or if its results are finalized without errors.
+    # Otherwise just return the metadata, which includes statuses and error messages to display.
+    # TODO(julie): refactor + clarify pipeline run statuses (JIRA: https://jira.czi.team/browse/IDSEQ-1890)
+    unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?)) && @pipeline_run.total_reads
       return JSON.dump(
         metadata: metadata
       )
     end
-    @pipeline_run_id = @pipeline_run.id
 
     adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
@@ -82,17 +85,20 @@ class PipelineReportService
     if @parallel
       parallel_steps = [
         -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_size) },
-        -> { fetch_taxon_counts(@pipeline_run_id, @background_id) },
-        -> { fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id) },
+        -> { fetch_taxon_counts(@pipeline_run.id, @background_id) },
+        -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id) },
       ]
-      results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
-        begin
-          ActiveRecord::Base.connection_pool.with_connection do
-            lambda.call()
+      results = nil
+      ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+        results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
+          begin
+            ActiveRecord::Base.connection_pool.with_connection do
+              lambda.call()
+            end
+          rescue => e
+            LogUtil.log_err_and_airbrake("Parallel fetch failed")
+            raise e
           end
-        rescue => e
-          LogUtil.log_err_and_airbrake("Parallel fetch failed")
-          raise e
         end
       end
       @timer.split("parallel_fetch_report_data")
@@ -101,10 +107,10 @@ class PipelineReportService
       contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
       @timer.split("get_contig_summary")
 
-      taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
+      taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run.id, @background_id)
       @timer.split("fetch_taxon_counts_and_summaries")
 
-      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id)
+      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id)
       @timer.split("fetch_taxons_absent_from_sample")
     end
 
@@ -146,7 +152,7 @@ class PipelineReportService
       lineage_version = PipelineRun
                         .select("alignment_configs.lineage_version")
                         .joins(:alignment_config)
-                        .find(@pipeline_run_id)[:lineage_version]
+                        .find(@pipeline_run.id)[:lineage_version]
 
       required_columns = %w[
         taxid
@@ -176,7 +182,7 @@ class PipelineReportService
       ReportsHelper.validate_names(
         counts_by_tax_level,
         lineage_by_tax_id,
-        @pipeline_run_id
+        @pipeline_run.id
       )
       @timer.split("fill_missing_names")
 
@@ -201,7 +207,6 @@ class PipelineReportService
 
     has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
     align_viz_available = @pipeline_run.align_viz_available?
-    report_ready = @pipeline_run.report_ready?
 
     @timer.split("compute_options_available_for_pipeline_run")
 
@@ -213,8 +218,7 @@ class PipelineReportService
                                 adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
                                 subsampledReadsCount: @pipeline_run.subsampled_reads,
                                 hasByteRanges: has_byte_ranges,
-                                alignVizAvailable: align_viz_available,
-                                report_ready: report_ready)
+                                alignVizAvailable: align_viz_available)
 
       json_dump =
         Oj.dump(
@@ -240,7 +244,7 @@ class PipelineReportService
         errorMessage: nil,
         knownUserError: nil,
         jobStatus: "Waiting to Start or Receive Files",
-        pipelineRunReportAvailable: false,
+        reportReady: false,
       }
     end
 
@@ -259,21 +263,8 @@ class PipelineReportService
       errorMessage: pipeline_run.error_message,
       knownUserError: pipeline_run.known_user_error,
       jobStatus: pipeline_run.job_status_display,
-      pipelineRunReportAvailable: pipeline_run_report_available?(pipeline_run),
+      reportReady: pipeline_run && pipeline_run.report_ready?,
     }
-  end
-
-  def pipeline_run_report_available?(pipeline_run)
-    # TODO: clean up the implementation of pipeline_run statuses.
-    # JIRA: https://jira.czi.team/browse/IDSEQ-1890
-
-    # This condition is carried over from the previous version of the report page (report_helper.rb).
-    # If the pipeline run exists
-    # AND the pipeline run has remaining reads OR is finalized (no longer checked by the pipeline monitor)
-    # AND the pipeline run did not fail (none of the jobs or final stats compilation failed)
-    # OR the pipeline run is report-ready (at least taxon_counts has been loaded)
-    # then the report can be generated.
-    return pipeline_run && (((pipeline_run.adjusted_remaining_reads.to_i > 0 || pipeline_run.finalized?) && !pipeline_run.failed?) || pipeline_run.report_ready?)
   end
 
   def fetch_taxon_counts(pipeline_run_id, background_id)
@@ -309,7 +300,7 @@ class PipelineReportService
   end
 
   def fetch_taxons_absent_from_sample(pipeline_run_id, background_id)
-    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: @pipeline_run_id).distinct
+    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: pipeline_run_id).distinct
 
     taxons_absent_from_sample = TaxonSummary
                                 .joins("LEFT OUTER JOIN"\
@@ -393,7 +384,7 @@ class PipelineReportService
           end
         else
           # TODO(tiago): not sure if this case ever happens
-          Rails.logger.warn("[PR=#{@pipeline_run_id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
+          Rails.logger.warn("[PR=#{@pipeline_run.id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
         end
       end
     end

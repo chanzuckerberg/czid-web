@@ -493,6 +493,8 @@ export default class TidyTree {
         d => (this.hasVisibleChildren(d) ? "baseline" : "middle")
       )
       .style("font-size", d => fontScale(d.data.values[this.options.attribute]))
+      .style("font-weight", 600)
+      .style("letter-spacing", 0.3)
       .attr(
         "dy",
         d =>

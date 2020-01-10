@@ -1,4 +1,5 @@
 @import "~styles/themes/typography";
+@import "~styles/themes/colors";
 @import "~styles/themes/elements";
 
 .title {
@@ -7,6 +8,19 @@
 
 .loadingContainer {
   margin-top: $space-m;
+}
+
+.adminDetails {
+  margin-bottom: $space-l;
+  color: $medium-grey;
+
+  .logUrl {
+    text-decoration: underline;
+
+    &:hover {
+      color: $black;
+    }
+  }
 }
 
 .details {
@@ -25,6 +39,7 @@
     .sampleName {
       @include font-body-xs;
       padding: $space-xxxs 0;
+      word-break: break-word;
     }
   }
 }

@@ -14,6 +14,7 @@ import {
 import cx from "classnames";
 import memoize from "memoize-one";
 
+import StatusLabel from "~ui/labels/StatusLabel";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
@@ -25,6 +26,7 @@ import {
   getHeatmapMetrics,
 } from "~/api";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { UserContext } from "~/components/common/UserContext";
 
 import TaxonContigSelect from "./TaxonContigSelect";
 import cs from "./choose_step.scss";
@@ -280,11 +282,11 @@ class ChooseStep extends React.Component {
       case "taxa_with_reads":
         dropdownOptions = [
           {
-            text: "All Taxon",
+            text: "All Taxa",
             value: "all",
             customNode: (
               <div className={cs.taxaWithReadsOption}>
-                <div className={cs.taxonName}>All taxon</div>
+                <div className={cs.taxonName}>All taxa</div>
                 <div className={cs.fill} />
                 <div className={cs.sampleCount}>{selectedSampleIds.size}</div>
               </div>
@@ -295,8 +297,8 @@ class ChooseStep extends React.Component {
           ...(this.sortTaxaWithReadsOptions(taxaWithReadsOptions) || []),
         ];
 
-        placeholder = "Select taxa";
-        menuLabel = "Select taxa";
+        placeholder = "Select taxon";
+        menuLabel = "Select taxon";
         showNoResultsMessage = true;
         search = true;
         onFilterChange = this.handleTaxaWithReadsSelectFilterChange;
@@ -305,7 +307,7 @@ class ChooseStep extends React.Component {
 
         optionsHeader = (
           <div className={cs.taxaWithReadsOptionsHeader}>
-            <div className={cs.header}>Taxa</div>
+            <div className={cs.header}>Taxon</div>
             <div className={cs.fill} />
             <div className={cs.header}>Samples</div>
           </div>
@@ -388,17 +390,21 @@ class ChooseStep extends React.Component {
   renderDownloadType = downloadType => {
     const { selectedDownloadTypeName, onSelect } = this.props;
     const { allSamplesUploadedByCurrentUser } = this.state;
+    const { admin } = this.context || {};
+
     const selected = selectedDownloadTypeName === downloadType.type;
     let disabled = false;
     let disabledMessage = "";
 
     if (
-      downloadType.type === "host_gene_counts" &&
-      !allSamplesUploadedByCurrentUser
+      downloadType.uploader_only &&
+      !allSamplesUploadedByCurrentUser &&
+      !admin
     ) {
       disabled = true;
-      disabledMessage =
-        "To download host gene counts, you must be the original uploader of all selected samples.";
+      disabledMessage = `To download ${
+        downloadType.display_name
+      }, you must be the original uploader of all selected samples.`;
     }
 
     const downloadTypeElement = (
@@ -417,7 +423,17 @@ class ChooseStep extends React.Component {
           selected={selected}
         />
         <div className={cs.content}>
-          <div className={cs.name}>{downloadType.display_name}</div>
+          <div className={cs.name}>
+            {downloadType.display_name}
+            {downloadType.file_type_display && (
+              <span className={cs.fileType}>
+                &nbsp;({downloadType.file_type_display})
+              </span>
+            )}
+            {downloadType.admin_only && (
+              <StatusLabel inline status="Admin Only" />
+            )}
+          </div>
           <div className={cs.description}>{downloadType.description}</div>
           {downloadType.fields &&
             selected && (
@@ -469,13 +485,17 @@ class ChooseStep extends React.Component {
   };
 
   render() {
-    const { onContinue } = this.props;
+    const { onContinue, selectedSampleIds } = this.props;
+
+    const numSamples = selectedSampleIds.size;
 
     return (
       <div className={cs.chooseStep}>
         <div className={cs.header}>
           <div className={cs.title}>Choose a Download</div>
-          <div className={cs.tagline}>Learn More</div>
+          <div className={cs.tagline}>
+            {numSamples} sample{numSamples != 1 ? "s" : ""} selected
+          </div>
         </div>
         <div className={cs.downloadTypeContainer}>
           {this.renderDownloadTypes()}
@@ -505,5 +525,7 @@ ChooseStep.propTypes = {
   onContinue: PropTypes.func.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };
+
+ChooseStep.contextType = UserContext;
 
 export default ChooseStep;

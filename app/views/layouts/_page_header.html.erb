@@ -9,6 +9,7 @@
         userName: '<%= current_user.name %>',
         userSignedIn: true,
         disableNavigation: <%= @disable_header_navigation %>,
+        announcementBannerEnabled: <%= @announcement_banner_enabled %>,
       }, 'page_header', JSON.parse('<%= raw escape_json(user_context)%>'))
 
 

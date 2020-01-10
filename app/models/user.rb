@@ -21,8 +21,13 @@ class User < ApplicationRecord
   has_many :phylo_trees, dependent: :destroy
   has_many :backgrounds, dependent: :destroy
   has_many :bulk_downloads, dependent: :destroy
+  has_many :user_settings, dependent: :destroy
 
-  validates :email, presence: true
+  validates :email, presence: true, uniqueness: true, format: {
+    # Auth0 converts all emails to lowercase. Let's raise this at creation time
+    # instead of automatically lower-casing.
+    with: /\A(?~[A-Z])\z/, message: "may not contain capital letters",
+  }
   validates :name, presence: true, format: {
     # See https://www.ascii-code.com/. These were the ranges that captured the
     # common accented chars I knew from experience, leaving out pure symbols.
@@ -119,6 +124,46 @@ class User < ApplicationRecord
 
   def owns_project?(project_id)
     projects.exists?(project_id)
+  end
+
+  def get_user_setting(key)
+    user_setting = user_settings.find_by(key: key)
+
+    return user_setting.value unless user_setting.nil?
+
+    return UserSetting::METADATA[key][:default]
+  end
+
+  def save_user_setting(key, value)
+    user_setting = user_settings.find_or_initialize_by(key: key)
+
+    user_setting.value = value
+    user_setting.save!
+  end
+
+  # Remove any user settings gated on allowed_features that the user doesn't have access to.
+  def viewable_user_setting_keys
+    parsed_allowed_feature_list = allowed_feature_list
+    UserSetting::METADATA.select do |_key, metadata|
+      metadata[:required_allowed_feature].nil? || parsed_allowed_feature_list.include?(metadata[:required_allowed_feature])
+    end.keys
+  end
+
+  def viewable_user_settings
+    # Fetch viewable user settings.
+    existing_user_settings = user_settings
+                             .where(key: viewable_user_setting_keys)
+                             .map { |setting| [setting.key, setting.value] }
+                             .to_h
+
+    # Fill in all missing user settings with the default value.
+    viewable_user_setting_keys.each do |key|
+      if existing_user_settings[key].nil?
+        existing_user_settings[key] = UserSetting::METADATA[key][:default]
+      end
+    end
+
+    existing_user_settings
   end
 
   # Update login trackable fields

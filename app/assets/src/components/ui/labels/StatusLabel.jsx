@@ -8,9 +8,13 @@ import cs from "./status_label.scss";
 
 class StatusLabel extends React.Component {
   render() {
-    const { status, type, className, tooltipText } = this.props;
+    const { status, type, className, tooltipText, inline } = this.props;
     const label = (
-      <div className={cx(className, cs.statusLabel, cs[type])}>{status}</div>
+      <div
+        className={cx(className, cs.statusLabel, inline && cs.inline, cs[type])}
+      >
+        {status}
+      </div>
     );
 
     if (tooltipText) {
@@ -32,6 +36,7 @@ StatusLabel.propTypes = {
   status: PropTypes.node,
   type: PropTypes.oneOf(["success", "warn", "error", "default"]),
   tooltipText: PropTypes.string,
+  inline: PropTypes.bool,
 };
 
 StatusLabel.defaultProps = {

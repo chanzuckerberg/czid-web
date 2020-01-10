@@ -27,13 +27,21 @@
       margin-left: $space-xxs;
     }
 
-    .sampleCount {
+    .metadata {
       @include font-body-xxs;
       color: $medium-grey;
-      cursor: pointer;
 
-      &:hover {
-        color: $black;
+      .detailsLink {
+        cursor: pointer;
+        margin-right: 10px;
+
+        &:hover {
+          color: $black;
+        }
+      }
+
+      .userName {
+        margin-left: 10px;
       }
     }
   }

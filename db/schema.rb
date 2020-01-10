@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_191_212_204_812) do
+ActiveRecord::Schema.define(version: 20_200_109_023_047) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -94,6 +94,7 @@ ActiveRecord::Schema.define(version: 20_191_212_204_812) do
     t.string "access_token"
     t.float "progress"
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
+    t.bigint "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
   end
 
@@ -552,6 +553,14 @@ ActiveRecord::Schema.define(version: 20_191_212_204_812) do
     t.integer "top_n"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "user_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "user_id"
+    t.string "key", comment: "The name of the user setting, e.g. receives_bulk_download_success_emails"
+    t.string "value", comment: "The value of the user setting, e.g. true. The schema of this value (e.g. boolean, number) is determined by the hard-coded data type associated with the key."
+    t.index ["user_id", "key"], name: "index_user_settings_on_user_id_and_key", unique: true
+    t.index ["user_id"], name: "index_user_settings_on_user_id"
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

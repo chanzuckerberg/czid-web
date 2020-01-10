@@ -23,6 +23,7 @@ const PathogenPreview = ({ tag2Count }) => {
       <BasicPopup
         trigger={display}
         content="Contains flagged pathogen species"
+        basic={false}
       />
     );
   }

@@ -351,7 +351,7 @@ export default class DiscoverySidebar extends React.Component {
               {this.buildMetadataRows("host")}
             </div>
             <div className={cs.hasBackground}>
-              <span className={cs.rowLabel}>Tissue</span>
+              <span className={cs.rowLabel}>Sample Type</span>
               {this.buildMetadataRows("tissue")}
             </div>
             <div className={cs.hasBackground}>

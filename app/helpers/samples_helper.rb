@@ -15,6 +15,10 @@ module SamplesHelper
   # Limit the number of objects we scan in a bucket to avoid timeouts and memory issues.
   S3_OBJECT_LIMIT = 10_000
 
+  # Sample files stored in S3 have paths like s3://idseq-samples-prod/samples/{project_id}/{sample_id}/{path_to_file}
+  # This regex extracts the sample_id from sample S3 paths.
+  SAMPLE_PATH_ID_MATCHER = %r{\A.*samples\/\d*\/(\d*)\/.*\z}
+
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
@@ -187,7 +191,9 @@ module SamplesHelper
     location_v2 = params[:locationV2]
     taxon = params[:taxon]
     time = params[:time]
-    tissue = params[:tissue]
+    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+    # instances to "sample_type"
+    sample_type = params[:tissue]
     visibility = params[:visibility]
     project_id = params[:projectId]
     search_string = params[:search]
@@ -199,7 +205,7 @@ module SamplesHelper
     samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
     samples = filter_by_metadata_key(samples, "collection_location_v2", location_v2) if location_v2.present?
     samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
-    samples = filter_by_metadata_key(samples, "sample_type", tissue) if tissue.present?
+    samples = filter_by_metadata_key(samples, "sample_type", sample_type) if sample_type.present?
     samples = filter_by_visibility(samples, visibility) if visibility.present?
     samples = filter_by_search_string(samples, search_string) if search_string.present?
     samples = filter_by_sample_ids(samples, requested_sample_ids) if requested_sample_ids.present?
@@ -638,6 +644,19 @@ module SamplesHelper
       taxon["sample_count_contigs"] = pipeline_runs_by_taxid[taxon["taxid"]].uniq.length
     end
     taxon_list
+  end
+
+  def self.get_sample_count_from_sample_paths(urls)
+    sample_ids = Set.new
+
+    urls.each do |url|
+      if (matches = SAMPLE_PATH_ID_MATCHER.match(url))
+        sample_id = matches[1]
+        sample_ids.add(sample_id)
+      end
+    end
+
+    sample_ids.size
   end
 
   private

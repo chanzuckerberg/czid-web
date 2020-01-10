@@ -15,7 +15,16 @@ class BulkDownloadsController < ApplicationController
 
   # GET /bulk_downloads/types
   def types
-    render json: BulkDownloadTypesHelper.bulk_download_types
+    download_types = BulkDownloadTypesHelper.bulk_download_types
+
+    # Filter out all types that are admin-only.
+    unless current_user.admin?
+      download_types = download_types.reject do |type|
+        type[:admin_only]
+      end
+    end
+
+    render json: download_types
   end
 
   # POST /bulk_downloads
@@ -23,27 +32,7 @@ class BulkDownloadsController < ApplicationController
     create_params = bulk_download_create_params
     # Convert sample ids to pipeline run ids.
     begin
-      sample_ids = create_params[:sample_ids]
-
-      # Max samples check.
-      max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
-
-      # Max samples should be string containing an integer, but just in case.
-      if max_samples_allowed.nil?
-        raise KICKOFF_FAILURE_HUMAN_READABLE
-      end
-
-      if sample_ids.length > Integer(max_samples_allowed)
-        raise BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
-      end
-
-      # Access control check.
-      viewable_samples = current_power.viewable_samples.where(id: sample_ids)
-      if viewable_samples.length != sample_ids.length
-        raise BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR
-      end
-
-      pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(viewable_samples)
+      pipeline_run_ids = validate_bulk_download_create_params(create_params, current_user)
     rescue => e
       # Throw an error if any sample doesn't have a valid pipeline run.
       # The user should never see this error, because the validation step should catch any issues.
@@ -87,8 +76,8 @@ class BulkDownloadsController < ApplicationController
       format.html
       format.json do
         render json: current_power.viewable_bulk_downloads
-                                  .includes(:pipeline_runs)
-                                  .map { |bulk_download| format_bulk_download(bulk_download) }
+                                  .includes(:pipeline_runs, :user)
+                                  .map { |bulk_download| format_bulk_download(bulk_download, admin: current_user.admin?) }
       end
     end
   end
@@ -98,7 +87,7 @@ class BulkDownloadsController < ApplicationController
     bulk_download = viewable_bulk_download_from_params
 
     render json: {
-      bulk_download: format_bulk_download(bulk_download, true),
+      bulk_download: format_bulk_download(bulk_download, with_pipeline_runs: true, admin: current_user.admin?),
       download_type: BulkDownloadTypesHelper.bulk_download_type(bulk_download.download_type),
     }
   rescue ActiveRecord::RecordNotFound
@@ -128,13 +117,18 @@ class BulkDownloadsController < ApplicationController
   # POST /bulk_downloads/:id/success/:access_token
   def success_with_token
     # set bulk download and validate access token in before_action
+    @bulk_download.mark_success
+
     # Clear the access token, so it can no longer be used.
-    @bulk_download.update(status: BulkDownload::STATUS_SUCCESS, access_token: nil)
+    update_params = { access_token: nil }
 
     if params[:error_type] == "FailedSrcUrlError"
       LogUtil.log_err_and_airbrake("BulkDownloadFailedSrcUrlError (id #{@bulk_download.id}): The following paths failed to process: #{params[:error_data]}")
-      @bulk_download.update(error_message: FAILED_SAMPLES_ERROR_TEMPLATE % params[:error_data].length)
+      sample_count = SamplesHelper.get_sample_count_from_sample_paths(params[:error_data])
+      update_params[:error_message] = FAILED_SAMPLES_ERROR_TEMPLATE % sample_count
     end
+
+    @bulk_download.update(update_params)
 
     render json: { status: "success" }
   end
