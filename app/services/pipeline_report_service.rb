@@ -89,14 +89,17 @@ class PipelineReportService
         -> { fetch_taxon_counts(@pipeline_run_id, @background_id) },
         -> { fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id) },
       ]
-      results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
-        begin
-          ActiveRecord::Base.connection_pool.with_connection do
-            lambda.call()
+      results = nil
+      ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+        results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
+          begin
+            ActiveRecord::Base.connection_pool.with_connection do
+              lambda.call()
+            end
+          rescue => e
+            LogUtil.log_err_and_airbrake("Parallel fetch failed")
+            raise e
           end
-        rescue => e
-          LogUtil.log_err_and_airbrake("Parallel fetch failed")
-          raise e
         end
       end
       @timer.split("parallel_fetch_report_data")
