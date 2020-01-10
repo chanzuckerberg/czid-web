@@ -82,6 +82,7 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
         { name: 'Cultured Isolate' },
         { name: 'Unknown' },
         { name: 'Tumor' },
+        { name: 'Environmental' },
       ],
     }
     initial_data.each do |group_name, group|
