@@ -24,7 +24,16 @@ class ObjectCollection {
 class ObjectCollectionView {
   constructor(
     collection,
-    { conditions = {}, pageSize = 50, onViewChange = null }
+    {
+      // conditions: Extra conditions to use for this view.
+      // These will be sent to the apiFunction of the corresponding collection when requesting new data.
+      conditions = {},
+      // pageSize: Size of the page for this view.
+      pageSize = 50,
+      // callbacks to notify the client when changes occur
+      // onViewChange: triggered when the view finishes loading new object ids (the full list of ids in the view)
+      onViewChange = null,
+    }
   ) {
     this._orderedIds = null;
     this._loading = true;
@@ -118,6 +127,10 @@ class ObjectCollectionView {
         this._collection.entries[sample.id] = sample;
       });
 
+      // NOTE(tiago): we currently load the ids of ALL objects in the view. This allows using a simple solution to
+      // handle the select all options.
+      // It currently works with minimal performance impact, but might need to review in the future, as the number
+      // of objects in these views increases
       if (fetchedObjectIds) {
         this._orderedIds = fetchedObjectIds;
         this._onViewChange && this._onViewChange();
