@@ -4,7 +4,7 @@ import { set } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import Tabs from "~/components/ui/controls/Tabs";
-import { saveSampleName, saveSampleNotes } from "~/api";
+import { saveSampleName, saveSampleNotes, getAllSampleTypes } from "~/api";
 import {
   getSampleMetadata,
   saveSampleMetadata,
@@ -66,9 +66,10 @@ class SampleDetailsMode extends React.Component {
       return;
     }
 
-    const [metadata, metadataTypes] = await Promise.all([
+    const [metadata, metadataTypes, sampleTypes] = await Promise.all([
       getSampleMetadata(sampleId, pipelineVersion),
       getSampleMetadataFields(sampleId),
+      getAllSampleTypes(),
     ]);
 
     const processedMetadata = processMetadata(metadata.metadata, true);
@@ -82,6 +83,7 @@ class SampleDetailsMode extends React.Component {
       metadataTypes: metadataTypes
         ? processMetadataTypes(metadataTypes)
         : this.state.metadataTypes,
+      sampleTypes,
     });
   };
 
@@ -195,6 +197,7 @@ class SampleDetailsMode extends React.Component {
       pipelineInfo,
       pipelineRun,
       metadataErrors,
+      sampleTypes,
     } = this.state;
 
     const savePending = some(metadataSavePending);
@@ -209,6 +212,7 @@ class SampleDetailsMode extends React.Component {
           onMetadataSave={this.handleMetadataSave}
           savePending={savePending}
           metadataErrors={metadataErrors}
+          sampleTypes={sampleTypes}
         />
       );
     }

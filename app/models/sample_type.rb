@@ -12,13 +12,13 @@ class SampleType < ApplicationRecord
   validates :name, :group, length: { in: 3..30 }
   validates :group, inclusion: { in: [
     # See CreateSampleTypes
-    "Systemic Inflammation",
-    "CNS Infections",
-    "Respiratory Infections",
-    "Reproductive",
-    "Excrement",
-    "Organs",
-    "Insect Body Parts",
-    "Other",
+    'Systemic Inflammation',
+    'Central Nervous System',
+    'Respiratory Tract',
+    'Reproductive Tract',
+    'Excrement',
+    'Organs',
+    'Insect Body Parts',
+    'Other',
   ], }
 end
