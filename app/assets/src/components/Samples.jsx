@@ -629,8 +629,6 @@ class Samples extends React.Component {
     });
   };
 
-  // TODO (gdingle): fix me
-  // console error: TypeError: Cannot read property 'length' of undefined
   allTissueTypes(all_tissues) {
     return all_tissues.length == 0 || all_tissues.indexOf("Not set") >= 0
       ? all_tissues
