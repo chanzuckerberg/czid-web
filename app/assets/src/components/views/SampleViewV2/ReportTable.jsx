@@ -245,6 +245,7 @@ class ReportTable extends React.Component {
       <div className={cs.annotatedData}>
         <div className={cs.icon}>
           {rowData.highlighted && <ReportInsightIcon />}
+          {rowData.highlightedChildren && <ReportInsightIcon />}
         </div>
         <div className={cs.data}>
           {TableRenderers.formatNumberWithCommas(Number(cellData).toFixed(0))}

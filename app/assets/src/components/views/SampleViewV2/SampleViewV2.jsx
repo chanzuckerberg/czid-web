@@ -221,13 +221,16 @@ export default class SampleViewV2 extends React.Component {
       );
 
       rawReportData.sortedGenus.forEach(genusTaxId => {
+        let hasHighlightedChildren = false;
         const childrenSpecies =
           rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId].species_tax_ids;
         const speciesData = childrenSpecies.map(speciesTaxId => {
+          const isHighlighted = highlightedTaxIds.has(speciesTaxId);
+          hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
           return merge(
             rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId],
             {
-              highlighted: highlightedTaxIds.has(speciesTaxId),
+              highlighted: isHighlighted,
               taxId: speciesTaxId,
               taxLevel: "species",
             }
@@ -235,7 +238,7 @@ export default class SampleViewV2 extends React.Component {
         });
         reportData.push(
           merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
-            highlighted: highlightedTaxIds.has(genusTaxId),
+            highlightedChildren: hasHighlightedChildren,
             pathogens: generaPathogenCounts[genusTaxId],
             taxId: genusTaxId,
             taxLevel: "genus",
