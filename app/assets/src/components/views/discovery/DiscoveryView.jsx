@@ -122,6 +122,7 @@ class DiscoveryView extends React.Component {
         sampleActiveColumns: undefined,
         sampleDimensions: [],
         search: null,
+        selectableSampleIds: [],
         selectedSampleIds: new Set(),
         showFilters: true,
         showStats: true,
@@ -132,7 +133,10 @@ class DiscoveryView extends React.Component {
     );
     this.dataLayer = new DiscoveryDataLayer(this.props.domain);
     const conditions = this.getConditions();
-    this.samples = this.dataLayer.samples.createView({ conditions });
+    this.samples = this.dataLayer.samples.createView({
+      conditions,
+      onViewChange: this.refreshSampleData,
+    });
     this.projects = this.dataLayer.projects.createView({
       conditions,
       onViewChange: this.refreshProjectData,
@@ -389,6 +393,12 @@ class DiscoveryView extends React.Component {
   refreshProjectData = () => {
     this.refreshProject();
     this.refreshProjectStats();
+  };
+
+  refreshSampleData = () => {
+    this.setState({
+      selectableSampleIds: this.samples.getIds(),
+    });
   };
 
   refreshFilteredDimensions = async () => {
@@ -962,6 +972,7 @@ class DiscoveryView extends React.Component {
       mapLocationData,
       mapPreviewedLocationId,
       sampleActiveColumns,
+      selectableSampleIds,
       selectedSampleIds,
       projectId,
     } = this.state;
@@ -1030,7 +1041,7 @@ class DiscoveryView extends React.Component {
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}
                 samples={samples}
-                selectableIds={samples.getIds()}
+                selectableIds={selectableSampleIds}
                 selectedSampleIds={selectedSampleIds}
               />
             </div>
@@ -1199,19 +1210,18 @@ class DiscoveryView extends React.Component {
         <Divider style="medium" />
         <div className={cs.mainContainer}>
           <div className={cs.leftPane}>
-            {showFilters &&
-              dimensions && (
-                <DiscoveryFilters
-                  {...mapValues(
-                    dim => dim.values,
-                    keyBy("dimension", dimensions)
-                  )}
-                  {...filters}
-                  domain={domain}
-                  onFilterChange={this.handleFilterChange}
-                  allowedFeatures={allowedFeatures}
-                />
-              )}
+            {showFilters && dimensions && (
+              <DiscoveryFilters
+                {...mapValues(
+                  dim => dim.values,
+                  keyBy("dimension", dimensions)
+                )}
+                {...filters}
+                domain={domain}
+                onFilterChange={this.handleFilterChange}
+                allowedFeatures={allowedFeatures}
+              />
+            )}
           </div>
           <div className={cs.centerPane}>
             {currentDisplay === "map" &&
