@@ -1,3 +1,4 @@
+# NOTE: we should probably be using seeds.rb instead of migrations for initializing data.
 class UpdateMetadataFields < ActiveRecord::Migration[5.1]
   def up
     #########################

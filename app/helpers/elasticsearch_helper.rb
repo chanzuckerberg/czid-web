@@ -1,4 +1,9 @@
 module ElasticsearchHelper
+  # Limit maximum number of results for performance
+  # Since we currently might filter by sample and/or project only after the ElasticSearch,
+  # it should be large enough to avoid filtering everything out
+  # TODO(tiago): Eventually, this filtering should be moved to ElasticSearch, at which point we should reduce the max value
+  # (We can also move it to a parameter that clients of this functions can set)
   MAX_SEARCH_RESULTS = 50
 
   def prefix_match(model, field, prefix, condition)
@@ -27,18 +32,25 @@ module ElasticsearchHelper
     matching_taxa = []
     taxon_ids = []
     tax_levels.each do |level|
+      # ElasticSearch `match` query matching multiple strings in a fuzzy way (supports a few typos based
+      # on the size of the query)according to the operator specified (`and` in this case).
+      # `match` is the query type recommended by ElasticSearch for full-text search.
       search_params = {
         size: ElasticsearchHelper::MAX_SEARCH_RESULTS,
         query: {
-          query_string: {
-            query: "*#{query}*",
-            fields: ["#{level}_name"],
+          match: {
+            "#{level}_name": {
+              query: query,
+              fuzziness: "auto",
+              operator: "and",
+            },
           },
         },
         aggs: {
           distinct_taxa: {
             terms: {
               field: "#{level}_taxid",
+              size: ElasticsearchHelper::MAX_SEARCH_RESULTS,
             },
           },
         },

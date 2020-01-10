@@ -71,7 +71,12 @@ json.steps do
     class: 'PipelineStepRunStar',
     module: 'idseq_dag.steps.run_star',
     additional_files: { star_genome: attr[:star_genome] },
-    additional_attributes: { output_gene_file: 'reads_per_gene.star.tab' },
+    additional_attributes: {
+      output_gene_file: 'reads_per_gene.star.tab',
+      nucleotide_type: attr[:nucleotide_type],
+      output_metrics_file: 'picard_insert_metrics.txt',
+      output_histogram_file: 'insert_size_histogram.pdf',
+    },
   }
   steps << {
     in: ['star_out'],

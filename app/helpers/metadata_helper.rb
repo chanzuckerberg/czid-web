@@ -170,8 +170,10 @@ module MetadataHelper
   end
 
   # Receives an array of samples, and validates metadata from a csv.
+  # NOTE: validation depends on fields of each sample which depends on fields of each sample project.
   def validate_metadata_csv_for_samples(samples, metadata, new_samples = false)
-    # If new samples, enforce required metadata constraint, and pull the host genome from the metadata rows for validation.
+    # If new samples, enforce required metadata constraint, and pull the host genome from the
+    # metadata rows for validation.
     enforce_required = new_samples
     extract_host_genome_from_metadata = new_samples
 

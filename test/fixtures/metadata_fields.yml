@@ -12,6 +12,13 @@ nucleotide_type:
   force_options: 1
   options: "[\"DNA\", \"RNA\"]"
 
+water_control:
+  name: "water_control"
+  display_name: "Water Control"
+  base_type: 0
+  is_required: 1
+  is_core: 1
+
 collection_date:
   name: "collection_date"
   display_name: "Collection Date"

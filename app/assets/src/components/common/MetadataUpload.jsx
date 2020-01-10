@@ -1,6 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import _fp, { filter, keyBy, concat, find } from "lodash/fp";
+import _fp, { filter, keyBy, concat, find, sortBy } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import MetadataCSVLocationsMenu, {
@@ -9,7 +9,7 @@ import MetadataCSVLocationsMenu, {
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
-import { getAllHostGenomes } from "~/api";
+import { getAllHostGenomes, getAllSampleTypes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import LoadingIcon from "~ui/icons/LoadingIcon";
@@ -30,18 +30,41 @@ class MetadataUpload extends React.Component {
     },
     projectMetadataFields: null,
     hostGenomes: [],
+    sampleTypes: [],
     validatingCSV: false,
     CSVLocationWarnings: {},
   };
 
+  // Define the order in which metadata fields should be render in the upload
+  // grid. The order was defined by the perceived affinity of fields.
+  // Any field not defined will appear after in the pre-existing order.
+  ordering = {
+    host_genome: 1, // currently, this is not a MetadataField technically
+    sample_type: 2,
+    water_control: 3,
+    nucleotide_type: 4,
+    collection_date: 5,
+    collection_location: 6, // legacy, code for both cases to be safe
+    collection_location_v2: 7,
+  };
+
   async componentDidMount() {
-    const [projectMetadataFields, hostGenomes] = await Promise.all([
-      getProjectMetadataFields(this.props.project.id),
-      getAllHostGenomes(),
-    ]);
+    const [projectMetadataFields, hostGenomes, sampleTypes] = await Promise.all(
+      [
+        getProjectMetadataFields(this.props.project.id),
+        getAllHostGenomes(),
+        getAllSampleTypes(),
+      ]
+    );
+    const sorted = sortBy(
+      metadataField =>
+        this.ordering[metadataField.key] || Number.MAX_SAFE_INTEGER,
+      projectMetadataFields
+    );
     this.setState({
-      projectMetadataFields: keyBy("key", projectMetadataFields),
+      projectMetadataFields: keyBy("key", sorted),
       hostGenomes,
+      sampleTypes,
     });
   }
 
@@ -149,6 +172,7 @@ class MetadataUpload extends React.Component {
             withinModal={this.props.withinModal}
             projectMetadataFields={this.state.projectMetadataFields}
             hostGenomes={this.state.hostGenomes}
+            sampleTypes={this.state.sampleTypes}
           />
         );
       }

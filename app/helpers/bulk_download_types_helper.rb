@@ -17,14 +17,16 @@ module BulkDownloadTypesHelper
     {
       type: SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,
       display_name: "Sample Overviews",
-      description: "Sample metadata and QC metrics",
+      description: "Sample QC metrics (e.g. percent reads passing QC) and other summary statistics",
       category: "report",
       execution_type: RESQUE_EXECUTION_TYPE,
+      # This will be displayed in the bulk-download creation modal.
+      file_type_display: ".csv",
     },
     {
       type: SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Sample Taxon Reports",
-      description: "Metrics (e.g. total reads, rPM) and metadata for each taxon identified in the sample",
+      description: "Computed metrics (e.g. total reads, rPM) and metadata for each taxon identified in the sample",
       category: "report",
       execution_type: RESQUE_EXECUTION_TYPE,
       fields: [
@@ -33,11 +35,12 @@ module BulkDownloadTypesHelper
           type: "background",
         },
       ],
+      file_type_display: ".csv",
     },
     {
       type: COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
       display_name: "Combined Sample Taxon Results",
-      description: "The value of a particular metric (e.g. total reads, rPM) for all taxa in all selected samples, in a single data table",
+      description: "The value of a particular metric (e.g. total reads, rPM) for all taxa in all selected samples, combined into a single file",
       category: "report",
       fields: [
         {
@@ -50,13 +53,15 @@ module BulkDownloadTypesHelper
         },
       ],
       execution_type: RESQUE_EXECUTION_TYPE,
+      file_type_display: ".csv",
     },
     {
       type: CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Contig Summary Reports",
-      description: "Contig metadata and QC metrics",
+      description: "Contig QC metrics (e.g. read coverage, percent identity) and other summary statistics",
       category: "report",
       execution_type: RESQUE_EXECUTION_TYPE,
+      file_type_display: ".csv",
     },
     {
       type: HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE,
@@ -65,6 +70,7 @@ module BulkDownloadTypesHelper
       category: "report",
       execution_type: ECS_EXECUTION_TYPE,
       admin_only: true,
+      file_type_display: ".star.tab",
     },
     {
       type: READS_NON_HOST_BULK_DOWNLOAD_TYPE,

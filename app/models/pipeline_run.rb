@@ -480,6 +480,10 @@ class PipelineRun < ApplicationRecord
 
   # buffer can be a file or an array.
   def write_contig_mapping_table_csv(buffer)
+    # If there are no contigs, return an empty file.
+    if contigs.empty?
+      return
+    end
     nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
     nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
     header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_191_218_220_321) do
+ActiveRecord::Schema.define(version: 20_200_109_023_047) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -94,7 +94,7 @@ ActiveRecord::Schema.define(version: 20_191_218_220_321) do
     t.string "access_token"
     t.float "progress"
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
-    t.integer "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
+    t.bigint "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
   end
 
