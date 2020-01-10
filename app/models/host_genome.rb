@@ -2,12 +2,12 @@ class HostGenome < ApplicationRecord
   has_many :samples, dependent: :restrict_with_exception
   has_and_belongs_to_many :metadata_fields
 
-  validates :taxa_category, inclusion: { in: [
+  validates :taxa_category, inclusion: { allow_blank: true, in: [
     # From "Sample Type Groupings" at
     # https://docs.google.com/spreadsheets/d/1_hPkQe5LI0Zw_C0Ls4HVCEDsc_FNNVOaU_aAfoaiZRE/
     "human",
     "insect",
-  ], }
+  ], }, if: -> { respond_to?(:taxa_category) } # for migrations
 
   before_create :add_default_metadata_fields
 
