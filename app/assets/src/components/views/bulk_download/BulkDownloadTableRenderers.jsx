@@ -28,7 +28,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
           </div>
           <div className={cs.metadata}>
             <span className={cs.detailsLink} onClick={rowData.onStatusClick}>
-              Details...
+              Details
             </span>
             {admin && (
               <React.Fragment>
