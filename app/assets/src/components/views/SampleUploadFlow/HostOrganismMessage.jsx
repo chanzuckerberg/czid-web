@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { keys, countBy, groupBy } from "lodash/fp";
 
+const MATCH = "MATCH";
 const NO_MATCH = "NO_MATCH";
 
 /**
@@ -14,36 +15,28 @@ export default class HostOrganismMessage extends React.Component {
     selectedHostOrganisms: PropTypes.arrayOf(PropTypes.string).isRequired,
   };
 
+  hasMatch(host) {
+    return this.props.allHostOrganisms.includes(host);
+  }
+
   renderOneHost(host) {
-    if (this.props.allHostOrganisms.includes(host)) {
+    if (this.hasMatch(host)) {
       return "one host, match";
     }
     return "one host, no match";
   }
 
-  renderManyHost(uniqHosts) {
-    const getMatchingHost = uniqHost =>
-      this.props.allHostOrganisms.includes(uniqHost) ? uniqHost : NO_MATCH;
-    const grouped = groupBy(getMatchingHost, keys(uniqHosts));
-    return (
-      <div>
-        {keys(grouped).map(key => {
-          const count = uniqHosts[key];
-          if (key === NO_MATCH) {
-            return count + " hosts, NO_MATCH";
-          } else {
-            // TODO (gdingle): need to do frequency counts!!!
-            return count + " matches of host" + key;
-          }
-        })}
-      </div>
+  renderManyHosts(uniqHosts) {
+    const grouped = groupBy(
+      host => (this.hasMatch(host) ? MATCH : NO_MATCH),
+      keys(uniqHosts)
     );
+    // TODO (gdingle): more display after final designs
+    return <div>{JSON.stringify(grouped)}</div>;
   }
 
   render() {
-    const { selectedHostOrganisms } = this.props;
-    // TODO (gdingle): need to do frequency counts here!!!
-    const uniqHosts = countBy(selectedHostOrganisms);
+    const uniqHosts = countBy(this.props.selectedHostOrganisms);
     const length = keys(uniqHosts).length;
     if (length === 0) {
       return null;
@@ -51,6 +44,6 @@ export default class HostOrganismMessage extends React.Component {
     if (length === 1) {
       return this.renderOneHost(keys(uniqHosts)[0]);
     }
-    return this.renderManyHost(uniqHosts);
+    return this.renderManyHosts(uniqHosts);
   }
 }
