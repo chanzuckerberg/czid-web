@@ -42,7 +42,7 @@ module BulkDownloadsHelper
     return pipeline_runs.map(&:id)
   end
 
-  def format_bulk_download(bulk_download, with_pipeline_runs: false, admin: false)
+  def format_bulk_download(bulk_download, detailed: false, admin: false)
     formatted_bulk_download = bulk_download.as_json(except: [:access_token])
     formatted_bulk_download[:num_samples] = bulk_download.pipeline_runs.length
     formatted_bulk_download[:download_name] = bulk_download.download_display_name
@@ -57,13 +57,15 @@ module BulkDownloadsHelper
       formatted_bulk_download[:params] = JSON.parse(bulk_download.params_json)
     end
 
-    if with_pipeline_runs
+    if detailed
       formatted_bulk_download[:pipeline_runs] = bulk_download.pipeline_runs.map do |pipeline_run|
         {
           "id": pipeline_run.id,
           "sample_name": pipeline_run.sample.name,
         }
       end
+
+      formatted_bulk_download[:presigned_output_url] = bulk_download.output_file_presigned_url
     end
     formatted_bulk_download
   end

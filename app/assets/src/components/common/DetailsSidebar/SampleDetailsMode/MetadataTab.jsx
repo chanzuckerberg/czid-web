@@ -7,6 +7,7 @@ import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import MetadataInput from "~/components/common/MetadataInput";
 import { logAnalyticsEvent } from "~/api/analytics";
+import FieldList from "~/components/common/DetailsSidebar/FieldList";
 
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
@@ -147,55 +148,56 @@ class MetadataTab extends React.Component {
     );
     const isSectionEditing = sectionEditing[section.name];
 
+    const metadataFields = [];
+
+    // Special Sample Info fields.
     // TODO: Consider refactoring so SAMPLE_ADDITIONAL_INFO doesn't have to be special.
-    return (
-      <div>
-        {/* Special section for Sample Info */}
-        {section.name === "Sample Info" &&
-          !isSectionEditing &&
-          SAMPLE_ADDITIONAL_INFO.map(info => (
-            <div className={cs.field} key={info.key}>
-              <div className={cs.label}>{info.name}</div>
-              {info.key === "project_name" ? (
-                <a
-                  className={cs.projectLink}
-                  href={`/home?project_id=${additionalInfo.project_id}`}
-                >
-                  {additionalInfo[info.key]}
-                </a>
-              ) : (
-                MetadataTab.renderMetadataValue(additionalInfo[info.key])
-              )}
-            </div>
-          ))}
-        {/* Sample name is a special case */}
-        {section.name === "Sample Info" &&
-          isSectionEditing && (
-            <div className={cs.field}>
-              <div className={cs.label}>Sample Name</div>
-              <Input
-                onChange={val => onMetadataChange("name", val)}
-                onBlur={() => onMetadataSave("name")}
-                value={additionalInfo.name}
-                type="text"
-                className={cs.sampleNameInput}
-              />
-            </div>
-          )}
-        {validKeys.map(key => {
-          // Hide legacy collection_location (v1) field.
-          if (key === "collection_location") return;
-          return (
-            <div className={cs.field} key={metadataTypes[key].key}>
-              <div className={cs.label}>{metadataTypes[key].name}</div>
-              {isSectionEditing
-                ? this.renderInput(metadataTypes[key])
-                : this.renderMetadataType(metadataTypes[key])}
-            </div>
-          );
-        })}
-      </div>
-    );
+    if (section.name === "Sample Info" && !isSectionEditing) {
+      SAMPLE_ADDITIONAL_INFO.forEach(info => {
+        metadataFields.push({
+          label: info.name,
+          value:
+            info.key === "project_name" ? (
+              <a
+                className={cs.projectLink}
+                href={`/home?project_id=${additionalInfo.project_id}`}
+              >
+                {additionalInfo[info.key]}
+              </a>
+            ) : (
+              MetadataTab.renderMetadataValue(additionalInfo[info.key])
+            ),
+        });
+      });
+    }
+
+    // Sample name is a special case. It is not a MetadataField.
+    // When editing, we need to show an input for Sample Name.
+    if (section.name === "Sample Info" && isSectionEditing) {
+      metadataFields.push({
+        label: "Sample Name",
+        value: (
+          <Input
+            onChange={val => onMetadataChange("name", val)}
+            onBlur={() => onMetadataSave("name")}
+            value={additionalInfo.name}
+            type="text"
+            className={cs.sampleNameInput}
+          />
+        ),
+      });
+    }
+
+    validKeys.forEach(key => {
+      metadataFields.push({
+        label: metadataTypes[key].name,
+        value: isSectionEditing
+          ? this.renderInput(metadataTypes[key])
+          : this.renderMetadataType(metadataTypes[key]),
+      });
+    });
+
+    return <FieldList fields={metadataFields} className={cs.metadataFields} />;
   };
 
   render() {

@@ -205,7 +205,7 @@ $font-weight-heavy: 800;
 }
 
 @mixin font-code {
-  font-face: $font-family-monospace;
+  font-family: $font-family-monospace;
   font-size: 13px;
   line-height: 16px;
 }

@@ -52,6 +52,10 @@ class BulkDownload < ApplicationRecord
   end
 
   def output_file_presigned_url
+    if status != STATUS_SUCCESS
+      return nil
+    end
+
     begin
       return S3_PRESIGNER.presigned_url(:get_object,
                                         bucket: ENV['SAMPLES_BUCKET_NAME'],
