@@ -116,9 +116,15 @@ class BulkDownloadList extends React.Component {
       },
       {
         dataKey: "created_at",
-        label: "Created On",
+        label: "Date",
         width: 200,
         cellRenderer: TableRenderers.renderDateWithElapsed,
+      },
+      {
+        dataKey: "num_samples",
+        label: "Samples",
+        width: 100,
+        cellRenderer: BulkDownloadTableRenderers.renderNumberOfSamples,
       },
       {
         dataKey: "file_size",

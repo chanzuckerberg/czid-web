@@ -28,7 +28,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
           </div>
           <div className={cs.metadata}>
             <span className={cs.detailsLink} onClick={rowData.onStatusClick}>
-              {rowData.num_samples} Sample{rowData.num_samples === 1 ? "" : "s"}
+              Details...
             </span>
             {admin && (
               <React.Fragment>
@@ -39,6 +39,10 @@ export default class BulkDownloadTableRenderers extends React.Component {
         </div>
       </div>
     );
+  };
+
+  static renderNumberOfSamples = ({ rowData }) => {
+    return <div className={cs.samplesCell}>{rowData.num_samples}</div>;
   };
 
   static renderStatus = ({ rowData }) => {
