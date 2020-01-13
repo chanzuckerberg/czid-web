@@ -24,13 +24,14 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
         { name: 'Whole Blood' },
       ],
 
-      'CNS Infections': [
+      'Central Nervous System': [
         { name: 'Brain' },
         { name: 'Cerebrospinal Fluid', human_only: true },
+        { name: 'CNS Tissue' },
         { name: 'Ocular Fluid', human_only: true },
       ],
 
-      'Respiratory Infections': [
+      'Respiratory Tract': [
         { name: 'Lung' },
         { name: 'Bronchoalveolar Lavage', human_only: true },
         { name: 'Nasopharyngeal Swab', human_only: true },
@@ -41,7 +42,7 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
         { name: 'Tracheal Aspirate', human_only: true },
       ],
 
-      'Reproductive': [
+      'Reproductive Tract': [
         { name: 'Amniotic Fluid', human_only: true },
         { name: 'Placenta', human_only: true },
         { name: 'Cervicovaginal Swab', human_only: true },
@@ -76,11 +77,12 @@ class CreateSampleTypes < ActiveRecord::Migration[5.1]
 
       'Other': [
         { name: 'Mixed Tissue' },
-        { name: 'Simulation', human_only: true },
+        { name: 'Simulation' },
         { name: 'Cell Line' },
         { name: 'Cultured Isolate' },
         { name: 'Unknown' },
-        { name: 'Tumo' },
+        { name: 'Tumor' },
+        { name: 'Environmental' },
       ],
     }
     initial_data.each do |group_name, group|

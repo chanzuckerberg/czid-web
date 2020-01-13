@@ -100,6 +100,7 @@ json.steps do
     additional_files: {
       lineage_db: attr[:lineage_db],
       loc_db: attr[:nt_loc_db],
+      db: attr[:nt_db],
     },
     additional_attributes: {
       db: attr[:nt_db],
@@ -115,6 +116,7 @@ json.steps do
     additional_files: {
       lineage_db: attr[:lineage_db],
       loc_db: attr[:nr_loc_db],
+      db: attr[:nr_db],
     },
     additional_attributes: {
       db: attr[:nr_db],
