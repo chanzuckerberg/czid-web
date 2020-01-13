@@ -81,12 +81,16 @@ class SampleTypeSearchBox extends React.Component {
 
   render() {
     const { className, value, onResultSelect } = this.props;
+    // TODO (gdingle): new icon is not working!!!
     return (
       <LiveSearchPopBox
         className={className}
         value={value}
         onSearchTriggered={this.handleSearchTriggered}
         onResultSelect={onResultSelect}
+        minChars={1}
+        placeholder=""
+        icon="search"
       />
     );
   }
