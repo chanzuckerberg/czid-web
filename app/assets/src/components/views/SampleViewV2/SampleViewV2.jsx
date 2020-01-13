@@ -810,7 +810,9 @@ export default class SampleViewV2 extends React.Component {
     } else if (sidebarMode === "sampleDetails") {
       return {
         sampleId: sample.id,
-        pipelineVersion: pipelineRun.pipeline_version,
+        pipelineVersion: pipelineRun.pipeline_version
+          ? pipelineRun.pipeline_version
+          : null,
         onMetadataUpdate: this.handleMetadataUpdate,
       };
     }
@@ -923,7 +925,10 @@ export default class SampleViewV2 extends React.Component {
       message = "Loading report data.";
       icon = <LoadingIcon className={cs.icon} />;
       type = "inProgress";
-    } else if (pipelineRunStatus === "WAITING") {
+    } else if (
+      pipelineRunStatus === "WAITING" &&
+      (sample && !sample.upload_error)
+    ) {
       status = "IN PROGRESS";
       message = jobStatus;
       icon = <LoadingIcon className={cs.icon} />;
@@ -937,6 +942,12 @@ export default class SampleViewV2 extends React.Component {
     } else {
       // Some kind of error or warning has occurred.
       if (sample) {
+        // If an upload error occurred, the pipeline run might not exist so
+        // only try to set these fields if the pipeline run started.
+        if (pipelineRun) {
+          pipelineRun.known_user_error = knownUserError;
+          pipelineRun.error_message = errorMessage;
+        }
         pipelineRun.known_user_error = knownUserError;
         pipelineRun.error_message = errorMessage;
         ({ status, message, linkText, type, link, icon } = sampleErrorInfo(
