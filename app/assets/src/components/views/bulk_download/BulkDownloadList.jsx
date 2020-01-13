@@ -44,7 +44,7 @@ const STATUS_DISPLAY = {
 // In this case, the bulk download task will have status = success and also have an error message.
 const getStatusType = bulkDownload => {
   if (bulkDownload.status === "success" && bulkDownload.error_message) {
-    return "warning";
+    return "warn";
   }
   return STATUS_TYPES[bulkDownload.status];
 };
@@ -116,9 +116,15 @@ class BulkDownloadList extends React.Component {
       },
       {
         dataKey: "created_at",
-        label: "Created On",
+        label: "Date",
         width: 200,
         cellRenderer: TableRenderers.renderDateWithElapsed,
+      },
+      {
+        dataKey: "num_samples",
+        label: "Samples",
+        width: 100,
+        cellRenderer: BulkDownloadTableRenderers.renderNumberOfSamples,
       },
       {
         dataKey: "file_size",
