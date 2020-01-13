@@ -810,9 +810,7 @@ export default class SampleViewV2 extends React.Component {
     } else if (sidebarMode === "sampleDetails") {
       return {
         sampleId: sample.id,
-        pipelineVersion: pipelineRun.pipeline_version
-          ? pipelineRun.pipeline_version
-          : null,
+        pipelineVersion: pipelineRun ? pipelineRun.pipeline_version : null,
         onMetadataUpdate: this.handleMetadataUpdate,
       };
     }
@@ -948,8 +946,6 @@ export default class SampleViewV2 extends React.Component {
           pipelineRun.known_user_error = knownUserError;
           pipelineRun.error_message = errorMessage;
         }
-        pipelineRun.known_user_error = knownUserError;
-        pipelineRun.error_message = errorMessage;
         ({ status, message, linkText, type, link, icon } = sampleErrorInfo(
           sample,
           pipelineRun
