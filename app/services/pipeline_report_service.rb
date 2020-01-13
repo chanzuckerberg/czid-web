@@ -477,20 +477,15 @@ class PipelineReportService
   end
 
   def find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
-    # Find the top n (ui_config.top_n) species that satisfy:
-    #     NT.zscore > min_z AND
-    #     NR.zscore > min_z AND
-    #     NT.rpm > min_rpm AND
-    #     NR.rpm > min_rpm AND
-    #     tax_id > 0
     ui_config = UiConfig.last
     return unless ui_config
 
-    meets_highlight_condition = lambda do |counts|
+    meets_highlight_condition = lambda do |tax_id, counts|
       return (counts.dig(:nt, :rpm) || 0) > ui_config.min_nt_rpm \
         && (counts.dig(:nr, :rpm) || 0) > ui_config.min_nr_rpm \
         && (counts.dig(:nt, :z_score) || 0) > ui_config.min_nt_z \
-        && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z
+        && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z \
+        && tax_id > 0
     end
 
     highlighted_tax_ids = []
@@ -500,7 +495,7 @@ class PipelineReportService
         return highlighted_tax_ids if highlighted_tax_ids.length >= ui_config.top_n
 
         species_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_tax_id]
-        if meets_highlight_condition.call(species_taxon) && species_tax_id > 0
+        if meets_highlight_condition.call(species_tax_id, species_taxon)
           highlighted_tax_ids << species_tax_id
         end
       end
