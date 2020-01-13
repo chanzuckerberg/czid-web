@@ -52,8 +52,9 @@ module BulkDownloadsHelper
       formatted_bulk_download[:log_url] = bulk_download.log_url
     end
 
-    unless bulk_download.params_json.nil?
-      formatted_bulk_download[:params] = JSON.parse(bulk_download.params_json)
+    # params is not included by default, because it's a wrapper variable around params_json.
+    unless bulk_download.params.nil?
+      formatted_bulk_download[:params] = bulk_download.params
     end
 
     if detailed

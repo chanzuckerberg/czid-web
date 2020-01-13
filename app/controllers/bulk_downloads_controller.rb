@@ -30,6 +30,7 @@ class BulkDownloadsController < ApplicationController
   # POST /bulk_downloads
   def create
     create_params = bulk_download_create_params
+
     # Convert sample ids to pipeline run ids.
     begin
       pipeline_run_ids = validate_bulk_download_create_params(create_params, current_user)
@@ -42,10 +43,14 @@ class BulkDownloadsController < ApplicationController
       return
     end
 
+    # Convert params to a hash before passing it into the model.
+    params = create_params[:params]
+    params = params.to_hash if params.present?
+
     # Create and save the bulk download.
     bulk_download = BulkDownload.new(download_type: create_params[:download_type],
                                      pipeline_run_ids: pipeline_run_ids,
-                                     params: create_params[:params],
+                                     params: params,
                                      status: BulkDownload::STATUS_WAITING,
                                      user_id: current_user.id)
 
@@ -66,7 +71,7 @@ class BulkDownloadsController < ApplicationController
     else
       LogUtil.log_err_and_airbrake(
         "BulkDownloadsFailedEvent: Failed to save bulk download for type #{create_params[:download_type]} with #{pipeline_run_ids.length} samples.
-        #{bulk_download.errors.full_messages} #{create_params[:params]}"
+        #{bulk_download.errors.full_messages} #{params}"
       )
       render json: { error: KICKOFF_FAILURE_HUMAN_READABLE }, status: :unprocessable_entity
     end
