@@ -66,7 +66,6 @@ class MetadataInput extends React.Component {
 
     // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
     // See https://jira.czi.team/browse/IDSEQ-2051.
-    console.log(admin, "adin", this.context);
     if (metadataType.key === "sample_type" && admin) {
       return (
         <SampleTypeSearchBox
