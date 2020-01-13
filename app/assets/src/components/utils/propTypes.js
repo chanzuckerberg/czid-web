@@ -109,6 +109,7 @@ const SampleUploadType = PropTypes.oneOf(["basespace", "local", "remote"]);
 const DownloadType = PropTypes.shape({
   type: PropTypes.string,
   display_name: PropTypes.string,
+  admin_only: PropTypes.bool,
   description: PropTypes.string,
   category: PropTypes.string,
   fields: PropTypes.arrayOf(
@@ -117,11 +118,19 @@ const DownloadType = PropTypes.shape({
       display_name: PropTypes.string,
     })
   ),
+  uploader_only: PropTypes.bool,
 });
 
 const DownloadTypeParam = PropTypes.shape({
   displayName: PropTypes.string,
   value: PropTypes.string,
+});
+
+const SampleTypeProps = PropTypes.shape({
+  name: PropTypes.string,
+  group: PropTypes.string,
+  insect_only: PropTypes.bool,
+  human_only: PropTypes.bool,
 });
 
 export default {
@@ -139,5 +148,6 @@ export default {
   SampleUploadType,
   DownloadType,
   DownloadTypeParam,
+  SampleTypeProps,
   ...PropTypes,
 };

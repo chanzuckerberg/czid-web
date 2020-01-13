@@ -12,7 +12,8 @@ import {
   pipelineVersionHasCoverageViz,
 } from "~/components/utils/sample";
 import { UserContext } from "~/components/common/UserContext";
-import InsightIcon from "~ui/icons/InsightIcon";
+import BasicPopup from "~/components/BasicPopup";
+import ReportInsightIcon from "../report/ReportInsightIcon";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import PathogenPreview from "~/components/views/report/PathogenPreview";
 import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
@@ -29,6 +30,10 @@ import cs from "./report_table.scss";
 const STRING_NULL_VALUES = ["", "zzzzzzzzz"];
 const NUMBER_NULL_VALUES = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER];
 const INVALID_CALL_BASE_TAXID = -1e8;
+const TAX_LEVEL_INDICES = {
+  species: 1,
+  genus: 2,
+};
 
 class ReportTable extends React.Component {
   constructor(props) {
@@ -60,7 +65,7 @@ class ReportTable extends React.Component {
         flexGrow: 1,
         headerClassName: cs.taxonHeader,
         label: "Taxon",
-        width: 170,
+        minWidth: 300,
         sortFunction: ({ data, sortDirection }) =>
           this.nestedSortFunction({
             data,
@@ -100,7 +105,7 @@ class ReportTable extends React.Component {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 60,
+        width: 65,
       },
       {
         cellDataGetter: ({ rowData }) =>
@@ -223,7 +228,7 @@ class ReportTable extends React.Component {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 60,
+        width: 65,
       },
       {
         dataKey: "ntnrSelector",
@@ -238,7 +243,9 @@ class ReportTable extends React.Component {
   renderAggregateScore = ({ cellData, rowData }) => {
     return (
       <div className={cs.annotatedData}>
-        <div className={cs.icon}>{rowData.highlighted && <InsightIcon />}</div>
+        <div className={cs.icon}>
+          {rowData.highlighted && <ReportInsightIcon />}
+        </div>
         <div className={cs.data}>
           {TableRenderers.formatNumberWithCommas(Number(cellData).toFixed(0))}
         </div>
@@ -335,25 +342,39 @@ class ReportTable extends React.Component {
   };
 
   renderNtNrSelector = () => {
-    return this.renderNtNrStack({
-      cellData: ["NT", "NR"],
-      onClick: [
-        withAnalytics(
-          () => this.handleNtNrChange("nt"),
-          "ReportTable_count-type_clicked",
-          {
-            countType: "nt",
-          }
-        ),
-        withAnalytics(
-          () => this.handleNtNrChange("nr"),
-          "ReportTable_count-type_clicked",
-          {
-            countType: "nr",
-          }
-        ),
-      ],
-    });
+    let selector = (
+      <div>
+        {this.renderNtNrStack({
+          cellData: ["NT", "NR"],
+          onClick: [
+            withAnalytics(
+              () => this.handleNtNrChange("nt"),
+              "ReportTable_count-type_clicked",
+              {
+                countType: "nt",
+              }
+            ),
+            withAnalytics(
+              () => this.handleNtNrChange("nr"),
+              "ReportTable_count-type_clicked",
+              {
+                countType: "nr",
+              }
+            ),
+          ],
+        })}
+      </div>
+    );
+    return (
+      <BasicPopup
+        trigger={selector}
+        position="top right"
+        content="Switch count type"
+        inverted
+        basic={false}
+        size="small"
+      />
+    );
   };
 
   renderNtNrStack = ({ cellData, onClick }) => {
@@ -390,7 +411,13 @@ class ReportTable extends React.Component {
 
   downloadFastaUrl = ({ taxLevel, taxId }) => {
     const { pipelineVersion, sampleId } = this.props;
-    location.href = `/samples/${sampleId}/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
+    const taxLevelIndex = TAX_LEVEL_INDICES[taxLevel];
+    if (!taxLevelIndex) {
+      // eslint-disable-next-line no-console
+      console.error("Unknown taxLevel:", taxLevel);
+      return;
+    }
+    location.href = `/samples/${sampleId}/fasta/${taxLevelIndex}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
   downloadContigUrl = ({ taxId }) => {
@@ -446,7 +473,9 @@ class ReportTable extends React.Component {
 
     const validTaxId =
       rowData.taxId < INVALID_CALL_BASE_TAXID || rowData.taxId > 0;
-    const contigVizEnabled = !!keys(getOr({}, "nt.contigs", rowData)).length;
+    const contigVizEnabled =
+      !!keys(getOr({}, "nt.contigs", rowData)).length ||
+      !!keys(getOr({}, "nr.contigs", rowData)).length;
     const coverageVizEnabled =
       alignVizAvailable && validTaxId && getOr(0, "nt.count", rowData) > 0;
     const phyloTreeEnabled =
@@ -468,7 +497,7 @@ class ReportTable extends React.Component {
       <HoverActions
         className={cs.hoverActions}
         taxId={rowData.taxId}
-        taxLevel={rowData.taxLevel === "species" ? 1 : 0}
+        taxLevel={rowData.taxLevel === "species" ? 1 : 2}
         taxName={rowData.name}
         taxCommonName={rowData.common_name}
         taxSpecies={rowData.species}
@@ -672,7 +701,7 @@ class ReportTable extends React.Component {
 ReportTable.defaultProps = {
   data: [],
   initialDbType: "nt",
-  rowHeight: 55,
+  rowHeight: 54,
 };
 
 ReportTable.propTypes = {

@@ -4,10 +4,10 @@ class RestartPipelineForSample
   def self.perform(sample_id)
     s = Sample.find(sample_id)
     if s.nil?
-      raise Exception("Sample #{sample_id} not found")
+      raise "Sample #{sample_id} not found"
     end
     Rails.logger.info("RestartPipelineForSample #{sample_id} is being triggered")
-    raise Exception("not restarted") unless s.kickoff_pipeline
+    raise "not restarted" unless s.kickoff_pipeline
     Rails.logger.info("RestartPipelineForSample #{sample_id} has started. ")
   rescue => err
     LogUtil.log_err_and_airbrake(

@@ -72,7 +72,9 @@ class SamplesController < ApplicationController
     name_search_query = params[:search]
     filter_query = params[:filter]
     page = params[:page]
-    tissue_type_query = params[:tissue].split(',') if params[:tissue].present?
+    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+    # instances to "sample_type".
+    sample_type_query = params[:tissue].split(',') if params[:tissue].present?
     host_query = params[:host].split(',') if params[:host].present?
     samples_query = params[:ids].split(',') if params[:ids].present?
     sort = params[:sort_by]
@@ -89,11 +91,11 @@ class SamplesController < ApplicationController
 
     @count_project = results.size
 
-    # Get tissue types and host genomes that are present in the sample list
-    # TODO(yf) : the following tissue_types, host_genomes have performance
+    # Get sample types and host genomes that are present in the sample list
+    # TODO(yf) : the following sample_types, host_genomes have performance
     # impact that it should be moved to different dedicated functions. Not
     # parsing the whole results.
-    @tissue_types = get_distinct_sample_types(results)
+    @sample_types = get_distinct_sample_types(results)
 
     host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
     @host_genomes = HostGenome.find(host_genome_ids)
@@ -106,7 +108,7 @@ class SamplesController < ApplicationController
     end
 
     results = filter_by_status(results, filter_query) if filter_query.present?
-    results = filter_by_metadatum(results, "sample_type", tissue_type_query) if tissue_type_query.present?
+    results = filter_by_metadatum(results, "sample_type", sample_type_query) if sample_type_query.present?
     results = filter_by_metadatum(results, "collection_location", params[:location].split(',')) if params[:location].present?
     results = filter_by_host(results, host_query) if host_query.present?
 
@@ -132,7 +134,9 @@ class SamplesController < ApplicationController
         samples: @samples_formatted,
         # Number of samples in the current query.
         count: @samples_count,
-        tissue_types: @tissue_types,
+        # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+        # instances to "sample_type"
+        tissues: @sample_types,
         host_genomes: @host_genomes,
         # Total number of samples in the project
         count_project: @count_project,
@@ -148,8 +152,8 @@ class SamplesController < ApplicationController
 
   def index_v2
     # this method is going to replace 'index' once we fully migrate to the
-    # discovery views (old one was kept to avoid breaking the current inteface
-    # without sacrificing speed of development and avoid breaking the current interface)
+    # discovery views (old one was kept to avoid breaking the current interface
+    # without sacrificing speed of development)
     domain = params[:domain]
     order_by = params[:orderBy] || :id
     order_dir = params[:orderDir] || :desc
@@ -216,15 +220,15 @@ class SamplesController < ApplicationController
     locations_v2 = LocationHelper.sample_dimensions(sample_ids, "collection_location_v2", samples_count)
     @timer.split("locations_v2")
 
-    tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type").count
-    tissues = tissues.map do |tissue, count|
-      { value: tissue, text: tissue, count: count }
+    sample_types = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type").count
+    sample_types = sample_types.map do |sample_type, count|
+      { value: sample_type, text: sample_type, count: count }
     end
-    not_set_count = samples_count - tissues.sum { |l| l[:count] }
+    not_set_count = samples_count - sample_types.sum { |l| l[:count] }
     if not_set_count > 0
-      tissues << { value: "not_set", text: "Unknown", count: not_set_count }
+      sample_types << { value: "not_set", text: "Unknown", count: not_set_count }
     end
-    @timer.split("tissues")
+    @timer.split("sample_types")
 
     # visibility
     public_count = samples.public_samples.count
@@ -301,7 +305,9 @@ class SamplesController < ApplicationController
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
-          { dimension: "tissue", values: tissues },
+          # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+          # instances to "sample_type"
+          { dimension: "tissue", values: sample_types },
         ]
       end
     end
@@ -433,11 +439,13 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("tissue")
-      tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "sample_type")
-      unless tissues.empty?
+      sample_types = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "sample_type")
+      unless sample_types.empty?
+        # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+        # instances to "sample_type".
         results["Tissue"] = {
           "name" => "Tissue",
-          "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
+          "results" => sample_types.pluck(:string_validated_value).uniq.map do |val|
             { "category" => "Tissue", "title" => val, "id" => val }
           end,
         }
@@ -600,7 +608,7 @@ class SamplesController < ApplicationController
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
     min_contig_size = params[:min_contig_size]
-    @report_csv = PipelineReportService.call(pipeline_run.id, background_id, true, min_contig_size)
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_size: min_contig_size)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -632,6 +640,7 @@ class SamplesController < ApplicationController
         name: @sample.name,
         editable: editable,
         host_genome_name: @sample.host_genome_name,
+        host_genome_taxa_category: @sample.host_genome.taxa_category,
         upload_date: @sample.created_at,
         project_name: @sample.project.name,
         project_id: @sample.project_id,
@@ -750,6 +759,7 @@ class SamplesController < ApplicationController
       :project_id,
       :status,
       :host_genome_id,
+      :upload_error,
     ]
     respond_to do |format|
       format.html { render 'show_v2' }
@@ -764,7 +774,7 @@ class SamplesController < ApplicationController
               },
             }
           ).merge(
-            default_pipeline_run_id: @sample.first_pipeline_run.id,
+            default_pipeline_run_id: @sample.first_pipeline_run.present? ? @sample.first_pipeline_run.id : nil,
             pipeline_runs: @sample.pipeline_runs_info,
             editable: current_power.updatable_sample?(@sample)
           )
@@ -800,19 +810,40 @@ class SamplesController < ApplicationController
 
   def report_v2
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    background_id = get_background_id(@sample, params[:background])
+
     if pipeline_run
-      background_id = get_background_id(@sample, params[:background])
-      render json: PipelineReportService.call(pipeline_run.id, background_id)
+      # Don't cache the response until the pipeline run is report-ready
+      # so the displayed pipeline run status will be updated correctly.
+      skip_cache = !pipeline_run.report_ready? || params[:skip_cache] || false
+
+      report_info_params = pipeline_run.report_info_params
+      # If the pipeline_version wasn't passed in from the client-side,
+      # then set it to version for the selected default pipeline run.
+      if params[:pipeline_version].nil?
+        params[:pipeline_version] = pipeline_run.pipeline_version
+      end
+      cache_key = PipelineReportService.report_info_cache_key(
+        request.path,
+        report_info_params
+          .merge(
+            params
+              .reject { |_, v| v.blank? }
+              .permit(report_info_params.keys)
+          ).merge(
+            background_id: background_id
+          ).symbolize_keys
+      )
+      httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+
+      json =
+        fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "PipelineReport") do
+          PipelineReportService.call(pipeline_run, background_id)
+        end
     else
-      render json: {
-        metadata: {
-          pipelineRunStatus: "WAITING",
-          jobStatus: "Waiting to Start or Receive Files",
-          errorMessage: nil,
-          knownUserError: nil,
-        },
-      }
+      json = PipelineReportService.call(pipeline_run, background_id)
     end
+    render json: json
   end
 
   def amr
@@ -1344,9 +1375,10 @@ class SamplesController < ApplicationController
     }
   end
 
-  # GET /samples/taxa_with_reads_suggestions
+  # POST /samples/taxa_with_reads_suggestions
   # Get taxon search suggestions, where taxa are restricted to the provided sample ids.
   # Also include, for each taxon, the number of samples that contain reads for the taxon.
+  # This method uses POST because hundreds of sampleIds params can be passed.
   def taxa_with_reads_suggestions
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     query = params[:query]
@@ -1368,9 +1400,10 @@ class SamplesController < ApplicationController
     render json: taxon_list
   end
 
-  # GET /samples/taxa_with_contigs_suggestions
+  # POST /samples/taxa_with_contigs_suggestions
   # Get taxon search suggestions, where taxa are restricted to the provided sample ids.
   # Also include, for each taxon, the number of samples that contain contigs for the taxon.
+  # This method uses POST because hundreds of sampleIds params can be passed.
   def taxa_with_contigs_suggestions
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     query = params[:query]
@@ -1392,8 +1425,9 @@ class SamplesController < ApplicationController
     render json: taxon_list
   end
 
-  # GET /samples/uploaded_by_current_user
+  # POST /samples/uploaded_by_current_user
   # Return whether all sampleIds were uploaded by the current user.
+  # This method uses POST because hundreds of sampleIds params can be passed.
   def uploaded_by_current_user
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     samples = Sample.where(user: current_user, id: sample_ids)
@@ -1429,11 +1463,9 @@ class SamplesController < ApplicationController
   def sample_params
     permitted_params = [:name, :project_name, :project_id, :status,
                         :s3_star_index_path, :s3_bowtie2_index_path,
-                        :host_genome_id, :host_genome_name, :sample_location, :sample_date, :sample_tissue,
-                        :sample_template, :sample_library, :sample_sequencer,
+                        :host_genome_id, :host_genome_name,
                         :sample_notes, :search, :subsample, :max_input_fragments,
-                        :basespace_dataset_id, :basespace_access_token,
-                        :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
+                        :basespace_dataset_id, :basespace_access_token, :client,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)

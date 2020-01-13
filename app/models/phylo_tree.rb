@@ -6,7 +6,7 @@ class PhyloTree < ApplicationRecord
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
   belongs_to :project
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true, uniqueness: { case_sensitive: false }
   after_create :create_visualization
 
   STATUS_INITIALIZED = 0

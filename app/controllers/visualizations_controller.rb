@@ -4,9 +4,6 @@ class VisualizationsController < ApplicationController
 
   around_action :instrument_with_timer
 
-  clear_respond_to
-  respond_to :json
-
   # This action takes up to 10s for 50 samples so we cache it.
   caches_action(
     :samples_taxons,
@@ -172,6 +169,10 @@ class VisualizationsController < ApplicationController
       allowedFeatures: current_user.allowed_feature_list,
       heatmapTs: heatmap_ts,
     }
+  end
+
+  def heatmap_metrics
+    render json: HeatmapHelper::ALL_METRICS
   end
 
   def download_heatmap

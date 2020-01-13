@@ -8,7 +8,7 @@ import LoadingBar from "~ui/controls/LoadingBar";
 import cs from "./bulk_download_table_renderers.scss";
 
 export default class BulkDownloadTableRenderers extends React.Component {
-  static renderDownload = ({ rowData }) => {
+  static renderDownload = ({ rowData }, admin = false) => {
     if (!rowData) {
       return null;
     }
@@ -26,12 +26,23 @@ export default class BulkDownloadTableRenderers extends React.Component {
               tooltipText={rowData.tooltipText}
             />
           </div>
-          <div className={cs.sampleCount} onClick={rowData.onStatusClick}>
-            {rowData.num_samples} Sample{rowData.num_samples === 1 ? "" : "s"}
+          <div className={cs.metadata}>
+            <span className={cs.detailsLink} onClick={rowData.onStatusClick}>
+              Details
+            </span>
+            {admin && (
+              <React.Fragment>
+                | <span className={cs.userName}>{rowData.user_name}</span>
+              </React.Fragment>
+            )}
           </div>
         </div>
       </div>
     );
+  };
+
+  static renderNumberOfSamples = ({ rowData }) => {
+    return <div className={cs.samplesCell}>{rowData.num_samples}</div>;
   };
 
   static renderStatus = ({ rowData }) => {

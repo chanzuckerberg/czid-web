@@ -12,7 +12,25 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe can add users to joe_project ' do
     sign_in(:joe)
     @joe_project = projects(:joe_project)
-    put add_user_project_url(@joe_project), params: { user_email_to_add: "abc@xyz.com" }
+    expect(@auth0_management_client_double)
+      .to(receive(:create_user)
+          .with(
+            "User invited from Power Controller test",
+            connection: "Username-Password-Authentication",
+            email: "help@idseq.net",
+            name: "User invited from Power Controller test",
+            password: instance_of(String),
+            app_metadata: { roles: [] }
+          )
+          .and_return("user_id" => "auth0|FAKE_AUTH0_USER_ID"))
+
+    expect(@auth0_management_client_double)
+      .to(receive(:post_password_change)
+          .with(user_id: "auth0|FAKE_AUTH0_USER_ID")
+          .and_return(
+            "ticket" => "https://fake_idseq_test.idseq.net/fake_auth0_response_ticket_url?"
+          ))
+    put add_user_project_url(@joe_project), params: { user_email_to_add: "help@idseq.net", user_name_to_add: "User invited from Power Controller test" }
     assert_response :success
   end
 
@@ -41,19 +59,19 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe can update sample to joe_project' do
     sign_in(:joe)
     @joe_sample = samples(:joe_sample)
-    post "#{save_metadata_sample_url(@joe_sample)}.json", params: { field: 'sample_tissue', value: 'bone' }
+    post "#{save_metadata_sample_url(@joe_sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
     assert_response :success
     @joe_sample.reload
-    assert @joe_sample.sample_tissue == 'bone'
+    assert @joe_sample.sample_notes == 'Test note'
   end
 
   test 'joe can update sample to joe_project v2' do
     sign_in(:joe)
     @joe_sample = samples(:joe_sample)
-    post "#{save_metadata_v2_sample_url(@joe_sample)}.json", params: { field: "sample_type", value: "Whole blood" }
+    post "#{save_metadata_v2_sample_url(@joe_sample)}.json", params: { field: "sample_notes", value: "Test note 2" }
     assert_response :success
     @joe_sample.reload
-    assert @joe_sample.metadata.find_by(key: "sample_type").string_validated_value == 'Whole blood'
+    assert @joe_sample.metadata.find_by(key: "sample_notes").string_validated_value == 'Test note 2'
   end
 
   # ===== START: /samples/index
@@ -273,10 +291,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     @public_sample = samples(:public_sample)
     assert_raises(ActiveRecord::RecordNotFound) do
-      post "#{save_metadata_sample_url(@public_sample)}.json", params: { field: 'sample_tissue', value: 'bone' }
+      post "#{save_metadata_sample_url(@public_sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
     end
     @public_sample.reload
-    assert @public_sample.sample_tissue != 'bone'
+    assert @public_sample.sample_notes != 'Test note'
   end
 
   test 'joe can see public_sample' do
@@ -349,10 +367,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     @sample = samples(:one)
     assert_raises(ActiveRecord::RecordNotFound) do
-      post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_tissue', value: 'bone' }
+      post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
     end
     @sample.reload
-    assert @sample.sample_tissue != 'bone'
+    assert @sample.sample_notes != 'Test note'
   end
 
   test 'joe cannot see sample one' do
@@ -392,10 +410,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     @sample = samples(:expired_sample)
     assert_raises(ActiveRecord::RecordNotFound) do
-      post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_tissue', value: 'bone' }
+      post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
     end
     @sample.reload
-    assert @sample.sample_tissue != 'bone'
+    assert @sample.sample_notes != 'Test note'
   end
 
   test 'joe can see expired_sample' do
@@ -572,8 +590,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'admin can see all visualizations by default' do
     sign_in(:admin)
-    @admin = users(:admin)
-    post user_session_path, params: { 'user[email]' => @admin.email, 'user[password]' => "password" }
 
     @admin_visualizations = visualizations(:joe_visualization, :admin_visualization, :public_visualization, :private_visualization)
     get "/visualizations.json"
@@ -586,8 +602,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'admin can see all visualizations on all data domain' do
     sign_in(:admin)
-    @admin = users(:admin)
-    post user_session_path, params: { 'user[email]' => @admin.email, 'user[password]' => "password" }
 
     @admin_visualizations = visualizations(:joe_visualization, :admin_visualization, :public_visualization, :private_visualization)
     get "/visualizations.json?domain=all_data"

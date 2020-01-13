@@ -91,7 +91,7 @@
     }
 
     .bannerText {
-      @include font-body-xxs-crop;
+      @include font-body-xxs;
       color: $medium-grey;
       background: $white;
       border-radius: 4px;
@@ -99,7 +99,7 @@
       cursor: default;
       display: inline-block;
       margin: $space-xs auto auto;
-      padding: $space-xxs $space-xs;
+      padding: $space-xxxs $space-xs;
       text-align: center;
     }
 

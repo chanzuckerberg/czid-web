@@ -1,5 +1,6 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .bulkDownloadList {
   display: flex;
@@ -20,6 +21,20 @@
 
   .loadingMessage {
     margin: $space-xl auto 0;
+  }
+
+  .lightCell {
+    font-weight: $font-weight-regular;
+    color: $medium-grey;
+  }
+}
+
+.autoUpdateWarning {
+  margin-bottom: $space-xxxs;
+
+  .link {
+    text-decoration: underline;
+    cursor: pointer;
   }
 }
 

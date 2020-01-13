@@ -46,7 +46,7 @@ class PipelineRun < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
 
   DAG_ANNOTATED_FASTA_BASENAME = 'taxid_annot.fasta'.freeze
-  DAG_ANNOTATED_COUNT_BASENAME = 'annotated_out.count'.freeze
+  DAG_ANNOTATED_COUNT_BASENAME = 'refined_annotated_out.count'.freeze
   DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
@@ -316,6 +316,7 @@ class PipelineRun < ApplicationRecord
 
   def create_run_stages
     run_stages = []
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     PipelineRunStage::STAGE_INFO.each do |step_number, info|
       run_stages << PipelineRunStage.new(
         step_number: step_number,
@@ -333,6 +334,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def active_stage
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     pipeline_run_stages.order(:step_number).each do |prs|
       return prs unless prs.succeeded?
     end
@@ -478,6 +480,10 @@ class PipelineRun < ApplicationRecord
 
   # buffer can be a file or an array.
   def write_contig_mapping_table_csv(buffer)
+    # If there are no contigs, return an empty file.
+    if contigs.empty?
+      return
+    end
     nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
     nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
     header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
@@ -813,6 +819,8 @@ class PipelineRun < ApplicationRecord
     begin
       # TODO:  Make this less expensive while jobs are running, perhaps by doing it only sometimes, then again at end.
       # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
+      # TODO: (gdingle): compile_stats_file! will fetch s3 files 100s of times unnecessarily in a typical run.
+      # See https://jira.czi.team/browse/IDSEQ-1924.
       compile_stats_file!
       load_stats_file
       load_chunk_stats
@@ -829,6 +837,7 @@ class PipelineRun < ApplicationRecord
 
         # Precache reports for all backgrounds
         Resque.enqueue(PrecacheReportInfo, id)
+        Resque.enqueue(PrecacheReportInfoV2, id)
 
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]
@@ -1088,14 +1097,17 @@ class PipelineRun < ApplicationRecord
   # only fetched from alignment.
   def fetch_unmapped_reads(
     all_counts,
-    s3_path = "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_COUNT_BASENAME}"
+    s3_path = "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_COUNT_BASENAME}"
   )
     unmapped_reads = nil
     unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
     if unidentified
       unmapped_reads = unidentified[:reads_after]
 
-      if supports_assembly? && finalized?
+      # This will fetch unconditionally on every iteration of the results
+      # monitor. My attempts to restrict fetching with "finalized?" and
+      # "step_number == 3" both failed to work in production.
+      if supports_assembly?
         # see idseq_dag/steps/generate_annotated_fasta.py
         begin
           Rails.logger.info("Fetching file: #{s3_path}")
@@ -1436,18 +1448,25 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_summary_contig_counts_v2(min_contig_size)
-    summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
-    contig_lineages(min_contig_size).each do |c|
-      lineage = JSON.parse(c.lineage_json)
-      lineage.each do |count_type, taxid_arr|
-        taxids = taxid_arr[0..1]
-        taxids.each do |taxid|
-          summary_per_tax = summary_dict[taxid] ||= {}
-          summary_per_tax_and_type = summary_per_tax[count_type.downcase] ||= {}
-          summary_per_tax_and_type[c.read_count] ||= 0
-          summary_per_tax_and_type[c.read_count] += 1
+    # Stores the number of contigs that match a given taxid, count_type (nt or nr), and read_count (number of reads aligned to that contig).
+    # Create and store default values for the hash if the key doesn't exist yet
+    summary_dict = Hash.new do |summary, taxid|
+      summary[taxid] = Hash.new do |taxid_hash, count_type| # rubocop forces different variable names
+        taxid_hash[count_type] = Hash.new do |count_type_hash, read_count|
+          count_type_hash[read_count] = 0
         end
       end
+    end
+    contig_taxids = contigs.where("read_count >= ?", min_contig_size)
+                           .where("lineage_json IS NOT NULL")
+                           .pluck("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
+    contig_taxids.each do |c|
+      read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr = c
+
+      summary_dict[species_taxid_nt]["nt"][read_count] += 1 if species_taxid_nt
+      summary_dict[species_taxid_nr]["nr"][read_count] += 1 if species_taxid_nr
+      summary_dict[genus_taxid_nt]["nt"][read_count] += 1 if genus_taxid_nt
+      summary_dict[genus_taxid_nr]["nr"][read_count] += 1 if genus_taxid_nr
     end
     return summary_dict
   end
@@ -1555,7 +1574,7 @@ class PipelineRun < ApplicationRecord
   # Gets last update time of all has_many relations and current pipeline run
   def max_updated_at
     assocs = PipelineRun.reflect_on_all_associations(:has_many)
-    assocs_max = assocs.map { |assoc| send(assoc.name).pluck(:updated_at).max }
+    assocs_max = assocs.map { |assoc| send(assoc.name).maximum(:updated_at) }
     [updated_at, assocs_max.compact.max].compact.max
   end
 
@@ -1574,6 +1593,22 @@ class PipelineRun < ApplicationRecord
       end
 
       MetricUtil.put_metric_now("samples.cache.precached", 1)
+    end
+  end
+
+  def precache_report_info_v2!
+    params = report_info_params
+    Background.top_for_sample(sample).pluck(:id).each do |background_id|
+      cache_key = PipelineReportService.report_info_cache_key(
+        "/samples/#{sample.id}/report_v2.json",
+        params.merge(background_id: background_id)
+      )
+      Rails.logger.info("Precaching #{cache_key} with background #{background_id}")
+      Rails.cache.fetch(cache_key, expires_in: 30.days) do
+        PipelineReportService.call(self, background_id)
+      end
+
+      MetricUtil.log_analytics_event("PipelineReport_precached", nil)
     end
   end
 

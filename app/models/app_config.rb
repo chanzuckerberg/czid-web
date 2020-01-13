@@ -10,4 +10,9 @@ class AppConfig < ApplicationRecord
   # When this is "1", new users will also be created in the Auth0 database.
   # Enable when Auth0 rolls out.
   USE_AUTH0_FOR_NEW_USERS = 'use_auth0_for_new_users'.freeze
+  # The maximum number of samples that can be part of one bulk download.
+  MAX_SAMPLES_BULK_DOWNLOAD = 'max_samples_bulk_download'.freeze
+  # When this is "1", the announcement banner on the top of the site header will be enabled.
+  # Other conditions may check a time constraint.
+  SHOW_ANNOUNCEMENT_BANNER = 'show_announcement_banner'.freeze
 end

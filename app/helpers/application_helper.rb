@@ -6,6 +6,14 @@ module ApplicationHelper
     Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
   end
 
+  def warden
+    request.env['warden']
+  end
+
+  def current_user
+    warden&.user(:auth0_user)
+  end
+
   def hash_array_json2csv(input_file, output_file, keys)
     CSV.open(output_file, "w") do |csv|
       JSON.parse(File.open(input_file).read).each do |hash|
@@ -26,6 +34,8 @@ module ApplicationHelper
     {
       admin: current_user ? current_user.role == 1 : false,
       allowedFeatures: current_user && current_user.allowed_feature_list,
+      maxSamplesBulkDownload: get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD),
+      userSettings: current_user && current_user.viewable_user_settings,
     }
   end
 

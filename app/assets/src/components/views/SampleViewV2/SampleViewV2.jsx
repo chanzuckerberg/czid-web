@@ -216,6 +216,10 @@ export default class SampleViewV2 extends React.Component {
     const reportData = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     if (rawReportData.sortedGenus) {
+      const generaPathogenCounts = getGeneraPathogenCounts(
+        rawReportData.counts[SPECIES_LEVEL_INDEX]
+      );
+
       rawReportData.sortedGenus.forEach(genusTaxId => {
         let hasHighlightedChildren = false;
         const childrenSpecies =
@@ -232,9 +236,6 @@ export default class SampleViewV2 extends React.Component {
             }
           );
         });
-        const generaPathogenCounts = getGeneraPathogenCounts(
-          rawReportData.counts[SPECIES_LEVEL_INDEX]
-        );
         reportData.push(
           merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
             highlighted:
@@ -331,11 +332,12 @@ export default class SampleViewV2 extends React.Component {
 
     // taxon's category was selected and its subcategories were not excluded
     if (
-      categories.has(row.category) &&
-      !some(
-        subcategory => subcategories.has(subcategory),
-        row.subcategories || []
-      )
+      (categories.has(row.category) &&
+        !some(
+          subcategory => subcategories.has(subcategory),
+          row.subcategories || []
+        )) ||
+      (categories.has("uncategorized") && row.category === null)
     ) {
       return true;
     }
@@ -344,7 +346,27 @@ export default class SampleViewV2 extends React.Component {
   };
 
   getTaxonMetricValue = (row, metric) => {
-    return get(metric.split(":"), row);
+    let parsedMetric = metric.split(":");
+    let parsedValue = get(parsedMetric, row);
+
+    // Contigs/contig_reads are stored in the format {length of contig: count},
+    // so some extra processing is needed to extract the value.
+    if (parsedMetric.includes("contigs") && parsedValue) {
+      // To get the total number of contigs, sum up all the values (counts) in the object.
+      parsedValue = sum(Object.values(parsedValue));
+    } else if (parsedMetric.includes("contig_reads")) {
+      // If the metric is contig_reads, need to extract the contig data.
+      parsedValue = get([parsedMetric[0], "contigs"], row);
+      // To get the total number of contig reads, multiply the keys (length of each contig) by
+      // the values (number of times a contig of that length appears) and sum them all up.
+      // Default to 0 if there are no contigs.
+      parsedValue = parsedValue
+        ? sum(
+            Object.entries(parsedValue).map(([reads, count]) => reads * count)
+          )
+        : 0;
+    }
+    return parsedValue;
   };
 
   filterThresholds = ({ row, thresholds }) => {
@@ -356,9 +378,9 @@ export default class SampleViewV2 extends React.Component {
 
         switch (operator) {
           case ">=":
-            return parsedThresholdValue < parsedValue;
+            return parsedThresholdValue <= parsedValue;
           case "<=":
-            return parsedThresholdValue > parsedValue;
+            return parsedThresholdValue >= parsedValue;
         }
         return true;
       }, thresholds);
@@ -789,7 +811,7 @@ export default class SampleViewV2 extends React.Component {
     } else if (sidebarMode === "sampleDetails") {
       return {
         sampleId: sample.id,
-        pipelineVersion: pipelineRun.pipeline_version,
+        pipelineVersion: pipelineRun ? pipelineRun.pipeline_version : null,
         onMetadataUpdate: this.handleMetadataUpdate,
       };
     }
@@ -902,7 +924,10 @@ export default class SampleViewV2 extends React.Component {
       message = "Loading report data.";
       icon = <LoadingIcon className={cs.icon} />;
       type = "inProgress";
-    } else if (pipelineRunStatus === "WAITING") {
+    } else if (
+      pipelineRunStatus === "WAITING" &&
+      (sample && !sample.upload_error)
+    ) {
       status = "IN PROGRESS";
       message = jobStatus;
       icon = <LoadingIcon className={cs.icon} />;
@@ -916,8 +941,12 @@ export default class SampleViewV2 extends React.Component {
     } else {
       // Some kind of error or warning has occurred.
       if (sample) {
-        pipelineRun.known_user_error = knownUserError;
-        pipelineRun.error_message = errorMessage;
+        // If an upload error occurred, the pipeline run might not exist so
+        // only try to set these fields if the pipeline run started.
+        if (pipelineRun) {
+          pipelineRun.known_user_error = knownUserError;
+          pipelineRun.error_message = errorMessage;
+        }
         ({ status, message, linkText, type, link, icon } = sampleErrorInfo(
           sample,
           pipelineRun
@@ -965,7 +994,15 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
-    if (reportMetadata.pipelineRunStatus === "COMPLETE") {
+    // reportReady is true if the pipeline run hasn't failed and is report-ready
+    // (might still be running Experimental, but at least taxon_counts has been loaded).
+    // pipelineRunReportAvailable was renamed to reportReady, but we check both in case the old variable
+    // name was cached.
+    // TODO(julie): remove pipelineRunReportAvailable during cleanup.
+    if (
+      reportMetadata.reportReady ||
+      reportMetadata.pipelineRunReportAvailable
+    ) {
       return (
         <div className={cs.reportViewContainer}>
           <div className={cs.reportFilters}>
@@ -997,7 +1034,7 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
           </div>
-          {view == "table" && (
+          {view === "table" && (
             <div className={cs.reportTable}>
               <ReportTable
                 alignVizAvailable={
@@ -1020,19 +1057,20 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
           )}
-          {view == "tree" && (
-            <div>
-              <TaxonTreeVis
-                lineage={lineageData}
-                metric={selectedOptions.metric}
-                nameType={selectedOptions.nameType}
-                onTaxonClick={this.handleTaxonClick}
-                sample={sample}
-                taxa={filteredReportData}
-                useReportV2Format={true}
-              />
-            </div>
-          )}
+          {view == "tree" &&
+            filteredReportData.length > 0 && (
+              <div>
+                <TaxonTreeVis
+                  lineage={lineageData}
+                  metric={selectedOptions.metric}
+                  nameType={selectedOptions.nameType}
+                  onTaxonClick={this.handleTaxonClick}
+                  sample={sample}
+                  taxa={filteredReportData}
+                  useReportV2Format={true}
+                />
+              </div>
+            )}
         </div>
       );
     } else {
@@ -1069,7 +1107,13 @@ export default class SampleViewV2 extends React.Component {
               pipelineRun={pipelineRun}
               project={project}
               projectSamples={projectSamples}
-              reportPresent={reportMetadata.report_ready !== false}
+              // report_ready was consolidated with reportReady but we check both in case
+              // the old variable name was cached.
+              // TODO(julie): remove report_ready during cleanup.
+              reportPresent={
+                reportMetadata.reportReady === true ||
+                reportMetadata.report_ready === true
+              }
               sample={sample}
               view={view}
               minContigSize={selectedOptions.minContigSize}
@@ -1079,7 +1123,7 @@ export default class SampleViewV2 extends React.Component {
             <UserContext.Consumer>
               {currentUser =>
                 currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) &&
-                reportMetadata.pipelineRunStatus === "COMPLETE" ? (
+                reportMetadata.pipelineRunStatus === "SUCCEEDED" ? (
                   <Tabs
                     className={cs.tabs}
                     tabs={["Report", "Antimicrobial Resistance"]}

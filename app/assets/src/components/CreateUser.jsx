@@ -35,6 +35,7 @@ class CreateUser extends React.Component {
       name: this.selectedUser.name || "",
       adminstatus: this.selectedUser.adminStatus,
       id: this.selectedUser.id,
+      sendActivation: true,
     };
   }
 
@@ -108,6 +109,7 @@ class CreateUser extends React.Component {
   }
 
   createUser() {
+    const { sendActivation } = this.state;
     var that = this;
     axios
       .post(
@@ -118,6 +120,7 @@ class CreateUser extends React.Component {
             email: this.state.email,
             institution: this.state.institution,
             role: this.state.isAdmin ? 1 : 0,
+            send_activation: sendActivation,
           },
         },
         { headers: { "X-CSRF-TOKEN": this.csrf } }
@@ -205,6 +208,8 @@ class CreateUser extends React.Component {
   }
 
   renderUserForm(submitFunc, funcName) {
+    const { selectedUser } = this.props;
+    const { sendActivation } = this.state;
     return (
       <div className="user-form">
         <div className="row">
@@ -286,6 +291,21 @@ class CreateUser extends React.Component {
                 />
                 <label htmlFor="admin">Admin</label>
               </p>
+              {!selectedUser && (
+                <p>
+                  <input
+                    type="checkbox"
+                    id="sendActivation"
+                    className="filled-in"
+                    checked={sendActivation ? "checked" : ""}
+                    onChange={withAnalytics(() => {
+                      this.setState({ sendActivation: !sendActivation });
+                    }, "CreateUser_send-activation_changed")}
+                    value={sendActivation}
+                  />
+                  <label htmlFor="sendActivation">Send activation email</label>
+                </p>
+              )}
             </div>
             <input className="hidden" type="submit" />
             {this.state.submitting ? (

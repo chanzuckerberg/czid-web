@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_191_211_043_618) do
+ActiveRecord::Schema.define(version: 20_200_109_023_047) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -30,6 +30,7 @@ ActiveRecord::Schema.define(version: 20_191_211_043_618) do
   create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "gene"
     t.string "allele"
+
     t.float "coverage", limit: 24
     t.float "depth", limit: 24
     t.bigint "pipeline_run_id"
@@ -106,6 +107,7 @@ ActiveRecord::Schema.define(version: 20_191_211_043_618) do
     t.string "access_token"
     t.float "progress", limit: 24
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
+    t.bigint "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
   end
 
@@ -468,13 +470,6 @@ ActiveRecord::Schema.define(version: 20_191_211_043_618) do
     t.datetime "updated_at", null: false
     t.bigint "project_id"
     t.string "status"
-    t.string "sample_unique_id"
-    t.string "sample_location"
-    t.string "sample_date"
-    t.string "sample_tissue"
-    t.string "sample_template"
-    t.string "sample_library"
-    t.string "sample_sequencer"
     t.text "sample_notes"
     t.text "s3_preload_result_path"
     t.text "s3_star_index_path"
@@ -483,11 +478,6 @@ ActiveRecord::Schema.define(version: 20_191_211_043_618) do
     t.bigint "user_id"
     t.integer "subsample"
     t.string "pipeline_branch"
-    t.float "sample_input_pg", limit: 24
-    t.integer "sample_batch"
-    t.text "sample_diagnosis"
-    t.string "sample_organism"
-    t.string "sample_detection"
     t.string "alignment_config_name"
     t.string "web_commit", default: ""
     t.string "pipeline_commit", default: ""
@@ -721,6 +711,14 @@ ActiveRecord::Schema.define(version: 20_191_211_043_618) do
     t.integer "top_n"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "user_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "user_id"
+    t.string "key", comment: "The name of the user setting, e.g. receives_bulk_download_success_emails"
+    t.string "value", comment: "The value of the user setting, e.g. true. The schema of this value (e.g. boolean, number) is determined by the hard-coded data type associated with the key."
+    t.index ["user_id", "key"], name: "index_user_settings_on_user_id_and_key", unique: true
+    t.index ["user_id"], name: "index_user_settings_on_user_id"
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

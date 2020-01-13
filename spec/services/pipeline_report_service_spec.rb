@@ -15,6 +15,7 @@ RSpec.describe PipelineReportService, type: :service do
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
                              job_status: "CHECKED",
+                             finalized: 1,
                              total_reads: 1122,
                              adjusted_remaining_reads: 316,
                              subsample: 1_000_000,
@@ -93,7 +94,7 @@ RSpec.describe PipelineReportService, type: :service do
                              stdev: 64.2056,
                            },])
 
-      @report = PipelineReportService.call(@pipeline_run.id, @background.id)
+      @report = PipelineReportService.call(@pipeline_run, @background.id)
     end
 
     it "should get correct values for species 573" do
@@ -153,6 +154,7 @@ RSpec.describe PipelineReportService, type: :service do
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
                              job_status: "CHECKED",
+                             finalized: 1,
                              total_reads: 1122,
                              adjusted_remaining_reads: 316,
                              subsample: 1_000_000,
@@ -243,7 +245,7 @@ RSpec.describe PipelineReportService, type: :service do
                              stdev: 374.243,
                            },])
 
-      @report = PipelineReportService.call(@pipeline_run.id, @background.id)
+      @report = PipelineReportService.call(@pipeline_run, @background.id)
     end
 
     it "should get correct values for species 1313" do
@@ -319,6 +321,7 @@ RSpec.describe PipelineReportService, type: :service do
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
                              job_status: "CHECKED",
+                             finalized: 1,
                              total_reads: 1125,
                              adjusted_remaining_reads: 315,
                              subsample: 1_000_000,
@@ -346,7 +349,7 @@ RSpec.describe PipelineReportService, type: :service do
                                     sample: create(:sample, project: create(:project))).id,
                            ])
 
-      @report = PipelineReportService.call(@pipeline_run.id, @background.id)
+      @report = PipelineReportService.call(@pipeline_run, @background.id)
     end
 
     it "should return correct z-score values" do
@@ -361,6 +364,78 @@ RSpec.describe PipelineReportService, type: :service do
       # Since NR is missing from both the sample and the background model, it won't be returned
       # in the report service. The frontend should fill in the NR row with default 0 values.
       expect(JSON.parse(@report)["counts"]["1"]["1"]).not_to include("nr")
+    end
+  end
+
+  describe "sample contains pathogenic taxa" do
+    before do
+      ResqueSpec.reset!
+
+      @pipeline_run = create(:pipeline_run,
+                             sample: create(:sample, project: create(:project)),
+                             finalized: 1,
+                             total_reads: 100,
+                             adjusted_remaining_reads: 100,
+                             taxon_counts_data: [{
+                               tax_id: 1,
+                               tax_level: 2,
+                               taxon_name: "Escherichia", # nonpathogenic genus
+                               e_value: 0,
+                               genus_taxid: 1,
+                             }, {
+                               tax_id: 2,
+                               tax_level: 1,
+                               taxon_name: "Escherichia albertii", # nonpathogenic species
+                               e_value: 0,
+                               genus_taxid: 1,
+                             }, {
+                               tax_id: 3,
+                               tax_level: 1,
+                               taxon_name: "Escherichia coli", # pathogenic species
+                               e_value: 0,
+                               genus_taxid: 1,
+                             }, {
+                               tax_id: 4,
+                               tax_level: 2,
+                               taxon_name: "Salmonella", # pathogenic genus
+                               e_value: 0,
+                               genus_taxid: 4,
+                             }, {
+                               tax_id: 5,
+                               tax_level: 1,
+                               taxon_name: "Salmonella enterica", # species belonging to pathogenic genus
+                               e_value: 0,
+                               genus_taxid: 4,
+                             },])
+
+      @background = create(:background,
+                           pipeline_run_ids: [
+                             create(:pipeline_run,
+                                    sample: create(:sample, project: create(:project))).id,
+                             create(:pipeline_run,
+                                    sample: create(:sample, project: create(:project))).id,
+                           ])
+      @report = PipelineReportService.call(@pipeline_run, @background.id)
+    end
+
+    it "should not tag nonpathogenic genera" do
+      expect(JSON.parse(@report)["counts"]["2"]["1"]).not_to include("pathogenTag")
+    end
+
+    it "should tag pathogenic genera" do
+      expect(JSON.parse(@report)["counts"]["2"]["4"]).to include_json("pathogenTag" => "categoryB")
+    end
+
+    it "should not tag nonpathogenic species" do
+      expect(JSON.parse(@report)["counts"]["1"]["2"]).not_to include("pathogenTag")
+    end
+
+    it "should tag pathogenic species" do
+      expect(JSON.parse(@report)["counts"]["1"]["3"]).to include_json("pathogenTag" => "categoryB")
+    end
+
+    it "should tag species belonging to a pathogenic genus" do
+      expect(JSON.parse(@report)["counts"]["1"]["5"]).to include_json("pathogenTag" => "categoryB")
     end
   end
 end

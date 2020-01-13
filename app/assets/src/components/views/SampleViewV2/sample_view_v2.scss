@@ -26,6 +26,8 @@
   }
 
   .reportTable {
+    display: flex;
+    flex-direction: column;
     flex: 1 0 auto;
   }
 
@@ -40,12 +42,12 @@
 
       .reportInfoMsg {
         &:not(:first-child) {
-          margin-left: $space-xs;
+          margin-left: $space-xxxs;
         }
       }
 
       .clearAllFilters {
-        margin-left: $space-s;
+        margin-left: $space-xxxs;
         font-weight: $font-weight-semibold;
         white-space: nowrap;
         cursor: pointer;

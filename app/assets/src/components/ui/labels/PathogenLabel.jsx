@@ -42,7 +42,13 @@ const PathogenLabel = ({ type }) => {
       />
     </a>
   );
-  return <BasicPopup trigger={label} content={CATEGORIES[type]["tooltip"]} />;
+  return (
+    <BasicPopup
+      trigger={label}
+      content={CATEGORIES[type]["tooltip"]}
+      basic={false}
+    />
+  );
 };
 
 export default PathogenLabel;

@@ -52,11 +52,12 @@ class PipelineReportService
     nil => "uncategorized",
   }.freeze
 
-  def initialize(pipeline_run_id, background_id, csv = false, min_contig_size = DEFAULT_MIN_CONTIG_SIZE)
-    @pipeline_run_id = pipeline_run_id
+  def initialize(pipeline_run, background_id, csv: false, min_contig_size: DEFAULT_MIN_CONTIG_SIZE, parallel: true)
+    @pipeline_run = pipeline_run
     @background_id = background_id
     @csv = csv
     @min_contig_size = min_contig_size
+    @parallel = parallel
   end
 
   def call
@@ -67,24 +68,51 @@ class PipelineReportService
   end
 
   def generate
-    pipeline_run, metadata = get_pipeline_status(@pipeline_run_id)
-    if @pipeline_run_id.nil? || !pipeline_run.completed?
+    metadata = get_pipeline_status(@pipeline_run)
+    # Only generate the report if the pipeline has initialized and has loaded
+    # taxon_counts (is report_ready), or if its results are finalized without errors.
+    # Otherwise just return the metadata, which includes statuses and error messages to display.
+    # TODO(julie): refactor + clarify pipeline run statuses (JIRA: https://jira.czi.team/browse/IDSEQ-1890)
+    unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?)) && @pipeline_run.total_reads
       return JSON.dump(
         metadata: metadata
       )
     end
 
-    adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
+    adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
-    contigs = pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
-    @timer.split("get_contig_summary")
+    if @parallel
+      parallel_steps = [
+        -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_size) },
+        -> { fetch_taxon_counts(@pipeline_run.id, @background_id) },
+        -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id) },
+      ]
+      results = nil
+      ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+        results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
+          begin
+            ActiveRecord::Base.connection_pool.with_connection do
+              lambda.call()
+            end
+          rescue => e
+            LogUtil.log_err_and_airbrake("Parallel fetch failed")
+            raise e
+          end
+        end
+      end
+      @timer.split("parallel_fetch_report_data")
+      contigs, taxon_counts_and_summaries, taxons_absent_from_sample = *results
+    else
+      contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
+      @timer.split("get_contig_summary")
 
-    taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
-    @timer.split("fetch_taxon_counts_and_summaries")
+      taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run.id, @background_id)
+      @timer.split("fetch_taxon_counts_and_summaries")
 
-    taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id)
-    @timer.split("fetch_taxons_absent_from_sample")
+      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id)
+      @timer.split("fetch_taxons_absent_from_sample")
+    end
 
     taxons_absent_from_sample.each do |taxon|
       taxon_counts_and_summaries.concat([zero_metrics(taxon)])
@@ -97,86 +125,88 @@ class PipelineReportService
     counts_by_tax_level.transform_values! { |counts| hash_by_tax_id_and_count_type(counts) }
     @timer.split("index_by_tax_id_and_count_type")
 
-    # TODO(tiago): check if still necessary and move out of reports helper
-    ReportsHelper.cleanup_missing_genus_counts(
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
-    )
-    @timer.split("cleanup_missing_genus_counts")
+    # In the edge case where there are no matching species found, skip all this processing.
+    if counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES]
+      # TODO(tiago): check if still necessary and move out of reports helper
+      ReportsHelper.cleanup_missing_genus_counts(
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
+      )
+      @timer.split("cleanup_missing_genus_counts")
 
-    merge_contigs(contigs, counts_by_tax_level, @csv)
-    @timer.split("merge_contigs")
+      merge_contigs(contigs, counts_by_tax_level, @csv)
+      @timer.split("merge_contigs")
 
-    counts_by_tax_level.each_value do |tax_level_taxa|
-      compute_z_scores(tax_level_taxa, adjusted_total_reads)
+      counts_by_tax_level.each_value do |tax_level_taxa|
+        compute_z_scores(tax_level_taxa, adjusted_total_reads)
+      end
+      @timer.split("compute_z_scores")
+
+      compute_aggregate_scores(
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
+      )
+      @timer.split("compute_agg_scores")
+
+      # TODO: we should try to use TaxonLineage::fetch_lineage_by_taxid
+      lineage_version = PipelineRun
+                        .select("alignment_configs.lineage_version")
+                        .joins(:alignment_config)
+                        .find(@pipeline_run.id)[:lineage_version]
+
+      required_columns = %w[
+        taxid
+        superkingdom_taxid kingdom_taxid phylum_taxid class_taxid order_taxid family_taxid genus_taxid species_taxid
+        superkingdom_name kingdom_name phylum_name class_name order_name family_name genus_name species_name
+      ]
+
+      tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
+      # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
+      # species id rather than genus id, so select those species ids as well.
+      # TODO: check if this step is still necessary after the data has been cleaned up.
+      species_with_missing_genus = []
+      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
+        species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
+      end
+      tax_ids.concat(species_with_missing_genus)
+
+      lineage_by_tax_id = TaxonLineage
+                          .where(taxid: tax_ids)
+                          .where('? BETWEEN version_start AND version_end', lineage_version)
+                          .pluck(*required_columns)
+                          .map { |r| [r[0], required_columns.zip(r).to_h] }
+                          .to_h
+      @timer.split("fetch_taxon_lineage")
+
+      # TODO(tiago):move out of reports helper
+      ReportsHelper.validate_names(
+        counts_by_tax_level,
+        lineage_by_tax_id,
+        @pipeline_run.id
+      )
+      @timer.split("fill_missing_names")
+
+      tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
+      @timer.split("tag_pathogens")
+
+      structured_lineage = encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
+      @timer.split("encode_taxon_lineage")
+
+      sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
+      @timer.split("sort_genus_by_aggregate_score")
+
+      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
+        genus[:species_tax_ids] = genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][DEFAULT_SORT_PARAM] }.reverse!
+        genus
+      end
+      @timer.split("sort_species_within_each_genus")
+
+      highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+      @timer.split("find_taxa_to_highlight")
     end
-    @timer.split("compute_z_scores")
 
-    compute_aggregate_scores(
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
-      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
-    )
-    @timer.split("compute_agg_scores")
-
-    # TODO: we should try to use TaxonLineage::fetch_lineage_by_taxid
-    lineage_version = PipelineRun
-                      .select("alignment_configs.lineage_version")
-                      .joins(:alignment_config)
-                      .find(@pipeline_run_id)[:lineage_version]
-
-    required_columns = %w[
-      taxid
-      superkingdom_taxid kingdom_taxid phylum_taxid class_taxid order_taxid family_taxid genus_taxid species_taxid
-      superkingdom_name kingdom_name phylum_name class_name order_name family_name genus_name species_name
-    ]
-
-    tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
-    # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
-    # species id rather than genus id, so select those species ids as well.
-    # TODO: check if this step is still necessary after the data has been cleaned up.
-    species_with_missing_genus = []
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES].each do |tax_id, species|
-      species_with_missing_genus += [tax_id] unless species[:genus_tax_id] >= 0
-    end
-    tax_ids.concat(species_with_missing_genus)
-
-    lineage_by_tax_id = TaxonLineage
-                        .where(taxid: tax_ids)
-                        .where('? BETWEEN version_start AND version_end', lineage_version)
-                        .pluck(*required_columns)
-                        .map { |r| [r[0], required_columns.zip(r).to_h] }
-                        .to_h
-    @timer.split("fetch_taxon_lineage")
-
-    # TODO(tiago):move out of reports helper
-    ReportsHelper.validate_names(
-      counts_by_tax_level,
-      lineage_by_tax_id,
-      @pipeline_run_id
-    )
-    @timer.split("fill_missing_names")
-
-    tag_pathogens(counts_by_tax_level)
-    @timer.split("tag_pathogens")
-
-    structured_lineage = encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
-    @timer.split("encode_taxon_lineage")
-
-    sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
-    @timer.split("sort_genus_by_aggregate_score")
-
-    counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
-      genus[:species_tax_ids] = genus[:species_tax_ids].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][DEFAULT_SORT_PARAM] }.reverse!
-      genus
-    end
-    @timer.split("sort_species_within_each_genus")
-
-    highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
-    @timer.split("find_taxa_to_highlight")
-
-    has_byte_ranges = pipeline_run.taxon_byte_ranges_available?
-    align_viz_available = pipeline_run.align_viz_available?
-    report_ready = pipeline_run.report_ready?
+    has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
+    align_viz_available = @pipeline_run.align_viz_available?
 
     @timer.split("compute_options_available_for_pipeline_run")
 
@@ -184,67 +214,73 @@ class PipelineReportService
       return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
     else
       metadata = metadata.merge(backgroundId: @background_id,
-                                truncatedReadsCount: pipeline_run.truncated,
-                                adjustedRemainingReadsCount: pipeline_run.adjusted_remaining_reads,
-                                subsampledReadsCount: pipeline_run.subsampled_reads,
+                                truncatedReadsCount: @pipeline_run.truncated,
+                                adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
+                                subsampledReadsCount: @pipeline_run.subsampled_reads,
                                 hasByteRanges: has_byte_ranges,
-                                alignVizAvailable: align_viz_available,
-                                report_ready: report_ready)
+                                alignVizAvailable: align_viz_available)
+
       json_dump =
-        JSON.dump(
-          metadata: metadata.compact,
-          counts: counts_by_tax_level,
-          lineage: structured_lineage,
-          sortedGenus: sorted_genus_tax_ids,
-          highlightedTaxIds: highlighted_tax_ids
+        Oj.dump(
+          {
+            metadata: metadata.compact,
+            counts: counts_by_tax_level,
+            lineage: structured_lineage,
+            sortedGenus: sorted_genus_tax_ids,
+            highlightedTaxIds: highlighted_tax_ids,
+          },
+          mode: :compat
         )
-      @timer.split("convert_to_json_with_JSON")
+      @timer.split("convert_to_json_with_OJ")
 
       return json_dump
     end
   end
 
-  def get_pipeline_status(pipeline_run_id)
-    if pipeline_run_id.nil?
-      return [
-        nil,
-        {
-          pipelineRunStatus: "WAITING",
-          errorMessage: nil,
-          knownUserError: nil,
-          jobStatus: "Waiting to Start or Receive Files",
-        },
-      ]
+  def get_pipeline_status(pipeline_run)
+    if pipeline_run.nil?
+      return {
+        pipelineRunStatus: "WAITING",
+        errorMessage: nil,
+        knownUserError: nil,
+        jobStatus: "Waiting to Start or Receive Files",
+        reportReady: false,
+      }
     end
 
-    pipeline_run = PipelineRun.find(pipeline_run_id)
+    # pipeline_run.results_finalized? indicates that the results monitor sees all outputs are in a finished state
+    # (either loaded or failed). This can be true if there were errors, so we still need to check pipeline_run.failed? as well.
+    # pipeline_run.report_ready? indicates if taxon_counts output is loaded and available to use in report generation.
+    # This is only true if no errors have occurred for taxon_counts.
+
+    # The pipeline is either still in progress or results monitor is waiting to load in outputs.
     pipeline_status = "WAITING"
-    if pipeline_run.completed?
-      pipeline_status = "COMPLETE"
-    elsif pipeline_run.failed?
+    # The pipeline has stopped running and encountered errors.
+    if pipeline_run.failed?
       pipeline_status = "FAILED"
+    # The pipeline has finished running without critical errors and all outputs have been loaded.
+    elsif pipeline_run.results_finalized?
+      pipeline_status = "SUCCEEDED"
     end
-    return [
-      pipeline_run,
-      {
-        pipelineRunStatus: pipeline_status,
-        hasErrors: pipeline_run.failed?,
-        errorMessage: pipeline_run.error_message,
-        knownUserError: pipeline_run.known_user_error,
-        jobStatus: pipeline_run.job_status_display,
-      },
-    ]
+    return {
+      pipelineRunStatus: pipeline_status,
+      hasErrors: pipeline_run.failed?,
+      errorMessage: pipeline_run.error_message,
+      knownUserError: pipeline_run.known_user_error,
+      jobStatus: pipeline_run.job_status_display,
+      reportReady: pipeline_run && pipeline_run.report_ready?,
+    }
   end
 
-  def fetch_taxon_counts(_pipeline_run_id, _background_id)
+  def fetch_taxon_counts(pipeline_run_id, background_id)
     taxon_counts_and_summaries_query = TaxonCount
                                        .joins("LEFT OUTER JOIN"\
                                           " taxon_summaries ON taxon_counts.count_type = taxon_summaries.count_type"\
                                           " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
                                           " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
-                                          " AND taxon_summaries.background_id = #{@background_id}")
+                                          " AND taxon_summaries.background_id = #{background_id}")
                                        .where(
-                                         pipeline_run_id: @pipeline_run_id,
+                                         pipeline_run_id: pipeline_run_id,
                                          count_type: ['NT', 'NR'],
                                          tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS]
                                        )
@@ -255,7 +291,6 @@ class PipelineReportService
                                          ].flatten
                                        )
     # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
-
     return taxon_counts_and_summaries_query.pluck(*FIELDS_TO_PLUCK)
   end
 
@@ -269,18 +304,18 @@ class PipelineReportService
     return taxon
   end
 
-  def fetch_taxons_absent_from_sample(_pipeline_run_id, _background_id)
-    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: @pipeline_run_id).distinct
+  def fetch_taxons_absent_from_sample(pipeline_run_id, background_id)
+    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: pipeline_run_id).distinct
 
     taxons_absent_from_sample = TaxonSummary
                                 .joins("LEFT OUTER JOIN"\
                                   " taxon_counts ON taxon_counts.count_type = taxon_summaries.count_type"\
                                   " AND taxon_counts.tax_level = taxon_summaries.tax_level"\
                                   " AND taxon_counts.tax_id = taxon_summaries.tax_id"\
-                                  " AND taxon_counts.pipeline_run_id = #{@pipeline_run_id}")
+                                  " AND taxon_counts.pipeline_run_id = #{pipeline_run_id}")
                                 .where(
                                   taxon_summaries: {
-                                    background_id: @background_id,
+                                    background_id: background_id,
                                     tax_id: tax_ids,
                                     tax_level: [TaxonCount::TAX_LEVEL_SPECIES, TaxonCount::TAX_LEVEL_GENUS],
                                     count_type: ['NT', 'NR'],
@@ -354,7 +389,7 @@ class PipelineReportService
           end
         else
           # TODO(tiago): not sure if this case ever happens
-          Rails.logger.warn("[PR=#{@pipeline_run_id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
+          Rails.logger.warn("[PR=#{@pipeline_run.id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
         end
       end
     end
@@ -482,18 +517,31 @@ class PipelineReportService
     return highlighted_tax_ids
   end
 
-  def tag_pathogens(counts_by_tax_level)
-    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES])
-    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS])
+  def tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
+    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES], lineage_by_tax_id)
+    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS], lineage_by_tax_id)
     counts_by_tax_level
   end
 
-  def get_best_pathogen_tag(tax_map)
-    tax_map.each do |_tax_id, tax_info|
+  def get_best_pathogen_tag(tax_map, lineage_by_tax_id)
+    tax_map.each do |tax_id, tax_info|
       pathogen_tags = []
+      if lineage_by_tax_id[tax_id]
+        lineage = lineage_by_tax_id[tax_id]
+      elsif lineage_by_tax_id[tax_info[:genus_tax_id]]
+        lineage = lineage_by_tax_id[tax_info[:genus_tax_id]]
+      end
+
       TaxonLineage::PRIORITY_PATHOGENS.each do |category, pathogen_list|
+        if lineage
+          name_columns = lineage.keys.select { |cn| cn.include?("_name") }
+          name_columns.each do |col|
+            pathogen_tags |= [category] if pathogen_list.include?(lineage[col])
+          end
+        end
         pathogen_tags |= [category] if pathogen_list.include?(tax_info[:name])
       end
+
       best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
       if best_tag
         tax_info['pathogenTag'] = best_tag
@@ -530,5 +578,14 @@ class PipelineReportService
         csv << tax_info_by_symbols.values_at(*flat_keys_symbols)
       end
     end
+  end
+
+  # Example cache key:
+  # /samples/12303/report_v2.json?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990&pipeline_run_id=39185
+  def self.report_info_cache_key(path, kvs)
+    kvs = kvs.to_h.sort.to_h
+    # Increment this if you ever change the response structure of report_info
+    kvs["_cache_key_version"] = 2
+    path + "?" + kvs.to_param
   end
 end

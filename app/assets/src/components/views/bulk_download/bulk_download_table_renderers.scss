@@ -14,32 +14,42 @@
   }
 
   .downloadRightPane {
-    padding: $space-xxs 0;
-
     .downloadNameContainer {
       display: flex;
       align-items: center;
-      margin-bottom: $space-xs;
     }
 
     .downloadName {
-      @include font-header-s-crop;
+      @include font-header-s;
     }
 
     .downloadStatus {
       margin-left: $space-xxs;
     }
 
-    .sampleCount {
-      @include font-body-xxs-crop;
+    .metadata {
+      @include font-body-xxs;
       color: $medium-grey;
-      cursor: pointer;
 
-      &:hover {
-        color: $black;
+      .detailsLink {
+        cursor: pointer;
+        margin-right: 10px;
+
+        &:hover {
+          color: $black;
+        }
+      }
+
+      .userName {
+        margin-left: 10px;
       }
     }
   }
+}
+
+.samplesCell {
+  @include font-body-xxs;
+  font-weight: $font-weight-regular;
 }
 
 .statusCell {
@@ -75,26 +85,14 @@
     }
   }
 
-  .warningTooltip {
-    @include font-body-xxs-crop;
-    margin-left: $space-xxs;
-    color: $medium-grey;
-    text-decoration: underline;
-    text-decoration-style: dashed;
-  }
-
-  .message {
-    @include font-body-xxs-crop;
-  }
-
   .separator {
-    @include font-body-xxs-crop;
+    @include font-body-xxs;
     margin: 0 $space-xs;
     color: $medium-grey;
   }
 
   .link {
-    @include font-label-s-crop;
+    @include font-label-s;
     /* overwrite header.scss */
     color: $primary-light !important;
     cursor: pointer;

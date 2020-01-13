@@ -31,5 +31,11 @@ admin_project:
 
 metadata_validation_project:
   name: Metadata Project
-  users: [one]
+  users: [admin_one]
   metadata_fields: [sample_type, nucleotide_type, collection_date, age, admission_date, blood_fed, reported_sex, sex]
+
+# This was added later to test water_control specifically.
+metadata_validation_project_with_water_control:
+  name: Metadata Project With Water Control
+  users: [admin_one]
+  metadata_fields: [sample_type, nucleotide_type, water_control]

@@ -3,7 +3,8 @@
 @import "~styles/themes/elements";
 
 .statusLabel {
-  @include font-label-xxs-crop;
+  @include font-label-xxs;
+  line-height: 9px;
   border-radius: 13px;
   margin-left: $space-xxs;
   padding: $space-xxxs $space-xxs;
@@ -26,5 +27,9 @@
   &.warning {
     background-color: $warning-bg;
     color: $warning;
+  }
+
+  &.inline {
+    display: inline-block;
   }
 }

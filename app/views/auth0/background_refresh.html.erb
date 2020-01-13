@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <link rel="icon" type="image/png" href="<%= image_url("logo-#{Rails.env}.png") %>"/>
+  </head>
   <pre><%=@refresh_values.to_yaml%></pre>
   <% if @refresh_values[:active] %>
     <script language="javascript">(function () {

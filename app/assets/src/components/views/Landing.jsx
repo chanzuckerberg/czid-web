@@ -76,11 +76,7 @@ class Landing extends React.Component {
 
   render() {
     const signInLink = () => {
-      if (this.props.signInStrategy == "AUTH0") {
-        location.href = "/auth0/login";
-      } else {
-        location.href = "/users/sign_in";
-      }
+      location.href = "/auth0/login";
     };
     const header = (
       <div className="header-row row">
@@ -95,13 +91,20 @@ class Landing extends React.Component {
           <div className="fill" />
           <div className="hiring-ad">
             {"Join our team! We're hiring "}
-            <a
-              href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1620152"
-              target="_blank"
-              rel="noopener noreferrer"
+            <ExternalLink
+              // No number because specific position was filled.
+              href="https://boards.greenhouse.io/chanzuckerberginitiative"
+              analyticsEventName="Landing_engineer-job-link_clicked"
             >
               engineers
-            </a>
+            </ExternalLink>
+            {` and `}
+            <ExternalLink
+              href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1919743"
+              analyticsEventName="Landing_scientist-job-link_clicked"
+            >
+              scientists
+            </ExternalLink>
             !
           </div>
           {this.props.browserInfo.supported ? (
@@ -336,7 +339,6 @@ Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
   showBulletin: PropTypes.bool,
   browserInfo: PropTypes.object,
-  signInStrategy: PropTypes.string,
 };
 
 export default Landing;

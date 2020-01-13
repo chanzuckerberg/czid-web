@@ -26,7 +26,7 @@ joe_failed_phylo_tree:
 public_phylo_tree:
   name: public_phylo_tree
   project: public_project
-  user: one
+  user: admin_one
   taxid: 1
   tax_level: 1
   tax_name: 'some species'

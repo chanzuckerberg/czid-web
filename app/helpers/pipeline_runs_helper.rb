@@ -199,6 +199,7 @@ module PipelineRunsHelper
   end
 
   def check_for_user_error(failed_stage)
+    # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     return [nil, nil] unless [1, 2].include? failed_stage.step_number
     # We need to set the pipeline version in the failed pipeline run so that the host_filter_output_s3_path includes it,
     # i.e. "/results/3.7" instead of "/results"

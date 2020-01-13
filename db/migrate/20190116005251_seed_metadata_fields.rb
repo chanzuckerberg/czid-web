@@ -1,3 +1,4 @@
+# NOTE: we should probably be using seeds.rb instead of migrations for initializing data.
 class SeedMetadataFields < ActiveRecord::Migration[5.1]
   def up
     # TODO: All the validation_types, proper association with Metadata-data entries, project associations, etc.

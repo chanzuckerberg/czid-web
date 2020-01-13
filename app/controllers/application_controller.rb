@@ -1,7 +1,6 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
-  before_action :sign_in_auth0_token!
   before_action :authenticate_user!
   before_action :check_for_maintenance
   before_action :check_rack_mini_profiler
@@ -12,6 +11,7 @@ class ApplicationController < ActionController::Base
   include Consul::Controller
   include AppConfigHelper
   include Auth0Helper
+  include ApplicationHelper
 
   current_power do
     Power.new(current_user)
@@ -25,41 +25,29 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && current_user.admin?
   end
 
-  # This method checks if auth0 token is present and valid
-  # and then sets the current user,
-  # This method allows auth0 authentication to work simultaneously
-  # with legacy devise database mode.
-  def sign_in_auth0_token!
-    @auth0_token = auth0_decode_auth_token
-    if @auth0_token
-      if @auth0_token[:authenticated] && (!user_signed_in? || @auth0_token.dig(:auth_payload, :email) != current_user.email)
-        auth_payload = @auth0_token[:auth_payload]
-        auth_user = User.find_by(email: auth_payload["email"])
-        if auth_user.present?
-          sign_in auth_user
-          return
-        else
-          auth0_logout
-          redirect_to root_path
-        end
-      end
-    end
-  end
-
   def authenticate_user!
-    if @auth0_token && !@auth0_token[:authenticated]
-      # redirect user if auth0 token is invalid or expired
+    if @token_based_login_request
+      # in token based requests there is no auth0 token to validate, and the user is already validated
+      return true
+    end
+
+    auth_check = auth0_check_user_auth(current_user)
+
+    case auth_check
+    when AUTH_INVALID_USER
       respond_to do |format|
-        format.html do
-          # we want to redirect user to auth0 login page in silent mode
-          # if the user still have a valid SSO token in the auth0 session
-          # the sliding session will be refreshed
-          redirect_to "/auth0/refresh_token?mode=expired"
-        end
+        format.html { redirect_to  controller: :auth0, action: :login }
         format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
       end
-    else
-      super
+    when AUTH_TOKEN_EXPIRED
+      respond_to do |format|
+        # we want to redirect user to auth0 login page in silent mode
+        # because the user may still have a valid SSO token in the auth0 session.
+        # in this case the sliding session will be refreshed, otherwise user will be
+        # required to enter email and password
+        format.html { redirect_to controller: :auth0, action: :refresh_token, params: { mode: "expired" } }
+        format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
+      end
     end
   end
 
@@ -124,9 +112,10 @@ class ApplicationController < ActionController::Base
     if user_email.present? && user_token.present?
       user = User.find_by(email: user_email)
 
-      # Devise.secure_compare is used to mitigate timing attacks.
-      if user && Devise.secure_compare(user.authentication_token, user_token)
-        sign_in user, store: false
+      # secure_compare is used to mitigate timing attacks
+      if user && ActiveSupport::SecurityUtils.secure_compare(user.authentication_token, user_token)
+        warden.set_user(user, scope: :auth0_user)
+        @token_based_login_request = true
         return
       end
     end
@@ -152,6 +141,7 @@ class ApplicationController < ActionController::Base
 
   def set_application_view_variables
     @disable_header_navigation = false
+    @announcement_banner_enabled = announcement_banner_enabled
   end
 
   # Set current user and request to global for use in logging in ActiveRecord.
@@ -172,5 +162,47 @@ class ApplicationController < ActionController::Base
     @timer = Timer.new("#{params[:controller]}.#{params[:action]}")
     yield
     @timer.publish
+  end
+
+  # This should wrap a code block whose output should be cached.
+  # If caching is enabled, attempts to fetch the cached response corresponding to the
+  # given cache_key and fills out custom response headers.
+  # If the attempt results in a cache miss, then the response is generated normally and
+  # will be stored in the cache.
+  def fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, event_name)
+    if skip_cache
+      yield
+    else
+      MetricUtil.log_analytics_event(event_name + "_cache-requested", current_user) unless skip_cache
+      # This allows 304 Not Modified to be returned so that the client can use its
+      # local cache and avoid the large download.
+      response.headers["Last-Modified"] = httpdate
+      # This is a custom header for testing and debugging
+      response.headers["X-IDseq-Cache"] = 'requested'
+      response.headers["X-IDseq-Cache-Key"] = cache_key
+      Rails.logger.info("Requesting #{cache_key}")
+
+      Rails.cache.fetch(cache_key, expires_in: 30.days) do
+        MetricUtil.log_analytics_event(event_name + "_cache-missed", current_user)
+        response.headers["X-IDseq-Cache"] = 'missed'
+        yield
+      end
+    end
+  end
+
+  def announcement_banner_enabled
+    # Enabled if the flag is enabled AND it's in the active time range.
+    if get_app_config(AppConfig::SHOW_ANNOUNCEMENT_BANNER) == "1"
+      time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
+      now = time_zone.now
+      start_time = time_zone.parse("2019-12-20 18:00:00")
+      end_time = time_zone.parse("2019-12-30 9:00:00")
+
+      if start_time < now && now < end_time
+        return true
+      end
+    end
+
+    false
   end
 end

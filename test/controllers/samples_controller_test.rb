@@ -12,22 +12,20 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     @sample_human_existing_metadata_expired = samples(:sample_human_existing_metadata_expired)
     @deletable_sample = samples(:deletable_sample)
     @project = projects(:one)
-    @user = users(:one)
+    @user = users(:admin_one)
     @user.authentication_token = 'sdfsdfsdff'
     @user.save
-    @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'should get index' do
-    post user_session_path, params: @user_params
+    sign_in @user
     get samples_url
     assert_response :success
   end
 
   test 'should get new' do
-    post user_session_path, params: @user_params
+    sign_in @user
     get new_sample_url
     assert_response :success
   end
@@ -66,7 +64,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'reupload source' do
-    post user_session_path, params: @user_params
+    sign_in @user
     put reupload_source_sample_url(@sample)
     assert :success
   end
@@ -77,18 +75,18 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'kick off pipeline' do
-    post user_session_path, params: @user_params
+    sign_in @user
     put kickoff_pipeline_sample_url(@sample)
     assert :success
   end
 
-  test 'kick off pipeline redirect' do
+  test 'kick off pipeline without authentication' do
     put kickoff_pipeline_sample_url(@sample)
     assert_redirected_to new_user_session_url
   end
 
   test 'should create sample through web' do
-    post user_session_path, params: @user_params
+    sign_in @user
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
                      source_type: "local", },
@@ -102,13 +100,13 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show sample' do
-    post user_session_path, params: @user_params
+    sign_in @user
     get sample_url(@sample)
     assert_response :success
   end
 
   test 'should get correct report' do
-    post user_session_path, params: @user_params
+    sign_in @user
     get "/samples/#{samples(:six).id}/report_info?background_id=#{@background.id}"
     json_response = JSON.parse(response.body)
 
@@ -183,20 +181,20 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should get edit' do
-    post user_session_path, params: @user_params
+    sign_in @user
     get edit_sample_url(@sample)
     assert_response :success
   end
 
   test 'should update sample' do
-    post user_session_path, params: @user_params
+    sign_in @user
     assert @sample.valid?
     patch sample_url(@sample), params: { sample: { name: @sample.name + ' asdf' } }
     assert_redirected_to sample_url(@sample)
   end
 
   test 'should destroy sample' do
-    post user_session_path, params: @user_params
+    sign_in @user
     assert_difference('Sample.count', -1) do
       delete sample_url(@deletable_sample)
     end
@@ -204,7 +202,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can fetch metadata for a public sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_sample_url(@sample_human_existing_metadata_public)
     assert_response :success
@@ -213,7 +211,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can fetch metadata for an expired sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_sample_url(@sample_human_existing_metadata_expired)
     assert_response :success
@@ -222,7 +220,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can fetch metadata for his own private samples' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_sample_url(@sample_human_existing_metadata_joe_project)
     assert_response :success
@@ -232,7 +230,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
   # non-admin user should not be able to query another user's private sample.
   test 'joe cannot fetch metadata for another user\'s private samples' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       get metadata_sample_url(@metadata_validation_sample_human_existing_metadata)
@@ -240,7 +238,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can fetch the metadata fields for a public sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_public.id],
@@ -251,7 +249,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can fetch the metadata fields for an expired sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_expired.id],
@@ -262,7 +260,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can fetch the metadata fields for his own private sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_joe_project.id],
@@ -273,7 +271,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot fetch the metadata fields for another user\'s private sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       get metadata_fields_samples_url, params: {
@@ -284,7 +282,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
   # If multiple samples, merge the fields.
   test 'joe can fetch the metadata fields for multiple samples' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_public.id, @sample_human_existing_metadata_expired.id],
@@ -296,7 +294,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
   # If multiple samples but one is invalid, return fields for the valid ones.
   test 'joe can fetch the metadata fields for multiple samples, and invalid ones will be omitted' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     get metadata_fields_samples_url, params: {
       sampleIds: [@sample_human_existing_metadata_public.id, @metadata_validation_sample_human_existing_metadata.id],
@@ -307,7 +305,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot save metadata to a public sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       post save_metadata_v2_sample_url(@sample_human_existing_metadata_public), params: {
@@ -318,7 +316,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot save metadata to an expired sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       post save_metadata_v2_sample_url(@sample_human_existing_metadata_expired), params: {
@@ -329,7 +327,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe can save metadata to his own private sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     post save_metadata_v2_sample_url(@sample_human_existing_metadata_joe_project), params: {
       field: "sample_type",
@@ -342,7 +340,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'joe cannot save metadata to another user\'s private sample' do
-    post user_session_path, params: @user_nonadmin_params
+    sign_in @user_nonadmin
 
     assert_raises(ActiveRecord::RecordNotFound) do
       post save_metadata_v2_sample_url(@metadata_validation_sample_human_existing_metadata), params: {
@@ -353,7 +351,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'report_info should return cached copy on second request' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     url = report_info_url
     get url
@@ -377,7 +375,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'report_info should override background when background is not viewable' do
-    post user_session_path, params: @user_params
+    sign_in @user
     # ids beyond any conceivable range
     url = report_info_url(background_id: rand(10**10..11**10))
     get url
@@ -389,7 +387,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     travel_to(Time.current) do
       report_ts = Time.now.utc
 
-      post user_session_path, params: @user_params
+      sign_in @user
 
       url = report_info_url(report_ts: report_ts.to_i)
       get url
@@ -402,7 +400,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'report_info cache should error on bad sample' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     assert_raises(ActiveRecord::RecordNotFound) do
       test_miss("pipeline_version")
@@ -418,7 +416,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'report_info cache should invalidate on change of relevant params' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     test_miss("background_id")
     test_miss("scoring_model")
@@ -428,7 +426,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'report_info cache should remain on change of irrelevant params' do
-    post user_session_path, params: @user_params
+    sign_in @user
 
     url = report_info_url
     get url

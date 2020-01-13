@@ -2,10 +2,11 @@ class CreatePipelineRunStages < ActiveRecord::Migration[5.1]
   def change
     create_table :pipeline_run_stages do |t|
       t.references :pipeline_run, foreign_key: true
+      # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
       t.integer    :step_number
       t.integer    :job_type
       t.string     :job_status
-      t.integer    :db_load_status, null:false, default: 0
+      t.integer    :db_load_status, null: false, default: 0
       t.text       :job_command
       t.text       :command_stdout
       t.text       :command_stderr

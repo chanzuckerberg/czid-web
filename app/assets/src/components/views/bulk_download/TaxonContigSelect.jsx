@@ -74,11 +74,11 @@ class TaxonContigSelect extends React.Component {
 
     const dropdownOptions = [
       {
-        text: "All Taxon",
+        text: "All Taxa",
         value: "all",
         customNode: (
           <div className={cs.option}>
-            <div className={cs.taxonName}>All taxon</div>
+            <div className={cs.taxonName}>All taxa</div>
             <div className={cs.fill} />
             <div className={cs.sampleCount}>{sampleIds.size}</div>
           </div>
@@ -91,7 +91,7 @@ class TaxonContigSelect extends React.Component {
 
     const optionsHeader = (
       <div className={cs.optionsHeader}>
-        <div className={cs.header}>Taxa</div>
+        <div className={cs.header}>Taxon</div>
         <div className={cs.fill} />
         <div className={cs.header}>Samples</div>
       </div>
@@ -100,12 +100,12 @@ class TaxonContigSelect extends React.Component {
     return (
       <Dropdown
         fluid
-        placeholder="Select taxa"
+        placeholder="Select taxon"
         options={dropdownOptions}
         onChange={onChange}
         value={value}
         optionsHeader={optionsHeader}
-        menuLabel="Select taxa"
+        menuLabel="Select taxon"
         className={cs.taxaWithContigsDropdown}
         search
         onFilterChange={this.handleFilterChange}

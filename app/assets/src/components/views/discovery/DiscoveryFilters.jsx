@@ -207,7 +207,7 @@ class DiscoveryFilters extends React.Component {
             onChange={this.handleChange.bind(this, "tissueSelected")}
             selected={tissue && tissue.length ? tissueSelected : null}
             options={tissue}
-            label="Tissue"
+            label="Sample Type"
           />
           {this.renderTags("tissue")}
         </div>

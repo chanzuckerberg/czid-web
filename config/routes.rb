@@ -2,10 +2,6 @@ Rails.application.routes.draw do
   resources :backgrounds do
     get :show_taxon_dist, on: :member
   end
-  devise_for :users, controllers: {
-    sessions: 'sessions',
-    registrations: 'registrations',
-  }
 
   get 'auth/auth0/callback/' => 'auth0#callback'
   get 'auth/failure/' => 'auth0#failure'
@@ -13,10 +9,12 @@ Rails.application.routes.draw do
     post :request_password_reset
     get :refresh_token
     get :background_refresh
-    get :login
-    get :logout
+    match :login, via: [:get, :post]
+    match :logout, via: [:get, :post]
+    post :logout
     get :failure
   end
+  get 'users/password/new' => 'users#password_new'
 
   resources :samples do
     put :reupload_source, on: :member
@@ -60,9 +58,9 @@ Rails.application.routes.draw do
     get :coverage_viz_summary, on: :member
     get :coverage_viz_data, on: :member
     get :show_v2, on: :member
-    get :taxa_with_reads_suggestions, on: :collection
-    get :taxa_with_contigs_suggestions, on: :collection
-    get :uploaded_by_current_user, on: :collection
+    post :taxa_with_reads_suggestions, on: :collection
+    post :taxa_with_contigs_suggestions, on: :collection
+    post :uploaded_by_current_user, on: :collection
     get :legacy, on: :member
   end
 
@@ -120,6 +118,7 @@ Rails.application.routes.draw do
   get 'phylo_trees/validate_name', to: 'phylo_trees#validate_name'
 
   get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
+  get 'visualizations/heatmap_metrics.json', to: 'visualizations#heatmap_metrics'
   get 'visualizations/download_heatmap', to: 'visualizations#download_heatmap'
   post 'visualizations/:type/save', to: 'visualizations#save'
   get 'visualizations/:type(/:id)', to: 'visualizations#visualization'
@@ -143,6 +142,12 @@ Rails.application.routes.draw do
   post 'bulk_downloads/:id/success/:access_token', to: 'bulk_downloads#success_with_token', as: :bulk_downloads_success
   post 'bulk_downloads/:id/error/:access_token', to: 'bulk_downloads#error_with_token', as: :bulk_downloads_error
   post 'bulk_downloads/:id/progress/:access_token', to: 'bulk_downloads#progress_with_token', as: :bulk_downloads_progress
+
+  get 'user_settings/metadata_by_category', to: 'user_settings#metadata_by_category'
+  post 'user_settings/update', to: 'user_settings#update'
+  get 'user_settings', to: 'user_settings#index'
+
+  get 'sample_types.json', to: 'sample_types#index'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
@@ -173,16 +178,33 @@ Rails.application.routes.draw do
 
   get 'heatmaps/project/:id', to: 'heatmaps#project'
 
-  authenticate :user, ->(u) { u.admin? } do
+  authenticate :auth0_user, ->(u) { u.admin? } do
     mount RESQUE_SERVER, at: "/resque"
   end
 
   # See health_check gem
   get 'health_check' => "health_check/health_check#index"
 
+  # No default favicon.ico
+  get '/favicon.ico', to: proc { [404, {}, ['']] }
+
   # Un-shorten URLs. This should go second-to-last.
   get '/:id' => "shortener/shortened_urls#show"
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#landing'
+end
+
+Rails.application.routes.named_routes.url_helpers_module.module_eval do
+  def new_user_session_url
+    url_for(new_user_session_path)
+  end
+
+  def new_user_session_path
+    url_for(controller: :auth0, action: :login, only_path: true)
+  end
+
+  def destroy_user_session_path
+    url_for(controller: :auth0, action: :logout, only_path: true)
+  end
 end

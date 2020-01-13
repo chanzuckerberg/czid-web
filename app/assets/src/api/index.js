@@ -92,6 +92,8 @@ const createSample = (
 
 const getAllHostGenomes = () => get("/host_genomes.json");
 
+const getAllSampleTypes = () => get("/sample_types.json");
+
 // TODO(mark): Remove this method once we launch the new sample upload flow.
 const bulkUploadRemoteSamples = samples =>
   postWithCSRF(`/samples/bulk_upload.json`, {
@@ -361,31 +363,36 @@ const getSamplePipelineResults = (sampleId, pipelineVersion) =>
 
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
 const getTaxaWithReadsSuggestions = (query, sampleIds) =>
-  get("/samples/taxa_with_reads_suggestions.json", {
-    params: {
-      query,
-      sampleIds,
-    },
+  postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
+    query,
+    sampleIds,
   });
 
 // Get autocomplete suggestions for "taxa that have contigs" for a set of samples.
 const getTaxaWithContigsSuggestions = (query, sampleIds) =>
-  get("/samples/taxa_with_contigs_suggestions.json", {
-    params: {
-      query,
-      sampleIds,
-    },
+  postWithCSRF("/samples/taxa_with_contigs_suggestions.json", {
+    query,
+    sampleIds,
   });
 
 const uploadedByCurrentUser = async sampleIds => {
-  const response = await get("samples/uploaded_by_current_user", {
-    params: {
-      sampleIds,
-    },
+  const response = await postWithCSRF("samples/uploaded_by_current_user", {
+    sampleIds,
   });
 
   return response.uploaded_by_current_user;
 };
+
+const getHeatmapMetrics = () => get("/visualizations/heatmap_metrics.json");
+
+const getUserSettingMetadataByCategory = () =>
+  get("/user_settings/metadata_by_category");
+
+const updateUserSetting = (key, value) =>
+  postWithCSRF("user_settings/update", {
+    key,
+    value,
+  });
 
 export {
   bulkImportRemoteSamples,
@@ -396,9 +403,11 @@ export {
   deleteSample,
   getAlignmentData,
   getAllHostGenomes,
+  getAllSampleTypes,
   getContigsSequencesByByteranges,
   getCoverageVizData,
   getCoverageVizSummary,
+  getHeatmapMetrics,
   getPhyloTree,
   getProject,
   getProjectDimensions,
@@ -417,6 +426,7 @@ export {
   getSummaryContigCounts,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
+  getUserSettingMetadataByCategory,
   getVisualizations,
   markSampleUploaded,
   saveProjectDescription,
@@ -433,4 +443,5 @@ export {
   getTaxaWithReadsSuggestions,
   getTaxaWithContigsSuggestions,
   uploadedByCurrentUser,
+  updateUserSetting,
 };

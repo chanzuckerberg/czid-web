@@ -136,7 +136,7 @@ class BulkDownloadModal extends React.Component {
           downloadTypes={bulkDownloadTypes}
           selectedDownloadTypeName={selectedDownloadTypeName}
           onSelect={this.handleSelectDownloadType}
-          selectedFields={selectedFields}
+          selectedFields={get(selectedDownloadTypeName, selectedFields)}
           onFieldSelect={this.handleFieldSelect}
           onContinue={this.handleChooseStepContinue}
           selectedSampleIds={selectedSampleIds}
