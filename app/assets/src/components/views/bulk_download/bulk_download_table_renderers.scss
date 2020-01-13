@@ -47,6 +47,11 @@
   }
 }
 
+.samplesCell {
+  @include font-body-xxs;
+  font-weight: $font-weight-regular;
+}
+
 .statusCell {
   margin-bottom: 2px;
 

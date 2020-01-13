@@ -248,14 +248,19 @@ class PipelineReportService
       }
     end
 
+    # pipeline_run.results_finalized? indicates that the results monitor sees all outputs are in a finished state
+    # (either loaded or failed). This can be true if there were errors, so we still need to check pipeline_run.failed? as well.
+    # pipeline_run.report_ready? indicates if taxon_counts output is loaded and available to use in report generation.
+    # This is only true if no errors have occurred for taxon_counts.
+
+    # The pipeline is either still in progress or results monitor is waiting to load in outputs.
     pipeline_status = "WAITING"
-    # pipeline_run.completed? and pipeline_run.finalized? both indicate if the pipeline run
-    # is no longer being checked by the pipeline monitor (i.e. the run has completed),
-    # but .completed? includes extra logic for an old version of pipeline without run stages.
-    if pipeline_run.completed?
-      pipeline_status = "COMPLETE"
-    elsif pipeline_run.failed?
+    # The pipeline has stopped running and encountered errors.
+    if pipeline_run.failed?
       pipeline_status = "FAILED"
+    # The pipeline has finished running without critical errors and all outputs have been loaded.
+    elsif pipeline_run.results_finalized?
+      pipeline_status = "SUCCEEDED"
     end
     return {
       pipelineRunStatus: pipeline_status,
