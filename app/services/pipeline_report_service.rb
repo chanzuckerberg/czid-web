@@ -477,6 +477,12 @@ class PipelineReportService
   end
 
   def find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+    # Find the top n (ui_config.top_n) species that satisfy:
+    #     NT.zscore > min_z AND
+    #     NR.zscore > min_z AND
+    #     NT.rpm > min_rpm AND
+    #     NR.rpm > min_rpm AND
+    #     tax_id > 0
     ui_config = UiConfig.last
     return unless ui_config
 
