@@ -64,7 +64,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
         <div className={cs.statusCell}>
           <div className={cs.links}>
             <a className={cs.link} href="mailto:help@idseq.net">
-              Contact us for help
+              Contact us
             </a>
           </div>
         </div>
@@ -73,7 +73,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
 
     return (
       <div className={cs.statusCell}>
-        <LoadingBar percentage={progress} showHint />
+        <LoadingBar percentage={progress} showHint tiny />
       </div>
     );
   };

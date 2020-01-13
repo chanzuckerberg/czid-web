@@ -135,7 +135,7 @@ class BulkDownloadList extends React.Component {
       {
         dataKey: "status",
         label: "",
-        width: 105,
+        width: 120,
         cellRenderer: BulkDownloadTableRenderers.renderStatus,
         disableSort: true,
       },

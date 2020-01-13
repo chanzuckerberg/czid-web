@@ -14,7 +14,7 @@ export default class AdvancedDownloadTab extends React.Component {
     tooltip: "",
   };
 
-  hasCloudCommand = () => {
+  hasCLICommand = () => {
     const { bulkDownload } = this.props;
     return (
       bulkDownload.status === "success" &&
@@ -22,7 +22,7 @@ export default class AdvancedDownloadTab extends React.Component {
     );
   };
 
-  getCloudCommand = () => {
+  getCLICommand = () => {
     const { bulkDownload } = this.props;
 
     if (
@@ -54,7 +54,7 @@ export default class AdvancedDownloadTab extends React.Component {
   };
 
   copyCommandToClipboard = () => {
-    copy(this.getCloudCommand());
+    copy(this.getCLICommand());
     this.setState({
       tooltip: "Copied command to clipboard",
     });
@@ -69,7 +69,7 @@ export default class AdvancedDownloadTab extends React.Component {
   render() {
     const { bulkDownload } = this.props;
 
-    const handleCloudCommandClick = this.hasCloudCommand()
+    const handleCLICommandClick = this.hasCLICommand()
       ? withAnalytics(
           this.copyCommandToClipboard,
           "AdvancedDownloadTab_copy-cloud-command-link_clicked",
@@ -84,22 +84,22 @@ export default class AdvancedDownloadTab extends React.Component {
       <div
         className={cx(
           cs.cloudCommandContainer,
-          this.hasCloudCommand() && cs.enabled
+          this.hasCLICommand() && cs.enabled
         )}
-        onClick={handleCloudCommandClick}
+        onClick={handleCLICommandClick}
         onMouseLeave={this.resetTooltip}
       >
-        <div className={cs.command}>{this.getCloudCommand()}</div>
+        <div className={cs.command}>{this.getCLICommand()}</div>
         <CopyIcon className={cs.icon} />
       </div>
     );
 
     return (
       <div className={cs.advancedDownloadTab}>
-        <div className={cs.header}>Download to your cloud machine:</div>
+        <div className={cs.header}>Download via command line:</div>
         <div className={cs.description}>
-          Copy and paste the following command into the terminal of your cloud
-          machine to download and extract your files into a folder called{" "}
+          Copy and paste the following command into your terminal to download
+          and extract your files into a folder called{" "}
           {bulkDownload.download_name}:
         </div>
         {this.state.tooltip ? (
