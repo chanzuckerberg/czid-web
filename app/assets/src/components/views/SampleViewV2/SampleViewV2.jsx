@@ -1122,7 +1122,7 @@ export default class SampleViewV2 extends React.Component {
             <UserContext.Consumer>
               {currentUser =>
                 currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) &&
-                reportMetadata.pipelineRunStatus === "COMPLETE" ? (
+                reportMetadata.pipelineRunStatus === "SUCCEEDED" ? (
                   <Tabs
                     className={cs.tabs}
                     tabs={["Report", "Antimicrobial Resistance"]}

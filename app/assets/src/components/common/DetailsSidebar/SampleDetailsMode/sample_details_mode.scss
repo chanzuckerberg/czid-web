@@ -21,8 +21,67 @@
   margin: 30px 10px;
 }
 
-// See also discovery_sidebar.scss
-.field {
+.noData {
+  color: $light-grey;
+  margin-left: 10px;
+}
+
+.pipelineInfoFields,
+.metadataFields {
+  .inputWrapper,
+  .sampleNameInput {
+    flex: 1 1 0;
+    min-width: 0;
+
+    .metadataInput {
+      width: 100%;
+
+      :global(.ui):global(.input) {
+        width: 100%;
+      }
+    }
+
+    .error {
+      @include font-body-xxs;
+      color: $error;
+      margin-top: 5px;
+    }
+  }
+
+  .metadataValue {
+    color: $dark-grey;
+    word-break: break-all;
+  }
+
+  .emptyValue {
+    color: $light-grey;
+    font-weight: $font-weight-regular;
+  }
+
+  .projectLink {
+    /* overwrite header.scss */
+    color: $primary-light !important;
+
+    &:hover {
+      /* overwrite header.scss */
+      opacity: 0.5;
+    }
+  }
+
+  .vizLink {
+    @include font-header-xxs;
+    // Override color: inherit in _header.scss.
+    color: $primary-light !important;
+    margin-left: 15px;
+
+    .rightArrow {
+      font-size: 0.75em;
+      margin-left: 4px;
+    }
+  }
+}
+
+.readsRemainingRow {
   padding: 10px 0;
   display: flex;
   align-items: center;
@@ -64,44 +123,9 @@
     }
   }
 
-  .inputWrapper,
-  .sampleNameInput {
-    flex: 1 1 0;
-    min-width: 0;
-
-    .metadataInput {
-      width: 100%;
-
-      :global(.ui):global(.input) {
-        width: 100%;
-      }
-    }
-
-    .error {
-      @include font-body-xxs;
-      color: $error;
-      margin-top: 5px;
-    }
-  }
-
   .metadataValue {
     color: $dark-grey;
     word-break: break-all;
-  }
-
-  .emptyValue {
-    color: $light-grey;
-    font-weight: $font-weight-regular;
-  }
-
-  .projectLink {
-    /* overwrite header.scss */
-    color: $primary-light !important;
-
-    &:hover {
-      /* overwrite header.scss */
-      opacity: 0.5;
-    }
   }
 }
 
@@ -163,17 +187,5 @@
   .textarea {
     height: 600px;
     resize: vertical;
-  }
-}
-
-.vizLink {
-  @include font-header-xxs;
-  // Override color: inherit in _header.scss.
-  color: $primary-light !important;
-  margin-left: 15px;
-
-  .rightArrow {
-    font-size: 0.75em;
-    margin-left: 4px;
   }
 }

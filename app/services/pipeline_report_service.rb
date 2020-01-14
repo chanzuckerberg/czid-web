@@ -73,12 +73,11 @@ class PipelineReportService
     # taxon_counts (is report_ready), or if its results are finalized without errors.
     # Otherwise just return the metadata, which includes statuses and error messages to display.
     # TODO(julie): refactor + clarify pipeline run statuses (JIRA: https://jira.czi.team/browse/IDSEQ-1890)
-    unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?))
+    unless @pipeline_run && (@pipeline_run.report_ready? || (@pipeline_run.finalized? && !@pipeline_run.failed?)) && @pipeline_run.total_reads
       return JSON.dump(
         metadata: metadata
       )
     end
-    @pipeline_run_id = @pipeline_run.id
 
     adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
@@ -86,17 +85,20 @@ class PipelineReportService
     if @parallel
       parallel_steps = [
         -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_size) },
-        -> { fetch_taxon_counts(@pipeline_run_id, @background_id) },
-        -> { fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id) },
+        -> { fetch_taxon_counts(@pipeline_run.id, @background_id) },
+        -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id) },
       ]
-      results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
-        begin
-          ActiveRecord::Base.connection_pool.with_connection do
-            lambda.call()
+      results = nil
+      ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+        results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
+          begin
+            ActiveRecord::Base.connection_pool.with_connection do
+              lambda.call()
+            end
+          rescue => e
+            LogUtil.log_err_and_airbrake("Parallel fetch failed")
+            raise e
           end
-        rescue => e
-          LogUtil.log_err_and_airbrake("Parallel fetch failed")
-          raise e
         end
       end
       @timer.split("parallel_fetch_report_data")
@@ -105,10 +107,10 @@ class PipelineReportService
       contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
       @timer.split("get_contig_summary")
 
-      taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run_id, @background_id)
+      taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run.id, @background_id)
       @timer.split("fetch_taxon_counts_and_summaries")
 
-      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run_id, @background_id)
+      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id)
       @timer.split("fetch_taxons_absent_from_sample")
     end
 
@@ -150,7 +152,7 @@ class PipelineReportService
       lineage_version = PipelineRun
                         .select("alignment_configs.lineage_version")
                         .joins(:alignment_config)
-                        .find(@pipeline_run_id)[:lineage_version]
+                        .find(@pipeline_run.id)[:lineage_version]
 
       required_columns = %w[
         taxid
@@ -180,11 +182,11 @@ class PipelineReportService
       ReportsHelper.validate_names(
         counts_by_tax_level,
         lineage_by_tax_id,
-        @pipeline_run_id
+        @pipeline_run.id
       )
       @timer.split("fill_missing_names")
 
-      tag_pathogens(counts_by_tax_level)
+      tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
       @timer.split("tag_pathogens")
 
       structured_lineage = encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
@@ -246,14 +248,19 @@ class PipelineReportService
       }
     end
 
+    # pipeline_run.results_finalized? indicates that the results monitor sees all outputs are in a finished state
+    # (either loaded or failed). This can be true if there were errors, so we still need to check pipeline_run.failed? as well.
+    # pipeline_run.report_ready? indicates if taxon_counts output is loaded and available to use in report generation.
+    # This is only true if no errors have occurred for taxon_counts.
+
+    # The pipeline is either still in progress or results monitor is waiting to load in outputs.
     pipeline_status = "WAITING"
-    # pipeline_run.completed? and pipeline_run.finalized? both indicate if the pipeline run
-    # is no longer being checked by the pipeline monitor (i.e. the run has completed),
-    # but .completed? includes extra logic for an old version of pipeline without run stages.
-    if pipeline_run.completed?
-      pipeline_status = "COMPLETE"
-    elsif pipeline_run.failed?
+    # The pipeline has stopped running and encountered errors.
+    if pipeline_run.failed?
       pipeline_status = "FAILED"
+    # The pipeline has finished running without critical errors and all outputs have been loaded.
+    elsif pipeline_run.results_finalized?
+      pipeline_status = "SUCCEEDED"
     end
     return {
       pipelineRunStatus: pipeline_status,
@@ -298,7 +305,7 @@ class PipelineReportService
   end
 
   def fetch_taxons_absent_from_sample(pipeline_run_id, background_id)
-    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: @pipeline_run_id).distinct
+    tax_ids = TaxonCount.select(:tax_id).where(pipeline_run_id: pipeline_run_id).distinct
 
     taxons_absent_from_sample = TaxonSummary
                                 .joins("LEFT OUTER JOIN"\
@@ -382,7 +389,7 @@ class PipelineReportService
           end
         else
           # TODO(tiago): not sure if this case ever happens
-          Rails.logger.warn("[PR=#{@pipeline_run_id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
+          Rails.logger.warn("[PR=#{@pipeline_run.id}] PR has contigs but not taxon counts for taxon #{tax_id} in #{db_type}: #{contigs_per_read_count}")
         end
       end
     end
@@ -503,18 +510,31 @@ class PipelineReportService
     return highlighted_tax_ids
   end
 
-  def tag_pathogens(counts_by_tax_level)
-    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES])
-    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS])
+  def tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
+    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES], lineage_by_tax_id)
+    get_best_pathogen_tag(counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS], lineage_by_tax_id)
     counts_by_tax_level
   end
 
-  def get_best_pathogen_tag(tax_map)
-    tax_map.each do |_tax_id, tax_info|
+  def get_best_pathogen_tag(tax_map, lineage_by_tax_id)
+    tax_map.each do |tax_id, tax_info|
       pathogen_tags = []
+      if lineage_by_tax_id[tax_id]
+        lineage = lineage_by_tax_id[tax_id]
+      elsif lineage_by_tax_id[tax_info[:genus_tax_id]]
+        lineage = lineage_by_tax_id[tax_info[:genus_tax_id]]
+      end
+
       TaxonLineage::PRIORITY_PATHOGENS.each do |category, pathogen_list|
+        if lineage
+          name_columns = lineage.keys.select { |cn| cn.include?("_name") }
+          name_columns.each do |col|
+            pathogen_tags |= [category] if pathogen_list.include?(lineage[col])
+          end
+        end
         pathogen_tags |= [category] if pathogen_list.include?(tax_info[:name])
       end
+
       best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
       if best_tag
         tax_info['pathogenTag'] = best_tag

@@ -1,15 +1,18 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { isArray } from "lodash/fp";
 import cx from "classnames";
 
-import Input from "~/components/ui/controls/Input";
-import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
+import { UserContext } from "~/components/common/UserContext";
+import PropTypes from "~/components/utils/propTypes";
+import Input from "~ui/controls/Input";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
-} from "~/components/ui/controls/GeoSearchInputBox";
+} from "~ui/controls/GeoSearchInputBox";
+import SampleTypeSearchBox from "~ui/controls/SampleTypeSearchBox";
 import AlertIcon from "~ui/icons/AlertIcon";
+import Toggle from "~ui/controls/Toggle";
 
 import cs from "./metadata_input.scss";
 
@@ -55,10 +58,41 @@ class MetadataInput extends React.Component {
       metadataType,
       className,
       isHuman,
+      isInsect,
+      sampleTypes,
     } = this.props;
     const { warning } = this.state;
+    const { admin } = this.context || {};
 
-    if (isArray(metadataType.options)) {
+    // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
+    // See https://jira.czi.team/browse/IDSEQ-2051.
+    if (metadataType.key === "sample_type" && admin) {
+      return (
+        <SampleTypeSearchBox
+          className={className}
+          value={value}
+          onResultSelect={({ result }) => {
+            // Result can be plain text or a match. We treat them the same.
+            onChange(metadataType.key, result.name || result);
+          }}
+          isHuman={isHuman}
+          isInsect={isInsect}
+          sampleTypes={sampleTypes}
+        />
+      );
+    } else if (metadataType.isBoolean) {
+      const onLabel = metadataType.options[0];
+      const offLabel = metadataType.options[1];
+      return (
+        <Toggle
+          initialChecked={value === onLabel ? true : false}
+          onLabel={onLabel}
+          offLabel={offLabel}
+          onChange={label => onChange(metadataType.key, label, true)}
+          className={className}
+        />
+      );
+    } else if (isArray(metadataType.options)) {
       const options = metadataType.options.map(option => ({
         text: option,
         value: option,
@@ -144,6 +178,7 @@ MetadataInput.propTypes = {
     key: PropTypes.string,
     dataType: PropTypes.oneOf(["number", "string", "date", "location"]),
     options: PropTypes.arrayOf(PropTypes.string),
+    isBoolean: PropTypes.bool,
   }),
   // Third optional parameter signals to the parent whether to immediately save. false means "wait for onSave to fire".
   // This is useful for the text input, where the parent wants to save onBlur, not onChange.
@@ -151,7 +186,11 @@ MetadataInput.propTypes = {
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
   isHuman: PropTypes.bool,
+  isInsect: PropTypes.bool,
   warning: PropTypes.string,
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
+
+MetadataInput.contextType = UserContext;
 
 export default MetadataInput;

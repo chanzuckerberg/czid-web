@@ -7,6 +7,7 @@ import React from "react";
 import Sidebar from "~/components/ui/containers/Sidebar";
 import PropTypes from "~/components/utils/propTypes";
 
+import BulkDownloadDetailsMode from "./BulkDownloadDetailsMode";
 import SampleDetailsMode from "./SampleDetailsMode";
 import TaxonDetailsMode from "./TaxonDetailsMode";
 import PipelineStepDetailsMode from "./PipelineStepDetailsMode";
@@ -28,6 +29,8 @@ export default class DetailsSidebar extends React.Component {
         return <PipelineStepDetailsMode {...params} />;
       case "geneDetails":
         return <GeneDetailsMode {...params} />;
+      case "bulkDownloadDetails":
+        return <BulkDownloadDetailsMode {...params} />;
       default:
         return null;
     }

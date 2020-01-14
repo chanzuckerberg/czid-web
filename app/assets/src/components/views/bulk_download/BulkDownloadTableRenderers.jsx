@@ -2,7 +2,6 @@ import React from "react";
 
 import DownloadIcon from "~ui/icons/DownloadIcon";
 import StatusLabel from "~ui/labels/StatusLabel";
-import BasicPopup from "~/components/BasicPopup";
 import LoadingBar from "~ui/controls/LoadingBar";
 
 import cs from "./bulk_download_table_renderers.scss";
@@ -28,7 +27,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
           </div>
           <div className={cs.metadata}>
             <span className={cs.detailsLink} onClick={rowData.onStatusClick}>
-              {rowData.num_samples} Sample{rowData.num_samples === 1 ? "" : "s"}
+              Details
             </span>
             {admin && (
               <React.Fragment>
@@ -41,6 +40,10 @@ export default class BulkDownloadTableRenderers extends React.Component {
     );
   };
 
+  static renderNumberOfSamples = ({ rowData }) => {
+    return <div className={cs.samplesCell}>{rowData.num_samples}</div>;
+  };
+
   static renderStatus = ({ rowData }) => {
     const { status, progress } = rowData;
 
@@ -51,16 +54,6 @@ export default class BulkDownloadTableRenderers extends React.Component {
             <div className={cs.link} onClick={rowData.onDownloadFileClick}>
               Download File
             </div>
-            <div className={cs.separator}>|</div>
-            <BasicPopup
-              trigger={
-                <div className={cs.link} onClick={rowData.onCopyUrlClick}>
-                  Copy Url
-                </div>
-              }
-              content="Copy the file URL to your clipboard. This link will expire in 24 hours."
-              position="top right"
-            />
           </div>
         </div>
       );
@@ -71,7 +64,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
         <div className={cs.statusCell}>
           <div className={cs.links}>
             <a className={cs.link} href="mailto:help@idseq.net">
-              Contact us for help
+              Contact us
             </a>
           </div>
         </div>
@@ -80,7 +73,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
 
     return (
       <div className={cs.statusCell}>
-        <LoadingBar percentage={progress} showHint />
+        <LoadingBar percentage={progress} showHint tiny />
       </div>
     );
   };

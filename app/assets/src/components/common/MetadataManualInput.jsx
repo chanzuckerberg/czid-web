@@ -264,6 +264,9 @@ class MetadataManualInput extends React.Component {
         )
       : sample.host_genome_id;
 
+  getSampleHostGenome = sample =>
+    find(["id", this.getSampleHostGenomeId(sample)], this.state.hostGenomes);
+
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
     // Special-case 'Host Genome' (the field that lets you change the Host Genome)
     field === "Host Genome" ||
@@ -319,6 +322,7 @@ class MetadataManualInput extends React.Component {
 
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
           if (this.isHostGenomeIdValidForField(sampleHostGenomeId, column)) {
+            const hostGenome = this.getSampleHostGenome(sample);
             return (
               <div>
                 <MetadataInput
@@ -335,7 +339,9 @@ class MetadataManualInput extends React.Component {
                     });
                   }}
                   withinModal={this.props.withinModal}
-                  isHuman={sampleHostGenomeId === 1}
+                  isHuman={hostGenome.taxa_category === "human"}
+                  isInsect={hostGenome.taxa_category === "insect"}
+                  sampleTypes={this.props.sampleTypes}
                 />
                 {this.props.samples.length > 1 &&
                   this.renderApplyToAll(sample, column)}
@@ -353,10 +359,12 @@ class MetadataManualInput extends React.Component {
   };
 
   getColumnWidth = column => {
+    // The width of the input needs to be about 15px smaller than the width of
+    // the column to maintain some padding. See also getColumnWidth.
     if (["Sample Name", "collection_location_v2"].includes(column)) {
-      return 240;
+      return parseInt(cs.metadataInputExtraWidth) + 15;
     } else {
-      return 145;
+      return parseInt(cs.metadataInputWidth) + 15;
     }
   };
 
@@ -389,6 +397,7 @@ MetadataManualInput.propTypes = {
   withinModal: PropTypes.bool,
   projectMetadataFields: PropTypes.object,
   hostGenomes: PropTypes.array,
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
 
 export default MetadataManualInput;

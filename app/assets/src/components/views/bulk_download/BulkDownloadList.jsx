@@ -1,7 +1,8 @@
 import React from "react";
 import cx from "classnames";
 import { SortDirection } from "react-virtualized";
-import copy from "copy-to-clipboard";
+import { some } from "lodash/fp";
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 
 import LargeDownloadIcon from "~ui/icons/LargeDownloadIcon";
 import LoadingMessage from "~/components/common/LoadingMessage";
@@ -12,10 +13,17 @@ import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import { Table } from "~/components/visualizations/table";
 import { openUrl } from "~utils/links";
 import { UserContext } from "~/components/common/UserContext";
+import Notification from "~ui/notifications/Notification";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 
 import BulkDownloadTableRenderers from "./BulkDownloadTableRenderers";
-import BulkDownloadDetailsModal from "./BulkDownloadDetailsModal";
 import cs from "./bulk_download_list.scss";
+
+// The number of times we automatically update the bulk downloads on the page before prompting the user.
+const AUTO_UPDATE_MAX_COUNT = 15;
+
+// Slightly larger than PROGRESS_UPDATE_DELAY on the back-end.
+const AUTO_UPDATE_DELAY = 20000;
 
 const STATUS_TYPES = {
   waiting: "default",
@@ -36,7 +44,7 @@ const STATUS_DISPLAY = {
 // In this case, the bulk download task will have status = success and also have an error message.
 const getStatusType = bulkDownload => {
   if (bulkDownload.status === "success" && bulkDownload.error_message) {
-    return "warning";
+    return "warn";
   }
   return STATUS_TYPES[bulkDownload.status];
 };
@@ -61,15 +69,37 @@ class BulkDownloadList extends React.Component {
     bulkDownloads: null,
     modalOpen: false,
     selectedBulkDownload: null,
+    autoUpdateCount: 0,
   };
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.autoUpdateBulkDownloads();
+  }
+
+  initiateAutoUpdate = () => {
+    this.setState({
+      autoUpdateCount: 0,
+    });
+
+    this.autoUpdateBulkDownloads();
+  };
+
+  autoUpdateBulkDownloads = async () => {
     const bulkDownloads = await getBulkDownloads();
+    const newAutoUpdateCount = this.state.autoUpdateCount + 1;
 
     this.setState({
       bulkDownloads: this.processBulkDownloads(bulkDownloads),
+      autoUpdateCount: newAutoUpdateCount,
     });
-  }
+
+    if (
+      newAutoUpdateCount < AUTO_UPDATE_MAX_COUNT &&
+      this.hasInProgressBulkDownloads()
+    ) {
+      setTimeout(this.autoUpdateBulkDownloads, AUTO_UPDATE_DELAY);
+    }
+  };
 
   getTableColumns = () => {
     const { admin } = this.context || {};
@@ -86,9 +116,15 @@ class BulkDownloadList extends React.Component {
       },
       {
         dataKey: "created_at",
-        label: "Created On",
+        label: "Date",
         width: 200,
         cellRenderer: TableRenderers.renderDateWithElapsed,
+      },
+      {
+        dataKey: "num_samples",
+        label: "Samples",
+        width: 100,
+        cellRenderer: BulkDownloadTableRenderers.renderNumberOfSamples,
       },
       {
         dataKey: "file_size",
@@ -99,20 +135,33 @@ class BulkDownloadList extends React.Component {
       {
         dataKey: "status",
         label: "",
-        width: 190,
+        width: 120,
         cellRenderer: BulkDownloadTableRenderers.renderStatus,
+        disableSort: true,
       },
     ];
   };
+
+  hasInProgressBulkDownloads = () =>
+    some(["status", "running"], this.state.bulkDownloads);
 
   processBulkDownloads = bulkDownloads =>
     bulkDownloads.map(bulkDownload => ({
       ...bulkDownload,
       // Add callback to be used in renderDownload table renderer.
-      onStatusClick: () => this.onStatusClick(bulkDownload),
+      onStatusClick: () => {
+        logAnalyticsEvent("BulkDownloadList_details-link_clicked", {
+          bulkDownloadId: bulkDownload.id,
+        });
+        this.handleStatusClick(bulkDownload);
+      },
       // Add callbacks to be used in renderStatus table renderer.
-      onDownloadFileClick: () => this.onDownloadFileClick(bulkDownload),
-      onCopyUrlClick: () => this.onCopyUrlClick(bulkDownload),
+      onDownloadFileClick: () => {
+        logAnalyticsEvent("BulkDownloadList_direct-download-link_clicked", {
+          bulkDownloadId: bulkDownload.id,
+        });
+        this.handleDownloadFileClick(bulkDownload);
+      },
       statusType: getStatusType(bulkDownload),
       statusDisplay: getStatusDisplay(bulkDownload),
       tooltipText: getTooltipText(bulkDownload),
@@ -122,14 +171,14 @@ class BulkDownloadList extends React.Component {
   isEmpty = () =>
     this.state.bulkDownloads && this.state.bulkDownloads.length === 0;
 
-  onStatusClick = bulkDownload => {
+  handleStatusClick = bulkDownload => {
     this.setState({
       selectedBulkDownload: bulkDownload,
-      modalOpen: true,
+      sidebarOpen: true,
     });
   };
 
-  onDownloadFileClick = async bulkDownload => {
+  handleDownloadFileClick = async bulkDownload => {
     // This should only be clickable when the bulk download has succeeded
     // TODO(mark): Handle error case.
     if (bulkDownload.status === "success") {
@@ -140,24 +189,21 @@ class BulkDownloadList extends React.Component {
     }
   };
 
-  onCopyUrlClick = async bulkDownload => {
-    // This should only be clickable when the bulk download has succeeded
-    // TODO(mark): Handle error case. Want to change popup text, which involves a forceUpdate on the table.
-    if (bulkDownload.status === "success") {
-      const outputFilePresignedUrl = await getPresignedOutputUrl(
-        bulkDownload.id
-      );
-      copy(outputFilePresignedUrl);
-    }
-  };
-
-  onModalClose = () => {
+  handleSidebarClose = () => {
     this.setState({
-      modalOpen: false,
+      sidebarOpen: false,
     });
   };
 
+  getSidebarParams = () => {
+    return {
+      bulkDownload: this.state.selectedBulkDownload,
+    };
+  };
+
   renderBody() {
+    const { autoUpdateCount } = this.state;
+
     if (this.isLoading()) {
       return (
         <LoadingMessage
@@ -182,6 +228,19 @@ class BulkDownloadList extends React.Component {
 
     return (
       <NarrowContainer className={cs.tableContainer}>
+        {autoUpdateCount >= AUTO_UPDATE_MAX_COUNT &&
+          this.hasInProgressBulkDownloads() && (
+            <Notification
+              type="warn"
+              displayStyle="flat"
+              className={cs.autoUpdateWarning}
+            >
+              This page is no longer auto-updating.{" "}
+              <span onClick={this.initiateAutoUpdate} className={cs.link}>
+                Click here to see additional updates.
+              </span>
+            </Notification>
+          )}
         <Table
           rowClassName={cs.tableRow}
           headerClassName={cs.tableHeader}
@@ -198,7 +257,7 @@ class BulkDownloadList extends React.Component {
   }
 
   render() {
-    const { modalOpen, selectedBulkDownload } = this.state;
+    const { selectedBulkDownload, sidebarOpen } = this.state;
     return (
       <div
         className={cx(
@@ -219,10 +278,17 @@ class BulkDownloadList extends React.Component {
         </NarrowContainer>
         <Divider />
         {this.renderBody()}
-        <BulkDownloadDetailsModal
-          onClose={this.onModalClose}
-          open={modalOpen}
-          bulkDownload={selectedBulkDownload}
+        <DetailsSidebar
+          visible={sidebarOpen}
+          mode="bulkDownloadDetails"
+          onClose={withAnalytics(
+            this.handleSidebarClose,
+            "BulkDownloadList_details-sidebar_closed",
+            {
+              bulkDownloadId: selectedBulkDownload && selectedBulkDownload.id,
+            }
+          )}
+          params={this.getSidebarParams()}
         />
       </div>
     );

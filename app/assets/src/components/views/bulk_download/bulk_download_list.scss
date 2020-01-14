@@ -29,6 +29,15 @@
   }
 }
 
+.autoUpdateWarning {
+  margin-bottom: $space-xxxs;
+
+  .link {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
 .viewHeader {
   margin-top: $space-xl;
   margin-bottom: $space-xl;

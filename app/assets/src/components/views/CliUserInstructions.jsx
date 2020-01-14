@@ -59,12 +59,12 @@ class CliUserInstructions extends React.Component {
             --upgrade
           </span>
           <p className={cs.instructionMediumMarginTop}>
-            - Tips: Make sure you have Python 2 or 3 installed already. Try
-            running <span className={cs.code}>pip --version</span> or{" "}
+            - Tips: Make sure you have Python 3 installed already. Try running{" "}
+            <span className={cs.code}>pip --version</span> or{" "}
             <span className={cs.code}>python --version</span>.
           </p>
           <p>
-            - Try running with <span className={cs.code}>pip2</span> or{" "}
+            - Try running with <span className={cs.code}>pip</span> or{" "}
             <span className={cs.code}>pip3</span> depending on your
             configuration. Try <span className={cs.code}>sudo pip</span> if you
             run into permissions errors (anything like OSError: [Errno 13]

@@ -17,4 +17,13 @@
       min-width: 4px;
     }
   }
+
+  &.tiny {
+    height: 6px;
+
+    .loadingBar {
+      height: 6px;
+      border-radius: 3px;
+    }
+  }
 }

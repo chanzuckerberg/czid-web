@@ -9,6 +9,7 @@ import { getDownloadLinks } from "~/components/views/report/utils/download";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { getSamplePipelineResults } from "~/api";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import FieldList from "~/components/common/DetailsSidebar/FieldList";
 
 import { PIPELINE_INFO_FIELDS, HOST_FILTERING_WIKI } from "./constants";
 import MetadataSection from "./MetadataSection";
@@ -58,35 +59,35 @@ class PipelineTab extends React.Component {
     });
   };
 
-  renderPipelineInfoField = field => {
+  getPipelineInfoField = field => {
     const { pipelineInfo } = this.props;
     const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
-    const metadataLink = linkLabel && link && (
-      <a
-        className={cs.vizLink}
-        href={link}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {linkLabel}
-        <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-      </a>
-    );
+    const metadataLink = linkLabel &&
+      link && (
+        <a
+          className={cs.vizLink}
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {linkLabel}
+          <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+        </a>
+      );
 
-    return (
-      <div className={cs.field} key={field.key}>
-        <div className={cs.label}>{field.name}</div>
-        {text === undefined || text === null || text === "" ? (
+    return {
+      label: field.name,
+      value:
+        text === undefined || text === null || text === "" ? (
           <div className={cs.emptyValue}>--</div>
         ) : (
           <div className={cs.metadataValue}>
             {text}
             {metadataLink}
           </div>
-        )}
-      </div>
-    );
+        ),
+    };
   };
 
   getReadCounts = async () => {
@@ -111,10 +112,10 @@ class PipelineTab extends React.Component {
 
     const totalReads = this.props.pipelineRun.total_reads;
     let readsAfter = step["reads_after"];
-    let percentReads = ((readsAfter / totalReads) * 100).toFixed(2);
+    let percentReads = (readsAfter / totalReads * 100).toFixed(2);
 
     return (
-      <div className={cs.field}>
+      <div className={cs.readsRemainingRow}>
         <div className={cs.label}>
           <ColumnHeaderTooltip
             position="top left"
@@ -135,6 +136,10 @@ class PipelineTab extends React.Component {
 
   render() {
     const { pipelineRun, sampleId } = this.props;
+    const pipelineInfoFields = PIPELINE_INFO_FIELDS.map(
+      this.getPipelineInfoField
+    );
+
     return (
       <div>
         <MetadataSection
@@ -143,7 +148,10 @@ class PipelineTab extends React.Component {
           open={this.state.sectionOpen.pipelineInfo}
           title="Pipeline Info"
         >
-          {PIPELINE_INFO_FIELDS.map(this.renderPipelineInfoField)}
+          <FieldList
+            fields={pipelineInfoFields}
+            className={cs.pipelineInfoFields}
+          />
         </MetadataSection>
         <MetadataSection
           toggleable
@@ -155,12 +163,10 @@ class PipelineTab extends React.Component {
           !pipelineRun.total_reads ||
           isEmpty(this.state.pipelineStepDict) ||
           isEmpty(this.state.pipelineStepDict["steps"]) ? (
-            <div className={cs.field}>
-              <div className={cx(cs.label, cs.emptyValue)}>No data</div>
-            </div>
+            <div className={cs.noData}>No data</div>
           ) : (
             <div>
-              <div className={cs.field}>
+              <div className={cs.readsRemainingRow}>
                 <div className={cs.label}>
                   <ColumnHeaderTooltip
                     position="top left"

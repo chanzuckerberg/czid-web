@@ -52,6 +52,10 @@ class BulkDownload < ApplicationRecord
   end
 
   def output_file_presigned_url
+    if status != STATUS_SUCCESS
+      return nil
+    end
+
     begin
       return S3_PRESIGNER.presigned_url(:get_object,
                                         bucket: ENV['SAMPLES_BUCKET_NAME'],
@@ -150,7 +154,8 @@ class BulkDownload < ApplicationRecord
     command = ["python", "s3_tar_writer.py",
                "--src-urls", *src_urls,
                "--tar-names", *tar_names,
-               "--dest-url", dest_url,]
+               "--dest-url", dest_url,
+               "--progress-delay", PROGRESS_UPDATE_DELAY,]
 
     # The success url is mandatory.
     if success_url
