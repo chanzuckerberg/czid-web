@@ -115,10 +115,6 @@ describe BulkDownload, type: :model do
         "--progress-url",
         "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
       ]
-      print("\n")
-      print(@bulk_download.bulk_download_ecs_task_command.join(" "))
-      print("\n")
-      print(task_command.join(" "))
 
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
     end
@@ -158,9 +154,13 @@ describe BulkDownload, type: :model do
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ], params: {
-                                "file_format" => {
-                                  "value" => ".fasta",
-                                  "displayName" => ".fasta",
+                                "file_format": {
+                                  "value": ".fasta",
+                                  "displayName": ".fasta",
+                                },
+                                "taxa_with_reads": {
+                                  "value": "all",
+                                  "displayName": "All Taxa",
                                 },
                               })
 
@@ -193,9 +193,13 @@ describe BulkDownload, type: :model do
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ], params: {
-                                "file_format" => {
-                                  "value" => ".fastq",
-                                  "displayName" => ".fastq",
+                                "file_format": {
+                                  "value": ".fastq",
+                                  "displayName": ".fastq",
+                                },
+                                "taxa_with_reads": {
+                                  "value": "all",
+                                  "displayName": "All Taxa",
                                 },
                               })
 
@@ -226,11 +230,16 @@ describe BulkDownload, type: :model do
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
     end
 
-    it "returns the correct task command for contigs_non_host download type with fasta file format" do
+    it "returns the correct task command for contigs_non_host download type" do
       @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
-                              ])
+                              ], params: {
+                                "taxa_with_contigs": {
+                                  "value": 100,
+                                  "displayName": "Mock Taxon",
+                                },
+                              })
 
       task_command = [
         "python",
@@ -292,9 +301,13 @@ describe BulkDownload, type: :model do
                                 @sample_two.first_pipeline_run.id,
                                 @sample_one.first_pipeline_run.id,
                               ], params: {
-                                "file_format" => {
-                                  "value" => ".fastq",
-                                  "displayName" => ".fastq",
+                                "file_format": {
+                                  "value": ".fastq",
+                                  "displayName": ".fastq",
+                                },
+                                "taxa_with_reads": {
+                                  "value": 100,
+                                  "displayName": "Mock Taxon",
                                 },
                               })
 
@@ -336,9 +349,13 @@ describe BulkDownload, type: :model do
                                 @sample_one.first_pipeline_run.id,
                                 @sample_two.first_pipeline_run.id,
                               ], params: {
-                                "file_format" => {
-                                  "value" => ".fastq",
-                                  "displayName" => ".fastq",
+                                "file_format": {
+                                  "value": ".fastq",
+                                  "displayName": ".fastq",
+                                },
+                                "taxa_with_reads": {
+                                  "value": 100,
+                                  "displayName": "Mock Taxon",
                                 },
                               })
 
@@ -374,9 +391,13 @@ describe BulkDownload, type: :model do
                                 @sample_two.first_pipeline_run.id,
                                 @sample_one.first_pipeline_run.id,
                               ], params: {
-                                "file_format" => {
-                                  "value" => ".fastq",
-                                  "displayName" => ".fastq",
+                                "file_format": {
+                                  "value": ".fastq",
+                                  "displayName": ".fastq",
+                                },
+                                "taxa_with_reads": {
+                                  "value": 100,
+                                  "displayName": "Mock Taxon",
                                 },
                               })
 
@@ -582,9 +603,9 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly generates download file for download type sample_taxon_report" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background" => {
-                                             "value" => mock_background_id,
-                                             "displayName" => "Mock Background",
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background": {
+                                             "value": mock_background_id,
+                                             "displayName": "Mock Background",
                                            })
 
       expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
@@ -601,9 +622,9 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly updates the bulk_download status and progress as the sample_taxon_report runs" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background" => {
-                                             "value" => mock_background_id,
-                                             "displayName" => "Mock Background",
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background": {
+                                             "value": mock_background_id,
+                                             "displayName": "Mock Background",
                                            })
 
       expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
@@ -661,9 +682,9 @@ describe BulkDownload, type: :model do
     it "correctly generates download file for download type reads_non_host for single taxon" do
       create_taxon_lineage(mock_tax_id)
 
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
-                                             "value" => mock_tax_id,
-                                             "displayName" => "Salmonella enterica",
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads": {
+                                             "value": mock_tax_id,
+                                             "displayName": "Salmonella enterica",
                                            })
 
       expect(bulk_download).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).with(anything, mock_tax_id, mock_tax_level).exactly(2).times.and_return("mock_reads_nonhost_fasta")
@@ -681,9 +702,9 @@ describe BulkDownload, type: :model do
     it "correctly handles empty fastas for download type reads_non_host for single taxon" do
       create_taxon_lineage(mock_tax_id)
 
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
-                                             "value" => mock_tax_id,
-                                             "displayName" => "Salmonella enterica",
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads": {
+                                             "value": mock_tax_id,
+                                             "displayName": "Salmonella enterica",
                                            })
 
       expect(bulk_download).to receive(:get_taxon_fasta_from_pipeline_run_combined_nt_nr).with(anything, mock_tax_id, mock_tax_level).exactly(2).times.and_return(nil)
@@ -702,12 +723,12 @@ describe BulkDownload, type: :model do
 
     it "correctly generates download file for download type combined_sample_taxon_results" do
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
-                                           "background" => {
-                                             "value" => mock_background_id,
-                                             "displayName" => "Mock Background",
-                                           }, "metric" => {
-                                             "value" => "NT.rpm",
-                                             "displayName" => "NT RPM",
+                                           "background": {
+                                             "value": mock_background_id,
+                                             "displayName": "Mock Background",
+                                           }, "metric": {
+                                             "value": "NT.rpm",
+                                             "displayName": "NT RPM",
                                            })
 
       expect(BulkDownloadsHelper).to receive(:generate_combined_sample_taxon_results_csv).with(
@@ -726,12 +747,12 @@ describe BulkDownload, type: :model do
 
     it "correctly handles individual sample failures for download type combined_sample_taxon_results" do
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
-                                           "background" => {
-                                             "value" => mock_background_id,
-                                             "displayName" => "Mock Background",
-                                           }, "metric" => {
-                                             "value" => "NT.rpm",
-                                             "displayName" => "NT RPM",
+                                           "background": {
+                                             "value": mock_background_id,
+                                             "displayName": "Mock Background",
+                                           }, "metric": {
+                                             "value": "NT.rpm",
+                                             "displayName": "NT RPM",
                                            })
 
       expect(BulkDownloadsHelper).to receive(:generate_combined_sample_taxon_results_csv).with(
@@ -750,22 +771,10 @@ describe BulkDownload, type: :model do
       expect(bulk_download.error_message).to eq(BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % 1)
     end
 
-    it "correctly throws exception if taxa_with_reads param not found for download type reads_non_host for single taxon" do
-      create_taxon_lineage(mock_tax_id)
-
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, {})
-
-      expect do
-        bulk_download.generate_download_file
-      end.to raise_error.with_message(BulkDownloadsHelper::READS_NON_HOST_TAXID_EXPECTED)
-
-      expect(bulk_download.status).to eq(BulkDownload::STATUS_ERROR)
-    end
-
     it "correctly throws exception if taxon count not found for download type reads_non_host for single taxon" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads" => {
-                                             "value" => mock_tax_id,
-                                             "displayName" => "Salmonella enterica",
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_reads": {
+                                             "value": mock_tax_id,
+                                             "displayName": "Salmonella enterica",
                                            })
 
       expect do
@@ -776,9 +785,9 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly generates download file for download type contigs_non_host for single taxon" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_contigs" => {
-                                             "value" => mock_tax_id,
-                                             "displayName" => "Salmonella enterica",
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE, "taxa_with_contigs": {
+                                             "value": mock_tax_id,
+                                             "displayName": "Salmonella enterica",
                                            })
       allow_any_instance_of(PipelineRun).to receive(:get_contigs_for_taxid).and_return([object_double(Contig.new, to_fa: "mock_contigs_nonhost_fasta")])
 
@@ -793,9 +802,9 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly handles individual sample failures" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background" => {
-                                             "value" => mock_background_id,
-                                             "displayName" => "Mock Background",
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background": {
+                                             "value": mock_background_id,
+                                             "displayName": "Mock Background",
                                            })
 
       expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
@@ -814,9 +823,9 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly handles s3 tar file upload error" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background" => {
-                                             "value" => mock_background_id,
-                                             "displayName" => "Mock Background",
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background": {
+                                             "value": mock_background_id,
+                                             "displayName": "Mock Background",
                                            })
 
       expect(PipelineReportService).to receive(:call).with(anything, mock_background_id, csv: true).exactly(1).times.and_return("mock_report_csv")
@@ -1005,9 +1014,9 @@ describe BulkDownload, type: :model do
         pipeline_run_ids: [@sample_one.first_pipeline_run.id],
         download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE,
         params: {
-          "taxa_with_reads" => {
-            "value" => 100,
-            "displayName" => "Mock Taxon",
+          "taxa_with_reads": {
+            "value": 100,
+            "displayName": "Mock Taxon",
           },
         }
       )
@@ -1022,9 +1031,9 @@ describe BulkDownload, type: :model do
         pipeline_run_ids: [@sample_one.first_pipeline_run.id],
         download_type: BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,
         params: {
-          "taxa_with_contigs" => {
-            "value" => 200,
-            "displayName" => "Mock Taxon 2",
+          "taxa_with_contigs": {
+            "value": 200,
+            "displayName": "Mock Taxon 2",
           },
         }
       )
@@ -1039,18 +1048,79 @@ describe BulkDownload, type: :model do
         pipeline_run_ids: [@sample_one.first_pipeline_run.id],
         download_type: BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,
         params: {
-          "taxa_with_contigs" => {
-            "value" => "all",
-            "displayName" => "All Taxon",
+          "taxa_with_contigs": {
+            "value": "all",
+            "displayName": "All Taxon",
           },
-          "file_format" => {
-            "value" => ".fastq",
-            "displayName" => ".fastq",
+          "file_format": {
+            "value": ".fastq",
+            "displayName": ".fastq",
           },
         }
       )
 
       expect(bulk_download.download_display_name).to eq("Contigs (Non-host)")
+    end
+  end
+
+  context "#params_checks validations" do
+    before do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe], name: "Test Project")
+      @sample_one = create(:sample, project: @project, name: "Test Sample One",
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+    end
+
+    let(:bulk_download) do
+      build(
+        :bulk_download,
+        user: @joe,
+        pipeline_run_ids: [@sample_one.first_pipeline_run.id],
+        download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE
+      )
+    end
+
+    it "should pass for bulk downloads without field params" do
+      bulk_download.download_type = BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+      expect(bulk_download).to be_valid
+    end
+
+    it "should pass for valid parameters" do
+      bulk_download.params = {
+        "taxa_with_reads" => {
+          "value" => 100,
+          "displayName" => "All Taxon",
+        },
+      }
+
+      expect(bulk_download).to be_valid
+    end
+
+    it "should pass for extraneous parameters" do
+      bulk_download.params = {
+        "taxa_with_reads" => {
+          "value" => 100,
+          "displayName" => "All Taxon",
+        },
+        "extra_params" => {
+          "value" => "foo",
+          "displayName" => "bar",
+        },
+      }
+
+      expect(bulk_download).to be_valid
+    end
+
+    it "should throw error if parameters are invalid" do
+      bulk_download.params = {
+        "taxa_with_reads" => {
+          # value should be an integer or "all"
+          "value" => "abc",
+          "displayName" => "All Taxon",
+        },
+      }
+
+      expect(bulk_download).to_not be_valid
     end
   end
 end
