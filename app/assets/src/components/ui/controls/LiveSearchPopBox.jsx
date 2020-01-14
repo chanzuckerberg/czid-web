@@ -117,11 +117,8 @@ class LiveSearchPopBox extends React.Component {
   };
 
   handleFocus = _ => {
-    console.log("handleFocus", this.state.inputValue);
     if (this.hasEnoughChars() && this.props.shouldSearchOnFocus) {
-      console.log("shouldSearchOnFocus");
       this.handleSearchChange(this.state.inputValue);
-      debugger;
     }
 
     this.setState({ focus: true }); // open the dropdown

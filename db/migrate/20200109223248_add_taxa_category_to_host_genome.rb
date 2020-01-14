@@ -7,10 +7,6 @@ class AddTaxaCategoryToHostGenome < ActiveRecord::Migration[5.1]
   end
 
   def update_existing!(names, value)
-    rows = HostGenome.find_by(name: names)
-    if rows
-      rows.update!(taxa_category: value)
-      rows.save!
-    end
+    HostGenome.where(name: names).find_each { |u| u.update(taxa_category: value) }
   end
 end

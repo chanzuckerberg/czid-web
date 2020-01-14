@@ -1,5 +1,5 @@
 import React from "react";
-import { groupBy } from "lodash/fp";
+import { groupBy, sortBy } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 
@@ -11,6 +11,10 @@ const ALL = "ALL";
 
 class SampleTypeSearchBox extends React.Component {
   handleSearchTriggered = query => {
+    return this.buildResults(this.getMatchesByCategory(query), query);
+  };
+
+  getMatchesByCategory(query) {
     const matchSampleTypes = sampleType => {
       // If no query, return all possible
       if (query === "") return true;
@@ -24,6 +28,19 @@ class SampleTypeSearchBox extends React.Component {
       return false;
     };
     const matchedSampleTypes = this.props.sampleTypes.filter(matchSampleTypes);
+
+    // Sort matches by position of match. If no position, alphabetical.
+    const sortSampleTypes = sampleType => {
+      const name = sampleType.name.toLowerCase();
+      const q = query.toLowerCase();
+      const res =
+        name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
+      return res;
+    };
+    let sortedSampleTypes = sortBy(t => t.name, matchedSampleTypes);
+    if (query !== "") {
+      sortedSampleTypes = sortBy(sortSampleTypes, sortedSampleTypes);
+    }
 
     // Sample types are grouped differently based on whether the current
     // sample's host genome is an insect, a human, or neither. The "suggested"
@@ -44,13 +61,8 @@ class SampleTypeSearchBox extends React.Component {
       // Non-human animals get suggested a subset
       return sampleType.human_only ? ALL : SUGGESTED;
     };
-    const sampleTypesByCategory = groupBy(
-      getSampleTypeCategory,
-      matchedSampleTypes
-    );
-
-    return this.buildResults(sampleTypesByCategory, query);
-  };
+    return groupBy(getSampleTypeCategory, sortedSampleTypes);
+  }
 
   buildResults(sampleTypesByCategory, query) {
     const formatResult = result => {
@@ -73,13 +85,13 @@ class SampleTypeSearchBox extends React.Component {
         results: sampleTypesByCategory[ALL].map(formatResult),
       };
     }
-    return {
-      ...results,
-      noMatch: {
+    if (query.length) {
+      results.noMatch = {
         name: "Use Plain Text (No Match)",
         results: [{ title: query, name: query }],
-      },
-    };
+      };
+    }
+    return results;
   }
 
   render() {
@@ -95,6 +107,7 @@ class SampleTypeSearchBox extends React.Component {
         placeholder=""
         icon="search"
         shouldSearchOnFocus={true}
+        delayTriggerSearch={0}
       />
     );
   }
