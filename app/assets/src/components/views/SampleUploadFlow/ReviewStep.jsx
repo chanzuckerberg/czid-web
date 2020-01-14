@@ -148,8 +148,13 @@ class ReviewStep extends React.Component {
         return 200;
       case "Input Files":
         return 300;
+      case "Water Control":
+        return 80;
+      case "Nucleotide Type":
+      case "Collection Date":
+        return 100;
       default:
-        return 160;
+        return 140;
     }
   };
 
