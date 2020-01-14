@@ -201,8 +201,8 @@ class PipelineReportService
       end
       @timer.split("sort_species_within_each_genus")
 
-      highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
-      @timer.split("find_taxa_to_highlight")
+      highlighted_tax_ids = find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+      @timer.split("find_species_to_highlight")
     end
 
     has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
@@ -483,35 +483,28 @@ class PipelineReportService
            .reverse!
   end
 
-  def find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+  def find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     ui_config = UiConfig.last
     return unless ui_config
 
-    highlighted_tax_ids = []
-
-    meets_highlight_condition = lambda do |counts|
+    meets_highlight_condition = lambda do |tax_id, counts|
       return (counts.dig(:nt, :rpm) || 0) > ui_config.min_nt_rpm \
         && (counts.dig(:nr, :rpm) || 0) > ui_config.min_nr_rpm \
         && (counts.dig(:nt, :z_score) || 0) > ui_config.min_nt_z \
-        && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z
+        && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z \
+        && tax_id > 0
     end
 
+    highlighted_tax_ids = []
     sorted_genus_tax_ids.each do |genus_tax_id|
       genus_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS][genus_tax_id]
-      highlighted_children = false
       genus_taxon[:species_tax_ids].each do |species_tax_id|
         return highlighted_tax_ids if highlighted_tax_ids.length >= ui_config.top_n
 
         species_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_tax_id]
-        if meets_highlight_condition.call(species_taxon)
+        if meets_highlight_condition.call(species_tax_id, species_taxon)
           highlighted_tax_ids << species_tax_id
-          highlighted_children = true
         end
-      end
-
-      # if children species were not highlighted check genus
-      if meets_highlight_condition.call(genus_taxon)
-        highlighted_tax_ids << genus_tax_id
       end
     end
     return highlighted_tax_ids

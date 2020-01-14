@@ -238,8 +238,7 @@ export default class SampleViewV2 extends React.Component {
         });
         reportData.push(
           merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
-            highlighted:
-              hasHighlightedChildren || highlightedTaxIds.has(genusTaxId),
+            highlightedChildren: hasHighlightedChildren,
             pathogens: generaPathogenCounts[genusTaxId],
             taxId: genusTaxId,
             taxLevel: "genus",
