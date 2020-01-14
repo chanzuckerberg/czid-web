@@ -97,7 +97,7 @@ class SampleTypeSearchBox extends React.Component {
         onResultSelect={onResultSelect}
         minChars={0}
         placeholder=""
-        icon="search"
+        icon="chevron down"
         shouldSearchOnFocus={true}
         delayTriggerSearch={0}
       />
