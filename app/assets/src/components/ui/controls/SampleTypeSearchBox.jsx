@@ -62,7 +62,7 @@ class SampleTypeSearchBox extends React.Component {
       return {
         title: result.name,
         name: result.name,
-        description: result.group,
+        description: this.props.showDescription ? result.group : null,
       };
     };
     const results = {};
@@ -112,6 +112,7 @@ SampleTypeSearchBox.propTypes = {
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
   isHuman: PropTypes.bool.isRequired,
   isInsect: PropTypes.bool.isRequired,
+  showDescription: PropTypes.bool,
 };
 
 export default SampleTypeSearchBox;
