@@ -12,6 +12,9 @@ const ALL = "ALL";
 class SampleTypeSearchBox extends React.Component {
   handleSearchTriggered = query => {
     const matchSampleTypes = sampleType => {
+      // If no query, return all possible
+      if (query === "") return true;
+
       // Match chars in any position. Good for acronyms. Ignore spaces.
       const noSpaces = query.replace(/\s*/gi, "");
       const regex = new RegExp(noSpaces.split("").join(".*"), "gi");
@@ -88,9 +91,10 @@ class SampleTypeSearchBox extends React.Component {
         value={value}
         onSearchTriggered={this.handleSearchTriggered}
         onResultSelect={onResultSelect}
-        minChars={1}
+        minChars={0}
         placeholder=""
         icon="search"
+        shouldSearchOnFocus={true}
       />
     );
   }
