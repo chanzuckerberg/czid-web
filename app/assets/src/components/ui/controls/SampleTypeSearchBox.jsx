@@ -6,7 +6,6 @@ import PropTypes from "~/components/utils/propTypes";
 import LiveSearchPopBox from "./LiveSearchPopBox";
 
 const SUGGESTED = "SUGGESTED";
-const DONOTSHOW = "DONOTSHOW";
 const ALL = "ALL";
 
 class SampleTypeSearchBox extends React.Component {
@@ -46,20 +45,14 @@ class SampleTypeSearchBox extends React.Component {
     // sample's host genome is an insect, a human, or neither. The "suggested"
     // group is shown first, then the "all" group.
     const getSampleTypeCategory = sampleType => {
-      // Insects only get their own types
-      if (this.props.isInsect) {
-        return sampleType.insect_only ? SUGGESTED : DONOTSHOW;
-      }
-      // Other categories do not get insect types
       if (sampleType.insect_only) {
-        return DONOTSHOW;
+        return this.props.isInsect ? SUGGESTED : ALL;
       }
-      // Humans get any type except those for insects
-      if (this.props.isHuman) {
-        return SUGGESTED;
+      if (sampleType.human_only) {
+        return this.props.isHuman ? SUGGESTED : ALL;
       }
-      // Non-human animals get suggested a subset
-      return sampleType.human_only ? ALL : SUGGESTED;
+      // insects should only be suggested insect body parts
+      return this.isInsect ? ALL : SUGGESTED;
     };
     return groupBy(getSampleTypeCategory, sortedSampleTypes);
   }
@@ -96,7 +89,6 @@ class SampleTypeSearchBox extends React.Component {
 
   render() {
     const { className, value, onResultSelect } = this.props;
-    // TODO (gdingle): new icon is not working!!!
     return (
       <LiveSearchPopBox
         className={className}
