@@ -1,8 +1,8 @@
 import React from "react";
 import cx from "classnames";
 import { SortDirection } from "react-virtualized";
-import copy from "copy-to-clipboard";
 import { some } from "lodash/fp";
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 
 import LargeDownloadIcon from "~ui/icons/LargeDownloadIcon";
 import LoadingMessage from "~/components/common/LoadingMessage";
@@ -14,9 +14,9 @@ import { Table } from "~/components/visualizations/table";
 import { openUrl } from "~utils/links";
 import { UserContext } from "~/components/common/UserContext";
 import Notification from "~ui/notifications/Notification";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 
 import BulkDownloadTableRenderers from "./BulkDownloadTableRenderers";
-import BulkDownloadDetailsModal from "./BulkDownloadDetailsModal";
 import cs from "./bulk_download_list.scss";
 
 // The number of times we automatically update the bulk downloads on the page before prompting the user.
@@ -135,7 +135,7 @@ class BulkDownloadList extends React.Component {
       {
         dataKey: "status",
         label: "",
-        width: 190,
+        width: 120,
         cellRenderer: BulkDownloadTableRenderers.renderStatus,
         disableSort: true,
       },
@@ -149,10 +149,19 @@ class BulkDownloadList extends React.Component {
     bulkDownloads.map(bulkDownload => ({
       ...bulkDownload,
       // Add callback to be used in renderDownload table renderer.
-      onStatusClick: () => this.onStatusClick(bulkDownload),
+      onStatusClick: () => {
+        logAnalyticsEvent("BulkDownloadList_details-link_clicked", {
+          bulkDownloadId: bulkDownload.id,
+        });
+        this.handleStatusClick(bulkDownload);
+      },
       // Add callbacks to be used in renderStatus table renderer.
-      onDownloadFileClick: () => this.onDownloadFileClick(bulkDownload),
-      onCopyUrlClick: () => this.onCopyUrlClick(bulkDownload),
+      onDownloadFileClick: () => {
+        logAnalyticsEvent("BulkDownloadList_direct-download-link_clicked", {
+          bulkDownloadId: bulkDownload.id,
+        });
+        this.handleDownloadFileClick(bulkDownload);
+      },
       statusType: getStatusType(bulkDownload),
       statusDisplay: getStatusDisplay(bulkDownload),
       tooltipText: getTooltipText(bulkDownload),
@@ -162,14 +171,14 @@ class BulkDownloadList extends React.Component {
   isEmpty = () =>
     this.state.bulkDownloads && this.state.bulkDownloads.length === 0;
 
-  onStatusClick = bulkDownload => {
+  handleStatusClick = bulkDownload => {
     this.setState({
       selectedBulkDownload: bulkDownload,
-      modalOpen: true,
+      sidebarOpen: true,
     });
   };
 
-  onDownloadFileClick = async bulkDownload => {
+  handleDownloadFileClick = async bulkDownload => {
     // This should only be clickable when the bulk download has succeeded
     // TODO(mark): Handle error case.
     if (bulkDownload.status === "success") {
@@ -180,21 +189,16 @@ class BulkDownloadList extends React.Component {
     }
   };
 
-  onCopyUrlClick = async bulkDownload => {
-    // This should only be clickable when the bulk download has succeeded
-    // TODO(mark): Handle error case. Want to change popup text, which involves a forceUpdate on the table.
-    if (bulkDownload.status === "success") {
-      const outputFilePresignedUrl = await getPresignedOutputUrl(
-        bulkDownload.id
-      );
-      copy(outputFilePresignedUrl);
-    }
+  handleSidebarClose = () => {
+    this.setState({
+      sidebarOpen: false,
+    });
   };
 
-  onModalClose = () => {
-    this.setState({
-      modalOpen: false,
-    });
+  getSidebarParams = () => {
+    return {
+      bulkDownload: this.state.selectedBulkDownload,
+    };
   };
 
   renderBody() {
@@ -253,7 +257,7 @@ class BulkDownloadList extends React.Component {
   }
 
   render() {
-    const { modalOpen, selectedBulkDownload } = this.state;
+    const { selectedBulkDownload, sidebarOpen } = this.state;
     return (
       <div
         className={cx(
@@ -274,10 +278,17 @@ class BulkDownloadList extends React.Component {
         </NarrowContainer>
         <Divider />
         {this.renderBody()}
-        <BulkDownloadDetailsModal
-          onClose={this.onModalClose}
-          open={modalOpen}
-          bulkDownload={selectedBulkDownload}
+        <DetailsSidebar
+          visible={sidebarOpen}
+          mode="bulkDownloadDetails"
+          onClose={withAnalytics(
+            this.handleSidebarClose,
+            "BulkDownloadList_details-sidebar_closed",
+            {
+              bulkDownloadId: selectedBulkDownload && selectedBulkDownload.id,
+            }
+          )}
+          params={this.getSidebarParams()}
         />
       </div>
     );

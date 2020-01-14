@@ -119,11 +119,20 @@ const DownloadType = PropTypes.shape({
     })
   ),
   uploader_only: PropTypes.bool,
+  file_type_display: PropTypes.string,
 });
 
 const DownloadTypeParam = PropTypes.shape({
   displayName: PropTypes.string,
-  value: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+});
+
+const BulkDownload = PropTypes.shape({
+  num_samples: PropTypes.number,
+  params: PropTypes.objectOf(DownloadTypeParam),
+  presigned_output_url: PropTypes.string,
+  download_name: PropTypes.string,
+  file_size: PropTypes.string,
 });
 
 const SampleTypeProps = PropTypes.shape({
@@ -149,5 +158,6 @@ export default {
   DownloadType,
   DownloadTypeParam,
   SampleTypeProps,
+  BulkDownload,
   ...PropTypes,
 };
