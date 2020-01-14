@@ -154,6 +154,20 @@ class SamplesView extends React.Component {
     }
   }
 
+  getSelectedSampleStatuses = () => {
+    const { selectedSampleIds, samples } = this.props;
+    const statuses = {};
+    selectedSampleIds.forEach(id => {
+      const entry = samples.get(id);
+      if (entry == undefined) {
+        statuses[id] = "loading";
+      } else {
+        statuses[id] = entry.sample.status;
+      }
+    });
+    return statuses;
+  };
+
   handleSelectRow = (value, checked) => {
     const { selectedSampleIds, onSelectedSamplesUpdate } = this.props;
     let newSelected = new Set(selectedSampleIds);
@@ -534,6 +548,7 @@ class SamplesView extends React.Component {
               "SamplesView_bulk-download-modal_closed"
             )}
             selectedSampleIds={selectedSampleIds}
+            selectedSampleStatuses={this.getSelectedSampleStatuses()}
           />
         )}
       </div>
