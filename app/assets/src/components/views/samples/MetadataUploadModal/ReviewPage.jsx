@@ -9,7 +9,6 @@ class ReviewPage extends React.Component {
   render() {
     return (
       <div className={cs.tableContainer}>
-        TODO (gdingle): hellow
         <DataTable
           className={cs.metadataTable}
           columns={this.props.metadata.headers}

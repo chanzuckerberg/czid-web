@@ -23,6 +23,7 @@ import { formatFileSize } from "~/components/utils/format";
 
 import cs from "./sample_upload_flow.scss";
 import UploadProgressModal from "./UploadProgressModal";
+import HostOrganismMessage from "./HostOrganismMessage";
 
 const processMetadataRows = metadataRows =>
   flow(
@@ -311,7 +312,10 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          TODO (gdingle): hellow
+          <HostOrganismMessage
+            allHostOrganisms={["a", "b"]}
+            selectedHostOrganisms={["b"]}
+          />
           <TermsAgreement
             checked={this.state.consentChecked}
             onChange={() =>
