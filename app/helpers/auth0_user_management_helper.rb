@@ -92,12 +92,15 @@ module Auth0UserManagementHelper
 
   # Set up Auth0 management client for actions like adding users.
   def self.auth0_management_client
-    # See: https://github.com/auth0/ruby-auth0/blob/master/README.md#management-api-v2
-    @auth0_management_client ||= Auth0Client.new(
-      client_id: ENV["AUTH0_MANAGEMENT_CLIENT_ID"],
-      client_secret: ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"],
-      domain: ENV["AUTH0_MANAGEMENT_DOMAIN"],
-      api_version: 2
-    )
+    @auth0_management_client_cache ||= ActiveSupport::Cache::MemoryStore.new(expires_in: 1.hour)
+    @auth0_management_client_cache.fetch('management_client', race_condition_ttl: 10.seconds) do
+      # See: https://github.com/auth0/ruby-auth0/blob/master/README.md#management-api-v2
+      Auth0Client.new(
+        client_id: ENV["AUTH0_MANAGEMENT_CLIENT_ID"],
+        client_secret: ENV["AUTH0_MANAGEMENT_CLIENT_SECRET"],
+        domain: ENV["AUTH0_MANAGEMENT_DOMAIN"],
+        api_version: 2
+      )
+    end
   end
 end
