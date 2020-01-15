@@ -46,20 +46,23 @@ class MetadataManualInput extends React.Component {
   componentDidMount() {
     const { projectMetadataFields, hostGenomes, samplesAreNew } = this.props;
 
-    this.setState({
-      projectMetadataFields: projectMetadataFields,
-      // Default to the required fields.
-      selectedFieldNames: map(
-        "key",
-        filter(["is_required", 1], projectMetadataFields)
-      ),
-      hostGenomes,
-      headers: {
-        "Sample Name": "Sample Name",
-        ...(samplesAreNew ? { "Host Genome": "Host Genome" } : {}),
-        ...mapValues("name", keyBy("key", projectMetadataFields)),
+    this.setState(
+      {
+        projectMetadataFields: projectMetadataFields,
+        // Default to the required fields.
+        selectedFieldNames: map(
+          "key",
+          filter(["is_required", 1], projectMetadataFields)
+        ),
+        hostGenomes,
+        headers: {
+          "Sample Name": "Sample Name",
+          ...(samplesAreNew ? { "Host Genome": "Host Genome" } : {}),
+          ...mapValues("name", keyBy("key", projectMetadataFields)),
+        },
       },
-    });
+      this.setDefaultWaterControl
+    );
 
     this.setDefaultHostGenomes();
   }
@@ -71,6 +74,11 @@ class MetadataManualInput extends React.Component {
       this.setDefaultHostGenomes();
     }
   }
+
+  // Need to special case this to avoid a missing required field error.
+  setDefaultWaterControl = () => {
+    this.applyToAll("water_control", "No");
+  };
 
   setDefaultHostGenomes = () => {
     // If samples are new, set all host genomes to Human by default.
@@ -119,9 +127,7 @@ class MetadataManualInput extends React.Component {
     this.onMetadataChange(newHeaders, newFields);
   };
 
-  applyToAll = (column, sample) => {
-    const newValue = this.getMetadataValue(sample, column);
-
+  applyToAll = (column, newValue) => {
     let newFields = this.state.metadataFieldsToEdit;
 
     this.props.samples.forEach(curSample => {
@@ -241,7 +247,8 @@ class MetadataManualInput extends React.Component {
       <div
         className={cs.applyToAll}
         onClick={() => {
-          this.applyToAll(column, sample);
+          const newValue = this.getMetadataValue(sample, column);
+          this.applyToAll(column, newValue);
           logAnalyticsEvent("MetadataManualInput_apply-all_clicked", {
             sampleName: sample.name,
             column,
