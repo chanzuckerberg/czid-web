@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { keys, countBy, groupBy } from "lodash/fp";
+import { keys, countBy, groupBy, mapValues, keyBy, map } from "lodash/fp";
 
 const MATCH = "MATCH";
 const NO_MATCH = "NO_MATCH";
@@ -11,12 +11,14 @@ const NO_MATCH = "NO_MATCH";
  */
 export default class HostOrganismMessage extends React.Component {
   static propTypes = {
-    allHostOrganisms: PropTypes.arrayOf(PropTypes.string).isRequired,
-    selectedHostOrganisms: PropTypes.arrayOf(PropTypes.string).isRequired,
+    samples: PropTypes.arrayOf(
+      PropTypes.shape({ host_genome_id: PropTypes.number })
+    ).isRequired,
+    hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
   };
 
   hasMatch(host) {
-    return this.props.allHostOrganisms.includes(host);
+    return map("name", this.props.hostGenomes).includes(host);
   }
 
   renderOneHost(host) {
@@ -32,11 +34,18 @@ export default class HostOrganismMessage extends React.Component {
       keys(uniqHosts)
     );
     // TODO (gdingle): more display after final designs
-    return <div>{JSON.stringify(grouped)}</div>;
+    // TODO (gdingle): need to get the counts back from uniqHosts
+    return JSON.stringify(grouped);
+  }
+
+  // TODO (gdingle): need to think about new plain text hosts
+  getSelectedHostOrganisms() {
+    const idToName = mapValues("name", keyBy("id", this.props.hostGenomes));
+    return this.props.samples.map(sample => idToName[sample.host_genome_id]);
   }
 
   render() {
-    const uniqHosts = countBy(this.props.selectedHostOrganisms);
+    const uniqHosts = countBy(null, this.getSelectedHostOrganisms());
     const length = keys(uniqHosts).length;
     if (length === 0) {
       return null;

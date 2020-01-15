@@ -194,6 +194,7 @@ class ReviewStep extends React.Component {
       samples,
       metadata,
       project,
+      hostGenomes,
     } = this.props;
 
     const shouldTruncateDescription =
@@ -312,10 +313,7 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          <HostOrganismMessage
-            allHostOrganisms={["a", "b"]}
-            selectedHostOrganisms={["b"]}
-          />
+          <HostOrganismMessage hostGenomes={hostGenomes} samples={samples} />
           <TermsAgreement
             checked={this.state.consentChecked}
             onChange={() =>
