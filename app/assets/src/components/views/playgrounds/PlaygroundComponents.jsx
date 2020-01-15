@@ -27,10 +27,11 @@ export default class PlaygroundComponents extends React.Component {
     const { currentTab } = this.state;
 
     if (currentTab === TABS[0]) {
-      const hostGenomes = [{ name: "Human", id: 1 }];
-      const samples = [{ host_genome_id: 1 }];
       return (
-        <HostOrganismMessage hostGenomes={hostGenomes} samples={samples} />
+        <HostOrganismMessage
+          hostGenomes={[{ name: "Human", id: 1 }]}
+          samples={{ host_genome_id: 1 }}
+        />
       );
     }
 

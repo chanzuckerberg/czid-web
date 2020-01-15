@@ -34,10 +34,12 @@ export default class HostOrganismMessage extends React.Component {
     // TODO (gdingle): strong classname
     return (
       <span>
-        For the
-        <strong>{count} samples</strong>
-        that you indicated as a
-        <strong>{host}</strong> Host Organism,
+        {" "}
+        For the{" "}
+        <strong>
+          {count} sample{count > 1 ? "s" : ""}
+        </strong>{" "}
+        that you indicated as a <strong>{host}</strong> Host Organism,{" "}
         {this.hasMatch(host) ? (
           <span>
             we will subtract out a <strong>{host}</strong> genome.
