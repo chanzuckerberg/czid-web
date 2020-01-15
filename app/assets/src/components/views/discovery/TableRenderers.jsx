@@ -3,6 +3,8 @@ import React from "react";
 import cx from "classnames";
 import moment from "moment";
 
+import { logAnalyticsEvent } from "~/api/analytics";
+import { openUrl } from "~utils/links";
 import BasicPopup from "~/components/BasicPopup";
 import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
 import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
@@ -106,7 +108,16 @@ class TableRenderers extends React.Component {
         )}
         <div className={cs.sampleRightPane}>
           {sample ? (
-            <div className={cs.sampleNameAndStatus}>
+            <div
+              className={cs.sampleNameAndStatus}
+              onClick={event => {
+                openUrl(`/samples/${sample.id}`, event);
+                logAnalyticsEvent("TableRenderers_sample-name_clicked", {
+                  sampleId: sample.id,
+                  sampleName: sample.name,
+                });
+              }}
+            >
               <BasicPopup
                 trigger={<div className={cs.sampleName}>{sample.name}</div>}
                 content={sample.name}

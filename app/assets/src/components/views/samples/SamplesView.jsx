@@ -496,6 +496,7 @@ class SamplesView extends React.Component {
   };
 
   handleRowClick = ({ event, rowData }) => {
+    // TODO (gdingle): change me to select checkbox
     const { onSampleSelected, samples } = this.props;
     const sample = samples.get(rowData.id);
     onSampleSelected && onSampleSelected({ sample, currentEvent: event });
