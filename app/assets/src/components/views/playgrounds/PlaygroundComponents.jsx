@@ -3,10 +3,11 @@ import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
 import GeoSearchInputBox from "~ui/controls/GeoSearchInputBox";
+import HostOrganismMessage from "~/components/views/SampleUploadFlow/HostOrganismMessage";
 
 import cs from "./playground_components.scss";
 
-const TABS = ["Geo Search Box"];
+const TABS = ["Host Organism Message", "Geo Search Box"];
 
 export default class PlaygroundComponents extends React.Component {
   state = {
@@ -24,7 +25,16 @@ export default class PlaygroundComponents extends React.Component {
 
   renderComponent = () => {
     const { currentTab } = this.state;
-    if (currentTab === "Geo Search Box") {
+
+    if (currentTab === TABS[0]) {
+      const hostGenomes = [{ name: "Human", id: 1 }];
+      const samples = [{ host_genome_id: 1 }];
+      return (
+        <HostOrganismMessage hostGenomes={hostGenomes} samples={samples} />
+      );
+    }
+
+    if (currentTab === TABS[1]) {
       return (
         <GeoSearchInputBox
           className={cs.geoSearchBox}
