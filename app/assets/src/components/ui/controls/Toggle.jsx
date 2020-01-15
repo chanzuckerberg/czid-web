@@ -31,12 +31,6 @@ class Toggle extends React.PureComponent {
     }
   }
 
-  // Set default value on mount to avoid required field missing error
-  componentDidMount() {
-    const { onLabel, offLabel, onChange } = this.props;
-    onChange && onChange(this.props.initialChecked ? onLabel : offLabel);
-  }
-
   render() {
     const { onLabel, offLabel, onChange } = this.props;
     return (
