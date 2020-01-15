@@ -66,7 +66,7 @@ begin
   system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque --set rake_command=resque:workers idseq-#{cluster}-ecs idseq-#{env}-resque czecs-resque.json")
   system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-pipeline-monitor --set rake_command=pipeline_monitor idseq-#{cluster}-ecs idseq-#{env}-resque-pipeline-monitor czecs-resque.json")
   system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-result-monitor --set rake_command=result_monitor idseq-#{cluster}-ecs idseq-#{env}-resque-result-monitor czecs-resque.json")
-  notify_slack(env, image, "end")
+  # notify_slack(env, image, "end")
 rescue Exception  # Even on abort/SystemExit
   #notify_slack(env, image, "failure")
   raise
