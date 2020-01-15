@@ -104,9 +104,6 @@ class ChooseStep extends React.Component {
     }));
 
     return backgroundOptions;
-    // this.setState({
-    //   backgroundOptions,
-    // });
   }
 
   // We use the heatmap metrics as the valid metrics for bulk downloads.
@@ -114,9 +111,6 @@ class ChooseStep extends React.Component {
     const heatmapMetrics = await getHeatmapMetrics();
 
     return heatmapMetrics;
-    // this.setState({
-    //   metricsOptions: heatmapMetrics,
-    // });
   }
 
   async checkAllSamplesUploadedByCurrentUser() {
@@ -126,9 +120,6 @@ class ChooseStep extends React.Component {
     );
 
     return allSamplesUploadedByCurrentUser;
-    // this.setState({
-    //   allSamplesUploadedByCurrentUser,
-    // });
   }
 
   getSelectedDownloadType = () => {
@@ -524,11 +515,13 @@ class ChooseStep extends React.Component {
         </div>
         <div className={cs.footer}>
           {filteredSampleNames.length > 0 && (
-            <Notification type="warn" displayStyle="flat">
-              {filteredSampleNames.length} sample(s) won't be included in this
-              bulk download, because they are in progress or failed samples:{" "}
-              {filteredSampleNames.join(", ")}
-            </Notification>
+            <div className={cs.notification}>
+              <Notification type="warn" displayStyle="flat">
+                {filteredSampleNames.length} sample(s) won't be included in this
+                bulk download, because they are in progress or failed samples:{" "}
+                {filteredSampleNames.join(", ")}
+              </Notification>
+            </div>
           )}
           <PrimaryButton
             disabled={!this.isSelectedDownloadValid()}
