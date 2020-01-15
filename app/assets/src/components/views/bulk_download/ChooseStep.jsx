@@ -77,21 +77,27 @@ class ChooseStep extends React.Component {
 
   // make async requests in parallel
   async fetchUserData() {
-    const backgroundOptions = this.fetchBackgrounds();
-    const metricsOptions = this.fetchHeatmapMetrics();
-    const allSamplesUploadedByCurrentUser = this.checkAllSamplesUploadedByCurrentUser();
+    const backgroundOptionsRequest = this.fetchBackgrounds();
+    const metricsOptionsRequest = this.fetchHeatmapMetrics();
+    const allSamplesUploadedByCurrentUserRequest = this.checkAllSamplesUploadedByCurrentUser();
 
     await Promise.all([
-      backgroundOptions,
-      metricsOptions,
-      allSamplesUploadedByCurrentUser,
-    ]);
-
-    this.setState({
-      backgroundOptions,
-      metricsOptions,
-      allSamplesUploadedByCurrentUser,
-    });
+      backgroundOptionsRequest,
+      metricsOptionsRequest,
+      allSamplesUploadedByCurrentUserRequest,
+    ]).then(
+      ([
+        backgroundOptions,
+        metricsOptions,
+        allSamplesUploadedByCurrentUser,
+      ]) => {
+        this.setState({
+          backgroundOptions,
+          metricsOptions,
+          allSamplesUploadedByCurrentUser,
+        });
+      }
+    );
   }
 
   // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
@@ -499,7 +505,6 @@ class ChooseStep extends React.Component {
 
   render() {
     const { onContinue, validSampleIds, filteredSampleNames } = this.props;
-    console.log("Choose step props", this.props);
     const numSamples = validSampleIds.size;
 
     return (

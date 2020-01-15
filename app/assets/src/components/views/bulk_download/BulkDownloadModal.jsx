@@ -79,7 +79,6 @@ class BulkDownloadModal extends React.Component {
     ) {
       this.filterSamplesThatCannotBeDownloaded();
     }
-    console.log("current valid ids", this.state.validSampleIds);
   }
 
   async fetchDownloadTypes() {
@@ -92,7 +91,6 @@ class BulkDownloadModal extends React.Component {
 
   filterSamplesThatCannotBeDownloaded = () => {
     const { selectedSampleIds, selectedSampleStatuses } = this.props;
-    console.log("filtering using", selectedSampleIds, selectedSampleStatuses);
     const validSampleIds = [];
     const filteredSampleIds = [];
     selectedSampleIds.forEach(id => {
@@ -104,7 +102,6 @@ class BulkDownloadModal extends React.Component {
       }
     });
 
-    console.log("filtered out", filteredSampleIds);
     this.setState({
       validSampleIds: new Set(validSampleIds),
       filteredSampleIds,
