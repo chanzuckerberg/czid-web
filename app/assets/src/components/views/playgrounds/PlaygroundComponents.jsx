@@ -55,11 +55,13 @@ export default class PlaygroundComponents extends React.Component {
 
     if (currentTab === TABS[1]) {
       return (
-        <GeoSearchInputBox
-          className={cs.geoSearchBox}
-          // Calls save on selection
-          onResultSelect={this.handleResultSelected}
-        />
+        <div className={cs.componentFrame}>
+          <GeoSearchInputBox
+            className={cs.geoSearchBox}
+            // Calls save on selection
+            onResultSelect={this.handleResultSelected}
+          />
+        </div>
       );
     }
   };
@@ -73,9 +75,7 @@ export default class PlaygroundComponents extends React.Component {
           value={this.state.currentTab}
           onChange={this.onTabChange}
         />
-        <div className={cs.componentContainer}>
-          <div className={cs.componentFrame}>{this.renderComponent()}</div>
-        </div>
+        <div className={cs.componentContainer}>{this.renderComponent()}</div>
       </NarrowContainer>
     );
   }

@@ -1,9 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { keys, countBy, groupBy, mapValues, keyBy, map } from "lodash/fp";
+import { keys, countBy, mapValues, keyBy, map } from "lodash/fp";
 
-const MATCH = "MATCH";
-const NO_MATCH = "NO_MATCH";
+import cs from "./host_organism_message.scss";
 
 /**
  * Shows a message depending on whether the selected host matches a
@@ -25,7 +24,7 @@ export default class HostOrganismMessage extends React.Component {
   renderOneHost(host, count) {
     // TODO (gdingle): global style
     return (
-      <div style={{ margin: "10px" }}>
+      <div className={cs.messageContainer}>
         We will be subtracting a host during data processing.
         {this.renderTextLine(host, count)}
       </div>
@@ -54,22 +53,14 @@ export default class HostOrganismMessage extends React.Component {
   }
 
   renderManyHosts(uniqHosts) {
-    // TODO (gdingle): condense NO_MATCH into one line?
-    // const grouped = groupBy(
-    //   host => (this.hasMatch(host) ? MATCH : NO_MATCH),
-    //   keys(uniqHosts)
-    // );
-    // grouped.MATCH
-    // grouped.NO_MATCH
-
     return (
       // TODO (gdingle): global style
-      <div style={{ margin: "10px" }}>
+      <div className={cs.messageContainer}>
         We will be subtracting a host during data processing. Based on your
         selections for Host Organism, we will be subtracting the following
         hosts:
         {keys(uniqHosts).map(host => (
-          <div key={host} style={{ margin: "10px" }}>
+          <div key={host} className={cs.messageLine}>
             {this.renderTextLine(host, uniqHosts[host])}
           </div>
         ))}
@@ -77,7 +68,6 @@ export default class HostOrganismMessage extends React.Component {
     );
   }
 
-  // TODO (gdingle): need to think about new plain text hosts
   getSelectedHostOrganisms() {
     const idToName = mapValues("name", keyBy("id", this.props.hostGenomes));
     return this.props.samples.map(sample => idToName[sample.host_genome_id]);
