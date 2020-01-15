@@ -313,12 +313,25 @@ class Metadatum < ApplicationRecord
     end
   end
 
-  def self.by_sample_ids(sample_ids)
+  # use_raw_date_strings is used to show 2001-01 instead of 2001-01-01 for human samples.
+  # when use_raw_date_string is used, date-type metadata will be returned as strings instead of Date objects.
+  def self.by_sample_ids(sample_ids, use_raw_date_strings: false)
     includes(:metadata_field, :location)
       .where(sample_id: sample_ids)
       .group_by(&:sample_id)
       .map do |sample_id, sample_metadata|
-        [sample_id, Hash[sample_metadata.map { |m| [m.key.to_sym, m.validated_value] }]]
+        [
+          sample_id,
+          sample_metadata.map do |m|
+            # When fetching metadata for a human sample for displaying on the front-end, we want 2001-01 for dates, not 2001-01-01.
+            # date_validated_value is a Date object and will show the day when converted to a string. We use the original raw_value string instead.
+            if m.metadata_field.base_type == MetadataField::DATE_TYPE && use_raw_date_strings
+              [m.key.to_sym, m.raw_value]
+            else
+              [m.key.to_sym, m.validated_value]
+            end
+          end.to_h,
+        ]
       end.to_h
   end
 end

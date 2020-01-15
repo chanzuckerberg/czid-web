@@ -361,6 +361,45 @@ RSpec.describe SamplesController, type: :controller do
                                               ])
       end
     end
+
+    describe "#index" do
+      it "returns basic samples with correctly formatted date" do
+        project = create(:project, users: [@joe])
+        create(:sample, name: "Mosquito Sample", project: project, user: @joe, host_genome_name: "Mosquito", metadata_fields: { collection_date: "2019-01-01" })
+
+        get :index, params: { project_id: project.id, basic: true }
+        json_response = JSON.parse(response.body)
+        print(json_response)
+        expect(json_response.length).to eq(1)
+        expect(json_response).to include_json([
+                                                {
+                                                  "name" => "Mosquito Sample",
+                                                  "metadata" => {
+                                                    "collection_date" => "2019-01-01",
+                                                  },
+                                                },
+
+                                              ])
+      end
+
+      it "for human samples, truncates date metadata to month" do
+        project = create(:project, users: [@joe])
+        create(:sample, name: "Human Sample", project: project, user: @joe, host_genome_name: "Human", metadata_fields: { collection_date: "2019-01" })
+
+        get :index, params: { project_id: project.id, basic: true }
+        json_response = JSON.parse(response.body)
+        print(json_response)
+        expect(json_response.length).to eq(1)
+        expect(json_response).to include_json([
+                                                {
+                                                  "name" => "Human Sample",
+                                                  "metadata" => {
+                                                    "collection_date" => "2019-01",
+                                                  },
+                                                },
+                                              ])
+      end
+    end
   end
 
   describe "POST #uploaded_by_current_user" do
