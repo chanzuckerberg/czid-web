@@ -25,6 +25,7 @@ import {
   uploadedByCurrentUser,
   getHeatmapMetrics,
 } from "~/api";
+import Notification from "~ui/notifications/Notification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
@@ -71,9 +72,26 @@ class ChooseStep extends React.Component {
   _lastTaxaWithReadsQuery = "";
 
   componentDidMount() {
-    this.fetchBackgrounds();
-    this.fetchHeatmapMetrics();
-    this.checkAllSamplesUploadedByCurrentUser();
+    this.fetchUserData();
+  }
+
+  // make async requests in parallel
+  async fetchUserData() {
+    const backgroundOptions = this.fetchBackgrounds();
+    const metricsOptions = this.fetchHeatmapMetrics();
+    const allSamplesUploadedByCurrentUser = this.checkAllSamplesUploadedByCurrentUser();
+
+    await Promise.all([
+      backgroundOptions,
+      metricsOptions,
+      allSamplesUploadedByCurrentUser,
+    ]);
+
+    this.setState({
+      backgroundOptions,
+      metricsOptions,
+      allSamplesUploadedByCurrentUser,
+    });
   }
 
   // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
@@ -85,28 +103,32 @@ class ChooseStep extends React.Component {
       value: background.id,
     }));
 
-    this.setState({
-      backgroundOptions,
-    });
+    return backgroundOptions;
+    // this.setState({
+    //   backgroundOptions,
+    // });
   }
 
   // We use the heatmap metrics as the valid metrics for bulk downloads.
   async fetchHeatmapMetrics() {
     const heatmapMetrics = await getHeatmapMetrics();
 
-    this.setState({
-      metricsOptions: heatmapMetrics,
-    });
+    return heatmapMetrics;
+    // this.setState({
+    //   metricsOptions: heatmapMetrics,
+    // });
   }
 
   async checkAllSamplesUploadedByCurrentUser() {
-    const { selectedSampleIds } = this.props;
+    const { validSampleIds } = this.props;
     const allSamplesUploadedByCurrentUser = await uploadedByCurrentUser(
-      Array.from(selectedSampleIds)
+      Array.from(validSampleIds)
     );
-    this.setState({
-      allSamplesUploadedByCurrentUser,
-    });
+
+    return allSamplesUploadedByCurrentUser;
+    // this.setState({
+    //   allSamplesUploadedByCurrentUser,
+    // });
   }
 
   getSelectedDownloadType = () => {
@@ -182,11 +204,11 @@ class ChooseStep extends React.Component {
     AUTOCOMPLETE_DEBOUNCE_DELAY,
     async query => {
       this._lastTaxaWithReadsQuery = query;
-      const { selectedSampleIds } = this.props;
+      const { validSampleIds } = this.props;
 
       const searchResults = await getTaxaWithReadsSuggestions(
         query,
-        Array.from(selectedSampleIds)
+        Array.from(validSampleIds)
       );
 
       // If the query has since changed, discard the response.
@@ -220,7 +242,7 @@ class ChooseStep extends React.Component {
   );
 
   renderOption = (downloadType, field) => {
-    const { selectedFields, onFieldSelect, selectedSampleIds } = this.props;
+    const { selectedFields, onFieldSelect, validSampleIds } = this.props;
     const {
       backgroundOptions,
       taxaWithReadsOptions,
@@ -288,7 +310,7 @@ class ChooseStep extends React.Component {
               <div className={cs.taxaWithReadsOption}>
                 <div className={cs.taxonName}>All taxa</div>
                 <div className={cs.fill} />
-                <div className={cs.sampleCount}>{selectedSampleIds.size}</div>
+                <div className={cs.sampleCount}>{validSampleIds.size}</div>
               </div>
             ),
           },
@@ -318,7 +340,7 @@ class ChooseStep extends React.Component {
           <div className={cs.field} key={field.type}>
             <div className={cs.label}>{field.display_name}:</div>
             <TaxonContigSelect
-              sampleIds={selectedSampleIds}
+              sampleIds={validSampleIds}
               onChange={(value, displayName) => {
                 onFieldSelect(
                   downloadType.type,
@@ -485,9 +507,9 @@ class ChooseStep extends React.Component {
   };
 
   render() {
-    const { onContinue, selectedSampleIds } = this.props;
-
-    const numSamples = selectedSampleIds.size;
+    const { onContinue, validSampleIds, filteredSampleNames } = this.props;
+    console.log("Choose step props", this.props);
+    const numSamples = validSampleIds.size;
 
     return (
       <div className={cs.chooseStep}>
@@ -501,6 +523,13 @@ class ChooseStep extends React.Component {
           {this.renderDownloadTypes()}
         </div>
         <div className={cs.footer}>
+          {filteredSampleNames.length > 0 && (
+            <Notification type="warn" displayStyle="flat">
+              {filteredSampleNames.length} sample(s) won't be included in this
+              bulk download, because they are in progress or failed samples:{" "}
+              {filteredSampleNames.join(", ")}
+            </Notification>
+          )}
           <PrimaryButton
             disabled={!this.isSelectedDownloadValid()}
             text="Continue"
@@ -523,7 +552,8 @@ ChooseStep.propTypes = {
   selectedFields: PropTypes.objectOf(PropTypes.string),
   onFieldSelect: PropTypes.func.isRequired,
   onContinue: PropTypes.func.isRequired,
-  selectedSampleIds: PropTypes.instanceOf(Set),
+  validSampleIds: PropTypes.instanceOf(Set),
+  filteredSampleNames: PropTypes.arrayOf(PropTypes.string),
 };
 
 ChooseStep.contextType = UserContext;

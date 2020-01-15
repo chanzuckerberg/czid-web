@@ -154,15 +154,22 @@ class SamplesView extends React.Component {
     }
   }
 
+  // Queries the samples prop (an ObjectCollectionView) for the job
+  // status of each selected sample id. Returns a Map where the
+  // keys are sampleIds and values are the name and status of the sample.
   getSelectedSampleStatuses = () => {
     const { selectedSampleIds, samples } = this.props;
-    const statuses = {};
+    const statuses = new Map();
     selectedSampleIds.forEach(id => {
       const entry = samples.get(id);
+      // if unloaded samples are somehow selected
       if (entry == undefined) {
-        statuses[id] = "loading";
+        statuses.set(id, { name: "N/A", status: "loading" });
       } else {
-        statuses[id] = entry.sample.status;
+        statuses.set(id, {
+          name: entry.sample.name,
+          status: entry.sample.status,
+        });
       }
     });
     return statuses;

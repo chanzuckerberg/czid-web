@@ -56,9 +56,12 @@ class BulkDownloadModal extends React.Component {
     selectedFieldsDisplay: {},
     selectedDownloadTypeName: null,
     currentStep: "choose",
+    filteredSampleIds: [],
+    validSampleIds: new Set(),
   };
 
   componentDidMount() {
+    this.filterSamplesThatCannotBeDownloaded();
     this.fetchDownloadTypes();
   }
 
@@ -71,6 +74,12 @@ class BulkDownloadModal extends React.Component {
         selectedFields: {},
       });
     }
+    if (
+      prevProps.selectedSampleStatuses !== this.props.selectedSampleStatuses
+    ) {
+      this.filterSamplesThatCannotBeDownloaded();
+    }
+    console.log("current valid ids", this.state.validSampleIds);
   }
 
   async fetchDownloadTypes() {
@@ -80,6 +89,41 @@ class BulkDownloadModal extends React.Component {
       bulkDownloadTypes,
     });
   }
+
+  filterSamplesThatCannotBeDownloaded = () => {
+    const { selectedSampleIds, selectedSampleStatuses } = this.props;
+    console.log("filtering using", selectedSampleIds, selectedSampleStatuses);
+    const validSampleIds = [];
+    const filteredSampleIds = [];
+    selectedSampleIds.forEach(id => {
+      const sampleInfo = selectedSampleStatuses.get(id);
+      if (sampleInfo && sampleInfo.status == "complete") {
+        validSampleIds.push(id);
+      } else {
+        filteredSampleIds.push(id);
+      }
+    });
+
+    console.log("filtered out", filteredSampleIds);
+    this.setState({
+      validSampleIds: new Set(validSampleIds),
+      filteredSampleIds,
+    });
+  };
+
+  getFilteredSampleNames = () => {
+    const { filteredSampleIds } = this.state;
+    const { selectedSampleStatuses } = this.props;
+    const sampleNames = filteredSampleIds.map(id => {
+      const sampleInfo = selectedSampleStatuses.get(id);
+      if (sampleInfo) {
+        return sampleInfo.name;
+      } else {
+        return "N/A";
+      }
+    });
+    return sampleNames;
+  };
 
   handleSelectDownloadType = selectedDownloadTypeName => {
     this.setState({
@@ -121,13 +165,13 @@ class BulkDownloadModal extends React.Component {
   };
 
   renderStep = () => {
-    const { selectedSampleIds } = this.props;
     const {
       currentStep,
       bulkDownloadTypes,
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
+      validSampleIds,
     } = this.state;
 
     if (currentStep === "choose") {
@@ -139,7 +183,8 @@ class BulkDownloadModal extends React.Component {
           selectedFields={get(selectedDownloadTypeName, selectedFields)}
           onFieldSelect={this.handleFieldSelect}
           onContinue={this.handleChooseStepContinue}
-          selectedSampleIds={selectedSampleIds}
+          validSampleIds={validSampleIds}
+          filteredSampleNames={this.getFilteredSampleNames()}
         />
       );
     }
@@ -149,7 +194,7 @@ class BulkDownloadModal extends React.Component {
         selectedDownloadTypeName,
         selectedFields,
         selectedFieldsDisplay,
-        selectedSampleIds
+        validSampleIds
       );
 
       const selectedDownloadType = find(
@@ -182,6 +227,7 @@ BulkDownloadModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
   selectedSampleIds: PropTypes.instanceOf(Set),
+  selectedSampleStatuses: PropTypes.instanceOf(Map),
 };
 
 export default BulkDownloadModal;
