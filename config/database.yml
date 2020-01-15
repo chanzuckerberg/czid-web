@@ -32,8 +32,8 @@ prod:
 
 sandbox:
   <<: *default
-  host: db
-#  host: <%= ENV['RDS_ADDRESS'] %>
-#  password: <%= ENV['DB_PASSWORD'] %>
-#  port: <%= ENV['DB_PORT'] %>
-#  username: <%= ENV['DB_USERNAME'] %>
+#  host: db
+  host: <%= ENV['RDS_ADDRESS'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  port: <%= ENV['DB_PORT'] %>
+  username: <%= ENV['DB_USERNAME'] %>
