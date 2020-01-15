@@ -106,18 +106,19 @@ class TableRenderers extends React.Component {
               ))}
           </div>
         )}
-        <div className={cs.sampleRightPane}>
+        <div
+          className={cs.sampleRightPane}
+          onClick={event => {
+            event.stopPropagation(); // prevent handleRowClick
+            openUrl(`/samples/${sample.id}`, event);
+            logAnalyticsEvent("TableRenderers_sample-name_clicked", {
+              sampleId: sample.id,
+              sampleName: sample.name,
+            });
+          }}
+        >
           {sample ? (
-            <div
-              className={cs.sampleNameAndStatus}
-              onClick={event => {
-                openUrl(`/samples/${sample.id}`, event);
-                logAnalyticsEvent("TableRenderers_sample-name_clicked", {
-                  sampleId: sample.id,
-                  sampleName: sample.name,
-                });
-              }}
-            >
+            <div className={cs.sampleNameAndStatus}>
               <BasicPopup
                 trigger={<div className={cs.sampleName}>{sample.name}</div>}
                 content={sample.name}

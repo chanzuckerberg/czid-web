@@ -52,6 +52,7 @@ const getDiscoveryStats = async ({ domain, filters, projectId, search }) => {
 const processRawSample = sample => {
   const row = {
     sample: {
+      id: sample.id,
       name: sample.name,
       project: get("derived_sample_output.project_name", sample.details),
       publicAccess: !!sample.public,

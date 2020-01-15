@@ -496,10 +496,14 @@ class SamplesView extends React.Component {
   };
 
   handleRowClick = ({ event, rowData }) => {
-    // TODO (gdingle): change me to select checkbox
-    const { onSampleSelected, samples } = this.props;
+    const { onSampleSelected, samples, selectedSampleIds } = this.props;
     const sample = samples.get(rowData.id);
-    onSampleSelected && onSampleSelected({ sample, currentEvent: event });
+    if (onSampleSelected) {
+      onSampleSelected({ sample, currentEvent: event });
+    } else {
+      // Default to selecting the row
+      this.handleSelectRow(sample.id, !selectedSampleIds.has(sample.id));
+    }
     logAnalyticsEvent("SamplesView_row_clicked", {
       sampleId: sample.id,
       sampleName: sample.name,

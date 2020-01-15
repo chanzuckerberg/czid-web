@@ -657,7 +657,6 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  // TODO (gdingle): fix me
   handleSampleSelected = ({ sample, currentEvent }) => {
     openUrl(`/samples/${sample.id}`, currentEvent);
   };
@@ -1037,7 +1036,6 @@ class DiscoveryView extends React.Component {
                 onMapLevelChange={this.handleMapLevelChange}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
-                onSampleSelected={this.handleSampleSelected}
                 onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}
