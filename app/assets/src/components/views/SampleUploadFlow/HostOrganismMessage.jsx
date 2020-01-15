@@ -13,7 +13,6 @@ export default class HostOrganismMessage extends React.Component {
     samples: PropTypes.arrayOf(
       PropTypes.shape({ host_genome_id: PropTypes.number })
     ).isRequired,
-    // TODO (gdingle): Failed prop type: Property `hostGenomes` of component `HostOrganismMessage` has invalid PropType notation inside arrayOf.
     hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
   };
 
@@ -22,7 +21,6 @@ export default class HostOrganismMessage extends React.Component {
   }
 
   renderOneHost(host, count) {
-    // TODO (gdingle): global style
     return (
       <div className={cs.messageContainer}>
         We will be subtracting a host during data processing.
@@ -32,7 +30,6 @@ export default class HostOrganismMessage extends React.Component {
   }
 
   renderTextLine(host, count) {
-    // TODO (gdingle): strong classname
     return (
       <span>
         {" "}
@@ -54,7 +51,6 @@ export default class HostOrganismMessage extends React.Component {
 
   renderManyHosts(uniqHosts) {
     return (
-      // TODO (gdingle): global style
       <div className={cs.messageContainer}>
         We will be subtracting a host during data processing. Based on your
         selections for Host Organism, we will be subtracting the following

@@ -40,9 +40,15 @@ export default class PlaygroundComponents extends React.Component {
           hostGenomes={[{ name: "Human", id: 1 }]}
           samples={[{ host_genome_id: 2 }]}
         />,
-        // many
+        // ERCC only
         <HostOrganismMessage
           key="3"
+          hostGenomes={[{ name: "ERCC Only", id: 7 }]}
+          samples={[{ host_genome_id: 7 }]}
+        />,
+        // many
+        <HostOrganismMessage
+          key="4"
           hostGenomes={[{ name: "Human", id: 1 }, { name: "Mosquito", id: 2 }]}
           samples={[
             { host_genome_id: 1 },
