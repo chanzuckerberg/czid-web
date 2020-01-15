@@ -95,7 +95,7 @@ class BulkDownloadModal extends React.Component {
     const filteredSampleIds = [];
     selectedSampleIds.forEach(id => {
       const sampleInfo = selectedSampleStatuses.get(id);
-      if (sampleInfo && sampleInfo.status.startsWith("complete")) {
+      if (sampleInfo && sampleInfo.status == "complete") {
         validSampleIds.push(id);
       } else {
         filteredSampleIds.push(id);
