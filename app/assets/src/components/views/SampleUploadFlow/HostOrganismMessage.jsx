@@ -30,6 +30,20 @@ export default class HostOrganismMessage extends React.Component {
   }
 
   renderTextLine(host, count) {
+    // special case explict choice of ERCC to avoid awkward phrasing
+    if (host.toLowerCase() === "ercc only") {
+      return (
+        <span>
+          {" "}
+          For the{" "}
+          <strong>
+            {count} sample{count > 1 ? "s" : ""}
+          </strong>{" "}
+          that you indicated as <strong>{host}</strong>,{" "}
+          <span>we will only remove ERCCs.</span>
+        </span>
+      );
+    }
     return (
       <span>
         {" "}
