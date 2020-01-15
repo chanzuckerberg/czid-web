@@ -5,7 +5,7 @@ import { size, map, keyBy, isEmpty } from "lodash/fp";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { DataTooltip } from "~ui/containers";
-import { openUrl } from "~utils/links";
+import { openUrlInNewTab } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
@@ -350,7 +350,7 @@ class SamplesHeatmapVis extends React.Component {
     // Disable cell click if spacebar is pressed to pan the heatmap.
     if (!this.state.spacePressed) {
       const sampleId = this.props.sampleIds[cell.columnIndex];
-      openUrl(`/samples/${sampleId}`, currentEvent);
+      openUrlInNewTab(`/samples/${sampleId}`, currentEvent);
       logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
         sampleId,
       });
