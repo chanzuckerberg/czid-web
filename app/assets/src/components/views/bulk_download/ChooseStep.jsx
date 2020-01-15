@@ -503,6 +503,23 @@ class ChooseStep extends React.Component {
     );
   };
 
+  renderFilteredSamplesWarning = () => {
+    const { filteredSampleNames } = this.props;
+
+    return (
+      <div className={cs.notification}>
+        <Notification type="warn" displayStyle="flat">
+          <span className={cs.filteredSamplesWarning}>
+            {filteredSampleNames.length}{" "}
+            {filteredSampleNames.length > 1 ? "samples " : "sample "}
+            won't be included in this bulk download{" "}
+          </span>, because they are in progress or failed samples:{" "}
+          {filteredSampleNames.join(", ")}
+        </Notification>
+      </div>
+    );
+  };
+
   render() {
     const { onContinue, validSampleIds, filteredSampleNames } = this.props;
     const numSamples = validSampleIds.size;
@@ -519,17 +536,8 @@ class ChooseStep extends React.Component {
           {this.renderDownloadTypes()}
         </div>
         <div className={cs.footer}>
-          {filteredSampleNames.length > 0 && (
-            <div className={cs.notification}>
-              <Notification type="warn" displayStyle="flat">
-                <span className={cs.filteredSamplesWarning}>
-                  {filteredSampleNames.length} sample(s) won't be included in
-                  this bulk download
-                </span>, because they are in progress or failed samples:{" "}
-                {filteredSampleNames.join(", ")}
-              </Notification>
-            </div>
-          )}
+          {filteredSampleNames.length > 0 &&
+            this.renderFilteredSamplesWarning()}
           <PrimaryButton
             disabled={!this.isSelectedDownloadValid()}
             text="Continue"
