@@ -92,6 +92,7 @@ json.steps do
     module: "idseq_dag.steps.generate_alignment_viz",
     additional_files: {
       nt_loc_db: attr[:nt_loc_db],
+      nt_db: attr[:nt_db],
     },
     additional_attributes: {
       nt_db: attr[:nt_db],

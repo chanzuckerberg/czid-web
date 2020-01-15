@@ -18,7 +18,6 @@ module BulkDownloadsHelper
   ADMIN_ONLY_DOWNLOAD_TYPE = "You must be an admin to initiate this download type.".freeze
   UPLOADER_ONLY_DOWNLOAD_TYPE = "You must be the uploader of all selected samples to initiate this download type.".freeze
   BULK_DOWNLOAD_GENERATION_FAILED = "Could not generate bulk download".freeze
-  READS_NON_HOST_TAXID_EXPECTED = "Expected taxid for reads non-host bulk download".freeze
   READS_NON_HOST_TAXON_LINEAGE_EXPECTED_TEMPLATE = "Unexpected error. Could not find valid taxon lineage for taxid %s".freeze
 
   # Check that all pipeline runs have succeeded for the provided samples
@@ -42,7 +41,7 @@ module BulkDownloadsHelper
     return pipeline_runs.map(&:id)
   end
 
-  def format_bulk_download(bulk_download, with_pipeline_runs: false, admin: false)
+  def format_bulk_download(bulk_download, detailed: false, admin: false)
     formatted_bulk_download = bulk_download.as_json(except: [:access_token])
     formatted_bulk_download[:num_samples] = bulk_download.pipeline_runs.length
     formatted_bulk_download[:download_name] = bulk_download.download_display_name
@@ -53,17 +52,20 @@ module BulkDownloadsHelper
       formatted_bulk_download[:log_url] = bulk_download.log_url
     end
 
-    unless bulk_download.params_json.nil?
-      formatted_bulk_download[:params] = JSON.parse(bulk_download.params_json)
+    # params is not included by default, because it's a wrapper variable around params_json.
+    unless bulk_download.params.nil?
+      formatted_bulk_download[:params] = bulk_download.params
     end
 
-    if with_pipeline_runs
+    if detailed
       formatted_bulk_download[:pipeline_runs] = bulk_download.pipeline_runs.map do |pipeline_run|
         {
           "id": pipeline_run.id,
           "sample_name": pipeline_run.sample.name,
         }
       end
+
+      formatted_bulk_download[:presigned_output_url] = bulk_download.output_file_presigned_url
     end
     formatted_bulk_download
   end
@@ -78,14 +80,14 @@ module BulkDownloadsHelper
 
     # Max samples should be string containing an integer, but just in case.
     if max_samples_allowed.nil?
-      raise KICKOFF_FAILURE_HUMAN_READABLE
+      raise BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE
     end
 
     if sample_ids.length > Integer(max_samples_allowed) && !current_user.admin?
       raise BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
     end
 
-    # Access control check.
+    # Check that user can view all the samples being downloaded.
     viewable_samples = current_power.viewable_samples.where(id: sample_ids)
     if viewable_samples.length != sample_ids.length
       raise BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR

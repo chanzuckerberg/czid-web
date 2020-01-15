@@ -346,7 +346,7 @@ module SamplesHelper
   end
 
   def format_samples_basic(samples)
-    metadata_by_sample_id = Metadatum.by_sample_ids(samples.map(&:id))
+    metadata_by_sample_id = Metadatum.by_sample_ids(samples.map(&:id), use_raw_date_strings: true)
     return samples.map do |sample|
       {
         name: sample.name,
@@ -369,7 +369,7 @@ module SamplesHelper
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
     pipeline_run_stages_by_pipeline_run_id = dependent_records_multiget(PipelineRunStage, :pipeline_run_id, pipeline_run_ids)
     output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
-    metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids)
+    metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids, use_raw_date_strings: true)
 
     # Massage data into the right format
     samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user).each_with_index do |sample|

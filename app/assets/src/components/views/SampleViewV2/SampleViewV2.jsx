@@ -238,8 +238,7 @@ export default class SampleViewV2 extends React.Component {
         });
         reportData.push(
           merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
-            highlighted:
-              hasHighlightedChildren || highlightedTaxIds.has(genusTaxId),
+            highlightedChildren: hasHighlightedChildren,
             pathogens: generaPathogenCounts[genusTaxId],
             taxId: genusTaxId,
             taxLevel: "genus",
@@ -1123,7 +1122,7 @@ export default class SampleViewV2 extends React.Component {
             <UserContext.Consumer>
               {currentUser =>
                 currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) &&
-                reportMetadata.pipelineRunStatus === "COMPLETE" ? (
+                reportMetadata.pipelineRunStatus === "SUCCEEDED" ? (
                   <Tabs
                     className={cs.tabs}
                     tabs={["Report", "Antimicrobial Resistance"]}

@@ -201,8 +201,8 @@ class PipelineReportService
       end
       @timer.split("sort_species_within_each_genus")
 
-      highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
-      @timer.split("find_taxa_to_highlight")
+      highlighted_tax_ids = find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+      @timer.split("find_species_to_highlight")
     end
 
     has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
@@ -248,14 +248,19 @@ class PipelineReportService
       }
     end
 
+    # pipeline_run.results_finalized? indicates that the results monitor sees all outputs are in a finished state
+    # (either loaded or failed). This can be true if there were errors, so we still need to check pipeline_run.failed? as well.
+    # pipeline_run.report_ready? indicates if taxon_counts output is loaded and available to use in report generation.
+    # This is only true if no errors have occurred for taxon_counts.
+
+    # The pipeline is either still in progress or results monitor is waiting to load in outputs.
     pipeline_status = "WAITING"
-    # pipeline_run.completed? and pipeline_run.finalized? both indicate if the pipeline run
-    # is no longer being checked by the pipeline monitor (i.e. the run has completed),
-    # but .completed? includes extra logic for an old version of pipeline without run stages.
-    if pipeline_run.completed?
-      pipeline_status = "COMPLETE"
-    elsif pipeline_run.failed?
+    # The pipeline has stopped running and encountered errors.
+    if pipeline_run.failed?
       pipeline_status = "FAILED"
+    # The pipeline has finished running without critical errors and all outputs have been loaded.
+    elsif pipeline_run.results_finalized?
+      pipeline_status = "SUCCEEDED"
     end
     return {
       pipelineRunStatus: pipeline_status,
@@ -478,35 +483,28 @@ class PipelineReportService
            .reverse!
   end
 
-  def find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+  def find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     ui_config = UiConfig.last
     return unless ui_config
 
-    highlighted_tax_ids = []
-
-    meets_highlight_condition = lambda do |counts|
+    meets_highlight_condition = lambda do |tax_id, counts|
       return (counts.dig(:nt, :rpm) || 0) > ui_config.min_nt_rpm \
         && (counts.dig(:nr, :rpm) || 0) > ui_config.min_nr_rpm \
         && (counts.dig(:nt, :z_score) || 0) > ui_config.min_nt_z \
-        && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z
+        && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z \
+        && tax_id > 0
     end
 
+    highlighted_tax_ids = []
     sorted_genus_tax_ids.each do |genus_tax_id|
       genus_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS][genus_tax_id]
-      highlighted_children = false
       genus_taxon[:species_tax_ids].each do |species_tax_id|
         return highlighted_tax_ids if highlighted_tax_ids.length >= ui_config.top_n
 
         species_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_tax_id]
-        if meets_highlight_condition.call(species_taxon)
+        if meets_highlight_condition.call(species_tax_id, species_taxon)
           highlighted_tax_ids << species_tax_id
-          highlighted_children = true
         end
-      end
-
-      # if children species were not highlighted check genus
-      if meets_highlight_condition.call(genus_taxon)
-        highlighted_tax_ids << genus_tax_id
       end
     end
     return highlighted_tax_ids
