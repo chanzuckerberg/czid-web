@@ -522,8 +522,10 @@ class ChooseStep extends React.Component {
           {filteredSampleNames.length > 0 && (
             <div className={cs.notification}>
               <Notification type="warn" displayStyle="flat">
-                {filteredSampleNames.length} sample(s) won't be included in this
-                bulk download, because they are in progress or failed samples:{" "}
+                <span className={cs.filteredSamplesWarning}>
+                  {filteredSampleNames.length} sample(s) won't be included in
+                  this bulk download
+                </span>, because they are in progress or failed samples:{" "}
                 {filteredSampleNames.join(", ")}
               </Notification>
             </div>

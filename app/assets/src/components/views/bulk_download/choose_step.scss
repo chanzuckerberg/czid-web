@@ -169,4 +169,8 @@
 
 .notification {
   margin-bottom: 20px;
+
+  .filteredSamplesWarning {
+    @include font-header-xs;
+  }
 }
