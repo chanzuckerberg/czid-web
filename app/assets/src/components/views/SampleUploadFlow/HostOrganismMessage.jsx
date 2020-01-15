@@ -21,21 +21,54 @@ export default class HostOrganismMessage extends React.Component {
     return map("name", this.props.hostGenomes).includes(host);
   }
 
-  renderOneHost(host) {
-    if (this.hasMatch(host)) {
-      return "one host, match";
-    }
-    return "one host, no match";
+  renderOneHost(host, count) {
+    return (
+      <div>
+        We will be subtracting a host during data processing.
+        {this.renderTextLine(host, count)}
+      </div>
+    );
+  }
+
+  renderTextLine(host, count) {
+    // TODO (gdingle): strong classname
+    return (
+      <span>
+        For the
+        <strong>{count} samples</strong>
+        that you indicated as a
+        <strong>{host}</strong> Host Organism,
+        {this.hasMatch(host) ? (
+          <span>
+            we will subtract out a <strong>{host}</strong> genome.
+          </span>
+        ) : (
+          <span>we will only remove ERCCs.</span>
+        )}
+      </span>
+    );
   }
 
   renderManyHosts(uniqHosts) {
-    const grouped = groupBy(
-      host => (this.hasMatch(host) ? MATCH : NO_MATCH),
-      keys(uniqHosts)
+    // TODO (gdingle): condense NO_MATCH into one line?
+    // const grouped = groupBy(
+    //   host => (this.hasMatch(host) ? MATCH : NO_MATCH),
+    //   keys(uniqHosts)
+    // );
+    // grouped.MATCH
+    // grouped.NO_MATCH
+
+    return (
+      <div>
+        We will be subtracting a host during data processing. Based on your
+        selections for Host Organism, we will be subtracting the following
+        hosts:
+        {map(
+          (host, count) => <div>{this.renderTextLine(host, count)}</div>,
+          uniqHosts
+        )}
+      </div>
     );
-    // TODO (gdingle): more display after final designs
-    // TODO (gdingle): need to get the counts back from uniqHosts
-    return JSON.stringify(grouped);
   }
 
   // TODO (gdingle): need to think about new plain text hosts
@@ -51,7 +84,8 @@ export default class HostOrganismMessage extends React.Component {
       return null;
     }
     if (length === 1) {
-      return this.renderOneHost(keys(uniqHosts)[0]);
+      const host = keys(uniqHosts)[0];
+      return this.renderOneHost(host, uniqHosts[host]);
     }
     return this.renderManyHosts(uniqHosts);
   }
