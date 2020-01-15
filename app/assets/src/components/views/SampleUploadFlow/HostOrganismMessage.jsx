@@ -68,14 +68,11 @@ export default class HostOrganismMessage extends React.Component {
         We will be subtracting a host during data processing. Based on your
         selections for Host Organism, we will be subtracting the following
         hosts:
-        {map(
-          (count, host) => (
-            <div key={host} style={{ margin: "10px" }}>
-              {this.renderTextLine(host, count)}
-            </div>
-          ),
-          uniqHosts
-        )}
+        {keys(uniqHosts).map(host => (
+          <div key={host} style={{ margin: "10px" }}>
+            {this.renderTextLine(host, uniqHosts[host])}
+          </div>
+        ))}
       </div>
     );
   }
