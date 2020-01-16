@@ -4,7 +4,7 @@
 
 .chooseStep {
   height: calc(85vh - 80px);
-  max-height: 700px;
+  max-height: 1400px;
   display: flex;
   flex-direction: column;
 }
@@ -158,19 +158,35 @@
 }
 
 .footer {
-  margin-top: 40px;
+  margin-top: $space-m;
 
   .downloadDisclaimer {
     @include font-body-xxs;
     color: $medium-grey;
-    margin-top: 6px;
+    margin-top: $space-xxs;
   }
-}
+  .notification {
+    margin-bottom: $space-m;
+    max-height: 150px;
 
-.notification {
-  margin-bottom: $space-m;
+    .highlight {
+      @include font-header-xs;
+    }
 
-  .filteredSamplesWarning {
-    @include font-header-xs;
+    .content {
+      @include scrollable;
+      max-height: 100px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+
+      .listItem {
+        @include font-body-xs;
+
+        &:nth-child(odd) {
+          background-color: $transparent-lightest-grey;
+        }
+      }
+    }
   }
 }

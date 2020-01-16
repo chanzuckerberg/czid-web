@@ -506,15 +506,35 @@ class ChooseStep extends React.Component {
   renderFilteredSamplesWarning = () => {
     const { filteredSampleNames } = this.props;
 
+    const label = (
+      <React.Fragment>
+        <span className={cs.highlight}>
+          {filteredSampleNames.length}{" "}
+          {filteredSampleNames.length > 1 ? "samples " : "sample "}
+          won't be included in this bulk download
+        </span>, because they are in progress or failed samples:
+      </React.Fragment>
+    );
+
+    const content = (
+      <React.Fragment>
+        <div className={cs.content}>
+          <ul>
+            {filteredSampleNames.map((name, index) => (
+              <div key={index} className={cs.listItem}>
+                <li key={`list-${index}`}>{name}</li>
+              </div>
+            ))}
+          </ul>
+        </div>
+      </React.Fragment>
+    );
+
     return (
       <div className={cs.notification}>
         <Notification type="warn" displayStyle="flat">
-          <span className={cs.filteredSamplesWarning}>
-            {filteredSampleNames.length}{" "}
-            {filteredSampleNames.length > 1 ? "samples " : "sample "}
-            won't be included in this bulk download
-          </span>, because they are in progress or failed samples:{" "}
-          {filteredSampleNames.join(", ")}
+          {label}
+          {content}
         </Notification>
       </div>
     );
