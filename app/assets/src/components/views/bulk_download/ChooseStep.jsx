@@ -26,6 +26,9 @@ import {
   getHeatmapMetrics,
 } from "~/api";
 import Notification from "~ui/notifications/Notification";
+import ListNotification from "~ui/notifications/ListNotification";
+import Accordion from "~/components/layout/Accordion";
+import Divider from "~/components/layout/Divider";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
@@ -507,34 +510,37 @@ class ChooseStep extends React.Component {
     const { filteredSampleNames } = this.props;
 
     const label = (
-      <React.Fragment>
+      <div className={cs.warningLabel}>
         <span className={cs.highlight}>
           {filteredSampleNames.length}{" "}
           {filteredSampleNames.length > 1 ? "samples " : "sample "}
           won't be included in this bulk download
         </span>, because they are in progress or failed samples:
-      </React.Fragment>
+      </div>
     );
 
     const content = (
-      <React.Fragment>
-        <div className={cs.content}>
-          <ul>
-            {filteredSampleNames.map((name, index) => (
-              <div key={index} className={cs.listItem}>
-                <li key={`list-${index}`}>{name}</li>
-              </div>
-            ))}
-          </ul>
-        </div>
-      </React.Fragment>
+      <div className={cs.accordionContent}>
+        {filteredSampleNames.map((name, index) => (
+          <div key={index} className={cs.listItem}>
+            {name}
+          </div>
+        ))}
+      </div>
     );
 
     return (
-      <div className={cs.notification}>
+      <div className={cs.warning}>
         <Notification type="warn" displayStyle="flat">
           {label}
-          {content}
+          <Accordion
+            className={cs.accordion}
+            header={<div className={cs.accordionHeader}>Hide Samples</div>}
+            open={true}
+            toggleable={true}
+          >
+            {content}
+          </Accordion>
         </Notification>
       </div>
     );

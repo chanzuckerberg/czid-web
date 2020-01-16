@@ -165,28 +165,72 @@
     color: $medium-grey;
     margin-top: $space-xxs;
   }
-  .notification {
-    margin-bottom: $space-m;
-    max-height: 150px;
+}
+
+.warning {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: $space-m;
+  max-height: 150px;
+
+  .warningLabel {
+    margin-bottom: $space-xs;
 
     .highlight {
       @include font-header-xs;
     }
+  }
 
-    .content {
-      @include scrollable;
+  .accordion {
+    flex: 1;
+
+    .accordionHeader {
+      @include font-header-accordion;
+    }
+
+    .accordionContent {
       max-height: 100px;
       overflow: auto;
-      display: flex;
-      flex-direction: column;
 
       .listItem {
         @include font-body-xs;
 
         &:nth-child(odd) {
-          background-color: $transparent-lightest-grey;
+          background-color: $warning-dark;
         }
       }
     }
   }
 }
+
+// .accordion {
+//   background-color: $warning-dark;
+//   border-radius: 5px;
+//   margin-top: 10px;
+
+//   .accordionHeader {
+//     font-size: 12px;
+//     text-transform: uppercase;
+//     font-weight: 600;
+//     padding: 10px;
+//   }
+
+//   .accordionContent {
+//     max-height: 300px;
+//     max-width: 340px;
+//     overflow: auto;
+
+//     .listItem {
+//       line-height: 22px;
+//       padding: 10px;
+
+//       &:nth-child(odd) {
+//         background-color: $warning-dark;
+//       }
+//     }
+//   }
+// }
+
+// .accordionIcon {
+//   font-size: 20px;
+// }
