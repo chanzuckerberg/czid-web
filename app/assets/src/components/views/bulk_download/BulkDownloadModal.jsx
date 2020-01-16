@@ -56,12 +56,13 @@ class BulkDownloadModal extends React.Component {
     selectedFieldsDisplay: {},
     selectedDownloadTypeName: null,
     currentStep: "choose",
-    filteredSampleIds: [],
+    invalidSampleIds: [],
     validSampleIds: new Set(),
+    filteredSampleNames: [],
   };
 
   componentDidMount() {
-    this.filterSamplesThatCannotBeDownloaded();
+    this.filterSamples();
     this.fetchDownloadTypes();
   }
 
@@ -74,11 +75,6 @@ class BulkDownloadModal extends React.Component {
         selectedFields: {},
       });
     }
-    if (
-      prevProps.selectedSampleStatuses !== this.props.selectedSampleStatuses
-    ) {
-      this.filterSamplesThatCannotBeDownloaded();
-    }
   }
 
   async fetchDownloadTypes() {
@@ -89,29 +85,39 @@ class BulkDownloadModal extends React.Component {
     });
   }
 
+  filterSamples = () => {
+    const [
+      validSampleIds,
+      invalidSampleIds,
+    ] = this.filterSamplesThatCannotBeDownloaded();
+    const filteredSampleNames = this.getFilteredSampleNames(invalidSampleIds);
+
+    this.setState({
+      validSampleIds,
+      invalidSampleIds,
+      filteredSampleNames,
+    });
+  };
+
   filterSamplesThatCannotBeDownloaded = () => {
     const { selectedSampleIds, selectedSampleStatuses } = this.props;
     const validSampleIds = [];
-    const filteredSampleIds = [];
+    const invalidSampleIds = [];
     selectedSampleIds.forEach(id => {
       const sampleInfo = selectedSampleStatuses.get(id);
       if (sampleInfo && sampleInfo.status == "complete") {
         validSampleIds.push(id);
       } else {
-        filteredSampleIds.push(id);
+        invalidSampleIds.push(id);
       }
     });
 
-    this.setState({
-      validSampleIds: new Set(validSampleIds),
-      filteredSampleIds,
-    });
+    return [new Set(validSampleIds), invalidSampleIds];
   };
 
-  getFilteredSampleNames = () => {
-    const { filteredSampleIds } = this.state;
+  getFilteredSampleNames = invalidSampleIds => {
     const { selectedSampleStatuses } = this.props;
-    const sampleNames = filteredSampleIds.map(id => {
+    const sampleNames = invalidSampleIds.map(id => {
       const sampleInfo = selectedSampleStatuses.get(id);
       if (sampleInfo) {
         return sampleInfo.name;
@@ -169,6 +175,7 @@ class BulkDownloadModal extends React.Component {
       selectedFields,
       selectedFieldsDisplay,
       validSampleIds,
+      filteredSampleNames,
     } = this.state;
 
     if (currentStep === "choose") {
@@ -181,7 +188,7 @@ class BulkDownloadModal extends React.Component {
           onFieldSelect={this.handleFieldSelect}
           onContinue={this.handleChooseStepContinue}
           validSampleIds={validSampleIds}
-          filteredSampleNames={this.getFilteredSampleNames()}
+          filteredSampleNames={filteredSampleNames}
         />
       );
     }

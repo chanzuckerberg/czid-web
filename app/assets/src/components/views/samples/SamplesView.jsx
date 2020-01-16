@@ -38,6 +38,7 @@ class SamplesView extends React.Component {
       bulkDownloadModalOpen: false,
       // This tooltip is reset whenever the selectedSampleIds changes.
       bulkDownloadButtonTempTooltip: null,
+      selectedSampleStatuses: new Map(),
     };
 
     this.columns = [
@@ -150,6 +151,7 @@ class SamplesView extends React.Component {
     if (this.props.selectedSampleIds !== prevProps.selectedSampleIds) {
       this.setState({
         bulkDownloadButtonTempTooltip: null,
+        selectedSampleStatuses: this.getSelectedSampleStatuses(),
       });
     }
   }
@@ -528,7 +530,11 @@ class SamplesView extends React.Component {
 
   render() {
     const { currentDisplay, allowedFeatures, selectedSampleIds } = this.props;
-    const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
+    const {
+      phyloTreeCreationModalOpen,
+      bulkDownloadModalOpen,
+      selectedSampleStatuses,
+    } = this.state;
     return (
       <div className={cs.container}>
         {currentDisplay === "table" ? (
@@ -547,17 +553,18 @@ class SamplesView extends React.Component {
             )}
           />
         )}
-        {allowedFeatures.includes("bulk_downloads") && (
-          <BulkDownloadModal
-            open={bulkDownloadModalOpen}
-            onClose={withAnalytics(
-              this.handleBulkDownloadModalClose,
-              "SamplesView_bulk-download-modal_closed"
-            )}
-            selectedSampleIds={selectedSampleIds}
-            selectedSampleStatuses={this.getSelectedSampleStatuses()}
-          />
-        )}
+        {allowedFeatures.includes("bulk_downloads") &&
+          bulkDownloadModalOpen && (
+            <BulkDownloadModal
+              open={bulkDownloadModalOpen}
+              onClose={withAnalytics(
+                this.handleBulkDownloadModalClose,
+                "SamplesView_bulk-download-modal_closed"
+              )}
+              selectedSampleIds={selectedSampleIds}
+              selectedSampleStatuses={selectedSampleStatuses}
+            />
+          )}
       </div>
     );
   }
