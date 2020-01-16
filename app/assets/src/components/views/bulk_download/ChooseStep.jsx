@@ -84,23 +84,21 @@ class ChooseStep extends React.Component {
     const metricsOptionsRequest = this.fetchHeatmapMetrics();
     const allSamplesUploadedByCurrentUserRequest = this.checkAllSamplesUploadedByCurrentUser();
 
-    await Promise.all([
+    const [
+      backgroundOptions,
+      metricsOptions,
+      allSamplesUploadedByCurrentUser,
+    ] = await Promise.all([
       backgroundOptionsRequest,
       metricsOptionsRequest,
       allSamplesUploadedByCurrentUserRequest,
-    ]).then(
-      ([
-        backgroundOptions,
-        metricsOptions,
-        allSamplesUploadedByCurrentUser,
-      ]) => {
-        this.setState({
-          backgroundOptions,
-          metricsOptions,
-          allSamplesUploadedByCurrentUser,
-        });
-      }
-    );
+    ]);
+
+    this.setState({
+      backgroundOptions,
+      metricsOptions,
+      allSamplesUploadedByCurrentUser,
+    });
   }
 
   // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
