@@ -163,7 +163,7 @@ class SamplesView extends React.Component {
     selectedSampleIds.forEach(id => {
       const entry = samples.get(id);
       // if unloaded samples are somehow selected
-      if (entry == undefined) {
+      if (entry === undefined) {
         statuses.set(id, { name: "N/A", status: "loading" });
       } else {
         statuses.set(id, {

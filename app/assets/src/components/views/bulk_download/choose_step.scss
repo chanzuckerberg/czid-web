@@ -168,7 +168,7 @@
 }
 
 .notification {
-  margin-bottom: 20px;
+  margin-bottom: $space-m;
 
   .filteredSamplesWarning {
     @include font-header-xs;
