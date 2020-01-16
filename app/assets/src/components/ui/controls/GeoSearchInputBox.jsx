@@ -124,7 +124,7 @@ class GeoSearchInputBox extends React.Component {
         inputMode
         onResultSelect={this.handleResultSelected}
         onSearchTriggered={this.handleSearchTriggered}
-        placeholder="Enter a city, region, or country"
+        placeholder="Enter a city, region or country"
         rectangular
         value={isString(value) ? value : value.name}
       />
