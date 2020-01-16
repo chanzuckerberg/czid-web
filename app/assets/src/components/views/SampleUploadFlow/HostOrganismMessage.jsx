@@ -2,6 +2,9 @@ import React from "react";
 import PropTypes from "prop-types";
 import { keys, countBy, mapValues, keyBy, map } from "lodash/fp";
 
+import { openUrlInNewTab } from "~/components/utils/links";
+import { logAnalyticsEvent } from "~/api/analytics";
+
 import cs from "./host_organism_message.scss";
 
 /**
@@ -9,13 +12,6 @@ import cs from "./host_organism_message.scss";
  * IDseq-supported host.
  */
 export default class HostOrganismMessage extends React.Component {
-  static propTypes = {
-    samples: PropTypes.arrayOf(
-      PropTypes.shape({ host_genome_id: PropTypes.number })
-    ).isRequired,
-    hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
-  };
-
   hasMatch(host) {
     return map("name", this.props.hostGenomes).includes(host);
   }
@@ -23,27 +19,25 @@ export default class HostOrganismMessage extends React.Component {
   renderOneHost(host, count) {
     return (
       <div className={cs.messageContainer}>
-        We will be subtracting a host during data processing.
-        {this.renderTextLine(host, count)}
+        <strong>Host Subtraction:</strong>
+        {!this.hasMatch(host) &&
+          " We don't have any hosts matching your selection."}
+        {this.renderTextLine(host, count)}{" "}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://help.idseq.net/"
+          onClick={() =>
+            logAnalyticsEvent("HostOrganismMessage_learn-more-link_clicked")
+          }
+        >
+          Learn more
+        </a>.
       </div>
     );
   }
 
   renderTextLine(host, count) {
-    // special case explict choice of ERCC to avoid awkward phrasing
-    if (host.toLowerCase() === "ercc only") {
-      return (
-        <span>
-          {" "}
-          For the{" "}
-          <strong>
-            {count} sample{count > 1 ? "s" : ""}
-          </strong>{" "}
-          that you indicated as <strong>{host}</strong>,{" "}
-          <span>we will only remove ERCCs.</span>
-        </span>
-      );
-    }
     return (
       <span>
         {" "}
@@ -51,14 +45,36 @@ export default class HostOrganismMessage extends React.Component {
         <strong>
           {count} sample{count > 1 ? "s" : ""}
         </strong>{" "}
-        that you indicated as a <strong>{host}</strong> Host Organism,{" "}
-        {this.hasMatch(host) ? (
+        {this.renderHostPhrase(host, count)}{" "}
+        {this.hasMatch(host) && !this.isERCC(host) ? (
           <span>
-            we will subtract out a <strong>{host}</strong> genome.
+            we will subtract out reads that align to a <strong>{host}</strong>{" "}
+            genome
           </span>
         ) : (
-          <span>we will only remove ERCCs.</span>
+          <span>we will only remove ERCCs</span>
         )}
+        {host !== "Human" && " and reads that align to the human genome"}.
+      </span>
+    );
+  }
+
+  isERCC(host) {
+    return host.toLowerCase() === "ercc only";
+  }
+
+  renderHostPhrase(host, count) {
+    // special case explict choice of ERCC to avoid awkward phrasing
+    return (
+      <span>
+        {this.isERCC(host) ? (
+          <span>that you indicated {count > 1 ? "are" : "is"} ERCC Only</span>
+        ) : (
+          <span>
+            that you indicated {count > 1 ? "are" : "is"} from a{" "}
+            <strong>{host}</strong> Host Organism
+          </span>
+        )},
       </span>
     );
   }
@@ -66,14 +82,31 @@ export default class HostOrganismMessage extends React.Component {
   renderManyHosts(uniqHosts) {
     return (
       <div className={cs.messageContainer}>
-        We will be subtracting a host during data processing. Based on your
-        selections for Host Organism, we will be subtracting the following
-        hosts:
+        <strong>Host Subtraction:</strong> Based on your selections for Host
+        Organism, we will subtract out reads from your samples that align to
+        different genomes.{" "}
+        <a
+          onClick={() => {
+            console.log("todo");
+          }}
+        >
+          Click for more details.
+        </a>
         {keys(uniqHosts).map(host => (
           <div key={host} className={cs.messageLine}>
             {this.renderTextLine(host, uniqHosts[host])}
           </div>
         ))}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://help.idseq.net/"
+          onClick={() =>
+            logAnalyticsEvent("HostOrganismMessage_learn-more-link_clicked")
+          }
+        >
+          Learn more
+        </a>.
       </div>
     );
   }
@@ -96,3 +129,10 @@ export default class HostOrganismMessage extends React.Component {
     return this.renderManyHosts(uniqHosts);
   }
 }
+
+HostOrganismMessage.propTypes = {
+  samples: PropTypes.arrayOf(
+    PropTypes.shape({ host_genome_id: PropTypes.number })
+  ).isRequired,
+  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
+};
