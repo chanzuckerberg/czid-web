@@ -1,0 +1,26 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.messageContainer {
+  margin: $space-s 0;
+  padding: $space-s;
+  background-color: $info-bg;
+
+  strong {
+    font-weight: $font-weight-bold;
+  }
+}
+
+.messageLine {
+  margin: 0 $space-s;
+  padding: $space-s;
+
+  &:nth-child(1) {
+    margin-top: $space-s;
+  }
+
+  &:nth-child(odd) {
+    background-color: $info-dark;
+  }
+}
