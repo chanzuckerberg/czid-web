@@ -36,6 +36,7 @@ class Sample < ApplicationRecord
   UPLOAD_ERROR_S3_UPLOAD_FAILED = "S3_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_LOCAL_UPLOAD_STALLED = "LOCAL_UPLOAD_STALLED".freeze
   UPLOAD_ERROR_LOCAL_UPLOAD_FAILED = "LOCAL_UPLOAD_FAILED".freeze
+  DO_NOT_PROCESS = "DO_NOT_PROCESS".freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
@@ -716,6 +717,11 @@ class Sample < ApplicationRecord
   def kickoff_pipeline
     # only kickoff pipeline when no active pipeline_run running
     return unless pipeline_runs.in_progress.empty?
+
+    if do_not_process
+      update(status: STATUS_CHECKED, upload_error: Sample::DO_NOT_PROCESS)
+      return
+    end
 
     pr = PipelineRun.new
     pr.sample = self

@@ -42,6 +42,7 @@ export const bulkUploadLocalWithMetadata = async ({
       "input_files_attributes",
       "name",
       "project_id",
+      "do_not_process",
     ]),
     samples
   );
