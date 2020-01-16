@@ -14,15 +14,17 @@ import {
 import { getProjectMetadataFields } from "~/api/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
+import { formatFileSize } from "~/components/utils/format";
+import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
-import { formatFileSize } from "~/components/utils/format";
 
 import cs from "./sample_upload_flow.scss";
 import UploadProgressModal from "./UploadProgressModal";
+import HostOrganismMessage from "./HostOrganismMessage";
 
 const processMetadataRows = metadataRows =>
   flow(
@@ -148,8 +150,13 @@ class ReviewStep extends React.Component {
         return 200;
       case "Input Files":
         return 300;
+      case "Water Control":
+        return 80;
+      case "Nucleotide Type":
+      case "Collection Date":
+        return 100;
       default:
-        return 160;
+        return 140;
     }
   };
 
@@ -193,11 +200,11 @@ class ReviewStep extends React.Component {
       samples,
       metadata,
       project,
+      hostGenomes,
     } = this.props;
 
     const shouldTruncateDescription =
       project.description && this.countNewLines(project.description) > 5;
-
     return (
       <div
         className={cx(
@@ -311,6 +318,9 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
+          {this.context.admin && (
+            <HostOrganismMessage hostGenomes={hostGenomes} samples={samples} />
+          )}
           <TermsAgreement
             checked={this.state.consentChecked}
             onChange={() =>
@@ -387,5 +397,7 @@ ReviewStep.propTypes = {
   onStepSelect: PropTypes.func,
   onUploadComplete: PropTypes.func.isRequired,
 };
+
+ReviewStep.contextType = UserContext;
 
 export default ReviewStep;
