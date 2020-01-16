@@ -74,8 +74,6 @@ json.steps do
     additional_attributes: {
       output_gene_file: 'reads_per_gene.star.tab',
       nucleotide_type: attr[:nucleotide_type],
-      output_metrics_file: 'picard_insert_metrics.txt',
-      output_histogram_file: 'insert_size_histogram.pdf',
     },
   }
   steps << {
