@@ -68,6 +68,6 @@
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:after {
-  background-color: $lightest-grey;
+  background: $lightest-grey;
   left: 2px;
 }

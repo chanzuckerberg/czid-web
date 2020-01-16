@@ -73,7 +73,7 @@ class MetadataInput extends React.Component {
           value={value}
           onResultSelect={({ result }) => {
             // Result can be plain text or a match. We treat them the same.
-            onChange(metadataType.key, result.name || result);
+            onChange(metadataType.key, result.name || result, true);
           }}
           isHuman={isHuman}
           isInsect={isInsect}
