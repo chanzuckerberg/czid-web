@@ -172,32 +172,7 @@
   flex-direction: column;
   margin-bottom: $space-m;
 
-  .warningLabel {
-    margin-bottom: $space-xs;
-
-    .highlight {
-      @include font-header-xs;
-    }
-  }
-
-  .accordion {
+  .notification {
     flex: 1;
-
-    .accordionHeader {
-      @include font-header-accordion;
-    }
-
-    .accordionContent {
-      max-height: 100px;
-      overflow: auto;
-
-      .listItem {
-        @include font-body-xs;
-
-        &:nth-child(odd) {
-          background-color: $warning-dark;
-        }
-      }
-    }
   }
 }

@@ -36,7 +36,7 @@ class IssueGroup extends React.Component {
         }
         open={initialOpen}
       >
-        <div className={cs.tableContainer}>
+        <div className={cx(cs.tableContainer, cs[this.props.height])}>
           <DataTable
             columns={this.props.headers}
             data={rowObject}
@@ -49,6 +49,10 @@ class IssueGroup extends React.Component {
   }
 }
 
+IssueGroup.defaultProps = {
+  height: "unlimited",
+};
+
 IssueGroup.propTypes = {
   caption: PropTypes.string,
   className: PropTypes.string,
@@ -57,6 +61,7 @@ IssueGroup.propTypes = {
   initialOpen: PropTypes.bool,
   rows: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)),
   type: PropTypes.oneOf(["error", "warning", "info"]),
+  height: PropTypes.oneOf(["limited", "unlimited"]),
 };
 
 export default IssueGroup;

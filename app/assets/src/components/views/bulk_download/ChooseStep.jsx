@@ -25,10 +25,7 @@ import {
   uploadedByCurrentUser,
   getHeatmapMetrics,
 } from "~/api";
-import Notification from "~ui/notifications/Notification";
-import ListNotification from "~ui/notifications/ListNotification";
-import Accordion from "~/components/layout/Accordion";
-import Divider from "~/components/layout/Divider";
+import IssueGroup from "~ui/notifications/IssueGroup";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
@@ -507,39 +504,22 @@ class ChooseStep extends React.Component {
   renderFilteredSamplesWarning = () => {
     const { filteredSampleNames } = this.props;
 
-    const label = (
-      <div className={cs.warningLabel}>
-        <span className={cs.highlight}>
-          {filteredSampleNames.length}{" "}
-          {filteredSampleNames.length > 1 ? "samples " : "sample "}
-          won't be included in this bulk download
-        </span>, because they are in progress or failed samples:
-      </div>
-    );
-
-    const content = (
-      <div className={cs.accordionContent}>
-        {filteredSampleNames.map((name, index) => (
-          <div key={index} className={cs.listItem}>
-            {name}
-          </div>
-        ))}
-      </div>
-    );
+    const caption = `${filteredSampleNames.length} ${
+      filteredSampleNames.length > 1 ? "samples " : "sample "
+    } won't be included in this bulk download, because they are in progress or failed samples:`;
+    const rows = filteredSampleNames.map(name => [name]);
 
     return (
       <div className={cs.warning}>
-        <Notification type="warn" displayStyle="flat">
-          {label}
-          <Accordion
-            className={cs.accordion}
-            header={<div className={cs.accordionHeader}>Hide Samples</div>}
-            open={true}
-            toggleable={true}
-          >
-            {content}
-          </Accordion>
-        </Notification>
+        <IssueGroup
+          caption={caption}
+          type="warning"
+          headers={["Sample Name"]}
+          rows={rows}
+          initialOpen={true}
+          className="notification"
+          height={"limited"}
+        />
       </div>
     );
   };
