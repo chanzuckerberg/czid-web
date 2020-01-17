@@ -26,8 +26,6 @@ import {
   getHeatmapMetrics,
 } from "~/api";
 import CompactListNotification from "~ui/notifications/CompactListNotification";
-import Notification from "~ui/notifications/Notification";
-import Accordion from "~/components/layout/Accordion";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
