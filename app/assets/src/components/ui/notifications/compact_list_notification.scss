@@ -24,9 +24,17 @@
     // border-color: $success;
     background-color: $success-bg;
   }
+
+  .toggleIcon {
+    padding: 10px 0;
+  }
 }
 
 .notificationContainer {
   @include font-body-xxs;
   margin: $space-s 0;
+
+  .icon {
+    padding: 10px 0;
+  }
 }

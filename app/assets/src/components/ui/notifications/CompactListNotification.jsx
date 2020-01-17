@@ -39,6 +39,7 @@ export default class CompactListNotification extends React.Component {
           header={notification}
           open={open}
           className={cx(cs.listContainer, cs[type])}
+          toggleAlignment="baseline"
         >
           {content}
         </Accordion>
