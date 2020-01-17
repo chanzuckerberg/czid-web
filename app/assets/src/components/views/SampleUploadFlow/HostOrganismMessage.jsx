@@ -1,11 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { keys, countBy, mapValues, keyBy, map } from "lodash/fp";
-import cx from "classnames";
 
-import { openUrlInNewTab } from "~/components/utils/links";
 import { logAnalyticsEvent } from "~/api/analytics";
-import AlertIcon from "~ui/icons/AlertIcon";
 import Accordion from "~/components/layout/Accordion";
 import Notification from "~ui/notifications/Notification";
 
