@@ -415,7 +415,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("sample")
-      samples = constrained_samples.db_search(query)
+      samples = constrained_samples.search_by_name(query)
       unless samples.empty?
         results["Sample"] = {
           "name" => "Sample",

@@ -935,7 +935,7 @@ class Sample < ApplicationRecord
     input_files.map { |input_file| "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}" }
   end
 
-  def self.db_search(query)
+  def self.search_by_name(query)
     if query
       tokens = query.scan(/\w+/).map { |t| "%#{t}%" }
       q = scoped
