@@ -11,13 +11,14 @@ import {
   without,
 } from "lodash/fp";
 
+import { UserContext } from "~/components/common/UserContext";
 import { getProjectMetadataFields } from "~/api/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import { formatFileSize } from "~/components/utils/format";
-import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
+import Checkbox from "~ui/controls/Checkbox";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
@@ -38,6 +39,7 @@ class ReviewStep extends React.Component {
     projectMetadataFields: null,
     showLessDescription: true,
     showUploadModal: false,
+    skipSampleProcessing: false,
   };
 
   componentDidMount() {
@@ -174,6 +176,24 @@ class ReviewStep extends React.Component {
     return 0;
   };
 
+  toggleSkipSampleProcessing = () => {
+    this.setState({
+      skipSampleProcessing: !this.state.skipSampleProcessing,
+    });
+  };
+
+  // This is only for admins and QA testers.
+  renderSkipSampleProcessingOption = () => {
+    return (
+      <Checkbox
+        className={cs.skipSampleProcessingOption}
+        checked={this.state.skipSampleProcessing}
+        onChange={this.toggleSkipSampleProcessing}
+        label="Skip sample processing after upload is complete."
+      />
+    );
+  };
+
   renderReviewTable = () => {
     const { projectMetadataFields } = this.state;
 
@@ -192,7 +212,11 @@ class ReviewStep extends React.Component {
   };
 
   render() {
-    const { showUploadModal, showLessDescription } = this.state;
+    const {
+      showUploadModal,
+      showLessDescription,
+      skipSampleProcessing,
+    } = this.state;
 
     const {
       onUploadComplete,
@@ -205,6 +229,9 @@ class ReviewStep extends React.Component {
 
     const shouldTruncateDescription =
       project.description && this.countNewLines(project.description) > 5;
+
+    const { userSettings, admin } = this.context || {};
+
     return (
       <div
         className={cx(
@@ -318,9 +345,11 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          {this.context.admin && (
+          {admin && (
             <HostOrganismMessage hostGenomes={hostGenomes} samples={samples} />
           )}
+          {get("show_skip_processing_option", userSettings) &&
+            this.renderSkipSampleProcessingOption()}
           <TermsAgreement
             checked={this.state.consentChecked}
             onChange={() =>
@@ -357,6 +386,7 @@ class ReviewStep extends React.Component {
               onUploadComplete={onUploadComplete}
               metadata={processMetadataRows(metadata.rows)}
               project={project}
+              skipSampleProcessing={skipSampleProcessing}
             />
           )}
         </div>

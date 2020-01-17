@@ -114,11 +114,23 @@ export default class UploadProgressModal extends React.Component {
     }));
   };
 
+  // Add any flags selected by the user in the Review Step.
+  addFlagsToSamples = samples => {
+    const { skipSampleProcessing } = this.props;
+
+    return samples.map(sample => ({
+      ...sample,
+      do_not_process: skipSampleProcessing,
+    }));
+  };
+
   initiateUploadLocal = () => {
     const { samples, metadata } = this.props;
 
+    const samplesToUpload = this.addFlagsToSamples(samples);
+
     bulkUploadLocalWithMetadata({
-      samples,
+      samples: samplesToUpload,
       metadata,
       callbacks: {
         onCreateSamplesError: (errors, erroredSampleNames) => {
@@ -177,6 +189,8 @@ export default class UploadProgressModal extends React.Component {
       bulkUploadFnName = "bulkUploadBasespace";
       samplesToUpload = map(pick(BASESPACE_SAMPLE_FIELDS), samplesToUpload);
     }
+
+    samplesToUpload = this.addFlagsToSamples(samplesToUpload);
 
     let response;
 
@@ -498,4 +512,5 @@ UploadProgressModal.propTypes = {
   onUploadComplete: PropTypes.func.isRequired,
   uploadType: PropTypes.string.isRequired,
   project: PropTypes.Project,
+  skipSampleProcessing: PropTypes.bool,
 };

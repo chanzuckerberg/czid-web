@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .sampleUploadFlow {
   .inner {
@@ -417,5 +418,16 @@
 
   .loadingIcon {
     margin-right: 5px;
+  }
+
+  .skipSampleProcessingOption {
+    margin-top: $space-l;
+
+    // Global because Checkbox does not use CSS modules
+    :global(.label) {
+      font-size: 12px;
+      line-height: 20px;
+      margin-left: 10px;
+    }
   }
 }

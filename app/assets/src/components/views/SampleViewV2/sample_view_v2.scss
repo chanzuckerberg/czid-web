@@ -131,6 +131,15 @@
           font-size: 20px;
         }
       }
+
+      &.info {
+        background-color: $info-bg;
+        color: $info;
+
+        .icon {
+          fill: $info;
+        }
+      }
     }
 
     .message {
