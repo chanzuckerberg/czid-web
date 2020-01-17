@@ -167,12 +167,34 @@
   }
 }
 
-.warning {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: $space-m;
+.highlight {
+  @include font-header-xxs;
+}
 
-  .notification {
-    flex: 1;
+.listContainer {
+  background-color: $warning-bg;
+  margin-bottom: $space-s;
+}
+
+.notificationContainer {
+  @include font-body-xxs;
+  margin: $space-s 0;
+  background-color: $warning-bg;
+}
+
+.messageContainer {
+  max-height: 150px;
+  overflow: auto;
+  background-color: $warning-bg;
+  margin-left: 30px; // to align text with icon
+}
+
+.messageLine {
+  @include font-body-xxs;
+  margin: 0 $space-s;
+  padding: $space-xxxs;
+
+  &:last-child {
+    margin-bottom: $space-s;
   }
 }
