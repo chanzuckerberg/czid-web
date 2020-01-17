@@ -13,15 +13,7 @@ export default class CompactListNotification extends React.Component {
   }
 
   render() {
-    const {
-      className,
-      header,
-      content,
-      type,
-      open,
-      height,
-      displayStyle,
-    } = this.props;
+    const { className, header, content, type, open, displayStyle } = this.props;
     const notification = (
       <Notification
         type={type}
