@@ -934,4 +934,17 @@ class Sample < ApplicationRecord
   def input_file_s3_paths
     input_files.map { |input_file| "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}" }
   end
+
+  def self.db_search(query)
+    if query
+      tokens = query.scan(/\w+/).map { |t| "%#{t}%" }
+      q = scoped
+      tokens.each do |token|
+        q = q.where("samples.name LIKE :search", search: token.to_s)
+      end
+      q
+    else
+      scoped
+    end
+  end
 end
