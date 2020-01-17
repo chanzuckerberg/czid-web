@@ -116,7 +116,7 @@ export default class HostOrganismMessage extends React.Component {
       <Accordion
         bottomContentPadding
         header={header}
-        open={true}
+        open={false}
         className={cs.listContainer}
       >
         {keys(uniqHosts).map(host => (

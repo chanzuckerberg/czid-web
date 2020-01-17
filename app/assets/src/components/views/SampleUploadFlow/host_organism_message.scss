@@ -7,6 +7,7 @@
 }
 
 .messageContainer {
+  margin: $space-s 0;
   strong {
     font-weight: $font-weight-bold;
   }
@@ -22,6 +23,10 @@
 
   &:nth-child(even) {
     background-color: $info-bg;
+  }
+
+  &:last-child {
+    margin-bottom: $space-l;
   }
 }
 
