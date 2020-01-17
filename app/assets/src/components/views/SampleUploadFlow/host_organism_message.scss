@@ -8,6 +8,7 @@
 
 .messageContainer {
   margin: $space-s 0;
+  font-size: $font-size;
   strong {
     font-weight: $font-weight-bold;
   }
@@ -16,6 +17,8 @@
 .messageLine {
   margin: 0 $space-s;
   padding: $space-s;
+  font-size: $font-size;
+  margin: 0 44px; // align to right of icon
 
   &:nth-child(odd) {
     background-color: $info-dark;
@@ -26,10 +29,11 @@
   }
 
   &:last-child {
-    margin-bottom: $space-l;
+    margin-bottom: $space-m;
   }
 }
 
+// NOTE: we should really have a Link component
 .link {
   // Overwrite <a> inherit rule in header.scss
   color: $primary-light !important;
