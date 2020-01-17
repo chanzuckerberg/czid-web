@@ -1,9 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { keys, countBy, mapValues, keyBy, map } from "lodash/fp";
+import cx from "classnames";
 
 import { openUrlInNewTab } from "~/components/utils/links";
 import { logAnalyticsEvent } from "~/api/analytics";
+import AlertIcon from "~ui/icons/AlertIcon";
+import Accordion from "~/components/layout/Accordion";
+import Notification from "~ui/notifications/Notification";
 
 import cs from "./host_organism_message.scss";
 
@@ -18,22 +22,32 @@ export default class HostOrganismMessage extends React.Component {
 
   renderOneHost(host, count) {
     return (
-      <div className={cs.messageContainer}>
-        <strong>Host Subtraction:</strong>
+      <Notification
+        type="info"
+        displayStyle="flat"
+        className={cs.messageContainer}
+      >
+        <strong>Host Subtraction:</strong>{" "}
         {!this.hasMatch(host) &&
           " We don't have any hosts matching your selection."}
-        {this.renderTextLine(host, count)}{" "}
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://help.idseq.net/"
-          onClick={() =>
-            logAnalyticsEvent("HostOrganismMessage_learn-more-link_clicked")
-          }
-        >
-          Learn more
-        </a>.
-      </div>
+        {this.renderTextLine(host, count)} {this.renderLearnMoreLink()}.
+      </Notification>
+    );
+  }
+
+  renderLearnMoreLink() {
+    return (
+      <a
+        className={cs.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://help.idseq.net/"
+        onClick={() =>
+          logAnalyticsEvent("HostOrganismMessage_learn-more-link_clicked")
+        }
+      >
+        Learn more
+      </a>
     );
   }
 
@@ -80,34 +94,37 @@ export default class HostOrganismMessage extends React.Component {
   }
 
   renderManyHosts(uniqHosts) {
-    return (
-      <div className={cs.messageContainer}>
-        <strong>Host Subtraction:</strong> Based on your selections for Host
-        Organism, we will subtract out reads from your samples that align to
-        different genomes.{" "}
-        <a
-          onClick={() => {
-            console.log("todo");
-          }}
+    // Strangely, the " " spaces are not being ending up in the header so
+    // we use &nbsp;
+    const header = (
+      <Notification
+        type="info"
+        displayStyle="flat"
+        className={cs.messageContainer}
+      >
+        <strong>Host Subtraction:</strong>
+        &nbsp;Based on your selections for Host Organism, we will subtract out
+        reads from your samples that align to different genomes. &nbsp;<a
+          href="#"
+          className={cs.link}
         >
           Click for more details.
         </a>
+      </Notification>
+    );
+    return (
+      <Accordion
+        bottomContentPadding
+        header={header}
+        open={true}
+        className={cs.listContainer}
+      >
         {keys(uniqHosts).map(host => (
           <div key={host} className={cs.messageLine}>
             {this.renderTextLine(host, uniqHosts[host])}
           </div>
         ))}
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://help.idseq.net/"
-          onClick={() =>
-            logAnalyticsEvent("HostOrganismMessage_learn-more-link_clicked")
-          }
-        >
-          Learn more
-        </a>.
-      </div>
+      </Accordion>
     );
   }
 

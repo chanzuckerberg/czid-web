@@ -2,11 +2,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
-.messageContainer {
-  margin: $space-s 0;
-  padding: $space-s;
+.listContainer {
   background-color: $info-bg;
+}
 
+.messageContainer {
   strong {
     font-weight: $font-weight-bold;
   }
@@ -16,11 +16,17 @@
   margin: 0 $space-s;
   padding: $space-s;
 
-  &:nth-child(1) {
-    margin-top: $space-s;
-  }
-
   &:nth-child(odd) {
     background-color: $info-dark;
   }
+
+  &:nth-child(even) {
+    background-color: $info-bg;
+  }
+}
+
+.link {
+  // Overwrite <a> inherit rule in header.scss
+  color: $primary-light !important;
+  cursor: pointer;
 }
