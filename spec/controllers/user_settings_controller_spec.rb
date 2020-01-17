@@ -12,12 +12,12 @@ RSpec.describe UserSettingsController, type: :controller do
   def stub_mock_user_setting_metadata(additional_settings = {})
     user_settings = {
       mock_user_setting => {
-        default: "true",
+        default: true,
         description: mock_user_setting_description,
         data_type: UserSetting::DATA_TYPE_BOOLEAN,
       },
       mock_user_setting_two => {
-        default: "true",
+        default: true,
         description: mock_user_setting_description_two,
         data_type: UserSetting::DATA_TYPE_BOOLEAN,
       },
@@ -120,12 +120,12 @@ RSpec.describe UserSettingsController, type: :controller do
         stub_mock_user_setting_metadata()
         stub_mock_display_categories()
 
-        post :update, params: { format: "json", key: mock_user_setting, value: "true" }
+        post :update, params: { format: "json", key: mock_user_setting, value: true }
 
         json_response = JSON.parse(response.body)
         expect(json_response["status"]).to eq("success")
         expect(json_response["key"]).to eq(mock_user_setting)
-        expect(json_response["value"]).to eq("true")
+        expect(json_response["value"]).to eq(true)
       end
 
       it "throws error if value is invalid for boolean data type" do
@@ -143,7 +143,7 @@ RSpec.describe UserSettingsController, type: :controller do
         stub_mock_user_setting_metadata()
         stub_mock_display_categories()
 
-        post :update, params: { format: "json", key: "mock_bad_key", value: "true" }
+        post :update, params: { format: "json", key: "mock_bad_key", value: true }
 
         expect(response).to have_http_status :unprocessable_entity
         json_response = JSON.parse(response.body)

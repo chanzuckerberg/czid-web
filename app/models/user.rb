@@ -141,7 +141,7 @@ class User < ApplicationRecord
     user_setting.save!
   end
 
-  # Remove any user settings gated on allowed_features that the user doesn't have access to.
+  # Remove any user settings gated on allowed_features that the user doesn't have access to due to allowed_feature flags.
   def viewable_user_setting_keys
     parsed_allowed_feature_list = allowed_feature_list
     UserSetting::METADATA.select do |_key, metadata|
@@ -149,6 +149,7 @@ class User < ApplicationRecord
     end.keys
   end
 
+  # Get all viewable user settings, excluding any that are guarded on feature flags.
   def viewable_user_settings
     # Fetch viewable user settings.
     existing_user_settings = user_settings
