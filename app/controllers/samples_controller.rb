@@ -370,7 +370,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("project")
-      projects = prefix_match(Project, "name", query, id: current_power.projects.pluck(:id))
+      projects = current_power.projects_by_domain(domain).db_search(query)
       unless projects.empty?
         results["Project"] = {
           "name" => "Project",
