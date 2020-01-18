@@ -105,17 +105,17 @@ RSpec.describe SamplesController, type: :controller do
                                                 {
                                                   "taxid" => 100,
                                                   "name" => "Mock Taxa 100",
-                                                  "sample_count" => 3,
+                                                  "sample_count_reads" => 3,
                                                 },
                                                 {
                                                   "taxid" => 200,
                                                   "name" => "Mock Taxa 200",
-                                                  "sample_count" => 2,
+                                                  "sample_count_reads" => 2,
                                                 },
                                                 {
                                                   "taxid" => 300,
                                                   "name" => "Mock Taxa 300",
-                                                  "sample_count" => 1,
+                                                  "sample_count_reads" => 1,
                                                 },
                                               ])
       end
@@ -146,17 +146,17 @@ RSpec.describe SamplesController, type: :controller do
                                                 {
                                                   "taxid" => 100,
                                                   "name" => "Mock Taxa 100",
-                                                  "sample_count" => 2,
+                                                  "sample_count_reads" => 2,
                                                 },
                                                 {
                                                   "taxid" => 200,
                                                   "name" => "Mock Taxa 200",
-                                                  "sample_count" => 2,
+                                                  "sample_count_reads" => 2,
                                                 },
                                                 {
                                                   "taxid" => 300,
                                                   "name" => "Mock Taxa 300",
-                                                  "sample_count" => 1,
+                                                  "sample_count_reads" => 1,
                                                 },
                                               ])
       end
@@ -184,17 +184,17 @@ RSpec.describe SamplesController, type: :controller do
                                                 {
                                                   "taxid" => 100,
                                                   "name" => "Mock Taxa 100",
-                                                  "sample_count" => 3,
+                                                  "sample_count_reads" => 3,
                                                 },
                                                 {
                                                   "taxid" => 200,
                                                   "name" => "Mock Taxa 200",
-                                                  "sample_count" => 2,
+                                                  "sample_count_reads" => 2,
                                                 },
                                                 {
                                                   "taxid" => 300,
                                                   "name" => "Mock Taxa 300",
-                                                  "sample_count" => 1,
+                                                  "sample_count_reads" => 1,
                                                 },
                                               ])
       end
