@@ -480,7 +480,7 @@ class SamplesView extends React.Component {
           "Unexpected issue. Please contact us for help.",
       });
     } else if (
-      this.props.selectedSampleIds.size > parseInt(maxSamplesBulkDownload) &&
+      this.props.selectedSampleIds.size > maxSamplesBulkDownload &&
       !admin
     ) {
       this.setState({
