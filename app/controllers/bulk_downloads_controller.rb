@@ -27,7 +27,27 @@ class BulkDownloadsController < ApplicationController
     render json: download_types
   end
 
+  def validate
+    queried_sample_ids = validation_params
+
+    validator = BulkDownloadsValidationService.new(queried_sample_ids, current_user)
+
+    begin
+      valid_sample_ids = validator.validate_sample_ids()
+    rescue => e
+      # Throw an error if any sample doesn't have a valid pipeline run.
+      # The user should never see this error, because the validation step should catch any issues.
+      LogUtil.log_backtrace(e)
+      LogUtil.log_err_and_airbrake("BulkDownloadsFailedEvent: Unexpected issue validating bulk download: #{e}")
+      render json: { error: e }, status: :unprocessable_entity
+    end
+
+    render json: { results: valid_sample_ids }
+  end
+
   # POST /bulk_downloads
+  # TODO: Change flow to use BulkDownloadsValidationService
+  # This will require using the BulkDownloadsTypeHelper to translate download types from params
   def create
     create_params = bulk_download_create_params
 
