@@ -1,5 +1,4 @@
 @import "~styles/themes/colors";
-@import "~styles/themes/typography";
 
 .issueGroup {
   border-bottom: none !important;
@@ -39,7 +38,6 @@
   display: flex;
   align-items: center;
   padding: 10px;
-  @include font-header-xs;
 
   .icon {
     width: 20px;
@@ -74,11 +72,5 @@
 
   th {
     color: $darkest-grey;
-  }
-
-  &.limited {
-    max-height: 100px;
-    overflow: auto;
-    @include font-body-xs;
   }
 }
