@@ -537,44 +537,6 @@ class ChooseStep extends React.Component {
     );
   };
 
-  // renderFilteredSamplesWarning = () => {
-  //   const { filteredSampleNames } = this.props;
-  //   const caption = `${filteredSampleNames.length} ${
-  //     filteredSampleNames.length > 1 ? "samples " : "sample "
-  //   } won't be included in this bulk download, because they are in progress or failed samples:`;
-  //   const rows = filteredSampleNames.map(name => [name]);
-
-  //   const header = (
-  //     <Notification
-  //       type="warn"
-  //       displayStyle="flat"
-  //       className={cs.notificationContainer}
-  //     >
-  //       <span className={cs.highlight}>{filteredSampleNames.length} sample
-  //       {filteredSampleNames.length > 1 ? "s" : ""} won't be included in the
-  //       bulk download</span>, because they are in progress or failed samples:
-  //     </Notification>
-  //   );
-  //   return (
-  //     <Accordion
-  //       bottomContentPadding
-  //       header={header}
-  //       open={false}
-  //       className={cs.listContainer}
-  //     >
-  //       <div className={cs.messageContainer}>
-  //         {filteredSampleNames.map((name, index) => {
-  //           return (
-  //             <div key={index} className={cs.messageLine}>
-  //               {name}
-  //             </div>
-  //           )
-  //         })}
-  //       </div>
-  //     </Accordion>
-  //   );
-  // }
-
   render() {
     const { onContinue, validSampleIds, filteredSampleNames } = this.props;
     const numSamples = validSampleIds.size;
