@@ -34,11 +34,7 @@ module ApplicationHelper
     {
       admin: current_user ? current_user.role == 1 : false,
       allowedFeatures: current_user && current_user.allowed_feature_list,
-      # TODO(mark): Fetch all app configs in one request.
-      appConfig: {
-        maxSamplesBulkDownload: get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD).to_i,
-        maxSamplesBulkDownloadOriginalFiles: get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES).to_i,
-      },
+      appConfig: AppConfigHelper.configs_for_context(),
       userSettings: current_user && current_user.viewable_user_settings,
     }
   end
