@@ -31,7 +31,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
             </span>
             {admin && (
               <React.Fragment>
-                | <span className={cs.userName}>{rowData.user_name}</span>
+                |<span className={cs.userName}>{rowData.user_name}</span>
               </React.Fragment>
             )}
           </div>

@@ -16,7 +16,7 @@ module BulkDownloadTypesHelper
   BULK_DOWNLOAD_TYPES = [
     {
       type: SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,
-      display_name: "Sample Overviews",
+      display_name: "Samples Overview",
       description: "Sample QC metrics (e.g. percent reads passing QC) and other summary statistics",
       category: "report",
       execution_type: RESQUE_EXECUTION_TYPE,
