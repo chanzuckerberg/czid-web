@@ -586,9 +586,9 @@ module SamplesHelper
     end
   end
 
-  # For each taxon, count how many samples have taxon counts for that taxon.
+  # For each taxon, count how many samples have reads for that taxon.
   # Add these counts to the taxon objects.
-  def augment_taxon_list_with_sample_count_reads(taxon_list, samples)
+  def add_sample_count_to_taxa_with_reads(taxon_list, samples)
     tax_ids = taxon_list.map { |taxon| taxon["taxid"] }
     pipeline_run_ids = get_succeeded_pipeline_runs_for_samples(samples).pluck(:id)
     counts_by_taxid = TaxonCount
@@ -598,14 +598,14 @@ module SamplesHelper
                       .map { |r| [r.tax_id, r.sample_count] }
                       .to_h
     taxon_list.each do |taxon|
-      taxon["sample_count_reads"] = counts_by_taxid[taxon["taxid"]] || 0
+      taxon["sample_count"] = counts_by_taxid[taxon["taxid"]] || 0
     end
     taxon_list
   end
 
   # For each taxon, count how many samples have contigs for that taxon.
   # Add these counts to the taxon objects.
-  def augment_taxon_list_with_sample_count_contigs(taxon_list, samples)
+  def add_sample_count_to_taxa_with_contigs(taxon_list, samples)
     get_tax_ids_by_level = lambda do |level|
       taxon_list.select { |taxon| taxon["level"] == level }.map { |taxon| taxon["taxid"] }
     end
@@ -646,7 +646,7 @@ module SamplesHelper
 
     taxon_list.each do |taxon|
       # De-dupe the pipeline run ids before taking the length.
-      taxon["sample_count_contigs"] = pipeline_runs_by_taxid[taxon["taxid"]].uniq.length
+      taxon["sample_count"] = pipeline_runs_by_taxid[taxon["taxid"]].uniq.length
     end
     taxon_list
   end

@@ -105,17 +105,17 @@ RSpec.describe SamplesController, type: :controller do
                                                 {
                                                   "taxid" => 100,
                                                   "name" => "Mock Taxa 100",
-                                                  "sample_count_reads" => 3,
+                                                  "sample_count" => 3,
                                                 },
                                                 {
                                                   "taxid" => 200,
                                                   "name" => "Mock Taxa 200",
-                                                  "sample_count_reads" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 300,
                                                   "name" => "Mock Taxa 300",
-                                                  "sample_count_reads" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                               ])
       end
@@ -146,17 +146,17 @@ RSpec.describe SamplesController, type: :controller do
                                                 {
                                                   "taxid" => 100,
                                                   "name" => "Mock Taxa 100",
-                                                  "sample_count_reads" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 200,
                                                   "name" => "Mock Taxa 200",
-                                                  "sample_count_reads" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 300,
                                                   "name" => "Mock Taxa 300",
-                                                  "sample_count_reads" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                               ])
       end
@@ -184,17 +184,17 @@ RSpec.describe SamplesController, type: :controller do
                                                 {
                                                   "taxid" => 100,
                                                   "name" => "Mock Taxa 100",
-                                                  "sample_count_reads" => 3,
+                                                  "sample_count" => 3,
                                                 },
                                                 {
                                                   "taxid" => 200,
                                                   "name" => "Mock Taxa 200",
-                                                  "sample_count_reads" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 300,
                                                   "name" => "Mock Taxa 300",
-                                                  "sample_count_reads" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                               ])
       end
@@ -261,19 +261,19 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 1,
-                                                  "sample_count_contigs" => 3,
+                                                  "sample_count" => 3,
                                                 },
                                                 {
                                                   "taxid" => 2,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 101,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 102,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                               ])
       end
@@ -303,19 +303,19 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 1,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 2,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 101,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 102,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                               ])
       end
@@ -344,19 +344,19 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 1,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 2,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 101,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 102,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                               ])
       end

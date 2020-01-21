@@ -52,9 +52,6 @@ class TaxonHitSelect extends React.Component {
       return;
     }
 
-    const sampleCountKey =
-      hitType === "contig" ? "sample_count_contigs" : "sample_count_reads";
-
     const options = searchResults.map(result => ({
       value: result.taxid,
       text: result.title,
@@ -62,11 +59,11 @@ class TaxonHitSelect extends React.Component {
         <div className={cs.option}>
           <div className={cs.taxonName}>{result.title}</div>
           <div className={cs.fill} />
-          <div className={cs.sampleCount}>{result[sampleCountKey]}</div>
+          <div className={cs.sampleCount}>{result.sample_count}</div>
         </div>
       ),
       // Ignored by the dropdown, used for sorting.
-      sampleCount: result[sampleCountKey],
+      sampleCount: result.sample_count,
     }));
 
     this.setState({
