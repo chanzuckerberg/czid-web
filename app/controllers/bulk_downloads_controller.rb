@@ -27,13 +27,15 @@ class BulkDownloadsController < ApplicationController
     render json: download_types
   end
 
+  # GET /bulk_downloads/validate
   def validate
-    queried_sample_ids = validation_params
+    queried_sample_ids = params[:sampleIds]
+    max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
 
-    validator = BulkDownloadsValidationService.new(queried_sample_ids, current_user)
+    validator = BulkDownloadsValidationService.new(queried_sample_ids, current_user, max_samples_allowed)
 
     begin
-      valid_sample_ids = validator.validate_sample_ids()
+      id_validation_info = validator.validate_sample_ids()
     rescue => e
       # Throw an error if any sample doesn't have a valid pipeline run.
       # The user should never see this error, because the validation step should catch any issues.
@@ -42,7 +44,7 @@ class BulkDownloadsController < ApplicationController
       render json: { error: e }, status: :unprocessable_entity
     end
 
-    render json: { results: valid_sample_ids }
+    render json: id_validation_info
   end
 
   # POST /bulk_downloads
@@ -176,6 +178,8 @@ class BulkDownloadsController < ApplicationController
     @bulk_download.update(progress: params[:progress].to_f)
     render json: { status: "success" }
   end
+
+  private
 
   def set_bulk_download_and_validate_access_token
     @bulk_download = BulkDownload.find(params[:id])

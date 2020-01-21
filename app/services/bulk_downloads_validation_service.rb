@@ -4,24 +4,34 @@ class BulkDownloadsValidationService
   UPLOADER_ONLY_DOWNLOAD_TYPE = "You must be the uploader of all selected samples to initiate this download type.".freeze
   MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE = "No more than %s samples allowed in one download.".freeze
 
-  def initialize(query_ids, current_user)
+  def initialize(query_ids, current_user, max_samples_allowed)
     @query_ids = query_ids
     @user = current_user
+    @max_samples = max_samples_allowed
   end
 
   def validate_sample_ids
-    valid_sample_ids = []
     error = nil
 
     begin
       viewable_samples = validate_sample_access(@query_ids, @user)
-      valid_sample_ids = get_finalized_sample_ids(viewable_samples)
+      finalized_info = get_finalized_sample_ids(viewable_samples)
     rescue => e
       Rails.logger.warn("Error validating samples for bulk download while checking against max samples: #{e}")
       error = e
     end
 
-    return { valid_sample_ids: valid_sample_ids, error: error }
+    result = if error.nil?
+               {
+                 valid_sample_ids: finalized_info[:valid_sample_ids],
+                 invalid_sample_info: finalized_info[:invalid_sample_info],
+                 error: error,
+               }
+             else
+               { valid_sample_ids: [], invalid_sample_info: [], error: error }
+             end
+
+    return result
   end
 
   def download_type_valid?(type_data)
@@ -71,7 +81,7 @@ class BulkDownloadsValidationService
   # Returns pipeline_run_ids for the samples in the bulk download.
   def validate_sample_access(sample_ids, user)
     # Max samples check.
-    max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
+    max_samples_allowed = @max_samples
 
     # Max samples should be string containing an integer, but just in case.
     if max_samples_allowed.nil?
@@ -82,9 +92,7 @@ class BulkDownloadsValidationService
       raise MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
     end
 
-    current_power do
-      Power.new(user)
-    end
+    current_power = Power.new(user)
 
     # Filter out samples the user shouldn't be able to view
     viewable_samples = current_power.viewable_samples.where(id: sample_ids)
@@ -106,7 +114,12 @@ class BulkDownloadsValidationService
     valid_pipeline_runs = valid_pipeline_runs.select(&:succeeded?)
     valid_sample_ids = valid_pipeline_runs.map(&:sample_id)
 
-    return valid_sample_ids
+    invalid_samples = samples.reject { |sample| valid_sample_ids.include?(sample.id) }
+    invalid_sample_info = invalid_samples.map { |sample| { id: sample.id, name: sample.name } }
+
+    finalized_info = { valid_sample_ids: valid_sample_ids, invalid_sample_info: invalid_sample_info }
+
+    return finalized_info
   end
 
   # Return all pipeline runs that have succeeded for given samples
