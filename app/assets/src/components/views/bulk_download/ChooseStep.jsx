@@ -492,7 +492,7 @@ class ChooseStep extends React.Component {
     return (
       <div className={cs.chooseStep}>
         <div className={cs.header}>
-          <div className={cs.title}>Choose a Download</div>
+          <div className={cs.title}>Select a Download Type</div>
           <div className={cs.tagline}>
             {numSamples} sample{numSamples != 1 ? "s" : ""} selected
           </div>
