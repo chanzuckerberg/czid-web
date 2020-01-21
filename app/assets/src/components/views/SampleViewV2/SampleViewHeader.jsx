@@ -188,6 +188,7 @@ SampleViewHeader.propTypes = {
   onDetailsClick: PropTypes.func.isRequired,
   onPipelineVersionChange: PropTypes.func.isRequired,
   pipelineRun: PropTypes.PipelineRun,
+  pipelineRunStatus: PropTypes.oneOf(["WAITING", "FAILED", "SUCCEEDED"]),
   pipelineVersions: PropTypes.arrayOf(PropTypes.string),
   project: PropTypes.Project,
   projectSamples: PropTypes.arrayOf(PropTypes.Sample),
