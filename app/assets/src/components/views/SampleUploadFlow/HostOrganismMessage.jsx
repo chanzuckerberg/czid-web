@@ -2,9 +2,9 @@ import React from "react";
 import PropTypes from "prop-types";
 import { keys, countBy, mapValues, keyBy, map } from "lodash/fp";
 
-import { logAnalyticsEvent } from "~/api/analytics";
 import Accordion from "~/components/layout/Accordion";
 import Notification from "~ui/notifications/Notification";
+import ExternalLink from "~ui/controls/ExternalLink";
 
 import cs from "./host_organism_message.scss";
 
@@ -34,17 +34,13 @@ export default class HostOrganismMessage extends React.Component {
 
   renderLearnMoreLink() {
     return (
-      <a
+      <ExternalLink
         className={cs.link}
-        target="_blank"
-        rel="noopener noreferrer"
         href="https://help.idseq.net/"
-        onClick={() =>
-          logAnalyticsEvent("HostOrganismMessage_learn-more-link_clicked")
-        }
+        analyticsEventName="HostOrganismMessage_learn-more-link_clicked"
       >
         Learn more
-      </a>
+      </ExternalLink>
     );
   }
 

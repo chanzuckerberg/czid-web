@@ -7,18 +7,22 @@
 }
 
 .messageContainer {
+  @include font-body-xs;
+
   margin: $space-s 0;
-  font-size: $font-size;
+
   strong {
     font-weight: $font-weight-bold;
   }
 }
 
 .messageLine {
+  @include font-body-xs;
+
   margin: 0 $space-s;
   padding: $space-s;
-  font-size: $font-size;
-  margin: 0 44px; // align to right of icon
+  // .messageContainer margin + .icon margin + .icon width (see notification.scss)
+  margin: 0 calc(#{$space-s} + #{$space-m} + 20px);
 
   &:nth-child(odd) {
     background-color: $info-dark;
@@ -33,7 +37,6 @@
   }
 }
 
-// NOTE: we should really have a Link component
 .link {
   // Overwrite <a> inherit rule in header.scss
   color: $primary-light !important;
