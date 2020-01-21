@@ -370,7 +370,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("project")
-      projects = prefix_match(Project, "name", query, id: current_power.projects.pluck(:id))
+      projects = current_power.projects_by_domain(domain).search_by_name(query)
       unless projects.empty?
         results["Project"] = {
           "name" => "Project",
@@ -415,7 +415,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("sample")
-      samples = prefix_match(Sample, "name", query, id: constrained_sample_ids)
+      samples = constrained_samples.search_by_name(query)
       unless samples.empty?
         results["Sample"] = {
           "name" => "Sample",
@@ -1394,7 +1394,7 @@ class SamplesController < ApplicationController
     end
 
     taxon_list = taxon_search(query, ["species", "genus"])
-    taxon_list = augment_taxon_list_with_sample_count(taxon_list, samples)
+    taxon_list = add_sample_count_to_taxa_with_reads(taxon_list, samples)
     taxon_list = taxon_list.select { |taxon| taxon["sample_count"] > 0 }
 
     render json: taxon_list
@@ -1419,8 +1419,8 @@ class SamplesController < ApplicationController
     end
 
     taxon_list = taxon_search(query, ["species", "genus"])
-    taxon_list = augment_taxon_list_with_sample_count_contigs(taxon_list, samples)
-    taxon_list = taxon_list.select { |taxon| taxon["sample_count_contigs"] > 0 }
+    taxon_list = add_sample_count_to_taxa_with_contigs(taxon_list, samples)
+    taxon_list = taxon_list.select { |taxon| taxon["sample_count"] > 0 }
 
     render json: taxon_list
   end

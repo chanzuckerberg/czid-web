@@ -45,10 +45,6 @@
 
 .downloadNameHeader {
   justify-content: flex-start;
-  // 10px for the margin-left react-virtualized provides
-  // 38px for the size of the DownloadIcon.
-  // Override react-virtualized default.
-  margin-left: 48px !important;
 }
 
 .tableContainer {
