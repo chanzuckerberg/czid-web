@@ -3,7 +3,10 @@ import PropTypes from "prop-types";
 import { unset, find, get, set } from "lodash/fp";
 import memoize from "memoize-one";
 
-import { getBulkDownloadTypes } from "~/api/bulk_downloads";
+import {
+  getBulkDownloadTypes,
+  validateBulkDownloadIds,
+} from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 
 import ChooseStep from "./ChooseStep";
@@ -56,14 +59,13 @@ class BulkDownloadModal extends React.Component {
     selectedFieldsDisplay: {},
     selectedDownloadTypeName: null,
     currentStep: "choose",
-    invalidSampleIds: [],
     validSampleIds: new Set(),
-    filteredSampleNames: [],
+    invalidSampleNames: [],
+    validationError: null,
   };
 
   componentDidMount() {
-    this.filterSamples();
-    this.fetchDownloadTypes();
+    this.fetchDownloadTypesAndValidationInfo();
   }
 
   componentDidUpdate(prevProps) {
@@ -77,56 +79,44 @@ class BulkDownloadModal extends React.Component {
     }
   }
 
-  async fetchDownloadTypes() {
-    const bulkDownloadTypes = await getBulkDownloadTypes();
+  async fetchDownloadTypesAndValidationInfo() {
+    const { selectedSampleIds } = this.props;
+
+    const bulkDownloadTypesRequest = this.fetchDownloadTypes();
+    const sampleValidationInfoRequest = this.fetchValidationInfo(
+      Array.from(selectedSampleIds)
+    );
+
+    const [bulkDownloadTypes, sampleValidationInfo] = await Promise.all([
+      bulkDownloadTypesRequest,
+      sampleValidationInfoRequest,
+    ]);
+
+    const validSampleIds = new Set(sampleValidationInfo.validSampleIds);
+    const invalidSampleNames = sampleValidationInfo.invalidSampleNames;
+    const validationError = sampleValidationInfo.error;
 
     this.setState({
       bulkDownloadTypes,
+      validSampleIds,
+      invalidSampleNames,
+      validationError,
     });
   }
 
-  filterSamples = () => {
-    const [
-      validSampleIds,
-      invalidSampleIds,
-    ] = this.filterSamplesThatCannotBeDownloaded();
-    const filteredSampleNames = this.getFilteredSampleNames(invalidSampleIds);
+  async fetchDownloadTypes() {
+    const bulkDownloadTypes = await getBulkDownloadTypes();
 
-    this.setState({
-      validSampleIds,
-      invalidSampleIds,
-      filteredSampleNames,
-    });
-  };
+    return bulkDownloadTypes;
+  }
 
-  filterSamplesThatCannotBeDownloaded = () => {
-    const { selectedSampleIds, selectedSampleStatuses } = this.props;
-    const validSampleIds = [];
-    const invalidSampleIds = [];
-    selectedSampleIds.forEach(id => {
-      const sampleInfo = selectedSampleStatuses.get(id);
-      if (sampleInfo && sampleInfo.status == "complete") {
-        validSampleIds.push(id);
-      } else {
-        invalidSampleIds.push(id);
-      }
-    });
+  async fetchValidationInfo(selectedSampleIds) {
+    const sampleValidationInfo = await validateBulkDownloadIds(
+      selectedSampleIds
+    );
 
-    return [new Set(validSampleIds), invalidSampleIds];
-  };
-
-  getFilteredSampleNames = invalidSampleIds => {
-    const { selectedSampleStatuses } = this.props;
-    const sampleNames = invalidSampleIds.map(id => {
-      const sampleInfo = selectedSampleStatuses.get(id);
-      if (sampleInfo) {
-        return sampleInfo.name;
-      } else {
-        return "N/A";
-      }
-    });
-    return sampleNames;
-  };
+    return sampleValidationInfo;
+  }
 
   handleSelectDownloadType = selectedDownloadTypeName => {
     this.setState({
@@ -175,7 +165,8 @@ class BulkDownloadModal extends React.Component {
       selectedFields,
       selectedFieldsDisplay,
       validSampleIds,
-      filteredSampleNames,
+      invalidSampleNames,
+      validationError,
     } = this.state;
 
     if (currentStep === "choose") {
@@ -188,7 +179,8 @@ class BulkDownloadModal extends React.Component {
           onFieldSelect={this.handleFieldSelect}
           onContinue={this.handleChooseStepContinue}
           validSampleIds={validSampleIds}
-          filteredSampleNames={filteredSampleNames}
+          invalidSampleNames={invalidSampleNames}
+          validationError={validationError}
         />
       );
     }
@@ -231,7 +223,6 @@ BulkDownloadModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
   selectedSampleIds: PropTypes.instanceOf(Set),
-  selectedSampleStatuses: PropTypes.instanceOf(Map),
 };
 
 export default BulkDownloadModal;

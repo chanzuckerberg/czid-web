@@ -27,7 +27,10 @@ class BulkDownloadsController < ApplicationController
     render json: download_types
   end
 
-  # GET /bulk_downloads/validate
+  # POST /bulk_downloads/validate
+  # This is a POST route and not a GET request because Puma does not allow
+  # query strings longer than a certain amount (1024 * 10 chars), which causes
+  # trouble with projects with a large number of samples.
   def validate
     queried_sample_ids = params[:sampleIds]
     max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
@@ -44,12 +47,14 @@ class BulkDownloadsController < ApplicationController
       render json: { error: e }, status: :unprocessable_entity
     end
 
-    render json: id_validation_info
+    render json: {
+      validSampleIds: id_validation_info[:valid_sample_ids],
+      invalidSampleNames: id_validation_info[:invalid_sample_names],
+      error: id_validation_info[:error],
+    }
   end
 
   # POST /bulk_downloads
-  # TODO: Change flow to use BulkDownloadsValidationService
-  # This will require using the BulkDownloadsTypeHelper to translate download types from params
   def create
     create_params = bulk_download_create_params
 

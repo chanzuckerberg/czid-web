@@ -77,6 +77,8 @@ class ChooseStep extends React.Component {
 
   // make async requests in parallel
   async fetchUserData() {
+    const { selectedSampleIds } = this.props;
+
     const backgroundOptionsRequest = this.fetchBackgrounds();
     const metricsOptionsRequest = this.fetchHeatmapMetrics();
     const allSamplesUploadedByCurrentUserRequest = this.checkAllSamplesUploadedByCurrentUser();
@@ -501,14 +503,14 @@ class ChooseStep extends React.Component {
     );
   };
 
-  renderFilteredSamplesWarning = () => {
-    const { filteredSampleNames } = this.props;
+  renderInvalidSamplesWarning = () => {
+    const { invalidSampleNames } = this.props;
 
     const header = (
       <div className={cs.header}>
         <span className={cs.highlight}>
-          {filteredSampleNames.length} sample
-          {filteredSampleNames.length > 1 ? "s" : ""} won't be included in the
+          {invalidSampleNames.length} sample
+          {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
           bulk download
         </span>, because they are in progress or failed samples:
       </div>
@@ -516,7 +518,7 @@ class ChooseStep extends React.Component {
 
     const content = (
       <div className={cs.messageContainer}>
-        {filteredSampleNames.map((name, index) => {
+        {invalidSampleNames.map((name, index) => {
           return (
             <div key={index} className={cs.messageLine}>
               {name}
@@ -537,8 +539,37 @@ class ChooseStep extends React.Component {
     );
   };
 
+  renderValidationError = () => {
+    const { validationError } = this.props;
+
+    const header = (
+      <div className={cs.header}>There was an error fetching sample data:</div>
+    );
+
+    const content = (
+      <div className={cs.errorContainer}>
+        <div className={cs.messageLine}>{validationError}</div>
+      </div>
+    );
+
+    return (
+      <CompactListNotification
+        header={header}
+        content={content}
+        open={true}
+        type={"error"}
+        displayStyle={"flat"}
+      />
+    );
+  };
+
   render() {
-    const { onContinue, validSampleIds, filteredSampleNames } = this.props;
+    const {
+      onContinue,
+      validSampleIds,
+      invalidSampleNames,
+      validationError,
+    } = this.props;
     const numSamples = validSampleIds.size;
 
     return (
@@ -553,8 +584,8 @@ class ChooseStep extends React.Component {
           {this.renderDownloadTypes()}
         </div>
         <div className={cs.footer}>
-          {filteredSampleNames.length > 0 &&
-            this.renderFilteredSamplesWarning()}
+          {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
+          {validationError != null && this.renderValidationError()}
           <PrimaryButton
             disabled={!this.isSelectedDownloadValid()}
             text="Continue"
@@ -577,8 +608,9 @@ ChooseStep.propTypes = {
   selectedFields: PropTypes.objectOf(PropTypes.string),
   onFieldSelect: PropTypes.func.isRequired,
   onContinue: PropTypes.func.isRequired,
-  validSampleIds: PropTypes.instanceOf(Set),
-  filteredSampleNames: PropTypes.arrayOf(PropTypes.string),
+  validSampleIds: PropTypes.instanceOf(Set).isRequired,
+  invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
+  validationError: PropTypes.string,
 };
 
 ChooseStep.contextType = UserContext;

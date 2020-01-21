@@ -151,31 +151,10 @@ class SamplesView extends React.Component {
     if (this.props.selectedSampleIds !== prevProps.selectedSampleIds) {
       this.setState({
         bulkDownloadButtonTempTooltip: null,
-        selectedSampleStatuses: this.getSelectedSampleStatuses(),
+        // selectedSampleStatuses: this.getSelectedSampleStatuses(),
       });
     }
   }
-
-  // Queries the samples prop (an ObjectCollectionView) for the job
-  // status of each selected sample id. Returns a Map where the
-  // keys are sampleIds and values are the name and status of the sample.
-  getSelectedSampleStatuses = () => {
-    const { selectedSampleIds, samples } = this.props;
-    const statuses = new Map();
-    selectedSampleIds.forEach(id => {
-      const entry = samples.get(id);
-      // if unloaded samples are somehow selected
-      if (entry === undefined) {
-        statuses.set(id, { name: "N/A", status: "loading" });
-      } else {
-        statuses.set(id, {
-          name: entry.sample.name,
-          status: entry.sample.status,
-        });
-      }
-    });
-    return statuses;
-  };
 
   handleSelectRow = (value, checked) => {
     const { selectedSampleIds, onSelectedSamplesUpdate } = this.props;
@@ -562,7 +541,6 @@ class SamplesView extends React.Component {
                 "SamplesView_bulk-download-modal_closed"
               )}
               selectedSampleIds={selectedSampleIds}
-              selectedSampleStatuses={selectedSampleStatuses}
             />
           )}
       </div>

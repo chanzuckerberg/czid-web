@@ -24,11 +24,11 @@ class BulkDownloadsValidationService
     result = if error.nil?
                {
                  valid_sample_ids: finalized_info[:valid_sample_ids],
-                 invalid_sample_info: finalized_info[:invalid_sample_info],
+                 invalid_sample_names: finalized_info[:invalid_sample_names],
                  error: error,
                }
              else
-               { valid_sample_ids: [], invalid_sample_info: [], error: error }
+               { valid_sample_ids: [], invalid_sample_names: [], error: error }
              end
 
     return result
@@ -115,9 +115,9 @@ class BulkDownloadsValidationService
     valid_sample_ids = valid_pipeline_runs.map(&:sample_id)
 
     invalid_samples = samples.reject { |sample| valid_sample_ids.include?(sample.id) }
-    invalid_sample_info = invalid_samples.map { |sample| { id: sample.id, name: sample.name } }
+    invalid_sample_names = invalid_samples.map(&:name)
 
-    finalized_info = { valid_sample_ids: valid_sample_ids, invalid_sample_info: invalid_sample_info }
+    finalized_info = { valid_sample_ids: valid_sample_ids, invalid_sample_names: invalid_sample_names }
 
     return finalized_info
   end

@@ -17,9 +17,7 @@ export const getBulkDownload = bulkDownloadId =>
 export const getPresignedOutputUrl = bulkDownloadId =>
   get(`/bulk_downloads/${bulkDownloadId}/presigned_output_url`);
 
-export const getValidBulkDownloadIds = bulkDownloadIds =>
-  get("/bulk_downloads/validate", {
-    params: {
-      sampleIds: bulkDownloadIds,
-    },
+export const validateBulkDownloadIds = bulkDownloadIds =>
+  postWithCSRF("/bulk_downloads/validate", {
+    sampleIds: bulkDownloadIds,
   });

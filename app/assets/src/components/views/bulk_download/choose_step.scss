@@ -189,6 +189,13 @@
   margin-left: 30px; // to align text with icon
 }
 
+.errorContainer {
+  max-height: 150px;
+  overflow: auto;
+  background-color: $error-bg;
+  margin-left: 30px; // to align text with icon
+}
+
 .messageLine {
   @include font-body-xxs;
   margin: 0 $space-s;
