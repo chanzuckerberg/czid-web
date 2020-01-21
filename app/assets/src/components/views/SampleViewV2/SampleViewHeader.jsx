@@ -92,15 +92,6 @@ export default function SampleViewHeader({
             }}
           />
         </div>
-        {/* Temporary link to legacy view of report page.
-        TODO: Remove when v2 of report page is enabled for everyone. */}
-        {sample && (
-          <span className={cs.legacyLink}>
-            <a href={`/samples/${sample.id}/legacy`}>
-              | View legacy report page.
-            </a>
-          </span>
-        )}
         <ViewHeader.Pretitle
           breadcrumbLink={project && `/home?project_id=${project.id}`}
         >
