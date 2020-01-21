@@ -54,21 +54,21 @@ def notify_slack(env, image, stage)
   end
 end
 
-#notify_slack(env, image, "start")
+notify_slack(env, image, "start")
 begin
   os = RbConfig::CONFIG['host_os'] =~ /darwin/ ? 'darwin' : 'linux'
   system!("curl -L https://github.com/chanzuckerberg/czecs/releases/download/v0.1.1/czecs_0.1.1_#{os}_amd64.tar.gz | tar xz -C /tmp czecs")
   task_definition_arn = `/tmp/czecs register --quiet -f balances.json --set tag=#{image} --set env=#{env} czecs.json`.strip
   $?.exitstatus == 0 || abort("\n== Could not register task ==\n")
   puts 'running migrations'
-  system!("/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=idseq-#{cluster}-ecs czecs-task-migrate.json")
-  system!("/tmp/czecs upgrade --task-definition-arn #{task_definition_arn} idseq-#{cluster}-ecs idseq-#{env}-web")
-  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque --set rake_command=resque:workers idseq-#{cluster}-ecs idseq-#{env}-resque czecs-resque.json")
-  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-pipeline-monitor --set rake_command=pipeline_monitor idseq-#{cluster}-ecs idseq-#{env}-resque-pipeline-monitor czecs-resque.json")
-  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-result-monitor --set rake_command=result_monitor idseq-#{cluster}-ecs idseq-#{env}-resque-result-monitor czecs-resque.json")
-  # notify_slack(env, image, "end")
+  system!("/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json")
+  system!("/tmp/czecs upgrade --task-definition-arn #{task_definition_arn} #{cluster} idseq-#{env}-web")
+  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque --set rake_command=resque:workers #{cluster} idseq-#{env}-resque czecs-resque.json")
+  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-pipeline-monitor --set rake_command=pipeline_monitor #{cluster} idseq-#{env}-resque-pipeline-monitor czecs-resque.json")
+  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-result-monitor --set rake_command=result_monitor #{cluster} idseq-#{env}-resque-result-monitor czecs-resque.json")
+  notify_slack(env, image, "end")
 rescue Exception  # Even on abort/SystemExit
-  #notify_slack(env, image, "failure")
+  notify_slack(env, image, "failure")
   raise
 ensure
   system!("rm -f /tmp/czecs")
