@@ -464,7 +464,7 @@ class ProjectsController < ApplicationController
   end
 
   def add_user
-    @user = User.find_by(email: params[:user_email_to_add])
+    @user = User.find_by(email: params[:user_email_to_add].downcase)
     if @user
       UserMailer.added_to_projects_email(@user.id, shared_project_email_arguments).deliver_now unless @project.user_ids.include? @user.id
     else
@@ -548,6 +548,7 @@ class ProjectsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def create_new_user_random_password(name, email)
+    email = email.downcase
     Rails.logger.info("Going to create new user via project sharing: #{email}")
     user_params = { email: email, name: name }
     @user = User.new(user_params)
