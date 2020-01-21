@@ -13,8 +13,7 @@ class Notification extends React.Component {
       case "error":
         return <AlertIcon />;
       case "info":
-        // TODO (gdingle): test me... add new custom icon
-        return <InfoIcon className={cs.successIcon} />;
+        return <InfoIcon />;
       case "success":
         return <CheckmarkIcon className={cs.successIcon} />;
       default:
