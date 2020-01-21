@@ -305,7 +305,7 @@ class ChooseStep extends React.Component {
       selectedSampleIds,
     } = this.props;
     const { allSamplesUploadedByCurrentUser } = this.state;
-    const { admin, maxSamplesBulkDownloadOriginalFiles } = this.context || {};
+    const { admin, appConfig } = this.context || {};
 
     const selected = selectedDownloadTypeName === downloadType.type;
     let disabled = false;
@@ -322,12 +322,14 @@ class ChooseStep extends React.Component {
       }, you must be the original uploader of all selected samples.`;
     } else if (
       downloadType.type === "original_input_file" &&
-      maxSamplesBulkDownloadOriginalFiles &&
-      selectedSampleIds.size > maxSamplesBulkDownloadOriginalFiles &&
+      appConfig.maxSamplesBulkDownloadOriginalFiles &&
+      selectedSampleIds.size > appConfig.maxSamplesBulkDownloadOriginalFiles &&
       !admin
     ) {
       disabled = true;
-      disabledMessage = `No more than ${maxSamplesBulkDownloadOriginalFiles} samples
+      disabledMessage = `No more than ${
+        appConfig.maxSamplesBulkDownloadOriginalFiles
+      } samples
         allowed for ${downloadType.display_name} downloads`;
     }
 
