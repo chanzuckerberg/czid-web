@@ -44,7 +44,7 @@ const STATUS_DISPLAY = {
 // In this case, the bulk download task will have status = success and also have an error message.
 const getStatusType = bulkDownload => {
   if (bulkDownload.status === "success" && bulkDownload.error_message) {
-    return "warn";
+    return "warning";
   }
   return STATUS_TYPES[bulkDownload.status];
 };
