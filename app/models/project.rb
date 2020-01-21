@@ -109,7 +109,7 @@ class Project < ApplicationRecord
   end
 
   # search is used by ES
-  def self.db_search(query)
+  def self.search_by_name(query)
     if query
       tokens = query.scan(/\w+/).map { |t| "%#{t}%" }
       q = scoped

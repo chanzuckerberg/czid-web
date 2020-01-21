@@ -74,7 +74,7 @@ class ProjectsController < ApplicationController
         # we use includes because we need data from both associations to return aggregate data for the project
         projects = projects.includes(:users).includes(:samples)
         projects = projects.where(id: project_id) if project_id
-        projects = projects.db_search(search) if search
+        projects = projects.search_by_name(search) if search
         if [:host, :location, :locationV2, :taxon, :time, :tissue, :visibility].any? { |key| params.key? key }
           projects = projects.where(samples: { id: filter_samples(current_power.samples, params) })
         end

@@ -370,7 +370,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("project")
-      projects = current_power.projects_by_domain(domain).db_search(query)
+      projects = current_power.projects_by_domain(domain).search_by_name(query)
       unless projects.empty?
         results["Project"] = {
           "name" => "Project",
