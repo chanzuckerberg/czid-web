@@ -16,7 +16,7 @@ test:
   <<: *default
   host: db
 
-deployed:
+deployed: &deployed
   <<: *default
   host: <%= ENV['RDS_ADDRESS'] %>
   password: <%= ENV['DB_PASSWORD'] %>
