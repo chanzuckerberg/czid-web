@@ -728,7 +728,7 @@ module SamplesHelper
   end
 
   def filter_by_search_string(samples, search_string)
-    samples.search(search_string)
+    samples.search_by_name(search_string)
   end
 
   def filter_by_sample_ids(samples, requested_sample_ids)

@@ -109,10 +109,14 @@ class Project < ApplicationRecord
   end
 
   # search is used by ES
-  def self.db_search(search)
-    if search
-      search = search.strip
-      where("projects.name LIKE :search", search: "%#{search}%")
+  def self.search_by_name(query)
+    if query
+      tokens = query.scan(/\w+/).map { |t| "%#{t}%" }
+      q = scoped
+      tokens.each do |token|
+        q = q.where("projects.name LIKE :search", search: token.to_s)
+      end
+      q
     else
       scoped
     end
