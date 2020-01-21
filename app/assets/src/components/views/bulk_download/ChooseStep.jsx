@@ -77,8 +77,6 @@ class ChooseStep extends React.Component {
 
   // make async requests in parallel
   async fetchUserData() {
-    const { selectedSampleIds } = this.props;
-
     const backgroundOptionsRequest = this.fetchBackgrounds();
     const metricsOptionsRequest = this.fetchHeatmapMetrics();
     const allSamplesUploadedByCurrentUserRequest = this.checkAllSamplesUploadedByCurrentUser();

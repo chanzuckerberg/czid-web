@@ -38,7 +38,6 @@ class SamplesView extends React.Component {
       bulkDownloadModalOpen: false,
       // This tooltip is reset whenever the selectedSampleIds changes.
       bulkDownloadButtonTempTooltip: null,
-      selectedSampleStatuses: new Map(),
     };
 
     this.columns = [
@@ -151,7 +150,6 @@ class SamplesView extends React.Component {
     if (this.props.selectedSampleIds !== prevProps.selectedSampleIds) {
       this.setState({
         bulkDownloadButtonTempTooltip: null,
-        // selectedSampleStatuses: this.getSelectedSampleStatuses(),
       });
     }
   }
@@ -509,11 +507,7 @@ class SamplesView extends React.Component {
 
   render() {
     const { currentDisplay, allowedFeatures, selectedSampleIds } = this.props;
-    const {
-      phyloTreeCreationModalOpen,
-      bulkDownloadModalOpen,
-      selectedSampleStatuses,
-    } = this.state;
+    const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
     return (
       <div className={cs.container}>
         {currentDisplay === "table" ? (
