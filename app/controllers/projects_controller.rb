@@ -464,7 +464,8 @@ class ProjectsController < ApplicationController
   end
 
   def add_user
-    @user = User.find_by(email: params[:user_email_to_add].downcase)
+    params[:user_email_to_add].downcase!
+    @user = User.find_by(email: params[:user_email_to_add])
     if @user
       UserMailer.added_to_projects_email(@user.id, shared_project_email_arguments).deliver_now unless @project.user_ids.include? @user.id
     else

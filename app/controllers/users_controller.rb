@@ -18,9 +18,7 @@ class UsersController < ApplicationController
   # POST /users.json
   def create
     new_user_params = user_params.to_h.symbolize_keys
-    if new_user_params.key?(:email)
-      new_user_params[:email] = new_user_params[:email].downcase
-    end
+    new_user_params[:email].downcase!
     send_activation = new_user_params.delete(:send_activation)
     new_user(new_user_params)
 
