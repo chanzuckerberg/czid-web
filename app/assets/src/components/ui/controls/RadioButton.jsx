@@ -14,9 +14,7 @@ class RadioButton extends React.Component {
           this.props.disabled && cs.disabled
         )}
         onClick={this.props.disabled ? undefined : this.props.onClick}
-      >
-        <div className={cs.inner} />
-      </div>
+      />
     );
   }
 }

@@ -8,28 +8,15 @@
   padding: 2px;
   cursor: pointer;
 
-  .inner {
-    width: 9px;
-    height: 9px;
-    border-radius: 15px;
-    background-color: transparent;
-  }
-
   &:hover {
-    .inner {
-      background-color: $light-grey;
-    }
+    border: 5px solid $light-grey;
   }
 
   &.selected {
-    .inner {
-      background-color: $primary-light;
-    }
+    border: 5px solid $primary-light;
 
     &:hover {
-      .inner {
-        background-color: $primary-lighter;
-      }
+      border: 5px solid $primary-lighter;
     }
   }
 
@@ -37,10 +24,9 @@
     cursor: default;
     border: 1px solid $light-grey;
 
-    &:hover {
-      .inner {
-        background-color: transparent;
-      }
+    &:hover,
+    &.selected {
+      border: 1px solid $light-grey;
     }
   }
 }
