@@ -3,6 +3,5 @@
   "project": "idseq",
   "env": "staging",
   "name": "web",
-  "region": "us-west-2",
-  "resque_queues": "data_migration,precache_report_info,q03_pipeline_run,transfer_basespace_files,generate_bulk_download,*"
+  "region": "us-west-2"
 }
