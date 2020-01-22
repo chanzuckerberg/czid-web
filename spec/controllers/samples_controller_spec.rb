@@ -261,19 +261,19 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 1,
-                                                  "sample_count_contigs" => 3,
+                                                  "sample_count" => 3,
                                                 },
                                                 {
                                                   "taxid" => 2,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 101,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 102,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                               ])
       end
@@ -303,19 +303,19 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 1,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 2,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 101,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 102,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                               ])
       end
@@ -344,19 +344,19 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 1,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 2,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 101,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 102,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                               ])
       end

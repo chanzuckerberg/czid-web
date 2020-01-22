@@ -1,19 +1,22 @@
-// Given a set of samples, allows the user to select a taxon that had contigs align to it
+// Given a set of samples, allows the user to select a taxon that had hits (reads or contigs) align to it
 // in at least one of the samples.
-// For each taxon, provides a count of how many of the provided samples had contigs align to that taxon.
+// For each taxon, provides a count of how many of the provided samples had hits align to that taxon.
 import React from "react";
 import { debounce, orderBy } from "lodash/fp";
 import memoize from "memoize-one";
 
-import { getTaxaWithContigsSuggestions } from "~/api";
+import {
+  getTaxaWithContigsSuggestions,
+  getTaxaWithReadsSuggestions,
+} from "~/api";
 import PropTypes from "~/components/utils/propTypes";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 
-import cs from "./taxon_contig_select.scss";
+import cs from "./taxon_hit_select.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 
-class TaxonContigSelect extends React.Component {
+class TaxonHitSelect extends React.Component {
   state = {
     options: null,
     isLoadingOptions: false,
@@ -32,9 +35,14 @@ class TaxonContigSelect extends React.Component {
   // Debounce this function, so it only runs after the user has not typed for a delay.
   loadOptionsForQuery = debounce(AUTOCOMPLETE_DEBOUNCE_DELAY, async query => {
     this._lastQuery = query;
-    const { sampleIds } = this.props;
+    const { sampleIds, hitType } = this.props;
 
-    const searchResults = await getTaxaWithContigsSuggestions(
+    const suggestionsEndpoint =
+      hitType === "contig"
+        ? getTaxaWithContigsSuggestions
+        : getTaxaWithReadsSuggestions;
+
+    const searchResults = await suggestionsEndpoint(
       query,
       Array.from(sampleIds)
     );
@@ -51,11 +59,11 @@ class TaxonContigSelect extends React.Component {
         <div className={cs.option}>
           <div className={cs.taxonName}>{result.title}</div>
           <div className={cs.fill} />
-          <div className={cs.sampleCount}>{result.sample_count_contigs}</div>
+          <div className={cs.sampleCount}>{result.sample_count}</div>
         </div>
       ),
       // Ignored by the dropdown, used for sorting.
-      sampleCount: result.sample_count_contigs,
+      sampleCount: result.sample_count,
     }));
 
     this.setState({
@@ -106,7 +114,7 @@ class TaxonContigSelect extends React.Component {
         value={value}
         optionsHeader={optionsHeader}
         menuLabel="Select taxon"
-        className={cs.taxaWithContigsDropdown}
+        className={cs.taxaWithHitsDropdown}
         search
         onFilterChange={this.handleFilterChange}
         showNoResultsMessage
@@ -118,17 +126,18 @@ class TaxonContigSelect extends React.Component {
   }
 }
 
-TaxonContigSelect.propTypes = {
+TaxonHitSelect.propTypes = {
   sampleIds: PropTypes.instanceOf(Set),
   onChange: PropTypes.func,
   value: PropTypes.number, // The currently selected taxid.
   usePortal: PropTypes.bool,
   withinModal: PropTypes.bool,
+  hitType: PropTypes.oneOf(["read", "contig"]),
 };
 
-TaxonContigSelect.defaultProps = {
+TaxonHitSelect.defaultProps = {
   usePortal: true,
   withinModal: true,
 };
 
-export default TaxonContigSelect;
+export default TaxonHitSelect;

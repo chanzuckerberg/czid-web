@@ -128,11 +128,11 @@
       text-align: left;
 
       span:not(:first-child) {
-        margin-left: 10px;
+        margin-left: $space-xxxs;
       }
 
       span:not(:last-child) {
-        margin-right: 10px;
+        margin-right: $space-xxxs;
       }
     }
   }

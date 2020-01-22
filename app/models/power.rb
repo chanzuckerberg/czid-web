@@ -73,4 +73,17 @@ class Power
   power :viewable_bulk_downloads do
     BulkDownload.viewable(@user)
   end
+
+  power :projects_by_domain do |domain|
+    case domain
+    when "my_data"
+      @user.projects
+    when "public"
+      Project.public_projects
+    when "updatable"
+      updatable_projects
+    else
+      projects
+    end
+  end
 end

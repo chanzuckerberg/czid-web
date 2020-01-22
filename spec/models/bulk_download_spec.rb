@@ -1004,7 +1004,7 @@ describe BulkDownload, type: :model do
         download_type: BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
       )
 
-      expect(bulk_download.download_display_name).to eq("Sample Overviews")
+      expect(bulk_download.download_display_name).to eq("Samples Overview")
     end
 
     it "includes taxon for single-taxon reads non host download" do

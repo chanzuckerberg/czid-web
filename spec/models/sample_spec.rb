@@ -231,4 +231,41 @@ describe Sample, type: :model do
       expect(@sample.status_url).to eq("http://localhost:3000/samples/8/pipeline_runs")
     end
   end
+
+  context "#search_by_name" do
+    before do
+      project = create(:project, name: "Test Search Project")
+      @sample_single_match1 = create(:sample, project: project, name: "Sample test single match 1")
+      @sample_single_match2 = create(:sample, project: project, name: "Sample test single match 2")
+      @sample_partial_match = create(:sample, project: project, name: "Sample test anywhereSinglePartial match")
+      @sample_multiple_match = create(:sample, project: project, name: "Sample test single and multiple match")
+      @sample_no_match = create(:sample, project: project, name: "Sample test with no match")
+    end
+
+    subject { Sample.search_by_name(query) }
+
+    context "with a single word query" do
+      let(:query) { "single" }
+
+      it "returns samples matching single word query" do
+        expect(subject.pluck(:name)).to include(@sample_single_match1.name, @sample_single_match2.name, @sample_multiple_match.name)
+      end
+
+      it "returns samples with partial matches" do
+        expect(subject.pluck(:name)).to include(@sample_partial_match.name)
+      end
+
+      it "does not return samples with no matches" do
+        expect(subject.pluck(:name)).to_not include(@sample_no_match.name)
+      end
+    end
+
+    context "with a multiple word query" do
+      let(:query) { "single multiple" }
+
+      it "returns only samples matching all tokens in query" do
+        expect(subject.pluck(:name)).to eq([@sample_multiple_match.name])
+      end
+    end
+  end
 end

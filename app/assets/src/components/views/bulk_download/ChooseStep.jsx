@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
 import {
-  debounce,
   find,
   filter,
   get,
@@ -21,7 +20,6 @@ import RadioButton from "~ui/controls/RadioButton";
 import BasicPopup from "~/components/BasicPopup";
 import {
   getBackgrounds,
-  getTaxaWithReadsSuggestions,
   uploadedByCurrentUser,
   getHeatmapMetrics,
 } from "~/api";
@@ -29,10 +27,8 @@ import CompactListNotification from "~ui/notifications/CompactListNotification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
-import TaxonContigSelect from "./TaxonContigSelect";
+import TaxonHitSelect from "./TaxonHitSelect";
 import cs from "./choose_step.scss";
-
-const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 
 // Stores information about conditional fields for bulk downloads.
 const CONDITIONAL_FIELDS = [
@@ -64,12 +60,8 @@ class ChooseStep extends React.Component {
   state = {
     backgroundOptions: null,
     metricsOptions: null,
-    taxaWithReadsOptions: null,
-    isLoadingTaxaWithReadsOptionsOptions: false,
     allSamplesUploadedByCurrentUser: false,
   };
-
-  _lastTaxaWithReadsQuery = "";
 
   componentDidMount() {
     this.fetchUserData();
@@ -186,52 +178,6 @@ class ChooseStep extends React.Component {
     return true;
   };
 
-  handleTaxaWithReadsSelectFilterChange = query => {
-    this.setState({
-      isLoadingTaxaWithReadsOptionsOptions: true,
-    });
-
-    this.loadTaxaWithReadsOptionsForQuery(query);
-  };
-
-  // Debounce this function, so it only runs after the user has not typed for a delay.
-  loadTaxaWithReadsOptionsForQuery = debounce(
-    AUTOCOMPLETE_DEBOUNCE_DELAY,
-    async query => {
-      this._lastTaxaWithReadsQuery = query;
-      const { validSampleIds } = this.props;
-
-      const searchResults = await getTaxaWithReadsSuggestions(
-        query,
-        Array.from(validSampleIds)
-      );
-
-      // If the query has since changed, discard the response.
-      if (query != this._lastTaxaWithReadsQuery) {
-        return;
-      }
-
-      const taxaWithReadsOptions = searchResults.map(result => ({
-        value: result.taxid,
-        text: result.title,
-        customNode: (
-          <div className={cs.taxaWithReadsOption}>
-            <div className={cs.taxonName}>{result.title}</div>
-            <div className={cs.fill} />
-            <div className={cs.sampleCount}>{result.sample_count}</div>
-          </div>
-        ),
-        // Ignored by the dropdown, used for sorting.
-        sampleCount: result.sample_count,
-      }));
-
-      this.setState({
-        taxaWithReadsOptions,
-        isLoadingTaxaWithReadsOptionsOptions: false,
-      });
-    }
-  );
-
   sortTaxaWithReadsOptions = memoize(options =>
     orderBy(["sampleCount", "text"], ["desc", "asc"], options)
   );
@@ -240,22 +186,13 @@ class ChooseStep extends React.Component {
     const { selectedFields, onFieldSelect, validSampleIds } = this.props;
     const {
       backgroundOptions,
-      taxaWithReadsOptions,
       isLoadingTaxaWithReadsOptionsOptions,
       metricsOptions,
     } = this.state;
 
     const selectedField = get(field.type, selectedFields);
     let dropdownOptions = null;
-    let loadingOptions = false;
-    let optionsHeader = null;
     let placeholder = "";
-    let menuLabel = "";
-    let className = "";
-    let search = false;
-    let onFilterChange = null;
-    let showNoResultsMessage = false;
-    let isLoadingSearchOptions = false;
 
     // Handle rendering conditional fields.
 
@@ -297,45 +234,11 @@ class ChooseStep extends React.Component {
         placeholder = "Select file format";
         break;
       case "taxa_with_reads":
-        dropdownOptions = [
-          {
-            text: "All Taxa",
-            value: "all",
-            customNode: (
-              <div className={cs.taxaWithReadsOption}>
-                <div className={cs.taxonName}>All taxa</div>
-                <div className={cs.fill} />
-                <div className={cs.sampleCount}>{validSampleIds.size}</div>
-              </div>
-            ),
-          },
-          // Note: BareDropdown with search prioritizes prefix matches, so the final ordering of options
-          // might not be the one provided here.
-          ...(this.sortTaxaWithReadsOptions(taxaWithReadsOptions) || []),
-        ];
-
-        placeholder = "Select taxon";
-        menuLabel = "Select taxon";
-        showNoResultsMessage = true;
-        search = true;
-        onFilterChange = this.handleTaxaWithReadsSelectFilterChange;
-        className = cs.taxaWithReadsDropdown;
-        isLoadingSearchOptions = isLoadingTaxaWithReadsOptionsOptions;
-
-        optionsHeader = (
-          <div className={cs.taxaWithReadsOptionsHeader}>
-            <div className={cs.header}>Taxon</div>
-            <div className={cs.fill} />
-            <div className={cs.header}>Samples</div>
-          </div>
-        );
-        break;
-      case "taxa_with_contigs":
         return (
           <div className={cs.field} key={field.type}>
             <div className={cs.label}>{field.display_name}:</div>
-            <TaxonContigSelect
-              sampleIds={validSampleIds}
+            <TaxonHitSelect
+              sampleIds={selectedSampleIds}
               onChange={(value, displayName) => {
                 onFieldSelect(
                   downloadType.type,
@@ -345,6 +248,26 @@ class ChooseStep extends React.Component {
                 );
               }}
               value={selectedField}
+              hitType="read"
+            />
+          </div>
+        );
+      case "taxa_with_contigs":
+        return (
+          <div className={cs.field} key={field.type}>
+            <div className={cs.label}>{field.display_name}:</div>
+            <TaxonHitSelect
+              sampleIds={selectedSampleIds}
+              onChange={(value, displayName) => {
+                onFieldSelect(
+                  downloadType.type,
+                  field.type,
+                  value,
+                  displayName
+                );
+              }}
+              value={selectedField}
+              hitType="contig"
             />
           </div>
         );
@@ -367,8 +290,7 @@ class ChooseStep extends React.Component {
         <div className={cs.label}>{field.display_name}:</div>
         <Dropdown
           fluid
-          disabled={loadingOptions}
-          placeholder={loadingOptions ? "Loading..." : placeholder}
+          placeholder={placeholder}
           options={dropdownOptions}
           onChange={(value, displayName) => {
             onFieldSelect(downloadType.type, field.type, value, displayName);
@@ -390,15 +312,8 @@ class ChooseStep extends React.Component {
             });
           }}
           value={selectedField}
-          optionsHeader={optionsHeader}
-          menuLabel={menuLabel}
-          className={className}
           usePortal
           withinModal
-          search={search}
-          onFilterChange={onFilterChange}
-          showNoResultsMessage={showNoResultsMessage}
-          isLoadingSearchOptions={isLoadingSearchOptions}
         />
       </div>
     );
@@ -573,7 +488,7 @@ class ChooseStep extends React.Component {
     return (
       <div className={cs.chooseStep}>
         <div className={cs.header}>
-          <div className={cs.title}>Choose a Download</div>
+          <div className={cs.title}>Select a Download Type</div>
           <div className={cs.tagline}>
             {numSamples} sample{numSamples != 1 ? "s" : ""} selected
           </div>

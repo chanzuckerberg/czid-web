@@ -97,7 +97,7 @@ RSpec.describe SamplesHelper, type: :helper do
     end
   end
 
-  describe "#augment_taxon_list_with_sample_count_contigs" do
+  describe "#add_sample_count_to_taxa_with_contigs" do
     let(:taxon_list) do
       [
         {
@@ -145,29 +145,29 @@ RSpec.describe SamplesHelper, type: :helper do
     end
 
     it "returns correct counts in the basic case" do
-      response = helper.augment_taxon_list_with_sample_count_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id]))
+      response = helper.add_sample_count_to_taxa_with_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id]))
 
       expect(response[0]["taxid"]).to be 1
-      expect(response[0]["sample_count_contigs"]).to be 3
+      expect(response[0]["sample_count"]).to be 3
       expect(response[1]["taxid"]).to be 2
-      expect(response[1]["sample_count_contigs"]).to be 2
+      expect(response[1]["sample_count"]).to be 2
       expect(response[2]["taxid"]).to be 101
-      expect(response[2]["sample_count_contigs"]).to be 2
+      expect(response[2]["sample_count"]).to be 2
       expect(response[3]["taxid"]).to be 102
-      expect(response[3]["sample_count_contigs"]).to be 2
+      expect(response[3]["sample_count"]).to be 2
     end
 
     it "doesn't count samples that weren't passed in" do
-      response = helper.augment_taxon_list_with_sample_count_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id]))
+      response = helper.add_sample_count_to_taxa_with_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id]))
 
       expect(response[0]["taxid"]).to be 1
-      expect(response[0]["sample_count_contigs"]).to be 2
+      expect(response[0]["sample_count"]).to be 2
       expect(response[1]["taxid"]).to be 2
-      expect(response[1]["sample_count_contigs"]).to be 1
+      expect(response[1]["sample_count"]).to be 1
       expect(response[2]["taxid"]).to be 101
-      expect(response[2]["sample_count_contigs"]).to be 1
+      expect(response[2]["sample_count"]).to be 1
       expect(response[3]["taxid"]).to be 102
-      expect(response[3]["sample_count_contigs"]).to be 1
+      expect(response[3]["sample_count"]).to be 1
     end
   end
 end
