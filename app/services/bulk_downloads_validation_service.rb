@@ -97,7 +97,9 @@ class BulkDownloadsValidationService
     # Filter out samples the user shouldn't be able to view
     viewable_samples = current_power.viewable_samples.where(id: sample_ids)
     if viewable_samples.length != sample_ids.length
-      raise SAMPLE_ACCESS_ERROR # don't leak permission/existence information
+      viewable_ids = viewable_samples.map(&:id)
+      private_samples = sample_ids.reject { |id| viewable_ids.include?(id) }
+      LogUtil.log_err_and_airbrake("BulkDownloadsImproperAccessEvent: User made bulk download request for samples they don't have access to: #{private_samples}")
     end
 
     return viewable_samples
