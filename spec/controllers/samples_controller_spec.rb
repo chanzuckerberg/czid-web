@@ -369,7 +369,6 @@ RSpec.describe SamplesController, type: :controller do
 
         get :index, params: { project_id: project.id, basic: true }
         json_response = JSON.parse(response.body)
-        print(json_response)
         expect(json_response.length).to eq(1)
         expect(json_response).to include_json([
                                                 {
@@ -388,7 +387,6 @@ RSpec.describe SamplesController, type: :controller do
 
         get :index, params: { project_id: project.id, basic: true }
         json_response = JSON.parse(response.body)
-        print(json_response)
         expect(json_response.length).to eq(1)
         expect(json_response).to include_json([
                                                 {
