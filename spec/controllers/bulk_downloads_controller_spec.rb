@@ -14,8 +14,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
     describe "POST #validate" do
       before do
-        TEST_MAX_SAMPLES_CONST = 4
-        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, TEST_MAX_SAMPLES_CONST)
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
         @admin_project = create(:project, users: [@admin])
       end
 
@@ -97,7 +96,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         logger = class_double(LogUtil).as_stubbed_const
 
-        expect(logger).to receive(:log_err_and_airbrake).with(/BulkDownloadsImproperAccessEvent/)
+        expect(logger).to receive(:log_err_and_airbrake).with(/BulkDownloadsImproperAccessEvent: User made bulk download request for samples they don't have access to: \[#{different_owner_sample.id}\]/)
 
         post :validate, params: validate_params
 
@@ -112,7 +111,10 @@ RSpec.describe BulkDownloadsController, type: :controller do
       end
 
       it "should return an error in json when more than max samples allowed are asked for" do
-        # should include more samples than defined in TEST_MAX_SAMPLES_CONST
+        test_max_samples_value = 4
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, test_max_samples_value)
+
+        # should include more samples than defined in test_max_samples_value
         validate_params = {
           sampleIds: [good_sample_one, good_sample_two, in_progress_sample, failed_sample, different_owner_sample],
         }
@@ -125,7 +127,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(json_response).not_to eq(nil)
         expect(json_response["validSampleIds"]).to be_empty
         expect(json_response["invalidSampleNames"]).to be_empty
-        expect(json_response["error"]).to eq(BulkDownloadsValidationService::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % TEST_MAX_SAMPLES_CONST)
+        expect(json_response["error"]).to eq(BulkDownloadsValidationService::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % test_max_samples_value)
       end
     end
 
@@ -516,6 +518,32 @@ RSpec.describe BulkDownloadsController, type: :controller do
     end
 
     describe "POST #validate" do
+      it "does not call action" do
+        sample_one = create(:sample, project: @project,
+                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        validate_params = {
+          sampleIds: [sample_one],
+        }
+
+        post :validate, params: validate_params
+
+        expect(controller).not_to receive(:validate)
+      end
+
+      it "redirected to home page" do
+        sample_one = create(:sample, project: @project,
+                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        validate_params = {
+          download_type: "sample_overview",
+          sampleIds: [sample_one],
+        }
+
+        post :validate, params: validate_params
+
+        expect(response).to redirect_to(root_path)
+      end
     end
 
     describe "POST #create" do
@@ -637,6 +665,61 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(bulk_downloads[0]["user_name"]).to eq("Joe")
         expect(bulk_downloads[0]["execution_type"]).to eq("ecs")
         expect(bulk_downloads[0]["log_url"]).to match("MOCK_TASK_ARN")
+      end
+    end
+
+    describe "POST #validate" do
+      before do
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+        @joe_project = create(:project, users: [@joe])
+      end
+
+      let(:good_sample_one) do
+        create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:good_sample_two) do
+        create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:different_owner_sample) do
+        create(:sample, project: @joe_project, name: "Joe Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      it "should ignore max samples limit if admin" do
+        test_max_samples_value = 1
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, test_max_samples_value)
+
+        validate_params = {
+          sampleIds: [good_sample_one, good_sample_two],
+        }
+
+        post :validate, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
+        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["invalidSampleNames"]).to be_empty
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should validate samples owned by any user" do
+        validate_params = {
+          sampleIds: [different_owner_sample],
+        }
+
+        post :validate, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(different_owner_sample.id)
+        expect(json_response["invalidSampleNames"]).to be_empty
+        expect(json_response["error"]).to be_nil
       end
     end
 
