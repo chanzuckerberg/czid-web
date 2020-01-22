@@ -12,7 +12,6 @@ import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
 } from "~/components/views/report/utils/download";
-import SampleView from "./SampleView";
 
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
