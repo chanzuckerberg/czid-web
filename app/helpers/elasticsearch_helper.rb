@@ -5,6 +5,7 @@ module ElasticsearchHelper
   # TODO(tiago): Eventually, this filtering should be moved to ElasticSearch, at which point we should reduce the max value
   # (We can also move it to a parameter that clients of this functions can set)
   MAX_SEARCH_RESULTS = 50
+  HOMO_SAPIEN_TAX_ID = 9606
 
   def prefix_match(model, field, prefix, condition)
     prefix = sanitize(prefix)
@@ -89,6 +90,10 @@ module ElasticsearchHelper
     taxon_ids = filter_by_samples(taxon_ids, filters[:samples]) if filters[:samples]
     taxon_ids = filter_by_project(taxon_ids, filters[:project_id]) if filters[:project_id]
     taxon_ids = Set.new(taxon_ids)
+
+    # Always remove homo sapiens from search, same as reports, because all homo sapiens
+    # hits are supposed to removed upstream in the pipeline. See also remove_homo_sapiens_counts!
+    taxon_ids = taxon_ids.delete(HOMO_SAPIEN_TAX_ID)
 
     return matching_taxa.select { |taxon| taxon_ids.include? taxon["taxid"] }
   end
