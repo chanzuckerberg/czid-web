@@ -1100,6 +1100,7 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.sampleViewHeader}>
             <SampleViewHeader
               backgroundId={selectedOptions.background}
+              deletable={sample ? sample.deletable : false}
               editable={sample ? sample.editable : false}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}

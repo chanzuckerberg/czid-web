@@ -12,6 +12,7 @@ import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
 } from "~/components/views/report/utils/download";
+import SampleView from "./SampleView";
 
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
@@ -104,7 +105,7 @@ class SampleViewControls extends React.Component {
   }
 
   render() {
-    const { reportPresent, pipelineRun, editable } = this.props;
+    const { deletable, editable, pipelineRun, reportPresent } = this.props;
 
     if (reportPresent && pipelineRun) {
       const downloadOptions = [
@@ -123,7 +124,7 @@ class SampleViewControls extends React.Component {
           direction="left"
         />
       );
-    } else if (editable) {
+    } else if (editable && deletable) {
       return <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />;
     } else {
       return <div />;
@@ -131,15 +132,20 @@ class SampleViewControls extends React.Component {
   }
 }
 
+SampleViewControls.defaultProps = {
+  deletable: false,
+};
+
 SampleViewControls.propTypes = {
   backgroundId: PropTypes.number,
+  deletable: PropTypes.bool,
+  editable: PropTypes.bool,
+  minContigSize: PropTypes.number,
   reportPresent: PropTypes.bool,
   sample: PropTypes.Sample,
-  project: PropTypes.Project,
   pipelineRun: PropTypes.PipelineRun,
-  editable: PropTypes.bool,
+  project: PropTypes.Project,
   view: PropTypes.string,
-  minContigSize: PropTypes.number,
 };
 
 export default SampleViewControls;
