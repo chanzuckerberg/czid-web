@@ -36,7 +36,7 @@ export default class HostOrganismMessage extends React.Component {
     return (
       <ExternalLink
         className={cs.link}
-        href="https://help.idseq.net/"
+        href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035296573-Upload-on-the-Web#reviewing-data"
         analyticsEventName="HostOrganismMessage_learn-more-link_clicked"
       >
         Learn more
@@ -97,12 +97,8 @@ export default class HostOrganismMessage extends React.Component {
       >
         <strong>Host Subtraction:</strong>
         &nbsp;Based on your selections for Host Organism, we will subtract out
-        reads from your samples that align to different genomes. &nbsp;<a
-          href="#"
-          className={cs.link}
-        >
-          Click for more details.
-        </a>
+        reads from your samples that align to different genomes.{" "}
+        {this.renderLearnMoreLink()}.
       </Notification>
     );
     return (
