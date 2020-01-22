@@ -483,6 +483,9 @@ class SamplesView extends React.Component {
       this.props.selectedSampleIds.size > appConfig.maxSamplesBulkDownload &&
       !admin
     ) {
+      // There is a separate max sample limit for the original input file download type.
+      // This is checked in BulkDownloadModal, and the original input file option is disabled if there
+      // are too many samples.
       this.setState({
         bulkDownloadButtonTempTooltip: `No more than ${
           appConfig.maxSamplesBulkDownload
