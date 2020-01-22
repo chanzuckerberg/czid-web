@@ -31,7 +31,7 @@
         },
         {
           "name": "QUEUE",
-          "value": "*"
+          "value": "data_migration,q03_pipeline_run,transfer_basespace_files,generate_bulk_download,precache_report_info,*"
         },
         {
           "name": "COUNT",

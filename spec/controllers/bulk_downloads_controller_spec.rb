@@ -15,6 +15,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
     describe "POST #create" do
       before do
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 50)
         stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
                                             "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
       end
@@ -160,6 +161,46 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         bulk_download_params = {
           download_type: "sample_overview",
+          sample_ids: [@sample_one, @sample_two],
+        }
+
+        post :create, params: bulk_download_params
+        expect(response).to have_http_status(422)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % 1)
+      end
+
+      it "should use the correct max samples app config for normal downloads" do
+        @sample_one = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample_two = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        # Set MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES to 1
+        # Since this is not the original input file download type, the download should succeed.
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 1)
+
+        bulk_download_params = {
+          download_type: "sample_overview",
+          sample_ids: [@sample_one, @sample_two],
+        }
+
+        post :create, params: bulk_download_params
+        expect(response).to have_http_status(200)
+      end
+
+      it "should error if too many samples are requested in an original input files bulk download" do
+        @sample_one = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample_two = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        # Set MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES to 1
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 1)
+
+        bulk_download_params = {
+          download_type: "original_input_file",
           sample_ids: [@sample_one, @sample_two],
         }
 
@@ -523,6 +564,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
     describe "POST #create" do
       before do
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 50)
         stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
                                             "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
       end
