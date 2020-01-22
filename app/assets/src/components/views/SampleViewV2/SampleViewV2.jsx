@@ -1105,7 +1105,6 @@ export default class SampleViewV2 extends React.Component {
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
               pipelineRun={pipelineRun}
-              pipeilneRunStatus={reportMetadata.pipeilneRunStatus}
               project={project}
               projectSamples={projectSamples}
               reportPresent={!!reportMetadata.reportReady}
