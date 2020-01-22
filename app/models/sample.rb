@@ -623,17 +623,15 @@ class Sample < ApplicationRecord
 
   def deletable?(user)
     if user.admin?
-      true
+      return true
     elsif user_id == user.id
       # Sample belongs to the user
       # Allow deletion if no pipeline runs, or report failed.
-      unless pipeline_runs.empty?
-        pipeline_runs.each do |prun|
-          return false unless prun.report_failed?
-        end
-      end
-      true
+      # The following returns true for an empty array
+      return pipeline_runs.all?(&:report_failed?)
     end
+
+    false
   end
 
   def self.public_samples
