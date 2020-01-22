@@ -1,8 +1,9 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .termsAgreement {
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-top: $space-l;
+  margin-bottom: $space-l;
 
   // Global because Checkbox does not use CSS modules
   :global(.label) {

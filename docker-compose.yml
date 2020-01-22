@@ -102,7 +102,7 @@ services:
       - MYSQL_DATABASE=idseq_development
     command: ['--character-set-server=utf8', '--collation-server=utf8_unicode_ci']
   redis:
-    image: redis:3.0.5
+    image: redis:5.0.3
     container_name: redis
     ports:
       - '6379:6379'
@@ -169,7 +169,7 @@ services:
       <<: *web-variables
       <<: *aws-variables
       <<: *travis-variables
-    command: bundle exec "QUEUE=q03_pipeline_run,precache_report_info,transfer_basespace_files,* COUNT=5 rake resque:workers"
+    command: bundle exec "COUNT=5 rake resque:workers"
   resque_result_monitor:
     image: chanzuckerberg/idseq-web:compose
     volumes:

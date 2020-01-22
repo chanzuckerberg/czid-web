@@ -71,7 +71,7 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   config.action_mailer.perform_caching = false
-  config.action_mailer.default_url_options = { host: 'staging.idseq.net' }
+  config.action_mailer.default_url_options = { host: "#{Rails.env}.idseq.net" }
   config.action_mailer.delivery_method = :mailgun
   config.action_mailer.mailgun_settings = {
     api_key: ENV['MAIL_GUN_API_KEY'],
@@ -80,15 +80,15 @@ Rails.application.configure do
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # We configure IDseq to use cloudfront CDN when available.
-  config.action_controller.asset_host = ENV['CLOUDFRONT_ENDPOINT'] || 'staging.idseq.net'
+  config.action_controller.asset_host = ENV['CLOUDFRONT_ENDPOINT'] || "#{Rails.env}.idseq.net"
   # Custom config for idseq to enable CORS headers by environment. See rack_cors.rb.
   config.allowed_cors_origins = [
-    "https://staging.idseq.net",
-    "https://www.staging.idseq.net",
-    "https://assets.staging.idseq.net",
+    "https://#{Rails.env}.idseq.net",
+    "https://www.#{Rails.env}.idseq.net",
+    "https://assets.#{Rails.env}.idseq.net",
   ]
 
-  config.middleware.use Rack::HostRedirect, 'www.staging.idseq.net' => 'staging.idseq.net'
+  config.middleware.use Rack::HostRedirect, "www.#{Rails.env}.idseq.net" => "#{Rails.env}.idseq.net"
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

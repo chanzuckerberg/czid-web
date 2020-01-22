@@ -68,21 +68,13 @@ class ProjectsController < ApplicationController
 
         list_all_project_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
-        projects = case domain
-                   when "my_data"
-                     current_user.projects
-                   when "public"
-                     Project.public_projects
-                   when "updatable"
-                     current_power.updatable_projects
-                   else
-                     current_power.projects
-                   end
+        projects = current_power.projects_by_domain(domain)
+
         # including these early ensures that users and samples are joined in the same order, making rails assign deterministic aliases
         # we use includes because we need data from both associations to return aggregate data for the project
         projects = projects.includes(:users).includes(:samples)
         projects = projects.where(id: project_id) if project_id
-        projects = projects.db_search(search) if search
+        projects = projects.search_by_name(search) if search
         if [:host, :location, :locationV2, :taxon, :time, :tissue, :visibility].any? { |key| params.key? key }
           projects = projects.where(samples: { id: filter_samples(current_power.samples, params) })
         end
@@ -464,6 +456,7 @@ class ProjectsController < ApplicationController
   end
 
   def add_user
+    params[:user_email_to_add].downcase!
     @user = User.find_by(email: params[:user_email_to_add])
     if @user
       UserMailer.added_to_projects_email(@user.id, shared_project_email_arguments).deliver_now unless @project.user_ids.include? @user.id
@@ -548,6 +541,7 @@ class ProjectsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def create_new_user_random_password(name, email)
+    email = email.downcase
     Rails.logger.info("Going to create new user via project sharing: #{email}")
     user_params = { email: email, name: name }
     @user = User.new(user_params)
