@@ -21,12 +21,12 @@ main() {
   declare staging_tag; staging_tag="$(_get_latest_tag "$STAGING_ENV")"
   declare prod_tag; prod_tag="$(_get_latest_tag "$PROD_ENV")"
 
-  _log "**** READY FOR DEPLOYMENT ****"
   declare msg;
-  msg="Please execute the following commands${LF}"
-  msg+="./bin/deploy_automation/deploy_tag staging '${staging_tag}'${LF}"
-  msg+="./bin/deploy_automation/deploy_tag prod '${prod_tag}'"
-  echo "$msg"
+  msg="**** READY FOR DEPLOYMENT ****${LF}"
+  msg+="${YELLOW}PLEASE EXECUTE THE FOLLOWING COMMANDS${LF}"
+  msg+="./bin/deploy_automation/deploy_tag.sh staging '${staging_tag}'${LF}"
+  msg+="./bin/deploy_automation/deploy_tag.sh prod '${prod_tag}'"
+  _log "$msg"
 }
 
 main "$@"

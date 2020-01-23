@@ -16,7 +16,9 @@ main() {
   declare checklist_api_url; checklist_api_url=$(jq -er .url <<< "$checklist_json")
   declare checklist_body; checklist_body=$(jq -er .body <<< "$checklist_json")
 
-  _log "Checking commits $source_commit..$target_commit"
+  _log "Checking if updates are required in release checklist"
+
+  _trace "Checking commits $source_commit..$target_commit"
   declare changed=0
   oldIFS=$IFS; IFS=$'\n'
   for commit in $(git log --date-order --pretty=format:$'* [ ] %h - % %s %d (%cD) **%an**' "${source_commit}..${target_commit}")
@@ -24,9 +26,9 @@ main() {
     declare sha="${commit:6:8}"
     if ( grep -qE '^\* \[.\]\s*'"$sha"' - ' <<< "$checklist_body" )
     then
-      _log "- commit $sha is already present in the checklist"
+      _trace "- commit $sha is already present in the checklist"
     else
-      _log "- commit $sha is not present in the checklist - adding"
+      _trace "- commit $sha is not present in the checklist - adding"
       checklist_body+=$'\n'$commit
       changed=1
     fi

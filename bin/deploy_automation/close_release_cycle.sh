@@ -45,8 +45,7 @@ main() {
   git push -f origin "${PROD_BRANCH}"
 
   # deploy instructions
-  _log "Released closed. Please deploy ${tag} to prod using the following command: \n" \
-       "  ./bin/deploy.sh ${PROD_ENV} $(git log -n1 "${tag}" --format=%h)"
+  _log "Release cycle $staging_tag_version successfully closed."
 }
 
 main "$@"

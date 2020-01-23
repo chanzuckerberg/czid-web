@@ -5,19 +5,23 @@ _trap_err() {
   declare exit_code=$?
   declare fn=( "${FUNCNAME[@]:1}" )
   if [ "$exit_code" != 0 ] && [ "$exit_code" != 99 ]; then
-    >&2 printf "\nERROR: failed to execute command \"%s\". Exit code %d. Invoked from %s." "$BASH_COMMAND" "${exit_code}" "${fn[*]} $0"
+    >&2 printf "\n${RED}ERROR: failed to execute command \"%s\". Exit code %d. Invoked from %s.${RESET}\n" "$BASH_COMMAND" "${exit_code}" "${fn[*]} $0"
   fi
   exit $exit_code
 }
 trap '_trap_err' EXIT
 
 _exit_with_err_msg() {
-  >&2 printf "\n\n[%s]: ERROR: %s\n\n" "$(date +'%Y-%m-%dT%H:%M:%S%z')" "$*"
+  >&2 printf "\n\n${CYAN}[%s]: ${BOLD}${RED}ERROR: %s${RESET}\n\n" "$(date +'%Y-%m-%dT%H:%M:%S%z')" "$*"
   exit 99
 }
 
 _log() {
-  >&2 printf "[%s]: %s\n" "$(date +'%Y-%m-%dT%H:%M:%S%z')" "$*"
+  >&2 printf "${CYAN}[%s]: ${BOLD}${GREEN}%s${RESET}\n" "$(date +'%Y-%m-%dT%H:%M:%S%z')" "$*"
+}
+
+_trace() {
+  >&2 printf "${RESET}%s\n" "$*"
 }
 
 _get_latest_commit() {
@@ -29,7 +33,7 @@ _fetch_current_release_checklist_from_github() {
   # Fetch current release checklist using github API and prints a json object.
   # If there is no checklist available it will print json object "null" (without quotes)
   declare url="${GITHUB_REPOSITORY_API}/pulls?state=open"
-  _log "Fetching [RELEASE_CHECKLIST] draft pull request from repo $GITHUB_REPOSITORY_URL/pulls"
+  _trace "Fetching [RELEASE_CHECKLIST] draft pull request from repo $GITHUB_REPOSITORY_URL/pulls"
   http --ignore-stdin --check-status --timeout=30 \
       GET "$url" "Authorization:token $GITHUB_TOKEN" \
     | jq 'map(select(.title | test("^\\[RELEASE_CHECKLIST\\] ")))[0]'
