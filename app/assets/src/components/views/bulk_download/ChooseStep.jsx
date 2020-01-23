@@ -23,7 +23,7 @@ import {
   uploadedByCurrentUser,
   getHeatmapMetrics,
 } from "~/api";
-import CompactListNotification from "~ui/notifications/CompactListNotification";
+import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
@@ -416,7 +416,7 @@ class ChooseStep extends React.Component {
     const { invalidSampleNames } = this.props;
 
     const header = (
-      <div className={cs.header}>
+      <div>
         <span className={cs.highlight}>
           {invalidSampleNames.length} sample
           {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
@@ -426,7 +426,7 @@ class ChooseStep extends React.Component {
     );
 
     const content = (
-      <div className={cs.messageContainer}>
+      <span>
         {invalidSampleNames.map((name, index) => {
           return (
             <div key={index} className={cs.messageLine}>
@@ -434,11 +434,11 @@ class ChooseStep extends React.Component {
             </div>
           );
         })}
-      </div>
+      </span>
     );
 
     return (
-      <CompactListNotification
+      <AccordionNotification
         header={header}
         content={content}
         open={false}

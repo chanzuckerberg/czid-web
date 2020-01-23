@@ -6,7 +6,7 @@ class BulkDownloadsSampleValidationService
     @user = current_user
   end
 
-  def valid_samples
+  def validate_samples
     error = nil
     result = { viewable_samples: [], error: error }
 

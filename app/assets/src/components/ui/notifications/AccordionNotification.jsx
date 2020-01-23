@@ -5,15 +5,15 @@ import cx from "classnames";
 import Notification from "~ui/notifications/Notification";
 import Accordion from "~/components/layout/Accordion";
 
-import cs from "./compact_list_notification.scss";
+import cs from "./accordion_notification.scss";
 
-export default class CompactListNotification extends React.Component {
+export default class AccordionNotification extends React.Component {
   constructor(props) {
     super(props);
   }
 
   render() {
-    const { className, header, content, type, open, displayStyle } = this.props;
+    const { className, header, content, type, open } = this.props;
     const notification = (
       <Notification
         type={type}
@@ -25,7 +25,7 @@ export default class CompactListNotification extends React.Component {
     );
 
     return (
-      <div className={cx(cs.compactListNotification, className)}>
+      <div className={cx(cs.AccordionNotification, className)}>
         <Accordion
           bottomContentPadding
           header={notification}
@@ -33,18 +33,18 @@ export default class CompactListNotification extends React.Component {
           className={cx(cs.listContainer, cs[type])}
           toggleAlignment="baseline"
         >
-          {content}
+          <div className={cs.messageContainer}>{content}</div>
         </Accordion>
       </div>
     );
   }
 }
 
-CompactListNotification.defaultProps = {
+AccordionNotification.defaultProps = {
   type: "info",
 };
 
-CompactListNotification.propTypes = {
+AccordionNotification.propTypes = {
   className: PropTypes.string,
   header: PropTypes.node,
   content: PropTypes.node,
