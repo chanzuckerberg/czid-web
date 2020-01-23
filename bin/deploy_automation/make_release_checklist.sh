@@ -17,7 +17,7 @@ main() {
 }
 
 __make_release_checklist() {
-  declare source_branch="$1" 
+  declare source_branch="$1"
   declare target_branch="$2"
   declare title="$3"
 
@@ -31,13 +31,13 @@ __make_release_checklist() {
       | awk -F $'\t' '{ a[$1] = a[$1] "\n" $2; } END { for (i in a) print i a[i]; }'
     echo
     echo "_(included commits: ($source_commit)..($target_commit), created on $(date '+%Y-%m-%d %H:%M:%S'))_"
-    echo 
+    echo
     echo "# Release/Hot fixes"
     echo '_Make sure all your release/hot fixes are listed here. Check your commits after testing and cherry-picking to staging/master accordingly:_'
   )
 
   _log "Creating release checklist..."
-  declare response_json; 
+  declare response_json
   if response_json=$(
     http --ignore-stdin --check-status --timeout=30 POST "${GITHUB_REPOSITORY_API}/pulls" \
       "Accept:application/vnd.github.shadow-cat-preview+json" \

@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 main() {
   declare env="$1"
   declare tag="$2"
-  
+
   declare sha; sha=$(git log -n1 "${tag}" --format=%h)
   declare docker_image="${DOCKER_REPOSITORY_NAME}:sha-$sha"
 
@@ -44,7 +44,7 @@ __check_commit_state() {
     http --ignore-stdin --timeout 30 --check-status -b \
       GET "$GITHUB_REPOSITORY_API/commits/$sha/status"
   )
-  
+
   declare state; state="$(jq -er .state <<< "$response_json")"
   if [ "$state" != "success" ]; then
     _trace "Invalid state '$state' for commit ${sha} in branch ${branch}. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
