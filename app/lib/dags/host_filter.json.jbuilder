@@ -65,6 +65,7 @@ json.steps do
       file_ext: attr[:file_ext],
     },
   }
+  # NOTE: this step structure is depended on by host_subtracted method
   steps << {
     in: ['validate_input_out'],
     out: 'star_out',

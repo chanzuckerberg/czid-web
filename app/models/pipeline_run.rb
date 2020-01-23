@@ -455,13 +455,23 @@ class PipelineRun < ApplicationRecord
   # according to the underlying dag_json during host filtering. A host other
   # than the sample host may have been subtracted for
   # two reasons:
+  #
   # 1) there are no host genome files so we only subtract ERCCs
   # 2) the sample host or index files were changed after the run
+  #
+  # Note: This method returns a string identifier extracted from the index
+  # filename, not a HostGenome instance, which could be ambiguous.
   def host_subtracted
-    return nil unless report_ready?
-    dag_json = pipeline_run_stages[1] && pr.pipeline_run_stages[1].dag_json
-    return nil unless dag_json
-    JSON.parse(dag_json)
+    pipeline_run_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
+    dag = pipeline_run_stage && JSON.parse(pipeline_run_stage.dag_json)
+    return nil unless dag
+    # See app/lib/dags/host_filter.json.jbuilder for step definition
+    host_filtering = dag["steps"].find { |step| step["class"] == "PipelineStepRunStar" }
+    star_genome = host_filtering["additional_files"]["star_genome"]
+    # Assumes stable URL structure. See HostGenome.rb.
+    matches = star_genome.match(%r{s3://idseq-database/host_filter/(\w+)/})
+    return nil unless matches
+    return matches[1] # "ercc" for example
   end
 
   def get_lineage_json(ct2taxid, taxon_lineage_map)
