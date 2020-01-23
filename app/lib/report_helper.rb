@@ -15,8 +15,6 @@ module ReportHelper
   DEFAULT_SAMPLE_PERCENTIDENTITY = 0.0
   DEFAULT_SAMPLE_ALIGNMENTLENGTH = 0.0
 
-  HOMO_SAPIEN_TAX_ID = 9606
-
   # For taxon_count 'species' rows without a corresponding 'genus' rows,
   # we create a fake singleton genus containing just that species;
   # the fake genus IDs start here:
@@ -604,7 +602,7 @@ module ReportHelper
   end
 
   def self.remove_homo_sapiens_counts!(taxon_counts_2d)
-    taxon_counts_2d.delete_if { |tax_id, _tax_info| HOMO_SAPIEN_TAX_ID == tax_id }
+    taxon_counts_2d.delete_if { |tax_id, _tax_info| TaxonLineage::HOMO_SAPIENS_TAX_IDS.include?(tax_id) }
   end
 
   def self.taxon_counts_cleanup(taxon_counts)
