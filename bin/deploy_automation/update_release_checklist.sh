@@ -20,7 +20,8 @@ main() {
 
   _trace "Checking commits $source_commit..$target_commit"
   declare changed=0
-  oldIFS=$IFS; IFS=$'\n'
+  declare old_IFS="$IFS";
+  IFS=$'\n'
   for commit in $(git log --date-order --pretty=format:$'* [ ] %h - % %s %d (%cD) **%an**' "${source_commit}..${target_commit}")
   do
     declare sha="${commit:6:8}"
@@ -33,7 +34,7 @@ main() {
       changed=1
     fi
   done
-  IFS=$oldIFS; 
+  IFS="$old_IFS"
 
   if [ $changed -eq 1 ]
   then
