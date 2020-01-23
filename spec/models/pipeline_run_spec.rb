@@ -339,4 +339,23 @@ RSpec.describe PipelineRun, type: :model do
       end
     end
   end
+
+  context "host_subtracted" do
+    let(:user) { build_stubbed(:admin) }
+    let(:host_genome) { build_stubbed(:host_genome, name: "Test Host") }
+    let(:sample) { build_stubbed(:sample, user: user, id: 123, host_genome: host_genome) }
+    let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample) }
+    let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage, pipeline_run: pipeline_run) }
+
+    it "should show the host that was subtracted" do
+      expect(pipeline_run.host_subtracted).to eq("Test Host")
+    end
+    it "should show ERCC only when no host files" do
+      expect(pipeline_run.host_subtracted).to eq("ERCC only")
+    end
+    it "should return nil when report is not ready" do
+      expect(pipeline_run.report_ready?).to eq(false)
+      expect(pipeline_run.host_subtracted).to eq(nil)
+    end
+  end
 end
