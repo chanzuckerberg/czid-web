@@ -10,7 +10,7 @@ import _fp, {
   get,
   values,
   includes,
-  sortBy,
+  orderBy,
   find,
   pickBy,
   isEqual,
@@ -199,11 +199,13 @@ class MetadataManualInput extends React.Component {
   };
 
   getHostGenomeOptions = () =>
-    sortBy(
-      "text",
+    orderBy(
+      "count",
+      "desc",
       this.props.hostGenomes.map(hostGenome => ({
         text: hostGenome.name,
         value: hostGenome.id,
+        count: hostGenome.samples_count,
       }))
     );
 
