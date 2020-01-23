@@ -15,7 +15,7 @@ import FiltersIcon from "./FiltersIcon";
 import GlobeIcon from "./GlobeIcon";
 import HeatmapIcon from "./HeatmapIcon";
 import HumanIcon from "./HumanIcon";
-import InfoIcon from "./InfoIcon";
+import InfoPanelIcon from "./InfoPanelIcon";
 import InsightIcon from "./InsightIcon";
 import LargeDownloadIcon from "./LargeDownloadIcon";
 import LoadingIcon from "./LoadingIcon";
@@ -57,7 +57,7 @@ export default {
     GlobeIcon,
     HeatmapIcon,
     HumanIcon,
-    InfoIcon,
+    InfoPanelIcon,
     LargeDownloadIcon,
     LockIcon,
     MosquitoIcon,
