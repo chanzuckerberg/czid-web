@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 # - Prints deployment commands to be executed in a separate terminal
 main() {
   _log "**** CHECKING TAG VERSIONS FOR RELEASE/HOT FIXES ****"
-  "$SCRIPT_DIR/deploy_automation/patch_branch_version_tags.sh"
+  "$SCRIPT_DIR/patch_branch_version_tags.sh"
 
   _log "**** CLOSING RELEASE CYCLE ****"
   "$SCRIPT_DIR/close_release_cycle.sh"
