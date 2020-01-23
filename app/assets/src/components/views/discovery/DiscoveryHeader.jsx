@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 
 import FiltersIcon from "~ui/icons/FiltersIcon";
-import InfoIcon from "~ui/icons/InfoIcon";
+import InfoPanelIcon from "~ui/icons/InfoPanelIcon";
 import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
@@ -117,7 +117,7 @@ class DiscoveryHeader extends React.Component {
           <BasicPopup
             trigger={
               <div>
-                <InfoIcon
+                <InfoPanelIcon
                   className={cx(cs.statsIcon, cs.icon, !showStats && cs.closed)}
                 />
               </div>

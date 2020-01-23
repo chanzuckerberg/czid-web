@@ -537,9 +537,9 @@ RSpec.describe ProjectsController, type: :controller do
             create(:project, users: [@user])
             create(:project, :with_sample, users: [@user])
             create(:project, :with_sample, users: [@user], host_genome_name: "pig")
-            expected_projects << create(:project, :with_sample, users: [@user], host_genome_name: "human")
+            expected_projects << create(:project, :with_sample, users: [@user], host_genome_name: "Human")
 
-            get :index, params: { format: "json", domain: domain, host: HostGenome.find_by(name: "human").id }
+            get :index, params: { format: "json", domain: domain, host: HostGenome.find_by(name: "Human").id }
 
             json_response = JSON.parse(response.body)
             expect(json_response["projects"].count).to eq(expected_projects.count)

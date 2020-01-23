@@ -25,6 +25,9 @@
 }
 
 .content {
+  // prevent margin collapse, so that interior elements can set a bottom margin
+  overflow: auto;
+
   &.bottomPadding {
     margin-bottom: 20px;
   }

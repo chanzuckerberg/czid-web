@@ -72,7 +72,7 @@ class Sample < ApplicationRecord
   belongs_to :project
   # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
   belongs_to :user, optional: true, counter_cache: true # use .size for cache, use .count to force COUNT query
-  belongs_to :host_genome, optional: true
+  belongs_to :host_genome, optional: true, counter_cache: true # use .size for cache, use .count to force COUNT query
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
   has_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
