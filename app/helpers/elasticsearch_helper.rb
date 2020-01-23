@@ -90,6 +90,10 @@ module ElasticsearchHelper
     taxon_ids = filter_by_project(taxon_ids, filters[:project_id]) if filters[:project_id]
     taxon_ids = Set.new(taxon_ids)
 
+    # Always remove homo sapiens from search, same as reports, because all homo sapiens
+    # hits are supposed to removed upstream in the pipeline. See also remove_homo_sapiens_counts!
+    taxon_ids = taxon_ids.delete_if { |tax_id| TaxonLineage::HOMO_SAPIENS_TAX_IDS.include?(tax_id) }
+
     return matching_taxa.select { |taxon| taxon_ids.include? taxon["taxid"] }
   end
 
