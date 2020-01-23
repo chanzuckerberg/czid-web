@@ -117,7 +117,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
         samples,
         mock_background_id,
         any_args
-      ).exactly(1).times.and_return(generate_fetch_taxon_response(samples, [4, 5, ReportHelper::HOMO_SAPIEN_TAX_ID]))
+      ).exactly(1).times.and_return(generate_fetch_taxon_response(samples, [4, 5, TaxonLineage::HOMO_SAPIENS_TAX_IDS[1]]))
 
       response = BulkDownloadsHelper.generate_combined_sample_taxon_results_csv(
         samples, mock_background_id, "NR.zscore"

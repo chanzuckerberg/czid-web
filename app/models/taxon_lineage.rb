@@ -32,7 +32,8 @@ class TaxonLineage < ApplicationRecord
     superkingdom: MISSING_SUPERKINGDOM_ID,
   }.freeze
 
-  HOMO_SAPIENS_TAX_ID = [9605, 9606].freeze
+  # 9605 is the genus, 9606 the species.
+  HOMO_SAPIENS_TAX_IDS = [9605, 9606].freeze
 
   # From https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens
   # Accessed 9/18/2018.

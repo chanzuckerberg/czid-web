@@ -13,7 +13,6 @@ import _fp, {
   sortBy,
   find,
   pickBy,
-  isEqual,
 } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -61,42 +60,13 @@ class MetadataManualInput extends React.Component {
           ...mapValues("name", keyBy("key", projectMetadataFields)),
         },
       },
-      this.setDefaultWaterControl
+      samplesAreNew ? this.setDefaultWaterControl : null
     );
-
-    this.setDefaultHostGenomes();
-  }
-
-  componentDidUpdate(prevProps) {
-    const prevSampleNames = map("name", prevProps.samples);
-    const sampleNames = map("name", this.props.samples);
-    if (!isEqual(prevSampleNames, sampleNames)) {
-      this.setDefaultHostGenomes();
-    }
   }
 
   // Need to special case this to avoid a missing required field error.
   setDefaultWaterControl = () => {
     this.applyToAll("water_control", "No");
-  };
-
-  setDefaultHostGenomes = () => {
-    // If samples are new, set all host genomes to Human by default.
-    // Can't use updateHostGenome/updateMetadataField for bulk update.
-    if (this.props.samplesAreNew) {
-      const newHeaders = union(["Host Genome"], this.state.headersToEdit);
-      let newFields = this.state.metadataFieldsToEdit;
-      this.props.samples.forEach(sample => {
-        if (!get([sample.name, "Host Genome"], newFields)) {
-          newFields = set([sample.name, "Host Genome"], "Human", newFields);
-        }
-      });
-      this.setState({
-        headersToEdit: newHeaders,
-        metadataFieldsToEdit: newFields,
-      });
-      this.onMetadataChange(newHeaders, newFields);
-    }
   };
 
   getManualInputColumns = () => {
