@@ -70,21 +70,29 @@ module BulkDownloadsHelper
     formatted_bulk_download
   end
 
-  # Will raise errors if any validation fails.
-  # Returns pipeline_run_ids for the samples in the bulk download.
-  def validate_bulk_download_create_params(create_params, user)
-    sample_ids = create_params[:sample_ids]
-
+  def validate_num_samples(num_samples, app_config_key)
     # Max samples check.
-    max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
+    max_samples_allowed = get_app_config(app_config_key)
 
     # Max samples should be string containing an integer, but just in case.
     if max_samples_allowed.nil?
       raise BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE
     end
 
-    if sample_ids.length > Integer(max_samples_allowed) && !current_user.admin?
+    if num_samples > Integer(max_samples_allowed) && !current_user.admin?
       raise BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
+    end
+  end
+
+  # Will raise errors if any validation fails.
+  # Returns pipeline_run_ids for the samples in the bulk download.
+  def validate_bulk_download_create_params(create_params, user)
+    sample_ids = create_params[:sample_ids]
+
+    if create_params[:download_type] == BulkDownloadTypesHelper::ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE
+      validate_num_samples(sample_ids.length, AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES)
+    else
+      validate_num_samples(sample_ids.length, AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
     end
 
     # Check that user can view all the samples being downloaded.

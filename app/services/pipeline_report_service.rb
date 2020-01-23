@@ -287,7 +287,7 @@ class PipelineReportService
                                        .where.not(
                                          tax_id: [
                                            TaxonLineage::BLACKLIST_GENUS_ID,
-                                           TaxonLineage::HOMO_SAPIENS_TAX_ID,
+                                           TaxonLineage::HOMO_SAPIENS_TAX_IDS,
                                          ].flatten
                                        )
     # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
@@ -328,7 +328,7 @@ class PipelineReportService
                                   taxon_summaries: {
                                     tax_id: [
                                       TaxonLineage::BLACKLIST_GENUS_ID,
-                                      TaxonLineage::HOMO_SAPIENS_TAX_ID,
+                                      TaxonLineage::HOMO_SAPIENS_TAX_IDS,
                                     ].flatten,
                                   }
                                 )

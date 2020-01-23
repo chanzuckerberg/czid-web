@@ -1100,19 +1100,14 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.sampleViewHeader}>
             <SampleViewHeader
               backgroundId={selectedOptions.background}
+              deletable={sample ? sample.deletable : false}
               editable={sample ? sample.editable : false}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
               pipelineRun={pipelineRun}
               project={project}
               projectSamples={projectSamples}
-              // report_ready was consolidated with reportReady but we check both in case
-              // the old variable name was cached.
-              // TODO(julie): remove report_ready during cleanup.
-              reportPresent={
-                reportMetadata.reportReady === true ||
-                reportMetadata.report_ready === true
-              }
+              reportPresent={!!reportMetadata.reportReady}
               sample={sample}
               view={view}
               minContigSize={selectedOptions.minContigSize}

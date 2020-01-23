@@ -18,6 +18,7 @@ import cs from "./sample_view_header.scss";
 
 export default function SampleViewHeader({
   backgroundId,
+  deletable,
   editable,
   onDetailsClick,
   onPipelineVersionChange,
@@ -155,6 +156,7 @@ export default function SampleViewHeader({
         )}{" "}
         <SampleViewControls
           backgroundId={backgroundId}
+          deletable={deletable}
           reportPresent={reportPresent}
           sample={sample}
           project={project}
@@ -169,12 +171,14 @@ export default function SampleViewHeader({
 }
 
 SampleViewHeader.defaultProps = {
+  deletable: false,
   projectSample: [],
   reportPresent: false,
 };
 
 SampleViewHeader.propTypes = {
   backgroundId: PropTypes.number,
+  deletable: PropTypes.bool,
   editable: PropTypes.bool.isRequired,
   onDetailsClick: PropTypes.func.isRequired,
   onPipelineVersionChange: PropTypes.func.isRequired,

@@ -118,6 +118,8 @@ class PhyloTreesController < ApplicationController
     end
   end
 
+  # NOTE: this is used by the report page as well as phylo trees
+  # See https://jira.czi.team/browse/IDSEQ-2127
   def choose_taxon
     taxon_search_args = [params[:query]]
     taxon_search_args << params[:args].split(",") if params[:args].present?
