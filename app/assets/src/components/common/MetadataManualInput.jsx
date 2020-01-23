@@ -61,7 +61,7 @@ class MetadataManualInput extends React.Component {
           ...mapValues("name", keyBy("key", projectMetadataFields)),
         },
       },
-      this.setDefaultWaterControl
+      samplesAreNew ? this.setDefaultWaterControl : null
     );
 
     this.setDefaultHostGenomes();
