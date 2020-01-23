@@ -47,7 +47,7 @@ __check_commit_state() {
   
   declare state; state="$(jq -er .state <<< "$response_json")"
   if [ "$state" != "success" ]; then
-    _log "Invalid state '$state' for commit ${sha} in branch ${branch}. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
+    _trace "Invalid state '$state' for commit ${sha} in branch ${branch}. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
     return 1
   fi
 }
@@ -63,7 +63,7 @@ __retry() {
     { $cmd && exit_code=0 && break; } || {
       exit_code=$?
       ((n++))
-      _log "Command failed with exit code $exit_code. Waiting ${sleep_seconds} seconds before next attempt ($n of $attempts)"
+      _trace "Command failed with exit code $exit_code. Waiting ${sleep_seconds} seconds before next attempt ($n of $attempts)"
       sleep "$sleep_seconds";
     }
   done
