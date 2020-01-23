@@ -10,7 +10,7 @@ class HostGenome < ApplicationRecord
   }
 
   validates :s3_bowtie2_index_path, :s3_star_index_path, format: {
-    with: %r{\As3://},
+    with: %r{\As3://.*\z},
     message: "should be located in s3.",
   }
 
