@@ -4,9 +4,8 @@ class HostGenome < ApplicationRecord
 
   before_create :add_default_metadata_fields
 
-  # TODO: (gdingle): char class ?
   validates :name, presence: true, uniqueness: { case_sensitive: false }, format: {
-    with: /\A[A-Z][\w|\s|.|\-]+\z/,
+    with: /\A[A-Z][\w|\s|\.|\-]+\z/,
     message: "allows only word, period, dash or space chars, and first char must be capitalized: %<value>",
   }
 
@@ -16,7 +15,6 @@ class HostGenome < ApplicationRecord
   }
 
   # NOTE: not sure why this columns was not created as boolean
-  # TODO: (gdingle): not working
   validates :skip_deutero_filter, inclusion: { in: [0, 1] }
 
   validates :taxa_category, inclusion: { allow_blank: true, in: [
