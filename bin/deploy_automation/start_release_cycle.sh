@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-SCRIPT_DIR=$(dirname "$0")  
+SCRIPT_DIR=$(dirname "$0")
 source "$SCRIPT_DIR/_global_vars.sh"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
@@ -14,12 +14,16 @@ main() {
   # make sure release checklist doesn't exist yet
   _assert_no_release_checklist
 
+
   declare staging_tag_version; staging_tag_version="$(_get_latest_version "$STAGING_BRANCH")"
   declare prod_tag_version; prod_tag_version="$(_get_latest_version "$PROD_BRANCH")"
 
   # Check if tag versions match for prod and staging
   if [ "$staging_tag_version" != "$prod_tag_version" ]; then
-    _exit_with_err_msg "ASSERTION ERROR - $STAGING_BRANCH and $PROD_BRANCH tag versions should match."
+    declare msg="ASSERTION ERROR - $STAGING_BRANCH and $PROD_BRANCH tag versions should match. "
+    msg+="When the release cycle is closed, any fixes should have been applied to both enviroments (prod and staging), "
+    msg+="and versions should have been bumped accordingly. This mismatch could mean this flow is incomplete."
+    _exit_with_err_msg "$msg"
   fi
 
   # Bump tag version

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-SCRIPT_DIR=$(dirname "$0")  
+SCRIPT_DIR=$(dirname "$0")
 source "$SCRIPT_DIR/_global_vars.sh"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
