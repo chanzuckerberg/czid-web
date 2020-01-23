@@ -513,6 +513,8 @@ module SamplesHelper
 
       if sample_attributes[:host_genome_name]
         name = sample_attributes.delete(:host_genome_name)
+        # TODO: (gdingle): find or create!!!
+        # TODO: (gdingle): check for both upload form and csv
         sample_attributes[:host_genome_id] = HostGenome.find_by(name: name).id
       end
       sample = Sample.new(sample_attributes)

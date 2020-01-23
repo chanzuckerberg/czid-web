@@ -94,6 +94,8 @@ RSpec.describe SamplesHelper, type: :helper do
                                            ErrorHelper::SampleUploadErrors.missing_input_files_or_basespace_params(fake_sample_name),
                                          ])
       end
+
+      # TODO: (gdingle): it creates if ...
     end
   end
 
