@@ -10,12 +10,14 @@ module PipelineOutputsHelper
       alignment_db: pipeline_run.alignment_config.name,
     }
     host_subtracted = pipeline_run.host_subtracted
-    pipeline_run_display["host_subtracted"] =
-      if host_subtracted == "ercc"
-        "ERCC only"
-      else
-        host_subtracted.titleize
-      end
+    if host_subtracted
+      pipeline_run_display["host_subtracted"] =
+        if host_subtracted == "ercc"
+          "ERCC only"
+        else
+          host_subtracted.titleize
+        end
+    end
     pipeline_run_display
   end
 
