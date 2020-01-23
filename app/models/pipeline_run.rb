@@ -467,6 +467,7 @@ class PipelineRun < ApplicationRecord
     return nil unless dag
     # See app/lib/dags/host_filter.json.jbuilder for step definition
     host_filtering = dag["steps"].find { |step| step["class"] == "PipelineStepRunStar" }
+    return nil unless host_filtering
     star_genome = host_filtering["additional_files"]["star_genome"]
     # Assumes stable URL structure. See HostGenome.rb.
     matches = star_genome.match(%r{s3://idseq-database/host_filter/(\w+)/})
