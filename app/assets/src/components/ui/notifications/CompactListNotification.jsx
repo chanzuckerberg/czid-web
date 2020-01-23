@@ -17,7 +17,7 @@ export default class CompactListNotification extends React.Component {
     const notification = (
       <Notification
         type={type}
-        displayStyle={displayStyle}
+        displayStyle="flat"
         className={cs.notificationContainer}
       >
         {header}
@@ -50,5 +50,4 @@ CompactListNotification.propTypes = {
   content: PropTypes.node,
   open: PropTypes.bool,
   type: PropTypes.oneOf(["success", "info", "warn", "error"]),
-  displayStyle: PropTypes.oneOf(["flat", "elevated"]),
 };

@@ -529,7 +529,7 @@ class SamplesView extends React.Component {
         {allowedFeatures.includes("bulk_downloads") &&
           bulkDownloadModalOpen && (
             <BulkDownloadModal
-              open={bulkDownloadModalOpen}
+              open
               onClose={withAnalytics(
                 this.handleBulkDownloadModalClose,
                 "SamplesView_bulk-download-modal_closed"

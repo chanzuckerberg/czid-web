@@ -24,6 +24,7 @@ import {
   getHeatmapMetrics,
 } from "~/api";
 import CompactListNotification from "~ui/notifications/CompactListNotification";
+import Notification from "~ui/notifications/Notification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
@@ -151,11 +152,11 @@ class ChooseStep extends React.Component {
   };
 
   isSelectedDownloadValid = () => {
-    const { selectedFields } = this.props;
+    const { selectedFields, validSampleIds } = this.props;
 
     const downloadType = this.getSelectedDownloadType();
 
-    if (!downloadType) {
+    if (!downloadType || validSampleIds.size < 1) {
       return false;
     }
 
@@ -184,16 +185,11 @@ class ChooseStep extends React.Component {
 
   renderOption = (downloadType, field) => {
     const { selectedFields, onFieldSelect, validSampleIds } = this.props;
-    const {
-      backgroundOptions,
-      isLoadingTaxaWithReadsOptionsOptions,
-      metricsOptions,
-    } = this.state;
+    const { backgroundOptions, metricsOptions } = this.state;
 
     const selectedField = get(field.type, selectedFields);
     let dropdownOptions = null;
     let placeholder = "";
-
     // Handle rendering conditional fields.
 
     // For the file format field, render a placeholder. This is a special case.
@@ -238,7 +234,7 @@ class ChooseStep extends React.Component {
           <div className={cs.field} key={field.type}>
             <div className={cs.label}>{field.display_name}:</div>
             <TaxonHitSelect
-              sampleIds={selectedSampleIds}
+              sampleIds={validSampleIds}
               onChange={(value, displayName) => {
                 onFieldSelect(
                   downloadType.type,
@@ -257,7 +253,7 @@ class ChooseStep extends React.Component {
           <div className={cs.field} key={field.type}>
             <div className={cs.label}>{field.display_name}:</div>
             <TaxonHitSelect
-              sampleIds={selectedSampleIds}
+              sampleIds={validSampleIds}
               onChange={(value, displayName) => {
                 onFieldSelect(
                   downloadType.type,
@@ -425,7 +421,7 @@ class ChooseStep extends React.Component {
           {invalidSampleNames.length} sample
           {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
           bulk download
-        </span>, because they are in progress or failed samples:
+        </span>, because they either failed or are still processing:
       </div>
     );
 
@@ -453,26 +449,24 @@ class ChooseStep extends React.Component {
   };
 
   renderValidationError = () => {
-    const { validationError } = this.props;
-
-    const header = (
-      <div className={cs.header}>There was an error fetching sample data:</div>
-    );
-
-    const content = (
-      <div className={cs.errorContainer}>
-        <div className={cs.messageLine}>{validationError}</div>
+    return (
+      <div className={cs.notificationContainer}>
+        <Notification type="error" displayStyle="flat">
+          <div className={cs.header}>
+            An error occurred when verifying your selected samples.
+          </div>
+        </Notification>
       </div>
     );
+  };
 
+  renderNoValidSamplesError = () => {
     return (
-      <CompactListNotification
-        header={header}
-        content={content}
-        open={true}
-        type={"error"}
-        displayStyle={"flat"}
-      />
+      <div className={cs.notificationContainer}>
+        <Notification type="error" displayStyle="flat">
+          No valid samples to download data from.
+        </Notification>
+      </div>
     );
   };
 
@@ -499,6 +493,7 @@ class ChooseStep extends React.Component {
         <div className={cs.footer}>
           {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
           {validationError != null && this.renderValidationError()}
+          {numSamples < 1 && this.renderNoValidSamplesError()}
           <PrimaryButton
             disabled={!this.isSelectedDownloadValid()}
             text="Continue"

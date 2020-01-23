@@ -1,6 +1,7 @@
 class BulkDownloadsController < ApplicationController
   include BulkDownloadTypesHelper
   include BulkDownloadsHelper
+  include PipelineRunsHelper
   include AppConfigHelper
 
   UPDATE_WITH_TOKEN_ACTIONS = [:success_with_token, :error_with_token, :progress_with_token].freeze
@@ -27,31 +28,37 @@ class BulkDownloadsController < ApplicationController
     render json: download_types
   end
 
-  # POST /bulk_downloads/validate
+  # POST /bulk_downloads/validate_sample_ids
   # This is a POST route and not a GET request because Puma does not allow
   # query strings longer than a certain amount (1024 * 10 chars), which causes
   # trouble with projects with a large number of samples.
-  def validate
+  def validate_sample_ids
     queried_sample_ids = params[:sampleIds]
-    max_samples_allowed = get_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
 
-    validator = BulkDownloadsValidationService.new(queried_sample_ids, current_user, max_samples_allowed)
+    validator = BulkDownloadsSampleValidationService.new(queried_sample_ids, current_user)
 
-    begin
-      id_validation_info = validator.validate_sample_ids()
-    rescue => e
-      # Throw an error if any sample doesn't have a valid pipeline run.
-      # The user should never see this error, because the validation step should catch any issues.
-      LogUtil.log_backtrace(e)
-      LogUtil.log_err_and_airbrake("BulkDownloadsFailedEvent: Unexpected issue validating bulk download: #{e}")
-      render json: { error: e }, status: :unprocessable_entity
+    # We want to return valid sample ids, but for invalid samples we need their names to display
+    # to the user. No information is returned on samples they don't have access to.
+    validated_sample_info = validator.validate_samples()
+    viewable_samples = validated_sample_info[:viewable_samples]
+    if validated_sample_info[:error].nil?
+      valid_sample_ids = get_succeeded_pipeline_runs_for_samples(viewable_samples, false, [:sample_id]).map(&:sample_id)
+
+      invalid_samples = viewable_samples.reject { |sample| valid_sample_ids.include?(sample.id) }
+      invalid_sample_names = invalid_samples.map(&:name)
+
+      render json: {
+        validSampleIds: valid_sample_ids,
+        invalidSampleNames: invalid_sample_names,
+        error: nil,
+      }
+    else
+      render json: {
+        validSampleIds: [],
+        invalidSampleNames: [],
+        error: id_validation_info[:error],
+      }
     end
-
-    render json: {
-      validSampleIds: id_validation_info[:valid_sample_ids],
-      invalidSampleNames: id_validation_info[:invalid_sample_names],
-      error: id_validation_info[:error],
-    }
   end
 
   # POST /bulk_downloads

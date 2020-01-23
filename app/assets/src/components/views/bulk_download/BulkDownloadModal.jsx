@@ -5,7 +5,7 @@ import memoize from "memoize-one";
 
 import {
   getBulkDownloadTypes,
-  validateBulkDownloadIds,
+  validateSampleIdsForBulkDownload,
 } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 
@@ -111,7 +111,7 @@ class BulkDownloadModal extends React.Component {
   }
 
   async fetchValidationInfo(selectedSampleIds) {
-    const sampleValidationInfo = await validateBulkDownloadIds(
+    const sampleValidationInfo = await validateSampleIdsForBulkDownload(
       selectedSampleIds
     );
 
