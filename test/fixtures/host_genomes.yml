@@ -2,11 +2,11 @@ one:
   name: host genome 1
 
 two:
-  name: Human
+  name: Human 1
   metadata_fields: [collection_date, sample_type, sex, age, admission_date, nucleotide_type, water_control]
 
 human:
-  name: Human
+  name: Human 2
   metadata_fields: [collection_date, sample_type, sex, age, admission_date, nucleotide_type, core_field, water_control]
 
 mosquito:
