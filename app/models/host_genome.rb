@@ -1,4 +1,5 @@
 class HostGenome < ApplicationRecord
+  belongs_to :user
   has_many :samples, dependent: :restrict_with_exception
   has_and_belongs_to_many :metadata_fields
 
