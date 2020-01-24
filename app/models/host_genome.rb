@@ -6,7 +6,7 @@ class HostGenome < ApplicationRecord
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }, format: {
     with: /\A[A-Z][\w|\s|\.|\-]+\z/,
-    message: "allows only word, period, dash or space chars, and first char must be capitalized: %<value>",
+    message: "of host organism allows only word, period, dash or space chars, and first char must be capitalized.",
   }
 
   validates :s3_bowtie2_index_path, :s3_star_index_path, format: {
@@ -45,5 +45,12 @@ class HostGenome < ApplicationRecord
     if MetadataField.table_exists?
       self.metadata_fields = MetadataField.where(default_for_new_host_genome: 1)
     end
+  end
+
+  # This should be true for all host genomes created without index files, and
+  # the "ERCC only" genome.
+  def ercc_only?
+    s3_star_index_path.starts_with?(HostGenome::ERCC_PATH_PREFIX) &&
+      s3_bowtie2_index_path.starts_with?(HostGenome::ERCC_PATH_PREFIX)
   end
 end
