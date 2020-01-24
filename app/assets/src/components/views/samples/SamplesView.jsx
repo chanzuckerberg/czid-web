@@ -500,6 +500,11 @@ class SamplesView extends React.Component {
     this.setState({ bulkDownloadModalOpen: false });
   };
 
+  handleBulkDownloadGenerate = () => {
+    this.handleBulkDownloadModalClose();
+    console.log("Bulk download generated!");
+  };
+
   handleRowClick = ({ event, rowData }) => {
     const { onSampleSelected, samples } = this.props;
     const sample = samples.get(rowData.id);
@@ -540,6 +545,7 @@ class SamplesView extends React.Component {
                 "SamplesView_bulk-download-modal_closed"
               )}
               selectedSampleIds={selectedSampleIds}
+              onGenerate={this.handleBulkDownloadGenerate}
             />
           )}
       </div>

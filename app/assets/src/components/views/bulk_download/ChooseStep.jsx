@@ -1,9 +1,11 @@
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
 import {
+  unset,
   find,
   filter,
   get,
+  set,
   some,
   map,
   isUndefined,
@@ -18,11 +20,7 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
 import BasicPopup from "~/components/BasicPopup";
-import {
-  getBackgrounds,
-  uploadedByCurrentUser,
-  getHeatmapMetrics,
-} from "~/api";
+import { createBulkDownload } from "~/api/bulk_downloads";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -57,70 +55,58 @@ const triggersConditionalField = (conditionalField, selectedFields) =>
     get(conditionalField.dependentField, selectedFields)
   );
 
-class ChooseStep extends React.Component {
-  state = {
-    backgroundOptions: null,
-    metricsOptions: null,
-    allSamplesUploadedByCurrentUser: false,
-  };
-
-  componentDidMount() {
-    this.fetchUserData();
-  }
-
-  // make async requests in parallel
-  async fetchUserData() {
-    const backgroundOptionsRequest = this.fetchBackgrounds();
-    const metricsOptionsRequest = this.fetchHeatmapMetrics();
-    const allSamplesUploadedByCurrentUserRequest = this.checkAllSamplesUploadedByCurrentUser();
-
-    const [
-      backgroundOptions,
-      metricsOptions,
-      allSamplesUploadedByCurrentUser,
-    ] = await Promise.all([
-      backgroundOptionsRequest,
-      metricsOptionsRequest,
-      allSamplesUploadedByCurrentUserRequest,
-    ]);
-
-    this.setState({
-      backgroundOptions,
-      metricsOptions,
-      allSamplesUploadedByCurrentUser,
-    });
-  }
-
-  // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
-  async fetchBackgrounds() {
-    const backgrounds = await getBackgrounds();
-
-    const backgroundOptions = backgrounds.map(background => ({
-      text: background.name,
-      value: background.id,
-    }));
-
-    return backgroundOptions;
-  }
-
-  // We use the heatmap metrics as the valid metrics for bulk downloads.
-  async fetchHeatmapMetrics() {
-    const heatmapMetrics = await getHeatmapMetrics();
-
-    return heatmapMetrics;
-  }
-
-  async checkAllSamplesUploadedByCurrentUser() {
-    const { validSampleIds } = this.props;
-    const allSamplesUploadedByCurrentUser = await uploadedByCurrentUser(
-      Array.from(validSampleIds)
+const assembleSelectedDownload = memoize(
+  (
+    selectedDownloadTypeName,
+    allSelectedFields,
+    allSelectedFieldsDisplay,
+    sampleIds
+  ) => {
+    const fieldValues = get(selectedDownloadTypeName, allSelectedFields);
+    const fieldDisplayNames = get(
+      selectedDownloadTypeName,
+      allSelectedFieldsDisplay
     );
 
-    return allSamplesUploadedByCurrentUser;
+    const fields = {};
+    if (fieldValues) {
+      for (let [fieldName, fieldValue] of Object.entries(fieldValues)) {
+        fields[fieldName] = {
+          value: fieldValue,
+          // Use the display name for the value if it exists. Otherwise, use the value.
+          displayName: fieldDisplayNames[fieldName] || fieldValue,
+        };
+      }
+    }
+
+    return {
+      downloadType: selectedDownloadTypeName,
+      fields,
+      sampleIds: Array.from(sampleIds),
+    };
   }
+);
+
+class ChooseStep extends React.Component {
+  state = {
+    selectedFields: {},
+    // For each selected field, we also save a human-readable "display name" for that field.
+    // While the user is in the choose step, we store a field's value and display name separately.
+    // This is to be compatible with <Dropdowns>, which only accept a string or number as the value
+    // (as opposed to an object).
+    // However, after the selected download is "assembled", both the value and display name for each field are stored
+    // in the params. This is also how the bulk download is stored in the database.
+    selectedFieldsDisplay: {},
+    selectedDownloadTypeName: null,
+    // Whether we are waiting for the createBulkDownload call to complete.
+    waitingForCreate: false,
+    createStatus: null,
+    createError: "",
+  };
 
   getSelectedDownloadType = () => {
-    const { selectedDownloadTypeName, downloadTypes } = this.props;
+    const { downloadTypes } = this.props;
+    const { selectedDownloadTypeName } = this.state;
 
     if (!selectedDownloadTypeName) {
       return null;
@@ -131,7 +117,7 @@ class ChooseStep extends React.Component {
 
   // Get all the fields we need to validate for the selected download type.
   getRequiredFieldsForSelectedType = () => {
-    const { selectedFields } = this.props;
+    const { selectedFields } = this.state;
     const downloadType = this.getSelectedDownloadType();
 
     if (!downloadType) return null;
@@ -152,7 +138,8 @@ class ChooseStep extends React.Component {
   };
 
   isSelectedDownloadValid = () => {
-    const { selectedFields, validSampleIds } = this.props;
+    const { validSampleIds } = this.props;
+    const { selectedFields } = this.state;
 
     const downloadType = this.getSelectedDownloadType();
 
@@ -183,9 +170,95 @@ class ChooseStep extends React.Component {
     orderBy(["sampleCount", "text"], ["desc", "asc"], options)
   );
 
+  // *** TBD ***
+
+  getSelectedFields = () => {
+    const { selectedDownloadTypeName, selectedFields } = this.state;
+
+    return get(selectedDownloadTypeName, selectedFields);
+  };
+
+  // *** BULK DOWNLOAD GENERATION
+
+  continue = () => {
+    const {
+      selectedDownloadTypeName,
+      selectedFields,
+      selectedFieldsDisplay,
+    } = this.state;
+    const { validSampleIds, downloadTypes } = this.props;
+    const selectedDownload = assembleSelectedDownload(
+      selectedDownloadTypeName,
+      selectedFields,
+      selectedFieldsDisplay,
+      validSampleIds
+    );
+
+    const selectedDownloadType = find(
+      ["type", selectedDownloadTypeName],
+      downloadTypes
+    );
+
+    this.createBulkDownload(selectedDownload);
+  };
+
+  handleSelectDownloadType = selectedDownloadTypeName => {
+    this.setState({
+      selectedDownloadTypeName,
+    });
+  };
+
+  handleFieldSelect = (downloadType, fieldType, value, displayName) => {
+    this.setState(prevState => {
+      // If the value is undefined, delete it from selectedFields.
+      // This allows us to support cases where certain fields are conditionally required;
+      // if the field becomes no longer required, we can unset it.
+      const newSelectedFields =
+        value !== undefined
+          ? set([downloadType, fieldType], value, prevState.selectedFields)
+          : unset([downloadType, fieldType], prevState.selectedFields);
+
+      const newSelectedFieldsDisplay =
+        displayName !== undefined
+          ? set(
+              [downloadType, fieldType],
+              displayName,
+              prevState.selectedFieldsDisplay
+            )
+          : unset([downloadType, fieldType], prevState.selectedFieldsDisplay);
+
+      return {
+        selectedFields: newSelectedFields,
+        selectedFieldsDisplay: newSelectedFieldsDisplay,
+      };
+    });
+  };
+
+  createBulkDownload = async selectedDownload => {
+    const { onGenerate } = this.props;
+    this.setState({
+      waitingForCreate: true,
+    });
+
+    try {
+      await createBulkDownload(selectedDownload);
+    } catch (e) {
+      this.setState({
+        waitingForCreate: false,
+        createStatus: "error",
+        createError: e.error,
+      });
+      return;
+    }
+
+    onGenerate();
+  };
+
+  // *** RENDERING FUNCTIONS ***
+
   renderOption = (downloadType, field) => {
-    const { selectedFields, onFieldSelect, validSampleIds } = this.props;
-    const { backgroundOptions, metricsOptions } = this.state;
+    const { backgroundOptions, metricsOptions, validSampleIds } = this.props;
+    const { selectedFields } = this.state;
 
     const selectedField = get(field.type, selectedFields);
     let dropdownOptions = null;
@@ -236,7 +309,7 @@ class ChooseStep extends React.Component {
             <TaxonHitSelect
               sampleIds={validSampleIds}
               onChange={(value, displayName) => {
-                onFieldSelect(
+                this.handleFieldSelect(
                   downloadType.type,
                   field.type,
                   value,
@@ -255,7 +328,7 @@ class ChooseStep extends React.Component {
             <TaxonHitSelect
               sampleIds={validSampleIds}
               onChange={(value, displayName) => {
-                onFieldSelect(
+                this.handleFieldSelect(
                   downloadType.type,
                   field.type,
                   value,
@@ -289,7 +362,12 @@ class ChooseStep extends React.Component {
           placeholder={placeholder}
           options={dropdownOptions}
           onChange={(value, displayName) => {
-            onFieldSelect(downloadType.type, field.type, value, displayName);
+            this.handleFieldSelect(
+              downloadType.type,
+              field.type,
+              value,
+              displayName
+            );
 
             // Reset conditional fields if they are no longer needed.
             CONDITIONAL_FIELDS.forEach(conditionalField => {
@@ -298,7 +376,7 @@ class ChooseStep extends React.Component {
                 downloadType.type === conditionalField.downloadType &&
                 !conditionalField.triggerValues.includes(value)
               ) {
-                onFieldSelect(
+                this.handleFieldSelect(
                   downloadType.type,
                   conditionalField.field,
                   undefined,
@@ -316,12 +394,11 @@ class ChooseStep extends React.Component {
   };
 
   renderDownloadType = downloadType => {
+    const { validSampleIds } = this.props;
     const {
+      allSamplesUploadedByCurrentUser,
       selectedDownloadTypeName,
-      onSelect,
-      selectedSampleIds,
-    } = this.props;
-    const { allSamplesUploadedByCurrentUser } = this.state;
+    } = this.state;
     const { admin, appConfig } = this.context || {};
 
     const selected = selectedDownloadTypeName === downloadType.type;
@@ -340,7 +417,7 @@ class ChooseStep extends React.Component {
     } else if (
       downloadType.type === "original_input_file" &&
       appConfig.maxSamplesBulkDownloadOriginalFiles &&
-      selectedSampleIds.size > appConfig.maxSamplesBulkDownloadOriginalFiles &&
+      validSampleIds.size > appConfig.maxSamplesBulkDownloadOriginalFiles &&
       !admin
     ) {
       disabled = true;
@@ -358,7 +435,9 @@ class ChooseStep extends React.Component {
           disabled && cs.disabled
         )}
         key={downloadType.type}
-        onClick={() => !disabled && onSelect(downloadType.type)}
+        onClick={() =>
+          !disabled && this.handleSelectDownloadType(downloadType.type)
+        }
       >
         <RadioButton
           disabled={disabled}
@@ -485,6 +564,26 @@ class ChooseStep extends React.Component {
     );
   };
 
+  renderDownloadButton = () => {
+    const { waitingForCreate, createStatus, createError } = this.state;
+
+    if (waitingForCreate) {
+      return <LoadingMessage message="Starting your download..." />;
+    }
+
+    if (createStatus === "error") {
+      return <Notification type="error">{createError}</Notification>;
+    }
+
+    return (
+      <PrimaryButton
+        disabled={!this.isSelectedDownloadValid()}
+        text="Start Generating Download"
+        onClick={this.continue}
+      />
+    );
+  };
+
   render() {
     const {
       onContinue,
@@ -509,11 +608,7 @@ class ChooseStep extends React.Component {
           {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
           {validationError != null && this.renderValidationError()}
           {numSamples < 1 && this.renderNoValidSamplesError()}
-          <PrimaryButton
-            disabled={!this.isSelectedDownloadValid()}
-            text="Continue"
-            onClick={onContinue}
-          />
+          {this.renderDownloadButton()}
           <div className={cs.downloadDisclaimer}>
             Downloads for larger files can take multiple hours to generate.
           </div>
@@ -525,15 +620,13 @@ class ChooseStep extends React.Component {
 
 ChooseStep.propTypes = {
   downloadTypes: PropTypes.arrayOf(PropTypes.DownloadType),
-  selectedDownloadTypeName: PropTypes.string,
-  onSelect: PropTypes.func.isRequired,
-  // The selected fields of the currently selected download type.
-  selectedFields: PropTypes.objectOf(PropTypes.string),
-  onFieldSelect: PropTypes.func.isRequired,
-  onContinue: PropTypes.func.isRequired,
+  onGenerate: PropTypes.func.isRequired,
   validSampleIds: PropTypes.instanceOf(Set).isRequired,
   invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
   validationError: PropTypes.string,
+  backgroundOptions: PropTypes.array,
+  metricsOptions: PropTypes.array,
+  allSamplesUploadedByCurrentUser: PropTypes.bool,
 };
 
 ChooseStep.contextType = UserContext;
