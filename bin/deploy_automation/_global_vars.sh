@@ -15,13 +15,13 @@ export TAB=$'\t'
 export LF=$'\n'
 
 # Color vars
-export BLACK; BLACK="$(tput setaf 0)"
-export RED; RED="$(tput setaf 1)"
-export GREEN; GREEN="$(tput setaf 2)"
-export YELLOW; YELLOW="$(tput setaf 3)"
-export BLUE; BLUE="$(tput setaf 4)"
-export MAGENTA; MAGENTA="$(tput setaf 5)"
-export CYAN; CYAN="$(tput setaf 6)"
-export WHITE; WHITE="$(tput setaf 7)"
-export BOLD; BOLD="$(tput bold)"
-export RESET; RESET="$(tput sgr0)"
+export BLACK; BLACK="$( { tty -s && tput setaf 0; } || true )"
+export RED; RED="$( { tty -s && tput setaf 1; } || true )"
+export GREEN; GREEN="$( { tty -s && tput setaf 2; } || true )"
+export YELLOW; YELLOW="$( { tty -s && tput setaf 3; } || true )"
+export BLUE; BLUE="$( { tty -s && tput setaf 4; } || true )"
+export MAGENTA; MAGENTA="$( { tty -s && tput setaf 5; } || true )"
+export CYAN; CYAN="$( { tty -s && tput setaf 6; } || true )"
+export WHITE; WHITE="$( { tty -s && tput setaf 7; } || true )"
+export BOLD; BOLD="$( { tty -s && tput bold; } || true )"
+export RESET; RESET="$( { tty -s && tput sgr0; } || true )"
