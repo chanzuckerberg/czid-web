@@ -1,0 +1,37 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.listContainer {
+  margin-bottom: $space-s;
+  &.error {
+    border-color: $error;
+    background-color: $error-bg;
+  }
+
+  &.warn {
+    border-color: $warning;
+    background-color: $warning-bg;
+  }
+
+  &.info {
+    border-color: $info;
+    background-color: $info-bg;
+  }
+
+  &.success {
+    border-color: $success;
+    background-color: $success-bg;
+  }
+}
+
+.notificationContainer {
+  @include font-body-xxs;
+  margin: $space-xxs 0;
+}
+
+.messageContainer {
+  max-height: 150px;
+  overflow: auto;
+  margin-left: 30px; // to align text with icon
+}
