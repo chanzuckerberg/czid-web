@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";

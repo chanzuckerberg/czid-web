@@ -129,7 +129,7 @@ class BulkDownloadModal extends React.Component {
   // *** Render methods ***
 
   render() {
-    const { open, onGenerate } = this.props;
+    const { open, onGenerate, onClose } = this.props;
     const {
       bulkDownloadTypes,
       validSampleIds,
@@ -142,9 +142,11 @@ class BulkDownloadModal extends React.Component {
     } = this.state;
 
     return (
-      <Modal narrow open={open} tall onClose={this.props.onClose}>
-        {loading && "L O A D I N G"}
-        {!loading && (
+      <Modal narrow open={open} tall onClose={onClose}>
+        {
+          //loading && "L O A D I N G"
+        }
+        {
           <ChooseStep
             downloadTypes={bulkDownloadTypes}
             onGenerate={onGenerate}
@@ -155,7 +157,7 @@ class BulkDownloadModal extends React.Component {
             metricsOptions={metricsOptions}
             allSamplesUploadedByCurrentUser={allSamplesUploadedByCurrentUser}
           />
-        )}
+        }
       </Modal>
     );
   }

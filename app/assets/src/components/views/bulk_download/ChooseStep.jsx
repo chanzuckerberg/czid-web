@@ -117,7 +117,8 @@ class ChooseStep extends React.Component {
 
   // Get all the fields we need to validate for the selected download type.
   getRequiredFieldsForSelectedType = () => {
-    const { selectedFields } = this.state;
+    const { selectedFields, selectedDownloadTypeName } = this.state;
+    const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
     const downloadType = this.getSelectedDownloadType();
 
     if (!downloadType) return null;
@@ -128,7 +129,7 @@ class ChooseStep extends React.Component {
     CONDITIONAL_FIELDS.forEach(field => {
       if (
         downloadType.type === field.downloadType &&
-        !triggersConditionalField(field, selectedFields)
+        !triggersConditionalField(field, selectedFieldsForType)
       ) {
         requiredFields = reject(["type", field.field], requiredFields);
       }
@@ -139,8 +140,9 @@ class ChooseStep extends React.Component {
 
   isSelectedDownloadValid = () => {
     const { validSampleIds } = this.props;
-    const { selectedFields } = this.state;
+    const { selectedFields, selectedDownloadTypeName } = this.state;
 
+    const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
     const downloadType = this.getSelectedDownloadType();
 
     if (!downloadType || validSampleIds.size < 1) {
@@ -154,7 +156,7 @@ class ChooseStep extends React.Component {
         some(
           Boolean,
           map(
-            field => isUndefined(get(field.type, selectedFields)),
+            field => isUndefined(get(field.type, selectedFieldsForType)),
             requiredFields
           )
         )
@@ -170,33 +172,20 @@ class ChooseStep extends React.Component {
     orderBy(["sampleCount", "text"], ["desc", "asc"], options)
   );
 
-  // *** TBD ***
+  // *** BULK DOWNLOAD GENERATION ***
 
-  getSelectedFields = () => {
-    const { selectedDownloadTypeName, selectedFields } = this.state;
-
-    return get(selectedDownloadTypeName, selectedFields);
-  };
-
-  // *** BULK DOWNLOAD GENERATION
-
-  continue = () => {
+  handleDownloadRequest = () => {
     const {
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
     } = this.state;
-    const { validSampleIds, downloadTypes } = this.props;
+    const { validSampleIds } = this.props;
     const selectedDownload = assembleSelectedDownload(
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
       validSampleIds
-    );
-
-    const selectedDownloadType = find(
-      ["type", selectedDownloadTypeName],
-      downloadTypes
     );
 
     this.createBulkDownload(selectedDownload);
@@ -258,9 +247,10 @@ class ChooseStep extends React.Component {
 
   renderOption = (downloadType, field) => {
     const { backgroundOptions, metricsOptions, validSampleIds } = this.props;
-    const { selectedFields } = this.state;
+    const { selectedFields, selectedDownloadTypeName } = this.state;
 
-    const selectedField = get(field.type, selectedFields);
+    const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
+    const selectedField = get(field.type, selectedFieldsForType);
     let dropdownOptions = null;
     let placeholder = "";
     // Handle rendering conditional fields.
@@ -270,7 +260,10 @@ class ChooseStep extends React.Component {
     if (
       field.type === fileFormatConditionalField.field &&
       downloadType.type === fileFormatConditionalField.downloadType &&
-      !triggersConditionalField(fileFormatConditionalField, selectedFields)
+      !triggersConditionalField(
+        fileFormatConditionalField,
+        selectedFieldsForType
+      )
     ) {
       return (
         <div className={cs.field} key={field.type}>
@@ -287,7 +280,7 @@ class ChooseStep extends React.Component {
         conditionalField =>
           field.type === conditionalField.field &&
           downloadType.type === conditionalField.downloadType &&
-          !triggersConditionalField(conditionalField, selectedFields)
+          !triggersConditionalField(conditionalField, selectedFieldsForType)
       )
     )
       return;
@@ -579,19 +572,23 @@ class ChooseStep extends React.Component {
       <PrimaryButton
         disabled={!this.isSelectedDownloadValid()}
         text="Start Generating Download"
-        onClick={this.continue}
+        onClick={this.handleDownloadRequest}
       />
     );
   };
 
   render() {
     const {
-      onContinue,
       validSampleIds,
       invalidSampleNames,
       validationError,
+      downloadTypes,
     } = this.props;
+
     const numSamples = validSampleIds.size;
+    // this is to keep the "no valid samples" error
+    // from displaying while data is still being fetched
+    const loading = downloadTypes ? false : true;
 
     return (
       <div className={cs.chooseStep}>
@@ -607,7 +604,7 @@ class ChooseStep extends React.Component {
         <div className={cs.footer}>
           {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
           {validationError != null && this.renderValidationError()}
-          {numSamples < 1 && this.renderNoValidSamplesError()}
+          {numSamples < 1 && !loading && this.renderNoValidSamplesError()}
           {this.renderDownloadButton()}
           <div className={cs.downloadDisclaimer}>
             Downloads for larger files can take multiple hours to generate.
