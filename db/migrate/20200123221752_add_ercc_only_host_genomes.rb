@@ -82,6 +82,12 @@ class AddErccOnlyHostGenomes < ActiveRecord::Migration[5.1]
 
     hg = HostGenome.new
     hg.name = name
+    # This should not be necessary but errors running migration in travis
+    # were observed most likely because of dependence on new mysql defaults in
+    # previous migration. See ChangeHostGenomeDefaults.
+    hg.s3_star_index_path = HostGenome.s3_star_index_path_default
+    hg.s3_bowtie2_index_path = HostGenome.s3_bowtie2_index_path_default
+    hg.skip_deutero_filter = 0
 
     human_host = HostGenome.find_by(name: "Human")
     hg.default_background_id = human_host.default_background_id if human_host
