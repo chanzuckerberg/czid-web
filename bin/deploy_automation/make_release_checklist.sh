@@ -39,6 +39,7 @@ __make_release_checklist() {
   _log "Creating release checklist..."
   declare response_json
   if response_json=$(
+    # see https://developer.github.com/v3/pulls/#create-a-pull-request
     http --ignore-stdin --check-status --timeout=30 POST "${GITHUB_REPOSITORY_API}/pulls" \
       "Accept:application/vnd.github.shadow-cat-preview+json" \
       "Authorization:token $GITHUB_TOKEN" \

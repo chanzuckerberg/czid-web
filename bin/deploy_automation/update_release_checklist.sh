@@ -41,6 +41,7 @@ main() {
     >&2 echo "Updating release checklist body for $checklist_api_url ..."
     declare response_json;
     if response_json=$(
+      # see https://developer.github.com/v3/pulls/#update-a-pull-request
       http --ignore-stdin --check-status --timeout=30 PATCH "$checklist_api_url" \
         Accept:application/vnd.github.shadow-cat-preview+json \
         Authorization:"token $GITHUB_TOKEN" \

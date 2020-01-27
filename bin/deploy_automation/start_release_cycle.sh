@@ -5,7 +5,7 @@ source "$SCRIPT_DIR/_global_vars.sh"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
 # Start a new release cycle:
-# - points stage branch master
+# - points stage branch to master
 # - creates a new staging version tag
 # - creates new release checklist
 main() {
@@ -13,7 +13,6 @@ main() {
 
   # make sure release checklist doesn't exist yet
   _assert_no_release_checklist
-
 
   declare staging_tag_version; staging_tag_version="$(_get_latest_version "$STAGING_BRANCH")"
   declare prod_tag_version; prod_tag_version="$(_get_latest_version "$PROD_BRANCH")"

@@ -21,7 +21,7 @@ main() {
   declare checklist_body; checklist_body=$(jq -er .body <<< "$checklist_json")
   declare checklist_html_url; checklist_html_url=$(jq -er .html_url <<< "$checklist_json")
 
-  # Verify if there are at least one item in the check list
+  # Verify if there is at least one item in the check list
   if ! ( grep -qE '^\s*\*\s*\[[xX ]+\]' <<< "$checklist_body" ); then
     _exit_with_err_msg "INVALID STATE: Couldn't find any items in the release checklist. Please check $checklist_html_url"
   fi
