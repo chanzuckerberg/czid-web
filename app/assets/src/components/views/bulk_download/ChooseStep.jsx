@@ -23,6 +23,8 @@ import {
   uploadedByCurrentUser,
   getHeatmapMetrics,
 } from "~/api";
+import AccordionNotification from "~ui/notifications/AccordionNotification";
+import Notification from "~ui/notifications/Notification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
@@ -63,9 +65,30 @@ class ChooseStep extends React.Component {
   };
 
   componentDidMount() {
-    this.fetchBackgrounds();
-    this.fetchHeatmapMetrics();
-    this.checkAllSamplesUploadedByCurrentUser();
+    this.fetchUserData();
+  }
+
+  // make async requests in parallel
+  async fetchUserData() {
+    const backgroundOptionsRequest = this.fetchBackgrounds();
+    const metricsOptionsRequest = this.fetchHeatmapMetrics();
+    const allSamplesUploadedByCurrentUserRequest = this.checkAllSamplesUploadedByCurrentUser();
+
+    const [
+      backgroundOptions,
+      metricsOptions,
+      allSamplesUploadedByCurrentUser,
+    ] = await Promise.all([
+      backgroundOptionsRequest,
+      metricsOptionsRequest,
+      allSamplesUploadedByCurrentUserRequest,
+    ]);
+
+    this.setState({
+      backgroundOptions,
+      metricsOptions,
+      allSamplesUploadedByCurrentUser,
+    });
   }
 
   // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
@@ -77,28 +100,23 @@ class ChooseStep extends React.Component {
       value: background.id,
     }));
 
-    this.setState({
-      backgroundOptions,
-    });
+    return backgroundOptions;
   }
 
   // We use the heatmap metrics as the valid metrics for bulk downloads.
   async fetchHeatmapMetrics() {
     const heatmapMetrics = await getHeatmapMetrics();
 
-    this.setState({
-      metricsOptions: heatmapMetrics,
-    });
+    return heatmapMetrics;
   }
 
   async checkAllSamplesUploadedByCurrentUser() {
-    const { selectedSampleIds } = this.props;
+    const { validSampleIds } = this.props;
     const allSamplesUploadedByCurrentUser = await uploadedByCurrentUser(
-      Array.from(selectedSampleIds)
+      Array.from(validSampleIds)
     );
-    this.setState({
-      allSamplesUploadedByCurrentUser,
-    });
+
+    return allSamplesUploadedByCurrentUser;
   }
 
   getSelectedDownloadType = () => {
@@ -134,11 +152,11 @@ class ChooseStep extends React.Component {
   };
 
   isSelectedDownloadValid = () => {
-    const { selectedFields } = this.props;
+    const { selectedFields, validSampleIds } = this.props;
 
     const downloadType = this.getSelectedDownloadType();
 
-    if (!downloadType) {
+    if (!downloadType || validSampleIds.size < 1) {
       return false;
     }
 
@@ -166,13 +184,12 @@ class ChooseStep extends React.Component {
   );
 
   renderOption = (downloadType, field) => {
-    const { selectedFields, onFieldSelect, selectedSampleIds } = this.props;
+    const { selectedFields, onFieldSelect, validSampleIds } = this.props;
     const { backgroundOptions, metricsOptions } = this.state;
 
     const selectedField = get(field.type, selectedFields);
     let dropdownOptions = null;
     let placeholder = "";
-
     // Handle rendering conditional fields.
 
     // For the file format field, render a placeholder. This is a special case.
@@ -217,7 +234,7 @@ class ChooseStep extends React.Component {
           <div className={cs.field} key={field.type}>
             <div className={cs.label}>{field.display_name}:</div>
             <TaxonHitSelect
-              sampleIds={selectedSampleIds}
+              sampleIds={validSampleIds}
               onChange={(value, displayName) => {
                 onFieldSelect(
                   downloadType.type,
@@ -236,7 +253,7 @@ class ChooseStep extends React.Component {
           <div className={cs.field} key={field.type}>
             <div className={cs.label}>{field.display_name}:</div>
             <TaxonHitSelect
-              sampleIds={selectedSampleIds}
+              sampleIds={validSampleIds}
               onChange={(value, displayName) => {
                 onFieldSelect(
                   downloadType.type,
@@ -410,10 +427,72 @@ class ChooseStep extends React.Component {
     );
   };
 
-  render() {
-    const { onContinue, selectedSampleIds } = this.props;
+  renderInvalidSamplesWarning = () => {
+    const { invalidSampleNames } = this.props;
 
-    const numSamples = selectedSampleIds.size;
+    const header = (
+      <div>
+        <span className={cs.highlight}>
+          {invalidSampleNames.length} sample
+          {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
+          bulk download
+        </span>, because they either failed or are still processing:
+      </div>
+    );
+
+    const content = (
+      <span>
+        {invalidSampleNames.map((name, index) => {
+          return (
+            <div key={index} className={cs.messageLine}>
+              {name}
+            </div>
+          );
+        })}
+      </span>
+    );
+
+    return (
+      <AccordionNotification
+        header={header}
+        content={content}
+        open={false}
+        type={"warn"}
+        displayStyle={"flat"}
+      />
+    );
+  };
+
+  renderValidationError = () => {
+    return (
+      <div className={cs.notificationContainer}>
+        <Notification type="error" displayStyle="flat">
+          <div className={cs.header}>
+            An error occurred when verifying your selected samples.
+          </div>
+        </Notification>
+      </div>
+    );
+  };
+
+  renderNoValidSamplesError = () => {
+    return (
+      <div className={cs.notificationContainer}>
+        <Notification type="error" displayStyle="flat">
+          No valid samples to download data from.
+        </Notification>
+      </div>
+    );
+  };
+
+  render() {
+    const {
+      onContinue,
+      validSampleIds,
+      invalidSampleNames,
+      validationError,
+    } = this.props;
+    const numSamples = validSampleIds.size;
 
     return (
       <div className={cs.chooseStep}>
@@ -427,6 +506,9 @@ class ChooseStep extends React.Component {
           {this.renderDownloadTypes()}
         </div>
         <div className={cs.footer}>
+          {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
+          {validationError != null && this.renderValidationError()}
+          {numSamples < 1 && this.renderNoValidSamplesError()}
           <PrimaryButton
             disabled={!this.isSelectedDownloadValid()}
             text="Continue"
@@ -449,7 +531,9 @@ ChooseStep.propTypes = {
   selectedFields: PropTypes.objectOf(PropTypes.string),
   onFieldSelect: PropTypes.func.isRequired,
   onContinue: PropTypes.func.isRequired,
-  selectedSampleIds: PropTypes.instanceOf(Set),
+  validSampleIds: PropTypes.instanceOf(Set).isRequired,
+  invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
+  validationError: PropTypes.string,
 };
 
 ChooseStep.contextType = UserContext;

@@ -2,10 +2,17 @@
 
 .header {
   display: flex;
-  align-items: center;
 
   &.toggleable {
     cursor: pointer;
+  }
+
+  &.center {
+    align-items: center;
+  }
+
+  &.baseline {
+    align-items: baseline;
   }
 
   .fill {
@@ -25,6 +32,9 @@
 }
 
 .content {
+  // prevent margin collapse, so that interior elements can set a bottom margin
+  overflow: auto;
+
   &.bottomPadding {
     margin-bottom: 20px;
   }

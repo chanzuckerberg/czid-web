@@ -2,7 +2,7 @@ one:
   name: host genome 1
 
 two:
-  name: Human
+  name: host genome 2
   metadata_fields: [collection_date, sample_type, sex, age, admission_date, nucleotide_type, water_control]
 
 human:

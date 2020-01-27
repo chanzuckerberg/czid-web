@@ -34,6 +34,18 @@ export default class PlaygroundComponents extends React.Component {
           hostGenomes={[{ name: "Human", id: 1 }]}
           samples={[{ host_genome_id: 1 }]}
         />,
+        // multiple same match
+        <HostOrganismMessage
+          key="6"
+          hostGenomes={[{ name: "Human", id: 1 }]}
+          samples={[{ host_genome_id: 1 }, { host_genome_id: 1 }]}
+        />,
+        // one non-human match
+        <HostOrganismMessage
+          key="5"
+          hostGenomes={[{ name: "Bat", id: 4 }]}
+          samples={[{ host_genome_id: 4 }]}
+        />,
         // one no match
         <HostOrganismMessage
           key="2"
