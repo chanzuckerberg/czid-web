@@ -21,6 +21,7 @@ class Accordion extends React.Component {
       className,
       iconClassName,
       bottomContentPadding,
+      toggleArrowAlignment,
     } = this.props;
 
     const open = this.state.wasToggled ? this.state.open : this.props.open;
@@ -28,7 +29,11 @@ class Accordion extends React.Component {
     return (
       <div className={cx(cs.accordion, className)}>
         <div
-          className={cx(cs.header, toggleable && cs.toggleable)}
+          className={cx(
+            cs.header,
+            toggleable && cs.toggleable,
+            cs[toggleArrowAlignment]
+          )}
           onClick={this.props.onToggle || this.onToggle}
         >
           {header}
@@ -62,6 +67,8 @@ Accordion.propTypes = {
   className: PropTypes.string,
   iconClassName: PropTypes.string,
   toggleable: PropTypes.bool,
+  // the vertical alignment of the toggle arrow with other header elements
+  toggleArrowAlignment: PropTypes.oneOf(["center", "baseline"]),
   // Accordion can be controlled or non-controlled.
   onToggle: PropTypes.func,
   open: PropTypes.bool,
@@ -73,6 +80,7 @@ Accordion.propTypes = {
 
 Accordion.defaultProps = {
   toggleable: true,
+  toggleArrowAlignment: "center",
   open: false,
 };
 

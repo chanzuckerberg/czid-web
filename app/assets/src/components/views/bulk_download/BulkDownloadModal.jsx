@@ -3,7 +3,10 @@ import PropTypes from "prop-types";
 import { unset, find, get, set } from "lodash/fp";
 import memoize from "memoize-one";
 
-import { getBulkDownloadTypes } from "~/api/bulk_downloads";
+import {
+  getBulkDownloadTypes,
+  validateSampleIdsForBulkDownload,
+} from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 
 import ChooseStep from "./ChooseStep";
@@ -56,10 +59,13 @@ class BulkDownloadModal extends React.Component {
     selectedFieldsDisplay: {},
     selectedDownloadTypeName: null,
     currentStep: "choose",
+    validSampleIds: new Set(),
+    invalidSampleNames: [],
+    validationError: null,
   };
 
   componentDidMount() {
-    this.fetchDownloadTypes();
+    this.fetchDownloadTypesAndValidationInfo();
   }
 
   componentDidUpdate(prevProps) {
@@ -73,12 +79,43 @@ class BulkDownloadModal extends React.Component {
     }
   }
 
-  async fetchDownloadTypes() {
-    const bulkDownloadTypes = await getBulkDownloadTypes();
+  async fetchDownloadTypesAndValidationInfo() {
+    const { selectedSampleIds } = this.props;
+
+    const bulkDownloadTypesRequest = this.fetchDownloadTypes();
+    const sampleValidationInfoRequest = this.fetchValidationInfo(
+      Array.from(selectedSampleIds)
+    );
+
+    const [bulkDownloadTypes, sampleValidationInfo] = await Promise.all([
+      bulkDownloadTypesRequest,
+      sampleValidationInfoRequest,
+    ]);
+
+    const validSampleIds = new Set(sampleValidationInfo.validSampleIds);
+    const invalidSampleNames = sampleValidationInfo.invalidSampleNames;
+    const validationError = sampleValidationInfo.error;
 
     this.setState({
       bulkDownloadTypes,
+      validSampleIds,
+      invalidSampleNames,
+      validationError,
     });
+  }
+
+  async fetchDownloadTypes() {
+    const bulkDownloadTypes = await getBulkDownloadTypes();
+
+    return bulkDownloadTypes;
+  }
+
+  async fetchValidationInfo(selectedSampleIds) {
+    const sampleValidationInfo = await validateSampleIdsForBulkDownload(
+      selectedSampleIds
+    );
+
+    return sampleValidationInfo;
   }
 
   handleSelectDownloadType = selectedDownloadTypeName => {
@@ -121,13 +158,15 @@ class BulkDownloadModal extends React.Component {
   };
 
   renderStep = () => {
-    const { selectedSampleIds } = this.props;
     const {
       currentStep,
       bulkDownloadTypes,
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
+      validSampleIds,
+      invalidSampleNames,
+      validationError,
     } = this.state;
 
     if (currentStep === "choose") {
@@ -139,7 +178,9 @@ class BulkDownloadModal extends React.Component {
           selectedFields={get(selectedDownloadTypeName, selectedFields)}
           onFieldSelect={this.handleFieldSelect}
           onContinue={this.handleChooseStepContinue}
-          selectedSampleIds={selectedSampleIds}
+          validSampleIds={validSampleIds}
+          invalidSampleNames={invalidSampleNames}
+          validationError={validationError}
         />
       );
     }
@@ -149,7 +190,7 @@ class BulkDownloadModal extends React.Component {
         selectedDownloadTypeName,
         selectedFields,
         selectedFieldsDisplay,
-        selectedSampleIds
+        validSampleIds
       );
 
       const selectedDownloadType = find(
