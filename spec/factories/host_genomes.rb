@@ -4,6 +4,9 @@ FactoryBot.define do
       metadata_fields { [] }
     end
     sequence(:name) { |n| "Host #{n}" }
+    # Use an admin user by default to reflect current reality. All host genomes
+    # up to this point have been created by admins.
+    association :user, factory: [:admin]
 
     after :create do |host_genome, options|
       options.metadata_fields.each do |metadata_field_name|

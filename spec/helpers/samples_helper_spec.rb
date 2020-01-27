@@ -12,7 +12,7 @@ RSpec.describe SamplesHelper, type: :helper do
         @project = create(:public_project)
         @joe = create(:joe)
         # Add the metadata fields to the host genome so that the metadata will pass validation.
-        @host_genome = create(:host_genome, metadata_fields: [
+        @host_genome = create(:host_genome, user: @joe, metadata_fields: [
                                 "Fake Metadata Field One", "Fake Metadata Field Two",
                               ])
       end
@@ -57,6 +57,7 @@ RSpec.describe SamplesHelper, type: :helper do
 
         expect(created_sample.name).to eq(fake_sample_name)
         expect(created_sample.host_genome.id).to be @host_genome.id
+        expect(created_sample.host_genome.user).to eq(@joe)
         expect(created_sample.project.id).to be @project.id
         expect(created_sample.bulk_mode).to be nil
         expect(created_sample.uploaded_from_basespace).to be 1
@@ -146,7 +147,7 @@ RSpec.describe SamplesHelper, type: :helper do
         host_genome = HostGenome.find_by(name: host_genome_name)
         expect(host_genome).to be_truthy
         expect(host_genome.ercc_only?).to be true
-        expect(host_genome.user).to be @admin
+        expect(host_genome.user).to eq(@admin)
       end
 
       it "raises an error if the host genome name is bad" do

@@ -1,7 +1,8 @@
 class HostGenome < ApplicationRecord
-  belongs_to :user
   has_many :samples, dependent: :restrict_with_exception
   has_and_belongs_to_many :metadata_fields
+  # The user that created the host genome should be recorded after 2020-02-01.
+  belongs_to :user
 
   before_create :add_default_metadata_fields
 

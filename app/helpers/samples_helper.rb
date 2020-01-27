@@ -517,7 +517,7 @@ module SamplesHelper
           # TODO: (gdingle): remove admin feature gating.
           # See https://jira.czi.team/browse/IDSEQ-2051
           hg = if user.admin
-                 HostGenome.find_or_create_by!(name: name)
+                 HostGenome.find_or_create_by!(name: name, user: user)
                else
                  HostGenome.find_by(name: name)
                end
