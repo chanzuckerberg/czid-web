@@ -34,8 +34,8 @@ export default class BulkDownloadNotification extends React.Component {
   }
 }
 
-export const showBulkDownloadNotification = onClose => {
+export const showBulkDownloadNotification = () => {
   showToast(({ closeToast }) => <BulkDownloadNotification />, {
-    onClose,
+    autoClose: 12000,
   });
 };
