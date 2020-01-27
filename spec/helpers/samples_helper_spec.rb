@@ -101,7 +101,9 @@ RSpec.describe SamplesHelper, type: :helper do
 
       before do
         @project = create(:public_project)
-        @joe = create(:joe)
+        # Because of initial admin only gating. See
+        # https://jira.czi.team/browse/IDSEQ-2051
+        @admin = create(:admin)
       end
 
       def sample_attributes(host_genome_name)
@@ -131,7 +133,7 @@ RSpec.describe SamplesHelper, type: :helper do
         response = helper.upload_samples_with_metadata(
           sample_attributes(host_genome_name),
           metadata_attributes,
-          @joe
+          @admin
         )
 
         expect(response["samples"].length).to be 1
@@ -144,6 +146,7 @@ RSpec.describe SamplesHelper, type: :helper do
         host_genome = HostGenome.find_by(name: host_genome_name)
         expect(host_genome).to be_truthy
         expect(host_genome.ercc_only?).to be true
+        expect(host_genome.user).to be @admin
       end
 
       it "raises an error if the host genome name is bad" do
@@ -154,7 +157,7 @@ RSpec.describe SamplesHelper, type: :helper do
         response = helper.upload_samples_with_metadata(
           sample_attributes(host_genome_name),
           metadata_attributes,
-          @joe
+          @admin
         )
 
         expect(response["samples"].length).to be 0
