@@ -5,10 +5,12 @@ source "$SCRIPT_DIR/_global_vars.sh"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
 # Close release cycle
-# - Update release checklist with release fixes
-# - Verify if all items from release checklist are checked
-# - Create a new tag for prod using same version as staging
-# - Reset prod branch to this new tag
+# - Update the current release checklist with any release fixes
+# - Make sure all items from current release checklist are checked
+# - Create a new tag for `prod` pointing to HEAD of `staging`,
+#   preserving version number (ex: if staging version is v0.24.1_staging_..., 
+#   this step will create a v0.24.1_prod_... tag)
+# - Set HEAD of prod branch to this new tag
 # Note: You need to manually deploy after this task
 main() {
   git fetch --all

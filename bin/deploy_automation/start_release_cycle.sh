@@ -5,9 +5,13 @@ source "$SCRIPT_DIR/_global_vars.sh"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
 # Start a new release cycle:
-# - points stage branch to master
-# - creates a new staging version tag
-# - creates new release checklist
+# - Create a new staging tag, pointing to HEAD of master branch. 
+#   The name of this tag bumps minor version from previous staging tag
+#   (ex: if previous staging version is v0.24.1_staging_...,
+#        this step will create tag v0.25_staging_...)
+# - Set HEAD of `staging` branch to point to this new tag
+# - Create new release checklist with all changes that are now
+#   in staging and not yet in prod
 main() {
   git fetch --all
 
