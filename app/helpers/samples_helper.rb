@@ -514,7 +514,13 @@ module SamplesHelper
       if sample_attributes[:host_genome_name]
         name = sample_attributes.delete(:host_genome_name)
         begin
-          hg = HostGenome.find_or_create_by!(name: name)
+          # TODO: (gdingle): remove admin feature gating.
+          # See https://jira.czi.team/browse/IDSEQ-2051
+          hg = if user.admin
+                 HostGenome.find_or_create_by!(name: name)
+               else
+                 HostGenome.find_by(name: name)
+               end
         rescue => e
           errors << e.message
           metadata.delete(sample_attributes[:name])
