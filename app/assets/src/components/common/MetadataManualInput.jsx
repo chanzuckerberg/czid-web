@@ -249,6 +249,7 @@ class MetadataManualInput extends React.Component {
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
     // Special-case 'Host Genome' (the field that lets you change the Host Genome)
     field === "Host Genome" ||
+    this.props.projectMetadataFields[field].is_required ||
     includes(
       hostGenomeId,
       get([field, "host_genome_ids"], this.props.projectMetadataFields)
@@ -301,7 +302,8 @@ class MetadataManualInput extends React.Component {
 
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
           if (this.isHostGenomeIdValidForField(sampleHostGenomeId, column)) {
-            const hostGenome = this.getSampleHostGenome(sample);
+            // host is unknown on initial load
+            const hostGenome = this.getSampleHostGenome(sample) || {};
             return (
               <div>
                 <MetadataInput
