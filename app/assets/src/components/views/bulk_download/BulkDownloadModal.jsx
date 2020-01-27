@@ -138,7 +138,6 @@ class BulkDownloadModal extends React.Component {
       backgroundOptions,
       metricsOptions,
       allSamplesUploadedByCurrentUser,
-      loading,
     } = this.state;
 
     return (
