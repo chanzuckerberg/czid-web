@@ -463,7 +463,7 @@ class PipelineRun < ApplicationRecord
   # filename, not a HostGenome instance, which could be ambiguous.
   def host_subtracted
     pipeline_run_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
-    dag = pipeline_run_stage && JSON.parse(pipeline_run_stage.dag_json)
+    dag = pipeline_run_stage && pipeline_run_stage.dag_json && JSON.parse(pipeline_run_stage.dag_json)
     return nil unless dag
     # See app/lib/dags/host_filter.json.jbuilder for step definition
     host_filtering = dag["steps"].find { |step| step["class"] == "PipelineStepRunStar" }
