@@ -3,6 +3,7 @@ import { difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
@@ -502,7 +503,7 @@ class SamplesView extends React.Component {
 
   handleBulkDownloadGenerate = () => {
     this.handleBulkDownloadModalClose();
-    console.log("Bulk download generated!");
+    showBulkDownloadNotification();
   };
 
   handleRowClick = ({ event, rowData }) => {
