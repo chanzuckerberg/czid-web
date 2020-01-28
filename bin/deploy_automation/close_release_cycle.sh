@@ -38,15 +38,15 @@ main() {
     _exit_with_err_msg "INVALID STATE: There are unchecked items in the release checklist. Please check $checklist_html_url"
   fi
 
-  # create a new tag for prod pointing prod to head of staging branch
+  # Create a new tag for `prod` pointing to HEAD of `staging`
   declare staging_tag_version; staging_tag_version="$(_get_latest_version staging)"
   declare tag; tag="$(_format_version_tag "${staging_tag_version}" "${PROD_BRANCH}")"
   _log "Creating tag ${tag} to point ${PROD_BRANCH} to the head of ${STAGING_BRANCH} branch..."
   git tag -af -m "Release $staging_tag_version" "${tag}" "origin/$STAGING_BRANCH"
   git push -f origin "${tag}"
 
-  # reset prod branch head to staging
-  declare sha; sha=$(git log -n1 "${tag}" --format=%h)
+  # Set HEAD of prod branch to this new tag
+  declare sha; sha=$(_get_latest_commit "${tag}")
   _log "Pointing prod branch to tag ${tag}..."
   git branch -f "${PROD_BRANCH}" "${sha}"
   git push -f origin "${PROD_BRANCH}"
