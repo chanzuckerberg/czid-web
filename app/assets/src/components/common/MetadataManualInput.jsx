@@ -13,6 +13,7 @@ import _fp, {
   find,
   pickBy,
   has,
+  orderBy,
 } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -20,6 +21,7 @@ import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import PlusIcon from "~ui/icons/PlusIcon";
+import { UserContext } from "~/components/common/UserContext";
 import HostOrganismSearchBox from "~ui/controls/HostOrganismSearchBox";
 
 import cs from "./metadata_manual_input.scss";
@@ -170,17 +172,16 @@ class MetadataManualInput extends React.Component {
     });
   };
 
-  // TODO (gdingle): still need this?
-  // getHostGenomeOptions = () =>
-  //   orderBy(
-  //     "count",
-  //     "desc",
-  //     this.props.hostGenomes.map(hostGenome => ({
-  //       text: hostGenome.name,
-  //       value: hostGenome.id,
-  //       count: hostGenome.samples_count,
-  //     }))
-  //   );
+  getHostGenomeOptions = () =>
+    orderBy(
+      "count",
+      "desc",
+      this.props.hostGenomes.map(hostGenome => ({
+        text: hostGenome.name,
+        value: hostGenome.id,
+        count: hostGenome.samples_count,
+      }))
+    );
 
   renderColumnSelector = () => {
     const options = values(this.props.projectMetadataFields).map(field => ({
@@ -290,28 +291,33 @@ class MetadataManualInput extends React.Component {
 
           // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
           // See https://jira.czi.team/browse/IDSEQ-2051.
-          if (column === "Host Genome" && admin) {
+          if (this.props.samplesAreNew && column === "Host Genome") {
             console.log(this.getMetadataValue(sample, column));
-            return (
-              <HostOrganismSearchBox
-                className={inputClasses}
-                value={this.getMetadataValue(sample, column)}
-                onResultSelect={({ result }) => {
-                  // Result can be plain text or a match. We treat them the same.
-                  console.log(result);
-                  debugger;
+            if (admin) {
+              return (
+                <HostOrganismSearchBox
+                  className={inputClasses}
+                  value={this.getMetadataValue(sample, column)}
+                  onResultSelect={({ result }) => {
+                    // Result can be plain text or a match. We treat them the same.
+                    console.log(result);
+                    debugger;
 
-                  // onChange(metadataType.key, result.name || result, true);
+                    // onChange(metadataType.key, result.name || result, true);
 
-                  // this.updateHostGenome(id, sample);
-                }}
-                hostGenomes={this.props.hostGenomes}
-              />
-            );
+                    // this.updateHostGenome(id, sample);
+                  }}
+                  hostGenomes={this.props.hostGenomes}
+                />
+              );
+            } else {
+              // TODO (gdingle):
+            }
           }
-
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
-          if (this.isHostGenomeIdValidForField(sampleHostGenomeId, column)) {
+          else if (
+            this.isHostGenomeIdValidForField(sampleHostGenomeId, column)
+          ) {
             // host is unknown on initial load
             const hostGenome = this.getSampleHostGenome(sample) || {};
             return (
@@ -391,6 +397,6 @@ MetadataManualInput.propTypes = {
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
 
-MetadataInput.contextType = UserContext;
+MetadataManualInput.contextType = UserContext;
 
 export default MetadataManualInput;

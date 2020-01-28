@@ -5,9 +5,7 @@ import PropTypes from "~/components/utils/propTypes";
 
 import LiveSearchPopBox from "./LiveSearchPopBox";
 
-const SUGGESTED = "SUGGESTED";
-const ALL = "ALL";
-
+// Adapted from SampleTypeSearchBox
 class HostOrganismSearchBox extends React.Component {
   handleSearchTriggered = query => {
     return this.buildResults(this.getMatchesByCategory(query), query);
@@ -37,8 +35,7 @@ class HostOrganismSearchBox extends React.Component {
         name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
       return res;
     };
-    // TODO (gdingle): change to sort by popularity
-    let sortedHostGenomes = sortBy(t => t.name, matchedHostGenomes);
+    let sortedHostGenomes = sortBy(t => t.samples_count, matchedHostGenomes);
     if (query !== "") {
       sortedHostGenomes = sortBy(sortHostGenomes, sortedHostGenomes);
     }
@@ -46,25 +43,19 @@ class HostOrganismSearchBox extends React.Component {
     return sortedHostGenomes;
   }
 
-  buildResults(hostGenomesByCategory, query) {
+  buildResults(sortedHostGenomes, query) {
     const formatResult = result => {
       return {
         title: result.name,
         name: result.name,
-        description: this.props.showDescription ? result.group : null,
+        id: result.id,
       };
     };
     const results = {};
-    if (hostGenomesByCategory[SUGGESTED]) {
+    if (sortedHostGenomes) {
       results.suggested = {
-        name: SUGGESTED,
-        results: hostGenomesByCategory[SUGGESTED].map(formatResult),
-      };
-    }
-    if (hostGenomesByCategory[ALL]) {
-      results.all = {
-        name: ALL,
-        results: hostGenomesByCategory[ALL].map(formatResult),
+        name: "SUGGESTED",
+        results: sortedHostGenomes.map(formatResult),
       };
     }
     if (query.length) {
