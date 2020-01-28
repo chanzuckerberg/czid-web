@@ -361,7 +361,11 @@ module MetadataHelper
     host_genomes = if allow_new_host_genomes
                      # TODO: (gdingle): need to add user name
                      host_genome_names.map do |name|
-                       hg = HostGenome.find_or_initialize_by(name: name)
+                       hg = HostGenome.find_by(name: name)
+                       unless hg
+                         # NOTE: this is the only place in MetadataHelper where current_user is called.
+                         hg = HostGenome.new(name: name, user: current_user)
+                       end
                        hg.save && hg
                      end
                    else
