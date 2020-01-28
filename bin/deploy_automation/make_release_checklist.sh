@@ -12,8 +12,8 @@ main() {
   # make sure release checklist doesn't exist yet
   _assert_no_release_checklist
 
-  declare version; version="$(_get_latest_version "$STAGING_BRANCH")"
-  __make_release_checklist "$STAGING_BRANCH" "$PROD_BRANCH" "[RELEASE_CHECKLIST] - v${version}"
+  declare major_minor_version; major_minor_version="$(_get_latest_version "$STAGING_BRANCH" | cut -d. -f1-2)"
+  __make_release_checklist "$STAGING_BRANCH" "$PROD_BRANCH" "[RELEASE_CHECKLIST] - v${major_minor_version}"
 }
 
 __make_release_checklist() {

@@ -54,7 +54,17 @@ _get_current_release_checklist_json() {
 
 _get_latest_version() {
   declare env_name="${1:-staging}"
-  _get_latest_tag "$env_name" | perl -pe 's/^v([\.0-9]+)_.*$/\1/'
+  _get_latest_tag "$env_name" \
+    | perl -pe 's/^v([\.0-9]+)_.*$/\1.0.0.0/' \
+    | cut -d. -f1-3
+}
+
+_get_current_version_initial_tag() {
+  declare env_name="${1:-staging}"
+
+  declare latest_version; latest_version=$(_get_latest_version "$env_name")
+  declare major_minor_version; major_minor_version=$(cut -d. -f1-2 <<< "$latest_version")
+  git tag -l --sort=-version:refname "v${major_minor_version}*_${env_name}_*" | tail -n 1
 }
 
 _get_latest_tag() {
@@ -68,7 +78,7 @@ _bump_version_string() {
   echo "${from_version}.0.0.0" | \
     awk -v i="$field" -F. '{$i = $i + 1} 1' | \
     sed 's/ /./g' | \
-    cut -d. -f1-"${field}"
+    cut -d. -f1-3
 }
 
 _format_version_tag() {
