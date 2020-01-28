@@ -289,6 +289,8 @@ class MetadataManualInput extends React.Component {
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
+          // TODO (gdingle): what about initial render
+          // hostGenomes` is marked as required in `HostOrganismSearchBox
 
           // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
           // See https://jira.czi.team/browse/IDSEQ-2051.
@@ -304,7 +306,7 @@ class MetadataManualInput extends React.Component {
                       // TODO (gdingle): need to handle plain text here
                       this.updateHostGenome(result.name, sample);
                     }}
-                    hostGenomes={this.props.hostGenomes}
+                    hostGenomes={this.props.hostGenomes || []}
                   />
                 ) : (
                   <Dropdown
