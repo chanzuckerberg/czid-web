@@ -7,8 +7,7 @@ class Input extends React.Component {
     super(props);
   }
 
-  handleChange = (e, inputProps) => {
-    console.log("handleChange called, e: ", e);
+  handleChange = (_, inputProps) => {
     if (this.props.onChange) {
       this.props.onChange(inputProps.value);
     }
@@ -21,12 +20,10 @@ class Input extends React.Component {
       <SemanticInput
         className={className}
         {...props}
-        onKeyPress={e => console.log("hello 4:11pm. e: ", e)}
         onChange={this.handleChange}
         // Chrome ignores autocomplete="off" on purpose, so use a non-standard
         // label. See: https://stackoverflow.com/questions/15738259/disabling-chrome-autofill
         autoComplete={disableAutocomplete ? "idseq-ui" : null}
-        onKeyDown={e => console.log("key down e: ", e)}
       />
     );
   }
