@@ -303,7 +303,6 @@ class MetadataManualInput extends React.Component {
                     className={inputClasses}
                     value={this.getMetadataValue(sample, column)}
                     onResultSelect={({ result }) => {
-                      console.log(result);
                       this.updateHostGenome(result.name || result, sample);
                     }}
                     hostGenomes={this.props.hostGenomes || []}
