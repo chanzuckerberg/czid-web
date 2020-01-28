@@ -88,7 +88,6 @@ class AddErccOnlyHostGenomes < ActiveRecord::Migration[5.1]
     hg.s3_star_index_path = HostGenome.s3_star_index_path_default
     hg.s3_bowtie2_index_path = HostGenome.s3_bowtie2_index_path_default
     hg.skip_deutero_filter = 0
-    hg.user = User.find_by(email: "gdingle@chanzuckerberg.com")
 
     human_host = HostGenome.find_by(name: "Human")
     hg.default_background_id = human_host.default_background_id if human_host
