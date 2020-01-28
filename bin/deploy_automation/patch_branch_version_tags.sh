@@ -6,7 +6,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 
 # Checks prod and staging branchs to detect eventual additional commits after last tag.
 # If there are additional commits, create a new tag for that environment and bump the
-# patch version.
+# patch version (ex: v0.24_staging_... -> v0.24.1_staging_...)
 main() {
   git fetch --all
 
