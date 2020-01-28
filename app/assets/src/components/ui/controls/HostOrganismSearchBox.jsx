@@ -1,5 +1,5 @@
 import React from "react";
-import { groupBy, sortBy } from "lodash/fp";
+import { sortBy } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 
@@ -13,51 +13,40 @@ class HostOrganismSearchBox extends React.Component {
     return this.buildResults(this.getMatchesByCategory(query), query);
   };
 
+  // TODO (gdingle): extract all these to utils if re-used
   getMatchesByCategory(query) {
-    const matchSampleTypes = sampleType => {
+    const matchHostGenomes = hostGenome => {
       // If no query, return all possible
       if (query === "") return true;
 
       // Match chars in any position. Good for acronyms. Ignore spaces.
       const noSpaces = query.replace(/\s*/gi, "");
       const regex = new RegExp(noSpaces.split("").join(".*"), "gi");
-      if (regex.test(sampleType.name)) {
+      if (regex.test(hostGenome.name)) {
         return true;
       }
       return false;
     };
-    const matchedSampleTypes = this.props.sampleTypes.filter(matchSampleTypes);
+    const matchedHostGenomes = this.props.hostGenomes.filter(matchHostGenomes);
 
     // Sort matches by position of match. If no position, alphabetical.
-    const sortSampleTypes = sampleType => {
-      const name = sampleType.name.toLowerCase();
+    const sortHostGenomes = hostGenome => {
+      const name = hostGenome.name.toLowerCase();
       const q = query.toLowerCase();
       const res =
         name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
       return res;
     };
-    let sortedSampleTypes = sortBy(t => t.name, matchedSampleTypes);
+    // TODO (gdingle): change to sort by popularity
+    let sortedHostGenomes = sortBy(t => t.name, matchedHostGenomes);
     if (query !== "") {
-      sortedSampleTypes = sortBy(sortSampleTypes, sortedSampleTypes);
+      sortedHostGenomes = sortBy(sortHostGenomes, sortedHostGenomes);
     }
 
-    // Sample types are grouped differently based on whether the current
-    // sample's host genome is an insect, a human, or neither. The "suggested"
-    // group is shown first, then the "all" group.
-    const getSampleTypeCategory = sampleType => {
-      if (sampleType.insect_only) {
-        return this.props.isInsect ? SUGGESTED : ALL;
-      }
-      if (sampleType.human_only) {
-        return this.props.isHuman ? SUGGESTED : ALL;
-      }
-      // insects should only be suggested insect body parts
-      return this.isInsect ? ALL : SUGGESTED;
-    };
-    return groupBy(getSampleTypeCategory, sortedSampleTypes);
+    return sortedHostGenomes;
   }
 
-  buildResults(sampleTypesByCategory, query) {
+  buildResults(hostGenomesByCategory, query) {
     const formatResult = result => {
       return {
         title: result.name,
@@ -66,16 +55,16 @@ class HostOrganismSearchBox extends React.Component {
       };
     };
     const results = {};
-    if (sampleTypesByCategory[SUGGESTED]) {
+    if (hostGenomesByCategory[SUGGESTED]) {
       results.suggested = {
         name: SUGGESTED,
-        results: sampleTypesByCategory[SUGGESTED].map(formatResult),
+        results: hostGenomesByCategory[SUGGESTED].map(formatResult),
       };
     }
-    if (sampleTypesByCategory[ALL]) {
+    if (hostGenomesByCategory[ALL]) {
       results.all = {
         name: ALL,
-        results: sampleTypesByCategory[ALL].map(formatResult),
+        results: hostGenomesByCategory[ALL].map(formatResult),
       };
     }
     if (query.length) {
@@ -109,10 +98,7 @@ HostOrganismSearchBox.propTypes = {
   className: PropTypes.string,
   onResultSelect: PropTypes.func.isRequired,
   value: PropTypes.string,
-  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
-  isHuman: PropTypes.bool.isRequired,
-  isInsect: PropTypes.bool.isRequired,
-  showDescription: PropTypes.bool,
+  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
 };
 
 export default HostOrganismSearchBox;
