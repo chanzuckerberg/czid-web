@@ -370,6 +370,7 @@ class PipelineRun < ApplicationRecord
     return align_summary_file && get_s3_file(align_summary_file) ? true : false
   end
 
+  # NOTE: not clear whether this is the complement of report_ready? method
   def report_failed?
     # The report failed if host filtering or alignment failed.
     host_filtering_status = output_states.find_by(output: "ercc_counts").state
@@ -448,6 +449,30 @@ class PipelineRun < ApplicationRecord
     return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if supports_assembly?
     return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
     "#{alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
+  end
+
+  # This method exists to show exactly what host was subtracted in the run
+  # according to the underlying dag_json during host filtering. A host other
+  # than the sample host may have been subtracted for
+  # two reasons:
+  #
+  # 1) there are no host genome files so we only subtract ERCCs
+  # 2) the sample host or index files were changed after the run
+  #
+  # Note: This method returns a string identifier extracted from the index
+  # filename, not a HostGenome instance, which could be ambiguous.
+  def host_subtracted
+    pipeline_run_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
+    dag = pipeline_run_stage && pipeline_run_stage.dag_json && JSON.parse(pipeline_run_stage.dag_json)
+    return nil unless dag
+    # See app/lib/dags/host_filter.json.jbuilder for step definition
+    host_filtering = dag["steps"].find { |step| step["class"] == "PipelineStepRunStar" }
+    return nil unless host_filtering
+    star_genome = host_filtering["additional_files"]["star_genome"]
+    # Assumes stable URL structure. See HostGenome.rb.
+    matches = star_genome.match(%r{s3://idseq-database/host_filter/(\w+)/})
+    return nil unless matches
+    return matches[1] # "ercc" for example
   end
 
   def get_lineage_json(ct2taxid, taxon_lineage_map)
