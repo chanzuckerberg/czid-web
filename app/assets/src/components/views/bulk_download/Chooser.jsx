@@ -27,7 +27,7 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
 import TaxonHitSelect from "./TaxonHitSelect";
-import cs from "./choose_step.scss";
+import cs from "./chooser.scss";
 
 // Stores information about conditional fields for bulk downloads.
 const CONDITIONAL_FIELDS = [
@@ -87,7 +87,7 @@ const assembleSelectedDownload = memoize(
   }
 );
 
-class ChooseStep extends React.Component {
+class Chooser extends React.Component {
   state = {
     selectedFields: {},
     // For each selected field, we also save a human-readable "display name" for that field.
@@ -591,7 +591,7 @@ class ChooseStep extends React.Component {
     const loading = downloadTypes ? false : true;
 
     return (
-      <div className={cs.chooseStep}>
+      <div className={cs.chooser}>
         <div className={cs.header}>
           <div className={cs.title}>Select a Download Type</div>
           <div className={cs.tagline}>
@@ -615,7 +615,7 @@ class ChooseStep extends React.Component {
   }
 }
 
-ChooseStep.propTypes = {
+Chooser.propTypes = {
   downloadTypes: PropTypes.arrayOf(PropTypes.DownloadType),
   onGenerate: PropTypes.func.isRequired,
   validSampleIds: PropTypes.instanceOf(Set).isRequired,
@@ -626,6 +626,6 @@ ChooseStep.propTypes = {
   allSamplesUploadedByCurrentUser: PropTypes.bool,
 };
 
-ChooseStep.contextType = UserContext;
+Chooser.contextType = UserContext;
 
-export default ChooseStep;
+export default Chooser;

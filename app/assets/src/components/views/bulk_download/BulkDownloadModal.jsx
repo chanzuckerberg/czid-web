@@ -12,7 +12,7 @@ import {
 } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 
-import ChooseStep from "./ChooseStep";
+import Chooser from "./Chooser";
 
 class BulkDownloadModal extends React.Component {
   state = {
@@ -146,7 +146,7 @@ class BulkDownloadModal extends React.Component {
           //loading && "L O A D I N G"
         }
         {
-          <ChooseStep
+          <Chooser
             downloadTypes={bulkDownloadTypes}
             onGenerate={onGenerate}
             validSampleIds={validSampleIds}
