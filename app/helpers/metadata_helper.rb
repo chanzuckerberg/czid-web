@@ -172,7 +172,12 @@ module MetadataHelper
 
   # Receives an array of samples, and validates metadata from a csv.
   # NOTE: validation depends on fields of each sample which depends on fields of each sample project.
-  def validate_metadata_csv_for_samples(samples, metadata, new_samples = false)
+  def validate_metadata_csv_for_samples(
+    samples,
+    metadata,
+    new_samples = false,
+    allow_new_host_genomes = false
+  )
     # If new samples, enforce required metadata constraint, and pull the host genome from the
     # metadata rows for validation.
     enforce_required = new_samples
@@ -220,10 +225,7 @@ module MetadataHelper
     sample_name_index = metadata["headers"].find_index("sample_name") || metadata["headers"].find_index("Sample Name")
 
     if extract_host_genome_from_metadata
-      host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
-      # TODO: (gdingle): create hgs here?
-      host_genomes = HostGenome.where(name: metadata["rows"].map { |row| row[host_genome_index] }.uniq)
-                               .includes(:metadata_fields).to_a
+      host_genomes, host_genome_index = get_host_genomes(metadata, allow_new_host_genomes)
     end
 
     processed_samples = []
@@ -349,5 +351,19 @@ module MetadataHelper
       warnings: warning_aggregator.error_groups,
       errors: errors + error_aggregator.error_groups,
     }
+  end
+
+  private
+
+  def get_host_genomes(metadata, allow_new_host_genomes)
+    host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
+    # TODO: (gdingle): create hgs here?
+    host_genome_names = metadata["rows"].map { |row| row[host_genome_index] }.uniq
+    host_genomes = if allow_new_host_genomes
+                     host_genome_name.map { |name| HostGenome.find_or_create!(name: name) }
+                   else
+                     HostGenome.where(name: host_genome_names)
+                   end
+    [host_genomes.includes(:metadata_fields).to_a, host_genome_index]
   end
 end

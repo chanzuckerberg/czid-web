@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_115_021_328) do
+ActiveRecord::Schema.define(version: 20_200_124_003_731) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -92,7 +92,7 @@ ActiveRecord::Schema.define(version: 20_200_115_021_328) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "access_token"
-    t.float "progress"
+    t.float "progress", limit: 24
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
     t.bigint "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
@@ -144,13 +144,17 @@ ActiveRecord::Schema.define(version: 20_200_115_021_328) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", null: false
-    t.text "s3_star_index_path"
-    t.text "s3_bowtie2_index_path"
+    t.string "name", null: false, comment: "Friendly name of host genome. May be common name or scientific name of species. Must be unique and start with a capital letter."
+    t.string "s3_star_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
+    t.string "s3_bowtie2_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "skip_deutero_filter"
+    t.integer "skip_deutero_filter", default: 0, null: false, comment: "See https://en.wikipedia.org/wiki/Deuterostome. This affects the pipeline."
+    t.integer "samples_count", default: 0, null: false, comment: "Added to enable ranking of host genomes by popularity"
+    t.bigint "user_id", comment: "The user that created the host genome. Values previous to 2020-02 may be NULL."
+    t.index ["name"], name: "index_host_genomes_on_name", unique: true
+    t.index ["user_id"], name: "index_host_genomes_on_user_id"
   end
 
   create_table "host_genomes_metadata_fields", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -608,11 +612,12 @@ ActiveRecord::Schema.define(version: 20_200_115_021_328) do
   add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
   add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
   add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
+  add_foreign_key "bulk_downloads", "users"
   add_foreign_key "bulk_downloads_pipeline_runs", "bulk_downloads", name: "bulk_downloads_pipeline_runs_bulk_download_id_fk"
   add_foreign_key "bulk_downloads_pipeline_runs", "pipeline_runs", name: "bulk_downloads_pipeline_runs_pipeline_run_id_fk"
-  add_foreign_key "bulk_downloads", "users"
   add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
   add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
+  add_foreign_key "host_genomes", "users"
   add_foreign_key "host_genomes_metadata_fields", "host_genomes", name: "host_genomes_metadata_fields_host_genome_id_fk"
   add_foreign_key "host_genomes_metadata_fields", "metadata_fields", name: "host_genomes_metadata_fields_metadata_field_id_fk"
   add_foreign_key "input_files", "samples", name: "input_files_sample_id_fk"
