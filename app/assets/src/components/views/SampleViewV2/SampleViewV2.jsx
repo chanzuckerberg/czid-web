@@ -995,13 +995,7 @@ export default class SampleViewV2 extends React.Component {
     } = this.state;
     // reportReady is true if the pipeline run hasn't failed and is report-ready
     // (might still be running Experimental, but at least taxon_counts has been loaded).
-    // pipelineRunReportAvailable was renamed to reportReady, but we check both in case the old variable
-    // name was cached.
-    // TODO(julie): remove pipelineRunReportAvailable during cleanup.
-    if (
-      reportMetadata.reportReady ||
-      reportMetadata.pipelineRunReportAvailable
-    ) {
+    if (reportMetadata.reportReady) {
       return (
         <div className={cs.reportViewContainer}>
           <div className={cs.reportFilters}>
