@@ -111,8 +111,10 @@ class ThresholdFilterDropdown extends React.Component {
   }
 
   handleClose = shouldApply => {
+    console.log("handleClose called. shouldApply: ", shouldApply);
     this.setState({ popupIsOpen: false });
 
+    // shouldApply = true;
     if (shouldApply) {
       let newThresholds = this.state.thresholds.filter(
         ThresholdFilterDropdown.isThresholdValid
@@ -171,9 +173,15 @@ class ThresholdFilterDropdown extends React.Component {
         arrowInsideTrigger
         className={cs.thresholdFilterDropdown}
         onOpen={this.handleOpen}
-        onClose={() => this.handleClose(false)}
+        onClose={e => {
+          if (e && e.key && e.key === "Enter") {
+            console.log("YOU SHOULD APPLY");
+          }
+          this.handleClose(false);
+        }}
         open={this.state.popupIsOpen}
         closeOnClick={false}
+        onKeyPress={() => console.log("YO")}
       >
         <div className={cs.container}>
           <Grid verticalAlign="middle" columns="equal">
@@ -189,6 +197,7 @@ class ThresholdFilterDropdown extends React.Component {
                 onRemove={() => {
                   this.handleThresholdRemove(idx);
                 }}
+                onKeyPress={e => console.log("key press: ", e)}
               />
             ))}
             <Grid.Row className={cs.thresholdActions}>
@@ -258,11 +267,15 @@ const ThresholdFilter = ({
   };
 
   const handleValueChange = newValue => {
+    console.log("handleValueChange called");
     onChange({ metric, value: newValue, operator, metricDisplay });
   };
 
   return (
-    <Grid.Row className={cs.thresholdFilter}>
+    <Grid.Row
+      className={cs.thresholdFilter}
+      onKeyPress={() => console.log("YO")}
+    >
       <Grid.Column width={9}>
         <Dropdown
           placeholder="Metric"
@@ -285,8 +298,13 @@ const ThresholdFilter = ({
           value={operator}
         />
       </Grid.Column>
-      <Grid.Column>
-        <Input type="number" onChange={handleValueChange} value={value} />
+      <Grid.Column onKeyPress={() => console.log("YO")}>
+        <Input
+          type="number"
+          onChange={handleValueChange}
+          value={value}
+          onKeyPress={() => console.log("YO")}
+        />
       </Grid.Column>
       <Grid.Column width={1}>
         <div onClick={onRemove} className={cs.removeIcon}>

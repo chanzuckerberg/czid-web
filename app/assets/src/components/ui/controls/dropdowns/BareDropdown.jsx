@@ -190,14 +190,22 @@ class BareDropdown extends React.Component {
 
     // Allows you the flexibility to put stuff OTHER than a menu of options in the dropdown.
     if (!this.props.options && !this.props.items) {
+      console.log("on line 193");
       return (
         <BaseDropdown
           {...otherProps}
           trigger={wrappedTrigger}
           className={dropdownClassName}
-          onBlur={e => e.stopPropagation()}
+          onBlur={e => {
+            console.log("e in onBlur is: ", e);
+            e.stopPropagation();
+          }}
+          onKeyPress={e => console.log("At BaseDropdown", e.key)}
         >
-          <BaseDropdown.Menu onClick={this.handleMenuClick}>
+          <BaseDropdown.Menu
+            onClick={this.handleMenuClick}
+            onKeyPress={e => console.log("At BaseDropdown.Menu", e.key)}
+          >
             {children}
           </BaseDropdown.Menu>
         </BaseDropdown>
