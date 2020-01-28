@@ -63,8 +63,7 @@ module MetadataHelper
                default = MetadataField.where(is_default: true)
 
                (required | default)
-             # TODO: (gdingle): may need to change
-             # If samples are new, just use Human metadata fields since we default to Human.
+             # If samples are new, just use Human metadata fields since Human is by far most common.
              elsif samples_are_new
                HostGenome.find_by(name: "Human").metadata_fields & project.metadata_fields
              else
@@ -225,8 +224,7 @@ module MetadataHelper
     sample_name_index = metadata["headers"].find_index("sample_name") || metadata["headers"].find_index("Sample Name")
 
     if extract_host_genome_from_metadata
-      # TODO: (gdingle):
-      host_genomes, host_genome_index = get_host_genomes(metadata, allow_new_host_genomes)
+      host_genomes, host_genome_index = find_or_create_host_genomes(metadata, allow_new_host_genomes)
     end
 
     processed_samples = []
@@ -269,7 +267,6 @@ module MetadataHelper
       end
 
       # Check for valid host genome
-      # TODO: (gdingle): change me
       if extract_host_genome_from_metadata && (row[host_genome_index].nil? || row[host_genome_index] == "")
         error_aggregator.add_error(:row_missing_host_genome, [index + 1, sample.name])
         next
@@ -278,6 +275,8 @@ module MetadataHelper
       if extract_host_genome_from_metadata
         host_genome = host_genomes.select { |cur_host_genome| cur_host_genome.name == row[host_genome_index] }.first
 
+        # TODO: (gdingle): This behavior will change after removal of admin-only of new host genome input.
+        # See https://jira.czi.team/browse/IDSEQ-2051.
         if host_genome.nil?
           error_aggregator.add_error(:row_invalid_host_genome, [index + 1, sample.name, row[host_genome_index]])
           next
@@ -356,9 +355,8 @@ module MetadataHelper
 
   private
 
-  def get_host_genomes(metadata, allow_new_host_genomes)
+  def find_or_create_host_genomes(metadata, allow_new_host_genomes)
     host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
-    # TODO: (gdingle): create hgs here?
     host_genome_names = metadata["rows"].map { |row| row[host_genome_index] }.uniq
     host_genomes = if allow_new_host_genomes
                      host_genome_names.map { |name| HostGenome.find_or_create_by!(name: name) }

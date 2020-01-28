@@ -61,8 +61,6 @@ class HostOrganismSearchBox extends React.Component {
       };
     }
     if (query.length && get([0, "name"], sortedHostGenomes) !== query) {
-      // TODO (gdingle): show this only if there is no exact match
-      // also add this to sample type
       results.noMatch = {
         name: "Use Plain Text (No Match)",
         results: [{ title: query, name: query }],

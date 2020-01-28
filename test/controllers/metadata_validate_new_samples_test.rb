@@ -176,7 +176,7 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
-  # TODO: (gdingle): This behavior will change after removal of admin-only.
+  # TODO: (gdingle): This behavior will change after removal of admin-only of new host genome input.
   # See https://jira.czi.team/browse/IDSEQ-2051.
   test 'missing or invalid host genome' do
     sign_in @user_nonadmin
