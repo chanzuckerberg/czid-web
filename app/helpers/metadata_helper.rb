@@ -273,7 +273,7 @@ module MetadataHelper
       end
 
       if extract_host_genome_from_metadata
-        host_genome = host_genomes.select { |cur_host_genome| cur_host_genome.name == row[host_genome_index] }.first
+        host_genome = host_genomes.select { |cur_host_genome| cur_host_genome && cur_host_genome.name == row[host_genome_index] }.first
 
         # TODO: (gdingle): This behavior will change after removal of admin-only of new host genome input.
         # See https://jira.czi.team/browse/IDSEQ-2051.
@@ -359,7 +359,7 @@ module MetadataHelper
     host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
     host_genome_names = metadata["rows"].map { |row| row[host_genome_index] }.uniq
     host_genomes = if allow_new_host_genomes
-                     host_genome_names.map { |name| HostGenome.find_or_create_by!(name: name) }
+                     host_genome_names.map { |name| HostGenome.find_or_initialize_by(name: name).save }
                    else
                      HostGenome.where(name: host_genome_names).includes(:metadata_fields)
                    end

@@ -126,7 +126,7 @@ module ErrorHelper
       # See https://jira.czi.team/browse/IDSEQ-2051.
       row_invalid_host_genome: {
         headers: ["Row #", "Sample Name", "Invalid Host Genome"],
-        title: ->(num_rows, _) { "#{num_rows} rows specify host genomes that are not supported." },
+        title: ->(num_rows, _) { "#{num_rows} rows specify host genomes that are not supported. Names should be title-cased common or scientific species name." },
       },
       # This should theoretically never happen. This is when a Metadata object doesn't have a sample attached to it.
       sample_not_found: {
