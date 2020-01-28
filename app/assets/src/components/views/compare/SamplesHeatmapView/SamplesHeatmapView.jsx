@@ -373,13 +373,11 @@ class SamplesHeatmapView extends React.Component {
   }
 
   filterTaxons() {
-    this.setTaxonThresholdFilterState();
     let {
-      allTaxonIds,
-      allTaxonDetails,
       taxonFilterState,
-      allData,
-    } = this.state;
+      taxonPassesThresholdFilters,
+    } = this.getTaxonThresholdFilterState();
+    let { allTaxonIds, allTaxonDetails, allData } = this.state;
     let taxonDetails = {},
       taxonIds = new Set(),
       filteredData = {};
@@ -387,7 +385,7 @@ class SamplesHeatmapView extends React.Component {
       allTaxonIds.forEach(taxonId => {
         let taxon = allTaxonDetails[taxonId];
         if (!taxonIds.has(taxonId) && this.taxonPassesSelectedFilters(taxon)) {
-          if (Object.values(taxonFilterState[taxon["index"]]).includes(true)) {
+          if (taxonPassesThresholdFilters[taxon["index"]]) {
             taxonDetails[taxon["id"]] = taxon;
             taxonDetails[taxon["name"]] = taxon;
             taxonIds.add(taxon["id"]);
@@ -409,6 +407,7 @@ class SamplesHeatmapView extends React.Component {
     this.updateHistoryState();
 
     this.setState({
+      taxonFilterState: taxonFilterState,
       taxonDetails: taxonDetails,
       taxonIds: taxonIds,
       loading: false,
@@ -416,7 +415,7 @@ class SamplesHeatmapView extends React.Component {
     });
   }
 
-  setTaxonThresholdFilterState() {
+  getTaxonThresholdFilterState() {
     // Set the state of whether or not a taxon passes the custom threshold filters
     // for each selected sample.
     let {
@@ -425,23 +424,27 @@ class SamplesHeatmapView extends React.Component {
       allData,
       taxonFilterState,
     } = this.state;
+    let taxonPassesThresholdFilters = {};
     Object.values(sampleDetails).forEach(sample => {
       Object.values(allTaxonDetails).forEach(taxon => {
         taxonFilterState[taxon["index"]] =
           taxonFilterState[taxon["index"]] || {};
         taxonFilterState[taxon["index"]][
           sample["index"]
-        ] = this.taxonPassesCustomThresholdFilters(
-          sample["index"],
-          taxon,
-          allData
-        );
+        ] = this.taxonThresholdFiltersCheck(sample["index"], taxon, allData);
+
+        taxonPassesThresholdFilters[taxon["index"]] =
+          taxonPassesThresholdFilters[taxon["index"]] ||
+          taxonFilterState[taxon["index"]][sample["index"]];
       });
     });
-    this.setState({ taxonFilterState: taxonFilterState });
+    return {
+      taxonFilterState: taxonFilterState,
+      taxonPassesThresholdFilters: taxonPassesThresholdFilters,
+    };
   }
 
-  taxonPassesCustomThresholdFilters(sampleIndex, taxonDetails, data) {
+  taxonThresholdFiltersCheck(sampleIndex, taxonDetails, data) {
     let { thresholdFilters } = this.state.selectedOptions;
     for (let filter of thresholdFilters) {
       // Convert metric name format from "NT_zscore" to "NT.zscore"
