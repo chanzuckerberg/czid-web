@@ -478,7 +478,7 @@ class ProjectsController < ApplicationController
       project_samples.to_a,
       metadata,
       false,
-      current_user.admin?
+      current_user && current_user.admin?
     )
     # TODO: (gdingle): remove admin only after launch. See https://jira.czi.team/browse/IDSEQ-2051.
     render json: {

@@ -176,7 +176,7 @@ module MetadataHelper
     samples,
     metadata,
     new_samples = false,
-    _allow_new_host_genomes = false
+    allow_new_host_genomes = false
   )
     # If new samples, enforce required metadata constraint, and pull the host genome from the
     # metadata rows for validation.
@@ -226,7 +226,7 @@ module MetadataHelper
 
     if extract_host_genome_from_metadata
       # TODO: (gdingle):
-      host_genomes, host_genome_index = get_host_genomes(metadata, false)
+      host_genomes, host_genome_index = get_host_genomes(metadata, allow_new_host_genomes)
     end
 
     processed_samples = []
@@ -361,10 +361,10 @@ module MetadataHelper
     # TODO: (gdingle): create hgs here?
     host_genome_names = metadata["rows"].map { |row| row[host_genome_index] }.uniq
     host_genomes = if allow_new_host_genomes
-                     host_genome_names.map { |name| HostGenome.find_or_create!(name: name) }
+                     host_genome_names.map { |name| HostGenome.find_or_create_by!(name: name) }
                    else
-                     HostGenome.where(name: host_genome_names)
+                     HostGenome.where(name: host_genome_names).includes(:metadata_fields)
                    end
-    [host_genomes.includes(:metadata_fields).to_a, host_genome_index]
+    [host_genomes.to_a, host_genome_index]
   end
 end
