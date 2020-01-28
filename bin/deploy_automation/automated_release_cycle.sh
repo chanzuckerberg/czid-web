@@ -9,6 +9,12 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 # - Opens a new release cycle
 # - Prints deployment commands to be executed in a separate terminal
 main() {
+  
+  # Ensure current branch is not prod or staging
+  # This command will set prod and staging HEADs to other commits,
+  # and we want to be in a different branch to prevent any issues.
+  _assert_current_branch_is_not "prod" "staging"
+
   _log "**** CHECKING TAG VERSIONS FOR RELEASE/HOT FIXES ****"
   "$SCRIPT_DIR/patch_branch_version_tags.sh"
 

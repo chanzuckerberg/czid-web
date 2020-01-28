@@ -76,3 +76,17 @@ _format_version_tag() {
   declare env="$2"
   echo "v${version}_${env}_$(date '+%Y-%m-%d')"
 }
+
+_assert_current_branch_is_not() {
+  declare branch_names=("${@}")
+
+  declare current_branch; current_branch=$(git rev-parse --abbrev-ref HEAD)
+  declare branch_name
+  for branch_name in "${branch_names[@]}"; do
+    if [[ "$current_branch" == "$branch_name" ]]; then
+      _exit_with_err_msg "INVALID CURRENT BRANCH: You cannot run this command when" \
+                         "your current branch is '$current_branch'." \
+                         "Please, checkout a different branch (other than [${branch_names[@]}])."
+    fi
+  done
+}

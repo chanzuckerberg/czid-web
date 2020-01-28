@@ -15,6 +15,11 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 main() {
   git fetch --all
 
+  # Ensure current branch is not prod
+  # This command will set prod HEAD to a different commit,
+  # and we want to be in a different branch to prevent any issues.  
+  _assert_current_branch_is_not "prod"
+
   # Update release checklist
   "$SCRIPT_DIR/update_release_checklist.sh"
 

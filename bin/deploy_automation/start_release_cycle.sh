@@ -15,6 +15,11 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 main() {
   git fetch --all
 
+  # Ensure current branch is not staging
+  # This command will set staging HEAD to a different commit,
+  # and we want to be in a different branch to prevent any issues.  
+  _assert_current_branch_is_not "staging"
+
   # make sure release checklist doesn't exist yet
   _assert_no_release_checklist
 
