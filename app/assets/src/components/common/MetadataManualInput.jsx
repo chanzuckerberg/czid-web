@@ -209,11 +209,15 @@ class MetadataManualInput extends React.Component {
   };
 
   // Update host genome for a sample.
-  updateHostGenome = (hostGenomeId, sample) => {
+  updateHostGenome = (hostGenomeIdOrNewName, sample) => {
+    const hostGenome = find(
+      ["id", hostGenomeIdOrNewName],
+      this.props.hostGenomes
+    );
     this.updateMetadataField(
       "Host Genome",
       // Convert the id to a name.
-      find(["id", hostGenomeId], this.props.hostGenomes).name,
+      hostGenome ? hostGenome.name : hostGenomeIdOrNewName,
       sample
     );
   };
@@ -289,22 +293,18 @@ class MetadataManualInput extends React.Component {
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
-          // TODO (gdingle): what about initial render
-          // hostGenomes` is marked as required in `HostOrganismSearchBox
-
           // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
           // See https://jira.czi.team/browse/IDSEQ-2051.
           if (this.props.samplesAreNew && column === "Host Genome") {
             return (
               <div>
-                {!admin ? (
+                {admin ? (
                   <HostOrganismSearchBox
                     className={inputClasses}
                     value={this.getMetadataValue(sample, column)}
                     onResultSelect={({ result }) => {
                       console.log(result);
-                      // TODO (gdingle): need to handle plain text here
-                      this.updateHostGenome(result.name, sample);
+                      this.updateHostGenome(result.name || result, sample);
                     }}
                     hostGenomes={this.props.hostGenomes || []}
                   />

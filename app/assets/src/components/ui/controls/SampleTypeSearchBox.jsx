@@ -1,5 +1,5 @@
 import React from "react";
-import { groupBy, sortBy } from "lodash/fp";
+import { groupBy, sortBy, get } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 
@@ -78,7 +78,10 @@ class SampleTypeSearchBox extends React.Component {
         results: sampleTypesByCategory[ALL].map(formatResult),
       };
     }
-    if (query.length) {
+    if (
+      query.length &&
+      get([0, "name"], sampleTypesByCategory[SUGGESTED]) !== query
+    ) {
       results.noMatch = {
         name: "Use Plain Text (No Match)",
         results: [{ title: query, name: query }],

@@ -204,6 +204,7 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal 2, @response.parsed_body['issues']['errors'].length
     # Error should throw if host genome is invalid for a row.
     assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    # TODO: (gdingle): change me
     assert_equal ErrorAggregator::ERRORS[:row_invalid_host_genome][:title].call(1, nil), @response.parsed_body['issues']['errors'][0]['caption']
     assert_equal [[1, "Test Sample", "Fake Genome"]], @response.parsed_body['issues']['errors'][0]['rows']
     # Error should throw if host genome is missing for a row.

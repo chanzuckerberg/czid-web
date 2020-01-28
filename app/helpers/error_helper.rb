@@ -122,6 +122,7 @@ module ErrorHelper
         headers: ["Row #", "Sample Name"],
         title: ->(num_rows, _) { "#{num_rows} rows are missing host genomes." },
       },
+      # TODO: (gdingle): chagne me
       row_invalid_host_genome: {
         headers: ["Row #", "Sample Name", "Invalid Host Genome"],
         title: ->(num_rows, _) { "#{num_rows} rows specify host genomes that are not supported." },

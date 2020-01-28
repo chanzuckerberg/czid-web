@@ -1,5 +1,5 @@
 import React from "react";
-import { sortBy } from "lodash/fp";
+import { sortBy, get } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 
@@ -60,7 +60,9 @@ class HostOrganismSearchBox extends React.Component {
         results: sortedHostGenomes.map(formatResult),
       };
     }
-    if (query.length) {
+    if (query.length && get([0, "name"], sortedHostGenomes) !== query) {
+      // TODO (gdingle): show this only if there is no exact match
+      // also add this to sample type
       results.noMatch = {
         name: "Use Plain Text (No Match)",
         results: [{ title: query, name: query }],

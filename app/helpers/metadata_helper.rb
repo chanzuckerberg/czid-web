@@ -63,6 +63,7 @@ module MetadataHelper
                default = MetadataField.where(is_default: true)
 
                (required | default)
+             # TODO: (gdingle): may need to change
              # If samples are new, just use Human metadata fields since we default to Human.
              elsif samples_are_new
                HostGenome.find_by(name: "Human").metadata_fields & project.metadata_fields
@@ -220,6 +221,7 @@ module MetadataHelper
 
     if extract_host_genome_from_metadata
       host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
+      # TODO: (gdingle): create hgs here?
       host_genomes = HostGenome.where(name: metadata["rows"].map { |row| row[host_genome_index] }.uniq)
                                .includes(:metadata_fields).to_a
     end
@@ -264,6 +266,7 @@ module MetadataHelper
       end
 
       # Check for valid host genome
+      # TODO: (gdingle): change me
       if extract_host_genome_from_metadata && (row[host_genome_index].nil? || row[host_genome_index] == "")
         error_aggregator.add_error(:row_missing_host_genome, [index + 1, sample.name])
         next
