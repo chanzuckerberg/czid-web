@@ -11,6 +11,7 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
   ROW_3 = ['Test Sample', 'Human', 'Whole Blood', 'DNA'].freeze
 
   setup do
+    # TODO: (gdingle): what to do about admin user here....?
     @user = users(:admin_one)
     @mosquito_host_genome = host_genomes(:mosquito)
     @human_host_genome = host_genomes(:human)
