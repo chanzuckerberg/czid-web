@@ -26,6 +26,7 @@ class HostGenome < ApplicationRecord
     "insect",
   ], }, if: -> { respond_to?(:taxa_category) } # for migrations
 
+  # NOTE: Consider updating the star and bowtie defaults if we ever add new ERCC index files.
   ERCC_PATH_PREFIX = "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/".freeze
   S3_STAR_INDEX_FILE = "STAR_genome.tar".freeze
   S3_BOWTIE2_INDEX_FILE = "bowtie2_genome.tar".freeze

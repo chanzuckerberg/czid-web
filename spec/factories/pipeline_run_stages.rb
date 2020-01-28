@@ -7,6 +7,7 @@ FactoryBot.define do
     step_number { 1 }
     name { PipelineRunStage::HOST_FILTERING_STAGE_NAME }
     job_status { PipelineRunStage::STATUS_SUCCEEDED }
+    # NOTE: in the model dag_json is actually stored as a string
     dag_json do
       {
         output_dir_s3: "s3:gc/someBucket/samples/theProjectId/theSampleId/results",
