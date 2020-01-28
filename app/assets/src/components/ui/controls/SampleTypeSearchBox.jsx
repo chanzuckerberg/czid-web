@@ -1,62 +1,81 @@
 import React from "react";
-import { sortBy } from "lodash/fp";
+import { groupBy, sortBy } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 
 import LiveSearchPopBox from "./LiveSearchPopBox";
 
-// Adapted from SampleTypeSearchBox
-class HostOrganismSearchBox extends React.Component {
+const SUGGESTED = "SUGGESTED";
+const ALL = "ALL";
+
+class SampleTypeSearchBox extends React.Component {
   handleSearchTriggered = query => {
     return this.buildResults(this.getMatchesByCategory(query), query);
   };
 
-  // TODO (gdingle): extract all these to utils if re-used
   getMatchesByCategory(query) {
-    const matchHostGenomes = hostGenome => {
+    const matchSampleTypes = sampleType => {
       // If no query, return all possible
       if (query === "") return true;
 
       // Match chars in any position. Good for acronyms. Ignore spaces.
       const noSpaces = query.replace(/\s*/gi, "");
       const regex = new RegExp(noSpaces.split("").join(".*"), "gi");
-      if (regex.test(hostGenome.name)) {
+      if (regex.test(sampleType.name)) {
         return true;
       }
       return false;
     };
-    const matchedHostGenomes = this.props.hostGenomes.filter(matchHostGenomes);
+    const matchedSampleTypes = this.props.sampleTypes.filter(matchSampleTypes);
 
     // Sort matches by position of match. If no position, alphabetical.
-    const sortHostGenomes = hostGenome => {
-      const name = hostGenome.name.toLowerCase();
+    const sortSampleTypes = sampleType => {
+      const name = sampleType.name.toLowerCase();
       const q = query.toLowerCase();
       const res =
         name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
       return res;
     };
-    // TODO (gdingle): change to sort by popularity
-    let sortedHostGenomes = sortBy(t => t.name, matchedHostGenomes);
+    let sortedSampleTypes = sortBy(t => t.name, matchedSampleTypes);
     if (query !== "") {
-      sortedHostGenomes = sortBy(sortHostGenomes, sortedHostGenomes);
+      sortedSampleTypes = sortBy(sortSampleTypes, sortedSampleTypes);
     }
 
-    return sortedHostGenomes;
+    // Sample types are grouped differently based on whether the current
+    // sample's host genome is an insect, a human, or neither. The "suggested"
+    // group is shown first, then the "all" group.
+    const getSampleTypeCategory = sampleType => {
+      if (sampleType.insect_only) {
+        return this.props.isInsect ? SUGGESTED : ALL;
+      }
+      if (sampleType.human_only) {
+        return this.props.isHuman ? SUGGESTED : ALL;
+      }
+      // insects should only be suggested insect body parts
+      return this.isInsect ? ALL : SUGGESTED;
+    };
+    return groupBy(getSampleTypeCategory, sortedSampleTypes);
   }
 
-  buildResults(sortedHostGenomes, query) {
+  buildResults(sampleTypesByCategory, query) {
     const formatResult = result => {
       return {
         title: result.name,
         name: result.name,
-        id: result.id,
+        description: this.props.showDescription ? result.group : null,
       };
     };
     const results = {};
-    if (sortedHostGenomes) {
+    if (sampleTypesByCategory[SUGGESTED]) {
       results.suggested = {
-        name: "SUGGESTED",
-        results: sortedHostGenomes.map(formatResult),
+        name: SUGGESTED,
+        results: sampleTypesByCategory[SUGGESTED].map(formatResult),
+      };
+    }
+    if (sampleTypesByCategory[ALL]) {
+      results.all = {
+        name: ALL,
+        results: sampleTypesByCategory[ALL].map(formatResult),
       };
     }
     if (query.length) {
@@ -86,11 +105,14 @@ class HostOrganismSearchBox extends React.Component {
   }
 }
 
-HostOrganismSearchBox.propTypes = {
+SampleTypeSearchBox.propTypes = {
   className: PropTypes.string,
   onResultSelect: PropTypes.func.isRequired,
   value: PropTypes.string,
-  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
+  sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
+  isHuman: PropTypes.bool.isRequired,
+  isInsect: PropTypes.bool.isRequired,
+  showDescription: PropTypes.bool,
 };
 
-export default HostOrganismSearchBox;
+export default SampleTypeSearchBox;
