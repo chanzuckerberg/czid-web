@@ -88,6 +88,7 @@ const SummaryStats = PropTypes.shape({
 const HostGenome = PropTypes.shape({
   id: PropTypes.number,
   name: PropTypes.string,
+  samples_count: PropTypes.number,
 });
 
 const Location = PropTypes.shape({
