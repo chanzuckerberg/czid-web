@@ -18,6 +18,7 @@ import _fp, {
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import PlusIcon from "~ui/icons/PlusIcon";
@@ -292,27 +293,33 @@ class MetadataManualInput extends React.Component {
           // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
           // See https://jira.czi.team/browse/IDSEQ-2051.
           if (this.props.samplesAreNew && column === "Host Genome") {
-            console.log(this.getMetadataValue(sample, column));
-            if (admin) {
-              return (
-                <HostOrganismSearchBox
-                  className={inputClasses}
-                  value={this.getMetadataValue(sample, column)}
-                  onResultSelect={({ result }) => {
-                    // Result can be plain text or a match. We treat them the same.
-                    console.log(result);
-                    debugger;
-
-                    // onChange(metadataType.key, result.name || result, true);
-
-                    // this.updateHostGenome(id, sample);
-                  }}
-                  hostGenomes={this.props.hostGenomes}
-                />
-              );
-            } else {
-              // TODO (gdingle):
-            }
+            return (
+              <div>
+                {!admin ? (
+                  <HostOrganismSearchBox
+                    className={inputClasses}
+                    value={this.getMetadataValue(sample, column)}
+                    onResultSelect={({ result }) => {
+                      console.log(result);
+                      // TODO (gdingle): need to handle plain text here
+                      this.updateHostGenome(result.name, sample);
+                    }}
+                    hostGenomes={this.props.hostGenomes}
+                  />
+                ) : (
+                  <Dropdown
+                    className={inputClasses}
+                    options={this.getHostGenomeOptions()}
+                    value={sampleHostGenomeId}
+                    onChange={id => this.updateHostGenome(id, sample)}
+                    usePortal
+                    withinModal={this.props.withinModal}
+                  />
+                )}
+                {this.props.samples.length > 1 &&
+                  this.renderApplyToAll(sample, column)}
+              </div>
+            );
           }
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
           else if (

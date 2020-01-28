@@ -35,7 +35,10 @@ class HostOrganismSearchBox extends React.Component {
         name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
       return res;
     };
-    let sortedHostGenomes = sortBy(t => t.samples_count, matchedHostGenomes);
+    let sortedHostGenomes = sortBy(
+      t => t.samples_count * -1,
+      matchedHostGenomes
+    );
     if (query !== "") {
       sortedHostGenomes = sortBy(sortHostGenomes, sortedHostGenomes);
     }
@@ -47,8 +50,7 @@ class HostOrganismSearchBox extends React.Component {
     const formatResult = result => {
       return {
         title: result.name,
-        name: result.name,
-        id: result.id,
+        name: result.id,
       };
     };
     const results = {};
