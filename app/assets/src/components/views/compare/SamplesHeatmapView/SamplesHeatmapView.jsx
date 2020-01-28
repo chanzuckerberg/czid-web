@@ -381,19 +381,16 @@ class SamplesHeatmapView extends React.Component {
       allData,
     } = this.state;
     let taxonDetails = {},
-      taxonIds = [],
+      taxonIds = new Set(),
       filteredData = {};
     if (this.props.allowedFeatures.includes("heatmap_filter_fe")) {
-      for (let taxonId of allTaxonIds) {
+      allTaxonIds.forEach(taxonId => {
         let taxon = allTaxonDetails[taxonId];
-        if (
-          !taxonIds.includes(taxonId) &&
-          this.taxonPassesSelectedFilters(taxon)
-        ) {
+        if (!taxonIds.has(taxonId) && this.taxonPassesSelectedFilters(taxon)) {
           if (Object.values(taxonFilterState[taxon["index"]]).includes(true)) {
             taxonDetails[taxon["id"]] = taxon;
             taxonDetails[taxon["name"]] = taxon;
-            taxonIds.push(taxon["id"]);
+            taxonIds.add(taxon["id"]);
             this.props.metrics.forEach(metric => {
               filteredData[metric.value] = filteredData[metric.value] || [];
               filteredData[metric.value][filteredData[metric.value].length] =
@@ -401,7 +398,8 @@ class SamplesHeatmapView extends React.Component {
             });
           }
         }
-      }
+      });
+      taxonIds = Array.from(taxonIds);
     } else {
       taxonDetails = allTaxonDetails;
       taxonIds = allTaxonIds;
@@ -662,18 +660,19 @@ class SamplesHeatmapView extends React.Component {
 
   handleSelectedOptionsChange = newOptions => {
     if (this.props.allowedFeatures.includes("heatmap_filter_fe")) {
-      const frontend_filters = [
+      const frontendFilters = [
         "categories",
         "subcategories",
         "thresholdFilters",
         "readSpecificity",
         "metric",
       ];
-      const backend_filters = ["species", "background", "taxonsPerSample"];
+      // TODO(julie): species and taxaPerSample should eventually be frontend filters
+      const backendFilters = ["species", "background", "taxonsPerSample"];
       const shouldRefetchData =
-        intersection(keys(newOptions), backend_filters).length > 0;
+        intersection(keys(newOptions), backendFilters).length > 0;
       const shouldRefilterData =
-        intersection(keys(newOptions), frontend_filters).length > 0;
+        intersection(keys(newOptions), frontendFilters).length > 0;
       this.setState(
         {
           selectedOptions: assign(this.state.selectedOptions, newOptions),
