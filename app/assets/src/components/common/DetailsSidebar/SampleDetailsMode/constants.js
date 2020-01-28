@@ -23,6 +23,10 @@ export const PIPELINE_INFO_FIELDS = [
     key: "pipelineVersion",
   },
   {
+    name: "Host Subtracted",
+    key: "hostSubtracted",
+  },
+  {
     name: "Total Reads",
     key: "totalReads",
   },
