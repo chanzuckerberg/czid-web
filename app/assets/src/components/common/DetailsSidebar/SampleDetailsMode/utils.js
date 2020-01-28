@@ -39,6 +39,7 @@ export const processPipelineInfo = additionalInfo => {
         }`,
       };
     }
+    pipelineInfo.hostSubtracted = { text: pipelineRun.host_subtracted };
   }
 
   if (summaryStats) {

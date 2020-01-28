@@ -531,16 +531,17 @@ class SamplesView extends React.Component {
             )}
           />
         )}
-        {allowedFeatures.includes("bulk_downloads") && (
-          <BulkDownloadModal
-            open={bulkDownloadModalOpen}
-            onClose={withAnalytics(
-              this.handleBulkDownloadModalClose,
-              "SamplesView_bulk-download-modal_closed"
-            )}
-            selectedSampleIds={selectedSampleIds}
-          />
-        )}
+        {allowedFeatures.includes("bulk_downloads") &&
+          bulkDownloadModalOpen && (
+            <BulkDownloadModal
+              open
+              onClose={withAnalytics(
+                this.handleBulkDownloadModalClose,
+                "SamplesView_bulk-download-modal_closed"
+              )}
+              selectedSampleIds={selectedSampleIds}
+            />
+          )}
       </div>
     );
   }
