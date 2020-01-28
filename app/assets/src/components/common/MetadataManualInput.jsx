@@ -10,7 +10,6 @@ import _fp, {
   get,
   values,
   includes,
-  orderBy,
   find,
   pickBy,
   has,
@@ -20,8 +19,8 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
-import { Dropdown } from "~ui/controls/dropdowns";
 import PlusIcon from "~ui/icons/PlusIcon";
+import HostOrganismSearchBox from "~ui/controls/HostOrganismSearchBox";
 
 import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
@@ -171,16 +170,17 @@ class MetadataManualInput extends React.Component {
     });
   };
 
-  getHostGenomeOptions = () =>
-    orderBy(
-      "count",
-      "desc",
-      this.props.hostGenomes.map(hostGenome => ({
-        text: hostGenome.name,
-        value: hostGenome.id,
-        count: hostGenome.samples_count,
-      }))
-    );
+  // TODO (gdingle): still need this?
+  // getHostGenomeOptions = () =>
+  //   orderBy(
+  //     "count",
+  //     "desc",
+  //     this.props.hostGenomes.map(hostGenome => ({
+  //       text: hostGenome.name,
+  //       value: hostGenome.id,
+  //       count: hostGenome.samples_count,
+  //     }))
+  //   );
 
   renderColumnSelector = () => {
     const options = values(this.props.projectMetadataFields).map(field => ({
@@ -260,6 +260,8 @@ class MetadataManualInput extends React.Component {
 
   // Create form fields for the table.
   getManualInputData = () => {
+    const { admin } = this.context || {};
+
     if (!this.props.samples) {
       return null;
     }
@@ -286,20 +288,25 @@ class MetadataManualInput extends React.Component {
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
 
-          if (column === "Host Genome") {
+          // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
+          // See https://jira.czi.team/browse/IDSEQ-2051.
+          if (column === "Host Genome" && admin) {
+            console.log(this.getMetadataValue(sample, column));
             return (
-              <div>
-                <Dropdown
-                  className={inputClasses}
-                  options={this.getHostGenomeOptions()}
-                  value={sampleHostGenomeId}
-                  onChange={id => this.updateHostGenome(id, sample)}
-                  usePortal
-                  withinModal={this.props.withinModal}
-                />
-                {this.props.samples.length > 1 &&
-                  this.renderApplyToAll(sample, column)}
-              </div>
+              <HostOrganismSearchBox
+                className={inputClasses}
+                value={this.getMetadataValue(sample, column)}
+                onResultSelect={({ result }) => {
+                  // Result can be plain text or a match. We treat them the same.
+                  console.log(result);
+                  debugger;
+
+                  // onChange(metadataType.key, result.name || result, true);
+
+                  // this.updateHostGenome(id, sample);
+                }}
+                hostGenomes={this.props.hostGenomes}
+              />
             );
           }
 
@@ -383,5 +390,7 @@ MetadataManualInput.propTypes = {
   hostGenomes: PropTypes.array,
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
+
+MetadataInput.contextType = UserContext;
 
 export default MetadataManualInput;
