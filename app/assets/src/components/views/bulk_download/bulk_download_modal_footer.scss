@@ -1,0 +1,36 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.footer {
+  .downloadDisclaimer {
+    @include font-body-xxs;
+    color: $medium-grey;
+    margin-top: $space-xxs;
+  }
+}
+
+.highlight {
+  @include font-header-xxs;
+}
+
+.listContainer {
+  background-color: $warning-bg;
+  margin-bottom: $space-s;
+}
+
+.notificationContainer {
+  @include font-body-xxs;
+  margin: $space-s 0;
+  background-color: $warning-bg;
+}
+
+.messageLine {
+  @include font-body-xxs;
+  margin: 0 $space-s;
+  padding: $space-xxxs;
+
+  &:last-child {
+    margin-bottom: $space-s;
+  }
+}

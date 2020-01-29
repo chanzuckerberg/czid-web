@@ -1,5 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { unset, get, set, isUndefined, map } from "lodash/fp";
+import memoize from "memoize-one";
 
 import {
   getBackgrounds,
@@ -7,12 +9,68 @@ import {
   getHeatmapMetrics,
 } from "~/api";
 import {
+  createBulkDownload,
   getBulkDownloadTypes,
   validateSampleIdsForBulkDownload,
 } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 
-import Chooser from "./Chooser";
+import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
+import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
+import cs from "./bulk_download_modal.scss";
+
+const assembleSelectedDownload = memoize(
+  (
+    selectedDownloadTypeName,
+    allSelectedFields,
+    allSelectedFieldsDisplay,
+    sampleIds
+  ) => {
+    const fieldValues = get(selectedDownloadTypeName, allSelectedFields);
+    const fieldDisplayNames = get(
+      selectedDownloadTypeName,
+      allSelectedFieldsDisplay
+    );
+
+    const fields = {};
+    if (fieldValues) {
+      for (let [fieldName, fieldValue] of Object.entries(fieldValues)) {
+        fields[fieldName] = {
+          value: fieldValue,
+          // Use the display name for the value if it exists. Otherwise, use the value.
+          displayName: fieldDisplayNames[fieldName] || fieldValue,
+        };
+      }
+    }
+
+    return {
+      downloadType: selectedDownloadTypeName,
+      fields,
+      sampleIds: Array.from(sampleIds),
+    };
+  }
+);
+
+// Stores information about conditional fields for bulk downloads.
+const CONDITIONAL_FIELDS = [
+  // Note: This first field is referenced directly in renderOption, as
+  // it needs to display a placeholder component. Be careful when modifying.
+  {
+    field: "file_format",
+    // The download type this conditional field applies to.
+    downloadType: "reads_non_host",
+    // The field this conditional field depends on.
+    dependentField: "taxa_with_reads",
+    // The values of the dependent field that trigger the conditional field.
+    triggerValues: ["all", undefined],
+  },
+  {
+    field: "background",
+    downloadType: "combined_sample_taxon_results",
+    dependentField: "metric",
+    triggerValues: ["NR.zscore", "NT.zscore"],
+  },
+];
 
 class BulkDownloadModal extends React.Component {
   state = {
@@ -35,6 +93,9 @@ class BulkDownloadModal extends React.Component {
     metricsOptions: null,
     allSamplesUploadedByCurrentUser: false,
     loading: true,
+    waitingForCreate: false,
+    createStatus: null,
+    createError: null,
   };
 
   componentDidMount() {
@@ -126,6 +187,80 @@ class BulkDownloadModal extends React.Component {
     return allSamplesUploadedByCurrentUser;
   }
 
+  // ***
+
+  handleDownloadRequest = () => {
+    console.log("Bulk download requested");
+    console.log("State: ", this.state);
+    const {
+      selectedDownloadTypeName,
+      selectedFields,
+      selectedFieldsDisplay,
+      validSampleIds,
+    } = this.state;
+
+    const selectedDownload = assembleSelectedDownload(
+      selectedDownloadTypeName,
+      selectedFields,
+      selectedFieldsDisplay,
+      validSampleIds
+    );
+    console.log("Bulk download assembled");
+    this.createBulkDownload(selectedDownload);
+  };
+
+  handleSelectDownloadType = selectedDownloadTypeName => {
+    this.setState({
+      selectedDownloadTypeName,
+    });
+  };
+
+  handleFieldSelect = (downloadType, fieldType, value, displayName) => {
+    this.setState(prevState => {
+      // If the value is undefined, delete it from selectedFields.
+      // This allows us to support cases where certain fields are conditionally required;
+      // if the field becomes no longer required, we can unset it.
+      const newSelectedFields =
+        value !== undefined
+          ? set([downloadType, fieldType], value, prevState.selectedFields)
+          : unset([downloadType, fieldType], prevState.selectedFields);
+
+      const newSelectedFieldsDisplay =
+        displayName !== undefined
+          ? set(
+              [downloadType, fieldType],
+              displayName,
+              prevState.selectedFieldsDisplay
+            )
+          : unset([downloadType, fieldType], prevState.selectedFieldsDisplay);
+
+      return {
+        selectedFields: newSelectedFields,
+        selectedFieldsDisplay: newSelectedFieldsDisplay,
+      };
+    });
+  };
+
+  createBulkDownload = async selectedDownload => {
+    const { onGenerate } = this.props;
+    this.setState({
+      waitingForCreate: true,
+    });
+    console.log("Bulk Download creation requested");
+    try {
+      await createBulkDownload(selectedDownload);
+    } catch (e) {
+      this.setState({
+        waitingForCreate: false,
+        createStatus: "error",
+        createError: e.error,
+      });
+      return;
+    }
+    console.log("Bulk download creation done");
+    onGenerate();
+  };
+
   // *** Render methods ***
 
   render() {
@@ -138,25 +273,55 @@ class BulkDownloadModal extends React.Component {
       backgroundOptions,
       metricsOptions,
       allSamplesUploadedByCurrentUser,
+      selectedDownloadTypeName,
+      selectedFields,
+      waitingForCreate,
+      createStatus,
+      createError,
     } = this.state;
+
+    const numSamples = validSampleIds.size;
 
     return (
       <Modal narrow open={open} tall onClose={onClose}>
-        {
-          //loading && "L O A D I N G"
-        }
-        {
-          <Chooser
-            downloadTypes={bulkDownloadTypes}
-            onGenerate={onGenerate}
-            validSampleIds={validSampleIds}
-            invalidSampleNames={invalidSampleNames}
-            validationError={validationError}
-            backgroundOptions={backgroundOptions}
-            metricsOptions={metricsOptions}
-            allSamplesUploadedByCurrentUser={allSamplesUploadedByCurrentUser}
-          />
-        }
+        <div className={cs.modal}>
+          <div className={cs.header}>
+            <div className={cs.title}>Select a Download Type</div>
+            <div className={cs.tagline}>
+              {numSamples} sample{numSamples != 1 ? "s" : ""} selected
+            </div>
+          </div>
+          <div className={cs.options}>
+            <BulkDownloadModalOptions
+              downloadTypes={bulkDownloadTypes}
+              validSampleIds={validSampleIds}
+              backgroundOptions={backgroundOptions}
+              metricsOptions={metricsOptions}
+              allSamplesUploadedByCurrentUser={allSamplesUploadedByCurrentUser}
+              onFieldSelect={this.handleFieldSelect}
+              selectedFields={selectedFields}
+              selectedDownloadTypeName={selectedDownloadTypeName}
+              handleSelectDownloadType={this.handleSelectDownloadType}
+              conditionalFields={CONDITIONAL_FIELDS}
+            />
+          </div>
+          <div className={cs.footer}>
+            <BulkDownloadModalFooter
+              loading={bulkDownloadTypes ? false : true}
+              downloadTypes={bulkDownloadTypes}
+              validSampleIds={validSampleIds}
+              invalidSampleNames={invalidSampleNames}
+              validationError={validationError}
+              waitingForCreate={waitingForCreate}
+              createStatus={createStatus}
+              createError={createError}
+              selectedFields={selectedFields}
+              selectedDownloadTypeName={selectedDownloadTypeName}
+              conditionalFields={CONDITIONAL_FIELDS}
+              onDownloadRequest={this.handleDownloadRequest}
+            />
+          </div>
+        </div>
       </Modal>
     );
   }
