@@ -350,31 +350,27 @@ class MetadataUpload extends React.Component {
           <div className={cs.info}>
             <div className={cs.details}>
               <span className={cs.label}>{`Required fields: `}</span>
-              {requiredFields && requiredFields.join(", ")}
-            </div>
-            <div className={cs.details}>
-              <span className={cs.label}>{`Available host genomes: `}</span>
-              {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
-            </div>
-            <div className={cs.details}>
-              <span>
-                <a
-                  href="/metadata/dictionary"
-                  className={cs.link}
-                  target="_blank"
-                  onClick={() =>
-                    logAnalyticsEvent(
-                      "MetadataUpload_full-dictionary-link_clicked",
-                      {
-                        projectId: this.props.project.id,
-                        projectName: this.props.project.name,
-                      }
-                    )
-                  }
-                >
-                  View Full Metadata Dictionary
-                </a>
-              </span>
+              We require some fields, because they are needed to determine how
+              your data should be processed and displayed for your analysis in
+              IDseq. Please be as accurate as possible. Your choices will affect
+              the way your data is processed. The required fields are:
+              {requiredFields && requiredFields.join(", ")}.{" "}
+              <a
+                href="/metadata/dictionary"
+                className={cs.link}
+                target="_blank"
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "MetadataUpload_full-dictionary-link_clicked",
+                    {
+                      projectId: this.props.project.id,
+                      projectName: this.props.project.name,
+                    }
+                  )
+                }
+              >
+                View Full Metadata Dictionary
+              </a>.
             </div>
           </div>
         )}
