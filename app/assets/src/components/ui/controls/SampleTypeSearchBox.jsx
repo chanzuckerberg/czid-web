@@ -1,7 +1,11 @@
 import React from "react";
-import { groupBy, sortBy, get } from "lodash/fp";
+import { groupBy, get } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
+import {
+  matchType,
+  sortTypes,
+} from "~/components/views/SampleUploadFlow/utils";
 
 import LiveSearchPopBox from "./LiveSearchPopBox";
 
@@ -14,32 +18,15 @@ class SampleTypeSearchBox extends React.Component {
   };
 
   getMatchesByCategory(query) {
-    const matchSampleTypes = sampleType => {
-      // If no query, return all possible
-      if (query === "") return true;
+    const matchedSampleTypes = this.props.sampleTypes.filter(sampleType =>
+      matchType(sampleType, query)
+    );
 
-      // Match chars in any position. Good for acronyms. Ignore spaces.
-      const noSpaces = query.replace(/\s*/gi, "");
-      const regex = new RegExp(noSpaces.split("").join(".*"), "gi");
-      if (regex.test(sampleType.name)) {
-        return true;
-      }
-      return false;
-    };
-    const matchedSampleTypes = this.props.sampleTypes.filter(matchSampleTypes);
-
-    // Sort matches by position of match. If no position, alphabetical.
-    const sortSampleTypes = sampleType => {
-      const name = sampleType.name.toLowerCase();
-      const q = query.toLowerCase();
-      const res =
-        name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
-      return res;
-    };
-    let sortedSampleTypes = sortBy(t => t.name, matchedSampleTypes);
-    if (query !== "") {
-      sortedSampleTypes = sortBy(sortSampleTypes, sortedSampleTypes);
-    }
+    const sortedSampleTypes = sortTypes(
+      matchedSampleTypes,
+      query,
+      sampleType => sampleType.name
+    );
 
     // Sample types are grouped differently based on whether the current
     // sample's host genome is an insect, a human, or neither. The "suggested"

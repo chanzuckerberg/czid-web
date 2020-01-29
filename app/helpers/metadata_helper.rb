@@ -359,7 +359,6 @@ module MetadataHelper
     host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
     host_genome_names = metadata["rows"].map { |row| row[host_genome_index] }.uniq
     host_genomes = if allow_new_host_genomes
-                     # TODO: (gdingle): need to add user name
                      host_genome_names.map do |name|
                        hg = HostGenome.find_by(name: name)
                        unless hg

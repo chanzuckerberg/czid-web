@@ -1,7 +1,11 @@
 import React from "react";
-import { sortBy, get } from "lodash/fp";
+import { get } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
+import {
+  matchType,
+  sortTypes,
+} from "~/components/views/SampleUploadFlow/utils";
 
 import LiveSearchPopBox from "./LiveSearchPopBox";
 
@@ -13,37 +17,11 @@ class HostOrganismSearchBox extends React.Component {
 
   // TODO (gdingle): extract all these to utils if re-used
   getMatchesByCategory(query) {
-    const matchHostGenomes = hostGenome => {
-      // If no query, return all possible
-      if (query === "") return true;
-
-      // Match chars in any position. Good for acronyms. Ignore spaces.
-      const noSpaces = query.replace(/\s*/gi, "");
-      const regex = new RegExp(noSpaces.split("").join(".*"), "gi");
-      if (regex.test(hostGenome.name)) {
-        return true;
-      }
-      return false;
-    };
-    const matchedHostGenomes = this.props.hostGenomes.filter(matchHostGenomes);
-
-    // Sort matches by position of match. If no position, alphabetical.
-    const sortHostGenomes = hostGenome => {
-      const name = hostGenome.name.toLowerCase();
-      const q = query.toLowerCase();
-      const res =
-        name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
-      return res;
-    };
-    let sortedHostGenomes = sortBy(
-      t => t.samples_count * -1,
-      matchedHostGenomes
+    const matchedHostGenomes = this.props.hostGenomes.filter(hostGenome =>
+      matchType(hostGenome, query)
     );
-    if (query !== "") {
-      sortedHostGenomes = sortBy(sortHostGenomes, sortedHostGenomes);
-    }
 
-    return sortedHostGenomes;
+    return sortTypes(matchedHostGenomes, query, t => t.samples_count * -1);
   }
 
   buildResults(sortedHostGenomes, query) {
