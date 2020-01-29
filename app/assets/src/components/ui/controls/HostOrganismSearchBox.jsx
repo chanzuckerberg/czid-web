@@ -30,7 +30,9 @@ class HostOrganismSearchBox extends React.Component {
       return {
         title: result.name,
         name: result.id,
-        description: hostGenome.ercc_only ? "ERCC subtraction only" : null,
+        description: hostGenome.ercc_only
+          ? "Host will not be subtracted"
+          : null,
       };
     };
     const results = {};
