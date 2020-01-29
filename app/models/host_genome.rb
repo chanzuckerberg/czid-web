@@ -5,10 +5,12 @@ class HostGenome < ApplicationRecord
   belongs_to :user, optional: true
 
   before_create :add_default_metadata_fields
+  # Hosts before 2020-02-01 may be different case. "ERCC only" is one exception.
+  before_create { name.titleize! }
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }, format: {
-    with: /\A[A-Z][\w|\s|\.|\-]+\z/,
-    message: "of host organism allows only word, period, dash or space chars, and first char must be capitalized.",
+    with: /\A[\w][\w|\s|\.|\-]+\z/,
+    message: "of host organism allows only word, period, dash or space chars, and start with a word char.",
   }
 
   validates :s3_bowtie2_index_path, :s3_star_index_path, format: {
