@@ -39,6 +39,12 @@ class HostGenome < ApplicationRecord
     HostGenome::ERCC_PATH_PREFIX + HostGenome::S3_BOWTIE2_INDEX_FILE
   end
 
+  def as_json(options = {})
+    hash = super(options)
+    hash[:ercc_only] = ercc_only?
+    hash
+  end
+
   def default_background
     Background.find(default_background_id) if default_background_id
   end

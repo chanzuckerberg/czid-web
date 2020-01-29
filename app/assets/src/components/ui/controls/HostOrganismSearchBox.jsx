@@ -26,9 +26,11 @@ class HostOrganismSearchBox extends React.Component {
 
   buildResults(sortedHostGenomes, query) {
     const formatResult = result => {
+      const hostGenome = this.props.hostGenomes.find(hg => hg.id === result.id);
       return {
         title: result.name,
         name: result.id,
+        description: hostGenome.ercc_only ? "ERCC subtraction only" : null,
       };
     };
     const results = {};
