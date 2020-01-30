@@ -25,6 +25,7 @@ class SampleUploadFlow extends React.Component {
       uploadMetadata: false,
       review: false,
     },
+    hostGenomes: [], // set on metadata upload
   };
 
   componentDidMount() {
@@ -53,7 +54,9 @@ class SampleUploadFlow extends React.Component {
     });
   };
 
-  handleUploadMetadata = ({ metadata, issues }) => {
+  handleUploadMetadata = ({ metadata, issues, newHostGenomes }) => {
+    const updatedHostGenomes = this.state.hostGenomes.concat(newHostGenomes);
+
     // Populate host_genome_id in sample using metadata.
     const newSamples = this.state.samples.map(sample => {
       const metadataRow = find(
@@ -62,13 +65,14 @@ class SampleUploadFlow extends React.Component {
           get("Sample Name", row) === sample.name,
         metadata.rows
       );
-
+      const hostGenome =
+        get("host_genome", metadataRow) || get("Host Genome", metadataRow);
+      debugger;
       const hostGenomeId = find(
-        [
-          "name",
-          get("host_genome", metadataRow) || get("Host Genome", metadataRow),
-        ],
-        this.props.hostGenomes
+        // Lowercase to allow for 'human' to match 'Human'. The same logic
+        // is replicated in MetadataHelper.
+        hg => hg.name.toLowerCase() === hostGenome.name.toLowerCase(),
+        updatedHostGenomes
       ).id;
 
       return {
@@ -89,6 +93,7 @@ class SampleUploadFlow extends React.Component {
       metadataIssues: issues,
       currentStep: "review",
       stepsEnabled: set("review", true, this.state.stepsEnabled),
+      hostGenomes: updatedHostGenomes,
     });
   };
 
@@ -148,20 +153,21 @@ class SampleUploadFlow extends React.Component {
             onDirty={this.metadataChanged}
           />
         )}
-        {this.state.samples && this.state.metadata && (
-          <ReviewStep
-            metadata={this.state.metadata}
-            samples={this.state.samples}
-            uploadType={this.state.uploadType}
-            project={this.state.project}
-            sampleNamesToFiles={this.state.sampleNamesToFiles}
-            hostGenomes={this.props.hostGenomes}
-            visible={this.state.currentStep === "review"}
-            onUploadStatusChange={this.onUploadStatusChange}
-            onStepSelect={this.handleStepSelect}
-            onUploadComplete={this.onUploadComplete}
-          />
-        )}
+        {this.state.samples &&
+          this.state.metadata && (
+            <ReviewStep
+              metadata={this.state.metadata}
+              samples={this.state.samples}
+              uploadType={this.state.uploadType}
+              project={this.state.project}
+              sampleNamesToFiles={this.state.sampleNamesToFiles}
+              hostGenomes={this.state.hostGenomes}
+              visible={this.state.currentStep === "review"}
+              onUploadStatusChange={this.onUploadStatusChange}
+              onStepSelect={this.handleStepSelect}
+              onUploadComplete={this.onUploadComplete}
+            />
+          )}
       </div>
     );
   };

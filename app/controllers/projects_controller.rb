@@ -474,13 +474,10 @@ class ProjectsController < ApplicationController
       host_genome: [:metadata_fields],
       metadata: [:metadata_field]
     )
-    issues = validate_metadata_csv_for_samples(
+    issues = validate_metadata_csv_for_project_samples(
       project_samples.to_a,
-      metadata,
-      false,
-      current_user && current_user.admin?
+      metadata
     )
-    # TODO: (gdingle): remove admin only after launch. See https://jira.czi.team/browse/IDSEQ-2051.
     render json: {
       status: "success",
       issues: issues,

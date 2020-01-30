@@ -42,17 +42,15 @@ class MetadataController < ApplicationController
       )
     end
 
-    issues = validate_metadata_csv_for_samples(
+    issues, new_host_genomes = validate_metadata_csv_for_new_samples(
       samples,
-      metadata,
-      true,
-      current_user && current_user.admin?
+      metadata
     )
-    # TODO: (gdingle): remove admin only after launch. See https://jira.czi.team/browse/IDSEQ-2051.
 
     render json: {
       status: "success",
       issues: issues,
+      newHostGenomes: new_host_genomes,
     }
   rescue => err
     render json: {
