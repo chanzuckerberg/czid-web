@@ -105,9 +105,9 @@ _git_fetch_and_cleanup() {
   # fetch from remote origin
   git fetch origin
 
-  # remove any dangling version tags not present in the remote origin
+  # remove any dangling version tags not present in remote origin
   # (this could happen if a previous run failed to push tags to remote)
-  git tag -d $(
+  declare dangling_tags; dangling_tags=$(
     grep -vxFf  \
       <(git ls-remote --tags origin | cut -f 2 | sed -E 's/^refs\/tags\///') \
       <(git tag -l \
@@ -115,4 +115,8 @@ _git_fetch_and_cleanup() {
       ) \
       || [[ $? == 1 ]]
   )
+  if [ ! -z "$dangling_tags" ]; then
+    _trace "Found some dangling version tags not present in remote origin. Removing..."
+    git tag -d "$dangling_tags"
+  fi
 }

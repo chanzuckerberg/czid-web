@@ -54,6 +54,7 @@ main() {
 
   # deploy instructions
   _log "Release cycle $staging_tag_version successfully closed."
+       "Please deploy ${tag} ($(git log -n1 "${tag}" --format=%h)) to ${prod}"
 }
 
 main "$@"
