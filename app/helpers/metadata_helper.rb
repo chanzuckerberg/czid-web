@@ -171,13 +171,15 @@ module MetadataHelper
 
   # Convenience wrapper
   def validate_metadata_csv_for_project_samples(samples, metadata)
-    validate_metadata_csv_for_samples(samples, metadata, false, false)[0]
+    validate_metadata_csv_for_samples(samples, metadata, false, false)
   end
 
   # Convenience wrapper
   def validate_metadata_csv_for_new_samples(samples, metadata)
     # TODO: (gdingle): remove admin only after launch. See https://jira.czi.team/browse/IDSEQ-2051.
-    validate_metadata_csv_for_samples(samples, metadata, true, current_user.admin?)
+    issues = validate_metadata_csv_for_samples(samples, metadata, true, current_user.admin?)
+    # repackage for coherence
+    [issues.reject(:new_host_genomes), issues[:new_host_genomes]]
   end
 
   private
@@ -361,13 +363,11 @@ module MetadataHelper
       end
     end
 
-    [
-      {
-        warnings: warning_aggregator.error_groups,
-        errors: errors + error_aggregator.error_groups,
-      },
-      new_host_genomes,
-    ]
+    {
+      warnings: warning_aggregator.error_groups,
+      errors: errors + error_aggregator.error_groups,
+      new_host_genomes: new_host_genomes,
+    }
   end
 
   def find_or_create_host_genomes(metadata, allow_new_host_genomes)
