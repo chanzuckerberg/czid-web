@@ -483,9 +483,6 @@ class SamplesHeatmapView extends React.Component {
     if (readSpecificity && taxonDetails["id"] < 0) {
       return false;
     }
-    // TODO(julie): Backend needs to send more data (ex: top n taxa per category per sample)
-    // to ensure the same amount of information is displayed on the heatmap when filters are applied
-    // on the frontend.
     if (categories.length) {
       if (!phage_selected && taxonDetails["phage"]) {
         return false;
