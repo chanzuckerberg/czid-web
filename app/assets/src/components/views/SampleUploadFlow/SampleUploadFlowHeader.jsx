@@ -57,8 +57,8 @@ class SampleUploadFlowHeader extends React.Component {
               )}
               {currentStep === "uploadMetadata" && (
                 <div className={cs.subtitle}>
-                  Add custom metadata to leverage in our heatmap and other
-                  visualizations.
+                  This metadata will provide context around your samples and
+                  results in IDseq.
                 </div>
               )}
               {currentStep === "review" && (

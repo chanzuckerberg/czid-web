@@ -350,11 +350,10 @@ class MetadataUpload extends React.Component {
           <div className={cs.info}>
             <div className={cs.details}>
               <span className={cs.label}>{`Required fields: `}</span>
-              We require some fields, because they are needed to determine how
-              your data should be processed and displayed for your analysis in
-              IDseq. Please be as accurate as possible. Your choices will affect
-              the way your data is processed. The required fields are:{" "}
-              {requiredFields && requiredFields.join(", ")}.{" "}
+              We require the following metadata to determine how to process your
+              data and display the results:{" "}
+              {requiredFields && requiredFields.join(", ")}. Please be as
+              accurate as possible!
               <a
                 href="/metadata/dictionary"
                 className={cs.link}
