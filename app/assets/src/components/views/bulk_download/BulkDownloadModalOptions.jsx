@@ -170,7 +170,7 @@ class BulkDownloadModalOptions extends React.Component {
   renderDownloadType = downloadType => {
     const {
       validSampleIds,
-      handleSelectDownloadType,
+      onSelect,
       allSamplesUploadedByCurrentUser,
       selectedDownloadTypeName,
     } = this.props;
@@ -210,7 +210,7 @@ class BulkDownloadModalOptions extends React.Component {
           disabled && cs.disabled
         )}
         key={downloadType.type}
-        onClick={() => !disabled && handleSelectDownloadType(downloadType.type)}
+        onClick={() => !disabled && onSelect(downloadType.type)}
       >
         <RadioButton
           disabled={disabled}
@@ -298,7 +298,7 @@ BulkDownloadModalOptions.propTypes = {
   backgroundOptions: PropTypes.array,
   metricsOptions: PropTypes.array,
   allSamplesUploadedByCurrentUser: PropTypes.bool,
-  handleSelectDownloadType: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
   conditionalFields: PropTypes.arrayOf(PropTypes.object),
 };
 

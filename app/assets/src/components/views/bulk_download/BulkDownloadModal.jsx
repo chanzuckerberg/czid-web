@@ -300,7 +300,7 @@ class BulkDownloadModal extends React.Component {
               onFieldSelect={this.handleFieldSelect}
               selectedFields={selectedFields}
               selectedDownloadTypeName={selectedDownloadTypeName}
-              handleSelectDownloadType={this.handleSelectDownloadType}
+              onSelect={this.handleSelectDownloadType}
               conditionalFields={CONDITIONAL_FIELDS}
             />
           </div>
