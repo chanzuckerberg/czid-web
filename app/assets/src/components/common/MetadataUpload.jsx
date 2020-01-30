@@ -353,7 +353,7 @@ class MetadataUpload extends React.Component {
               We require the following metadata to determine how to process your
               data and display the results:{" "}
               {requiredFields && requiredFields.join(", ")}. Please be as
-              accurate as possible!
+              accurate as possible!{" "}
               <a
                 href="/metadata/dictionary"
                 className={cs.link}
