@@ -2,6 +2,9 @@ class HostGenome < ApplicationRecord
   has_many :samples, dependent: :restrict_with_exception
   has_and_belongs_to_many :metadata_fields
   # The user that created the host genome should be recorded after 2020-02-01.
+  # IMPORTANT NOTE: Only existing, null-user host genomes will be shown as
+  # options for new samples until the team gets a chance to review this policy
+  # in light of the data. See showAsOption below.
   belongs_to :user, optional: true
 
   before_create :add_default_metadata_fields
@@ -44,6 +47,7 @@ class HostGenome < ApplicationRecord
   def as_json(options = {})
     hash = super(options)
     hash[:ercc_only] = ercc_only?
+    hash[:showAsOption] = user.nil?
     hash
   end
 

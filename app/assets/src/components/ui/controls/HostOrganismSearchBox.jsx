@@ -17,8 +17,12 @@ class HostOrganismSearchBox extends React.Component {
 
   // TODO (gdingle): extract all these to utils if re-used
   getMatchesByCategory(query) {
-    const matchedHostGenomes = this.props.hostGenomes.filter(hostGenome =>
-      matchType(hostGenome, query)
+    const matchedHostGenomes = this.props.hostGenomes.filter(
+      hostGenome =>
+        // IMPORTANT NOTE: Only existing, null-user host genomes will be shown as
+        // options for new samples until the team gets a chance to review this
+        // policy in light of the data. See HostGenome.rb.
+        hostGenome.showAsOption && matchType(hostGenome, query)
     );
 
     return sortTypes(matchedHostGenomes, query, t => t.samples_count * -1);

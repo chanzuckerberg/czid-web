@@ -338,7 +338,7 @@ class MetadataUpload extends React.Component {
   };
 
   render() {
-    const { projectMetadataFields, currentTab } = this.state;
+    const { hostGenomes, projectMetadataFields, currentTab } = this.state;
     const { samplesAreNew } = this.props;
     const requiredFields = concat(
       "Host Genome",
@@ -371,6 +371,16 @@ class MetadataUpload extends React.Component {
               >
                 View Full Metadata Dictionary
               </a>.
+            </div>
+            <div className={cs.details}>
+              <span
+                className={cs.label}
+              >{`Available organisms for host subtraction: `}</span>
+              {hostGenomes &&
+                hostGenomes
+                  .filter(h => !h.ercc_only)
+                  .map(h => h.name)
+                  .join(", ")}.
             </div>
           </div>
         )}
