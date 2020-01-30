@@ -5,6 +5,7 @@ class HostGenome < ApplicationRecord
   # IMPORTANT NOTE: Only existing, null-user host genomes will be shown as
   # options for new samples until the team gets a chance to review this policy
   # in light of the data. See showAsOption below.
+  # See https://jira.czi.team/browse/IDSEQ-2193.
   belongs_to :user, optional: true
 
   before_create :add_default_metadata_fields

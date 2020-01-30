@@ -22,6 +22,7 @@ class HostOrganismSearchBox extends React.Component {
         // IMPORTANT NOTE: Only existing, null-user host genomes will be shown as
         // options for new samples until the team gets a chance to review this
         // policy in light of the data. See HostGenome.rb.
+        // See https://jira.czi.team/browse/IDSEQ-2193.
         hostGenome.showAsOption && matchType(hostGenome, query)
     );
 
