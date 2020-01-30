@@ -1,13 +1,16 @@
 import React from "react";
 import cx from "classnames";
 import { get, without, flow, omit, set, find } from "lodash/fp";
+
 import UploadSampleStep from "./UploadSampleStep";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
+
 import UploadMetadataStep from "./UploadMetadataStep";
 import ReviewStep from "./ReviewStep";
 import cs from "./sample_upload_flow.scss";
 import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
+import HostOrganismMessage from "./HostOrganismMessage";
 
 class SampleUploadFlow extends React.Component {
   state = {
@@ -167,7 +170,14 @@ class SampleUploadFlow extends React.Component {
               onUploadStatusChange={this.onUploadStatusChange}
               onStepSelect={this.handleStepSelect}
               onUploadComplete={this.onUploadComplete}
-            />
+            >
+              {this.props.admin && (
+                <HostOrganismMessage
+                  hostGenomes={this.props.hostGenomes}
+                  samples={this.state.samples}
+                />
+              )}
+            </ReviewStep>
           )}
       </div>
     );

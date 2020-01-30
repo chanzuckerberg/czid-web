@@ -25,7 +25,6 @@ import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 
 import cs from "./sample_upload_flow.scss";
 import UploadProgressModal from "./UploadProgressModal";
-import HostOrganismMessage from "./HostOrganismMessage";
 
 const processMetadataRows = metadataRows =>
   flow(
@@ -224,13 +223,12 @@ class ReviewStep extends React.Component {
       samples,
       metadata,
       project,
-      hostGenomes,
     } = this.props;
 
     const shouldTruncateDescription =
       project.description && this.countNewLines(project.description) > 5;
 
-    const { userSettings, admin } = this.context || {};
+    const { userSettings } = this.context || {};
 
     return (
       <div
@@ -345,9 +343,7 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          {admin && (
-            <HostOrganismMessage hostGenomes={hostGenomes} samples={samples} />
-          )}
+          {this.props.children}
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
           <TermsAgreement
@@ -426,6 +422,7 @@ ReviewStep.propTypes = {
   onUploadStatusChange: PropTypes.func,
   onStepSelect: PropTypes.func,
   onUploadComplete: PropTypes.func.isRequired,
+  children: PropTypes.node,
 };
 
 ReviewStep.contextType = UserContext;
