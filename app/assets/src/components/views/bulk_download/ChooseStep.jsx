@@ -316,11 +316,7 @@ class ChooseStep extends React.Component {
   };
 
   renderDownloadType = downloadType => {
-    const {
-      selectedDownloadTypeName,
-      onSelect,
-      selectedSampleIds,
-    } = this.props;
+    const { selectedDownloadTypeName, onSelect, validSampleIds } = this.props;
     const { allSamplesUploadedByCurrentUser } = this.state;
     const { admin, appConfig } = this.context || {};
 
@@ -340,7 +336,7 @@ class ChooseStep extends React.Component {
     } else if (
       downloadType.type === "original_input_file" &&
       appConfig.maxSamplesBulkDownloadOriginalFiles &&
-      selectedSampleIds.size > appConfig.maxSamplesBulkDownloadOriginalFiles &&
+      validSampleIds.size > appConfig.maxSamplesBulkDownloadOriginalFiles &&
       !admin
     ) {
       disabled = true;
