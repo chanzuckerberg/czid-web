@@ -55,7 +55,7 @@ class SampleUploadFlow extends React.Component {
   };
 
   handleUploadMetadata = ({ metadata, issues, newHostGenomes }) => {
-    const updatedHostGenomes = this.state.hostGenomes.concat(newHostGenomes);
+    const updatedHostGenomes = this.props.hostGenomes.concat(newHostGenomes);
 
     // Populate host_genome_id in sample using metadata.
     const newSamples = this.state.samples.map(sample => {
@@ -65,13 +65,14 @@ class SampleUploadFlow extends React.Component {
           get("Sample Name", row) === sample.name,
         metadata.rows
       );
-      const hostGenome =
+      const hostGenomeName =
         get("host_genome", metadataRow) || get("Host Genome", metadataRow);
-      debugger;
       const hostGenomeId = find(
         // Lowercase to allow for 'human' to match 'Human'. The same logic
         // is replicated in MetadataHelper.
-        hg => hg.name.toLowerCase() === hostGenome.name.toLowerCase(),
+        hg => {
+          return hg.name.toLowerCase() === hostGenomeName.toLowerCase();
+        },
         updatedHostGenomes
       ).id;
 
