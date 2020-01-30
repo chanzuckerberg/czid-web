@@ -34,6 +34,13 @@ main() {
     _exit_with_err_msg "$msg"
   fi
 
+  # check if there is any commit in master
+  declare commit_count; commit_count=$(git rev-list "origin/$STAGING_BRANCH".."origin/$MASTER_BRANCH" | wc -l)
+  if [ "$commit_count" -eq "0" ]; then
+    _exit_with_err_msg "origin/${MASTER_BRANCH} doesn't seem to have any additional commits after origin/${STAGING_BRANCH}." \
+                       "Cannot start a new release cycle."
+  fi
+ 
   # Bump tag version
   declare next_version; next_version=$(_bump_version_string "$staging_tag_version" 2)
   _log "Bumping $STAGING_BRANCH from version $staging_tag_version to $next_version"
@@ -55,7 +62,8 @@ main() {
   "$SCRIPT_DIR/make_release_checklist.sh"
 
   # deploy instructions
-  _log "Release cycle ready. Please deploy ${tag} ($(git log -n1 "${tag}" --format=%h)) to ${STAGING_ENV}"
+  _log "Release cycle ready." \
+       "Please deploy ${tag} ($(git log -n1 "${tag}" --format=%h)) to ${STAGING_ENV}"
 }
 
 main "$@"

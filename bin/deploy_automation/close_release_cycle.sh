@@ -30,12 +30,14 @@ main() {
 
   # Verify if there is at least one item in the check list
   if ! ( grep -qE '^\s*\*\s*\[[xX ]+\]' <<< "$checklist_body" ); then
-    _exit_with_err_msg "INVALID STATE: Couldn't find any items in the release checklist. Please check $checklist_html_url"
+    _exit_with_err_msg "INVALID STATE: Couldn't find any items in the release checklist." \
+                       "Please check $checklist_html_url and restart the process"
   fi
 
   # Verify if there are unchecked items left
   if ( grep -qE '^\s*\*\s*\[[^xX]\]' <<< "$checklist_body" ); then
-    _exit_with_err_msg "INVALID STATE: There are unchecked items in the release checklist. Please check $checklist_html_url"
+    _exit_with_err_msg "INVALID STATE: There are unchecked items in the release checklist." \
+                       "Please check $checklist_html_url and restart the process"
   fi
 
   # Create a new tag for `prod` pointing to HEAD of `staging`
@@ -53,8 +55,8 @@ main() {
   git push --atomic -f origin "${tag}" "${PROD_BRANCH}"
 
   # deploy instructions
-  _log "Release cycle $staging_tag_version successfully closed."
-       "Please deploy ${tag} ($(git log -n1 "${tag}" --format=%h)) to ${prod}"
+  _log "Release cycle $staging_tag_version successfully closed." \
+       "Please deploy ${tag} ($(git log -n1 "${tag}" --format=%h)) to ${PROD_ENV}"
 }
 
 main "$@"
