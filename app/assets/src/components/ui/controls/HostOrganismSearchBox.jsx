@@ -40,7 +40,7 @@ class HostOrganismSearchBox extends React.Component {
       };
     };
     const results = {};
-    if (sortedHostGenomes) {
+    if (sortedHostGenomes.length) {
       results.suggested = {
         name: "SUGGESTED",
         results: sortedHostGenomes.map(formatResult),

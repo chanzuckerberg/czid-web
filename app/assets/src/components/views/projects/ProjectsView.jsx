@@ -60,6 +60,8 @@ class ProjectsView extends React.Component {
       },
       {
         dataKey: "tissues",
+        // tissue type was later renamed to sample type globally
+        label: "Sample Types",
         width: 200,
         disableSort: true,
         cellRenderer: TableRenderers.renderList,
