@@ -193,7 +193,10 @@ class PipelineRunStage < ApplicationRecord
 
     # note failed attempt and retry
     add_failed_job
-    unless count_failed_tries <= MAX_RETRIES
+    # Disable retrying for non host alignment
+    #  It is best if such a retry needs to happen for it to happen many hours
+    #  later after a different set of instances are running.
+    unless count_failed_tries <= MAX_RETRIES || dag_name == DAG_NAME_ALIGNMENT
       LogUtil.log_err_and_airbrake("Job #{job_id} for pipeline run #{id} was killed #{MAX_RETRIES} times.")
       save
       return
