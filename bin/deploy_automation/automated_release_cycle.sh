@@ -21,7 +21,6 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 
 
 main() {
-  
   # Ensure current branch is not prod or staging
   # This command will set prod and staging HEADs to other commits,
   # and we want to be in a different branch to prevent any issues.
@@ -36,15 +35,9 @@ main() {
   _log "**** STARTING NEW RELEASE CYCLE ****"
   "$SCRIPT_DIR/start_release_cycle.sh"
 
-  declare staging_tag; staging_tag="$(_get_latest_tag "$STAGING_ENV")"
-  declare prod_tag; prod_tag="$(_get_latest_tag "$PROD_ENV")"
-
-  declare msg;
-  msg="**** READY FOR DEPLOYMENT ****${LF}"
-  msg+="${YELLOW}PLEASE EXECUTE THE FOLLOWING COMMANDS${LF}"
-  msg+="./bin/deploy_automation/deploy_tag.sh staging '${staging_tag}'${LF}"
-  msg+="./bin/deploy_automation/deploy_tag.sh prod '${prod_tag}'"
-  _log "$msg"
+  _log "**** READY FOR DEPLOYMENT ****"
+  _log "New tags: ${YELLOW}" \
+       "$(_get_latest_tag "$PROD_ENV")    $(_get_latest_tag "$STAGING_ENV")"
 }
 
 main "$@"

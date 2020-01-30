@@ -4,25 +4,27 @@ SCRIPT_DIR=$(dirname "$0")
 source "$SCRIPT_DIR/_global_vars.sh"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
-# Deploy a tag to an environment.
-# This command will wait for the commit of this tag
+# Deploy a git rev to an environment.
+# This command will wait for the commit of this git rev
 # to be available in Docker hub and passed all checks in github before deploying it
 main() {
-  declare env="$1"
-  declare tag="$2"
+  declare env="$1" # staging / prod
+  declare git_rev="$2" # https://git-scm.com/docs/git-rev-parse#_specifying_revisions
 
-  declare sha; sha=$(git log -n1 "${tag}" --format=%h)
+  _git_fetch_and_cleanup
+
+  declare sha; sha=$(git log -n1 "${git_rev}" --format=%h)
   declare docker_image="${DOCKER_REPOSITORY_NAME}:sha-$sha"
 
-  _log "Starting deployment of tag $tag (sha-$sha) to $env"
+  _log "Starting deployment of $git_rev (sha-$sha) to $env"
 
   _log "Checking if docker image $docker_image is available"
-  if ! __retry 5 15 __docker_tag_exists "${DOCKER_REPOSITORY_NAME}" "sha-$sha"; then
+  if ! __retry 10 60 __docker_tag_exists "${DOCKER_REPOSITORY_NAME}" "sha-$sha"; then
     _exit_with_err_msg "Couldn't find image ${docker_image} in docker hub"
   fi
 
   _log "Checking if Github commit ${sha} in a valid state"
-  if ! __retry 5 15 __check_commit_state "${sha}" "$env"; then
+  if ! __retry 10 60 __check_commit_state "${sha}" "$env"; then
     _exit_with_err_msg "Commit ${sha} is in an invalid state. Aborting deployment. More details at $GITHUB_REPOSITORY_URL/commits/${env}"
   fi
 

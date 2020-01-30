@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 # - Set HEAD of prod branch to this new tag
 # Note: You need to manually deploy after this task
 main() {
-  git fetch --all
+  _git_fetch_and_cleanup
 
   # Ensure current branch is not prod
   # This command will set prod HEAD to a different commit,
@@ -42,14 +42,15 @@ main() {
   declare staging_tag_version; staging_tag_version="$(_get_latest_version staging)"
   declare tag; tag="$(_format_version_tag "${staging_tag_version}" "${PROD_BRANCH}")"
   _log "Creating tag ${tag} to point ${PROD_BRANCH} to the head of ${STAGING_BRANCH} branch..."
-  git tag -af -m "Release $staging_tag_version" "${tag}" "origin/$STAGING_BRANCH"
-  git push -f origin "${tag}"
+  git tag -a -m "Release $staging_tag_version" "${tag}" "origin/$STAGING_BRANCH"
 
   # Set HEAD of prod branch to this new tag
   declare sha; sha=$(_get_latest_commit "${tag}")
   _log "Pointing prod branch to tag ${tag}..."
   git branch -f "${PROD_BRANCH}" "${sha}"
-  git push -f origin "${PROD_BRANCH}"
+
+  # Update remote with new tag and branch head
+  git push --atomic -f origin "${tag}" "${PROD_BRANCH}"
 
   # deploy instructions
   _log "Release cycle $staging_tag_version successfully closed."
