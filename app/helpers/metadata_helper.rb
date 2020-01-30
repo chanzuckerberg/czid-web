@@ -179,7 +179,7 @@ module MetadataHelper
     # TODO: (gdingle): remove admin only after launch. See https://jira.czi.team/browse/IDSEQ-2051.
     issues = validate_metadata_csv_for_samples(samples, metadata, true, current_user.admin?)
     # repackage for coherence
-    [issues.reject(:new_host_genomes), issues[:new_host_genomes]]
+    [issues.reject { |key| key == :new_host_genomes }, issues[:new_host_genomes]]
   end
 
   private
