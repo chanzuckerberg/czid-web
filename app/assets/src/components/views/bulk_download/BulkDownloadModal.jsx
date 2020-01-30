@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { unset, get, set, isUndefined, map } from "lodash/fp";
+import { unset, get, set } from "lodash/fp";
 import memoize from "memoize-one";
 
 import {
@@ -99,12 +99,12 @@ class BulkDownloadModal extends React.Component {
   };
 
   componentDidMount() {
-    this.parallelFetchNeededData();
+    this.fetchSampleOptionsAndValidateSelectedSamples();
   }
 
   // *** Async requests ***
 
-  async parallelFetchNeededData() {
+  async fetchSampleOptionsAndValidateSelectedSamples() {
     const { selectedSampleIds } = this.props;
 
     const bulkDownloadTypesRequest = this.fetchDownloadTypes();
@@ -187,11 +187,9 @@ class BulkDownloadModal extends React.Component {
     return allSamplesUploadedByCurrentUser;
   }
 
-  // ***
+  // *** Callbacks ***
 
   handleDownloadRequest = () => {
-    console.log("Bulk download requested");
-    console.log("State: ", this.state);
     const {
       selectedDownloadTypeName,
       selectedFields,
@@ -205,7 +203,6 @@ class BulkDownloadModal extends React.Component {
       selectedFieldsDisplay,
       validSampleIds
     );
-    console.log("Bulk download assembled");
     this.createBulkDownload(selectedDownload);
   };
 
@@ -241,12 +238,14 @@ class BulkDownloadModal extends React.Component {
     });
   };
 
+  // *** Create bulk download and close modal ***
+
   createBulkDownload = async selectedDownload => {
     const { onGenerate } = this.props;
+
     this.setState({
       waitingForCreate: true,
     });
-    console.log("Bulk Download creation requested");
     try {
       await createBulkDownload(selectedDownload);
     } catch (e) {
@@ -257,14 +256,14 @@ class BulkDownloadModal extends React.Component {
       });
       return;
     }
-    console.log("Bulk download creation done");
+
     onGenerate();
   };
 
   // *** Render methods ***
 
   render() {
-    const { open, onGenerate, onClose } = this.props;
+    const { open, onClose } = this.props;
     const {
       bulkDownloadTypes,
       validSampleIds,

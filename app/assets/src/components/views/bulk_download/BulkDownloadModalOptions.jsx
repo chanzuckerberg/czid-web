@@ -1,17 +1,6 @@
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
-import {
-  unset,
-  find,
-  filter,
-  get,
-  set,
-  some,
-  map,
-  isUndefined,
-  orderBy,
-  reject,
-} from "lodash/fp";
+import { filter, get, orderBy } from "lodash/fp";
 import cx from "classnames";
 import memoize from "memoize-one";
 
@@ -20,10 +9,6 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
 import BasicPopup from "~/components/BasicPopup";
-import { createBulkDownload } from "~/api/bulk_downloads";
-import AccordionNotification from "~ui/notifications/AccordionNotification";
-import Notification from "~ui/notifications/Notification";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
 import TaxonHitSelect from "./TaxonHitSelect";

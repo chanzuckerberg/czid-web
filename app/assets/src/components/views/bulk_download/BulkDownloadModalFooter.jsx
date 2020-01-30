@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
-import { get, some, map, isUndefined } from "lodash/fp";
+import { get, some, map, isUndefined, reject } from "lodash/fp";
 
 import LoadingMessage from "~/components/common/LoadingMessage";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
@@ -8,6 +8,11 @@ import Notification from "~ui/notifications/Notification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
 import cs from "./bulk_download_modal_footer.scss";
+
+const triggersConditionalField = (conditionalField, selectedFields) =>
+  conditionalField.triggerValues.includes(
+    get(conditionalField.dependentField, selectedFields)
+  );
 
 export default class BulkDownloadModalFooter extends React.Component {
   constructor(props) {
@@ -65,7 +70,6 @@ export default class BulkDownloadModalFooter extends React.Component {
     const downloadType = this.getSelectedDownloadType();
 
     if (!downloadType || validSampleIds.size < 1) {
-      console.log("No download type or valid sample ids", downloadType);
       return false;
     }
 
@@ -81,7 +85,6 @@ export default class BulkDownloadModalFooter extends React.Component {
           )
         )
       ) {
-        console.log("Needed conditional field is undefined");
         return false;
       }
     }
