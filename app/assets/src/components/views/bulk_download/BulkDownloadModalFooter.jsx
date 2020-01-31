@@ -34,11 +34,7 @@ export default class BulkDownloadModalFooter extends React.Component {
 
   // Get all the fields we need to validate for the selected download type.
   getRequiredFieldsForSelectedType = () => {
-    const {
-      selectedFields,
-      selectedDownloadTypeName,
-      CONDITIONAL_FIELDS,
-    } = this.props;
+    const { selectedFields, selectedDownloadTypeName } = this.props;
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
     const downloadType = this.getSelectedDownloadType();
 
