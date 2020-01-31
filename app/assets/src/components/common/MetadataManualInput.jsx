@@ -23,7 +23,7 @@ import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import PlusIcon from "~ui/icons/PlusIcon";
 import { UserContext } from "~/components/common/UserContext";
-import HostOrganismSearchBox from "~ui/controls/HostOrganismSearchBox";
+import HostOrganismSearchBox from "~ui/components/common/HostOrganismSearchBox";
 
 import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
