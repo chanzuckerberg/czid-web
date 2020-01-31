@@ -20,7 +20,7 @@ echo '--'
 docker pull $LATEST_TAG || true
 docker pull $REPO:"branch-$BRANCH_CLEANED" || true
 
-docker-compose build web
+docker build -t $COMPOSE_TAG .
 
 if [ "$BRANCH" == "master" ]; then
   docker tag $COMPOSE_TAG $LATEST_TAG
