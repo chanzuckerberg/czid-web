@@ -339,4 +339,39 @@ RSpec.describe PipelineRun, type: :model do
       end
     end
   end
+
+  context "host_subtracted" do
+    def dag_json(host)
+      {
+        # copied from actual stage
+        "steps": [
+          {
+            "class": "PipelineStepRunStar",
+            "additional_files": {
+              "star_genome": "s3://idseq-database/host_filter/#{host}/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar",
+            },
+          },
+        ],
+      }.to_json
+    end
+
+    let(:user) { build_stubbed(:admin) }
+    let(:sample) { build_stubbed(:sample, user: user, id: 123) }
+    let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage, dag_json: dag_json("test_host")) }
+    let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample, pipeline_run_stages: [pipeline_run_stage]) }
+
+    it "should show the host that was subtracted" do
+      expect(pipeline_run.host_subtracted).to eq("test_host")
+      pipeline_run_stage.dag_json = dag_json("ercc")
+      expect(pipeline_run.host_subtracted).to eq("ercc")
+    end
+    it "should return nil when no host filtering stage" do
+      pipeline_run_stage.step_number = 0
+      expect(pipeline_run.host_subtracted).to eq(nil)
+    end
+    it "should return nil when no valid star_genome" do
+      pipeline_run_stage.dag_json = dag_json('no match spaces')
+      expect(pipeline_run.host_subtracted).to eq(nil)
+    end
+  end
 end

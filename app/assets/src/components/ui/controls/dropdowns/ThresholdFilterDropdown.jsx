@@ -171,7 +171,10 @@ class ThresholdFilterDropdown extends React.Component {
         arrowInsideTrigger
         className={cs.thresholdFilterDropdown}
         onOpen={this.handleOpen}
-        onClose={() => this.handleClose(false)}
+        onClose={e => {
+          // shouldApply on 'Enter'
+          this.handleClose(get("key", e) === "Enter");
+        }}
         open={this.state.popupIsOpen}
         closeOnClick={false}
       >

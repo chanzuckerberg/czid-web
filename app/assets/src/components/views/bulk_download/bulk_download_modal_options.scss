@@ -2,29 +2,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 
-.chooseStep {
-  height: calc(85vh - 80px);
-  max-height: 700px;
-  display: flex;
-  flex-direction: column;
-}
-
-.header {
-  .title {
-    @include font-header-xxl;
-  }
-
-  .tagline {
-    @include font-body-xs;
-    color: $medium-grey;
-  }
-}
-
 .downloadTypeContainer {
-  margin-top: 20px;
+  margin-top: $space-m;
   flex: 1 1 0;
   min-height: 0;
-  overflow: auto;
 
   .category {
     &:not(:first-child) {
@@ -81,7 +62,10 @@
 }
 
 .downloadType {
-  padding: 10px 18px;
+  padding: $space-xs $space-s;
+  margin-bottom: $space-xxxs;
+  margin-right: $space-s;
+  border-radius: 4px;
   display: flex;
   cursor: pointer;
 
@@ -98,14 +82,15 @@
     }
 
     .name,
-    .description {
+    .description,
+    .fileType {
       color: $light-grey;
     }
   }
 
   .radioButton {
-    margin-right: 10px;
-    margin-top: 4px;
+    margin-right: $space-s;
+    margin-top: $space-xxxs;
   }
 
   .content {
@@ -123,20 +108,22 @@
   }
 
   .fileType {
+    @include font-body-xs;
     color: $medium-grey;
   }
 }
 
 .fields {
-  margin-top: 12px;
+  margin-top: $space-s;
+  margin-bottom: $space-xxxs;
   display: flex;
   flex-wrap: wrap;
 
   .field {
-    width: calc(50% - 10px);
+    width: calc(50% - #{$space-l / 2});
 
     &:nth-child(odd) {
-      margin-right: 20px;
+      margin-right: $space-l;
     }
 
     .label {
@@ -154,15 +141,5 @@
       @include font-body-xxs;
       color: $dark-grey;
     }
-  }
-}
-
-.footer {
-  margin-top: 40px;
-
-  .downloadDisclaimer {
-    @include font-body-xxs;
-    color: $medium-grey;
-    margin-top: 6px;
   }
 }

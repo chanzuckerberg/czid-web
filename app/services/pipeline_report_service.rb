@@ -35,6 +35,12 @@ class PipelineReportService
 
   FIELDS_INDEX = Hash[FIELDS_TO_PLUCK.map.with_index { |field, i| [field, i] }]
 
+  LINEAGE_COLUMNS = %w[
+    taxid
+    superkingdom_taxid kingdom_taxid phylum_taxid class_taxid order_taxid family_taxid genus_taxid species_taxid
+    superkingdom_name kingdom_name phylum_name class_name order_name family_name genus_name species_name
+  ].freeze
+
   Z_SCORE_MIN = -99
   Z_SCORE_MAX =  99
   Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
@@ -148,17 +154,17 @@ class PipelineReportService
       )
       @timer.split("compute_agg_scores")
 
+      add_children_species_to_genus(
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES],
+        counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
+      )
+      @timer.split("add_children_species_to_genus")
+
       # TODO: we should try to use TaxonLineage::fetch_lineage_by_taxid
       lineage_version = PipelineRun
                         .select("alignment_configs.lineage_version")
                         .joins(:alignment_config)
                         .find(@pipeline_run.id)[:lineage_version]
-
-      required_columns = %w[
-        taxid
-        superkingdom_taxid kingdom_taxid phylum_taxid class_taxid order_taxid family_taxid genus_taxid species_taxid
-        superkingdom_name kingdom_name phylum_name class_name order_name family_name genus_name species_name
-      ]
 
       tax_ids = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].keys
       # If a species has an undefined genus (id < 0), the TaxonLineage id is based off the
@@ -173,8 +179,8 @@ class PipelineReportService
       lineage_by_tax_id = TaxonLineage
                           .where(taxid: tax_ids)
                           .where('? BETWEEN version_start AND version_end', lineage_version)
-                          .pluck(*required_columns)
-                          .map { |r| [r[0], required_columns.zip(r).to_h] }
+                          .pluck(*LINEAGE_COLUMNS)
+                          .map { |r| [r[0], LINEAGE_COLUMNS.zip(r).to_h] }
                           .to_h
       @timer.split("fetch_taxon_lineage")
 
@@ -201,8 +207,8 @@ class PipelineReportService
       end
       @timer.split("sort_species_within_each_genus")
 
-      highlighted_tax_ids = find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
-      @timer.split("find_taxa_to_highlight")
+      highlighted_tax_ids = find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+      @timer.split("find_species_to_highlight")
     end
 
     has_byte_ranges = @pipeline_run.taxon_byte_ranges_available?
@@ -287,7 +293,7 @@ class PipelineReportService
                                        .where.not(
                                          tax_id: [
                                            TaxonLineage::BLACKLIST_GENUS_ID,
-                                           TaxonLineage::HOMO_SAPIENS_TAX_ID,
+                                           TaxonLineage::HOMO_SAPIENS_TAX_IDS,
                                          ].flatten
                                        )
     # TODO: investigate the history behind BLACKLIST_GENUS_ID and if we can get rid of it ("All artificial constructs")
@@ -328,7 +334,7 @@ class PipelineReportService
                                   taxon_summaries: {
                                     tax_id: [
                                       TaxonLineage::BLACKLIST_GENUS_ID,
-                                      TaxonLineage::HOMO_SAPIENS_TAX_ID,
+                                      TaxonLineage::HOMO_SAPIENS_TAX_IDS,
                                     ].flatten,
                                   }
                                 )
@@ -404,7 +410,6 @@ class PipelineReportService
   def compute_z_scores(taxa_counts, adjusted_total_reads)
     taxa_counts.each_value do |taxon_counts|
       # TODO : consider moving rpm calc to more appropriate place
-      # TODO : consider always creating nt and nr hashes to facilitate computation
       taxon_counts[:nt][:rpm] = taxon_counts[:nt][:count] * 1E6 / adjusted_total_reads if taxon_counts[:nt].present?
       taxon_counts[:nr][:rpm] = taxon_counts[:nr][:count] * 1E6 / adjusted_total_reads if taxon_counts[:nr].present?
 
@@ -422,8 +427,6 @@ class PipelineReportService
     species_counts.each do |tax_id, species|
       genus = genus_counts[species[:genus_tax_id]]
       # Workaround placeholder for bad data (e.g. species counts present in TaxonSummary but genus counts aren't)
-      # TODO: investigate why a count type appearing in species is missing in its genus.
-      # JIRA: https://jira.czi.team/browse/IDSEQ-1807
       genus_nt_zscore = genus[:nt].present? ? genus[:nt][:z_score] : 100
       genus_nr_zscore = genus[:nr].present? ? genus[:nr][:z_score] : 100
       if species[:nt].present? && genus[:nt].blank?
@@ -436,7 +439,12 @@ class PipelineReportService
       species[:agg_score] = (species[:nt].present? ? genus_nt_zscore.abs * species[:nt][:z_score] * species[:nt][:rpm] : 0) \
         + (species[:nr].present? ? genus_nr_zscore.abs * species[:nr][:z_score] * species[:nr][:rpm] : 0)
       genus[:agg_score] = species[:agg_score] if genus[:agg_score].nil? || genus[:agg_score] < species[:agg_score]
-      # TODO : more this to a more logical place
+    end
+  end
+
+  def add_children_species_to_genus(species_counts, genus_counts)
+    species_counts.each do |tax_id, species|
+      genus = genus_counts[species[:genus_tax_id]]
       if !genus[:species_tax_ids]
         genus[:species_tax_ids] = [tax_id]
       else
@@ -483,35 +491,28 @@ class PipelineReportService
            .reverse!
   end
 
-  def find_taxa_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
+  def find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     ui_config = UiConfig.last
     return unless ui_config
 
-    highlighted_tax_ids = []
-
-    meets_highlight_condition = lambda do |counts|
+    meets_highlight_condition = lambda do |tax_id, counts|
       return (counts.dig(:nt, :rpm) || 0) > ui_config.min_nt_rpm \
         && (counts.dig(:nr, :rpm) || 0) > ui_config.min_nr_rpm \
         && (counts.dig(:nt, :z_score) || 0) > ui_config.min_nt_z \
-        && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z
+        && (counts.dig(:nr, :z_score) || 0) > ui_config.min_nr_z \
+        && tax_id > 0
     end
 
+    highlighted_tax_ids = []
     sorted_genus_tax_ids.each do |genus_tax_id|
       genus_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS][genus_tax_id]
-      highlighted_children = false
       genus_taxon[:species_tax_ids].each do |species_tax_id|
         return highlighted_tax_ids if highlighted_tax_ids.length >= ui_config.top_n
 
         species_taxon = counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_tax_id]
-        if meets_highlight_condition.call(species_taxon)
+        if meets_highlight_condition.call(species_tax_id, species_taxon)
           highlighted_tax_ids << species_tax_id
-          highlighted_children = true
         end
-      end
-
-      # if children species were not highlighted check genus
-      if meets_highlight_condition.call(genus_taxon)
-        highlighted_tax_ids << genus_tax_id
       end
     end
     return highlighted_tax_ids

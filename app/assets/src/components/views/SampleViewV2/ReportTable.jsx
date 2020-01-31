@@ -542,7 +542,7 @@ class ReportTable extends React.Component {
       rowProps.className = cx(
         rowProps.className,
         cs[`${data.taxLevel}Row`],
-        data.highlighted && cs.highlighted
+        (data.highlighted || data.highlightedChildren) && cs.highlighted
       );
     }
     return defaultTableRowRenderer(rowProps);

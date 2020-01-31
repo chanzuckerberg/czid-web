@@ -91,7 +91,6 @@
 
   .taxonContainer {
     .taxonName {
-      text-transform: capitalize;
       white-space: normal;
       &:hover {
         cursor: pointer;
@@ -116,6 +115,10 @@
       color: $primary-light;
     }
   }
+}
+
+.taxonContainer::first-letter {
+  text-transform: uppercase;
 }
 
 .speciesRow {

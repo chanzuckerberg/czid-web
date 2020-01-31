@@ -1,6 +1,7 @@
 class BulkDownloadsController < ApplicationController
   include BulkDownloadTypesHelper
   include BulkDownloadsHelper
+  include PipelineRunsHelper
   include AppConfigHelper
 
   UPDATE_WITH_TOKEN_ACTIONS = [:success_with_token, :error_with_token, :progress_with_token].freeze
@@ -27,9 +28,43 @@ class BulkDownloadsController < ApplicationController
     render json: download_types
   end
 
+  # POST /bulk_downloads/validate_sample_ids
+  # This is a POST route and not a GET request because Puma does not allow
+  # query strings longer than a certain amount (1024 * 10 chars), which causes
+  # trouble with projects with a large number of samples.
+  def validate_sample_ids
+    queried_sample_ids = params[:sampleIds]
+
+    validator = BulkDownloadsSampleValidationService.new(queried_sample_ids, current_user)
+
+    # We want to return valid sample ids, but for invalid samples we need their names to display
+    # to the user. No information is returned on samples they don't have access to.
+    validated_sample_info = validator.validate_samples()
+    viewable_samples = validated_sample_info[:viewable_samples]
+    if validated_sample_info[:error].nil?
+      valid_sample_ids = get_succeeded_pipeline_runs_for_samples(viewable_samples, false, [:sample_id]).map(&:sample_id)
+
+      invalid_samples = viewable_samples.reject { |sample| valid_sample_ids.include?(sample.id) }
+      invalid_sample_names = invalid_samples.map(&:name)
+
+      render json: {
+        validSampleIds: valid_sample_ids,
+        invalidSampleNames: invalid_sample_names,
+        error: nil,
+      }
+    else
+      render json: {
+        validSampleIds: [],
+        invalidSampleNames: [],
+        error: id_validation_info[:error],
+      }
+    end
+  end
+
   # POST /bulk_downloads
   def create
     create_params = bulk_download_create_params
+
     # Convert sample ids to pipeline run ids.
     begin
       pipeline_run_ids = validate_bulk_download_create_params(create_params, current_user)
@@ -42,11 +77,14 @@ class BulkDownloadsController < ApplicationController
       return
     end
 
-    # TODO(mark): Additional validations for each download type.
+    # Convert params to a hash before passing it into the model.
+    params = create_params[:params]
+    params = params.to_hash if params.present?
+
     # Create and save the bulk download.
     bulk_download = BulkDownload.new(download_type: create_params[:download_type],
                                      pipeline_run_ids: pipeline_run_ids,
-                                     params: create_params[:params],
+                                     params: params,
                                      status: BulkDownload::STATUS_WAITING,
                                      user_id: current_user.id)
 
@@ -65,7 +103,11 @@ class BulkDownloadsController < ApplicationController
         }, status: :internal_server_error
       end
     else
-      render json: bulk_download.errors.full_messages, status: :unprocessable_entity
+      LogUtil.log_err_and_airbrake(
+        "BulkDownloadsFailedEvent: Failed to save bulk download for type #{create_params[:download_type]} with #{pipeline_run_ids.length} samples.
+        #{bulk_download.errors.full_messages} #{params}"
+      )
+      render json: { error: KICKOFF_FAILURE_HUMAN_READABLE }, status: :unprocessable_entity
     end
   end
 
@@ -87,7 +129,7 @@ class BulkDownloadsController < ApplicationController
     bulk_download = viewable_bulk_download_from_params
 
     render json: {
-      bulk_download: format_bulk_download(bulk_download, with_pipeline_runs: true, admin: current_user.admin?),
+      bulk_download: format_bulk_download(bulk_download, detailed: true, admin: current_user.admin?),
       download_type: BulkDownloadTypesHelper.bulk_download_type(bulk_download.download_type),
     }
   rescue ActiveRecord::RecordNotFound
@@ -148,6 +190,8 @@ class BulkDownloadsController < ApplicationController
     @bulk_download.update(progress: params[:progress].to_f)
     render json: { status: "success" }
   end
+
+  private
 
   def set_bulk_download_and_validate_access_token
     @bulk_download = BulkDownload.find(params[:id])

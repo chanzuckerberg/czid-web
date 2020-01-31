@@ -12,7 +12,7 @@ RSpec.describe SamplesHelper, type: :helper do
         @project = create(:public_project)
         @joe = create(:joe)
         # Add the metadata fields to the host genome so that the metadata will pass validation.
-        @host_genome = create(:host_genome, metadata_fields: [
+        @host_genome = create(:host_genome, user: @joe, metadata_fields: [
                                 "Fake Metadata Field One", "Fake Metadata Field Two",
                               ])
       end
@@ -57,6 +57,7 @@ RSpec.describe SamplesHelper, type: :helper do
 
         expect(created_sample.name).to eq(fake_sample_name)
         expect(created_sample.host_genome.id).to be @host_genome.id
+        expect(created_sample.host_genome.user).to eq(@joe)
         expect(created_sample.project.id).to be @project.id
         expect(created_sample.bulk_mode).to be nil
         expect(created_sample.uploaded_from_basespace).to be 1
@@ -95,9 +96,81 @@ RSpec.describe SamplesHelper, type: :helper do
                                          ])
       end
     end
+
+    context "adding new host genomes" do
+      let(:fake_sample_name) { "fake_sample_name" }
+
+      before do
+        @project = create(:public_project)
+        # Because of initial admin only gating. See
+        # https://jira.czi.team/browse/IDSEQ-2051
+        @admin = create(:admin)
+      end
+
+      def sample_attributes(host_genome_name)
+        [
+          {
+            basespace_access_token: "fake_access_token",
+            basespace_dataset_id: "fake_dataset_id",
+            # No host_genome_id to force creating a new one
+            host_genome_name: host_genome_name,
+            name: fake_sample_name,
+            project_id: @project.id,
+          },
+        ]
+      end
+
+      let(:metadata_attributes) do
+        {
+          # No metadata because we only care about host_genome_name
+          fake_sample_name.to_s => {},
+        }
+      end
+
+      it "creates a new host genome if none exists" do
+        host_genome_name = "Test Host"
+        expect(HostGenome.find_by(name: host_genome_name)).to be nil
+
+        response = helper.upload_samples_with_metadata(
+          sample_attributes(host_genome_name),
+          metadata_attributes,
+          @admin
+        )
+
+        expect(response["samples"].length).to be 1
+        expect(response["errors"].length).to be 0
+
+        created_sample = response["samples"][0]
+
+        expect(created_sample.host_genome.name).to eq(host_genome_name)
+
+        host_genome = HostGenome.find_by(name: host_genome_name)
+        expect(host_genome).to be_truthy
+        expect(host_genome.ercc_only?).to be true
+        expect(host_genome.user).to eq(@admin)
+      end
+
+      it "raises an error if the host genome name is bad" do
+        message = "Validation failed: Name of host organism allows only word, period, dash or space chars, and first char must be capitalized."
+        host_genome_name = "bad lowercase name"
+        expect(HostGenome.find_by(name: host_genome_name)).to be nil
+
+        response = helper.upload_samples_with_metadata(
+          sample_attributes(host_genome_name),
+          metadata_attributes,
+          @admin
+        )
+
+        expect(response["samples"].length).to be 0
+        expect(response["errors"].length).to be 1
+        expect(response["errors"]).to eq([message])
+
+        expect(HostGenome.find_by(name: host_genome_name)).to be nil
+      end
+    end
   end
 
-  describe "#augment_taxon_list_with_sample_count_contigs" do
+  describe "#add_sample_count_to_taxa_with_contigs" do
     let(:taxon_list) do
       [
         {
@@ -145,29 +218,29 @@ RSpec.describe SamplesHelper, type: :helper do
     end
 
     it "returns correct counts in the basic case" do
-      response = helper.augment_taxon_list_with_sample_count_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id]))
+      response = helper.add_sample_count_to_taxa_with_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id]))
 
       expect(response[0]["taxid"]).to be 1
-      expect(response[0]["sample_count_contigs"]).to be 3
+      expect(response[0]["sample_count"]).to be 3
       expect(response[1]["taxid"]).to be 2
-      expect(response[1]["sample_count_contigs"]).to be 2
+      expect(response[1]["sample_count"]).to be 2
       expect(response[2]["taxid"]).to be 101
-      expect(response[2]["sample_count_contigs"]).to be 2
+      expect(response[2]["sample_count"]).to be 2
       expect(response[3]["taxid"]).to be 102
-      expect(response[3]["sample_count_contigs"]).to be 2
+      expect(response[3]["sample_count"]).to be 2
     end
 
     it "doesn't count samples that weren't passed in" do
-      response = helper.augment_taxon_list_with_sample_count_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id]))
+      response = helper.add_sample_count_to_taxa_with_contigs(taxon_list, Sample.where(id: [@sample_one.id, @sample_two.id]))
 
       expect(response[0]["taxid"]).to be 1
-      expect(response[0]["sample_count_contigs"]).to be 2
+      expect(response[0]["sample_count"]).to be 2
       expect(response[1]["taxid"]).to be 2
-      expect(response[1]["sample_count_contigs"]).to be 1
+      expect(response[1]["sample_count"]).to be 1
       expect(response[2]["taxid"]).to be 101
-      expect(response[2]["sample_count_contigs"]).to be 1
+      expect(response[2]["sample_count"]).to be 1
       expect(response[3]["taxid"]).to be 102
-      expect(response[3]["sample_count_contigs"]).to be 1
+      expect(response[3]["sample_count"]).to be 1
     end
   end
 end

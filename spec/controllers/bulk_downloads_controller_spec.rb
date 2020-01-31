@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe BulkDownloadsController, type: :controller do
   create_users
 
-  # Admin specific behavior
+  # Regular user specific behavior
   context "Normal user with bulk_downloads flag" do
     # create_users
     before do
@@ -12,9 +12,109 @@ RSpec.describe BulkDownloadsController, type: :controller do
       @project = create(:project, users: [@joe], name: "Test Project")
     end
 
+    describe "POST #validate" do
+      before do
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+        @admin_project = create(:project, users: [@admin])
+      end
+
+      let(:good_sample_one) do
+        create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:good_sample_two) do
+        create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:in_progress_sample) do
+        create(:sample, project: @project, name: "In Progress Sample", pipeline_runs_data: [{ finalized: 0, job_status: PipelineRun::STATUS_RUNNING }])
+      end
+
+      let(:failed_sample) do
+        create(:sample, project: @project, name: "Failed Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_FAILED }])
+      end
+
+      let(:different_owner_sample) do
+        create(:sample, project: @admin_project, name: "Admin Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      it "should validate successful samples owned by user" do
+        validate_params = {
+          sampleIds: [good_sample_one, good_sample_two],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
+        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["invalidSampleNames"]).to be_empty
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should filter out samples in progress" do
+        validate_params = {
+          sampleIds: [good_sample_one, good_sample_two, in_progress_sample],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
+        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["invalidSampleNames"]).to include(in_progress_sample.name)
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should filter out failed samples" do
+        validate_params = {
+          sampleIds: [good_sample_one, good_sample_two, failed_sample],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
+        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["invalidSampleNames"]).to include(failed_sample.name)
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should silently filter out samples the user cannot view" do
+        validate_params = {
+          sampleIds: [good_sample_one, good_sample_two, different_owner_sample],
+        }
+
+        logger = class_double(LogUtil).as_stubbed_const
+
+        expect(logger).to receive(:log_err_and_airbrake).with(/BulkDownloadsImproperAccessEvent: User with id #{@joe.id} made bulk download request for samples they don't have access to: \[#{different_owner_sample.id}\]/)
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
+        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["invalidSampleNames"]).to be_empty
+        expect(json_response["error"]).to be_nil
+      end
+    end
+
     describe "POST #create" do
       before do
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 50)
         stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
                                             "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
       end
@@ -23,6 +123,15 @@ RSpec.describe BulkDownloadsController, type: :controller do
         Shellwords.escape(
           "#{project.cleaned_project_name[0...100]}_#{project.id}/#{sample.name[0...65]}_#{sample.id}_#{suffix}"
         )
+      end
+
+      let(:mock_field_params) do
+        {
+          foo: {
+            displayName: "Bar",
+            value: "bar",
+          },
+        }
       end
 
       it "should create new bulk download and kickoff the aegea ecs task" do
@@ -40,9 +149,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "unmapped_reads",
           sample_ids: [@sample_one, @sample_two],
-          params: {
-            foo: "bar",
-          },
+          params: mock_field_params,
         }
 
         post :create, params: bulk_download_params
@@ -59,7 +166,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(bulk_download.user_id).to eq(@joe.id)
         expect(bulk_download.status).to eq(BulkDownload::STATUS_RUNNING)
         expect(bulk_download.ecs_task_arn).to eq("ABC")
-        expect(bulk_download.params_json).to eq({ foo: "bar" }.to_json)
+        expect(bulk_download.params_json).to eq(mock_field_params.to_json)
       end
 
       it "should return failure if aegea task failed to start" do
@@ -75,9 +182,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "unmapped_reads",
           sample_ids: [@sample_one, @sample_two],
-          params: {
-            foo: "bar",
-          },
+          params: mock_field_params,
         }
 
         post :create, params: bulk_download_params
@@ -155,6 +260,46 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         bulk_download_params = {
           download_type: "sample_overview",
+          sample_ids: [@sample_one, @sample_two],
+        }
+
+        post :create, params: bulk_download_params
+        expect(response).to have_http_status(422)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % 1)
+      end
+
+      it "should use the correct max samples app config for normal downloads" do
+        @sample_one = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample_two = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        # Set MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES to 1
+        # Since this is not the original input file download type, the download should succeed.
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 1)
+
+        bulk_download_params = {
+          download_type: "sample_overview",
+          sample_ids: [@sample_one, @sample_two],
+        }
+
+        post :create, params: bulk_download_params
+        expect(response).to have_http_status(200)
+      end
+
+      it "should error if too many samples are requested in an original input files bulk download" do
+        @sample_one = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample_two = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        # Set MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES to 1
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 1)
+
+        bulk_download_params = {
+          download_type: "original_input_file",
           sample_ids: [@sample_one, @sample_two],
         }
 
@@ -245,6 +390,28 @@ RSpec.describe BulkDownloadsController, type: :controller do
         json_response = JSON.parse(response.body)
         expect(json_response["error"]).to eq(BulkDownloadsHelper::UNKNOWN_DOWNLOAD_TYPE)
       end
+
+      it "should error if field params are invalid" do
+        @sample_one = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+        @sample_two = create(:sample, project: @project,
+                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        bulk_download_params = {
+          download_type: "reads_non_host",
+          sample_ids: [@sample_one, @sample_two],
+          params: {
+            # Intentionally pass a string, instead of a hash of the form { displayName: "FOO", value: "BAR" }
+            taxa_with_reads: "abc",
+          },
+        }
+
+        post :create, params: bulk_download_params
+        expect(response).to have_http_status(422)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE)
+      end
     end
 
     describe "GET #index" do
@@ -255,7 +422,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_two = create(:sample, project: @project_admin,
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        bulk_download_joe = create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+        bulk_download_joe = create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "unmapped_reads")
         create(:bulk_download, user: @admin, pipeline_run_ids: [@sample_two.first_pipeline_run.id])
 
         get :index, format: :json
@@ -266,7 +433,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(bulk_downloads.length).to eq(1)
         expect(bulk_downloads[0]["id"]).to eq(bulk_download_joe.id)
         expect(bulk_downloads[0]["user_id"]).to eq(@joe.id)
-        expect(bulk_downloads[0]["download_type"]).to eq("reads_non_host")
+        expect(bulk_downloads[0]["download_type"]).to eq("unmapped_reads")
         expect(bulk_downloads[0]["num_samples"]).to eq(1)
         # Should not return pipeline runs.
         expect(bulk_downloads[0]["pipeline_runs"]).to eq(nil)
@@ -282,7 +449,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_one = create(:sample, project: @project, name: "Joes Sample",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        bulk_download_joe = create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+        bulk_download_joe = create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "unmapped_reads")
 
         get :show, params: { format: "json", id: bulk_download_joe.id }
 
@@ -290,11 +457,11 @@ RSpec.describe BulkDownloadsController, type: :controller do
         json_response = JSON.parse(response.body)
 
         expect(json_response["bulk_download"]["user_id"]).to eq(@joe.id)
-        expect(json_response["bulk_download"]["download_type"]).to eq("reads_non_host")
+        expect(json_response["bulk_download"]["download_type"]).to eq("unmapped_reads")
         expect(json_response["bulk_download"]["num_samples"]).to eq(1)
         expect(json_response["bulk_download"]["pipeline_runs"].length).to eq(1)
         expect(json_response["bulk_download"]["pipeline_runs"][0]["sample_name"]).to eq("Joes Sample")
-        expect(json_response["download_type"]["display_name"]).to eq("Reads (Non-host)")
+        expect(json_response["download_type"]["display_name"]).to eq("Unmapped Reads")
       end
 
       it "should error if the requested bulk download is not viewable" do
@@ -320,7 +487,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_one = create(:sample, project: @project, name: "Joes Sample",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_SUCCESS, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_SUCCESS, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "unmapped_reads")
       end
 
       it "should return url in basic case" do
@@ -369,6 +536,35 @@ RSpec.describe BulkDownloadsController, type: :controller do
     before do
       sign_in @admin
       @project = create(:project, users: [@admin])
+    end
+
+    describe "POST #validate" do
+      it "does not call action" do
+        sample_one = create(:sample, project: @project,
+                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        validate_params = {
+          sampleIds: [sample_one],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(controller).not_to receive(:validate_sample_ids)
+      end
+
+      it "redirected to home page" do
+        sample_one = create(:sample, project: @project,
+                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+        validate_params = {
+          download_type: "sample_overview",
+          sampleIds: [sample_one],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to redirect_to(root_path)
+      end
     end
 
     describe "POST #create" do
@@ -454,8 +650,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_two = create(:sample, project: @project_admin,
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
-        create(:bulk_download, user: @admin, pipeline_run_ids: [@sample_two.first_pipeline_run.id], download_type: "contigs_non_host")
+        create(:bulk_download, user: @joe, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "unmapped_reads")
+        create(:bulk_download, user: @admin, pipeline_run_ids: [@sample_two.first_pipeline_run.id], download_type: "sample_overview")
 
         get :index, format: :json
 
@@ -464,10 +660,10 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         expect(bulk_downloads.length).to eq(2)
         expect(bulk_downloads[0]["user_id"]).to eq(@joe.id)
-        expect(bulk_downloads[0]["download_type"]).to eq("reads_non_host")
+        expect(bulk_downloads[0]["download_type"]).to eq("unmapped_reads")
         expect(bulk_downloads[0]["num_samples"]).to eq(1)
         expect(bulk_downloads[1]["user_id"]).to eq(@admin.id)
-        expect(bulk_downloads[1]["download_type"]).to eq("contigs_non_host")
+        expect(bulk_downloads[1]["download_type"]).to eq("sample_overview")
         expect(bulk_downloads[1]["num_samples"]).to eq(1)
       end
 
@@ -493,9 +689,45 @@ RSpec.describe BulkDownloadsController, type: :controller do
       end
     end
 
+    describe "POST #validate" do
+      before do
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+        @joe_project = create(:project, users: [@joe])
+      end
+
+      let(:good_sample_one) do
+        create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:good_sample_two) do
+        create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:different_owner_sample) do
+        create(:sample, project: @joe_project, name: "Joe Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      it "should validate samples owned by any user" do
+        validate_params = {
+          sampleIds: [different_owner_sample],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(different_owner_sample.id)
+        expect(json_response["invalidSampleNames"]).to be_empty
+        expect(json_response["error"]).to be_nil
+      end
+    end
+
     describe "POST #create" do
       before do
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 50)
         stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
                                             "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
       end
@@ -574,7 +806,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_one = create(:sample, project: @project, name: "Joes Sample",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "unmapped_reads")
       end
 
       let(:mock_file_size) { 1000 }
@@ -642,7 +874,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_one = create(:sample, project: @project, name: "Joes Sample",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "unmapped_reads")
       end
 
       it "should properly update bulk download on success" do
@@ -666,7 +898,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_one = create(:sample, project: @project, name: "Joes Sample",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "unmapped_reads")
       end
 
       it "should properly update bulk download on success" do
@@ -690,7 +922,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_one = create(:sample, project: @project, name: "Joes Sample",
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "reads_non_host")
+        @bulk_download_joe = create(:bulk_download, user: @joe, status: BulkDownload::STATUS_RUNNING, pipeline_run_ids: [@sample_one.first_pipeline_run.id], download_type: "unmapped_reads")
       end
 
       actions = BulkDownloadsController::UPDATE_WITH_TOKEN_ACTIONS

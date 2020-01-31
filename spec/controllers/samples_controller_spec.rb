@@ -261,19 +261,19 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 1,
-                                                  "sample_count_contigs" => 3,
+                                                  "sample_count" => 3,
                                                 },
                                                 {
                                                   "taxid" => 2,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 101,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 102,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                               ])
       end
@@ -303,19 +303,19 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 1,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 2,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 101,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 102,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                               ])
       end
@@ -344,19 +344,56 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).to include_json([
                                                 {
                                                   "taxid" => 1,
-                                                  "sample_count_contigs" => 2,
+                                                  "sample_count" => 2,
                                                 },
                                                 {
                                                   "taxid" => 2,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 101,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
                                                 },
                                                 {
                                                   "taxid" => 102,
-                                                  "sample_count_contigs" => 1,
+                                                  "sample_count" => 1,
+                                                },
+                                              ])
+      end
+    end
+
+    describe "#index" do
+      it "returns basic samples with correctly formatted date" do
+        project = create(:project, users: [@joe])
+        create(:sample, name: "Mosquito Sample", project: project, user: @joe, host_genome_name: "Mosquito", metadata_fields: { collection_date: "2019-01-01" })
+
+        get :index, params: { project_id: project.id, basic: true }
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(1)
+        expect(json_response).to include_json([
+                                                {
+                                                  "name" => "Mosquito Sample",
+                                                  "metadata" => {
+                                                    "collection_date" => "2019-01-01",
+                                                  },
+                                                },
+
+                                              ])
+      end
+
+      it "for human samples, truncates date metadata to month" do
+        project = create(:project, users: [@joe])
+        create(:sample, name: "Human Sample", project: project, user: @joe, host_genome_name: "Human", metadata_fields: { collection_date: "2019-01" })
+
+        get :index, params: { project_id: project.id, basic: true }
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(1)
+        expect(json_response).to include_json([
+                                                {
+                                                  "name" => "Human Sample",
+                                                  "metadata" => {
+                                                    "collection_date" => "2019-01",
+                                                  },
                                                 },
                                               ])
       end

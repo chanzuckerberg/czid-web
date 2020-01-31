@@ -1,17 +1,23 @@
 import React from "react";
-import { groupBy } from "lodash/fp";
+import { groupBy, sortBy } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 
 import LiveSearchPopBox from "./LiveSearchPopBox";
 
 const SUGGESTED = "SUGGESTED";
-const DONOTSHOW = "DONOTSHOW";
 const ALL = "ALL";
 
 class SampleTypeSearchBox extends React.Component {
   handleSearchTriggered = query => {
+    return this.buildResults(this.getMatchesByCategory(query), query);
+  };
+
+  getMatchesByCategory(query) {
     const matchSampleTypes = sampleType => {
+      // If no query, return all possible
+      if (query === "") return true;
+
       // Match chars in any position. Good for acronyms. Ignore spaces.
       const noSpaces = query.replace(/\s*/gi, "");
       const regex = new RegExp(noSpaces.split("").join(".*"), "gi");
@@ -22,39 +28,41 @@ class SampleTypeSearchBox extends React.Component {
     };
     const matchedSampleTypes = this.props.sampleTypes.filter(matchSampleTypes);
 
+    // Sort matches by position of match. If no position, alphabetical.
+    const sortSampleTypes = sampleType => {
+      const name = sampleType.name.toLowerCase();
+      const q = query.toLowerCase();
+      const res =
+        name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
+      return res;
+    };
+    let sortedSampleTypes = sortBy(t => t.name, matchedSampleTypes);
+    if (query !== "") {
+      sortedSampleTypes = sortBy(sortSampleTypes, sortedSampleTypes);
+    }
+
     // Sample types are grouped differently based on whether the current
     // sample's host genome is an insect, a human, or neither. The "suggested"
     // group is shown first, then the "all" group.
     const getSampleTypeCategory = sampleType => {
-      // Insects only get their own types
-      if (this.props.isInsect) {
-        return sampleType.insect_only ? SUGGESTED : DONOTSHOW;
-      }
-      // Other categories do not get insect types
       if (sampleType.insect_only) {
-        return DONOTSHOW;
+        return this.props.isInsect ? SUGGESTED : ALL;
       }
-      // Humans get any type except those for insects
-      if (this.props.isHuman) {
-        return SUGGESTED;
+      if (sampleType.human_only) {
+        return this.props.isHuman ? SUGGESTED : ALL;
       }
-      // Non-human animals get suggested a subset
-      return sampleType.human_only ? ALL : SUGGESTED;
+      // insects should only be suggested insect body parts
+      return this.isInsect ? ALL : SUGGESTED;
     };
-    const sampleTypesByCategory = groupBy(
-      getSampleTypeCategory,
-      matchedSampleTypes
-    );
-
-    return this.buildResults(sampleTypesByCategory, query);
-  };
+    return groupBy(getSampleTypeCategory, sortedSampleTypes);
+  }
 
   buildResults(sampleTypesByCategory, query) {
     const formatResult = result => {
       return {
         title: result.name,
         name: result.name,
-        description: result.group,
+        description: this.props.showDescription ? result.group : null,
       };
     };
     const results = {};
@@ -70,13 +78,13 @@ class SampleTypeSearchBox extends React.Component {
         results: sampleTypesByCategory[ALL].map(formatResult),
       };
     }
-    return {
-      ...results,
-      noMatch: {
+    if (query.length) {
+      results.noMatch = {
         name: "Use Plain Text (No Match)",
         results: [{ title: query, name: query }],
-      },
-    };
+      };
+    }
+    return results;
   }
 
   render() {
@@ -87,6 +95,11 @@ class SampleTypeSearchBox extends React.Component {
         value={value}
         onSearchTriggered={this.handleSearchTriggered}
         onResultSelect={onResultSelect}
+        minChars={0}
+        placeholder=""
+        icon="chevron down"
+        shouldSearchOnFocus={true}
+        delayTriggerSearch={0}
       />
     );
   }
@@ -99,6 +112,7 @@ SampleTypeSearchBox.propTypes = {
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
   isHuman: PropTypes.bool.isRequired,
   isInsect: PropTypes.bool.isRequired,
+  showDescription: PropTypes.bool,
 };
 
 export default SampleTypeSearchBox;

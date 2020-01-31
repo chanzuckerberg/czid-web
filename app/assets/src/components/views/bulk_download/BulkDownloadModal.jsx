@@ -1,13 +1,23 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { unset, find, get, set } from "lodash/fp";
+import { unset, get, set } from "lodash/fp";
 import memoize from "memoize-one";
 
-import { getBulkDownloadTypes } from "~/api/bulk_downloads";
+import {
+  getBackgrounds,
+  uploadedByCurrentUser,
+  getHeatmapMetrics,
+} from "~/api";
+import {
+  createBulkDownload,
+  getBulkDownloadTypes,
+  validateSampleIdsForBulkDownload,
+} from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 
-import ChooseStep from "./ChooseStep";
-import ReviewStep from "./ReviewStep";
+import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
+import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
+import cs from "./bulk_download_modal.scss";
 
 const assembleSelectedDownload = memoize(
   (
@@ -55,31 +65,125 @@ class BulkDownloadModal extends React.Component {
     // in the params. This is also how the bulk download is stored in the database.
     selectedFieldsDisplay: {},
     selectedDownloadTypeName: null,
-    currentStep: "choose",
+    validSampleIds: new Set(),
+    invalidSampleNames: [],
+    validationError: null,
+    backgroundOptions: null,
+    metricsOptions: null,
+    allSamplesUploadedByCurrentUser: false,
+    loading: true,
+    waitingForCreate: false,
+    createStatus: null,
+    createError: null,
   };
 
   componentDidMount() {
-    this.fetchDownloadTypes();
+    this.fetchSampleOptionsAndValidateSelectedSamples();
   }
 
-  componentDidUpdate(prevProps) {
-    // If the user has just closed the modal, reset it.
-    if (prevProps.open && !this.props.open) {
-      this.setState({
-        selectedDownloadTypeName: null,
-        currentStep: "choose",
-        selectedFields: {},
-      });
-    }
+  // *** Async requests ***
+
+  async fetchSampleOptionsAndValidateSelectedSamples() {
+    const { selectedSampleIds } = this.props;
+
+    const bulkDownloadTypesRequest = this.fetchDownloadTypes();
+    const sampleValidationInfoRequest = this.fetchValidationInfo(
+      Array.from(selectedSampleIds)
+    );
+    const backgroundOptionsRequest = this.fetchBackgrounds();
+    const metricsOptionsRequest = this.fetchHeatmapMetrics();
+    const allSamplesUploadedByCurrentUserRequest = this.checkAllSamplesUploadedByCurrentUser();
+
+    const [
+      bulkDownloadTypes,
+      sampleValidationInfo,
+      backgroundOptions,
+      metricsOptions,
+      allSamplesUploadedByCurrentUser,
+    ] = await Promise.all([
+      bulkDownloadTypesRequest,
+      sampleValidationInfoRequest,
+      backgroundOptionsRequest,
+      metricsOptionsRequest,
+      allSamplesUploadedByCurrentUserRequest,
+    ]);
+
+    const validSampleIds = new Set(sampleValidationInfo.validSampleIds);
+    const invalidSampleNames = sampleValidationInfo.invalidSampleNames;
+    const validationError = sampleValidationInfo.error;
+
+    this.setState({
+      bulkDownloadTypes,
+      validSampleIds,
+      invalidSampleNames,
+      validationError,
+      backgroundOptions,
+      metricsOptions,
+      allSamplesUploadedByCurrentUser,
+      loading: false,
+    });
   }
 
   async fetchDownloadTypes() {
     const bulkDownloadTypes = await getBulkDownloadTypes();
 
-    this.setState({
-      bulkDownloadTypes,
-    });
+    return bulkDownloadTypes;
   }
+
+  async fetchValidationInfo(selectedSampleIds) {
+    const sampleValidationInfo = await validateSampleIdsForBulkDownload(
+      selectedSampleIds
+    );
+
+    return sampleValidationInfo;
+  }
+
+  // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
+  async fetchBackgrounds() {
+    const backgrounds = await getBackgrounds();
+
+    const backgroundOptions = backgrounds.map(background => ({
+      text: background.name,
+      value: background.id,
+    }));
+
+    return backgroundOptions;
+  }
+
+  // We use the heatmap metrics as the valid metrics for bulk downloads.
+  async fetchHeatmapMetrics() {
+    const heatmapMetrics = await getHeatmapMetrics();
+
+    return heatmapMetrics;
+  }
+
+  async checkAllSamplesUploadedByCurrentUser() {
+    const { selectedSampleIds } = this.props;
+    const allSamplesUploadedByCurrentUser = await uploadedByCurrentUser(
+      Array.from(selectedSampleIds)
+    );
+
+    return allSamplesUploadedByCurrentUser;
+  }
+
+  // *** Callbacks ***
+
+  handleDownloadRequest = () => {
+    const {
+      selectedDownloadTypeName,
+      selectedFields,
+      selectedFieldsDisplay,
+      validSampleIds,
+    } = this.state;
+
+    const selectedDownload = assembleSelectedDownload(
+      selectedDownloadTypeName,
+      selectedFields,
+      selectedFieldsDisplay,
+      validSampleIds
+    );
+    this.createBulkDownload(selectedDownload);
+  };
 
   handleSelectDownloadType = selectedDownloadTypeName => {
     this.setState({
@@ -113,66 +217,87 @@ class BulkDownloadModal extends React.Component {
     });
   };
 
-  handleChooseStepContinue = () => {
-    this.setState({ currentStep: "review" });
-  };
-  handleBackClick = () => {
-    this.setState({ currentStep: "choose" });
-  };
+  // *** Create bulk download and close modal ***
 
-  renderStep = () => {
-    const { selectedSampleIds } = this.props;
-    const {
-      currentStep,
-      bulkDownloadTypes,
-      selectedDownloadTypeName,
-      selectedFields,
-      selectedFieldsDisplay,
-    } = this.state;
+  createBulkDownload = async selectedDownload => {
+    const { onGenerate } = this.props;
 
-    if (currentStep === "choose") {
-      return (
-        <ChooseStep
-          downloadTypes={bulkDownloadTypes}
-          selectedDownloadTypeName={selectedDownloadTypeName}
-          onSelect={this.handleSelectDownloadType}
-          selectedFields={get(selectedDownloadTypeName, selectedFields)}
-          onFieldSelect={this.handleFieldSelect}
-          onContinue={this.handleChooseStepContinue}
-          selectedSampleIds={selectedSampleIds}
-        />
-      );
+    this.setState({
+      waitingForCreate: true,
+    });
+    try {
+      await createBulkDownload(selectedDownload);
+    } catch (e) {
+      this.setState({
+        waitingForCreate: false,
+        createStatus: "error",
+        createError: e.error,
+      });
+      return;
     }
 
-    if (currentStep === "review") {
-      const selectedDownload = assembleSelectedDownload(
-        selectedDownloadTypeName,
-        selectedFields,
-        selectedFieldsDisplay,
-        selectedSampleIds
-      );
-
-      const selectedDownloadType = find(
-        ["type", selectedDownloadTypeName],
-        bulkDownloadTypes
-      );
-
-      return (
-        <ReviewStep
-          selectedDownload={selectedDownload}
-          downloadType={selectedDownloadType}
-          onBackClick={this.handleBackClick}
-        />
-      );
-    }
+    onGenerate();
   };
+
+  // *** Render methods ***
 
   render() {
-    const { open } = this.props;
+    const { open, onClose } = this.props;
+    const {
+      bulkDownloadTypes,
+      validSampleIds,
+      invalidSampleNames,
+      validationError,
+      backgroundOptions,
+      metricsOptions,
+      allSamplesUploadedByCurrentUser,
+      selectedDownloadTypeName,
+      selectedFields,
+      waitingForCreate,
+      createStatus,
+      createError,
+    } = this.state;
+
+    const numSamples = validSampleIds.size;
 
     return (
-      <Modal narrow open={open} tall onClose={this.props.onClose}>
-        {this.renderStep()}
+      <Modal narrow open={open} tall onClose={onClose}>
+        <div className={cs.modal}>
+          <div className={cs.header}>
+            <div className={cs.title}>Select a Download Type</div>
+            <div className={cs.tagline}>
+              {numSamples} sample{numSamples != 1 ? "s" : ""} selected
+            </div>
+          </div>
+          <div className={cs.options}>
+            <BulkDownloadModalOptions
+              downloadTypes={bulkDownloadTypes}
+              validSampleIds={validSampleIds}
+              backgroundOptions={backgroundOptions}
+              metricsOptions={metricsOptions}
+              allSamplesUploadedByCurrentUser={allSamplesUploadedByCurrentUser}
+              onFieldSelect={this.handleFieldSelect}
+              selectedFields={selectedFields}
+              selectedDownloadTypeName={selectedDownloadTypeName}
+              onSelect={this.handleSelectDownloadType}
+            />
+          </div>
+          <div className={cs.footer}>
+            <BulkDownloadModalFooter
+              loading={bulkDownloadTypes ? false : true}
+              downloadTypes={bulkDownloadTypes}
+              validSampleIds={validSampleIds}
+              invalidSampleNames={invalidSampleNames}
+              validationError={validationError}
+              waitingForCreate={waitingForCreate}
+              createStatus={createStatus}
+              createError={createError}
+              selectedFields={selectedFields}
+              selectedDownloadTypeName={selectedDownloadTypeName}
+              onDownloadRequest={this.handleDownloadRequest}
+            />
+          </div>
+        </div>
       </Modal>
     );
   }
@@ -182,6 +307,8 @@ BulkDownloadModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
   selectedSampleIds: PropTypes.instanceOf(Set),
+  // called when a bulk download has successfully been kicked off
+  onGenerate: PropTypes.func.isRequired,
 };
 
 export default BulkDownloadModal;

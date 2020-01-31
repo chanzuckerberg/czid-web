@@ -65,6 +65,7 @@ json.steps do
       file_ext: attr[:file_ext],
     },
   }
+  # NOTE: this step structure is depended on by host_subtracted method
   steps << {
     in: ['validate_input_out'],
     out: 'star_out',
@@ -74,8 +75,6 @@ json.steps do
     additional_attributes: {
       output_gene_file: 'reads_per_gene.star.tab',
       nucleotide_type: attr[:nucleotide_type],
-      output_metrics_file: 'picard_insert_metrics.txt',
-      output_histogram_file: 'insert_size_histogram.pdf',
     },
   }
   steps << {

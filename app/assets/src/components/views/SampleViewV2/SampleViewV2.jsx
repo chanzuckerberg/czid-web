@@ -238,8 +238,7 @@ export default class SampleViewV2 extends React.Component {
         });
         reportData.push(
           merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
-            highlighted:
-              hasHighlightedChildren || highlightedTaxIds.has(genusTaxId),
+            highlightedChildren: hasHighlightedChildren,
             pathogens: generaPathogenCounts[genusTaxId],
             taxId: genusTaxId,
             taxLevel: "genus",
@@ -996,13 +995,7 @@ export default class SampleViewV2 extends React.Component {
     } = this.state;
     // reportReady is true if the pipeline run hasn't failed and is report-ready
     // (might still be running Experimental, but at least taxon_counts has been loaded).
-    // pipelineRunReportAvailable was renamed to reportReady, but we check both in case the old variable
-    // name was cached.
-    // TODO(julie): remove pipelineRunReportAvailable during cleanup.
-    if (
-      reportMetadata.reportReady ||
-      reportMetadata.pipelineRunReportAvailable
-    ) {
+    if (reportMetadata.reportReady) {
       return (
         <div className={cs.reportViewContainer}>
           <div className={cs.reportFilters}>
@@ -1101,19 +1094,14 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.sampleViewHeader}>
             <SampleViewHeader
               backgroundId={selectedOptions.background}
+              deletable={sample ? sample.deletable : false}
               editable={sample ? sample.editable : false}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
               pipelineRun={pipelineRun}
               project={project}
               projectSamples={projectSamples}
-              // report_ready was consolidated with reportReady but we check both in case
-              // the old variable name was cached.
-              // TODO(julie): remove report_ready during cleanup.
-              reportPresent={
-                reportMetadata.reportReady === true ||
-                reportMetadata.report_ready === true
-              }
+              reportPresent={!!reportMetadata.reportReady}
               sample={sample}
               view={view}
               minContigSize={selectedOptions.minContigSize}

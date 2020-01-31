@@ -370,7 +370,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("project")
-      projects = prefix_match(Project, "name", query, id: current_power.projects.pluck(:id))
+      projects = current_power.projects_by_domain(domain).search_by_name(query)
       unless projects.empty?
         results["Project"] = {
           "name" => "Project",
@@ -415,7 +415,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("sample")
-      samples = prefix_match(Sample, "name", query, id: constrained_sample_ids)
+      samples = constrained_samples.search_by_name(query)
       unless samples.empty?
         results["Sample"] = {
           "name" => "Sample",
@@ -776,6 +776,7 @@ class SamplesController < ApplicationController
           ).merge(
             default_pipeline_run_id: @sample.first_pipeline_run.present? ? @sample.first_pipeline_run.id : nil,
             pipeline_runs: @sample.pipeline_runs_info,
+            deletable: @sample.deletable?(current_user),
             editable: current_power.updatable_sample?(@sample)
           )
       end
@@ -1394,7 +1395,7 @@ class SamplesController < ApplicationController
     end
 
     taxon_list = taxon_search(query, ["species", "genus"])
-    taxon_list = augment_taxon_list_with_sample_count(taxon_list, samples)
+    taxon_list = add_sample_count_to_taxa_with_reads(taxon_list, samples)
     taxon_list = taxon_list.select { |taxon| taxon["sample_count"] > 0 }
 
     render json: taxon_list
@@ -1419,8 +1420,8 @@ class SamplesController < ApplicationController
     end
 
     taxon_list = taxon_search(query, ["species", "genus"])
-    taxon_list = augment_taxon_list_with_sample_count_contigs(taxon_list, samples)
-    taxon_list = taxon_list.select { |taxon| taxon["sample_count_contigs"] > 0 }
+    taxon_list = add_sample_count_to_taxa_with_contigs(taxon_list, samples)
+    taxon_list = taxon_list.select { |taxon| taxon["sample_count"] > 0 }
 
     render json: taxon_list
   end
@@ -1455,7 +1456,7 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
-    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name, :basespace_dataset_id, :basespace_access_token, :skip_cache,
+    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name, :basespace_dataset_id, :basespace_access_token, :skip_cache, :do_not_process,
                                          input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],])
     new_params[:samples] if new_params
   end
@@ -1465,7 +1466,7 @@ class SamplesController < ApplicationController
                         :s3_star_index_path, :s3_bowtie2_index_path,
                         :host_genome_id, :host_genome_name,
                         :sample_notes, :search, :subsample, :max_input_fragments,
-                        :basespace_dataset_id, :basespace_access_token, :client,
+                        :basespace_dataset_id, :basespace_access_token, :client, :do_not_process,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)

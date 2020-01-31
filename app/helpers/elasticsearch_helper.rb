@@ -32,18 +32,28 @@ module ElasticsearchHelper
     matching_taxa = []
     taxon_ids = []
     tax_levels.each do |level|
-      # ElasticSearch `match` query matching multiple strings in a fuzzy way (supports a few typos based
-      # on the size of the query)according to the operator specified (`and` in this case).
-      # `match` is the query type recommended by ElasticSearch for full-text search.
+      # NOTE(tiago): We tried to use a query of type `match` before but did not work
+      # with partial matching. The default analyzers (standard english) used to
+      # index only creates full word terms. For partial matching to work, we
+      # would have to re-index data using an n-gram analyzer. This would allows
+      # us to support both fuzziness and wildcards.
+      # Thus, we decided to stick with `query_string` and add wildcards to each
+      # of the tokens for partial matching.
+      # We might want to review this method, use `match` and re-index data using
+      # n-gram analyzer if we ever want fuzziness+wildcard or if performance
+      # of the search becomes an issue.
+      # NOTE(tiago): We should revisit use of aggregations to guarantee uniqueness,
+      # in particular if there are performance issues. Probably replace by extra constraints.
+      #
+      # tokenize query and add wildcards for partial matching
+      tokens = query.scan(/\w+/).map { |t| "*#{t}*" }
       search_params = {
         size: ElasticsearchHelper::MAX_SEARCH_RESULTS,
         query: {
-          match: {
-            "#{level}_name": {
-              query: query,
-              fuzziness: "auto",
-              operator: "and",
-            },
+          query_string: {
+            query: tokens.join(" "),
+            fields: ["#{level}_name"],
+            default_operator: "and",
           },
         },
         aggs: {
@@ -79,6 +89,10 @@ module ElasticsearchHelper
     taxon_ids = filter_by_samples(taxon_ids, filters[:samples]) if filters[:samples]
     taxon_ids = filter_by_project(taxon_ids, filters[:project_id]) if filters[:project_id]
     taxon_ids = Set.new(taxon_ids)
+
+    # Always remove homo sapiens from search, same as reports, because all homo sapiens
+    # hits are supposed to removed upstream in the pipeline. See also remove_homo_sapiens_counts!
+    taxon_ids = taxon_ids.delete_if { |tax_id| TaxonLineage::HOMO_SAPIENS_TAX_IDS.include?(tax_id) }
 
     return matching_taxa.select { |taxon| taxon_ids.include? taxon["taxid"] }
   end

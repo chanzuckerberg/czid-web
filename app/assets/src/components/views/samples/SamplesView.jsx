@@ -3,6 +3,7 @@ import { difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
@@ -473,18 +474,23 @@ class SamplesView extends React.Component {
   };
 
   handleBulkDownloadModalOpen = () => {
-    const { maxSamplesBulkDownload, admin } = this.context || {};
-    if (!maxSamplesBulkDownload) {
+    const { appConfig, admin } = this.context || {};
+    if (!appConfig.maxSamplesBulkDownload) {
       this.setState({
         bulkDownloadButtonTempTooltip:
           "Unexpected issue. Please contact us for help.",
       });
     } else if (
-      this.props.selectedSampleIds.size > parseInt(maxSamplesBulkDownload) &&
+      this.props.selectedSampleIds.size > appConfig.maxSamplesBulkDownload &&
       !admin
     ) {
+      // There is a separate max sample limit for the original input file download type.
+      // This is checked in BulkDownloadModal, and the original input file option is disabled if there
+      // are too many samples.
       this.setState({
-        bulkDownloadButtonTempTooltip: `No more than ${maxSamplesBulkDownload} samples allowed in one download.`,
+        bulkDownloadButtonTempTooltip: `No more than ${
+          appConfig.maxSamplesBulkDownload
+        } samples allowed in one download.`,
       });
     } else {
       this.setState({ bulkDownloadModalOpen: true });
@@ -493,6 +499,11 @@ class SamplesView extends React.Component {
 
   handleBulkDownloadModalClose = () => {
     this.setState({ bulkDownloadModalOpen: false });
+  };
+
+  handleBulkDownloadGenerate = () => {
+    this.handleBulkDownloadModalClose();
+    showBulkDownloadNotification();
   };
 
   handleRowClick = ({ event, rowData }) => {
@@ -526,16 +537,18 @@ class SamplesView extends React.Component {
             )}
           />
         )}
-        {allowedFeatures.includes("bulk_downloads") && (
-          <BulkDownloadModal
-            open={bulkDownloadModalOpen}
-            onClose={withAnalytics(
-              this.handleBulkDownloadModalClose,
-              "SamplesView_bulk-download-modal_closed"
-            )}
-            selectedSampleIds={selectedSampleIds}
-          />
-        )}
+        {allowedFeatures.includes("bulk_downloads") &&
+          bulkDownloadModalOpen && (
+            <BulkDownloadModal
+              open
+              onClose={withAnalytics(
+                this.handleBulkDownloadModalClose,
+                "SamplesView_bulk-download-modal_closed"
+              )}
+              selectedSampleIds={selectedSampleIds}
+              onGenerate={this.handleBulkDownloadGenerate}
+            />
+          )}
       </div>
     );
   }

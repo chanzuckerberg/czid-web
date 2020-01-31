@@ -1,0 +1,108 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.content {
+  padding: $space-xl $space-l;
+  position: relative;
+}
+
+.title,
+.loadingMsg {
+  @include font-header-xl;
+  margin: 0 $space-s;
+  // Leave room for the close button.
+  margin-right: 60px;
+  word-break: break-all;
+}
+
+.adminDetails {
+  margin: 0 $space-s;
+  color: $medium-grey;
+
+  .logUrl {
+    text-decoration: underline;
+
+    &:hover {
+      color: $black;
+    }
+  }
+}
+
+.tabs {
+  margin: $space-l $space-s;
+}
+
+.notification {
+  margin: 14px 10px -4px 10px;
+}
+
+.accordion {
+  border-bottom: 1px solid $light-grey;
+
+  .header {
+    @include font-header-accordion;
+
+    color: $black;
+    padding: 0 $space-s;
+    height: 40px;
+  }
+}
+
+.detailsTab {
+  .samplesList {
+    max-height: 360px;
+    overflow: auto;
+    padding: 0 $space-m;
+
+    .sampleName {
+      @include font-body-xs;
+      padding: $space-xxxs 0;
+      word-break: break-word;
+    }
+  }
+}
+
+.advancedDownloadTab {
+  margin: 0 $space-s;
+
+  .header {
+    @include font-header-xs;
+    margin-bottom: $space-xxxs;
+  }
+
+  .description {
+    @include font-body-xs;
+    margin-bottom: $space-s;
+  }
+
+  .cloudCommandContainer {
+    background-color: $off-white;
+    padding: $space-s;
+    display: flex;
+    align-items: center;
+
+    &.enabled {
+      cursor: pointer;
+
+      &:hover {
+        background-color: $lightest-grey;
+      }
+    }
+
+    .command {
+      @include font-code;
+      word-break: break-all;
+      overflow: hidden;
+      max-height: 48px;
+      flex: 1 1 0;
+    }
+
+    .icon {
+      width: 24px;
+      fill: $medium-grey;
+      margin-left: 16px;
+      margin-right: 10px;
+    }
+  }
+}

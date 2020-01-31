@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 // NOTE: Omit px so value can be exported for parseInt
-$metadata-input-width: 95;
+$metadata-input-width: 110;
 $metadata-input-extra-width: 225;
 
 :export {
@@ -57,6 +57,7 @@ $metadata-input-extra-width: 225;
     .input {
       margin: $space-xxs $space-m $space-xxs 0;
       width: $metadata-input-width + 0px;
+      vertical-align: top; // for host genome to align to others
 
       &.extraWidth {
         width: $metadata-input-extra-width + 0px;

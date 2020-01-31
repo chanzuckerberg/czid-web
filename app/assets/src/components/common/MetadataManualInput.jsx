@@ -10,10 +10,9 @@ import _fp, {
   get,
   values,
   includes,
-  sortBy,
+  orderBy,
   find,
   pickBy,
-  isEqual,
 } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -46,49 +45,28 @@ class MetadataManualInput extends React.Component {
   componentDidMount() {
     const { projectMetadataFields, hostGenomes, samplesAreNew } = this.props;
 
-    this.setState({
-      projectMetadataFields: projectMetadataFields,
-      // Default to the required fields.
-      selectedFieldNames: map(
-        "key",
-        filter(["is_required", 1], projectMetadataFields)
-      ),
-      hostGenomes,
-      headers: {
-        "Sample Name": "Sample Name",
-        ...(samplesAreNew ? { "Host Genome": "Host Genome" } : {}),
-        ...mapValues("name", keyBy("key", projectMetadataFields)),
+    this.setState(
+      {
+        projectMetadataFields: projectMetadataFields,
+        // Default to the required fields.
+        selectedFieldNames: map(
+          "key",
+          filter(["is_required", 1], projectMetadataFields)
+        ),
+        hostGenomes,
+        headers: {
+          "Sample Name": "Sample Name",
+          ...(samplesAreNew ? { "Host Genome": "Host Genome" } : {}),
+          ...mapValues("name", keyBy("key", projectMetadataFields)),
+        },
       },
-    });
-
-    this.setDefaultHostGenomes();
+      samplesAreNew ? this.setDefaultWaterControl : null
+    );
   }
 
-  componentDidUpdate(prevProps) {
-    const prevSampleNames = map("name", prevProps.samples);
-    const sampleNames = map("name", this.props.samples);
-    if (!isEqual(prevSampleNames, sampleNames)) {
-      this.setDefaultHostGenomes();
-    }
-  }
-
-  setDefaultHostGenomes = () => {
-    // If samples are new, set all host genomes to Human by default.
-    // Can't use updateHostGenome/updateMetadataField for bulk update.
-    if (this.props.samplesAreNew) {
-      const newHeaders = union(["Host Genome"], this.state.headersToEdit);
-      let newFields = this.state.metadataFieldsToEdit;
-      this.props.samples.forEach(sample => {
-        if (!get([sample.name, "Host Genome"], newFields)) {
-          newFields = set([sample.name, "Host Genome"], "Human", newFields);
-        }
-      });
-      this.setState({
-        headersToEdit: newHeaders,
-        metadataFieldsToEdit: newFields,
-      });
-      this.onMetadataChange(newHeaders, newFields);
-    }
+  // Need to special case this to avoid a missing required field error.
+  setDefaultWaterControl = () => {
+    this.applyToAll("water_control", "No");
   };
 
   getManualInputColumns = () => {
@@ -119,9 +97,7 @@ class MetadataManualInput extends React.Component {
     this.onMetadataChange(newHeaders, newFields);
   };
 
-  applyToAll = (column, sample) => {
-    const newValue = this.getMetadataValue(sample, column);
-
+  applyToAll = (column, newValue) => {
     let newFields = this.state.metadataFieldsToEdit;
 
     this.props.samples.forEach(curSample => {
@@ -193,11 +169,13 @@ class MetadataManualInput extends React.Component {
   };
 
   getHostGenomeOptions = () =>
-    sortBy(
-      "text",
+    orderBy(
+      "count",
+      "desc",
       this.props.hostGenomes.map(hostGenome => ({
         text: hostGenome.name,
         value: hostGenome.id,
+        count: hostGenome.samples_count,
       }))
     );
 
@@ -241,7 +219,8 @@ class MetadataManualInput extends React.Component {
       <div
         className={cs.applyToAll}
         onClick={() => {
-          this.applyToAll(column, sample);
+          const newValue = this.getMetadataValue(sample, column);
+          this.applyToAll(column, newValue);
           logAnalyticsEvent("MetadataManualInput_apply-all_clicked", {
             sampleName: sample.name,
             column,
@@ -270,6 +249,7 @@ class MetadataManualInput extends React.Component {
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
     // Special-case 'Host Genome' (the field that lets you change the Host Genome)
     field === "Host Genome" ||
+    get([field, "is_required"], this.props.projectMetadataFields) ||
     includes(
       hostGenomeId,
       get([field, "host_genome_ids"], this.props.projectMetadataFields)
@@ -322,7 +302,8 @@ class MetadataManualInput extends React.Component {
 
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
           if (this.isHostGenomeIdValidForField(sampleHostGenomeId, column)) {
-            const hostGenome = this.getSampleHostGenome(sample);
+            // host is unknown on initial load
+            const hostGenome = this.getSampleHostGenome(sample) || {};
             return (
               <div>
                 <MetadataInput

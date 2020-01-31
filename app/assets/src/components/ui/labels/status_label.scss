@@ -24,6 +24,11 @@
     color: $error;
   }
 
+  &.info {
+    background-color: $info-bg;
+    color: $info;
+  }
+
   &.warning {
     background-color: $warning-bg;
     color: $warning;

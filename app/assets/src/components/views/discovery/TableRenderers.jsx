@@ -21,6 +21,7 @@ const STATUS_TYPE = {
   "host filtering": "default",
   alignment: "default",
   waiting: "default",
+  skipped: "info",
 };
 
 class TableRenderers extends React.Component {

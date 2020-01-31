@@ -92,7 +92,7 @@ class LiveSearchPopBox extends React.Component {
   };
 
   renderSearchBox = () => {
-    const { placeholder, rectangular, inputClassName } = this.props;
+    const { placeholder, rectangular, inputClassName, icon } = this.props;
     const { isLoading, inputValue } = this.state;
 
     return (
@@ -104,7 +104,7 @@ class LiveSearchPopBox extends React.Component {
             rectangular && cs.rectangular,
             inputClassName
           )}
-          icon="search"
+          icon={icon}
           loading={isLoading}
           placeholder={placeholder}
           onChange={this.handleSearchChange}
@@ -117,6 +117,10 @@ class LiveSearchPopBox extends React.Component {
   };
 
   handleFocus = _ => {
+    if (this.hasEnoughChars() && this.props.shouldSearchOnFocus) {
+      this.handleSearchChange(this.state.inputValue);
+    }
+
     this.setState({ focus: true }); // open the dropdown
   };
 
@@ -179,13 +183,14 @@ class LiveSearchPopBox extends React.Component {
     return sumBy(cat => ((cat || {}).results || []).length, values(results));
   };
 
+  hasEnoughChars = () =>
+    this.state.inputValue.trim().length >= this.props.minChars;
+
   render() {
     const { className, rectangular } = this.props;
 
     const shouldOpen =
-      this.getResultsLength() &&
-      this.state.focus &&
-      this.state.inputValue.trim().length >= this.props.minChars;
+      this.getResultsLength() && this.state.focus && this.hasEnoughChars();
 
     return (
       <BareDropdown
@@ -215,6 +220,8 @@ LiveSearchPopBox.defaultProps = {
   placeholder: "Search",
   rectangular: false,
   inputMode: false,
+  icon: "search",
+  shouldSearchOnFocus: false,
 };
 
 LiveSearchPopBox.propTypes = {
@@ -231,6 +238,8 @@ LiveSearchPopBox.propTypes = {
   placeholder: PropTypes.string,
   rectangular: PropTypes.bool,
   value: PropTypes.string,
+  icon: PropTypes.string,
+  shouldSearchOnFocus: PropTypes.bool,
 };
 
 export default LiveSearchPopBox;

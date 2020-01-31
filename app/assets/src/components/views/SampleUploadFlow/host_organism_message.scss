@@ -1,0 +1,44 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.listContainer {
+  background-color: $info-bg;
+}
+
+.messageContainer {
+  @include font-body-xs;
+
+  margin: $space-s 0;
+
+  strong {
+    font-weight: $font-weight-bold;
+  }
+}
+
+.messageLine {
+  @include font-body-xs;
+
+  margin: 0 $space-s;
+  padding: $space-s;
+  // .messageContainer margin + .icon margin + .icon width (see notification.scss)
+  margin: 0 calc(#{$space-s} + #{$space-m} + 20px);
+
+  &:nth-child(odd) {
+    background-color: $info-dark;
+  }
+
+  &:nth-child(even) {
+    background-color: $info-bg;
+  }
+
+  &:last-child {
+    margin-bottom: $space-m;
+  }
+}
+
+.link {
+  // Overwrite <a> inherit rule in header.scss
+  color: $primary-light !important;
+  cursor: pointer;
+}

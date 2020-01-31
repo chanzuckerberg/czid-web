@@ -85,7 +85,7 @@ class PhyloTreesController < ApplicationController
 
     nodes = {}
     # populate metadata for sample nodes
-    metadata_by_sample_id = Metadatum.by_sample_ids(@phylo_tree.pipeline_runs.pluck(:sample_id).uniq)
+    metadata_by_sample_id = Metadatum.by_sample_ids(@phylo_tree.pipeline_runs.pluck(:sample_id).uniq, use_raw_date_strings: true)
     @phylo_tree.pipeline_runs
                .joins(:sample, sample: [:project, :host_genome])
                .select("pipeline_runs.id, samples.id as sample_id," \
@@ -118,6 +118,8 @@ class PhyloTreesController < ApplicationController
     end
   end
 
+  # NOTE: this is used by the report page as well as phylo trees
+  # See https://jira.czi.team/browse/IDSEQ-2127
   def choose_taxon
     taxon_search_args = [params[:query]]
     taxon_search_args << params[:args].split(",") if params[:args].present?
@@ -278,7 +280,7 @@ class PhyloTreesController < ApplicationController
     # because the taxon_counts table is large.
     taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).index_by { |tc| "#{tc.pipeline_run_id},#{tc.count_type}" }
 
-    metadata_by_sample_id = Metadatum.by_sample_ids(samples_projects.pluck("sample_id"))
+    metadata_by_sample_id = Metadatum.by_sample_ids(samples_projects.pluck("sample_id"), use_raw_date_strings: true)
 
     samples_projects.each do |sp|
       sp["taxid_reads"] ||= {}

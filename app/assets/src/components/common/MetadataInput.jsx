@@ -2,6 +2,7 @@ import React from "react";
 import { isArray } from "lodash/fp";
 import cx from "classnames";
 
+import { UserContext } from "~/components/common/UserContext";
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~ui/controls/Input";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
@@ -61,15 +62,18 @@ class MetadataInput extends React.Component {
       sampleTypes,
     } = this.props;
     const { warning } = this.state;
+    const { admin } = this.context || {};
 
-    if (metadataType.key === "sample_type") {
+    // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
+    // See https://jira.czi.team/browse/IDSEQ-2051.
+    if (metadataType.key === "sample_type" && admin) {
       return (
         <SampleTypeSearchBox
           className={className}
           value={value}
           onResultSelect={({ result }) => {
             // Result can be plain text or a match. We treat them the same.
-            onChange(metadataType.key, result.name || result);
+            onChange(metadataType.key, result.name || result, true);
           }}
           isHuman={isHuman}
           isInsect={isInsect}
@@ -186,5 +190,7 @@ MetadataInput.propTypes = {
   warning: PropTypes.string,
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
+
+MetadataInput.contextType = UserContext;
 
 export default MetadataInput;
