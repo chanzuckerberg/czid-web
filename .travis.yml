@@ -9,7 +9,7 @@ services:
   - redis
 before_install:
   - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
-  - bin/build-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8} $TRAVIS_BUILD_NUMBER
+  - bin/build-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8}
   # map db and redis to localhost to seamlessly use travis-ci services instead of docker-compose
   - sudo bash -c "echo '127.0.0.1 db' >> /etc/hosts"
   - sudo bash -c "echo '127.0.0.1 redis' >> /etc/hosts"
