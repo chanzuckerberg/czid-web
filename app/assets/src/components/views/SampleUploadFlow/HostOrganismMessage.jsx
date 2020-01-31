@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { every, keys, countBy, mapValues, keyBy, map } from "lodash/fp";
+import { every, keys, countBy, map } from "lodash/fp";
 import cx from "classnames";
 
 import Accordion from "~/components/layout/Accordion";
@@ -119,8 +119,7 @@ export default class HostOrganismMessage extends React.Component {
   }
 
   getSelectedHostOrganisms() {
-    const idToName = mapValues("name", keyBy("id", this.props.hostGenomes));
-    return this.props.samples.map(sample => idToName[sample.host_genome_id]);
+    return this.props.samples.map(sample => sample.host_genome_name);
   }
 
   render() {

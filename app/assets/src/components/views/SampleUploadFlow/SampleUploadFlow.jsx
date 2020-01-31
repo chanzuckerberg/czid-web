@@ -81,7 +81,9 @@ class SampleUploadFlow extends React.Component {
 
       return {
         ...sample,
+        // Set the host_genome_id and name so it is available in review
         host_genome_id: hostGenomeId,
+        host_genome_name: hostGenomeName,
       };
     });
 
