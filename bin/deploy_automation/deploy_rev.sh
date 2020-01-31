@@ -19,12 +19,12 @@ main() {
   _log "Starting deployment of $git_rev (sha-$sha) to $env"
 
   _log "Checking if docker image $docker_image is available"
-  if ! __retry 10 60 __docker_tag_exists "${DOCKER_REPOSITORY_NAME}" "sha-$sha"; then
+  if ! __retry 15 60 __docker_tag_exists "${DOCKER_REPOSITORY_NAME}" "sha-$sha"; then
     _exit_with_err_msg "Couldn't find image ${docker_image} in docker hub"
   fi
 
   _log "Checking if Github commit ${sha} in a valid state"
-  if ! __retry 10 60 __check_commit_state "${sha}" "$env"; then
+  if ! __retry 15 60 __check_commit_state "${sha}" "$env"; then
     _exit_with_err_msg "Commit ${sha} is in an invalid state. Aborting deployment. More details at $GITHUB_REPOSITORY_URL/commits/${env}"
   fi
 
