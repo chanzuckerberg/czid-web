@@ -174,9 +174,9 @@ module MetadataHelper
     validate_metadata_csv_for_samples(samples, metadata, false, false)
   end
 
-  # Convenience wrapper
+  # Convenience wrapper. NOTE: this method will return initialized
+  # new_host_genomes that pass validation as second part of a pair.
   def validate_metadata_csv_for_new_samples(samples, metadata)
-    # TODO: (gdingle): remove admin only after launch. See https://jira.czi.team/browse/IDSEQ-2051.
     issues = validate_metadata_csv_for_samples(samples, metadata, true, current_user.admin?)
     # repackage for coherence
     [issues.reject { |key| key == :new_host_genomes }, issues[:new_host_genomes]]
@@ -185,7 +185,10 @@ module MetadataHelper
   private
 
   # Receives an array of samples, and validates metadata from a csv.
-  # NOTE: validation depends on fields of each sample which depends on fields of each sample project.
+  # NOTE: validation depends on fields of each sample which depends on fields of
+  # each sample project.
+  # NOTE: if allow_new_host_genomes, this method will return initialized
+  # new_host_genomes that pass validation.
   def validate_metadata_csv_for_samples(
     samples,
     metadata,
@@ -291,8 +294,6 @@ module MetadataHelper
       if extract_host_genome_from_metadata
         host_genome = host_genomes.select { |cur_hg| cur_hg && cur_hg.name.casecmp?(row[host_genome_index]) }.first
 
-        # TODO: (gdingle): This behavior will change after removal of admin-only of new host genome input.
-        # See https://jira.czi.team/browse/IDSEQ-2051.
         if host_genome.nil?
           error_aggregator.add_error(:row_invalid_host_genome, [index + 1, sample.name, row[host_genome_index]])
           next
@@ -382,7 +383,7 @@ module MetadataHelper
                          hg = HostGenome.new(name: name, user: current_user)
                          new_host_genomes << hg
                        end
-                       hg.save && hg
+                       hg.valid? && hg
                      end
                    else
                      HostGenome.where(name: host_genome_names).includes(:metadata_fields)
