@@ -1,20 +1,25 @@
 FROM ruby:2.5-stretch
 
+ENV GIT_VERSION $(git rev-parse HEAD)
+
 # Install apt based dependencies required to run Rails as
 # well as RubyGems. As the Ruby image itself is based on a
 # Debian image, we use apt-get to install those.
 RUN apt-get update && apt-get install -y build-essential nodejs mysql-client python-dev python-pip apt-transport-https
 
+# Install node + npm
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get update && apt-get install -y nodejs
-RUN pip install --upgrade pip
 
+# Install pip
+RUN pip install --upgrade pip
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
 
 # Install chamber, for pulling secrets into the container.
 RUN curl -L https://github.com/segmentio/chamber/releases/download/v2.2.0/chamber-v2.2.0-linux-amd64 -o /bin/chamber
 RUN chmod +x /bin/chamber
+
+RUN pip install -r requirements.txt
 
 # Configure the main working directory. This is the base
 # directory used in any further RUN, COPY, and ENTRYPOINT
@@ -34,15 +39,14 @@ RUN npm update -g
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Copy the main application.
-COPY . ./
-
 # Generate the app's static resources using npm/webpack
 # Increase memory available to node to 6GB (from default 1.5GB). At this Travis runs on 7.5GB instances.
 ENV NODE_OPTIONS "--max_old_space_size=6144"
+COPY app/assets/src app/assets/src
 RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
 
-ENV GIT_VERSION $(git rev-parse HEAD)
+# Copy the main application.
+COPY . ./
 
 # Expose port 3000 to the Docker host, so we can access it
 # from the outside.
