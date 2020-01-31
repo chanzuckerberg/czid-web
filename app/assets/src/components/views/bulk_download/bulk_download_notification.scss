@@ -4,13 +4,10 @@
 
 .label {
   @include font-body-xs;
-}
 
-.footer {
-  margin-top: $space-m;
-  color: $primary-light;
-
-  .downloadsLink {
-    @include font-label-s;
+  .message {
+    a {
+      text-decoration: underline;
+    }
   }
 }
