@@ -3,8 +3,8 @@ import { get } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import {
-  matchType,
-  sortTypes,
+  doesResultMatch,
+  sortResults,
 } from "~/components/views/SampleUploadFlow/utils";
 
 import LiveSearchPopBox from "./LiveSearchPopBox";
@@ -23,10 +23,10 @@ class HostOrganismSearchBox extends React.Component {
         // options for new samples until the team gets a chance to review this
         // policy in light of the data. See HostGenome.rb.
         // See https://jira.czi.team/browse/IDSEQ-2193.
-        hostGenome.showAsOption && matchType(hostGenome, query)
+        hostGenome.showAsOption && doesResultMatch(hostGenome, query)
     );
 
-    return sortTypes(matchedHostGenomes, query, t => t.samples_count * -1);
+    return sortResults(matchedHostGenomes, query, t => t.samples_count * -1);
   }
 
   buildResults(sortedHostGenomes, query) {

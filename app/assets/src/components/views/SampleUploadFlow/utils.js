@@ -24,30 +24,33 @@ export const openBasespaceOAuthPopup = params => {
 
 // The following three functions were extracted from SampleTypeSearchBox.
 // They aid client-side search of options.
-export const matchType = (type, query) => {
+export const doesResultMatch = (result, query) => {
   // If no query, return all possible
   if (query === "") return true;
 
   // Match chars in any position. Good for acronyms. Ignore spaces.
   const noSpaces = query.replace(/\s*/gi, "");
   const regex = new RegExp(noSpaces.split("").join(".*"), "gi");
-  if (regex.test(type.name)) {
+  if (regex.test(result.name)) {
     return true;
   }
   return false;
 };
 
 // Sort matches by position of match. If no position, by func.
-export const sortTypes = (matchedTypes, query, func) => {
-  let sortedTypes = sortBy(func, matchedTypes);
+export const sortResults = (matchedResults, query, func) => {
+  let sortedResults = sortBy(func, matchedResults);
   if (query !== "") {
-    sortedTypes = sortBy(type => sortTypesByMatch(type, query), sortedTypes);
+    sortedResults = sortBy(
+      result => sortResultsByMatch(result, query),
+      sortedResults
+    );
   }
-  return sortedTypes;
+  return sortedResults;
 };
 
-export const sortTypesByMatch = (type, query) => {
-  const name = type.name.toLowerCase();
+export const sortResultsByMatch = (result, query) => {
+  const name = result.name.toLowerCase();
   const q = query.toLowerCase();
   const res =
     name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);

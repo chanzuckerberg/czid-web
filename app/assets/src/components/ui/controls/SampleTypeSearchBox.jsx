@@ -3,8 +3,8 @@ import { groupBy, get } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import {
-  matchType,
-  sortTypes,
+  doesResultMatch,
+  sortResults,
 } from "~/components/views/SampleUploadFlow/utils";
 
 import LiveSearchPopBox from "./LiveSearchPopBox";
@@ -19,10 +19,10 @@ class SampleTypeSearchBox extends React.Component {
 
   getMatchesByCategory(query) {
     const matchedSampleTypes = this.props.sampleTypes.filter(sampleType =>
-      matchType(sampleType, query)
+      doesResultMatch(sampleType, query)
     );
 
-    const sortedSampleTypes = sortTypes(
+    const sortedSampleTypes = sortResults(
       matchedSampleTypes,
       query,
       sampleType => sampleType.name
