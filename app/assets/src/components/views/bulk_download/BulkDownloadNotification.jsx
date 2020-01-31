@@ -11,7 +11,7 @@ export default class BulkDownloadNotification extends React.Component {
       <div className={cs.label}>
         <div className={cs.message}>
           You've requested a download. We are processing it now. It may take
-          some time, so we will notify you by email when it's done!
+          some time to finish.
         </div>
         <div className={cs.footer}>
           <a className={cs.downloadsLink} href="bulk_downloads">

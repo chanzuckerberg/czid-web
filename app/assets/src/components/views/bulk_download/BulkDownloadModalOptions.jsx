@@ -12,6 +12,7 @@ import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 
 import TaxonHitSelect from "./TaxonHitSelect";
+import { CONDITIONAL_FIELDS } from "./constants.js";
 import cs from "./bulk_download_modal_options.scss";
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
@@ -32,7 +33,6 @@ class BulkDownloadModalOptions extends React.Component {
       onFieldSelect,
       selectedFields,
       selectedDownloadTypeName,
-      conditionalFields,
     } = this.props;
 
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
@@ -42,7 +42,7 @@ class BulkDownloadModalOptions extends React.Component {
     // Handle rendering conditional fields.
 
     // For the file format field, render a placeholder. This is a special case.
-    const fileFormatConditionalField = conditionalFields[0];
+    const fileFormatConditionalField = CONDITIONAL_FIELDS[0];
     if (
       field.type === fileFormatConditionalField.field &&
       downloadType.type === fileFormatConditionalField.downloadType &&
@@ -62,7 +62,7 @@ class BulkDownloadModalOptions extends React.Component {
       );
       // For other conditional fields, render nothing.
     } else if (
-      conditionalFields.some(
+      CONDITIONAL_FIELDS.some(
         conditionalField =>
           field.type === conditionalField.field &&
           downloadType.type === conditionalField.downloadType &&
@@ -144,7 +144,7 @@ class BulkDownloadModalOptions extends React.Component {
             onFieldSelect(downloadType.type, field.type, value, displayName);
 
             // Reset conditional fields if they are no longer needed.
-            conditionalFields.forEach(conditionalField => {
+            CONDITIONAL_FIELDS.forEach(conditionalField => {
               if (
                 field.type === conditionalField.dependentField &&
                 downloadType.type === conditionalField.downloadType &&
@@ -299,7 +299,6 @@ BulkDownloadModalOptions.propTypes = {
   metricsOptions: PropTypes.array,
   allSamplesUploadedByCurrentUser: PropTypes.bool,
   onSelect: PropTypes.func.isRequired,
-  conditionalFields: PropTypes.arrayOf(PropTypes.object),
 };
 
 BulkDownloadModalOptions.contextType = UserContext;

@@ -7,6 +7,7 @@ import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
+import { CONDITIONAL_FIELDS } from "./constants.js";
 import cs from "./bulk_download_modal_footer.scss";
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
@@ -21,7 +22,6 @@ export default class BulkDownloadModalFooter extends React.Component {
 
   getSelectedDownloadType = () => {
     const { downloadTypes, selectedDownloadTypeName } = this.props;
-    // const { selectedDownloadTypeName } = this.state;
 
     if (!selectedDownloadTypeName) {
       return null;
@@ -37,7 +37,7 @@ export default class BulkDownloadModalFooter extends React.Component {
     const {
       selectedFields,
       selectedDownloadTypeName,
-      conditionalFields,
+      CONDITIONAL_FIELDS,
     } = this.props;
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
     const downloadType = this.getSelectedDownloadType();
@@ -47,7 +47,7 @@ export default class BulkDownloadModalFooter extends React.Component {
     let requiredFields = downloadType.fields;
 
     // Remove any conditional fields if they don't meet the criteria.
-    conditionalFields.forEach(field => {
+    CONDITIONAL_FIELDS.forEach(field => {
       if (
         downloadType.type === field.downloadType &&
         !triggersConditionalField(field, selectedFieldsForType)
@@ -132,7 +132,7 @@ export default class BulkDownloadModalFooter extends React.Component {
     return (
       <div className={cs.notificationContainer}>
         <Notification type="error" displayStyle="flat">
-          <div className={cs.header}>
+          <div className={cs.errorMessage}>
             An error occurred when verifying your selected samples.
           </div>
         </Notification>
@@ -144,7 +144,9 @@ export default class BulkDownloadModalFooter extends React.Component {
     return (
       <div className={cs.notificationContainer}>
         <Notification type="error" displayStyle="flat">
-          No valid samples to download data from.
+          <div className={cs.errorMessage}>
+            No valid samples to download data from.
+          </div>
         </Notification>
       </div>
     );
@@ -187,9 +189,11 @@ export default class BulkDownloadModalFooter extends React.Component {
 
     return (
       <div className={cs.footer}>
-        {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
-        {validationError != null && this.renderValidationError()}
-        {numSamples < 1 && !loading && this.renderNoValidSamplesError()}
+        <div className={cs.notifications}>
+          {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
+          {validationError != null && this.renderValidationError()}
+          {numSamples < 1 && !loading && this.renderNoValidSamplesError()}
+        </div>
         {this.renderDownloadButton()}
         <div className={cs.downloadDisclaimer}>
           Downloads for larger files can take multiple hours to generate.
@@ -211,6 +215,5 @@ BulkDownloadModalFooter.propTypes = {
   waitingForCreate: PropTypes.bool,
   createStatus: PropTypes.string,
   createError: PropTypes.string,
-  conditionalFields: PropTypes.arrayOf(PropTypes.object),
   onDownloadRequest: PropTypes.func.isRequired,
 };

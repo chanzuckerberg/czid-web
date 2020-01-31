@@ -3,6 +3,8 @@
 @import "~styles/themes/elements";
 
 .footer {
+  padding: $space-m;
+
   .downloadDisclaimer {
     @include font-body-xxs;
     color: $medium-grey;
@@ -16,13 +18,15 @@
 
 .listContainer {
   background-color: $warning-bg;
-  margin-bottom: $space-s;
+  margin-bottom: $space-m;
 }
 
 .notificationContainer {
-  @include font-body-xxs;
-  margin: $space-s 0;
-  background-color: $warning-bg;
+  margin: $space-m 0 $space-m;
+
+  .errorMessage {
+    @include font-header-xxs;
+  }
 }
 
 .messageLine {
@@ -33,4 +37,9 @@
   &:last-child {
     margin-bottom: $space-s;
   }
+}
+
+.notifications {
+  margin-bottom: $space-xl;
+  padding-right: $space-m;
 }
