@@ -7,7 +7,7 @@ import {
   sortResults,
 } from "~/components/views/SampleUploadFlow/utils";
 
-import LiveSearchPopBox from "./LiveSearchPopBox";
+import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 
 const SUGGESTED = "SUGGESTED";
 const ALL = "ALL";

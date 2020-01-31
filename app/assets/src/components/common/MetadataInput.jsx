@@ -10,7 +10,7 @@ import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
 } from "~ui/controls/GeoSearchInputBox";
-import SampleTypeSearchBox from "~ui/controls/SampleTypeSearchBox";
+import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Toggle from "~ui/controls/Toggle";
 
