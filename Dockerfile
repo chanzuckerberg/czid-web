@@ -34,7 +34,7 @@ RUN gem install bundler && bundle install --jobs 20 --retry 5
 
 # Do the same for node packages, allowing them to be cached
 RUN npm update -g
-COPY package.json package-lock.json .snyk ./
+COPY package.json package-lock.json ./
 RUN npm install
 
 # Generate the app's static resources using npm/webpack

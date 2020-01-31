@@ -114,7 +114,7 @@ services:
     image: chanzuckerberg/idseq-web:compose
     volumes:
       - ~/.aws:/root/.aws:ro
-    network_mode: "host"
+    network_mode: host
     environment:
       <<: *web-variables
       <<: *travis-variables
