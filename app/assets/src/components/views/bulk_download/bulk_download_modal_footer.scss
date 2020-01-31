@@ -1,0 +1,44 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.footer {
+  padding-top: $space-m;
+
+  .downloadDisclaimer {
+    @include font-body-xxs;
+    color: $medium-grey;
+    margin-top: $space-xxs;
+  }
+}
+
+.highlight {
+  @include font-header-xxs;
+}
+
+.listContainer {
+  background-color: $warning-bg;
+  margin-bottom: $space-m;
+}
+
+.notificationContainer {
+  margin: $space-m 0 $space-m;
+
+  .errorMessage {
+    @include font-header-xxs;
+  }
+}
+
+.messageLine {
+  @include font-body-xxs;
+  margin: 0 $space-s;
+  padding: $space-xxxs;
+
+  &:last-child {
+    margin-bottom: $space-s;
+  }
+}
+
+.notifications {
+  margin-bottom: $space-xl;
+}

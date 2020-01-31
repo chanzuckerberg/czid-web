@@ -7,7 +7,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 # Updates the release checklist with all release fixes that have been created since
 # the beginning of the current version
 main() {
-  git fetch --all
+  _git_fetch_and_cleanup
 
   declare checklist_json; checklist_json=$(_get_current_release_checklist_json)
   declare checklist_html_url; checklist_html_url=$(jq -er .html_url <<< "$checklist_json")

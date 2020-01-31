@@ -8,7 +8,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 # If there are additional commits, create a new tag for that environment and bump the
 # patch version (ex: v0.24_staging_... -> v0.24.1_staging_...)
 main() {
-  git fetch --all
+  _git_fetch_and_cleanup
 
   __patch_version_tag "$STAGING_BRANCH" "$STAGING_ENV" "Release fix"
   __patch_version_tag "$PROD_BRANCH" "$PROD_ENV" "Hot fix"

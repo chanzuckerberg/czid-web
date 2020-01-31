@@ -2,31 +2,10 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
 
-.chooseStep {
-  height: calc(85vh - 80px);
-  max-height: 1400px;
-  display: flex;
-  flex-direction: column;
-}
-
-.header {
-  .title {
-    @include font-header-xl;
-    // Reduce the amount of margin at the top of the modal.
-    margin-top: -$space-xs;
-  }
-
-  .tagline {
-    @include font-body-xs;
-    color: $medium-grey;
-  }
-}
-
 .downloadTypeContainer {
   margin-top: $space-m;
   flex: 1 1 0;
   min-height: 0;
-  overflow: auto;
 
   .category {
     &:not(:first-child) {
@@ -162,40 +141,5 @@
       @include font-body-xxs;
       color: $dark-grey;
     }
-  }
-}
-
-.footer {
-  margin-top: $space-xl;
-
-  .downloadDisclaimer {
-    @include font-body-xxs;
-    color: $medium-grey;
-    margin-top: $space-xxs;
-  }
-}
-
-.highlight {
-  @include font-header-xxs;
-}
-
-.listContainer {
-  background-color: $warning-bg;
-  margin-bottom: $space-s;
-}
-
-.notificationContainer {
-  @include font-body-xxs;
-  margin: $space-s 0;
-  background-color: $warning-bg;
-}
-
-.messageLine {
-  @include font-body-xxs;
-  margin: 0 $space-s;
-  padding: $space-xxxs;
-
-  &:last-child {
-    margin-bottom: $space-s;
   }
 }

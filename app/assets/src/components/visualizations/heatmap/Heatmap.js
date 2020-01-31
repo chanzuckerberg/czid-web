@@ -640,7 +640,7 @@ export default class Heatmap {
     // might be space-inneficient if the matrix is too sparse
     // alternative is to create a distance function that supports nulls
     let rows = [];
-    for (let i = 0; i < this.data.values.length; i++) {
+    for (let i = 0; i < this.rowLabels.length; i++) {
       if (!this.rowLabels[i].hidden) {
         let row = this.data.values[i].slice();
         for (let j = 0; j < this.columnLabels.length; j++) {

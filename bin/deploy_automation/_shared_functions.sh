@@ -25,8 +25,8 @@ _trace() {
 }
 
 _get_latest_commit() {
-  declare branch_or_tag_name="$1"
-  git log -n 1 --pretty=format:"%h" "$branch_or_tag_name"
+  declare git_rev="$1" # https://git-scm.com/docs/git-rev-parse#_specifying_revisions
+  git log -n 1 --pretty=format:"%h" "$git_rev"
 }
 
 _fetch_current_release_checklist_from_github() {
@@ -76,7 +76,7 @@ _bump_version_string() {
   declare from_version="$1"
   declare field="$2" # 1: major, 2: minor, 3: patch
   echo "${from_version}.0.0.0" | \
-    awk -v i="$field" -F. '{$i = $i + 1} 1' | \
+    awk -v i="$field" -F. '{$i = $i + 1; for(j=i+1;j<=NF;j++){$j="0";}} 1' | \
     sed 's/ /./g' | \
     cut -d. -f1-3
 }
@@ -99,4 +99,24 @@ _assert_current_branch_is_not() {
                          "Please, checkout a different branch (other than [${branch_names[@]}])."
     fi
   done
+}
+
+_git_fetch_and_cleanup() {
+  # fetch from remote origin
+  git fetch origin
+
+  # remove any dangling version tags not present in remote origin
+  # (this could happen if a previous run failed to push tags to remote)
+  declare dangling_tags; dangling_tags=$(
+    grep -vxFf  \
+      <(git ls-remote --tags origin | cut -f 2 | sed -E 's/^refs\/tags\///') \
+      <(git tag -l \
+          | grep -E '^v(?:[0-9]+\.){1,2}(?:[0-9]+)_[^_]+_[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+      ) \
+      || [[ $? == 1 ]]
+  )
+  if [ ! -z "$dangling_tags" ]; then
+    _trace "Found some dangling version tags not present in remote origin. Removing..."
+    git tag -d "$dangling_tags"
+  fi
 }

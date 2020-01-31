@@ -1,15 +1,6 @@
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
-import {
-  find,
-  filter,
-  get,
-  some,
-  map,
-  isUndefined,
-  orderBy,
-  reject,
-} from "lodash/fp";
+import { filter, get, orderBy } from "lodash/fp";
 import cx from "classnames";
 import memoize from "memoize-one";
 
@@ -18,176 +9,34 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
 import BasicPopup from "~/components/BasicPopup";
-import {
-  getBackgrounds,
-  uploadedByCurrentUser,
-  getHeatmapMetrics,
-} from "~/api";
-import AccordionNotification from "~ui/notifications/AccordionNotification";
-import Notification from "~ui/notifications/Notification";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { UserContext } from "~/components/common/UserContext";
 
 import TaxonHitSelect from "./TaxonHitSelect";
-import cs from "./choose_step.scss";
-
-// Stores information about conditional fields for bulk downloads.
-const CONDITIONAL_FIELDS = [
-  // Note: This first field is referenced directly in renderOption, as
-  // it needs to display a placeholder component. Be careful when modifying.
-  {
-    field: "file_format",
-    // The download type this conditional field applies to.
-    downloadType: "reads_non_host",
-    // The field this conditional field depends on.
-    dependentField: "taxa_with_reads",
-    // The values of the dependent field that trigger the conditional field.
-    triggerValues: ["all", undefined],
-  },
-  {
-    field: "background",
-    downloadType: "combined_sample_taxon_results",
-    dependentField: "metric",
-    triggerValues: ["NR.zscore", "NT.zscore"],
-  },
-];
+import { CONDITIONAL_FIELDS } from "./constants.js";
+import cs from "./bulk_download_modal_options.scss";
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
   conditionalField.triggerValues.includes(
     get(conditionalField.dependentField, selectedFields)
   );
 
-class ChooseStep extends React.Component {
-  state = {
-    backgroundOptions: null,
-    metricsOptions: null,
-    allSamplesUploadedByCurrentUser: false,
-  };
-
-  componentDidMount() {
-    this.fetchUserData();
-  }
-
-  // make async requests in parallel
-  async fetchUserData() {
-    const backgroundOptionsRequest = this.fetchBackgrounds();
-    const metricsOptionsRequest = this.fetchHeatmapMetrics();
-    const allSamplesUploadedByCurrentUserRequest = this.checkAllSamplesUploadedByCurrentUser();
-
-    const [
-      backgroundOptions,
-      metricsOptions,
-      allSamplesUploadedByCurrentUser,
-    ] = await Promise.all([
-      backgroundOptionsRequest,
-      metricsOptionsRequest,
-      allSamplesUploadedByCurrentUserRequest,
-    ]);
-
-    this.setState({
-      backgroundOptions,
-      metricsOptions,
-      allSamplesUploadedByCurrentUser,
-    });
-  }
-
-  // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
-  async fetchBackgrounds() {
-    const backgrounds = await getBackgrounds();
-
-    const backgroundOptions = backgrounds.map(background => ({
-      text: background.name,
-      value: background.id,
-    }));
-
-    return backgroundOptions;
-  }
-
-  // We use the heatmap metrics as the valid metrics for bulk downloads.
-  async fetchHeatmapMetrics() {
-    const heatmapMetrics = await getHeatmapMetrics();
-
-    return heatmapMetrics;
-  }
-
-  async checkAllSamplesUploadedByCurrentUser() {
-    const { validSampleIds } = this.props;
-    const allSamplesUploadedByCurrentUser = await uploadedByCurrentUser(
-      Array.from(validSampleIds)
-    );
-
-    return allSamplesUploadedByCurrentUser;
-  }
-
-  getSelectedDownloadType = () => {
-    const { selectedDownloadTypeName, downloadTypes } = this.props;
-
-    if (!selectedDownloadTypeName) {
-      return null;
-    }
-
-    return find(["type", selectedDownloadTypeName], downloadTypes);
-  };
-
-  // Get all the fields we need to validate for the selected download type.
-  getRequiredFieldsForSelectedType = () => {
-    const { selectedFields } = this.props;
-    const downloadType = this.getSelectedDownloadType();
-
-    if (!downloadType) return null;
-
-    let requiredFields = downloadType.fields;
-
-    // Remove any conditional fields if they don't meet the criteria.
-    CONDITIONAL_FIELDS.forEach(field => {
-      if (
-        downloadType.type === field.downloadType &&
-        !triggersConditionalField(field, selectedFields)
-      ) {
-        requiredFields = reject(["type", field.field], requiredFields);
-      }
-    });
-
-    return requiredFields;
-  };
-
-  isSelectedDownloadValid = () => {
-    const { selectedFields, validSampleIds } = this.props;
-
-    const downloadType = this.getSelectedDownloadType();
-
-    if (!downloadType || validSampleIds.size < 1) {
-      return false;
-    }
-
-    const requiredFields = this.getRequiredFieldsForSelectedType();
-
-    if (requiredFields) {
-      if (
-        some(
-          Boolean,
-          map(
-            field => isUndefined(get(field.type, selectedFields)),
-            requiredFields
-          )
-        )
-      ) {
-        return false;
-      }
-    }
-
-    return true;
-  };
-
+class BulkDownloadModalOptions extends React.Component {
   sortTaxaWithReadsOptions = memoize(options =>
     orderBy(["sampleCount", "text"], ["desc", "asc"], options)
   );
 
   renderOption = (downloadType, field) => {
-    const { selectedFields, onFieldSelect, validSampleIds } = this.props;
-    const { backgroundOptions, metricsOptions } = this.state;
+    const {
+      backgroundOptions,
+      metricsOptions,
+      validSampleIds,
+      onFieldSelect,
+      selectedFields,
+      selectedDownloadTypeName,
+    } = this.props;
 
-    const selectedField = get(field.type, selectedFields);
+    const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
+    const selectedField = get(field.type, selectedFieldsForType);
     let dropdownOptions = null;
     let placeholder = "";
     // Handle rendering conditional fields.
@@ -197,7 +46,10 @@ class ChooseStep extends React.Component {
     if (
       field.type === fileFormatConditionalField.field &&
       downloadType.type === fileFormatConditionalField.downloadType &&
-      !triggersConditionalField(fileFormatConditionalField, selectedFields)
+      !triggersConditionalField(
+        fileFormatConditionalField,
+        selectedFieldsForType
+      )
     ) {
       return (
         <div className={cs.field} key={field.type}>
@@ -214,7 +66,7 @@ class ChooseStep extends React.Component {
         conditionalField =>
           field.type === conditionalField.field &&
           downloadType.type === conditionalField.downloadType &&
-          !triggersConditionalField(conditionalField, selectedFields)
+          !triggersConditionalField(conditionalField, selectedFieldsForType)
       )
     )
       return;
@@ -316,8 +168,12 @@ class ChooseStep extends React.Component {
   };
 
   renderDownloadType = downloadType => {
-    const { selectedDownloadTypeName, onSelect, validSampleIds } = this.props;
-    const { allSamplesUploadedByCurrentUser } = this.state;
+    const {
+      validSampleIds,
+      onSelect,
+      allSamplesUploadedByCurrentUser,
+      selectedDownloadTypeName,
+    } = this.props;
     const { admin, appConfig } = this.context || {};
 
     const selected = selectedDownloadTypeName === downloadType.type;
@@ -423,115 +279,28 @@ class ChooseStep extends React.Component {
     );
   };
 
-  renderInvalidSamplesWarning = () => {
-    const { invalidSampleNames } = this.props;
-
-    const header = (
-      <div>
-        <span className={cs.highlight}>
-          {invalidSampleNames.length} sample
-          {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
-          bulk download
-        </span>, because they either failed or are still processing:
-      </div>
-    );
-
-    const content = (
-      <span>
-        {invalidSampleNames.map((name, index) => {
-          return (
-            <div key={index} className={cs.messageLine}>
-              {name}
-            </div>
-          );
-        })}
-      </span>
-    );
-
-    return (
-      <AccordionNotification
-        header={header}
-        content={content}
-        open={false}
-        type={"warn"}
-        displayStyle={"flat"}
-      />
-    );
-  };
-
-  renderValidationError = () => {
-    return (
-      <div className={cs.notificationContainer}>
-        <Notification type="error" displayStyle="flat">
-          <div className={cs.header}>
-            An error occurred when verifying your selected samples.
-          </div>
-        </Notification>
-      </div>
-    );
-  };
-
-  renderNoValidSamplesError = () => {
-    return (
-      <div className={cs.notificationContainer}>
-        <Notification type="error" displayStyle="flat">
-          No valid samples to download data from.
-        </Notification>
-      </div>
-    );
-  };
-
   render() {
-    const {
-      onContinue,
-      validSampleIds,
-      invalidSampleNames,
-      validationError,
-    } = this.props;
-    const numSamples = validSampleIds.size;
-
     return (
-      <div className={cs.chooseStep}>
-        <div className={cs.header}>
-          <div className={cs.title}>Select a Download Type</div>
-          <div className={cs.tagline}>
-            {numSamples} sample{numSamples != 1 ? "s" : ""} selected
-          </div>
-        </div>
-        <div className={cs.downloadTypeContainer}>
-          {this.renderDownloadTypes()}
-        </div>
-        <div className={cs.footer}>
-          {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
-          {validationError != null && this.renderValidationError()}
-          {numSamples < 1 && this.renderNoValidSamplesError()}
-          <PrimaryButton
-            disabled={!this.isSelectedDownloadValid()}
-            text="Continue"
-            onClick={onContinue}
-          />
-          <div className={cs.downloadDisclaimer}>
-            Downloads for larger files can take multiple hours to generate.
-          </div>
-        </div>
+      <div className={cs.downloadTypeContainer}>
+        {this.renderDownloadTypes()}
       </div>
     );
   }
 }
 
-ChooseStep.propTypes = {
+BulkDownloadModalOptions.propTypes = {
   downloadTypes: PropTypes.arrayOf(PropTypes.DownloadType),
   selectedDownloadTypeName: PropTypes.string,
-  onSelect: PropTypes.func.isRequired,
   // The selected fields of the currently selected download type.
   selectedFields: PropTypes.objectOf(PropTypes.string),
   onFieldSelect: PropTypes.func.isRequired,
-  onContinue: PropTypes.func.isRequired,
   validSampleIds: PropTypes.instanceOf(Set).isRequired,
-  invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
-  validationError: PropTypes.string,
+  backgroundOptions: PropTypes.array,
+  metricsOptions: PropTypes.array,
+  allSamplesUploadedByCurrentUser: PropTypes.bool,
+  onSelect: PropTypes.func.isRequired,
 };
 
-ChooseStep.contextType = UserContext;
+BulkDownloadModalOptions.contextType = UserContext;
 
-export default ChooseStep;
+export default BulkDownloadModalOptions;

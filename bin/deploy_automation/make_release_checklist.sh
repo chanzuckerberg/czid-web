@@ -7,7 +7,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 # Compare staging to prod and create a draft pull request in github
 # with commits that are only in staging
 main() {
-  git fetch --all
+  _git_fetch_and_cleanup
 
   # make sure release checklist doesn't exist yet
   _assert_no_release_checklist
