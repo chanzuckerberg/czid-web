@@ -3,18 +3,17 @@ env:
   CI: yes
 services:
   - docker
+  - mysql
+  - redis
 before_install:
   - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
   - bin/build-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8} $TRAVIS_BUILD_NUMBER
-  - docker-compose up -d db
-  - docker-compose up -d redis
-  - sleep 10
-  - docker-compose run web rake db:create
+  - sudo bash -c "echo '127.0.0.1 db' >> /etc/hosts"
+  - sudo bash -c "echo '127.0.0.1 redis' >> /etc/hosts"
 script:
   - docker-compose run --rm webtest "./node_modules/.bin/eslint app/assets/src --ext .js,.jsx"
-  - echo "quit" | docker-compose run --rm webtest "rails dbconsole"
   - docker-compose run --rm webtest "rubocop -R --config .rubocop_todo.yml"
-  - docker-compose run --rm webtest "rake db:drop db:create db:migrate db:seed"
+  - docker-compose run --rm webtest "rake db:create db:migrate db:seed"
   - docker-compose run --rm webtest "rails test"
   - docker-compose run --rm webtest "rake db:drop db:create db:migrate db:seed"
   - docker-compose run --rm webtest "rspec"

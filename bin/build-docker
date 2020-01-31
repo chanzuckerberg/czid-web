@@ -7,6 +7,7 @@ BRANCH="$1"
 BRANCH_CLEANED=`echo $BRANCH | sed 's/\//-/g'`
 COMMIT="$2"
 BUILD_NUMBER="$3"
+BRANCH_TAG=$REPO:"branch-$BRANCH_CLEANED"
 COMPOSE_TAG="$REPO:compose"
 LATEST_TAG="$REPO:latest"
 
@@ -17,10 +18,15 @@ echo $TAG
 echo '--'
 
 # need to pull images for cache_from first
-docker pull $LATEST_TAG || true
-docker pull $REPO:"branch-$BRANCH_CLEANED" || true
+docker pull  || true
 
-docker build -t $COMPOSE_TAG --cache-from $REPO:"branch-$BRANCH_CLEANED" .
+if ! ( docker pull $BRANCH_TAG ); then
+  docker pull $LATEST_TAG || true
+else
+  docker tag $BRANCH_TAG $LATEST_TAG
+fi
+
+docker build -t $COMPOSE_TAG .
 
 if [ "$BRANCH" == "master" ]; then
   docker tag $COMPOSE_TAG $LATEST_TAG
