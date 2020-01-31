@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 .footer {
-  padding: $space-m;
+  padding-top: $space-m;
 
   .downloadDisclaimer {
     @include font-body-xxs;
@@ -41,5 +41,4 @@
 
 .notifications {
   margin-bottom: $space-xl;
-  padding-right: $space-m;
 }

@@ -3,8 +3,7 @@
 @import "~styles/themes/colors";
 
 .modal {
-  height: calc(85vh - 80px);
-  max-height: 1200px;
+  max-height: calc(85vh - 80px);
   display: flex;
   flex-direction: column;
 
@@ -27,8 +26,5 @@
 
   .footer {
     margin-top: $space-m;
-    margin-right: $space-m;
-    position: absolute;
-    bottom: 15px;
   }
 }
