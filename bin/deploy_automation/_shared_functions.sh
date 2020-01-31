@@ -76,7 +76,7 @@ _bump_version_string() {
   declare from_version="$1"
   declare field="$2" # 1: major, 2: minor, 3: patch
   echo "${from_version}.0.0.0" | \
-    awk -v i="$field" -F. '{$i = $i + 1} 1' | \
+    awk -v i="$field" -F. '{$i = $i + 1; for(j=i+1;j<=NF;j++){$j="0";}} 1' | \
     sed 's/ /./g' | \
     cut -d. -f1-3
 }
