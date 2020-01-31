@@ -1,6 +1,8 @@
 language: minimal
 env:
   CI: yes
+  DB_USERNAME: travis
+  DB_PASSWORD: root
 services:
   - docker
   - mysql
