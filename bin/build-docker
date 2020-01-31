@@ -26,7 +26,7 @@ else
   docker tag $BRANCH_TAG $LATEST_TAG
 fi
 
-docker build -t $COMPOSE_TAG .
+docker build -t $COMPOSE_TAG --cache-from $LATEST_TAG .
 
 if [ "$BRANCH" == "master" ]; then
   docker tag $COMPOSE_TAG $LATEST_TAG
