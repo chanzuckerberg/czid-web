@@ -13,6 +13,7 @@ import {
   getBulkDownloadTypes,
   validateSampleIdsForBulkDownload,
 } from "~/api/bulk_downloads";
+import { logAnalyticsEvent } from "~/api/analytics";
 import Modal from "~ui/containers/Modal";
 
 import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
@@ -182,6 +183,7 @@ class BulkDownloadModal extends React.Component {
       selectedFieldsDisplay,
       validSampleIds
     );
+
     this.createBulkDownload(selectedDownload);
   };
 
@@ -193,6 +195,12 @@ class BulkDownloadModal extends React.Component {
 
   handleFieldSelect = (downloadType, fieldType, value, displayName) => {
     this.setState(prevState => {
+      logAnalyticsEvent("BulkDownloadModal_field-for-download-type-selected", {
+        downloadType,
+        fieldType,
+        fieldValue: value,
+        displayName,
+      });
       // If the value is undefined, delete it from selectedFields.
       // This allows us to support cases where certain fields are conditionally required;
       // if the field becomes no longer required, we can unset it.
@@ -233,8 +241,11 @@ class BulkDownloadModal extends React.Component {
         createStatus: "error",
         createError: e.error,
       });
+      logAnalyticsEvent("BulkDownloadModal_bulk-download-creation-failed");
       return;
     }
+
+    logAnalyticsEvent("BulkDownloadModal_bulk-download-creation-successful");
 
     onGenerate();
   };

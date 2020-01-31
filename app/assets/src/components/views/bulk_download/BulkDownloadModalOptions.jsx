@@ -10,6 +10,7 @@ import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
+import { withAnalytics } from "~/api/analytics";
 
 import TaxonHitSelect from "./TaxonHitSelect";
 import { CONDITIONAL_FIELDS } from "./constants.js";
@@ -210,7 +211,14 @@ class BulkDownloadModalOptions extends React.Component {
           disabled && cs.disabled
         )}
         key={downloadType.type}
-        onClick={() => !disabled && onSelect(downloadType.type)}
+        onClick={() =>
+          !disabled &&
+          withAnalytics(
+            onSelect(downloadType.type),
+            "BulkDownloadModalOptions_download-type-selected",
+            { downloadType: downloadType.type }
+          )
+        }
       >
         <RadioButton
           disabled={disabled}
