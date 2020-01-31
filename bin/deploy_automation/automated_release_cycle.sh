@@ -21,7 +21,8 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 
 
 main() {
-  
+  _git_fetch_and_cleanup
+
   # Ensure current branch is not prod or staging
   # This command will set prod and staging HEADs to other commits,
   # and we want to be in a different branch to prevent any issues.
@@ -29,22 +30,58 @@ main() {
 
   _log "**** CHECKING TAG VERSIONS FOR RELEASE/HOT FIXES ****"
   "$SCRIPT_DIR/patch_branch_version_tags.sh"
+  _trace ""
+
+  _log "**** CHECKING RELEASE CYCLE STATE ****"
+  declare current_release_state; current_release_state=$(__check_release_state)
+  _log "Current release cycle state: $current_release_state"
+  _trace ""
 
   _log "**** CLOSING RELEASE CYCLE ****"
-  "$SCRIPT_DIR/close_release_cycle.sh"
+  if [ "$current_release_state" != "closed" ]; then
+    "$SCRIPT_DIR/close_release_cycle.sh"
+  else
+    _log "${YELLOW}WARNING: Current release cycle seems to be already closed. Skipping this step."
+  fi
+  _trace ""
 
   _log "**** STARTING NEW RELEASE CYCLE ****"
   "$SCRIPT_DIR/start_release_cycle.sh"
+  _trace ""
 
-  declare staging_tag; staging_tag="$(_get_latest_tag "$STAGING_ENV")"
-  declare prod_tag; prod_tag="$(_get_latest_tag "$PROD_ENV")"
-
-  declare msg;
-  msg="**** READY FOR DEPLOYMENT ****${LF}"
-  msg+="${YELLOW}PLEASE EXECUTE THE FOLLOWING COMMANDS${LF}"
-  msg+="./bin/deploy_automation/deploy_tag.sh staging '${staging_tag}'${LF}"
-  msg+="./bin/deploy_automation/deploy_tag.sh prod '${prod_tag}'"
-  _log "$msg"
+  _log "**** READY FOR DEPLOYMENT ****"
+  _log "New tags: ${YELLOW}" \
+       "$(_get_latest_tag "$PROD_ENV")    $(_get_latest_tag "$STAGING_ENV")"
 }
+
+__check_release_state() {
+  declare current_prod_version; current_prod_version=$(_get_latest_version "${PROD_ENV}")
+  declare current_staging_version; current_staging_version=$(_get_latest_version "${STAGING_ENV}")
+  declare checklist_json; checklist_json=$(_fetch_current_release_checklist_from_github)
+  declare highest_version; highest_version=$(sort -rV <( printf "%s\n" "$current_prod_version" "$current_staging_version" ) | head -n 1)
+  declare latest_staging_tag; latest_staging_tag=$(_get_latest_tag "${STAGING_ENV}")
+  declare latest_staging_tag_commit; latest_staging_tag_commit=$(_get_latest_commit "origin/${STAGING_BRANCH}")
+  declare latest_staging_commit; latest_staging_commit=$(_get_latest_commit "origin/${STAGING_BRANCH}")
+
+  _trace "current_prod_version=$current_prod_version"
+  _trace "current_staging_version=$current_staging_version"
+  _trace "highest_version=$highest_version"
+  _trace "latest_staging_tag=$latest_staging_tag ($latest_staging_tag_commit)"
+  _trace "latest_staging_commit=$latest_staging_commit"
+  _trace "checklist_json=$(jq -c <<<"$checklist_json" | cut -c 1-40)"
+
+  if [ "$checklist_json" == "null" ] \
+     && [ ! -z "$current_staging_version" ] \
+     && [ "$current_staging_version" == "$current_prod_version" ] \
+     && [ "$latest_staging_tag_commit" == "$latest_staging_commit" ]; then
+    echo "closed"
+  elif [ "$checklist_json" != "null" ] && \
+       [ "$current_staging_version" == "$highest_version" ]; then
+    echo "open"
+  else
+    echo "unknown"
+  fi
+}
+
 
 main "$@"

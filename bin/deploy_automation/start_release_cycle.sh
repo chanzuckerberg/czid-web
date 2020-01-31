@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 # - Create new release checklist with all changes that are now
 #   in staging and not yet in prod
 main() {
-  git fetch --all
+  _git_fetch_and_cleanup
 
   # Ensure current branch is not staging
   # This command will set staging HEAD to a different commit,
@@ -34,6 +34,13 @@ main() {
     _exit_with_err_msg "$msg"
   fi
 
+  # check if there is any commit in master
+  declare commit_count; commit_count=$(git rev-list "origin/$STAGING_BRANCH".."origin/$MASTER_BRANCH" | wc -l)
+  if [ "$commit_count" -eq "0" ]; then
+    _exit_with_err_msg "origin/${MASTER_BRANCH} doesn't seem to have any additional commits after origin/${STAGING_BRANCH}." \
+                       "Cannot start a new release cycle."
+  fi
+ 
   # Bump tag version
   declare next_version; next_version=$(_bump_version_string "$staging_tag_version" 2)
   _log "Bumping $STAGING_BRANCH from version $staging_tag_version to $next_version"
@@ -41,20 +48,22 @@ main() {
   # create a new tag to make staging point to latest commit from master
   declare tag; tag="$(_format_version_tag "${next_version}" "${STAGING_ENV}")"
   _log "Creating tag ${tag} pointing to the top of ${MASTER_BRANCH} branch..."
-  git tag -af -m "Started release cycle $next_version" "${tag}" "origin/$MASTER_BRANCH"
-  git push -f origin "${tag}"
+  git tag -a -m "Started release cycle $next_version" "${tag}" "origin/$MASTER_BRANCH"
 
   # point staging branch head to master
   declare sha; sha=$(git log -n1 "${tag}" --format=%h)
   _log "Pointing ${STAGING_BRANCH} branch to tag ${tag}..."
   git branch -f "${STAGING_BRANCH}" "${sha}"
-  git push -f origin "${STAGING_BRANCH}"
+
+  # Update remote with new tag and branch head
+  git push --atomic -f origin "${tag}" "${STAGING_BRANCH}"
 
   # make a new release checklist
   "$SCRIPT_DIR/make_release_checklist.sh"
 
-  # # deploy instructions
-  _log "Release cycle ready. Please deploy ${tag} ($(git log -n1 "${tag}" --format=%h)) to ${STAGING_ENV}"
+  # deploy instructions
+  _log "Release cycle ready." \
+       "Please deploy ${tag} ($(git log -n1 "${tag}" --format=%h)) to ${STAGING_ENV}"
 }
 
 main "$@"
