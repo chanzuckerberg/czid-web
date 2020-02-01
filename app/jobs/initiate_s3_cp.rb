@@ -1,6 +1,6 @@
 # Job to initiate s3 copy
 class InitiateS3Cp
-  @queue = :q03_pipeline_run
+  @queue = :initiate_s3_cp
   def self.perform(sample_id)
     sample = Sample.find(sample_id)
     Rails.logger.info("Start copying sample #{sample.id}")
