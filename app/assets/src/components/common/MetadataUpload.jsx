@@ -56,17 +56,44 @@ class MetadataUpload extends React.Component {
         getAllSampleTypes(),
       ]
     );
+    this.setState({
+      projectMetadataFields: this.processProjectMetadataFields(
+        projectMetadataFields
+      ),
+      hostGenomes,
+      sampleTypes,
+    });
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (prevProps.project.id !== this.props.project.id) {
+      // Set the projectMetadataFields to null while fetching the new fields.
+      // This forces the MetadataManualInput to re-mount which is necessary for correct behavior.
+      this.setState({
+        projectMetadataFields: null,
+      });
+
+      const projectMetadataFields = await getProjectMetadataFields(
+        this.props.project.id
+      );
+
+      this.setState({
+        projectMetadataFields: this.processProjectMetadataFields(
+          projectMetadataFields
+        ),
+      });
+    }
+  }
+
+  processProjectMetadataFields = projectMetadataFields => {
     const sorted = sortBy(
       metadataField =>
         this.ordering[metadataField.key] || Number.MAX_SAFE_INTEGER,
       projectMetadataFields
     );
-    this.setState({
-      projectMetadataFields: keyBy("key", sorted),
-      hostGenomes,
-      sampleTypes,
-    });
-  }
+
+    return keyBy("key", sorted);
+  };
 
   handleTabChange = tab => {
     this.setState({ currentTab: tab, issues: null });

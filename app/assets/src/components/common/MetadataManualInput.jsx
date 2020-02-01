@@ -13,6 +13,7 @@ import _fp, {
   orderBy,
   find,
   pickBy,
+  has,
 } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -66,7 +67,9 @@ class MetadataManualInput extends React.Component {
 
   // Need to special case this to avoid a missing required field error.
   setDefaultWaterControl = () => {
-    this.applyToAll("water_control", "No");
+    if (has("water_control", this.props.projectMetadataFields)) {
+      this.applyToAll("water_control", "No");
+    }
   };
 
   getManualInputColumns = () => {
