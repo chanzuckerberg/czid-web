@@ -4,8 +4,7 @@ jobs:
   include:
     - name: "Rails Test"
       language: ruby
-      rvm:
-      - 2.5
+      rvm: 2.5
       cache:
         bundler: true
         directories:
@@ -42,8 +41,7 @@ jobs:
       script: rails test
     - name: "Rspec"
       language: ruby
-      rvm:
-        - 2.5
+      rvm: 2.5
       cache: 
         bundler: true
         directories:
@@ -67,12 +65,14 @@ jobs:
       script:  rspec
     - name: "Brakeman"
       language: ruby
+      rvm: 2.5
       cache: bundler
       install: bundle install
       # Block on High Confidence warnings
       script: brakeman --no-pager -w3
     - name: "Rubocop"
       language: ruby
+      rvm: 2.5
       cache:  bundler
       install: bundle install
       script: rubocop -R --config .rubocop_todo.yml
