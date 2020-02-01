@@ -50,9 +50,6 @@ jobs:
         - sudo bash -c "echo '127.0.0.1 db' >> /etc/hosts" 
         - sudo bash -c "echo '127.0.0.1 redis' >> /etc/hosts" 
         - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
-        - sudo apt-get update && sudo apt-get install -y build-essential python-dev python-pip
-        - sudo pip install --upgrade pip
-        - sudo pip install -r requirements.txt --ignore-installed PyYAML
       before_script: bundle exec rake db:create db:migrate db:seed
       script: bundle exec rspec
     - name: "Ruby Code Quality"
