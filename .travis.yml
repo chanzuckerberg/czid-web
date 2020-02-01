@@ -9,6 +9,7 @@ jobs:
       rvm: 2.5
       cache: bundler
       env:
+        # foo
         - DB_USERNAME: travis
         - DB_PASSWORD: root
         - SAMPLES_BUCKET_NAME: idseq-samples-development
