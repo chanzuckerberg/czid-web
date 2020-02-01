@@ -7,7 +7,10 @@ jobs:
     - name: "Rails Test"
       language: ruby
       rvm: 2.5
-      cache: bundler
+      cache:
+        bundler: true
+        directories:
+          - $HOME/.cache/pip
       env:
         # foo
         - DB_USERNAME: travis
@@ -17,13 +20,19 @@ jobs:
         - mysql
         - redis
       before_install:
+        # Emulate docker compose routing
+        #   Docker compose maps the host db and redis to the mysql and redis containers
+        #   We are using travis-ci services, which use localhost, for testing instead of docker compose 
+        #   we need to map these hosts to localhost to maintain compatibility between the two.
         - sudo bash -c "echo '127.0.0.1 db' >> /etc/hosts" 
         - sudo bash -c "echo '127.0.0.1 redis' >> /etc/hosts" 
         - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
-        - sudo apt-get update && sudo apt-get install -y build-essential python-dev python-pip
-        - sudo pip install --upgrade pip
-        - sudo pip install -r requirements.txt --ignore-installed PyYAML
+        # Install python and dependencies
+        - source ~/virtualenv/python2.7/bin/activate
+        - pip install -r requirements.txt --ignore-installed PyYAML
       before_script:
+        # Create dummy versions of our javascript and css bundle
+        #   The actual files are not required for testing ruby, just the presence of the files
         - mkdir -p app/assets/dist
         - echo foo > app/assets/dist/bundle.min.css
         - echo foo > app/assets/dist/bundle.min.js
@@ -40,7 +49,10 @@ jobs:
     - name: "Rspec"
       language: ruby
       rvm: 2.5
-      cache: bundler
+      cache:
+        bundler: true
+        directories:
+          - $HOME/.cache/pip
       env:
         - DB_USERNAME: travis
         - DB_PASSWORD: root
@@ -48,12 +60,16 @@ jobs:
         - mysql
         - redis
       before_install:
+        # Emulate docker compose routing
+        #   Docker compose maps the host db and redis to the mysql and redis containers
+        #   We are using travis-ci services, which use localhost, for testing instead of docker compose 
+        #   we need to map these hosts to localhost to maintain compatibility between the two.
         - sudo bash -c "echo '127.0.0.1 db' >> /etc/hosts" 
         - sudo bash -c "echo '127.0.0.1 redis' >> /etc/hosts" 
         - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
-        - sudo apt-get update && sudo apt-get install -y build-essential python-dev python-pip
-        - sudo pip install --upgrade pip
-        - sudo pip install -r requirements.txt --ignore-installed PyYAML
+        # Install python and dependencies
+        - source ~/virtualenv/python2.7/bin/activate
+        - pip install -r requirements.txt --ignore-installed PyYAML
       before_script: bundle exec rake db:create db:migrate db:seed
       script: bundle exec rspec
     - name: "Ruby Code Quality"
