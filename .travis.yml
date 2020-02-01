@@ -70,7 +70,9 @@ jobs:
         - python -m unittest discover -v -s test/ -p 'test_*.py'
     - name: "JavaScript Tests + Lint"
       language: node_js
+      cache: npm
       node_js: 10
+      before_install: npm update -g
       script:
         - ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
         - npm test
