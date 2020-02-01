@@ -7,6 +7,7 @@ jobs:
       rvm: 2.5
       cache: bundler
       env:
+        - CACHE_NAME: rails_test
         - DB_USERNAME: travis
         - DB_PASSWORD: root
         - SAMPLES_BUCKET_NAME: idseq-samples-development
@@ -41,6 +42,7 @@ jobs:
       rvm: 2.5
       cache: bundler
       env:
+        - CACHE_NAME: rspec
         - DB_USERNAME: travis
         - DB_PASSWORD: root
       services:
@@ -61,6 +63,8 @@ jobs:
       language: ruby
       rvm: 2.5
       cache: bundler
+      environment:
+        - CACHE_NAME: ruby_code_quality
       install: bundle install
       script: 
         - rubocop -R --config .rubocop_todo.yml
