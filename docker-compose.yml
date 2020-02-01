@@ -40,7 +40,6 @@ x-env-variables: &env-variables
   ? ENVIRONMENT
   ? OFFLINE
 
-
 x-travis-variables: &travis-variables
   ? CI
   ? CONTINUOUS_INTEGRATION
