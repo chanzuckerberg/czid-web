@@ -7,7 +7,6 @@ jobs:
       rvm: 2.5
       cache: bundler
       env:
-        - CACHE_NAME: rails_test
         - DB_USERNAME: travis
         - DB_PASSWORD: root
         - SAMPLES_BUCKET_NAME: idseq-samples-development
@@ -33,14 +32,13 @@ jobs:
         - echo foo > app/assets/dist/vendors~main.bundle.min.css.map
         - echo foo > app/assets/dist/vendors~main.bundle.min.js
         - echo foo > app/assets/dist/vendors~main.bundle.min.js.map
-        - rake db:create db:migrate db:seed
-      script: rails test
+        - bundle exec rake db:create db:migrate db:seed
+      script: bundle exec rails test
     - name: "Rspec"
       language: ruby
       rvm: 2.5
       cache: bundler
       env:
-        - CACHE_NAME: rspec
         - DB_USERNAME: travis
         - DB_PASSWORD: root
       services:
@@ -53,18 +51,16 @@ jobs:
         - sudo apt-get update && sudo apt-get install -y build-essential python-dev python-pip
         - sudo pip install --upgrade pip
         - sudo pip install -r requirements.txt --ignore-installed PyYAML
-      before_script: rake db:create db:migrate db:seed
-      script:  rspec
+      before_script: bundle exec rake db:create db:migrate db:seed
+      script: bundle exec rspec
     - name: "Ruby Code Quality"
       language: ruby
       rvm: 2.5
       cache: bundler
-      env:
-        - CACHE_NAME: ruby_code_quality
       script: 
-        - rubocop -R --config .rubocop_todo.yml
+        - bundle exec rubocop -R --config .rubocop_todo.yml
         # Block on High Confidence warnings
-        - brakeman --no-pager -w3
+        - bundle exec brakeman --no-pager -w3
     - name: "Python Test"
       language: python
       python: 2.7
