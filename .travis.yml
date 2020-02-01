@@ -73,6 +73,7 @@ jobs:
       cache: npm
       node_js: 10
       before_install: npm update -g
+      install: npm install
       script:
         - ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
         - npm test
