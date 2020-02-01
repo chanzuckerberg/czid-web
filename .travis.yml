@@ -63,7 +63,7 @@ jobs:
       language: ruby
       rvm: 2.5
       cache: bundler
-      environment:
+      env:
         - CACHE_NAME: ruby_code_quality
       install: bundle install
       script: 
@@ -86,7 +86,7 @@ jobs:
         - ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
         - npm test
     - name: "Docker Build"
-      language: minimal
+      language: shell
       services:
         - docker
       script:
