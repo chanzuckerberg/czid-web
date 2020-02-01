@@ -18,8 +18,6 @@ jobs:
         - sudo bash -c "echo '127.0.0.1 db' >> /etc/hosts" 
         - sudo bash -c "echo '127.0.0.1 redis' >> /etc/hosts" 
         - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
-      install:
-        - bundle install
         - sudo apt-get update && sudo apt-get install -y build-essential python-dev python-pip
         - sudo pip install --upgrade pip
         - sudo pip install -r requirements.txt --ignore-installed PyYAML
@@ -52,8 +50,6 @@ jobs:
         - sudo bash -c "echo '127.0.0.1 db' >> /etc/hosts" 
         - sudo bash -c "echo '127.0.0.1 redis' >> /etc/hosts" 
         - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
-      install:
-        - bundle install
         - sudo apt-get update && sudo apt-get install -y build-essential python-dev python-pip
         - sudo pip install --upgrade pip
         - sudo pip install -r requirements.txt --ignore-installed PyYAML
@@ -65,7 +61,6 @@ jobs:
       cache: bundler
       env:
         - CACHE_NAME: ruby_code_quality
-      install: bundle install
       script: 
         - rubocop -R --config .rubocop_todo.yml
         # Block on High Confidence warnings
@@ -74,14 +69,12 @@ jobs:
       language: python
       python: 2.7
       cache: pip
-      install: pip install -r requirements.txt
       script:
         - pip install mock
         - python -m unittest discover -v -s test/ -p 'test_*.py'
     - name: "JavaScript Tests + Lint"
       language: node_js
       node_js: 10
-      install: npm install
       script:
         - ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
         - npm test
