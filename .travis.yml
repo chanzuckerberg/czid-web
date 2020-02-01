@@ -9,12 +9,10 @@ jobs:
       cache:
         bundler: true
         directories:
-          - node_modules
           - /usr/local/lib/python2.7/site-packages
       env:
         - DB_USERNAME: travis
         - DB_PASSWORD: root
-        - NODE_OPTIONS: "--max_old_space_size=6144"
         - SAMPLES_BUCKET_NAME: idseq-samples-development
       services:
         - mysql
