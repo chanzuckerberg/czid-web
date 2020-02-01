@@ -7,6 +7,7 @@ BRANCH="$1"
 BRANCH_CLEANED=`echo $BRANCH | sed 's/\//-/g'`
 COMMIT="$2"
 BRANCH_TAG=$REPO:"branch-$BRANCH_CLEANED"
+CACHE_TAG="$REPO:cache"
 COMMIT_TAG=$REPO:"sha-$COMMIT"
 COMPOSE_TAG="$REPO:compose"
 LATEST_TAG="$REPO:latest"
@@ -18,12 +19,12 @@ echo $TAG
 echo '--'
 
 # Try to pull the latest image for this branch, otherwise pull latest image for caching
-if ! ( docker pull $BRANCH_TAG && docker tag $BRANCH_TAG $COMPOSE_TAG ); then
+if ! ( docker pull $BRANCH_TAG && docker tag $BRANCH_TAG $CACHE_TAG ); then
   docker pull $LATEST_TAG
-  docker tag $LATEST_TAG $COMPOSE_TAG
+  docker tag $LATEST_TAG $CACHE_TAG
 fi
 
-docker build -t $COMPOSE_TAG --cache-from $COMPOSE_TAG --build-arg GIT_COMMIT=${COMMIT} .
+docker build -t $COMPOSE_TAG --cache-from $CACHE_TAG --build-arg GIT_COMMIT=${COMMIT} .
 
 if [ "$BRANCH" == "master" ]; then
   docker tag $COMPOSE_TAG $LATEST_TAG

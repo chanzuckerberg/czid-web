@@ -2,6 +2,14 @@ os: linux
 language: ruby
 env:
   CI: yes
+addons:
+  # Emulate docker compose routing
+  #   Docker compose maps the host db and redis to the mysql and redis containers
+  #   We are using travis-ci services, which use localhost, for testing instead of docker compose 
+  #   we need to map these hosts to localhost to maintain compatibility between the two.
+  hosts:
+    - db
+    - redis
 jobs:
   include:
     - name: "Rails Test"
@@ -12,7 +20,6 @@ jobs:
         directories:
           - $HOME/.cache/pip
       env:
-        # foo
         - DB_USERNAME: travis
         - DB_PASSWORD: root
         - SAMPLES_BUCKET_NAME: idseq-samples-development
@@ -20,13 +27,6 @@ jobs:
         - mysql
         - redis
       before_install:
-        # Emulate docker compose routing
-        #   Docker compose maps the host db and redis to the mysql and redis containers
-        #   We are using travis-ci services, which use localhost, for testing instead of docker compose 
-        #   we need to map these hosts to localhost to maintain compatibility between the two.
-        - sudo bash -c "echo '127.0.0.1 db' >> /etc/hosts" 
-        - sudo bash -c "echo '127.0.0.1 redis' >> /etc/hosts" 
-        - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
         # Install python and dependencies
         - source ~/virtualenv/python2.7/bin/activate
         - pip install -r requirements.txt --ignore-installed PyYAML
@@ -60,13 +60,6 @@ jobs:
         - mysql
         - redis
       before_install:
-        # Emulate docker compose routing
-        #   Docker compose maps the host db and redis to the mysql and redis containers
-        #   We are using travis-ci services, which use localhost, for testing instead of docker compose 
-        #   we need to map these hosts to localhost to maintain compatibility between the two.
-        - sudo bash -c "echo '127.0.0.1 db' >> /etc/hosts" 
-        - sudo bash -c "echo '127.0.0.1 redis' >> /etc/hosts" 
-        - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
         # Install python and dependencies
         - source ~/virtualenv/python2.7/bin/activate
         - pip install -r requirements.txt --ignore-installed PyYAML
