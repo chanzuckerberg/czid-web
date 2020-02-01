@@ -1,4 +1,5 @@
 {
+  "name": "idseq-web",
   "scripts": {
     "start": "npm install --no-optional && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
