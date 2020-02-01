@@ -5,10 +5,7 @@ jobs:
     - name: "Rails Test"
       language: ruby
       rvm: 2.5
-      cache:
-        bundler: true
-        directories:
-          - /usr/local/lib/python2.7/site-packages
+      cache: bundler
       env:
         - DB_USERNAME: travis
         - DB_PASSWORD: root
@@ -42,10 +39,7 @@ jobs:
     - name: "Rspec"
       language: ruby
       rvm: 2.5
-      cache: 
-        bundler: true
-        directories:
-          - /usr/local/lib/python2.7/site-packages
+      cache: bundler
       env:
         - DB_USERNAME: travis
         - DB_PASSWORD: root
@@ -66,7 +60,7 @@ jobs:
     - name: "Ruby Code Quality"
       language: ruby
       rvm: 2.5
-      cache:  bundler
+      cache: bundler
       install: bundle install
       script: 
         - rubocop -R --config .rubocop_todo.yml
