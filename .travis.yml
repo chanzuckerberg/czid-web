@@ -63,19 +63,15 @@ jobs:
         - sudo pip install -r requirements.txt --ignore-installed PyYAML
       before_script: rake db:create db:migrate db:seed
       script:  rspec
-    - name: "Brakeman"
-      language: ruby
-      rvm: 2.5
-      cache: bundler
-      install: bundle install
-      # Block on High Confidence warnings
-      script: brakeman --no-pager -w3
-    - name: "Rubocop"
+    - name: "Ruby Code Quality"
       language: ruby
       rvm: 2.5
       cache:  bundler
       install: bundle install
-      script: rubocop -R --config .rubocop_todo.yml
+      script: 
+        - rubocop -R --config .rubocop_todo.yml
+        # Block on High Confidence warnings
+        - brakeman --no-pager -w3
     - name: "Python Test"
       language: python
       python: 2.7
@@ -84,16 +80,13 @@ jobs:
       script:
         - pip install mock
         - python -m unittest discover -v -s test/ -p 'test_*.py'
-    - name: "JS Test"
+    - name: "JavaScript Tests + Lint"
       language: node_js
       node_js: 10
       install: npm install
-      script: npm test
-    - name: "ESLint"
-      language: node_js
-      node_js: 10
-      install: npm install
-      script: ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
+      script:
+        - ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
+        - npm test
     - name: "Docker Build"
       language: minimal
       services:
