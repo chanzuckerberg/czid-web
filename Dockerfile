@@ -1,5 +1,5 @@
 # Build the assets in a separate stage so we don't need to pack node in our container
-FROM node:10.18.1-alpine3.11 as asset-builder
+FROM node:10.18.1-stretch as asset-builder
 WORKDIR /usr/src
 
 # Git needed for github node modules
