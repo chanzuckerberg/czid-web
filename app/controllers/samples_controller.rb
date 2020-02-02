@@ -814,7 +814,7 @@ class SamplesController < ApplicationController
     background_id = get_background_id(@sample, params[:background])
 
     if pipeline_run
-      # Don't cache the response until all results for the pipeline run have been loaded
+      # Don't cache the response until all results for the pipeline run are available
       # so the displayed pipeline run status and report hover actions will be updated correctly.
       skip_cache = !pipeline_run.complete_and_successful? || params[:skip_cache] || false
 
