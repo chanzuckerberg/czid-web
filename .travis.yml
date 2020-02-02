@@ -87,6 +87,8 @@ jobs:
       script:
         - bin/build-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8}
         - bin/push-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8}
+    # There seems to be a quirk of travis-ci where jobs beyond the fifth
+    #   seem to start later. This job is the fastest by far so keep it last.
     - name: "Python Test"
       language: python
       python: 2.7
