@@ -2,9 +2,6 @@
 FROM node:10.18.1-stretch as asset-builder
 WORKDIR /usr/src
 
-# Git needed for github node modules
-RUN apk update && apk add git
-
 # Copy files required to install dependencies only for caching
 COPY package.json package-lock.json .snyk ./
 RUN npm install
