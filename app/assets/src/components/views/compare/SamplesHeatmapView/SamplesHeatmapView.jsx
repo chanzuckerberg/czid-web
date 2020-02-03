@@ -48,6 +48,14 @@ const SPECIFICITY_OPTIONS = [
   { text: "All", value: 0 },
   { text: "Specific Only", value: 1 },
 ];
+const METRIC_OPTIONS = [
+  "NT.zscore",
+  "NT.rpm",
+  "NT.r",
+  "NR.zscore",
+  "NR.rpm",
+  "NR.r",
+];
 
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
@@ -638,14 +646,9 @@ class SamplesHeatmapView extends React.Component {
 
   getControlOptions = () => ({
     // Server side options
-    metrics: [
-      { value: "NT.zscore", text: "NT Z Score" },
-      { value: "NT.rpm", text: "NT rPM" },
-      { value: "NT.r", text: "NT r (total reads)" },
-      { value: "NR.zscore", text: "NR Z Score" },
-      { value: "NR.rpm", text: "NR rPM" },
-      { value: "NR.r", text: "NR r (total reads)" },
-    ],
+    metrics: this.props.metrics.filter(metric =>
+      METRIC_OPTIONS.includes(metric.value)
+    ),
     categories: this.props.categories || [],
     subcategories: this.props.subcategories || {},
     backgrounds: this.props.backgrounds,
