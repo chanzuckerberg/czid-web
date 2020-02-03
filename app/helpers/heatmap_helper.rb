@@ -24,6 +24,12 @@ module HeatmapHelper
     { text: "NR rPM", value: "NR.rpm" },
     { text: "NR Z Score", value: "NR.zscore" },
     { text: "NR r (total reads)", value: "NR.r" },
+    { text: "NT %id", value: "NT.percentidentity" },
+    { text: "NT L (alignment length in bp)", value: "NT.alignmentlength" },
+    { text: "NT log(1/e)", value: "NT.neglogevalue" },
+    { text: "NR %id", value: "NR.percentidentity" },
+    { text: "NR L (alignment length in bp)", value: "NR.alignmentlength" },
+    { text: "R log(1/e)", value: "NR.neglogevalue" },
   ].freeze
 
   # Samples and background are assumed here to be vieweable.
