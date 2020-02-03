@@ -292,7 +292,7 @@ class PipelineRun < ApplicationRecord
     [FINALIZED_SUCCESS, FINALIZED_FAIL].include?(results_finalized)
   end
 
-  def complete_and_successful?
+  def ready_for_cache?
     # This method is used to decide whether a report is ready to be cached, which is only the case
     # once a pipeline run is successful and all results are available.
     #   (1) "results_finalized == FINALIZED_SUCCESS" means all results destined for the DB
@@ -872,9 +872,11 @@ class PipelineRun < ApplicationRecord
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
 
-        # Precache reports for all backgrounds
-        Resque.enqueue(PrecacheReportInfo, id)
-        Resque.enqueue(PrecacheReportInfoV2, id)
+        # Precache reports for all backgrounds.
+        if ready_for_cache?
+          Resque.enqueue(PrecacheReportInfo, id)
+          Resque.enqueue(PrecacheReportInfoV2, id)
+        end
 
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]

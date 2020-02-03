@@ -816,7 +816,7 @@ class SamplesController < ApplicationController
     if pipeline_run
       # Don't cache the response until all results for the pipeline run are available
       # so the displayed pipeline run status and report hover actions will be updated correctly.
-      skip_cache = !pipeline_run.complete_and_successful? || params[:skip_cache] || false
+      skip_cache = !pipeline_run.ready_for_cache? || params[:skip_cache] || false
 
       report_info_params = pipeline_run.report_info_params
       # If the pipeline_version wasn't passed in from the client-side,
