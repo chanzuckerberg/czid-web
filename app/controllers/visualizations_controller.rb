@@ -160,7 +160,7 @@ class VisualizationsController < ApplicationController
           { text: "NR rPM", value: "NR_rpm" },
           { text: "NR %id", value: "NR_percentidentity" },
           { text: "NR L (alignment length in bp)", value: "NR_alignmentlength" },
-          { text: "NR log(1/e)", value: "NR_neglogevalue" },
+          { text: "R log(1/e)", value: "NR_neglogevalue" },
         ],
         operators: [">=", "<="],
       },

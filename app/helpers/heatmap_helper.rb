@@ -29,7 +29,7 @@ module HeatmapHelper
     { text: "NT log(1/e)", value: "NT.neglogevalue" },
     { text: "NR %id", value: "NR.percentidentity" },
     { text: "NR L (alignment length in bp)", value: "NR.alignmentlength" },
-    { text: "NR log(1/e)", value: "NR.neglogevalue" },
+    { text: "R log(1/e)", value: "NR.neglogevalue" },
   ].freeze
 
   # Samples and background are assumed here to be vieweable.
