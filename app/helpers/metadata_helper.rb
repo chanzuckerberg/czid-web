@@ -300,6 +300,10 @@ module MetadataHelper
         end
 
         sample.host_genome = host_genome
+        if sample.host_genome.new_record?
+          # for passing sample.metadatum_validate below
+          sample.host_genome.add_default_metadata_fields!
+        end
       end
 
       # The MetadataField objects that were used to validate the metadata.
