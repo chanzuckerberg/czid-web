@@ -297,7 +297,7 @@ class PipelineRun < ApplicationRecord
     # once a pipeline run is successful and all results are available.
     #   (1) "results_finalized == FINALIZED_SUCCESS" means all results destined for the DB
     #       have successfully been loaded from S3.
-    #   (2) "finalized == STATUS_CHECKED" means all Batch jobs have completed successfully.
+    #   (2) "job_status == STATUS_CHECKED" means all Batch jobs have completed successfully.
     #       This is important because certain outputs (e.g. coverage viz) are never loaded to
     #       the DB. Instead they are fetched at the time a report is viewed. We can only be
     #       certain that generation of those outputs is complete if the last Batch job has succeeded.
