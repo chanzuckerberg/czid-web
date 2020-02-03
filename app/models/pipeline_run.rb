@@ -301,7 +301,7 @@ class PipelineRun < ApplicationRecord
     #       This is important because certain outputs (e.g. coverage viz) are never loaded to
     #       the DB. Instead they are fetched at the time a report is viewed. We can only be
     #       certain that generation of those outputs is complete if the last Batch job has succeeded.
-    pipeline_run.results_finalized == FINALIZED_SUCCESS && pipeline_run.finalized == STATUS_CHECKED
+    results_finalized == FINALIZED_SUCCESS && job_status == STATUS_CHECKED
   end
 
   def failed?
