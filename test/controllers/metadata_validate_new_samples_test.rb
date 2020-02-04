@@ -176,8 +176,10 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
+  # TODO: (gdingle): This behavior will change after removal of admin-only of new host genome input.
+  # See https://jira.czi.team/browse/IDSEQ-2051.
   test 'missing or invalid host genome' do
-    sign_in @user
+    sign_in @user_nonadmin
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
@@ -190,11 +192,11 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id,
+          project_id: @joe_project.id,
         },
         {
           name: "Test Sample 2",
-          project_id: @metadata_validation_project.id,
+          project_id: @joe_project.id,
         },
       ],
     }, as: :json
