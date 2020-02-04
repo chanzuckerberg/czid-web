@@ -40,6 +40,9 @@ class Metadatum < ApplicationRecord
     # Check if the key is valid. Metadata_field was supposed to be set.
     valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten
     if sample.host_genome.new_record?
+      # The sample's host genome may be a user-defined host genome that hasn't
+      # been created yet and has no metadata fields. Add the default fields for
+      # host genomes as valid keys.
       valid_keys += MetadataField.where(default_for_new_host_genome: 1).pluck(:name, :display_name).flatten
     end
 
