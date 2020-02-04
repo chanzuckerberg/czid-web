@@ -102,9 +102,10 @@ RSpec.describe SamplesHelper, type: :helper do
 
       before do
         @project = create(:public_project)
+        @admin = create(:admin)
         # Because of initial admin only gating. See
         # https://jira.czi.team/browse/IDSEQ-2051
-        @admin = create(:admin)
+        @admin.add_allowed_feature("host_genome_free_text")
       end
 
       def sample_attributes(host_genome_name)
@@ -151,8 +152,8 @@ RSpec.describe SamplesHelper, type: :helper do
       end
 
       it "raises an error if the host genome name is bad" do
-        message = "Validation failed: Name of host organism allows only word, period, dash or space chars, and first char must be capitalized."
-        host_genome_name = "bad lowercase name"
+        message = "Validation failed: Name of host organism allows only word, period, dash or space chars, and must start with a word char."
+        host_genome_name = "~~~bad name~~~"
         expect(HostGenome.find_by(name: host_genome_name)).to be nil
 
         response = helper.upload_samples_with_metadata(

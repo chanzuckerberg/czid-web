@@ -4,6 +4,10 @@
 
 .listContainer {
   background-color: $info-bg;
+
+  &.warn {
+    background-color: $warning-bg;
+  }
 }
 
 .messageContainer {
@@ -26,10 +30,16 @@
 
   &:nth-child(odd) {
     background-color: $info-dark;
+    &.warn {
+      background-color: $warning-dark;
+    }
   }
 
   &:nth-child(even) {
     background-color: $info-bg;
+    &.warn {
+      background-color: $warning-bg;
+    }
   }
 
   &:last-child {
