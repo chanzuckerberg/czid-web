@@ -4,8 +4,11 @@ set -e
 export REPO=chanzuckerberg/idseq-web
 
 BRANCH="$1"
+BRANCH_CLEANED=`echo $BRANCH | sed 's/\//-/g'`
 COMMIT="$2"
-BUILD_NUMBER="$3"
+BRANCH_TAG=$REPO:"branch-$BRANCH_CLEANED"
+CACHE_TAG="$REPO:cache"
+COMMIT_TAG=$REPO:"sha-$COMMIT"
 COMPOSE_TAG="$REPO:compose"
 LATEST_TAG="$REPO:latest"
 
@@ -15,16 +18,16 @@ echo $REPO
 echo $TAG
 echo '--'
 
-# need to pull images for cache_from first
-docker pull $LATEST_TAG || true
-docker pull $COMPOSE_TAG || true
+# Try to pull the latest image for this branch, otherwise pull latest image for caching
+if ! ( docker pull $BRANCH_TAG && docker tag $BRANCH_TAG $CACHE_TAG ); then
+  docker pull $LATEST_TAG
+  docker tag $LATEST_TAG $CACHE_TAG
+fi
 
-docker-compose build --build-arg GIT_COMMIT=${COMMIT} web
+docker build -t $COMPOSE_TAG --cache-from $CACHE_TAG --build-arg GIT_COMMIT=${COMMIT} .
 
 if [ "$BRANCH" == "master" ]; then
   docker tag $COMPOSE_TAG $LATEST_TAG
 fi
-docker tag $COMPOSE_TAG $REPO:"sha-$COMMIT"
-BRANCH_CLEANED=`echo $BRANCH | sed 's/\//-/g'`
-docker tag $COMPOSE_TAG $REPO:"branch-$BRANCH_CLEANED"
-docker tag $COMPOSE_TAG $REPO:"build-$BUILD_NUMBER"
+docker tag $COMPOSE_TAG $COMMIT_TAG
+docker tag $COMPOSE_TAG $BRANCH_TAG

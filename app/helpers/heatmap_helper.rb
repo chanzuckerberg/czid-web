@@ -24,10 +24,16 @@ module HeatmapHelper
     { text: "NR rPM", value: "NR.rpm" },
     { text: "NR Z Score", value: "NR.zscore" },
     { text: "NR r (total reads)", value: "NR.r" },
+    { text: "NT %id", value: "NT.percentidentity" },
+    { text: "NT L (alignment length in bp)", value: "NT.alignmentlength" },
+    { text: "NT log(1/e)", value: "NT.neglogevalue" },
+    { text: "NR %id", value: "NR.percentidentity" },
+    { text: "NR L (alignment length in bp)", value: "NR.alignmentlength" },
+    { text: "R log(1/e)", value: "NR.neglogevalue" },
   ].freeze
 
   # Samples and background are assumed here to be vieweable.
-  def self.sample_taxons_dict(params, samples, background_id)
+  def self.sample_taxons_dict(params, samples, background_id, client_filtering_enabled: false)
     return {} if samples.empty?
 
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
@@ -65,13 +71,14 @@ module HeatmapHelper
       samples,
       background_id,
       categories,
-      read_specificity,
-      include_phage,
-      num_results,
-      min_reads,
-      sort_by,
-      threshold_filters,
-      species_selected
+      read_specificity: read_specificity,
+      include_phage: include_phage,
+      num_results: num_results,
+      min_reads: min_reads,
+      sort_by: sort_by,
+      threshold_filters: threshold_filters,
+      species_selected: species_selected,
+      client_filtering_enabled: client_filtering_enabled
     )
 
     details = top_taxons_details(
@@ -79,7 +86,8 @@ module HeatmapHelper
       num_results,
       sort_by,
       species_selected,
-      threshold_filters
+      threshold_filters,
+      client_filtering_enabled: client_filtering_enabled
     )
 
     taxon_ids = details.pluck('tax_id')
@@ -96,7 +104,8 @@ module HeatmapHelper
       samples,
       taxon_ids,
       species_selected,
-      threshold_filters
+      threshold_filters,
+      client_filtering_enabled: client_filtering_enabled
     )
   end
 
@@ -105,7 +114,8 @@ module HeatmapHelper
     num_results,
     sort_by,
     species_selected,
-    threshold_filters
+    threshold_filters,
+    client_filtering_enabled: false
   )
     sort = ReportHelper.decode_sort_by(sort_by)
     count_type = sort[:count_type]
@@ -117,7 +127,7 @@ module HeatmapHelper
       sample_id = pr.sample_id
 
       tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-      HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected)
+      HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected) unless client_filtering_enabled
 
       rows = []
       tax_2d.each do |_tax_id, tax_info|
@@ -160,13 +170,14 @@ module HeatmapHelper
     samples,
     background_id,
     categories,
-    read_specificity = READ_SPECIFICITY,
-    include_phage = INCLUDE_PHAGE,
-    num_results = DEFAULT_NUM_RESULTS,
-    min_reads = MINIMUM_READ_THRESHOLD,
-    sort_by = DEFAULT_TAXON_SORT_PARAM,
-    threshold_filters = [],
-    species_selected = true
+    read_specificity: READ_SPECIFICITY,
+    include_phage: INCLUDE_PHAGE,
+    num_results: DEFAULT_NUM_RESULTS,
+    min_reads: MINIMUM_READ_THRESHOLD,
+    sort_by: DEFAULT_TAXON_SORT_PARAM,
+    threshold_filters: [],
+    species_selected: true,
+    client_filtering_enabled: false
   )
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
@@ -188,6 +199,7 @@ module HeatmapHelper
     end
 
     tax_level = species_selected ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
+    tax_level_clause = client_filtering_enabled ? " AND taxon_counts.tax_level IN ('#{TaxonCount::TAX_LEVEL_SPECIES}', '#{TaxonCount::TAX_LEVEL_GENUS}')" : " AND taxon_counts.tax_level = #{tax_level}"
 
     # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
     # fraction_subsampled = 1.0.
@@ -237,7 +249,7 @@ module HeatmapHelper
       AND count >= #{min_reads}
       -- We need both types of counts for threshold filters
       AND taxon_counts.count_type IN ('NT', 'NR')
-      AND taxon_counts.tax_level = #{tax_level}
+      #{tax_level_clause}
       #{categories_clause}
       #{read_specificity_clause}
       #{phage_clause}"
@@ -283,7 +295,8 @@ module HeatmapHelper
     samples,
     taxon_ids,
     species_selected,
-    threshold_filters
+    threshold_filters,
+    client_filtering_enabled: false
   )
     results = {}
 
@@ -295,7 +308,7 @@ module HeatmapHelper
         taxon_counts = res["taxon_counts"]
         sample_id = pr.sample_id
         tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-        HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected)
+        HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected) unless client_filtering_enabled
 
         rows = []
         tax_2d.each { |_tax_id, tax_info| rows << tax_info }

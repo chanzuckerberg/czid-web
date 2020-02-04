@@ -1,32 +1,95 @@
+os: linux
 language: ruby
-sudo: required
 env:
   CI: yes
-rvm:
-- 2.5
-services:
-  - docker
-before_install:
-  - mkdir -p ~/.aws && printf "[default]\nregion = $AWS_REGION\naws_access_key_id = $AWS_ACCESS_KEY_ID\naws_secret_access_key = $AWS_SECRET_ACCESS_KEY\n" > ~/.aws/credentials
-  - bin/build-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8} $TRAVIS_BUILD_NUMBER
-  - docker-compose up -d db
-  - docker-compose up -d redis
-  - sleep 10
-  - docker-compose run web rake db:create
-install:
-  - gem install brakeman
-script:
-  - docker-compose run --rm webtest "./node_modules/.bin/eslint app/assets/src --ext .js,.jsx"
-  - echo "quit" | docker-compose run --rm webtest "rails dbconsole"
-  - docker-compose run --rm webtest "rubocop -R --config .rubocop_todo.yml"
-  - docker-compose run --rm webtest "rake db:drop db:create db:migrate db:seed"
-  - docker-compose run --rm webtest "rails test"
-  - docker-compose run --rm webtest "rake db:drop db:create db:migrate db:seed"
-  - docker-compose run --rm webtest "rspec"
-  - docker-compose run --rm webtest "npm test"
-  - docker-compose run --rm webtest "pip install mock; python -m unittest discover -v -s /app/test/ -p 'test_*.py'"
-  # Block on High Confidence warnings
-  - brakeman --no-pager -w3
+addons:
+  # Emulate docker compose routing
+  #   Docker compose maps the host db and redis to the mysql and redis containers
+  #   We are using travis-ci services, which use localhost, for testing instead of docker compose 
+  #   we need to map these hosts to localhost to maintain compatibility between the two.
+  hosts:
+    - db
+    - redis
+jobs:
+  include:
+    - name: "Rails Test"
+      language: ruby
+      rvm: 2.5
+      cache:
+        bundler: true
+        directories:
+          - $HOME/.cache/pip
+      env:
+        - DB_USERNAME: travis
+        - DB_PASSWORD: root
+        - SAMPLES_BUCKET_NAME: idseq-samples-development
+      services:
+        - mysql
+        - redis
+      before_install:
+        # Install python and dependencies
+        - source ~/virtualenv/python2.7/bin/activate
+        - pip install -r requirements.txt
+      before_script:
+        # Create dummy versions of our javascript and css bundle
+        #   The actual files are not required for testing ruby, just the presence of the files
+        - mkdir -p app/assets/dist
+        - echo foo > app/assets/dist/main.bundle.min.css
+        - echo foo > app/assets/dist/main.bundle.min.js
+        - echo foo > app/assets/dist/vendors~main.bundle.min.css
+        - echo foo > app/assets/dist/vendors~main.bundle.min.js
+        - bundle exec rake db:create db:migrate db:seed
+      script: bundle exec rails test
+    - name: "Rspec"
+      language: ruby
+      rvm: 2.5
+      cache:
+        bundler: true
+        directories:
+          - $HOME/.cache/pip
+      env:
+        - DB_USERNAME: travis
+        - DB_PASSWORD: root
+      services:
+        - mysql
+        - redis
+      before_install:
+        # Install python and dependencies
+        - source ~/virtualenv/python2.7/bin/activate
+        - pip install -r requirements.txt
+      before_script: bundle exec rake db:create db:migrate db:seed
+      script: bundle exec rspec
+    - name: "Ruby Code Quality"
+      language: ruby
+      rvm: 2.5
+      cache: bundler
+      script: 
+        - bundle exec rubocop -R --config .rubocop_todo.yml
+        # Block on High Confidence warnings
+        - bundle exec brakeman --no-pager -w3
+    - name: "JavaScript Tests + Lint"
+      language: node_js
+      node_js: 10
+      cache: npm
+      script:
+        - ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
+        - npm test
+    - name: "Docker Build"
+      language: shell
+      services:
+        - docker
+      script:
+        - bin/build-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8}
+        - bin/push-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8}
+    # There seems to be a quirk of travis-ci where jobs beyond the fifth
+    #   seem to start later. This job is the fastest by far so keep it last.
+    - name: "Python Test"
+      language: python
+      python: 2.7
+      cache: pip
+      script:
+        - pip install mock
+        - python -m unittest discover -v -s test/ -p 'test_*.py'
 env:
   global:
   - secure: l6JImOInd+PoLwf9hbAl6QmjXE4mShlG7SEkasSKk6XzT4npNTUqqYVVpNewr1f58U97SdHShv6WgxKIiUpX+adIBp9b59CsI7SCKxt1aSp9egyZE6F1ZIoqjmfH6o9U4dUkE32TJdG4Tn/QMd0fj3nCqathFIWFhato6ovqXmJpklJHH9BGbK330bEYG1LoUU3u/hIhBc8bAuNIO15eih1vMltYiSw5ScQxBMjcCskAjEeb8EA7i82pEpyD9iBWcIomw5Mrro0IInjJbudIQ5RukNZtI3zZXiSbR8m8VWzK8A8ixihHKRbBoLXn3X719s13FIJKL2Pn1utxMx4zrLLUx4iMafey2e8iG9C3JYyHu6UoR/E5hcSCdhHDmwiCiIQF8cHt2sZNVE33rEGdEkhsPgwlH16O6kBJmVOqaaihPN/yjzIyjxDoyknPfswpkiRiuqaa9XDXh5dgU0xHDfKic6ioAJvRMn0Ngbo7Ogi90rTaxksFFo7UAL9mChQaB+qtJk+tU0I7PFTR52ie62KcIAfqU3PFOo1jchmw7uEu/k8yNpZM4gar2gnl8gqe5dIVqkTDfNWBTlYX17dTqeHB7ZqCRKZzYcEZK8SVmw9fs/JTouwQK2nXgwEnp7dJdofvZgXhLZ4/ZhNniLn0ObDQauzYKPKgk819CtIb968=
@@ -35,5 +98,3 @@ env:
 notifications:
   slack:
     secure: ToieN3tJjRDoLTqOuoWQ5mFWTl9Pm4eNgDYDLar7AKp0YteDSsUBdqbTzdV8s4Gjmbb8/q5Lj9/FM1oZnW1n8RPxLKV1i8mCVfrQVl6c9ynLZCfs/FGYgsspe2NwaIPcDzeIFwwbmL9DzEGPR+1WkuYZe4Iiq0GnI0otajqx0VfBjUjbDNUVXZtZV26K24fykJ18+U+2OHUPAmoHHeUGKRnW1CLeyqvZQWommlo6aULHHi1cFc4HdiR0LR44mrk7wuZrQJwbvrWSYGl6QVBcDj/g6MjZKkS5HKmiCfw/quT32/YS8pDdK11g71aw+4svzfHkGsxhVBADI6EOkiqKfFkAjn2nARjey966Q8X6yit2BVASWD+T7r8COC31aVDwZtg5tNsYjmmhD+7NlXZswqeazz9cHi+4wJTBU4QyUzqYsyZZJIdORDAnLUOre+5eqzIT84dKU2JtAzqkHF9x/FrBJ3+km0ocbsRn746/Yk4htvL9HAo8ovnYy4NYnmNAEtc704mgnx60pytQAc97DxD4bvG4gujkv6mqrNrwm2GqavrmicW7OW6NZ+yCoR0qrFRUmElAlnFdafw/2x1HbZVf+scn6PJMTjIjjOPxrHwidU9ARkGTt8or+zbPmUK6l15QkZGEpXzVKJQ7rt92hywWSldh6StZNpP1wUpTnfQ=
-after_success:
-  - bin/push-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8} $TRAVIS_BUILD_NUMBER
