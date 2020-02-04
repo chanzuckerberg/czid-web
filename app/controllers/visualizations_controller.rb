@@ -187,7 +187,8 @@ class VisualizationsController < ApplicationController
     @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
       params,
       samples_for_heatmap,
-      background_for_heatmap
+      background_for_heatmap,
+      current_user.allowed_feature?("heatmap_filter_fe")
     )
     render json: @sample_taxons_dict
   end
