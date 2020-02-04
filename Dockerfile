@@ -5,16 +5,19 @@ FROM ruby:2.5-stretch
 # Debian image, we use apt-get to install those.
 RUN apt-get update && apt-get install -y build-essential nodejs mysql-client python-dev python-pip apt-transport-https
 
+# Install node + npm
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get update && apt-get install -y nodejs
+
+# Install pip
 RUN pip install --upgrade pip
+
+# Install chamber, for pulling secrets into the container.
+RUN curl -L https://github.com/segmentio/chamber/releases/download/v2.2.0/chamber-v2.2.0-linux-amd64 -o /bin/chamber
+RUN chmod +x /bin/chamber
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
-
-# Install chamber, for pulling secrets into the container.
-ADD https://github.com/segmentio/chamber/releases/download/v2.2.0/chamber-v2.2.0-linux-amd64 /bin/chamber
-RUN chmod +x /bin/chamber
 
 # Configure the main working directory. This is the base
 # directory used in any further RUN, COPY, and ENTRYPOINT
@@ -34,13 +37,17 @@ RUN npm update -g
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Copy the main application.
-COPY . ./
-
 # Generate the app's static resources using npm/webpack
 # Increase memory available to node to 6GB (from default 1.5GB). At this Travis runs on 7.5GB instances.
 ENV NODE_OPTIONS "--max_old_space_size=6144"
+# Only copy what is required so we don't need to rebuild when we are only updating the api
+COPY app/assets app/assets
+COPY webpack.config.common.js webpack.config.prod.js .babelrc ./
+# Generate assets
 RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
+
+# Copy the main application.
+COPY . ./
 
 ARG GIT_COMMIT
 ENV GIT_VERSION ${GIT_COMMIT}

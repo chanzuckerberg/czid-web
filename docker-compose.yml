@@ -77,7 +77,6 @@ version: '3.4'
 services:
   elasticsearch:
     image: elasticsearch:6.4.3
-
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
@@ -114,11 +113,7 @@ services:
     image: chanzuckerberg/idseq-web:compose
     volumes:
       - ~/.aws:/root/.aws:ro
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - redis
+    network_mode: host
     environment:
       <<: *web-variables
       <<: *travis-variables
