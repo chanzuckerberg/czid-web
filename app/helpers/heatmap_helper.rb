@@ -27,7 +27,7 @@ module HeatmapHelper
   ].freeze
 
   # Samples and background are assumed here to be vieweable.
-  def self.sample_taxons_dict(params, samples, background_id, client_filtering_enabled = false)
+  def self.sample_taxons_dict(params, samples, background_id, client_filtering_enabled: false)
     return {} if samples.empty?
 
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
@@ -71,7 +71,8 @@ module HeatmapHelper
       min_reads,
       sort_by,
       threshold_filters,
-      species_selected
+      species_selected,
+      client_filtering_enabled: client_filtering_enabled
     )
 
     details = top_taxons_details(
@@ -80,7 +81,7 @@ module HeatmapHelper
       sort_by,
       species_selected,
       threshold_filters,
-      client_filtering_enabled
+      client_filtering_enabled: client_filtering_enabled
     )
 
     taxon_ids = details.pluck('tax_id')
@@ -98,7 +99,7 @@ module HeatmapHelper
       taxon_ids,
       species_selected,
       threshold_filters,
-      client_filtering_enabled
+      client_filtering_enabled: client_filtering_enabled
     )
   end
 
@@ -108,7 +109,7 @@ module HeatmapHelper
     sort_by,
     species_selected,
     threshold_filters,
-    client_filtering_enabled = false
+    client_filtering_enabled: false
   )
     sort = ReportHelper.decode_sort_by(sort_by)
     count_type = sort[:count_type]
@@ -159,6 +160,7 @@ module HeatmapHelper
     candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }
   end
 
+  # rubocop:disable Metrics/ParameterLists
   def self.fetch_top_taxons(
     samples,
     background_id,
@@ -169,7 +171,8 @@ module HeatmapHelper
     min_reads = MINIMUM_READ_THRESHOLD,
     sort_by = DEFAULT_TAXON_SORT_PARAM,
     threshold_filters = [],
-    _species_selected = true
+    species_selected = true,
+    client_filtering_enabled: false
   )
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
@@ -193,7 +196,8 @@ module HeatmapHelper
     # Select both species and genus level counts.
     # Taxon counts are later filtered down to the desired taxon level in samples_taxons_details and top_taxons_details
     # by calling only_species_or_genus_counts!, OR will be filtered on the client-side if a user has "heatmap_filter_fe" enabled.
-    tax_level_clause = " AND taxon_counts.tax_level IN ('#{TaxonCount::TAX_LEVEL_SPECIES}', '#{TaxonCount::TAX_LEVEL_GENUS}')"
+    tax_level = species_selected ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
+    tax_level_clause = client_filtering_enabled ? " AND taxon_counts.tax_level IN ('#{TaxonCount::TAX_LEVEL_SPECIES}', '#{TaxonCount::TAX_LEVEL_GENUS}')" : " AND taxon_counts.tax_level = #{tax_level}"
 
     # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
     # fraction_subsampled = 1.0.
@@ -290,7 +294,7 @@ module HeatmapHelper
     taxon_ids,
     species_selected,
     threshold_filters,
-    client_filtering_enabled = false
+    client_filtering_enabled: false
   )
     results = {}
 
@@ -503,7 +507,7 @@ module HeatmapHelper
       -- Overfetch by a factor of 8 to allow for a) both count types, and
       -- b) any post-SQL filtering
       -- c) both genus and species results
-      WHERE rank <= #{num_results * 8}
+      WHERE rank <= #{num_results * 4}
     "
   end
 
