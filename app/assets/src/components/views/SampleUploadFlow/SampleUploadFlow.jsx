@@ -10,7 +10,6 @@ import UploadMetadataStep from "./UploadMetadataStep";
 import ReviewStep from "./ReviewStep";
 import cs from "./sample_upload_flow.scss";
 import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
-import HostOrganismMessage from "./HostOrganismMessage";
 
 class SampleUploadFlow extends React.Component {
   state = {
@@ -168,18 +167,13 @@ class SampleUploadFlow extends React.Component {
               project={this.state.project}
               sampleNamesToFiles={this.state.sampleNamesToFiles}
               hostGenomes={this.state.hostGenomes}
+              originalHostGenomes={this.props.hostGenomes}
               visible={this.state.currentStep === "review"}
               onUploadStatusChange={this.onUploadStatusChange}
               onStepSelect={this.handleStepSelect}
               onUploadComplete={this.onUploadComplete}
-            >
-              {this.props.admin && (
-                <HostOrganismMessage
-                  hostGenomes={this.props.hostGenomes}
-                  samples={this.state.samples}
-                />
-              )}
-            </ReviewStep>
+              admin={this.props.admin}
+            />
           )}
       </div>
     );

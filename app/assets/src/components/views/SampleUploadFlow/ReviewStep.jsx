@@ -25,6 +25,7 @@ import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 
 import cs from "./sample_upload_flow.scss";
 import UploadProgressModal from "./UploadProgressModal";
+import HostOrganismMessage from "./HostOrganismMessage";
 
 const processMetadataRows = metadataRows =>
   flow(
@@ -343,7 +344,12 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          {this.props.children}
+          {this.props.admin && (
+            <HostOrganismMessage
+              hostGenomes={this.props.originalHostGenomes}
+              samples={this.state.samples}
+            />
+          )}
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
           <TermsAgreement
@@ -417,12 +423,13 @@ ReviewStep.propTypes = {
   ),
   uploadType: PropTypes.string.isRequired,
   hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
+  originalHostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
   visible: PropTypes.bool,
   // Triggers when we start or stop uploading. Lets the parent know to disable header link.
   onUploadStatusChange: PropTypes.func,
   onStepSelect: PropTypes.func,
   onUploadComplete: PropTypes.func.isRequired,
-  children: PropTypes.node,
+  admin: PropTypes.bool,
 };
 
 ReviewStep.contextType = UserContext;
