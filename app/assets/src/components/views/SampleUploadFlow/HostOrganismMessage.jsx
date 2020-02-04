@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { keys, countBy, mapValues, keyBy, map } from "lodash/fp";
+import { every, keys, countBy, map } from "lodash/fp";
+import cx from "classnames";
 
 import Accordion from "~/components/layout/Accordion";
 import Notification from "~ui/notifications/Notification";
@@ -13,14 +14,12 @@ import cs from "./host_organism_message.scss";
  * IDseq-supported host.
  */
 export default class HostOrganismMessage extends React.Component {
-  hasMatch(host) {
-    return map("name", this.props.hostGenomes).includes(host);
-  }
+  hasMatch = host => map("name", this.props.hostGenomes).includes(host);
 
   renderOneHost(host, count) {
     return (
       <Notification
-        type="info"
+        type={this.hasMatch(host) ? "info" : "warn"}
         displayStyle="flat"
         className={cs.messageContainer}
       >
@@ -89,9 +88,11 @@ export default class HostOrganismMessage extends React.Component {
   renderManyHosts(uniqHosts) {
     // Strangely, the " " spaces are not being ending up in the header so
     // we use &nbsp;
+    const isWarn = !every(this.hasMatch, uniqHosts);
+    const color = { [cs.warn]: isWarn };
     const header = (
       <Notification
-        type="info"
+        type={isWarn ? "warn" : "info"}
         displayStyle="flat"
         className={cs.messageContainer}
       >
@@ -106,10 +107,10 @@ export default class HostOrganismMessage extends React.Component {
         bottomContentPadding
         header={header}
         open={false}
-        className={cs.listContainer}
+        className={cx(cs.listContainer, color)}
       >
         {keys(uniqHosts).map(host => (
-          <div key={host} className={cs.messageLine}>
+          <div key={host} className={cx(cs.messageLine, color)}>
             {this.renderTextLine(host, uniqHosts[host])}
           </div>
         ))}
@@ -118,8 +119,7 @@ export default class HostOrganismMessage extends React.Component {
   }
 
   getSelectedHostOrganisms() {
-    const idToName = mapValues("name", keyBy("id", this.props.hostGenomes));
-    return this.props.samples.map(sample => idToName[sample.host_genome_id]);
+    return this.props.samples.map(sample => sample.host_genome_name);
   }
 
   render() {

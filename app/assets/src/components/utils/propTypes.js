@@ -89,6 +89,7 @@ const HostGenome = PropTypes.shape({
   id: PropTypes.number,
   name: PropTypes.string,
   samples_count: PropTypes.number,
+  ercc_only: PropTypes.bool,
 });
 
 const Location = PropTypes.shape({
