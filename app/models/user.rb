@@ -79,6 +79,17 @@ class User < ApplicationRecord
     end
   end
 
+  # This is a convenience function for the common case of adding all team
+  # members, test accounts, contractors and beta testers to a new feature before
+  # general release. IMPORTANT NOTE: it assumes that only valid personnel have
+  # a @chanzuckerberg address. This method is intended to be called from the rails
+  # console.
+  def add_allowed_feature_for_all_czi(feature)
+    # covers contractors and regular employees
+    users = User.where("email like '%@%chanzuckerberg.com'")
+    users.each { |u| u.add_allowed_feature(feature) }
+  end
+
   def can_upload(s3_path)
     return true if admin?
 
