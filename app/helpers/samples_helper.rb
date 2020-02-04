@@ -67,7 +67,11 @@ module SamplesHelper
   end
 
   def host_genomes_list
-    HostGenome.all.map { |h| h.slice('name', 'id') }
+    # IMPORTANT NOTE: Only existing, null-user host genomes will be shown as
+    # options for new samples until the team gets a chance to review this policy
+    # in light of the data. See also showAsOption.
+    # See https://jira.czi.team/browse/IDSEQ-2193.
+    HostGenome.all.select { |h| h.user.nil? }.map { |h| h.slice('name', 'id') }
   end
 
   def get_summary_stats(job_stats_hash, pipeline_run)
