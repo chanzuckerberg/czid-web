@@ -172,7 +172,6 @@ class SampleUploadFlow extends React.Component {
               onUploadStatusChange={this.onUploadStatusChange}
               onStepSelect={this.handleStepSelect}
               onUploadComplete={this.onUploadComplete}
-              admin={this.props.admin}
             />
           )}
       </div>

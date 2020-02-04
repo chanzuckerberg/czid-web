@@ -229,7 +229,7 @@ class ReviewStep extends React.Component {
     const shouldTruncateDescription =
       project.description && this.countNewLines(project.description) > 5;
 
-    const { userSettings } = this.context || {};
+    const { userSettings, allowedFeatures } = this.context || {};
 
     return (
       <div
@@ -344,7 +344,7 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          {this.props.admin && (
+          {allowedFeatures.includes("host_genome_free_text") && (
             <HostOrganismMessage
               hostGenomes={this.props.originalHostGenomes}
               samples={samples}
