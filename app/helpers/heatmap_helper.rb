@@ -500,9 +500,10 @@ module HeatmapHelper
           count_type = '#{sort[:count_type]}' DESC,
           #{sort[:metric]} #{sort[:direction] == 'highest' ? 'DESC' : 'ASC'}
       ) b
-      -- Overfetch by a factor of 4 to allow for a) both count types, and
+      -- Overfetch by a factor of 8 to allow for a) both count types, and
       -- b) any post-SQL filtering
-      WHERE rank <= #{num_results * 4}
+      -- c) both genus and species results
+      WHERE rank <= #{num_results * 8}
     "
   end
 
