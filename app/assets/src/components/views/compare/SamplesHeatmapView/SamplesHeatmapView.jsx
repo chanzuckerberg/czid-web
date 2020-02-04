@@ -352,6 +352,7 @@ class SamplesHeatmapView extends React.Component {
                 taxon.tax_id === taxon.species_taxid && taxon.genus_taxid,
               phage: !!taxon.is_phage,
               genusName: taxon.genus_name,
+              taxLevel: taxon.tax_level,
             };
             allTaxonDetails[taxon.name] = allTaxonDetails[taxon.tax_id];
           }
@@ -481,10 +482,16 @@ class SamplesHeatmapView extends React.Component {
       readSpecificity,
       categories,
       subcategories,
+      species,
     } = this.state.selectedOptions;
     let phage_selected =
       subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
 
+    if (species && taxonDetails["taxLevel"] !== 1) {
+      return false;
+    } else if (!species && taxonDetails["taxLevel"] !== 2) {
+      return false;
+    }
     if (readSpecificity && taxonDetails["id"] < 0) {
       return false;
     }
@@ -668,14 +675,15 @@ class SamplesHeatmapView extends React.Component {
   handleSelectedOptionsChange = newOptions => {
     if (this.props.allowedFeatures.includes("heatmap_filter_fe")) {
       const frontendFilters = [
+        "species",
         "categories",
         "subcategories",
         "thresholdFilters",
         "readSpecificity",
         "metric",
       ];
-      // TODO(julie): species and taxaPerSample should eventually be frontend filters
-      const backendFilters = ["species", "background", "taxonsPerSample"];
+      // TODO(julie): taxaPerSample should eventually be a frontend filter
+      const backendFilters = ["background", "taxonsPerSample"];
       const shouldRefetchData =
         intersection(keys(newOptions), backendFilters).length > 0;
       const shouldRefilterData =
