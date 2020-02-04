@@ -57,15 +57,16 @@ class MetadataInput extends React.Component {
       onSave,
       metadataType,
       className,
-      isHuman,
+      taxaCategory,
       isInsect,
       sampleTypes,
     } = this.props;
     const { warning } = this.state;
     const { allowedFeatures } = this.context || {};
-
+    const isHuman = taxaCategory === "human";
     // TODO (gdingle): remove allowedFeatures after launch of sample type, 2020-01-15.
     // See https://jira.czi.team/browse/IDSEQ-2051.
+    debugger;
     if (
       metadataType.key === "sample_type" &&
       allowedFeatures.includes("sample_type_free_text")
@@ -189,8 +190,8 @@ MetadataInput.propTypes = {
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
   isHuman: PropTypes.bool,
-  isInsect: PropTypes.bool,
   warning: PropTypes.string,
+  taxaCategory: PropTypes.string,
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
 

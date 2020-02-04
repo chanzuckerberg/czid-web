@@ -32,14 +32,26 @@ class SampleTypeSearchBox extends React.Component {
     // sample's host genome is an insect, a human, or neither. The "suggested"
     // group is shown first, then the "all" group.
     const getSampleTypeCategory = sampleType => {
+      const { taxaCategory } = this.props;
+      const isInsect = taxaCategory === "insect";
+      const isUnknown = taxaCategory === "unknown";
+      const isNonHumanAnimal = !taxaCategory;
+
       if (sampleType.insect_only) {
-        return this.props.isInsect ? SUGGESTED : ALL;
+        return isInsect ? SUGGESTED : ALL;
       }
       if (sampleType.human_only) {
-        return this.props.isHuman ? SUGGESTED : ALL;
+        return this.props.taxaCategory === "human" ? SUGGESTED : ALL;
       }
-      // insects should only be suggested insect body parts
-      return this.isInsect ? ALL : SUGGESTED;
+      if (isNonHumanAnimal) {
+        return SUGGESTED;
+      }
+      if (isUnknown) {
+        return ALL;
+      }
+      // eslint-disable-next-line no-console
+      console.warn("unexpected category: ", taxaCategory);
+      return ALL;
     };
     return groupBy(getSampleTypeCategory, sortedSampleTypes);
   }
@@ -100,8 +112,7 @@ SampleTypeSearchBox.propTypes = {
   onResultSelect: PropTypes.func.isRequired,
   value: PropTypes.string,
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
-  isHuman: PropTypes.bool.isRequired,
-  isInsect: PropTypes.bool.isRequired,
+  taxaCategory: PropTypes.string,
   showDescription: PropTypes.bool,
 };
 

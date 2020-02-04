@@ -381,7 +381,7 @@ module MetadataHelper
                      host_genome_names.map do |name|
                        hg = HostGenome.find_by(name: name) # case insensitive
                        unless hg
-                         hg = HostGenome.new(name: name, user: current_user)
+                         hg = HostGenome.new(name: name, user: current_user, taxa_category: "unknown")
                          new_host_genomes << hg
                        end
                        hg.valid? && hg

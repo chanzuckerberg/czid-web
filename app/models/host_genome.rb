@@ -28,6 +28,8 @@ class HostGenome < ApplicationRecord
     # https://docs.google.com/spreadsheets/d/1_hPkQe5LI0Zw_C0Ls4HVCEDsc_FNNVOaU_aAfoaiZRE/
     "human",
     "insect",
+    "unknown",
+    # NOTE: blank is interpreted as non-human animal. See getSampleTypeCategory.
   ], }, if: -> { respond_to?(:taxa_category) } # for migrations
 
   # NOTE: Consider updating the star and bowtie defaults if we ever add new ERCC index files.
