@@ -76,6 +76,7 @@ Metrics/MethodLength:
 
 Metrics/ParameterLists:
   Max: 10
+  CountKeywordArgs: false
 
 ModuleLength:
   Enabled: false
