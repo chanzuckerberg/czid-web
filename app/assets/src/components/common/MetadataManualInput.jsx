@@ -266,7 +266,7 @@ class MetadataManualInput extends React.Component {
 
   // Create form fields for the table.
   getManualInputData = () => {
-    const { admin } = this.context || {};
+    const { allowedFeatures } = this.context || {};
 
     if (!this.props.samples) {
       return null;
@@ -293,12 +293,12 @@ class MetadataManualInput extends React.Component {
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
-          // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
+          // TODO (gdingle): remove allowedFeatures after launch of sample type, 2020-01-15.
           // See https://jira.czi.team/browse/IDSEQ-2051.
           if (this.props.samplesAreNew && column === "Host Genome") {
             return (
               <div>
-                {admin ? (
+                {allowedFeatures.includes("host_genome_free_text") ? (
                   <HostOrganismSearchBox
                     className={inputClasses}
                     value={this.getMetadataValue(sample, column)}

@@ -122,8 +122,6 @@ module ErrorHelper
         headers: ["Row #", "Sample Name"],
         title: ->(num_rows, _) { "#{num_rows} rows are missing host genomes." },
       },
-      # TODO: (gdingle): This behavior will change after removal of admin-only of new host genome input.
-      # See https://jira.czi.team/browse/IDSEQ-2051.
       row_invalid_host_genome: {
         headers: ["Row #", "Sample Name", "Invalid Host Genome"],
         title: ->(num_rows, _) { "#{num_rows} rows specify host genomes that are not supported. Names should not contain special characters." },
