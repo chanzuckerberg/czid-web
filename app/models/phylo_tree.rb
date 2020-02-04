@@ -116,6 +116,11 @@ class PhyloTree < ApplicationRecord
     end
   end
 
+  def log_url
+    return nil unless job_log_id
+    AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
+  end
+
   def monitor_job(throttle = true)
     # Detect if batch job has failed so we can stop polling for results.
     # Also, populate job_log_id.
