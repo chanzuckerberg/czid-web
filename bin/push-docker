@@ -4,7 +4,6 @@ export REPO=chanzuckerberg/idseq-web
 
 BRANCH="branch-$1"
 COMMIT="sha-$2"
-BUILD_NUMBER="build-$3"
 
 echo $BRANCH
 echo $COMMIT

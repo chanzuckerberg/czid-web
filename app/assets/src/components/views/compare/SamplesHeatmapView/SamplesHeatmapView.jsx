@@ -48,6 +48,14 @@ const SPECIFICITY_OPTIONS = [
   { text: "All", value: 0 },
   { text: "Specific Only", value: 1 },
 ];
+const METRIC_OPTIONS = [
+  "NT.zscore",
+  "NT.rpm",
+  "NT.r",
+  "NR.zscore",
+  "NR.rpm",
+  "NR.r",
+];
 
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
@@ -450,9 +458,6 @@ class SamplesHeatmapView extends React.Component {
     for (let filter of thresholdFilters) {
       // Convert metric name format from "NT_zscore" to "NT.zscore"
       let metric = filter["metric"].split("_").join(".");
-      // TODO(julie): Backend needs to send more metric data to enable all threshold filters on frontend.
-      // ALL_METRICS currently only includes rPM, zscore, and total reads (and is missing %id, L, log(1/e)).
-      // Current placeholder logic returns true for all taxons if the data for a particular metric is not present.
       if (Object.keys(data).includes(metric)) {
         let value = data[metric][taxonDetails["index"]][sampleIndex];
         if (!value) {
@@ -648,7 +653,9 @@ class SamplesHeatmapView extends React.Component {
 
   getControlOptions = () => ({
     // Server side options
-    metrics: this.props.metrics,
+    metrics: this.props.metrics.filter(metric =>
+      METRIC_OPTIONS.includes(metric.value)
+    ),
     categories: this.props.categories || [],
     subcategories: this.props.subcategories || {},
     backgrounds: this.props.backgrounds,
