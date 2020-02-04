@@ -876,6 +876,8 @@ class PipelineRun < ApplicationRecord
         if ready_for_cache?
           Resque.enqueue(PrecacheReportInfo, id)
           Resque.enqueue(PrecacheReportInfoV2, id)
+        else
+          MetricUtil.log_analytics_event("PipelineReport_not_precached", nil)
         end
 
         # Send to Datadog and Segment
