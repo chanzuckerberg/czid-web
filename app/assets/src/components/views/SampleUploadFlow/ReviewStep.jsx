@@ -347,7 +347,7 @@ class ReviewStep extends React.Component {
           {this.props.admin && (
             <HostOrganismMessage
               hostGenomes={this.props.originalHostGenomes}
-              samples={this.state.samples}
+              samples={samples}
             />
           )}
           {get("show_skip_processing_option", userSettings) &&
