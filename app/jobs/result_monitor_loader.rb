@@ -1,6 +1,6 @@
 # Load a result from S3 into the db
 class ResultMonitorLoader
-  @queue = :q03_pipeline_run
+  @queue = :result_monitor_loader
 
   def self.perform(pipeline_run_id, output)
     pr = PipelineRun.find(pipeline_run_id)
