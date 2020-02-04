@@ -47,7 +47,9 @@ class MetadataController < ApplicationController
       metadata
     )
     # passed validation, now save
-    new_host_genomes.each(&:save!)
+    if issues.empty?
+      new_host_genomes.each(&:save!)
+    end
 
     render json: {
       status: "success",

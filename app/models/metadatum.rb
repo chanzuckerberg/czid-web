@@ -39,6 +39,10 @@ class Metadatum < ApplicationRecord
 
     # Check if the key is valid. Metadata_field was supposed to be set.
     valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten
+    if sample.host_genome.new_record?
+      valid_keys += MetadataField.where(default_for_new_host_genome: 1).pluck(:name, :display_name).flatten
+    end
+
     unless key && valid_keys.include?(key) && metadata_field
       errors.add(:invalid_field_for_host_genome, MetadataValidationErrors::INVALID_FIELD_FOR_HOST_GENOME)
       return

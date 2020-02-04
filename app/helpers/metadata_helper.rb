@@ -4,12 +4,13 @@ module MetadataHelper
   include ErrorHelper
 
   def get_available_matching_field(sample, name)
-    available_fields = sample.project.metadata_fields
+    available_fields = sample.project.metadata_fields.to_a
     return available_fields.find { |field| field.name == name || field.display_name == name }
   end
 
   def get_matching_core_field(sample, name)
-    return sample.host_genome.metadata_fields.where(is_core: true).to_a.find { |field| field.name == name || field.display_name == name }
+    fields = sample.host_genome.metadata_fields.where(is_core: true).to_a
+    return fields.find { |field| field.name == name || field.display_name == name }
   end
 
   def get_new_custom_field(name)
@@ -179,7 +180,7 @@ module MetadataHelper
   def validate_metadata_csv_for_new_samples(samples, metadata)
     issues = validate_metadata_csv_for_samples(samples, metadata, true, current_user.admin?)
     # repackage for coherence
-    [issues.reject { |key| key == :new_host_genomes }, issues[:new_host_genomes]]
+    [issues.reject { |key| key == :new_host_genomes }, issues[:new_host_genomes] || []]
   end
 
   private
@@ -300,10 +301,6 @@ module MetadataHelper
         end
 
         sample.host_genome = host_genome
-        if sample.host_genome.new_record?
-          # for passing sample.metadatum_validate below
-          sample.host_genome.add_default_metadata_fields!
-        end
       end
 
       # The MetadataField objects that were used to validate the metadata.
