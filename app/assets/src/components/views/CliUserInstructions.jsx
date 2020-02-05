@@ -151,7 +151,7 @@ class CliUserInstructions extends React.Component {
         <p>
           {`- If your entered Host Organism does not match a supported host
         genome, we will only subtract out ERCCs and the Human genome. You can
-        read more about how to request a new genome to be added to IDseq`}
+        read more about how to request a new genome to be added to IDseq `}
           <span
             onClick={() =>
               openUrlInNewTab(
