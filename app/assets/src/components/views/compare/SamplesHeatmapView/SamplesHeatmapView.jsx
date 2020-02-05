@@ -333,6 +333,7 @@ class SamplesHeatmapView extends React.Component {
         index: i,
         host_genome_name: sample.host_genome_name,
         metadata: processMetadata(sample.metadata, true),
+        taxa: [],
       };
       if (sample.taxons) {
         for (let j = 0; j < sample.taxons.length; j++) {
@@ -356,6 +357,8 @@ class SamplesHeatmapView extends React.Component {
             };
             allTaxonDetails[taxon.name] = allTaxonDetails[taxon.tax_id];
           }
+
+          sampleDetails[sample.sample_id].taxa.push(taxon.tax_id);
 
           this.props.metrics.forEach(metric => {
             let [metricType, metricName] = metric.value.split(".");
@@ -381,7 +384,7 @@ class SamplesHeatmapView extends React.Component {
     };
   }
 
-  filterTaxons() {
+  filterTaxa() {
     let {
       taxonFilterState,
       taxonPassesThresholdFilters,
@@ -395,17 +398,13 @@ class SamplesHeatmapView extends React.Component {
         let taxon = allTaxonDetails[taxonId];
         if (!taxonIds.has(taxonId) && this.taxonPassesSelectedFilters(taxon)) {
           if (taxonPassesThresholdFilters[taxon["index"]]) {
-            taxonDetails[taxon["id"]] = taxon;
-            taxonDetails[taxon["name"]] = taxon;
             taxonIds.add(taxon["id"]);
-            this.props.metrics.forEach(metric => {
-              filteredData[metric.value] = filteredData[metric.value] || [];
-              filteredData[metric.value][filteredData[metric.value].length] =
-                allData[metric.value][taxon["index"]] || [];
-            });
           }
         }
       });
+      [taxonIds, taxonDetails, filteredData] = this.getTopTaxaPerSample(
+        taxonIds
+      );
       taxonIds = Array.from(taxonIds);
     } else {
       taxonDetails = allTaxonDetails;
@@ -510,6 +509,53 @@ class SamplesHeatmapView extends React.Component {
       return false;
     }
     return true;
+  }
+
+  getTopTaxaPerSample(filteredTaxonIds) {
+    // Fetch the top N taxa from each sample, sorted by the selected metric,
+    // that passed all selected filters.
+    let {
+      sampleDetails,
+      allData,
+      allTaxonDetails,
+      selectedOptions,
+    } = this.state;
+    let { metric, taxonsPerSample } = selectedOptions;
+    let topTaxIds = new Set(),
+      topTaxonDetails = {},
+      filteredData = {};
+
+    Object.values(sampleDetails).forEach(sample => {
+      let filteredTaxaInSample = sample.taxa.filter(taxon =>
+        filteredTaxonIds.has(taxon)
+      );
+
+      filteredTaxaInSample.sort(
+        (taxId1, taxId2) =>
+          allData[metric][allTaxonDetails[taxId2].index][sample.index] -
+          allData[metric][allTaxonDetails[taxId1].index][sample.index]
+      );
+
+      let count = 0;
+      for (let taxId of filteredTaxaInSample) {
+        if (count >= taxonsPerSample) {
+          break;
+        } else if (!topTaxIds.has(taxId)) {
+          let taxon = allTaxonDetails[taxId];
+          topTaxIds.add(taxId);
+          topTaxonDetails[taxId] = allTaxonDetails[taxId];
+          topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
+
+          this.props.metrics.forEach(metric => {
+            filteredData[metric.value] = filteredData[metric.value] || [];
+            filteredData[metric.value][filteredData[metric.value].length] =
+              allData[metric.value][taxon["index"]] || [];
+          });
+          count++;
+        }
+      }
+    });
+    return [topTaxIds, topTaxonDetails, filteredData];
   }
 
   handleMetadataUpdate = (key, value) => {
@@ -681,9 +727,9 @@ class SamplesHeatmapView extends React.Component {
         "thresholdFilters",
         "readSpecificity",
         "metric",
+        "taxonsPerSample",
       ];
-      // TODO(julie): taxaPerSample should eventually be a frontend filter
-      const backendFilters = ["background", "taxonsPerSample"];
+      const backendFilters = ["background"];
       const shouldRefetchData =
         intersection(keys(newOptions), backendFilters).length > 0;
       const shouldRefilterData =
@@ -716,7 +762,7 @@ class SamplesHeatmapView extends React.Component {
   }
 
   updateFilters() {
-    this.filterTaxons();
+    this.filterTaxa();
   }
 
   renderVisualization() {
