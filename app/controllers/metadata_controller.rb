@@ -42,11 +42,23 @@ class MetadataController < ApplicationController
       )
     end
 
-    issues = validate_metadata_csv_for_samples(samples, metadata, true)
+    # If validation passes and the user provides host genome names that we
+    # currently don't support, new custom host genomes will be created and
+    # assigned to that user. This is done at this step because the sample upload
+    # flow requires host genome ids to be passed to the create endpoint.
+    issues, new_host_genomes = validate_metadata_csv_for_new_samples(
+      samples,
+      metadata
+    )
+    # passed validation, now save
+    if issues[:errors] && issues[:errors].empty?
+      new_host_genomes.each(&:save!)
+    end
 
     render json: {
       status: "success",
       issues: issues,
+      newHostGenomes: new_host_genomes,
     }
   rescue => err
     render json: {
