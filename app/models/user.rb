@@ -86,7 +86,9 @@ class User < ApplicationRecord
   # console.
   def add_allowed_feature_for_all_czi(feature)
     # covers contractors and regular employees
-    users = User.where("email like '%@%chanzuckerberg.com'")
+    users = User.where(
+      "email LIKE '%@chanzuckerberg.com OR email LIKE '%@contractor.chanzuckerberg.com''"
+    )
     users.each { |u| u.add_allowed_feature(feature) }
   end
 
