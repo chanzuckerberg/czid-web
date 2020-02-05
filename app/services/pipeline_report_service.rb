@@ -149,7 +149,7 @@ class PipelineReportService
       @timer.split("compute_rpm")
 
       counts_by_tax_level.each_value do |tax_level_taxa|
-        compute_z_scores(tax_level_taxa, adjusted_total_reads)
+        compute_z_scores(tax_level_taxa)
       end
       @timer.split("compute_z_scores")
 
@@ -419,7 +419,7 @@ class PipelineReportService
     return value.clamp(min_z_score, max_z_score)
   end
 
-  def compute_z_scores(taxa_counts, _adjusted_total_reads)
+  def compute_z_scores(taxa_counts)
     taxa_counts.each_value do |taxon_counts|
       nt_z_score = compute_z_score(taxon_counts[:nt][:rpm], taxon_counts[:nt][:bg_mean], taxon_counts[:nt][:bg_stdev]) if taxon_counts[:nt].present?
       nr_z_score = compute_z_score(taxon_counts[:nr][:rpm], taxon_counts[:nr][:bg_mean], taxon_counts[:nr][:bg_stdev]) if taxon_counts[:nr].present?
