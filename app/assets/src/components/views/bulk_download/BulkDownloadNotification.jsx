@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./bulk_download_notification.scss";
 
@@ -15,7 +16,14 @@ export default class BulkDownloadNotification extends React.Component {
         <div className={cs.message}>
           We've received your download request and are busy preparing your data.
           To check the status of your download, visit the{" "}
-          <a href="bulk_downloads">Downloads page</a>.
+          <a
+            href="bulk_downloads"
+            onClick={logAnalyticsEvent(
+              "BulkDownloadNotification_downloads-page-link-clicked"
+            )}
+          >
+            Downloads page
+          </a>.
         </div>
       </div>
     );
