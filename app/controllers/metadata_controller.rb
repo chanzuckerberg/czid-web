@@ -51,7 +51,7 @@ class MetadataController < ApplicationController
       metadata
     )
     # passed validation, now save
-    if issues[:errors].empty?
+    if issues[:errors] && issues[:errors].empty?
       new_host_genomes.map(&:save!)
     end
 
