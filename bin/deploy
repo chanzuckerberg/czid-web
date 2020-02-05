@@ -49,7 +49,7 @@ def notify_slack(env, image, stage)
           definition = JSON.parse(`aws ecs describe-task-definition --task-definition #{definition_list["taskDefinitionArns"][0]}`)
           prod_image = definition["taskDefinition"]["containerDefinitions"][0]["image"].split(':')[1]
           log_history = `git log --graph --pretty=format:'%an -%d %s (%cr) <%h>' --abbrev-commit #{prod_image.split('-')[1]}..#{image.split('-')[1]} | sort`
-          post_slack_message({"icon_emoji": ":sharkdance:", "text": "Please test these changes:\n#{log_history}" }, slack_hook)
+          post_slack_message({"icon_emoji": ":sharkdance:", "text": "Please test these changes:\n#{log_history}"}, slack_hook)
         rescue
         end
       end
