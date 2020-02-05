@@ -178,7 +178,14 @@ module MetadataHelper
   # Convenience wrapper. NOTE: this method will return initialized
   # new_host_genomes that pass validation as second part of a pair.
   def validate_metadata_csv_for_new_samples(samples, metadata)
-    issues = validate_metadata_csv_for_samples(samples, metadata, true, current_user.admin?)
+    # TODO: (gdingle): remove allowedFeatures after launch of sample type, 2020-02-15.
+    # See https://jira.czi.team/browse/IDSEQ-2051.
+    issues = validate_metadata_csv_for_samples(
+      samples,
+      metadata,
+      true,
+      current_user.allowed_feature?("host_genome_free_text")
+    )
     # repackage for coherence
     [issues.reject { |key| key == :new_host_genomes }, issues[:new_host_genomes] || []]
   end
