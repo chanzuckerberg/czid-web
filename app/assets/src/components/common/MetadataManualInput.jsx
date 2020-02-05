@@ -11,6 +11,7 @@ import _fp, {
   values,
   includes,
   find,
+  isEmpty,
   pickBy,
   has,
   orderBy,
@@ -67,11 +68,34 @@ class MetadataManualInput extends React.Component {
     );
   }
 
+  componentDidUpdate(prevProps) {
+    const { samples, samplesAreNew } = this.props;
+    // Whenever the samples change, we need to re-sync the metadata with the parent.
+    // (e.g. update which samples are included in the metadata object)
+    // This is because the validation function checks whether the metadata and samples being uploaded are synced up.
+    if (samples !== prevProps.samples) {
+      if (samplesAreNew) {
+        const isWaterControlSet = this.setDefaultWaterControl();
+
+        // If the water control default was set, the metadata is already synced. No need to do it again.
+        if (!isWaterControlSet) {
+          this.resyncMetadataWithParent();
+        }
+      } else {
+        this.resyncMetadataWithParent();
+      }
+    }
+  }
+
   // Need to special case this to avoid a missing required field error.
+  // Return whether water control was set.
   setDefaultWaterControl = () => {
     if (has("water_control", this.props.projectMetadataFields)) {
-      this.applyToAll("water_control", "No");
+      // Default water_control values to No if they aren't already set.
+      this.applyToAll("water_control", "No", false);
+      return true;
     }
+    return false;
   };
 
   getManualInputColumns = () => {
@@ -102,16 +126,18 @@ class MetadataManualInput extends React.Component {
     this.onMetadataChange(newHeaders, newFields);
   };
 
-  applyToAll = (column, newValue) => {
+  applyToAll = (column, newValue, overrideExistingValue = true) => {
     let newFields = this.state.metadataFieldsToEdit;
 
     this.props.samples.forEach(curSample => {
       // Only change the metadata value for samples where that field is valid.
       if (
-        this.isHostGenomeIdValidForField(
+        (this.isHostGenomeIdValidForField(
           this.getSampleHostGenomeId(curSample),
           column
-        )
+        ) &&
+          overrideExistingValue) ||
+        get([curSample.name, column], newFields) === undefined
       ) {
         newFields = set([curSample.name, column], newValue, newFields);
       }
@@ -132,14 +158,26 @@ class MetadataManualInput extends React.Component {
 
   // Convert metadata headers and fields to a CSV-like format before passing to parent.
   onMetadataChange = (newHeaders, newFields) => {
+    const { samples, samplesAreNew } = this.props;
     // Only send fields for the selected samples to the parent component.
     // If a sample was added, and then later removed, that sample's metadata will not be sent up,
     // but will still persist in this component.
-    const sampleNames = map("name", this.props.samples);
-    const fieldsForSamples = pickBy(
-      (fields, sampleName) => includes(sampleName, sampleNames),
-      newFields
+    // If a sample has no metadata set yet, send an empty object.
+    const sampleNames = map("name", samples);
+    const sampleMetadataFields = map(
+      sampleName => newFields[sampleName] || {},
+      sampleNames
     );
+
+    let fieldsForSamples = zipObject(sampleNames, sampleMetadataFields);
+
+    // If we are modifying existing samples, no need to include the samples with empty metadata fields to edit.
+    // When modifying new samples, we DO include the empty field objects so the validation error is clearer.
+    // (i.e. instead of saying "row missing" for metadata manual input, it will say "host genome missing".)
+    if (!samplesAreNew) {
+      fieldsForSamples = pickBy(fields => !isEmpty(fields), fieldsForSamples);
+    }
+
     this.props.onMetadataChange({
       metadata: {
         headers: ["sample_name", ...newHeaders],
@@ -152,6 +190,14 @@ class MetadataManualInput extends React.Component {
         ),
       },
     });
+  };
+
+  // If the samples have changed, we need to re-sync the metadata with the parent
+  // (e.g. update which samples are included in the metadata object)
+  // even if the user hasn't changed any of the metadata.
+  resyncMetadataWithParent = () => {
+    const { headersToEdit, metadataFieldsToEdit } = this.state;
+    this.onMetadataChange(headersToEdit, metadataFieldsToEdit);
   };
 
   getMetadataValue = (sample, key) => {
