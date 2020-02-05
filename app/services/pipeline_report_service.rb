@@ -144,6 +144,11 @@ class PipelineReportService
       @timer.split("merge_contigs")
 
       counts_by_tax_level.each_value do |tax_level_taxa|
+        compute_rpm(tax_level_taxa, adjusted_total_reads)
+      end
+      @timer.split("compute_rpm")
+
+      counts_by_tax_level.each_value do |tax_level_taxa|
         compute_z_scores(tax_level_taxa, adjusted_total_reads)
       end
       @timer.split("compute_z_scores")
@@ -401,18 +406,21 @@ class PipelineReportService
     end
   end
 
+  def compute_rpm(taxa_counts, adjusted_total_reads)
+    taxa_counts.each_value do |taxon_counts|
+      taxon_counts[:nt][:rpm] = taxon_counts[:nt][:count] * 1E6 / adjusted_total_reads if taxon_counts[:nt].present?
+      taxon_counts[:nr][:rpm] = taxon_counts[:nr][:count] * 1E6 / adjusted_total_reads if taxon_counts[:nr].present?
+    end
+  end
+
   def compute_z_score(rpm, mean, stdev, min_z_score = Z_SCORE_MIN, max_z_score = Z_SCORE_MAX, absent_z_score = Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND)
     return absent_z_score unless stdev
     value = (rpm - mean) / stdev
     return value.clamp(min_z_score, max_z_score)
   end
 
-  def compute_z_scores(taxa_counts, adjusted_total_reads)
+  def compute_z_scores(taxa_counts, _adjusted_total_reads)
     taxa_counts.each_value do |taxon_counts|
-      # TODO : consider moving rpm calc to more appropriate place
-      taxon_counts[:nt][:rpm] = taxon_counts[:nt][:count] * 1E6 / adjusted_total_reads if taxon_counts[:nt].present?
-      taxon_counts[:nr][:rpm] = taxon_counts[:nr][:count] * 1E6 / adjusted_total_reads if taxon_counts[:nr].present?
-
       nt_z_score = compute_z_score(taxon_counts[:nt][:rpm], taxon_counts[:nt][:bg_mean], taxon_counts[:nt][:bg_stdev]) if taxon_counts[:nt].present?
       nr_z_score = compute_z_score(taxon_counts[:nr][:rpm], taxon_counts[:nr][:bg_mean], taxon_counts[:nr][:bg_stdev]) if taxon_counts[:nr].present?
       taxon_counts[:nt][:z_score] = nt_z_score if taxon_counts[:nt].present?
