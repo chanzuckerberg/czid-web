@@ -171,7 +171,7 @@ export default class BulkDownloadModalFooter extends React.Component {
         text="Start Generating Download"
         onClick={withAnalytics(
           onDownloadRequest,
-          "BulkDownloadModalFooter_start-generating-button-clicked"
+          "BulkDownloadModalFooter_start-generating-button_clicked"
         )}
       />
     );
