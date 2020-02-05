@@ -116,6 +116,11 @@ class PhyloTree < ApplicationRecord
     end
   end
 
+  def log_url
+    return nil unless job_log_id
+    AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
+  end
+
   def monitor_job(throttle = true)
     # Detect if batch job has failed so we can stop polling for results.
     # Also, populate job_log_id.
@@ -127,7 +132,7 @@ class PhyloTree < ApplicationRecord
     if job_status == PipelineRunStage::STATUS_FAILED ||
        (job_status == "SUCCEEDED" && !required_outputs.all? { |ro| exists_in_s3?(s3_outputs[ro]["s3_path"]) })
       self.status = STATUS_FAILED
-      LogUtil.log_err_and_airbrake("Phylo tree creation failed for #{name} (#{id}).")
+      LogUtil.log_err_and_airbrake("Phylo tree creation failed for #{name} (#{id}). See #{log_url}.")
     end
     save
   end
