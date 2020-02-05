@@ -292,6 +292,18 @@ class PipelineRun < ApplicationRecord
     [FINALIZED_SUCCESS, FINALIZED_FAIL].include?(results_finalized)
   end
 
+  def ready_for_cache?
+    # This method is used to decide whether a report is ready to be cached, which is only the case
+    # once a pipeline run is successful and all results are available.
+    #   (1) "results_finalized == FINALIZED_SUCCESS" means all results destined for the DB
+    #       have successfully been loaded from S3.
+    #   (2) "job_status == STATUS_CHECKED" means all Batch jobs have completed successfully.
+    #       This is important because certain outputs (e.g. coverage viz) are never loaded to
+    #       the DB. Instead they are fetched at the time a report is viewed. We can only be
+    #       certain that generation of those outputs is complete if the last Batch job has succeeded.
+    results_finalized == FINALIZED_SUCCESS && job_status == STATUS_CHECKED
+  end
+
   def failed?
     /FAILED/ =~ job_status || results_finalized == FINALIZED_FAIL
   end
@@ -860,9 +872,13 @@ class PipelineRun < ApplicationRecord
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
 
-        # Precache reports for all backgrounds
-        Resque.enqueue(PrecacheReportInfo, id)
-        Resque.enqueue(PrecacheReportInfoV2, id)
+        # Precache reports for all backgrounds.
+        if ready_for_cache?
+          Resque.enqueue(PrecacheReportInfo, id)
+          Resque.enqueue(PrecacheReportInfoV2, id)
+        else
+          MetricUtil.put_metric_now("samples.cache.not_precached", 1, ["pipeline_run_id:#{id}"])
+        end
 
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]

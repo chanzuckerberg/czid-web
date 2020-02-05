@@ -1,9 +1,11 @@
 import React from "react";
 import cx from "classnames";
 import { get, without, flow, omit, set, find } from "lodash/fp";
+
 import UploadSampleStep from "./UploadSampleStep";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
+
 import UploadMetadataStep from "./UploadMetadataStep";
 import ReviewStep from "./ReviewStep";
 import cs from "./sample_upload_flow.scss";
@@ -25,6 +27,7 @@ class SampleUploadFlow extends React.Component {
       uploadMetadata: false,
       review: false,
     },
+    hostGenomes: [], // set on metadata upload
   };
 
   componentDidMount() {
@@ -53,7 +56,9 @@ class SampleUploadFlow extends React.Component {
     });
   };
 
-  handleUploadMetadata = ({ metadata, issues }) => {
+  handleUploadMetadata = ({ metadata, issues, newHostGenomes }) => {
+    const updatedHostGenomes = this.props.hostGenomes.concat(newHostGenomes);
+
     // Populate host_genome_id in sample using metadata.
     const newSamples = this.state.samples.map(sample => {
       const metadataRow = find(
@@ -62,18 +67,22 @@ class SampleUploadFlow extends React.Component {
           get("Sample Name", row) === sample.name,
         metadata.rows
       );
-
+      const hostGenomeName =
+        get("host_genome", metadataRow) || get("Host Genome", metadataRow);
       const hostGenomeId = find(
-        [
-          "name",
-          get("host_genome", metadataRow) || get("Host Genome", metadataRow),
-        ],
-        this.props.hostGenomes
+        // Lowercase to allow for 'human' to match 'Human'. The same logic
+        // is replicated in MetadataHelper.
+        hg => {
+          return hg.name.toLowerCase() === hostGenomeName.toLowerCase();
+        },
+        updatedHostGenomes
       ).id;
 
       return {
         ...sample,
+        // Set the host_genome_id and name so it is available in review
         host_genome_id: hostGenomeId,
+        host_genome_name: hostGenomeName,
       };
     });
 
@@ -89,6 +98,7 @@ class SampleUploadFlow extends React.Component {
       metadataIssues: issues,
       currentStep: "review",
       stepsEnabled: set("review", true, this.state.stepsEnabled),
+      hostGenomes: updatedHostGenomes,
     });
   };
 
@@ -148,20 +158,22 @@ class SampleUploadFlow extends React.Component {
             onDirty={this.metadataChanged}
           />
         )}
-        {this.state.samples && this.state.metadata && (
-          <ReviewStep
-            metadata={this.state.metadata}
-            samples={this.state.samples}
-            uploadType={this.state.uploadType}
-            project={this.state.project}
-            sampleNamesToFiles={this.state.sampleNamesToFiles}
-            hostGenomes={this.props.hostGenomes}
-            visible={this.state.currentStep === "review"}
-            onUploadStatusChange={this.onUploadStatusChange}
-            onStepSelect={this.handleStepSelect}
-            onUploadComplete={this.onUploadComplete}
-          />
-        )}
+        {this.state.samples &&
+          this.state.metadata && (
+            <ReviewStep
+              metadata={this.state.metadata}
+              samples={this.state.samples}
+              uploadType={this.state.uploadType}
+              project={this.state.project}
+              sampleNamesToFiles={this.state.sampleNamesToFiles}
+              hostGenomes={this.state.hostGenomes}
+              originalHostGenomes={this.props.hostGenomes}
+              visible={this.state.currentStep === "review"}
+              onUploadStatusChange={this.onUploadStatusChange}
+              onStepSelect={this.handleStepSelect}
+              onUploadComplete={this.onUploadComplete}
+            />
+          )}
       </div>
     );
   };

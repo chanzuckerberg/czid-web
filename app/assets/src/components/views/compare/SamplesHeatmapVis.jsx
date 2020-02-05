@@ -137,8 +137,14 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   colorScale = (value, node, originalColor, _, colorNoValue) => {
-    const { taxonFilterState } = this.props;
-    const filtered = taxonFilterState[node.rowIndex][node.columnIndex];
+    const { taxonFilterState, sampleIds, taxonIds } = this.props;
+    let sampleId = sampleIds[node.columnIndex];
+    let taxonId = taxonIds[node.rowIndex];
+    let sampleDetails = this.props.sampleDetails[sampleId];
+    let taxonDetails = this.props.taxonDetails[taxonId];
+
+    const filtered =
+      taxonFilterState[taxonDetails["index"]][sampleDetails["index"]];
     return value > 0 && filtered ? originalColor : colorNoValue;
   };
 
@@ -273,7 +279,8 @@ class SamplesHeatmapVis extends React.Component {
       metric => !!data[metric.key][node.rowIndex][node.columnIndex]
     );
 
-    const isFiltered = taxonFilterState[node.rowIndex][node.columnIndex];
+    const isFiltered =
+      taxonFilterState[taxonDetails["index"]][sampleDetails["index"]];
 
     let values = null;
     if (nodeHasData) {

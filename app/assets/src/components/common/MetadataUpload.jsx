@@ -56,17 +56,44 @@ class MetadataUpload extends React.Component {
         getAllSampleTypes(),
       ]
     );
+    this.setState({
+      projectMetadataFields: this.processProjectMetadataFields(
+        projectMetadataFields
+      ),
+      hostGenomes,
+      sampleTypes,
+    });
+  }
+
+  async componentDidUpdate(prevProps) {
+    if (prevProps.project.id !== this.props.project.id) {
+      // Set the projectMetadataFields to null while fetching the new fields.
+      // This forces the MetadataManualInput to re-mount which is necessary for correct behavior.
+      this.setState({
+        projectMetadataFields: null,
+      });
+
+      const projectMetadataFields = await getProjectMetadataFields(
+        this.props.project.id
+      );
+
+      this.setState({
+        projectMetadataFields: this.processProjectMetadataFields(
+          projectMetadataFields
+        ),
+      });
+    }
+  }
+
+  processProjectMetadataFields = projectMetadataFields => {
     const sorted = sortBy(
       metadataField =>
         this.ordering[metadataField.key] || Number.MAX_SAFE_INTEGER,
       projectMetadataFields
     );
-    this.setState({
-      projectMetadataFields: keyBy("key", sorted),
-      hostGenomes,
-      sampleTypes,
-    });
-  }
+
+    return keyBy("key", sorted);
+  };
 
   handleTabChange = tab => {
     this.setState({ currentTab: tab, issues: null });
@@ -323,31 +350,36 @@ class MetadataUpload extends React.Component {
           <div className={cs.info}>
             <div className={cs.details}>
               <span className={cs.label}>{`Required fields: `}</span>
-              {requiredFields && requiredFields.join(", ")}
+              We require the following metadata to determine how to process your
+              data and display the results:{" "}
+              {requiredFields && requiredFields.join(", ")}. Please be as
+              accurate as possible!{" "}
+              <a
+                href="/metadata/dictionary"
+                className={cs.link}
+                target="_blank"
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "MetadataUpload_full-dictionary-link_clicked",
+                    {
+                      projectId: this.props.project.id,
+                      projectName: this.props.project.name,
+                    }
+                  )
+                }
+              >
+                View Full Metadata Dictionary
+              </a>.
             </div>
             <div className={cs.details}>
-              <span className={cs.label}>{`Available host genomes: `}</span>
-              {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
-            </div>
-            <div className={cs.details}>
-              <span>
-                <a
-                  href="/metadata/dictionary"
-                  className={cs.link}
-                  target="_blank"
-                  onClick={() =>
-                    logAnalyticsEvent(
-                      "MetadataUpload_full-dictionary-link_clicked",
-                      {
-                        projectId: this.props.project.id,
-                        projectName: this.props.project.name,
-                      }
-                    )
-                  }
-                >
-                  View Full Metadata Dictionary
-                </a>
-              </span>
+              <span
+                className={cs.label}
+              >{`Available organisms for host subtraction: `}</span>
+              {hostGenomes &&
+                hostGenomes
+                  .filter(h => !h.ercc_only)
+                  .map(h => h.name)
+                  .join(", ")}.
             </div>
           </div>
         )}

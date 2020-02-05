@@ -474,7 +474,10 @@ class ProjectsController < ApplicationController
       host_genome: [:metadata_fields],
       metadata: [:metadata_field]
     )
-    issues = validate_metadata_csv_for_samples(project_samples.to_a, metadata)
+    issues = validate_metadata_csv_for_project_samples(
+      project_samples.to_a,
+      metadata
+    )
     render json: {
       status: "success",
       issues: issues,

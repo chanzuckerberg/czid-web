@@ -10,17 +10,20 @@ import _fp, {
   get,
   values,
   includes,
-  orderBy,
   find,
   pickBy,
+  has,
+  orderBy,
 } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
-import { Dropdown } from "~ui/controls/dropdowns";
 import PlusIcon from "~ui/icons/PlusIcon";
+import { UserContext } from "~/components/common/UserContext";
+import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 
 import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
@@ -66,7 +69,9 @@ class MetadataManualInput extends React.Component {
 
   // Need to special case this to avoid a missing required field error.
   setDefaultWaterControl = () => {
-    this.applyToAll("water_control", "No");
+    if (has("water_control", this.props.projectMetadataFields)) {
+      this.applyToAll("water_control", "No");
+    }
   };
 
   getManualInputColumns = () => {
@@ -204,11 +209,15 @@ class MetadataManualInput extends React.Component {
   };
 
   // Update host genome for a sample.
-  updateHostGenome = (hostGenomeId, sample) => {
+  updateHostGenome = (hostGenomeIdOrNewName, sample) => {
+    const hostGenome = find(
+      ["id", hostGenomeIdOrNewName],
+      this.props.hostGenomes
+    );
     this.updateMetadataField(
       "Host Genome",
       // Convert the id to a name.
-      find(["id", hostGenomeId], this.props.hostGenomes).name,
+      hostGenome ? hostGenome.name : hostGenomeIdOrNewName,
       sample
     );
   };
@@ -257,6 +266,8 @@ class MetadataManualInput extends React.Component {
 
   // Create form fields for the table.
   getManualInputData = () => {
+    const { allowedFeatures } = this.context || {};
+
     if (!this.props.samples) {
       return null;
     }
@@ -282,26 +293,39 @@ class MetadataManualInput extends React.Component {
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
-
-          if (column === "Host Genome") {
+          // TODO (gdingle): remove allowedFeatures after launch of sample type, 2020-01-15.
+          // See https://jira.czi.team/browse/IDSEQ-2051.
+          if (this.props.samplesAreNew && column === "Host Genome") {
             return (
               <div>
-                <Dropdown
-                  className={inputClasses}
-                  options={this.getHostGenomeOptions()}
-                  value={sampleHostGenomeId}
-                  onChange={id => this.updateHostGenome(id, sample)}
-                  usePortal
-                  withinModal={this.props.withinModal}
-                />
+                {allowedFeatures.includes("host_genome_free_text") ? (
+                  <HostOrganismSearchBox
+                    className={inputClasses}
+                    value={this.getMetadataValue(sample, column)}
+                    onResultSelect={({ result }) => {
+                      this.updateHostGenome(result.name || result, sample);
+                    }}
+                    hostGenomes={this.props.hostGenomes || []}
+                  />
+                ) : (
+                  <Dropdown
+                    className={inputClasses}
+                    options={this.getHostGenomeOptions()}
+                    value={sampleHostGenomeId}
+                    onChange={id => this.updateHostGenome(id, sample)}
+                    usePortal
+                    withinModal={this.props.withinModal}
+                  />
+                )}
                 {this.props.samples.length > 1 &&
                   this.renderApplyToAll(sample, column)}
               </div>
             );
           }
-
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
-          if (this.isHostGenomeIdValidForField(sampleHostGenomeId, column)) {
+          else if (
+            this.isHostGenomeIdValidForField(sampleHostGenomeId, column)
+          ) {
             // host is unknown on initial load
             const hostGenome = this.getSampleHostGenome(sample) || {};
             return (
@@ -380,5 +404,7 @@ MetadataManualInput.propTypes = {
   hostGenomes: PropTypes.array,
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
+
+MetadataManualInput.contextType = UserContext;
 
 export default MetadataManualInput;

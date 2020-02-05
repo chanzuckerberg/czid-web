@@ -10,7 +10,7 @@ import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
 } from "~ui/controls/GeoSearchInputBox";
-import SampleTypeSearchBox from "~ui/controls/SampleTypeSearchBox";
+import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Toggle from "~ui/controls/Toggle";
 
@@ -62,11 +62,14 @@ class MetadataInput extends React.Component {
       sampleTypes,
     } = this.props;
     const { warning } = this.state;
-    const { admin } = this.context || {};
+    const { allowedFeatures } = this.context || {};
 
-    // TODO (gdingle): remove admin after launch of sample type, 2020-01-15.
+    // TODO (gdingle): remove allowedFeatures after launch of sample type, 2020-01-15.
     // See https://jira.czi.team/browse/IDSEQ-2051.
-    if (metadataType.key === "sample_type" && admin) {
+    if (
+      metadataType.key === "sample_type" &&
+      allowedFeatures.includes("sample_type_free_text")
+    ) {
       return (
         <SampleTypeSearchBox
           className={className}

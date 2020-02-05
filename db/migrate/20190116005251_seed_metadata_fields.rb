@@ -284,7 +284,6 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       options: ["NEB Ultra II FS DNA", "NEB RNA Ultra II", "NEB Ultra II Directional RNA", "NEB Utra II DNA", "Nextera DNA", "Other"],
       is_core: 1,
       is_default: 1,
-      is_required: 1,
       group: "Sequencing",
       host_genomes: HostGenome.all
     )
@@ -297,7 +296,6 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       options: %w[MiSeq NextSeq HiSeq NovaSeq Other],
       is_core: 1,
       is_default: 1,
-      is_required: 1,
       group: "Sequencing",
       host_genomes: HostGenome.all
     )

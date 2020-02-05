@@ -43,6 +43,19 @@ class UploadInstructions extends React.Component {
               >
                 CSV template.
               </a>
+              <p>
+                {`If your entered Host Organism does not match a supported host
+              genome, we will only subtract out ERCCs and the Human genome. You can
+              read more about how to request a new genome to be added to IDseq `}
+                <a
+                  href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790814-How-do-I-request-a-new-host-genome-be-added-to-IDseq-"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cs.link}
+                >
+                  here.
+                </a>
+              </p>
             </li>
             <li>Make sure your column headers match our naming convention.</li>
             <li>Make sure your metadata values are in the correct format.</li>

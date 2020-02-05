@@ -4,12 +4,13 @@ module MetadataHelper
   include ErrorHelper
 
   def get_available_matching_field(sample, name)
-    available_fields = sample.project.metadata_fields
+    available_fields = sample.project.metadata_fields.to_a
     return available_fields.find { |field| field.name == name || field.display_name == name }
   end
 
   def get_matching_core_field(sample, name)
-    return sample.host_genome.metadata_fields.where(is_core: true).to_a.find { |field| field.name == name || field.display_name == name }
+    fields = sample.host_genome.metadata_fields.where(is_core: true).to_a
+    return fields.find { |field| field.name == name || field.display_name == name }
   end
 
   def get_new_custom_field(name)
@@ -63,7 +64,7 @@ module MetadataHelper
                default = MetadataField.where(is_default: true)
 
                (required | default)
-             # If samples are new, just use Human metadata fields since we default to Human.
+             # If samples are new, just use Human metadata fields since Human is by far most common.
              elsif samples_are_new
                HostGenome.find_by(name: "Human").metadata_fields & project.metadata_fields
              else
@@ -169,9 +170,39 @@ module MetadataHelper
     return has_duplicate_columns
   end
 
+  # Convenience wrapper
+  def validate_metadata_csv_for_project_samples(samples, metadata)
+    validate_metadata_csv_for_samples(samples, metadata, false, false)
+  end
+
+  # Convenience wrapper. NOTE: this method will return initialized
+  # new_host_genomes that pass validation as second part of a pair.
+  def validate_metadata_csv_for_new_samples(samples, metadata)
+    # TODO: (gdingle): remove allowedFeatures after launch of sample type, 2020-02-15.
+    # See https://jira.czi.team/browse/IDSEQ-2051.
+    issues = validate_metadata_csv_for_samples(
+      samples,
+      metadata,
+      true,
+      current_user.allowed_feature?("host_genome_free_text")
+    )
+    # repackage for coherence
+    [issues.reject { |key| key == :new_host_genomes }, issues[:new_host_genomes] || []]
+  end
+
+  private
+
   # Receives an array of samples, and validates metadata from a csv.
-  # NOTE: validation depends on fields of each sample which depends on fields of each sample project.
-  def validate_metadata_csv_for_samples(samples, metadata, new_samples = false)
+  # NOTE: validation depends on fields of each sample which depends on fields of
+  # each sample project.
+  # NOTE: if allow_new_host_genomes, this method will return initialized
+  # new_host_genomes that pass validation.
+  def validate_metadata_csv_for_samples(
+    samples,
+    metadata,
+    new_samples = false,
+    allow_new_host_genomes = false
+  )
     # If new samples, enforce required metadata constraint, and pull the host genome from the
     # metadata rows for validation.
     enforce_required = new_samples
@@ -219,9 +250,8 @@ module MetadataHelper
     sample_name_index = metadata["headers"].find_index("sample_name") || metadata["headers"].find_index("Sample Name")
 
     if extract_host_genome_from_metadata
-      host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
-      host_genomes = HostGenome.where(name: metadata["rows"].map { |row| row[host_genome_index] }.uniq)
-                               .includes(:metadata_fields).to_a
+      host_genomes, host_genome_index, new_host_genomes =
+        find_or_create_host_genomes(metadata, allow_new_host_genomes)
     end
 
     processed_samples = []
@@ -270,7 +300,7 @@ module MetadataHelper
       end
 
       if extract_host_genome_from_metadata
-        host_genome = host_genomes.select { |cur_host_genome| cur_host_genome.name == row[host_genome_index] }.first
+        host_genome = host_genomes.select { |cur_hg| cur_hg && cur_hg.name.casecmp?(row[host_genome_index]) }.first
 
         if host_genome.nil?
           error_aggregator.add_error(:row_invalid_host_genome, [index + 1, sample.name, row[host_genome_index]])
@@ -345,6 +375,27 @@ module MetadataHelper
     {
       warnings: warning_aggregator.error_groups,
       errors: errors + error_aggregator.error_groups,
+      new_host_genomes: new_host_genomes,
     }
+  end
+
+  def find_or_create_host_genomes(metadata, allow_new_host_genomes)
+    new_host_genomes = []
+    host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
+    # same name rules as before_validation
+    host_genome_names = metadata["rows"].map { |row| row[host_genome_index] }.uniq
+    host_genomes = if allow_new_host_genomes
+                     host_genome_names.map do |name|
+                       hg = HostGenome.find_by(name: name) # case insensitive
+                       unless hg
+                         hg = HostGenome.new(name: name, user: current_user)
+                         new_host_genomes << hg
+                       end
+                       hg.valid? && hg
+                     end
+                   else
+                     HostGenome.where(name: host_genome_names).includes(:metadata_fields)
+                   end
+    [host_genomes.to_a, host_genome_index, new_host_genomes]
   end
 end

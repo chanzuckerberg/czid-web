@@ -139,6 +139,12 @@ class SamplesView extends React.Component {
         cellDataGetter: ({ dataKey, rowData }) =>
           TableRenderers.formatDuration(rowData[dataKey]),
       },
+      {
+        dataKey: "waterControl",
+        label: "Water Control",
+        flexGrow: 1,
+        className: cs.basicCell,
+      },
     ];
 
     for (let column of this.columns) {
