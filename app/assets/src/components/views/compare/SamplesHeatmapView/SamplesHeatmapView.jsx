@@ -103,6 +103,20 @@ class SamplesHeatmapView extends React.Component {
       sampleIds: compact(
         map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds)
       ),
+      sampleDetails: {},
+      allTaxonIds: [],
+      taxonIds: [],
+      allTaxonDetails: {},
+      taxonDetails: {},
+      // allData is an object containing all the metric data for every taxa for each sample.
+      // The key corresponds to the metric type (e.g. NT.rpm), and the value is 2D array;
+      // rows correspond to taxa and columns correspond to samples.
+      // Note that the 2D array is accesed by a taxon's/sample's INDEX, not id.
+      allData: {},
+      // data is an object containing metric data for only the samples that have passed filters
+      // and are displayed on the heatmap. data is onlyl a subset of allData if client-side
+      // filtering is enabled, otherwise they should be identical.
+      data: {},
       hideFilters: false,
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
@@ -521,13 +535,15 @@ class SamplesHeatmapView extends React.Component {
       selectedOptions,
     } = this.state;
     let { metric, taxonsPerSample } = selectedOptions;
+    const { metrics } = this.props;
+
     let topTaxIds = new Set(),
       topTaxonDetails = {},
       filteredData = {};
 
     Object.values(sampleDetails).forEach(sample => {
-      let filteredTaxaInSample = sample.taxa.filter(taxon =>
-        filteredTaxonIds.has(taxon)
+      let filteredTaxaInSample = sample.taxa.filter(taxonId =>
+        filteredTaxonIds.has(taxonId)
       );
 
       filteredTaxaInSample.sort(
@@ -546,10 +562,11 @@ class SamplesHeatmapView extends React.Component {
           topTaxonDetails[taxId] = allTaxonDetails[taxId];
           topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
 
-          this.props.metrics.forEach(metric => {
+          metrics.forEach(metric => {
             filteredData[metric.value] = filteredData[metric.value] || [];
-            filteredData[metric.value][filteredData[metric.value].length] =
-              allData[metric.value][taxon["index"]] || [];
+            filteredData[metric.value].push(
+              allData[metric.value][taxon["index"]]
+            );
           });
           count++;
         }
