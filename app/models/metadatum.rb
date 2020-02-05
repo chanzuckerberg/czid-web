@@ -38,8 +38,6 @@ class Metadatum < ApplicationRecord
     end
 
     # Check if the key is valid. Metadata_field was supposed to be set.
-    # undefined method `metadata_fields' for nil:NilClass
-
     valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten
     if sample.host_genome.new_record?
       # The sample's host genome may be a user-defined host genome that hasn't
