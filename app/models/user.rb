@@ -84,7 +84,7 @@ class User < ApplicationRecord
   # general release. IMPORTANT NOTE: it assumes that only valid personnel have
   # a @chanzuckerberg address. This method is intended to be called from the rails
   # console.
-  def add_allowed_feature_for_all_czi(feature)
+  def self.add_allowed_feature_for_all_czi(feature)
     # covers contractors and regular employees
     users = User.where(
       "email LIKE '%@chanzuckerberg.com' OR email LIKE '%@contractor.chanzuckerberg.com'"
