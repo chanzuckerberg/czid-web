@@ -32,40 +32,43 @@ export default class PlaygroundComponents extends React.Component {
         <HostOrganismMessage
           key="1"
           hostGenomes={[{ name: "Human", id: 1 }]}
-          samples={[{ host_genome_id: 1 }]}
+          samples={[{ host_genome_id: 1, host_genome_name: "Human" }]}
         />,
         // multiple same match
         <HostOrganismMessage
           key="6"
           hostGenomes={[{ name: "Human", id: 1 }]}
-          samples={[{ host_genome_id: 1 }, { host_genome_id: 1 }]}
+          samples={[
+            { host_genome_id: 1, host_genome_name: "Human" },
+            { host_genome_id: 1, host_genome_name: "Human" },
+          ]}
         />,
         // one non-human match
         <HostOrganismMessage
           key="5"
           hostGenomes={[{ name: "Bat", id: 4 }]}
-          samples={[{ host_genome_id: 4 }]}
+          samples={[{ host_genome_id: 4, host_genome_name: "Bat" }]}
         />,
         // one no match
         <HostOrganismMessage
           key="2"
           hostGenomes={[{ name: "Human", id: 1 }]}
-          samples={[{ host_genome_id: 2 }]}
+          samples={[{ host_genome_id: 2, host_genome_name: "none" }]}
         />,
         // ERCC only
         <HostOrganismMessage
           key="3"
           hostGenomes={[{ name: "ERCC Only", id: 7 }]}
-          samples={[{ host_genome_id: 7 }]}
+          samples={[{ host_genome_id: 7, host_genome_name: "ERCC Only" }]}
         />,
         // many
         <HostOrganismMessage
           key="4"
           hostGenomes={[{ name: "Human", id: 1 }, { name: "Mosquito", id: 2 }]}
           samples={[
-            { host_genome_id: 1 },
-            { host_genome_id: 2 },
-            { host_genome_id: 3 },
+            { host_genome_id: 1, host_genome_name: "Human" },
+            { host_genome_id: 2, host_genome_name: "none" },
+            { host_genome_id: 3, host_genome_name: "none" },
           ]}
         />,
       ];
