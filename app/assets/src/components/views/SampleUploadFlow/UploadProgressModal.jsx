@@ -492,7 +492,7 @@ export default class UploadProgressModal extends React.Component {
 UploadProgressModal.propTypes = {
   samples: PropTypes.arrayOf(
     PropTypes.shape({
-      host_genome_id: PropTypes.number,
+      host_genome_id: PropTypes.number.isRequired,
       input_file_attributes: PropTypes.shape({
         name: PropTypes.string,
         source: PropTypes.string,
