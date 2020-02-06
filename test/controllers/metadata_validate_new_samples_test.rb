@@ -6,7 +6,6 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
 
   HEADERS_1 = ['sample_name', 'host_genome', 'sample_type', 'blood_fed'].freeze
   HEADERS_2 = ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type'].freeze
-  HEADERS_3 = ['sample_name', 'host_organism', 'sample_type', 'nucleotide_type'].freeze
   ROW_1 = ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'].freeze
   ROW_2 = ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Partially Blood Fed'].freeze
   ROW_3 = ['Test Sample', 'Human', 'Whole Blood', 'DNA'].freeze
