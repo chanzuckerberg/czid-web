@@ -389,8 +389,10 @@ module MetadataHelper
                        hg = HostGenome.find_by(name: name) # case insensitive
                        unless hg
                          hg = HostGenome.new(name: name, user: current_user)
-                         new_host_genomes << hg
                        end
+                       # Return all found or created host genomes until this is resolved:
+                       # https://jira.czi.team/browse/IDSEQ-2193.
+                       new_host_genomes << hg
                        hg.valid? && hg
                      end
                    else

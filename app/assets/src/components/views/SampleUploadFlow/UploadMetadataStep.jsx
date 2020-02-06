@@ -18,6 +18,7 @@ class UploadMetadataStep extends React.Component {
     metadata: null,
     issues: null,
     wasManual: false,
+    newHostGenomes: [],
   };
 
   setShowInstructions = showInstructions => {
@@ -26,11 +27,12 @@ class UploadMetadataStep extends React.Component {
     });
   };
 
-  handleMetadataChange = ({ metadata, issues, wasManual }) => {
+  handleMetadataChange = ({ metadata, issues, wasManual, newHostGenomes }) => {
     this.setState({
       metadata,
       issues,
       wasManual,
+      newHostGenomes,
     });
 
     const metadataValid = metadata && !(issues && issues.errors.length > 0);
