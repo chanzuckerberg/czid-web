@@ -15,8 +15,6 @@ module HeatmapHelper
   # indicate this.
   INCLUDE_PHAGE = false
 
-  MINIMUM_ZSCORE_THRESHOLD = 1.7
-
   # The number of taxa per sample to load
   # this should be high enough to compensate for any filters and thresholds
   #  that the user might use.
@@ -152,10 +150,9 @@ module HeatmapHelper
       # filtering now happens earlier in SQL.
       HeatmapHelper.compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD &&
-          # Note: these are applied *after* SQL filters, so results may not be
-          # 100% as expected .
-          HeatmapHelper.apply_custom_filters(row, threshold_filters)
+        # Note: these are applied *after* SQL filters, so results may not be
+        # 100% as expected .
+        HeatmapHelper.apply_custom_filters(row, threshold_filters)
       end
 
       # Get the top N for each sample. This re-sorts on the same metric as in
