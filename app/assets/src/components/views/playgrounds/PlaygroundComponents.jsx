@@ -32,7 +32,7 @@ export default class PlaygroundComponents extends React.Component {
         <HostOrganismMessage
           key="1"
           hostGenomes={[{ name: "Human", id: 1 }]}
-          samples={[{ host_genome_id: 1, host_genome_name: "Human" }]}
+          samples={[{ host_genome_id: 1, host_genome_name: "human" }]}
         />,
         // multiple same match
         <HostOrganismMessage

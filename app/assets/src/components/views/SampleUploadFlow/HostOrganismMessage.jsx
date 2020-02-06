@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { every, keys, countBy, map } from "lodash/fp";
+import { capitalize, every, keys, countBy, map } from "lodash/fp";
 import cx from "classnames";
 
 import Accordion from "~/components/layout/Accordion";
@@ -59,13 +59,14 @@ export default class HostOrganismMessage extends React.Component {
         {this.renderHostPhrase(host, count)}{" "}
         {this.hasMatch(host) && !this.isERCC(host) ? (
           <span>
-            we will subtract out reads that align to a <strong>{host}</strong>{" "}
-            genome
+            we will subtract out reads that align to a{" "}
+            <strong>{capitalize(host)}</strong> genome
           </span>
         ) : (
           <span>we will only remove ERCCs</span>
         )}
-        {host !== "Human" && " and reads that align to the human genome"}.
+        {host.toLowerCase() !== "human" &&
+          " and reads that align to the human genome"}.
       </span>
     );
   }
