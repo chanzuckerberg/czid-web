@@ -560,6 +560,12 @@ class PipelineReportService
 
   def report_csv(counts, sorted_genus_tax_ids)
     rows = []
+
+    # If there are no genus taxids (due to there being no taxon counts), return empty string.
+    if sorted_genus_tax_ids.nil?
+      return ""
+    end
+
     sorted_genus_tax_ids.each do |genus_tax_id|
       genus_info = counts[2][genus_tax_id]
       # add the hash keys in order for csv generation
