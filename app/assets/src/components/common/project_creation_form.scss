@@ -5,6 +5,13 @@
   .label {
     @include font-header-s;
     margin-bottom: 5px;
+
+    .infoLink {
+      @include font-label-s;
+      margin-left: 10px;
+      color: $primary-light;
+      cursor: pointer;
+    }
   }
 
   .optionalLabel {
@@ -29,6 +36,33 @@
 
   .field {
     margin-bottom: 30px;
+
+    .info {
+      background-color: $lightest-grey;
+      padding: 20px;
+      margin-bottom: 10px;
+
+      .title {
+        @include font-header-xs;
+      }
+
+      ul {
+        margin: 5px 0 10px 20px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        li {
+          @include font-body-xs;
+          list-style-type: disc;
+        }
+      }
+
+      p {
+        @include font-body-xs;
+      }
+    }
   }
 
   .sharingOption {
