@@ -9,6 +9,7 @@ import { createProject } from "~/api";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./project_creation_form.scss";
 
