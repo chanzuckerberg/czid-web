@@ -65,13 +65,16 @@ class ProjectCreationForm extends React.Component {
   toggleInfo = () => {
     const { showInfo } = this.state;
 
-    logAnalyticsEvent("ProjectCreationForm_more-info-toggle_clicked", {
-      showInfo,
-    });
-
-    this.setState({
-      showInfo: !showInfo,
-    });
+    this.setState(
+      {
+        showInfo: !showInfo,
+      },
+      () => {
+        logAnalyticsEvent("ProjectCreationForm_more-info-toggle_clicked", {
+          showInfo: this.state.showInfo,
+        });
+      }
+    );
   };
 
   render() {
