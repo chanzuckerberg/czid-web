@@ -520,11 +520,10 @@ module SamplesHelper
         begin
           # TODO: (gdingle): remove allowedFeatures feature gating.
           # See https://jira.czi.team/browse/IDSEQ-2051
-          hg = if user.allowed_feature?("host_genome_free_text")
-                 HostGenome.find_or_create_by!(name: name, user: user)
-               else
-                 HostGenome.find_by(name: name)
-               end
+          hg = HostGenome.find_by(name: name)
+          if hg.nil? && user.allowed_feature?("host_genome_free_text")
+            hg = HostGenome.create!(name: name, user: user)
+          end
         rescue => e
           errors << e.message
           metadata.delete(sample_attributes[:name])
