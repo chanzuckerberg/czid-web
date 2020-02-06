@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .projectCreationForm {
   .label {
@@ -8,7 +9,7 @@
 
     .infoLink {
       @include font-label-s;
-      margin-left: 10px;
+      margin-left: $space-xxxs;
       color: $primary-light;
       cursor: pointer;
     }
@@ -22,10 +23,12 @@
   .descriptionTextArea {
     @include font-body-xs;
     margin-top: 5px;
-    padding: 5px;
-    height: 150px;
+    // margin-left: -5px;
+    padding: $space-m;
+    height: 100px;
     resize: vertical;
     background-color: $white;
+    text-indent: $space-xxs;
   }
 
   .charCounter {
@@ -35,12 +38,13 @@
   }
 
   .field {
-    margin-bottom: 30px;
+    margin-bottom: $space-xs;
 
     .info {
       background-color: $lightest-grey;
       padding: 20px;
-      margin-bottom: 10px;
+      margin-bottom: $space-default;
+      border-radius: 4px;
 
       .title {
         @include font-header-xs;
