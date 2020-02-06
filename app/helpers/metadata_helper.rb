@@ -56,6 +56,8 @@ module MetadataHelper
     # downloading it from a stand-alone upload instruction page such as /cli_user_instructions.
     # The CLI also directs users to /metadata/metadata_template_csv when asking for metadata during new sample upload,
     # and we should include the host genome column here as well.
+    # NOTE: In Feb 2020, Host Genome was renamed in the UI to Host Organism.
+    # Both names are equivalent in CSV upload.
     include_host_genome = project.nil? || samples_are_new
 
     # If project is nil, use global default and required fields.
@@ -80,7 +82,7 @@ module MetadataHelper
     # TODO(jsheu): Remove legacy field and swap in collection_location_v2.
     fields = fields.reject { |f| f.name == "collection_location" }
 
-    field_names = ["Sample Name"] + (include_host_genome ? ["Host Genome"] : []) + fields.pluck(:display_name)
+    field_names = ["Sample Name"] + (include_host_genome ? ["Host Organism"] : []) + fields.pluck(:display_name)
 
     host_genomes_by_name = HostGenome.all.includes(:metadata_fields).reject { |x| x.metadata_fields.empty? }.index_by(&:name)
 

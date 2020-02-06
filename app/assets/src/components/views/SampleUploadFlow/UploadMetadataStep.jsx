@@ -71,7 +71,7 @@ class UploadMetadataStep extends React.Component {
       this.props.onUploadMetadata({
         metadata: this.state.metadata,
         issues: this.state.issues,
-        newHostGenomes: result.newHostGenomes,
+        newHostGenomes: this.state.newHostGenomes,
       });
     }
     logAnalyticsEvent("UploadMetadataStep_continue-button_clicked", {
