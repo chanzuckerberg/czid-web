@@ -37,17 +37,19 @@ def notify_slack(env, image, stage)
   slack_hook = slack_secret["SecretString"]
   if slack_hook
     if stage=="start"
-      puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":ghost:", "text": "starting to deploy #{image} to #{env}"}' #{slack_hook}`
+      post_slack_message({"icon_emoji": ":ghost:",
+                          "text": "starting to deploy #{image} to #{env}.\n" +
+                                  "   - refs: #{tags_and_branches(image).join(', ')}"
+                         }, slack_hook)
     elsif stage=="end"
-      puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":sharkdance:", "text": "finished deploying #{image} to #{env}"}' #{slack_hook}`
+      post_slack_message({"icon_emoji": ":sharkdance:", "text": "finished deploying #{image} to #{env}"}, slack_hook)
       if env=="staging"
         begin
           definition_list = JSON.parse(`aws ecs list-task-definitions --family-prefix idseq-prod-web --sort DESC --max-items 1`)
           definition = JSON.parse(`aws ecs describe-task-definition --task-definition #{definition_list["taskDefinitionArns"][0]}`)
           prod_image = definition["taskDefinition"]["containerDefinitions"][0]["image"].split(':')[1]
           log_history = `git log --graph --pretty=format:'%an -%d %s (%cr) <%h>' --abbrev-commit #{prod_image.split('-')[1]}..#{image.split('-')[1]} | sort`
-          payload = { "icon_emoji": ":sharkdance:", "text": "Please test these changes:\n#{log_history}" }
-          puts `curl -X POST --data-urlencode payload=#{Shellwords.escape(JSON.dump(payload))} #{slack_hook}`
+          post_slack_message({"icon_emoji": ":sharkdance:", "text": "Please test these changes:\n#{log_history}"}, slack_hook)
         rescue
         end
       end
@@ -57,6 +59,20 @@ def notify_slack(env, image, stage)
   else
     puts "Unable to get Slack hook from AWS Secrets Manager. Please check your configuration."
   end
+end
+
+def post_slack_message(payload, slack_hook)
+  puts `curl -X POST --data-urlencode payload=#{Shellwords.escape(JSON.dump(payload))} #{slack_hook}`
+end
+
+def tags_and_branches(image)
+  m = image.match(/^sha-([0-9a-f]{7,})$/)
+  return unless m
+  `git ls-remote --tags --heads origin | grep ^#{m.captures[0]} | cut -f 2` \
+      .gsub(/\^\{\}$/m, '') \
+      .gsub(/^refs\/heads\//m, 'origin/') \
+      .gsub(/^refs\/tags\//m, '') \
+      .split("\n")
 end
 
 notify_slack(env, image, "start")

@@ -14,6 +14,7 @@ class LiveSearchPopBox extends React.Component {
       isLoading: false,
       results: [],
       // the current value of the search input
+      // Cannot be undefined or null. Must be a string.
       inputValue: this.props.initialValue,
     };
 
@@ -26,7 +27,7 @@ class LiveSearchPopBox extends React.Component {
     if (props.value !== state.prevValue) {
       return {
         prevValue: props.value,
-        inputValue: props.value,
+        inputValue: props.value || "",
       };
     }
     return null;

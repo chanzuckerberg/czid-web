@@ -10,18 +10,21 @@ import _fp, {
   get,
   values,
   includes,
-  orderBy,
   find,
+  isEmpty,
   pickBy,
   has,
+  orderBy,
 } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
-import { Dropdown } from "~ui/controls/dropdowns";
 import PlusIcon from "~ui/icons/PlusIcon";
+import { UserContext } from "~/components/common/UserContext";
+import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 
 import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
@@ -65,11 +68,34 @@ class MetadataManualInput extends React.Component {
     );
   }
 
+  componentDidUpdate(prevProps) {
+    const { samples, samplesAreNew } = this.props;
+    // Whenever the samples change, we need to re-sync the metadata with the parent.
+    // (e.g. update which samples are included in the metadata object)
+    // This is because the validation function checks whether the metadata and samples being uploaded are synced up.
+    if (samples !== prevProps.samples) {
+      if (samplesAreNew) {
+        const isWaterControlSet = this.setDefaultWaterControl();
+
+        // If the water control default was set, the metadata is already synced. No need to do it again.
+        if (!isWaterControlSet) {
+          this.resyncMetadataWithParent();
+        }
+      } else {
+        this.resyncMetadataWithParent();
+      }
+    }
+  }
+
   // Need to special case this to avoid a missing required field error.
+  // Return whether water control was set.
   setDefaultWaterControl = () => {
     if (has("water_control", this.props.projectMetadataFields)) {
-      this.applyToAll("water_control", "No");
+      // Default water_control values to No if they aren't already set.
+      this.applyToAll("water_control", "No", false);
+      return true;
     }
+    return false;
   };
 
   getManualInputColumns = () => {
@@ -100,16 +126,18 @@ class MetadataManualInput extends React.Component {
     this.onMetadataChange(newHeaders, newFields);
   };
 
-  applyToAll = (column, newValue) => {
+  applyToAll = (column, newValue, overrideExistingValue = true) => {
     let newFields = this.state.metadataFieldsToEdit;
 
     this.props.samples.forEach(curSample => {
       // Only change the metadata value for samples where that field is valid.
       if (
-        this.isHostGenomeIdValidForField(
+        (this.isHostGenomeIdValidForField(
           this.getSampleHostGenomeId(curSample),
           column
-        )
+        ) &&
+          overrideExistingValue) ||
+        get([curSample.name, column], newFields) === undefined
       ) {
         newFields = set([curSample.name, column], newValue, newFields);
       }
@@ -130,14 +158,26 @@ class MetadataManualInput extends React.Component {
 
   // Convert metadata headers and fields to a CSV-like format before passing to parent.
   onMetadataChange = (newHeaders, newFields) => {
+    const { samples, samplesAreNew } = this.props;
     // Only send fields for the selected samples to the parent component.
     // If a sample was added, and then later removed, that sample's metadata will not be sent up,
     // but will still persist in this component.
-    const sampleNames = map("name", this.props.samples);
-    const fieldsForSamples = pickBy(
-      (fields, sampleName) => includes(sampleName, sampleNames),
-      newFields
+    // If a sample has no metadata set yet, send an empty object.
+    const sampleNames = map("name", samples);
+    const sampleMetadataFields = map(
+      sampleName => newFields[sampleName] || {},
+      sampleNames
     );
+
+    let fieldsForSamples = zipObject(sampleNames, sampleMetadataFields);
+
+    // If we are modifying existing samples, no need to include the samples with empty metadata fields to edit.
+    // When modifying new samples, we DO include the empty field objects so the validation error is clearer.
+    // (i.e. instead of saying "row missing" for metadata manual input, it will say "host genome missing".)
+    if (!samplesAreNew) {
+      fieldsForSamples = pickBy(fields => !isEmpty(fields), fieldsForSamples);
+    }
+
     this.props.onMetadataChange({
       metadata: {
         headers: ["sample_name", ...newHeaders],
@@ -150,6 +190,14 @@ class MetadataManualInput extends React.Component {
         ),
       },
     });
+  };
+
+  // If the samples have changed, we need to re-sync the metadata with the parent
+  // (e.g. update which samples are included in the metadata object)
+  // even if the user hasn't changed any of the metadata.
+  resyncMetadataWithParent = () => {
+    const { headersToEdit, metadataFieldsToEdit } = this.state;
+    this.onMetadataChange(headersToEdit, metadataFieldsToEdit);
   };
 
   getMetadataValue = (sample, key) => {
@@ -207,11 +255,15 @@ class MetadataManualInput extends React.Component {
   };
 
   // Update host genome for a sample.
-  updateHostGenome = (hostGenomeId, sample) => {
+  updateHostGenome = (hostGenomeIdOrNewName, sample) => {
+    const hostGenome = find(
+      ["id", hostGenomeIdOrNewName],
+      this.props.hostGenomes
+    );
     this.updateMetadataField(
       "Host Genome",
       // Convert the id to a name.
-      find(["id", hostGenomeId], this.props.hostGenomes).name,
+      hostGenome ? hostGenome.name : hostGenomeIdOrNewName,
       sample
     );
   };
@@ -260,6 +312,8 @@ class MetadataManualInput extends React.Component {
 
   // Create form fields for the table.
   getManualInputData = () => {
+    const { allowedFeatures } = this.context || {};
+
     if (!this.props.samples) {
       return null;
     }
@@ -285,26 +339,39 @@ class MetadataManualInput extends React.Component {
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
-
-          if (column === "Host Genome") {
+          // TODO (gdingle): remove allowedFeatures after launch of sample type, 2020-01-15.
+          // See https://jira.czi.team/browse/IDSEQ-2051.
+          if (this.props.samplesAreNew && column === "Host Genome") {
             return (
               <div>
-                <Dropdown
-                  className={inputClasses}
-                  options={this.getHostGenomeOptions()}
-                  value={sampleHostGenomeId}
-                  onChange={id => this.updateHostGenome(id, sample)}
-                  usePortal
-                  withinModal={this.props.withinModal}
-                />
+                {allowedFeatures.includes("host_genome_free_text") ? (
+                  <HostOrganismSearchBox
+                    className={inputClasses}
+                    value={this.getMetadataValue(sample, column)}
+                    onResultSelect={({ result }) => {
+                      this.updateHostGenome(result.name || result, sample);
+                    }}
+                    hostGenomes={this.props.hostGenomes || []}
+                  />
+                ) : (
+                  <Dropdown
+                    className={inputClasses}
+                    options={this.getHostGenomeOptions()}
+                    value={sampleHostGenomeId}
+                    onChange={id => this.updateHostGenome(id, sample)}
+                    usePortal
+                    withinModal={this.props.withinModal}
+                  />
+                )}
                 {this.props.samples.length > 1 &&
                   this.renderApplyToAll(sample, column)}
               </div>
             );
           }
-
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
-          if (this.isHostGenomeIdValidForField(sampleHostGenomeId, column)) {
+          else if (
+            this.isHostGenomeIdValidForField(sampleHostGenomeId, column)
+          ) {
             // host is unknown on initial load
             const hostGenome = this.getSampleHostGenome(sample) || {};
             return (
@@ -383,5 +450,7 @@ MetadataManualInput.propTypes = {
   hostGenomes: PropTypes.array,
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };
+
+MetadataManualInput.contextType = UserContext;
 
 export default MetadataManualInput;

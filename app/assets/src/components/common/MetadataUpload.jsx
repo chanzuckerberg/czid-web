@@ -350,31 +350,36 @@ class MetadataUpload extends React.Component {
           <div className={cs.info}>
             <div className={cs.details}>
               <span className={cs.label}>{`Required fields: `}</span>
-              {requiredFields && requiredFields.join(", ")}
+              We require the following metadata to determine how to process your
+              data and display the results:{" "}
+              {requiredFields && requiredFields.join(", ")}. Please be as
+              accurate as possible!{" "}
+              <a
+                href="/metadata/dictionary"
+                className={cs.link}
+                target="_blank"
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "MetadataUpload_full-dictionary-link_clicked",
+                    {
+                      projectId: this.props.project.id,
+                      projectName: this.props.project.name,
+                    }
+                  )
+                }
+              >
+                View Full Metadata Dictionary
+              </a>.
             </div>
             <div className={cs.details}>
-              <span className={cs.label}>{`Available host genomes: `}</span>
-              {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
-            </div>
-            <div className={cs.details}>
-              <span>
-                <a
-                  href="/metadata/dictionary"
-                  className={cs.link}
-                  target="_blank"
-                  onClick={() =>
-                    logAnalyticsEvent(
-                      "MetadataUpload_full-dictionary-link_clicked",
-                      {
-                        projectId: this.props.project.id,
-                        projectName: this.props.project.name,
-                      }
-                    )
-                  }
-                >
-                  View Full Metadata Dictionary
-                </a>
-              </span>
+              <span
+                className={cs.label}
+              >{`Available organisms for host subtraction: `}</span>
+              {hostGenomes &&
+                hostGenomes
+                  .filter(h => !h.ercc_only)
+                  .map(h => h.name)
+                  .join(", ")}.
             </div>
           </div>
         )}

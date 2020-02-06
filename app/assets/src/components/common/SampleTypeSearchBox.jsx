@@ -1,9 +1,13 @@
 import React from "react";
-import { groupBy, sortBy } from "lodash/fp";
+import { groupBy, get } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
+import {
+  doesResultMatch,
+  sortResults,
+} from "~/components/views/SampleUploadFlow/utils";
 
-import LiveSearchPopBox from "./LiveSearchPopBox";
+import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 
 const SUGGESTED = "SUGGESTED";
 const ALL = "ALL";
@@ -14,32 +18,15 @@ class SampleTypeSearchBox extends React.Component {
   };
 
   getMatchesByCategory(query) {
-    const matchSampleTypes = sampleType => {
-      // If no query, return all possible
-      if (query === "") return true;
+    const matchedSampleTypes = this.props.sampleTypes.filter(sampleType =>
+      doesResultMatch(sampleType, query)
+    );
 
-      // Match chars in any position. Good for acronyms. Ignore spaces.
-      const noSpaces = query.replace(/\s*/gi, "");
-      const regex = new RegExp(noSpaces.split("").join(".*"), "gi");
-      if (regex.test(sampleType.name)) {
-        return true;
-      }
-      return false;
-    };
-    const matchedSampleTypes = this.props.sampleTypes.filter(matchSampleTypes);
-
-    // Sort matches by position of match. If no position, alphabetical.
-    const sortSampleTypes = sampleType => {
-      const name = sampleType.name.toLowerCase();
-      const q = query.toLowerCase();
-      const res =
-        name.indexOf(q) === -1 ? Number.MAX_SAFE_INTEGER : name.indexOf(q);
-      return res;
-    };
-    let sortedSampleTypes = sortBy(t => t.name, matchedSampleTypes);
-    if (query !== "") {
-      sortedSampleTypes = sortBy(sortSampleTypes, sortedSampleTypes);
-    }
+    const sortedSampleTypes = sortResults(
+      matchedSampleTypes,
+      query,
+      sampleType => sampleType.name
+    );
 
     // Sample types are grouped differently based on whether the current
     // sample's host genome is an insect, a human, or neither. The "suggested"
@@ -78,7 +65,10 @@ class SampleTypeSearchBox extends React.Component {
         results: sampleTypesByCategory[ALL].map(formatResult),
       };
     }
-    if (query.length) {
+    if (
+      query.length &&
+      get([0, "name"], sampleTypesByCategory[SUGGESTED]) !== query
+    ) {
       results.noMatch = {
         name: "Use Plain Text (No Match)",
         results: [{ title: query, name: query }],
