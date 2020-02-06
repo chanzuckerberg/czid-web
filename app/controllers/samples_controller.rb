@@ -62,6 +62,16 @@ class SamplesController < ApplicationController
   MIN_CLI_VERSION = '0.7.3'.freeze
   CLI_DEPRECATION_MSG = "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git` or with sudo + pip2/pip3 depending on your setup to update and try again.".freeze
 
+  SAMPLE_DEFAULT_FIELDS = [
+    :name,
+    :created_at,
+    :updated_at,
+    :project_id,
+    :status,
+    :host_genome_id,
+    :upload_error,
+  ].freeze
+
   # GET /samples
   # GET /samples.json
   def index
@@ -751,23 +761,13 @@ class SamplesController < ApplicationController
   end
 
   def show_v2
-    # TODO: move to fastjson_api serializer
-    default_fields = [
-      :name,
-      :created_at,
-      :updated_at,
-      :project_id,
-      :status,
-      :host_genome_id,
-      :upload_error,
-    ]
     respond_to do |format|
       format.html { render 'show_v2' }
       format.json do
         render json: @sample
           .as_json(
             methods: [],
-            only: default_fields,
+            only: SAMPLE_DEFAULT_FIELDS,
             include: {
               project: {
                 only: [:id, :name],
