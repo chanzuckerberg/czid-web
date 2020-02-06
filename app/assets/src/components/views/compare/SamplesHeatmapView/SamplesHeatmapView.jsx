@@ -103,6 +103,20 @@ class SamplesHeatmapView extends React.Component {
       sampleIds: compact(
         map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds)
       ),
+      sampleDetails: {},
+      allTaxonIds: [],
+      taxonIds: [],
+      allTaxonDetails: {},
+      taxonDetails: {},
+      // allData is an object containing all the metric data for every taxa for each sample.
+      // The key corresponds to the metric type (e.g. NT.rpm), and the value is 2D array;
+      // rows correspond to taxa and columns correspond to samples.
+      // Note that the 2D array is accesed by a taxon's/sample's INDEX, not id.
+      allData: {},
+      // data is an object containing metric data for only the samples that have passed filters
+      // and are displayed on the heatmap. data is onlyl a subset of allData if client-side
+      // filtering is enabled, otherwise they should be identical.
+      data: {},
       hideFilters: false,
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
@@ -333,6 +347,7 @@ class SamplesHeatmapView extends React.Component {
         index: i,
         host_genome_name: sample.host_genome_name,
         metadata: processMetadata(sample.metadata, true),
+        taxa: [],
       };
       if (sample.taxons) {
         for (let j = 0; j < sample.taxons.length; j++) {
@@ -352,9 +367,12 @@ class SamplesHeatmapView extends React.Component {
                 taxon.tax_id === taxon.species_taxid && taxon.genus_taxid,
               phage: !!taxon.is_phage,
               genusName: taxon.genus_name,
+              taxLevel: taxon.tax_level,
             };
             allTaxonDetails[taxon.name] = allTaxonDetails[taxon.tax_id];
           }
+
+          sampleDetails[sample.sample_id].taxa.push(taxon.tax_id);
 
           this.props.metrics.forEach(metric => {
             let [metricType, metricName] = metric.value.split(".");
@@ -380,7 +398,7 @@ class SamplesHeatmapView extends React.Component {
     };
   }
 
-  filterTaxons() {
+  filterTaxa() {
     let {
       taxonFilterState,
       taxonPassesThresholdFilters,
@@ -394,17 +412,13 @@ class SamplesHeatmapView extends React.Component {
         let taxon = allTaxonDetails[taxonId];
         if (!taxonIds.has(taxonId) && this.taxonPassesSelectedFilters(taxon)) {
           if (taxonPassesThresholdFilters[taxon["index"]]) {
-            taxonDetails[taxon["id"]] = taxon;
-            taxonDetails[taxon["name"]] = taxon;
             taxonIds.add(taxon["id"]);
-            this.props.metrics.forEach(metric => {
-              filteredData[metric.value] = filteredData[metric.value] || [];
-              filteredData[metric.value][filteredData[metric.value].length] =
-                allData[metric.value][taxon["index"]] || [];
-            });
           }
         }
       });
+      [taxonIds, taxonDetails, filteredData] = this.getTopTaxaPerSample(
+        taxonIds
+      );
       taxonIds = Array.from(taxonIds);
     } else {
       taxonDetails = allTaxonDetails;
@@ -481,10 +495,16 @@ class SamplesHeatmapView extends React.Component {
       readSpecificity,
       categories,
       subcategories,
+      species,
     } = this.state.selectedOptions;
     let phage_selected =
       subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
 
+    if (species && taxonDetails["taxLevel"] !== 1) {
+      return false;
+    } else if (!species && taxonDetails["taxLevel"] !== 2) {
+      return false;
+    }
     if (readSpecificity && taxonDetails["id"] < 0) {
       return false;
     }
@@ -503,6 +523,56 @@ class SamplesHeatmapView extends React.Component {
       return false;
     }
     return true;
+  }
+
+  getTopTaxaPerSample(filteredTaxonIds) {
+    // Fetch the top N taxa from each sample, sorted by the selected metric,
+    // that passed all selected filters.
+    let {
+      sampleDetails,
+      allData,
+      allTaxonDetails,
+      selectedOptions,
+    } = this.state;
+    let { metric, taxonsPerSample } = selectedOptions;
+    const { metrics } = this.props;
+
+    let topTaxIds = new Set(),
+      topTaxonDetails = {},
+      filteredData = {};
+
+    Object.values(sampleDetails).forEach(sample => {
+      let filteredTaxaInSample = sample.taxa.filter(taxonId =>
+        filteredTaxonIds.has(taxonId)
+      );
+
+      filteredTaxaInSample.sort(
+        (taxId1, taxId2) =>
+          allData[metric][allTaxonDetails[taxId2].index][sample.index] -
+          allData[metric][allTaxonDetails[taxId1].index][sample.index]
+      );
+
+      let count = 0;
+      for (let taxId of filteredTaxaInSample) {
+        if (count >= taxonsPerSample) {
+          break;
+        } else if (!topTaxIds.has(taxId)) {
+          let taxon = allTaxonDetails[taxId];
+          topTaxIds.add(taxId);
+          topTaxonDetails[taxId] = allTaxonDetails[taxId];
+          topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
+
+          metrics.forEach(metric => {
+            filteredData[metric.value] = filteredData[metric.value] || [];
+            filteredData[metric.value].push(
+              allData[metric.value][taxon["index"]]
+            );
+          });
+          count++;
+        }
+      }
+    });
+    return [topTaxIds, topTaxonDetails, filteredData];
   }
 
   handleMetadataUpdate = (key, value) => {
@@ -668,14 +738,15 @@ class SamplesHeatmapView extends React.Component {
   handleSelectedOptionsChange = newOptions => {
     if (this.props.allowedFeatures.includes("heatmap_filter_fe")) {
       const frontendFilters = [
+        "species",
         "categories",
         "subcategories",
         "thresholdFilters",
         "readSpecificity",
         "metric",
+        "taxonsPerSample",
       ];
-      // TODO(julie): species and taxaPerSample should eventually be frontend filters
-      const backendFilters = ["species", "background", "taxonsPerSample"];
+      const backendFilters = ["background"];
       const shouldRefetchData =
         intersection(keys(newOptions), backendFilters).length > 0;
       const shouldRefilterData =
@@ -708,7 +779,7 @@ class SamplesHeatmapView extends React.Component {
   }
 
   updateFilters() {
-    this.filterTaxons();
+    this.filterTaxa();
   }
 
   renderVisualization() {

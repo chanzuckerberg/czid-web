@@ -224,13 +224,12 @@ class ReviewStep extends React.Component {
       samples,
       metadata,
       project,
-      hostGenomes,
     } = this.props;
 
     const shouldTruncateDescription =
       project.description && this.countNewLines(project.description) > 5;
 
-    const { userSettings, admin } = this.context || {};
+    const { userSettings, allowedFeatures } = this.context || {};
 
     return (
       <div
@@ -345,8 +344,11 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          {admin && (
-            <HostOrganismMessage hostGenomes={hostGenomes} samples={samples} />
+          {allowedFeatures.includes("host_genome_free_text") && (
+            <HostOrganismMessage
+              hostGenomes={this.props.originalHostGenomes}
+              samples={samples}
+            />
           )}
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
@@ -403,7 +405,7 @@ ReviewStep.propTypes = {
   project: PropTypes.Project,
   samples: PropTypes.arrayOf(
     PropTypes.shape({
-      host_genome_id: PropTypes.number,
+      host_genome_id: PropTypes.number.isRequired,
       input_file_attributes: PropTypes.shape({
         name: PropTypes.string,
         source: PropTypes.string,
@@ -421,11 +423,13 @@ ReviewStep.propTypes = {
   ),
   uploadType: PropTypes.string.isRequired,
   hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
+  originalHostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
   visible: PropTypes.bool,
   // Triggers when we start or stop uploading. Lets the parent know to disable header link.
   onUploadStatusChange: PropTypes.func,
   onStepSelect: PropTypes.func,
   onUploadComplete: PropTypes.func.isRequired,
+  admin: PropTypes.bool,
 };
 
 ReviewStep.contextType = UserContext;

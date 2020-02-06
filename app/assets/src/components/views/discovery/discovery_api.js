@@ -104,6 +104,7 @@ const processRawSample = sample => {
       sample.details
     ),
     totalRuntime: get("run_info.total_runtime", sample.details),
+    waterControl: get("metadata.water_control", sample.details),
   };
   return row;
 };

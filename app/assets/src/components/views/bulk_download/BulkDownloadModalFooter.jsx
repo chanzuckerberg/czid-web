@@ -6,6 +6,7 @@ import LoadingMessage from "~/components/common/LoadingMessage";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { withAnalytics } from "~/api/analytics";
 
 import { CONDITIONAL_FIELDS } from "./constants.js";
 import cs from "./bulk_download_modal_footer.scss";
@@ -168,7 +169,10 @@ export default class BulkDownloadModalFooter extends React.Component {
       <PrimaryButton
         disabled={!this.isSelectedDownloadValid()}
         text="Start Generating Download"
-        onClick={onDownloadRequest}
+        onClick={withAnalytics(
+          onDownloadRequest,
+          "BulkDownloadModalFooter_start-generating-button_clicked"
+        )}
       />
     );
   }
