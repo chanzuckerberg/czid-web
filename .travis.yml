@@ -30,6 +30,8 @@ jobs:
         # Install python and dependencies
         - source ~/virtualenv/python2.7/bin/activate
         - pip install -r requirements.txt
+        # Upgrade bundler to v2 - https://docs.travis-ci.com/user/languages/ruby/#bundler-20
+        - gem install bundler
       before_script:
         # Create dummy versions of our javascript and css bundle
         #   The actual files are not required for testing ruby, just the presence of the files
@@ -57,12 +59,17 @@ jobs:
         # Install python and dependencies
         - source ~/virtualenv/python2.7/bin/activate
         - pip install -r requirements.txt
+        # Upgrade bundler to v2 - https://docs.travis-ci.com/user/languages/ruby/#bundler-20
+        - gem install bundler
       before_script: bundle exec rake db:create db:migrate db:seed
       script: bundle exec rspec
     - name: "Ruby Code Quality"
       language: ruby
       rvm: 2.5
       cache: bundler
+      before_install:
+        # Upgrade bundler to v2 - https://docs.travis-ci.com/user/languages/ruby/#bundler-20
+        - gem install bundler
       script: 
         - bundle exec rubocop -R --config .rubocop_todo.yml
         # Block on High Confidence warnings
