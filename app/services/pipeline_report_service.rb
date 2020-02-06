@@ -58,6 +58,38 @@ class PipelineReportService
     nil => "uncategorized",
   }.freeze
 
+  CSV_COLUMNS = [
+    "tax_id",
+    "tax_level",
+    "genus_tax_id",
+    "name",
+    "common_name",
+    "category",
+    "agg_score",
+    "max_z_score",
+    "nt_z_score",
+    "nt_rpm",
+    "nt_count",
+    "nt_contigs",
+    "nt_contig_r",
+    "nt_percent_identity",
+    "nt_alignment_length",
+    "nt_e_value",
+    "nt_bg_mean",
+    "nt_bg_stdev",
+    "nr_z_score",
+    "nr_rpm",
+    "nr_count",
+    "nr_contigs",
+    "nr_contig_r",
+    "nr_percent_identity",
+    "nr_alignment_length",
+    "nr_e_value",
+    "nr_bg_mean",
+    "nr_bg_stdev",
+    "species_tax_ids",
+  ].freeze
+
   def initialize(pipeline_run, background_id, csv: false, min_contig_size: DEFAULT_MIN_CONTIG_SIZE, parallel: true)
     @pipeline_run = pipeline_run
     @background_id = background_id
@@ -222,7 +254,9 @@ class PipelineReportService
     @timer.split("compute_options_available_for_pipeline_run")
 
     if @csv
-      return report_csv(counts_by_tax_level, sorted_genus_tax_ids)
+      csv_output = report_csv(counts_by_tax_level, sorted_genus_tax_ids)
+      @timer.split("generate_downloadable_csv")
+      return csv_output
     else
       metadata = metadata.merge(backgroundId: @background_id,
                                 truncatedReadsCount: @pipeline_run.truncated,
@@ -583,14 +617,11 @@ class PipelineReportService
       end
     end
 
-    flat_keys = rows[0].keys
-    flat_keys_symbols = flat_keys.map { |array_key| array_key.map(&:to_sym) }
-    attribute_names = flat_keys_symbols.map { |k| k.map(&:to_s).join("_") }
     CSVSafe.generate(headers: true) do |csv|
-      csv << attribute_names
-      rows.each do |tax_info|
-        tax_info_by_symbols = tax_info.map { |k, v| [k.map(&:to_sym), v] }.to_h
-        csv << tax_info_by_symbols.values_at(*flat_keys_symbols)
+      csv << CSV_COLUMNS
+      rows.each do |row|
+        tax_info = row.map { |k, v| [k.map(&:to_s).join("_"), v] }.to_h
+        csv << tax_info.values_at(*CSV_COLUMNS)
       end
     end
   end
