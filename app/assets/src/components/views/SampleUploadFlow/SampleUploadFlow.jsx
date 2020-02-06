@@ -128,13 +128,6 @@ class SampleUploadFlow extends React.Component {
     });
   };
 
-  getSamplesForMetadataValidation = () => {
-    return this.state.samples.map(sample => ({
-      name: sample.name,
-      project_id: sample.project_id,
-    }));
-  };
-
   // SLIGHT HACK: Keep steps mounted, so user can return to them if needed.
   // The internal state of some steps is difficult to recover if they are unmounted.
   renderSteps = () => {
@@ -152,7 +145,7 @@ class SampleUploadFlow extends React.Component {
         {this.state.samples && (
           <UploadMetadataStep
             onUploadMetadata={this.handleUploadMetadata}
-            samples={this.getSamplesForMetadataValidation()}
+            samples={this.state.samples}
             project={this.state.project}
             visible={this.state.currentStep === "uploadMetadata"}
             onDirty={this.metadataChanged}
