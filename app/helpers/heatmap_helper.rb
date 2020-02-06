@@ -17,6 +17,15 @@ module HeatmapHelper
 
   MINIMUM_ZSCORE_THRESHOLD = 1.7
 
+  # The number of taxa per sample to load
+  # this should be high enough to compensate for any filters and thresholds
+  #  that the user might use.
+  # Note: [Feb 5 2020] At this moment, we set this at 1000 with no other reasoning
+  # that being significantly higher (10x) than the maximum value for taxa per
+  # sample (100)  that the user can select on the frontend interface.
+  CLIENT_FILTERING_TAXA_PER_SAMPLE = 1000
+  CLIENT_FILTERING_SORT_VALUES = { metric: "rpm", direction: "highest" }.freeze
+
   ALL_METRICS = [
     { text: "NT rPM", value: "NT.rpm" },
     { text: "NT Z Score", value: "NT.zscore" },
@@ -254,9 +263,31 @@ module HeatmapHelper
       #{read_specificity_clause}
       #{phage_clause}"
 
+    sort = if client_filtering_enabled
+             CLIENT_FILTERING_SORT_VALUES
+           else
+             ReportHelper.decode_sort_by(sort_by)
+           end
+
+    num_results_with_overfetch = if client_filtering_enabled
+                                   TAXA_PER_SAMPLE_FOR_CLIENT_FILTERING
+                                 else
+                                   # Overfetch by a factor of 4 to allow for
+                                   #   a) both count types, and
+                                   #   b) any post-SQL filtering
+                                   num_results * 4
+                                 end
+
     # TODO: (gdingle): how do we protect against SQL injection?
     sql_results = TaxonCount.connection.select_all(
-      top_n_query(query, sort_by, num_results, threshold_filters)
+      top_n_query(
+        query,
+        num_results_with_overfetch,
+        sort[:metric],
+        sort[:direction],
+        threshold_filters: threshold_filters,
+        count_type: sort[:count_type]
+      )
     ).to_hash
 
     # organizing the results by pipeline_run_id
@@ -485,13 +516,22 @@ module HeatmapHelper
   # 1) assigns a rank to each row within a pipeline run
   # 2) returns rows ranking <= num_results
   # See http://www.sqlines.com/mysql/how-to/get_top_n_each_group
-  def self.top_n_query(query, sort_by, num_results, threshold_filters)
+  def self.top_n_query(
+    query,
+    num_results,
+    sort_field,
+    sort_direction,
+    threshold_filters: nil,
+    count_type: nil
+  )
     if threshold_filters.present?
       # custom filters are applied at the taxon level, not the count level,
       # so we need rank entirely in ruby.
       return query
     end
-    sort = ReportHelper.decode_sort_by(sort_by)
+
+    count_type_order_clause = count_type.present? ? "count_type = '#{count_type}' DESC," : ""
+
     "SELECT *
       FROM (
         SELECT
@@ -503,12 +543,10 @@ module HeatmapHelper
         ) a
         ORDER BY
           pipeline_run_id,
-          count_type = '#{sort[:count_type]}' DESC,
-          #{sort[:metric]} #{sort[:direction] == 'highest' ? 'DESC' : 'ASC'}
+          #{count_type_order_clause}
+          #{sort_field} #{sort_direction == 'highest' ? 'DESC' : 'ASC'}
       ) b
-      -- Overfetch by a factor of 4 to allow for a) both count types, and
-      -- b) any post-SQL filtering
-      WHERE rank <= #{num_results * 4}
+      WHERE rank <= #{num_results}
     "
   end
 
