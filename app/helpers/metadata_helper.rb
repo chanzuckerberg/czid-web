@@ -148,12 +148,10 @@ module MetadataHelper
       end
 
       # Account for both the name and the display_name, as both are accepted.
-      if ["sample_name", "Sample Name"].include?(col)
-        column_to_index["sample_name"] = index
-        column_to_index["Sample Name"] = index
-      elsif ["host_genome", "Host Genome"].include?(col)
-        column_to_index["host_genome"] = index
-        column_to_index["Host Genome"] = index
+      if MetadataField::SAMPLE_NAME_SYNONYMS.include?(col)
+        MetadataField::SAMPLE_NAME_SYNONYMS.map { |key| column_to_index[key] = index }
+      elsif MetadataField::HOST_GENOME_SYNONYMS.include?(col)
+        MetadataField::HOST_GENOME_SYNONYMS.map { |key| column_to_index[key] = index }
       else
         matching_field = existing_fields.select { |field| field.name == col || field.display_name == col }
 
@@ -214,13 +212,13 @@ module MetadataHelper
     warning_aggregator = ErrorAggregator.new
 
     # Require sample_name or Sample Name column.
-    if (metadata["headers"] & ["sample_name", "Sample Name"]).blank?
+    if (metadata["headers"] & MetadataField::SAMPLE_NAME_SYNONYMS).blank?
       errors.push(MetadataValidationErrors::MISSING_SAMPLE_NAME_COLUMN)
       return { "errors" => errors, "warnings" => [] }
     end
 
     # Require host_genome or Host Genome column.
-    if extract_host_genome_from_metadata && (metadata["headers"] & ["host_genome", "Host Genome"]).blank?
+    if extract_host_genome_from_metadata && (metadata["headers"] & MetadataField::HOST_GENOME_SYNONYMS).blank?
       errors.push(MetadataValidationErrors::MISSING_HOST_GENOME_COLUMN)
       return { "errors" => errors, "warnings" => [] }
     end
@@ -238,7 +236,7 @@ module MetadataHelper
 
     # Add a warning for each custom field that will be created.
     metadata["headers"].each_with_index do |col, index|
-      next if ["sample_name", "Sample Name", "host_genome", "Host Genome"].include?(col)
+      next if MetadataField::RESERVED_NAMES.include?(col)
 
       matching_field = existing_fields.select { |field| field.name == col || field.display_name == col }
 
@@ -247,7 +245,7 @@ module MetadataHelper
       end
     end
 
-    sample_name_index = metadata["headers"].find_index("sample_name") || metadata["headers"].find_index("Sample Name")
+    sample_name_index = metadata["headers"].find_index { |header| MetadataField::SAMPLE_NAME_SYNONYMS.include?(header) }
 
     if extract_host_genome_from_metadata
       host_genomes, host_genome_index, new_host_genomes =
@@ -324,7 +322,7 @@ module MetadataHelper
         field = metadata["headers"][col_index]
 
         # Ignore invalid columns.
-        next if ["sample_name", "Sample Name", "host_genome", "Host Genome"].include?(field)
+        next if MetadataField::RESERVED_NAMES.include?(field)
         val_errors, val_field = sample.metadatum_validate(field, value).values_at(
           :errors, :metadata_field
         )
@@ -381,7 +379,7 @@ module MetadataHelper
 
   def find_or_create_host_genomes(metadata, allow_new_host_genomes)
     new_host_genomes = []
-    host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
+    host_genome_index = metadata["headers"].find_index { |header| MetadataField::HOST_GENOME_SYNONYMS.include?(header) }
     # same name rules as before_validation
     host_genome_names = metadata["rows"].map { |row| row[host_genome_index] }.uniq
     host_genomes = if allow_new_host_genomes

@@ -5,6 +5,20 @@ class MetadataField < ApplicationRecord
 
   validate :metadata_field_subsets
 
+  # As of Feb 2020, we renamed "Host Genome" in the UI to better reflect its
+  # purpose as "Host Organism". For backwards compatibility, especially for CSV
+  # uploads, we treat both as synonyms.
+  HOST_GENOME_SYNONYMS = [
+    "host_genome",
+    "Host Genome",
+    "host_organism",
+    "Host Organism",
+  ].freeze
+  # We can't let a user create their own sample_name custom metadata column
+  SAMPLE_NAME_SYNONYMS = ["sample_name", "Sample Name"].freeze
+  RESERVED_NAMES = HOST_GENOME_SYNONYMS | SAMPLE_NAME_SYNONYMS
+  validates :name, exclusion: { in: RESERVED_NAMES }
+
   STRING_TYPE = 0
   NUMBER_TYPE = 1
   DATE_TYPE = 2
