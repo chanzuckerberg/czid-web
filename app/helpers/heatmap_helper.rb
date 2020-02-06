@@ -26,6 +26,11 @@ module HeatmapHelper
   CLIENT_FILTERING_TAXA_PER_SAMPLE = 1000
   CLIENT_FILTERING_SORT_VALUES = { metric: "rpm", direction: "highest" }.freeze
 
+  # Overfetch by a factor of 4 to allow for
+  #   a) both count types, and
+  #   b) any post-SQL filtering
+  SERVER_FILTERING_OVERFETCH_FACTOR = 4
+
   ALL_METRICS = [
     { text: "NT rPM", value: "NT.rpm" },
     { text: "NT Z Score", value: "NT.zscore" },
@@ -167,7 +172,7 @@ module HeatmapHelper
           taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
         taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
         candidate_taxons[row["tax_id"]] = taxon
-        break if count >= num_results
+        break if count >= num_results && !client_filtering_enabled
         count += 1
       end
     end
@@ -270,12 +275,9 @@ module HeatmapHelper
            end
 
     num_results_with_overfetch = if client_filtering_enabled
-                                   TAXA_PER_SAMPLE_FOR_CLIENT_FILTERING
+                                   CLIENT_FILTERING_TAXA_PER_SAMPLE
                                  else
-                                   # Overfetch by a factor of 4 to allow for
-                                   #   a) both count types, and
-                                   #   b) any post-SQL filtering
-                                   num_results * 4
+                                   num_results * SERVER_FILTERING_OVERFETCH_FACTOR
                                  end
 
     # TODO: (gdingle): how do we protect against SQL injection?
