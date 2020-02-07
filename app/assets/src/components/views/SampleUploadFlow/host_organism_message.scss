@@ -3,6 +3,8 @@
 @import "~styles/themes/typography";
 
 .listContainer {
+  margin: $space-s 0;
+
   background-color: $info-bg;
 
   &.warn {
