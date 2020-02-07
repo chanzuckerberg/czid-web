@@ -418,7 +418,7 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
     # Error should throw if there are multiple columns with the same name.
     assert @response.parsed_body['issues']['errors'][0]['isGroup']
     assert_equal ErrorAggregator::ERRORS[:duplicate_columns][:title].call(4, nil), @response.parsed_body['issues']['errors'][0]['caption']
-    assert_equal [[1, "Sample Name", 0], [4, "Sample Type", 3], [5, "Host Genome", 2], [7, "Custom Field", 6]], @response.parsed_body['issues']['errors'][0]['rows']
+    assert_equal [[1, "Sample Name", 0], [4, "Sample Type", 3], [5, "Host Organism", 2], [7, "Custom Field", 6]], @response.parsed_body['issues']['errors'][0]['rows']
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
