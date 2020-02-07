@@ -197,6 +197,12 @@ module HeatmapHelper
     read_specificity_clause = ""
     phage_clause = ""
 
+    # If client-side filtering is enabled on the heatmap, then skip the filters in the query.
+    # This enables consistent behavior for users viewing saved heatmaps with the client-side filtering flag enabled,
+    # so that they will not only be filtering on an already-filtered subset of the data.
+    # The filters are skipped in the query rather than modifying the client's request paramaters since
+    # saved visualizations are tied to visualization ids, and saved parameters are then pulled from the
+    # Visualizations table on the server-side.
     unless client_filtering_enabled
       if categories.present?
         categories_clause = " AND superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
