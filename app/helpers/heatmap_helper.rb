@@ -149,10 +149,12 @@ module HeatmapHelper
       # NOTE: This block of code can probably be all removed because the same
       # filtering now happens earlier in SQL.
       HeatmapHelper.compute_aggregate_scores_v2!(rows)
-      rows = rows.select do |row|
-        # Note: these are applied *after* SQL filters, so results may not be
-        # 100% as expected .
-        HeatmapHelper.apply_custom_filters(row, threshold_filters)
+      unless client_filtering_enabled
+        rows = rows.select do |row|
+          # Note: these are applied *after* SQL filters, so results may not be
+          # 100% as expected .
+          HeatmapHelper.apply_custom_filters(row, threshold_filters)
+        end
       end
 
       # Get the top N for each sample. This re-sorts on the same metric as in
@@ -192,21 +194,31 @@ module HeatmapHelper
   )
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
-    if categories.present?
-      categories_clause = " AND superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
-    elsif include_phage
-      categories_clause = " AND superkingdom_taxid = #{categories_map['Viruses']}"
-    end
-
     read_specificity_clause = ""
-    if read_specificity
-      read_specificity_clause = " AND taxon_counts.tax_id > 0"
-    end
+    phage_clause = ""
 
-    if !include_phage && categories.present?
-      phage_clause = " AND is_phage != 1"
-    elsif include_phage && categories.blank?
-      phage_clause = " AND is_phage = 1"
+    # If client-side filtering is enabled on the heatmap, then skip the filters in the query.
+    # This enables consistent behavior for users viewing saved heatmaps with the client-side filtering flag enabled,
+    # so that they will not only be filtering on an already-filtered subset of the data.
+    # The filters are skipped in the query rather than modifying the client's request paramaters since
+    # saved visualizations are tied to visualization ids, and saved parameters are then pulled from the
+    # Visualizations table on the server-side.
+    unless client_filtering_enabled
+      if categories.present?
+        categories_clause = " AND superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
+      elsif include_phage
+        categories_clause = " AND superkingdom_taxid = #{categories_map['Viruses']}"
+      end
+
+      if read_specificity
+        read_specificity_clause = " AND taxon_counts.tax_id > 0"
+      end
+
+      if !include_phage && categories.present?
+        phage_clause = " AND is_phage != 1"
+      elsif include_phage && categories.blank?
+        phage_clause = " AND is_phage = 1"
+      end
     end
 
     tax_level = species_selected ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
