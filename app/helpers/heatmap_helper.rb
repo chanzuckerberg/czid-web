@@ -194,22 +194,20 @@ module HeatmapHelper
   )
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
+    read_specificity_clause = ""
+    phage_clause = ""
+
     unless client_filtering_enabled
       if categories.present?
         categories_clause = " AND superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
       elsif include_phage
         categories_clause = " AND superkingdom_taxid = #{categories_map['Viruses']}"
       end
-    end
 
-    read_specificity_clause = ""
-    unless client_filtering_enabled
       if read_specificity
         read_specificity_clause = " AND taxon_counts.tax_id > 0"
       end
-    end
 
-    unless client_filtering_enabled
       if !include_phage && categories.present?
         phage_clause = " AND is_phage != 1"
       elsif include_phage && categories.blank?
