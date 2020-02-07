@@ -131,7 +131,7 @@ class MetadataDictionary extends React.Component {
             <div>* = Required</div>
             <Dropdown
               className={cs.hostGenome}
-              label="Host Genome"
+              label="Host Organism"
               options={this.getHostGenomeOptions()}
               value={this.state.currentHostGenome}
               onChange={this.handleHostGenomeChange}

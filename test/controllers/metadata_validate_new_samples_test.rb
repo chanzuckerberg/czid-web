@@ -400,7 +400,7 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
-        headers: ['sample_name', 'Sample Name', 'host_genome', 'sample_type', 'Sample Type', 'Host Genome', 'Custom Field', 'Custom Field'],
+        headers: ['sample_name', 'Sample Name', 'host_genome', 'sample_type', 'Sample Type', 'Host Organism', 'Custom Field', 'Custom Field'],
         rows: [
           ['Test Sample', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar'],
         ],

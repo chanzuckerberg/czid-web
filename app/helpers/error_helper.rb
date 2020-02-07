@@ -1,7 +1,7 @@
 module ErrorHelper
   module MetadataValidationErrors
     MISSING_SAMPLE_NAME_COLUMN = "\"Sample Name\" column is required.".freeze
-    MISSING_HOST_GENOME_COLUMN = "\"Host Genome\" column is required.".freeze
+    MISSING_HOST_GENOME_COLUMN = "\"Host Organism\" column is required.".freeze
     SAMPLE_NOT_FOUND = "Sample not found".freeze
     INVALID_FIELD_FOR_HOST_GENOME = "Invalid metadata field key for host genome.".freeze
     INVALID_OPTION = "Invalid option for metadata field.".freeze

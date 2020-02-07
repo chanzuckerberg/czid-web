@@ -81,14 +81,19 @@ class ReviewStep extends React.Component {
     );
 
     if (uploadType !== "basespace") {
-      return ["Sample Name", "Input Files", "Host Genome", ...metadataHeaders];
+      return [
+        "Sample Name",
+        "Input Files",
+        "Host Organism",
+        ...metadataHeaders,
+      ];
     } else {
       return [
         "Sample Name",
         "Basespace Project",
         "File Size",
         "File Type",
-        "Host Genome",
+        "Host Organism",
         ...metadataHeaders,
       ];
     }
@@ -112,7 +117,7 @@ class ReviewStep extends React.Component {
       const sampleData = {
         ...metadataBySample[sample.name],
         "Sample Name": <div className={cs.sampleName}>{sample.name}</div>,
-        "Host Genome": get("name", hostGenomesById[sample.host_genome_id]),
+        "Host Organism": get("name", hostGenomesById[sample.host_genome_id]),
       };
 
       // We display different columns if the uploadType is basespace.
