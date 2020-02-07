@@ -31,3 +31,6 @@ staging:
 
 sandbox:
   <<: *deployed
+
+public:
+  <<: *deployed
