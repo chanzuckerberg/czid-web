@@ -32,6 +32,7 @@ class PhyloTreesController < ApplicationController
   before_action :assert_access, only: OTHER_ACTIONS
   before_action :check_access
 
+  # This limit determines how many rows can be displayed in "additional samples".
   # This limit was added because the phylo tree creation was timing out for admins
   # and otherwise the results will grow without bound per user.
   ELIGIBLE_PIPELINE_RUNS_LIMIT = 1000
