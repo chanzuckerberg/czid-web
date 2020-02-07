@@ -81,6 +81,50 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
+  test 'basic with alternate names (host organism)' do
+    sign_in @user
+
+    post validate_csv_for_new_samples_metadata_url, params: {
+      metadata: {
+        headers: ['sample_name', 'host_organism', 'Sample Type', 'Blood Fed'],
+        rows: [
+          ROW_1,
+        ],
+      },
+      samples: [
+        {
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id,
+        },
+      ],
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 0, @response.parsed_body['issues']['errors'].length
+    assert_equal 0, @response.parsed_body['issues']['warnings'].length
+
+    post validate_csv_for_new_samples_metadata_url, params: {
+      metadata: {
+        headers: ['sample_name', 'Host Organism', 'Sample Type', 'Blood Fed'],
+        rows: [
+          ROW_1,
+        ],
+      },
+      samples: [
+        {
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id,
+        },
+      ],
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 0, @response.parsed_body['issues']['errors'].length
+    assert_equal 0, @response.parsed_body['issues']['warnings'].length
+  end
+
   test 'sample names valid' do
     sign_in @user
 
