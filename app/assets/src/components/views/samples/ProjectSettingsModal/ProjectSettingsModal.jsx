@@ -106,10 +106,12 @@ class ProjectSettingsModal extends React.Component {
                     </span>
                   </div>
                 )}
-                <div className={cs.note}>
-                  Next project sample will become public on{" "}
-                  {nextPublicSampleDate}.
-                </div>
+                {nextPublicSampleDate && (
+                  <div className={cs.note}>
+                    Next project sample will become public on{" "}
+                    {nextPublicSampleDate}.
+                  </div>
+                )}
               </div>
               <Divider />
               <div className={cs.userManagementFormContainer}>
