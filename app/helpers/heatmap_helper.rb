@@ -149,10 +149,12 @@ module HeatmapHelper
       # NOTE: This block of code can probably be all removed because the same
       # filtering now happens earlier in SQL.
       HeatmapHelper.compute_aggregate_scores_v2!(rows)
-      rows = rows.select do |row|
-        # Note: these are applied *after* SQL filters, so results may not be
-        # 100% as expected .
-        HeatmapHelper.apply_custom_filters(row, threshold_filters)
+      unless client_filtering_enabled
+        rows = rows.select do |row|
+          # Note: these are applied *after* SQL filters, so results may not be
+          # 100% as expected .
+          HeatmapHelper.apply_custom_filters(row, threshold_filters)
+        end
       end
 
       # Get the top N for each sample. This re-sorts on the same metric as in
@@ -192,21 +194,27 @@ module HeatmapHelper
   )
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
-    if categories.present?
-      categories_clause = " AND superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
-    elsif include_phage
-      categories_clause = " AND superkingdom_taxid = #{categories_map['Viruses']}"
+    unless client_filtering_enabled
+      if categories.present?
+        categories_clause = " AND superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
+      elsif include_phage
+        categories_clause = " AND superkingdom_taxid = #{categories_map['Viruses']}"
+      end
     end
 
     read_specificity_clause = ""
-    if read_specificity
-      read_specificity_clause = " AND taxon_counts.tax_id > 0"
+    unless client_filtering_enabled
+      if read_specificity
+        read_specificity_clause = " AND taxon_counts.tax_id > 0"
+      end
     end
 
-    if !include_phage && categories.present?
-      phage_clause = " AND is_phage != 1"
-    elsif include_phage && categories.blank?
-      phage_clause = " AND is_phage = 1"
+    unless client_filtering_enabled
+      if !include_phage && categories.present?
+        phage_clause = " AND is_phage != 1"
+      elsif include_phage && categories.blank?
+        phage_clause = " AND is_phage = 1"
+      end
     end
 
     tax_level = species_selected ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
