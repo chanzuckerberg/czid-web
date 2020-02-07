@@ -16,7 +16,7 @@ ecs_client = Aws::ECS::Client.new(region: 'us-west-2')
 ec2_client = Aws::EC2::Client.new(region: 'us-west-2')
 
 # TODO(2020-01-23): Rename staging/prod clusters to new format (IDSEQ-2155).
-cluster = if env == "sandbox"
+cluster = if ["sandbox", "public"].include?(env)
             "idseq-#{env}-ecs"
           else
             env
