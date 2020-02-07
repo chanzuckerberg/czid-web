@@ -465,7 +465,7 @@ module SamplesHelper
       end
 
       fields.each do |key, value|
-        next if ["Sample Name", "Host Genome", "sample_name", "host_genome"].include?(key)
+        next if MetadataField::RESERVED_NAMES.include?(key)
 
         status = sample.ensure_metadata_field_for_key(key)
 

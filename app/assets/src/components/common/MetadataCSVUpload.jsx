@@ -102,6 +102,7 @@ class MetadataCSVUpload extends React.Component {
       metadata: processCSVMetadata(csv),
       issues: serverResponse.issues,
       validatingCSV: false,
+      newHostGenomes: serverResponse.newHostGenomes,
     });
   };
 
