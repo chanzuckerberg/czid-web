@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { every, keys, countBy, map } from "lodash/fp";
+import { capitalize, every, keys, countBy, map } from "lodash/fp";
 import cx from "classnames";
 
 import Accordion from "~/components/layout/Accordion";
@@ -14,7 +14,12 @@ import cs from "./host_organism_message.scss";
  * IDseq-supported host.
  */
 export default class HostOrganismMessage extends React.Component {
-  hasMatch = host => map("name", this.props.hostGenomes).includes(host);
+  // By design, host names are case insensitive, so we don't
+  // get duplicates.
+  hasMatch = host =>
+    map(hg => hg.name.toLowerCase(), this.props.hostGenomes).includes(
+      host.toLowerCase()
+    );
 
   renderOneHost(host, count) {
     return (
@@ -54,13 +59,14 @@ export default class HostOrganismMessage extends React.Component {
         {this.renderHostPhrase(host, count)}{" "}
         {this.hasMatch(host) && !this.isERCC(host) ? (
           <span>
-            we will subtract out reads that align to a <strong>{host}</strong>{" "}
-            genome
+            we will subtract out reads that align to a{" "}
+            <strong>{capitalize(host)}</strong> genome
           </span>
         ) : (
           <span>we will only remove ERCCs</span>
         )}
-        {host !== "Human" && " and reads that align to the human genome"}.
+        {host.toLowerCase() !== "human" &&
+          " and reads that align to the human genome"}.
       </span>
     );
   }
@@ -88,7 +94,7 @@ export default class HostOrganismMessage extends React.Component {
   renderManyHosts(uniqHosts) {
     // Strangely, the " " spaces are not being ending up in the header so
     // we use &nbsp;
-    const isWarn = !every(this.hasMatch, uniqHosts);
+    const isWarn = !every(this.hasMatch, keys(uniqHosts));
     const color = { [cs.warn]: isWarn };
     const header = (
       <Notification
@@ -138,7 +144,10 @@ export default class HostOrganismMessage extends React.Component {
 
 HostOrganismMessage.propTypes = {
   samples: PropTypes.arrayOf(
-    PropTypes.shape({ host_genome_id: PropTypes.number })
+    PropTypes.shape({
+      host_genome_id: PropTypes.number,
+      host_genome_name: PropTypes.string,
+    })
   ).isRequired,
   hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome).isRequired,
 };

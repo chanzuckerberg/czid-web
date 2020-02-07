@@ -26,6 +26,7 @@ import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import SortIcon from "~ui/icons/SortIcon";
+import { UserContext } from "~/components/common/UserContext";
 
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
@@ -399,6 +400,8 @@ class SamplesHeatmapView extends React.Component {
   }
 
   filterTaxa() {
+    const { allowedFeatures } = this.context || {};
+
     let {
       taxonFilterState,
       taxonPassesThresholdFilters,
@@ -407,7 +410,7 @@ class SamplesHeatmapView extends React.Component {
     let taxonDetails = {},
       taxonIds = new Set(),
       filteredData = {};
-    if (this.props.allowedFeatures.includes("heatmap_filter_fe")) {
+    if (allowedFeatures.includes("heatmap_filter_fe")) {
       allTaxonIds.forEach(taxonId => {
         let taxon = allTaxonDetails[taxonId];
         if (!taxonIds.has(taxonId) && this.taxonPassesSelectedFilters(taxon)) {
@@ -736,7 +739,9 @@ class SamplesHeatmapView extends React.Component {
   });
 
   handleSelectedOptionsChange = newOptions => {
-    if (this.props.allowedFeatures.includes("heatmap_filter_fe")) {
+    const { allowedFeatures } = this.context || {};
+
+    if (allowedFeatures.includes("heatmap_filter_fe")) {
       const frontendFilters = [
         "species",
         "categories",
@@ -915,7 +920,6 @@ class SamplesHeatmapView extends React.Component {
 }
 
 SamplesHeatmapView.propTypes = {
-  allowedFeatures: PropTypes.array,
   backgrounds: PropTypes.array,
   categories: PropTypes.array,
   metrics: PropTypes.array,
@@ -927,5 +931,7 @@ SamplesHeatmapView.propTypes = {
   thresholdFilters: PropTypes.object,
   heatmapTs: PropTypes.number,
 };
+
+SamplesHeatmapView.contextType = UserContext;
 
 export default SamplesHeatmapView;

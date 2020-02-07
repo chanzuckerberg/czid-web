@@ -1,11 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { ViewHeader } from "~/components/layout";
 import BasicPopup from "~/components/BasicPopup";
+import StatusLabel from "~ui/labels/StatusLabel";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
+import { ViewHeader } from "~/components/layout";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -40,11 +42,23 @@ export default class SamplesHeatmapHeader extends React.Component {
 
   render() {
     const { sampleIds } = this.props;
+    const { allowedFeatures } = this.context || {};
 
     return (
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
-          <ViewHeader.Pretitle>Heatmap</ViewHeader.Pretitle>
+          <ViewHeader.Pretitle>
+            <React.Fragment>
+              Heatmap
+              {allowedFeatures.includes("heatmap_filter_fe") && (
+                <StatusLabel
+                  status="Beta - Client Filtering"
+                  type="info"
+                  inline={true}
+                />
+              )}
+            </React.Fragment>
+          </ViewHeader.Pretitle>
           <ViewHeader.Title
             label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
           />
@@ -101,3 +115,5 @@ SamplesHeatmapHeader.propTypes = {
   onShareClick: PropTypes.func.isRequired,
   onSaveClick: PropTypes.func.isRequired,
 };
+
+SamplesHeatmapHeader.contextType = UserContext;
