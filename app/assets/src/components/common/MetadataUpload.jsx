@@ -111,8 +111,18 @@ class MetadataUpload extends React.Component {
   };
 
   // MetadataCSVUpload validates metadata before calling onMetadataChangeCSV.
-  onMetadataChangeCSV = ({ metadata, issues, validatingCSV }) => {
-    this.props.onMetadataChange({ metadata, issues, wasManual: false });
+  onMetadataChangeCSV = ({
+    metadata,
+    issues,
+    validatingCSV,
+    newHostGenomes,
+  }) => {
+    this.props.onMetadataChange({
+      metadata,
+      issues,
+      wasManual: false,
+      newHostGenomes,
+    });
     this.setState({
       issues,
       validatingCSV,
