@@ -32,6 +32,10 @@ class PhyloTreesController < ApplicationController
   before_action :assert_access, only: OTHER_ACTIONS
   before_action :check_access
 
+  # This limit was added because the phylo tree creation was timing out for admins
+  # and otherwise the results will grow without bound per user.
+  ELIGIBLE_PIPELINE_RUNS_LIMIT = 1000
+
   def index
     @project = []
     # Common use case is looking for the most recently created phylo tree
@@ -144,7 +148,9 @@ class PhyloTreesController < ApplicationController
     # Retrieve pipeline runs that contain the specified taxid.
     eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
     all_pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
-    eligible_pipeline_run_ids_with_taxid = eligible_pipeline_runs.where(id: all_pipeline_run_ids_with_taxid).pluck(:id)
+    eligible_pipeline_run_ids_with_taxid =
+      eligible_pipeline_runs.where(id: all_pipeline_run_ids_with_taxid)
+                            .order(id: :desc).limit(ELIGIBLE_PIPELINE_RUNS_LIMIT).pluck(:id)
 
     # Retrieve information for displaying the tree's sample list.
     @samples = sample_details_json(eligible_pipeline_run_ids_with_taxid, taxid)
