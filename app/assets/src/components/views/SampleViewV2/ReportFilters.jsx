@@ -5,7 +5,7 @@ import { flatten, forEach, getOr, map, transform, values } from "lodash/fp";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
 import MetricPicker from "~/components/views/report/filters/MetricPicker";
-import MinContigSizeFilter from "~/components/views/report/filters/MinContigSizeFilter";
+import MinContigReadsFilter from "~/components/views/report/filters/MinContigReadsFilter";
 import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
 import SearchBox from "~ui/controls/SearchBox";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
@@ -234,11 +234,11 @@ class ReportFilters extends React.Component {
           )}
           {view == "table" && (
             <div className={cs.filterListElement}>
-              <MinContigSizeFilter
-                value={selected.minContigSize}
+              <MinContigReadsFilter
+                value={selected.minContigReads}
                 onChange={value =>
                   this.handleFilterChange({
-                    key: "minContigSize",
+                    key: "minContigReads",
                     value,
                   })
                 }

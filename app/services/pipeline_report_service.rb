@@ -47,7 +47,7 @@ class PipelineReportService
   Z_SCORE_WHEN_ABSENT_FROM_SAMPLE = -100
 
   DEFAULT_SORT_PARAM = :agg_score
-  DEFAULT_MIN_CONTIG_SIZE = 0
+  DEFAULT_MIN_CONTIG_READS = 0
 
   CATEGORIES = {
     2 => "bacteria",
@@ -90,11 +90,11 @@ class PipelineReportService
     "species_tax_ids",
   ].freeze
 
-  def initialize(pipeline_run, background_id, csv: false, min_contig_size: DEFAULT_MIN_CONTIG_SIZE, parallel: true)
+  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: DEFAULT_MIN_CONTIG_READS, parallel: true)
     @pipeline_run = pipeline_run
     @background_id = background_id
     @csv = csv
-    @min_contig_size = min_contig_size
+    @min_contig_reads = min_contig_reads
     @parallel = parallel
   end
 
@@ -122,7 +122,7 @@ class PipelineReportService
 
     if @parallel
       parallel_steps = [
-        -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_size) },
+        -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads) },
         -> { fetch_taxon_counts(@pipeline_run.id, @background_id) },
         -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id) },
       ]
@@ -142,7 +142,7 @@ class PipelineReportService
       @timer.split("parallel_fetch_report_data")
       contigs, taxon_counts_and_summaries, taxons_absent_from_sample = *results
     else
-      contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_size)
+      contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads)
       @timer.split("get_contig_summary")
 
       taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run.id, @background_id)

@@ -617,8 +617,8 @@ class SamplesController < ApplicationController
   def report_csv_v2
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
-    min_contig_size = params[:min_contig_size]
-    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_size: min_contig_size)
+    min_contig_reads = params[:min_contig_reads]
+    @report_csv = PipelineReportService.call(pipeline_run, background_id, csv: true, min_contig_reads: min_contig_reads)
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
@@ -947,9 +947,9 @@ class SamplesController < ApplicationController
 
   def summary_contig_counts
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    min_contig_size = params[:min_contig_size] || PipelineRun::MIN_CONTIG_SIZE
-    contig_counts = pr.get_summary_contig_counts(min_contig_size)
-    render json: { min_contig_size: min_contig_size, contig_counts: contig_counts }
+    min_contig_reads = params[:min_contig_reads] || PipelineRun::MIN_CONTIG_READS
+    contig_counts = pr.get_summary_contig_counts(min_contig_reads)
+    render json: { min_contig_reads: min_contig_reads, contig_counts: contig_counts }
   end
 
   def show_taxid_fasta
