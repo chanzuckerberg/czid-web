@@ -21,4 +21,9 @@ describe MetadataField, type: :model do
   it 'be boolean if force_options and two options' do
     expect(create(:metadata_field, force_options: 1, options: options).boolean?).to be
   end
+
+  it 'will not create a reserved name' do
+    expect { create(:metadata_field, name: 'sample_name') }.to raise_error(ActiveRecord::RecordInvalid)
+    expect { create(:metadata_field, name: 'my_name') }.to_not raise_error
+  end
 end

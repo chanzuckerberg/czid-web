@@ -57,7 +57,9 @@ export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
   return { newMetadata, warnings: allWarnings };
 };
 
-const isRowHuman = row => row["Host Genome"] && row["Host Genome"] === "Human";
+const isRowHuman = row =>
+  (row["Host Organism"] && row["Host Organism"] === "Human") ||
+  (row["Host Genome"] && row["Host Genome"] === "Human");
 
 const NAME_COLUMN = "Sample Name";
 

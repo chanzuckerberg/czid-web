@@ -11,6 +11,14 @@ import ReviewStep from "./ReviewStep";
 import cs from "./sample_upload_flow.scss";
 import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
 
+// See HOST_GENOME_SYNONYMS in MetadataField
+const HOST_GENOME_SYNONYMS = [
+  "host_genome",
+  "Host Genome",
+  "host_organism",
+  "Host Organism",
+];
+
 class SampleUploadFlow extends React.Component {
   state = {
     currentStep: "uploadSamples",
@@ -67,8 +75,10 @@ class SampleUploadFlow extends React.Component {
           get("Sample Name", row) === sample.name,
         metadata.rows
       );
-      const hostGenomeName =
-        get("host_genome", metadataRow) || get("Host Genome", metadataRow);
+      const hostGenomeName = HOST_GENOME_SYNONYMS.reduce(
+        (match, name) => metadataRow[name] || match,
+        null
+      );
       const hostGenomeId = find(
         // Lowercase to allow for 'human' to match 'Human'. The same logic
         // is replicated in MetadataHelper.
@@ -88,8 +98,8 @@ class SampleUploadFlow extends React.Component {
 
     // Remove host_genome from metadata.
     const newMetadata = flow(
-      set("rows", metadata.rows.map(omit(["host_genome", "Host Genome"]))),
-      set("headers", without(["host_genome", "Host Genome"], metadata.headers))
+      set("rows", metadata.rows.map(omit(HOST_GENOME_SYNONYMS))),
+      set("headers", without(HOST_GENOME_SYNONYMS, metadata.headers))
     )(metadata);
 
     this.setState({

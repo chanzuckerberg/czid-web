@@ -8,6 +8,9 @@ class VisualizationsController < ApplicationController
     expires_in: 30.days,
     cache_path: proc do |c|
       sorted_params = c.request.params.to_h.sort.to_h
+      if current_user.allowed_feature?("heatmap_filter_fe")
+        sorted_params[:heatmap_filter_fe] = true
+      end
       sorted_params.to_query
     end
   )
