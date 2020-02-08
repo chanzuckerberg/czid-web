@@ -41,7 +41,7 @@ import CategoryFilter from "./views/report/filters/CategoryFilter";
 import MetricPicker from "./views/report/filters/MetricPicker";
 import SpecificityFilter from "./views/report/filters/SpecificityFilter";
 import NameTypeFilter from "./views/report/filters/NameTypeFilter";
-import MinContigSizeFilter from "./views/report/filters/MinContigSizeFilter";
+import MinContigReadsFilter from "./views/report/filters/MinContigReadsFilter";
 import SearchBox from "./ui/controls/SearchBox";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
@@ -55,7 +55,7 @@ import {
   pipelineVersionHasCoverageViz,
 } from "./utils/sample";
 
-const DEFAULT_MIN_CONTIG_SIZE = 4;
+const DEFAULT_MIN_CONTIG_READS = 4;
 const HUMAN_TAX_IDS = [9605, 9606];
 
 class PipelineSampleReport extends React.Component {
@@ -93,7 +93,7 @@ class PipelineSampleReport extends React.Component {
 
     const cachedReadSpecificity = Cookies.get("readSpecificity");
     const cachedTreeMetric = Cookies.get("treeMetric");
-    const cachedMinContigSize = parseInt(Cookies.get("minContigSize"), 10);
+    const cachedMinContigReads = parseInt(Cookies.get("minContigReads"), 10);
 
     this.allThresholds = [
       { text: "Score", value: "NT_aggregatescore" },
@@ -187,7 +187,7 @@ class PipelineSampleReport extends React.Component {
       treeMetric: cachedTreeMetric || this.treeMetrics[0].value,
       phyloTreeModalOpen: true,
       contigTaxidList: [],
-      minContigSize: cachedMinContigSize || DEFAULT_MIN_CONTIG_SIZE,
+      minContigReads: cachedMinContigReads || DEFAULT_MIN_CONTIG_READS,
       hoverRowId: null,
       phyloTreeModalParams: null,
     };
@@ -239,7 +239,7 @@ class PipelineSampleReport extends React.Component {
 
     const [sampleReportInfo, summaryContigCounts] = await Promise.all([
       getSampleReportInfo(this.sampleId, params),
-      getSummaryContigCounts(this.sampleId, this.state.minContigSize),
+      getSummaryContigCounts(this.sampleId, this.state.minContigReads),
     ]);
 
     this.nanobar.go(100);
@@ -739,18 +739,18 @@ class PipelineSampleReport extends React.Component {
     });
   };
 
-  handleMinContigSizeChange = async minContigSize => {
-    Cookies.set("minContigSize", minContigSize);
-    this.setState({ minContigSize }, () => {
+  handleMinContigReadsChange = async minContigReads => {
+    Cookies.set("minContigReads", minContigReads);
+    this.setState({ minContigReads }, () => {
       logAnalyticsEvent("PipelineSampleReport_min-contig-size-filter_changed", {
-        minContigSize,
+        minContigReads,
       });
     });
 
     // Refetch the summary contig counts based on the new value.
     const summaryContigCounts = await getSummaryContigCounts(
       this.sampleId,
-      minContigSize
+      minContigReads
     );
 
     const taxonomyDetails = addContigCountsToTaxonomyDetails(
@@ -1551,9 +1551,9 @@ class RenderMarkup extends React.Component {
           )}
           {this.props.view == "table" && (
             <div className="filter-lists-element">
-              <MinContigSizeFilter
-                value={parent.state.minContigSize}
-                onChange={parent.handleMinContigSizeChange}
+              <MinContigReadsFilter
+                value={parent.state.minContigReads}
+                onChange={parent.handleMinContigReadsChange}
               />
             </div>
           )}

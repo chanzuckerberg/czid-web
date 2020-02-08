@@ -36,8 +36,10 @@ const getSampleReportData = ({ sampleId, background, pipelineVersion }) =>
 const getSampleReportInfo = (id, params) =>
   get(`/samples/${id}/report_info${params}`);
 
-const getSummaryContigCounts = (id, minContigSize) =>
-  get(`/samples/${id}/summary_contig_counts?min_contig_size=${minContigSize}`);
+const getSummaryContigCounts = (id, minContigReads) =>
+  get(
+    `/samples/${id}/summary_contig_counts?min_contig_reads=${minContigReads}`
+  );
 
 // TODO(mark): Remove this method once we launch the new sample upload flow.
 // Send a request to create a single sample. Does not upload the files.
