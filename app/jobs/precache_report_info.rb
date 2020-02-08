@@ -6,7 +6,7 @@ class PrecacheReportInfo
     pr.precache_report_info!
   rescue => err
     LogUtil.log_err_and_airbrake(
-      "PipelineRun #{pipeline_run_id} failed to precache report_info"
+      "PipelineRun #{pipeline_run_id} failed to precache report"
     )
     LogUtil.log_backtrace(err)
   end

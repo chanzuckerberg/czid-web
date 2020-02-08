@@ -57,8 +57,7 @@ class VisualizationsController < ApplicationController
     # Redirects until we support standalone visualizations for these types
     if @type == "table" || @type == "tree"
       sample_id = vis.sample_ids[0]
-      path = current_user.allowed_feature?("report_v2") ? "/show_v2" : ""
-      return redirect_to "/samples/#{sample_id}#{path}?" + vis.data.to_query
+      return redirect_to "/samples/#{sample_id}?" + vis.data.to_query
     elsif @type == "phylo_tree"
       return redirect_to "/phylo_trees/index?" + vis.data.to_query
     end

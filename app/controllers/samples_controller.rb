@@ -20,7 +20,7 @@ class SamplesController < ApplicationController
   ##########################################
 
   # Read action meant for single samples with set_sample before_action
-  READ_ACTIONS = [:show, :show_v2, :report_v2, :legacy, :report_info, :report_csv, :report_csv_v2, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+  READ_ACTIONS = [:show, :report_v2, :legacy, :report_info, :report_csv, :report_csv_v2, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
@@ -47,9 +47,6 @@ class SamplesController < ApplicationController
   before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
   before_action :check_owner, only: OWNER_ACTIONS
   before_action :check_access
-  before_action only: :show_v2 do
-    allowed_feature_required("report_v2")
-  end
   before_action only: :amr do
     allowed_feature_required("AMR")
   end
@@ -605,12 +602,7 @@ class SamplesController < ApplicationController
 
   # GET /samples/1/report_csv
   def report_csv
-    if current_user.allowed_feature?("report_v2")
-      report_csv_v2
-    else
-      @report_csv = report_csv_from_params(@sample, params)
-      send_data @report_csv, filename: @sample.name + '_report.csv'
-    end
+    report_csv_v2
   end
 
   # GET /samples/1/report_csv_v2
@@ -707,62 +699,8 @@ class SamplesController < ApplicationController
   # GET /samples/1
   # GET /samples/1.json
   def show
-    if !params[:legacy] && current_user.allowed_feature_list.include?("report_v2")
-      show_v2
-    else
-      @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-      @amr_counts = nil
-      can_see_amr = (current_user.admin? || current_user.allowed_feature_list.include?("AMR"))
-      if can_see_amr && @pipeline_run
-        amr_state = @pipeline_run.output_states.find_by(output: "amr_counts")
-        if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
-          @amr_counts = @pipeline_run.amr_counts
-        end
-      end
-      @pipeline_version = @pipeline_run.report_info_params[:pipeline_version] if @pipeline_run
-      @pipeline_versions = @sample.pipeline_versions
-
-      @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
-      @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start or Receive Files'
-      pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
-      job_stats_hash = job_stats_get(pipeline_run_id)
-      @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
-      @project_info = @sample.project ? @sample.project : nil
-      @project_sample_ids_names = @sample.project ? Hash[current_power.project_samples(@sample.project).map { |s| [s.id, s.name] }] : nil
-      @host_genome = @sample.host_genome ? @sample.host_genome : nil
-      @background_models = current_power.backgrounds.where(ready: 1)
-      @can_edit = current_power.updatable_sample?(@sample)
-      @git_version = ENV['GIT_VERSION'] || ""
-
-      @align_viz = false
-      align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
-      @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
-
-      background_id = get_background_id(@sample)
-      @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
-      @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
-
-      # Check if the report table should actually show
-      if background_id && @pipeline_run && @pipeline_run.report_ready?
-        @report_present = true
-        @report_ts = @pipeline_run.report_info_params[:report_ts]
-        @all_categories = ReportHelper::ALL_CATEGORIES
-        @report_details = ReportHelper.report_details(@pipeline_run, current_user.id)
-        @ercc_comparison = @pipeline_run.compare_ercc_counts
-      end
-
-      viz = last_saved_visualization
-      @saved_param_values = viz ? viz.data : {}
-
-      tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
-      # DEPRECATED. Use log_analytics_event.
-      MetricUtil.put_metric_now("samples.showed", 1, tags)
-    end
-  end
-
-  def show_v2
     respond_to do |format|
-      format.html { render 'show_v2' }
+      format.html { render 'show' }
       format.json do
         render json: @sample
           .as_json(
