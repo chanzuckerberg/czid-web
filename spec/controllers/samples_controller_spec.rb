@@ -420,14 +420,14 @@ RSpec.describe SamplesController, type: :controller do
       json_response = JSON.parse(response.body)
       expect(json_response).to include_json(uploaded_by_current_user: false)
     end
-  end
 
-  describe "GET show" do
-    it "can see sample report_v2" do
-      project = create(:project, users: [@joe])
-      sample = create(:sample, project: project)
-      get :show, params: { id: sample.id }
-      expect(response).to have_http_status :success
+    describe "GET show" do
+      it "can see sample report_v2" do
+        project = create(:project, users: [@joe])
+        sample = create(:sample, project: project)
+        get :show, params: { id: sample.id }
+        expect(response).to have_http_status :success
+      end
     end
   end
 end

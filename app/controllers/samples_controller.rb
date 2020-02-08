@@ -20,7 +20,7 @@ class SamplesController < ApplicationController
   ##########################################
 
   # Read action meant for single samples with set_sample before_action
-  READ_ACTIONS = [:show, :report_v2, :legacy, :report_info, :report_csv, :report_csv_v2, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+  READ_ACTIONS = [:show, :report_v2, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
@@ -602,11 +602,6 @@ class SamplesController < ApplicationController
 
   # GET /samples/1/report_csv
   def report_csv
-    report_csv_v2
-  end
-
-  # GET /samples/1/report_csv_v2
-  def report_csv_v2
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     background_id = get_background_id(@sample, params[:background])
     min_contig_size = params[:min_contig_size]
