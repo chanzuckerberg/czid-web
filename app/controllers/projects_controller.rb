@@ -24,9 +24,13 @@ class ProjectsController < ApplicationController
   OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
   TOKEN_AUTH_METHODS = [:index, :create].freeze
 
+  # Endpoints made public for public ncov page.
+  PUBLIC_NCOV_ENDPOINTS = [:index, :dimensions].freeze
+
   # Required for token auth for CLI actions
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_METHODS
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_METHODS
+  skip_before_action :authenticate_user!, only: PUBLIC_NCOV_ENDPOINTS
 
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
 

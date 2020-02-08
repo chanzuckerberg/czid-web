@@ -8,17 +8,19 @@ const UNMAPPED_READS_LABEL = "Download Unmapped Reads (.fasta)";
 const RESULTS_FOLDER_LABEL = "View Results Folder";
 const PIPELINE_VIZ_LABEL = "View Pipeline Visualization";
 
+const NCOV_PUBLIC_SITE = true;
+
 // Get download options based on pipeline metadata.
 const getDownloadOptions = pipelineRun => {
   let stageTwoComplete = pipelineRun && pipelineRun.adjusted_remaining_reads;
   const assembled = pipelineRun && pipelineRun.assembled === 1;
 
   return compact([
-    stageTwoComplete && NON_HOST_READS_LABEL,
-    assembled && NON_HOST_CONTIGS_LABEL,
-    assembled && NON_HOST_CONTIGS_MAPPING_LABEL,
-    stageTwoComplete && UNMAPPED_READS_LABEL,
-    RESULTS_FOLDER_LABEL,
+    !NCOV_PUBLIC_SITE && stageTwoComplete && NON_HOST_READS_LABEL,
+    !NCOV_PUBLIC_SITE && assembled && NON_HOST_CONTIGS_LABEL,
+    !NCOV_PUBLIC_SITE && assembled && NON_HOST_CONTIGS_MAPPING_LABEL,
+    !NCOV_PUBLIC_SITE && stageTwoComplete && UNMAPPED_READS_LABEL,
+    !NCOV_PUBLIC_SITE && RESULTS_FOLDER_LABEL,
     pipelineRun.pipeline_version && PIPELINE_VIZ_LABEL,
   ]);
 };
@@ -37,23 +39,33 @@ export const getDownloadDropdownOptions = pipelineRun => {
 // whether to open link in new page.
 const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
   [NON_HOST_READS_LABEL]: {
-    path: `/samples/${sampleId}/nonhost_fasta?pipeline_version=${pipelineRun.pipeline_version}`,
+    path: `/samples/${sampleId}/nonhost_fasta?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: false,
   },
   [NON_HOST_CONTIGS_LABEL]: {
-    path: `/samples/${sampleId}/contigs_fasta?pipeline_version=${pipelineRun.pipeline_version}`,
+    path: `/samples/${sampleId}/contigs_fasta?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: false,
   },
   [NON_HOST_CONTIGS_MAPPING_LABEL]: {
-    path: `/samples/${sampleId}/contigs_summary?pipeline_version=${pipelineRun.pipeline_version}`,
+    path: `/samples/${sampleId}/contigs_summary?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: false,
   },
   [UNMAPPED_READS_LABEL]: {
-    path: `/samples/${sampleId}/unidentified_fasta?pipeline_version=${pipelineRun.pipeline_version}`,
+    path: `/samples/${sampleId}/unidentified_fasta?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: false,
   },
   [RESULTS_FOLDER_LABEL]: {
-    path: `/samples/${sampleId}/results_folder?pipeline_version=${pipelineRun.pipeline_version}`,
+    path: `/samples/${sampleId}/results_folder?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: true,
   },
   [PIPELINE_VIZ_LABEL]: {

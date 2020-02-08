@@ -17,6 +17,8 @@ const DOWNLOAD_OPTIONS = [
   { text: "Download PNG", value: "png" },
 ];
 
+const NCOV_PUBLIC_SITE = true;
+
 export default class SamplesHeatmapHeader extends React.Component {
   handleDownloadClick = fileType => {
     switch (fileType) {
@@ -81,17 +83,19 @@ export default class SamplesHeatmapHeader extends React.Component {
             on="click"
             hideOnScroll
           />
-          <SaveButton
-            onClick={withAnalytics(
-              this.props.onSaveClick,
-              "SamplesHeatmapHeader_save-button_clicked",
-              {
-                sampleIds: sampleIds.length,
-                path: window.location.pathname,
-              }
-            )}
-            className={cs.controlElement}
-          />
+          {!NCOV_PUBLIC_SITE && (
+            <SaveButton
+              onClick={withAnalytics(
+                this.props.onSaveClick,
+                "SamplesHeatmapHeader_save-button_clicked",
+                {
+                  sampleIds: sampleIds.length,
+                  path: window.location.pathname,
+                }
+              )}
+              className={cs.controlElement}
+            />
+          )}
           <DownloadButtonDropdown
             className={cs.controlElement}
             options={DOWNLOAD_OPTIONS}
