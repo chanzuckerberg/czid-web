@@ -231,7 +231,7 @@ class PipelineRun < ApplicationRecord
 
   def self.in_progress
     where("job_status != '#{STATUS_FAILED}' OR job_status IS NULL")
-      .where(finalized: 0)
+        .where(finalized: 0)
   end
 
   def self.results_in_progress
@@ -286,15 +286,15 @@ class PipelineRun < ApplicationRecord
     completed_rapsearch_chunks = Hash[need_alignment.pluck(:id, :completed_rapsearch_chunks)]
     # Compute number of chunks that still need to be processed
     count_configs = {
-      gsnap: {
-        chunk_size: GSNAP_CHUNK_SIZE,
-        can_pair_chunks: true, # gsnap can take paired inputs
-        is_run_paired: is_run_paired,
-      },
-      rapsearch: {
-        chunk_size: RAPSEARCH_CHUNK_SIZE,
-        can_pair_chunks: false # rapsearch always takes a single input file
-      },
+        gsnap: {
+            chunk_size: GSNAP_CHUNK_SIZE,
+            can_pair_chunks: true, # gsnap can take paired inputs
+            is_run_paired: is_run_paired,
+        },
+        rapsearch: {
+            chunk_size: RAPSEARCH_CHUNK_SIZE,
+            can_pair_chunks: false # rapsearch always takes a single input file
+        },
     }
     gsnap_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:gsnap], completed_gsnap_chunks)
     rapsearch_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:rapsearch], completed_rapsearch_chunks)
@@ -338,8 +338,8 @@ class PipelineRun < ApplicationRecord
     output_state_entries = []
     target_outputs.each do |output|
       output_state_entries << OutputState.new(
-        output: output,
-        state: STATUS_UNKNOWN
+          output: output,
+          state: STATUS_UNKNOWN
       )
     end
     self.output_states = output_state_entries
@@ -353,9 +353,9 @@ class PipelineRun < ApplicationRecord
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     PipelineRunStage::STAGE_INFO.each do |step_number, info|
       run_stages << PipelineRunStage.new(
-        step_number: step_number,
-        name: info[:name],
-        job_command_func: info[:job_command_func]
+          step_number: step_number,
+          name: info[:name],
+          job_command_func: info[:job_command_func]
       )
     end
     self.pipeline_run_stages = run_stages
@@ -480,16 +480,16 @@ class PipelineRun < ApplicationRecord
     end
 
     update(
-      insert_size_metric_set_attributes: {
-        median: extract_int_metric(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME),
-        mode: extract_int_metric(insert_size_metrics, MODE_INSERT_SIZE_NAME),
-        median_absolute_deviation: extract_int_metric(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME),
-        min: extract_int_metric(insert_size_metrics, MIN_INSERT_SIZE_NAME),
-        max: extract_int_metric(insert_size_metrics, MAX_INSERT_SIZE_NAME),
-        mean: extract_float_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME),
-        standard_deviation: extract_float_metric(insert_size_metrics, STANDARD_DEVIATION_NAME),
-        read_pairs: extract_int_metric(insert_size_metrics, READ_PAIRS_NAME),
-      }
+        insert_size_metric_set_attributes: {
+            median: extract_int_metric(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME),
+            mode: extract_int_metric(insert_size_metrics, MODE_INSERT_SIZE_NAME),
+            median_absolute_deviation: extract_int_metric(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME),
+            min: extract_int_metric(insert_size_metrics, MIN_INSERT_SIZE_NAME),
+            max: extract_int_metric(insert_size_metrics, MAX_INSERT_SIZE_NAME),
+            mean: extract_float_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME),
+            standard_deviation: extract_float_metric(insert_size_metrics, STANDARD_DEVIATION_NAME),
+            read_pairs: extract_int_metric(insert_size_metrics, READ_PAIRS_NAME),
+        }
     )
   end
 
@@ -528,7 +528,7 @@ class PipelineRun < ApplicationRecord
     input_file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
 
     files = [
-      "#{postprocess_output_s3_path}/nonhost_R1.#{input_file_ext}",
+        "#{postprocess_output_s3_path}/nonhost_R1.#{input_file_ext}",
     ]
 
     if sample.input_files.length == 2
@@ -690,9 +690,9 @@ class PipelineRun < ApplicationRecord
       genus_taxid_nr = lineage_json.dig("NR", 1) || nil
 
       {
-        name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json,
-        species_taxid_nt: species_taxid_nt, species_taxid_nr: species_taxid_nr,
-        genus_taxid_nt: genus_taxid_nt, genus_taxid_nr: genus_taxid_nr,
+          name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json,
+          species_taxid_nt: species_taxid_nt, species_taxid_nr: species_taxid_nr,
+          genus_taxid_nt: genus_taxid_nt, genus_taxid_nr: genus_taxid_nr,
       }
     end
 
@@ -773,7 +773,7 @@ class PipelineRun < ApplicationRecord
     # check if there's any record loaded into taxon_counts. If so, skip
     check_count_type = refined ? 'NT+' : 'NT'
     loaded_records = TaxonCount.where(pipeline_run_id: id)
-                               .where(count_type: check_count_type).count
+                         .where(count_type: check_count_type).count
     return if loaded_records > 0
 
     # only keep counts at certain taxonomic levels
@@ -787,9 +787,9 @@ class PipelineRun < ApplicationRecord
     # Set created_at and updated_at
     current_time = Time.now.utc # to match TaxonLineage date range comparison
     tcnt_attrs_to_merge = {
-      'created_at' => current_time,
-      'updated_at' => current_time,
-      'pipeline_run_id' => id,
+        'created_at' => current_time,
+        'updated_at' => current_time,
+        'pipeline_run_id' => id,
     }
     taxon_counts_attributes_filtered.each do |tcnt|
       tcnt["count_type"] += "+" if refined
@@ -898,7 +898,7 @@ class PipelineRun < ApplicationRecord
     if output_ready?(output)
       output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
-    # check if job is done more than a minute ago
+      # check if job is done more than a minute ago
     elsif finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
       checker = CHECKERS_BY_OUTPUT[output_state.output]
       # If there is no checker, the file should have been generated
@@ -982,9 +982,9 @@ class PipelineRun < ApplicationRecord
       end
 
       MetricUtil.log_analytics_event(
-        event,
-        sample.user,
-        pipeline_run_id: id, project_id: sample.project.id, run_time: run_time
+          event,
+          sample.user,
+          pipeline_run_id: id, project_id: sample.project.id, run_time: run_time
       )
     end
   end
@@ -1075,8 +1075,8 @@ class PipelineRun < ApplicationRecord
 
   def previous_pipeline_runs_same_version
     sample.pipeline_runs
-          .where.not(id: id)
-          .where(pipeline_version: pipeline_version)
+        .where.not(id: id)
+        .where(pipeline_version: pipeline_version)
   end
 
   def enqueue_new_pipeline_run
@@ -1228,8 +1228,8 @@ class PipelineRun < ApplicationRecord
   # assembly stage, as each becomes available. Prior to Dec 2019, the count was
   # only fetched from alignment.
   def fetch_unmapped_reads(
-    all_counts,
-    s3_path = "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_COUNT_BASENAME}"
+      all_counts,
+      s3_path = "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_COUNT_BASENAME}"
   )
     unmapped_reads = nil
     unidentified = all_counts.detect { |entry| entry.value?("unidentified_fasta") }
@@ -1304,7 +1304,7 @@ class PipelineRun < ApplicationRecord
     uncategorizable_name = "Uncategorizable as a #{tax_level_name}"
     lineage_version = alignment_config.lineage_version
     TaxonCount.connection.execute(
-      "REPLACE INTO taxon_counts(pipeline_run_id, tax_id, name,
+        "REPLACE INTO taxon_counts(pipeline_run_id, tax_id, name,
                                 tax_level, count_type, count,
                                 percent_identity, alignment_length, e_value,
                                 species_total_concordant, genus_total_concordant, family_total_concordant,
@@ -1496,16 +1496,16 @@ class PipelineRun < ApplicationRecord
     file_prefix = ASSEMBLY_PREFIX if supports_assembly?
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
-      'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
-      'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}",
+        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
+        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}",
     },
       TaxonCount::TAX_LEVEL_GENUS => {
-        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}",
+          'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
+          'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}",
       },
       TaxonCount::TAX_LEVEL_FAMILY => {
-        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}",
+          'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
+          'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}",
       }, }
   end
 
@@ -1541,8 +1541,8 @@ class PipelineRun < ApplicationRecord
 
   def contig_lineages(min_contig_reads = MIN_CONTIG_READS)
     contigs.select("id, read_count, lineage_json")
-           .where("read_count >= ?", min_contig_reads)
-           .where("lineage_json IS NOT NULL")
+        .where("read_count >= ?", min_contig_reads)
+        .where("lineage_json IS NOT NULL")
   end
 
   def get_contigs_for_taxid(taxid, min_contig_reads = MIN_CONTIG_READS)
@@ -1590,8 +1590,8 @@ class PipelineRun < ApplicationRecord
       end
     end
     contig_taxids = contigs.where("read_count >= ?", min_contig_reads)
-                           .where("lineage_json IS NOT NULL")
-                           .pluck("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
+                        .where("lineage_json IS NOT NULL")
+                        .pluck("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
     contig_taxids.each do |c|
       read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr = c
 
@@ -1630,9 +1630,9 @@ class PipelineRun < ApplicationRecord
       actual = ercc_counts_by_name[baseline[:ercc_id]]
       actual_count = actual && actual.count || 0
       ret << {
-        name: baseline[:ercc_id],
-        actual: actual_count,
-        expected: baseline[:concentration_in_mix_1_attomolesul],
+          name: baseline[:ercc_id],
+          actual: actual_count,
+          expected: baseline[:concentration_in_mix_1_attomolesul],
       }
     end
     ret
@@ -1655,9 +1655,9 @@ class PipelineRun < ApplicationRecord
     pipeline_run_stages.each_with_index do |prs, stage_idx|
       next unless prs.dag_json && STEP_DESCRIPTIONS[prs.name]
       result[prs.name] = {
-        "stage_description" => STEP_DESCRIPTIONS[prs.name]["stage"],
-        "stage_dag_json" => prs.redacted_dag_json,
-        "steps" => {},
+          "stage_description" => STEP_DESCRIPTIONS[prs.name]["stage"],
+          "stage_dag_json" => prs.redacted_dag_json,
+          "steps" => {},
       }
       dag_dict = JSON.parse(prs.dag_json)
       output_dir_s3_key = dag_dict["output_dir_s3"].chomp("/").split("/", 4)[3] # keep everything after bucket name, except trailing '/'
@@ -1690,13 +1690,11 @@ class PipelineRun < ApplicationRecord
           file_info << file_info_for_output
         end
 
-        if file_info.present?
-          result[prs.name]["steps"][target_name] = {
+        result[prs.name]["steps"][target_name] = {
             "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
             "file_list" => file_info,
             "reads_after" => (job_stats_by_task[target_name] || {})["reads_after"],
-          }
-        end
+        }
       end
     end
     result
@@ -1710,14 +1708,14 @@ class PipelineRun < ApplicationRecord
   # The values here are used as defaults for PipelineSampleReport.jsx.
   def report_info_params
     {
-      pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
-      # background should be set by caller
-      background_id: nil,
-      pipeline_run_id: id,
-      # For invalidation if underlying data changes. This should only happen in
-      # exceptional situations, such as manual DB edits.
-      report_ts: max_updated_at.utc.beginning_of_day.to_i,
-      format: "json",
+        pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
+        # background should be set by caller
+        background_id: nil,
+        pipeline_run_id: id,
+        # For invalidation if underlying data changes. This should only happen in
+        # exceptional situations, such as manual DB edits.
+        report_ts: max_updated_at.utc.beginning_of_day.to_i,
+        format: "json",
     }
   end
 
@@ -1733,8 +1731,8 @@ class PipelineRun < ApplicationRecord
     params = report_info_params
     Background.top_for_sample(sample).pluck(:id).each do |background_id|
       cache_key = PipelineReportService.report_info_cache_key(
-        "/samples/#{sample.id}/report_v2.json",
-        params.merge(background_id: background_id)
+          "/samples/#{sample.id}/report_v2.json",
+          params.merge(background_id: background_id)
       )
       Rails.logger.info("Precaching #{cache_key} with background #{background_id}")
       Rails.cache.fetch(cache_key, expires_in: 30.days) do

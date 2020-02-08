@@ -13,7 +13,7 @@ end
 
 env = ARGV.shift
 image = ARGV.shift
-cluster = if env == "sandbox"
+cluster = if ["sandbox", "public"].include?(env)
             "idseq-#{env}-ecs"
           else
             # TODO(2020-01-23): Rename staging/prod clusters to new format (IDSEQ-2155).
@@ -39,7 +39,7 @@ def notify_slack(env, image, stage)
     if stage=="start"
       post_slack_message({"icon_emoji": ":ghost:",
                           "text": "starting to deploy #{image} to #{env}.\n" +
-                                  "   - refs: #{tags_and_branches(image).join(', ')}"
+                              "   - refs: #{tags_and_branches(image).join(', ')}"
                          }, slack_hook)
     elsif stage=="end"
       post_slack_message({"icon_emoji": ":sharkdance:", "text": "finished deploying #{image} to #{env}"}, slack_hook)
@@ -86,7 +86,7 @@ begin
   system!("/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json")
   system!("/tmp/czecs upgrade --task-definition-arn #{task_definition_arn} #{cluster} idseq-#{env}-web")
   system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque --set rake_command=resque:workers --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque czecs-resque.json")
-  unless env == "sandbox"
+  unless ["sandbox", "public"].include?(env)
     system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-pipeline-monitor --set rake_command=pipeline_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-pipeline-monitor czecs-resque.json")
     system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-result-monitor --set rake_command=result_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-result-monitor czecs-resque.json")
   end
