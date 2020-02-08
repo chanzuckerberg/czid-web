@@ -351,7 +351,7 @@ class MetadataUpload extends React.Component {
     const { hostGenomes, projectMetadataFields, currentTab } = this.state;
     const { samplesAreNew } = this.props;
     const requiredFields = concat(
-      "Host Genome",
+      "Host Organism",
       map("name", filter(["is_required", 1], projectMetadataFields))
     );
     return (
