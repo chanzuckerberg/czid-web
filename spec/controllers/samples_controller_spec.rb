@@ -424,8 +424,8 @@ RSpec.describe SamplesController, type: :controller do
 
   describe "GET show" do
     it "can see sample report_v2" do
-      @project = create(:project, users: [@joe])
-      sample = create(:sample, project: @project)
+      project = create(:project, users: [@joe])
+      sample = create(:sample, project: project)
       get :show, params: { id: sample.id }
       expect(response).to have_http_status :success
     end

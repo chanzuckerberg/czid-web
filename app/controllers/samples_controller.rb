@@ -691,16 +691,11 @@ class SamplesController < ApplicationController
     end
   end
 
-  # GET /samples/1/legacy
-  def legacy
-    redirect_to action: "show", legacy: true
-  end
-
   # GET /samples/1
   # GET /samples/1.json
   def show
     respond_to do |format|
-      format.html { render 'show' }
+      format.html
       format.json do
         render json: @sample
           .as_json(
