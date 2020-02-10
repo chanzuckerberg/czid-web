@@ -32,6 +32,12 @@ class PhyloTreesController < ApplicationController
   before_action :assert_access, only: OTHER_ACTIONS
   before_action :check_access
 
+  # This limit determines how many rows can be displayed in "additional samples".
+  # This limit was added because the phylo tree creation was timing out for admins
+  # and otherwise the results will grow without bound per user.
+  ELIGIBLE_PIPELINE_RUNS_LIMIT = 1000
+  PIPELINE_RUN_IDS_WITH_TAXID_LIMIT = 10_000
+
   def index
     @project = []
     # Common use case is looking for the most recently created phylo tree
@@ -143,11 +149,18 @@ class PhyloTreesController < ApplicationController
 
     # Retrieve pipeline runs that contain the specified taxid.
     eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
-    all_pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
-    eligible_pipeline_run_ids_with_taxid = eligible_pipeline_runs.where(id: all_pipeline_run_ids_with_taxid).pluck(:id)
+    pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).order(id: :desc).limit(PIPELINE_RUN_IDS_WITH_TAXID_LIMIT).pluck(:id)
+    eligible_pipeline_run_ids_with_taxid =
+      eligible_pipeline_runs.where(id: pipeline_run_ids_with_taxid)
+                            .order(id: :desc).limit(ELIGIBLE_PIPELINE_RUNS_LIMIT).pluck(:id)
+    # Always include all project runs
+    project_pipeline_run_ids_with_taxid = TaxonByterange.joins(pipeline_run: [{ sample: :project }]).where(taxid: taxid, samples: { project_id: project_id }).pluck(:pipeline_run_id)
 
     # Retrieve information for displaying the tree's sample list.
-    @samples = sample_details_json(eligible_pipeline_run_ids_with_taxid, taxid)
+    @samples = sample_details_json(
+      (eligible_pipeline_run_ids_with_taxid | project_pipeline_run_ids_with_taxid).uniq,
+      taxid
+    )
 
     # Retrieve information about the taxon
     taxon_lineage = TaxonLineage.where(taxid: taxid).last

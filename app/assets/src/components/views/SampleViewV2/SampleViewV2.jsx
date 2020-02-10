@@ -160,7 +160,7 @@ export default class SampleViewV2 extends React.Component {
     return {
       categories: {},
       metric: TREE_METRICS[0].value,
-      minContigSize: 4,
+      minContigReads: 4,
       nameType: "Scientific name",
       readSpecificity: 0,
       thresholds: [],
@@ -397,7 +397,7 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
-  computeRowContigStats = ({ row, minContigSize }) => {
+  computeRowContigStats = ({ row, minContigReads }) => {
     ["nr", "nt"].forEach(dbType => {
       const contigDetails = get([dbType, "contigs"], row);
       if (contigDetails && keys(contigDetails).length) {
@@ -408,7 +408,7 @@ export default class SampleViewV2 extends React.Component {
         flow(
           entries,
           map(([readsPerContig, count]) => {
-            if (readsPerContig >= minContigSize) {
+            if (readsPerContig >= minContigReads) {
               dbTypeRow.contigCount += count;
               dbTypeRow.readsCount += count * readsPerContig;
             }
@@ -418,11 +418,11 @@ export default class SampleViewV2 extends React.Component {
     });
   };
 
-  computeContigStats = ({ reportData, minContigSize }) => {
+  computeContigStats = ({ reportData, minContigReads }) => {
     reportData.forEach(genus => {
-      this.computeRowContigStats({ row: genus, minContigSize });
+      this.computeRowContigStats({ row: genus, minContigReads });
       genus.species.forEach(species => {
-        this.computeRowContigStats({ row: species, minContigSize });
+        this.computeRowContigStats({ row: species, minContigReads });
       });
     });
   };
@@ -672,7 +672,7 @@ export default class SampleViewV2 extends React.Component {
     // different behavior given type of option
     switch (key) {
       // - min contig size: recompute contig statistics with new size and refresh display
-      case "minContigSize":
+      case "minContigReads":
         this.computeContigStats({ reportData, ...newSelectedOptions });
         this.setState({ reportData: [...reportData] });
         break;
@@ -1104,7 +1104,7 @@ export default class SampleViewV2 extends React.Component {
               reportPresent={!!reportMetadata.reportReady}
               sample={sample}
               view={view}
-              minContigSize={selectedOptions.minContigSize}
+              minContigReads={selectedOptions.minContigReads}
             />
           </div>
           <div className={cs.tabsContainer}>

@@ -60,7 +60,7 @@ class MetadataManualInput extends React.Component {
         hostGenomes,
         headers: {
           "Sample Name": "Sample Name",
-          ...(samplesAreNew ? { "Host Genome": "Host Genome" } : {}),
+          ...(samplesAreNew ? { "Host Organism": "Host Organism" } : {}),
           ...mapValues("name", keyBy("key", projectMetadataFields)),
         },
       },
@@ -101,7 +101,7 @@ class MetadataManualInput extends React.Component {
   getManualInputColumns = () => {
     return [
       "Sample Name",
-      ...(this.props.samplesAreNew ? ["Host Genome"] : []),
+      ...(this.props.samplesAreNew ? ["Host Organism"] : []),
       ...this.state.selectedFieldNames,
     ];
   };
@@ -261,7 +261,7 @@ class MetadataManualInput extends React.Component {
       this.props.hostGenomes
     );
     this.updateMetadataField(
-      "Host Genome",
+      "Host Organism",
       // Convert the id to a name.
       hostGenome ? hostGenome.name : hostGenomeIdOrNewName,
       sample
@@ -292,7 +292,7 @@ class MetadataManualInput extends React.Component {
       ? get(
           "id",
           find(
-            ["name", this.getMetadataValue(sample, "Host Genome")],
+            ["name", this.getMetadataValue(sample, "Host Organism")],
             this.props.hostGenomes
           )
         )
@@ -302,8 +302,8 @@ class MetadataManualInput extends React.Component {
     find(["id", this.getSampleHostGenomeId(sample)], this.state.hostGenomes);
 
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
-    // Special-case 'Host Genome' (the field that lets you change the Host Genome)
-    field === "Host Genome" ||
+    // Special-case "Host Organism" (the field that lets you change the Host Genome)
+    field === "Host Organism" ||
     get([field, "is_required"], this.props.projectMetadataFields) ||
     includes(
       hostGenomeId,
@@ -341,7 +341,7 @@ class MetadataManualInput extends React.Component {
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
           // TODO (gdingle): remove allowedFeatures after launch of sample type, 2020-01-15.
           // See https://jira.czi.team/browse/IDSEQ-2051.
-          if (this.props.samplesAreNew && column === "Host Genome") {
+          if (this.props.samplesAreNew && column === "Host Organism") {
             return (
               <div>
                 {allowedFeatures.includes("host_genome_free_text") ? (
