@@ -698,6 +698,9 @@ class UploadSampleStep extends React.Component {
       >
         <div className={cs.flexContent}>
           <div className={cs.projectSelect}>
+            <div className={cs.header} role="heading">
+              Select Project
+            </div>
             <div className={cs.label}>Project</div>
             <ProjectSelect
               projects={this.state.projects}
@@ -744,7 +747,9 @@ class UploadSampleStep extends React.Component {
           {this.state.currentTab === LOCAL_UPLOAD &&
             this.state.removedLocalFiles.length > 0 && (
               <IssueGroup
-                caption={`${this.state.removedLocalFiles.length} files were invalid. Please check the acceptable file formats under "More Info".`}
+                caption={`${
+                  this.state.removedLocalFiles.length
+                } files were invalid. Please check the acceptable file formats under "More Info".`}
                 headers={["Invalid File Names"]}
                 rows={this.state.removedLocalFiles.map(file => [file])}
                 type="warning"

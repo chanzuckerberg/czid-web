@@ -9,6 +9,7 @@ import { createProject } from "~/api";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./project_creation_form.scss";
 
@@ -18,6 +19,7 @@ class ProjectCreationForm extends React.Component {
     publicAccess: -1, // No selection by default
     error: "",
     description: "",
+    showInfo: false,
   };
 
   handleNameChange = name => {
@@ -60,7 +62,24 @@ class ProjectCreationForm extends React.Component {
     }
   };
 
+  toggleInfo = () => {
+    const { showInfo } = this.state;
+
+    this.setState(
+      {
+        showInfo: !showInfo,
+      },
+      () => {
+        logAnalyticsEvent("ProjectCreationForm_more-info-toggle_clicked", {
+          showInfo: this.state.showInfo,
+        });
+      }
+    );
+  };
+
   render() {
+    const { showInfo } = this.state;
+
     return (
       <div className={cs.projectCreationForm}>
         <div className={cs.field}>
@@ -109,14 +128,44 @@ class ProjectCreationForm extends React.Component {
         </div>
         <div className={cs.field}>
           <div className={cs.label}>
-            Description
-            <span className={cs.optionalLabel}> - Optional</span>
+            Project Description{" "}
+            <span className={cs.infoLink} onClick={this.toggleInfo}>
+              {showInfo ? "Less Info" : "More Info"}
+            </span>
           </div>
+          {showInfo && (
+            <div className={cs.info}>
+              <div className={cs.title}>A project description may include:</div>
+              <ul>
+                <li>
+                  The project goal (benchmarking, identifying an unknown
+                  pathogen, microbiome, etc.)
+                </li>
+                <li>
+                  If this work is part of a larger study, the aim of that study
+                </li>
+                <li>
+                  A summary of where the samples came from (geographically and
+                  collection date) and preparation techniques, if relevant
+                </li>
+                <li>
+                  Any other context that might be helpful in interpreting the
+                  data
+                </li>
+              </ul>
+              <p>
+                <span className={cs.title}>Example project description: </span>Investigation
+                of pathogen diversity in healthy vs. diseased dogs in
+                California. Sequenced RNA extracted from dog stool with a MiSeq.
+              </p>
+            </div>
+          )}
           <Textarea
             onChange={this.handleDescriptionChange}
             value={this.state.description}
             className={cs.descriptionTextArea}
             maxLength={MAX_DESCRIPTION_LENGTH}
+            placeholder="Enter your project goals, information about your study, where your samples came from, etc..."
           />
           <div className={cs.charCounter}>
             {MAX_DESCRIPTION_LENGTH - this.state.description.length}/
