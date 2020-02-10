@@ -50,7 +50,13 @@ class HostOrganismSearchBox extends React.Component {
     if (query.length && get([0, "name"], sortedHostGenomes) !== query) {
       results.noMatch = {
         name: "Use Plain Text (No Match)",
-        results: [{ title: query, name: query }],
+        results: [
+          {
+            title: query,
+            name: query,
+            description: "Host will not be subtracted",
+          },
+        ],
       };
     }
     return results;
