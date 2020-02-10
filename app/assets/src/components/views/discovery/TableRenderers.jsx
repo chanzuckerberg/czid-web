@@ -57,6 +57,7 @@ class TableRenderers extends React.Component {
                 }
                 content={descriptionRenderer(item)}
                 wide="very"
+                inverted={false}
               />
             )}
           <div className={cs.itemDetails}>{detailsRenderer(item)}</div>
