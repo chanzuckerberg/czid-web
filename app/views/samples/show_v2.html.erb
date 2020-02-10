@@ -1,7 +1,0 @@
-<div id="sample_view_v2">
-  <%= javascript_tag do %>
-    react_component('SampleViewV2', {
-      sampleId: <%= @sample.id %>,
-    }, 'sample_view_v2', JSON.parse('<%= raw escape_json(user_context)%>'));
-  <% end %>
-</div>
