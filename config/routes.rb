@@ -27,7 +27,6 @@ Rails.application.routes.draw do
     get :amr, on: :member
     get :report_info, on: :member
     get :report_csv, on: :member
-    get :report_csv_v2, on: :member
     get :bulk_new, on: :collection
     get :bulk_import, on: :collection
     get :upload, on: :collection
@@ -57,7 +56,6 @@ Rails.application.routes.draw do
     put :upload_heartbeat, on: :member
     get :coverage_viz_summary, on: :member
     get :coverage_viz_data, on: :member
-    get :show_v2, on: :member
     post :taxa_with_reads_suggestions, on: :collection
     post :taxa_with_contigs_suggestions, on: :collection
     post :uploaded_by_current_user, on: :collection

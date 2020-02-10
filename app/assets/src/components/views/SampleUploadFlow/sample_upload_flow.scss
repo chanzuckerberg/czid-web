@@ -135,6 +135,11 @@
   .projectSelect {
     margin-bottom: 30px;
 
+    .header {
+      @include font-header-xl;
+      margin-bottom: $space-default;
+    }
+
     .createProjectButton {
       @include font-label-s;
       color: $primary-light;
