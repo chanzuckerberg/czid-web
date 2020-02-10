@@ -23,7 +23,6 @@
   .descriptionTextArea {
     @include font-body-xs;
     margin-top: 5px;
-    // margin-left: -5px;
     padding: $space-m;
     height: 100px;
     resize: vertical;

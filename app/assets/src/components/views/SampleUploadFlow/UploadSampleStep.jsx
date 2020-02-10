@@ -698,7 +698,9 @@ class UploadSampleStep extends React.Component {
       >
         <div className={cs.flexContent}>
           <div className={cs.projectSelect}>
-            <header>Select Project</header>
+            <div className={cs.header} role="heading">
+              Select Project
+            </div>
             <div className={cs.label}>Project</div>
             <ProjectSelect
               projects={this.state.projects}

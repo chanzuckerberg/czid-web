@@ -135,7 +135,7 @@
   .projectSelect {
     margin-bottom: 30px;
 
-    header {
+    .header {
       @include font-header-xl;
       margin-bottom: $space-default;
     }
