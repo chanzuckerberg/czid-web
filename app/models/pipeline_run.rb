@@ -81,7 +81,7 @@ class PipelineRun < ApplicationRecord
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
 
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
-  MIN_CONTIG_SIZE = 4 # minimal # reads mapped to the  contig
+  MIN_CONTIG_READS = 4 # minimal # reads mapped to the  contig
   M8_FIELDS = ["Query", "Accession", "Percentage Identity", "Alignment Length",
                "Number of mismatches", "Number of gap openings",
                "Start of alignment in query", "End of alignment in query",
@@ -621,7 +621,7 @@ class PipelineRun < ApplicationRecord
       while line
         if line[0] == '>'
           contig_hash = get_contig_hash.call(header, sequence)
-          if contig_hash[:read_count] >= MIN_CONTIG_SIZE && header != ''
+          if contig_hash[:read_count] >= MIN_CONTIG_READS && header != ''
             contig_array << contig_hash
           end
           header = line[1..line.size].rstrip
@@ -632,7 +632,7 @@ class PipelineRun < ApplicationRecord
         line = cf.gets
       end
       contig_hash = get_contig_hash.call(header, sequence)
-      if contig_hash[:read_count] >= MIN_CONTIG_SIZE
+      if contig_hash[:read_count] >= MIN_CONTIG_READS
         contig_array << contig_hash
       end
     end
@@ -1448,15 +1448,15 @@ class PipelineRun < ApplicationRecord
     # Once we decide to deploy the assembly pipeline, change "1000.1000" to the relevant version number of idseq-pipeline.
   end
 
-  def contig_lineages(min_contig_size = MIN_CONTIG_SIZE)
+  def contig_lineages(min_contig_reads = MIN_CONTIG_READS)
     contigs.select("id, read_count, lineage_json")
-           .where("read_count >= ?", min_contig_size)
+           .where("read_count >= ?", min_contig_reads)
            .where("lineage_json IS NOT NULL")
   end
 
-  def get_contigs_for_taxid(taxid, min_contig_size = MIN_CONTIG_SIZE)
+  def get_contigs_for_taxid(taxid, min_contig_reads = MIN_CONTIG_READS)
     contig_ids = []
-    contig_lineages(min_contig_size).each do |c|
+    contig_lineages(min_contig_reads).each do |c|
       lineage = JSON.parse(c.lineage_json)
       contig_ids << c.id if lineage.values.flatten.include?(taxid)
     end
@@ -1464,9 +1464,9 @@ class PipelineRun < ApplicationRecord
     contigs.where(id: contig_ids).order("read_count DESC")
   end
 
-  def get_summary_contig_counts(min_contig_size)
+  def get_summary_contig_counts(min_contig_reads)
     summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
-    contig_lineages(min_contig_size).each do |c|
+    contig_lineages(min_contig_reads).each do |c|
       lineage = JSON.parse(c.lineage_json)
       lineage.each do |count_type, taxid_arr|
         taxids = taxid_arr[0..1]
@@ -1488,7 +1488,7 @@ class PipelineRun < ApplicationRecord
     output
   end
 
-  def get_summary_contig_counts_v2(min_contig_size)
+  def get_summary_contig_counts_v2(min_contig_reads)
     # Stores the number of contigs that match a given taxid, count_type (nt or nr), and read_count (number of reads aligned to that contig).
     # Create and store default values for the hash if the key doesn't exist yet
     summary_dict = Hash.new do |summary, taxid|
@@ -1498,7 +1498,7 @@ class PipelineRun < ApplicationRecord
         end
       end
     end
-    contig_taxids = contigs.where("read_count >= ?", min_contig_size)
+    contig_taxids = contigs.where("read_count >= ?", min_contig_reads)
                            .where("lineage_json IS NOT NULL")
                            .pluck("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
     contig_taxids.each do |c|
@@ -1512,9 +1512,9 @@ class PipelineRun < ApplicationRecord
     return summary_dict
   end
 
-  def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
+  def get_taxid_list_with_contigs(min_contig_reads = MIN_CONTIG_READS)
     taxid_list = []
-    contig_lineages(min_contig_size).each do |c|
+    contig_lineages(min_contig_reads).each do |c|
       lineage = JSON.parse(c.lineage_json)
       lineage.values.each { |taxid_arr| taxid_list += taxid_arr[0..1] }
     end

@@ -11,6 +11,14 @@ import ReviewStep from "./ReviewStep";
 import cs from "./sample_upload_flow.scss";
 import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
 
+// See HOST_GENOME_SYNONYMS in MetadataField
+const HOST_GENOME_SYNONYMS = [
+  "host_genome",
+  "Host Genome",
+  "host_organism",
+  "Host Organism",
+];
+
 class SampleUploadFlow extends React.Component {
   state = {
     currentStep: "uploadSamples",
@@ -58,13 +66,6 @@ class SampleUploadFlow extends React.Component {
 
   handleUploadMetadata = ({ metadata, issues, newHostGenomes }) => {
     const updatedHostGenomes = this.props.hostGenomes.concat(newHostGenomes);
-    // See HOST_GENOME_SYNONYMS in MetadataField
-    const hostGenomeSynonyms = [
-      "host_genome",
-      "Host Genome",
-      "host_organism",
-      "Host Organism",
-    ];
 
     // Populate host_genome_id in sample using metadata.
     const newSamples = this.state.samples.map(sample => {
@@ -74,7 +75,7 @@ class SampleUploadFlow extends React.Component {
           get("Sample Name", row) === sample.name,
         metadata.rows
       );
-      const hostGenomeName = hostGenomeSynonyms.reduce(
+      const hostGenomeName = HOST_GENOME_SYNONYMS.reduce(
         (match, name) => metadataRow[name] || match,
         null
       );
@@ -97,8 +98,8 @@ class SampleUploadFlow extends React.Component {
 
     // Remove host_genome from metadata.
     const newMetadata = flow(
-      set("rows", metadata.rows.map(omit(["host_genome", "Host Genome"]))),
-      set("headers", without(["host_genome", "Host Genome"], metadata.headers))
+      set("rows", metadata.rows.map(omit(HOST_GENOME_SYNONYMS))),
+      set("headers", without(HOST_GENOME_SYNONYMS, metadata.headers))
     )(metadata);
 
     this.setState({

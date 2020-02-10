@@ -2,13 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 import Input from "~ui/controls/Input";
 import HelpIcon from "~ui/containers/HelpIcon";
-import cs from "./min_contig_size_filter.scss";
+import cs from "./min_contig_reads_filter.scss";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import DropdownTrigger from "../../../ui/controls/dropdowns/common/DropdownTrigger";
 
-const MIN_CONTIG_SIZE_LOWER_BOUND = 4;
+const MIN_CONTIG_READS_LOWER_BOUND = 4;
 
-class MinContigSizeFilter extends React.Component {
+class MinContigReadsFilter extends React.Component {
   state = {
     value: this.props.value,
     error: "",
@@ -31,7 +31,7 @@ class MinContigSizeFilter extends React.Component {
   handleBlur = () => {
     const newValue = Number(this.state.value);
 
-    if (isNaN(newValue) || newValue < MIN_CONTIG_SIZE_LOWER_BOUND) {
+    if (isNaN(newValue) || newValue < MIN_CONTIG_READS_LOWER_BOUND) {
       // Reset back to the previous value.
       this.setState({
         value: this.state.previousValue,
@@ -50,13 +50,13 @@ class MinContigSizeFilter extends React.Component {
   renderContents = () => {
     const helpText = `
       Contig Size refers to the number of reads that covered the contig.
-      Only contigs that were assembled from at least {Min Contig Size} reads will be counted in the contig and contig r columns.
+      Only contigs that were assembled from at least {Min Contig Reads} reads will be counted in the contig and contig r columns.
     `;
 
     return (
       <div className={cs.contents}>
         <div className={cs.labelContainer}>
-          <span className={cs.label}>Set the Min Contig Size:</span>
+          <span className={cs.label}>Set the Min Contig Reads:</span>
           <HelpIcon text={helpText} />
         </div>
         <Input
@@ -73,11 +73,11 @@ class MinContigSizeFilter extends React.Component {
 
   render() {
     const labelText =
-      "Min Contig Size" +
+      "Min Contig Reads" +
       (this.state.value !== undefined && this.state.value !== null ? ":" : "");
     return (
       <BareDropdown
-        className={cs.minContigSizeFilter}
+        className={cs.minContigReadsFilter}
         trigger={
           <DropdownTrigger
             className={cs.dropdownTrigger}
@@ -96,9 +96,9 @@ class MinContigSizeFilter extends React.Component {
   }
 }
 
-MinContigSizeFilter.propTypes = {
+MinContigReadsFilter.propTypes = {
   value: PropTypes.number,
   onChange: PropTypes.func,
 };
 
-export default MinContigSizeFilter;
+export default MinContigReadsFilter;

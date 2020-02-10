@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_115_021_328) do
+ActiveRecord::Schema.define(version: 20_200_207_200_038) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -46,7 +46,7 @@ ActiveRecord::Schema.define(version: 20_200_115_021_328) do
 
   create_table "app_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "key"
-    t.string "value"
+    t.text "value"
     t.index ["key"], name: "index_app_configs_on_key", unique: true
   end
 
