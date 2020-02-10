@@ -16,10 +16,14 @@ import cs from "./host_organism_message.scss";
 export default class HostOrganismMessage extends React.Component {
   // By design, host names are case insensitive, so we don't
   // get duplicates.
-  hasMatch = host =>
-    map(hg => hg.name.toLowerCase(), this.props.hostGenomes).includes(
+  hasMatch = host => {
+    const filtered = this.props.hostGenomes.filter(
+      hg => this.isERCC(hg.name) || !hg.ercc_only
+    );
+    return map(hg => hg.name.toLowerCase(), filtered).includes(
       host.toLowerCase()
     );
+  };
 
   renderOneHost(host, count) {
     return (
