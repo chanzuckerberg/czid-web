@@ -1156,7 +1156,7 @@ class BulkUploadImport extends React.Component {
                       ""
                     ) : (
                       <div>
-                        <small>No host genome found!</small>
+                        <small>No host organism found!</small>
                       </div>
                     )}
                   </ul>
