@@ -189,6 +189,7 @@ const getSamples = ({
   filters,
   listAllIds,
   sampleIds,
+  basic,
 } = {}) =>
   get("/samples/index_v2.json", {
     params: {
@@ -198,6 +199,7 @@ const getSamples = ({
       limit,
       offset,
       listAllIds,
+      basic, // if true, then don't include extra details (ex: metadata) for each sample
       // &sampleIds=[1,2] instead of default &sampleIds[]=1&sampleIds[]=2 format.
       sampleIds: JSON.stringify(sampleIds),
       ...filters,
