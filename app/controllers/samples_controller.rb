@@ -181,7 +181,8 @@ class SamplesController < ApplicationController
     )
 
     # If basic requested, then don't include extra details (ex: metadata) for each sample.
-    if params[:basic].blank?
+    # params[:basic] becomes a string, so cast it into a boolean for this check.
+    unless ActiveModel::Type::Boolean.new.cast(params[:basic])
       samples_visibility = get_visibility(limited_samples)
       # format_samples loads a lot of information about samples
       # There are many ways we can refactor: multiple endpoints for client to ask for the information

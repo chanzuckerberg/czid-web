@@ -189,7 +189,7 @@ const getSamples = ({
   filters,
   listAllIds,
   sampleIds,
-  basic,
+  basic = false,
 } = {}) =>
   get("/samples/index_v2.json", {
     params: {
