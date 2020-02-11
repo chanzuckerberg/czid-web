@@ -1,10 +1,17 @@
 require 'will_paginate/array'
 
+PUBLIC_ENDPOINTS = [:landing, :sign_up, :maintenance].freeze
+
+# Endpoints made public for public ncov page.
+PUBLIC_NCOV_ENDPOINTS = [
+  :public, :index,
+].freeze
+
 class HomeController < ApplicationController
   include SamplesHelper
   before_action :login_required, except: [:landing, :sign_up, :maintenance]
   before_action :admin_required, only: [:all_data]
-  skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance]
+  skip_before_action :authenticate_user!, :verify_authenticity_token, only: PUBLIC_ENDPOINTS + PUBLIC_NCOV_ENDPOINTS
   skip_before_action :check_for_maintenance, only: [:maintenance, :landing, :sign_up]
   power :projects, except: [:landing, :sign_up, :maintenance]
 

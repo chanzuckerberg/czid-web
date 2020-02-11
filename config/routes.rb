@@ -190,7 +190,7 @@ Rails.application.routes.draw do
   get '/:id' => "shortener/shortened_urls#show"
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
-  root to: 'home#landing'
+  root to: 'support#public_ncov_homepage'
 end
 
 Rails.application.routes.named_routes.url_helpers_module.module_eval do

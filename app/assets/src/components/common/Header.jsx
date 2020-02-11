@@ -27,6 +27,8 @@ import cs from "./header.scss";
 // TODO(mark): Remove after this expires.
 const PRIVACY_UPDATE_DATE = moment("2019-06-24", "YYYY-MM-DD");
 
+const NCOV_PUBLIC_SITE = true;
+
 const setPrivacyUpdateNotificationViewed = () => {
   localStorage.setItem("dismissedPrivacyUpdateNotification", "true");
 };
@@ -137,6 +139,13 @@ class Header extends React.Component {
                 <LogoIcon className={cs.icon} />
               </a>
             </div>
+            {NCOV_PUBLIC_SITE && (
+              <a href="/">
+                <div className={cs.publicNcovHomeLink}>
+                  Coronavirus Public Data
+                </div>
+              </a>
+            )}
             <div className={cs.fill} />
             {!disableNavigation && <MainMenu adminUser={adminUser} />}
             {!disableNavigation && (
@@ -257,36 +266,37 @@ const UserMenuDropDown = ({
         />
       );
 
-    userDropdownItems.push(
-      <BareDropdown.Item
-        key="help"
-        text={
-          <ExternalLink
-            className={cs.option}
-            href="https://help.idseq.net"
-            onClick={() =>
-              logAnalyticsEvent("Header_dropdown-help-option_clicked")
-            }
-          >
-            Help Center
-          </ExternalLink>
-        }
-      />,
-      <BareDropdown.Item
-        key="feedback"
-        text={
-          <a
-            className={cs.option}
-            href={`mailto:${email}?Subject=Report%20Feedback`}
-            onClick={() =>
-              logAnalyticsEvent("Header_dropdown-feedback-option_clicked")
-            }
-          >
-            Contact Us
-          </a>
-        }
-      />
-    );
+    !NCOV_PUBLIC_SITE &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="help"
+          text={
+            <ExternalLink
+              className={cs.option}
+              href="https://help.idseq.net"
+              onClick={() =>
+                logAnalyticsEvent("Header_dropdown-help-option_clicked")
+              }
+            >
+              Help Center
+            </ExternalLink>
+          }
+        />,
+        <BareDropdown.Item
+          key="feedback"
+          text={
+            <a
+              className={cs.option}
+              href={`mailto:${email}?Subject=Report%20Feedback`}
+              onClick={() =>
+                logAnalyticsEvent("Header_dropdown-feedback-option_clicked")
+              }
+            >
+              Contact Us
+            </a>
+          }
+        />
+      );
 
     adminUser &&
       userDropdownItems.push(
@@ -300,8 +310,10 @@ const UserMenuDropDown = ({
         />
       );
 
+    !NCOV_PUBLIC_SITE &&
+      userDropdownItems.push(<BareDropdown.Divider key="divider_one" />);
+
     userDropdownItems.push(
-      <BareDropdown.Divider key="divider_one" />,
       <BareDropdown.Item
         key="terms_of_service"
         text={
@@ -333,24 +345,31 @@ const UserMenuDropDown = ({
             Privacy Policy
           </a>
         }
-      />,
-      <BareDropdown.Divider key="divider_two" />,
-      <BareDropdown.Item
-        key="logout"
-        text="Logout"
-        onClick={withAnalytics(
-          signOut,
-          "Header_dropdown-logout-option_clicked"
-        )}
       />
     );
+    !NCOV_PUBLIC_SITE &&
+      userDropdownItems.push(
+        <BareDropdown.Divider key="divider_two" />,
+        <BareDropdown.Item
+          key="logout"
+          text="Logout"
+          onClick={withAnalytics(
+            signOut,
+            "Header_dropdown-logout-option_clicked"
+          )}
+        />
+      );
     return userDropdownItems;
   };
 
   return (
     <div>
       <BareDropdown
-        trigger={<div className={cs.userName}>{userName}</div>}
+        trigger={
+          <div className={cs.userName}>
+            {!NCOV_PUBLIC_SITE ? userName : "Menu"}
+          </div>
+        }
         className={cs.userDropdown}
         items={renderItems(adminUser)}
         direction="left"
@@ -370,6 +389,19 @@ UserMenuDropDown.propTypes = forbidExtraProps({
 
 const MainMenu = ({ adminUser }) => {
   const isSelected = tab => window.location.pathname.startsWith(`/${tab}`);
+
+  if (NCOV_PUBLIC_SITE) {
+    return (
+      <div className={cs.mainMenu}>
+        <a className={cs.item} href="https://idseq.net">
+          Request Full Access
+        </a>
+        <a className={cs.item} href="https://help.idseq.net">
+          Help
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className={cs.mainMenu}>

@@ -3,7 +3,8 @@
 
 .privacyPolicy,
 .termsOfUse,
-.faqPage {
+.faqPage,
+.publicNcovHomepage {
   margin-top: 90px;
   margin-bottom: 90px;
 
@@ -113,5 +114,53 @@
   .innerListItem {
     margin-top: 10px;
     margin-left: 20px;
+  }
+}
+
+.publicNcovHomepage {
+  margin-top: 60px;
+
+  .title {
+    display: flex;
+    margin-bottom: 20px;
+
+    .fill {
+      flex: 1 1 0;
+    }
+  }
+
+  .image {
+    max-width: 100%;
+    margin-top: 20px;
+  }
+
+  h2 {
+    @include font-header-l;
+    margin-top: 30px;
+  }
+
+  ol {
+    margin: 30px 0 30px 20px;
+
+    li {
+      @include font-body-m;
+      list-style-type: none;
+      margin-bottom: 20px;
+
+      .listItemTitle {
+        @include font-header-m;
+        margin-bottom: 5px;
+      }
+
+      .content {
+        display: flex;
+        margin-top: 10px;
+
+        img {
+          width: 300px;
+          margin-right: 30px;
+        }
+      }
+    }
   }
 }

@@ -69,6 +69,8 @@ const BACKGROUND_METRICS = [
   { text: "NR Z Score", value: "NR.zscore" },
 ];
 
+const NCOV_PUBLIC_SITE = true;
+
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
   return isNaN(parsed) ? defaultVal : parsed;
@@ -85,7 +87,9 @@ class SamplesHeatmapView extends React.Component {
       ...this.urlParams,
     };
 
-    this.initOnBeforeUnload(props.savedParamValues);
+    if (!NCOV_PUBLIC_SITE) {
+      this.initOnBeforeUnload(props.savedParamValues);
+    }
 
     // IMPORTANT NOTE: These default values should be kept in sync with the
     // backend defaults in HeatmapHelper for sanity.

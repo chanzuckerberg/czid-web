@@ -28,6 +28,8 @@ import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
 
+const NCOV_PUBLIC_SITE = true;
+
 class SamplesView extends React.Component {
   constructor(props) {
     super(props);
@@ -329,26 +331,30 @@ class SamplesView extends React.Component {
     return (
       <div className={cs.samplesToolbar}>
         {this.renderDisplaySwitcher()}
-        <div className={cs.fluidBlank} />
-        <div className={cs.counterContainer}>
-          <Label
-            circular
-            className={cs.counter}
-            // Log this no-op so we know if users want a way to view their selected samples
-            onClick={() =>
-              logAnalyticsEvent(`SamplesView_sample-counter_clicked`)
-            }
-            text={`${selectedSampleIds.size}`}
-          />
-          <span className={cs.label}>Selected</span>
-        </div>
-        <div className={cs.separator} />
-        <div className={cs.actions}>
-          {this.renderCollectionTrigger()}
-          {this.renderHeatmapTrigger()}
-          {this.renderPhyloTreeTrigger()}
-          {this.renderBulkDownloadTrigger()}
-        </div>
+        {!NCOV_PUBLIC_SITE && (
+          <React.Fragment>
+            <div className={cs.fluidBlank} />
+            <div className={cs.counterContainer}>
+              <Label
+                circular
+                className={cs.counter}
+                // Log this no-op so we know if users want a way to view their selected samples
+                onClick={() =>
+                  logAnalyticsEvent(`SamplesView_sample-counter_clicked`)
+                }
+                text={`${selectedSampleIds.size}`}
+              />
+              <span className={cs.label}>Selected</span>
+            </div>
+            <div className={cs.separator} />
+            <div className={cs.actions}>
+              {this.renderCollectionTrigger()}
+              {this.renderHeatmapTrigger()}
+              {this.renderPhyloTreeTrigger()}
+              {this.renderBulkDownloadTrigger()}
+            </div>
+          </React.Fragment>
+        )}
       </div>
     );
   };
@@ -383,7 +389,7 @@ class SamplesView extends React.Component {
           onRowClick={this.handleRowClick}
           protectedColumns={protectedColumns}
           rowClassName={cs.tableDataRow}
-          selectableKey="id"
+          selectableKey={!NCOV_PUBLIC_SITE ? "id" : undefined}
           selected={selectedSampleIds}
           selectAllChecked={selectAllChecked}
           selectableCellClassName={cs.selectableCell}

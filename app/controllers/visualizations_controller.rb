@@ -2,6 +2,11 @@ class VisualizationsController < ApplicationController
   include ReportHelper
   include HeatmapHelper
 
+  # Endpoints made public for public ncov page.
+  PUBLIC_NCOV_ENDPOINTS = [:index, :shorten_url, :visualization, :samples_taxons, :download_heatmap].freeze
+
+  skip_before_action :authenticate_user!, only: PUBLIC_NCOV_ENDPOINTS
+
   # This action takes up to 10s for 50 samples so we cache it.
   caches_action(
     :samples_taxons,
