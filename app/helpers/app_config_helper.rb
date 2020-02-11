@@ -35,6 +35,9 @@ module AppConfigHelper
                   .where(key: [
                            AppConfig::MAX_SAMPLES_BULK_DOWNLOAD,
                            AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES,
+                           AppConfig::PUBLIC_NCOV_REPORT_PAGE_SELECTED_OPTIONS,
+                           AppConfig::PUBLIC_NCOV_PROJECT_ID,
+                           AppConfig::PUBLIC_NCOV_HEATMAP_ID,
                          ])
                   .map { |app_config| [app_config.key, app_config.value] }
                   .to_h
@@ -42,6 +45,9 @@ module AppConfigHelper
     {
       maxSamplesBulkDownload: app_configs[AppConfig::MAX_SAMPLES_BULK_DOWNLOAD].to_i,
       maxSamplesBulkDownloadOriginalFiles: app_configs[AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES].to_i,
+      publicNcovReportPageSelectedOptions: JSON.parse(app_configs[AppConfig::PUBLIC_NCOV_REPORT_PAGE_SELECTED_OPTIONS] || ""),
+      publicNcovProjectId: app_configs[AppConfig::PUBLIC_NCOV_PROJECT_ID].to_i,
+      publicNcovHeatmapId: app_configs[AppConfig::PUBLIC_NCOV_HEATMAP_ID].to_i,
     }
   end
 end

@@ -1583,7 +1583,8 @@ class PipelineRun < ApplicationRecord
         if file_info.present?
           result[prs.name]["steps"][target_name] = {
             "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
-            "file_list" => file_info,
+            # Do not send list of files.
+            # "file_list" => file_info,
             "reads_after" => (job_stats_by_task[target_name] || {})["reads_after"],
           }
         end

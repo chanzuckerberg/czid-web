@@ -15,6 +15,8 @@ import { PIPELINE_INFO_FIELDS, HOST_FILTERING_WIKI } from "./constants";
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
+const NCOV_PUBLIC_SITE = true;
+
 class PipelineTab extends React.Component {
   state = {
     sectionOpen: {
@@ -211,34 +213,36 @@ class PipelineTab extends React.Component {
             />
           </div>
         </MetadataSection>
-        <MetadataSection
-          toggleable
-          onToggle={() => this.toggleSection("downloads")}
-          open={this.state.sectionOpen.downloads}
-          title="Downloads"
-        >
-          <div className={cs.downloadSectionContent}>
-            {pipelineRun &&
-              getDownloadLinks(sampleId, pipelineRun).map(option => (
-                <a
-                  key={option.label}
-                  className={cs.downloadLink}
-                  href={option.path}
-                  target={option.newPage ? "_blank" : "_self"}
-                  onClick={() =>
-                    logAnalyticsEvent("PipelineTab_download-link_clicked", {
-                      newPage: option.newPage,
-                      label: option.label,
-                      href: option.path,
-                      sampleId: this.props.sampleId,
-                    })
-                  }
-                >
-                  {option.label}
-                </a>
-              ))}
-          </div>
-        </MetadataSection>
+        {!NCOV_PUBLIC_SITE && (
+          <MetadataSection
+            toggleable
+            onToggle={() => this.toggleSection("downloads")}
+            open={this.state.sectionOpen.downloads}
+            title="Downloads"
+          >
+            <div className={cs.downloadSectionContent}>
+              {pipelineRun &&
+                getDownloadLinks(sampleId, pipelineRun).map(option => (
+                  <a
+                    key={option.label}
+                    className={cs.downloadLink}
+                    href={option.path}
+                    target={option.newPage ? "_blank" : "_self"}
+                    onClick={() =>
+                      logAnalyticsEvent("PipelineTab_download-link_clicked", {
+                        newPage: option.newPage,
+                        label: option.label,
+                        href: option.path,
+                        sampleId: this.props.sampleId,
+                      })
+                    }
+                  >
+                    {option.label}
+                  </a>
+                ))}
+            </div>
+          </MetadataSection>
+        )}
       </div>
     );
   }
