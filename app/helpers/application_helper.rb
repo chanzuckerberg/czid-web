@@ -11,7 +11,9 @@ module ApplicationHelper
   end
 
   def current_user
-    warden&.user(:auth0_user)
+    # For the public site, use the user with id 1.
+    # allowed_feature flags and other settings should be properly configured for this user.
+    User.first
   end
 
   def hash_array_json2csv(input_file, output_file, keys)

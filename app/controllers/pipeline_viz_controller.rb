@@ -1,6 +1,11 @@
 class PipelineVizController < ApplicationController
   include PipelineOutputsHelper
 
+  # Endpoints made public for public ncov page.
+  PUBLIC_NCOV_ENDPOINTS = [:show].freeze
+
+  skip_before_action :authenticate_user!, only: PUBLIC_NCOV_ENDPOINTS
+
   # GET /sample/:sample_id/pipeline_viz/:pipeline_version
   # GET /sample/:sample_id/pipeline_viz/:pipeline_version.json
   def show
