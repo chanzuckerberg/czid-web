@@ -191,6 +191,8 @@ class SamplesHeatmapView extends React.Component {
     }
     if (typeof urlParams.thresholdFilters === "string") {
       // If the saved threshold object doesn't have metricDisplay, add it. For backwards compatibility.
+      // See also parseSavedParams().
+      // TODO: should remove this when the Visualization table is cleaned up.
       urlParams.thresholdFilters = map(
         threshold => ({
           metricDisplay: get(
@@ -216,6 +218,8 @@ class SamplesHeatmapView extends React.Component {
 
   parseSavedParams = () => {
     // If the saved threshold object doesn't have metricDisplay, add it. For backwards compatibility.
+    // See also parseUrlParams().
+    // TODO: should remove this when the Visualization table is cleaned up.
     let savedParams = this.props.savedParamValues;
     savedParams.thresholdFilters = map(
       threshold => ({
