@@ -108,7 +108,7 @@ class CliUserInstructions extends React.Component {
         </p>
         <p>
           - You will be prompted to upload metadata in a CSV file with your
-          samples. This is also where you will specify the Host Genome.
+          samples.
         </p>
         <p>
           <div className={cs.firstIndent}>
@@ -146,23 +146,25 @@ class CliUserInstructions extends React.Component {
               Metadata CSV Template
             </span>
           </div>
+          <p>
+            {"- "}The CSV is also where you will specify the Host Organism.
+            Please enter an accurate value here, but note that if your entered
+            Host Organism does not match a supported host genome, we will only
+            subtract out ERCCs and the Human genome. You can read more about how
+            to request a new genome to be added to IDseq{" "}
+            <span
+              onClick={() =>
+                openUrlInNewTab(
+                  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790814-How-do-I-request-a-new-host-genome-be-added-to-IDseq-"
+                )
+              }
+              className={cs.link}
+            >
+              here
+            </span>.
+          </p>
         </p>
         <p>{`- Supported host genome values: ${genomesList}`}</p>
-        <p>
-          {`- If your entered Host Organism does not match a supported host
-        genome, we will only subtract out ERCCs and the Human genome. You can
-        read more about how to request a new genome to be added to IDseq `}
-          <span
-            onClick={() =>
-              openUrlInNewTab(
-                "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790814-How-do-I-request-a-new-host-genome-be-added-to-IDseq-"
-              )
-            }
-            className={cs.link}
-          >
-            here
-          </span>.
-        </p>
         <p>
           {"- Your authentication token for uploading is: "}
           <span className={cs.codePersonal}>{this.props.authToken}</span>
