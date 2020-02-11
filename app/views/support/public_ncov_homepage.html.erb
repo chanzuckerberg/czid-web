@@ -1,0 +1,5 @@
+<div id="PublicNcovHomepage">
+  <%= javascript_tag do %>
+    react_component('PublicNcovHomepage', {}, 'PublicNcovHomepage', JSON.parse('<%= raw escape_json(user_context)%>'));
+  <% end %>
+</div>

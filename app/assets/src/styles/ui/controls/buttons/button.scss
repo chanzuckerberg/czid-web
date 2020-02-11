@@ -63,4 +63,15 @@
       content: "\f107";
     }
   }
+
+  &.next-action-button {
+    display: flex;
+    align-items: center;
+    padding-left: 16px;
+
+    .right-icon {
+      font-size: 20px;
+      margin-left: 8px;
+    }
+  }
 }

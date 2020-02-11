@@ -1210,18 +1210,19 @@ class DiscoveryView extends React.Component {
         <Divider style="medium" />
         <div className={cs.mainContainer}>
           <div className={cs.leftPane}>
-            {showFilters && dimensions && (
-              <DiscoveryFilters
-                {...mapValues(
-                  dim => dim.values,
-                  keyBy("dimension", dimensions)
-                )}
-                {...filters}
-                domain={domain}
-                onFilterChange={this.handleFilterChange}
-                allowedFeatures={allowedFeatures}
-              />
-            )}
+            {showFilters &&
+              dimensions && (
+                <DiscoveryFilters
+                  {...mapValues(
+                    dim => dim.values,
+                    keyBy("dimension", dimensions)
+                  )}
+                  {...filters}
+                  domain={domain}
+                  onFilterChange={this.handleFilterChange}
+                  allowedFeatures={allowedFeatures}
+                />
+              )}
           </div>
           <div className={cs.centerPane}>
             {currentDisplay === "map" &&

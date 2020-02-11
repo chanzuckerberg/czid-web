@@ -77,8 +77,8 @@ const LOCAL_STORAGE_FIELDS = {
 };
 
 export default class SampleViewV2 extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);
     // remove nested options to be merge separately
@@ -90,6 +90,8 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions: selectedOptionsFromLocal,
       ...nonNestedLocalState
     } = this.loadState(localStorage, "SampleViewOptions");
+
+    const { appConfig } = context || {};
 
     this.state = Object.assign(
       {
@@ -114,8 +116,7 @@ export default class SampleViewV2 extends React.Component {
         view: "table",
         selectedOptions: Object.assign(
           this.defaultSelectedOptions(),
-          selectedOptionsFromLocal,
-          selectedOptionsFromUrl
+          appConfig.publicNcovReportPageSelectedOptions
         ),
       },
       nonNestedLocalState,
@@ -1168,6 +1169,8 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 }
+
+SampleViewV2.contextType = UserContext;
 
 SampleViewV2.propTypes = {
   sampleId: PropTypes.number,
