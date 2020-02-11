@@ -36,7 +36,7 @@ class ApplicationController < ActionController::Base
     case auth_check
     when AUTH_INVALID_USER
       respond_to do |format|
-        format.html { redirect_to  controller: :auth0, action: :login }
+        format.html { redirect_to root_path }
         format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
       end
     when AUTH_TOKEN_EXPIRED
@@ -45,7 +45,7 @@ class ApplicationController < ActionController::Base
         # because the user may still have a valid SSO token in the auth0 session.
         # in this case the sliding session will be refreshed, otherwise user will be
         # required to enter email and password
-        format.html { redirect_to controller: :auth0, action: :refresh_token, params: { mode: "expired" } }
+        format.html { redirect_to root_path }
         format.json { render json: { errors: ['Not Authenticated'] }, status: :unauthorized }
       end
     end

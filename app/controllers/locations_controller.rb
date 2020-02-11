@@ -8,7 +8,12 @@ class LocationsController < ApplicationController
 
   TOKEN_AUTH_ACTIONS = [:external_search].freeze
 
+  # Endpoints made public for public ncov page.
+  PUBLIC_NCOV_ENDPOINTS = [:sample_locations].freeze
+
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
+
+  skip_before_action :authenticate_user!, only: PUBLIC_NCOV_ENDPOINTS
 
   def external_search
     results = []
