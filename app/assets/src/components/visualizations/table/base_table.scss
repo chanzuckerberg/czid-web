@@ -138,7 +138,7 @@
 .selectableColumnClassName {
   // LUCIA: We pass in the "selectableCell" className to
   // our checkbox to modify the enclosing div as follows;
-  // this creates a large, clickable "button" the height of
+  // this creates a large, invisible "button" the height of
   // the row, making samples easier to select.
   .selectableCell {
     position: absolute;
@@ -148,17 +148,5 @@
     margin: -11px -10px -10px -10px;
     padding-left: 0px;
     justify-content: center;
-    border-radius: 4px;
-
-    &:hover {
-      background-color: $primary-lighter;
-      opacity: 0.7;
-      transition: background-color 0.3s;
-    }
-
-    &:active {
-      background-color: $primary-dark;
-      opacity: 0.7;
-    }
   }
 }

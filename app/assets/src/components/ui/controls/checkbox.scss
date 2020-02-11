@@ -28,6 +28,8 @@
     position: relative;
     height: 16px;
     width: 16px;
+    min-width: 16px;
+    min-height: 16px;
     border: 1px solid $light-grey;
     border-radius: 2px;
     opacity: 100;
