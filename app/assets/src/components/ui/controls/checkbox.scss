@@ -14,14 +14,8 @@
   justify-content: center;
 
   input[type="checkbox"] {
-    position: relative;
     opacity: 0;
     cursor: pointer;
-    clip: rect(0 0 0 0);
-    height: 1px;
-    width: 1px;
-    margin: -1px;
-    overflow: hidden;
   }
 
   .checkmark {

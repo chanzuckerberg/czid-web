@@ -249,7 +249,7 @@ class BaseTable extends React.Component {
             >
               {selectableKey && (
                 <Column
-                  className={cs.selectableColumnClassName}
+                  className={cs.selectableColumn}
                   dataKey={selectableKey}
                   headerRenderer={this.renderSelectableHeader}
                   cellRenderer={this.renderSelectableCell}

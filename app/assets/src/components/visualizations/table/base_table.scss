@@ -135,8 +135,8 @@
   }
 }
 
-.selectableColumnClassName {
-  // LUCIA: We pass in the "selectableCell" className to
+.selectableColumn {
+  // We pass in the "selectableCell" className to
   // our checkbox to modify the enclosing div as follows;
   // this creates a large, invisible "button" the height of
   // the row, making samples easier to select.
