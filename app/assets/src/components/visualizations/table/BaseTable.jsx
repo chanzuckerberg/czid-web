@@ -174,6 +174,7 @@ class BaseTable extends React.Component {
     const disabled = cellData === null || cellData === undefined;
     return (
       <Checkbox
+        className={cs.selectableCell}
         checked={selected.has(cellData)}
         onChange={onSelectRow}
         value={disabled ? -1 : cellData}
@@ -210,7 +211,6 @@ class BaseTable extends React.Component {
       rowCount,
       rowGetter,
       rowRenderer,
-      selectableColumnClassName,
       selectableKey,
       sortable,
       sortBy,
@@ -249,12 +249,12 @@ class BaseTable extends React.Component {
             >
               {selectableKey && (
                 <Column
-                  className={selectableColumnClassName}
+                  className={cs.selectableColumnClassName}
                   dataKey={selectableKey}
                   headerRenderer={this.renderSelectableHeader}
                   cellRenderer={this.renderSelectableCell}
                   disableSort={true}
-                  width={defaultSelectColumnWidth}
+                  width={defaultSelectColumnWidth || 30}
                 />
               )}
               {columnOrder.map(dataKey => {
@@ -343,7 +343,6 @@ BaseTable.propTypes = {
   sortDirection: PropTypes.string,
   sortedHeaderClassName: PropTypes.string,
 
-  selectableColumnClassName: PropTypes.string,
   // make the table selectable, by setting a selectable key
   // the tables will check for the selectable key in the selected set/array
   selectableKey: PropTypes.string,

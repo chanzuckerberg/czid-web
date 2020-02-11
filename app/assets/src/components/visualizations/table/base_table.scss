@@ -134,3 +134,15 @@
     display: block;
   }
 }
+
+.selectableColumnClassName {
+  .selectableCell {
+    position: absolute;
+    overflow: visible;
+    height: 66px;
+    width: 50px;
+    margin: -11px -10px -10px -10px;
+    padding-left: 0px;
+    justify-content: center;
+  }
+}

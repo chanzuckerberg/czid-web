@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
+import cs from "./checkbox.scss";
+
 class Checkbox extends React.Component {
   constructor(props) {
     super(props);
@@ -37,10 +39,7 @@ class Checkbox extends React.Component {
     const { isChecked } = this.state;
 
     return (
-      <div
-        className={cx("idseq-ui input checkbox", className)}
-        onClick={this.handleClick}
-      >
+      <div className={cx(cs.checkbox, className)} onClick={this.handleClick}>
         <input
           type="checkbox"
           value={value}
@@ -48,8 +47,8 @@ class Checkbox extends React.Component {
           readOnly={true}
           disabled={disabled}
         />
-        <span className="checkmark" />
-        <span className="label">{label}</span>
+        <span className={cs.checkmark} />
+        <span className={cs.label}>{label}</span>
       </div>
     );
   }

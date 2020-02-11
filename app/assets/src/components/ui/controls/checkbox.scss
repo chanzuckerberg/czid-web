@@ -1,0 +1,65 @@
+@import "~styles/themes/colors";
+
+.checkbox {
+  display: flex;
+  position: relative;
+  padding: 0px 0px 0px 0px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+
+  input[type="checkbox"] {
+    position: relative;
+    opacity: 0;
+    cursor: pointer;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    width: 1px;
+    margin: -1px;
+    overflow: hidden;
+  }
+
+  .checkmark {
+    position: relative;
+    height: 16px;
+    width: 16px;
+    border: 1px solid $light-grey;
+    border-radius: 2px;
+    opacity: 100;
+
+    &:hover {
+      border: 2px solid $medium-grey;
+    }
+
+    &:after {
+      content: "";
+      position: relative;
+      display: none;
+      width: 6px;
+      height: 9px;
+      border: solid $white;
+      border-radius: 2px;
+      border-width: 0 2px 2px 0;
+      -webkit-transform: rotate(40deg);
+      -ms-transform: rotate(40deg);
+      transform: rotate(40deg);
+    }
+  }
+
+  & input:checked ~ .checkmark {
+    background-color: $primary-light;
+
+    &:after {
+      display: block;
+    }
+  }
+
+  .label {
+    line-height: 18px;
+  }
+}
