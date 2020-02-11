@@ -68,6 +68,18 @@ class PipelineRun < ApplicationRecord
   REFINED_TAXID_BYTERANGE_JSON_NAME = 'assembly/refined_taxid_locations_combined.json'.freeze
   READS_PER_GENE_STAR_TAB_NAME = 'reads_per_gene.star.tab'.freeze
 
+  # Insert size metrics constants
+  INSERT_SIZE_METRICS_OUTPUT_NAME = 'picard_insert_metrics.txt'.freeze
+  INSERT_SIZE_HISTOGRAM_OUTPUT_NAME = 'insert_size_histogram.pdf'.freeze
+  MEDIAN_INSERT_SIZE_NAME = 'MEDIAN_INSERT_SIZE'.freeze
+  MODE_INSERT_SIZE_NAME = 'MODE_INSERT_SIZE'.freeze
+  MEDIAN_ABSOLUTE_DEVIATION_NAME = 'MEDIAN_ABSOLUTE_DEVIATION'.freeze
+  MIN_INSERT_SIZE_NAME = 'MIN_INSERT_SIZE'.freeze
+  MAX_INSERT_SIZE_NAME = 'MAX_INSERT_SIZE'.freeze
+  MEAN_INSERT_SIZE_NAME = 'MEAN_INSERT_SIZE'.freeze
+  STANDARD_DEVIATION_NAME = 'STANDARD_DEVIATION'.freeze
+  READ_PAIRS_NAME = 'READ_PAIRS'.freeze
+
   ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
   ASSEMBLED_STATS_NAME = 'assembly/contig_stats.json'.freeze
@@ -137,7 +149,8 @@ class PipelineRun < ApplicationRecord
                         "taxon_counts" => "db_load_taxon_counts",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
-                        "amr_counts" => "db_load_amr_counts", }.freeze
+                        "amr_counts" => "db_load_amr_counts",
+                        "insert_size_metrics" => "db_load_insert_size_metrics", }.freeze
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.
@@ -409,6 +422,60 @@ class PipelineRun < ApplicationRecord
     update(ercc_counts_attributes: ercc_counts_array)
     total_ercc_reads = ercc_counts_array.pluck(:count).sum * sample.input_files.count
     update(total_ercc_reads: total_ercc_reads)
+  end
+
+  def db_load_insert_size_metrics
+    insert_size_metrics_s3_path = "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", insert_size_metrics_s3_path)
+    return unless status.exitstatus.zero?
+    insert_size_metrics_lines = Syscall.pipe_with_output(["aws", "s3", "cp", insert_size_metrics_s3_path])
+    tsv_lines = []
+    tsv_header_line = -1
+    insert_size_metrics_lines.split(/\r?\n/).each do |line, index|
+      if line.start_with?("## METRICS CLASS")
+        tsv_header_line = index
+      elsif tsv_header_line > 0 && index - tsv_header_line <= 2
+        tsv_lines << CSV.parse_line(line, col_sep: "\t")
+      elsif tsv_lines.length >= 2
+        break
+      end
+    end
+    if tsv_lines.length != 2
+      Rails.logger.error("Pipleine run ##{id} has an insert size metrics file but metrics could not be found")
+      return
+    end
+    insert_size_metrics = {}
+    tsv_lines[0].zip(tsv_lines[1]).each do |row|
+      insert_size_metrics[row[0]] = row[1]
+    end
+
+    extract_int = lambda do |metrics, metric_name|
+      begin
+        return metrics[metric_name].to_i
+      rescue
+        return nil
+      end
+    end
+
+    median_insert_size = extract_int.call(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME)
+    mode_insert_size = extract_int.call(insert_size_metrics, MODE_INSERT_SIZE_NAME)
+    median_absolute_deviation = extract_int.call(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME)
+    min_insert_size = extract_int.call(insert_size_metrics, MIN_INSERT_SIZE_NAME)
+    max_insert_size = extract_int.call(insert_size_metrics, MAX_INSERT_SIZE_NAME)
+    mean_insert_size = extract_int.call(insert_size_metrics, MEAN_INSERT_SIZE_NAME)
+    standard_deviation = extract_int.call(insert_size_metrics, STANDARD_DEVIATION_NAME)
+    read_pairs = extract_int.call(insert_size_metrics, READ_PAIRS_NAME)
+
+    update(
+      median_insert_size: median_insert_size,
+      mode_insert_size: mode_insert_size,
+      median_absolute_deviation: median_absolute_deviation,
+      min_insert_size: min_insert_size,
+      max_insert_size: max_insert_size,
+      mean_insert_size: mean_insert_size,
+      standard_deviation: standard_deviation,
+      read_pairs: read_pairs
+    )
   end
 
   def coverage_viz_summary_s3_path
@@ -1547,7 +1614,7 @@ class PipelineRun < ApplicationRecord
     ret
   end
 
-  def outputs_by_step(can_see_stage1_results = false)
+  def outputs_by_step(_can_see_stage1_results = false)
     # Get map of s3 path to presigned URL and size.
     filename_to_info = {}
     sample.results_folder_files(pipeline_version).each do |entry|
@@ -1557,7 +1624,7 @@ class PipelineRun < ApplicationRecord
     job_stats_by_task = job_stats.index_by(&:task)
     # Get outputs and descriptions by target.
     result = {}
-    pipeline_run_stages.each_with_index do |prs, stage_idx|
+    pipeline_run_stages.each_with_index do |prs, _stage_idx|
       next unless prs.dag_json && STEP_DESCRIPTIONS[prs.name]
       result[prs.name] = {
         "stage_description" => STEP_DESCRIPTIONS[prs.name]["stage"],
@@ -1569,17 +1636,26 @@ class PipelineRun < ApplicationRecord
       targets = dag_dict["targets"]
       given_targets = dag_dict["given_targets"]
       num_steps = targets.length
-      targets.each_with_index do |(target_name, output_list), step_idx|
+      targets.each_with_index do |(target_name, output_list), _step_idx|
         next if given_targets.keys.include?(target_name)
         file_info = []
-        output_list.each do |output|
-          file_info_for_output = filename_to_info["#{output_dir_s3_key}/#{pipeline_version}/#{output}"]
-          next unless file_info_for_output
+
+        add_file = lambda do |arr, path|
+          file_info_for_output = filename_to_info[path]
+          return unless file_info_for_output
           if !can_see_stage1_results && stage_idx.zero? && step_idx < num_steps - 1
             # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
             file_info_for_output["url"] = nil
           end
-          file_info << file_info_for_output
+          arr << file_info_for_output
+        end
+
+        output_list.each do |output|
+          add_file.call(file_info, "#{output_dir_s3_key}/#{pipeline_version}/#{output}")
+        end
+        if prs.name == PipelineRunStage::DAG_NAME_ALIGNMENT && target_name == 'star_out'
+          add_file.call(file_info, "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}")
+          add_file.call(file_info, "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}")
         end
         if file_info.present?
           result[prs.name]["steps"][target_name] = {
