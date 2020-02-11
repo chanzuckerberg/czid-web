@@ -144,5 +144,14 @@
     margin: -11px -10px -10px -10px;
     padding-left: 0px;
     justify-content: center;
+
+    &:hover {
+      box-shadow: inset 2px 2px 2px $lightest-grey,
+        inset -2px -2px 2px $medium-grey;
+    }
+
+    &:active {
+      box-shadow: inset 0 0 6px $medium-grey;
+    }
   }
 }
