@@ -895,18 +895,6 @@ export default class Heatmap {
       this.columnMetadataSortAsc = true;
     }
 
-    if (this.columnMetadataSortField) {
-      this.columnClustering = null;
-      orderBy(
-        this.columnLabels,
-        label => {
-          return (label.metadata && label.metadata[value]) || "ZZZ";
-        },
-        this.columnMetadataSortAsc ? "asc" : "desc"
-      ).forEach((label, idx) => {
-        label.pos = idx;
-      });
-    }
     this.processData("cluster");
     onColumnMetadataSortChange &&
       onColumnMetadataSortChange(
