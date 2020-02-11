@@ -254,7 +254,7 @@ class BaseTable extends React.Component {
                   headerRenderer={this.renderSelectableHeader}
                   cellRenderer={this.renderSelectableCell}
                   disableSort={true}
-                  width={defaultSelectColumnWidth || 30}
+                  width={defaultSelectColumnWidth}
                 />
               )}
               {columnOrder.map(dataKey => {
