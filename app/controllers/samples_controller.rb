@@ -33,9 +33,19 @@ class SamplesController < ApplicationController
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
+  # Endpoints made public for public ncov page.
+  PUBLIC_NCOV_ENDPOINTS = [
+    :index_v2, :dimensions, :stats, :samples_going_public, :search_suggestions, :report_v2, :report, :show_v2, :show,
+    :show_taxid_fasta, :taxid_contigs, :show_taxid_alignment_viz, :coverage_viz_summary, :coverage_viz_data,
+    :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :metadata, :metadata_fields, :results_folder,
+    :report_csv,
+  ].freeze
+
   # For API-like access
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
+
+  skip_before_action :authenticate_user!, only: PUBLIC_NCOV_ENDPOINTS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :login_required, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
@@ -1045,9 +1055,8 @@ class SamplesController < ApplicationController
     end
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
-      format.html do
-        render template: "samples/folder"
-      end
+      # Do not show the results_folder HTML.
+      format.html { redirect_to root_path }
       format.json do
         render json: { displayed_data: @file_list }
       end
