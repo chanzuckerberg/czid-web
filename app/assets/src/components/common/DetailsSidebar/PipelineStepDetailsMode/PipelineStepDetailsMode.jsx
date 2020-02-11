@@ -13,6 +13,8 @@ import { withAnalytics } from "~/api/analytics";
 
 import cs from "./pipeline_step_details_mode.scss";
 
+const NCOV_PUBLIC_SITE = true;
+
 class PipelineStepDetailsMode extends React.Component {
   renderStatusBox() {
     const { status, startTime, endTime, sample, pipelineRun } = this.props;
@@ -196,8 +198,8 @@ class PipelineStepDetailsMode extends React.Component {
         <div className={cs.stepName}>{stepName}</div>
         {this.renderStatusBox()}
         {this.renderStepInfo()}
-        {this.renderInputFiles()}
-        {this.renderOutputFiles()}
+        {!NCOV_PUBLIC_SITE && this.renderInputFiles()}
+        {!NCOV_PUBLIC_SITE && this.renderOutputFiles()}
         {this.renderResources()}
       </div>
     );
