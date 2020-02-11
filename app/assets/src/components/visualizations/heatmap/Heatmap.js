@@ -605,7 +605,22 @@ export default class Heatmap {
       this.clusterRows();
     }
 
-    if (this.columnMetadataSortField) return;
+    if (this.columnMetadataSortField) {
+      this.columnClustering = null;
+      orderBy(
+        this.columnLabels,
+        label => {
+          return (
+            (label.metadata && label.metadata[this.columnMetadataSortField]) ||
+            "ZZZ"
+          );
+        },
+        this.columnMetadataSortAsc ? "asc" : "desc"
+      ).forEach((label, idx) => {
+        label.pos = idx;
+      });
+      return;
+    }
 
     if (this.options.shouldSortColumns) {
       this.sortColumns("asc");
