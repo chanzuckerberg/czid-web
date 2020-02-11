@@ -18,11 +18,18 @@ class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should create phylo_tree' do
-    entrypoint_taxon_count = taxon_counts(:three)
+    entrypoint_taxon_count = taxon_counts(:five) # Klebsiella pneumoniae
     assert_difference('PhyloTree.count') do
-      post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: @project.id,
-                                            taxId: entrypoint_taxon_count.tax_id, pipelineRunIds: [pipeline_runs(:three).id, pipeline_runs(:four).id],
-                                            taxName: entrypoint_taxon_count.name, }
+      params = {
+        name: 'new_phylo_tree',
+        projectId: @project.id,
+        taxId: entrypoint_taxon_count.tax_id, pipelineRunIds: [
+          pipeline_runs(:three).id,
+          pipeline_runs(:four).id,
+        ],
+        taxName: entrypoint_taxon_count.name,
+      }
+      post "/phylo_trees/create", params: params
     end
     assert_equal "ok", JSON.parse(@response.body)['status']
   end

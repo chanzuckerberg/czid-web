@@ -194,7 +194,6 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
 
   create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "task"
-    t.integer "reads_before"
     t.integer "reads_after"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -421,8 +420,8 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
     t.integer "max_input_fragments"
     t.datetime "client_updated_at"
     t.integer "uploaded_from_basespace", limit: 1, default: 0
-    t.string "basespace_access_token"
     t.string "upload_error"
+    t.string "basespace_access_token"
     t.boolean "do_not_process", default: false, null: false, comment: "If true, sample will skip pipeline processing."
     t.string "pipeline_execution_strategy", default: "directed_acyclic_graph", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
@@ -539,8 +538,8 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
     t.string "tax_name"
-    t.integer "version_start", limit: 1
-    t.integer "version_end", limit: 1
+    t.integer "version_start", limit: 2, null: false, comment: "The first version for which the taxon is active"
+    t.integer "version_end", limit: 2, null: false, comment: "The last version for which the taxon is active"
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
@@ -602,10 +601,6 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
@@ -622,7 +617,6 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
     t.integer "phylo_trees_count", default: 0, null: false
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
   create_table "visualizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

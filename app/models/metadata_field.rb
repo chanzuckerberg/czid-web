@@ -3,6 +3,12 @@ class MetadataField < ApplicationRecord
   has_and_belongs_to_many :projects
   has_many :metadata, dependent: :destroy
 
+  # Obeying the same rules as in MetadataHelper validate_metadata_csv_for_samples
+  # Metadata fields are shared globally and can be created by users.
+  # TODO: (gdingle): is a custom field created by one user visible to another?
+  validates :name, presence: true, uniqueness: true
+  validates :display_name, presence: true, uniqueness: true
+
   validate :metadata_field_subsets
 
   # As of Feb 2020, we renamed "Host Genome" in the UI to better reflect its

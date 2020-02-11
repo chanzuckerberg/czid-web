@@ -3,6 +3,7 @@ class Project < ApplicationRecord
     include Elasticsearch::Model
     include Elasticsearch::Model::Callbacks
   end
+  include ReportHelper
 
   has_and_belongs_to_many :users
   has_many :samples, dependent: :restrict_with_exception
@@ -11,8 +12,12 @@ class Project < ApplicationRecord
   has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :restrict_with_exception
   has_one :background
   has_and_belongs_to_many :metadata_fields
+
   validates :name, presence: true, uniqueness: { case_sensitive: false }
-  include ReportHelper
+  # NOTE: not sure why these columns were not created as booleans
+  validates :public_access, inclusion: { in: [0, 1] }
+  # NOTE: all values of background_flag in prod db are currently zero.
+  validates :background_flag, inclusion: { in: [0, 1] }, allow_nil: true
 
   before_create :add_default_metadata_fields
 

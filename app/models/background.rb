@@ -3,8 +3,12 @@ class Background < ApplicationRecord
   has_many :samples, through: :pipeline_runs
   has_many :taxon_summaries, dependent: :destroy
   belongs_to :user, optional: true
+
   validate :validate_size
   validates :name, presence: true, uniqueness: { case_sensitive: false }
+  # Not sure why this is not a boolean
+  validates :ready, presence: true, inclusion: { in: [0, 1] }
+
   after_save :submit_store_summary_job
   attr_accessor :just_updated
 

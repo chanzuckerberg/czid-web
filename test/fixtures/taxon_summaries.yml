@@ -5,6 +5,7 @@ one:
   tax_level: 1
   mean: 29.9171
   stdev: 236.332
+  rpm_list: "[]"
 two:
   background: real_background
   tax_id: 573
@@ -12,6 +13,7 @@ two:
   tax_level: 1
   mean: 9.35068
   stdev: 26.4471
+  rpm_list: "[]"
 three:
   background: real_background
   tax_id: 570
@@ -19,6 +21,7 @@ three:
   tax_level: 2
   mean: 35.0207
   stdev: 238.639
+  rpm_list: "[]"
 four:
   background: real_background
   tax_id: 570
@@ -26,6 +29,7 @@ four:
   tax_level: 2
   mean: 18.3311
   stdev: 64.2056
+  rpm_list: "[]"
 five:
   background: real_background
   tax_id: 1313
@@ -33,6 +37,7 @@ five:
   tax_level: 1
   mean: 81.3845
   stdev: 404.076
+  rpm_list: "[]"
 six:
   background: real_background
   tax_id: 1313
@@ -40,6 +45,7 @@ six:
   tax_level: 1
   mean: 81.6257
   stdev: 442.207
+  rpm_list: "[]"
 seven:
   background: real_background
   tax_id: 1301
@@ -47,6 +53,7 @@ seven:
   tax_level: 2
   mean: 201.318
   stdev: 942.975
+  rpm_list: "[]"
 eight:
   background: real_background
   tax_id: 1301
@@ -54,6 +61,7 @@ eight:
   tax_level: 2
   mean: 290.481
   stdev: 1482.97
+  rpm_list: "[]"
 nine:
   background: real_background
   tax_id: 28037
@@ -61,6 +69,7 @@ nine:
   tax_level: 1
   mean: 25.6849
   stdev: 139.526
+  rpm_list: "[]"
 ten:
   background: real_background
   tax_id: 28037
@@ -68,3 +77,4 @@ ten:
   tax_level: 1
   mean: 65.9058
   stdev: 374.243
+  rpm_list: "[]"

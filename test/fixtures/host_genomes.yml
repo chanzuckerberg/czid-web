@@ -1,5 +1,8 @@
 one:
   name: host genome 1
+  default_background: real_background
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 two:
   name: host genome 2
@@ -7,11 +10,20 @@ two:
 
 human:
   name: Human
+  default_background: real_background
   metadata_fields: [collection_date, sample_type, sex, age, admission_date, nucleotide_type, core_field, water_control]
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 mosquito:
   name: Mosquito
   metadata_fields: [collection_date, sample_type, sex, reported_sex, blood_fed, water_control]
+  default_background: real_background
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 tick:
   name: Tick
+  default_background: real_background
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz

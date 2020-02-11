@@ -15,7 +15,9 @@ class Metadatum < ApplicationRecord
 
   # ActiveRecord related
   belongs_to :sample
+  validates :sample, presence: true
   belongs_to :metadata_field
+  validates :metadata_field, presence: true
   belongs_to :location, optional: true
 
   # Validations

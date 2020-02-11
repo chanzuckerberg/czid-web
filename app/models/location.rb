@@ -5,6 +5,9 @@ class Location < ApplicationRecord
   belongs_to :subdivision, class_name: "Location", optional: true
   belongs_to :city, class_name: "Location", optional: true
 
+  validates :lat, inclusion: -90..90
+  validates :lng, inclusion: -180..180
+
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
   GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze
   AUTOCOMPLETE_BASE_QUERY = "autocomplete.php?normalizecity=1".freeze

@@ -30,6 +30,16 @@ class Sample < ApplicationRecord
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
+  validates :status, presence: true, inclusion: { in: [
+    STATUS_CREATED,
+    STATUS_UPLOADED,
+    STATUS_RERUN,
+    STATUS_RETRY_PR,
+    STATUS_CHECKED,
+  ], }
+
+  # Not sure why this is not a boolean
+  validates :uploaded_from_basespace, presence: true, inclusion: { in: [0, 1] }
 
   # Constants for upload errors.
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
@@ -70,9 +80,11 @@ class Sample < ApplicationRecord
   attr_accessor :bulk_mode, :basespace_dataset_id
 
   belongs_to :project
+  validates :project, presence: true
+
   # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
-  belongs_to :user, optional: true, counter_cache: true # use .size for cache, use .count to force COUNT query
-  belongs_to :host_genome, optional: true, counter_cache: true # use .size for cache, use .count to force COUNT query
+  belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
+  belongs_to :host_genome, counter_cache: true # use .size for cache, use .count to force COUNT query
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
   has_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
@@ -82,7 +94,7 @@ class Sample < ApplicationRecord
 
   validate :input_files_checks
   after_create :initiate_input_file_upload
-  validates :name, uniqueness: { scope: :project_id, case_sensitive: false }
+  validates :name, presence: true, uniqueness: { scope: :project_id, case_sensitive: false }
 
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
@@ -526,7 +538,9 @@ class Sample < ApplicationRecord
   end
 
   def check_host_genome
+    # Host genome should always be present.
     if host_genome.present?
+      # Unclear purpose of copying this info. See also host_subtracted.
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
     end

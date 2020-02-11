@@ -27,5 +27,7 @@ FactoryBot.define do
     tax_level { 1 }
     count { nt || nr || 1 }
     count_type { nt ? "NT" : "NR" }
+    percent_identity { 95.65 }
+    alignment_length { 149.75 }
   end
 end

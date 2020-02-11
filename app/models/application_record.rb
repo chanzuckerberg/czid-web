@@ -7,6 +7,13 @@ class ApplicationRecord < ActiveRecord::Base
   after_update { |record| log_analytics record, "updated" }
   after_destroy { |record| log_analytics record, "destroyed" }
 
+  # Condition for rollout of mass addition of validation rules.
+  def validate_all?
+    Rails.env.development? ||
+      Rails.env.test? ||
+      AppConfig.find_by(key: AppConfig::ENABLE_MASS_VALIDATION)
+  end
+
   # Set current user and request to global for use in logging.
   # See https://stackoverflow.com/a/11670283/200312
   class << self

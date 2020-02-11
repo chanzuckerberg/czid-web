@@ -3,16 +3,32 @@ class PhyloTree < ApplicationRecord
   include PipelineRunsHelper
   include SamplesHelper
   include ActionView::Helpers::DateHelper
+
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
+  validates :user, presence: true
   belongs_to :project
+  validates :project, presence: true
+
+  # TODO: (gdingle): should this be scoped to project or user?
   validates :name, presence: true, uniqueness: { case_sensitive: false }
+  validates :tax_level, presence: true, inclusion: { in: [
+    TaxonCount::TAX_LEVEL_SPECIES,
+    TaxonCount::TAX_LEVEL_GENUS,
+  ], }
+
   after_create :create_visualization
 
   STATUS_INITIALIZED = 0
   STATUS_READY = 1
   STATUS_FAILED = 2
   STATUS_IN_PROGRESS = 3
+  validates :status, presence: true, inclusion: { in: [
+    STATUS_INITIALIZED,
+    STATUS_READY,
+    STATUS_FAILED,
+    STATUS_IN_PROGRESS,
+  ], }
 
   def self.in_progress
     where(status: STATUS_IN_PROGRESS)
