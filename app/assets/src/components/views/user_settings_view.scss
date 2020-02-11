@@ -23,5 +23,9 @@
 
   .field {
     padding: $space-s;
+
+    .preference {
+      justify-content: left;
+    }
   }
 }
