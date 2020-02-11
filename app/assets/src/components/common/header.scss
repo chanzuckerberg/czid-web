@@ -124,3 +124,11 @@
     }
   }
 }
+
+.publicNcovHomeLink {
+  @include font-body-m;
+  border-left: 1px solid $white;
+  padding-left: $space-s;
+  margin-left: $space-xs;
+  color: $white;
+}

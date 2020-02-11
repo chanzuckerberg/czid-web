@@ -10,6 +10,8 @@ import { pipelineVersionHasCoverageViz } from "~/components/utils/sample";
 
 import cs from "./hover_actions.scss";
 
+const NCOV_PUBLIC_SITE = true;
+
 class HoverActions extends React.Component {
   handlePhyloModalOpen = () => {
     const { taxId, taxName, onPhyloTreeModalOpened } = this.props;
@@ -84,19 +86,23 @@ class HoverActions extends React.Component {
               "Alignment Visualization Not Available - requires reads in NT",
             params,
           },
-      {
-        key: `phylo_tree_${params.taxId}`,
-        message: (
-          <div>
-            Phylogenetic Analysis <BetaLabel />
-          </div>
-        ),
-        icon: "fa-code-fork",
-        handleClick: this.handlePhyloModalOpen,
-        enabled: this.props.phyloTreeEnabled,
-        disabledMessage:
-          "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR",
-      },
+      ...(!NCOV_PUBLIC_SITE
+        ? [
+            {
+              key: `phylo_tree_${params.taxId}`,
+              message: (
+                <div>
+                  Phylogenetic Analysis <BetaLabel />
+                </div>
+              ),
+              icon: "fa-code-fork",
+              handleClick: this.handlePhyloModalOpen,
+              enabled: this.props.phyloTreeEnabled,
+              disabledMessage:
+                "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR",
+            },
+          ]
+        : []),
     ];
   };
 

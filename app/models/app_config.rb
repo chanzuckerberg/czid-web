@@ -18,4 +18,10 @@ class AppConfig < ApplicationRecord
   # When this is "1", the announcement banner on the top of the site header will be enabled.
   # Other conditions may check a time constraint.
   SHOW_ANNOUNCEMENT_BANNER = 'show_announcement_banner'.freeze
+  # The default selected options for report page on public ncov site, in JSON format.
+  PUBLIC_NCOV_REPORT_PAGE_SELECTED_OPTIONS = 'public_ncov_report_page_selected_options'.freeze
+  # The ID of the public ncov project
+  PUBLIC_NCOV_PROJECT_ID = 'public_ncov_project_id'.freeze
+  # The ID of the public ncov heatmap
+  PUBLIC_NCOV_HEATMAP_ID = 'public_ncov_heatmap_id'.freeze
 end

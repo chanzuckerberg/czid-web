@@ -16,6 +16,8 @@ import { ObjectCollectionView } from "../DiscoveryDataLayer";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import cs from "./map_preview_sidebar.scss";
 
+const NCOV_PUBLIC_SITE = true;
+
 export default class MapPreviewSidebar extends React.Component {
   constructor(props) {
     super(props);
@@ -309,7 +311,7 @@ export default class MapPreviewSidebar extends React.Component {
             }}
             rowClassName={cs.sampleRow}
             selectableColumnClassName={cs.selectColumn}
-            selectableKey="id"
+            selectableKey={!NCOV_PUBLIC_SITE ? "id" : undefined}
             selectAllChecked={selectAllChecked}
             selected={selectedSampleIds}
           />
