@@ -70,7 +70,7 @@ class SamplesHeatmapView extends React.Component {
     this.urlParams = this.parseUrlParams();
     // URL params have precedence
     this.urlParams = {
-      ...props.savedParamValues,
+      ...this.parseSavedParams(),
       ...this.urlParams,
     };
 
@@ -191,6 +191,8 @@ class SamplesHeatmapView extends React.Component {
     }
     if (typeof urlParams.thresholdFilters === "string") {
       // If the saved threshold object doesn't have metricDisplay, add it. For backwards compatibility.
+      // See also parseSavedParams().
+      // TODO: should remove this when the Visualization table is cleaned up.
       urlParams.thresholdFilters = map(
         threshold => ({
           metricDisplay: get(
@@ -212,6 +214,24 @@ class SamplesHeatmapView extends React.Component {
       urlParams.metadataSortAsc = urlParams.metadataSortAsc === "true";
     }
     return urlParams;
+  };
+
+  parseSavedParams = () => {
+    // If the saved threshold object doesn't have metricDisplay, add it. For backwards compatibility.
+    // See also parseUrlParams().
+    // TODO: should remove this when the Visualization table is cleaned up.
+    let savedParams = this.props.savedParamValues;
+    savedParams.thresholdFilters = map(
+      threshold => ({
+        metricDisplay: get(
+          "text",
+          find(["value", threshold.metric], this.props.thresholdFilters.targets)
+        ),
+        ...threshold,
+      }),
+      savedParams.thresholdFilters
+    );
+    return savedParams;
   };
 
   getUrlParams = () => {
