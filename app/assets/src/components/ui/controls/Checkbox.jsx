@@ -48,7 +48,7 @@ class Checkbox extends React.Component {
           disabled={disabled}
         />
         <span className={cs.checkmark} />
-        <span className={cs.label}>{label}</span>
+        {label && <span className={cs.label}>{label}</span>}
       </div>
     );
   }
