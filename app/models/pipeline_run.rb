@@ -20,12 +20,14 @@ class PipelineRun < ApplicationRecord
   has_many :ercc_counts, dependent: :destroy
   has_many :amr_counts, dependent: :destroy
   has_many :contigs, dependent: :destroy
+  has_many :insert_size_metric_sets, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
   accepts_nested_attributes_for :amr_counts
   accepts_nested_attributes_for :contigs
+  accepts_nested_attributes_for :insert_size_metric_sets
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
@@ -150,7 +152,7 @@ class PipelineRun < ApplicationRecord
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts",
-                        "insert_size_metrics" => "db_load_insert_size_metrics", }.freeze
+                        "insert_size_metric_sets" => "db_load_insert_size_metrics", }.freeze
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.
@@ -323,7 +325,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
+    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metric_sets]
 
     # Then, generate output_states
     output_state_entries = []
@@ -467,14 +469,16 @@ class PipelineRun < ApplicationRecord
     read_pairs = extract_int.call(insert_size_metrics, READ_PAIRS_NAME)
 
     update(
-      median_insert_size: median_insert_size,
-      mode_insert_size: mode_insert_size,
-      median_absolute_deviation: median_absolute_deviation,
-      min_insert_size: min_insert_size,
-      max_insert_size: max_insert_size,
-      mean_insert_size: mean_insert_size,
-      standard_deviation: standard_deviation,
-      read_pairs: read_pairs
+      insert_size_metric_sets_attributes: [{
+        median_insert_size: median_insert_size,
+        mode_insert_size: mode_insert_size,
+        median_absolute_deviation: median_absolute_deviation,
+        min_insert_size: min_insert_size,
+        max_insert_size: max_insert_size,
+        mean_insert_size: mean_insert_size,
+        standard_deviation: standard_deviation,
+        read_pairs: read_pairs,
+      },]
     )
   end
 
@@ -1643,7 +1647,7 @@ class PipelineRun < ApplicationRecord
         output_list.each do |output|
           file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
         end
-        if prs.name == PipelineRunStage::DAG_NAME_ALIGNMENT && target_name == 'star_out'
+        if prs.name == PipelineRunStage::HOST_FILTERING_STAGE_NAME && target_name == 'star_out'
           file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
           file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_HISTOGRAM_OUTPUT_NAME}"
         end
