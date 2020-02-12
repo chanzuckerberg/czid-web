@@ -1659,13 +1659,6 @@ class PipelineRun < ApplicationRecord
           file_info << file_info_for_output
         end
 
-        output_list.each do |output|
-          add_file.call(file_info, "#{output_dir_s3_key}/#{pipeline_version}/#{output}")
-        end
-        if prs.name == PipelineRunStage::DAG_NAME_ALIGNMENT && target_name == 'star_out'
-          add_file.call(file_info, "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}")
-          add_file.call(file_info, "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_HISTOGRAM_OUTPUT_NAME}")
-        end
         if file_info.present?
           result[prs.name]["steps"][target_name] = {
             "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
