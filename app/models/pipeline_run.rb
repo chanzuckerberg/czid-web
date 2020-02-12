@@ -428,7 +428,7 @@ class PipelineRun < ApplicationRecord
     insert_size_metrics_s3_path = "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", insert_size_metrics_s3_path)
     return unless status.exitstatus.zero?
-    insert_size_metrics_lines = Syscall.pipe_with_output(["aws", "s3", "cp", insert_size_metrics_s3_path])
+    insert_size_metrics_lines = Syscall.pipe_with_output(["aws", "s3", "cp", insert_size_metrics_s3_path, "-"])
     tsv_lines = []
     tsv_header_line = -1
     insert_size_metrics_lines.split(/\r?\n/).each do |line, index|
@@ -1656,7 +1656,7 @@ class PipelineRun < ApplicationRecord
             # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
             file_info_for_output["url"] = nil
           end
-          arr << file_info_for_output
+          file_info << file_info_for_output
         end
 
         output_list.each do |output|
