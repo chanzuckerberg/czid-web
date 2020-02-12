@@ -5,9 +5,13 @@ import { Button as BaseButton } from "semantic-ui-react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
-const NextActionButton = ({ label }) => {
+const NextActionButton = ({ label, onClick }) => {
   return (
-    <BaseButton primary className={cx("idseq-ui next-action-button")}>
+    <BaseButton
+      primary
+      className={cx("idseq-ui next-action-button")}
+      onClick={onClick}
+    >
       {label}
       <i className={cx("fa fa-angle-right right-icon")} />
     </BaseButton>
@@ -16,6 +20,7 @@ const NextActionButton = ({ label }) => {
 
 NextActionButton.propTypes = {
   label: PropTypes.string,
+  onClick: PropTypes.func,
 };
 
 export default NextActionButton;

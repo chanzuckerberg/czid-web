@@ -3,6 +3,7 @@ import React from "react";
 import { NarrowContainer } from "~/components/layout";
 import NextActionButton from "~/components/ui/controls/buttons/NextActionButton";
 import { UserContext } from "~/components/common/UserContext";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./support.scss";
 
@@ -22,7 +23,14 @@ export default class PublicNcovHomepage extends React.Component {
           <h1>Wuhan Family Cluster</h1>
           <div className={cs.fill} />
           <a href={VIEW_SAMPLES_LINK}>
-            <NextActionButton label="View Samples" />
+            <NextActionButton
+              label="View Samples"
+              onClick={() =>
+                logAnalyticsEvent(
+                  "PublicNcovHomepage_view-samples-link_clicked"
+                )
+              }
+            />
           </a>
         </div>
         <p className={cs.large}>
