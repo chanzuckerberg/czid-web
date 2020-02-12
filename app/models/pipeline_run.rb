@@ -1614,7 +1614,7 @@ class PipelineRun < ApplicationRecord
     ret
   end
 
-  def outputs_by_step(_can_see_stage1_results = false)
+  def outputs_by_step(can_see_stage1_results = false)
     # Get map of s3 path to presigned URL and size.
     filename_to_info = {}
     sample.results_folder_files(pipeline_version).each do |entry|
@@ -1624,7 +1624,7 @@ class PipelineRun < ApplicationRecord
     job_stats_by_task = job_stats.index_by(&:task)
     # Get outputs and descriptions by target.
     result = {}
-    pipeline_run_stages.each_with_index do |prs, _stage_idx|
+    pipeline_run_stages.each_with_index do |prs, stage_idx|
       next unless prs.dag_json && STEP_DESCRIPTIONS[prs.name]
       result[prs.name] = {
         "stage_description" => STEP_DESCRIPTIONS[prs.name]["stage"],
@@ -1636,13 +1636,22 @@ class PipelineRun < ApplicationRecord
       targets = dag_dict["targets"]
       given_targets = dag_dict["given_targets"]
       num_steps = targets.length
-      targets.each_with_index do |(target_name, output_list), _step_idx|
+      targets.each_with_index do |(target_name, output_list), step_idx|
         next if given_targets.keys.include?(target_name)
-        file_info = []
 
-        add_file = lambda do |arr, path|
+        file_paths = []
+        output_list.each do |output|
+          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
+        end
+        if prs.name == PipelineRunStage::DAG_NAME_ALIGNMENT && target_name == 'star_out'
+          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
+          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_HISTOGRAM_OUTPUT_NAME}"
+        end
+
+        file_info = []
+        file_paths.each do |path|
           file_info_for_output = filename_to_info[path]
-          return unless file_info_for_output
+          next unless file_info_for_output
           if !can_see_stage1_results && stage_idx.zero? && step_idx < num_steps - 1
             # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
             file_info_for_output["url"] = nil
