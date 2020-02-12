@@ -619,10 +619,7 @@ export default class Heatmap {
       ).forEach((label, idx) => {
         label.pos = idx;
       });
-      return;
-    }
-
-    if (this.options.shouldSortColumns) {
+    } else if (this.options.shouldSortColumns) {
       this.sortColumns("asc");
     } else if (this.options.clustering) {
       this.clusterColumns();
