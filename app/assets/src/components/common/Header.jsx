@@ -393,10 +393,18 @@ const MainMenu = ({ adminUser }) => {
   if (NCOV_PUBLIC_SITE) {
     return (
       <div className={cs.mainMenu}>
-        <a className={cs.item} href="https://idseq.net">
+        <a
+          className={cs.item}
+          href="https://idseq.net"
+          onClick={() => logAnalyticsEvent("MainMenu_request-access_clicked")}
+        >
           Request Full Access
         </a>
-        <a className={cs.item} href="https://help.idseq.net">
+        <a
+          className={cs.item}
+          href="https://help.idseq.net"
+          onClick={() => logAnalyticsEvent("MainMenu_help_clicked")}
+        >
           Help
         </a>
       </div>
