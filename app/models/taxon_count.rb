@@ -1,4 +1,5 @@
-# NOTE: validations are typically skipped because of update_all in results loader.
+# NOTE: Validations here are typically skipped because of update_all in results
+# loader.
 class TaxonCount < ApplicationRecord
   belongs_to :pipeline_run
   # NOTE: currently optional because some tests assume non-existant taxa
@@ -30,14 +31,12 @@ class TaxonCount < ApplicationRecord
     COUNT_TYPE_NR,
   ], }, if: :mass_validation_enabled?
 
-  # TODO: (gdingle): is it really okay to have a count of zero? that's what
-  # some existing rspec tests assume.
+  # NOTE: some existing rspec tests assume a value of zero
   validates :count, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
-
   validates :percent_identity, inclusion: 0..100, if: :mass_validation_enabled?
-  # TODO: (gdingle): is it really okay to have a alignment_length of zero?
-  # that's what some existing rspec tests assume.
+  # NOTE: some existing rspec tests assume a value of zero
   validates :alignment_length, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
+  validates :e_value, presence: true, if: :mass_validation_enabled?
 
   NAME_2_LEVEL = { 'species' => TAX_LEVEL_SPECIES,
                    'genus' => TAX_LEVEL_GENUS,

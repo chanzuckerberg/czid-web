@@ -29,5 +29,6 @@ FactoryBot.define do
     count_type { nt ? "NT" : "NR" }
     percent_identity { 95.65 }
     alignment_length { 149.75 }
+    e_value { 1.31 }
   end
 end
