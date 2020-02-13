@@ -170,10 +170,11 @@ class BaseTable extends React.Component {
   };
 
   renderSelectableCell = ({ cellData }) => {
-    const { selected, onSelectRow } = this.props;
+    const { selected, onSelectRow, selectableCellClassName } = this.props;
     const disabled = cellData === null || cellData === undefined;
     return (
       <Checkbox
+        className={selectableCellClassName}
         checked={selected.has(cellData)}
         onChange={onSelectRow}
         value={disabled ? -1 : cellData}
@@ -338,12 +339,13 @@ BaseTable.propTypes = {
   rowGetter: PropTypes.func.isRequired,
   rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func,
+  selectableCellClassName: PropTypes.string,
+  selectableColumnClassName: PropTypes.string,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
   sortedHeaderClassName: PropTypes.string,
 
-  selectableColumnClassName: PropTypes.string,
   // make the table selectable, by setting a selectable key
   // the tables will check for the selectable key in the selected set/array
   selectableKey: PropTypes.string,

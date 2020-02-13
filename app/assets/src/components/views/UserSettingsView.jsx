@@ -70,6 +70,7 @@ export default class UserSettingsView extends React.Component {
       return (
         <div className={cs.field}>
           <Checkbox
+            className={cs.preference}
             label={field.description}
             onChange={(_, isChecked) =>
               this.handleUserPreferenceUpdate(field.key, isChecked)
