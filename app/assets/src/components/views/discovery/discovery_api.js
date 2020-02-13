@@ -56,7 +56,7 @@ const processRawSample = sample => {
     sample.details
   );
   const insertSizeStandardDeviation = get(
-    "derived_sample_output.pipeline_run.insert_size_mean",
+    "derived_sample_output.pipeline_run.insert_size_standard_deviation",
     sample.details
   );
 

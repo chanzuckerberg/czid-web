@@ -20,7 +20,7 @@ export const getSampleTableData = sample => {
 
   const meanInsertSize = get("pipeline_run.insert_size_mean", derivedOutput);
   const insertSizeStandardDeviation = get(
-    "pipeline_run.insert_size_mean",
+    "pipeline_run.insert_size_standard_deviation",
     derivedOutput
   );
   const hasMeanInsertSize =
