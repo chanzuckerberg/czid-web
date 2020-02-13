@@ -5,9 +5,8 @@ class MetadataField < ApplicationRecord
 
   # Obeying the same rules as in MetadataHelper validate_metadata_csv_for_samples
   # Metadata fields are shared globally and can be created by users.
-  # TODO: (gdingle): is a custom field created by one user visible to another?
-  validates :name, presence: true, uniqueness: true
-  validates :display_name, presence: true, uniqueness: true
+  validates :name, presence: true, uniqueness: true, if: :mass_validation_enabled?
+  validates :display_name, presence: true, uniqueness: true, if: :mass_validation_enabled?
 
   validate :metadata_field_subsets
 
@@ -42,6 +41,7 @@ class MetadataField < ApplicationRecord
   validates :is_core, inclusion: { in: [0, 1] }
   validates :is_default, inclusion: { in: [0, 1] }
   validates :is_required, inclusion: { in: [0, 1] }
+  validates :default_for_new_host_genome, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
 
   # ActiveRecord documentation summary
 
