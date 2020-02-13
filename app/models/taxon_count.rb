@@ -1,6 +1,8 @@
 # NOTE: validations are typically skipped because of update_all in results loader.
 class TaxonCount < ApplicationRecord
   belongs_to :pipeline_run
+  # NOTE: currently optional because some tests assume non-existant taxa
+  belongs_to :taxon_lineage, class_name: "TaxonLineage", foreign_key: :tax_id, primary_key: :taxid, optional: true
 
   TAX_LEVEL_SPECIES = 1
   TAX_LEVEL_GENUS = 2

@@ -1,6 +1,8 @@
 # This model gives, for each taxon, summary statistics (mean count, standard deviation) of the background model.
 class TaxonSummary < ApplicationRecord
   belongs_to :background
+  # NOTE: this conflicts with pipeline_report_service_spec.rb
+  # belongs_to :taxon_lineage, class_name: "TaxonLineage", foreign_key: :tax_id, primary_key: :taxid
 
   validates :count_type, presence: true, inclusion: { in: [
     TaxonCount::COUNT_TYPE_NT,

@@ -3,6 +3,7 @@ FactoryBot.define do
     sequence(:tax_id) { |n| n }
     count_type { "NT" }
     tax_level { 1 }
-    association :taxon_lineage, factory: [:taxon_lineage]
+    # NOTE: this conflicts with pipeline_report_service_spec.rb
+    # association :taxon_lineage, factory: [:taxon_lineage]
   end
 end
