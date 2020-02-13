@@ -177,21 +177,6 @@ ActiveRecord::Schema.define(version: 20_200_212_163_108) do
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 
-  create_table "insert_size_metric_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "pipeline_run_id"
-    t.integer "median_insert_size"
-    t.integer "mode_insert_size"
-    t.integer "median_absolute_deviation"
-    t.integer "min_insert_size"
-    t.integer "max_insert_size"
-    t.integer "mean_insert_size"
-    t.integer "standard_deviation"
-    t.integer "read_pairs"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pipeline_run_id"], name: "index_insert_size_metric_sets_on_pipeline_run_id"
-  end
-
   create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "task"
     t.integer "reads_after"
@@ -364,14 +349,6 @@ ActiveRecord::Schema.define(version: 20_200_212_163_108) do
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
-    t.integer "median_insert_size"
-    t.integer "mode_insert_size"
-    t.integer "median_absolute_deviation"
-    t.integer "min_insert_size"
-    t.integer "max_insert_size"
-    t.integer "mean_insert_size"
-    t.integer "standard_deviation"
-    t.integer "read_pairs"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"

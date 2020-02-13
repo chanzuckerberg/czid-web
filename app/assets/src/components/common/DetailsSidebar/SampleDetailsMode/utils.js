@@ -64,8 +64,8 @@ export const processPipelineInfo = additionalInfo => {
       : BLANK_TEXT;
 
     const meanInsertSize =
-      pipelineRun.mean_insert_size &&
-      numberWithCommas(pipelineRun.mean_insert_size);
+      pipelineRun.insert_size_mean &&
+      numberWithCommas(pipelineRun.insert_size_mean);
 
     const insertSizeStandardDeviation =
       pipelineRun.insert_size_standard_deviation &&

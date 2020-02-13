@@ -18,10 +18,6 @@ module PipelineOutputsHelper
           host_subtracted.titleize
         end
     end
-    if pipeline_run.insert_size_metric_set
-      pipeline_run_display["mean_insert_size"] = pipeline_run.insert_size_metric_set.mean_insert_size
-      pipeline_run_display["insert_size_standard_deviation"] = pipeline_run.insert_size_metric_set.standard_deviation
-    end
     pipeline_run_display
   end
 

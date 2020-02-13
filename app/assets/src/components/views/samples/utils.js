@@ -18,9 +18,9 @@ export const getSampleTableData = sample => {
     metadata,
   } = sample;
 
-  const meanInsertSize = get("pipeline_run.mean_insert_size", derivedOutput);
+  const meanInsertSize = get("pipeline_run.insert_size_mean", derivedOutput);
   const insertSizeStandardDeviation = get(
-    "pipeline_run.mean_insert_size",
+    "pipeline_run.insert_size_mean",
     derivedOutput
   );
 
@@ -49,7 +49,7 @@ export const getSampleTableData = sample => {
     collection_location: get("collection_location", metadata),
     host_genome: get("host_genome_name", dbSample),
     notes: get("sample_notes", dbSample),
-    mean_insert_size:
+    insert_size_mean:
       (meanInsertSize || meanInsertSize === 0) &&
       (insertSizeStandardDeviation || insertSizeStandardDeviation === 0)
         ? `${numberWithCommas(meanInsertSize)}±${numberWithCommas(

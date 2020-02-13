@@ -125,7 +125,7 @@ export const SAMPLE_TABLE_COLUMNS = {
     display_name: "Notes",
     type: "sampleMetadata",
   },
-  mean_insert_size: {
+  insert_size_mean: {
     display_name: "Mean Insert Size",
     type: "metadata",
   },
