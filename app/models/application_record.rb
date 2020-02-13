@@ -8,7 +8,7 @@ class ApplicationRecord < ActiveRecord::Base
   after_destroy { |record| log_analytics record, "destroyed" }
 
   # Condition for rollout of mass addition of validation rules.
-  def validate_all?
+  def mass_validation_enabled?
     Rails.env.development? ||
       Rails.env.test? ||
       AppConfig.find_by(key: AppConfig::ENABLE_MASS_VALIDATION)

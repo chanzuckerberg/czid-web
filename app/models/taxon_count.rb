@@ -20,23 +20,23 @@ class TaxonCount < ApplicationRecord
     TAX_LEVEL_PHYLUM,
     TAX_LEVEL_KINGDOM,
     TAX_LEVEL_SUPERKINGDOM,
-  ], }, if: :validate_all?
+  ], }, if: :mass_validation_enabled?
 
   COUNT_TYPE_NT = 'NT'.freeze
   COUNT_TYPE_NR = 'NR'.freeze
   validates :count_type, presence: true, inclusion: { in: [
     COUNT_TYPE_NT,
     COUNT_TYPE_NR,
-  ], }, if: :validate_all?
+  ], }, if: :mass_validation_enabled?
 
   # TODO: (gdingle): is it really okay to have a count of zero? that's what
   # some existing rspec tests assume.
-  validates :count, numericality: { greater_than_or_equal_to: 0 }, if: :validate_all?
+  validates :count, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
 
-  validates :percent_identity, inclusion: 0..100, if: :validate_all?
+  validates :percent_identity, inclusion: 0..100, if: :mass_validation_enabled?
   # TODO: (gdingle): is it really okay to have a alignment_length of zero?
   # that's what some existing rspec tests assume.
-  validates :alignment_length, numericality: { greater_than_or_equal_to: 0 }, if: :validate_all?
+  validates :alignment_length, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
 
   NAME_2_LEVEL = { 'species' => TAX_LEVEL_SPECIES,
                    'genus' => TAX_LEVEL_GENUS,
