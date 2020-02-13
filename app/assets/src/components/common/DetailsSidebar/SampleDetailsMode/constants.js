@@ -52,7 +52,7 @@ export const PIPELINE_INFO_FIELDS = [
   },
   {
     name: "Mean Insert Size",
-    key: "compressionRatio",
+    key: "meanInsertSize",
   },
   {
     name: "Date Processed",

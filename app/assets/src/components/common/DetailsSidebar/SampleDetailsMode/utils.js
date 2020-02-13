@@ -64,8 +64,8 @@ export const processPipelineInfo = additionalInfo => {
       : BLANK_TEXT;
 
     const meanInsertSize =
-      summaryStats.average_insert_size &&
-      numberWithCommas(summaryStats.average_insert_size);
+      summaryStats.mean_insert_size &&
+      numberWithCommas(summaryStats.mean_insert_size);
 
     const insertSizeStandardDeviation =
       summaryStats.insert_size_standard_deviation &&
@@ -80,7 +80,11 @@ export const processPipelineInfo = additionalInfo => {
     pipelineInfo.lastProcessedAt = {
       text: moment(summaryStats.last_processed_at).format("YYYY-MM-DD"),
     };
-    if (meanInsertSize && insertSizeStandardDeviation) {
+
+    if (
+      (meanInsertSize || meanInsertSize === 0) &&
+      (insertSizeStandardDeviation || insertSizeStandardDeviation === 0)
+    ) {
       const withError = `${meanInsertSize}±${insertSizeStandardDeviation}`;
       pipelineInfo.meanInsertSize = { text: withError };
     }
