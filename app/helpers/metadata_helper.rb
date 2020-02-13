@@ -219,7 +219,7 @@ module MetadataHelper
       return { "errors" => errors, "warnings" => [] }
     end
 
-    # Require host_genome or Host Genome column.
+    # Require host_organism or Host Organism column.
     if extract_host_genome_from_metadata && (metadata["headers"] & MetadataField::HOST_GENOME_SYNONYMS).blank?
       errors.push(MetadataValidationErrors::MISSING_HOST_GENOME_COLUMN)
       return { "errors" => errors, "warnings" => [] }
