@@ -49,7 +49,7 @@ class HostGenome < ApplicationRecord
   def as_json(options = {})
     hash = super(options)
     hash[:ercc_only] = ercc_only?
-    hash[:showAsOption] = user.nil?
+    hash[:showAsOption] = show_as_option?
     hash
   end
 
@@ -65,5 +65,9 @@ class HostGenome < ApplicationRecord
   def ercc_only?
     s3_star_index_path.starts_with?(HostGenome::ERCC_PATH_PREFIX) &&
       s3_bowtie2_index_path.starts_with?(HostGenome::ERCC_PATH_PREFIX)
+  end
+
+  def show_as_option?
+    user.nil?
   end
 end
