@@ -114,11 +114,10 @@ const processRawSample = sample => {
     waterControl: get("metadata.water_control", sample.details),
     meanInsertSize:
       (meanInsertSize || meanInsertSize === 0) &&
-      (insertSizeStandardDeviation || insertSizeStandardDeviation === 0)
-        ? `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
-            insertSizeStandardDeviation
-          )}`
-        : "-",
+      (insertSizeStandardDeviation || insertSizeStandardDeviation === 0) &&
+      `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
+        insertSizeStandardDeviation
+      )}`,
   };
   return row;
 };

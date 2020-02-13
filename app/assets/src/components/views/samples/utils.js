@@ -51,11 +51,10 @@ export const getSampleTableData = sample => {
     notes: get("sample_notes", dbSample),
     insert_size_mean:
       (meanInsertSize || meanInsertSize === 0) &&
-      (insertSizeStandardDeviation || insertSizeStandardDeviation === 0)
-        ? `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
-            insertSizeStandardDeviation
-          )}`
-        : "-",
+      (insertSizeStandardDeviation || insertSizeStandardDeviation === 0) &&
+      `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
+        insertSizeStandardDeviation
+      )}`,
   };
 
   return data;
