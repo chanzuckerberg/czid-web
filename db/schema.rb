@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_212_163_108) do
+ActiveRecord::Schema.define(version: 20_200_213_210_949) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -349,13 +349,21 @@ ActiveRecord::Schema.define(version: 20_200_212_163_108) do
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
+    t.integer "insert_size_median"
+    t.integer "insert_size_mode"
+    t.integer "insert_size_median_absolute_deviation"
+    t.integer "insert_size_min"
+    t.integer "insert_size_max"
+    t.integer "insert_size_mean"
+    t.integer "insert_size_standard_deviation"
+    t.integer "insert_size_read_pairs"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
@@ -383,7 +391,7 @@ ActiveRecord::Schema.define(version: 20_200_212_163_108) do
   end
 
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
@@ -463,7 +471,7 @@ ActiveRecord::Schema.define(version: 20_200_212_163_108) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", collation: "utf8_general_ci"
+    t.string "name"
     t.string "count_type"
     t.float "percent_identity", limit: 24
     t.float "alignment_length", limit: 24
@@ -482,8 +490,8 @@ ActiveRecord::Schema.define(version: 20_200_212_163_108) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary", limit: 16_777_215
-    t.text "description", limit: 16_777_215
+    t.text "summary"
+    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -579,16 +587,16 @@ ActiveRecord::Schema.define(version: 20_200_212_163_108) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false, collation: "utf8_general_ci"
-    t.string "name", collation: "utf8_general_ci"
+    t.string "email", default: "", null: false
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip", collation: "utf8_general_ci"
-    t.string "last_sign_in_ip", collation: "utf8_general_ci"
-    t.string "authentication_token", limit: 30, collation: "utf8_general_ci"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
+    t.string "authentication_token", limit: 30
     t.integer "role"
     t.text "allowed_features"
     t.string "institution", limit: 100
