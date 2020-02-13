@@ -6,18 +6,18 @@ class PhyloTree < ApplicationRecord
 
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
-  validates :user, presence: true
   belongs_to :project
-  validates :project, presence: true
+  # NOTE: this conflicts with phylo_trees_controller_spec.rb
+  # belongs_to :taxon_lineage, class_name: "TaxonLineage", foreign_key: :taxid, primary_key: :taxid
 
   # TODO: (gdingle): should this be scoped to project or user?
   validates :name, presence: true, uniqueness: { case_sensitive: false }
+  validates :taxid, presence: true, if: :mass_validation_enabled?
+  validates :tax_name, presence: true, if: :mass_validation_enabled?
   validates :tax_level, presence: true, inclusion: { in: [
     TaxonCount::TAX_LEVEL_SPECIES,
     TaxonCount::TAX_LEVEL_GENUS,
-  ], }
-
-  after_create :create_visualization
+  ], }, if: :mass_validation_enabled?
 
   STATUS_INITIALIZED = 0
   STATUS_READY = 1
@@ -28,7 +28,9 @@ class PhyloTree < ApplicationRecord
     STATUS_READY,
     STATUS_FAILED,
     STATUS_IN_PROGRESS,
-  ], }
+  ], }, if: :mass_validation_enabled?
+
+  after_create :create_visualization
 
   def self.in_progress
     where(status: STATUS_IN_PROGRESS)

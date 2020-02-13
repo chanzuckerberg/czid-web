@@ -5,8 +5,10 @@ class Location < ApplicationRecord
   belongs_to :subdivision, class_name: "Location", optional: true
   belongs_to :city, class_name: "Location", optional: true
 
-  validates :lat, inclusion: -90..90
-  validates :lng, inclusion: -180..180
+  validates :lat, inclusion: -90..90, if: :mass_validation_enabled?
+  validates :lng, inclusion: -180..180, if: :mass_validation_enabled?
+  validates :osm_id, presence: true, if: :mass_validation_enabled?
+  validates :locationiq_id, presence: true, if: :mass_validation_enabled?
 
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
   GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze
