@@ -64,12 +64,12 @@ export const processPipelineInfo = additionalInfo => {
       : BLANK_TEXT;
 
     const meanInsertSize =
-      summaryStats.mean_insert_size &&
-      numberWithCommas(summaryStats.mean_insert_size);
+      pipelineRun.mean_insert_size &&
+      numberWithCommas(pipelineRun.mean_insert_size);
 
     const insertSizeStandardDeviation =
-      summaryStats.insert_size_standard_deviation &&
-      numberWithCommas(summaryStats.insert_size_standard_deviation);
+      pipelineRun.insert_size_standard_deviation &&
+      numberWithCommas(pipelineRun.insert_size_standard_deviation);
 
     pipelineInfo.nonhostReads = {
       text: `${adjustedRemainingReads}${adjustedPercent}`,

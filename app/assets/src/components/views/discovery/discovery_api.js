@@ -49,6 +49,12 @@ const getDiscoveryStats = async ({ domain, filters, projectId, search }) => {
   }
 };
 
+const meanInsertSize = get("pipeline_run.mean_insert_size", derivedOutput);
+const insertSizeStandardDeviation = get(
+  "pipeline_run.mean_insert_size",
+  derivedOutput
+);
+
 const processRawSample = sample => {
   const row = {
     sample: {
@@ -105,6 +111,13 @@ const processRawSample = sample => {
     ),
     totalRuntime: get("run_info.total_runtime", sample.details),
     waterControl: get("metadata.water_control", sample.details),
+    meanInsertSize:
+      (meanInsertSize || meanInsertSize === 0) &&
+      (insertSizeStandardDeviation || insertSizeStandardDeviation === 0)
+        ? `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
+            insertSizeStandardDeviation
+          )}`
+        : "-",
   };
   return row;
 };

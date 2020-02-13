@@ -145,6 +145,12 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
       },
+      {
+        dataKey: "meanInsertSize",
+        label: "Mean Insert Size",
+        flexGrow: 1,
+        className: cs.basicCell,
+      },
     ];
 
     for (let column of this.columns) {

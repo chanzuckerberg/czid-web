@@ -18,6 +18,12 @@ export const getSampleTableData = sample => {
     metadata,
   } = sample;
 
+  const meanInsertSize = get("pipeline_run.mean_insert_size", derivedOutput);
+  const insertSizeStandardDeviation = get(
+    "pipeline_run.mean_insert_size",
+    derivedOutput
+  );
+
   const data = {
     total_reads: numberWithCommas(
       get("pipeline_run.total_reads", derivedOutput)
@@ -43,6 +49,13 @@ export const getSampleTableData = sample => {
     collection_location: get("collection_location", metadata),
     host_genome: get("host_genome_name", dbSample),
     notes: get("sample_notes", dbSample),
+    mean_insert_size:
+      (meanInsertSize || meanInsertSize === 0) &&
+      (insertSizeStandardDeviation || insertSizeStandardDeviation === 0)
+        ? `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
+            insertSizeStandardDeviation
+          )}`
+        : "-",
   };
 
   return data;

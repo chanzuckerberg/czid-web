@@ -79,6 +79,8 @@ const PipelineRun = PropTypes.shape({
     version: PropTypes.string,
     alignment_db: PropTypes.string,
   }),
+  mean_insert_size: PropTypes.number,
+  insert_size_standard_deviation: PropTypes.number,
 });
 
 const SummaryStats = PropTypes.shape({
