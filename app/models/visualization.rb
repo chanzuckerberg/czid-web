@@ -2,7 +2,6 @@
 class Visualization < ApplicationRecord
   has_and_belongs_to_many :samples
   belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
-  validates :user, presence: true
 
   validates :name, presence: true
 
@@ -15,8 +14,8 @@ class Visualization < ApplicationRecord
     PHYLO_TREE_TYPE,
     TREE_TYPE,
     TABLE_TYPE,
-  ], }
-  validates :data, presence: true
+  ], }, if: :mass_validation_enabled?
+  validates :data, presence: true, if: :mass_validation_enabled?
 
   serialize :data, JSON
 
