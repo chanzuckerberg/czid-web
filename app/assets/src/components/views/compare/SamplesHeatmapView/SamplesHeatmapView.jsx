@@ -221,17 +221,22 @@ class SamplesHeatmapView extends React.Component {
     // See also parseUrlParams().
     // TODO: should remove this when the Visualization table is cleaned up.
     let savedParams = this.props.savedParamValues;
-    savedParams.thresholdFilters = map(
-      threshold => ({
-        metricDisplay: get(
-          "text",
-          find(["value", threshold.metric], this.props.thresholdFilters.targets)
-        ),
-        ...threshold,
-      }),
-      savedParams.thresholdFilters
-    );
-    return savedParams;
+    if (savedParams && savedParams.thresholdFilters) {
+      savedParams.thresholdFilters = map(
+        threshold => ({
+          metricDisplay: get(
+            "text",
+            find(
+              ["value", threshold.metric],
+              this.props.thresholdFilters.targets
+            )
+          ),
+          ...threshold,
+        }),
+        savedParams.thresholdFilters
+      );
+      return savedParams;
+    }
   };
 
   getUrlParams = () => {
