@@ -8,9 +8,7 @@ class PipelineRun < ApplicationRecord
   include PipelineRunsHelper
 
   belongs_to :sample
-  validates :sample, presence: true
   belongs_to :alignment_config
-  validates :alignment_config, presence: true
   has_many :pipeline_run_stages, dependent: :destroy
   accepts_nested_attributes_for :pipeline_run_stages
   has_and_belongs_to_many :backgrounds
