@@ -2,7 +2,7 @@
 class TaxonSummary < ApplicationRecord
   belongs_to :background
   validates :background, presence: true
-  # NOTE: TaxonSummary also has tax_id which is a key into TaxonLineage
+  belongs_to :taxon_lineage, class_name: "TaxonLineage", foreign_key: :tax_id, primary_key: :taxid
 
   validates :count_type, presence: true, inclusion: { in: [
     TaxonCount::COUNT_TYPE_NT,
