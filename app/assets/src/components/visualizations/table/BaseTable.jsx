@@ -211,6 +211,7 @@ class BaseTable extends React.Component {
       rowCount,
       rowGetter,
       rowRenderer,
+      selectableColumnClassName,
       selectableKey,
       sortable,
       sortBy,
@@ -249,7 +250,7 @@ class BaseTable extends React.Component {
             >
               {selectableKey && (
                 <Column
-                  className={cs.selectableColumn}
+                  className={selectableColumnClassName}
                   dataKey={selectableKey}
                   headerRenderer={this.renderSelectableHeader}
                   cellRenderer={this.renderSelectableCell}
@@ -339,6 +340,7 @@ BaseTable.propTypes = {
   rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func,
   selectableCellClassName: PropTypes.string,
+  selectableColumnClassName: PropTypes.string,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
