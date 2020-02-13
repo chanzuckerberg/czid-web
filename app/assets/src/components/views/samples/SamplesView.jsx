@@ -427,6 +427,7 @@ class SamplesView extends React.Component {
           selectableKey="id"
           selected={selectedSampleIds}
           selectAllChecked={selectAllChecked}
+          selectableCellClassName={cs.selectableCell}
         />
       </div>
     );

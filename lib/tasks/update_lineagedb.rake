@@ -171,8 +171,17 @@ class LineageDatabaseImporter
     unchanged_ids = unchanged_records_ids
     puts "#{unchanged_ids.count} records"
 
-    upgrade_count = insert_ids.count + update_ids.count + unchanged_ids.count
+    upgrade_ids = (insert_ids + update_ids + unchanged_ids)
+    upgrade_count = upgrade_ids.count
+
     if new_count != upgrade_count
+      # Should be investigated if counts are mismatched before ignoring. You can spot check taxids
+      # on NCBI. Ex: Some taxids may have no Rank, so they won't be used in IDseq.
+      new_ids = TaxonLineage.connection.select_all("SELECT taxid FROM #{@taxid_table}").pluck("taxid")
+
+      puts "Only in new_ids: ", new_ids - upgrade_ids
+      puts "Only in upgrade_ids: ", upgrade_ids - new_ids
+
       raise "Mismatched upgrade counts: #{new_count} and #{upgrade_count}"
     end
 

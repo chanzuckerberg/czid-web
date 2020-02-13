@@ -194,8 +194,10 @@ export default class SampleViewV2 extends React.Component {
     const { project } = this.state;
 
     if (project) {
+      // only really need sample names and ids, so request the basic version without extra details
       const projectSamples = await getSamples({
         projectId: project.id,
+        basic: true,
       });
 
       this.setState({ projectSamples: projectSamples.samples });

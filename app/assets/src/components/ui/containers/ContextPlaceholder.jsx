@@ -66,6 +66,12 @@ export default class ContextPlaceholder extends React.PureComponent {
           contextRect.width / 2 -
           horizontalOffset
       );
+      // If the placeholder is wider than how far to the right its trigger is positioned,
+      // then add an offset so that the placeholder doesn't run off the screen.
+      if (placeholderRect.width > contextRect.right) {
+        const xOffset = contextRect.right - placeholderRect.width;
+        right = right + xOffset;
+      }
       left = "auto";
     } else if (position.includes("left")) {
       left = Math.round(

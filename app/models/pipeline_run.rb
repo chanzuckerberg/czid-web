@@ -954,7 +954,6 @@ class PipelineRun < ApplicationRecord
         # Precache reports for all backgrounds.
         if ready_for_cache?
           Resque.enqueue(PrecacheReportInfo, id)
-          Resque.enqueue(PrecacheReportInfoV2, id)
         else
           MetricUtil.put_metric_now("samples.cache.not_precached", 1, ["pipeline_run_id:#{id}"])
         end
@@ -1714,25 +1713,8 @@ class PipelineRun < ApplicationRecord
     [updated_at, assocs_max.compact.max].compact.max
   end
 
-  # This precaches reports for *all* backgrounds. Each report took between 1 and
-  # 10s in testing.
+  # This precaches reports for a selection of backgrounds (see Background:top_for_sample).
   def precache_report_info!
-    params = report_info_params
-    Background.top_for_sample(sample).pluck(:id).each do |background_id|
-      cache_key = ReportHelper.report_info_cache_key(
-        "/samples/#{sample.id}/report_info",
-        params.merge(background_id: background_id)
-      )
-      Rails.logger.info("Precaching #{cache_key} with background #{background_id}")
-      Rails.cache.fetch(cache_key, expires_in: 30.days) do
-        ReportHelper.report_info_json(self, background_id)
-      end
-
-      MetricUtil.put_metric_now("samples.cache.precached", 1)
-    end
-  end
-
-  def precache_report_info_v2!
     params = report_info_params
     Background.top_for_sample(sample).pluck(:id).each do |background_id|
       cache_key = PipelineReportService.report_info_cache_key(

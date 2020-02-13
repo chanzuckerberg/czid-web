@@ -605,9 +605,21 @@ export default class Heatmap {
       this.clusterRows();
     }
 
-    if (this.columnMetadataSortField) return;
-
-    if (this.options.shouldSortColumns) {
+    if (this.columnMetadataSortField) {
+      this.columnClustering = null;
+      orderBy(
+        this.columnLabels,
+        label => {
+          return (
+            (label.metadata && label.metadata[this.columnMetadataSortField]) ||
+            "ZZZ"
+          );
+        },
+        this.columnMetadataSortAsc ? "asc" : "desc"
+      ).forEach((label, idx) => {
+        label.pos = idx;
+      });
+    } else if (this.options.shouldSortColumns) {
       this.sortColumns("asc");
     } else if (this.options.clustering) {
       this.clusterColumns();
@@ -880,18 +892,6 @@ export default class Heatmap {
       this.columnMetadataSortAsc = true;
     }
 
-    if (this.columnMetadataSortField) {
-      this.columnClustering = null;
-      orderBy(
-        this.columnLabels,
-        label => {
-          return (label.metadata && label.metadata[value]) || "ZZZ";
-        },
-        this.columnMetadataSortAsc ? "asc" : "desc"
-      ).forEach((label, idx) => {
-        label.pos = idx;
-      });
-    }
     this.processData("cluster");
     onColumnMetadataSortChange &&
       onColumnMetadataSortChange(
