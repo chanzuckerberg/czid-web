@@ -59,8 +59,15 @@ module SamplesHelper
                         # Handle both location objects w/name and strings
                         collection_location: collection_location,
                         host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
-                        notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '', }
-        # TODO: (tmorse)
+                        notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '',
+                        insert_size_median: pipeline_run ? pipeline_run.insert_size_median : '',
+                        insert_size_mode: pipeline_run ? pipeline_run.insert_size_mode : '',
+                        insert_size_median_absolute_deviation: pipeline_run ? pipeline_run.insert_size_median_absolute_deviation : '',
+                        insert_size_min: pipeline_run ? pipeline_run.insert_size_min : '',
+                        insert_size_max: pipeline_run ? pipeline_run.insert_size_max : '',
+                        insert_size_mean: pipeline_run ? pipeline_run.insert_size_mean : '',
+                        insert_size_standard_deviation: pipeline_run ? pipeline_run.insert_size_standard_deviation : '',
+                        insert_size_read_pairs: pipeline_run ? pipeline_run.insert_size_read_pairs : '', }
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end

@@ -725,13 +725,12 @@ class Sample < ApplicationRecord
     pr.sample = self
     pr.subsample = subsample || PipelineRun::DEFAULT_SUBSAMPLING
     pr.max_input_fragments = max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS
-    # TODO: (tmorse)
-    pr.pipeline_branch = "insert-size-human"
+    pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
     pr.dag_vars = dag_vars if dag_vars
     pr.pipeline_commit = Sample.pipeline_commit(pr.pipeline_branch)
 
-    # TODO: (tmorse)
-    pr.alignment_config = AlignmentConfig.find_by(name: "2020-02-10")
+    pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
+    pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
     pr.save
   end
 
