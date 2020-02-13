@@ -4,10 +4,10 @@ class PipelineRunStage < ApplicationRecord
   include PipelineOutputsHelper
 
   belongs_to :pipeline_run
-  validates :name, presence: true
+  validates :name, presence: true, if: :mass_validation_enabled?
   # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
-  validates :step_number, presence: true, numericality: { greater_than: 0, integer_only: true }
-  validates :job_command_func, presence: true
+  validates :step_number, presence: true, numericality: { greater_than: 0, integer_only: true }, if: :mass_validation_enabled?
+  validates :job_command_func, presence: true, if: :mass_validation_enabled?
 
   JOB_TYPE_BATCH = 1
   COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
