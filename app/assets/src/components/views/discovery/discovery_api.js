@@ -51,9 +51,12 @@ const getDiscoveryStats = async ({ domain, filters, projectId, search }) => {
 };
 
 const processRawSample = sample => {
-  const meanInsertSize = get("pipeline_run.insert_size_mean", sample.details);
+  const meanInsertSize = get(
+    "derived_sample_output.pipeline_run.insert_size_mean",
+    sample.details
+  );
   const insertSizeStandardDeviation = get(
-    "pipeline_run.insert_size_mean",
+    "derived_sample_output.pipeline_run.insert_size_mean",
     sample.details
   );
 
