@@ -20,7 +20,7 @@ class PipelineRun < ApplicationRecord
   has_many :ercc_counts, dependent: :destroy
   has_many :amr_counts, dependent: :destroy
   has_many :contigs, dependent: :destroy
-  has_many :insert_size_metric_sets, dependent: :destroy
+  has_one :insert_size_metric_sets, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
@@ -433,7 +433,7 @@ class PipelineRun < ApplicationRecord
     insert_size_metrics_lines = Syscall.pipe_with_output(["aws", "s3", "cp", insert_size_metrics_s3_path, "-"])
     tsv_lines = []
     tsv_header_line = -1
-    insert_size_metrics_lines.split(/\r?\n/).each do |line, index|
+    insert_size_metrics_lines.split(/\r?\n/).each_with_index do |line, index|
       if line.start_with?("## METRICS CLASS")
         tsv_header_line = index
       elsif tsv_header_line > 0 && index - tsv_header_line <= 2
@@ -469,7 +469,7 @@ class PipelineRun < ApplicationRecord
     read_pairs = extract_int.call(insert_size_metrics, READ_PAIRS_NAME)
 
     update(
-      insert_size_metric_sets_attributes: [{
+      insert_size_metric_sets_attributes: {
         median_insert_size: median_insert_size,
         mode_insert_size: mode_insert_size,
         median_absolute_deviation: median_absolute_deviation,
@@ -478,7 +478,7 @@ class PipelineRun < ApplicationRecord
         mean_insert_size: mean_insert_size,
         standard_deviation: standard_deviation,
         read_pairs: read_pairs,
-      },]
+      }
     )
   end
 
@@ -845,6 +845,8 @@ class PipelineRun < ApplicationRecord
       "#{postprocess_output_s3_path}/#{ASSEMBLED_STATS_NAME}"
     when "contig_counts"
       "#{postprocess_output_s3_path}/#{CONTIG_SUMMARY_JSON_NAME}"
+    when "insert_size_metric_sets"
+      "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
     end
   end
 
@@ -885,9 +887,15 @@ class PipelineRun < ApplicationRecord
     if output_ready?(output)
       output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
+    # check if job is done more than a minute ago
     elsif finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
-      # check if job is done more than a minute ago
-      output_state.update(state: STATUS_FAILED)
+      # HACK: don't fail for missing insert, size metrics, they are optional
+      #   Doing this may result in missing some errors
+      if output_state.output == "insert_size_metric_sets"
+        output_state.update(state: STATUS_LOADED)
+      else
+        output_state.update(state: STATUS_FAILED)
+      end
     end
   end
 
@@ -1269,6 +1277,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def file_generated(s3_path)
+    unless s3_path
+      # Warn of this behavior, still return true to avoid infinite loop in results monitor
+      Rails.logger.warn("Checking for existence of nil file")
+      return true
+    end
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     status.exitstatus.zero?
   end

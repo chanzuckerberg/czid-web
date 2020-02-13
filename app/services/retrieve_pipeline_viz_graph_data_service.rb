@@ -142,7 +142,7 @@ class RetrievePipelineVizGraphDataService
     @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version).each do |file_entry|
       file_path_to_info[file_entry[:key]] = file_entry
     end
-    edges = input_output_to_file_paths.map do |input_output_json, file_paths|
+    edges = input_output_to_file_paths(file_path_to_info).map do |input_output_json, file_paths|
       files = file_paths.map { |file_path| file_info(file_path, file_path_to_info) }
       edge_info = JSON.parse(input_output_json, symbolize_names: true)
       edge_info.merge(files: files,
@@ -152,9 +152,9 @@ class RetrievePipelineVizGraphDataService
     return edges
   end
 
-  def input_output_to_file_paths
+  def input_output_to_file_paths(file_path_to_info)
     file_paths_to_input_outputs = file_path_to_inputting_steps
-                                  .merge(file_path_to_outputting_step) do |_file_path, to_array, from|
+                                  .merge(file_path_to_outputting_step(file_path_to_info)) do |_file_path, to_array, from|
       to_array.map { |to| to.merge(from) }
     end
 
@@ -176,13 +176,26 @@ class RetrievePipelineVizGraphDataService
     input_output_to_file_paths
   end
 
-  def file_path_to_outputting_step
+  def file_path_to_outputting_step(file_path_to_info)
     file_path_to_outputting_step = {}
     @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
       stage_dag_json["steps"].each_with_index do |step, step_index|
         stage_dag_json["targets"][step["out"]].each do |file_name|
           file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
           file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
+        end
+        # Add insert size metrics files to output if available
+        if step["additional_attributes"] && step["additional_attributes"]["output_metrics_file"]
+          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{step['additional_attributes']['output_metrics_file']}"
+          if file_exists?(file_path, file_path_to_info)
+            file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
+          end
+        end
+        if step["additional_attributes"] && step["additional_attributes"]["output_histogram_file"]
+          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{step['additional_attributes']['output_histogram_file']}"
+          if file_exists?(file_path, file_path_to_info)
+            file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
+          end
         end
       end
     end
@@ -212,8 +225,16 @@ class RetrievePipelineVizGraphDataService
     file_path_to_inputting_steps
   end
 
+  def remove_bucket_from_s3_path(s3_path)
+    s3_path.split('/', 4).last # Remove s3://idseq-.../ to match key
+  end
+
+  def file_exists?(file_path, file_path_to_info)
+    file_path_to_info.key? remove_bucket_from_s3_path(file_path)
+  end
+
   def file_info(file_path, file_path_to_info)
-    file_path = file_path.split('/', 4).last # Remove s3://idseq-.../ to match key
+    file_path = remove_bucket_from_s3_path(file_path)
     file_info = file_path_to_info[file_path]
     display_name = file_info ? file_info[:display_name] : file_path.split("/").last
     url = file_info ? file_info[:url] : nil
