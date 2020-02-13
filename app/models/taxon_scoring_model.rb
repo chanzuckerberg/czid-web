@@ -35,6 +35,10 @@
 # }
 class TaxonScoringModel < ApplicationRecord
   include Math
+
+  validates :name, presence: true, if: :mass_validation_enabled?
+  validates :model_json, presence: true, if: :mass_validation_enabled?
+
   attr_accessor :model
   before_save :set_json, :validate_model
   after_find  :set_model
