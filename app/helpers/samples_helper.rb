@@ -60,6 +60,7 @@ module SamplesHelper
                         collection_location: collection_location,
                         host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
                         notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '', }
+        # TODO: (tmorse)
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end
@@ -86,6 +87,10 @@ module SamplesHelper
       unmapped_reads: unmapped_reads,
       last_processed_at: last_processed_at,
     }
+    if pr.insert_size_metric_set && pr.insert_size_metric_set.mean_insert_size && pr.insert_size_metric_set.standard_deviation
+      result["average_insert_size"] = pr.insert_size_metric_set.mean_insert_size
+      result["insert_size_standard_deviation"] = pr.insert_size_metric_set.standard_deviation
+    end
     ["star", "trimmomatic", "priceseq", "cdhitdup"].each do |step|
       result["reads_after_#{step}".to_sym] = (job_stats_hash["#{step}_out"] || {})["reads_after"]
     end

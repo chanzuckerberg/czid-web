@@ -63,6 +63,14 @@ export const processPipelineInfo = additionalInfo => {
       ? summaryStats.compression_ratio.toFixed(2)
       : BLANK_TEXT;
 
+    const meanInsertSize =
+      summaryStats.average_insert_size &&
+      numberWithCommas(summaryStats.average_insert_size);
+
+    const insertSizeStandardDeviation =
+      summaryStats.insert_size_standard_deviation &&
+      numberWithCommas(summaryStats.insert_size_standard_deviation);
+
     pipelineInfo.nonhostReads = {
       text: `${adjustedRemainingReads}${adjustedPercent}`,
     };
@@ -72,6 +80,10 @@ export const processPipelineInfo = additionalInfo => {
     pipelineInfo.lastProcessedAt = {
       text: moment(summaryStats.last_processed_at).format("YYYY-MM-DD"),
     };
+    if (meanInsertSize && insertSizeStandardDeviation) {
+      const withError = `${meanInsertSize}±${insertSizeStandardDeviation}`;
+      pipelineInfo.meanInsertSize = { text: withError };
+    }
   }
 
   return pipelineInfo;

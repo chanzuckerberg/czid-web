@@ -20,14 +20,14 @@ class PipelineRun < ApplicationRecord
   has_many :ercc_counts, dependent: :destroy
   has_many :amr_counts, dependent: :destroy
   has_many :contigs, dependent: :destroy
-  has_one :insert_size_metric_sets, dependent: :destroy
+  has_one :insert_size_metric_set, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
   accepts_nested_attributes_for :amr_counts
   accepts_nested_attributes_for :contigs
-  accepts_nested_attributes_for :insert_size_metric_sets
+  accepts_nested_attributes_for :insert_size_metric_set
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
@@ -152,7 +152,7 @@ class PipelineRun < ApplicationRecord
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts",
-                        "insert_size_metric_sets" => "db_load_insert_size_metrics", }.freeze
+                        "insert_size_metric_set" => "db_load_insert_size_metrics", }.freeze
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.
@@ -325,7 +325,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metric_sets]
+    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metric_set]
 
     # Then, generate output_states
     output_state_entries = []
@@ -469,7 +469,7 @@ class PipelineRun < ApplicationRecord
     read_pairs = extract_int.call(insert_size_metrics, READ_PAIRS_NAME)
 
     update(
-      insert_size_metric_sets_attributes: {
+      insert_size_metric_set_attributes: {
         median_insert_size: median_insert_size,
         mode_insert_size: mode_insert_size,
         median_absolute_deviation: median_absolute_deviation,
@@ -845,7 +845,7 @@ class PipelineRun < ApplicationRecord
       "#{postprocess_output_s3_path}/#{ASSEMBLED_STATS_NAME}"
     when "contig_counts"
       "#{postprocess_output_s3_path}/#{CONTIG_SUMMARY_JSON_NAME}"
-    when "insert_size_metric_sets"
+    when "insert_size_metric_set"
       "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
     end
   end
@@ -891,7 +891,7 @@ class PipelineRun < ApplicationRecord
     elsif finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
       # HACK: don't fail for missing insert, size metrics, they are optional
       #   Doing this may result in missing some errors
-      if output_state.output == "insert_size_metric_sets"
+      if output_state.output == "insert_size_metric_set"
         output_state.update(state: STATUS_LOADED)
       else
         output_state.update(state: STATUS_FAILED)
