@@ -520,7 +520,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
                                           taxId: 573, pipelineRunIds: [pipeline_runs(:public_project_sampleA_run).id,
                                                                        pipeline_runs(:public_project_sampleB_run).id,],
-                                          tax_name: 'some species', }
+                                          taxName: 'some species', }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
 
@@ -529,7 +529,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
                                           taxId: 573, pipelineRunIds: [pipeline_runs(:joe_project_sampleA_run).id,
                                                                        pipeline_runs(:joe_project_sampleB_run).id,],
-                                          tax_name: 'some species', }
+                                          taxName: 'some species', }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
 
