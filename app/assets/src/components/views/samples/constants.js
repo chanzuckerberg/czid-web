@@ -67,9 +67,9 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     tooltip: "Whether a sample is water-only as a control.",
   },
   meanInsertSize: {
-    // TODO (tmorse) link
     tooltip:
       "Mean length of the fragmented nucleic acid sequences input for sequencing, computed by Picard CollectInsertSizeMetrics.",
+    link: DOC_BASE_LINK + "360034790554-Pipeline-Details",
   },
 };
 
