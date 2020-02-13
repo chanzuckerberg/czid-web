@@ -4,7 +4,7 @@ PUBLIC_ENDPOINTS = [:landing, :sign_up, :maintenance].freeze
 
 # Endpoints made public for public ncov page.
 PUBLIC_NCOV_ENDPOINTS = [
-  :public, :index,
+  :public, :index, :taxon_descriptions,
 ].freeze
 
 class HomeController < ApplicationController
