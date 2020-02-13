@@ -57,6 +57,10 @@ const processRawSample = sample => {
     sample.details
   );
 
+  const hasMeanInsertSize =
+    (meanInsertSize || meanInsertSize === 0) &&
+    (insertSizeStandardDeviation || insertSizeStandardDeviation === 0);
+
   const row = {
     sample: {
       name: sample.name,
@@ -112,12 +116,11 @@ const processRawSample = sample => {
     ),
     totalRuntime: get("run_info.total_runtime", sample.details),
     waterControl: get("metadata.water_control", sample.details),
-    meanInsertSize:
-      (meanInsertSize || meanInsertSize === 0) &&
-      (insertSizeStandardDeviation || insertSizeStandardDeviation === 0) &&
-      `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
-        insertSizeStandardDeviation
-      )}`,
+    meanInsertSize: hasMeanInsertSize
+      ? `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
+          insertSizeStandardDeviation
+        )}`
+      : "",
   };
   return row;
 };
