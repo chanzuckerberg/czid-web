@@ -1,4 +1,5 @@
 import { get, map } from "lodash/fp";
+import { numberWithCommas } from "../../../helpers/strings";
 import {
   getProjectDimensions,
   getProjects,
@@ -49,13 +50,13 @@ const getDiscoveryStats = async ({ domain, filters, projectId, search }) => {
   }
 };
 
-const meanInsertSize = get("pipeline_run.mean_insert_size", derivedOutput);
-const insertSizeStandardDeviation = get(
-  "pipeline_run.mean_insert_size",
-  derivedOutput
-);
-
 const processRawSample = sample => {
+  const meanInsertSize = get("pipeline_run.mean_insert_size", sample.details);
+  const insertSizeStandardDeviation = get(
+    "pipeline_run.mean_insert_size",
+    sample.details
+  );
+
   const row = {
     sample: {
       name: sample.name,
