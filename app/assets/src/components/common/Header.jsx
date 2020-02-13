@@ -142,7 +142,7 @@ class Header extends React.Component {
             {NCOV_PUBLIC_SITE && (
               <a href="/">
                 <div className={cs.publicNcovHomeLink}>
-                  Coronavirus Public Data
+                  Novel Coronavirus Public Data
                 </div>
               </a>
             )}
