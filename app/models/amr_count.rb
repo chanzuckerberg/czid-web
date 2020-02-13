@@ -22,9 +22,11 @@
 #   "Tmt"]
 class AmrCount < ApplicationRecord
   belongs_to :pipeline_run
-  validates :pipeline_run, presence: true
 
+  validates :gene, presence: true, if: :mass_validation_enabled?
+  validates :allele, presence: true, if: :mass_validation_enabled?
+  validates :drug_family, presence: true, if: :mass_validation_enabled?
   # AmrCount is designed to handle partial data. See pipeline_run_spec.rb.
-  validates :coverage, inclusion: 0..100, allow_nil: true
-  validates :depth, numericality: { greater_than: 0 }, allow_nil: true
+  validates :coverage, inclusion: 0..100, allow_nil: true, if: :mass_validation_enabled?
+  validates :depth, numericality: { greater_than: 0 }, allow_nil: true, if: :mass_validation_enabled?
 end
