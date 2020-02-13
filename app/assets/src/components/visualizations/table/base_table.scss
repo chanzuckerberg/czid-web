@@ -134,19 +134,3 @@
     display: block;
   }
 }
-
-.selectableColumn {
-  // We pass in the "selectableCell" className to
-  // our checkbox to modify the enclosing div as follows;
-  // this creates a large, invisible "button" the height of
-  // the row, making samples easier to select.
-  .selectableCell {
-    position: absolute;
-    overflow: visible;
-    height: 100%;
-    width: 50px;
-    margin: -11px -10px -10px -10px;
-    padding-left: 0px;
-    justify-content: center;
-  }
-}

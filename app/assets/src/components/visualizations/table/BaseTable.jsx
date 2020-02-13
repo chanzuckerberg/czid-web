@@ -170,11 +170,11 @@ class BaseTable extends React.Component {
   };
 
   renderSelectableCell = ({ cellData }) => {
-    const { selected, onSelectRow } = this.props;
+    const { selected, onSelectRow, selectableCellClassName } = this.props;
     const disabled = cellData === null || cellData === undefined;
     return (
       <Checkbox
-        className={cs.selectableCell}
+        className={selectableCellClassName}
         checked={selected.has(cellData)}
         onChange={onSelectRow}
         value={disabled ? -1 : cellData}
@@ -338,6 +338,7 @@ BaseTable.propTypes = {
   rowGetter: PropTypes.func.isRequired,
   rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func,
+  selectableCellClassName: PropTypes.string,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
