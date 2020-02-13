@@ -3,6 +3,7 @@ class TaxonSummary < ApplicationRecord
   belongs_to :background
   # NOTE: this conflicts with pipeline_report_service_spec.rb
   # belongs_to :taxon_lineage, class_name: "TaxonLineage", foreign_key: :tax_id, primary_key: :taxid
+  validates :tax_id, presence: true, if: :mass_validation_enabled?
 
   validates :count_type, presence: true, inclusion: { in: [
     TaxonCount::COUNT_TYPE_NT,
@@ -19,4 +20,5 @@ class TaxonSummary < ApplicationRecord
 
   validates :mean, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
   validates :stdev, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
+  validates :rpm_list, presence: true, if: :mass_validation_enabled?
 end
