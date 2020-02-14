@@ -10,7 +10,6 @@ class PhyloTree < ApplicationRecord
   # NOTE: this conflicts with phylo_trees_controller_spec.rb
   # belongs_to :taxon_lineage, class_name: "TaxonLineage", foreign_key: :taxid, primary_key: :taxid
 
-  # TODO: (gdingle): should this be scoped to project or user?
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   validates :taxid, presence: true, if: :mass_validation_enabled?
   validates :tax_name, presence: true, if: :mass_validation_enabled?

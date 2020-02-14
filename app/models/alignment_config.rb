@@ -1,4 +1,5 @@
-# configuration for alignment database for pipelines
+# Configuration for alignment database for pipelines
+# See also create_alignment_config.rake where configs are created.
 class AlignmentConfig < ApplicationRecord
   has_many :pipeline_runs, dependent: :restrict_with_exception
 
