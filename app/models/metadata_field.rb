@@ -41,7 +41,7 @@ class MetadataField < ApplicationRecord
   validates :is_core, inclusion: { in: [0, 1] }
   validates :is_default, inclusion: { in: [0, 1] }
   validates :is_required, inclusion: { in: [0, 1] }
-  validates :default_for_new_host_genome, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
+  validates :default_for_new_host_genome, inclusion: { in: [0, 1] }, if: -> { respond_to?(:default_for_new_host_genome) && mass_validation_enabled? } # respond_to? for migrations
 
   # ActiveRecord documentation summary
 
