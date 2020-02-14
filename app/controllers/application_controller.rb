@@ -169,7 +169,7 @@ class ApplicationController < ActionController::Base
   # given cache_key and fills out custom response headers.
   # If the attempt results in a cache miss, then the response is generated normally and
   # will be stored in the cache.
-  def fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, _event_name)
+  def fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate)
     if skip_cache
       yield
     else

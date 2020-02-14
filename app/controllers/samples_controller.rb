@@ -770,7 +770,7 @@ class SamplesController < ApplicationController
       httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
 
       json =
-        fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "PipelineReport") do
+        fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate) do
           PipelineReportService.call(pipeline_run, background_id)
         end
     else
