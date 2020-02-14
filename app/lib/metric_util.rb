@@ -28,7 +28,7 @@ class MetricUtil
     location_geosearched: "location_geosearched",
   }.freeze
 
-  # DEPRECATED. Use log_analytics_event.
+  # Use for system monitoring (e.g. performance) metrics. Sends to DataDog.
   def self.put_metric_now(name, value, tags = [], type = "count")
     put_metric(name, value, Time.now.to_i, tags, type)
   end
@@ -39,6 +39,8 @@ class MetricUtil
   # https://segment.com/docs/sources/server/http/#rate-limits. In addition,
   # segment says the server lib batches automatically. See
   # https://segment.com/docs/sources/server/http/#batch.
+
+  # Use for usage metrics. Sends to GoogleAnalytics.
   def self.log_analytics_event(event, user, properties = {}, request = nil)
     if SEGMENT_ANALYTICS && !a_test?(request)
       # current_user should be passed from a controller
