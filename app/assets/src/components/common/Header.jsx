@@ -142,7 +142,7 @@ class Header extends React.Component {
             {NCOV_PUBLIC_SITE && (
               <a href="/">
                 <div className={cs.publicNcovHomeLink}>
-                  Novel Coronavirus Public Data
+                  COVID-19 Public Dataset
                 </div>
               </a>
             )}
@@ -396,18 +396,25 @@ const MainMenu = ({ adminUser }) => {
       <div className={cs.mainMenu}>
         <a
           className={cs.item}
+          href="/"
+          onClick={() => logAnalyticsEvent("MainMenu_about_clicked")}
+        >
+          About
+        </a>
+        <ExternalLink
+          className={cs.item}
           href="https://idseq.net"
           onClick={() => logAnalyticsEvent("MainMenu_request-access_clicked")}
         >
           Request Full Access
-        </a>
-        <a
+        </ExternalLink>
+        <ExternalLink
           className={cs.item}
           href="https://help.idseq.net"
           onClick={() => logAnalyticsEvent("MainMenu_help_clicked")}
         >
-          Help
-        </a>
+          Help Center
+        </ExternalLink>
       </div>
     );
   }

@@ -140,11 +140,10 @@
   }
 
   ol {
-    margin: 30px 0 30px 20px;
+    margin: 20px 0;
 
     li {
       @include font-body-m;
-      list-style-type: none;
       margin-bottom: 20px;
 
       .listItemTitle {
