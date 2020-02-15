@@ -9,6 +9,8 @@ import MetadataSection from "~/components/common/DetailsSidebar/SampleDetailsMod
 import { saveProjectDescription } from "~/api";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
 
+const NCOV_PUBLIC_SITE = true;
+
 class ProjectDescription extends React.Component {
   constructor(props) {
     super(props);
@@ -21,7 +23,7 @@ class ProjectDescription extends React.Component {
       lastValidDescription: props.project.description
         ? props.project.description
         : "",
-      showLess: true,
+      showLess: !NCOV_PUBLIC_SITE,
       editing: false,
       changed: false,
       savePending: false,
