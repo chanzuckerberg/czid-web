@@ -40,6 +40,11 @@
   align-items: center;
   margin-bottom: 11px;
 
+  .instructions {
+    color: $dark-grey;
+    margin-left: $space-m;
+  }
+
   .fluidBlank {
     flex: 1 1 auto;
   }

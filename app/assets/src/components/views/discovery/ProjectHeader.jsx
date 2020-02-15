@@ -61,9 +61,6 @@ class ProjectHeader extends React.Component {
     return (
       <div className={cs.projectHeader}>
         <div className={cs.name}>{project.name}</div>
-        {NCOV_PUBLIC_SITE && (
-          <div className={cs.description}>{project.description}</div>
-        )}
         <div className={cs.fillIn} />
         {NCOV_PUBLIC_SITE && (
           <a href={VIEW_HEATMAP_LINK}>
