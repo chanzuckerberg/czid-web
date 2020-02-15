@@ -36,7 +36,8 @@
 
       align-items: center;
       display: flex;
-      font-weight: $font-weight-regular;
+      font-weight: $font-weight-semibold;
+      color: $medium-grey;
       margin-right: 5px;
       height: 36px;
       vertical-align: middle;
@@ -46,11 +47,15 @@
       display: block;
       width: 100%;
     }
+
+    i:before {
+      color: $medium-grey !important;
+    }
   }
 
   .mainMenu {
     @include font-body-xs;
-    margin-right: 100px;
+    margin-right: 25px;
     display: flex;
     color: $medium-grey;
 
