@@ -25,12 +25,15 @@ class PhyloTreesController < ApplicationController
   READ_ACTIONS = [:show, :download].freeze
   EDIT_ACTIONS = [:retry].freeze
   OTHER_ACTIONS = [:new, :create, :index, :choose_taxon, :validate_name].freeze
+  PUBLIC_NCOV_ENDPOINTS = [:choose_taxon].freeze
 
   power :phylo_trees, map: { EDIT_ACTIONS => :updatable_phylo_trees }, as: :phylo_trees_scope
 
   before_action :set_phylo_tree, only: READ_ACTIONS + EDIT_ACTIONS
   before_action :assert_access, only: OTHER_ACTIONS
   before_action :check_access
+
+  skip_before_action :authenticate_user!, only: PUBLIC_NCOV_ENDPOINTS
 
   # This limit determines how many rows can be displayed in "additional samples".
   # This limit was added because the phylo tree creation was timing out for admins

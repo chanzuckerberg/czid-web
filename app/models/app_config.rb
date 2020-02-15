@@ -46,4 +46,11 @@ class AppConfig < ApplicationRecord
   PUBLIC_NCOV_PROJECT_ID = 'public_ncov_project_id'.freeze
   # The ID of the public ncov heatmap
   PUBLIC_NCOV_HEATMAP_ID = 'public_ncov_heatmap_id'.freeze
+  # The following urls are linked in the public site About page
+  PUBLIC_INDEX_CASE_URL = 'public_index_case_url'.freeze
+  PUBLIC_INDEX_CASE_URL_WITH_COVERAGE_VIZ = 'public_index_case_url_with_coverage_viz'.freeze
+  PUBLIC_INDEX_CASE_URL_WITH_OLD_PIPELINE = 'public_index_case_url_with_old_pipeline'.freeze
+  PUBLIC_FAMILY_1_URL = 'public_family_1_url'.freeze
+  PUBLIC_FAMILY_2_URL = 'public_family_2_url'.freeze
+  PUBLIC_FAMILY_3_URL = 'public_family_3_url'.freeze
 end

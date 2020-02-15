@@ -42,6 +42,13 @@ module AppConfigHelper
                            AppConfig::PUBLIC_NCOV_REPORT_PAGE_SELECTED_OPTIONS,
                            AppConfig::PUBLIC_NCOV_PROJECT_ID,
                            AppConfig::PUBLIC_NCOV_HEATMAP_ID,
+                           AppConfig::PUBLIC_INDEX_CASE_URL,
+                           AppConfig::PUBLIC_INDEX_CASE_URL_WITH_COVERAGE_VIZ,
+                           AppConfig::PUBLIC_INDEX_CASE_URL_WITH_OLD_PIPELINE,
+                           AppConfig::PUBLIC_FAMILY_1_URL,
+                           AppConfig::PUBLIC_FAMILY_2_URL,
+                           AppConfig::PUBLIC_FAMILY_3_URL,
+
                          ])
                   .map { |app_config| [app_config.key, app_config.value] }
                   .to_h
@@ -52,6 +59,12 @@ module AppConfigHelper
       publicNcovReportPageSelectedOptions: JSON.parse(app_configs[AppConfig::PUBLIC_NCOV_REPORT_PAGE_SELECTED_OPTIONS] || ""),
       publicNcovProjectId: app_configs[AppConfig::PUBLIC_NCOV_PROJECT_ID].to_i,
       publicNcovHeatmapId: app_configs[AppConfig::PUBLIC_NCOV_HEATMAP_ID].to_i,
+      publicIndexCaseUrl: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL],
+      publicIndexCaseUrlWithCoverageViz: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_WITH_COVERAGE_VIZ],
+      publicIndexCaseUrlWithOldPipeline: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_WITH_OLD_PIPELINE],
+      publicFamily1Url: app_configs[AppConfig::PUBLIC_FAMILY_1_URL],
+      publicFamily2Url: app_configs[AppConfig::PUBLIC_FAMILY_2_URL],
+      publicFamily3Url: app_configs[AppConfig::PUBLIC_FAMILY_3_URL],
     }
   end
 end

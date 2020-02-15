@@ -331,6 +331,12 @@ class SamplesView extends React.Component {
     return (
       <div className={cs.samplesToolbar}>
         {this.renderDisplaySwitcher()}
+        {NCOV_PUBLIC_SITE && (
+          <div className={cs.instructions}>
+            Click on a sample below to see how the reads from that sample
+            matched to various organisms.
+          </div>
+        )}
         {!NCOV_PUBLIC_SITE && (
           <React.Fragment>
             <div className={cs.fluidBlank} />
