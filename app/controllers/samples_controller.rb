@@ -36,7 +36,7 @@ class SamplesController < ApplicationController
   # Endpoints made public for public ncov page.
   PUBLIC_NCOV_ENDPOINTS = [
     :index_v2, :dimensions, :stats, :samples_going_public, :search_suggestions, :report_v2, :report, :show_v2, :show,
-    :show_taxid_fasta, :taxid_contigs, :show_taxid_alignment_viz, :coverage_viz_summary, :coverage_viz_data,
+    :show_taxid_fasta, :show_taxid_alignment_viz, :coverage_viz_summary, :coverage_viz_data,
     :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :metadata, :metadata_fields, :results_folder,
     :report_csv,
   ].freeze
