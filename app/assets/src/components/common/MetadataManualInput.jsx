@@ -25,6 +25,7 @@ import PropTypes from "~/components/utils/propTypes";
 import PlusIcon from "~ui/icons/PlusIcon";
 import { UserContext } from "~/components/common/UserContext";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
 import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
@@ -419,15 +420,34 @@ class MetadataManualInput extends React.Component {
     }
   };
 
+  getColumnHeaders(columns) {
+    return zipObject(
+      columns,
+      columns.map(column => {
+        const label = (this.state.headers || {})[column];
+        return (
+          <ColumnHeaderTooltip
+            key={label}
+            trigger={<span className={cs.label}>{label}</span>}
+            title={label}
+            content={"TODO"}
+            link={"TODO"}
+          />
+        );
+      })
+    );
+  }
+
   render() {
+    const columns = this.getManualInputColumns();
     return (
       <div className={cx(cs.metadataManualInput, this.props.className)}>
         <div className={cs.tableContainer}>
           <div className={cs.tableScrollWrapper}>
             <DataTable
               className={cs.inputTable}
-              headers={this.state.headers}
-              columns={this.getManualInputColumns()}
+              headers={this.getColumnHeaders(columns)}
+              columns={columns}
               data={this.getManualInputData()}
               getColumnWidth={this.getColumnWidth}
             />
