@@ -102,7 +102,7 @@ class BaseTable extends React.Component {
       >
         {columnData ? (
           <ColumnHeaderTooltip
-            trigger={<span className={cs.label}>{label}</span>}
+            trigger={<span className={cs.label}>{label} HELLo</span>}
             title={label}
             content={columnData.tooltip}
             link={columnData.link}
