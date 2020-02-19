@@ -12,6 +12,10 @@ import Modal from "~ui/containers/Modal";
 import Notification from "~ui/notifications/Notification";
 import cs from "./collection_modal.scss";
 
+/**
+ * NOTE: "Collections" were an unrealized generalization of the background concept.
+ * For the time being, a collection is equivalent to a background.
+ */
 class CollectionModal extends React.Component {
   constructor(props) {
     super(props);
@@ -39,7 +43,7 @@ class CollectionModal extends React.Component {
         <div className={cs.warning}>
           <Notification className={cs.notification} type="warn">
             A large number of samples may increase the processing time before
-            your collection can be used as a background.
+            your background can be used in reports.
           </Notification>
         </div>
         <ul className={cs.selectedSamples}>
@@ -138,7 +142,7 @@ class CollectionModal extends React.Component {
       <div>
         {backgroundCreationResponse.status === "ok" ? (
           <Notification type="success">
-            Collection is being created and will be visible on the report page
+            Background is being created and will be visible on the report page
             once statistics have been computed.
           </Notification>
         ) : (
@@ -174,12 +178,12 @@ class CollectionModal extends React.Component {
             )}
             className={cs.collectionModal}
           >
-            <div className={cs.title}>Create a Collection</div>
+            <div className={cs.title}>Create a Background</div>
             <div className={cs.description}>
-              A collection is a group of samples. You can use this collection as
-              a background model to be selected on a sample report page. It will
-              update the calculated z-score to indicate how much the the sample
-              deviates from the norm for that collection.
+              A background is a group of samples. You can use a background as a
+              statistical model to compare your samples to. When you select a
+              background on a report or heatmap, the z-scores will indicate how
+              much a sample deviates from the mean of that background.
             </div>
             {this.renderForm()}
             {backgroundCreationResponse && this.renderStatus()}

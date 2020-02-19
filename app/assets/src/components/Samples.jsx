@@ -1673,7 +1673,7 @@ class BackgroundModal extends React.Component {
         className="modal project-popup add-user-modal"
       >
         <Modal.Header className="project_modal_header">
-          Create a Collection
+          Create a Background
         </Modal.Header>
         <Modal.Content className="modal-content">
           <div>
