@@ -25,11 +25,52 @@ import PropTypes from "~/components/utils/propTypes";
 import PlusIcon from "~ui/icons/PlusIcon";
 import { UserContext } from "~/components/common/UserContext";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
 import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
 
 const map = _fp.map.convert({ cap: false });
+
+// From https://czi.quip.com/FPnbATvWSIIL/Metadata-Tooltips#AQKACA1SEBr on 2020-02-18.
+// See also descriptions stored in database by MetadataField.
+// NOTE: for good layout, text should be no longer than 110 chars.
+const COLUMN_HEADER_TOOLTIPS = {
+  "Host Organism": "Host from which the sample was originally collected.",
+  collection_date:
+    "Date on which sample was originally collected. For privacy reasons, only use month and/or year for human data.",
+  collection_location_v2:
+    "Location from which sample was originally collected. For privacy, we do not allow city-level data for human hosts.",
+  nucleotide_type: "Nucleotide type of sample.",
+  sample_type:
+    "Tissue or site from which the sample was originally collected. Suggested list is dependent on host selection.",
+  water_control: "Whether or not sample is a water control.",
+  collected_by: "Institution/agency that collected sample.",
+  isolate: "Whether or not sample is an isolate.",
+  antibiotic_administered: "Antibiotics administered to host.",
+  comorbidity: "Other chronic diseases present.",
+  host_age: "Age of host (in years).",
+  host_genus_species: "Genus or species of host.",
+  host_id: "Unique identifier for host.",
+  host_race_ethnicity: "Race and-or ethnicity of host.",
+  host_sex: "Sex of host.",
+  immunocomp: "Information on if host was immunocompromised.",
+  primary_diagnosis: "Diagnosed disease that resulted in hospital admission.",
+  detection_method:
+    "Detection method for the known organism identified by a clinical lab.",
+  infection_class: "Class of infection.",
+  known_organism: "Organism in sample detected by clinical lab.",
+  library_prep: "Information on library prep kit.",
+  rna_dna_input: "RNA/DNA input in nanograms.",
+  sequencer: "Model of sequencer used.",
+  diseases_and_conditions: "Diseases and-or conditions observed in host.",
+  blood_fed: "Information about host's blood feeding.",
+  gravid: "Whether or not host was gravid.",
+  host_life_stage: "Life stage of host.",
+  preservation_method: "Preservation method of host.",
+  sample_unit: "Number of hosts in sample.",
+  trap_type: "Trap type used on host.",
+};
 
 class MetadataManualInput extends React.Component {
   state = {
@@ -419,15 +460,47 @@ class MetadataManualInput extends React.Component {
     }
   };
 
+  getColumnHeaders = columns => {
+    return zipObject(
+      columns,
+      columns.map(column => {
+        const label = (this.state.headers || {})[column];
+        const content = COLUMN_HEADER_TOOLTIPS[column];
+        if (content) {
+          const showLink = !["Sample Name", "Host Organism"].includes(column);
+          return (
+            // Disable the preventOverflow popper.js modifer as it is flipping
+            // the tooltip unnecessarily.
+            <ColumnHeaderTooltip
+              key={label}
+              trigger={<span className={cs.label}>{label}</span>}
+              title={label}
+              content={content}
+              link={showLink ? "/metadata/dictionary" : null}
+              wide={true}
+              popperModifiers={{
+                preventOverflow: {
+                  enabled: false,
+                },
+              }}
+            />
+          );
+        }
+        return label;
+      })
+    );
+  };
+
   render() {
+    const columns = this.getManualInputColumns();
     return (
       <div className={cx(cs.metadataManualInput, this.props.className)}>
         <div className={cs.tableContainer}>
           <div className={cs.tableScrollWrapper}>
             <DataTable
               className={cs.inputTable}
-              headers={this.state.headers}
-              columns={this.getManualInputColumns()}
+              headers={this.getColumnHeaders(columns)}
+              columns={columns}
               data={this.getManualInputData()}
               getColumnWidth={this.getColumnWidth}
             />
