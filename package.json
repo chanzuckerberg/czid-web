@@ -39,7 +39,7 @@
     "babel-loader": "^8.0.6",
     "babel-plugin-transform-replace-object-assign": "^2.0.0",
     "coveralls": "^3.0.0",
-    "css-loader": "^0.28.10",
+    "css-loader": "^3.4.2",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^4.15.0",

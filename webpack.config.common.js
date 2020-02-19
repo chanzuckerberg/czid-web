@@ -56,10 +56,11 @@ const config = {
           {
             loader: "css-loader",
             options: {
-              minimize: true,
               sourceMap: true,
-              modules: true,
-              localIdentName: "[local]-[hash:base64:5]",
+              modules: {
+                mode: "local",
+                localIdentName: "[path][name]__[local]--[hash:base64:5]",
+              },
             },
           },
           {
@@ -84,8 +85,10 @@ const config = {
           {
             loader: "css-loader",
             options: {
-              minimize: true,
               sourceMap: true,
+              modules: {
+                mode: "global",
+              },
             },
           },
           {
