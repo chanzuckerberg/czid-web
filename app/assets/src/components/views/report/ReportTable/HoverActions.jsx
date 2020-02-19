@@ -47,24 +47,6 @@ class HoverActions extends React.Component {
         disabledMessage: "NCBI Taxonomy Not Found",
         params,
       },
-      {
-        key: `fasta_download_${params.taxId}`,
-        message: "FASTA Download",
-        icon: "fa-download",
-        handleClick: this.props.onFastaActionClick,
-        enabled: this.props.fastaEnabled,
-        disabledMessage: "FASTA Download Not Available",
-        params,
-      },
-      {
-        key: `contigs_download_${params.taxId}`,
-        message: "Contigs Download",
-        icon: "fa-puzzle-piece",
-        handleClick: this.props.onContigVizClick,
-        enabled: this.props.contigVizEnabled,
-        disabledMessage: "No Contigs Available",
-        params,
-      },
       hasCoverageViz
         ? {
             key: `coverage_viz_${params.taxId}`,
