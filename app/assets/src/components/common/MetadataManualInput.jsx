@@ -54,7 +54,7 @@ const COLUMN_HEADER_TOOLTIPS = {
   host_id: "Unique identifier for host.",
   host_race_ethnicity: "Race and-or ethnicity of host.",
   host_sex: "Sex of host.",
-  immunocomp: "Immunocompromised Information on if host was immunocompromised.",
+  immunocomp: "Information on if host was immunocompromised.",
   primary_diagnosis: "Diagnosed disease that resulted in hospital admission.",
   detection_method:
     "Detection method for the known organism identified by a clinical lab.",
@@ -469,6 +469,8 @@ class MetadataManualInput extends React.Component {
         if (content) {
           const showLink = !["Sample Name", "Host Organism"].includes(column);
           return (
+            // Disable the preventOverflow popper.js modifer as it is flipping
+            // the tooltip unnecessarily.
             <ColumnHeaderTooltip
               key={label}
               trigger={<span className={cs.label}>{label}</span>}
@@ -476,6 +478,11 @@ class MetadataManualInput extends React.Component {
               content={content}
               link={showLink ? "/metadata/dictionary" : null}
               wide={true}
+              popperModifiers={{
+                preventOverflow: {
+                  enabled: false,
+                },
+              }}
             />
           );
         }
