@@ -424,14 +424,21 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: total_ercc_reads)
   end
 
+  private def extract_int_metric(metrics, metric_name)
+    if metrics[metric_name]
+      return metrics[metric_name].to_i
+    end
+    return nil
+  end
+
   def db_load_insert_size_metrics
     insert_size_metrics_s3_path = "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", insert_size_metrics_s3_path)
     return unless status.exitstatus.zero?
-    insert_size_metrics_lines = Syscall.pipe_with_output(["aws", "s3", "cp", insert_size_metrics_s3_path, "-"])
+    insert_size_metrics_raw = Syscall.pipe_with_output(["aws", "s3", "cp", insert_size_metrics_s3_path, "-"])
     tsv_lines = []
     tsv_header_line = -1
-    insert_size_metrics_lines.split(/\r?\n/).each_with_index do |line, index|
+    insert_size_metrics_raw.lines.each_with_index do |line, index|
       if line.start_with?("## METRICS CLASS")
         tsv_header_line = index
       elsif tsv_header_line > 0 && index - tsv_header_line <= 2
@@ -441,7 +448,7 @@ class PipelineRun < ApplicationRecord
       end
     end
     if tsv_lines.length != 2
-      Rails.logger.error("Pipleine run ##{id} has an insert size metrics file but metrics could not be found")
+      Rails.logger.error("Pipeline run ##{id} has an insert size metrics file but metrics could not be found")
       return
     end
     insert_size_metrics = {}
@@ -449,22 +456,14 @@ class PipelineRun < ApplicationRecord
       insert_size_metrics[row[0]] = row[1]
     end
 
-    extract_int = lambda do |metrics, metric_name|
-      begin
-        return metrics[metric_name].to_i
-      rescue
-        return nil
-      end
-    end
-
-    insert_size_median = extract_int.call(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME)
-    insert_size_mode = extract_int.call(insert_size_metrics, MODE_INSERT_SIZE_NAME)
-    insert_size_median_absolute_deviation = extract_int.call(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME)
-    insert_size_min = extract_int.call(insert_size_metrics, MIN_INSERT_SIZE_NAME)
-    insert_size_max = extract_int.call(insert_size_metrics, MAX_INSERT_SIZE_NAME)
-    insert_size_mean = extract_int.call(insert_size_metrics, MEAN_INSERT_SIZE_NAME)
-    insert_size_standard_deviation = extract_int.call(insert_size_metrics, STANDARD_DEVIATION_NAME)
-    insert_size_read_pairs = extract_int.call(insert_size_metrics, READ_PAIRS_NAME)
+    insert_size_median = extract_int_metric(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME)
+    insert_size_mode = extract_int_metric(insert_size_metrics, MODE_INSERT_SIZE_NAME)
+    insert_size_median_absolute_deviation = extract_int_metric(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME)
+    insert_size_min = extract_int_metric(insert_size_metrics, MIN_INSERT_SIZE_NAME)
+    insert_size_max = extract_int_metric(insert_size_metrics, MAX_INSERT_SIZE_NAME)
+    insert_size_mean = extract_int_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME)
+    insert_size_standard_deviation = extract_int_metric(insert_size_metrics, STANDARD_DEVIATION_NAME)
+    insert_size_read_pairs = extract_int_metric(insert_size_metrics, READ_PAIRS_NAME)
 
     update(
       insert_size_median: insert_size_median,
