@@ -10,5 +10,8 @@ class AddTaxaCategoryValuesToHostGenome < ActiveRecord::Migration[5.1]
 
     # By previous migration, these are all non-human
     HostGenome.where(user: nil, taxa_category: nil).find_each { |u| u.update(taxa_category: "non-human-animal") }
+
+    change_column_default :host_genomes, "taxa_category", from: nil, to: "unknown"
+    change_column_null :host_genomes, "taxa_category", false
   end
 end
