@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { difference, isEmpty, union } from "lodash/fp";
+import { sortBy, difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
@@ -31,6 +31,26 @@ import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
 
 const NCOV_PUBLIC_SITE = true;
+
+const NCOV_SAMPLE_ORDER = [
+  "Index Case",
+  "Family Member 1",
+  "Family Member 2",
+  "Family Member 3",
+  "Water Control 1",
+  "Water Control 2",
+  "Water Control 3",
+  "Water Control 4",
+];
+
+const sortPublicNcovSamples = sampleRows =>
+  sortBy(
+    row =>
+      NCOV_SAMPLE_ORDER.includes(row.sample.name)
+        ? NCOV_SAMPLE_ORDER.indexOf(row.sample.name)
+        : 100,
+    sampleRows
+  );
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -434,6 +454,7 @@ class SamplesView extends React.Component {
           selected={selectedSampleIds}
           selectAllChecked={selectAllChecked}
           selectableCellClassName={cs.selectableCell}
+          customSampleSortFn={sortPublicNcovSamples}
         />
       </div>
     );
