@@ -35,6 +35,9 @@ const TAX_LEVEL_INDICES = {
   genus: 2,
 };
 
+// Expand the coronavirus taxid by default.
+const BETACORONAVIRUS_GENUS_TAXID = 694002;
+
 class ReportTable extends React.Component {
   constructor(props) {
     super(props);
@@ -43,7 +46,7 @@ class ReportTable extends React.Component {
 
     this.state = {
       expandAllOpened: false,
-      expandedGenusIds: new Set(),
+      expandedGenusIds: new Set([BETACORONAVIRUS_GENUS_TAXID]),
       dbType: this.props.initialDbType,
     };
 
