@@ -33,16 +33,18 @@ import MetadataInput from "./MetadataInput";
 const map = _fp.map.convert({ cap: false });
 
 // From https://czi.quip.com/FPnbATvWSIIL/Metadata-Tooltips#AQKACA1SEBr on 2020-02-18.
+// See also descriptions stored in database by MetadataField.
 const COLUMN_HEADER_TOOLTIPS = {
-  host_organism: "Host from which the sample was originally collected.",
-  host_genome: "Host from which the sample was originally collected.", // duplicate of above for backwards compatibility
+  "Sample Name":
+    "The unique name of the sample, derived from the uploaded filename.",
+  "Host Organism": "Host from which the sample was originally collected.",
   collection_date:
     "Date on which sample was originally collected. For privacy reasons, only use month and/or year for human data.",
   collection_location_v2:
     "Location from which sample was originally collected. For privacy reasons, only use country, state, or county/sub-division for human data.",
   nucleotide_type: "Nucleotide type of sample.",
   sample_type:
-    "Tissue or site that most accurately describes sample. Suggested list is dependent on Host selection.",
+    "Tissue or site from which the sample was originally collected. Suggested list is dependent on host selection.",
   water_control: "Whether or not sample is a water control.",
   collected_by: "Institution/agency that collected sample.",
   isolate: "Whether or not sample is an isolate.",
@@ -459,26 +461,27 @@ class MetadataManualInput extends React.Component {
     }
   };
 
-  getColumnHeaders(columns) {
+  getColumnHeaders = columns => {
     return zipObject(
       columns,
       columns.map(column => {
         const label = (this.state.headers || {})[column];
         const content = COLUMN_HEADER_TOOLTIPS[column];
-        return content ? (
-          <ColumnHeaderTooltip
-            key={label}
-            trigger={<span className={cs.label}>{label}</span>}
-            title={label}
-            content={content}
-            link="/metadata/dictionary"
-          />
-        ) : (
-          this.state.headers[column]
-        );
+        if (content) {
+          return (
+            <ColumnHeaderTooltip
+              key={label}
+              trigger={<span className={cs.label}>{label}</span>}
+              title={label}
+              content={content}
+              link="/metadata/dictionary"
+            />
+          );
+        }
+        return label;
       })
     );
-  }
+  };
 
   render() {
     const columns = this.getManualInputColumns();
