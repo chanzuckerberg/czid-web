@@ -420,27 +420,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
         </div>
         <div className={cs.fill} />
         <div className={cs.headerControls}>
-          <div className={cs.vizLinkContainer}>
-            <a
-              className={cs.vizLink}
-              href={params.alignmentVizUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() =>
-                logAnalyticsEvent(
-                  "CoverageVizBottomSidebar_alignment-viz-link_clicked",
-                  {
-                    accessionId: currentAccessionSummary.id,
-                    taxonId: params.taxonId,
-                    sampleId,
-                  }
-                )
-              }
-            >
-              View read-level visualization
-              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-            </a>
-          </div>
+          <div className={cs.vizLinkContainer} />
         </div>
       </div>
     );
@@ -597,24 +577,6 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 Sorry, the coverage visualization is only available for taxons
                 with at least one assembled contig in NT.
               </div>
-              <a
-                className={cs.vizLink}
-                href={params.alignmentVizUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  logAnalyticsEvent(
-                    "CoverageVizBottomSidebar_no-data-alignment-viz-link_clicked",
-                    {
-                      taxonId: params.taxonId,
-                      sampleId,
-                    }
-                  )
-                }
-              >
-                View read-level visualization
-                <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-              </a>
             </div>
             <BacteriaIcon className={cs.icon} />
           </div>
