@@ -1,9 +1,9 @@
-@import "../../themes/colors";
+@import "~styles/themes/colors";
 
-.idseq-ui.input.checkbox {
+.checkbox {
   display: flex;
   position: relative;
-  padding: 0px 0px 0px 30px;
+  padding: 0px 0px 0px 0px;
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -11,27 +11,30 @@
   user-select: none;
   height: 28px;
   align-items: center;
+  justify-content: center;
 
   input[type="checkbox"] {
-    position: absolute;
     opacity: 0;
     cursor: pointer;
   }
 
   .checkmark {
-    position: absolute;
-    top: 6px;
-    left: 6px;
+    position: relative;
     height: 16px;
     width: 16px;
+    flex: none;
     border: 1px solid $light-grey;
     border-radius: 2px;
+    opacity: 100;
+
+    &:hover {
+      border: 1px solid $medium-grey;
+    }
 
     &:after {
       content: "";
-      position: absolute;
+      position: relative;
       display: none;
-
       left: 4px;
       top: 1px;
       width: 6px;
@@ -55,5 +58,6 @@
 
   .label {
     line-height: 18px;
+    padding: 0 10px 0 10px;
   }
 }

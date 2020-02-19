@@ -5,7 +5,7 @@
     email: '<%= current_user.email %>',
     hostGenomes: JSON.parse('<%= raw escape_json(
       # See showAsOption and https://jira.czi.team/browse/IDSEQ-2193.
-      HostGenome.all.select {|h| h.user.nil? }.map(&:name))
+      HostGenome.all.select {|h| h.show_as_option? && !h.ercc_only? }.map(&:name))
     %>')
     }, 'cli_user_instructions');
   <% end %>

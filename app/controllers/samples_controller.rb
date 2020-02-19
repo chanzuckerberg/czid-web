@@ -179,15 +179,19 @@ class SamplesController < ApplicationController
       only: [:id, :name, :host_genome_id, :project_id, :created_at, :public],
       methods: [:private_until]
     )
-    samples_visibility = get_visibility(limited_samples)
 
-    # format_samples loads a lot of information about samples
-    # There are many ways we can refactor: multiple endpoints for client to ask for the information
-    # they actually need or at least a configurable function to get only certain data
-    details_json = format_samples(limited_samples).as_json()
-    limited_samples_json.zip(details_json, samples_visibility).map do |sample, details, visibility|
-      sample[:public] = visibility
-      sample[:details] = details
+    basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
+    # If basic requested, then don't include extra details (ex: metadata) for each sample.
+    unless basic
+      samples_visibility = get_visibility(limited_samples)
+      # format_samples loads a lot of information about samples
+      # There are many ways we can refactor: multiple endpoints for client to ask for the information
+      # they actually need or at least a configurable function to get only certain data
+      details_json = format_samples(limited_samples).as_json()
+      limited_samples_json.zip(details_json, samples_visibility).map do |sample, details, visibility|
+        sample[:public] = visibility
+        sample[:details] = details
+      end
     end
 
     results = { samples: limited_samples_json }
@@ -766,7 +770,7 @@ class SamplesController < ApplicationController
       httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
 
       json =
-        fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "PipelineReport") do
+        fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "samples.report") do
           PipelineReportService.call(pipeline_run, background_id)
         end
     else

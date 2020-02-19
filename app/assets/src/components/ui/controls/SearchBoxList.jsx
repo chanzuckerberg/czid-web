@@ -53,10 +53,14 @@ class SearchBoxList extends React.Component {
     });
     unselectedOptions.sort(sortByLabel);
 
-    return Array.from(selected)
-      .map(optionValue => selectedOptions[optionValue])
-      .sort(sortByLabel)
-      .concat(unselectedOptions);
+    return (
+      Array.from(selected)
+        .map(optionValue => selectedOptions[optionValue])
+        // Filter out any selected fields that aren't present. Otherwise, this will cause an error.
+        .filter(option => option !== undefined)
+        .sort(sortByLabel)
+        .concat(unselectedOptions)
+    );
   }
 
   render() {

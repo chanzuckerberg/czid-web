@@ -71,7 +71,7 @@ module SamplesHelper
     # options for new samples until the team gets a chance to review this policy
     # in light of the data. See also showAsOption.
     # See https://jira.czi.team/browse/IDSEQ-2193.
-    HostGenome.all.select { |h| h.user.nil? }.map { |h| h.slice('name', 'id', 'ercc_only?') }
+    HostGenome.all.select(&:show_as_option?).map { |h| h.slice('name', 'id', 'ercc_only?') }
   end
 
   def get_summary_stats(job_stats_hash, pipeline_run)

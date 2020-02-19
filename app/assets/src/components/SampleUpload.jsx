@@ -386,7 +386,7 @@ class SampleUpload extends React.Component {
     ) {
       this.setState({
         invalid: true,
-        errorMessage: "Please fill in name, host genome and select a project",
+        errorMessage: "Please fill in name, host organism and select a project",
       });
       return true;
     } else if (this.state.sampleName === "") {
@@ -1184,7 +1184,7 @@ class SampleUpload extends React.Component {
                           ""
                         ) : (
                           <div>
-                            <small>No host genome found!</small>
+                            <small>No host organism found!</small>
                           </div>
                         )}
                       </ul>
