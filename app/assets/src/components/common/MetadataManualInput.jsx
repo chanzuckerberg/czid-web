@@ -34,6 +34,7 @@ const map = _fp.map.convert({ cap: false });
 
 // From https://czi.quip.com/FPnbATvWSIIL/Metadata-Tooltips#AQKACA1SEBr on 2020-02-18.
 // See also descriptions stored in database by MetadataField.
+// NOTE: for good layout, text should be no longer than 110 chars.
 const COLUMN_HEADER_TOOLTIPS = {
   "Sample Name":
     "The unique name of the sample, derived from the uploaded filename.",
@@ -41,7 +42,7 @@ const COLUMN_HEADER_TOOLTIPS = {
   collection_date:
     "Date on which sample was originally collected. For privacy reasons, only use month and/or year for human data.",
   collection_location_v2:
-    "Location from which sample was originally collected. For privacy reasons, only use country, state, or county/sub-division for human data.",
+    "Location from which sample was originally collected. For privacy, we do not allow city-level data for human hosts.",
   nucleotide_type: "Nucleotide type of sample.",
   sample_type:
     "Tissue or site from which the sample was originally collected. Suggested list is dependent on host selection.",
@@ -475,6 +476,7 @@ class MetadataManualInput extends React.Component {
               title={label}
               content={content}
               link="/metadata/dictionary"
+              wide={true}
             />
           );
         }
