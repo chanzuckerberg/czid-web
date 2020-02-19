@@ -1272,11 +1272,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def file_generated(s3_path)
-    unless s3_path
-      # Warn of this behavior, still return true to avoid infinite loop in results monitor
-      Rails.logger.warn("Checking for existence of nil file")
-      return true
-    end
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     status.exitstatus.zero?
   end
