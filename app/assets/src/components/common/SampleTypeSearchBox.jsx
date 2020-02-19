@@ -35,7 +35,7 @@ class SampleTypeSearchBox extends React.Component {
       const { taxaCategory } = this.props;
       const isHuman = taxaCategory === "human";
       const isInsect = taxaCategory === "insect";
-      const isNonHumanAnimal = "non-human-animal";
+      const isNonHumanAnimal = taxaCategory === "non-human-animal";
 
       if (sampleType.insect_only) {
         return isInsect ? SUGGESTED : ALL;
