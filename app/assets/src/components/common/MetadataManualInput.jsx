@@ -36,8 +36,6 @@ const map = _fp.map.convert({ cap: false });
 // See also descriptions stored in database by MetadataField.
 // NOTE: for good layout, text should be no longer than 110 chars.
 const COLUMN_HEADER_TOOLTIPS = {
-  "Sample Name":
-    "The unique name of the sample, derived from the uploaded filename.",
   "Host Organism": "Host from which the sample was originally collected.",
   collection_date:
     "Date on which sample was originally collected. For privacy reasons, only use month and/or year for human data.",
@@ -469,13 +467,14 @@ class MetadataManualInput extends React.Component {
         const label = (this.state.headers || {})[column];
         const content = COLUMN_HEADER_TOOLTIPS[column];
         if (content) {
+          const showLink = !["Sample Name", "Host Organism"].includes(column);
           return (
             <ColumnHeaderTooltip
               key={label}
               trigger={<span className={cs.label}>{label}</span>}
               title={label}
               content={content}
-              link="/metadata/dictionary"
+              link={showLink ? "/metadata/dictionary" : null}
               wide={true}
             />
           );
