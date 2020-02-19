@@ -105,6 +105,7 @@ class DiscoveryView extends React.Component {
         filteredProjectCount: null,
         filteredSampleCount: null,
         filteredSampleStats: {},
+        filteredVisualizationCount: null,
         filters: {},
         loadingDimensions: true,
         loadingLocations: true,
@@ -148,6 +149,7 @@ class DiscoveryView extends React.Component {
     });
     this.visualizations = this.dataLayer.visualizations.createView({
       conditions,
+      onViewChange: this.refreshVisualizationData,
       displayName: "VisualizationsViewBase",
     });
     this.mapPreviewProjects = this.projects;
@@ -293,6 +295,7 @@ class DiscoveryView extends React.Component {
         filteredProjectDimensions: [],
         filteredSampleCount: null,
         filteredSampleDimensions: [],
+        filteredVisualizationCount: null,
         filteredSampleStats: {},
         loadingDimensions: true,
         mapSidebarProjectCount: null,
@@ -405,6 +408,12 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  refreshVisualizationData = () => {
+    this.setState({
+      filteredVisualizationCount: this.visualizations.length,
+    });
+  };
+
   refreshMapSidebarProjectData = () => {
     this.setState({
       mapSidebarProjectCount: this.mapPreviewProjects.length,
@@ -472,7 +481,12 @@ class DiscoveryView extends React.Component {
 
   computeTabs = () => {
     const { domain } = this.props;
-    const { projectId, filteredProjectCount, filteredSampleCount } = this.state;
+    const {
+      projectId,
+      filteredProjectCount,
+      filteredSampleCount,
+      filteredVisualizationCount,
+    } = this.state;
 
     const renderTab = (label, count) => {
       return (
@@ -493,7 +507,7 @@ class DiscoveryView extends React.Component {
       },
       domain !== DISCOVERY_DOMAIN_PUBLIC &&
         !projectId && {
-          label: renderTab("Visualizations", this.visualizations.length || "-"),
+          label: renderTab("Visualizations", filteredVisualizationCount || "-"),
           value: "visualizations",
         },
     ]);
