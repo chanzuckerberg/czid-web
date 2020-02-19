@@ -32,6 +32,45 @@ import MetadataInput from "./MetadataInput";
 
 const map = _fp.map.convert({ cap: false });
 
+// From https://czi.quip.com/FPnbATvWSIIL/Metadata-Tooltips#AQKACA1SEBr on 2020-02-18.
+const COLUMN_HEADER_TOOLTIPS = {
+  host_organism: "Host from which the sample was originally collected.",
+  host_genome: "Host from which the sample was originally collected.", // duplicate of above for backwards compatibility
+  collection_date:
+    "Date on which sample was originally collected. For privacy reasons, only use month and/or year for human data.",
+  collection_location_v2:
+    "Location from which sample was originally collected. For privacy reasons, only use country, state, or county/sub-division for human data.",
+  nucleotide_type: "Nucleotide type of sample.",
+  sample_type:
+    "Tissue or site that most accurately describes sample. Suggested list is dependent on Host selection.",
+  water_control: "Whether or not sample is a water control.",
+  collected_by: "Institution/agency that collected sample.",
+  isolate: "Whether or not sample is an isolate.",
+  antibiotic_administered: "Antibiotics administered to host.",
+  comorbidity: "Other chronic diseases present.",
+  host_age: "Age of host (in years).",
+  host_genus_species: "Genus or species of host.",
+  host_id: "Unique identifier for host.",
+  host_race_ethnicity: "Race and-or ethnicity of host.",
+  host_sex: "Sex of host.",
+  immunocomp: "Immunocompromised Information on if host was immunocompromised.",
+  primary_diagnosis: "Diagnosed disease that resulted in hospital admission.",
+  detection_method:
+    "Detection method for the known organism identified by a clinical lab.",
+  infection_class: "Class of infection.",
+  known_organism: "Organism in sample detected by clinical lab.",
+  library_prep: "Information on library prep kit.",
+  rna_dna_input: "RNA/DNA input in nanograms.",
+  sequencer: "Model of sequencer used.",
+  diseases_and_conditions: "Diseases and-or conditions observed in host.",
+  blood_fed: "Information about host's blood feeding.",
+  gravid: "Whether or not host was gravid.",
+  host_life_stage: "Life stage of host.",
+  preservation_method: "Preservation method of host.",
+  sample_unit: "Number of hosts in sample.",
+  trap_type: "Trap type used on host.",
+};
+
 class MetadataManualInput extends React.Component {
   state = {
     selectedFieldNames: [],
@@ -425,14 +464,17 @@ class MetadataManualInput extends React.Component {
       columns,
       columns.map(column => {
         const label = (this.state.headers || {})[column];
-        return (
+        const content = COLUMN_HEADER_TOOLTIPS[column];
+        return content ? (
           <ColumnHeaderTooltip
             key={label}
             trigger={<span className={cs.label}>{label}</span>}
             title={label}
-            content={"TODO"}
-            link={"TODO"}
+            content={content}
+            link="/metadata/dictionary"
           />
+        ) : (
+          this.state.headers[column]
         );
       })
     );
