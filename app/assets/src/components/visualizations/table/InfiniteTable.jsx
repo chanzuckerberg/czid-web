@@ -58,7 +58,7 @@ class InfiniteTable extends React.Component {
   };
 
   loadMoreRows = async ({ startIndex, stopIndex }) => {
-    const { onLoadRows, minimumBatchSize } = this.props;
+    const { onLoadRows, minimumBatchSize, customSampleSortFn } = this.props;
 
     for (let i = startIndex; i <= stopIndex; i++) {
       this.loadedRowsMap[i] = STATUS_LOADING;
@@ -71,6 +71,9 @@ class InfiniteTable extends React.Component {
       .then(newRows => {
         const requestedNumberOfRows = stopIndex - startIndex + 1;
         this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
+        if (customSampleSortFn) {
+          this.rows = customSampleSortFn(this.rows);
+        }
 
         if (requestedNumberOfRows !== newRows.length) {
           this.setState({ rowCount: this.rows.length });
@@ -205,6 +208,8 @@ InfiniteTable.propTypes = {
   rowCount: PropTypes.number,
   defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
   threshold: PropTypes.number,
+  // Sort the rows after they are fetched. This is a hack to allow for specifying a particular order for the
+  customSampleSortFn: PropTypes.func,
 };
 
 export default InfiniteTable;
