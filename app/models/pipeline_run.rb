@@ -1692,8 +1692,7 @@ class PipelineRun < ApplicationRecord
 
         result[prs.name]["steps"][target_name] = {
             "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
-            # Do not send list of files.
-            # "file_list" => file_info,
+            "file_list" => file_info,
             "reads_after" => (job_stats_by_task[target_name] || {})["reads_after"],
         }
       end
