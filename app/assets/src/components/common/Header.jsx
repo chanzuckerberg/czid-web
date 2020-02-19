@@ -363,7 +363,7 @@ const UserMenuDropDown = ({
       <BareDropdown
         trigger={
           <div className={cs.userName}>
-            {!NCOV_PUBLIC_SITE ? userName : "Menu"}
+            {!NCOV_PUBLIC_SITE ? userName : "Terms"}
           </div>
         }
         className={cs.userDropdown}
