@@ -65,10 +65,6 @@ const processRawSample = sample => {
     insertSizeStandardDeviation
   );
 
-  const hasMeanInsertSize =
-    (meanInsertSize || meanInsertSize === 0) &&
-    (insertSizeStandardDeviation || insertSizeStandardDeviation === 0);
-
   const row = {
     sample: {
       name: sample.name,
