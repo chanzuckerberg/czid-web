@@ -40,6 +40,7 @@ class ReviewStep extends React.Component {
     showLessDescription: true,
     showUploadModal: false,
     skipSampleProcessing: false,
+    useNewStepFunctionPipeline: false,
   };
 
   componentDidMount() {
@@ -187,14 +188,32 @@ class ReviewStep extends React.Component {
     });
   };
 
+  toggleUseNewStepFunctionPipeline = () => {
+    this.setState({
+      useNewStepFunctionPipeline: !this.state.useNewStepFunctionPipeline,
+    });
+  };
+
   // This is only for admins and QA testers.
   renderSkipSampleProcessingOption = () => {
     return (
       <Checkbox
-        className={cs.skipSampleProcessingOption}
+        className={cs.sampleProcessingOption}
         checked={this.state.skipSampleProcessing}
         onChange={this.toggleSkipSampleProcessing}
         label="Skip sample processing after upload is complete."
+      />
+    );
+  };
+
+  // This is only for admins and QA testers.
+  renderUseNewStepFunctionPipelineOption = () => {
+    return (
+      <Checkbox
+        className={cs.sampleProcessingOption}
+        checked={this.state.useNewStepFunctionPipeline}
+        onChange={this.toggleUseNewStepFunctionPipeline}
+        label="Use new wdl / step function pipeline."
       />
     );
   };
@@ -234,7 +253,7 @@ class ReviewStep extends React.Component {
     const shouldTruncateDescription =
       project.description && this.countNewLines(project.description) > 5;
 
-    const { userSettings, allowedFeatures } = this.context || {};
+    const { userSettings, allowedFeatures, admin } = this.context || {};
 
     return (
       <div
@@ -357,6 +376,7 @@ class ReviewStep extends React.Component {
           )}
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
+          {admin && this.renderUseNewStepFunctionPipelineOption()}
           <TermsAgreement
             checked={this.state.consentChecked}
             onChange={() =>
