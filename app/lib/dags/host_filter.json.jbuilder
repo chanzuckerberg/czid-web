@@ -79,8 +79,8 @@ json.steps do
     },
     optional_out: [
       'picard_insert_metrics.txt',
-      'insert_size_histogram.pdf'
-    ]
+      'insert_size_histogram.pdf',
+    ],
   }
   steps << {
     in: ['star_out'],
