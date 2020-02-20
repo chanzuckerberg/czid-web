@@ -550,7 +550,6 @@ class PhyloTreeCreation extends React.Component {
                 }
                 placeholder="Tree Name"
                 onChange={this.handleNameChange}
-                value={this.state.treeName}
               />
             </div>
             {this.props.admin === 1 && (
