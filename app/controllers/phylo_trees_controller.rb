@@ -149,7 +149,7 @@ class PhyloTreesController < ApplicationController
 
     # Retrieve pipeline runs that contain the specified taxid.
     eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
-    pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).order(id: :desc).limit(PIPELINE_RUN_IDS_WITH_TAXID_LIMIT).pluck(:id)
+    pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).order(id: :desc).limit(PIPELINE_RUN_IDS_WITH_TAXID_LIMIT).pluck(:pipeline_run_id)
     eligible_pipeline_run_ids_with_taxid =
       eligible_pipeline_runs.where(id: pipeline_run_ids_with_taxid)
                             .order(id: :desc).limit(ELIGIBLE_PIPELINE_RUNS_LIMIT).pluck(:id)
