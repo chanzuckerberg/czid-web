@@ -1,5 +1,5 @@
 import React from "react";
-import { isUndefined, isArray } from "lodash/fp";
+import { isUndefined, isNull, isArray } from "lodash/fp";
 import cx from "classnames";
 
 import { UserContext } from "~/components/common/UserContext";
@@ -15,6 +15,14 @@ import AlertIcon from "~ui/icons/AlertIcon";
 import Toggle from "~ui/controls/Toggle";
 
 import cs from "./metadata_input.scss";
+
+// If value is undefined or null, an empty string should be displayed.
+// However, if the MetadataInput is re-used for different samples, and the second sample has no value
+// a particular metadata field, undefined will be passed to the MetadataInput for that field
+// and the first sample's metadata value will contain to be shown.
+// To avoid this, we explicitly pass in the empty string whenever the field is undefined or null.
+const ensureDefinedValue = value =>
+  isUndefined(value) || isNull(value) ? "" : value;
 
 class MetadataInput extends React.Component {
   constructor(props) {
@@ -118,9 +126,7 @@ class MetadataInput extends React.Component {
           className={className}
           onChange={val => onChange(metadataType.key, val)}
           onBlur={() => onSave && onSave(metadataType.key)}
-          // If value is undefined, an empty string should be displayed.
-          // We need to explicitly pass in the empty string. Otherwise, the previous value will be retained.
-          value={isUndefined(value) ? "" : value}
+          value={ensureDefinedValue(value)}
           placeholder={isHuman ? "YYYY-MM" : "YYYY-MM-DD"}
           type="text"
         />
@@ -164,9 +170,7 @@ class MetadataInput extends React.Component {
           className={className}
           onChange={val => onChange(metadataType.key, val)}
           onBlur={() => onSave && onSave(metadataType.key)}
-          // If value is undefined, an empty string should be displayed.
-          // We need to explicitly pass in the empty string. Otherwise, the previous value will be retained.
-          value={isUndefined(value) ? "" : value}
+          value={ensureDefinedValue(value)}
           type={metadataType.dataType === "number" ? "number" : "text"}
         />
       );
