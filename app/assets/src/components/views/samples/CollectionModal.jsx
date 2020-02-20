@@ -141,12 +141,12 @@ class CollectionModal extends React.Component {
     return (
       <div>
         {backgroundCreationResponse.status === "ok" ? (
-          <Notification type="success">
-            Background is being created and will be visible on the report page
-            once statistics have been computed.
+          <Notification className={cs.notification} type="success">
+            Your Background Model is being created and will be visible on the
+            report page once statistics have been computed.
           </Notification>
         ) : (
-          <Notification type="error">
+          <Notification className={cs.notification} type="error">
             {backgroundCreationResponse.message}
           </Notification>
         )}
@@ -178,7 +178,7 @@ class CollectionModal extends React.Component {
             )}
             className={cs.collectionModal}
           >
-            <div className={cs.title}>Create a Background</div>
+            <div className={cs.title}>Create a Background Model</div>
             <div className={cs.description}>
               A background is a group of samples. You can use a background as a
               statistical model to compare your samples to. When you select a
