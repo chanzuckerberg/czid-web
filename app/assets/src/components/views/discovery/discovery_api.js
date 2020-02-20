@@ -1,5 +1,5 @@
 import { get, map } from "lodash/fp";
-import { numberWithCommas } from "../../../helpers/strings";
+import { numberWithError } from "~/helpers/strings";
 import {
   getProjectDimensions,
   getProjects,
@@ -58,6 +58,11 @@ const processRawSample = sample => {
   const insertSizeStandardDeviation = get(
     "derived_sample_output.pipeline_run.insert_size_standard_deviation",
     sample.details
+  );
+
+  const meanInsertSizeString = numberWithError(
+    meanInsertSize,
+    insertSizeStandardDeviation
   );
 
   const hasMeanInsertSize =
@@ -119,11 +124,7 @@ const processRawSample = sample => {
     ),
     totalRuntime: get("run_info.total_runtime", sample.details),
     waterControl: get("metadata.water_control", sample.details),
-    meanInsertSize: hasMeanInsertSize
-      ? `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
-          insertSizeStandardDeviation
-        )}`
-      : "",
+    meanInsertSize: meanInsertSizeString ? meanInsertSizeString : "",
   };
   return row;
 };

@@ -57,3 +57,16 @@ export function splitIntoMultipleLines(string, maxChars) {
 
   return lines;
 }
+
+/**
+  @function numberWithError
+  @param {Number} x
+  @param {Number} error
+  @return {String|Null} comma separated numbers with error, null if either is not a number
+*/
+export function numberWithError(x, error) {
+  if (typeof x !== "number" || typeof error !== "number") {
+    return null;
+  }
+  return `${numberWithCommas(x)}±${numberWithCommas(error)}`;
+}

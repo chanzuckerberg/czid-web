@@ -1,5 +1,5 @@
 import moment from "moment";
-import { numberWithCommas } from "~/helpers/strings";
+import { numberWithCommas, numberWithError } from "~/helpers/strings";
 
 // Compute display values for Pipeline Info from server response.
 export const processPipelineInfo = additionalInfo => {
@@ -63,14 +63,6 @@ export const processPipelineInfo = additionalInfo => {
       ? summaryStats.compression_ratio.toFixed(2)
       : BLANK_TEXT;
 
-    const meanInsertSize =
-      pipelineRun.insert_size_mean &&
-      numberWithCommas(pipelineRun.insert_size_mean);
-
-    const insertSizeStandardDeviation =
-      pipelineRun.insert_size_standard_deviation &&
-      numberWithCommas(pipelineRun.insert_size_standard_deviation);
-
     pipelineInfo.nonhostReads = {
       text: `${adjustedRemainingReads}${adjustedPercent}`,
     };
@@ -81,12 +73,13 @@ export const processPipelineInfo = additionalInfo => {
       text: moment(summaryStats.last_processed_at).format("YYYY-MM-DD"),
     };
 
-    if (
-      (meanInsertSize || meanInsertSize === 0) &&
-      (insertSizeStandardDeviation || insertSizeStandardDeviation === 0)
-    ) {
-      const withError = `${meanInsertSize}±${insertSizeStandardDeviation}`;
-      pipelineInfo.meanInsertSize = { text: withError };
+    const meanInsertSize = numberWithError(
+      pipelineRun.insert_size_mean,
+      pipelineRun.insert_size_standard_deviation
+    );
+
+    if (meanInsertSize) {
+      pipelineInfo.meanInsertSize = { text: meanInsertSize };
     }
   }
 

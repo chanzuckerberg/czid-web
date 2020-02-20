@@ -1,5 +1,5 @@
 import { get, isFinite } from "lodash/fp";
-import { numberWithCommas } from "~/helpers/strings";
+import { numberWithCommas, numberWithError } from "~/helpers/strings";
 
 const roundToTwo = number => {
   if (!isFinite(number)) return number;
@@ -23,9 +23,10 @@ export const getSampleTableData = sample => {
     "pipeline_run.insert_size_standard_deviation",
     derivedOutput
   );
-  const hasMeanInsertSize =
-    (meanInsertSize || meanInsertSize === 0) &&
-    (insertSizeStandardDeviation || insertSizeStandardDeviation === 0);
+  const meanInsertSizeString = numberWithError(
+    meanInsertSize,
+    insertSizeStandardDeviation
+  );
 
   const data = {
     total_reads: numberWithCommas(
@@ -52,11 +53,7 @@ export const getSampleTableData = sample => {
     collection_location: get("collection_location", metadata),
     host_genome: get("host_genome_name", dbSample),
     notes: get("sample_notes", dbSample),
-    insert_size_mean: hasMeanInsertSize
-      ? `${numberWithCommas(meanInsertSize)}±${numberWithCommas(
-          insertSizeStandardDeviation
-        )}`
-      : "",
+    insert_size_mean: meanInsertSizeString ? meanInsertSizeString : "",
   };
 
   return data;
