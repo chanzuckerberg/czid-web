@@ -70,7 +70,6 @@ class PipelineRun < ApplicationRecord
 
   # Insert size metrics constants
   INSERT_SIZE_METRICS_OUTPUT_NAME = 'picard_insert_metrics.txt'.freeze
-  INSERT_SIZE_HISTOGRAM_OUTPUT_NAME = 'insert_size_histogram.pdf'.freeze
   MEDIAN_INSERT_SIZE_NAME = 'MEDIAN_INSERT_SIZE'.freeze
   MODE_INSERT_SIZE_NAME = 'MODE_INSERT_SIZE'.freeze
   MEDIAN_ABSOLUTE_DEVIATION_NAME = 'MEDIAN_ABSOLUTE_DEVIATION'.freeze
@@ -429,6 +428,15 @@ class PipelineRun < ApplicationRecord
       return metrics[metric_name].to_i
     end
     return nil
+  end
+
+  def should_have_insert_size_metrics
+    pipeline_run_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
+    status = JSON.parse(get_s3_file(pipeline_run_stage.step_status_file_path) || "{}")
+    if status["star_out"] && status["star_out"]["optional_output_files_generated"]
+      return status["star_out"]["optional_output_files_generated"][INSERT_SIZE_METRICS_OUTPUT_NAME]
+    end
+    return false
   end
 
   def db_load_insert_size_metrics
@@ -884,9 +892,8 @@ class PipelineRun < ApplicationRecord
       Resque.enqueue(ResultMonitorLoader, id, output)
     # check if job is done more than a minute ago
     elsif finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
-      # HACK: don't fail for missing insert, size metrics, they are optional
-      #   Doing this may result in missing some errors
-      if output_state.output == "insert_size_metrics"
+      # HACK: only fail if we wenre't expecting insert size metrics
+      if output_state.output == "insert_size_metrics" && !should_have_insert_size_metrics
         output_state.update(state: STATUS_LOADED)
       else
         output_state.update(state: STATUS_FAILED)
@@ -1649,9 +1656,12 @@ class PipelineRun < ApplicationRecord
         output_list.each do |output|
           file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
         end
-        if prs.name == PipelineRunStage::HOST_FILTERING_STAGE_NAME && target_name == 'star_out'
-          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
-          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{INSERT_SIZE_HISTOGRAM_OUTPUT_NAME}"
+
+        step = dag_dict["steps"].detect { |s| s["out"] == target_name }
+        if step && step["optional_out"]
+          step["optional_out"].each do |filename|
+            file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{filename}"
+          end
         end
 
         file_info = []
