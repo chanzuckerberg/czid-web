@@ -95,7 +95,11 @@ class CollectionModal extends React.Component {
     return (
       <div className={cs.form}>
         <div className={cs.label}>Name</div>
-        <Input fluid onChange={this.handleNameChange} />
+        <Input
+          fluid
+          onChange={this.handleNameChange}
+          value={this.state.backgroundName}
+        />
         <div className={cs.label}>
           Description
           <span className={cs.optional}>Optional</span>
