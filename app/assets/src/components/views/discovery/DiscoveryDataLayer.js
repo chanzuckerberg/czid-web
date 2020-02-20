@@ -6,10 +6,25 @@ import {
 } from "./discovery_api";
 
 class ObjectCollection {
-  constructor(domain, apiFunction) {
+  constructor(
+    // domain of the collection (my data, all data, public)
+    domain,
+    // function to fetch data from server
+    // should take the following parametes:
+    // - domain: my_data, public, all_data
+    // - ...conditions: any callback specific filters
+    // - limit: maximum number of results
+    // - offset: number of results to skip
+    // - listAllIds: boolean that indicates if it should retrieve
+    //   a list of all possible IDs
+    fetchDataCallback,
+    // name of the view: mostly used for debug
+    displayName = ""
+  ) {
     this.domain = domain;
     this.entries = {};
-    this.apiFunction = apiFunction;
+    this.fetchDataCallback = fetchDataCallback;
+    this._displayName = displayName;
   }
 
   createView = viewProps => {
@@ -26,13 +41,15 @@ class ObjectCollectionView {
     collection,
     {
       // conditions: Extra conditions to use for this view.
-      // These will be sent to the apiFunction of the corresponding collection when requesting new data.
+      // These will be sent to the fetchDataCallback of the corresponding collection when requesting new data.
       conditions = {},
       // pageSize: Size of the page for this view.
       pageSize = 50,
       // callbacks to notify the client when changes occur
       // onViewChange: triggered when the view finishes loading new object ids (the full list of ids in the view)
       onViewChange = null,
+      // name of the view: mostly used for debug
+      displayName = "",
     }
   ) {
     this._orderedIds = null;
@@ -41,7 +58,7 @@ class ObjectCollectionView {
     this._conditions = conditions;
     this._activePromises = {};
     this._pageSize = pageSize;
-
+    this._displayName = displayName;
     this._onViewChange = onViewChange;
   }
 
@@ -50,20 +67,30 @@ class ObjectCollectionView {
       .filter(id => id in this._collection.entries)
       .map(id => this._collection.entries[id]);
   }
+
   get length() {
     return (this._orderedIds || []).length;
   }
+
   get = id => this._collection.entries[id];
+
   getIds = () => this._orderedIds || [];
+
   getCollectionLength = () => {
     return Object.keys(this._collection.entries).length;
   };
+
   isLoading = () => this._loading;
-  reset = ({ conditions } = {}) => {
+
+  reset = ({ conditions, loadFirstPage = false } = {}) => {
     this._orderedIds = null;
     this._loading = true;
     this._conditions = conditions;
     this._activePromises = {};
+
+    if (loadFirstPage) {
+      this.loadPage(0);
+    }
   };
 
   loadPage = async pageNumber => {
@@ -115,7 +142,7 @@ class ObjectCollectionView {
       const {
         fetchedObjects,
         fetchedObjectIds,
-      } = await this._collection.apiFunction({
+      } = await this._collection.fetchDataCallback({
         domain,
         ...this._conditions,
         limit: maxNeededIdx - minNeededIdx + 1,
@@ -127,7 +154,7 @@ class ObjectCollectionView {
         this._collection.entries[sample.id] = sample;
       });
 
-      // NOTE(tiago): we currently load the ids of ALL objects in the view. This allows using a simple solution to
+      // We currently load the ids of ALL objects in the view. This allows using a simple solution to
       // handle the select all options.
       // It currently works with minimal performance impact, but might need to review in the future, as the number
       // of objects in these views increases
@@ -139,11 +166,9 @@ class ObjectCollectionView {
       this._loading = false;
     }
 
-    const requestedObjects = range(startIndex, minStopIndex + 1)
+    return range(startIndex, minStopIndex + 1)
       .filter(idx => idx in this._orderedIds)
       .map(idx => this._collection.entries[this._orderedIds[idx]]);
-
-    return requestedObjects;
   };
 }
 
