@@ -147,18 +147,19 @@ class PhyloTreesController < ApplicationController
 
     @project = current_power.updatable_projects.find(project_id)
 
-    # Retrieve pipeline runs that contain the specified taxid.
+    # Retrieve the top (most recent) pipeline runs from samples that contains the specified taxid.
     eligible_pipeline_runs = current_power.pipeline_runs.top_completed_runs
     pipeline_run_ids_with_taxid = TaxonByterange.where(taxid: taxid).order(id: :desc).limit(PIPELINE_RUN_IDS_WITH_TAXID_LIMIT).pluck(:pipeline_run_id)
     eligible_pipeline_run_ids_with_taxid =
       eligible_pipeline_runs.where(id: pipeline_run_ids_with_taxid)
                             .order(id: :desc).limit(ELIGIBLE_PIPELINE_RUNS_LIMIT).pluck(:id)
-    # Always include all project runs
+    # Always include the project's top pipeline runs (in case they were excluded due to the ELIGIBLE_PIPELINE_RUNS_LIMIT)
     project_pipeline_run_ids_with_taxid = TaxonByterange.joins(pipeline_run: [{ sample: :project }]).where(taxid: taxid, samples: { project_id: project_id }).pluck(:pipeline_run_id)
+    top_project_pipeline_run_ids_with_taxid = PipelineRun.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs.pluck(:id)
 
     # Retrieve information for displaying the tree's sample list.
     @samples = sample_details_json(
-      (eligible_pipeline_run_ids_with_taxid | project_pipeline_run_ids_with_taxid).uniq,
+      (eligible_pipeline_run_ids_with_taxid | top_project_pipeline_run_ids_with_taxid).uniq,
       taxid
     )
 
