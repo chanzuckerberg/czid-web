@@ -1,5 +1,5 @@
 import React from "react";
-import { isArray } from "lodash/fp";
+import { isUndefined, isArray } from "lodash/fp";
 import cx from "classnames";
 
 import { UserContext } from "~/components/common/UserContext";
@@ -118,7 +118,9 @@ class MetadataInput extends React.Component {
           className={className}
           onChange={val => onChange(metadataType.key, val)}
           onBlur={() => onSave && onSave(metadataType.key)}
-          value={value}
+          // If value is undefined, an empty string should be displayed.
+          // We need to explicitly pass in the empty string. Otherwise, the previous value will be retained.
+          value={isUndefined(value) ? "" : value}
           placeholder={isHuman ? "YYYY-MM" : "YYYY-MM-DD"}
           type="text"
         />
@@ -162,7 +164,9 @@ class MetadataInput extends React.Component {
           className={className}
           onChange={val => onChange(metadataType.key, val)}
           onBlur={() => onSave && onSave(metadataType.key)}
-          value={value}
+          // If value is undefined, an empty string should be displayed.
+          // We need to explicitly pass in the empty string. Otherwise, the previous value will be retained.
+          value={isUndefined(value) ? "" : value}
           type={metadataType.dataType === "number" ? "number" : "text"}
         />
       );
