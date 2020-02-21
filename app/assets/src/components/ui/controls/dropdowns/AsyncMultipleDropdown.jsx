@@ -1,8 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { find, unionBy } from "lodash/fp";
+import { find, unionBy, debounce } from "lodash/fp";
 import MultipleDropdown from "./MultipleDropdown";
-import { debounce } from "lodash/fp";
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 
 class AsyncMultipleDropdown extends React.Component {
