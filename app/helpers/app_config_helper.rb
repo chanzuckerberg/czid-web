@@ -41,6 +41,8 @@ module AppConfigHelper
                            AppConfig::PUBLIC_INDEX_CASE_URL,
                            AppConfig::PUBLIC_INDEX_CASE_URL_WITH_COVERAGE_VIZ,
                            AppConfig::PUBLIC_INDEX_CASE_URL_WITH_OLD_PIPELINE,
+                           AppConfig::PUBLIC_INDEX_CASE_URL_RESEQUENCED,
+                           AppConfig::PUBLIC_INDEX_CASE_URL_ENRICHED,
                            AppConfig::PUBLIC_FAMILY_1_URL,
                            AppConfig::PUBLIC_FAMILY_2_URL,
                            AppConfig::PUBLIC_FAMILY_3_URL,
