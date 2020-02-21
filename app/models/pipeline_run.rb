@@ -428,10 +428,8 @@ class PipelineRun < ApplicationRecord
 
   def should_have_insert_size_metrics
     host_filtering_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
-    status_file = get_s3_file(host_filtering_stage.step_status_file_path)
-    status = JSON.parse(status_file || "{}")
-    optional_outputs = status.dig("star_out", "optional_outputs")
-    return false unless optional_outputs.is_a?(Array)
+    host_filtering_step_statuses = host_filtering_stage.step_statuses
+    optional_outputs = get_optional_outputs(host_filtering_step_statuses, "star_out")
     return optional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
   end
 
@@ -1631,6 +1629,10 @@ class PipelineRun < ApplicationRecord
     ret
   end
 
+  def step_statuses_by_stage
+    pipeline_run_stages.map(&:step_statuses)
+  end
+
   def outputs_by_step(can_see_stage1_results = false)
     # Get map of s3 path to presigned URL and size.
     filename_to_info = {}
@@ -1653,6 +1655,9 @@ class PipelineRun < ApplicationRecord
       targets = dag_dict["targets"]
       given_targets = dag_dict["given_targets"]
       num_steps = targets.length
+      # Fetch step statuses for this stage
+      #   do it before the loop because step_statuses is expensive
+      step_statuses = prs.step_statuses
       targets.each_with_index do |(target_name, output_list), step_idx|
         next if given_targets.keys.include?(target_name)
 
@@ -1661,11 +1666,8 @@ class PipelineRun < ApplicationRecord
           file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
         end
 
-        step = dag_dict["steps"].detect { |s| s["out"] == target_name }
-        if step && step["optional_out"]
-          step["optional_out"].each do |filename|
-            file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{filename}"
-          end
+        get_optional_outputs(step_statuses, target_name).each do |filename|
+          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{filename}"
         end
 
         file_info = []

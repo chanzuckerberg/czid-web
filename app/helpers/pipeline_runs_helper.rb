@@ -254,4 +254,9 @@ module PipelineRunsHelper
 
     return valid_pipeline_runs
   end
+
+  def get_optional_outputs(status, target_name)
+    optional_outputs = status.dig(target_name, "optional_outputs")
+    optional_outputs || []
+  end
 end
