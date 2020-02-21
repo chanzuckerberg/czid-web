@@ -183,7 +183,7 @@ class ReviewStep extends React.Component {
   };
 
   toggleSkipSampleProcessing = () => {
-    const { skipSampleProcessing, useNewStepFunctionPipeline } = this.state;
+    const { skipSampleProcessing } = this.state;
     this.setState({
       skipSampleProcessing: !skipSampleProcessing,
       useNewStepFunctionPipeline: false,
@@ -191,7 +191,7 @@ class ReviewStep extends React.Component {
   };
 
   toggleUseNewStepFunctionPipeline = () => {
-    const { skipSampleProcessing, useNewStepFunctionPipeline } = this.state;
+    const { useNewStepFunctionPipeline } = this.state;
     this.setState({
       useNewStepFunctionPipeline: !useNewStepFunctionPipeline,
       skipSampleProcessing: false,
@@ -265,7 +265,7 @@ class ReviewStep extends React.Component {
     const shouldTruncateDescription =
       project.description && this.countNewLines(project.description) > 5;
 
-    const { userSettings, allowedFeatures, admin } = this.context || {};
+    const { userSettings, allowedFeatures } = this.context || {};
 
     return (
       <div
@@ -383,7 +383,8 @@ class ReviewStep extends React.Component {
           )}
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
-          {admin && this.renderUseNewStepFunctionPipelineOption()}
+          {allowedFeatures.includes("step_function_pipeline") &&
+            this.renderUseNewStepFunctionPipelineOption()}
           <TermsAgreement
             checked={consentChecked}
             onChange={() =>
