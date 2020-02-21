@@ -185,13 +185,11 @@ class RetrievePipelineVizGraphDataService
           file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
           file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end
-        if step["optional_out"]
-          step["optional_out"].each do |filename|
-            if all_step_statuses.dig(stage_index, step["out"], "optional_output_files_generated", filename)
-              file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{filename}"
-              file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
-            end
-          end
+        optional_outputs = all_step_statuses.dig(stage_index, step["out"], "optional_outputs")
+        next unless optional_outputs.is_a?(Array)
+        optional_outputs.each do |filename|
+          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{filename}"
+          file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end
       end
     end

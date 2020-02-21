@@ -150,6 +150,9 @@ class PipelineRun < ApplicationRecord
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts",
                         "insert_size_metrics" => "db_load_insert_size_metrics", }.freeze
+  # Functions for checking if an optional output should have been generated
+  # Don't include optional outputs
+  CHECKERS_BY_OUTPUT = { "insert_size_metrics" => "should_have_insert_size_metrics" }.freeze
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.
@@ -423,20 +426,18 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: total_ercc_reads)
   end
 
-  private def extract_int_metric(metrics, metric_name)
-    if metrics[metric_name]
-      return metrics[metric_name].to_i
-    end
-    return nil
+  def should_have_insert_size_metrics
+    host_filtering_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
+    status_file = get_s3_file(host_filtering_stage.step_status_file_path)
+    status = JSON.parse(status_file || "{}")
+    optional_outputs = status.dig("star_out", "optional_outputs")
+    return false unless optional_outputs.is_a?(Array)
+    return optional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
   end
 
-  def should_have_insert_size_metrics
-    pipeline_run_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
-    status = JSON.parse(get_s3_file(pipeline_run_stage.step_status_file_path) || "{}")
-    if status["star_out"] && status["star_out"]["optional_output_files_generated"]
-      return status["star_out"]["optional_output_files_generated"][INSERT_SIZE_METRICS_OUTPUT_NAME]
-    end
-    return false
+  private def extract_int_metric(metrics, metric_name)
+    return nil unless metrics[metric_name]
+    return metrics[metric_name].to_i
   end
 
   def db_load_insert_size_metrics
@@ -892,11 +893,14 @@ class PipelineRun < ApplicationRecord
       Resque.enqueue(ResultMonitorLoader, id, output)
     # check if job is done more than a minute ago
     elsif finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
-      # HACK: only fail if we wenre't expecting insert size metrics
-      if output_state.output == "insert_size_metrics" && !should_have_insert_size_metrics
-        output_state.update(state: STATUS_LOADED)
-      else
+      checker = CHECKERS_BY_OUTPUT[output_state.output]
+      # If there is no checker, the file should have been generated
+      # If there is a checker use it to check if the file should have been generated
+      should_have_been_generated = !checker || send(checker)
+      if should_have_been_generated
         output_state.update(state: STATUS_FAILED)
+      else
+        output_state.update(state: STATUS_LOADED)
       end
     end
   end
