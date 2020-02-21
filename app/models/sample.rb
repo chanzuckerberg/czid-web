@@ -731,6 +731,7 @@ class Sample < ApplicationRecord
     pr.subsample = subsample || PipelineRun::DEFAULT_SUBSAMPLING
     pr.max_input_fragments = max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
+    pr.pipeline_type = pipeline_type.blank? ? Sample.pipeline_types.directed_acyclic_graph : pipeline_type
     pr.dag_vars = dag_vars if dag_vars
     pr.pipeline_commit = Sample.pipeline_commit(pr.pipeline_branch)
 
