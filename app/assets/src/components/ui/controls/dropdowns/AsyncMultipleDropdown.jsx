@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { find, unionBy } from "lodash/fp";
 import MultipleDropdown from "./MultipleDropdown";
+import { debounce } from "lodash/fp";
+const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 
 class AsyncMultipleDropdown extends React.Component {
   constructor(props) {
@@ -48,13 +50,24 @@ class AsyncMultipleDropdown extends React.Component {
     );
   };
 
-  handleFilterChange = async query => {
+  handleFilterChange = query => {
+    this.loadOptionsForQuery(query);
+  };
+
+  // Debounce this function, so it only runs after the user has not typed for a delay.
+  loadOptionsForQuery = debounce(AUTOCOMPLETE_DEBOUNCE_DELAY, async query => {
+    this._lastQuery = query;
     const { onFilterChange } = this.props;
     const { selectedOptions } = this.state;
     let options = await onFilterChange(query);
 
+    // If the query has since changed, discard the response.
+    if (query != this._lastQuery) {
+      return;
+    }
+
     this.setState({ options: unionBy("value", options, selectedOptions) });
-  };
+  });
 
   render() {
     const { options, selectedOptions } = this.state;
