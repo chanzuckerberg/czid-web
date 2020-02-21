@@ -187,7 +187,7 @@ class RetrievePipelineVizGraphDataService
         end
         if step["optional_out"]
           step["optional_out"].each do |filename|
-            optional_output_files_generated = all_step_statuses[stage_index][step_index]["optional_output_files_generated"]
+            optional_output_files_generated = all_step_statuses[stage_index][step["out"]]["optional_output_files_generated"]
             if optional_output_files_generated && optional_output_files_generated[filename]
               file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{filename}"
               file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
