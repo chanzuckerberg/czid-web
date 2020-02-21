@@ -58,6 +58,8 @@ module AppConfigHelper
       publicIndexCaseUrl: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL],
       publicIndexCaseUrlWithCoverageViz: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_WITH_COVERAGE_VIZ],
       publicIndexCaseUrlWithOldPipeline: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_WITH_OLD_PIPELINE],
+      publicIndexCaseUrlResequenced: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_RESEQUENCED],
+      publicIndexCaseUrlEnriched: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_ENRICHED],
       publicFamily1Url: app_configs[AppConfig::PUBLIC_FAMILY_1_URL],
       publicFamily2Url: app_configs[AppConfig::PUBLIC_FAMILY_2_URL],
       publicFamily3Url: app_configs[AppConfig::PUBLIC_FAMILY_3_URL],

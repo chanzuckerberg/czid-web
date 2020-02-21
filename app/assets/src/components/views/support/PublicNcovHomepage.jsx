@@ -103,17 +103,31 @@ export default class PublicNcovHomepage extends React.Component {
       </ExternalLink>
     );
 
-    const INDEX_CASE_OLD_PIPELINE_LINK = (
+    const INDEX_CASE_RESEQUENCE_LINK = (
       <ExternalLink
         className={cs.link}
-        href={appConfig.publicIndexCaseUrlWithOldPipeline}
+        href={appConfig.publicIndexCaseUrlResequenced}
         onClick={() =>
           logAnalyticsEvent(
-            "PublicNCovHomePage_index-case-old-pipeline-link_clicked"
+            "PublicNCovHomePage_index-case-resequenced-link_clicked"
           )
         }
       >
-        In the first case
+        Re-sequencing of the initial Index Case
+      </ExternalLink>
+    );
+
+    const INDEX_CASE_ENRICHMENT_LINK = (
+      <ExternalLink
+        className={cs.link}
+        href={appConfig.publicIndexCaseUrlEnriched}
+        onClick={() =>
+          logAnalyticsEvent(
+            "PublicNCovHomePage_index-case-enriched-link_clicked"
+          )
+        }
+      >
+        target enrichment strategy
       </ExternalLink>
     );
 
@@ -213,17 +227,17 @@ export default class PublicNcovHomepage extends React.Component {
             SARS-CoV-2 was identified in the {INDEX_CASE_LINK_1}, confirming the
             PCR-positive results. Looking at the {INDEX_CASE_LINK_2} and
             pipeline run with the most recent index you can see that IDseq
-            picked up 582 reads that aligned to the genus Betacoronavirus (1,237
-            by NT, 1,173 by NR) with an average percent identity of 99.9% in NT.
-            IDseq was able to generate 30 contigs from those reads with 45.9%
-            coverage of NCBI accession sequence MN988558.1.
+            picked up 582 reads that aligned to the Wuhan seafood market
+            pneumonia virus (taxID 2697049) with an average percent identity of
+            100% in NT. IDseq was able to generate 26 contigs from those reads
+            with 33.2% coverage of NCBI accession sequence MN985325.1.
           </li>
           <li>
             SARS-CoV-2 or similar pathogens were not found in any of the
             PCR-negative symptomatic family members ({FAMILY_ONE_LINK},{" "}
             {FAMILY_TWO_LINK}
             , {FAMILY_THREE_LINK}) This means that the mNGS results align with
-            the previously given PCR test.
+            their COVID-19 PCR results.
           </li>
           <li>
             In the symptomatic, but PCR-negative family members, IDseq{" "}
@@ -232,21 +246,16 @@ export default class PublicNcovHomepage extends React.Component {
             symptoms.
           </li>
           <li>
-            IDseq was able to successfully provide information on the presence
-            of the novel coronavirus prior to the existence of full reference
-            genomes in the NCBI database. The Index Case sample was run through
-            the IDseq pipeline twice - first using an NCBI index that did not
-            contain the new Wuhan seafood market pneumonia virus and then again
-            with an NCBI index that was generated in February 2020 that did
-            contain the newly identified viral sequences.{" "}
-            {INDEX_CASE_OLD_PIPELINE_LINK}, IDseq correctly picked up a
-            divergent match with SARS-CoV (755 reads in NT and 854 reads in NR
-            with an average percent identity of 91.5% and 88.8%, respectively).
-            In the second case, IDseq correctly identified a match with the new
-            SARS-CoV-2 reference (1,278 reads, at 99.9% identity to the
-            reference sequence). These results indicate that even prior to the
-            addition of the reference sequence to the database, IDseq
-            demonstrated 93% read-level recall.
+            {INDEX_CASE_RESEQUENCE_LINK} in an attempt to obtain full genome
+            coverage resulted in a greater number of reads aligning to
+            SARS-CoV-2 (819 reads, 22 contigs), with limited impact on total
+            coverage.
+          </li>
+          <li>
+            By using a {INDEX_CASE_ENRICHMENT_LINK}, a full-length contig could
+            be assembled with an average depth of 14.9x. The SARS-CoV-2 genome
+            sequence was uploaded to the GISAID repository (accession
+            EPI_ISL_411902).
           </li>
         </ol>
       </NarrowContainer>
