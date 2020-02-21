@@ -93,6 +93,11 @@ class Sample < ApplicationRecord
   # setter
   attr_writer :bulk_mode
 
+  enum pipeline_type: {
+    directed_acyclic_graph: "DAG",
+    step_function: "SFN",
+  }
+
   def sample_path
     File.join('samples', project_id.to_s, id.to_s)
   end

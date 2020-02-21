@@ -43,7 +43,7 @@ export const bulkUploadLocalWithMetadata = async ({
       "name",
       "project_id",
       "do_not_process",
-      "use_step_function_pipeline",
+      "pipeline_type",
     ]),
     samples
   );

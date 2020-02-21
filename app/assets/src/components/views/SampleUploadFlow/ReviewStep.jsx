@@ -40,7 +40,7 @@ class ReviewStep extends React.Component {
     showLessDescription: true,
     showUploadModal: false,
     skipSampleProcessing: false,
-    useNewStepFunctionPipeline: false,
+    useStepFunctionPipeline: false,
   };
 
   componentDidMount() {
@@ -186,42 +186,43 @@ class ReviewStep extends React.Component {
     const { skipSampleProcessing } = this.state;
     this.setState({
       skipSampleProcessing: !skipSampleProcessing,
-      useNewStepFunctionPipeline: false,
+      useStepFunctionPipeline: false,
     });
   };
 
-  toggleUseNewStepFunctionPipeline = () => {
-    const { useNewStepFunctionPipeline } = this.state;
+  toggleUseStepFunctionPipeline = () => {
+    const { useStepFunctionPipeline } = this.state;
     this.setState({
-      useNewStepFunctionPipeline: !useNewStepFunctionPipeline,
+      useStepFunctionPipeline: !useStepFunctionPipeline,
       skipSampleProcessing: false,
     });
   };
 
   // This is only for admins and QA testers.
   renderSkipSampleProcessingOption = () => {
-    const { skipSampleProcessing, useNewStepFunctionPipeline } = this.state;
+    const { skipSampleProcessing, useStepFunctionPipeline } = this.state;
     return (
       <Checkbox
         className={cs.sampleProcessingOption}
-        checked={skipSampleProcessing && !useNewStepFunctionPipeline}
-        disabled={useNewStepFunctionPipeline}
+        checked={skipSampleProcessing && !useStepFunctionPipeline}
+        disabled={useStepFunctionPipeline}
         onChange={this.toggleSkipSampleProcessing}
         label="Skip sample processing after upload is complete."
       />
     );
   };
 
-  // This is only for admins. This option is XOR skipping sample processing.
-  renderUseNewStepFunctionPipelineOption = () => {
-    const { skipSampleProcessing, useNewStepFunctionPipeline } = this.state;
+  // This is only for admins. This option is exclusive with skipping sample processing.
+  // It wouldn't make sense to be able to select both options.
+  renderUseStepFunctionPipelineOption = () => {
+    const { skipSampleProcessing, useStepFunctionPipeline } = this.state;
     return (
       <Checkbox
         className={cs.sampleProcessingOption}
-        checked={useNewStepFunctionPipeline && !skipSampleProcessing}
+        checked={useStepFunctionPipeline && !skipSampleProcessing}
         disabled={skipSampleProcessing}
-        onChange={this.toggleUseNewStepFunctionPipeline}
-        label="Use new wdl / step function pipeline."
+        onChange={this.toggleUseStepFunctionPipeline}
+        label="Use wdl / step function pipeline."
       />
     );
   };
@@ -249,7 +250,7 @@ class ReviewStep extends React.Component {
       showLessDescription,
       skipSampleProcessing,
       consentChecked,
-      useNewStepFunctionPipeline,
+      useStepFunctionPipeline,
     } = this.state;
 
     const {
@@ -384,7 +385,7 @@ class ReviewStep extends React.Component {
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
           {allowedFeatures.includes("step_function_pipeline") &&
-            this.renderUseNewStepFunctionPipelineOption()}
+            this.renderUseStepFunctionPipelineOption()}
           <TermsAgreement
             checked={consentChecked}
             onChange={() =>
@@ -422,7 +423,7 @@ class ReviewStep extends React.Component {
               metadata={processMetadataRows(metadata.rows)}
               project={project}
               skipSampleProcessing={skipSampleProcessing}
-              useNewStepFunctionPipeline={useNewStepFunctionPipeline}
+              useStepFunctionPipeline={useStepFunctionPipeline}
             />
           )}
         </div>
