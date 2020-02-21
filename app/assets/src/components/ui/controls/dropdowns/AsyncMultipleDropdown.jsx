@@ -60,12 +60,11 @@ class AsyncMultipleDropdown extends React.Component {
     const { selectedOptions } = this.state;
     let options = await onFilterChange(query);
 
-    // If the query has since changed, discard the response.
-    if (query != this._lastQuery) {
-      return;
+    // If the query has since changed, discard the response (don't do anything).
+    // Otherwise, update the state with the query response.
+    if (query == this._lastQuery) {
+      this.setState({ options: unionBy("value", options, selectedOptions) });
     }
-
-    this.setState({ options: unionBy("value", options, selectedOptions) });
   });
 
   render() {
