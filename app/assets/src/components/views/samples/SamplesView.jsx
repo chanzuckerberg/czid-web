@@ -34,7 +34,7 @@ const NCOV_PUBLIC_SITE = true;
 
 const NCOV_SAMPLE_ORDER = [
   "Index Case",
-  "Index Case, resquenced",
+  "Index Case, resequenced",
   "Index Case, enriched",
   "Family Member 1",
   "Family Member 2",
