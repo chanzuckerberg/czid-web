@@ -160,7 +160,7 @@ class DiscoveryFilters extends React.Component {
           <TaxonFilter
             domain={domain}
             onChange={this.handleChange.bind(this, "taxonSelected")}
-            selected={taxonSelected}
+            selectedOptions={taxonSelected}
           />
           {this.renderTags("taxon")}
         </div>
