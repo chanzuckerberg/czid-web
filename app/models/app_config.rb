@@ -50,6 +50,8 @@ class AppConfig < ApplicationRecord
   PUBLIC_INDEX_CASE_URL = 'public_index_case_url'.freeze
   PUBLIC_INDEX_CASE_URL_WITH_COVERAGE_VIZ = 'public_index_case_url_with_coverage_viz'.freeze
   PUBLIC_INDEX_CASE_URL_WITH_OLD_PIPELINE = 'public_index_case_url_with_old_pipeline'.freeze
+  PUBLIC_INDEX_CASE_URL_RESEQUENCED = 'public_index_case_url_resequenced'.freeze
+  PUBLIC_INDEX_CASE_URL_ENRICHED = 'public_index_case_url_enriched'.freeze
   PUBLIC_FAMILY_1_URL = 'public_family_1_url'.freeze
   PUBLIC_FAMILY_2_URL = 'public_family_2_url'.freeze
   PUBLIC_FAMILY_3_URL = 'public_family_3_url'.freeze
