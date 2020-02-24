@@ -103,24 +103,38 @@ export default class PublicNcovHomepage extends React.Component {
       </ExternalLink>
     );
 
-    const INDEX_CASE_OLD_PIPELINE_LINK = (
+    const INDEX_CASE_RESEQUENCE_LINK = (
       <ExternalLink
         className={cs.link}
-        href={appConfig.publicIndexCaseUrlWithOldPipeline}
+        href={appConfig.publicIndexCaseUrlResequenced}
         onClick={() =>
           logAnalyticsEvent(
-            "PublicNCovHomePage_index-case-old-pipeline-link_clicked"
+            "PublicNCovHomePage_index-case-resequenced-link_clicked"
           )
         }
       >
-        In the first case
+        Re-sequencing of the initial Index Case
+      </ExternalLink>
+    );
+
+    const INDEX_CASE_ENRICHMENT_LINK = (
+      <ExternalLink
+        className={cs.link}
+        href={appConfig.publicIndexCaseUrlEnriched}
+        onClick={() =>
+          logAnalyticsEvent(
+            "PublicNCovHomePage_index-case-enriched-link_clicked"
+          )
+        }
+      >
+        target enrichment strategy
       </ExternalLink>
     );
 
     return (
       <NarrowContainer className={cs.publicNcovHomepage} size="small">
         <div className={cs.title}>
-          <h1>Wuhan Family Cluster</h1>
+          <h1>COVID-19 Cambodia Family Cluster</h1>
           <div className={cs.fill} />
           <a href={VIEW_SAMPLES_LINK}>
             <NextActionButton
@@ -136,23 +150,24 @@ export default class PublicNcovHomepage extends React.Component {
         <img className={cs.image} src="assets/wuhan_map.png" />
         <h2>Background</h2>
         <p className={cs.large}>
-          Incubation periods and transmissibility are questions of current
-          worldwide concern, but difficult to answer given nonspecific symptoms
-          that represent a variety of respiratory viruses. In this setting,
-          genetic characterization of the virus from geographically diverse
-          patient samples is key to infer the rate of spread. However, as the
-          virus reaches resource-limited settings such as Cambodia, Laos, and
-          Myanmar in proximity to the outbreak’s epicenter, there are basic
-          challenges in sample collection, contact tracing, and surveillance
-          that hinder disease containment, much less the ability to sequence new
-          cases in-country. Implementing in-country sequencing and
-          post-sequencing data analysis speeds up the time to answers, giving
-          scientists in-country more ability to combat emerging infections.
+          Incubation periods and transmissibility of COVID-19 are questions of
+          current worldwide concern, but difficult to answer given nonspecific
+          symptoms that represent a variety of respiratory viruses. In this
+          setting, genetic characterization of the virus from geographically
+          diverse patient samples is key to infer the rate of spread. However,
+          as the virus reaches resource-limited settings such as Cambodia, Laos,
+          and Myanmar in close proximity to the outbreak’s epicenter, there are
+          basic challenges in sample collection, contact tracing, and
+          surveillance that hinder disease containment, much less the ability to
+          sequence new cases in-country. Implementing in-country sequencing and
+          post-sequencing data analysis speeds up the time to pathogen
+          identification, giving scientists in-country the ability to inform
+          leading public health officials to combat emerging infections.
         </p>
         <h2>About</h2>
         <p className={cs.large}>
           In a rapidly implemented response to the nCOV-2019 outbreak, the{" "}
-          <b>CNM-NIAID</b> team and Institut Pasteur used metagenomic
+          <b>NIH-CNM</b> team and Institut Pasteur used metagenomic
           next-generation sequencing (mNGS) and the IDseq bioinformatics
           platform to review the Cambodian index nCOV-2019 case and three sick
           family members, who had tested negative for nCOV-2019, in less than 48
@@ -174,7 +189,7 @@ export default class PublicNcovHomepage extends React.Component {
             world to understand global transmission patterns.
           </li>
         </ol>
-        <h2>What hypothesis did the scientists have going in?</h2>
+        <h2>What were the scientists’ hypotheses?</h2>
         <ol>
           <li>
             While RT-PCR confirmed the first positive case of the novel
@@ -189,20 +204,22 @@ export default class PublicNcovHomepage extends React.Component {
         </ol>
         <h2>How was the data generated?</h2>
         <p className={cs.large}>
-          Institut Pasteur Cambodia conducted the RNA extraction from four
+          Institut Pasteur Cambodia performed the RNA extraction from four
           nasopharyngeal swabs (NPS) from the index case and three symptomatic
           family members. On February 1st, the <b>NIH-CNM</b> team made
-          libraries from the extracted RNA, sequenced the samples on an iSeq100,
-          demuxed the FASTQ files, and downloaded the results from Illumina’s
-          Basespace. The data was then uploaded to IDseq and processed using the
-          latest IDseq database - updated from NCBI on 2019-09-17. While the
-          index did not contain the reference sequences for SARS-CoV-2, which
-          were deposited to NCBI in January 2020, conclusions could still be
-          drawn from the data. IDseq’s NCBI database index was updated on
-          2019-02-10 with the most recent version of NCBI that included the
-          recently added SARS-CoV-2 sequences. The analysis was rerun using the
-          new index to confirm the match to SARS-CoV-2 in the PCR-positive index
-          case.
+          sequencing libraries from the extracted RNA, sequenced the samples on
+          an iSeq100, demultiplexed the FASTQ files, and the results of the
+          sequencing run were compiled into Illumina’s Basespace. The data was
+          then uploaded to IDseq and processed using the latest IDseq database -
+          updated from NCBI on 2019-09-17. While the index did not contain the
+          reference sequences for SARS-CoV-2, which were deposited to NCBI in
+          January 2020, conclusions could still be drawn from the data. IDseq’s
+          NCBI database index was updated on 2019-02-10 with the most recent
+          version of NCBI that included the recently added SARS-CoV-2 sequences.
+          The analysis was rerun using the new NCBI index to confirm the match
+          to SARS-CoV-2 in the PCR-positive index case. Further experiments were
+          done to isolate a full genome sequence for SARS-CoV-2 from the Index
+          Patient.
         </p>
         <h2>What conclusions were drawn from the data?</h2>
         <ol>
@@ -210,17 +227,17 @@ export default class PublicNcovHomepage extends React.Component {
             SARS-CoV-2 was identified in the {INDEX_CASE_LINK_1}, confirming the
             PCR-positive results. Looking at the {INDEX_CASE_LINK_2} and
             pipeline run with the most recent index you can see that IDseq
-            picked up 1,237 reads that aligned to the genus Betacoronavirus
-            (1,237 by NT, 1,173 by NR) with an average percent identity of 99.9%
-            in NT. IDseq was able to generate 30 contigs from those reads with
-            45.9% coverage of NCBI accession sequence MN988558.1.
+            picked up 582 reads that aligned to the Wuhan seafood market
+            pneumonia virus (taxID 2697049) with an average percent identity of
+            100% in NT. IDseq was able to generate 26 contigs from those reads
+            with 33.2% coverage of NCBI accession sequence MN985325.1.
           </li>
           <li>
             SARS-CoV-2 or similar pathogens were not found in any of the
             PCR-negative symptomatic family members ({FAMILY_ONE_LINK},{" "}
             {FAMILY_TWO_LINK}
             , {FAMILY_THREE_LINK}) This means that the mNGS results align with
-            the previously given PCR test.
+            their COVID-19 PCR results.
           </li>
           <li>
             In the symptomatic, but PCR-negative family members, IDseq{" "}
@@ -229,21 +246,16 @@ export default class PublicNcovHomepage extends React.Component {
             symptoms.
           </li>
           <li>
-            IDseq was able to successfully provide information on the presence
-            of the novel coronavirus prior to the existence of full reference
-            genomes in the NCBI database. The Index Case sample was run through
-            the IDseq pipeline twice - first using an NCBI index that did not
-            contain the new Wuhan seafood market pneumonia virus and then again
-            with an NCBI index that was generated in February 2020 that did
-            contain the newly identified viral sequences.{" "}
-            {INDEX_CASE_OLD_PIPELINE_LINK}, IDseq correctly picked up a
-            divergent match with SARS-CoV (755 reads in NT and 854 reads in NR
-            with an average percent identity of 91.5% and 88.8%, respectively).
-            In the second case, IDseq correctly identified a match with the new
-            SARS-CoV-2 reference (1,278 reads, at 99.9% identity to the
-            reference sequence). These results indicate that even prior to the
-            addition of the reference sequence to the database, IDseq
-            demonstrated 93% read-level recall.
+            {INDEX_CASE_RESEQUENCE_LINK} in an attempt to obtain full genome
+            coverage resulted in a greater number of reads aligning to
+            SARS-CoV-2 (819 reads, 22 contigs), with limited impact on total
+            coverage.
+          </li>
+          <li>
+            By using a {INDEX_CASE_ENRICHMENT_LINK}, a full-length contig could
+            be assembled with an average depth of 14.9x. The SARS-CoV-2 genome
+            sequence was uploaded to the GISAID repository (accession
+            EPI_ISL_411902).
           </li>
         </ol>
       </NarrowContainer>
