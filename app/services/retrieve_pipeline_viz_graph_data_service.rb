@@ -176,7 +176,7 @@ class RetrievePipelineVizGraphDataService
           file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end
         step_statuses = step_statuses_by_stage[stage_index]
-        get_optional_outputs(step_statuses, step["out"]).each do |filename|
+        get_additional_outputs(step_statuses, step["out"]).each do |filename|
           file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{filename}"
           file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end

@@ -429,8 +429,8 @@ class PipelineRun < ApplicationRecord
   def should_have_insert_size_metrics
     host_filtering_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
     host_filtering_step_statuses = host_filtering_stage.step_statuses
-    optional_outputs = get_optional_outputs(host_filtering_step_statuses, "star_out")
-    return optional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
+    additional_outputs = get_additional_outputs(host_filtering_step_statuses, "star_out")
+    return additional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
   end
 
   private def extract_int_metric(metrics, metric_name)
@@ -1666,7 +1666,7 @@ class PipelineRun < ApplicationRecord
           file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
         end
 
-        get_optional_outputs(step_statuses, target_name).each do |filename|
+        get_additional_outputs(step_statuses, target_name).each do |filename|
           file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{filename}"
         end
 
