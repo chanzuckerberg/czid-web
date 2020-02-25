@@ -24,7 +24,6 @@ RSpec.describe "Sample API", type: :request do
           name: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17",
           project_id: project.id,
           do_not_process: false,
-          status: Sample::STATUS_UPLOADED,
         }
 
         @metadata_params = {
