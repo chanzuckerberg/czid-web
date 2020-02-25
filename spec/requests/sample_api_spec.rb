@@ -1,0 +1,107 @@
+require 'rails_helper'
+
+RSpec.describe "Sample API", type: :request do
+  create_users
+
+  context 'Joe' do
+    before do
+      sign_in @joe
+    end
+
+    context "with a pre-existing project" do
+      before do
+        # Sample setup
+        project = create(:public_project, users: [@joe])
+        create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
+        @sample_params = {
+          client: "web",
+          host_genome_id: 1,
+          input_files_attributes: [
+            { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz" },
+            { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz" },
+          ],
+          length: 2,
+          name: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17",
+          project_id: project.id,
+          do_not_process: false,
+          status: Sample::STATUS_UPLOADED,
+        }
+
+        @metadata_params = {
+          "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17" => {
+            "sex" => "Female",
+            "age" => 100,
+            "water_control" => "No",
+            "sample_type" => "CSF",
+            "nucleotide_type" => "DNA",
+            "collection_date" => "2020-01",
+            "collection_location_v2" => { "title" => "Santa Barbara, CA", "name" => "Santa Barbara, CA" },
+          },
+        }
+
+        @client_params = "web"
+
+        # stub aws interactions
+        s3 = Aws::S3::Client.new(stub_responses: true)
+        s3.stub_responses(:get_bucket_accelerate_configuration, lambda { |_context|
+          return {
+            status: "Enabled",
+          }
+        })
+        stub_const("S3_CLIENT", s3)
+      end
+
+      describe "when we create a sample via sample upload flow" do
+        it "should properly add the pipeline_type flag, directed_acyclic_graph, to the sample and pipeline run" do
+          pipeline_run_count = PipelineRun.count
+
+          @sample_params[:pipeline_type] = "DAG"
+
+          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          test_sample = Sample.find(sample_id)
+          expect(test_sample.pipeline_type).to eq("directed_acyclic_graph")
+          expect(test_sample.status).to eq(Sample::STATUS_CREATED)
+
+          # we have to call the method manually in testing,
+          # to bypass the file upload process
+          test_sample.kickoff_pipeline
+
+          expect(PipelineRun.count).to eq(pipeline_run_count + 1)
+          pipeline_run = test_sample.pipeline_runs[0]
+          expect(pipeline_run.pipeline_type).to eq("directed_acyclic_graph")
+        end
+
+        it "should properly add the pipeline_type flag, step_function, to the sample and pipeline run" do
+          pipeline_run_count = PipelineRun.count
+
+          @sample_params[:pipeline_type] = "SFN"
+
+          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          test_sample = Sample.find(sample_id)
+          expect(test_sample.pipeline_type).to eq("step_function")
+          expect(test_sample.status).to eq(Sample::STATUS_CREATED)
+
+          # we have to call the method manually in testing,
+          # to bypass the file upload process
+          test_sample.kickoff_pipeline
+
+          expect(PipelineRun.count).to eq(pipeline_run_count + 1)
+          pipeline_run = test_sample.pipeline_runs[0]
+          expect(pipeline_run.pipeline_type).to eq("step_function")
+        end
+      end
+    end
+  end
+end
