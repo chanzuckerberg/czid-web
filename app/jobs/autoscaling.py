@@ -74,83 +74,90 @@ def autoscaling_update(config):
           You can provision machines for development jobs by manually setting MinSize on the ASGs,
           which is respected by this autoscaler.
     '''
-    my_environment = config['my_environment']
-    if my_environment == "development":
-        return
+    try:
+        my_environment = config['my_environment']
+        if my_environment == "development":
+            return
 
-    asg_list = get_asg_list()
-    tag_list = get_tag_list()
-    gsnap_ASG = ASG("gsnapl", asg_list, tag_list, config)
-    rapsearch_ASG = ASG("rapsearch2", asg_list, tag_list, config)
-    if not (gsnap_ASG.can_scale and rapsearch_ASG.can_scale):
-        print "Scaling by agents of {my_environment} is not permitted.".format(my_environment=my_environment)
-        return
+        asg_list = get_asg_list()
+        tag_list = get_tag_list()
+        gsnap_ASG = ASG("gsnapl", asg_list, tag_list, config)
+        rapsearch_ASG = ASG("rapsearch2", asg_list, tag_list, config)
+        if not (gsnap_ASG.can_scale and rapsearch_ASG.can_scale):
+            print "Scaling by agents of {my_environment} is not permitted.".format(my_environment=my_environment)
+            return
 
-    for service_ASG in [gsnap_ASG, rapsearch_ASG]:
-        print "--- Analyzing the {instance_name} ASG ---".format(instance_name=service_ASG.instance_name)
-        num_desired = service_ASG.desired_capacity()
-        available_instances, draining_instances, discarded_instances, terminating_instances, is_valid_classification = service_ASG.classify_instances()
-        num_available = len(available_instances)
-        num_draining = len(draining_instances)
-        num_discarded = len(discarded_instances)
-        print "CURRENTLY:"
-        print "The desired capacity is {num_desired}.".format(num_desired=num_desired)
-        print "There are {num_available} available instances: {available_instances}.".format(num_available=num_available, available_instances=available_instances)
-        print "There are {num_draining} draining instances: {draining_instances}.".format(num_draining=num_draining, draining_instances=draining_instances)
-        print "There are {num_discarded} discarded instances: {discarded_instances}.".format(num_discarded=num_discarded, discarded_instances=discarded_instances)
-        print "There are {num_terminating} terminating instances: {terminating_instances}.".format(num_terminating=len(terminating_instances), terminating_instances=terminating_instances)
-        if not is_valid_classification:
-            print "WARNING: some instances were classified into multiple states or none. This should never happen."
+        for service_ASG in [gsnap_ASG, rapsearch_ASG]:
+            print "--- Analyzing the {instance_name} ASG ---".format(instance_name=service_ASG.instance_name)
+            num_desired = service_ASG.desired_capacity()
+            available_instances, draining_instances, discarded_instances, terminating_instances, is_valid_classification = service_ASG.classify_instances()
+            num_available = len(available_instances)
+            num_draining = len(draining_instances)
+            num_discarded = len(discarded_instances)
+            print "CURRENTLY:"
+            print "The desired capacity is {num_desired}.".format(num_desired=num_desired)
+            print "There are {num_available} available instances: {available_instances}.".format(num_available=num_available, available_instances=available_instances)
+            print "There are {num_draining} draining instances: {draining_instances}.".format(num_draining=num_draining, draining_instances=draining_instances)
+            print "There are {num_discarded} discarded instances: {discarded_instances}.".format(num_discarded=num_discarded, discarded_instances=discarded_instances)
+            print "There are {num_terminating} terminating instances: {terminating_instances}.".format(num_terminating=len(terminating_instances), terminating_instances=terminating_instances)
+            if not is_valid_classification:
+                print "WARNING: some instances were classified into multiple states or none. This should never happen."
 
-        print "CHUNKS IN PROGRESS: {num_chunks}".format(num_chunks=service_ASG.num_chunks)
+            print "CHUNKS IN PROGRESS: {num_chunks}".format(num_chunks=service_ASG.num_chunks)
 
-        raw_new_num_desired = service_ASG.required_capacity()
-        print "MOVING FORWARD:"
-        print "In principle, the desired capacity needs to be {raw_new_num_desired}.".format(raw_new_num_desired=raw_new_num_desired)
-        new_num_desired = service_ASG.clamp_to_valid_range(raw_new_num_desired)
-        print "Enforcing the MinSize and MaxSize set by the operator, the desired capacity should be set to {new_num_desired}.".format(new_num_desired=new_num_desired)
-        if new_num_desired > num_desired and num_discarded != 0:
-            print ("Some instances have not yet moved from 'discarded' to 'terminating' state by AWS. "
-                   "Postponing DesiredCapacity increase to the next incarnation to avoid creating zombie instances.")
-        else:
-            print "Applying DesiredCapacity {new_num_desired}.".format(new_num_desired=new_num_desired)
-            service_ASG.set_desired_capacity(new_num_desired)
-            if service_ASG.num_chunks == 0 and new_num_desired == 0 and num_available + num_draining > 0:
-                print "Discarding all {instance_name} instances immediately without draining.".format(instance_name=service_ASG.instance_name)
-                # Note: safety here relies on the fact that the pipeline monitor is single-threaded, so no new stages can be dispatched
-                # between the 'num_chunks == 0' measurement and the discardment of the instances. The web app is also unable to dispatch any
-                # stage 2 jobs by itself -- it can only dispatch stage 1 jobs (new sample uploads), which do not call gsnap/rapsearch ASGs until
-                # the pipeline_monitor moves them along to stage 2.
-                service_ASG.remove_scalein_protection(available_instances + draining_instances)
-                continue
+            raw_new_num_desired = service_ASG.required_capacity()
+            print "MOVING FORWARD:"
+            print "In principle, the desired capacity needs to be {raw_new_num_desired}.".format(raw_new_num_desired=raw_new_num_desired)
+            new_num_desired = service_ASG.clamp_to_valid_range(raw_new_num_desired)
+            print "Enforcing the MinSize and MaxSize set by the operator, the desired capacity should be set to {new_num_desired}.".format(new_num_desired=new_num_desired)
+            if new_num_desired > num_desired and num_discarded != 0:
+                print ("Some instances have not yet moved from 'discarded' to 'terminating' state by AWS. "
+                    "Postponing DesiredCapacity increase to the next incarnation to avoid creating zombie instances.")
+            else:
+                print "Applying DesiredCapacity {new_num_desired}.".format(new_num_desired=new_num_desired)
+                service_ASG.set_desired_capacity(new_num_desired)
+                if service_ASG.num_chunks == 0 and new_num_desired == 0 and num_available + num_draining > 0:
+                    print "Discarding all {instance_name} instances immediately without draining.".format(instance_name=service_ASG.instance_name)
+                    # Note: safety here relies on the fact that the pipeline monitor is single-threaded, so no new stages can be dispatched
+                    # between the 'num_chunks == 0' measurement and the discardment of the instances. The web app is also unable to dispatch any
+                    # stage 2 jobs by itself -- it can only dispatch stage 1 jobs (new sample uploads), which do not call gsnap/rapsearch ASGs until
+                    # the pipeline_monitor moves them along to stage 2.
+                    service_ASG.remove_scalein_protection(available_instances + draining_instances)
+                    continue
 
-        print "AVAILABLE <--> DRAINING transitions:"
-        service_ASG.draining_instances = draining_instances
-        if new_num_desired < num_available:
-            num_to_drain = num_available - new_num_desired
-            print "{num_to_drain} instances need to be drained.".format(num_to_drain=num_to_drain)
-            instances_to_drain = service_ASG.start_draining(num_to_drain)
-            print "Moved {instances_to_drain} from 'available' to 'draining' state.".format(instances_to_drain=instances_to_drain)
-        elif new_num_desired > num_available and num_draining > 0:
-            num_to_rescue = min(new_num_desired - num_available, num_draining)
-            print "{num_to_rescue} instances need to stop draining.".format(num_to_rescue=num_to_rescue)
-            instances_to_rescue = service_ASG.stop_draining(num_to_rescue)
-            print "Moved {instances_to_rescue} from 'draining' to 'available' state.".format(instances_to_rescue=instances_to_rescue)
-        else:
-            print "No instances need to make an AVAILABLE <--> DRAINING transition."
+            print "AVAILABLE <--> DRAINING transitions:"
+            service_ASG.draining_instances = draining_instances
+            if new_num_desired < num_available:
+                num_to_drain = num_available - new_num_desired
+                print "{num_to_drain} instances need to be drained.".format(num_to_drain=num_to_drain)
+                instances_to_drain = service_ASG.start_draining(num_to_drain)
+                print "Moved {instances_to_drain} from 'available' to 'draining' state.".format(instances_to_drain=instances_to_drain)
+            elif new_num_desired > num_available and num_draining > 0:
+                num_to_rescue = min(new_num_desired - num_available, num_draining)
+                print "{num_to_rescue} instances need to stop draining.".format(num_to_rescue=num_to_rescue)
+                instances_to_rescue = service_ASG.stop_draining(num_to_rescue)
+                print "Moved {instances_to_rescue} from 'draining' to 'available' state.".format(instances_to_rescue=instances_to_rescue)
+            else:
+                print "No instances need to make an AVAILABLE <--> DRAINING transition."
 
-        print "DRAINING --> DISCARDED transitions:"
-        instances_to_discard = service_ASG.discard_if_safe()
-        num_to_discard = len(instances_to_discard)
-        if num_to_discard > 0:
-            print "{num_to_discard} instances have finished draining and can be discarded: {instances_to_discard}.".format(num_to_discard=num_to_discard, instances_to_discard=instances_to_discard)
-        else:
-            print "No instances are ready to move from 'draining' to 'discarded' state."
+            print "DRAINING --> DISCARDED transitions:"
+            instances_to_discard = service_ASG.discard_if_safe()
+            num_to_discard = len(instances_to_discard)
+            if num_to_discard > 0:
+                print "{num_to_discard} instances have finished draining and can be discarded: {instances_to_discard}.".format(num_to_discard=num_to_discard, instances_to_discard=instances_to_discard)
+            else:
+                print "No instances are ready to move from 'draining' to 'discarded' state."
 
-    if 'batch_configurations' in config:
-        print "Autoscaling batches:"
-        response_batch_autoscaling = batch_autoscaling.autoscale_compute_environments(config['batch_configurations'])
-        print json.dumps(response_batch_autoscaling, default=_default_json_serializer)
+        if 'batch_configurations' in config:
+            print "Autoscaling batches:"
+            response_batch_autoscaling = batch_autoscaling.autoscale_compute_environments(config['batch_configurations'])
+            print json.dumps(response_batch_autoscaling, default=_default_json_serializer)
+    except Exception as error:
+        # If any error occurs while performing an autoscaling update, append [Datadog] to ensure that the log is
+        # forwarded to Datadog.
+        # TODO(julie): Note that this is part of a temporary stopgap measure as we move away from Datadog and should be
+        # reverted once we transition to CloudWatch (or other replacements).
+        print "[Datadog] ", error
 
 
 def _default_json_serializer(obj):
