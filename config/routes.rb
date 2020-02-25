@@ -177,9 +177,10 @@ Rails.application.routes.draw do
     get :sample_locations, on: :collection
   end
 
-  authenticate :auth0_user, ->(u) { u.admin? } do
-    mount RESQUE_SERVER, at: "/resque"
-  end
+  # Replaced Warden 'authenticate' with BasicAuth in ApplicationController.
+  # authenticate :auth0_user, ->(u) { u.admin? } do
+  #   mount RESQUE_SERVER, at: "/resque"
+  # end
 
   # See health_check gem
   get 'health_check' => "health_check/health_check#index"
