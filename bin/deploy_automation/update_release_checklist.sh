@@ -64,7 +64,7 @@ __add_commits_to_checklist_body() {
 
   declare old_IFS="$IFS"
   IFS=$'\n'
-  for commit in $(git log --date-order --pretty=format:$'* [ ] %h - % %s %d (%cD) **%an**' "${source_commit}..${target_commit}")
+  for commit in $(git log --date-order --abbrev=8 --pretty=format:$'* [ ] %h - % %s %d (%cD) **%an**' "${source_commit}..${target_commit}")
   do
     declare sha="${commit:6:8}"
     if ( grep -qE '^\* \[.\]\s*'"$sha"' - ' <<< "$new_checklist_body" )
