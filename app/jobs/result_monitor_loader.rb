@@ -15,7 +15,7 @@ class ResultMonitorLoader
       # TODO: revisit this
       sleep(Time.now.to_i % 30)
       output_state.update(state: PipelineRun::STATUS_LOADING_ERROR)
-      message = "SampleFailedEvent: Pipeline Run #{pr.id} for Sample #{pr.sample.id} by #{pr.sample.user.email} failed loading #{output} with #{pr.adjusted_remaining_reads || 0} reads remaining after #{pr.duration_hrs} hours. See: #{pr.status_url}"
+      message = "[Datadog] SampleFailedEvent: Pipeline Run #{pr.id} for Sample #{pr.sample.id} by #{pr.sample.user.email} failed loading #{output} with #{pr.adjusted_remaining_reads || 0} reads remaining after #{pr.duration_hrs} hours. See: #{pr.status_url}"
       LogUtil.log_err_and_airbrake(message)
       raise
     end
