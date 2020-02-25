@@ -155,9 +155,11 @@ def autoscaling_update(config):
     except Exception as error:
         # If any error occurs while performing an autoscaling update, append [Datadog] to ensure that the log is
         # forwarded to Datadog.
-        # TODO(julie): Note that this is part of a temporary stopgap measure as we move away from Datadog and should be
+        # TODO(julie 2/25/20): Note that this is part of a temporary stopgap measure as we move away from Datadog and should be
         # reverted once we transition to CloudWatch (or other replacements).
+        # See JIRA IDSEQ-2236
         print "[Datadog] ", error
+        raise error
 
 
 def _default_json_serializer(obj):
