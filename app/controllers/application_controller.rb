@@ -1,6 +1,11 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
+  # NOTE: This is for public preview purposes only and not regular user auth.
+  PUBLIC_PREVIEW_USER = AppConfigHelper.get_app_config(AppConfig::PUBLIC_PREVIEW_USER) || SecureRandom.base64
+  PUBLIC_PREVIEW_KEY = AppConfigHelper.get_app_config(AppConfig::PUBLIC_PREVIEW_KEY) || SecureRandom.base64
+  http_basic_authenticate_with name: PUBLIC_PREVIEW_USER, password: PUBLIC_PREVIEW_KEY
+
   before_action :authenticate_user!
   before_action :check_for_maintenance
   before_action :check_rack_mini_profiler
