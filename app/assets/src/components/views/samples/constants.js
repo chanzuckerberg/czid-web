@@ -68,7 +68,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   },
   meanInsertSize: {
     tooltip:
-      "Mean length of the fragmented nucleic acid sequences input for sequencing, computed by Picard CollectInsertSizeMetrics.",
+      "Mean length of the fragmented nucleic acid sequences input for sequencing.",
     link: DOC_BASE_LINK + "360034790554-Pipeline-Details",
   },
 };

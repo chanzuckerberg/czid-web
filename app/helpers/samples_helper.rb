@@ -106,12 +106,18 @@ module SamplesHelper
     pr.adjusted_remaining_reads unless pr.nil?
   end
 
+  def get_insert_size_metric_set(pr)
+    return pr.insert_size_metric_set unless pr.nil?
+  end
+
   def get_insert_size_mean(pr)
-    pr.dig(:insert_size_metric_set, :mean) unless pr.nil?
+    insert_size_metric_set = get_insert_size_metric_set(pr)
+    insert_size_metric_set.mean unless insert_size_metric_set.nil?
   end
 
   def get_insert_size_standard_deviation(pr)
-    pr.dig(:insert_size_metric_set, :standard_deviation) unless pr.nil?
+    insert_size_metric_set = get_insert_size_metric_set(pr)
+    insert_size_metric_set.standard_deviation unless insert_size_metric_set.nil?
   end
 
   def compute_compression_ratio(job_stats_hash)

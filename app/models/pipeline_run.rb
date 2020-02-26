@@ -27,7 +27,7 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :ercc_counts
   accepts_nested_attributes_for :amr_counts
   accepts_nested_attributes_for :contigs
-  accepts_nested_attributes_for :insert_size_metric_sets
+  accepts_nested_attributes_for :insert_size_metric_set
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
