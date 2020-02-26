@@ -82,13 +82,14 @@ jobs:
         - ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
         - npm test
     - name: "Docker Build"
-      language: python
+      language: shell
       services:
         - docker
       cache: pip
       before_script:
         # Need to install the AWS command line to authenticate to ECR.
-        - pip install awscli
+        # Need to use user to avoid permission error on Travis CI when using shell language.
+        - pip install --user awscli
         # Need to set the region to do ECR authentication.
         - aws configure set default.region ${AWS_REGION}
         - $(aws ecr get-login --no-include-email)

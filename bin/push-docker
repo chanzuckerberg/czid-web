@@ -11,19 +11,20 @@ echo $REPO
 echo $TAG
 echo '--'
 
-# Retry up to 5 times total if failed Docker push
+# Retry up to 5 times total if we fail to push to Amazon ECR
 run=1
 count=1
 while [ $run -eq 1 ] ; do
-    echo "Trying Docker push..."
+    echo "Trying Amazon ECR push..."
     docker push $REPO
     if [ $? -eq 0 ]; then  # Success
         run=0
         break
     fi
+    echo "Failed. Trying again in 15s..."
     if [ $count -ge 5 ]; then
         run=0
-        echo "Error: Exceeded retries with Docker."
+        echo "Error: Exceeded max retries pushing to Amazon ECR."
         exit 1
     fi
     count=$((count+1))
