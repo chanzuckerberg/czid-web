@@ -1,4 +1,6 @@
 #!/bin/bash
+# NOTE: We push all created tags to the Docker repo, but only the commit, branch, and latest tags matter.
+# Cache and compose are noise.
 set -e
 
 export REPO="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web"
