@@ -53,7 +53,7 @@ export const getSampleTableData = sample => {
     collection_location: get("collection_location", metadata),
     host_genome: get("host_genome_name", dbSample),
     notes: get("sample_notes", dbSample),
-    insert_size_mean: meanInsertSizeString ? meanInsertSizeString : "",
+    insert_size_mean: meanInsertSizeString || "",
   };
 
   return data;

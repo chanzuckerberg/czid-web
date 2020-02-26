@@ -61,12 +61,12 @@ export function splitIntoMultipleLines(string, maxChars) {
 /**
   @function numberWithPlusOrMinus
   @param {Number} x
-  @param {Number} error
+  @param {Number} y
   @return {String|Null} comma separated numbers with error, null if either is not a number
 */
-export function numberWithPlusOrMinus(x, error) {
-  if (typeof x !== "number" || typeof error !== "number") {
+export function numberWithPlusOrMinus(x, y) {
+  if (typeof x !== "number" || typeof y !== "number") {
     return null;
   }
-  return `${numberWithCommas(x)}±${numberWithCommas(error)}`;
+  return `${numberWithCommas(Math.round(x))}±${Math.round(y)}`;
 }

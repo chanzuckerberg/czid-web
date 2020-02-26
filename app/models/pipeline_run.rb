@@ -443,6 +443,11 @@ class PipelineRun < ApplicationRecord
     return metrics[metric_name].to_i
   end
 
+  private def extract_float_metric(metrics, metric_name)
+    return nil unless metrics[metric_name]
+    return metrics[metric_name].to_f
+  end
+
   def db_load_insert_size_metrics
     insert_size_metrics_s3_path = "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", insert_size_metrics_s3_path)
@@ -476,8 +481,8 @@ class PipelineRun < ApplicationRecord
         median_absolute_deviation: extract_int_metric(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME),
         min: extract_int_metric(insert_size_metrics, MIN_INSERT_SIZE_NAME),
         max: extract_int_metric(insert_size_metrics, MAX_INSERT_SIZE_NAME),
-        mean: extract_int_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME),
-        standard_deviation: extract_int_metric(insert_size_metrics, STANDARD_DEVIATION_NAME),
+        mean: extract_float_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME),
+        standard_deviation: extract_float_metric(insert_size_metrics, STANDARD_DEVIATION_NAME),
         read_pairs: extract_int_metric(insert_size_metrics, READ_PAIRS_NAME),
       }
     )
