@@ -1037,7 +1037,7 @@ class PipelineRun < ApplicationRecord
     automatic_restart_text = automatic_restart ? "Automatic restart is being triggered. " : "** Manual action required **. "
     known_user_error = known_user_error ? "Known user error #{known_user_error}. " : ""
 
-    "SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
+    "[Datadog] SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
       "after #{duration_hrs} hours. #{automatic_restart_text}#{known_user_error}"\
       "See: #{status_url}"
   end
@@ -1093,7 +1093,7 @@ class PipelineRun < ApplicationRecord
       # NOTE (2019-08-02): Based on the last 3000 successful samples, only 0.17% took longer than 12 hours.
       threshold = 12.hours
       if run_time > threshold
-        msg = "LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
+        msg = "[Datadog] LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
           "See: #{status_url}"
         LogUtil.log_err_and_airbrake(msg)
         update(alert_sent: 1)

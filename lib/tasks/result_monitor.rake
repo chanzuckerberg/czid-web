@@ -54,7 +54,7 @@ class MonitorPipelineResults
     samples = Sample.current_stalled_local_uploads(18.hours)
     unless samples.empty?
       LogUtil.log_err_and_airbrake(
-        "SampleFailedEvent: Failed to upload local samples after 18 hours #{samples.pluck(:id)}"
+        "[Datadog] SampleFailedEvent: Failed to upload local samples after 18 hours #{samples.pluck(:id)}"
       )
       samples.update_all( # rubocop:disable Rails/SkipsModelValidations
         status: Sample::STATUS_CHECKED,
