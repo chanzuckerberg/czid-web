@@ -74,8 +74,8 @@ export const processPipelineInfo = additionalInfo => {
     };
 
     const meanInsertSize = numberWithPlusOrMinus(
-      pipelineRun.insert_size_mean,
-      pipelineRun.insert_size_standard_deviation
+      summaryStats.insert_size_mean,
+      summaryStats.insert_size_standard_deviation
     );
 
     if (meanInsertSize) {

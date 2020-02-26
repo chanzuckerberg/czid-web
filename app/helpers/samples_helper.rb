@@ -60,14 +60,14 @@ module SamplesHelper
                         collection_location: collection_location,
                         host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
                         notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '',
-                        insert_size_median: pipeline_run ? pipeline_run.insert_size_median : '',
-                        insert_size_mode: pipeline_run ? pipeline_run.insert_size_mode : '',
-                        insert_size_median_absolute_deviation: pipeline_run ? pipeline_run.insert_size_median_absolute_deviation : '',
-                        insert_size_min: pipeline_run ? pipeline_run.insert_size_min : '',
-                        insert_size_max: pipeline_run ? pipeline_run.insert_size_max : '',
-                        insert_size_mean: pipeline_run ? pipeline_run.insert_size_mean : '',
-                        insert_size_standard_deviation: pipeline_run ? pipeline_run.insert_size_standard_deviation : '',
-                        insert_size_read_pairs: pipeline_run ? pipeline_run.insert_size_read_pairs : '', }
+                        insert_size_median: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :median) : '',
+                        insert_size_mode: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :mode) : '',
+                        insert_size_median_absolute_deviation: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :median_absolute_deviation) : '',
+                        insert_size_min: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :min) : '',
+                        insert_size_max: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :max) : '',
+                        insert_size_mean: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :mean) : '',
+                        insert_size_standard_deviation: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :standard_deviation) : '',
+                        insert_size_read_pairs: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :read_pairs) : '', }
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end
@@ -92,6 +92,8 @@ module SamplesHelper
       qc_percent: compute_qc_value(job_stats_hash),
       percent_remaining: compute_percentage_reads(pr),
       unmapped_reads: unmapped_reads,
+      insert_size_mean: get_insert_size_mean(pr),
+      insert_size_standard_deviation: get_insert_size_standard_deviation(pr),
       last_processed_at: last_processed_at,
     }
     ["star", "trimmomatic", "priceseq", "cdhitdup"].each do |step|
@@ -102,6 +104,14 @@ module SamplesHelper
 
   def get_adjusted_remaining_reads(pr)
     pr.adjusted_remaining_reads unless pr.nil?
+  end
+
+  def get_insert_size_mean(pr)
+    pr.dig(:insert_size_metric_set, :mean) unless pr.nil?
+  end
+
+  def get_insert_size_standard_deviation(pr)
+    pr.dig(:insert_size_metric_set, :standard_deviation) unless pr.nil?
   end
 
   def compute_compression_ratio(job_stats_hash)

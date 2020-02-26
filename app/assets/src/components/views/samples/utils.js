@@ -18,9 +18,9 @@ export const getSampleTableData = sample => {
     metadata,
   } = sample;
 
-  const meanInsertSize = get("pipeline_run.insert_size_mean", derivedOutput);
+  const meanInsertSize = get("summary_stats.insert_size_mean", derivedOutput);
   const insertSizeStandardDeviation = get(
-    "pipeline_run.insert_size_standard_deviation",
+    "summary_stats.insert_size_standard_deviation",
     derivedOutput
   );
   const meanInsertSizeString = numberWithPlusOrMinus(

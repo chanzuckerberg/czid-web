@@ -20,12 +20,14 @@ class PipelineRun < ApplicationRecord
   has_many :ercc_counts, dependent: :destroy
   has_many :amr_counts, dependent: :destroy
   has_many :contigs, dependent: :destroy
+  has_one :insert_size_metric_set, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
   accepts_nested_attributes_for :amr_counts
   accepts_nested_attributes_for :contigs
+  accepts_nested_attributes_for :insert_size_metric_sets
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
@@ -468,14 +470,16 @@ class PipelineRun < ApplicationRecord
     end
 
     update(
-      insert_size_median: extract_int_metric(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME),
-      insert_size_mode: extract_int_metric(insert_size_metrics, MODE_INSERT_SIZE_NAME),
-      insert_size_median_absolute_deviation: extract_int_metric(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME),
-      insert_size_min: extract_int_metric(insert_size_metrics, MIN_INSERT_SIZE_NAME),
-      insert_size_max: extract_int_metric(insert_size_metrics, MAX_INSERT_SIZE_NAME),
-      insert_size_mean: extract_int_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME),
-      insert_size_standard_deviation: extract_int_metric(insert_size_metrics, STANDARD_DEVIATION_NAME),
-      insert_size_read_pairs: extract_int_metric(insert_size_metrics, READ_PAIRS_NAME)
+      insert_size_metric_set_attributes: {
+        median: extract_int_metric(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME),
+        mode: extract_int_metric(insert_size_metrics, MODE_INSERT_SIZE_NAME),
+        median_absolute_deviation: extract_int_metric(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME),
+        min: extract_int_metric(insert_size_metrics, MIN_INSERT_SIZE_NAME),
+        max: extract_int_metric(insert_size_metrics, MAX_INSERT_SIZE_NAME),
+        mean: extract_int_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME),
+        standard_deviation: extract_int_metric(insert_size_metrics, STANDARD_DEVIATION_NAME),
+        read_pairs: extract_int_metric(insert_size_metrics, READ_PAIRS_NAME),
+      }
     )
   end
 
