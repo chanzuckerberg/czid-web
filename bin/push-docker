@@ -1,6 +1,8 @@
 #!/bin/bash
+# NOTE: We push all created tags to the Docker repo, but only the commit, branch, and latest tags matter.
+# Cache and compose are noise.
 
-export REPO=chanzuckerberg/idseq-web
+export REPO="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web"
 
 BRANCH="branch-$1"
 COMMIT="sha-$2"
@@ -11,38 +13,20 @@ echo $REPO
 echo $TAG
 echo '--'
 
-# Retry up to 5 times total if failed Docker login
+# Retry up to 5 times total if we fail to push to Amazon ECR
 run=1
 count=1
 while [ $run -eq 1 ] ; do
-    echo "Trying Docker login..."
-    docker login -u $DOCKER_USER -p $DOCKER_PASS
-    if [ $? -eq 0 ]; then  # Success
-        run=0
-        break
-    fi
-    if [ $count -ge 5 ]; then
-        run=0
-        echo "Error: Exceeded retries with Docker."
-        exit 1
-    fi
-    count=$((count+1))
-    sleep 15
-done
-
-# Retry up to 5 times total if failed Docker push
-run=1
-count=1
-while [ $run -eq 1 ] ; do
-    echo "Trying Docker push..."
+    echo "Trying Amazon ECR push..."
     docker push $REPO
     if [ $? -eq 0 ]; then  # Success
         run=0
         break
     fi
+    echo "Failed. Trying again in 15s..."
     if [ $count -ge 5 ]; then
         run=0
-        echo "Error: Exceeded retries with Docker."
+        echo "Error: Exceeded max retries pushing to Amazon ECR."
         exit 1
     fi
     count=$((count+1))
