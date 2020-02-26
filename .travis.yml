@@ -5,7 +5,7 @@ env:
 addons:
   # Emulate docker compose routing
   #   Docker compose maps the host db and redis to the mysql and redis containers
-  #   We are using travis-ci services, which use localhost, for testing instead of docker compose 
+  #   We are using travis-ci services, which use localhost, for testing instead of docker compose
   #   we need to map these hosts to localhost to maintain compatibility between the two.
   hosts:
     - db
@@ -70,7 +70,7 @@ jobs:
       before_install:
         # Upgrade bundler to v2 - https://docs.travis-ci.com/user/languages/ruby/#bundler-20
         - gem install bundler
-      script: 
+      script:
         - bundle exec rubocop -R --config .rubocop_todo.yml
         # Block on High Confidence warnings
         - bundle exec brakeman --no-pager -w3
@@ -82,9 +82,16 @@ jobs:
         - ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
         - npm test
     - name: "Docker Build"
-      language: shell
+      language: python
       services:
         - docker
+      cache: pip
+      before_script:
+        # Need to install the AWS command line to authenticate to ECR.
+        - pip install awscli
+        # Need to set the region to do ECR authentication.
+        - aws configure set default.region ${AWS_REGION}
+        - $(aws ecr get-login --no-include-email)
       script:
         - bin/build-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8}
         - bin/push-docker $TRAVIS_BRANCH ${TRAVIS_COMMIT::8}

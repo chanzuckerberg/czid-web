@@ -3,7 +3,7 @@
   "containerDefinitions": [
     {
       "name": "idseq-{{ .Values.name }}",
-      "image": "chanzuckerberg/idseq-web:{{ .Values.tag }}",
+      "image": "{{ .Values.account_id }}.dkr.ecr.{{ .Values.region }}.amazonaws.com/idseq-web:{{ .Values.tag }}",
       "cpu": 1024,
       "memoryReservation": 3072,
       "essential": true,
