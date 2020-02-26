@@ -349,17 +349,22 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
-    t.integer "insert_size_median"
-    t.integer "insert_size_mode"
-    t.integer "insert_size_median_absolute_deviation"
-    t.integer "insert_size_min"
-    t.integer "insert_size_max"
-    t.integer "insert_size_mean"
-    t.integer "insert_size_standard_deviation"
-    t.integer "insert_size_read_pairs"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
+  end
+
+  create_table "insert_size_metric_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "pipeline_run_id", null: false
+    t.integer "median", null: false
+    t.integer "mode", null: false
+    t.integer "median_absolute_deviation", null: false
+    t.integer "min", null: false
+    t.integer "max", null: false
+    t.integer "mean", null: false
+    t.integer "standard_deviation", null: false
+    t.integer "read_pairs", null: false
+    t.index ["pipeline_run_id"], name: "index_insert_size_metric_sets_on_pipeline_run_id"
   end
 
   create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
