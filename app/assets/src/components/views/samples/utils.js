@@ -1,5 +1,5 @@
 import { get, isFinite } from "lodash/fp";
-import { numberWithCommas, numberWithError } from "~/helpers/strings";
+import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
 
 const roundToTwo = number => {
   if (!isFinite(number)) return number;
@@ -23,7 +23,7 @@ export const getSampleTableData = sample => {
     "pipeline_run.insert_size_standard_deviation",
     derivedOutput
   );
-  const meanInsertSizeString = numberWithError(
+  const meanInsertSizeString = numberWithPlusOrMinus(
     meanInsertSize,
     insertSizeStandardDeviation
   );

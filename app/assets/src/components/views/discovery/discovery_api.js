@@ -1,5 +1,5 @@
 import { get, map } from "lodash/fp";
-import { numberWithError } from "~/helpers/strings";
+import { numberWithPlusOrMinus } from "~/helpers/strings";
 import {
   getProjectDimensions,
   getProjects,
@@ -60,7 +60,7 @@ const processRawSample = sample => {
     sample.details
   );
 
-  const meanInsertSizeString = numberWithError(
+  const meanInsertSizeString = numberWithPlusOrMinus(
     meanInsertSize,
     insertSizeStandardDeviation
   );

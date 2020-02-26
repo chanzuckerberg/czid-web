@@ -426,8 +426,11 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: total_ercc_reads)
   end
 
+  def host_filtering_stage
+    pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
+  end
+
   def should_have_insert_size_metrics
-    host_filtering_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
     host_filtering_step_statuses = host_filtering_stage.step_statuses
     additional_outputs = get_additional_outputs(host_filtering_step_statuses, "star_out")
     return additional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
@@ -455,32 +458,24 @@ class PipelineRun < ApplicationRecord
       end
     end
     if tsv_lines.length != 2
-      Rails.logger.error("Pipeline run ##{id} has an insert size metrics file but metrics could not be found")
-      return
+      error_message = "Pipeline run ##{id} has an insert size metrics file but metrics could not be found"
+      LogUtil.log_err_and_airbrake(error_message)
+      raise error_message
     end
     insert_size_metrics = {}
     tsv_lines[0].zip(tsv_lines[1]).each do |row|
       insert_size_metrics[row[0]] = row[1]
     end
 
-    insert_size_median = extract_int_metric(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME)
-    insert_size_mode = extract_int_metric(insert_size_metrics, MODE_INSERT_SIZE_NAME)
-    insert_size_median_absolute_deviation = extract_int_metric(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME)
-    insert_size_min = extract_int_metric(insert_size_metrics, MIN_INSERT_SIZE_NAME)
-    insert_size_max = extract_int_metric(insert_size_metrics, MAX_INSERT_SIZE_NAME)
-    insert_size_mean = extract_int_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME)
-    insert_size_standard_deviation = extract_int_metric(insert_size_metrics, STANDARD_DEVIATION_NAME)
-    insert_size_read_pairs = extract_int_metric(insert_size_metrics, READ_PAIRS_NAME)
-
     update(
-      insert_size_median: insert_size_median,
-      insert_size_mode: insert_size_mode,
-      insert_size_median_absolute_deviation: insert_size_median_absolute_deviation,
-      insert_size_min: insert_size_min,
-      insert_size_max: insert_size_max,
-      insert_size_mean: insert_size_mean,
-      insert_size_standard_deviation: insert_size_standard_deviation,
-      insert_size_read_pairs: insert_size_read_pairs
+      insert_size_median: extract_int_metric(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME),
+      insert_size_mode: extract_int_metric(insert_size_metrics, MODE_INSERT_SIZE_NAME),
+      insert_size_median_absolute_deviation: extract_int_metric(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME),
+      insert_size_min: extract_int_metric(insert_size_metrics, MIN_INSERT_SIZE_NAME),
+      insert_size_max: extract_int_metric(insert_size_metrics, MAX_INSERT_SIZE_NAME),
+      insert_size_mean: extract_int_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME),
+      insert_size_standard_deviation: extract_int_metric(insert_size_metrics, STANDARD_DEVIATION_NAME),
+      insert_size_read_pairs: extract_int_metric(insert_size_metrics, READ_PAIRS_NAME)
     )
   end
 
@@ -547,7 +542,7 @@ class PipelineRun < ApplicationRecord
   # Note: This method returns a string identifier extracted from the index
   # filename, not a HostGenome instance, which could be ambiguous.
   def host_subtracted
-    pipeline_run_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
+    pipeline_run_stage = host_filtering_stage
     dag = pipeline_run_stage && pipeline_run_stage.dag_json && JSON.parse(pipeline_run_stage.dag_json)
     return nil unless dag
     # See app/lib/dags/host_filter.json.jbuilder for step definition
