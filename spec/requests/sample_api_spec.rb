@@ -40,14 +40,8 @@ RSpec.describe "Sample API", type: :request do
 
         @client_params = "web"
 
-        # stub aws interactions
-        s3 = Aws::S3::Client.new(stub_responses: true)
-        s3.stub_responses(:get_bucket_accelerate_configuration, lambda { |_context|
-          return {
-            status: "Enabled",
-          }
-        })
-        stub_const("S3_CLIENT", s3)
+        # don't actually do any remote work
+        allow_any_instance_of(Sample).to receive(:set_presigned_url_for_local_upload).and_return(true)
       end
 
       describe "when we create a sample via sample upload flow" do
