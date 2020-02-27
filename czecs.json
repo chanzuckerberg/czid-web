@@ -3,7 +3,7 @@
   "containerDefinitions": [
     {
       "name": "rails",
-      "image": "chanzuckerberg/idseq-web:{{ .Values.tag }}",
+      "image": "{{ .Values.account_id }}.dkr.ecr.{{ .Values.region }}.amazonaws.com/idseq-web:{{ .Values.tag }}",
       "cpu": 2048,
       "memoryReservation": 7168,
       "essential": true,
