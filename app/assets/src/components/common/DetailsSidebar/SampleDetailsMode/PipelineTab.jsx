@@ -126,7 +126,7 @@ class PipelineTab extends React.Component {
         </div>
         <div className={cs.narrowMetadataValueContainer}>
           <div className={cs.metadataValue}>
-            {readsAfter && readsAfter.toLocaleString()}
+            {readsAfter ? readsAfter.toLocaleString() : ""}
           </div>
         </div>
         <div className={cs.narrowMetadataValueContainer}>
