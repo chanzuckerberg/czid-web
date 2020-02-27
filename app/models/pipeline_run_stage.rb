@@ -255,33 +255,6 @@ class PipelineRunStage < ApplicationRecord
     return dag.render
   end
 
-  # def generate_host_filtering_dag_json
-  #   # Upload DAG to S3
-  #   sample = pipeline_run.sample
-  #   file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
-  #   nucleotide_type_metadatum = sample.metadata.find_by(key: "nucleotide_type")
-  #   nucleotide_type = nucleotide_type_metadatum ? nucleotide_type_metadatum.string_validated_value : ''
-
-  #   attribute_dict = {
-  #     fastq1: sample.input_files[0].name,
-  #     file_ext: file_ext,
-  #     star_genome: sample.s3_star_index_path,
-  #     bowtie2_genome: sample.s3_bowtie2_index_path,
-  #     max_fragments: pipeline_run.max_input_fragments,
-  #     max_subsample_frag: pipeline_run.subsample,
-  #     nucleotide_type: nucleotide_type,
-  #   }
-  #   human_host_genome = HostGenome.find_by(name: "Human")
-  #   attribute_dict[:human_star_genome] = human_host_genome.s3_star_index_path
-  #   attribute_dict[:human_bowtie2_genome] = human_host_genome.s3_bowtie2_index_path
-  #   attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
-  #   attribute_dict[:adapter_fasta] = if sample.input_files[1]
-  #                                      PipelineRun::ADAPTER_SEQUENCES["paired-end"]
-  #                                    else
-  #                                      PipelineRun::ADAPTER_SEQUENCES["single-end"]
-  #                                    end
-  # end
-
   def generate_host_filtering_dag_json
     # Upload DAG to S3
     sample = pipeline_run.sample
