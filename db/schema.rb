@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_227_011_503) do
+ActiveRecord::Schema.define(version: 20_200_227_225_541) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -365,6 +365,7 @@ ActiveRecord::Schema.define(version: 20_200_227_011_503) do
     t.text "error_message"
     t.string "known_user_error"
     t.string "pipeline_execution_strategy", default: "directed_acyclic_graph", comment: "A soft enum (string) describing which pipeline infrastructure the pipeline run was performed on."
+    t.string "sfn_execution_arn"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
