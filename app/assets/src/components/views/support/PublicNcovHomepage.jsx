@@ -86,7 +86,7 @@ export default class PublicNcovHomepage extends React.Component {
     return (
       <NarrowContainer className={cs.publicNcovHomepage} size="small">
         <div className={cs.title}>
-          <h1>COVID-19 Cambodia Case</h1>
+          <h1>COVID-19 Case in Cambodia</h1>
           <div className={cs.fill} />
           <a href={VIEW_SAMPLES_LINK}>
             <NextActionButton
