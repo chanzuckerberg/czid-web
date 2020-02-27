@@ -68,5 +68,7 @@ export function numberWithPlusOrMinus(x, y) {
   if (typeof x !== "number" || typeof y !== "number") {
     return null;
   }
-  return `${numberWithCommas(Math.round(x))}±${Math.round(y)}`;
+  return `${numberWithCommas(Math.round(x))}±${numberWithCommas(
+    Math.round(y)
+  )}`;
 }
