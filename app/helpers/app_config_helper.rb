@@ -47,10 +47,6 @@ module AppConfigHelper
                            AppConfig::PUBLIC_INDEX_CASE_URL_WITH_OLD_PIPELINE,
                            AppConfig::PUBLIC_INDEX_CASE_URL_RESEQUENCED,
                            AppConfig::PUBLIC_INDEX_CASE_URL_ENRICHED,
-                           AppConfig::PUBLIC_FAMILY_1_URL,
-                           AppConfig::PUBLIC_FAMILY_2_URL,
-                           AppConfig::PUBLIC_FAMILY_3_URL,
-
                          ])
                   .map { |app_config| [app_config.key, app_config.value] }
                   .to_h
@@ -66,9 +62,6 @@ module AppConfigHelper
       publicIndexCaseUrlWithOldPipeline: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_WITH_OLD_PIPELINE],
       publicIndexCaseUrlResequenced: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_RESEQUENCED],
       publicIndexCaseUrlEnriched: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_ENRICHED],
-      publicFamily1Url: app_configs[AppConfig::PUBLIC_FAMILY_1_URL],
-      publicFamily2Url: app_configs[AppConfig::PUBLIC_FAMILY_2_URL],
-      publicFamily3Url: app_configs[AppConfig::PUBLIC_FAMILY_3_URL],
     }
   end
 end
