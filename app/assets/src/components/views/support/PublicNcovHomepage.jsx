@@ -119,10 +119,10 @@ export default class PublicNcovHomepage extends React.Component {
         <h2>About</h2>
         <p className={cs.large}>
           In a rapidly implemented response to the nCOV-2019 outbreak, the{" "}
-          <b>NIH-CNM</b> team and Institut Pasteur used metagenomic
-          next-generation sequencing (mNGS) and the IDseq bioinformatics
-          platform to review the Cambodian index nCOV-2019 case in less than 48
-          hours from sample receipt.
+          NIH-CNM team and Institut Pasteur used metagenomic next-generation
+          sequencing (mNGS) and the IDseq bioinformatics platform to review the
+          Cambodian index nCOV-2019 case in less than 48 hours from sample
+          receipt.
         </p>
         <p className={cs.large}>This project had 2 goals:</p>
         <ol>
@@ -152,20 +152,20 @@ export default class PublicNcovHomepage extends React.Component {
         <h2>How was the data generated?</h2>
         <p className={cs.large}>
           Institut Pasteur Cambodia performed the RNA extraction from a
-          nasopharyngeal swab from the index case. On February 1st, the{" "}
-          <b>NIH-CNM</b> team made sequencing libraries from the extracted RNA,
-          sequenced the samples on an iSeq100, demultiplexed the FASTQ files,
-          and the results of the sequencing run were compiled into Illumina’s
-          Basespace. The data was then uploaded to IDseq and processed using the
-          latest IDseq database - updated from NCBI on 2019-09-17. While the
-          index did not contain the reference sequences for SARS-CoV-2, which
-          were deposited to NCBI in January 2020, conclusions could still be
-          drawn from the data. IDseq’s NCBI database index was updated on
-          2019-02-10 with the most recent version of NCBI that included the
-          recently added SARS-CoV-2 sequences. The analysis was rerun using the
-          new NCBI index to confirm the match to SARS-CoV-2 in the PCR-positive
-          index case. Further experiments were done to isolate a full genome
-          sequence for SARS-CoV-2 from the Index Patient.
+          nasopharyngeal swab from the index case. On February 1st, the NIH-CNM
+          team made sequencing libraries from the extracted RNA, sequenced the
+          samples on an iSeq100, demultiplexed the FASTQ files, and the results
+          of the sequencing run were compiled into Illumina’s Basespace. The
+          data was then uploaded to IDseq and processed using the latest IDseq
+          database - updated from NCBI on 2019-09-17. While the index did not
+          contain the reference sequences for SARS-CoV-2, which were deposited
+          to NCBI in January 2020, conclusions could still be drawn from the
+          data. IDseq’s NCBI database index was updated on 2019-02-10 with the
+          most recent version of NCBI that included the recently added
+          SARS-CoV-2 sequences. The analysis was rerun using the new NCBI index
+          to confirm the match to SARS-CoV-2 in the PCR-positive index case.
+          Further experiments were done to isolate a full genome sequence for
+          SARS-CoV-2 from the Index Patient.
         </p>
         <h2>What conclusions were drawn from the data?</h2>
         <ol>
