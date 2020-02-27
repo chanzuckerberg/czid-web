@@ -12,12 +12,12 @@ class SfnPipelineService
   def call
     stage_dags_json = generate_dag_stages_json
     sfn_input_json = generate_wdl_input(stage_dags_json)
-  #   sfn_arn = trigger_sfn_pipeline(sfn_input_json) if sfn_input_json
+    #   sfn_arn = trigger_sfn_pipeline(sfn_input_json) if sfn_input_json
     return {
       stage_dags_json: stage_dags_json,
       sfn_input_json: sfn_input_json
-  #     sfn_arn: sfn_arn,
-  }
+      #     sfn_arn: sfn_arn,
+    }
   end
 
   def generate_dag_stages_json
@@ -32,7 +32,7 @@ class SfnPipelineService
     return stages_json
   end
 
-  def convert_dag_json_to_wdl(dag_json)
+  def convert_dag_json_to_wdl(_dag_json)
     dag_tmp_file = Tempfile.new
     dag_tmp_file.write(JSON.dumps(stages_json))
     dag_tmp_file.close
@@ -58,20 +58,20 @@ class SfnPipelineService
     end
     sfn_pipeline_input_json = {
       Input: {
-        HostFilter: input_files_paths.each_with_index.map{|path, i| ["fastqs_#{i}", path]}.to_h
-      }
+        HostFilter: input_files_paths.each_with_index.map { |path, i| ["fastqs_#{i}", path] }.to_h,
+      },
     }
 
-    stage_dags_json.each_pair do |stage_name, stage_dag_json|
+    stage_dags_json.each_pair do |_stage_name, _stage_dag_json|
       stage_dag_json = convert_dag_json_to_wdl(stage)
       sfn_pipeline_input_json["#{stage.upcase}_WDL_URI"] = f"s3://#{WDL_BUCKET_NAME}/#{wdl_key}"
       # TODO: create the output path
-      sfn_pipeline_input_json["#{stage.upcase}_OUTPUT_URI"] = f"s3://#{OUTPUTS_BUCKET_NAME}/#{output_key}"
+      sfn_pipeline_input_json["#{stage.upcase}_OUTPUT_URI"] = f "s3://#{OUTPUTS_BUCKET_NAME}/#{output_key}"
     end
     return sfn_pipeline_input_json
   end
 
-  def upload_wdl_json()
+  def upload_wdl_json
     # TODO: (MAYBE) upload the dag json file for debug
     # TODO: create the path to the file (samples path  + sfn-wdl + stage.wdl) and upload to s3
     # TODO: upload the file to s3
