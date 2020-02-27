@@ -79,7 +79,7 @@ export default class PublicNcovHomepage extends React.Component {
           )
         }
       >
-        target enrichment strategy
+        from the sample
       </ExternalLink>
     );
 
@@ -127,8 +127,8 @@ export default class PublicNcovHomepage extends React.Component {
         <p className={cs.large}>This project had 2 goals:</p>
         <ol>
           <li>
-            Characterize the novel virus in addition to other potential
-            pathogens.
+            Characterize Cambodia's first case of the novel virus using
+            in-country mNGS approaches.
           </li>
           <li>
             Determine the full genomic sequence for immediate public use,
@@ -139,8 +139,9 @@ export default class PublicNcovHomepage extends React.Component {
         <h2>What were the scientists’ hypotheses?</h2>
         <ol>
           <li>
-            While RT-PCR confirmed the first positive case of the novel
-            coronavirus in Cambodia, mNGS may provide additional sensitivity.
+            In-country mNGS performed on an iSeq100 could be used to confirm and
+            further characterize the genomic sequence of SARS-CoV-2 in the first
+            RT-PCR confirmed positive case of the novel coronavirus in Cambodia.
           </li>
           <li>
             Given the patient traveled directly from Wuhan to Cambodia on
@@ -151,7 +152,7 @@ export default class PublicNcovHomepage extends React.Component {
         <h2>How was the data generated?</h2>
         <p className={cs.large}>
           Institut Pasteur Cambodia performed the RNA extraction from a
-          nasopharyngeal swab (NPS) from the index case. On February 1st, the{" "}
+          nasopharyngeal swab from the index case. On February 1st, the{" "}
           <b>NIH-CNM</b> team made sequencing libraries from the extracted RNA,
           sequenced the samples on an iSeq100, demultiplexed the FASTQ files,
           and the results of the sequencing run were compiled into Illumina’s
@@ -184,10 +185,15 @@ export default class PublicNcovHomepage extends React.Component {
             coverage.
           </li>
           <li>
-            By using a {INDEX_CASE_ENRICHMENT_LINK}, a full-length contig could
-            be assembled with an average depth of 14.9x. The SARS-CoV-2 genome
-            sequence was uploaded to the GISAID repository (accession
-            EPI_ISL_411902).
+            By using a target enrichment strategy, a full-length contig could be
+            assembled {INDEX_CASE_ENRICHMENT_LINK} with an average depth of
+            14.9x. The SARS-CoV-2 genome sequence was uploaded to the GISAID
+            repository (accession EPI_ISL_411902).
+          </li>
+          <li>
+            As expected, the COVID-19 genome from the Cambodian Index Case was
+            highly similar to the other published COVID-19 genomes, showing only
+            1 SNP at position 25,654 in ORF3.
           </li>
         </ol>
       </NarrowContainer>
