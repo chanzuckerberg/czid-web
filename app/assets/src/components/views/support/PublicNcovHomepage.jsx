@@ -55,54 +55,6 @@ export default class PublicNcovHomepage extends React.Component {
     )
     */
 
-    const FAMILY_ONE_LINK = (
-      <ExternalLink
-        className={cs.link}
-        href={appConfig.publicFamily1Url}
-        onClick={() =>
-          logAnalyticsEvent("PublicNCovHomePage_family-one-link_clicked")
-        }
-      >
-        Family Member 1
-      </ExternalLink>
-    );
-
-    const FAMILY_TWO_LINK = (
-      <ExternalLink
-        className={cs.link}
-        href={appConfig.publicFamily2Url}
-        onClick={() =>
-          logAnalyticsEvent("PublicNCovHomePage_family-two-link_clicked")
-        }
-      >
-        Family Member 2
-      </ExternalLink>
-    );
-
-    const FAMILY_THREE_LINK = (
-      <ExternalLink
-        className={cs.link}
-        href={appConfig.publicFamily3Url}
-        onClick={() =>
-          logAnalyticsEvent("PublicNCovHomePage_family-three-link_clicked")
-        }
-      >
-        Family Member 3
-      </ExternalLink>
-    );
-
-    const HEATMAP_LINK = (
-      <ExternalLink
-        className={cs.link}
-        href={`visualizations/heatmap/${appConfig.publicNcovHeatmapId}`}
-        onClick={() =>
-          logAnalyticsEvent("PublicNCovHomePage_heatmap-link_clicked")
-        }
-      >
-        identified several genera commonly associated with nasopharyngeal flora
-      </ExternalLink>
-    );
-
     const INDEX_CASE_RESEQUENCE_LINK = (
       <ExternalLink
         className={cs.link}
@@ -127,14 +79,14 @@ export default class PublicNcovHomepage extends React.Component {
           )
         }
       >
-        target enrichment strategy
+        from the sample
       </ExternalLink>
     );
 
     return (
       <NarrowContainer className={cs.publicNcovHomepage} size="small">
         <div className={cs.title}>
-          <h1>COVID-19 Cambodia Family Cluster</h1>
+          <h1>COVID-19 Case in Cambodia</h1>
           <div className={cs.fill} />
           <a href={VIEW_SAMPLES_LINK}>
             <NextActionButton
@@ -167,21 +119,16 @@ export default class PublicNcovHomepage extends React.Component {
         <h2>About</h2>
         <p className={cs.large}>
           In a rapidly implemented response to the nCOV-2019 outbreak, the{" "}
-          <b>NIH-CNM</b> team and Institut Pasteur used metagenomic
-          next-generation sequencing (mNGS) and the IDseq bioinformatics
-          platform to review the Cambodian index nCOV-2019 case and three sick
-          family members, who had tested negative for nCOV-2019, in less than 48
-          hours from sample receipt.
+          NIH-CNM team and Institut Pasteur used metagenomic next-generation
+          sequencing (mNGS) and the IDseq bioinformatics platform to review the
+          Cambodian index nCOV-2019 case in less than 48 hours from sample
+          receipt.
         </p>
-        <p className={cs.large}>This project had 3 goals:</p>
+        <p className={cs.large}>This project had 2 goals:</p>
         <ol>
           <li>
-            Characterize the novel virus in addition to other potential
-            pathogens circulating in the family cluster.
-          </li>
-          <li>
-            Investigate whether mNGS could reveal etiology for the 3 symptomatic
-            PCR-negative family members.
+            Characterize Cambodia's first case of the novel virus using
+            in-country mNGS approaches.
           </li>
           <li>
             Determine the full genomic sequence for immediate public use,
@@ -192,9 +139,9 @@ export default class PublicNcovHomepage extends React.Component {
         <h2>What were the scientists’ hypotheses?</h2>
         <ol>
           <li>
-            While RT-PCR confirmed the first positive case of the novel
-            coronavirus in Cambodia, mNGS may provide additional sensitivity and
-            reveal etiology for symptomatic, PCR-negative, family members.
+            In-country mNGS performed on an iSeq100 could be used to confirm and
+            further characterize the genomic sequence of SARS-CoV-2 in the first
+            RT-PCR confirmed positive case of the novel coronavirus in Cambodia.
           </li>
           <li>
             Given the patient traveled directly from Wuhan to Cambodia on
@@ -204,22 +151,21 @@ export default class PublicNcovHomepage extends React.Component {
         </ol>
         <h2>How was the data generated?</h2>
         <p className={cs.large}>
-          Institut Pasteur Cambodia performed the RNA extraction from four
-          nasopharyngeal swabs (NPS) from the index case and three symptomatic
-          family members. On February 1st, the <b>NIH-CNM</b> team made
-          sequencing libraries from the extracted RNA, sequenced the samples on
-          an iSeq100, demultiplexed the FASTQ files, and the results of the
-          sequencing run were compiled into Illumina’s Basespace. The data was
-          then uploaded to IDseq and processed using the latest IDseq database -
-          updated from NCBI on 2019-09-17. While the index did not contain the
-          reference sequences for SARS-CoV-2, which were deposited to NCBI in
-          January 2020, conclusions could still be drawn from the data. IDseq’s
-          NCBI database index was updated on 2019-02-10 with the most recent
-          version of NCBI that included the recently added SARS-CoV-2 sequences.
-          The analysis was rerun using the new NCBI index to confirm the match
-          to SARS-CoV-2 in the PCR-positive index case. Further experiments were
-          done to isolate a full genome sequence for SARS-CoV-2 from the Index
-          Patient.
+          Institut Pasteur Cambodia performed the RNA extraction from a
+          nasopharyngeal swab from the index case. On February 1st, the NIH-CNM
+          team made sequencing libraries from the extracted RNA, sequenced the
+          samples on an iSeq100, demultiplexed the FASTQ files, and the results
+          of the sequencing run were compiled into Illumina’s Basespace. The
+          data was then uploaded to IDseq and processed using the latest IDseq
+          database - updated from NCBI on 2019-09-17. While the index did not
+          contain the reference sequences for SARS-CoV-2, which were deposited
+          to NCBI in January 2020, conclusions could still be drawn from the
+          data. IDseq’s NCBI database index was updated on 2019-02-10 with the
+          most recent version of NCBI that included the recently added
+          SARS-CoV-2 sequences. The analysis was rerun using the new NCBI index
+          to confirm the match to SARS-CoV-2 in the PCR-positive index case.
+          Further experiments were done to isolate a full genome sequence for
+          SARS-CoV-2 from the Index Patient.
         </p>
         <h2>What conclusions were drawn from the data?</h2>
         <ol>
@@ -233,29 +179,21 @@ export default class PublicNcovHomepage extends React.Component {
             with 33.2% coverage of NCBI accession sequence MN985325.1.
           </li>
           <li>
-            SARS-CoV-2 or similar pathogens were not found in any of the
-            PCR-negative symptomatic family members ({FAMILY_ONE_LINK},{" "}
-            {FAMILY_TWO_LINK}
-            , {FAMILY_THREE_LINK}) This means that the mNGS results align with
-            their COVID-19 PCR results.
-          </li>
-          <li>
-            In the symptomatic, but PCR-negative family members, IDseq{" "}
-            {HEATMAP_LINK} at levels significantly greater than the water
-            controls, generating hypotheses regarding the origin of the
-            symptoms.
-          </li>
-          <li>
             {INDEX_CASE_RESEQUENCE_LINK} in an attempt to obtain full genome
             coverage resulted in a greater number of reads aligning to
             SARS-CoV-2 (819 reads, 22 contigs), with limited impact on total
             coverage.
           </li>
           <li>
-            By using a {INDEX_CASE_ENRICHMENT_LINK}, a full-length contig could
-            be assembled with an average depth of 14.9x. The SARS-CoV-2 genome
-            sequence was uploaded to the GISAID repository (accession
-            EPI_ISL_411902).
+            By using a target enrichment strategy, a full-length contig could be
+            assembled {INDEX_CASE_ENRICHMENT_LINK} with an average depth of
+            14.9x. The SARS-CoV-2 genome sequence was uploaded to the GISAID
+            repository (accession EPI_ISL_411902).
+          </li>
+          <li>
+            As expected, the COVID-19 genome from the Cambodian Index Case was
+            highly similar to the other published COVID-19 genomes, showing only
+            1 SNP at position 25,654 in ORF3.
           </li>
         </ol>
       </NarrowContainer>
