@@ -40,9 +40,9 @@ const BASESPACE_SAMPLE_FIELDS = [
 
 const NUM_FAILED_SAMPLES_TO_DISPLAY = 3;
 
-const PIPELINE_TYPE = {
-  directed_acyclic_graph: "DAG",
-  step_function: "SFN",
+const PIPELINE_EXECUTION_STRATEGIES = {
+  directed_acyclic_graph: "directed_acyclic_graph",
+  step_function: "step_function",
 };
 
 export default class UploadProgressModal extends React.Component {
@@ -123,14 +123,14 @@ export default class UploadProgressModal extends React.Component {
   addFlagsToSamples = samples => {
     const { skipSampleProcessing, useStepFunctionPipeline } = this.props;
 
-    const pipeline_type = useStepFunctionPipeline
-      ? PIPELINE_TYPE.step_function
-      : PIPELINE_TYPE.directed_acyclic_graph;
+    const pipeline_execution_strategy = useStepFunctionPipeline
+      ? PIPELINE_EXECUTION_STRATEGIES.step_function
+      : PIPELINE_EXECUTION_STRATEGIES.directed_acyclic_graph;
 
     return samples.map(sample => ({
       ...sample,
       do_not_process: skipSampleProcessing,
-      pipeline_type,
+      pipeline_execution_strategy,
     }));
   };
 

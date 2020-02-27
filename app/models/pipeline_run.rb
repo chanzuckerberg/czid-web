@@ -194,9 +194,9 @@ class PipelineRun < ApplicationRecord
 
   delegate :status_url, to: :sample
 
-  enum pipeline_type: {
-    directed_acyclic_graph: "DAG",
-    step_function: "SFN",
+  enum pipeline_execution_strategy: {
+    directed_acyclic_graph: "directed_acyclic_graph",
+    step_function: "step_function",
   }
 
   def parse_dag_vars
