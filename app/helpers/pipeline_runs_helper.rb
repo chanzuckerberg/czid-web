@@ -91,6 +91,88 @@ module PipelineRunsHelper
     [job_status, job_log_id, stdout]
   end
 
+  def sfn_info(sfn_execution_arn, run_id, stage_number)
+    job_status = nil
+    job_log_id = nil
+    stdout, stderr, status =
+      Open3.capture3(
+        "aws", "stepfunctions", "get-execution-history",
+        "--output", "json", "--execution-arn", sfn_execution_arn
+      )
+    if status.exitstatus.zero?
+      sfn_execution_history_hash = JSON.parse(stdout)
+      sfn_hash = parse_sfn_execution_history_hash(sfn_execution_history_hash)
+      job_status = sfn_hash[stage_number.to_s]["status"]
+    else
+      LogUtil.log_err_and_airbrake("Error for update sfn status for record #{run_id} - stage #{stage_number} with error #{stderr}")
+      job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"
+      job_status = PipelineRunStage::STATUS_FAILED if stderr =~ /ExecutionDoesNotExist/ # job no longer exists
+    end
+    [job_status, job_log_id, stdout]
+  end
+
+  def parse_sfn_execution_history_hash(sfn_execution_history_hash)
+    failed_state =
+      sfn_execution_history_hash["events"]
+      .select { |evt| %w[ExecutionAborted ExecutionFailed ExecutionTimedOut].include?(evt["type"]) }
+      .first
+
+    name_regexp = /\A(.*)(SPOT|EC2|ReadOutput)\Z/
+    step_numbers = {
+      "HostFilter" => 1,
+      "NonHostAlignment" => 2,
+      "Postprocess" => 3,
+      "Experimental" => 4,
+    }
+    result =
+      sfn_execution_history_hash["events"]
+      .select { |evt| evt["type"] =~ /^TaskState/ }
+      .map do |evt|
+        details_key = evt.keys.find { |k| k =~ /EventDetails$/ }
+        {
+          "type" => evt["type"],
+          "name" => evt.dig(details_key, "name"),
+        }
+      end
+      .map do |evt|
+        stage, task = evt["name"].match(name_regexp)[1..2]
+        { "stage" => stage, "task" => task, "type" => evt["type"] }
+      end
+      .each_with_object({}) do |evt, acc|
+        stage, task, evt_type = evt.values_at("stage", "task", "type")
+        evt_obj = acc[stage] ||= evt.slice("stage")
+        task_obj = evt_obj[task] ||= {}
+        task_obj[evt_type] = true
+      end
+      .values
+      .map do |evt|
+        stage = evt["stage"]
+        started = evt.dig("SPOT", "TaskStateEntered") || evt.dig("EC2", "TaskStateEntered") || evt.dig("ReadOutput", "TaskStateEntered") || false
+        completed = evt.dig("ReadOutput", "TaskStateExited") || false
+        # I'm not using declared constants here because I'm emulating aws batch job `status` field
+        # trying to mimic output behavior of PipelineRunsHelper#job_info
+        # the domain for a job `status` field is SUBMITTED,PENDING,RUNNABLE,STARTING,RUNNING,SUCCEEDED,FAILED
+        status = if started && completed
+                   "SUCCEEDED"
+                 elsif started && !completed && !failed_state
+                   "RUNNING"
+                 elsif failed_state
+                   "FAILED"
+                 else
+                   "PENDING"
+                 end
+        [step_numbers[stage].to_s, { "stage" => stage, "status" => status }]
+      end
+      .to_h
+
+    if failed_state && !result["1"]
+      # special case when step function is aborted before stage 1
+      { "1" => { "stage" => "HostFilter", "status" => "FAILED" } }
+    else
+      result
+    end
+  end
+
   def file_generated_since_run(record, s3_path)
     stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     return false unless status.exitstatus.zero?
