@@ -88,7 +88,7 @@ module PipelineRunsHelper
       job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"
       job_status = PipelineRunStage::STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
     end
-    [job_status, job_log_id, job_hash, stdout]
+    [job_status, job_log_id, stdout]
   end
 
   def file_generated_since_run(record, s3_path)
@@ -260,5 +260,10 @@ module PipelineRunsHelper
     end
 
     return valid_pipeline_runs
+  end
+
+  def get_additional_outputs(status, target_name)
+    additional_outputs = status.dig(target_name, "additional_output")
+    additional_outputs || []
   end
 end

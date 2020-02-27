@@ -56,9 +56,9 @@ class RetrievePipelineVizGraphDataService
   private
 
   def create_stage_nodes_scaffolding
-    all_step_statuses = step_statuses
+    step_statuses_by_stage = @pipeline_run.step_statuses_by_stage
     stages = @all_dag_jsons.map.with_index do |dag_json, stage_index|
-      stage_step_statuses = all_step_statuses[stage_index]
+      stage_step_statuses = step_statuses_by_stage[stage_index]
       stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
 
       all_redefined_statuses = []
@@ -85,16 +85,6 @@ class RetrievePipelineVizGraphDataService
       }
     end
     return stages
-  end
-
-  def step_statuses
-    @pipeline_run.pipeline_run_stages.map do |prs|
-      begin
-        JSON.parse(get_s3_file(prs.step_status_file_path) || "{}")
-      rescue JSON::ParserError
-        {}
-      end
-    end
   end
 
   def redefine_job_status(step_status, stage_status)
@@ -178,10 +168,16 @@ class RetrievePipelineVizGraphDataService
 
   def file_path_to_outputting_step
     file_path_to_outputting_step = {}
+    step_statuses_by_stage = @pipeline_run.step_statuses_by_stage
     @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
       stage_dag_json["steps"].each_with_index do |step, step_index|
         stage_dag_json["targets"][step["out"]].each do |file_name|
           file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
+          file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
+        end
+        step_statuses = step_statuses_by_stage[stage_index]
+        get_additional_outputs(step_statuses, step["out"]).each do |filename|
+          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{filename}"
           file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end
       end
@@ -212,8 +208,12 @@ class RetrievePipelineVizGraphDataService
     file_path_to_inputting_steps
   end
 
+  def remove_bucket_from_s3_path(s3_path)
+    s3_path.split('/', 4).last # Remove s3://idseq-.../ to match key
+  end
+
   def file_info(file_path, file_path_to_info)
-    file_path = file_path.split('/', 4).last # Remove s3://idseq-.../ to match key
+    file_path = remove_bucket_from_s3_path(file_path)
     file_info = file_path_to_info[file_path]
     display_name = file_info ? file_info[:display_name] : file_path.split("/").last
     url = file_info ? file_info[:url] : nil

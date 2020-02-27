@@ -125,14 +125,14 @@ class PhyloTree < ApplicationRecord
     # Detect if batch job has failed so we can stop polling for results.
     # Also, populate job_log_id.
     return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
-    job_status, job_log_id_response, _job_hash, self.job_description = job_info(job_id, id)
+    job_status, job_log_id_response, self.job_description = job_info(job_id, id)
     self.job_log_id = job_log_id_response unless job_log_id # don't overwrite once it's been set (job_log_id_response could be nil after job has terminated)
     required_outputs = select_outputs("required")
     update_pipeline_version(self, :dag_version, dag_version_file) if job_status == "SUCCEEDED" && dag_version.blank?
     if job_status == PipelineRunStage::STATUS_FAILED ||
        (job_status == "SUCCEEDED" && !required_outputs.all? { |ro| exists_in_s3?(s3_outputs[ro]["s3_path"]) })
       self.status = STATUS_FAILED
-      LogUtil.log_err_and_airbrake("Phylo tree creation failed for #{name} (#{id}). See #{log_url}.")
+      LogUtil.log_err_and_airbrake("[Datadog] Phylo tree creation failed for #{name} (#{id}). See #{log_url}.")
     end
     save
   end
@@ -146,7 +146,7 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_IN_PROGRESS
     else
       self.status = STATUS_FAILED
-      LogUtil.log_err_and_airbrake("Phylo tree failed to kick off for #{name} (#{id}).")
+      LogUtil.log_err_and_airbrake("[Datadog] Phylo tree failed to kick off for #{name} (#{id}).")
     end
     save
   end

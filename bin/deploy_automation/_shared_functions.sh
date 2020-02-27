@@ -26,7 +26,7 @@ _trace() {
 
 _get_latest_commit() {
   declare git_rev="$1" # https://git-scm.com/docs/git-rev-parse#_specifying_revisions
-  git log -n 1 --pretty=format:"%h" "$git_rev"
+  git log -n 1 --pretty=format:"%h" "$git_rev" --abbrev=8
 }
 
 _fetch_current_release_checklist_from_github() {

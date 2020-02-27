@@ -1,4 +1,5 @@
 import { get, map } from "lodash/fp";
+import { numberWithPlusOrMinus } from "~/helpers/strings";
 import {
   getProjectDimensions,
   getProjects,
@@ -50,6 +51,20 @@ const getDiscoveryStats = async ({ domain, filters, projectId, search }) => {
 };
 
 const processRawSample = sample => {
+  const meanInsertSize = get(
+    "derived_sample_output.summary_stats.insert_size_mean",
+    sample.details
+  );
+  const insertSizeStandardDeviation = get(
+    "derived_sample_output.summary_stats.insert_size_standard_deviation",
+    sample.details
+  );
+
+  const meanInsertSizeString = numberWithPlusOrMinus(
+    meanInsertSize,
+    insertSizeStandardDeviation
+  );
+
   const row = {
     sample: {
       name: sample.name,
@@ -105,6 +120,7 @@ const processRawSample = sample => {
     ),
     totalRuntime: get("run_info.total_runtime", sample.details),
     waterControl: get("metadata.water_control", sample.details),
+    meanInsertSize: meanInsertSizeString ? meanInsertSizeString : "",
   };
   return row;
 };

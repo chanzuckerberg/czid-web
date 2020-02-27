@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_207_200_038) do
+ActiveRecord::Schema.define(version: 20_200_219_181_808) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -92,7 +92,7 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "access_token"
-    t.float "progress"
+    t.float "progress", limit: 24
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
     t.bigint "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
@@ -112,7 +112,7 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "lineage_json"
+    t.text "lineage_json", limit: 16_777_215
     t.integer "species_taxid_nt"
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
@@ -144,13 +144,18 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", null: false
-    t.text "s3_star_index_path"
-    t.text "s3_bowtie2_index_path"
+    t.string "name", null: false, comment: "Friendly name of host genome. May be common name or scientific name of species. Must be unique and start with a capital letter."
+    t.string "s3_star_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
+    t.string "s3_bowtie2_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "skip_deutero_filter"
+    t.integer "skip_deutero_filter", default: 0, null: false, comment: "See https://en.wikipedia.org/wiki/Deuterostome. This affects the pipeline."
+    t.string "taxa_category", default: "unknown", null: false, comment: "An informal taxa name for grouping hosts. First implemented for sample type suggestions."
+    t.integer "samples_count", default: 0, null: false, comment: "Added to enable ranking of host genomes by popularity"
+    t.bigint "user_id"
+    t.index ["name"], name: "index_host_genomes_on_name", unique: true
+    t.index ["user_id"], name: "index_host_genomes_on_user_id"
   end
 
   create_table "host_genomes_metadata_fields", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -166,15 +171,29 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type", null: false
+    t.string "source_type"
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 
+  create_table "insert_size_metric_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "pipeline_run_id", null: false
+    t.integer "median", null: false
+    t.integer "mode", null: false
+    t.integer "median_absolute_deviation", null: false
+    t.integer "min", null: false
+    t.integer "max", null: false
+    t.float "mean", limit: 24, null: false
+    t.float "standard_deviation", limit: 24, null: false
+    t.integer "read_pairs", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pipeline_run_id"], name: "index_insert_size_metric_sets_on_pipeline_run_id"
+  end
+
   create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "task"
-    t.integer "reads_before"
     t.integer "reads_after"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -210,7 +229,7 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false
+    t.string "key", null: false, collation: "latin1_swedish_ci"
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
@@ -354,7 +373,7 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1
+    t.integer "public_access", limit: 1, default: 0
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
@@ -366,6 +385,16 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
     t.bigint "user_id", null: false
     t.index ["project_id"], name: "index_projects_users_on_project_id"
     t.index ["user_id"], name: "index_projects_users_on_user_id"
+  end
+
+  create_table "sample_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", null: false, comment: "Canonical name of the sample type. This should be immutable after creation. It is used as a key to join with MetadataField sample_type values."
+    t.string "group", null: false, comment: "Mutually exclusive grouping of names. Example: \"Organs\"."
+    t.boolean "insect_only", default: false, null: false, comment: "Whether a sample type should only be for insects."
+    t.boolean "human_only", default: false, null: false, comment: "Whether a sample type should only be for humans."
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_sample_types_on_name", unique: true
   end
 
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -389,8 +418,8 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
     t.integer "max_input_fragments"
     t.datetime "client_updated_at"
     t.integer "uploaded_from_basespace", limit: 1, default: 0
-    t.string "basespace_access_token"
     t.string "upload_error"
+    t.string "basespace_access_token"
     t.boolean "do_not_process", default: false, null: false, comment: "If true, sample will skip pipeline processing."
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
@@ -468,8 +497,8 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.text "summary", limit: 16_777_215
+    t.text "description", limit: 16_777_215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -506,8 +535,8 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
     t.string "tax_name"
-    t.integer "version_start", limit: 1
-    t.integer "version_end", limit: 1
+    t.integer "version_start", limit: 2, null: false, comment: "The first version for which the taxon is active"
+    t.integer "version_end", limit: 2, null: false, comment: "The last version for which the taxon is active"
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
@@ -565,14 +594,10 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false
+    t.string "email"
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
@@ -589,7 +614,6 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
     t.integer "phylo_trees_count", default: 0, null: false
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
   create_table "visualizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -608,11 +632,12 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
   add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
   add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
   add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
+  add_foreign_key "bulk_downloads", "users"
   add_foreign_key "bulk_downloads_pipeline_runs", "bulk_downloads", name: "bulk_downloads_pipeline_runs_bulk_download_id_fk"
   add_foreign_key "bulk_downloads_pipeline_runs", "pipeline_runs", name: "bulk_downloads_pipeline_runs_pipeline_run_id_fk"
-  add_foreign_key "bulk_downloads", "users"
   add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
   add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
+  add_foreign_key "host_genomes", "users"
   add_foreign_key "host_genomes_metadata_fields", "host_genomes", name: "host_genomes_metadata_fields_host_genome_id_fk"
   add_foreign_key "host_genomes_metadata_fields", "metadata_fields", name: "host_genomes_metadata_fields_metadata_field_id_fk"
   add_foreign_key "input_files", "samples", name: "input_files_sample_id_fk"
@@ -636,5 +661,6 @@ ActiveRecord::Schema.define(version: 20_200_207_200_038) do
   add_foreign_key "samples", "users", name: "samples_user_id_fk"
   add_foreign_key "samples_visualizations", "samples", name: "samples_visualizations_sample_id_fk"
   add_foreign_key "samples_visualizations", "visualizations", name: "samples_visualizations_visualization_id_fk"
+  add_foreign_key "user_settings", "users"
   add_foreign_key "visualizations", "users", name: "visualizations_user_id_fk"
 end

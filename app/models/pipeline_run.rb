@@ -20,12 +20,14 @@ class PipelineRun < ApplicationRecord
   has_many :ercc_counts, dependent: :destroy
   has_many :amr_counts, dependent: :destroy
   has_many :contigs, dependent: :destroy
+  has_one :insert_size_metric_set, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
   accepts_nested_attributes_for :amr_counts
   accepts_nested_attributes_for :contigs
+  accepts_nested_attributes_for :insert_size_metric_set
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
@@ -67,6 +69,17 @@ class PipelineRun < ApplicationRecord
   REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts.json'.freeze
   REFINED_TAXID_BYTERANGE_JSON_NAME = 'assembly/refined_taxid_locations_combined.json'.freeze
   READS_PER_GENE_STAR_TAB_NAME = 'reads_per_gene.star.tab'.freeze
+
+  # Insert size metrics constants
+  INSERT_SIZE_METRICS_OUTPUT_NAME = 'picard_insert_metrics.txt'.freeze
+  MEDIAN_INSERT_SIZE_NAME = 'MEDIAN_INSERT_SIZE'.freeze
+  MODE_INSERT_SIZE_NAME = 'MODE_INSERT_SIZE'.freeze
+  MEDIAN_ABSOLUTE_DEVIATION_NAME = 'MEDIAN_ABSOLUTE_DEVIATION'.freeze
+  MIN_INSERT_SIZE_NAME = 'MIN_INSERT_SIZE'.freeze
+  MAX_INSERT_SIZE_NAME = 'MAX_INSERT_SIZE'.freeze
+  MEAN_INSERT_SIZE_NAME = 'MEAN_INSERT_SIZE'.freeze
+  STANDARD_DEVIATION_NAME = 'STANDARD_DEVIATION'.freeze
+  READ_PAIRS_NAME = 'READ_PAIRS'.freeze
 
   ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
@@ -137,7 +150,11 @@ class PipelineRun < ApplicationRecord
                         "taxon_counts" => "db_load_taxon_counts",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
-                        "amr_counts" => "db_load_amr_counts", }.freeze
+                        "amr_counts" => "db_load_amr_counts",
+                        "insert_size_metrics" => "db_load_insert_size_metrics", }.freeze
+  # Functions for checking if an optional output should have been generated
+  # Don't include optional outputs
+  CHECKERS_BY_OUTPUT = { "insert_size_metrics" => "should_have_insert_size_metrics" }.freeze
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.
@@ -310,7 +327,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
+    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts insert_size_metrics]
 
     # Then, generate output_states
     output_state_entries = []
@@ -411,6 +428,66 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: total_ercc_reads)
   end
 
+  def host_filtering_stage
+    pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
+  end
+
+  def should_have_insert_size_metrics
+    host_filtering_step_statuses = host_filtering_stage.step_statuses
+    additional_outputs = get_additional_outputs(host_filtering_step_statuses, "star_out")
+    return additional_outputs.include?(INSERT_SIZE_METRICS_OUTPUT_NAME)
+  end
+
+  private def extract_int_metric(metrics, metric_name)
+    return nil unless metrics[metric_name]
+    return metrics[metric_name].to_i
+  end
+
+  private def extract_float_metric(metrics, metric_name)
+    return nil unless metrics[metric_name]
+    return metrics[metric_name].to_f
+  end
+
+  def db_load_insert_size_metrics
+    insert_size_metrics_s3_path = "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
+    _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", insert_size_metrics_s3_path)
+    return unless status.exitstatus.zero?
+    insert_size_metrics_raw = Syscall.pipe_with_output(["aws", "s3", "cp", insert_size_metrics_s3_path, "-"])
+    tsv_lines = []
+    tsv_header_line = -1
+    insert_size_metrics_raw.lines.each_with_index do |line, index|
+      if line.start_with?("## METRICS CLASS")
+        tsv_header_line = index
+      elsif tsv_header_line > 0 && index - tsv_header_line <= 2
+        tsv_lines << CSV.parse_line(line, col_sep: "\t")
+      elsif tsv_lines.length >= 2
+        break
+      end
+    end
+    if tsv_lines.length != 2
+      error_message = "Pipeline run ##{id} has an insert size metrics file but metrics could not be found"
+      LogUtil.log_err_and_airbrake(error_message)
+      raise error_message
+    end
+    insert_size_metrics = {}
+    tsv_lines[0].zip(tsv_lines[1]).each do |row|
+      insert_size_metrics[row[0]] = row[1]
+    end
+
+    update(
+      insert_size_metric_set_attributes: {
+        median: extract_int_metric(insert_size_metrics, MEDIAN_INSERT_SIZE_NAME),
+        mode: extract_int_metric(insert_size_metrics, MODE_INSERT_SIZE_NAME),
+        median_absolute_deviation: extract_int_metric(insert_size_metrics, MEDIAN_ABSOLUTE_DEVIATION_NAME),
+        min: extract_int_metric(insert_size_metrics, MIN_INSERT_SIZE_NAME),
+        max: extract_int_metric(insert_size_metrics, MAX_INSERT_SIZE_NAME),
+        mean: extract_float_metric(insert_size_metrics, MEAN_INSERT_SIZE_NAME),
+        standard_deviation: extract_float_metric(insert_size_metrics, STANDARD_DEVIATION_NAME),
+        read_pairs: extract_int_metric(insert_size_metrics, READ_PAIRS_NAME),
+      }
+    )
+  end
+
   def coverage_viz_summary_s3_path
     return "#{postprocess_output_s3_path}/#{COVERAGE_VIZ_SUMMARY_JSON_NAME}" if pipeline_version_has_coverage_viz(pipeline_version)
   end
@@ -474,7 +551,7 @@ class PipelineRun < ApplicationRecord
   # Note: This method returns a string identifier extracted from the index
   # filename, not a HostGenome instance, which could be ambiguous.
   def host_subtracted
-    pipeline_run_stage = pipeline_run_stages.find { |prs| prs["step_number"] == 1 }
+    pipeline_run_stage = host_filtering_stage
     dag = pipeline_run_stage && pipeline_run_stage.dag_json && JSON.parse(pipeline_run_stage.dag_json)
     return nil unless dag
     # See app/lib/dags/host_filter.json.jbuilder for step definition
@@ -774,6 +851,8 @@ class PipelineRun < ApplicationRecord
       "#{postprocess_output_s3_path}/#{ASSEMBLED_STATS_NAME}"
     when "contig_counts"
       "#{postprocess_output_s3_path}/#{CONTIG_SUMMARY_JSON_NAME}"
+    when "insert_size_metrics"
+      "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
     end
   end
 
@@ -814,9 +893,17 @@ class PipelineRun < ApplicationRecord
     if output_ready?(output)
       output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
+    # check if job is done more than a minute ago
     elsif finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
-      # check if job is done more than a minute ago
-      output_state.update(state: STATUS_FAILED)
+      checker = CHECKERS_BY_OUTPUT[output_state.output]
+      # If there is no checker, the file should have been generated
+      # If there is a checker use it to check if the file should have been generated
+      should_have_been_generated = !checker || send(checker)
+      if should_have_been_generated
+        output_state.update(state: STATUS_FAILED)
+      else
+        output_state.update(state: STATUS_LOADED)
+      end
     end
   end
 
@@ -959,7 +1046,7 @@ class PipelineRun < ApplicationRecord
     automatic_restart_text = automatic_restart ? "Automatic restart is being triggered. " : "** Manual action required **. "
     known_user_error = known_user_error ? "Known user error #{known_user_error}. " : ""
 
-    "SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
+    "[Datadog] SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
       "after #{duration_hrs} hours. #{automatic_restart_text}#{known_user_error}"\
       "See: #{status_url}"
   end
@@ -1015,7 +1102,7 @@ class PipelineRun < ApplicationRecord
       # NOTE (2019-08-02): Based on the last 3000 successful samples, only 0.17% took longer than 12 hours.
       threshold = 12.hours
       if run_time > threshold
-        msg = "LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
+        msg = "[Datadog] LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
           "See: #{status_url}"
         LogUtil.log_err_and_airbrake(msg)
         update(alert_sent: 1)
@@ -1546,6 +1633,10 @@ class PipelineRun < ApplicationRecord
     ret
   end
 
+  def step_statuses_by_stage
+    pipeline_run_stages.map(&:step_statuses)
+  end
+
   def outputs_by_step(can_see_stage1_results = false)
     # Get map of s3 path to presigned URL and size.
     filename_to_info = {}
@@ -1568,11 +1659,24 @@ class PipelineRun < ApplicationRecord
       targets = dag_dict["targets"]
       given_targets = dag_dict["given_targets"]
       num_steps = targets.length
+      # Fetch step statuses for this stage
+      #   do it before the loop because step_statuses is expensive
+      step_statuses = prs.step_statuses
       targets.each_with_index do |(target_name, output_list), step_idx|
         next if given_targets.keys.include?(target_name)
-        file_info = []
+
+        file_paths = []
         output_list.each do |output|
-          file_info_for_output = filename_to_info["#{output_dir_s3_key}/#{pipeline_version}/#{output}"]
+          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
+        end
+
+        get_additional_outputs(step_statuses, target_name).each do |filename|
+          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{filename}"
+        end
+
+        file_info = []
+        file_paths.each do |path|
+          file_info_for_output = filename_to_info[path]
           next unless file_info_for_output
           if !can_see_stage1_results && stage_idx.zero? && step_idx < num_steps - 1
             # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
@@ -1580,6 +1684,7 @@ class PipelineRun < ApplicationRecord
           end
           file_info << file_info_for_output
         end
+
         if file_info.present?
           result[prs.name]["steps"][target_name] = {
             "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
