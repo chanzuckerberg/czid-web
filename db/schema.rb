@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_219_181_808) do
+ActiveRecord::Schema.define(version: 20_200_227_011_503) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -112,7 +112,7 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "lineage_json", limit: 16_777_215
+    t.text "lineage_json"
     t.integer "species_taxid_nt"
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
@@ -151,9 +151,9 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "skip_deutero_filter", default: 0, null: false, comment: "See https://en.wikipedia.org/wiki/Deuterostome. This affects the pipeline."
-    t.string "taxa_category", default: "unknown", null: false, comment: "An informal taxa name for grouping hosts. First implemented for sample type suggestions."
+    t.string "taxa_category", default: "unknown", comment: "An informal taxa name for grouping hosts. First implemented for sample type suggestions."
     t.integer "samples_count", default: 0, null: false, comment: "Added to enable ranking of host genomes by popularity"
-    t.bigint "user_id"
+    t.bigint "user_id", comment: "The user that created the host genome. Values previous to 2020-02 may be NULL."
     t.index ["name"], name: "index_host_genomes_on_name", unique: true
     t.index ["user_id"], name: "index_host_genomes_on_user_id"
   end
@@ -171,10 +171,25 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type"
+    t.string "source_type", null: false
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
+  end
+
+  create_table "insert_size_metric_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "pipeline_run_id", null: false
+    t.integer "median", null: false
+    t.integer "mode", null: false
+    t.integer "median_absolute_deviation", null: false
+    t.integer "min", null: false
+    t.integer "max", null: false
+    t.float "mean", limit: 24, null: false
+    t.float "standard_deviation", limit: 24, null: false
+    t.integer "read_pairs", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pipeline_run_id"], name: "index_insert_size_metric_sets_on_pipeline_run_id"
   end
 
   create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -214,7 +229,7 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false, collation: "latin1_swedish_ci"
+    t.string "key", null: false
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
@@ -349,6 +364,7 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
+    t.string "pipeline_execution_strategy", default: "directed_acyclic_graph", comment: "A soft enum (string) describing which pipeline infrastructure the pipeline run was performed on."
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
@@ -358,7 +374,7 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1, default: 0
+    t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
@@ -406,6 +422,7 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
     t.string "upload_error"
     t.string "basespace_access_token"
     t.boolean "do_not_process", default: false, null: false, comment: "If true, sample will skip pipeline processing."
+    t.string "pipeline_execution_strategy", default: "directed_acyclic_graph", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
@@ -482,8 +499,8 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary", limit: 16_777_215
-    t.text "description", limit: 16_777_215
+    t.text "summary"
+    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -579,7 +596,7 @@ ActiveRecord::Schema.define(version: 20_200_219_181_808) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email"
+    t.string "email", default: "", null: false
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

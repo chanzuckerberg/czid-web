@@ -45,3 +45,12 @@ get-pip.py
 .byebug_history
 .editorconfig
 coverage
+
+# Ignore .sql and sql.gz files at root
+#   These are used to populate the db for local development
+/*.sql
+/*.sql.gz
+
+# Ignore vim swap files
+*.swp
+*.swo

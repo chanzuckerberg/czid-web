@@ -425,8 +425,10 @@
     margin-right: 5px;
   }
 
-  .skipSampleProcessingOption {
+  .sampleProcessingOption {
     margin-top: $space-l;
+    align-items: left;
+    justify-content: left;
 
     // Global because Checkbox does not use CSS modules
     :global(.label) {

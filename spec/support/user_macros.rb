@@ -1,4 +1,4 @@
-module ControllerMacros
+module UserMacros
   def create_users
     before do
       @admin = FactoryBot.create(:admin, role: 1)

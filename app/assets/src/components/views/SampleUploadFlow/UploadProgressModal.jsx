@@ -40,6 +40,11 @@ const BASESPACE_SAMPLE_FIELDS = [
 
 const NUM_FAILED_SAMPLES_TO_DISPLAY = 3;
 
+const PIPELINE_EXECUTION_STRATEGIES = {
+  directed_acyclic_graph: "directed_acyclic_graph",
+  step_function: "step_function",
+};
+
 export default class UploadProgressModal extends React.Component {
   state = {
     // For local uploads.
@@ -116,11 +121,16 @@ export default class UploadProgressModal extends React.Component {
 
   // Add any flags selected by the user in the Review Step.
   addFlagsToSamples = samples => {
-    const { skipSampleProcessing } = this.props;
+    const { skipSampleProcessing, useStepFunctionPipeline } = this.props;
+
+    const pipeline_execution_strategy = useStepFunctionPipeline
+      ? PIPELINE_EXECUTION_STRATEGIES.step_function
+      : PIPELINE_EXECUTION_STRATEGIES.directed_acyclic_graph;
 
     return samples.map(sample => ({
       ...sample,
       do_not_process: skipSampleProcessing,
+      pipeline_execution_strategy,
     }));
   };
 
@@ -513,4 +523,5 @@ UploadProgressModal.propTypes = {
   uploadType: PropTypes.string.isRequired,
   project: PropTypes.Project,
   skipSampleProcessing: PropTypes.bool,
+  useStepFunctionPipeline: PropTypes.bool,
 };

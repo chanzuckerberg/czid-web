@@ -336,4 +336,9 @@ module PipelineRunsHelper
 
     return valid_pipeline_runs
   end
+
+  def get_additional_outputs(status, target_name)
+    additional_outputs = status.dig(target_name, "additional_output")
+    additional_outputs || []
+  end
 end

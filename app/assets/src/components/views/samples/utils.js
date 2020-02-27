@@ -1,5 +1,5 @@
 import { get, isFinite } from "lodash/fp";
-import { numberWithCommas } from "~/helpers/strings";
+import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
 
 const roundToTwo = number => {
   if (!isFinite(number)) return number;
@@ -17,6 +17,16 @@ export const getSampleTableData = sample => {
     db_sample: dbSample,
     metadata,
   } = sample;
+
+  const meanInsertSize = get("summary_stats.insert_size_mean", derivedOutput);
+  const insertSizeStandardDeviation = get(
+    "summary_stats.insert_size_standard_deviation",
+    derivedOutput
+  );
+  const meanInsertSizeString = numberWithPlusOrMinus(
+    meanInsertSize,
+    insertSizeStandardDeviation
+  );
 
   const data = {
     total_reads: numberWithCommas(
@@ -43,6 +53,7 @@ export const getSampleTableData = sample => {
     collection_location: get("collection_location", metadata),
     host_genome: get("host_genome_name", dbSample),
     notes: get("sample_notes", dbSample),
+    insert_size_mean: meanInsertSizeString || "",
   };
 
   return data;

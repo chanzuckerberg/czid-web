@@ -1,5 +1,5 @@
 import moment from "moment";
-import { numberWithCommas } from "~/helpers/strings";
+import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
 
 // Compute display values for Pipeline Info from server response.
 export const processPipelineInfo = additionalInfo => {
@@ -72,6 +72,15 @@ export const processPipelineInfo = additionalInfo => {
     pipelineInfo.lastProcessedAt = {
       text: moment(summaryStats.last_processed_at).format("YYYY-MM-DD"),
     };
+
+    const meanInsertSize = numberWithPlusOrMinus(
+      summaryStats.insert_size_mean,
+      summaryStats.insert_size_standard_deviation
+    );
+
+    if (meanInsertSize) {
+      pipelineInfo.meanInsertSize = { text: meanInsertSize };
+    }
   }
 
   return pipelineInfo;
