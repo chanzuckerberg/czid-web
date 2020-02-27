@@ -45,3 +45,7 @@ get-pip.py
 .byebug_history
 .editorconfig
 coverage
+
+# RVM's local config files
+.ruby-gemset
+.ruby-version
