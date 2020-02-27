@@ -177,6 +177,21 @@ ActiveRecord::Schema.define(version: 20_200_227_011_503) do
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 
+  create_table "insert_size_metric_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "pipeline_run_id", null: false
+    t.integer "median", null: false
+    t.integer "mode", null: false
+    t.integer "median_absolute_deviation", null: false
+    t.integer "min", null: false
+    t.integer "max", null: false
+    t.float "mean", limit: 24, null: false
+    t.float "standard_deviation", limit: 24, null: false
+    t.integer "read_pairs", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pipeline_run_id"], name: "index_insert_size_metric_sets_on_pipeline_run_id"
+  end
+
   create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "task"
     t.integer "reads_after"

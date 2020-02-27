@@ -81,6 +81,12 @@ class PipelineRunStage < ApplicationRecord
     "#{path_beginning}/#{pipeline_run.pipeline_version}/#{dag_name}_status.json"
   end
 
+  def step_statuses
+    JSON.parse(get_s3_file(step_status_file_path) || "{}")
+  rescue JSON::ParserError
+    {}
+  end
+
   def check_status_file_and_update(status_file_suffix, job_status_value)
     status_file_present = file_generated_since_run(pipeline_run, stage_status_file(status_file_suffix))
     if status_file_present && job_status != job_status_value

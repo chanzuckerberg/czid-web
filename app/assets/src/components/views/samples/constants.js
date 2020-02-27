@@ -66,6 +66,11 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   waterControl: {
     tooltip: "Whether a sample is water-only as a control.",
   },
+  meanInsertSize: {
+    tooltip:
+      "Mean length of the fragmented nucleic acid sequences input for sequencing.",
+    link: DOC_BASE_LINK + "360034790554-Pipeline-Details",
+  },
 };
 
 // DEPRECATED
@@ -119,6 +124,10 @@ export const SAMPLE_TABLE_COLUMNS = {
   notes: {
     display_name: "Notes",
     type: "sampleMetadata",
+  },
+  insert_size_mean: {
+    display_name: "Mean Insert Size",
+    type: "metadata",
   },
 };
 
