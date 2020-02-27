@@ -69,11 +69,11 @@ RSpec.describe PipelineRunsHelper, type: :helper do
       expect(pipeline_runs.map(&:id)).to eq([first_pipeline_run.id])
     end
 
-    describe "#_parse_sfn_execution_history_hash" do
+    describe "#parse_sfn_execution_history_hash" do
       let(:aws_cli_stdout) { file_fixture("helpers/pipeline_runs_helper/#{fixture_file}").read }
 
       subject do
-        helper._parse_sfn_execution_history_hash(JSON.parse(aws_cli_stdout))
+        helper.parse_sfn_execution_history_hash(JSON.parse(aws_cli_stdout))
       end
 
       shared_examples "check output" do |fixture_file_name, expected_result|

@@ -101,7 +101,7 @@ module PipelineRunsHelper
       )
     if status.exitstatus.zero?
       sfn_execution_history_hash = JSON.parse(stdout)
-      sfn_hash = _parse_sfn_execution_history_hash(sfn_execution_history_hash)
+      sfn_hash = parse_sfn_execution_history_hash(sfn_execution_history_hash)
       job_status = sfn_hash[stage_number.to_s]["status"]
     else
       LogUtil.log_err_and_airbrake("Error for update sfn status for record #{run_id} - stage #{stage_number} with error #{stderr}")
@@ -111,7 +111,7 @@ module PipelineRunsHelper
     [job_status, job_log_id, stdout]
   end
 
-  def _parse_sfn_execution_history_hash(sfn_execution_history_hash)
+  def parse_sfn_execution_history_hash(sfn_execution_history_hash)
     failed_state =
       sfn_execution_history_hash["events"]
       .select { |evt| %w[ExecutionAborted ExecutionFailed ExecutionTimedOut].include?(evt["type"]) }
