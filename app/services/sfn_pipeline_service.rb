@@ -67,7 +67,7 @@ class SfnPipelineService
     end
     sfn_pipeline_input_json = {
       Input: {
-        HostFilter: input_files_paths.each_with_index.map { |path, i| ["fastqs_#{i}", path] }.to_h,
+        HostFilter: JSON.dump(input_files_paths.each_with_index.map { |path, i| ["fastqs_#{i}", path] }.to_h),
       },
     }
 
@@ -104,7 +104,7 @@ class SfnPipelineService
     sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
 
     # Not using SDK because aws-sdk-sfn is currently on version 1.0.0.rc4,
-    # which in terms requires aws-sdk-core (= 3.0.0.rc1)
+    # which in terms requires aws-sdk-core (= 3.0.0.rc1 which is lower than current version)
     #
     # sfn_client = Aws::SFN::Client.new
     # resp = sfn_client.start_execution({

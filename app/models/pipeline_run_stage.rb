@@ -122,7 +122,7 @@ class PipelineRunStage < ApplicationRecord
   def run_job
     # Check output for the run and decide if we should run this stage
     return if started? && !failed? # job has been started successfully
-    if step_function?
+    if pipeline_run.step_function?
       # We do not need to start stage anymore for SFNs, because now we only start
       # the step function which handles all stages (started in PipelineRun::update_job_status)
       # Filling job_command with placeholder string because current pipeline
