@@ -21,6 +21,7 @@ class SfnPipelineService
   def call
     stage_dags_json = generate_dag_stages_json
     sfn_input_json = generate_wdl_input(stage_dags_json)
+    sfn_arn = dispatch(sfn_input_json)
     return {
       stage_dags_json: stage_dags_json,
       sfn_input_json: sfn_input_json,

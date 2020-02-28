@@ -42,17 +42,24 @@ RSpec.describe SfnPipelineService, type: :service do
       )
     end
 
-    it "contains dag jsons" do
-      expect(subject).to include_json(
-        dag_jsons: {
-          PipelineRunStage::DAG_NAME_HOST_FILTER => {},
-          PipelineRunStage::DAG_NAME_ALIGNMENT => {},
-          PipelineRunStage::DAG_NAME_POSTPROCESS => {},
-          PipelineRunStage::DAG_NAME_EXPERIMENTAL => {},
-        }
-      )
+    it "uploads per-stage dag json files" do
+      raise "Needs test implementation"
+    end
+
+    it "uploads per-stage wdl files" do
+      raise "Needs test implementation"
     end
   end
 
-  # add function to test the call method
+  context "upload_inputs_and_generate_paths" do
+    it "generates correct paths" do
+      raise "Needs test implementation"
+    end
+  end
+
+  context "convert_dag_json_to_wdl" do
+    it "generates exception in case of error" do
+      raise "Needs test implementation"
+    end
+  end
 end
