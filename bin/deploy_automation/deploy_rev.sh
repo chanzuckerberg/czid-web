@@ -13,7 +13,7 @@ main() {
 
   _git_fetch_and_cleanup
 
-  declare sha; sha=$(git log -n1 "${git_rev}" --format=%h)
+  declare sha; sha=$(git log -n1 "${git_rev}" --format=%h --abbrev=8)
   declare docker_image="${DOCKER_REPOSITORY_NAME}:sha-$sha"
 
   _log "Starting deployment of $git_rev (sha-$sha) to $env"

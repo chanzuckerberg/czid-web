@@ -49,3 +49,12 @@ coverage
 # RVM's local config files
 .ruby-gemset
 .ruby-version
+
+# Ignore .sql and sql.gz files at root
+#   These are used to populate the db for local development
+/*.sql
+/*.sql.gz
+
+# Ignore vim swap files
+*.swp
+*.swo

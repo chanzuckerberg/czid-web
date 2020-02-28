@@ -119,6 +119,12 @@ export default class MapPreviewSidebar extends React.Component {
         cellDataGetter: ({ dataKey, rowData }) =>
           TableRenderers.formatDuration(rowData[dataKey]),
       },
+      {
+        dataKey: "meanInsertSize",
+        label: "Mean Insert Size",
+        flexGrow: 1,
+        className: cs.basicCell,
+      },
     ];
 
     this.projectColumns = [

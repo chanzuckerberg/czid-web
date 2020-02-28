@@ -40,6 +40,7 @@ class ReviewStep extends React.Component {
     showLessDescription: true,
     showUploadModal: false,
     skipSampleProcessing: false,
+    useStepFunctionPipeline: false,
   };
 
   componentDidMount() {
@@ -182,19 +183,46 @@ class ReviewStep extends React.Component {
   };
 
   toggleSkipSampleProcessing = () => {
+    const { skipSampleProcessing } = this.state;
     this.setState({
-      skipSampleProcessing: !this.state.skipSampleProcessing,
+      skipSampleProcessing: !skipSampleProcessing,
+      useStepFunctionPipeline: false,
+    });
+  };
+
+  toggleUseStepFunctionPipeline = () => {
+    const { useStepFunctionPipeline } = this.state;
+    this.setState({
+      useStepFunctionPipeline: !useStepFunctionPipeline,
+      skipSampleProcessing: false,
     });
   };
 
   // This is only for admins and QA testers.
   renderSkipSampleProcessingOption = () => {
+    const { skipSampleProcessing, useStepFunctionPipeline } = this.state;
     return (
       <Checkbox
-        className={cs.skipSampleProcessingOption}
-        checked={this.state.skipSampleProcessing}
+        className={cs.sampleProcessingOption}
+        checked={skipSampleProcessing && !useStepFunctionPipeline}
+        disabled={useStepFunctionPipeline}
         onChange={this.toggleSkipSampleProcessing}
         label="Skip sample processing after upload is complete."
+      />
+    );
+  };
+
+  // This is only for admins. This option is exclusive with skipping sample processing.
+  // It wouldn't make sense to be able to select both options.
+  renderUseStepFunctionPipelineOption = () => {
+    const { skipSampleProcessing, useStepFunctionPipeline } = this.state;
+    return (
+      <Checkbox
+        className={cs.sampleProcessingOption}
+        checked={useStepFunctionPipeline && !skipSampleProcessing}
+        disabled={skipSampleProcessing}
+        onChange={this.toggleUseStepFunctionPipeline}
+        label="Use wdl / step function pipeline."
       />
     );
   };
@@ -221,6 +249,8 @@ class ReviewStep extends React.Component {
       showUploadModal,
       showLessDescription,
       skipSampleProcessing,
+      consentChecked,
+      useStepFunctionPipeline,
     } = this.state;
 
     const {
@@ -229,6 +259,8 @@ class ReviewStep extends React.Component {
       samples,
       metadata,
       project,
+      visible,
+      originalHostGenomes,
     } = this.props;
 
     const shouldTruncateDescription =
@@ -238,11 +270,7 @@ class ReviewStep extends React.Component {
 
     return (
       <div
-        className={cx(
-          cs.reviewStep,
-          cs.uploadFlowStep,
-          this.props.visible && cs.visible
-        )}
+        className={cx(cs.reviewStep, cs.uploadFlowStep, visible && cs.visible)}
       >
         <div className={cs.flexContent}>
           <div className={cs.projectContainer}>
@@ -254,9 +282,9 @@ class ReviewStep extends React.Component {
                   onClick={() => {
                     this.onLinkClick("uploadSamples");
                     logAnalyticsEvent("ReviewStep_edit-project-link_clicked", {
-                      projectId: this.props.project.id,
-                      projectName: this.props.project.name,
-                      uploadType: this.props.uploadType,
+                      projectId: project.id,
+                      projectName: project.name,
+                      uploadType: uploadType,
                     });
                   }}
                 >
@@ -265,16 +293,16 @@ class ReviewStep extends React.Component {
               </div>
             </div>
             <div className={cs.project}>
-              {this.props.project.public_access === 1 ? (
+              {project.public_access === 1 ? (
                 <PublicProjectIcon className={cs.projectIcon} />
               ) : (
                 <PrivateProjectIcon className={cs.projectIcon} />
               )}
               <div className={cs.text}>
                 <div className={cs.header}>
-                  <div className={cs.name}>{this.props.project.name}</div>
+                  <div className={cs.name}>{project.name}</div>
                   <div className={cs.publicAccess}>
-                    {this.props.project.public_access
+                    {project.public_access
                       ? "Public Project"
                       : "Private Project"}
                   </div>
@@ -304,8 +332,7 @@ class ReviewStep extends React.Component {
                   </div>
                 )}
                 <div className={cs.existingSamples}>
-                  {this.props.project.number_of_samples || 0} existing samples
-                  in project
+                  {project.number_of_samples || 0} existing samples in project
                 </div>
               </div>
             </div>
@@ -319,9 +346,9 @@ class ReviewStep extends React.Component {
                   onClick={() => {
                     this.onLinkClick("uploadSamples");
                     logAnalyticsEvent("ReviewStep_edit-samples-link_clicked", {
-                      projectId: this.props.project.id,
-                      projectName: this.props.project.name,
-                      uploadType: this.props.uploadType,
+                      projectId: project.id,
+                      projectName: project.name,
+                      uploadType: uploadType,
                     });
                   }}
                 >
@@ -333,9 +360,9 @@ class ReviewStep extends React.Component {
                   onClick={() => {
                     this.onLinkClick("uploadMetadata");
                     logAnalyticsEvent("ReviewStep_edit-metadata-link_clicked", {
-                      projectId: this.props.project.id,
-                      projectName: this.props.project.name,
-                      uploadType: this.props.uploadType,
+                      projectId: project.id,
+                      projectName: project.name,
+                      uploadType: uploadType,
                     });
                   }}
                 >
@@ -351,22 +378,24 @@ class ReviewStep extends React.Component {
         <div className={cs.controls}>
           {allowedFeatures.includes("host_genome_free_text") && (
             <HostOrganismMessage
-              hostGenomes={this.props.originalHostGenomes}
+              hostGenomes={originalHostGenomes}
               samples={samples}
             />
           )}
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
+          {allowedFeatures.includes("step_function_pipeline") &&
+            this.renderUseStepFunctionPipelineOption()}
           <TermsAgreement
-            checked={this.state.consentChecked}
+            checked={consentChecked}
             onChange={() =>
               this.setState(
                 {
-                  consentChecked: !this.state.consentChecked,
+                  consentChecked: !consentChecked,
                 },
                 () =>
                   logAnalyticsEvent("ReviewStep_consent-checkbox_checked", {
-                    consentChecked: this.state.consentChecked,
+                    consentChecked: consentChecked,
                   })
               )
             }
@@ -374,13 +403,13 @@ class ReviewStep extends React.Component {
           {!showUploadModal && (
             <PrimaryButton
               text="Start Upload"
-              disabled={!this.state.consentChecked}
+              disabled={!consentChecked}
               onClick={withAnalytics(
                 this.uploadSamplesAndMetadata,
                 "ReviewStep_start-upload-button_clicked",
                 {
-                  samples: this.props.samples.length,
-                  uploadType: this.props.uploadType,
+                  samples: samples.length,
+                  uploadType: uploadType,
                 }
               )}
               rounded={false}
@@ -394,6 +423,7 @@ class ReviewStep extends React.Component {
               metadata={processMetadataRows(metadata.rows)}
               project={project}
               skipSampleProcessing={skipSampleProcessing}
+              useStepFunctionPipeline={useStepFunctionPipeline}
             />
           )}
         </div>

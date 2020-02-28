@@ -65,8 +65,7 @@ class MetadataInput extends React.Component {
       onSave,
       metadataType,
       className,
-      isHuman,
-      isInsect,
+      taxaCategory,
       sampleTypes,
     } = this.props;
     const { warning } = this.state;
@@ -86,8 +85,7 @@ class MetadataInput extends React.Component {
             // Result can be plain text or a match. We treat them the same.
             onChange(metadataType.key, result.name || result, true);
           }}
-          isHuman={isHuman}
-          isInsect={isInsect}
+          taxaCategory={taxaCategory}
           sampleTypes={sampleTypes}
         />
       );
@@ -127,7 +125,7 @@ class MetadataInput extends React.Component {
           onChange={val => onChange(metadataType.key, val)}
           onBlur={() => onSave && onSave(metadataType.key)}
           value={ensureDefinedValue(value)}
-          placeholder={isHuman ? "YYYY-MM" : "YYYY-MM-DD"}
+          placeholder={taxaCategory === "human" ? "YYYY-MM" : "YYYY-MM-DD"}
           type="text"
         />
       );
@@ -142,7 +140,7 @@ class MetadataInput extends React.Component {
             onResultSelect={({ result: selection }) => {
               const { result, warning } = processLocationSelection(
                 selection,
-                isHuman
+                taxaCategory === "human"
               );
               // Set warnedValue, so that a LOCATION_PRIVACY_WARNING warning isn't overwritten when the result propagates back down
               // as this.props.value.
@@ -196,8 +194,7 @@ MetadataInput.propTypes = {
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
-  isHuman: PropTypes.bool,
-  isInsect: PropTypes.bool,
+  taxaCategory: PropTypes.string,
   warning: PropTypes.string,
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
 };

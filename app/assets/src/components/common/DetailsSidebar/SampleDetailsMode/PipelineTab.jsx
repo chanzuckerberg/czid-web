@@ -125,7 +125,9 @@ class PipelineTab extends React.Component {
           />
         </div>
         <div className={cs.narrowMetadataValueContainer}>
-          <div className={cs.metadataValue}>{readsAfter.toLocaleString()}</div>
+          <div className={cs.metadataValue}>
+            {readsAfter ? readsAfter.toLocaleString() : ""}
+          </div>
         </div>
         <div className={cs.narrowMetadataValueContainer}>
           <div className={cs.metadataValue}>{percentReads}%</div>

@@ -85,6 +85,12 @@ class PipelineRunStage < ApplicationRecord
     "#{path_beginning}/#{pipeline_run.pipeline_version}/#{dag_name}_status.json"
   end
 
+  def step_statuses
+    JSON.parse(get_s3_file(step_status_file_path) || "{}")
+  rescue JSON::ParserError
+    {}
+  end
+
   def check_status_file_and_update(status_file_suffix, job_status_value)
     status_file_present = file_generated_since_run(pipeline_run, stage_status_file(status_file_suffix))
     if status_file_present && job_status != job_status_value
@@ -150,12 +156,6 @@ class PipelineRunStage < ApplicationRecord
     end
   end
 
-  def instance_terminated?(job_hash)
-    job_hash['status'] == STATUS_FAILED &&
-      job_hash['statusReason'].start_with?("Host EC2 (instance") &&
-      job_hash['statusReason'].end_with?(") terminated.")
-  end
-
   def add_failed_job
     existing_failed_jobs = failed_jobs ? "#{failed_jobs}, " : ""
     new_failed_job = "[#{job_id}, #{job_log_id}]"
@@ -181,37 +181,15 @@ class PipelineRunStage < ApplicationRecord
     if failed? || succeeded?
       unless job_log_id
         # set log id if not set
-        _job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
+        _job_status, self.job_log_id, self.job_description = job_info(job_id, id)
         save
       end
       return
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
     return unless due_for_aegea_check?
-    self.job_status, self.job_log_id, job_hash, self.job_description = job_info(job_id, id)
-    if [STATUS_ERROR, STATUS_FAILED].include?(job_status)
-      save
-      return
-    end
-    unless instance_terminated?(job_hash)
-      save
-      return
-    end
-
-    # This code path is not being used anymore because we no longer use spot
-    # instances for the Batch jobs. Spot instances can be terminated at any time
-    # if someone bids more, so a retry is necessary. Now we use on-demand
-    # instances. If we decided to go back to spot instances, this code would
-    # ensure that terminated Batch jobs get resubmitted.
-
-    # note failed attempt and retry
-    add_failed_job
-    unless count_failed_tries <= MAX_RETRIES
-      LogUtil.log_err_and_airbrake("Job #{job_id} for pipeline run #{id} was killed #{MAX_RETRIES} times.")
-      save
-      return
-    end
-    run_job # this saves
+    self.job_status, self.job_log_id, self.job_description = job_info(job_id, id)
+    save
   end
 
   def terminate_job

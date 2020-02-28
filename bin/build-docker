@@ -1,7 +1,9 @@
 #!/bin/bash
+# NOTE: We push all created tags to the Docker repo, but only the commit, branch, and latest tags matter.
+# Cache and compose are noise.
 set -e
 
-export REPO=chanzuckerberg/idseq-web
+export REPO="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web"
 
 BRANCH="$1"
 BRANCH_CLEANED=`echo $BRANCH | sed 's/\//-/g'`
@@ -20,8 +22,8 @@ echo '--'
 
 # Try to pull the latest image for this branch, otherwise pull latest image for caching
 if ! ( docker pull $BRANCH_TAG && docker tag $BRANCH_TAG $CACHE_TAG ); then
-  docker pull $LATEST_TAG
-  docker tag $LATEST_TAG $CACHE_TAG
+  # If we fail to fetch the latest image, continue the build without a cache image.
+  (docker pull $LATEST_TAG && docker tag $LATEST_TAG $CACHE_TAG) || true
 fi
 
 docker build -t $COMPOSE_TAG --cache-from $CACHE_TAG --build-arg GIT_COMMIT=${COMMIT} .

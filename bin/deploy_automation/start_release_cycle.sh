@@ -51,7 +51,7 @@ main() {
   git tag -a -m "Started release cycle $next_version" "${tag}" "origin/$MASTER_BRANCH"
 
   # point staging branch head to master
-  declare sha; sha=$(git log -n1 "${tag}" --format=%h)
+  declare sha; sha=$(git log -n1 "${tag}" --format=%h --abbrev=8)
   _log "Pointing ${STAGING_BRANCH} branch to tag ${tag}..."
   git branch -f "${STAGING_BRANCH}" "${sha}"
 
@@ -63,7 +63,7 @@ main() {
 
   # deploy instructions
   _log "Release cycle ready." \
-       "Please deploy ${tag} ($(git log -n1 "${tag}" --format=%h)) to ${STAGING_ENV}"
+       "Please deploy ${tag} ($(git log -n1 "${tag}" --format=%h --abbrev=8)) to ${STAGING_ENV}"
 }
 
 main "$@"
