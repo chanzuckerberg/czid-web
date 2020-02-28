@@ -1019,10 +1019,13 @@ class PipelineRun < ApplicationRecord
     sfn_service_result = SfnPipelineService.call(self)
     # TODO: handle error states better (exceptions from the service?)
     if sfn_service_result[:sfn_arn].present?
+      self.sfn_execution_arn = sfn_service_result[:sfn_arn]
+    else
       self.job_status = STATUS_FAILED
       self.finalized = 1
       # TODO: report errors
     end
+    return
   end
 
   def update_job_status
@@ -1041,13 +1044,6 @@ class PipelineRun < ApplicationRecord
         send_to_airbrake = !known_user_error
         report_failed_pipeline_run_stage(prs, automatic_restart, known_user_error, send_to_airbrake)
       elsif !prs.started?
-        # Note: this is not ideally place to initialize an SFN pipeline but
-        # in order to preserve most of the logic of the old pipeline we decided
-        # that this was the least intrusive place (vs. both downstream in run_job>host_filtering_command
-        # and upstream)
-        if step_function? && prs.step_number == 1
-          dispatch_sfn_pipeline
-        end
         # Run job will trigger dag pipeline for a particular stage
         # we're moving on to a new stage
         prs.run_job

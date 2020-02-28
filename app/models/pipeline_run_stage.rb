@@ -127,7 +127,7 @@ class PipelineRunStage < ApplicationRecord
       # the step function which handles all stages (started in PipelineRun::update_job_status)
       # Filling job_command with placeholder string because current pipeline
       # depends on it (e.g. see started? method)
-      self.job_command = "step_function"
+      self.job_command = pipeline.sfn_arn
     else
       # Fallback to DAG run
       self.job_command = send(job_command_func)
