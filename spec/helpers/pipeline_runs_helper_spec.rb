@@ -68,5 +68,108 @@ RSpec.describe PipelineRunsHelper, type: :helper do
 
       expect(pipeline_runs.map(&:id)).to eq([first_pipeline_run.id])
     end
+
+    describe "#parse_sfn_execution_history_hash" do
+      let(:aws_cli_stdout) { file_fixture("helpers/pipeline_runs_helper/#{fixture_file}").read }
+
+      subject do
+        helper.parse_sfn_execution_history_hash(JSON.parse(aws_cli_stdout))
+      end
+
+      shared_examples "check output" do |fixture_file_name, expected_result|
+        context "When processing #{fixture_file_name}" do
+          let(:fixture_file) { fixture_file_name }
+          it { is_expected.to eq(expected_result) }
+        end
+      end
+
+      include_examples(
+        "check output",
+        "sfn-execution-history_error-processing-output.json",
+        "1" => { "stage" => "HostFilter", "status" => "FAILED" }
+      )
+      include_examples(
+        "check output",
+        "sfn-execution-history_aborted.json",
+        "1" => { "stage" => "HostFilter", "status" => "FAILED" }
+      )
+      include_examples(
+        "check output",
+        "sfn-execution-history_failed-hostfiltering.json",
+        "1" => { "stage" => "HostFilter", "status" => "FAILED" }
+      )
+      include_examples(
+        "check output",
+        "sfn-execution-history_failed-nonhostalignment.json",
+        "1" => { "stage" => "HostFilter", "status" => "SUCCEEDED" },
+        "2" => { "stage" => "NonHostAlignment", "status" => "FAILED" }
+      )
+      include_examples(
+        "check output",
+        "sfn-execution-history_succeeded.json",
+        "1" => { "stage" => "HostFilter", "status" => "SUCCEEDED" },
+        "2" => { "stage" => "NonHostAlignment", "status" => "SUCCEEDED" },
+        "3" => { "stage" => "Postprocess", "status" => "SUCCEEDED" },
+        "4" => { "stage" => "Experimental", "status" => "SUCCEEDED" }
+      )
+      include_examples(
+        "check output",
+        "sfn-execution-history_timeout.json",
+        "1" => { "stage" => "HostFilter", "status" => "SUCCEEDED" },
+        "2" => { "stage" => "NonHostAlignment", "status" => "SUCCEEDED" },
+        "3" => { "stage" => "Postprocess", "status" => "FAILED" }
+      )
+      include_examples(
+        "check output",
+        "sfn-execution-history_in-progress.json",
+        "1" => { "stage" => "HostFilter", "status" => "SUCCEEDED" },
+        "2" => { "stage" => "NonHostAlignment", "status" => "RUNNING" }
+      )
+    end
+
+    describe "#sfn_info" do
+      let(:sfn_execution_arn) { "arn:aws:states:us-west-2:123456789012:execution:idseq-dev-main:idseq-1234567890" }
+      let(:run_id) { 12_345 }
+      let(:stage_number) { 1 }
+
+      subject do
+        helper.sfn_info(sfn_execution_arn, run_id, stage_number)
+      end
+
+      let(:aws_cli_stdout) { "" }
+      let(:aws_cli_stderr) { "" }
+      let(:aws_cli_exitstatus) { 0 }
+      before do
+        expect(Open3)
+          .to receive(:capture3)
+          .with("aws", "stepfunctions", "get-execution-history", "--output", "json", "--execution-arn", sfn_execution_arn)
+          .and_return([aws_cli_stdout, aws_cli_stderr, instance_double(Process::Status, exitstatus: aws_cli_exitstatus)])
+      end
+
+      context "when arn doesn't exist" do
+        let(:aws_cli_stderr) { "An error occurred (ExecutionDoesNotExist) when calling the GetExecutionHistory operation: Execution Does Not Exist: '#{sfn_execution_arn}'" }
+        let(:aws_cli_exitstatus) { 255 }
+
+        it { is_expected.to eq([PipelineRunStage::STATUS_FAILED, nil, ""]) }
+      end
+
+      context "when arn exists" do
+        let(:aws_cli_stdout) { file_fixture("helpers/pipeline_runs_helper/#{fixture_file}").read }
+
+        context "and an error happened during stage 2" do
+          let(:fixture_file) { "sfn-execution-history_failed-nonhostalignment.json" }
+
+          context "and fetching status for stage 1" do
+            let(:stage_number) { 1 }
+            it { is_expected.to eq(["SUCCEEDED", nil, aws_cli_stdout]) }
+          end
+
+          context "and fetching status for stage 2" do
+            let(:stage_number) { 2 }
+            it { is_expected.to eq(["FAILED", nil, aws_cli_stdout]) }
+          end
+        end
+      end
+    end
   end
 end

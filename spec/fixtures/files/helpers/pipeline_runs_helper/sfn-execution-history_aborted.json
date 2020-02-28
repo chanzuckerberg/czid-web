@@ -1,0 +1,24 @@
+{
+    "events": [
+        {
+            "timestamp": 1582320454.612,
+            "type": "ExecutionStarted",
+            "id": 1,
+            "previousEventId": 0,
+            "executionStartedEventDetails": {
+                "input": "{\"Input\": {\"HostFilter\": \"{\\\"fastqs_0\\\": \\\"s3://dummy-s3-bucket/samples/123/12345/fastqs/norg_13__nacc_35__uniform_weight_per_organism__hiseq_reads__v10__R1.fastq.gz\\\", \\\"fastqs_1\\\": \\\"s3://dummy-s3-bucket/samples/123/12345/fastqs/norg_13__nacc_35__uniform_weight_per_organism__hiseq_reads__v10__R2.fastq.gz\\\"}\"}, \"HOST_FILTER_WDL_URI\": \"s3://dummy-s3-bucket/samples/123/12345/sfn-wdl/host_filter.wdl\", \"HOST_FILTER_OUTPUT_URI\": \"s3://dummy-s3-bucket/samples/123/12345/sfn-wdl/host_filter/output.json\", \"NON_HOST_ALIGNMENT_WDL_URI\": \"s3://dummy-s3-bucket/samples/123/12345/sfn-wdl/non_host_alignment.wdl\", \"NON_HOST_ALIGNMENT_OUTPUT_URI\": \"s3://dummy-s3-bucket/samples/123/12345/sfn-wdl/non_host_alignment/output.json\", \"POSTPROCESS_WDL_URI\": \"s3://dummy-s3-bucket/samples/123/12345/sfn-wdl/postprocess.wdl\", \"POSTPROCESS_OUTPUT_URI\": \"s3://dummy-s3-bucket/samples/123/12345/sfn-wdl/postprocess/output.json\", \"EXPERIMENTAL_WDL_URI\": \"s3://dummy-s3-bucket/samples/123/12345/sfn-wdl/experimental.wdl\", \"EXPERIMENTAL_OUTPUT_URI\": \"s3://dummy-s3-bucket/samples/123/12345/sfn-wdl/experimental/output.json\"}",
+                "roleArn": "arn:aws:iam::123456789012:role/idseq-dev-sfn-service"
+            }
+        },
+        {
+            "timestamp": 1582320493.313,
+            "type": "ExecutionAborted",
+            "id": 6,
+            "previousEventId": 0,
+            "executionAbortedEventDetails": {
+                "error": "KeyboardInterrupt",
+                "cause": ""
+            }
+        }
+    ]
+}
