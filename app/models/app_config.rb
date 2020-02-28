@@ -18,4 +18,6 @@ class AppConfig < ApplicationRecord
   # When this is "1", the announcement banner on the top of the site header will be enabled.
   # Other conditions may check a time constraint.
   SHOW_ANNOUNCEMENT_BANNER = 'show_announcement_banner'.freeze
+  # The ARN of the pipeline's Step Function
+  SFN_ARN = 'sfn_arn'.freeze
 end

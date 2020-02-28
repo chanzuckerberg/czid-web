@@ -116,8 +116,17 @@ class PipelineRunStage < ApplicationRecord
   def run_job
     # Check output for the run and decide if we should run this stage
     return if started? && !failed? # job has been started successfully
-    self.job_command = send(job_command_func)
-    self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
+    if step_function?
+      # We do not need to start stage anymore for SFNs, because now we only start
+      # the step function which handles all stages (started in PipelineRun::update_job_status)
+      # Filling job_command with placeholder string because current pipeline
+      # depends on it (e.g. see started? method)
+      self.job_command = "step_function"
+    else
+      # Fallback to DAG run
+      self.job_command = send(job_command_func)
+      self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
+    end
     if status.exitstatus.zero?
       output = JSON.parse(command_stdout)
       self.job_id = output['jobId']
@@ -214,25 +223,6 @@ class PipelineRunStage < ApplicationRecord
     AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
   end
 
-  ########### STAGE SPECIFIC FUNCTIONS BELOW ############
-  # def prepare_dag(attribute_dict, key_s3_params = nil)
-  #   sample = pipeline_run.sample
-  #   dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
-  #   attribute_dict[:dag_name] = dag_name
-  #   attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-
-  #   # See our dag templates in app/lib/dags.
-  #   dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.jbuilder",
-  #                          sample.project_id,
-  #                          sample.id,
-  #                          sample.host_genome_name.downcase,
-  #                          attribute_dict,
-  #                          pipeline_run.parse_dag_vars)
-  #   self.dag_json = dag.render
-  #   copy_done_file = "echo done | aws s3 cp - #{Shellwords.escape(sample.sample_output_s3_path)}/\"$AWS_BATCH_JOB_ID\".#{JOB_SUCCEEDED_FILE_SUFFIX}"
-  #   upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
-  # end
-
   def prepare_dag(dag_json, key_s3_params = nil)
     sample = pipeline_run.sample
     copy_done_file = "echo done | aws s3 cp - #{Shellwords.escape(sample.sample_output_s3_path)}/\"$AWS_BATCH_JOB_ID\".#{JOB_SUCCEEDED_FILE_SUFFIX}"
@@ -254,33 +244,6 @@ class PipelineRunStage < ApplicationRecord
                            pipeline_run.parse_dag_vars)
     return dag.render
   end
-
-  # def generate_host_filtering_dag_json
-  #   # Upload DAG to S3
-  #   sample = pipeline_run.sample
-  #   file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
-  #   nucleotide_type_metadatum = sample.metadata.find_by(key: "nucleotide_type")
-  #   nucleotide_type = nucleotide_type_metadatum ? nucleotide_type_metadatum.string_validated_value : ''
-
-  #   attribute_dict = {
-  #     fastq1: sample.input_files[0].name,
-  #     file_ext: file_ext,
-  #     star_genome: sample.s3_star_index_path,
-  #     bowtie2_genome: sample.s3_bowtie2_index_path,
-  #     max_fragments: pipeline_run.max_input_fragments,
-  #     max_subsample_frag: pipeline_run.subsample,
-  #     nucleotide_type: nucleotide_type,
-  #   }
-  #   human_host_genome = HostGenome.find_by(name: "Human")
-  #   attribute_dict[:human_star_genome] = human_host_genome.s3_star_index_path
-  #   attribute_dict[:human_bowtie2_genome] = human_host_genome.s3_bowtie2_index_path
-  #   attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
-  #   attribute_dict[:adapter_fasta] = if sample.input_files[1]
-  #                                      PipelineRun::ADAPTER_SEQUENCES["paired-end"]
-  #                                    else
-  #                                      PipelineRun::ADAPTER_SEQUENCES["single-end"]
-  #                                    end
-  # end
 
   def generate_host_filtering_dag_json
     # Upload DAG to S3

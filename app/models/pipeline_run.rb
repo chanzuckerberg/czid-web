@@ -923,9 +923,14 @@ class PipelineRun < ApplicationRecord
     _stdout = Syscall.run("rm", "-f", downloaded_stats_path)
   end
 
-  def start_sfn_run
-    # 1. generate jsons for PRSs
-    # 2. trigger sfn function
+  def dispatch_sfn_pipeline
+    sfn_service_result = SfnPipelineService.call(self)
+    # TODO: handle error states better (exceptions from the service?)
+    if sfn_service_result[:sfn_arn].present?
+      self.job_status = STATUS_FAILED
+      self.finalized = 1
+      # TODO: report errors
+    end
   end
 
   def update_job_status
@@ -946,10 +951,10 @@ class PipelineRun < ApplicationRecord
       elsif !prs.started?
         # Note: this is not ideally place to initialize an SFN pipeline but
         # in order to preserve most of the logic of the old pipeline we decided
-        # that this was the least intrusive place (vs. both downsteams in run_job>host_filtering_command
+        # that this was the least intrusive place (vs. both downstream in run_job>host_filtering_command
         # and upstream)
-        if sample.pipeline_type == Sample::SFN && prs.step_number == 1
-          sfn_arn = SfnPipelineService.call(self)
+        if step_function? && prs.step_number == 1
+          dispatch_sfn_pipeline
         end
         # Run job will trigger dag pipeline for a particular stage
         # we're moving on to a new stage
