@@ -33,6 +33,7 @@ class Sample < ApplicationRecord
   has_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
+  validates_associated :input_files
   has_many :metadata, dependent: :destroy
   has_and_belongs_to_many :visualizations
 

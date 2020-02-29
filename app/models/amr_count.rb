@@ -22,11 +22,15 @@
 #   "Tmt"]
 class AmrCount < ApplicationRecord
   belongs_to :pipeline_run
-
-  validates :gene, presence: true, if: :mass_validation_enabled?
-  validates :allele, presence: true, if: :mass_validation_enabled?
-  validates :drug_family, presence: true, if: :mass_validation_enabled?
-  # AmrCount is designed to handle partial data. See pipeline_run_spec.rb.
+  # AmrCount is designed to handle partial data. See db_load_amr_counts.
+  validates :gene, presence: true, allow_nil: true, if: :mass_validation_enabled?
+  validates :allele, presence: true, allow_nil: true, if: :mass_validation_enabled?
+  validates :drug_family, presence: true, allow_nil: true, if: :mass_validation_enabled?
+  validates :annotation_gene, presence: true, allow_nil: true, if: :mass_validation_enabled?
+  validates :genbank_accession, presence: true, allow_nil: true, if: :mass_validation_enabled?
   validates :coverage, inclusion: 0..100, allow_nil: true, if: :mass_validation_enabled?
   validates :depth, numericality: { greater_than: 0 }, allow_nil: true, if: :mass_validation_enabled?
+  validates :total_reads, numericality: { greater_than: 0, integer_only: true }, allow_nil: true, if: :mass_validation_enabled?
+  validates :dpm, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true, if: :mass_validation_enabled?
+  validates :rpm, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true, if: :mass_validation_enabled?
 end

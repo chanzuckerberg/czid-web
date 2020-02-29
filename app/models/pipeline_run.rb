@@ -11,11 +11,13 @@ class PipelineRun < ApplicationRecord
   belongs_to :alignment_config
   has_many :pipeline_run_stages, dependent: :destroy
   accepts_nested_attributes_for :pipeline_run_stages
+  validates_associated :pipeline_run_stages
   has_and_belongs_to_many :backgrounds
   has_and_belongs_to_many :phylo_trees
   has_and_belongs_to_many :bulk_downloads
 
   has_many :output_states, dependent: :destroy
+  validates_associated :output_states
   has_many :taxon_counts, dependent: :destroy
   has_many :job_stats, dependent: :destroy
   has_many :taxon_byteranges, dependent: :destroy
@@ -24,12 +26,19 @@ class PipelineRun < ApplicationRecord
   has_many :contigs, dependent: :destroy
   has_one :insert_size_metric_set, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
+  validates_associated :taxon_counts
   accepts_nested_attributes_for :job_stats
+  validates_associated :job_stats
   accepts_nested_attributes_for :taxon_byteranges
+  validates_associated :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
+  validates_associated :ercc_counts
   accepts_nested_attributes_for :amr_counts
+  validates_associated :amr_counts
   accepts_nested_attributes_for :contigs
+  validates_associated :contigs
   accepts_nested_attributes_for :insert_size_metric_set
+  validates_associated :insert_size_metric_set
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline

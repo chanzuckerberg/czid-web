@@ -23,7 +23,8 @@ class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
       params = {
         name: 'new_phylo_tree',
         projectId: @project.id,
-        taxId: entrypoint_taxon_count.tax_id, pipelineRunIds: [
+        taxId: entrypoint_taxon_count.tax_id,
+        pipelineRunIds: [
           pipeline_runs(:three).id,
           pipeline_runs(:four).id,
         ],
