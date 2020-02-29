@@ -145,7 +145,8 @@ class PipelineRun < ApplicationRecord
   # | FAILED                                    |
   # | LOADED                                    |
   # +-------------------------------------------+
-  validates :job_status, presence: true
+  # NOTE: kickoff_pipeline does not set a job_status
+  validates :job_status, presence: true, allow_nil: true, if: :mass_validation_enabled?
   #
   # The RESULT MONITOR is responsible for keeping status of available outputs
   # and for loading those outputs in from S3.
@@ -182,6 +183,7 @@ class PipelineRun < ApplicationRecord
   # Values for results_finalized are as follows.
   # Note we don't put a default on results_finalized in the schema, so that we can
   # recognize old runs by results_finalized being nil.
+  # NOTE: kickoff_pipeline does not set results_finalized
   IN_PROGRESS = 0
   FINALIZED_SUCCESS = 10
   FINALIZED_FAIL = 20
@@ -190,9 +192,9 @@ class PipelineRun < ApplicationRecord
     FINALIZED_SUCCESS,
     FINALIZED_FAIL,
     # See also pre_result_monitor?
-  ], }
+  ], }, if: :mass_validation_enabled?
 
-  validates :finalized, presence: true, inclusion: { in: [0, 1] }
+  validates :finalized, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
 
   # State machine for RESULT MONITOR:
   #
