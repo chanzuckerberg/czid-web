@@ -1,15 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { createBackground } from "~/api";
+import { withAnalytics } from "~/api/analytics";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
-import { createBackground } from "~/api";
-import { withAnalytics } from "~/api/analytics";
 import Modal from "~ui/containers/Modal";
-
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Notification from "~ui/notifications/Notification";
+
 import cs from "./collection_modal.scss";
 
 /**
@@ -183,7 +184,13 @@ class CollectionModal extends React.Component {
               A background is a group of samples. You can use a background as a
               statistical model to compare your samples to. When you select a
               background on a report or heatmap, the z-scores will indicate how
-              much a sample deviates from the mean of that background.
+              much a sample deviates from the mean of that background.{" "}
+              <ExternalLink
+                className={cs.link}
+                href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035166174-How-do-I-create-and-use-background-models-in-IDseq-"
+              >
+                Learn More
+              </ExternalLink>.
             </div>
             {this.renderForm()}
             {backgroundCreationResponse && this.renderStatus()}
