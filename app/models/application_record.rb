@@ -7,12 +7,9 @@ class ApplicationRecord < ActiveRecord::Base
   after_update { |record| log_analytics record, "updated" }
   after_destroy { |record| log_analytics record, "destroyed" }
 
-  # Load once at boot for performance
-  ENABLE_MASS_VALIDATION = AppConfig.find_by(key: AppConfig::ENABLE_MASS_VALIDATION)
-
   # Condition for rollout of mass addition of validation rules.
   def mass_validation_enabled?
-    ENABLE_MASS_VALIDATION
+    self._enable_mass_validation ||= AppConfig.find_by(key: AppConfig::ENABLE_MASS_VALIDATION)
   end
 
   # Set current user and request to global for use in logging.
