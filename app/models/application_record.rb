@@ -9,7 +9,9 @@ class ApplicationRecord < ActiveRecord::Base
 
   # Condition for rollout of mass addition of validation rules.
   def mass_validation_enabled?
-    @enable_mass_validation ||= AppConfig.find_by(key: AppConfig::ENABLE_MASS_VALIDATION)
+    if AppConfig.table_exists?
+      return @enable_mass_validation ||= AppConfig.find_by(key: AppConfig::ENABLE_MASS_VALIDATION)
+    end
   end
 
   # Set current user and request to global for use in logging.
