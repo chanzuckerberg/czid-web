@@ -92,7 +92,7 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "access_token"
-    t.float "progress"
+    t.float "progress", limit: 24
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
     t.bigint "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
@@ -144,9 +144,9 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", null: false
-    t.text "s3_star_index_path"
-    t.text "s3_bowtie2_index_path"
+    t.string "name", null: false, comment: "Friendly name of host genome. May be common name or scientific name of species. Must be unique and start with a capital letter."
+    t.string "s3_star_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
+    t.string "s3_bowtie2_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -390,6 +390,16 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
     t.index ["user_id"], name: "index_projects_users_on_user_id"
   end
 
+  create_table "sample_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", null: false, comment: "Canonical name of the sample type. This should be immutable after creation. It is used as a key to join with MetadataField sample_type values."
+    t.string "group", null: false, comment: "Mutually exclusive grouping of names. Example: \"Organs\"."
+    t.boolean "insect_only", default: false, null: false, comment: "Whether a sample type should only be for insects."
+    t.boolean "human_only", default: false, null: false, comment: "Whether a sample type should only be for humans."
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_sample_types_on_name", unique: true
+  end
+
   create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -631,11 +641,12 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
   add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
   add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
   add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
+  add_foreign_key "bulk_downloads", "users"
   add_foreign_key "bulk_downloads_pipeline_runs", "bulk_downloads", name: "bulk_downloads_pipeline_runs_bulk_download_id_fk"
   add_foreign_key "bulk_downloads_pipeline_runs", "pipeline_runs", name: "bulk_downloads_pipeline_runs_pipeline_run_id_fk"
-  add_foreign_key "bulk_downloads", "users"
   add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
   add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
+  add_foreign_key "host_genomes", "users"
   add_foreign_key "host_genomes_metadata_fields", "host_genomes", name: "host_genomes_metadata_fields_host_genome_id_fk"
   add_foreign_key "host_genomes_metadata_fields", "metadata_fields", name: "host_genomes_metadata_fields_metadata_field_id_fk"
   add_foreign_key "input_files", "samples", name: "input_files_sample_id_fk"
@@ -659,5 +670,6 @@ ActiveRecord::Schema.define(version: 20_200_227_225_541) do
   add_foreign_key "samples", "users", name: "samples_user_id_fk"
   add_foreign_key "samples_visualizations", "samples", name: "samples_visualizations_sample_id_fk"
   add_foreign_key "samples_visualizations", "visualizations", name: "samples_visualizations_visualization_id_fk"
+  add_foreign_key "user_settings", "users"
   add_foreign_key "visualizations", "users", name: "visualizations_user_id_fk"
 end
