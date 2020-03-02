@@ -1672,7 +1672,7 @@ class PipelineRun < ApplicationRecord
 
         file_info = []
         output_list.each do |output|
-          path << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
+          path = "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
           file_info_for_output = filename_to_info[path]
           next unless file_info_for_output
           if !can_see_stage1_results && stage_idx.zero? && step_idx < num_steps - 1
