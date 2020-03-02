@@ -105,7 +105,7 @@ export default class PublicNcovHomepage extends React.Component {
               label="View Samples"
               onClick={() =>
                 logAnalyticsEvent(
-                  "PublicNcovHomepage_view-samples-link_clicked"
+                  "PublicNCovHomePage_view-samples-link_clicked"
                 )
               }
             />
