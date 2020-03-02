@@ -83,6 +83,18 @@ export default class PublicNcovHomepage extends React.Component {
       </ExternalLink>
     );
 
+    const PROTOCOL_LINK = (
+      <ExternalLink
+        className={cs.link}
+        href={appConfig.publicProtocolUrl}
+        onClick={() =>
+          logAnalyticsEvent("PublicNCovHomePage_protocol-link_clicked")
+        }
+      >
+        using an enrichment protocol
+      </ExternalLink>
+    );
+
     return (
       <NarrowContainer className={cs.publicNcovHomepage} size="small">
         <div className={cs.title}>
@@ -93,7 +105,7 @@ export default class PublicNcovHomepage extends React.Component {
               label="View Samples"
               onClick={() =>
                 logAnalyticsEvent(
-                  "PublicNcovHomepage_view-samples-link_clicked"
+                  "PublicNCovHomePage_view-samples-link_clicked"
                 )
               }
             />
@@ -164,8 +176,8 @@ export default class PublicNcovHomepage extends React.Component {
           most recent version of NCBI that included the recently added
           SARS-CoV-2 sequences. The analysis was rerun using the new NCBI index
           to confirm the match to SARS-CoV-2 in the PCR-positive index case.
-          Further experiments were done to isolate a full genome sequence for
-          SARS-CoV-2 from the Index Patient.
+          Further experiments were done {PROTOCOL_LINK} to isolate a full genome
+          sequence for SARS-CoV-2 from the Index Patient.
         </p>
         <h2>What conclusions were drawn from the data?</h2>
         <ol>
