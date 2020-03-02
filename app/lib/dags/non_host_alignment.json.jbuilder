@@ -26,7 +26,6 @@ json.targets do
 
   json.cdhitdup_cluster_sizes [
     "cdhitdup_cluster_sizes.tsv",
-
   ]
 end
 
@@ -59,7 +58,7 @@ json.steps do
   end
 
   steps << {
-    in: ["host_filter_out", "cdhitdup_cluster_sizes.tsv"],
+    in: ["host_filter_out", "cdhitdup_cluster_sizes"],
     out: "gsnap_out",
     class: "PipelineStepRunAlignmentRemotely",
     module: "idseq_dag.steps.run_alignment_remotely",
@@ -84,7 +83,7 @@ json.steps do
   end
 
   steps << {
-    in: ["host_filter_out", "cdhitdup_cluster_sizes.tsv"],
+    in: ["host_filter_out", "cdhitdup_cluster_sizes"],
     out: "rapsearch2_out",
     class: "PipelineStepRunAlignmentRemotely",
     module: "idseq_dag.steps.run_alignment_remotely",
@@ -102,7 +101,7 @@ json.steps do
   }
 
   steps << {
-    in: ["host_filter_out", "gsnap_out", "rapsearch2_out", "cdhitdup_cluster_sizes.tsv"],
+    in: ["host_filter_out", "gsnap_out", "rapsearch2_out", "cdhitdup_cluster_sizes"],
     out: "annotated_out",
     class: "PipelineStepGenerateAnnotatedFasta",
     module: "idseq_dag.steps.generate_annotated_fasta",
