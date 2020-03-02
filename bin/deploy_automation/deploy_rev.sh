@@ -14,12 +14,12 @@ main() {
   _git_fetch_and_cleanup
 
   declare sha; sha=$(git log -n1 "${git_rev}" --format=%h --abbrev=8)
-  declare docker_image="${DOCKER_REPOSITORY_NAME}:sha-$sha"
+  declare docker_image="${ECR_REPOSITORY_NAME}:sha-$sha"
 
   _log "Starting deployment of $git_rev (sha-$sha) to $env"
 
   _log "Checking if docker image $docker_image is available"
-  if ! __retry 15 60 __docker_tag_exists "${DOCKER_REPOSITORY_NAME}" "sha-$sha"; then
+  if ! __retry 15 60 __docker_tag_exists "${ECR_REPOSITORY_NAME}" "sha-$sha"; then
     _exit_with_err_msg "Couldn't find image ${docker_image} in docker hub"
   fi
 
@@ -32,10 +32,9 @@ main() {
 }
 
 __docker_tag_exists() {
-  declare docker_repo="$1"
+  declare repository_name="$1"
   declare tag="$2"
-  http --ignore-stdin --timeout 30 --check-status -b \
-    GET "https://index.docker.io/v1/repositories/$docker_repo/tags/$tag"
+  aws ecr describe-images --repository-name "$repository_name" --image-ids imageTag="$tag" | jq -e
 }
 
 __check_commit_state() {
