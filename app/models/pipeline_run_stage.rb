@@ -127,18 +127,19 @@ class PipelineRunStage < ApplicationRecord
       # the step function which handles all stages (started in PipelineRun::update_job_status)
       # Filling job_command with placeholder string because current pipeline
       # depends on it (e.g. see started? method)
-      self.job_command = pipeline.sfn_arn
+      self.job_command = pipeline_run.sfn_execution_arn
+      self.job_status = STATUS_STARTED
     else
       # Fallback to DAG run
       self.job_command = send(job_command_func)
       self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
-    end
-    if status.exitstatus.zero?
-      output = JSON.parse(command_stdout)
-      self.job_id = output['jobId']
-      self.job_status = STATUS_STARTED
-    else
-      self.job_status = STATUS_FAILED
+      if status.exitstatus.zero?
+        output = JSON.parse(command_stdout)
+        self.job_id = output['jobId']
+        self.job_status = STATUS_STARTED
+      else
+        self.job_status = STATUS_FAILED
+      end
     end
     self.created_at = Time.now.utc
     save
