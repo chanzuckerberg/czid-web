@@ -343,7 +343,7 @@ class SamplesView extends React.Component {
         className={cs.action}
         disabled
         icon={saveIcon}
-        popupText={"Save a Collection"}
+        popupText={"Background Model"}
         popupSubtitle="Select at least 2 samples"
       />
     ) : (
@@ -352,7 +352,7 @@ class SamplesView extends React.Component {
           <ToolbarIcon
             className={cs.action}
             icon={saveIcon}
-            popupText={"Save a Collection"}
+            popupText={"Background Model"}
           />
         }
         selectedSampleIds={selectedSampleIds}

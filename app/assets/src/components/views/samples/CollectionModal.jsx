@@ -1,17 +1,22 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { createBackground } from "~/api";
+import { withAnalytics } from "~/api/analytics";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
-import { createBackground } from "~/api";
-import { withAnalytics } from "~/api/analytics";
 import Modal from "~ui/containers/Modal";
-
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Notification from "~ui/notifications/Notification";
+
 import cs from "./collection_modal.scss";
 
+/**
+ * NOTE: "Collections" were an unrealized generalization of the background concept.
+ * For the time being, a collection is equivalent to a background.
+ */
 class CollectionModal extends React.Component {
   constructor(props) {
     super(props);
@@ -39,7 +44,7 @@ class CollectionModal extends React.Component {
         <div className={cs.warning}>
           <Notification className={cs.notification} type="warn">
             A large number of samples may increase the processing time before
-            your collection can be used as a background.
+            your background can be used in reports.
           </Notification>
         </div>
         <ul className={cs.selectedSamples}>
@@ -137,12 +142,12 @@ class CollectionModal extends React.Component {
     return (
       <div>
         {backgroundCreationResponse.status === "ok" ? (
-          <Notification type="success">
-            Collection is being created and will be visible on the report page
-            once statistics have been computed.
+          <Notification className={cs.notification} type="success">
+            Your Background Model is being created and will be visible on the
+            report page once statistics have been computed.
           </Notification>
         ) : (
-          <Notification type="error">
+          <Notification className={cs.notification} type="error">
             {backgroundCreationResponse.message}
           </Notification>
         )}
@@ -174,12 +179,18 @@ class CollectionModal extends React.Component {
             )}
             className={cs.collectionModal}
           >
-            <div className={cs.title}>Create a Collection</div>
+            <div className={cs.title}>Create a Background Model</div>
             <div className={cs.description}>
-              A collection is a group of samples. You can use this collection as
-              a background model to be selected on a sample report page. It will
-              update the calculated z-score to indicate how much the the sample
-              deviates from the norm for that collection.
+              A background is a group of samples. You can use a background as a
+              statistical model to compare your samples to. When you select a
+              background on a report or heatmap, the z-scores will indicate how
+              much a sample deviates from the mean of that background.{" "}
+              <ExternalLink
+                className={cs.link}
+                href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035166174-How-do-I-create-and-use-background-models-in-IDseq-"
+              >
+                Learn More
+              </ExternalLink>.
             </div>
             {this.renderForm()}
             {backgroundCreationResponse && this.renderStatus()}
