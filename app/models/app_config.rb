@@ -55,4 +55,5 @@ class AppConfig < ApplicationRecord
   # Control for public preview.
   PUBLIC_PREVIEW_USER = 'public_preview_user'.freeze
   PUBLIC_PREVIEW_KEY = 'public_preview_key'.freeze
+  PUBLIC_PROTOCOL_URL = 'public_protocol_url'.freeze
 end
