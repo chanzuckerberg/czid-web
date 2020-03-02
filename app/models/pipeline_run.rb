@@ -1670,23 +1670,23 @@ class PipelineRun < ApplicationRecord
       targets.each_with_index do |(target_name, output_list), step_idx|
         next if given_targets.keys.include?(target_name)
 
-        file_paths = []
-        output_list.each do |output|
-          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
-        end
-
-        get_additional_outputs(step_statuses, target_name).each do |filename|
-          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{filename}"
-        end
-
         file_info = []
-        file_paths.each do |path|
+        output_list.each do |output|
+          path << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
           file_info_for_output = filename_to_info[path]
           next unless file_info_for_output
           if !can_see_stage1_results && stage_idx.zero? && step_idx < num_steps - 1
             # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
             file_info_for_output["url"] = nil
           end
+          file_info << file_info_for_output
+        end
+
+        # All additional outputs don't get their URLs deleted
+        get_additional_outputs(step_statuses, target_name).each do |filename|
+          path = "#{output_dir_s3_key}/#{pipeline_version}/#{filename}"
+          file_info_for_output = filename_to_info[path]
+          next unless file_info_for_output
           file_info << file_info_for_output
         end
 
