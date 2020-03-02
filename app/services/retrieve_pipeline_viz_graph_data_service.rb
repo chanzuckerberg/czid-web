@@ -241,7 +241,10 @@ class RetrievePipelineVizGraphDataService
 
   def remove_host_filtering_urls(edges)
     edges.each do |edge|
-      if (edge[:to] && edge[:to][:stageIndex].zero?) || edge[:from].nil?
+      to_host_filtering = edge[:to] && edge[:to][:stageIndex].zero?
+      from_nowhere = edge[:from].nil?
+      host_filtering_additional_output = edge[:from] && edge[:from][:stageIndex].zero? && edge[:to].nil?
+      if to_host_filtering || from_nowhere || host_filtering_additional_output
         edge[:files].each { |file| file[:url] = nil }
       end
     end
