@@ -8,7 +8,7 @@ export GITHUB_TOKEN; GITHUB_TOKEN=${GITHUB_TOKEN:-$(cut -f 3 -d : ~/.git-credent
 export GITHUB_REMOTE_ORIGIN; GITHUB_REMOTE_ORIGIN=$(git remote get-url origin | sed -E "s/^(https|git)(:\/\/|@)([^\/:]+)[\/:]([^\/:]+)\/(.+).git$/\\4\/\\5/")
 export GITHUB_REPOSITORY_API="https://api.github.com/repos/${GITHUB_REMOTE_ORIGIN}"
 export GITHUB_REPOSITORY_URL="https://github.com/${GITHUB_REMOTE_ORIGIN}"
-export DOCKER_REPOSITORY_NAME="$GITHUB_REMOTE_ORIGIN"
+export ECR_REPOSITORY_NAME; ECR_REPOSITORY_NAME=$(cut -f 2 -d / <<<"$GITHUB_REMOTE_ORIGIN")
 
 # Special chars
 export TAB=$'\t'
