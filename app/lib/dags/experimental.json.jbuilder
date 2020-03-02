@@ -61,6 +61,9 @@ json.targets do
   json.cdhitdup_clusters [
     "dedup1.fa.clstr",
   ]
+  json.deduped_fasta [
+    "dedup1.fa",
+  ]
 end
 
 json.steps do
