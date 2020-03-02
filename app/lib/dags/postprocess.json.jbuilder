@@ -79,7 +79,7 @@ json.steps do
   steps = []
 
   steps << {
-    in: ["host_filter_out", "cdhitdup_cluster_sizes.tsv"],
+    in: ["host_filter_out", "cdhitdup_cluster_sizes"],
     out: "assembly_out",
     class: "PipelineStepRunAssembly",
     module: "idseq_dag.steps.run_assembly",
@@ -136,7 +136,7 @@ json.steps do
   end
 
   steps << {
-    in: ["gsnap_out", "assembly_out", "gsnap_accessions_out", "cdhitdup_cluster_sizes.tsv"],
+    in: ["gsnap_out", "assembly_out", "gsnap_accessions_out", "cdhitdup_cluster_sizes"],
     out: "refined_gsnap_out",
     class: "PipelineStepBlastContigs",
     module: "idseq_dag.steps.blast_contigs",
@@ -147,7 +147,7 @@ json.steps do
   }
 
   steps << {
-    in: ["rapsearch2_out", "assembly_out", "rapsearch2_accessions_out", "cdhitdup_cluster_sizes.tsv"],
+    in: ["rapsearch2_out", "assembly_out", "rapsearch2_accessions_out", "cdhitdup_cluster_sizes"],
     out: "refined_rapsearch2_out",
     class: "PipelineStepBlastContigs",
     module: "idseq_dag.steps.blast_contigs",
@@ -176,7 +176,7 @@ json.steps do
   }
 
   steps << {
-    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out", "cdhitdup_cluster_sizes.tsv"],
+    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out", "cdhitdup_cluster_sizes"],
     out: "refined_annotated_out",
     class: "PipelineStepGenerateAnnotatedFasta",
     module: "idseq_dag.steps.generate_annotated_fasta",
