@@ -69,13 +69,17 @@ json.targets do
     "assembly/refined_taxid_locations_family_nr.json",
     "assembly/refined_taxid_locations_combined.json",
   ]
+
+  json.cdhitdup_cluster_sizes [
+    "cdhitdup_cluster_sizes.tsv",
+  ]
 end
 
 json.steps do
   steps = []
 
   steps << {
-    in: ["host_filter_out"],
+    in: ["host_filter_out", "cdhitdup_cluster_sizes.tsv"],
     out: "assembly_out",
     class: "PipelineStepRunAssembly",
     module: "idseq_dag.steps.run_assembly",
@@ -132,7 +136,7 @@ json.steps do
   end
 
   steps << {
-    in: ["gsnap_out", "assembly_out", "gsnap_accessions_out"],
+    in: ["gsnap_out", "assembly_out", "gsnap_accessions_out", "cdhitdup_cluster_sizes.tsv"],
     out: "refined_gsnap_out",
     class: "PipelineStepBlastContigs",
     module: "idseq_dag.steps.blast_contigs",
@@ -143,7 +147,7 @@ json.steps do
   }
 
   steps << {
-    in: ["rapsearch2_out", "assembly_out", "rapsearch2_accessions_out"],
+    in: ["rapsearch2_out", "assembly_out", "rapsearch2_accessions_out", "cdhitdup_cluster_sizes.tsv"],
     out: "refined_rapsearch2_out",
     class: "PipelineStepBlastContigs",
     module: "idseq_dag.steps.blast_contigs",
@@ -172,7 +176,7 @@ json.steps do
   }
 
   steps << {
-    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out", "cdhitdup_cluster_sizes.tsv"],
     out: "refined_annotated_out",
     class: "PipelineStepGenerateAnnotatedFasta",
     module: "idseq_dag.steps.generate_annotated_fasta",
@@ -213,6 +217,10 @@ json.given_targets do
   end
 
   json.rapsearch2_out do
+    json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
+  end
+
+  json.cdhitdup_cluster_sizes do
     json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
   end
 end
