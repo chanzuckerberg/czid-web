@@ -240,8 +240,17 @@ class RetrievePipelineVizGraphDataService
   end
 
   def remove_host_filtering_urls(edges)
+    # Removing host filtering URLs is important because the host filtering files
+    #  may contain PGI. Removing the urls stops them from being downloadable.
     edges.each do |edge|
-      if (edge[:to] && edge[:to][:stageIndex].zero?) || edge[:from].nil?
+      to_host_filtering = edge[:to] && edge[:to][:stageIndex].zero?
+      from_nowhere = edge[:from].nil?
+      # Also remove the URLs of additional output from the host filtering stage
+      #  Additional output has no :to so it won't be caught in `to_host_filtering`.
+      #  These are removed for safety (in case one is added that still contains PGI)
+      #  and so that they are consist with the other host filtering files.
+      host_filtering_additional_output = edge[:from] && edge[:from][:stageIndex].zero? && edge[:to].nil?
+      if to_host_filtering || from_nowhere || host_filtering_additional_output
         edge[:files].each { |file| file[:url] = nil }
       end
     end
