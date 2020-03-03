@@ -1,9 +1,8 @@
 require 'digest/sha1'
 
-# Replaced with Basic Auth in ApplicationController for preview purposes.
-# Rails.application.config.middleware.use Warden::Manager do |manager|
-#   manager.failure_app = proc { |_env| ['401', { 'Content-Type' => 'application/json' }, { error: 'Unauthorized', code: 401 }] }
-# end
+Rails.application.config.middleware.use Warden::Manager do |manager|
+  manager.failure_app = proc { |_env| ['401', { 'Content-Type' => 'application/json' }, { error: 'Unauthorized', code: 401 }] }
+end
 
 Warden::Manager.serialize_into_session do |user|
   # convert to warden_session_obj
