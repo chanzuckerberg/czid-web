@@ -9,7 +9,7 @@ FactoryBot.define do
       taxon_counts_data { [] }
       amr_counts_data { [] }
       output_states_data { [] }
-      pipeline_run_stages_data { [] }
+      pipeline_run_stages_data { nil }
     end
 
     alignment_config { create(:alignment_config) }
@@ -24,9 +24,10 @@ FactoryBot.define do
       options.output_states_data.each do |output_states_data|
         pipeline_run.output_states.find_by(output: output_states_data[:output]).update(state: output_states_data[:state])
       end
-      pipeline_run.pipeline_run_stages = []
-      options.pipeline_run_stages_data.each do |pipeline_run_stage_data|
-        create(:pipeline_run_stage, pipeline_run: pipeline_run, **pipeline_run_stage_data)
+      unless options.pipeline_run_stages_data.nil?
+        pipeline_run.pipeline_run_stages = options.pipeline_run_stages_data.map do |pipeline_run_stage_data|
+          create(:pipeline_run_stage, pipeline_run: pipeline_run, **pipeline_run_stage_data)
+        end
       end
     end
   end
