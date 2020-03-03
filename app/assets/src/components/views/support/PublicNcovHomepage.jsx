@@ -95,6 +95,18 @@ export default class PublicNcovHomepage extends React.Component {
       </ExternalLink>
     );
 
+    const MANUSCRIPT_LINK = (
+      <ExternalLink
+        className={cs.link}
+        href={appConfig.publicManuscriptUrl}
+        onClick={() =>
+          logAnalyticsEvent("PublicNCovHomePage_manuscript-link_clicked")
+        }
+      >
+        a rapidly implemented response to the nCOV-2019 outbreak (manuscript)
+      </ExternalLink>
+    );
+
     return (
       <NarrowContainer className={cs.publicNcovHomepage} size="small">
         <div className={cs.title}>
@@ -130,11 +142,10 @@ export default class PublicNcovHomepage extends React.Component {
         </p>
         <h2>About</h2>
         <p className={cs.large}>
-          In a rapidly implemented response to the nCOV-2019 outbreak, the{" "}
-          NIH-CNM team and Institut Pasteur used metagenomic next-generation
-          sequencing (mNGS) and the IDseq bioinformatics platform to review the
-          Cambodian index nCOV-2019 case in less than 48 hours from sample
-          receipt.
+          In {MANUSCRIPT_LINK}, the NIH-CNM team and Institut Pasteur used
+          metagenomic next-generation sequencing (mNGS) and the IDseq
+          bioinformatics platform to review the Cambodian index nCOV-2019 case
+          in less than 48 hours from sample receipt.
         </p>
         <p className={cs.large}>This project had 2 goals:</p>
         <ol>

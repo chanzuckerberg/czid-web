@@ -48,6 +48,7 @@ module AppConfigHelper
                            AppConfig::PUBLIC_INDEX_CASE_URL_RESEQUENCED,
                            AppConfig::PUBLIC_INDEX_CASE_URL_ENRICHED,
                            AppConfig::PUBLIC_PROTOCOL_URL,
+                           AppConfig::PUBLIC_MANUSCRIPT_URL,
                          ])
                   .map { |app_config| [app_config.key, app_config.value] }
                   .to_h
@@ -64,6 +65,7 @@ module AppConfigHelper
       publicIndexCaseUrlResequenced: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_RESEQUENCED],
       publicIndexCaseUrlEnriched: app_configs[AppConfig::PUBLIC_INDEX_CASE_URL_ENRICHED],
       publicProtocolUrl: app_configs[AppConfig::PUBLIC_PROTOCOL_URL],
+      publicManuscriptUrl: app_configs[AppConfig::PUBLIC_MANUSCRIPT_URL],
     }
   end
 end
