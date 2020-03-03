@@ -18,6 +18,8 @@ import { getTooltipStyle } from "~/components/utils/tooltip";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 import { generateContigReadVizData, getGenomeVizTooltipData } from "./utils";
 
+const NCOV_PUBLIC_SITE = true;
+
 const DEFAULT_CONTIG_COPY_MESSAGE = "Copy Contig Sequence to Clipboard";
 
 const totalByterangeLength = byteranges =>
@@ -291,7 +293,8 @@ export default class HitGroupViz extends React.Component {
         {genomeVizTooltipLocation &&
           genomeVizTooltipData &&
           this.renderGenomeVizTooltip()}
-        {contigDownloaderLocation &&
+        {!NCOV_PUBLIC_SITE &&
+          contigDownloaderLocation &&
           contigDownloaderData &&
           this.renderContigDownloader()}
       </div>
