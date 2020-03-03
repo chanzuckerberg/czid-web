@@ -31,4 +31,5 @@ class AppConfig < ApplicationRecord
   PUBLIC_INDEX_CASE_URL_RESEQUENCED = 'public_index_case_url_resequenced'.freeze
   PUBLIC_INDEX_CASE_URL_ENRICHED = 'public_index_case_url_enriched'.freeze
   PUBLIC_PROTOCOL_URL = 'public_protocol_url'.freeze
+  PUBLIC_MANUSCRIPT_URL = 'public_manuscript_url'.freeze
 end
