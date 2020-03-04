@@ -8,8 +8,8 @@
     .label {
       @include font-body-s;
 
-      padding-top: 20px;
-      padding-bottom: 10px;
+      margin-top: 20px;
+      margin-bottom: 10px;
       font-weight: $font-weight-semibold;
 
       .optional {
@@ -62,6 +62,13 @@
   }
 
   .notification {
+    margin-top: 20px;
     margin-bottom: 20px;
+  }
+
+  .link {
+    // Overwrite <a> inherit rule in header.scss
+    color: $primary-light !important;
+    cursor: pointer;
   }
 }
