@@ -32,21 +32,25 @@ class PipelineRunStage < ApplicationRecord
       name: HOST_FILTERING_STAGE_NAME,
       dag_name: DAG_NAME_HOST_FILTER,
       job_command_func: 'host_filtering_command'.freeze,
+      json_generation_func: 'generate_host_filtering_dag_json'.freeze,
     },
     2 => {
       name: ALIGNMENT_STAGE_NAME,
       dag_name: DAG_NAME_ALIGNMENT,
       job_command_func: 'alignment_command'.freeze,
+      json_generation_func: 'generate_alignment_dag_json'.freeze,
     },
     3 => {
       name: POSTPROCESS_STAGE_NAME,
       dag_name: DAG_NAME_POSTPROCESS,
       job_command_func: 'postprocess_command'.freeze,
+      json_generation_func: 'generate_postprocess_dag_json'.freeze,
     },
     4 => {
       name: EXPT_STAGE_NAME,
       dag_name: DAG_NAME_EXPERIMENTAL,
       job_command_func: 'experimental_command'.freeze,
+      json_generation_func: 'generate_experimental_dag_json'.freeze,
     },
   }.freeze
 
@@ -200,10 +204,15 @@ class PipelineRunStage < ApplicationRecord
     AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
   end
 
-  ########### STAGE SPECIFIC FUNCTIONS BELOW ############
-  def prepare_dag(attribute_dict, key_s3_params = nil)
+  def prepare_dag(dag_json, key_s3_params = nil)
     sample = pipeline_run.sample
+    copy_done_file = "echo done | aws s3 cp - #{Shellwords.escape(sample.sample_output_s3_path)}/\"$AWS_BATCH_JOB_ID\".#{JOB_SUCCEEDED_FILE_SUFFIX}"
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
+    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
+  end
+
+  def generate_json(attribute_dict)
+    sample = pipeline_run.sample
     attribute_dict[:dag_name] = dag_name
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
 
@@ -214,12 +223,10 @@ class PipelineRunStage < ApplicationRecord
                            sample.host_genome_name.downcase,
                            attribute_dict,
                            pipeline_run.parse_dag_vars)
-    self.dag_json = dag.render
-    copy_done_file = "echo done | aws s3 cp - #{Shellwords.escape(sample.sample_output_s3_path)}/\"$AWS_BATCH_JOB_ID\".#{JOB_SUCCEEDED_FILE_SUFFIX}"
-    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
+    return dag.render
   end
 
-  def host_filtering_command
+  def generate_host_filtering_dag_json
     # Upload DAG to S3
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
@@ -244,15 +251,21 @@ class PipelineRunStage < ApplicationRecord
                                      else
                                        PipelineRun::ADAPTER_SEQUENCES["single-end"]
                                      end
-    dag_commands = prepare_dag(attribute_dict)
+    return generate_json(attribute_dict)
+  end
 
+  def host_filtering_command
+    # Upload DAG to S3
+    sample = pipeline_run.sample
+    dag_json = generate_host_filtering_dag_json
+    dag_commands = prepare_dag(dag_json)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
 
     # Dispatch job. Use the himem settings for host filtering.
     aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: DAG_NAME_HOST_FILTER, sample_id: sample.id)
   end
 
-  def alignment_command
+  def generate_alignment_dag_json
     # Upload DAG to S3
     sample = pipeline_run.sample
     alignment_config = pipeline_run.alignment_config
@@ -280,14 +293,20 @@ class PipelineRunStage < ApplicationRecord
       gsnap_m8: PipelineRun::GSNAP_M8,
       rapsearch_m8: PipelineRun::RAPSEARCH_M8,
     }
+    return generate_json(attribute_dict)
+  end
+
+  def alignment_command
+    sample = pipeline_run.sample
+    dag_json = generate_alignment_dag_json
     key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
-    dag_commands = prepare_dag(attribute_dict, key_s3_params)
+    dag_commands = prepare_dag(dag_json, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Run it
     aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_ALIGNMENT, sample_id: sample.id)
   end
 
-  def postprocess_command
+  def generate_postprocess_dag_json
     # Upload DAG to S3
     sample = pipeline_run.sample
     alignment_config = pipeline_run.alignment_config
@@ -304,13 +323,20 @@ class PipelineRunStage < ApplicationRecord
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
     }
-    dag_commands = prepare_dag(attribute_dict)
+    return generate_json(attribute_dict)
+  end
+
+  def postprocess_command
+    # Upload DAG to S3
+    sample = pipeline_run.sample
+    dag_json = generate_postprocess_dag_json
+    dag_commands = prepare_dag(dag_json)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
     aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: DAG_NAME_POSTPROCESS, sample_id: sample.id)
   end
 
-  def experimental_command
+  def generate_experimental_dag_json
     # Upload DAG to S3
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
@@ -329,7 +355,14 @@ class PipelineRunStage < ApplicationRecord
       nt_info_db: alignment_config.s3_nt_info_db_path || DEFAULT_S3_NT_INFO_DB_PATH,
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
-    dag_commands = prepare_dag(attribute_dict)
+    return generate_json(attribute_dict)
+  end
+
+  def experimental_command
+    # Upload DAG to S3
+    sample = pipeline_run.sample
+    dag_json = generate_experimental_dag_json
+    dag_commands = prepare_dag(dag_json)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
 
     # Dispatch job
