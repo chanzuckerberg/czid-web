@@ -180,26 +180,28 @@ export default class PublicNcovHomepage extends React.Component {
           samples on an iSeq100, demultiplexed the FASTQ files, and the results
           of the sequencing run were compiled into Illumina’s Basespace. The
           data was then uploaded to IDseq and processed using the latest IDseq
-          database - updated from NCBI on 2019-09-17. While the index did not
-          contain the reference sequences for SARS-CoV-2, which were deposited
-          to NCBI in January 2020, conclusions could still be drawn from the
-          data. IDseq’s NCBI database index was updated on 2019-02-10 with the
-          most recent version of NCBI that included the recently added
-          SARS-CoV-2 sequences. The analysis was rerun using the new NCBI index
-          to confirm the match to SARS-CoV-2 in the PCR-positive index case.
-          Further experiments were done {PROTOCOL_LINK} to isolate a full genome
-          sequence for SARS-CoV-2 from the Index Patient.
+          database - updated from NCBI on 2019-09-17. While the reference
+          database did not contain the reference sequences for SARS-CoV-2, which
+          were deposited to NCBI in January 2020, conclusions could still be
+          drawn from the data. IDseq’s NCBI reference database was updated on
+          2019-02-10 with the most recent version of NCBI that included the
+          recently added SARS-CoV-2 sequences. The analysis was rerun using the
+          new NCBI reference database to confirm the match to SARS-CoV-2 in the
+          PCR-positive index case. Further experiments were done {PROTOCOL_LINK}{" "}
+          to isolate a full genome sequence for SARS-CoV-2 from the Index
+          Patient.
         </p>
         <h2>What conclusions were drawn from the data?</h2>
         <ol>
           <li>
             SARS-CoV-2 was identified in the {INDEX_CASE_LINK_1}, confirming the
             PCR-positive results. Looking at the {INDEX_CASE_LINK_2} and
-            pipeline run with the most recent index you can see that IDseq
-            picked up 582 reads that aligned to the Wuhan seafood market
-            pneumonia virus (taxID 2697049) with an average percent identity of
-            100% in NT. IDseq was able to generate 26 contigs from those reads
-            with 33.2% coverage of NCBI accession sequence MN985325.1.
+            pipeline run with the most recent reference database you can see
+            that IDseq picked up 582 reads that aligned to the Wuhan seafood
+            market pneumonia virus (taxID 2697049) with an average percent
+            identity of 100% in NT. IDseq was able to generate 26 contigs from
+            those reads with 33.2% coverage of NCBI accession sequence
+            MN985325.1.
           </li>
           <li>
             {INDEX_CASE_RESEQUENCE_LINK} in an attempt to obtain full genome
