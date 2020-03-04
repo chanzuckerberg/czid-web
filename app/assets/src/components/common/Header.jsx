@@ -390,27 +390,36 @@ const MainMenu = ({ adminUser }) => {
   if (NCOV_PUBLIC_SITE) {
     return (
       <div className={cs.mainMenu}>
+        {/* Keep referrer links */}
         <a
           className={cs.item}
           href="/"
+          rel="noopener"
+          target="_blank"
           onClick={() => logAnalyticsEvent("MainMenu_about_clicked")}
         >
           About
         </a>
-        <ExternalLink
+        <a
           className={cs.item}
-          href="https://idseq.net"
+          href="https://idseq.net/?utm_source=public-idseq&utm_medium=request-access-button&utm_campaign=covid-19"
+          rel="noopener"
+          /* eslint-disable-next-line react/jsx-no-target-blank */
+          target="_blank"
           onClick={() => logAnalyticsEvent("MainMenu_request-access_clicked")}
         >
           Request Full Access
-        </ExternalLink>
-        <ExternalLink
+        </a>
+        <a
           className={cs.item}
           href="https://help.idseq.net"
+          rel="noopener"
+          /* eslint-disable-next-line react/jsx-no-target-blank */
+          target="_blank"
           onClick={() => logAnalyticsEvent("MainMenu_help_clicked")}
         >
           Help Center
-        </ExternalLink>
+        </a>
       </div>
     );
   }
