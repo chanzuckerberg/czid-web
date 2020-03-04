@@ -4,7 +4,7 @@ class AddUpdatedAlignmentConfig < ActiveRecord::Migration[5.1]
   def up
     unless AlignmentConfig.find_by(name: NEW_DATE)
       ENV["NCBI_DATE"] = NEW_DATE
-      ENV["LINEAGE_VERSION"] = (TaxonLineage.maximum('version_end') + 1).to_s
+      ENV["LINEAGE_VERSION"] = (TaxonLineage.maximum('version_end') || 0 + 1).to_s
 
       Rails.application.load_tasks
       Rake::Task['create_alignment_config'].invoke
