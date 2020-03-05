@@ -137,7 +137,7 @@ class Landing extends React.Component {
         <div className={cs.publicSiteBanner}>
           <BasicPopup
             content={
-              "Learn how our collaborators in Cambodia used IDseq to sequence SARS-CoV-2"
+              "Learn how researchers in Cambodia used IDseq to sequence SARS-CoV-2"
             }
             position="bottom center"
             wide="very"
@@ -152,7 +152,7 @@ class Landing extends React.Component {
                     logAnalyticsEvent("Landing_public-site-link_clicked")
                   }
                 >
-                  Learn how our collaborators in Cambodia used IDseq to sequence
+                  Learn how researchers in Cambodia used IDseq to sequence
                   SARS-CoV-2
                 </ExternalLink>
               </span>
