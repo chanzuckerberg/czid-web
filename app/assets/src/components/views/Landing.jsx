@@ -13,7 +13,6 @@ import {
 
 import BasicPopup from "~/components/BasicPopup";
 import AlertIcon from "~ui/icons/AlertIcon";
-
 import Container from "../ui/containers/Container";
 import ExternalLink from "~ui/controls/ExternalLink";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
@@ -23,6 +22,7 @@ import DiscoverIcon from "../ui/icons/DiscoverIcon";
 import DetectIcon from "../ui/icons/DetectIcon";
 import DecipherIcon from "../ui/icons/DecipherIcon";
 import LogoIcon from "../ui/icons/LogoIcon";
+import logAnalyticsEvent from "~/api/analytics";
 
 import cs from "./landing.scss";
 
