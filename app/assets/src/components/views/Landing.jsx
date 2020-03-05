@@ -10,6 +10,9 @@ import {
   Message,
   Divider,
 } from "semantic-ui-react";
+
+import BasicPopup from "~/components/BasicPopup";
+import AlertIcon from "~ui/icons/AlertIcon";
 import Container from "../ui/containers/Container";
 import ExternalLink from "~ui/controls/ExternalLink";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
@@ -19,6 +22,9 @@ import DiscoverIcon from "../ui/icons/DiscoverIcon";
 import DetectIcon from "../ui/icons/DetectIcon";
 import DecipherIcon from "../ui/icons/DecipherIcon";
 import LogoIcon from "../ui/icons/LogoIcon";
+import logAnalyticsEvent from "~/api/analytics";
+
+import cs from "./landing.scss";
 
 class Landing extends React.Component {
   constructor(props) {
@@ -124,6 +130,37 @@ class Landing extends React.Component {
         </div>
       </div>
     );
+
+    let publicSiteBanner;
+    if (this.props.showPublicSite) {
+      publicSiteBanner = (
+        <div className={cs.publicSiteBanner}>
+          <BasicPopup
+            content={
+              "Learn how researchers in Cambodia used IDseq to sequence SARS-CoV-2"
+            }
+            position="bottom center"
+            wide="very"
+            trigger={
+              <span className={cs.content}>
+                <AlertIcon className={cs.icon} />
+                <span className={cs.title}>COVID-19:</span>
+                <ExternalLink
+                  className={cs.link}
+                  href="https://public.idseq.net"
+                  onClick={() =>
+                    logAnalyticsEvent("Landing_public-site-link_clicked")
+                  }
+                >
+                  Learn how researchers in Cambodia used IDseq to sequence
+                  SARS-CoV-2
+                </ExternalLink>
+              </span>
+            }
+          />
+        </div>
+      );
+    }
 
     const topTitle = (
       <div className="top-title">
@@ -326,6 +363,7 @@ class Landing extends React.Component {
     return (
       <div>
         {header}
+        {publicSiteBanner}
         {firstBlock}
         {bulletinBanner}
         {partners}
@@ -339,6 +377,7 @@ Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
   showBulletin: PropTypes.bool,
   browserInfo: PropTypes.object,
+  showPublicSite: PropTypes.bool,
 };
 
 export default Landing;

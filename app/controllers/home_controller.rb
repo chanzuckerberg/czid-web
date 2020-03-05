@@ -25,6 +25,12 @@ class HomeController < ApplicationController
           @show_bulletin = true
         end
       end
+
+      @show_public_site = false
+      if get_app_config(AppConfig::SHOW_LANDING_PUBLIC_SITE_BANNER) == "1"
+        @show_public_site = true
+      end
+
       render 'landing'
     end
   end
