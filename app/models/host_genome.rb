@@ -46,6 +46,11 @@ class HostGenome < ApplicationRecord
     HostGenome::ERCC_PATH_PREFIX + HostGenome::S3_BOWTIE2_INDEX_FILE
   end
 
+  # This is designed to be called only during migrations and console sessions.
+  def self.all_without_metadata_field(name)
+    joins(:metadata_fields).where.not(metadata_fields: { name: [name] }).distinct
+  end
+
   def as_json(options = {})
     hash = super(options)
     hash[:ercc_only] = ercc_only?
