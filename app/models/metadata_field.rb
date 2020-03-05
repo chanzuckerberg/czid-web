@@ -89,7 +89,7 @@ class MetadataField < ApplicationRecord
 
   validate :metadata_field_subsets
 
-  before_create :update_host_genomes!
+  before_save :update_host_genomes!
 
   # As of Feb 2020, we renamed "Host Genome" in the UI to better reflect its
   # purpose as "Host Organism". For backwards compatibility, especially for CSV
