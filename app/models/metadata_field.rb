@@ -130,6 +130,9 @@ class MetadataField < ApplicationRecord
     if is_required == 1 && is_default == 0
       errors[:name] << 'Required field must also be default field'
     end
+    if is_required == 1 && default_for_new_host_genome == 0
+      errors[:name] << 'Required field must also be default_for_new_host_genome field'
+    end
   end
 
   # Important attributes for the frontend
