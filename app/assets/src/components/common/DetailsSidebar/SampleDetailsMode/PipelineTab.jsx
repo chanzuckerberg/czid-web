@@ -112,6 +112,16 @@ class PipelineTab extends React.Component {
 
     const totalReads = this.props.pipelineRun.total_reads;
     let readsAfter = step["reads_after"];
+
+    // Special case cdhitdup. All steps after cdhitdup transform their counts by
+    // in the pipeline by the compression ratio to return nonunique reads.
+    let uniqueReads = null;
+    if (stepKey === "cdhitdup_out") {
+      const previousStep = this.state.pipelineStepDict["steps"]["priceseq_out"];
+      uniqueReads = readsAfter;
+      readsAfter = previousStep["reads_after"];
+    }
+
     let percentReads = (readsAfter / totalReads * 100).toFixed(2);
 
     return (
@@ -127,6 +137,9 @@ class PipelineTab extends React.Component {
         <div className={cs.narrowMetadataValueContainer}>
           <div className={cs.metadataValue}>
             {readsAfter ? readsAfter.toLocaleString() : ""}
+            {uniqueReads && (
+              <div>{` (${uniqueReads.toLocaleString()} unique)`}</div>
+            )}
           </div>
         </div>
         <div className={cs.narrowMetadataValueContainer}>
