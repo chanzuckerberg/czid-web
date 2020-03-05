@@ -1,0 +1,53 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.publicSiteBanner {
+  @include font-body-xs;
+  background: $primary-light;
+  color: $white;
+  height: 40px;
+  position: relative;
+  text-align: center;
+  z-index: 900;
+
+  .content {
+    display: block;
+    line-height: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: calc(100% - 50px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .icon {
+      fill: $white;
+      height: 20px;
+      margin-right: $space-xs;
+      vertical-align: text-bottom;
+    }
+
+    .title {
+      @include font-header-xs;
+      margin-right: $space-xxxs;
+    }
+
+    .link {
+      margin-left: 3px;
+      text-decoration: underline;
+    }
+  }
+
+  .close {
+    cursor: pointer;
+    fill: $dark-grey;
+    position: absolute;
+    right: $space-m;
+    top: $space-m;
+
+    &:hover {
+      fill: $black;
+    }
+  }
+}

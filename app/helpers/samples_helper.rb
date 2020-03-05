@@ -24,7 +24,8 @@ module SamplesHelper
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
                     quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup
                     sample_type nucleotide_type collection_location
-                    host_genome notes]
+                    host_genome notes
+                    insert_size_median insert_size_mode insert_size_median_absolute_deviation insert_size_min insert_size_max insert_size_mean insert_size_standard_deviation insert_size_read_pairs]
     CSVSafe.generate(headers: true) do |csv|
       csv << attributes
       formatted_samples.each do |sample_info|
@@ -60,14 +61,14 @@ module SamplesHelper
                         collection_location: collection_location,
                         host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
                         notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '',
-                        insert_size_median: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :median) : '',
-                        insert_size_mode: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :mode) : '',
-                        insert_size_median_absolute_deviation: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :median_absolute_deviation) : '',
-                        insert_size_min: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :min) : '',
-                        insert_size_max: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :max) : '',
-                        insert_size_mean: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :mean) : '',
-                        insert_size_standard_deviation: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :standard_deviation) : '',
-                        insert_size_read_pairs: pipeline_run ? pipeline_run.dig(:insert_size_metric_set, :read_pairs) : '', }
+                        insert_size_median: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.median ? pipeline_run.insert_size_metric_set.median : '',
+                        insert_size_mode: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.mode ? pipeline_run.insert_size_metric_set.mode : '',
+                        insert_size_median_absolute_deviation: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.median_absolute_deviation ? pipeline_run.insert_size_metric_set.median_absolute_deviation : '',
+                        insert_size_min: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.min ? pipeline_run.insert_size_metric_set.min : '',
+                        insert_size_max: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.max ? pipeline_run.insert_size_metric_set.max : '',
+                        insert_size_mean: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.mean ? pipeline_run.insert_size_metric_set.mean : '',
+                        insert_size_standard_deviation: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.standard_deviation ? pipeline_run.insert_size_metric_set.standard_deviation : '',
+                        insert_size_read_pairs: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.read_pairs ? pipeline_run.insert_size_metric_set.read_pairs : '', }
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end

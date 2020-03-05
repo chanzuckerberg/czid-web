@@ -49,6 +49,8 @@ class MetadataDictionary extends React.Component {
       officialFields
     );
 
+    hostGenomes = hostGenomes.filter(hg => hg.showAsOption);
+
     this.setState({
       officialFields,
       hostGenomes,
