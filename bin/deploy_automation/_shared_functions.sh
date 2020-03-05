@@ -47,7 +47,7 @@ _assert_no_release_checklist() {
 }
 
 _get_current_release_checklist_json() {
-  if ! (_fetch_current_release_checklist_from_github | jq -e); then
+  if ! _fetch_current_release_checklist_from_github | jq -e .; then
     _exit_with_err_msg "INVALID STATE: Couldn't find an open release checklist."
   fi
 }
