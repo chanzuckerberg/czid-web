@@ -147,7 +147,7 @@ class Landing extends React.Component {
                 <span className={cs.title}>COVID-19:</span>
                 <ExternalLink
                   className={cs.link}
-                  href="https://public.idseq.net"
+                  href="https://public.idseq.net/covid-19?utm_source=idseq&utm_medium=banner&utm_campaign=covid-19"
                   onClick={() =>
                     logAnalyticsEvent("Landing_public-site-link_clicked")
                   }
