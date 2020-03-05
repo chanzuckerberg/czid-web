@@ -4,7 +4,8 @@
 
 .publicSiteBanner {
   @include font-body-xs;
-  background: $primary-lightest;
+  background: $primary-light;
+  color: $white;
   height: 40px;
   position: relative;
   text-align: center;
@@ -21,7 +22,7 @@
     white-space: nowrap;
 
     .icon {
-      fill: $primary-light;
+      fill: $white;
       height: 20px;
       margin-right: $space-xs;
       vertical-align: text-bottom;
