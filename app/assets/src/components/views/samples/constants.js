@@ -19,7 +19,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     tooltip: "User-defined location from which the sample was collected.",
   },
   totalReads: {
-    tooltip: "The total number of reads uploaded.",
+    tooltip: "The total number of single-end reads uploaded.",
   },
   nonHostReads: {
     tooltip: `The percentage of reads that came out of step (8) of the host filtration
