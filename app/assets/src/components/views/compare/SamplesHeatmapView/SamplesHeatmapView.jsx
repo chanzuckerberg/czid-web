@@ -358,6 +358,8 @@ class SamplesHeatmapView extends React.Component {
 
   extractData(rawData) {
     let sampleIds = [];
+    let sampleNames = {};
+    let duplicateSampleNames = new Set();
     let sampleDetails = {};
     let allTaxonIds = [];
     let allTaxonDetails = {};
@@ -367,6 +369,16 @@ class SamplesHeatmapView extends React.Component {
     for (let i = 0; i < rawData.length; i++) {
       let sample = rawData[i];
       sampleIds.push(sample.sample_id);
+
+      // Keep track of samples with the same name, which may occur if
+      // a user selects samples from multiple projects.
+      if (Object.keys(sampleNames).includes(sample.name)) {
+        sampleNames[sample.name].push(sample.sample_id);
+        duplicateSampleNames.add(sample.name);
+      } else {
+        sampleNames[sample.name] = [sample.sample_id];
+      }
+
       sampleDetails[sample.sample_id] = {
         id: sample.sample_id,
         name: sample.name,
@@ -411,6 +423,13 @@ class SamplesHeatmapView extends React.Component {
         }
       }
     }
+
+    // Append the sample id to a sample's name differentiate between samples with the same name.
+    duplicateSampleNames.forEach(sampleName => {
+      sampleNames[sampleName].forEach(sampleId => {
+        sampleDetails[sampleId]["name"] = `${sampleName} (${sampleId})`;
+      });
+    });
 
     return {
       // The server should always pass back the same set of sampleIds, but possibly in a different order.
