@@ -158,7 +158,7 @@ def autoscaling_update(config):
         # TODO(julie 2/25/20): Note that this is part of a temporary stopgap measure as we move away from Datadog and should be
         # reverted once we transition to CloudWatch (or other replacements).
         # See JIRA IDSEQ-2236
-        print "[Datadog] ", error
+        print "[Datadog] ", repr(error)
         raise error
 
 

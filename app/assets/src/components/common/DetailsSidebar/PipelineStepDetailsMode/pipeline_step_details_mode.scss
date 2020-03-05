@@ -120,10 +120,6 @@
     // Override color: inherit in _header.scss.
     color: $primary-light !important;
   }
-
-  strong {
-    font-weight: inherit; // Override bolding from markdown.
-  }
 }
 
 .fileLink {

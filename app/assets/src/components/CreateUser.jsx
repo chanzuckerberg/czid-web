@@ -36,6 +36,7 @@ class CreateUser extends React.Component {
       adminstatus: this.selectedUser.adminStatus,
       id: this.selectedUser.id,
       sendActivation: true,
+      institution: this.selectedUser.institution || "",
     };
   }
 

@@ -200,9 +200,16 @@ module PipelineRunsHelper
   end
 
   def upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
+    upload_dag_json(dag_json, dag_s3)
+    generate_job_command(dag_s3, dag_name, key_s3_params, copy_done_file)
+  end
+
+  def upload_dag_json(dag_json, dag_s3)
     # Upload dag json
     Syscall.pipe_with_output(["echo", dag_json], ["aws", "s3", "cp", "-", dag_s3])
+  end
 
+  def generate_job_command(dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
     # Generate job command
     dag_path_on_worker = "/mnt/#{dag_name}.json"
     download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"

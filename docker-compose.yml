@@ -1,7 +1,6 @@
 # Shared variables using Docker x- extension and YAML merging syntax.
 
 x-web-variables: &web-variables
-  ? ALIGNMENT_CONFIG_DEFAULT_NAME=2020-02-10
   ? SAMPLES_BUCKET_NAME=idseq-samples-development
   ? ES_ADDRESS=http://elasticsearch:9200
   ? AIRBRAKE_PROJECT_ID
@@ -38,33 +37,6 @@ x-aws-variables: &aws-variables
 x-env-variables: &env-variables
   ? ENVIRONMENT
   ? OFFLINE
-
-x-travis-variables: &travis-variables
-  ? CI
-  ? CONTINUOUS_INTEGRATION
-  ? TRAVIS_ALLOW_FAILURE
-  ? TRAVIS_BRANCH
-  ? TRAVIS_BUILD_DIR
-  ? TRAVIS_BUILD_ID
-  ? TRAVIS_BUILD_NUMBER
-  ? TRAVIS_COMMIT
-  ? TRAVIS_COMMIT_MESSAGE
-  ? TRAVIS_COMMIT_RANGE
-  ? TRAVIS_EVENT_TYPE
-  ? TRAVIS_FILTERED
-  ? TRAVIS_JOB_ID
-  ? TRAVIS_JOB_NUMBER
-  ? TRAVIS_LANGUAGE
-  ? TRAVIS_OS_NAME
-  ? TRAVIS_PRE_CHEF_BOOTSTRAP_TIME
-  ? TRAVIS_PULL_REQUEST_BRANCH
-  ? TRAVIS_PULL_REQUEST
-  ? TRAVIS_PULL_REQUEST_SHA
-  ? TRAVIS_PULL_REQUEST_SLUG
-  ? TRAVIS_REPO_SLUG
-  ? TRAVIS_SECURE_ENV_VARS
-  ? TRAVIS_TAG
-  ? TRAVIS
 
 x-honeycomb-variables: &honeycomb-variables
   ? IDSEQ_HONEYCOMB_DB_DATA_SET
@@ -106,17 +78,6 @@ services:
       - '6379:6379'
     volumes:
       - ./redis-data:/var/lib/redis/data
-  webtest:
-    # "webtest" service configuration is meant to be used only in the CI environment.
-    # To run unit tests locally, use "web" service configuration instead.
-    image: chanzuckerberg/idseq-web:compose
-    volumes:
-      - ~/.aws:/root/.aws:ro
-    network_mode: host
-    environment:
-      <<: *web-variables
-      <<: *travis-variables
-    command: bash
   web:
     build:
       context: .
@@ -143,7 +104,6 @@ services:
     environment:
       <<: *web-variables
       <<: *aws-variables
-      <<: *travis-variables
       <<: *honeycomb-variables
       <<: *auth0-variables
       <<: *env-variables
@@ -162,7 +122,6 @@ services:
     environment:
       <<: *web-variables
       <<: *aws-variables
-      <<: *travis-variables
     command: bundle exec "COUNT=5 rake resque:workers"
   resque_result_monitor:
     image: chanzuckerberg/idseq-web:compose
@@ -178,7 +137,6 @@ services:
     environment:
       <<: *web-variables
       <<: *aws-variables
-      <<: *travis-variables
     command: bundle exec "rake result_monitor"
   resque_pipeline_monitor:
     image: chanzuckerberg/idseq-web:compose
@@ -194,5 +152,4 @@ services:
     environment:
       <<: *web-variables
       <<: *aws-variables
-      <<: *travis-variables
     command: bundle exec "rake pipeline_monitor"
