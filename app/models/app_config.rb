@@ -20,4 +20,6 @@ class AppConfig < ApplicationRecord
   SHOW_ANNOUNCEMENT_BANNER = 'show_announcement_banner'.freeze
   # The ARN of the pipeline's Step Function
   SFN_ARN = 'sfn_arn'.freeze
+  # The pipeline version to use
+  SFN_PIPELINE_VERSION = 'sfn_pipeline_version'.freeze
 end

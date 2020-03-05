@@ -1016,21 +1016,31 @@ class PipelineRun < ApplicationRecord
   end
 
   def dispatch_sfn_pipeline
-    sfn_service_result = SfnPipelineService.call(self)
-    # TODO: handle error states better (exceptions from the service?)
-    if sfn_service_result[:sfn_arn].present?
+    sfn_service_result = {}
+    begin
+      sfn_service_result = SfnPipelineService.call(self)
       self.sfn_execution_arn = sfn_service_result[:sfn_arn]
-    else
+      self.pipeline_version = sfn_service_result[:pipeline_version]
+    rescue SfnPipelineService::PipelineVersionMissingError => e
+      LogUtil.log_err_and_airbrake("Pipeline version for SFN pipeline not configured: #{e}")
+      # we will retry later since the error is not related to this specific pipeline run
+      # return without changing status
+      return
+    rescue => e
+      LogUtil.log_err_and_airbrake("Error starting SFN pipeline: #{e}")
+      # we will not retry in this case, since we do not know what error occurred
+    end
+
+    if sfn_service_result[:sfn_arn].blank?
       self.job_status = STATUS_FAILED
       self.finalized = 1
-      # TODO: report errors
     end
-    return
   end
 
   def update_job_status
     automatic_restart = false
     prs = active_stage
+    puts "Update job status: #{prs.inspect}"
     if prs.nil?
       # all stages succeeded
       self.finalized = 1
@@ -1044,6 +1054,15 @@ class PipelineRun < ApplicationRecord
         send_to_airbrake = !known_user_error
         report_failed_pipeline_run_stage(prs, automatic_restart, known_user_error, send_to_airbrake)
       elsif !prs.started?
+        puts "PipelineRun:update_job_status: step_number=#{prs.step_number}"
+        # Note: this is not ideally place to initialize an SFN pipeline but
+        # in order to preserve most of the logic of the old pipeline we decided
+        # that this was the least intrusive place (vs. both downstream in run_job>host_filtering_command
+        # and upstream)
+        if step_function? && prs.step_number == 1
+          dispatch_sfn_pipeline
+        end
+
         # Run job will trigger dag pipeline for a particular stage
         # we're moving on to a new stage
         prs.run_job

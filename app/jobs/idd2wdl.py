@@ -41,7 +41,7 @@ def target_filename(target, index):
     if target == "fastqs":
         return f"{target}_{index}"
     else:
-        return f"{target}_{index}_{file_path_to_name(dag['targets'][target][index])}"
+        return f"{target}_{file_path_to_name(dag['targets'][target][index])}"
 
 
 for step in dag["steps"]:
@@ -80,7 +80,6 @@ task {task_name(step)} {{
   python3 <<CODE
   import os, sys, json, contextlib, importlib, threading, logging, subprocess
   os.environ.update(KEY_PATH_S3="{nha_cluster_ssh_key_uri}", AWS_DEFAULT_REGION="{os.environ["AWS_DEFAULT_REGION"]}")
-  subprocess.check_call(["pip3", "install", "--upgrade", "https://github.com/chanzuckerberg/idseq-dag/archive/akislyuk-no-input-clobbering.tar.gz"])
   import idseq_dag, idseq_dag.util.s3
   logging.basicConfig(level=logging.INFO)
   idseq_dag.util.s3.config["REF_DIR"] = os.getcwd()

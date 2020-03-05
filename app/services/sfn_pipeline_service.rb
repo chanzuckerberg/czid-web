@@ -6,6 +6,8 @@ class SfnPipelineService
 
   include Callable
 
+  class PipelineVersionMissingError < StandardError; end
+
   def initialize(pipeline_run)
     @pipeline_run = pipeline_run
     @sample = pipeline_run.sample
@@ -19,13 +21,23 @@ class SfnPipelineService
   end
 
   def call
+    # Make sure a version is defined and enforce it on the pipeline run. Although not strictly required since
+    # the SFN pipeline ignores this value, there are several features that depend on
+    # the version, so better to fail the sample.
+    # The JSON generation currently depends on setting this value, so just for backward compatibility we enforce it.
+    # TODO: this is temporary for v0; this value needs to be manually syncronized with the server
+    pipeline_version = AppConfigHelper.get_app_config(AppConfig::SFN_PIPELINE_VERSION)
+    raise PipelineVersionMissingError if pipeline_version.blank?
+    @pipeline_run.update(pipeline_version: pipeline_version)
+
     stage_dags_json = generate_dag_stages_json
     sfn_input_json = generate_wdl_input(stage_dags_json)
     sfn_arn = dispatch(sfn_input_json)
     return {
+      pipeline_version: pipeline_version,
       stage_dags_json: stage_dags_json,
       sfn_input_json: sfn_input_json,
-      sfn_arn: sfn_arn,
+      sfn_arn: sfn_arn
     }
   end
 
@@ -44,12 +56,14 @@ class SfnPipelineService
     dag_tmp_file = Tempfile.new
     dag_tmp_file.write(JSON.dump(dag_json))
     dag_tmp_file.close
+
     stdout, stderr, status = Open3.capture3(
       {
         "AWS_ACCOUNT_ID" => @aws_account_id,
         "AWS_DEFAULT_REGION" => AwsUtil::AWS_REGION,
       },
       "app/jobs/idd2wdl.py",
+      "--name", "#{dag_json['name']}",
       dag_tmp_file.path
     )
     if status.success?
@@ -67,7 +81,7 @@ class SfnPipelineService
     end
     sfn_pipeline_input_json = {
       Input: {
-        HostFilter: JSON.dump(input_files_paths.each_with_index.map { |path, i| ["fastqs_#{i}", path] }.to_h),
+        HostFilter: input_files_paths.each_with_index.map { |path, i| ["fastqs_#{i}", path] }.to_h,
       },
     }
 
@@ -89,7 +103,7 @@ class SfnPipelineService
     dag_json_input_s3_key = "#{wdl_s3_prefix}/#{stage_name}.dag.json"
 
     S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, dag_json_input_s3_key, JSON.dump(stage_dag_json))
-    S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, wdl_input_s3_key, JSON.dump(stage_wdl))
+    S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, wdl_input_s3_key, stage_wdl)
 
     # Does not include the dag json path, since it will be used solely for debug
     return {
@@ -99,12 +113,13 @@ class SfnPipelineService
   end
 
   def dispatch(sfn_input_json)
-    sfn_name = "idseq-#{Time.now.to_i}"
+    sfn_name = "idseq-#{Rails.env}-#{@sample.project_id}-#{@sample.id}-#{@pipeline_run.id}-#{Time.now.to_i}"
     sfn_input = JSON.dump(sfn_input_json)
     sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
 
     # Not using SDK because aws-sdk-sfn is currently on version 1.0.0.rc4,
-    # which in terms requires aws-sdk-core (= 3.0.0.rc1 which is lower than current version)
+    # which in terms requires aws-sdk-core (= 3.0.0.rc1 which is lower than current version
+    # and just an rc version)
     #
     # sfn_client = Aws::SFN::Client.new
     # resp = sfn_client.start_execution({
