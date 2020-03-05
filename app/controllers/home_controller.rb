@@ -29,13 +29,6 @@ class HomeController < ApplicationController
       @show_public_site = false
       if get_app_config(AppConfig::SHOW_LANDING_PUBLIC_SITE_BANNER) == "1"
         @show_public_site = true
-      else
-        time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
-        start_time = time_zone.parse("2020-03-04 05:00:00")
-        end_time = time_zone.parse("2020-06-20 11:30:00")
-        if start_time < Time.now.utc && Time.now.utc < end_time
-          @show_public_site = true
-        end
       end
 
       render 'landing'

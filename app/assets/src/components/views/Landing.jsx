@@ -160,8 +160,6 @@ class Landing extends React.Component {
           />
         </div>
       );
-    } else {
-      publicSiteBanner = <Divider />;
     }
 
     const topTitle = (
