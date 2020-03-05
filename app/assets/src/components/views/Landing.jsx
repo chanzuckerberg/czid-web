@@ -137,7 +137,7 @@ class Landing extends React.Component {
         <div className={cs.publicSiteBanner}>
           <BasicPopup
             content={
-              "COVID-19: Looking for the public version of IDSeq showcasing our work on the SARS-CoV-2 virus? Click here!"
+              "Learn how our collaborators in Cambodia used IDseq to sequence SARS-CoV-2"
             }
             position="bottom center"
             wide="very"
@@ -145,8 +145,6 @@ class Landing extends React.Component {
               <span className={cs.content}>
                 <AlertIcon className={cs.icon} />
                 <span className={cs.title}>COVID-19:</span>
-                Looking for the public version of IDSeq showcasing our work on
-                the SARS-CoV-2 virus?
                 <ExternalLink
                   className={cs.link}
                   href="https://public.idseq.net"
@@ -154,7 +152,8 @@ class Landing extends React.Component {
                     logAnalyticsEvent("Landing_public-site-link_clicked")
                   }
                 >
-                  Click here!
+                  Learn how our collaborators in Cambodia used IDseq to sequence
+                  SARS-CoV-2
                 </ExternalLink>
               </span>
             }
