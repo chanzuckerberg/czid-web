@@ -27,7 +27,7 @@ class HomeController < ApplicationController
       end
 
       @show_public_site = false
-      if get_app_config(AppConfig::SHOW_PUBLIC_SITE_BANNER) == "1"
+      if get_app_config(AppConfig::SHOW_LANDING_PUBLIC_SITE_BANNER) == "1"
         @show_public_site = true
       else
         time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
