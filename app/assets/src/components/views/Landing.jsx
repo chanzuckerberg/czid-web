@@ -137,7 +137,7 @@ class Landing extends React.Component {
         <div className={cs.publicSiteBanner}>
           <BasicPopup
             content={
-              "COVID-19: Looking for the public version of IDSeq showcasing our work on SARS-CoV-2? Click here!"
+              "COVID-19: Looking for the public version of IDSeq showcasing our work on the SARS-CoV-2 virus? Click here!"
             }
             position="bottom center"
             wide="very"
@@ -146,7 +146,7 @@ class Landing extends React.Component {
                 <AlertIcon className={cs.icon} />
                 <span className={cs.title}>COVID-19:</span>
                 Looking for the public version of IDSeq showcasing our work on
-                SARS-CoV-2?
+                the SARS-CoV-2 virus?
                 <ExternalLink
                   className={cs.link}
                   href="https://public.idseq.net"
