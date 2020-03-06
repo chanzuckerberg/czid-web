@@ -37,7 +37,7 @@ class SfnPipelineService
       pipeline_version: pipeline_version,
       stage_dags_json: stage_dags_json,
       sfn_input_json: sfn_input_json,
-      sfn_arn: sfn_arn
+      sfn_arn: sfn_arn,
     }
   end
 
@@ -63,7 +63,7 @@ class SfnPipelineService
         "AWS_DEFAULT_REGION" => AwsUtil::AWS_REGION,
       },
       "app/jobs/idd2wdl.py",
-      "--name", "#{dag_json['name']}",
+      "--name", (dag_json['name']).to_s,
       dag_tmp_file.path
     )
     if status.success?

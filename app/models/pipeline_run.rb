@@ -1040,7 +1040,6 @@ class PipelineRun < ApplicationRecord
   def update_job_status
     automatic_restart = false
     prs = active_stage
-    puts "Update job status: #{prs.inspect}"
     if prs.nil?
       # all stages succeeded
       self.finalized = 1
@@ -1054,7 +1053,6 @@ class PipelineRun < ApplicationRecord
         send_to_airbrake = !known_user_error
         report_failed_pipeline_run_stage(prs, automatic_restart, known_user_error, send_to_airbrake)
       elsif !prs.started?
-        puts "PipelineRun:update_job_status: step_number=#{prs.step_number}"
         # Note: this is not ideally place to initialize an SFN pipeline but
         # in order to preserve most of the logic of the old pipeline we decided
         # that this was the least intrusive place (vs. both downstream in run_job>host_filtering_command
