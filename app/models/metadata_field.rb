@@ -125,6 +125,11 @@ class MetadataField < ApplicationRecord
   validates :is_required, inclusion: { in: [0, 1] }
   validates :default_for_new_host_genome, inclusion: { in: [0, 1] }, if: -> { respond_to?(:default_for_new_host_genome) && mass_validation_enabled? } # respond_to? for migrations
 
+  def default_for_host_genome?
+    # for migration compatibility
+    respond_to?(:default_for_new_host_genome) && default_for_new_host_genome == 1
+  end
+
   def metadata_field_subsets
     if is_default == 1 && is_core == 0
       errors[:name] << 'Default field must also be core field'
@@ -132,16 +137,15 @@ class MetadataField < ApplicationRecord
     if is_required == 1 && is_default == 0
       errors[:name] << 'Required field must also be default field'
     end
-    if respond_to?(:default_for_new_host_genome) && # for migration compatibility
-       is_required == 1 && default_for_new_host_genome == 0 &&
-       errors[:name] << 'Required field must also be default_for_new_host_genome field'
+    if is_required == 1 && !default_for_host_genome?
+      errors[:name] << 'Required field must also be default_for_new_host_genome field'
     end
   end
 
   # This method is designed to be called when a field is made required or
   # default by an admin to update existing host genomes.
   def update_host_genomes!
-    if is_required == 1 || default_for_new_host_genome == 1
+    if is_required == 1 || default_for_host_genome?
       host_genomes << HostGenome.all_without_metadata_field(name)
     end
   end
