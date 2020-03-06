@@ -51,9 +51,19 @@ describe MetadataField, type: :model do
     expect(metadata_field).to be_nil
 
     create(:metadata_field, name: 'test', is_default: 1, is_core: 1, default_for_new_host_genome: 1, is_required: 1)
-    # refetch fresh data
     host_genome = HostGenome.find(host_genome.id)
     metadata_field = host_genome.metadata_fields.find { |mf| mf.name == 'test' }
     expect(metadata_field).to_not be_nil
+  end
+
+  it 'will not update all hosts needed when a non-required field is created' do
+    host_genome = create(:host_genome)
+    metadata_field = host_genome.metadata_fields.find { |mf| mf.name == 'test' }
+    expect(metadata_field).to be_nil
+
+    create(:metadata_field, name: 'test', is_default: 0, is_core: 0, default_for_new_host_genome: 0, is_required: 0)
+    host_genome = HostGenome.find(host_genome.id)
+    metadata_field = host_genome.metadata_fields.find { |mf| mf.name == 'test' }
+    expect(metadata_field).to be_nil
   end
 end

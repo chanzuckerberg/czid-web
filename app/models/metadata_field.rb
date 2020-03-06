@@ -138,7 +138,7 @@ class MetadataField < ApplicationRecord
   end
 
   def update_host_genomes!
-    if is_required
+    if is_required == 1
       host_genomes << HostGenome.all_without_metadata_field(name)
     end
   end
