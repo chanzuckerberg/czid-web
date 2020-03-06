@@ -2,6 +2,10 @@ require 'rails_helper'
 
 # This spec was created well after MetadataField, for the boolean? method.
 describe MetadataField, type: :model do
+  def find_test_field(host_genome)
+    host_genome.metadata_fields.find { |mf| mf.name == 'test' }
+  end
+
   let(:options) { '["Yes", "No"]' }
 
   it 'not be boolean if not force_options' do
@@ -47,23 +51,34 @@ describe MetadataField, type: :model do
 
   it 'will update all hosts needed when a required field is created' do
     host_genome = create(:host_genome)
-    metadata_field = host_genome.metadata_fields.find { |mf| mf.name == 'test' }
+    metadata_field = find_test_field(host_genome)
     expect(metadata_field).to be_nil
 
     create(:metadata_field, name: 'test', is_default: 1, is_core: 1, default_for_new_host_genome: 1, is_required: 1)
     host_genome = HostGenome.find(host_genome.id)
-    metadata_field = host_genome.metadata_fields.find { |mf| mf.name == 'test' }
+    metadata_field = find_test_field(host_genome)
+    expect(metadata_field).to_not be_nil
+  end
+
+  it 'will update all hosts needed when a default_for_new_host_genome field is created' do
+    host_genome = create(:host_genome)
+    metadata_field = find_test_field(host_genome)
+    expect(metadata_field).to be_nil
+
+    create(:metadata_field, name: 'test', is_default: 0, is_core: 0, default_for_new_host_genome: 1, is_required: 0)
+    host_genome = HostGenome.find(host_genome.id)
+    metadata_field = find_test_field(host_genome)
     expect(metadata_field).to_not be_nil
   end
 
   it 'will not update all hosts needed when a non-required field is created' do
     host_genome = create(:host_genome)
-    metadata_field = host_genome.metadata_fields.find { |mf| mf.name == 'test' }
+    metadata_field = find_test_field(host_genome)
     expect(metadata_field).to be_nil
 
     create(:metadata_field, name: 'test', is_default: 0, is_core: 0, default_for_new_host_genome: 0, is_required: 0)
     host_genome = HostGenome.find(host_genome.id)
-    metadata_field = host_genome.metadata_fields.find { |mf| mf.name == 'test' }
+    metadata_field = find_test_field(host_genome)
     expect(metadata_field).to be_nil
   end
 end
