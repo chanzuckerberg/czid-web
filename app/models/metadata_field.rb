@@ -77,6 +77,7 @@
 # Whether this metadata field should be added automatically to new host genomes.
 # See add_default_metadata_fields in host_genome.rb.
 # t.integer :default_for_new_host_genome, limit: 1, default: 0
+# NOTE: making the attribute true will also add the field to all existing host genomes.
 class MetadataField < ApplicationRecord
   has_and_belongs_to_many :host_genomes
   has_and_belongs_to_many :projects
@@ -137,6 +138,8 @@ class MetadataField < ApplicationRecord
     end
   end
 
+  # This method is designed to be called when a field is made required or
+  # default by an admin to update existing host genomes.
   def update_host_genomes!
     if is_required == 1 || default_for_new_host_genome == 1
       host_genomes << HostGenome.all_without_metadata_field(name)
