@@ -257,7 +257,7 @@ class PipelineRunStage < ApplicationRecord
   def host_filtering_command
     # Upload DAG to S3
     sample = pipeline_run.sample
-    dag_json = generate_host_filtering_dag_json
+    self.dag_json = generate_host_filtering_dag_json
     dag_commands = prepare_dag(dag_json)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
 
@@ -298,7 +298,7 @@ class PipelineRunStage < ApplicationRecord
 
   def alignment_command
     sample = pipeline_run.sample
-    dag_json = generate_alignment_dag_json
+    self.dag_json = generate_alignment_dag_json
     key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
     dag_commands = prepare_dag(dag_json, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
@@ -329,7 +329,7 @@ class PipelineRunStage < ApplicationRecord
   def postprocess_command
     # Upload DAG to S3
     sample = pipeline_run.sample
-    dag_json = generate_postprocess_dag_json
+    self.dag_json = generate_postprocess_dag_json
     dag_commands = prepare_dag(dag_json)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
@@ -361,7 +361,7 @@ class PipelineRunStage < ApplicationRecord
   def experimental_command
     # Upload DAG to S3
     sample = pipeline_run.sample
-    dag_json = generate_experimental_dag_json
+    self.dag_json = generate_experimental_dag_json
     dag_commands = prepare_dag(dag_json)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
 
