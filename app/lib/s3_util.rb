@@ -1,6 +1,8 @@
 require "aws-sdk-s3"
 
 module S3Util
+  AWS_S3_CLIENT = Aws::S3::Client.new
+
   # select a particular part of a JSON file using Amazon S3 Select SQL syntax
   def self.s3_select_json(bucket, key, expression)
     s3_select_params = {
@@ -22,7 +24,7 @@ module S3Util
 
     entry = []
     begin
-      S3_CLIENT.select_object_content(s3_select_params) do |stream|
+      AWS_S3_CLIENT.select_object_content(s3_select_params) do |stream|
         stream.on_records_event do |event|
           entry.push(event.payload.read)
         end
@@ -36,8 +38,8 @@ module S3Util
   end
 
   def self.upload_to_s3(bucket, key, content)
-    S3_CLIENT.put_object(bucket: bucket,
-                         key: key,
-                         body: content)
+    AWS_S3_CLIENT.put_object(bucket: bucket,
+                             key: key,
+                             body: content)
   end
 end

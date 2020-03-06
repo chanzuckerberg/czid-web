@@ -20,6 +20,7 @@ FactoryBot.define do
         build(:host_genome)
       end
     end
+    pipeline_execution_strategy { PipelineRun.pipeline_execution_strategies.directed_acyclic_graph }
 
     # metadata fields
     # ensure the metadata field is added to the host genome

@@ -1,4 +1,4 @@
-class SfnPipelineService
+class SfnPipelineDispatchService
   # This service is responsible for dispatching a request to the
   # StepFunctions-based pipeline.
   # It generates jsons for all the pipeline run stages, converts them to WDL,
@@ -6,7 +6,16 @@ class SfnPipelineService
 
   include Callable
 
-  class PipelineVersionMissingError < StandardError; end
+  class PipelineVersionMissingError < StandardError
+    def initialize
+      super("Pipeline Version not set on App Config")
+    end
+  end
+  class Idd2WdlError < StandardError
+    def initialize(error)
+      super("Command to convert dag to wdl failed ('idd2wdl.py'). Error: #{error}")
+    end
+  end
 
   def initialize(pipeline_run)
     @pipeline_run = pipeline_run
@@ -15,8 +24,8 @@ class SfnPipelineService
   end
 
   def retrieve_aws_account
-    client = Aws::STS::Client.new
-    resp = client.get_caller_identity
+    sts_client = Aws::STS::Client.new
+    resp = sts_client.get_caller_identity
     return resp[:account]
   end
 
@@ -41,6 +50,8 @@ class SfnPipelineService
     }
   end
 
+  private
+
   def generate_dag_stages_json
     # For compatibility with the legacy DAG json.
     # Generates a JSON composed by the jsons of all four stages in the DAG pipeline.
@@ -60,17 +71,14 @@ class SfnPipelineService
     stdout, stderr, status = Open3.capture3(
       {
         "AWS_ACCOUNT_ID" => @aws_account_id,
-        "AWS_DEFAULT_REGION" => AwsUtil::AWS_REGION,
+        "AWS_DEFAULT_REGION" => ENV['AWS_REGION'],
       },
       "app/jobs/idd2wdl.py",
-      "--name", (dag_json['name']).to_s,
+      "--name", dag_json['name'].to_s,
       dag_tmp_file.path
     )
-    if status.success?
-      return stdout
-    end
-    LogUtil.log_err_and_airbrake("Command to convert dag to wdl failed ('idd2wdl.py'). Error: #{stderr}")
-    return nil
+    return stdout if status.success?
+    raise Idd2WdlError, stderr
   ensure
     dag_tmp_file.unlink if dag_tmp_file
   end
@@ -102,13 +110,13 @@ class SfnPipelineService
     # Temporary file for debugging purposes
     dag_json_input_s3_key = "#{wdl_s3_prefix}/#{stage_name}.dag.json"
 
-    S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, dag_json_input_s3_key, JSON.dump(stage_dag_json))
-    S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, wdl_input_s3_key, stage_wdl)
+    S3Util.upload_to_s3(ENV['SAMPLES_BUCKET_NAME'], dag_json_input_s3_key, JSON.dump(stage_dag_json))
+    S3Util.upload_to_s3(ENV['SAMPLES_BUCKET_NAME'], wdl_input_s3_key, stage_wdl)
 
     # Does not include the dag json path, since it will be used solely for debug
     return {
-      wdl_input_s3_path: "s3://#{SAMPLES_BUCKET_NAME}/#{wdl_input_s3_key}",
-      wdl_output_s3_path: "s3://#{SAMPLES_BUCKET_NAME}/#{wdl_output_s3_key}",
+      wdl_input_s3_path: "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{wdl_input_s3_key}",
+      wdl_output_s3_path: "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{wdl_output_s3_key}",
     }
   end
 
@@ -138,7 +146,7 @@ class SfnPipelineService
     if status.success?
       response = JSON.parse(
         stdout,
-        symbolize_name: true
+        symbolize_names: true
       )
       return response[:execution_arn]
     else
