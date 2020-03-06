@@ -40,22 +40,6 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
              { name: "Experimental", step_number: 4 },
            ])
   end
-  # let(:fake_s3) {
-  #   fake_s3_blah = Aws::S3::Client.new(stub_responses: true)
-  #   puts "fake_s3_blah: #{fake_s3_blah}"
-  #   fake_s3_blah
-  # }
-  # let(:fake_sts) {
-  #   Aws::STS::Client.new(stub_responses: { get_caller_identity: { account: FAKE_ACCOUNT_ID } })
-  # }
-  # let(:fake_s3) { FAKE_S3 }
-  #   fake_s3_blah = Aws::S3::Client.new(stub_responses: true)
-  #   puts "fake_s3_blah: #{fake_s3_blah}"
-  #   fake_s3_blah
-  # }
-  # let(:fake_sts) { FAKE_STS }
-  #   Aws::STS::Client.new(stub_responses: { get_caller_identity: { account: FAKE_ACCOUNT_ID } })
-  # }
 
   describe "#call" do
     subject do
@@ -63,15 +47,14 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
     end
 
     before do
-      # FAKE_S3 = instance_double(Aws::S3::Client) # Aws::S3::Client.new(stub_responses: { put_object: {} })
-      allow(FAKE_S3).to receive(:put_object)
-
-      Aws.config[:stub_responses] = true
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with('SAMPLES_BUCKET_NAME').and_return(FAKE_SAMPLES_BUCKET)
       allow(ENV).to receive(:[]).with('AWS_REGION').and_return(FAKE_REGION)
-      allow(Aws::S3::Client).to receive(:new).and_return(FAKE_S3)
+
+      Aws.config[:stub_responses] = true
       allow(Aws::STS::Client).to receive(:new).and_return(FAKE_STS)
+      stub_const("S3_CLIENT", FAKE_S3)
+      allow(FAKE_S3).to receive(:put_object)
     end
 
     context "when no pipeline version is defined" do
