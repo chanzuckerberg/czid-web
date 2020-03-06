@@ -41,7 +41,6 @@ import CategoryFilter from "./views/report/filters/CategoryFilter";
 import MetricPicker from "./views/report/filters/MetricPicker";
 import SpecificityFilter from "./views/report/filters/SpecificityFilter";
 import NameTypeFilter from "./views/report/filters/NameTypeFilter";
-import MinContigReadsFilter from "./views/report/filters/MinContigReadsFilter";
 import SearchBox from "./ui/controls/SearchBox";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
@@ -1546,14 +1545,6 @@ class RenderMarkup extends React.Component {
                 options={parent.treeMetrics}
                 value={parent.state.treeMetric}
                 onChange={parent.handleTreeMetricChange}
-              />
-            </div>
-          )}
-          {this.props.view == "table" && (
-            <div className="filter-lists-element">
-              <MinContigReadsFilter
-                value={parent.state.minContigReads}
-                onChange={parent.handleMinContigReadsChange}
               />
             </div>
           )}
