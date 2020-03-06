@@ -386,6 +386,7 @@ class SamplesHeatmapView extends React.Component {
         host_genome_name: sample.host_genome_name,
         metadata: processMetadata(sample.metadata, true),
         taxa: [],
+        duplicate: false,
       };
       if (sample.taxons) {
         for (let j = 0; j < sample.taxons.length; j++) {
@@ -424,11 +425,13 @@ class SamplesHeatmapView extends React.Component {
       }
     }
 
-    // Append the sample id to a sample's name differentiate between samples with the same name.
+    // Append a number to a sample's name to differentiate between samples with the same name.
     duplicateSampleNames.forEach(sampleName => {
-      sampleNames[sampleName].forEach(sampleId => {
-        sampleDetails[sampleId]["name"] = `${sampleName} (${sampleId})`;
-      });
+      for (let i = 0; i < sampleNames[sampleName].length; i++) {
+        let sampleId = sampleNames[sampleName][i];
+        sampleDetails[sampleId]["name"] = `${sampleName} (${i + 1})`;
+        sampleDetails[sampleId]["duplicate"] = true;
+      }
     });
 
     return {

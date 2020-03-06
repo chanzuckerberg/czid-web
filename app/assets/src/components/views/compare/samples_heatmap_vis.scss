@@ -1,6 +1,9 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
+:export {
+  primaryLight: $primary-light;
+}
 
 .samplesHeatmapVis {
   .plusMinusControl {
