@@ -205,6 +205,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def prepare_dag(dag_json, key_s3_params = nil)
+    self.dag_json = dag_json
     sample = pipeline_run.sample
     copy_done_file = "echo done | aws s3 cp - #{Shellwords.escape(sample.sample_output_s3_path)}/\"$AWS_BATCH_JOB_ID\".#{JOB_SUCCEEDED_FILE_SUFFIX}"
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
