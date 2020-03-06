@@ -127,7 +127,8 @@ class SfnPipelineDispatchService
 
     # Not using SDK because aws-sdk-sfn is currently on version 1.0.0.rc4,
     # which in terms requires aws-sdk-core (= 3.0.0.rc1 which is lower than current version
-    # and just an rc version)
+    # and just an rc version).
+    # Leaving the code as a reference for when dependencies are more open and reliable.
     #
     # sfn_client = Aws::SFN::Client.new
     # resp = sfn_client.start_execution({
