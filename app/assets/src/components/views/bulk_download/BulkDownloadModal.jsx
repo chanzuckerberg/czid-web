@@ -113,6 +113,29 @@ class BulkDownloadModal extends React.Component {
     const invalidSampleNames = sampleValidationInfo.invalidSampleNames;
     const validationError = sampleValidationInfo.error;
 
+    // Set any default bulk download field values.
+    let newSelectedFields = this.state.selectedFields;
+    let newSelectedFieldsDisplay = this.state.selectedFieldsDisplay;
+
+    bulkDownloadTypes.forEach(type => {
+      if (type.fields) {
+        type.fields.forEach(field => {
+          if (field.default_value) {
+            newSelectedFields = set(
+              [type.type, field.type],
+              field.default_value.value,
+              newSelectedFields
+            );
+            newSelectedFieldsDisplay = set(
+              [type.type, field.type],
+              field.default_value.display_name,
+              newSelectedFieldsDisplay
+            );
+          }
+        });
+      }
+    });
+
     this.setState({
       bulkDownloadTypes,
       validSampleIds,
@@ -121,6 +144,8 @@ class BulkDownloadModal extends React.Component {
       backgroundOptions,
       metricsOptions,
       allSamplesUploadedByCurrentUser,
+      selectedFields: newSelectedFields,
+      selectedFieldsDisplay: newSelectedFieldsDisplay,
       loading: false,
     });
   }

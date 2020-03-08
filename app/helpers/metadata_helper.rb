@@ -49,6 +49,32 @@ module MetadataHelper
     end
   end
 
+  # Orders metadata fields for csv output.
+  # Accepts ActiveRelation or array, but always outputs array.
+  def self.order_metadata_fields_for_csv(fields)
+    # Show fields with is_required=1 first in the CSV, but otherwise keep the default order.
+    fields = fields.sort_by { |f| [-f.is_required, f.id] }
+
+    # Hide legacy collection_location (v1) field from CSV templates.
+    # TODO(jsheu): Remove legacy field and swap in collection_location_v2.
+    return fields.reject { |f| f.name == "collection_location" }
+  end
+
+  # Outputs csv header strings for the provided metadata fields.
+  def self.get_csv_headers_for_metadata_fields(fields)
+    fields.map do |field|
+      # Change collection_location_v2 to collection_location.
+      field.name == "collection_location_v2" ? "collection_location" : field.name
+    end
+  end
+
+  # Returns all unique MetadataFields that the provided samples have metadata for.
+  def self.get_unique_metadata_fields_for_samples(samples)
+    sample_ids = samples.pluck(:id)
+    metadata_field_ids = Metadatum.where(sample_id: sample_ids).pluck(:metadata_field_id).uniq
+    MetadataField.where(id: metadata_field_ids)
+  end
+
   def metadata_template_csv_helper(project_id, new_sample_names)
     samples_are_new = !new_sample_names.nil?
     project = Project.where(id: project_id)[0]
@@ -75,12 +101,7 @@ module MetadataHelper
                project.metadata_fields.includes(:host_genomes).reject { |field| (field.host_genome_ids & host_genome_ids).empty? }
              end
 
-    # Show fields with is_required=1 first in the CSV, but otherwise keep the default order.
-    fields = fields.sort_by { |f| [-f.is_required, f.id] }
-
-    # Hide legacy collection_location (v1) field from CSV templates.
-    # TODO(jsheu): Remove legacy field and swap in collection_location_v2.
-    fields = fields.reject { |f| f.name == "collection_location" }
+    fields = MetadataHelper.order_metadata_fields_for_csv(fields)
 
     field_names = ["Sample Name"] + (include_host_genome ? ["Host Organism"] : []) + fields.pluck(:display_name)
 
@@ -125,7 +146,7 @@ module MetadataHelper
             elsif project.nil?
               generate_metadata_default_value(field, sample[:host_genome_name])
             else
-              sample[:metadata][field.name]&.csv_template_value
+              sample[:metadata][field.name]&.csv_compatible_value
             end
           end
         end
