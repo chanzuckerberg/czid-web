@@ -1019,8 +1019,10 @@ class PipelineRun < ApplicationRecord
     sfn_service_result = {}
     begin
       sfn_service_result = SfnPipelineDispatchService.call(self)
-      self.sfn_execution_arn = sfn_service_result[:sfn_arn]
-      self.pipeline_version = sfn_service_result[:pipeline_version]
+      update(
+        sfn_execution_arn: sfn_service_result[:sfn_arn],
+        pipeline_version: sfn_service_result[:pipeline_version]
+      )
     rescue SfnPipelineDispatchService::PipelineVersionMissingError => e
       LogUtil.log_err_and_airbrake("Pipeline version for SFN pipeline not configured: #{e}")
       # we will retry later since the error is not related to this specific pipeline run
@@ -1032,8 +1034,10 @@ class PipelineRun < ApplicationRecord
     end
 
     if sfn_service_result[:sfn_arn].blank?
-      self.job_status = STATUS_FAILED
-      self.finalized = 1
+      update(
+        job_status: STATUS_FAILED,
+        finalized: 1
+      )
     end
   end
 

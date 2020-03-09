@@ -108,7 +108,7 @@ module PipelineRunsHelper
       job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"
       job_status = PipelineRunStage::STATUS_FAILED if stderr =~ /ExecutionDoesNotExist/ # job no longer exists
     end
-    [job_status, job_log_id, stdout]
+    [job_status, job_log_id]
   end
 
   def parse_sfn_execution_history_hash(sfn_execution_history_hash)
@@ -134,6 +134,7 @@ module PipelineRunsHelper
           "name" => evt.dig(details_key, "name"),
         }
       end
+      .select { |evt| evt["name"].match?(name_regexp) }
       .map do |evt|
         stage, task = evt["name"].match(name_regexp)[1..2]
         { "stage" => stage, "task" => task, "type" => evt["type"] }

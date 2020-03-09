@@ -180,7 +180,7 @@ class PipelineRunStage < ApplicationRecord
         LogUtil.log_err_and_airbrake("Invalid precondition for PipelineRunStage.update_job_status step_function #{id} #{pipeline_run.sfn_execution_arn} #{job_status}.")
         return
       end
-      self.job_status, self.job_log_id, self.job_description = sfn_info(pipeline_run.sfn_execution_arn, id, step_number)
+      self.job_status, self.job_log_id = sfn_info(pipeline_run.sfn_execution_arn, id, step_number)
       save
       return
     end
@@ -215,6 +215,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def prepare_dag(dag_json, key_s3_params = nil)
+    self.dag_json = dag_json
     sample = pipeline_run.sample
     copy_done_file = "echo done | aws s3 cp - #{Shellwords.escape(sample.sample_output_s3_path)}/\"$AWS_BATCH_JOB_ID\".#{JOB_SUCCEEDED_FILE_SUFFIX}"
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"

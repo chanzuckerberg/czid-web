@@ -6,6 +6,12 @@ class SfnPipelineDispatchService
 
   include Callable
 
+  ENV_TO_DEPLOYMENT_STAGE_NAMES = {
+    "development" => "dev",
+    "staging" => "staging",
+    "prod" => "production",
+  }.freeze
+
   class PipelineVersionMissingError < StandardError
     def initialize
       super("Pipeline Version not set on App Config")
@@ -63,6 +69,13 @@ class SfnPipelineDispatchService
     return stages_json
   end
 
+  def save_dag_json(stage_dag_jsons)
+    @pipeline_run.pipeline_run_stages.order(:step_number).each do |prs|
+      stage_info = PipelineRunStage::STAGE_INFO[prs.step_number]
+      prs.update(dag_json: stage_dag_jsons[stage_info[:dag_name]])
+    end
+  end
+
   def convert_dag_json_to_wdl(dag_json)
     dag_tmp_file = Tempfile.new
     dag_tmp_file.write(JSON.dump(dag_json))
@@ -72,9 +85,11 @@ class SfnPipelineDispatchService
       {
         "AWS_ACCOUNT_ID" => @aws_account_id,
         "AWS_DEFAULT_REGION" => ENV['AWS_REGION'],
+        "STAGE" => ENV_TO_DEPLOYMENT_STAGE_NAMES[Rails.env],
       },
       "app/jobs/idd2wdl.py",
       "--name", dag_json['name'].to_s,
+      "--pipeline-version", @pipeline_run.pipeline_version,
       dag_tmp_file.path
     )
     return stdout if status.success?
@@ -149,7 +164,7 @@ class SfnPipelineDispatchService
         stdout,
         symbolize_names: true
       )
-      return response[:execution_arn]
+      return response[:executionArn]
     else
       LogUtil.log_err_and_airbrake("Command to start SFN execution failed. Error: #{stderr}")
     end
