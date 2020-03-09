@@ -53,6 +53,7 @@ module PipelineRunsHelper
       },
     },
   }.freeze
+  ALL_STEP_NAMES = STEP_DESCRIPTIONS.values.map { |stage| stage["steps"].keys }.flatten
 
   PIPELINE_RUN_STILL_RUNNING_ERROR = "PIPELINE_RUN_STILL_RUNNING_ERROR".freeze
   PIPELINE_RUN_FAILED_ERROR = "PIPELINE_RUN_FAILED_ERROR".freeze

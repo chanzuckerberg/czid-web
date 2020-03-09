@@ -7,8 +7,7 @@ class HostGenome < ApplicationRecord
   # in light of the data. See showAsOption below.
   # See https://jira.czi.team/browse/IDSEQ-2193.
   belongs_to :user, optional: true
-
-  before_create :add_default_metadata_fields!
+  belongs_to :default_background, optional: true, class_name: "Background", foreign_key: :default_background_id
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }, format: {
     with: /\A\w[\w|\s|\.|\-]+\z/,
@@ -32,6 +31,8 @@ class HostGenome < ApplicationRecord
     "non-human-animal",
   ], }, if: -> { respond_to?(:taxa_category) } # for migrations
 
+  before_create :add_default_metadata_fields!
+
   # NOTE: Consider updating the star and bowtie defaults if we ever add new ERCC index files.
   ERCC_PATH_PREFIX = "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/".freeze
   S3_STAR_INDEX_FILE = "STAR_genome.tar".freeze
@@ -50,10 +51,6 @@ class HostGenome < ApplicationRecord
     hash[:ercc_only] = ercc_only?
     hash[:showAsOption] = show_as_option?
     hash
-  end
-
-  def default_background
-    Background.find(default_background_id) if default_background_id
   end
 
   def add_default_metadata_fields!

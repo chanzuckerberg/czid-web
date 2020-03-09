@@ -11,10 +11,7 @@ RSpec.describe SamplesHelper, type: :helper do
       before do
         @project = create(:public_project)
         @joe = create(:joe)
-        # Add the metadata fields to the host genome so that the metadata will pass validation.
-        @host_genome = create(:host_genome, user: @joe, metadata_fields: [
-                                "Fake Metadata Field One", "Fake Metadata Field Two",
-                              ])
+        @host_genome = create(:host_genome, user: @joe)
       end
 
       let(:basespace_sample_attributes) do

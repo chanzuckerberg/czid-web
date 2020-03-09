@@ -7,6 +7,24 @@ class ApplicationRecord < ActiveRecord::Base
   after_update { |record| log_analytics record, "updated" }
   after_destroy { |record| log_analytics record, "destroyed" }
 
+  before_save :log_errors, if: proc { |m| m.mass_validation_enabled? && m.errors.any? }
+
+  def log_errors
+    msg = errors.full_messages.join("\n")
+    LogUtil.log_err_and_airbrake(msg)
+    Rails.logger.error("Backtrace:\n\t#{caller.join("\n\t")}")
+  end
+
+  # Condition for rollout of mass addition of validation rules.
+  # Cached for performance.
+  def mass_validation_enabled?
+    if AppConfig.table_exists? # for migrations previous to AppConfig creation
+      return Rails.cache.fetch("ApplicationRecord.mass_validation_enabled?") do
+        AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION)
+      end
+    end
+  end
+
   # Set current user and request to global for use in logging.
   # See https://stackoverflow.com/a/11670283/200312
   class << self
