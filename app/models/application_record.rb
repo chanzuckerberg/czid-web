@@ -7,6 +7,14 @@ class ApplicationRecord < ActiveRecord::Base
   after_update { |record| log_analytics record, "updated" }
   after_destroy { |record| log_analytics record, "destroyed" }
 
+  after_validation :log_errors, if: proc { |m| m.errors.any? }
+
+  def log_errors
+    msg = errors.full_messages.join("\n")
+    LogUtil.log_err_and_airbrake(msg)
+    LogUtil.log_backtrace(ActiveRecord::RecordInvalid.new(self))
+  end
+
   # Condition for rollout of mass addition of validation rules.
   # Cached for performance.
   def mass_validation_enabled?
