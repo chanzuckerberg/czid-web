@@ -519,8 +519,7 @@ class BulkDownload < ApplicationRecord
       Rails.logger.info("Generating sample overviews for #{pipeline_runs.length} samples...")
       samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
       pipeline_runs_by_sample_id = pipeline_runs.map { |pr| [pr.sample_id, pr] }.to_h
-      formatted_samples = format_samples(samples, pipeline_runs_by_sample_id)
-      sample_overviews_csv = generate_sample_list_csv(formatted_samples)
+      sample_overviews_csv = generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, include_all_metadata: get_param_value("include_metadata"))
 
       s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
     elsif download_type == COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
@@ -539,6 +538,13 @@ class BulkDownload < ApplicationRecord
         LogUtil.log_err_and_airbrake("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{result[:failed_sample_ids]}")
         update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % result[:failed_sample_ids].length)
       end
+    elsif download_type == SAMPLE_METADATA_BULK_DOWNLOAD_TYPE
+      Rails.logger.info("Generating sample metadata for #{pipeline_runs.length} samples...")
+      samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+
+      sample_metadata_csv = BulkDownloadsHelper.generate_metadata_csv(samples)
+
+      s3_tar_writer.add_file_with_data("sample_metadata.csv", sample_metadata_csv)
     else
       write_output_files_to_s3_tar_writer(s3_tar_writer)
     end

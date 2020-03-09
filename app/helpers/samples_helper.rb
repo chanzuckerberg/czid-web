@@ -19,26 +19,35 @@ module SamplesHelper
   # This regex extracts the sample_id from sample S3 paths.
   SAMPLE_PATH_ID_MATCHER = %r{\A.*samples\/\d*\/(\d*)\/.*\z}
 
-  def generate_sample_list_csv(formatted_samples)
+  # If selected_pipeline_runs_by_sample_id is provided, use those pipelines runs instead of the latest pipeline run for each sample.
+  def generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: nil, include_all_metadata: false)
+    formatted_samples = format_samples(samples, selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
+
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
                     quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup
-                    sample_type nucleotide_type collection_location
                     host_genome notes
                     insert_size_median insert_size_mode insert_size_median_absolute_deviation insert_size_min insert_size_max insert_size_mean insert_size_standard_deviation insert_size_read_pairs]
+
+    if include_all_metadata
+      metadata_fields = MetadataHelper.get_unique_metadata_fields_for_samples(samples)
+      # Order the metadata fields so that required fields are first.
+      metadata_fields = MetadataHelper.order_metadata_fields_for_csv(metadata_fields)
+      metadata_headers = MetadataHelper.get_csv_headers_for_metadata_fields(metadata_fields)
+      metadata_keys = metadata_fields.pluck(:name)
+    else
+      metadata_headers = %w[sample_type nucleotide_type collection_location]
+      metadata_keys = %w[sample_type nucleotide_type collection_location_v2]
+    end
+
     CSVSafe.generate(headers: true) do |csv|
-      csv << attributes
+      csv << attributes + metadata_headers
       formatted_samples.each do |sample_info|
         derived_output = sample_info[:derived_sample_output]
         pipeline_run = derived_output[:pipeline_run]
         db_sample = sample_info[:db_sample]
         run_info = sample_info[:run_info]
-        metadata = sample_info[:metadata]
-        collection_location = if metadata && metadata[:collection_location_v2]
-                                metadata[:collection_location_v2].is_a?(Hash) ? metadata[:collection_location_v2].dig(:name) : metadata[:collection_location_v2]
-                              else
-                                ''
-                              end
+
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
                         upload_date: db_sample ? db_sample[:created_at] : '',
@@ -55,10 +64,6 @@ module SamplesHelper
                         reads_after_trimmomatic: (derived_output[:summary_stats] || {})[:reads_after_trimmomatic] || '',
                         reads_after_priceseq: (derived_output[:summary_stats] || {})[:reads_after_priceseq] || '',
                         reads_after_cdhitdup: (derived_output[:summary_stats] || {})[:reads_after_cdhitdup] || '',
-                        sample_type: metadata && metadata[:sample_type] ? metadata[:sample_type] : '',
-                        nucleotide_type: metadata && metadata[:nucleotide_type] ? metadata[:nucleotide_type] : '',
-                        # Handle both location objects w/name and strings
-                        collection_location: collection_location,
                         host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
                         notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '',
                         insert_size_median: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.median ? pipeline_run.insert_size_metric_set.median : '',
@@ -69,8 +74,9 @@ module SamplesHelper
                         insert_size_mean: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.mean ? pipeline_run.insert_size_metric_set.mean : '',
                         insert_size_standard_deviation: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.standard_deviation ? pipeline_run.insert_size_metric_set.standard_deviation : '',
                         insert_size_read_pairs: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.read_pairs ? pipeline_run.insert_size_metric_set.read_pairs : '', }
-        attributes_as_symbols = attributes.map(&:to_sym)
-        csv << data_values.values_at(*attributes_as_symbols)
+        metadata = sample_info[:metadata] || {}
+
+        csv << data_values.values_at(*attributes.map(&:to_sym)) + metadata.values_at(*metadata_keys.map(&:to_sym))
       end
     end
   end
@@ -386,19 +392,19 @@ module SamplesHelper
     end
   end
 
-  def format_samples(samples, pipeline_runs_by_sample_id = nil)
+  def format_samples(samples, selected_pipeline_runs_by_sample_id: nil, use_csv_compatible_values: false)
     formatted_samples = []
     return formatted_samples if samples.empty?
 
     # Do major SQL queries
     sample_ids = samples.map(&:id)
-    top_pipeline_run_by_sample_id = pipeline_runs_by_sample_id || top_pipeline_runs_multiget(sample_ids)
+    top_pipeline_run_by_sample_id = selected_pipeline_runs_by_sample_id || top_pipeline_runs_multiget(sample_ids)
     pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
     pipeline_run_stages_by_pipeline_run_id = dependent_records_multiget(PipelineRunStage, :pipeline_run_id, pipeline_run_ids)
     output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
-    metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids, use_raw_date_strings: true)
+    metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids, use_raw_date_strings: true, use_csv_compatible_values: use_csv_compatible_values)
 
     # Massage data into the right format
     samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user).each_with_index do |sample|

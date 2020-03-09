@@ -241,4 +241,43 @@ RSpec.describe SamplesHelper, type: :helper do
       expect(response[3]["sample_count"]).to be 1
     end
   end
+
+  describe "#generate_sample_list_csv" do
+    before do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe])
+      create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1)
+      @sample_one = create(:sample, project: @project, name: "Test Sample 1",
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
+                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", custom_field_one: "Value One" })
+      @sample_two = create(:sample, project: @project, name: "Test Sample 2",
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
+                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", custom_field_two: "Value Two" })
+    end
+
+    it "includes specific metadata fields in basic case" do
+      samples = Sample.where(id: [@sample_one.id, @sample_two.id])
+      csv_string = helper.generate_sample_list_csv(samples)
+      headers = csv_string.split("\n")[0]
+      expect(headers.include?("sample_type")).to be true
+      expect(headers.include?("nucleotide_type")).to be true
+      expect(headers.include?("collection_location")).to be true
+      # Does not include custom metadata
+      expect(headers.include?("custom_field_one")).to be false
+      expect(headers.include?("custom_field_two")).to be false
+    end
+
+    it "includes specific metadata fields in basic case" do
+      samples = Sample.where(id: [@sample_one.id, @sample_two.id])
+      csv_string = helper.generate_sample_list_csv(samples, include_all_metadata: true)
+      headers = csv_string.split("\n")[0]
+      expect(headers.include?("sample_type")).to be true
+      expect(headers.include?("collection_location")).to be true
+      # Doesn't include nucleotide_type because none of the samples have it
+      expect(headers.include?("nucleotide_type")).to be false
+      # Includes custom metadata
+      expect(headers.include?("custom_field_one")).to be true
+      expect(headers.include?("custom_field_two")).to be true
+    end
+  end
 end

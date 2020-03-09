@@ -1,6 +1,14 @@
 require "rails_helper"
 require "webmock/rspec"
 
+def generate_expected_csv_str(lines)
+  CSVSafe.generate(headers: true) do |csv|
+    lines.each do |line|
+      csv << line
+    end
+  end
+end
+
 RSpec.describe BulkDownloadsHelper, type: :helper do
   describe "#generate_combined_sample_taxon_results_csv" do
     def get_mock_metric_value(sample_id, tax_id, metric)
@@ -44,14 +52,6 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       end
 
       response
-    end
-
-    def generate_expected_csv_str(lines)
-      CSVSafe.generate(headers: true) do |csv|
-        lines.each do |line|
-          csv << line
-        end
-      end
     end
 
     let(:mock_background_id) { 123 }
@@ -183,6 +183,58 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
                                   ])
       )
       expect(response[:failed_sample_ids]).to eq([])
+    end
+  end
+
+  describe "#generate_metadata_csv" do
+    before do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe])
+      create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1)
+      @sample_one = create(:sample, project: @project, name: "Test Sample 1",
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
+                                    metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", custom_field_one: "Value One" })
+      @sample_two = create(:sample, project: @project, name: "Test Sample 2",
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
+                                    metadata_fields: { collection_location_v2: "Los Angeles, USA", sample_type: "CSF", custom_field_two: "Value Two" })
+    end
+
+    it "returns correct values in basic case" do
+      samples = Sample.where(id: [@sample_one.id, @sample_two.id])
+
+      csv_string = BulkDownloadsHelper.generate_metadata_csv(samples)
+
+      # Check that
+      # 1) Metadata is returned properly.
+      # 2) The required field is listed first.
+      # 3) collection_location is displayed in the header instead of collection_location_v2.
+      expect(csv_string).to eq(
+        generate_expected_csv_str([
+                                    ["sample_name", "sample_type", "collection_location", "custom_field_one", "custom_field_two"],
+                                    ["Test Sample 1", "Serum", "San Francisco, USA", "Value One", nil],
+                                    ["Test Sample 2", "CSF", "Los Angeles, USA", nil, "Value Two"],
+                                  ])
+      )
+    end
+
+    # It's possible that a very old sample in IDseq has no metadata.
+    it "returns reasonable csv if sample has no metadata" do
+      # Make sample_type not required for this test.
+      MetadataField.where(name: "sample_type").update(is_required: 0)
+
+      # Create a sample with no metadata.
+      sample_no_metadata = create(:sample, project: @project, name: "Test Sample 3",
+                                           pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      samples = Sample.where(id: [sample_no_metadata.id])
+
+      csv_string = BulkDownloadsHelper.generate_metadata_csv(samples)
+
+      expect(csv_string).to eq(
+        generate_expected_csv_str([
+                                    ["sample_name"],
+                                    ["Test Sample 3"],
+                                  ])
+      )
     end
   end
 end
