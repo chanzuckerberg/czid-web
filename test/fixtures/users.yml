@@ -14,7 +14,7 @@ joe:
   email: joe@gmail.com
   name: User Three
   allowed_features: "[\"pipeline_viz\"]"
-  
+
 admin:
   email: admin@example.com
   name: Admin User

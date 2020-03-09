@@ -1,5 +1,6 @@
 module BulkDownloadTypesHelper
   SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE = "sample_overview".freeze
+  SAMPLE_METADATA_BULK_DOWNLOAD_TYPE = "sample_metadata".freeze
   SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE = "sample_taxon_report".freeze
   COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE = "combined_sample_taxon_results".freeze
   CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE = "contig_summary_report".freeze
@@ -13,6 +14,9 @@ module BulkDownloadTypesHelper
   VARIABLE_EXECUTION_TYPE = "variable".freeze
   ECS_EXECUTION_TYPE = "ecs".freeze
 
+  # The "type" value of the bulk download fields is really the field key.
+  # There isn't currently anything that specifies what data type the field is.
+  # The front-end is hard-coded to display a select dropdown or a checkbox depending on the field type.
   BULK_DOWNLOAD_TYPES = [
     {
       type: SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,
@@ -21,6 +25,24 @@ module BulkDownloadTypesHelper
       category: "report",
       execution_type: RESQUE_EXECUTION_TYPE,
       # This will be displayed in the bulk-download creation modal.
+      file_type_display: ".csv",
+      fields: [
+        {
+          display_name: "Include Metadata",
+          type: "include_metadata",
+          default_value: {
+            value: false,
+            display_name: "No",
+          },
+        },
+      ],
+    },
+    {
+      type: SAMPLE_METADATA_BULK_DOWNLOAD_TYPE,
+      display_name: "Sample Metadata",
+      description: "User-uploaded metadata, including sample collection location, collection date, sample type",
+      category: "report",
+      execution_type: RESQUE_EXECUTION_TYPE,
       file_type_display: ".csv",
     },
     {

@@ -1,4 +1,14 @@
 class PipelineRunStage < ApplicationRecord
+  include ApplicationHelper
+  include PipelineRunsHelper
+  include PipelineOutputsHelper
+
+  belongs_to :pipeline_run
+  validates :name, presence: true, if: :mass_validation_enabled?
+  # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
+  validates :step_number, presence: true, numericality: { greater_than: 0, integer_only: true }, if: :mass_validation_enabled?
+  validates :job_command_func, presence: true, if: :mass_validation_enabled?
+
   JOB_TYPE_BATCH = 1
   COMMIT_SHA_FILE_ON_WORKER = "/mnt/idseq-pipeline/commit-sha.txt".freeze
 
@@ -56,11 +66,6 @@ class PipelineRunStage < ApplicationRecord
 
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
-
-  include ApplicationHelper
-  include PipelineRunsHelper
-  include PipelineOutputsHelper
-  belongs_to :pipeline_run
 
   def started?
     job_command.present?

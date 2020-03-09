@@ -22,6 +22,9 @@ FactoryBot.define do
     end
     pipeline_execution_strategy { PipelineRun.directed_acyclic_graph }
 
+    status { Sample::STATUS_CREATED }
+    association :user
+
     # metadata fields
     # ensure the metadata field is added to the host genome
     before(:create) do |sample, options|

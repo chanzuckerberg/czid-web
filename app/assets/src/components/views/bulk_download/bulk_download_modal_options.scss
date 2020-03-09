@@ -142,4 +142,9 @@
       color: $dark-grey;
     }
   }
+
+  .checkboxField {
+    @include font-body-xxs;
+    color: $dark-grey;
+  }
 }

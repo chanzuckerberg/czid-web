@@ -3,6 +3,11 @@ class MetadataField < ApplicationRecord
   has_and_belongs_to_many :projects
   has_many :metadata, dependent: :destroy
 
+  # Obeying the same rules as in MetadataHelper validate_metadata_csv_for_samples
+  # Metadata fields are shared globally and can be created by users.
+  validates :name, presence: true, uniqueness: true, if: :mass_validation_enabled?
+  validates :display_name, presence: true, uniqueness: true, if: :mass_validation_enabled?
+
   validate :metadata_field_subsets
 
   # As of Feb 2020, we renamed "Host Genome" in the UI to better reflect its
@@ -36,6 +41,7 @@ class MetadataField < ApplicationRecord
   validates :is_core, inclusion: { in: [0, 1] }
   validates :is_default, inclusion: { in: [0, 1] }
   validates :is_required, inclusion: { in: [0, 1] }
+  validates :default_for_new_host_genome, inclusion: { in: [0, 1] }, if: -> { respond_to?(:default_for_new_host_genome) && mass_validation_enabled? } # respond_to? for migrations
 
   # ActiveRecord documentation summary
 

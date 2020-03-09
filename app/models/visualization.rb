@@ -1,10 +1,23 @@
 # Represents a Heatmap, phylogeny or other visualization
 class Visualization < ApplicationRecord
-  serialize :data, JSON
   has_and_belongs_to_many :samples
   belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
+
   validates :name, presence: true
-  validates :data, presence: true
+
+  HEATMAP_TYPE = "heatmap".freeze
+  PHYLO_TREE_TYPE = "phylo_tree".freeze
+  TREE_TYPE = "tree".freeze
+  TABLE_TYPE = "table".freeze
+  validates :visualization_type, presence: true, inclusion: { in: [
+    HEATMAP_TYPE,
+    PHYLO_TREE_TYPE,
+    TREE_TYPE,
+    TABLE_TYPE,
+  ], }, if: :mass_validation_enabled?
+  validates :data, presence: true, if: :mass_validation_enabled?
+
+  serialize :data, JSON
 
   delegate :count, to: :samples, prefix: true
 
