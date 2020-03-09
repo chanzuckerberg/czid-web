@@ -7,7 +7,7 @@ class ApplicationRecord < ActiveRecord::Base
   after_update { |record| log_analytics record, "updated" }
   after_destroy { |record| log_analytics record, "destroyed" }
 
-  after_validation :log_errors, if: proc { |m| m.mass_validation_enabled? && m.errors.any? }
+  before_save :log_errors, if: proc { |m| m.mass_validation_enabled? && m.errors.any? }
 
   def log_errors
     msg = errors.full_messages.join("\n")
