@@ -2,6 +2,7 @@ import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
 
+import BasicPopup from "~/components/BasicPopup";
 import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
 import RadioButton from "~ui/controls/RadioButton";
@@ -77,18 +78,64 @@ class ProjectCreationForm extends React.Component {
     );
   };
 
+  renderControls = () => {
+    const { onCancel } = this.props;
+    const { name, publicAccess, description } = this.state;
+
+    let disableCreateButton = false;
+    let disabledReasons = "";
+    if (name === "" || publicAccess === -1 || description.length < 8) {
+      disableCreateButton = true;
+      disabledReasons = (
+        <div className={cs.requirements}>
+          Project is missing one or more required fields:
+          <ul>
+            {name === "" && <li>The project needs a name.</li>}
+            {publicAccess === -1 && (
+              <li>Please select whether this project is public or private.</li>
+            )}
+            {description.length < 8 && (
+              <li>
+                A project description needs to be at least 8 characters long.
+              </li>
+            )}
+          </ul>
+        </div>
+      );
+    }
+
+    const controls = (
+      <div className={cs.controls}>
+        <div
+          className={cx(cs.createButton, disableCreateButton && cs.disabled)}
+          onClick={this.handleCreateProject}
+        >
+          Create Project
+        </div>
+        <div className={cs.cancelButton} onClick={onCancel}>
+          Cancel
+        </div>
+      </div>
+    );
+
+    return (
+      <BasicPopup
+        children={disabledReasons}
+        trigger={controls}
+        disabled={!disableCreateButton} // enable the popup when create button is disabled and vice versa
+        flowing
+      />
+    );
+  };
+
   render() {
-    const { showInfo } = this.state;
+    const { showInfo, name, publicAccess, description, error } = this.state;
 
     return (
       <div className={cs.projectCreationForm}>
         <div className={cs.field}>
           <div className={cs.label}>New Project Name</div>
-          <Input
-            fluid
-            value={this.state.name}
-            onChange={this.handleNameChange}
-          />
+          <Input fluid value={name} onChange={this.handleNameChange} />
         </div>
         <div className={cs.field}>
           <div className={cs.label}>Project Sharing</div>
@@ -97,7 +144,7 @@ class ProjectCreationForm extends React.Component {
             onClick={() => this.setState({ publicAccess: 1 })}
           >
             <RadioButton
-              selected={this.state.publicAccess === 1}
+              selected={publicAccess === 1}
               className={cs.radioButton}
             />
             <PublicProjectIcon className={cs.projectIcon} />
@@ -113,7 +160,7 @@ class ProjectCreationForm extends React.Component {
             onClick={() => this.setState({ publicAccess: 0 })}
           >
             <RadioButton
-              selected={this.state.publicAccess === 0}
+              selected={publicAccess === 0}
               className={cs.radioButton}
             />
             <PrivateProjectIcon className={cs.projectIcon} />
@@ -162,32 +209,18 @@ class ProjectCreationForm extends React.Component {
           )}
           <Textarea
             onChange={this.handleDescriptionChange}
-            value={this.state.description}
+            value={description}
             className={cs.descriptionTextArea}
             maxLength={MAX_DESCRIPTION_LENGTH}
             placeholder="Enter your project goals, information about your study, where your samples came from, etc..."
           />
           <div className={cs.charCounter}>
-            {MAX_DESCRIPTION_LENGTH - this.state.description.length}/
+            {MAX_DESCRIPTION_LENGTH - description.length}/
             {MAX_DESCRIPTION_LENGTH} characters remaining
           </div>
         </div>
-        {this.state.error && <div className={cs.error}>{this.state.error}</div>}
-        <div className={cs.controls}>
-          <div
-            className={cx(
-              cs.createButton,
-              (this.state.name === "" || this.state.publicAccess === -1) &&
-                cs.disabled
-            )}
-            onClick={this.handleCreateProject}
-          >
-            Create Project
-          </div>
-          <div className={cs.cancelButton} onClick={this.props.onCancel}>
-            Cancel
-          </div>
-        </div>
+        {error && <div className={cs.error}>{error}</div>}
+        {this.renderControls()}
       </div>
     );
   }
