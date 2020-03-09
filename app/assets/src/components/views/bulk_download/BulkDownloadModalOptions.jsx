@@ -8,6 +8,7 @@ import StatusLabel from "~ui/labels/StatusLabel";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
+import Checkbox from "~ui/controls/Checkbox";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 
@@ -73,6 +74,22 @@ class BulkDownloadModalOptions extends React.Component {
 
     // Set different props for the dropdown depending on the field type.
     switch (field.type) {
+      case "include_metadata":
+        return (
+          <Checkbox
+            className={cs.checkboxField}
+            label="Include sample metadata in this table"
+            onChange={(_, isChecked) =>
+              onFieldSelect(
+                downloadType.type,
+                field.type,
+                isChecked /* value */,
+                isChecked ? "Yes" : "No" /* display name */
+              )
+            }
+            checked={selectedField}
+          />
+        );
       case "file_format":
         dropdownOptions = field.options.map(option => ({
           text: option,
