@@ -120,11 +120,13 @@ class ProjectCreationForm extends React.Component {
 
     return (
       <BasicPopup
-        children={disabledReasons}
         trigger={controls}
         disabled={!disableCreateButton} // enable the popup when create button is disabled and vice versa
+        inverted={false}
         flowing
-      />
+      >
+        {disabledReasons}
+      </BasicPopup>
     );
   };
 
