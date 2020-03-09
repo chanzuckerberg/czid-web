@@ -23,6 +23,7 @@ jobs:
         - DB_USERNAME: travis
         - DB_PASSWORD: root
         - SAMPLES_BUCKET_NAME: idseq-samples-development
+        - ALIGNMENT_CONFIG_DEFAULT_NAME: "2020-02-03"
       services:
         - mysql
         - redis
@@ -52,6 +53,7 @@ jobs:
       env:
         - DB_USERNAME: travis
         - DB_PASSWORD: root
+        - ALIGNMENT_CONFIG_DEFAULT_NAME: "2020-02-03"
       services:
         - mysql
         - redis

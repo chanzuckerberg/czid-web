@@ -1,27 +1,32 @@
 one:
   name: tree_one
   project: one
+  user: one
   taxid: 1
   tax_level: 1
   tax_name: 'some species'
   pipeline_runs: [three, four]
+  status: 1
 
 joe_phylo_tree:
   name: joe_phylo_tree
   project: joe_project
+  user: joe
   taxid: 1
   tax_level: 1
   tax_name: 'some species'
   pipeline_runs: [joe_project_sampleA_run, joe_project_sampleB_run]
+  status: 1
 
 joe_failed_phylo_tree:
   name: joe_failed_phylo_tree
   project: joe_project
-  status: 2
+  user: joe
   taxid: 1
   tax_level: 1
   tax_name: 'some species'
   pipeline_runs: [joe_project_sampleA_run, joe_project_sampleB_run]
+  status: 2
 
 public_phylo_tree:
   name: public_phylo_tree
@@ -31,3 +36,4 @@ public_phylo_tree:
   tax_level: 1
   tax_name: 'some species'
   pipeline_runs: [public_project_sampleA_run, public_project_sampleB_run]
+  status: 1

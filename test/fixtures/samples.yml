@@ -1,105 +1,157 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  user: regular_user
   name: sample1
   project: one
+  status: checked
+  host_genome: human
 
 two:
+  user: regular_user
   name: sample2
   project: two
+  status: checked
+  host_genome: human
 
 expired_sample:
+  user: regular_user
   name: expired_sample
   created_at: '2016-01-31 23:41:59'
   project: two
+  status: checked
   host_genome: human
 
 public_sample:
+  user: regular_user
   name: public_sample
   project: public_project
+  status: checked
+  host_genome: human
 
 deletable_sample:
+  user: regular_user
   name: sample5
   project: one
   status: "created"
+  host_genome: human
 
 joe_sample:
+  user: joe
   name: sample Joe
   project: joe_project
+  status: checked
   host_genome: human
 
 six:
+  user: regular_user
   name: RR004_water_2_S23-20180208
   project: one
+  status: checked
   host_genome: human
 
 public_project_sampleA:
+  user: regular_user
   name: public_project_sampleA
   project: public_project
+  status: checked
+  host_genome: human
 
 public_project_sampleB:
+  user: regular_user
   name: public_project_sampleB
   project: public_project
+  status: checked
   host_genome: human
 
 public_sample_with_pipeline_stages:
+  user: regular_user
   name: public_sample_with_pipeline_stages
   project: public_project
-  
+  status: checked
+  host_genome: human
+
 private_sample_with_pipeline_stages:
+  user: regular_user
   name: private_sample_with_pipeline_stages
   project: not_joe_project
+  status: checked
+  host_genome: human
 
 joe_project_sampleB:
+  user: joe
   name: joe_project_sampleB
   project: joe_project
+  status: checked
   host_genome: human
 
 joe_project_sampleA:
+  user: joe
   name: joe_project_sampleA
   project: joe_project
+  status: checked
   host_genome: human
 
 joe_project_sample_mosquito:
+  user: joe
   name: joe_project_sample_mosquito
   project: joe_project
+  status: checked
   host_genome: mosquito
 
 project_one_sampleA:
+  user: regular_user
   name: project_one_sampleA_run
   project: one
+  status: checked
+  host_genome: human
 
 project_one_sampleB:
+  user: regular_user
   name: project_one_sampleB
   project: one
+  status: checked
+  host_genome: human
 
 metadata_validation_sample_human:
+  user: regular_user
   name: metadata_validation_sample_human
   project: metadata_validation_project
+  status: checked
   host_genome: human
 
 metadata_validation_sample_mosquito:
+  user: regular_user
   name: metadata_validation_sample_mosquito
   project: metadata_validation_project
+  status: checked
   host_genome: mosquito
 
 metadata_validation_sample_human_existing_metadata:
+  user: regular_user
   name: metadata_validation_sample_human_existing_metadata
   project: metadata_validation_project
+  status: checked
   host_genome: human
 
 sample_human_existing_metadata_public:
+  user: regular_user
   name: sample_human_existing_metadata_public
   project: public_project
+  status: checked
   host_genome: human
 
 sample_human_existing_metadata_joe_project:
+  user: regular_user
   name: sample_human_existing_metadata_joe_project
   project: joe_project
+  status: checked
   host_genome: human
 
 sample_human_existing_metadata_expired:
+  user: regular_user
   name: sample_human_existing_metadata_expired
   project: two
+  status: checked
   host_genome: human
   created_at: '2016-01-31 23:41:59'

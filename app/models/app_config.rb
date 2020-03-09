@@ -24,4 +24,7 @@ class AppConfig < ApplicationRecord
   SFN_PIPELINE_VERSION = 'sfn_pipeline_version'.freeze
   # When this is "1", the COVID-19 Public Site banner on the landing page will be shown.
   SHOW_LANDING_PUBLIC_SITE_BANNER = 'show_landing_public_site_banner'.freeze
+  # Switch for additional ActiveRecord validations that were added en masse in Feb 2020.
+  # Presence of the flag switches on the feature.
+  ENABLE_MASS_VALIDATION = 'enable_mass_validation'.freeze
 end

@@ -41,7 +41,6 @@ import CategoryFilter from "./views/report/filters/CategoryFilter";
 import MetricPicker from "./views/report/filters/MetricPicker";
 import SpecificityFilter from "./views/report/filters/SpecificityFilter";
 import NameTypeFilter from "./views/report/filters/NameTypeFilter";
-import MinContigReadsFilter from "./views/report/filters/MinContigReadsFilter";
 import SearchBox from "./ui/controls/SearchBox";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
@@ -55,7 +54,9 @@ import {
   pipelineVersionHasCoverageViz,
 } from "./utils/sample";
 
-const DEFAULT_MIN_CONTIG_READS = 4;
+// NOTE: this used to be available as a filter. It is also enforced upstream in
+// the loader. See MIN_CONTIG_READS in pipeline_run.rb
+const MIN_CONTIG_READS = 4;
 const HUMAN_TAX_IDS = [9605, 9606];
 
 class PipelineSampleReport extends React.Component {
@@ -93,7 +94,6 @@ class PipelineSampleReport extends React.Component {
 
     const cachedReadSpecificity = Cookies.get("readSpecificity");
     const cachedTreeMetric = Cookies.get("treeMetric");
-    const cachedMinContigReads = parseInt(Cookies.get("minContigReads"), 10);
 
     this.allThresholds = [
       { text: "Score", value: "NT_aggregatescore" },
@@ -187,7 +187,7 @@ class PipelineSampleReport extends React.Component {
       treeMetric: cachedTreeMetric || this.treeMetrics[0].value,
       phyloTreeModalOpen: true,
       contigTaxidList: [],
-      minContigReads: cachedMinContigReads || DEFAULT_MIN_CONTIG_READS,
+      minContigReads: MIN_CONTIG_READS,
       hoverRowId: null,
       phyloTreeModalParams: null,
     };
@@ -737,36 +737,6 @@ class PipelineSampleReport extends React.Component {
         treeMetric,
       });
     });
-  };
-
-  handleMinContigReadsChange = async minContigReads => {
-    Cookies.set("minContigReads", minContigReads);
-    this.setState({ minContigReads }, () => {
-      logAnalyticsEvent("PipelineSampleReport_min-contig-size-filter_changed", {
-        minContigReads,
-      });
-    });
-
-    // Refetch the summary contig counts based on the new value.
-    const summaryContigCounts = await getSummaryContigCounts(
-      this.sampleId,
-      minContigReads
-    );
-
-    const taxonomyDetails = addContigCountsToTaxonomyDetails(
-      this.state.taxonomy_details,
-      summaryContigCounts.contig_counts
-    );
-
-    this.setState(
-      {
-        taxonomy_details: taxonomyDetails,
-      },
-      () => {
-        // Since the contig columns have changed, we need to maybe compute the thresholds again.
-        this.applyFilters(true);
-      }
-    );
   };
 
   // path to NCBI
@@ -1546,14 +1516,6 @@ class RenderMarkup extends React.Component {
                 options={parent.treeMetrics}
                 value={parent.state.treeMetric}
                 onChange={parent.handleTreeMetricChange}
-              />
-            </div>
-          )}
-          {this.props.view == "table" && (
-            <div className="filter-lists-element">
-              <MinContigReadsFilter
-                value={parent.state.minContigReads}
-                onChange={parent.handleMinContigReadsChange}
               />
             </div>
           )}

@@ -86,6 +86,8 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should create sample through web' do
+    skip("This endpoint is deprecated in favor of upload with metadata")
+
     sign_in @user
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
@@ -189,8 +191,8 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'should update sample' do
     sign_in @user
     assert @sample.valid?
-    patch sample_url(@sample), params: { sample: { name: @sample.name + ' asdf' } }
-    assert_redirected_to sample_url(@sample)
+    patch sample_url(@sample, format: "json"), params: { sample: { name: @sample.name + ' asdf' } }
+    assert_response :success
   end
 
   test 'should destroy sample' do

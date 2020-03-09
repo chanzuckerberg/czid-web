@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :background do
     sequence(:name) { |n| "Background #{n}" }
-    pipeline_run_ids { [] }
+    association :pipeline_runs, factory: [:pipeline_run]
     ready { 1 }
 
     transient do
