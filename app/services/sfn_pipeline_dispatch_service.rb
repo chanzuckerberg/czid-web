@@ -6,9 +6,9 @@ class SfnPipelineDispatchService
 
   include Callable
 
+  # Constains SFN deployment stage names that differ from Rails.env
   ENV_TO_DEPLOYMENT_STAGE_NAMES = {
     "development" => "dev",
-    "staging" => "staging",
     "prod" => "production",
   }.freeze
 
@@ -58,6 +58,10 @@ class SfnPipelineDispatchService
 
   private
 
+  def stage_deployment_name
+    return ENV_TO_DEPLOYMENT_STAGE_NAMES[Rails.env] || Rails.env
+  end
+
   def generate_dag_stages_json
     # For compatibility with the legacy DAG json.
     # Generates a JSON composed by the jsons of all four stages in the DAG pipeline.
@@ -85,7 +89,7 @@ class SfnPipelineDispatchService
       {
         "AWS_ACCOUNT_ID" => @aws_account_id,
         "AWS_DEFAULT_REGION" => ENV['AWS_REGION'],
-        "STAGE" => ENV_TO_DEPLOYMENT_STAGE_NAMES[Rails.env],
+        "STAGE" => stage_deployment_name,
       },
       "app/jobs/idd2wdl.py",
       "--name", dag_json['name'].to_s,

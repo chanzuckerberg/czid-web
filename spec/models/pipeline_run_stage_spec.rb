@@ -31,7 +31,7 @@ RSpec.describe PipelineRunStage, type: :model do
 
         it "updates attributes from #sfn_info method" do
           subject.update_job_status
-          is_expected.to have_attributes(job_status: "RUNNING", job_log_id: "FAKE_JOB_ID", job_description: "FAKE_JOB_DESCRIPTION")
+          is_expected.to have_attributes(job_status: "RUNNING", job_log_id: "FAKE_JOB_ID")
         end
       end
     end

@@ -146,11 +146,11 @@ RSpec.describe PipelineRunsHelper, type: :helper do
           .and_return([aws_cli_stdout, aws_cli_stderr, instance_double(Process::Status, exitstatus: aws_cli_exitstatus)])
       end
 
-      context "when arn doesn't exist" do
+      context "when arn does not exist" do
         let(:aws_cli_stderr) { "An error occurred (ExecutionDoesNotExist) when calling the GetExecutionHistory operation: Execution Does Not Exist: '#{sfn_execution_arn}'" }
         let(:aws_cli_exitstatus) { 255 }
 
-        it { is_expected.to eq([PipelineRunStage::STATUS_FAILED, nil, ""]) }
+        it { is_expected.to eq([PipelineRunStage::STATUS_FAILED, nil]) }
       end
 
       context "when arn exists" do
@@ -161,12 +161,12 @@ RSpec.describe PipelineRunsHelper, type: :helper do
 
           context "and fetching status for stage 1" do
             let(:stage_number) { 1 }
-            it { is_expected.to eq(["SUCCEEDED", nil, aws_cli_stdout]) }
+            it { is_expected.to eq(["SUCCEEDED", nil]) }
           end
 
           context "and fetching status for stage 2" do
             let(:stage_number) { 2 }
-            it { is_expected.to eq(["FAILED", nil, aws_cli_stdout]) }
+            it { is_expected.to eq(["FAILED", nil]) }
           end
         end
       end

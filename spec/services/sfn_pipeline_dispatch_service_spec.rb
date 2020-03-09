@@ -90,8 +90,12 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
             {
               "AWS_ACCOUNT_ID" => FAKE_ACCOUNT_ID,
               "AWS_DEFAULT_REGION" => FAKE_REGION,
+              "STAGE" => "test",
             },
-            "app/jobs/idd2wdl.py", "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES), anything
+            "app/jobs/idd2wdl.py",
+            "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
+            "--pipeline-version", FAKE_PIPELINE_VERSION,
+            anything
           )
           .and_return([idd2wdl_stdout, aws_cli_stderr, instance_double(Process::Status, success?: idd2wdl_exitstatus == 0, exitstatus: idd2wdl_exitstatus)])
 
@@ -180,8 +184,12 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
               {
                 "AWS_ACCOUNT_ID" => FAKE_ACCOUNT_ID,
                 "AWS_DEFAULT_REGION" => FAKE_REGION,
+                "STAGE" => "test",
               },
-              "app/jobs/idd2wdl.py", "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES), anything
+              "app/jobs/idd2wdl.py",
+              "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
+              "--pipeline-version", FAKE_PIPELINE_VERSION,
+              anything
             )
             .and_return([idd2wdl_stdout, aws_cli_stderr, instance_double(Process::Status, success?: idd2wdl_exitstatus == 0, exitstatus: idd2wdl_exitstatus)])
             .once
