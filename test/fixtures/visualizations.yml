@@ -4,6 +4,7 @@ joe_visualization:
   visualization_type: heatmap
   name: joe_visualization
   samples: [one, two]
+  data: "{}"
 
 admin_visualization:
   user: admin
@@ -11,6 +12,7 @@ admin_visualization:
   visualization_type: heatmap
   name: admin_visualization
   samples: [one, two]
+  data: "{}"
 
 private_visualization:
   user: admin_one
@@ -18,6 +20,7 @@ private_visualization:
   visualization_type: heatmap
   name: private_visualization
   samples: [one, two]
+  data: "{}"
 
 public_visualization:
   user: admin_one
@@ -25,3 +28,4 @@ public_visualization:
   visualization_type: heatmap
   name: public_visualization
   samples: [one, two]
+  data: "{}"

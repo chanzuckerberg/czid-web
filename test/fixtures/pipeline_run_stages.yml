@@ -1,6 +1,9 @@
 # Needs to integrate with TEST_RESULT_FOLDER from TestHelper which is a test return value for sample.list_outputs.
 public_sample_run_stage:
   pipeline_run: public_sample_run
+  step_number: 1
+  job_command_func: "command"
+  name: "Unknown Stage"
   dag_json: "{
     \"output_dir_s3\": \"s3://someBucket/samples/theProjectId/theSampleId/results\",
     \"targets\": {
@@ -23,40 +26,56 @@ public_sample_run_stage:
 
 public_sample_run_stage_host_filtering:
   pipeline_run: public_sample_run_with_pipeline_stages
+  step_number: 1
+  job_command_func: "command"
   name: "Host Filtering"
   dag_json: "{\"key1\": \"value1\"}"
 
 public_sample_run_stage_alignment:
   pipeline_run: public_sample_run_with_pipeline_stages
+  step_number: 1
+  job_command_func: "command"
   name: "GSNAPL/RAPSEARCH alignment"
   dag_json: "{\"key2\": \"value2\"}"
 
 public_sample_run_stage_post_processing:
   pipeline_run: public_sample_run_with_pipeline_stages
+  step_number: 1
+  job_command_func: "command"
   name: "Post Processing"
   dag_json: "{\"key3\": \"value3\"}"
 
 public_sample_run_stage_experimental:
   pipeline_run: public_sample_run_with_pipeline_stages
+  step_number: 1
+  job_command_func: "command"
   name: "Experimental"
   dag_json: "{\"key4\": \"value4\"}"
 
 private_sample_run_stage_host_filtering:
   pipeline_run: private_sample_run_with_pipeline_stages
+  step_number: 1
+  job_command_func: "command"
   name: "Host Filtering"
   dag_json: "{\"key1\": \"value1\"}"
 
 private_sample_run_stage_alignment:
   pipeline_run: private_sample_run_with_pipeline_stages
+  step_number: 1
+  job_command_func: "command"
   name: "GSNAPL/RAPSEARCH alignment"
   dag_json: "{\"key2\": \"value2\"}"
 
 private_sample_run_stage_post_processing:
   pipeline_run: private_sample_run_with_pipeline_stages
+  step_number: 1
+  job_command_func: "command"
   name: "Post Processing"
   dag_json: "{\"key3\": \"value3\"}"
 
 private_sample_run_stage_experimental:
   pipeline_run: private_sample_run_with_pipeline_stages
+  step_number: 1
+  job_command_func: "command"
   name: "Experimental"
   dag_json: "{\"key4\": \"value4\"}"

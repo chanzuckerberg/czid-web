@@ -7,6 +7,7 @@ FactoryBot.define do
     step_number { 1 }
     name { PipelineRunStage::HOST_FILTERING_STAGE_NAME }
     job_status { PipelineRunStage::STATUS_SUCCEEDED }
+    job_command_func { "command" }
     # NOTE: in the model dag_json is actually stored as a string
     dag_json do
       {

@@ -2,13 +2,16 @@
 
 one:
   name: Project 1
+  public_access: 0
 
 two:
   name: Project 2
   metadata_fields: [age]
+  public_access: 0
 
 deletable_project:
   name: Empty project
+  public_access: 0
 
 public_project:
   name: Public Project
@@ -19,6 +22,7 @@ joe_project:
   name: Project 3
   users: [joe, joe_dd]
   metadata_fields: [sample_type, nucleotide_type, age, admission_date, blood_fed, reported_sex, sex]
+  public_access: 0
 
 not_joe_project:
   name: Not Joe's Project
@@ -33,9 +37,11 @@ metadata_validation_project:
   name: Metadata Project
   users: [admin_one]
   metadata_fields: [sample_type, nucleotide_type, collection_date, age, admission_date, blood_fed, reported_sex, sex]
+  public_access: 0
 
 # This was added later to test water_control specifically.
 metadata_validation_project_with_water_control:
   name: Metadata Project With Water Control
   users: [admin_one]
   metadata_fields: [sample_type, nucleotide_type, water_control]
+  public_access: 0

@@ -647,10 +647,12 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly generates download file for download type sample_overview" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE, {})
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE, "include_metadata": {
+                                             "value": false,
+                                             "displayName": "No",
+                                           })
 
-      expect(bulk_download).to receive(:format_samples).exactly(1).times
-      expect(bulk_download).to receive(:generate_sample_list_csv).exactly(1).times.and_return("mock_sample_overview_csv")
+      expect(bulk_download).to receive(:generate_sample_list_csv).exactly(1).times.with(anything, hash_including(include_all_metadata: false)).and_return("mock_sample_overview_csv")
 
       add_s3_tar_writer_expectations(
         "sample_overviews.csv" => "mock_sample_overview_csv"
@@ -801,6 +803,20 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
     end
 
+    it "correctly generates download file for download type sample_metadata" do
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_METADATA_BULK_DOWNLOAD_TYPE, {})
+
+      expect(BulkDownloadsHelper).to receive(:generate_metadata_csv).exactly(1).times.and_return("mock_sample_metadata_csv")
+
+      add_s3_tar_writer_expectations(
+        "sample_metadata.csv" => "mock_sample_metadata_csv"
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+    end
+
     it "correctly handles individual sample failures" do
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE, "background": {
                                              "value": mock_background_id,
@@ -848,9 +864,11 @@ describe BulkDownload, type: :model do
     end
 
     it "correctly fetches output file size after download completes" do
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE, {})
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE, "include_metadata": {
+                                             "value": false,
+                                             "displayName": "No",
+                                           })
 
-      expect(bulk_download).to receive(:format_samples).exactly(1).times
       expect(bulk_download).to receive(:generate_sample_list_csv).exactly(1).times.and_return("mock_sample_overview_csv")
 
       add_s3_tar_writer_expectations(
@@ -866,9 +884,11 @@ describe BulkDownload, type: :model do
     it "correctly handles case where fetching output file size fails", :skip_s3_client_setup do
       allow(S3_CLIENT).to receive(:head_object).and_raise("mock_error")
 
-      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE, {})
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE, "include_metadata": {
+                                             "value": false,
+                                             "displayName": "No",
+                                           })
 
-      expect(bulk_download).to receive(:format_samples).exactly(1).times
       expect(bulk_download).to receive(:generate_sample_list_csv).exactly(1).times.and_return("mock_sample_overview_csv")
 
       add_s3_tar_writer_expectations(
@@ -1081,7 +1101,7 @@ describe BulkDownload, type: :model do
     end
 
     it "should pass for bulk downloads without field params" do
-      bulk_download.download_type = BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+      bulk_download.download_type = BulkDownloadTypesHelper::SAMPLE_METADATA_BULK_DOWNLOAD_TYPE
       expect(bulk_download).to be_valid
     end
 
