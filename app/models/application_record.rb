@@ -22,14 +22,7 @@ class ApplicationRecord < ActiveRecord::Base
   # Cached for performance.
   def mass_validation_enabled?
     if AppConfig.table_exists? # for migrations previous to AppConfig creation
-      if !@@mass_validation_enabled.nil?
-        return @@mass_validation_enabled
-      else
-        enabled = Rails.cache.fetch("ApplicationRecord.mass_validation_enabled?") do
-          AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) || false
-        end
-        return @@mass_validation_enabled = enabled # rubocop:disable Style/ClassVars
-      end
+      @@mass_validation_enabled ||= AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) || false # rubocop:disable Style/ClassVars
     end
   end
 
