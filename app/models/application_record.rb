@@ -1,6 +1,9 @@
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
+  # class instance fvar for caching
+  @mass_validation_enabled = nil
+
   # NOTE: Batch ActiveRecord operations such as update_all and delete_all do not
   # fire callbacks.
   after_create { |record| log_analytics record, "created" }
@@ -19,8 +22,13 @@ class ApplicationRecord < ActiveRecord::Base
   # Cached for performance.
   def mass_validation_enabled?
     if AppConfig.table_exists? # for migrations previous to AppConfig creation
-      return Rails.cache.fetch("ApplicationRecord.mass_validation_enabled?") do
-        AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION)
+      if !@mass_validation_enabled.nil?
+        return @mass_validation_enabled
+      else
+        enabled = Rails.cache.fetch("ApplicationRecord.mass_validation_enabled?") do
+          AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) || false
+        end
+        return self._mass_validation_enabled = enabled
       end
     end
   end
