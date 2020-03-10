@@ -68,7 +68,7 @@ Accordion.propTypes = {
   iconClassName: PropTypes.string,
   toggleable: PropTypes.bool,
   // the vertical alignment of the toggle arrow with other header elements
-  toggleArrowAlignment: PropTypes.oneOf(["center", "baseline"]),
+  toggleArrowAlignment: PropTypes.oneOf(["center", "baseline", "none"]),
   // Accordion can be controlled or non-controlled.
   onToggle: PropTypes.func,
   open: PropTypes.bool,
