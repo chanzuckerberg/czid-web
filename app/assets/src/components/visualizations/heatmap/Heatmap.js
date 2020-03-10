@@ -1099,13 +1099,6 @@ export default class Heatmap {
 
   renderColumnLabels() {
     let applyFormat = nodes => {
-      nodes.attr("class", d => {
-        if (d.duplicateLabel) {
-          return `${cs.columnLabel} ${cs.duplicateLabel}`;
-        } else {
-          return cs.columnLabel;
-        }
-      });
       nodes.attr("transform", d => {
         return `translate(${d.pos * this.cell.width},-${this.options.spacing})`;
       });

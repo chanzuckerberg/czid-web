@@ -277,7 +277,7 @@ class SamplesHeatmapVis extends React.Component {
     let sampleDetails = this.props.sampleDetails[sampleId];
 
     if (sampleDetails["duplicate"]) {
-      return { "Duplicate sample name": cs.primaryLight };
+      return { "Duplicate sample name": "" };
     }
   }
 
