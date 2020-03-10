@@ -1,7 +1,6 @@
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
-  # class instance fvar for caching
   @mass_validation_enabled = nil
 
   # NOTE: Batch ActiveRecord operations such as update_all and delete_all do not
