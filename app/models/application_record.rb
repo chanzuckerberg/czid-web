@@ -1,7 +1,8 @@
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
-  @mass_validation_enabled = nil
+  # class instance var for caching
+  @@mass_validation_enabled = nil # rubocop:disable Style/ClassVars
 
   # NOTE: Batch ActiveRecord operations such as update_all and delete_all do not
   # fire callbacks.
@@ -21,13 +22,13 @@ class ApplicationRecord < ActiveRecord::Base
   # Cached for performance.
   def mass_validation_enabled?
     if AppConfig.table_exists? # for migrations previous to AppConfig creation
-      if !@mass_validation_enabled.nil?
-        return @mass_validation_enabled
+      if !@@mass_validation_enabled.nil?
+        return @@mass_validation_enabled
       else
         enabled = Rails.cache.fetch("ApplicationRecord.mass_validation_enabled?") do
           AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) || false
         end
-        return self._mass_validation_enabled = enabled
+        return @@mass_validation_enabled = enabled # rubocop:disable Style/ClassVars
       end
     end
   end
