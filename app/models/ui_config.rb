@@ -1,4 +1,10 @@
 class UiConfig < ApplicationRecord
+  validates :min_nt_z, presence: true, if: :mass_validation_enabled?
+  validates :min_nr_z, presence: true, if: :mass_validation_enabled?
+  validates :min_nt_rpm, presence: true, if: :mass_validation_enabled?
+  validates :min_nr_rpm, presence: true, if: :mass_validation_enabled?
+  validates :top_n, presence: true, if: :mass_validation_enabled?
+
   after_initialize :set_default_values
 
   def set_default_values

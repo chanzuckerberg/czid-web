@@ -25,11 +25,41 @@ class Sample < ApplicationRecord
   include BasespaceHelper
   include ErrorHelper
 
+  belongs_to :project
+  # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
+  belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
+  belongs_to :host_genome, counter_cache: true # use .size for cache, use .count to force COUNT query
+  has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
+  has_many :backgrounds, through: :pipeline_runs
+  has_many :input_files, dependent: :destroy
+  accepts_nested_attributes_for :input_files
+  validates_associated :input_files
+  has_many :metadata, dependent: :destroy
+  has_and_belongs_to_many :visualizations
+
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
+  validates :status, presence: true, inclusion: { in: [
+    STATUS_CREATED,
+    STATUS_UPLOADED,
+    STATUS_RERUN,
+    STATUS_RETRY_PR,
+    STATUS_CHECKED,
+  ], }, if: :mass_validation_enabled?
+
+  validate :input_files_checks
+  validates :name, presence: true, uniqueness: { scope: :project_id, case_sensitive: false }
+
+  validates :web_commit, presence: true, allow_blank: true, if: :mass_validation_enabled?
+  validates :pipeline_commit, presence: true, allow_blank: true, if: :mass_validation_enabled?
+  validates :uploaded_from_basespace, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
+
+  after_create :initiate_input_file_upload
+  before_save :check_host_genome, :concatenate_input_parts, :check_status
+  after_save :set_presigned_url_for_local_upload
 
   # Constants for upload errors.
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
@@ -68,24 +98,6 @@ class Sample < ApplicationRecord
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id
-
-  belongs_to :project
-  # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
-  belongs_to :user, optional: true, counter_cache: true # use .size for cache, use .count to force COUNT query
-  belongs_to :host_genome, optional: true, counter_cache: true # use .size for cache, use .count to force COUNT query
-  has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
-  has_many :backgrounds, through: :pipeline_runs
-  has_many :input_files, dependent: :destroy
-  accepts_nested_attributes_for :input_files
-  has_many :metadata, dependent: :destroy
-  has_and_belongs_to_many :visualizations
-
-  validate :input_files_checks
-  after_create :initiate_input_file_upload
-  validates :name, uniqueness: { scope: :project_id, case_sensitive: false }
-
-  before_save :check_host_genome, :concatenate_input_parts, :check_status
-  after_save :set_presigned_url_for_local_upload
 
   # getter
   attr_reader :bulk_mode
@@ -526,7 +538,9 @@ class Sample < ApplicationRecord
   end
 
   def check_host_genome
+    # Host genome should always be present.
     if host_genome.present?
+      # Unclear purpose of copying this info. See also host_subtracted.
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
     end

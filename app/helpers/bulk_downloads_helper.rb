@@ -213,4 +213,24 @@ module BulkDownloadsHelper
       failed_sample_ids: failed_samples.pluck(:id),
     }
   end
+
+  # This method generates the csv for the metadata bulk download.
+  def self.generate_metadata_csv(samples)
+    metadata_fields = MetadataHelper.get_unique_metadata_fields_for_samples(samples)
+    # Order the metadata fields so that required fields are first.
+    metadata_fields = MetadataHelper.order_metadata_fields_for_csv(metadata_fields)
+    metadata_headers = MetadataHelper.get_csv_headers_for_metadata_fields(metadata_fields)
+    metadata_keys = metadata_fields.pluck(:name).map(&:to_sym)
+
+    sample_ids = samples.pluck(:id)
+    metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids, use_csv_compatible_values: true)
+
+    CSVSafe.generate(headers: true) do |csv|
+      csv << ["sample_name"] + metadata_headers
+      samples.each do |sample|
+        metadata = metadata_by_sample_id[sample.id] || {}
+        csv << [sample.name] + metadata.values_at(*metadata_keys)
+      end
+    end
+  end
 end

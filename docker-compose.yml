@@ -1,4 +1,6 @@
-# Shared variables using Docker x- extension and YAML merging syntax.
+# Shared variables using Docker x- extension and YAML merging syntax. IMPORTANT
+# NOTE: Unit tests in Travis currently run outside of Docker, so any environment
+# setup here may need to be reproduced in travis.yml.
 
 x-web-variables: &web-variables
   ? SAMPLES_BUCKET_NAME=idseq-samples-development

@@ -26,7 +26,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   test 'should create project' do
     sign_in @user
     assert_difference('Project.count') do
-      post projects_url, params: { project: { name: 'New Project' } }
+      post projects_url, params: { project: { name: 'New Project', public_access: 0 } }
     end
 
     assert_redirected_to project_url(Project.last)

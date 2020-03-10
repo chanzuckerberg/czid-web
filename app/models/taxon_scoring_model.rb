@@ -1,3 +1,5 @@
+# NOTE: This is DEPRECATED because there has only ever been one model in use.
+#
 # Scoring Model for Taxon
 # the scoring model is represented in json with a tree structure where a parent will apply an operator to all the children and the leaf node could be a constant(const) or an attribute from the taxon (attr)
 # Currently the operators supported are addition (+), product (-) for nodes with multiple children and atomic transformation function for nodes with one children.
@@ -33,6 +35,10 @@
 # }
 class TaxonScoringModel < ApplicationRecord
   include Math
+
+  validates :name, presence: true, if: :mass_validation_enabled?
+  validates :model_json, presence: true, if: :mass_validation_enabled?
+
   attr_accessor :model
   before_save :set_json, :validate_model
   after_find  :set_model
