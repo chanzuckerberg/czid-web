@@ -420,6 +420,7 @@ export default class SampleViewV2 extends React.Component {
     });
   };
 
+  // TODO (gdingle): fix me
   computeContigStats = ({ reportData, minContigReads }) => {
     reportData.forEach(genus => {
       this.computeRowContigStats({ row: genus, minContigReads });
