@@ -1130,6 +1130,14 @@ export default class Heatmap {
       )
       .on("mousein", this.options.onColumnLabelMouseIn)
       .on("mouseout", this.options.onColumnLabelMouseOut)
+      .on("mouseover", d => {
+        this.options.onColumnLabelHover && this.options.onColumnLabelHover(d);
+      })
+      .on("mouseleave", this.options.onColumnLabelOut)
+      .on("mousemove", d => {
+        this.options.onColumnLabelMove &&
+          this.options.onColumnLabelMove(d, d3.event);
+      })
       .on(
         "click",
         d =>

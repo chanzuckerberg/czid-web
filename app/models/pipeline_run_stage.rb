@@ -175,8 +175,8 @@ class PipelineRunStage < ApplicationRecord
         LogUtil.log_err_and_airbrake("Invalid precondition for PipelineRunStage.update_job_status step_function #{id} #{pipeline_run.sfn_execution_arn} #{job_status}.")
         return
       end
-      self.job_status, self.job_log_id, self.job_description = sfn_info(pipeline_run.sfn_execution_arn, id, step_number)
-      save
+      self.job_status, self.job_log_id = sfn_info(pipeline_run.sfn_execution_arn, id, step_number)
+      save!
       return
     end
 
