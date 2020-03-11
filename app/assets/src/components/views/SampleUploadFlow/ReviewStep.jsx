@@ -447,6 +447,7 @@ class ReviewStep extends React.Component {
               project={project}
               skipSampleProcessing={skipSampleProcessing}
               useStepFunctionPipeline={useStepFunctionPipeline}
+              useTaxonWhitelist={useTaxonWhitelist}
             />
           )}
         </div>
