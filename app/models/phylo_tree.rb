@@ -3,16 +3,33 @@ class PhyloTree < ApplicationRecord
   include PipelineRunsHelper
   include SamplesHelper
   include ActionView::Helpers::DateHelper
+
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
   belongs_to :project
+  # NOTE: this conflicts with phylo_trees_controller_spec.rb
+  # belongs_to :taxon_lineage, class_name: "TaxonLineage", foreign_key: :taxid, primary_key: :taxid
+
   validates :name, presence: true, uniqueness: { case_sensitive: false }
-  after_create :create_visualization
+  validates :taxid, presence: true, if: :mass_validation_enabled?
+  validates :tax_name, presence: true, if: :mass_validation_enabled?
+  validates :tax_level, presence: true, inclusion: { in: [
+    TaxonCount::TAX_LEVEL_SPECIES,
+    TaxonCount::TAX_LEVEL_GENUS,
+  ], }, if: :mass_validation_enabled?
 
   STATUS_INITIALIZED = 0
   STATUS_READY = 1
   STATUS_FAILED = 2
   STATUS_IN_PROGRESS = 3
+  validates :status, presence: true, inclusion: { in: [
+    STATUS_INITIALIZED,
+    STATUS_READY,
+    STATUS_FAILED,
+    STATUS_IN_PROGRESS,
+  ], }, if: :mass_validation_enabled?
+
+  after_create :create_visualization
 
   def self.in_progress
     where(status: STATUS_IN_PROGRESS)

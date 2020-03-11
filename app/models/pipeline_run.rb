@@ -1,19 +1,23 @@
 require 'open3'
 require 'json'
 require 'csv'
+
 class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
   include PipelineRunsHelper
+
   belongs_to :sample
   belongs_to :alignment_config
   has_many :pipeline_run_stages, dependent: :destroy
   accepts_nested_attributes_for :pipeline_run_stages
+  validates_associated :pipeline_run_stages
   has_and_belongs_to_many :backgrounds
   has_and_belongs_to_many :phylo_trees
   has_and_belongs_to_many :bulk_downloads
 
   has_many :output_states, dependent: :destroy
+  validates_associated :output_states
   has_many :taxon_counts, dependent: :destroy
   has_many :job_stats, dependent: :destroy
   has_many :taxon_byteranges, dependent: :destroy
@@ -22,12 +26,19 @@ class PipelineRun < ApplicationRecord
   has_many :contigs, dependent: :destroy
   has_one :insert_size_metric_set, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
+  validates_associated :taxon_counts
   accepts_nested_attributes_for :job_stats
+  validates_associated :job_stats
   accepts_nested_attributes_for :taxon_byteranges
+  validates_associated :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
+  validates_associated :ercc_counts
   accepts_nested_attributes_for :amr_counts
+  validates_associated :amr_counts
   accepts_nested_attributes_for :contigs
+  validates_associated :contigs
   accepts_nested_attributes_for :insert_size_metric_set
+  validates_associated :insert_size_metric_set
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
@@ -121,9 +132,31 @@ class PipelineRun < ApplicationRecord
   STATUS_CHECKED = 'CHECKED'.freeze
   STATUS_FAILED = 'FAILED'.freeze
   STATUS_RUNNING = 'RUNNING'.freeze
-  STATUS_RUNNABLE = 'RUNNABLE'.freeze
+  STATUS_RUNNABLE = 'RUNNABLE'.freeze # TODO: (gdingle): not used anywhere?
   STATUS_READY = 'READY'.freeze
-
+  # NOTE: The current stored job_status are...
+  # +-------------------------------------------+
+  # | job_status                                |
+  # +-------------------------------------------+
+  # | 1.Host Filtering-FAILED                   |
+  # | 1.Host Filtering-FAILED|READY             |
+  # | 2.GSNAPL/RAPSEARCH alignment-FAILED       |
+  # | 2.GSNAPL/RAPSEARCH alignment-FAILED|READY |
+  # | 2.GSNAPL/RAPSEARCH alignment-RUNNING      |
+  # | 3.Post Processing-FAILED                  |
+  # | 3.Post Processing-FAILED|READY            |
+  # | 4.De-Novo Assembly-FAILED|READY           |
+  # | 4.Experimental-FAILED                     |
+  # | 4.Experimental-FAILED|READY               |
+  # | 4.Experimental-SUCCEEDED                  |
+  # | 4.Experimental-SUCCEEDED|READY            |
+  # | CHECKED                                   |
+  # | FAILED                                    |
+  # | LOADED                                    |
+  # +-------------------------------------------+
+  # NOTE: kickoff_pipeline does not set a job_status
+  validates :job_status, presence: true, allow_nil: true, if: :mass_validation_enabled?
+  #
   # The RESULT MONITOR is responsible for keeping status of available outputs
   # and for loading those outputs in from S3.
   # It accomplishes this using the following:
@@ -139,7 +172,6 @@ class PipelineRun < ApplicationRecord
   # by checking whether REPORT_READY_OUTPUT has been loaded.
   # Note we don't put a default on results_finalized in the schema, so that we can
   # recognize old runs by results_finalized being nil.
-
   STATUS_LOADED = 'LOADED'.freeze
   STATUS_UNKNOWN = 'UNKNOWN'.freeze
   STATUS_LOADING = 'LOADING'.freeze
@@ -160,10 +192,18 @@ class PipelineRun < ApplicationRecord
   # Values for results_finalized are as follows.
   # Note we don't put a default on results_finalized in the schema, so that we can
   # recognize old runs by results_finalized being nil.
-
+  # NOTE: kickoff_pipeline does not set results_finalized
   IN_PROGRESS = 0
   FINALIZED_SUCCESS = 10
   FINALIZED_FAIL = 20
+  validates :results_finalized, presence: true, allow_nil: true, inclusion: { in: [
+    IN_PROGRESS,
+    FINALIZED_SUCCESS,
+    FINALIZED_FAIL,
+    # See also pre_result_monitor?
+  ], }, if: :mass_validation_enabled?
+
+  validates :finalized, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
 
   # State machine for RESULT MONITOR:
   #

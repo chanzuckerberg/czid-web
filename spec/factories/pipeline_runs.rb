@@ -1,5 +1,6 @@
 FactoryBot.define do
   factory :pipeline_run, class: PipelineRun do
+    association :sample
     pipeline_version { 1.0 }
 
     transient do
@@ -13,6 +14,8 @@ FactoryBot.define do
     end
 
     alignment_config { create(:alignment_config) }
+    results_finalized { 0 }
+    job_status { PipelineRun::STATUS_READY }
 
     after :create do |pipeline_run, options|
       options.taxon_counts_data.each do |taxon_count_data|

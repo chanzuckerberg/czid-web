@@ -81,6 +81,9 @@ class SamplesHeatmapVis extends React.Component {
         onRowGroupLeave: this.handleRowGroupLeave,
         onRemoveRow: this.props.onRemoveTaxon,
         onCellClick: this.handleCellClick,
+        onColumnLabelMove: this.handleMouseHoverMove,
+        onColumnLabelHover: this.handleSampleLabelHover,
+        onColumnLabelOut: this.handleSampleLabelOut,
         onColumnLabelClick: this.props.onSampleLabelClick,
         onRowLabelClick: this.props.onTaxonLabelClick,
         onAddColumnMetadataClick: this.handleAddColumnMetadataClick,
@@ -132,6 +135,7 @@ class SamplesHeatmapVis extends React.Component {
         label: this.props.sampleDetails[id].name,
         metadata: this.props.sampleDetails[id].metadata,
         id,
+        duplicateLabel: this.props.sampleDetails[id].duplicate,
       };
     });
   }
@@ -259,6 +263,23 @@ class SamplesHeatmapVis extends React.Component {
   handleRowGroupLeave = () => {
     this.setState({ rowGroupLegend: null });
   };
+
+  handleSampleLabelHover = node => {
+    this.setState({ columnMetadataLegend: this.getSampleTooltipData(node) });
+  };
+
+  handleSampleLabelOut = () => {
+    this.setState({ columnMetadataLegend: null });
+  };
+
+  getSampleTooltipData(node) {
+    let sampleId = node.id;
+    let sampleDetails = this.props.sampleDetails[sampleId];
+
+    if (sampleDetails["duplicate"]) {
+      return { "Duplicate sample name": "" };
+    }
+  }
 
   download() {
     this.heatmap.download();

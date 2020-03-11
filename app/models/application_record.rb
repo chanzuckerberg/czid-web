@@ -1,11 +1,30 @@
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
+  # class instance var for caching
+  @@mass_validation_enabled = nil # rubocop:disable Style/ClassVars
+
   # NOTE: Batch ActiveRecord operations such as update_all and delete_all do not
   # fire callbacks.
   after_create { |record| log_analytics record, "created" }
   after_update { |record| log_analytics record, "updated" }
   after_destroy { |record| log_analytics record, "destroyed" }
+
+  before_save :log_errors, if: proc { |m| m.mass_validation_enabled? && m.errors.any? }
+
+  def log_errors
+    msg = errors.full_messages.join("\n")
+    LogUtil.log_err_and_airbrake(msg)
+    Rails.logger.error("Backtrace:\n\t#{caller.join("\n\t")}")
+  end
+
+  # Condition for rollout of mass addition of validation rules.
+  # Cached for performance.
+  def mass_validation_enabled?
+    if AppConfig.table_exists? # for migrations previous to AppConfig creation
+      @@mass_validation_enabled ||= AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) || false # rubocop:disable Style/ClassVars
+    end
+  end
 
   # Set current user and request to global for use in logging.
   # See https://stackoverflow.com/a/11670283/200312

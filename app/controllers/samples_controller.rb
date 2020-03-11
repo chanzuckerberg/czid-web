@@ -1136,6 +1136,8 @@ class SamplesController < ApplicationController
 
     params[:input_files_attributes].reject! { |f| f["source"] == '' }
     params[:alignment_config_name] = AlignmentConfig::DEFAULT_NAME if params[:alignment_config_name].blank?
+    params[:status] = Sample::STATUS_CREATED
+    params[:user] = current_user
 
     @sample = Sample.new(params)
     @sample.project = project if project

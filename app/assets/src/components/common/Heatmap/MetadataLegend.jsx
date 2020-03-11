@@ -26,10 +26,12 @@ export default class MetadataLegend extends React.Component {
             .sort()
             .map(label => (
               <div className={cs.legendRow} key={label}>
-                <span
-                  className={cs.legendEntryColor}
-                  style={{ backgroundColor: metadataColors[label] }}
-                />
+                {metadataColors[label] && (
+                  <span
+                    className={cs.legendEntryColor}
+                    style={{ backgroundColor: metadataColors[label] }}
+                  />
+                )}
                 {label}
               </div>
             ))}
