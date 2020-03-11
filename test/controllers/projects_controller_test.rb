@@ -46,7 +46,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
   test 'should update project' do
     sign_in @user
-    patch project_url(@project), params: { project: { name: @project.name } }
+    patch project_url(@project), params: { project: { name: @project.name, public_access: 1, description: @project.description } }
     assert_redirected_to project_url(@project)
   end
 
