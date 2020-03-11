@@ -209,3 +209,27 @@ $font-weight-heavy: 800;
   font-size: 13px;
   line-height: 16px;
 }
+
+@mixin font-caps-xxs {
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 1px;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+}
+
+@mixin font-caps-xxxs {
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 1px;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+}
+
+@mixin font-caps-xxxxs {
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 1px;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+}

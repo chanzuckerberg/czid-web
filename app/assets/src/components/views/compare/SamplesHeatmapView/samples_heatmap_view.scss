@@ -63,3 +63,21 @@
     color: $medium-grey;
   }
 }
+
+.highlight {
+  @include font-header-xxs;
+}
+
+.listContainer {
+  background-color: $warning-bg;
+}
+
+.notificationContainer {
+  margin: $space-m 0 $space-m;
+}
+
+.messageLine {
+  @include font-body-xxs;
+  padding: $space-xxxs 0;
+  margin-right: $space-l;
+}
