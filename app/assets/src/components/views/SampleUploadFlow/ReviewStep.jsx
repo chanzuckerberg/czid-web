@@ -242,7 +242,7 @@ class ReviewStep extends React.Component {
         className={cs.sampleProcessingOption}
         checked={useTaxonWhitelist}
         onChange={this.toggleUseTaxonWhitelist}
-        label="Use wdl / step function pipeline."
+        label="Use respiratory pathogen whitelist mode."
       />
     );
   };
@@ -271,6 +271,7 @@ class ReviewStep extends React.Component {
       skipSampleProcessing,
       consentChecked,
       useStepFunctionPipeline,
+      useTaxonWhitelist,
     } = this.state;
 
     const {
@@ -406,6 +407,7 @@ class ReviewStep extends React.Component {
             this.renderSkipSampleProcessingOption()}
           {allowedFeatures.includes("step_function_pipeline") &&
             this.renderUseStepFunctionPipelineOption()}
+          {this.renderUseTaxonWhitelist()}
           <TermsAgreement
             checked={consentChecked}
             onChange={() =>
