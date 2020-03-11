@@ -5,7 +5,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'joe can create project' do
     sign_in(:joe)
-    post "#{projects_url}.json", params: { project: { name: "2nd Joe Project", public_access: 0 } }
+    post "#{projects_url}.json", params: { project: { name: "2nd Joe Project", public_access: 0, description: "Joe's second project" } }
     assert_response :success
   end
 
