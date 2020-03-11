@@ -1110,7 +1110,7 @@ class PipelineRun < ApplicationRecord
         check_and_log_long_run
       end
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-      self.job_status += "|#{STATUS_READY}" if report_ready?
+      self.job_status = "|#{STATUS_READY}" if report_ready?
     end
     save!
     enqueue_new_pipeline_run if automatic_restart
@@ -1154,9 +1154,9 @@ class PipelineRun < ApplicationRecord
   end
 
   def job_status_display
-    return "Pipeline Initializing" unless self.job_status
-    stage = self.job_status.to_s.split("-")[0].split(".")[1]
-    stage ? "Running #{stage}" : self.job_status
+    return "Pipeline Initializing" unless job_status
+    stage = job_status.to_s.split("-")[0].split(".")[1]
+    stage ? "Running #{stage}" : job_status
   end
 
   def run_time
