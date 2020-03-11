@@ -118,20 +118,20 @@ module PipelineRunsHelper
       .select { |evt| %w[ExecutionAborted ExecutionFailed ExecutionTimedOut].include?(evt["type"]) }
       .first
 
-    name_regexp = /\A(.*)(SPOT|EC2|ReadOutput)\Z/
     step_numbers = {
       "HostFilter" => 1,
       "NonHostAlignment" => 2,
       "Postprocess" => 3,
       "Experimental" => 4,
     }
+    name_regexp = /\A(#{step_numbers.keys.join("|")})(SPOT|EC2|Succeeded|Failed)\Z/
     result =
       sfn_execution_history_hash["events"]
-      .select { |evt| evt["type"] =~ /^TaskState/ }
+      .select { |evt| evt["type"] =~ /^TaskState|PassState/ }
       .map do |evt|
         details_key = evt.keys.find { |k| k =~ /EventDetails$/ }
         {
-          "type" => evt["type"],
+          "type" => evt["type"].gsub(/^(Pass|Task)State/, ""),
           "name" => evt.dig(details_key, "name"),
         }
       end
@@ -149,8 +149,8 @@ module PipelineRunsHelper
       .values
       .map do |evt|
         stage = evt["stage"]
-        started = evt.dig("SPOT", "TaskStateEntered") || evt.dig("EC2", "TaskStateEntered") || evt.dig("ReadOutput", "TaskStateEntered") || false
-        completed = evt.dig("ReadOutput", "TaskStateExited") || false
+        started = evt.dig("SPOT", "Entered") || evt.dig("EC2", "Entered") || evt.dig("Succeeded", "Entered") || false
+        completed = evt.dig("Succeeded", "Exited") || false
         # I'm not using declared constants here because I'm emulating aws batch job `status` field
         # trying to mimic output behavior of PipelineRunsHelper#job_info
         # the domain for a job `status` field is SUBMITTED,PENDING,RUNNABLE,STARTING,RUNNING,SUCCEEDED,FAILED

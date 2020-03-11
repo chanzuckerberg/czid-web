@@ -186,7 +186,7 @@ class PipelineRunStage < ApplicationRecord
         return
       end
       self.job_status, self.job_log_id = sfn_info(pipeline_run.sfn_execution_arn, id, step_number)
-      save
+      save!
       return
     end
 
