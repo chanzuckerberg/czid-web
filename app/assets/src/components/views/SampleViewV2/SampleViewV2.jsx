@@ -251,7 +251,7 @@ export default class SampleViewV2 extends React.Component {
     }
 
     this.setDisplayName({ reportData, ...selectedOptions });
-    this.computeContigStats({ reportData, ...selectedOptions });
+    this.setContigStats({ reportData, ...selectedOptions });
     const filteredReportData = this.filterReportData({
       reportData,
       filters: selectedOptions,
@@ -399,28 +399,21 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
-  // TODO (gdingle): rename me
-  computeRowContigStats = ({ row, minContigReads }) => {
+  setRowContigStats = ({ row, minContigReads }) => {
     ["nr", "nt"].forEach(dbType => {
       const dbTypeRow = row[dbType];
       if (dbTypeRow) {
-        if (get([dbType, "contigs"], row)) {
-          console.log(row, minContigReads);
-          debugger;
-        }
-
         dbTypeRow.contigCount = get([dbType, "contigs"], row);
         dbTypeRow.readsCount = get([dbType, "contig_r"], row);
       }
     });
   };
 
-  // TODO (gdingle): fix me
-  computeContigStats = ({ reportData, minContigReads }) => {
+  setContigStats = ({ reportData, minContigReads }) => {
     reportData.forEach(genus => {
-      this.computeRowContigStats({ row: genus, minContigReads });
+      this.setRowContigStats({ row: genus, minContigReads });
       genus.species.forEach(species => {
-        this.computeRowContigStats({ row: species, minContigReads });
+        this.setRowContigStats({ row: species, minContigReads });
       });
     });
   };
@@ -671,7 +664,7 @@ export default class SampleViewV2 extends React.Component {
     switch (key) {
       // - min contig size: recompute contig statistics with new size and refresh display
       case "minContigReads":
-        this.computeContigStats({ reportData, ...newSelectedOptions });
+        this.setContigStats({ reportData, ...newSelectedOptions });
         this.setState({ reportData: [...reportData] });
         break;
       // - name type: reset table to force a rerender

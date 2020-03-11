@@ -174,7 +174,7 @@ class PipelineReportService
       )
       @timer.split("cleanup_missing_genus_counts")
 
-      merge_contigs(contigs, counts_by_tax_level, @csv)
+      merge_contigs(contigs, counts_by_tax_level)
       @timer.split("merge_contigs")
 
       counts_by_tax_level.each_value do |tax_level_taxa|
@@ -412,8 +412,7 @@ class PipelineReportService
     return counts_hash
   end
 
-  # TODO: (gdingle): fix me
-  def merge_contigs(contigs, counts_by_tax_level, _csv)
+  def merge_contigs(contigs, counts_by_tax_level)
     contigs.each do |tax_id, contigs_per_db_type|
       contigs_per_db_type.each do |db_type, contigs_per_read_count|
         norm_count_type = db_type.downcase.to_sym
