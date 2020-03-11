@@ -33,5 +33,6 @@
 .messageContainer {
   max-height: 150px;
   overflow: auto;
-  margin-left: 30px; // to align text with icon
+  margin-top: $space-m;
+  word-break: break-word;
 }

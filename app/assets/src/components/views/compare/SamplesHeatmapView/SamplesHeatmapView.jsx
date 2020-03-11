@@ -26,6 +26,9 @@ import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import SortIcon from "~ui/icons/SortIcon";
+import AccordionNotification from "~ui/notifications/AccordionNotification";
+import { showToast } from "~/components/utils/toast";
+import { validateSampleIds } from "~/api/bulk_downloads";
 import { UserContext } from "~/components/common/UserContext";
 
 import cs from "./samples_heatmap_view.scss";
@@ -104,6 +107,7 @@ class SamplesHeatmapView extends React.Component {
       sampleIds: compact(
         map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds)
       ),
+      invalidSampleNames: [],
       sampleDetails: {},
       allTaxonIds: [],
       taxonIds: [],
@@ -338,6 +342,19 @@ class SamplesHeatmapView extends React.Component {
 
   async fetchViewData() {
     this.setState({ loading: true });
+
+    const sampleValidationInfo = await validateSampleIds(this.state.sampleIds);
+
+    this.setState({
+      sampleIds: sampleValidationInfo.validSampleIds,
+      invalidSampleNames: sampleValidationInfo.invalidSampleNames,
+    });
+
+    // If there are failed/waiting samples selected, display a warning
+    // to the user that they won't appear in the heatmap.
+    if (sampleValidationInfo.invalidSampleNames.length > 0) {
+      this.showNotification();
+    }
 
     let [heatmapData, metadataFields] = await Promise.all([
       this.fetchHeatmapData(),
@@ -902,6 +919,52 @@ class SamplesHeatmapView extends React.Component {
 
   toggleDisplayFilters = () => {
     this.setState(prevState => ({ hideFilters: !prevState.hideFilters }));
+  };
+
+  renderInvalidSamplesWarning(onClose) {
+    let { invalidSampleNames } = this.state;
+
+    const header = (
+      <div>
+        <span className={cs.highlight}>
+          {invalidSampleNames.length} sample
+          {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
+          heatmap
+        </span>, because they either failed or are still processing:
+      </div>
+    );
+
+    const content = (
+      <span>
+        {invalidSampleNames.map((name, index) => {
+          return (
+            <div key={index} className={cs.messageLine}>
+              {name}
+            </div>
+          );
+        })}
+      </span>
+    );
+
+    return (
+      <AccordionNotification
+        header={header}
+        content={content}
+        open={false}
+        type={"warn"}
+        displayStyle={"elevated"}
+        onClose={onClose}
+      />
+    );
+  }
+
+  showNotification = () => {
+    showToast(
+      ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
+      {
+        autoClose: 12000,
+      }
+    );
   };
 
   render() {

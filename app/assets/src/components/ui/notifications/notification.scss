@@ -39,11 +39,9 @@
   }
 
   .actions {
-    font-size: 11px;
+    @include font-caps-xxs;
     font-weight: 600;
-    letter-spacing: 1px;
     margin-top: 14px;
-    text-transform: uppercase;
   }
 
   &.error {

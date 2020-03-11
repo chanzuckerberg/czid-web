@@ -31,12 +31,8 @@
 
 .messageLine {
   @include font-body-xxs;
-  margin: 0 $space-s;
-  padding: $space-xxxs;
-
-  &:last-child {
-    margin-bottom: $space-s;
-  }
+  padding: $space-xxxs 0;
+  margin-right: $space-l;
 }
 
 .notifications {
