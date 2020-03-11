@@ -358,6 +358,8 @@ class SamplesHeatmapView extends React.Component {
 
   extractData(rawData) {
     let sampleIds = [];
+    let sampleNames = {};
+    let duplicateSampleNames = new Set();
     let sampleDetails = {};
     let allTaxonIds = [];
     let allTaxonDetails = {};
@@ -367,6 +369,16 @@ class SamplesHeatmapView extends React.Component {
     for (let i = 0; i < rawData.length; i++) {
       let sample = rawData[i];
       sampleIds.push(sample.sample_id);
+
+      // Keep track of samples with the same name, which may occur if
+      // a user selects samples from multiple projects.
+      if (Object.keys(sampleNames).includes(sample.name)) {
+        sampleNames[sample.name].push(sample.sample_id);
+        duplicateSampleNames.add(sample.name);
+      } else {
+        sampleNames[sample.name] = [sample.sample_id];
+      }
+
       sampleDetails[sample.sample_id] = {
         id: sample.sample_id,
         name: sample.name,
@@ -374,6 +386,7 @@ class SamplesHeatmapView extends React.Component {
         host_genome_name: sample.host_genome_name,
         metadata: processMetadata(sample.metadata, true),
         taxa: [],
+        duplicate: false,
       };
       if (sample.taxons) {
         for (let j = 0; j < sample.taxons.length; j++) {
@@ -411,6 +424,15 @@ class SamplesHeatmapView extends React.Component {
         }
       }
     }
+
+    // Append a number to a sample's name to differentiate between samples with the same name.
+    duplicateSampleNames.forEach(sampleName => {
+      for (let i = 0; i < sampleNames[sampleName].length; i++) {
+        let sampleId = sampleNames[sampleName][i];
+        sampleDetails[sampleId]["name"] = `${sampleName} (${i + 1})`;
+        sampleDetails[sampleId]["duplicate"] = true;
+      }
+    });
 
     return {
       // The server should always pass back the same set of sampleIds, but possibly in a different order.
