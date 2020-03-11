@@ -28,7 +28,7 @@ export default class AccordionNotification extends React.Component {
         header={header}
         open={open}
         className={cx(cs.listContainer, cs[type])}
-        toggleArrowAlignment="none"
+        toggleArrowAlignment="topRight"
       >
         <div className={cs.messageContainer}>{content}</div>
       </Accordion>

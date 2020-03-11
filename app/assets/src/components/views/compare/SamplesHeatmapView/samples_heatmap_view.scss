@@ -79,4 +79,5 @@
 .messageLine {
   @include font-body-xxs;
   padding: $space-xxxs 0;
+  margin-right: $space-l;
 }
