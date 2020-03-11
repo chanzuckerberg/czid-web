@@ -18,6 +18,8 @@ class Project < ApplicationRecord
   validates :public_access, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
   # NOTE: all values of background_flag in prod db are currently zero.
   validates :background_flag, inclusion: { in: [0, 1] }, allow_nil: true, if: :mass_validation_enabled?
+  # Description requirement added 2020-03-11
+  validates :description, presence: true
 
   before_create :add_default_metadata_fields
 

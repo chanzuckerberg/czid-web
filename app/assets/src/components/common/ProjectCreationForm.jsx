@@ -2,6 +2,7 @@ import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
 
+import BasicPopup from "~/components/BasicPopup";
 import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
 import RadioButton from "~ui/controls/RadioButton";
@@ -78,17 +79,19 @@ class ProjectCreationForm extends React.Component {
   };
 
   render() {
-    const { showInfo } = this.state;
+    const { onCancel } = this.props;
+    const { showInfo, name, publicAccess, description, error } = this.state;
+
+    let disableCreateButton = false;
+    if (name === "" || publicAccess === -1 || description.length < 1) {
+      disableCreateButton = true;
+    }
 
     return (
       <div className={cs.projectCreationForm}>
         <div className={cs.field}>
           <div className={cs.label}>New Project Name</div>
-          <Input
-            fluid
-            value={this.state.name}
-            onChange={this.handleNameChange}
-          />
+          <Input fluid value={name} onChange={this.handleNameChange} />
         </div>
         <div className={cs.field}>
           <div className={cs.label}>Project Sharing</div>
@@ -97,7 +100,7 @@ class ProjectCreationForm extends React.Component {
             onClick={() => this.setState({ publicAccess: 1 })}
           >
             <RadioButton
-              selected={this.state.publicAccess === 1}
+              selected={publicAccess === 1}
               className={cs.radioButton}
             />
             <PublicProjectIcon className={cs.projectIcon} />
@@ -113,7 +116,7 @@ class ProjectCreationForm extends React.Component {
             onClick={() => this.setState({ publicAccess: 0 })}
           >
             <RadioButton
-              selected={this.state.publicAccess === 0}
+              selected={publicAccess === 0}
               className={cs.radioButton}
             />
             <PrivateProjectIcon className={cs.projectIcon} />
@@ -162,29 +165,39 @@ class ProjectCreationForm extends React.Component {
           )}
           <Textarea
             onChange={this.handleDescriptionChange}
-            value={this.state.description}
+            value={description}
             className={cs.descriptionTextArea}
             maxLength={MAX_DESCRIPTION_LENGTH}
             placeholder="Enter your project goals, information about your study, where your samples came from, etc..."
           />
           <div className={cs.charCounter}>
-            {MAX_DESCRIPTION_LENGTH - this.state.description.length}/
+            {MAX_DESCRIPTION_LENGTH - description.length}/
             {MAX_DESCRIPTION_LENGTH} characters remaining
           </div>
         </div>
-        {this.state.error && <div className={cs.error}>{this.state.error}</div>}
+        {error && <div className={cs.error}>{error}</div>}
         <div className={cs.controls}>
-          <div
-            className={cx(
-              cs.createButton,
-              (this.state.name === "" || this.state.publicAccess === -1) &&
-                cs.disabled
-            )}
-            onClick={this.handleCreateProject}
+          <BasicPopup
+            trigger={
+              <div
+                className={cx(
+                  cs.createButton,
+                  disableCreateButton && cs.disabled
+                )}
+                onClick={this.handleCreateProject}
+              >
+                Create Project
+              </div>
+            }
+            disabled={!disableCreateButton} // enable the popup when create button is disabled and vice versa
+            inverted={false}
+            position="top center"
+            basic={false}
+            style={{ maxWidth: "175px" }}
           >
-            Create Project
-          </div>
-          <div className={cs.cancelButton} onClick={this.props.onCancel}>
+            Please complete all fields to create a project.
+          </BasicPopup>
+          <div className={cs.cancelButton} onClick={onCancel}>
             Cancel
           </div>
         </div>

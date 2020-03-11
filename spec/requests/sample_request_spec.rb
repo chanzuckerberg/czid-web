@@ -16,6 +16,7 @@ RSpec.describe "Sample request", type: :request do
         @sample_params = {
           client: "web",
           host_genome_id: 1,
+          host_genome_name: "Human",
           input_files_attributes: [
             { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz" },
             { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz" },
@@ -30,6 +31,7 @@ RSpec.describe "Sample request", type: :request do
           "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17" => {
             "sex" => "Female",
             "age" => 100,
+            "host_genome" => "Synthetic",
             "water_control" => "No",
             "sample_type" => "CSF",
             "nucleotide_type" => "DNA",
