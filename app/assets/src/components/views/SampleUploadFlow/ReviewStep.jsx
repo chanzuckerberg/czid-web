@@ -41,6 +41,7 @@ class ReviewStep extends React.Component {
     showUploadModal: false,
     skipSampleProcessing: false,
     useStepFunctionPipeline: false,
+    useTaxonWhitelist: false,
   };
 
   componentDidMount() {
@@ -198,6 +199,13 @@ class ReviewStep extends React.Component {
     });
   };
 
+  toggleUseTaxonWhitelist = () => {
+    const { useTaxonWhitelist } = this.state;
+    this.setState({
+      useTaxonWhitelist: !useTaxonWhitelist,
+    });
+  };
+
   // This is only for admins and QA testers.
   renderSkipSampleProcessingOption = () => {
     const { skipSampleProcessing, useStepFunctionPipeline } = this.state;
@@ -222,6 +230,18 @@ class ReviewStep extends React.Component {
         checked={useStepFunctionPipeline && !skipSampleProcessing}
         disabled={skipSampleProcessing}
         onChange={this.toggleUseStepFunctionPipeline}
+        label="Use wdl / step function pipeline."
+      />
+    );
+  };
+
+  renderUseTaxonWhitelist = () => {
+    const { useTaxonWhitelist } = this.state;
+    return (
+      <Checkbox
+        className={cs.sampleProcessingOption}
+        checked={useTaxonWhitelist}
+        onChange={this.toggleUseTaxonWhitelist}
         label="Use wdl / step function pipeline."
       />
     );
