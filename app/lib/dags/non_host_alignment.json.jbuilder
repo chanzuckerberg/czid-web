@@ -73,6 +73,7 @@ json.steps do
     job_tag_prefix: attr[:job_tag_prefix],
     job_tag_refresh_seconds: attr[:job_tag_refresh_seconds],
     draining_tag: attr[:draining_tag],
+    use_taxon_whitelist: attr[:use_taxon_whitelist],
   }
 
   if attr[:index_dir_suffix]
