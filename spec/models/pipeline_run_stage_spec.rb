@@ -26,12 +26,12 @@ RSpec.describe PipelineRunStage, type: :model do
       context "and preconditions work" do
         let(:sfn_execution_arn) { "arn:aws:states:us-west-2:123456789012:execution:idseq-dev-main:idseq-1234567890" }
 
-        before { is_expected.to receive(:sfn_info).with(sfn_execution_arn, subject.id, subject.step_number).and_return(["RUNNING", "FAKE_JOB_ID", "FAKE_JOB_DESCRIPTION"]) }
-        before { is_expected.to receive(:save) }
+        before { is_expected.to receive(:sfn_info).with(sfn_execution_arn, subject.id, subject.step_number).and_return(["RUNNING", "FAKE_JOB_ID"]) }
+        before { is_expected.to receive(:save!) }
 
         it "updates attributes from #sfn_info method" do
           subject.update_job_status
-          is_expected.to have_attributes(job_status: "RUNNING", job_log_id: "FAKE_JOB_ID", job_description: "FAKE_JOB_DESCRIPTION")
+          is_expected.to have_attributes(job_status: "RUNNING", job_log_id: "FAKE_JOB_ID")
         end
       end
     end
