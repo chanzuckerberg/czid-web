@@ -193,6 +193,7 @@ class ProjectCreationForm extends React.Component {
             inverted={false}
             position="top center"
             basic={false}
+            style={{ maxWidth: "175px" }}
           >
             Please complete all fields to create a project.
           </BasicPopup>
