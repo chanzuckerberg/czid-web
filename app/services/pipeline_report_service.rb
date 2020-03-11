@@ -122,7 +122,6 @@ class PipelineReportService
 
     if @parallel
       parallel_steps = [
-        # TODO: (gdingle): fix me
         -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads) },
         -> { fetch_taxon_counts(@pipeline_run.id, @background_id) },
         -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id) },
@@ -143,7 +142,6 @@ class PipelineReportService
       @timer.split("parallel_fetch_report_data")
       contigs, taxon_counts_and_summaries, taxons_absent_from_sample = *results
     else
-      # TODO: (gdingle): fix me
       contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads)
       @timer.split("get_contig_summary")
 
