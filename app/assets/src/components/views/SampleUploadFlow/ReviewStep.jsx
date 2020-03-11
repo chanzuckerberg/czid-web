@@ -407,7 +407,8 @@ class ReviewStep extends React.Component {
             this.renderSkipSampleProcessingOption()}
           {allowedFeatures.includes("step_function_pipeline") &&
             this.renderUseStepFunctionPipelineOption()}
-          {this.renderUseTaxonWhitelist()}
+          {allowedFeatures.includes("taxon_whitelist") &&
+            this.renderUseTaxonWhitelist()}
           <TermsAgreement
             checked={consentChecked}
             onChange={() =>
