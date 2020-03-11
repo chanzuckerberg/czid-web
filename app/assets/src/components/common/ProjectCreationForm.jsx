@@ -78,60 +78,14 @@ class ProjectCreationForm extends React.Component {
     );
   };
 
-  renderControls = () => {
+  render() {
     const { onCancel } = this.props;
-    const { name, publicAccess, description } = this.state;
+    const { showInfo, name, publicAccess, description, error } = this.state;
 
     let disableCreateButton = false;
-    let disabledReasons = "";
-    if (name === "" || publicAccess === -1 || description.length < 8) {
+    if (name === "" || publicAccess === -1 || description.length < 1) {
       disableCreateButton = true;
-      disabledReasons = (
-        <div className={cs.requirements}>
-          Project is missing one or more required fields:
-          <ul>
-            {name === "" && <li>The project needs a name.</li>}
-            {publicAccess === -1 && (
-              <li>Please select whether this project is public or private.</li>
-            )}
-            {description.length < 8 && (
-              <li>
-                A project description needs to be at least 8 characters long.
-              </li>
-            )}
-          </ul>
-        </div>
-      );
     }
-
-    const controls = (
-      <div className={cs.controls}>
-        <div
-          className={cx(cs.createButton, disableCreateButton && cs.disabled)}
-          onClick={this.handleCreateProject}
-        >
-          Create Project
-        </div>
-        <div className={cs.cancelButton} onClick={onCancel}>
-          Cancel
-        </div>
-      </div>
-    );
-
-    return (
-      <BasicPopup
-        trigger={controls}
-        disabled={!disableCreateButton} // enable the popup when create button is disabled and vice versa
-        inverted={false}
-        flowing
-      >
-        {disabledReasons}
-      </BasicPopup>
-    );
-  };
-
-  render() {
-    const { showInfo, name, publicAccess, description, error } = this.state;
 
     return (
       <div className={cs.projectCreationForm}>
@@ -222,7 +176,30 @@ class ProjectCreationForm extends React.Component {
           </div>
         </div>
         {error && <div className={cs.error}>{error}</div>}
-        {this.renderControls()}
+        <div className={cs.controls}>
+          <BasicPopup
+            trigger={
+              <div
+                className={cx(
+                  cs.createButton,
+                  disableCreateButton && cs.disabled
+                )}
+                onClick={this.handleCreateProject}
+              >
+                Create Project
+              </div>
+            }
+            disabled={!disableCreateButton} // enable the popup when create button is disabled and vice versa
+            inverted={false}
+            position="top center"
+            basic={false}
+          >
+            Please complete all fields to create a project.
+          </BasicPopup>
+          <div className={cs.cancelButton} onClick={onCancel}>
+            Cancel
+          </div>
+        </div>
       </div>
     );
   }
