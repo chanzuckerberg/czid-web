@@ -3,6 +3,7 @@
 one:
   name: Project 1
   public_access: 0
+  description: Test Project One
 
 two:
   name: Project 2

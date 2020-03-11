@@ -9,6 +9,7 @@ FactoryBot.define do
     end
 
     sequence(:name) { |n| "Project #{n}" }
+    sequence(:description) { |n| "Test project \##{n}" }
     public_access { 0 }
 
     trait :with_sample do
