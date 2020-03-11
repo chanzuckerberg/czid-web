@@ -47,6 +47,7 @@ class PipelineReportService
   Z_SCORE_WHEN_ABSENT_FROM_SAMPLE = -100
 
   DEFAULT_SORT_PARAM = :agg_score
+  # See also PipelineRun::MIN_CONTIG_READS
   DEFAULT_MIN_CONTIG_READS = 0
 
   CATEGORIES = {

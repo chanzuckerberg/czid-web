@@ -1,11 +1,9 @@
 import React from "react";
 import {
   compact,
-  entries,
   every,
   find,
   flatten,
-  flow,
   get,
   keys,
   map,
@@ -160,7 +158,6 @@ export default class SampleViewV2 extends React.Component {
     return {
       categories: {},
       metric: TREE_METRICS[0].value,
-      minContigReads: 4,
       nameType: "Scientific name",
       readSpecificity: 0,
       thresholds: [],
@@ -251,7 +248,6 @@ export default class SampleViewV2 extends React.Component {
     }
 
     this.setDisplayName({ reportData, ...selectedOptions });
-    this.setContigStats({ reportData, ...selectedOptions });
     const filteredReportData = this.filterReportData({
       reportData,
       filters: selectedOptions,
@@ -397,25 +393,6 @@ export default class SampleViewV2 extends React.Component {
       !readSpecificity ||
       (row.taxLevel === "genus" ? row.taxId > 0 : row.genus_tax_id > 0)
     );
-  };
-
-  setRowContigStats = ({ row, minContigReads }) => {
-    ["nr", "nt"].forEach(dbType => {
-      const dbTypeRow = row[dbType];
-      if (dbTypeRow) {
-        dbTypeRow.contigCount = get([dbType, "contigs"], row);
-        dbTypeRow.readsCount = get([dbType, "contig_r"], row);
-      }
-    });
-  };
-
-  setContigStats = ({ reportData, minContigReads }) => {
-    reportData.forEach(genus => {
-      this.setRowContigStats({ row: genus, minContigReads });
-      genus.species.forEach(species => {
-        this.setRowContigStats({ row: species, minContigReads });
-      });
-    });
   };
 
   setDisplayName = ({ reportData, nameType }) => {
@@ -662,11 +639,6 @@ export default class SampleViewV2 extends React.Component {
 
     // different behavior given type of option
     switch (key) {
-      // - min contig size: recompute contig statistics with new size and refresh display
-      case "minContigReads":
-        this.setContigStats({ reportData, ...newSelectedOptions });
-        this.setState({ reportData: [...reportData] });
-        break;
       // - name type: reset table to force a rerender
       case "nameType":
         this.setDisplayName({ reportData, ...newSelectedOptions });
@@ -1095,7 +1067,6 @@ export default class SampleViewV2 extends React.Component {
               reportPresent={!!reportMetadata.reportReady}
               sample={sample}
               view={view}
-              minContigReads={selectedOptions.minContigReads}
             />
           </div>
           <div className={cs.tabsContainer}>
