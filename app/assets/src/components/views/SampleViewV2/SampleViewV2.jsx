@@ -399,23 +399,18 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
+  // TODO (gdingle): rename me
   computeRowContigStats = ({ row, minContigReads }) => {
     ["nr", "nt"].forEach(dbType => {
-      const contigDetails = get([dbType, "contigs"], row);
-      if (contigDetails && keys(contigDetails).length) {
-        const dbTypeRow = row[dbType];
-        dbTypeRow.contigCount = 0;
-        dbTypeRow.readsCount = 0;
+      const dbTypeRow = row[dbType];
+      if (dbTypeRow) {
+        if (get([dbType, "contigs"], row)) {
+          console.log(row, minContigReads);
+          debugger;
+        }
 
-        flow(
-          entries,
-          map(([readsPerContig, count]) => {
-            if (readsPerContig >= minContigReads) {
-              dbTypeRow.contigCount += count;
-              dbTypeRow.readsCount += count * readsPerContig;
-            }
-          })
-        )(contigDetails);
+        dbTypeRow.contigCount = get([dbType, "contigs"], row);
+        dbTypeRow.readsCount = get([dbType, "contig_r"], row);
       }
     });
   };

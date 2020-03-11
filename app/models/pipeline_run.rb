@@ -1619,16 +1619,14 @@ class PipelineRun < ApplicationRecord
     output
   end
 
+  # TODO: (gdingle): make sure actually passing in min_contig_reads everywhere
   # TODO: (gdingle): fix me
+  # Stores the number of contigs that match a given taxid, count_type (nt or
+  # nr). Create and store default values for the hash if the key doesn't exist yet
   def get_summary_contig_counts_v2(min_contig_reads)
-    # Stores the number of contigs that match a given taxid, count_type (nt or
-    # nr), and read_count (number of reads aligned to that contig). Create and
-    # store default values for the hash if the key doesn't exist yet
     summary_dict = Hash.new do |summary, taxid|
       summary[taxid] = Hash.new do |taxid_hash, count_type| # rubocop forces different variable names
-        taxid_hash[count_type] = Hash.new do |count_type_hash, read_count|
-          count_type_hash[read_count] = 0
-        end
+        taxid_hash[count_type] = 0
       end
     end
     contig_taxids = contigs.where("read_count >= ?", min_contig_reads)
