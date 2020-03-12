@@ -21,7 +21,7 @@ class ApplicationRecord < ActiveRecord::Base
   # Condition for rollout of mass addition of validation rules.
   # Cached for performance.
   def mass_validation_enabled?
-    @@mass_validation_enabled = !!AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) if @@mass_validation_enabled.nil? # rubocop:disable Style/ClassVars,Style/DoubleNegation
+    @@mass_validation_enabled = (AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) || false) if @@mass_validation_enabled.nil? # rubocop:disable Style/ClassVars
   rescue StandardError
     # This will occur during CreateAppConfigTable migration
     @@mass_validation_enabled = false # rubocop:disable Style/ClassVars
