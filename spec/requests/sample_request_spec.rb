@@ -13,7 +13,7 @@ RSpec.describe "Sample request", type: :request do
         # Sample setup
         project = create(:public_project, users: [@joe])
         create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
-        hg = create(:host_genome, name: "Human", id: 1)
+        hg = create(:host_genome)
         @sample_params = {
           client: "web",
           host_genome_id: hg.id,
