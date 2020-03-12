@@ -22,7 +22,7 @@ class ApplicationRecord < ActiveRecord::Base
   # Cached for performance.
   def mass_validation_enabled?
     @@mass_validation_enabled ||= AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) || false # rubocop:disable Style/ClassVars
-  rescue Mysql2::Error
+  rescue StandardError
     # This will occur during some migrations
     @@mass_validation_enabled = false # rubocop:disable Style/ClassVars
   end
