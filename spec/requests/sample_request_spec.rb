@@ -13,10 +13,11 @@ RSpec.describe "Sample request", type: :request do
         # Sample setup
         project = create(:public_project, users: [@joe])
         create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
+        hg = create(:host_genome, name: "Human", id: 1)
         @sample_params = {
           client: "web",
-          host_genome_id: 1,
-          host_genome_name: "Human",
+          host_genome_id: hg.id,
+          host_genome_name: hg.name,
           input_files_attributes: [
             { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz" },
             { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz" },
