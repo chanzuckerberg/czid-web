@@ -53,7 +53,7 @@ module MetadataHelper
   # Accepts ActiveRelation or array, but always outputs array.
   def self.order_metadata_fields_for_csv(fields)
     # Show fields with is_required=1 first in the CSV, but otherwise keep the default order.
-    fields = fields.sort_by { |f| [-f.is_required, f.created_at] }
+    fields = fields.sort_by { |f| [-f.is_required, f.id] }
 
     # Hide legacy collection_location (v1) field from CSV templates.
     # TODO(jsheu): Remove legacy field and swap in collection_location_v2.
