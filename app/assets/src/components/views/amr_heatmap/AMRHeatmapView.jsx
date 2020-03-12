@@ -80,7 +80,7 @@ export default class AMRHeatmapView extends React.Component {
       ...sample,
       metadata: processMetadata(sample.metadata, true),
     }));
-    const samplesWithAMRCounts = this.correctGeneNames(
+    const samplesWithAMRCounts = this.correctSampleAndGeneNames(
       samplesWithKeyedMetadata
     );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
@@ -103,8 +103,19 @@ export default class AMRHeatmapView extends React.Component {
     });
   }
 
-  correctGeneNames(filteredSamples) {
+  correctSampleAndGeneNames(filteredSamples) {
+    let sampleNames = {};
+    let duplicateSampleNames = new Set();
     filteredSamples.forEach(sample => {
+      // Keep track of samples with the same name, which may occur if
+      // a user selects samples from multiple projects.
+      if (Object.keys(sampleNames).includes(sample.sampleName)) {
+        sampleNames[sample.sampleName].push(sample);
+        duplicateSampleNames.add(sample.sampleName);
+      } else {
+        sampleNames[sample.sampleName] = [sample];
+      }
+
       sample.amrCounts.forEach(amrCount => {
         // The following three lines are a kind of hacky workaround to the fact that
         // the amr counts stored in the db have a gene name that includes the actual gene
@@ -114,6 +125,14 @@ export default class AMRHeatmapView extends React.Component {
         const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
         amrCount.gene = geneName;
       });
+    });
+
+    // Append a number to a sample's name to differentiate between samples with the same name.
+    duplicateSampleNames.forEach(sampleName => {
+      for (let i = 0; i < sampleNames[sampleName].length; i++) {
+        let sample = sampleNames[sampleName][i];
+        sample.sampleName = `${sampleName} (${i + 1})`;
+      }
     });
 
     return filteredSamples;
