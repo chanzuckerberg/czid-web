@@ -47,11 +47,14 @@ json.steps do
     job_tag_prefix: attr[:job_tag_prefix],
     job_tag_refresh_seconds: attr[:job_tag_refresh_seconds],
     draining_tag: attr[:draining_tag],
-    use_taxon_whitelist: attr[:use_taxon_whitelist],
   }
 
   if attr[:index_dir_suffix]
     additional_attributes["index_dir_suffix"] = attr[:index_dir_suffix]
+  end
+
+  if attr[:use_taxon_whitelist]
+    additional_attributes["use_taxon_whitelist"] = attr[:use_taxon_whitelist]
   end
 
   steps << {
@@ -73,11 +76,14 @@ json.steps do
     job_tag_prefix: attr[:job_tag_prefix],
     job_tag_refresh_seconds: attr[:job_tag_refresh_seconds],
     draining_tag: attr[:draining_tag],
-    use_taxon_whitelist: attr[:use_taxon_whitelist],
   }
 
   if attr[:index_dir_suffix]
     additional_attributes["index_dir_suffix"] = attr[:index_dir_suffix]
+  end
+
+  if attr[:use_taxon_whitelist]
+    additional_attributes["use_taxon_whitelist"] = attr[:use_taxon_whitelist]
   end
 
   steps << {
