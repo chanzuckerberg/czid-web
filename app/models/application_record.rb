@@ -21,12 +21,14 @@ class ApplicationRecord < ActiveRecord::Base
   # Condition for rollout of mass addition of validation rules.
   # Cached for performance.
   def mass_validation_enabled?
-    # for migrations previous to AppConfig creation
-    if AppConfig.table_exists?
-      @@mass_validation_enabled = !!AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) if @@mass_validation_enabled.nil? # rubocop:disable Style/ClassVars,Style/DoubleNegation
+    if AppConfig.table_exists? # for migrations previous to AppConfig creation
+      @@mass_validation_enabled ||= AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) || false # rubocop:disable Style/ClassVars
     end
-    @@mass_validation_enabled
+  rescue Mysql2::Error
+    # This will occur during some migrations
+    @@mass_validation_enabled = false # rubocop:disable Style/ClassVars
   end
+
   # Set current user and request to global for use in logging.
   # See https://stackoverflow.com/a/11670283/200312
   class << self
