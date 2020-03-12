@@ -262,6 +262,7 @@ class PipelineReportService
                                 truncatedReadsCount: @pipeline_run.truncated,
                                 adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
                                 subsampledReadsCount: @pipeline_run.subsampled_reads,
+                                taxonWhitelisted: @pipeline_run.use_taxon_whitelist,
                                 hasByteRanges: has_byte_ranges,
                                 alignVizAvailable: align_viz_available)
 
