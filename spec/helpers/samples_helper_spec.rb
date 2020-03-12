@@ -246,7 +246,7 @@ RSpec.describe SamplesHelper, type: :helper do
     before do
       @joe = create(:joe)
       @project = create(:project, users: [@joe])
-      create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1)
+      create(:metadata_field, name: "sample_type", is_required: 1, is_default: 1, is_core: 1, default_for_new_host_genome: 1)
       @sample_one = create(:sample, project: @project, name: "Test Sample 1",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }],
                                     metadata_fields: { collection_location_v2: "San Francisco, USA", sample_type: "Serum", custom_field_one: "Value One" })
