@@ -41,6 +41,7 @@ class ReviewStep extends React.Component {
     showUploadModal: false,
     skipSampleProcessing: false,
     useStepFunctionPipeline: false,
+    useTaxonWhitelist: false,
   };
 
   componentDidMount() {
@@ -198,6 +199,13 @@ class ReviewStep extends React.Component {
     });
   };
 
+  toggleUseTaxonWhitelist = () => {
+    const { useTaxonWhitelist } = this.state;
+    this.setState({
+      useTaxonWhitelist: !useTaxonWhitelist,
+    });
+  };
+
   // This is only for admins and QA testers.
   renderSkipSampleProcessingOption = () => {
     const { skipSampleProcessing, useStepFunctionPipeline } = this.state;
@@ -227,6 +235,18 @@ class ReviewStep extends React.Component {
     );
   };
 
+  renderUseTaxonWhitelist = () => {
+    const { useTaxonWhitelist } = this.state;
+    return (
+      <Checkbox
+        className={cs.sampleProcessingOption}
+        checked={useTaxonWhitelist}
+        onChange={this.toggleUseTaxonWhitelist}
+        label="Use respiratory pathogen whitelist mode."
+      />
+    );
+  };
+
   renderReviewTable = () => {
     const { projectMetadataFields } = this.state;
 
@@ -251,6 +271,7 @@ class ReviewStep extends React.Component {
       skipSampleProcessing,
       consentChecked,
       useStepFunctionPipeline,
+      useTaxonWhitelist,
     } = this.state;
 
     const {
@@ -386,6 +407,8 @@ class ReviewStep extends React.Component {
             this.renderSkipSampleProcessingOption()}
           {allowedFeatures.includes("step_function_pipeline") &&
             this.renderUseStepFunctionPipelineOption()}
+          {allowedFeatures.includes("taxon_whitelist") &&
+            this.renderUseTaxonWhitelist()}
           <TermsAgreement
             checked={consentChecked}
             onChange={() =>
@@ -424,6 +447,7 @@ class ReviewStep extends React.Component {
               project={project}
               skipSampleProcessing={skipSampleProcessing}
               useStepFunctionPipeline={useStepFunctionPipeline}
+              useTaxonWhitelist={useTaxonWhitelist}
             />
           )}
         </div>

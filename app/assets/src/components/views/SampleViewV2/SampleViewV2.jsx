@@ -862,11 +862,22 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
+  whitelistedMessage = () => {
+    const {
+      reportMetadata: { taxonWhitelisted },
+    } = this.state;
+    return (
+      taxonWhitelisted &&
+      `Report was processed with a whitelist filter of respiratory pathogens.`
+    );
+  };
+
   renderReportInfo = () => {
     return compact([
       this.truncatedMessage(),
       this.subsamplingMessage(),
       this.filteredMessage(),
+      this.whitelistedMessage(),
     ]).map((msg, i) => (
       <span className={cs.reportInfoMsg} key={`msg-${i}`}>
         {msg}

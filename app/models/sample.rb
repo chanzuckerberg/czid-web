@@ -742,6 +742,7 @@ class Sample < ApplicationRecord
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
     pr.pipeline_execution_strategy = pipeline_execution_strategy.blank? ? PipelineRun.directed_acyclic_graph : pipeline_execution_strategy
     pr.dag_vars = dag_vars if dag_vars
+    pr.use_taxon_whitelist = use_taxon_whitelist
     pr.pipeline_commit = Sample.pipeline_commit(pr.pipeline_branch)
 
     pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
