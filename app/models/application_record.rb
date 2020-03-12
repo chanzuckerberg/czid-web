@@ -23,7 +23,7 @@ class ApplicationRecord < ActiveRecord::Base
   def mass_validation_enabled?
     @@mass_validation_enabled ||= AppConfigHelper.get_app_config(AppConfig::ENABLE_MASS_VALIDATION) || false # rubocop:disable Style/ClassVars
   rescue StandardError
-    # This will occur during some migrations
+    # This will occur during CreateAppConfigTable migration
     @@mass_validation_enabled = false # rubocop:disable Style/ClassVars
   end
 
