@@ -104,19 +104,17 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   correctSampleAndGeneNames(filteredSamples) {
-    let sampleNames = new Map();
-    let duplicateSampleNames = new Set();
+    let sampleNamesCounts = new Map();
     filteredSamples.forEach(sample => {
       // Keep track of samples with the same name, which may occur if
       // a user selects samples from multiple projects.
-      if (sampleNames.has(sample.sampleName)) {
-        let duplicateSamples = sampleNames
-          .get(sample.sampleName)
-          .concat([sample]);
-        sampleNames.set(sample.sampleName, duplicateSamples);
-        duplicateSampleNames.add(sample.sampleName);
+      if (sampleNamesCounts.has(sample.sampleName)) {
+        // Append a number to a sample's name to differentiate between samples with the same name.
+        let count = sampleNamesCounts.get(sample.sampleName);
+        sample.sampleName = `${sample.sampleName} (${count})`;
+        sampleNamesCounts.set(sample.sampleName, count + 1);
       } else {
-        sampleNames.set(sample.sampleName, [sample]);
+        sampleNamesCounts.set(sample.sampleName, 1);
       }
 
       sample.amrCounts.forEach(amrCount => {
@@ -128,14 +126,6 @@ export default class AMRHeatmapView extends React.Component {
         const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
         amrCount.gene = geneName;
       });
-    });
-
-    // Append a number to a sample's name to differentiate between samples with the same name.
-    duplicateSampleNames.forEach(sampleName => {
-      for (let i = 0; i < sampleNames.get(sampleName).length; i++) {
-        let sample = sampleNames.get(sampleName)[i];
-        sample.sampleName = `${sampleName} (${i + 1})`;
-      }
     });
 
     return filteredSamples;
