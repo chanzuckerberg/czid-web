@@ -47,8 +47,8 @@ class HostGenome < ApplicationRecord
   end
 
   def self.all_without_metadata_field(name)
-    exists = joins(:metadata_fields).where(metadata_fields: { name: [name] })
-    where.not(id: [exists.pluck(:id).uniq])
+    exists = joins(:metadata_fields).where(metadata_fields: { name: [name] }).distinct
+    where.not(id: exists)
   end
 
   def as_json(options = {})
