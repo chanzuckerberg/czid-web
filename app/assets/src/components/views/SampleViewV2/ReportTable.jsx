@@ -144,16 +144,16 @@ class ReportTable extends React.Component {
       },
       assemblyEnabled && {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "contigCount", 0),
+          this.getNtNrFromDataRow(rowData, "contigs", 0),
         cellRenderer: this.renderNtNrDecimalValues,
         columnData: REPORT_TABLE_COLUMNS["contigs"],
-        dataKey: "contigCount",
+        dataKey: "contigs",
         label: "contig",
         sortFunction: ({ data, sortDirection }) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
-            path: ["contigCount"],
+            path: ["contigs"],
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
@@ -161,16 +161,16 @@ class ReportTable extends React.Component {
       },
       assemblyEnabled && {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "readsCount", 0),
+          this.getNtNrFromDataRow(rowData, "contig_r", 0),
         cellRenderer: this.renderNtNrDecimalValues,
         columnData: REPORT_TABLE_COLUMNS["contigreads"],
-        dataKey: "readsCount",
+        dataKey: "contig_r",
         label: "contig r",
         sortFunction: ({ data, sortDirection }) =>
           this.nestedNtNrSortFunction({
             data,
             sortDirection,
-            path: ["readsCount"],
+            path: ["contig_r"],
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
