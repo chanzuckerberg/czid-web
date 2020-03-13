@@ -18,6 +18,10 @@ class AppConfig < ApplicationRecord
   # When this is "1", the announcement banner on the top of the site header will be enabled.
   # Other conditions may check a time constraint.
   SHOW_ANNOUNCEMENT_BANNER = 'show_announcement_banner'.freeze
+  # The ARN of the pipeline's Step Function
+  SFN_ARN = 'sfn_arn'.freeze
+  # The pipeline version to use
+  SFN_PIPELINE_VERSION = 'sfn_pipeline_version'.freeze
   # When this is "1", the COVID-19 Public Site banner on the landing page will be shown.
   SHOW_LANDING_PUBLIC_SITE_BANNER = 'show_landing_public_site_banner'.freeze
   # Switch for additional ActiveRecord validations that were added en masse in Feb 2020.
