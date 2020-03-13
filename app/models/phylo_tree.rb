@@ -124,7 +124,9 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_READY
       self.ready_at = Time.current
     end
-    save
+    if has_changes_to_save
+      save
+    end
 
     # Clean up:
     temp_files_by_output.values.each do |tf|
@@ -151,7 +153,9 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_FAILED
       LogUtil.log_err_and_airbrake("[Datadog] Phylo tree creation failed for #{name} (#{id}). See #{log_url}.")
     end
-    save
+    if has_changes_to_save
+      save
+    end
   end
 
   def kickoff
