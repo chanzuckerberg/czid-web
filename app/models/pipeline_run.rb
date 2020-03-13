@@ -1112,7 +1112,10 @@ class PipelineRun < ApplicationRecord
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
-    save!
+    if has_changes_to_save?
+      # save only when there have been changes to avoid unnecessary callbacks
+      save!
+    end
     enqueue_new_pipeline_run if automatic_restart
   end
 
