@@ -11,7 +11,7 @@ import {
 import {
   createBulkDownload,
   getBulkDownloadTypes,
-  validateSampleIdsForBulkDownload,
+  validateSampleIds,
 } from "~/api/bulk_downloads";
 import { logAnalyticsEvent } from "~/api/analytics";
 import Modal from "~ui/containers/Modal";
@@ -157,9 +157,7 @@ class BulkDownloadModal extends React.Component {
   }
 
   async fetchValidationInfo(selectedSampleIds) {
-    const sampleValidationInfo = await validateSampleIdsForBulkDownload(
-      selectedSampleIds
-    );
+    const sampleValidationInfo = await validateSampleIds(selectedSampleIds);
 
     return sampleValidationInfo;
   }

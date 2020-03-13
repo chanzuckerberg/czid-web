@@ -13,28 +13,37 @@ export default class AccordionNotification extends React.Component {
   }
 
   render() {
-    const { className, header, content, type, open } = this.props;
-    const notification = (
-      <Notification
-        type={type}
-        displayStyle="flat"
-        className={cs.notificationContainer}
+    const {
+      className,
+      header,
+      content,
+      type,
+      open,
+      displayStyle,
+      onClose,
+    } = this.props;
+    const accordion = (
+      <Accordion
+        bottomContentPadding
+        header={header}
+        open={open}
+        className={cx(cs.listContainer, cs[type])}
+        toggleArrowAlignment="topRight"
       >
-        {header}
-      </Notification>
+        <div className={cs.messageContainer}>{content}</div>
+      </Accordion>
     );
 
     return (
       <div className={cx(cs.AccordionNotification, className)}>
-        <Accordion
-          bottomContentPadding
-          header={notification}
-          open={open}
-          className={cx(cs.listContainer, cs[type])}
-          toggleAlignment="baseline"
+        <Notification
+          type={type}
+          displayStyle={displayStyle}
+          className={cs.notificationContainer}
+          onClose={onClose}
         >
-          <div className={cs.messageContainer}>{content}</div>
-        </Accordion>
+          {accordion}
+        </Notification>
       </div>
     );
   }
@@ -42,6 +51,7 @@ export default class AccordionNotification extends React.Component {
 
 AccordionNotification.defaultProps = {
   type: "info",
+  displayStyle: "flat",
 };
 
 AccordionNotification.propTypes = {
@@ -50,4 +60,6 @@ AccordionNotification.propTypes = {
   content: PropTypes.node,
   open: PropTypes.bool,
   type: PropTypes.oneOf(["success", "info", "warn", "error"]),
+  displayStyle: PropTypes.oneOf(["flat", "elevated"]),
+  onClose: PropTypes.func,
 };

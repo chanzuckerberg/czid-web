@@ -121,7 +121,11 @@ export default class UploadProgressModal extends React.Component {
 
   // Add any flags selected by the user in the Review Step.
   addFlagsToSamples = samples => {
-    const { skipSampleProcessing, useStepFunctionPipeline } = this.props;
+    const {
+      skipSampleProcessing,
+      useStepFunctionPipeline,
+      useTaxonWhitelist,
+    } = this.props;
 
     const pipeline_execution_strategy = useStepFunctionPipeline
       ? PIPELINE_EXECUTION_STRATEGIES.step_function
@@ -131,6 +135,7 @@ export default class UploadProgressModal extends React.Component {
       ...sample,
       do_not_process: skipSampleProcessing,
       pipeline_execution_strategy,
+      use_taxon_whitelist: useTaxonWhitelist,
     }));
   };
 
@@ -524,4 +529,5 @@ UploadProgressModal.propTypes = {
   project: PropTypes.Project,
   skipSampleProcessing: PropTypes.bool,
   useStepFunctionPipeline: PropTypes.bool,
+  useTaxonWhitelist: PropTypes.bool,
 };

@@ -165,6 +165,25 @@ RSpec.describe PipelineRunsHelper, type: :helper do
           it { is_expected.to eq(["FAILED", nil]) }
         end
       end
+
+      context "and it is in progress of stage 2" do
+        let(:fixture_file) { "sfn-execution-history_in-progress.json" }
+
+        context "and fetching status for stage 1" do
+          let(:stage_number) { 1 }
+          it { is_expected.to eq(["SUCCEEDED", nil]) }
+        end
+
+        context "and fetching status for stage 2" do
+          let(:stage_number) { 2 }
+          it { is_expected.to eq(["RUNNING", nil]) }
+        end
+
+        context "and fetching status for stage 3" do
+          let(:stage_number) { 3 }
+          it { is_expected.to eq(["PENDING", nil]) }
+        end
+      end
     end
   end
 end

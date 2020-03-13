@@ -1,11 +1,9 @@
 import React from "react";
 import {
   compact,
-  entries,
   every,
   find,
   flatten,
-  flow,
   get,
   keys,
   map,
@@ -160,7 +158,6 @@ export default class SampleViewV2 extends React.Component {
     return {
       categories: {},
       metric: TREE_METRICS[0].value,
-      minContigReads: 4,
       nameType: "Scientific name",
       readSpecificity: 0,
       thresholds: [],
@@ -251,7 +248,6 @@ export default class SampleViewV2 extends React.Component {
     }
 
     this.setDisplayName({ reportData, ...selectedOptions });
-    this.computeContigStats({ reportData, ...selectedOptions });
     const filteredReportData = this.filterReportData({
       reportData,
       filters: selectedOptions,
@@ -397,36 +393,6 @@ export default class SampleViewV2 extends React.Component {
       !readSpecificity ||
       (row.taxLevel === "genus" ? row.taxId > 0 : row.genus_tax_id > 0)
     );
-  };
-
-  computeRowContigStats = ({ row, minContigReads }) => {
-    ["nr", "nt"].forEach(dbType => {
-      const contigDetails = get([dbType, "contigs"], row);
-      if (contigDetails && keys(contigDetails).length) {
-        const dbTypeRow = row[dbType];
-        dbTypeRow.contigCount = 0;
-        dbTypeRow.readsCount = 0;
-
-        flow(
-          entries,
-          map(([readsPerContig, count]) => {
-            if (readsPerContig >= minContigReads) {
-              dbTypeRow.contigCount += count;
-              dbTypeRow.readsCount += count * readsPerContig;
-            }
-          })
-        )(contigDetails);
-      }
-    });
-  };
-
-  computeContigStats = ({ reportData, minContigReads }) => {
-    reportData.forEach(genus => {
-      this.computeRowContigStats({ row: genus, minContigReads });
-      genus.species.forEach(species => {
-        this.computeRowContigStats({ row: species, minContigReads });
-      });
-    });
   };
 
   setDisplayName = ({ reportData, nameType }) => {
@@ -673,11 +639,6 @@ export default class SampleViewV2 extends React.Component {
 
     // different behavior given type of option
     switch (key) {
-      // - min contig size: recompute contig statistics with new size and refresh display
-      case "minContigReads":
-        this.computeContigStats({ reportData, ...newSelectedOptions });
-        this.setState({ reportData: [...reportData] });
-        break;
       // - name type: reset table to force a rerender
       case "nameType":
         this.setDisplayName({ reportData, ...newSelectedOptions });
@@ -862,11 +823,22 @@ export default class SampleViewV2 extends React.Component {
     );
   };
 
+  whitelistedMessage = () => {
+    const {
+      reportMetadata: { taxonWhitelisted },
+    } = this.state;
+    return (
+      taxonWhitelisted &&
+      `Report was processed with a whitelist filter of respiratory pathogens.`
+    );
+  };
+
   renderReportInfo = () => {
     return compact([
       this.truncatedMessage(),
       this.subsamplingMessage(),
       this.filteredMessage(),
+      this.whitelistedMessage(),
     ]).map((msg, i) => (
       <span className={cs.reportInfoMsg} key={`msg-${i}`}>
         {msg}
@@ -1106,7 +1078,6 @@ export default class SampleViewV2 extends React.Component {
               reportPresent={!!reportMetadata.reportReady}
               sample={sample}
               view={view}
-              minContigReads={selectedOptions.minContigReads}
             />
           </div>
           <div className={cs.tabsContainer}>

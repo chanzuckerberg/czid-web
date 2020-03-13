@@ -103,7 +103,7 @@ module PipelineRunsHelper
     if status.exitstatus.zero?
       sfn_execution_history_hash = JSON.parse(stdout)
       sfn_hash = parse_sfn_execution_history_hash(sfn_execution_history_hash)
-      job_status = sfn_hash[stage_number.to_s]["status"]
+      job_status = sfn_hash.dig(stage_number.to_s, "status") || "PENDING"
     else
       LogUtil.log_err_and_airbrake("Error for update sfn status for record #{run_id} - stage #{stage_number} with error #{stderr}")
       job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"

@@ -45,7 +45,8 @@ class Accordion extends React.Component {
                   "fa",
                   open ? "fa-angle-up" : "fa-angle-down",
                   cs.toggleIcon,
-                  iconClassName
+                  iconClassName,
+                  cs[toggleArrowAlignment]
                 )}
               />
             </div>
@@ -68,7 +69,7 @@ Accordion.propTypes = {
   iconClassName: PropTypes.string,
   toggleable: PropTypes.bool,
   // the vertical alignment of the toggle arrow with other header elements
-  toggleArrowAlignment: PropTypes.oneOf(["center", "baseline"]),
+  toggleArrowAlignment: PropTypes.oneOf(["center", "baseline", "topRight"]),
   // Accordion can be controlled or non-controlled.
   onToggle: PropTypes.func,
   open: PropTypes.bool,
