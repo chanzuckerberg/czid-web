@@ -31,7 +31,7 @@ end
 
 RSpec.describe SfnPipelineDispatchService, type: :service do
   let(:project) { create(:project) }
-  let(:sample) { create(:sample, project: project, pipeline_execution_strategy: PipelineRun.step_function) }
+  let(:sample) { create(:sample, project: project, host_genome_name: "Human", pipeline_execution_strategy: PipelineRun.step_function) }
   let(:pipeline_run) do
     create(:pipeline_run, sample: sample, pipeline_run_stages_data: [
              { name: "Host Filtering", step_number: 1 },
