@@ -20,6 +20,7 @@ FactoryBot.define do
         build(:host_genome)
       end
     end
+    pipeline_execution_strategy { PipelineRun.directed_acyclic_graph }
 
     status { Sample::STATUS_CREATED }
     association :user

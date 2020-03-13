@@ -1046,6 +1046,32 @@ class PipelineRun < ApplicationRecord
     _stdout = Syscall.run("rm", "-f", downloaded_stats_path)
   end
 
+  def dispatch_sfn_pipeline
+    sfn_service_result = {}
+    begin
+      sfn_service_result = SfnPipelineDispatchService.call(self)
+      update(
+        sfn_execution_arn: sfn_service_result[:sfn_arn],
+        pipeline_version: sfn_service_result[:pipeline_version]
+      )
+    rescue SfnPipelineDispatchService::PipelineVersionMissingError => e
+      LogUtil.log_err_and_airbrake("Pipeline version for SFN pipeline not configured: #{e}")
+      # we will retry later since the error is not related to this specific pipeline run
+      # return without changing status
+      return
+    rescue => e
+      LogUtil.log_err_and_airbrake("Error starting SFN pipeline: #{e}")
+      # we will not retry in this case, since we do not know what error occurred
+    end
+
+    if sfn_service_result[:sfn_arn].blank?
+      update(
+        job_status: STATUS_FAILED,
+        finalized: 1
+      )
+    end
+  end
+
   def update_job_status
     automatic_restart = false
     prs = active_stage
@@ -1062,6 +1088,15 @@ class PipelineRun < ApplicationRecord
         send_to_airbrake = !known_user_error
         report_failed_pipeline_run_stage(prs, automatic_restart, known_user_error, send_to_airbrake)
       elsif !prs.started?
+        # Note: this is not ideally place to initialize an SFN pipeline but
+        # in order to preserve most of the logic of the old pipeline we decided
+        # that this was the least intrusive place (vs. both downstream in run_job>host_filtering_command
+        # and upstream)
+        if step_function? && prs.step_number == 1
+          dispatch_sfn_pipeline
+        end
+
+        # Run job will trigger dag pipeline for a particular stage
         # we're moving on to a new stage
         prs.run_job
       else

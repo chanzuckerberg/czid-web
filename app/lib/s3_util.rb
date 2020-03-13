@@ -34,4 +34,10 @@ module S3Util
     end
     return entry.join
   end
+
+  def self.upload_to_s3(bucket, key, content)
+    S3_CLIENT.put_object(bucket: bucket,
+                         key: key,
+                         body: content)
+  end
 end

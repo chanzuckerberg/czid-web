@@ -372,7 +372,9 @@ task "pipeline_monitor", [:duration] => :environment do |_t, args|
   Rails.logger.level = [1, Rails.logger.level].max
   HoneycombRails.config.sample_rate = 120
 
-  if args[:duration] == "finite_duration"
+  if args[:duration] == "single_iteration"
+    CheckPipelineRuns.run(0, 60.0 / checks_per_minute)
+  elsif args[:duration] == "finite_duration"
     CheckPipelineRuns.run(respawn_interval - wait_before_respawn, 60.0 / checks_per_minute)
   else
     # infinite duration
