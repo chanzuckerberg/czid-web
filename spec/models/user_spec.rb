@@ -16,5 +16,9 @@ describe User, type: :model do
     it "if launched features not configured return only user allowed features" do
       expect(subject).to contain_exactly("feature_1", "feature_3")
     end
+
+    it "if user features not configured return only launched features" do
+      expect(subject).to contain_exactly("feature_1", "feature_2")
+    end
   end
 end
