@@ -28,5 +28,6 @@ class AppConfig < ApplicationRecord
   # Presence of the flag switches on the feature.
   ENABLE_MASS_VALIDATION = 'enable_mass_validation'.freeze
   # List of launched features still guarded by a flag.
+  # Use the features rake tasks for editing this key
   LAUNCHED_FEATURES = 'launched_features'.freeze
 end
