@@ -28,6 +28,10 @@ module AppConfigHelper
     default_value
   end
 
+  def set_json_app_config(key, value)
+    AppConfigHelper.set_app_config(key, JSON.dump(value))
+  end
+
   # Return all app configs that should be sent to the front-end React application.
   def configs_for_context
     # Fetch all app configs in one query.
