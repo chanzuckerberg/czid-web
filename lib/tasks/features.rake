@@ -1,5 +1,4 @@
 namespace "features" do
-
   # rake features:launch[<feature_name>]
   task :launch, [:feature_name] => :environment do |_, args|
     new_features = AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, []) | [args[:feature_name]]
@@ -22,7 +21,7 @@ namespace "features" do
   end
 
   # rake features:list
-  task :list => :environment do
+  task list: :environment do
     features = AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, [])
     puts "Currently launched: #{features}"
   end
