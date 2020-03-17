@@ -66,6 +66,7 @@ class Sample < ApplicationRecord
   UPLOAD_ERROR_S3_UPLOAD_FAILED = "S3_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_LOCAL_UPLOAD_STALLED = "LOCAL_UPLOAD_STALLED".freeze
   UPLOAD_ERROR_LOCAL_UPLOAD_FAILED = "LOCAL_UPLOAD_FAILED".freeze
+  UPLOAD_ERROR_PIPELINE_KICKOFF = "PIPELINE_KICKOFF_FAILED".freeze
   DO_NOT_PROCESS = "DO_NOT_PROCESS".freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
@@ -747,7 +748,13 @@ class Sample < ApplicationRecord
 
     pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
     pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
-    pr.save
+    pr.save!
+  rescue StandardError => err
+    LogUtil.log_err_and_airbrake("Error saving pipeline run: #{err.inspect}")
+    # This will cause a message a to be shown to the user on the sample page.
+    # See app/assets/src/components/utils/sample.js
+    self.upload_error = Sample::UPLOAD_ERROR_PIPELINE_KICKOFF
+    save!
   end
 
   def get_existing_metadatum(key)
