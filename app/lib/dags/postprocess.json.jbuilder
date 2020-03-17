@@ -45,7 +45,7 @@ json.targets do
     "assembly/rapsearch2.blast.m8",
     "assembly/rapsearch2.reassigned.m8",
     "assembly/rapsearch2.hitsummary2.tab",
-    "assembly/refined_rapsearch2_counts_with_json.json",
+    "assembly/refined_rapsearch2_counts_with_dcr.json",
     "assembly/rapsearch2_contig_summary.json",
     "assembly/rapsearch2.blast.top.m8",
   ]
