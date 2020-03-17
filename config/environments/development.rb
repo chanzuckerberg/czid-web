@@ -82,7 +82,8 @@ Rails.application.configure do
     "http://127.0.0.1:3000",
   ]
 
-  ActiveRecordQueryTrace.enabled = true
+  # Enable this line to get tracebacks for all SQL queries
+  # ActiveRecordQueryTrace.enabled = true
 
   # Development logging configuration
   logger           = ActiveSupport::Logger.new(STDOUT)
