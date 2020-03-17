@@ -127,14 +127,24 @@ class PipelineRunStage < ApplicationRecord
   def run_job
     # Check output for the run and decide if we should run this stage
     return if started? && !failed? # job has been started successfully
-    self.job_command = send(job_command_func)
-    self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
-    if status.exitstatus.zero?
-      output = JSON.parse(command_stdout)
-      self.job_id = output['jobId']
+    if pipeline_run.step_function?
+      # We do not need to start stage anymore for SFNs, because now we only start
+      # the step function which handles all stages (started in PipelineRun::update_job_status)
+      # Filling job_command with placeholder string because current pipeline
+      # depends on it (e.g. see started? method)
+      self.job_command = pipeline_run.sfn_execution_arn
       self.job_status = STATUS_STARTED
     else
-      self.job_status = STATUS_FAILED
+      # Fallback to DAG run
+      self.job_command = send(job_command_func)
+      self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
+      if status.exitstatus.zero?
+        output = JSON.parse(command_stdout)
+        self.job_id = output['jobId']
+        self.job_status = STATUS_STARTED
+      else
+        self.job_status = STATUS_FAILED
+      end
     end
     self.created_at = Time.now.utc
     save
