@@ -30,6 +30,10 @@ class OutputState < ApplicationRecord
   # | RUNNING        |
   # | UNKNOWN        |
   # +----------------+
+  #
+  # Comment from pipeline_run.rb: The output_states indicate the state of each
+  # target output, the progression being as follows:
+  #   UNKNOWN -> LOADING_QUEUED -> LOADING -> LOADED / FAILED
   validates :state, inclusion: { in: [
     PipelineRun::STATUS_FAILED,
     PipelineRun::STATUS_LOADED,
