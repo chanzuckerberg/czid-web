@@ -16,11 +16,28 @@ class OutputState < ApplicationRecord
   # +----------------------+
   validates :output, presence: true, if: :mass_validation_enabled?
 
-  validates :state, inclusion: { in: [
+  # Current values of state are:
+  # +----------------+
+  # | state          |
+  # +----------------+
+  # | CHECKED        |
+  # | FAILED         |
+  # | LOADED         |
+  # | LOADING        |
+  # | LOADING_ERROR  |
+  # | LOADING_QUEUED |
+  # | NULL           |
+  # | RUNNING        |
+  # | UNKNOWN        |
+  # +----------------+
+  validates :state, allow_nil: true, inclusion: { in: [
+    PipelineRun::STATUS_CHECKED,
+    PipelineRun::STATUS_FAILED,
     PipelineRun::STATUS_LOADED,
-    PipelineRun::STATUS_UNKNOWN,
     PipelineRun::STATUS_LOADING,
-    PipelineRun::STATUS_LOADING_QUEUED,
     PipelineRun::STATUS_LOADING_ERROR,
+    PipelineRun::STATUS_LOADING_QUEUED,
+    PipelineRun::STATUS_RUNNING,
+    PipelineRun::STATUS_UNKNOWN,
   ], }, if: :mass_validation_enabled?
 end
