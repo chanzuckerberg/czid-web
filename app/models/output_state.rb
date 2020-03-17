@@ -16,7 +16,7 @@ class OutputState < ApplicationRecord
   # +----------------------+
   validates :output, presence: true, if: :mass_validation_enabled?
 
-  # Current values of state are:
+  # Current database values of state including legacy are:
   # +----------------+
   # | state          |
   # +----------------+
@@ -30,14 +30,12 @@ class OutputState < ApplicationRecord
   # | RUNNING        |
   # | UNKNOWN        |
   # +----------------+
-  validates :state, allow_nil: true, inclusion: { in: [
-    PipelineRun::STATUS_CHECKED,
+  validates :state, inclusion: { in: [
     PipelineRun::STATUS_FAILED,
     PipelineRun::STATUS_LOADED,
     PipelineRun::STATUS_LOADING,
     PipelineRun::STATUS_LOADING_ERROR,
     PipelineRun::STATUS_LOADING_QUEUED,
-    PipelineRun::STATUS_RUNNING,
     PipelineRun::STATUS_UNKNOWN,
   ], }, if: :mass_validation_enabled?
 end
