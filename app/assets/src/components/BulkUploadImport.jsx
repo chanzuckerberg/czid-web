@@ -257,7 +257,7 @@ class BulkUploadImport extends React.Component {
 
   toggleCheckBox(e) {
     this.setState({
-      [e.target.id]: e.target.value == "true" ? false : true,
+      [e.target.id]: e.target.value !== "true",
     });
   }
 
@@ -298,7 +298,7 @@ class BulkUploadImport extends React.Component {
           }
         );
       })
-      .catch(error => {
+      .catch(() => {
         that.setState({
           invalid: true,
           errorMessage: "Project exists already or is invalid",
@@ -608,7 +608,7 @@ class BulkUploadImport extends React.Component {
                                 <div className="genome-icon">
                                   {SampleUpload.resolveGenomeIcon(
                                     this.state.hostGenomes.find(
-                                      host => host.id == sample.host_genome_id
+                                      host => host.id === sample.host_genome_id
                                     ).name
                                   )}
                                 </div>

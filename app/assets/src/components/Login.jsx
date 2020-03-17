@@ -60,7 +60,7 @@ class Login extends React.Component {
           }
         );
       })
-      .catch(error => {
+      .catch(() => {
         that.setState(
           {
             showFailedLogin: true,

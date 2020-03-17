@@ -312,7 +312,7 @@ class BulkDownloadModal extends React.Component {
           <div className={cs.header}>
             <div className={cs.title}>Select a Download Type</div>
             <div className={cs.tagline}>
-              {numSamples} sample{numSamples != 1 ? "s" : ""} selected
+              {numSamples} sample{numSamples !== 1 ? "s" : ""} selected
             </div>
           </div>
           <div className={cs.options}>
@@ -330,7 +330,7 @@ class BulkDownloadModal extends React.Component {
           </div>
           <div className={cs.footer}>
             <BulkDownloadModalFooter
-              loading={bulkDownloadTypes ? false : true}
+              loading={!bulkDownloadTypes}
               downloadTypes={bulkDownloadTypes}
               validSampleIds={validSampleIds}
               invalidSampleNames={invalidSampleNames}

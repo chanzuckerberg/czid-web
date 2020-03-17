@@ -156,7 +156,7 @@ class SamplesHeatmapVis extends React.Component {
     return this.props.taxonIds.map(id => {
       const taxon = this.props.taxonDetails[id];
       const sortKey =
-        taxon.parentId == -200 // MISSING_GENUS_ID
+        taxon.parentId === -200 // MISSING_GENUS_ID
           ? Number.MAX_SAFE_INTEGER
           : taxon.parentId; // parentId is false when taxon level is genus
       return {
@@ -172,7 +172,7 @@ class SamplesHeatmapVis extends React.Component {
 
     const numFilters = size(thresholdFilters);
 
-    if (numFilters == 0) {
+    if (numFilters === 0) {
       return [];
     }
 

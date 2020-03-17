@@ -53,7 +53,7 @@ class ThresholdFilterDropdown extends React.Component {
     if (typeof tfs1 !== typeof tfs2) return false;
     tfs1 = tfs1 || [];
     tfs2 = tfs2 || [];
-    if (tfs1.length != tfs2.length || typeof tfs1 !== typeof tfs2) {
+    if (tfs1.length !== tfs2.length || typeof tfs1 !== typeof tfs2) {
       return false;
     }
     for (let i = 0; i < tfs1.length; i++) {
@@ -86,7 +86,7 @@ class ThresholdFilterDropdown extends React.Component {
     return (
       threshold.metric.length > 0 &&
       threshold.operator.length > 0 &&
-      threshold.value != "" &&
+      threshold.value !== "" &&
       !Number.isNaN(threshold.value)
     );
   }

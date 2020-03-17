@@ -12,6 +12,7 @@ import "./loader.scss";
 import "./styles/core.scss";
 
 if (!function f() {}.name) {
+  // eslint-disable-next-line no-extend-native
   Object.defineProperty(Function.prototype, "name", {
     get: function() {
       var name = (this.toString().match(/^function\s*([^\s(]+)/) || [])[1];

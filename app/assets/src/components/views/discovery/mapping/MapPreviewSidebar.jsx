@@ -193,8 +193,8 @@ export default class MapPreviewSidebar extends React.Component {
 
   componentDidUpdate = prevProps => {
     if (
-      this.props.samples != prevProps.samples ||
-      this.props.projects != prevProps.projects
+      this.props.samples !== prevProps.samples ||
+      this.props.projects !== prevProps.projects
     ) {
       this.reset();
     }

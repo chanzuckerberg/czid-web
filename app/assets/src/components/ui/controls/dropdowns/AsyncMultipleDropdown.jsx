@@ -62,7 +62,7 @@ class AsyncMultipleDropdown extends React.Component {
 
     // If the query has since changed, discard the response (don't do anything).
     // Otherwise, update the state with the query response.
-    if (query == this._lastQuery) {
+    if (query === this._lastQuery) {
       this.setState({ options: unionBy("value", options, selectedOptions) });
     }
   });

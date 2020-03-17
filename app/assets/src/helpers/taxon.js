@@ -12,7 +12,7 @@ export const getGeneraContainingTags = taxInfoArray => {
   // Map genus taxids to the number of species with pathogen tags contained within.
   let generaContainingTags = {};
   for (let taxInfo of taxInfoArray) {
-    if (taxInfo.tax_level == 1 && taxInfo.pathogenTag) {
+    if (taxInfo.tax_level === 1 && taxInfo.pathogenTag) {
       generaContainingTags[taxInfo.genus_taxid] =
         generaContainingTags[taxInfo.genus_taxid] || {};
       generaContainingTags[taxInfo.genus_taxid][taxInfo.pathogenTag] =
@@ -24,17 +24,17 @@ export const getGeneraContainingTags = taxInfoArray => {
 };
 
 export const getGeneraPathogenCounts = speciesCounts => {
-  const generaPathogenCounts = {};
+  const genusPathogenCnt = {};
   Object.values(speciesCounts).forEach(speciesInfo => {
     if (speciesInfo.pathogenTag) {
-      generaPathogenCounts[speciesInfo.genus_tax_id] =
-        generaPathogenCounts[speciesInfo.genus_tax_id] || {};
+      genusPathogenCnt[speciesInfo.genus_tax_id] =
+        genusPathogenCnt[speciesInfo.genus_tax_id] || {};
 
-      generaPathogenCounts[speciesInfo.genus_tax_id][speciesInfo.pathogenTag] =
-        (generaPathogenCounts[speciesInfo.genus_tax_id][
-          speciesInfo.pathogenTag
-        ] || 0) + 1;
+      const genusTaxid = speciesInfo.genus_tax_id;
+      const tag = speciesInfo.pathogenTag;
+      genusPathogenCnt[genusTaxid][tag] =
+        (genusPathogenCnt[genusTaxid][tag] || 0) + 1;
     }
   });
-  return generaPathogenCounts;
+  return genusPathogenCnt;
 };
