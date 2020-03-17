@@ -392,8 +392,9 @@ class SamplesHeatmapView extends React.Component {
       if (sampleNamesCounts.has(sample.name)) {
         // Append a number to a sample's name to differentiate between samples with the same name.
         let count = sampleNamesCounts.get(sample.name);
+        let originalName = sample.name;
         sample.name = `${sample.name} (${count})`;
-        sampleNamesCounts.set(sample.name, count + 1);
+        sampleNamesCounts.set(originalName, count + 1);
       } else {
         sampleNamesCounts.set(sample.name, 1);
       }

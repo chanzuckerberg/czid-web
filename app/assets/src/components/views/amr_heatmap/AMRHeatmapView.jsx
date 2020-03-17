@@ -111,8 +111,9 @@ export default class AMRHeatmapView extends React.Component {
       if (sampleNamesCounts.has(sample.sampleName)) {
         // Append a number to a sample's name to differentiate between samples with the same name.
         let count = sampleNamesCounts.get(sample.sampleName);
+        let originalName = sample.sampleName;
         sample.sampleName = `${sample.sampleName} (${count})`;
-        sampleNamesCounts.set(sample.sampleName, count + 1);
+        sampleNamesCounts.set(originalName, count + 1);
       } else {
         sampleNamesCounts.set(sample.sampleName, 1);
       }
