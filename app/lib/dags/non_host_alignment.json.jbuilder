@@ -13,15 +13,15 @@ json.targets do
     attr[:gsnap_m8],
     "gsnap.deduped.m8",
     "gsnap.hitsummary.tab",
-    "gsnap_counts.json",
+    "gsnap_counts_with_dcr.json",
   ]
   json.rapsearch2_out [
     attr[:rapsearch_m8],
     "rapsearch2.deduped.m8",
     "rapsearch2.hitsummary.tab",
-    "rapsearch2_counts.json",
+    "rapsearch2_counts_with_dcr.json",
   ]
-  json.taxon_count_out ["taxon_counts.json"]
+  json.taxon_count_out ["taxon_counts_with_dcr.json"]
   json.annotated_out ["annotated_merged.fa", "unidentified.fa"]
 
   json.cdhitdup_cluster_sizes [

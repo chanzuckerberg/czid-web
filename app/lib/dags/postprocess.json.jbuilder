@@ -13,13 +13,13 @@ json.targets do
     "gsnap.m8",
     "gsnap.deduped.m8",
     "gsnap.hitsummary.tab",
-    "gsnap_counts.json",
+    "gsnap_counts_with_dcr.json",
   ]
   json.rapsearch2_out [
     "rapsearch2.m8",
     "rapsearch2.deduped.m8",
     "rapsearch2.hitsummary.tab",
-    "rapsearch2_counts.json",
+    "rapsearch2_counts_with_dcr.json",
   ]
   json.assembly_out [
     "assembly/contigs.fasta",
@@ -37,7 +37,7 @@ json.targets do
     "assembly/gsnap.blast.m8",
     "assembly/gsnap.reassigned.m8",
     "assembly/gsnap.hitsummary2.tab",
-    "assembly/refined_gsnap_counts.json",
+    "assembly/refined_gsnap_counts_with_dcr.json",
     "assembly/gsnap_contig_summary.json",
     "assembly/gsnap.blast.top.m8",
   ]
@@ -45,11 +45,11 @@ json.targets do
     "assembly/rapsearch2.blast.m8",
     "assembly/rapsearch2.reassigned.m8",
     "assembly/rapsearch2.hitsummary2.tab",
-    "assembly/refined_rapsearch2_counts.json",
+    "assembly/refined_rapsearch2_counts_with_json.json",
     "assembly/rapsearch2_contig_summary.json",
     "assembly/rapsearch2.blast.top.m8",
   ]
-  json.refined_taxon_count_out ["assembly/refined_taxon_counts.json"]
+  json.refined_taxon_count_out ["assembly/refined_taxon_counts_with_dcr.json"]
   json.contig_summary_out ["assembly/combined_contig_summary.json"]
 
   json.refined_annotated_out ["assembly/refined_annotated_merged.fa", "assembly/refined_unidentified.fa"]
