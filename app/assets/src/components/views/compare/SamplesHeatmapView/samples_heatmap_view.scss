@@ -32,6 +32,19 @@
         margin-right: 0;
       }
     }
+
+    .statsRow {
+      @include font-body-xs;
+      color: $medium-grey;
+
+      .infoIcon {
+        margin-left: 4px;
+        height: 15px;
+        width: 15px;
+        fill: $medium-grey;
+        vertical-align: text-top;
+      }
+    }
   }
 
   .filterToggleContainer {

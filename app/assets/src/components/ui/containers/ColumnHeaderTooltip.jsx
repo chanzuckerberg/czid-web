@@ -14,6 +14,10 @@ class ColumnHeaderTooltip extends React.Component {
               <span className={cs.title}>{this.props.title}:</span>
             )}
             {this.props.content}
+            {this.props.list &&
+              this.props.list.map(item => {
+                return <li key={item}>{item}</li>;
+              })}
             {this.props.link && (
               <a
                 className={cs.link}
@@ -35,6 +39,7 @@ ColumnHeaderTooltip.propTypes = {
   size: PropTypes.string,
   title: PropTypes.string,
   link: PropTypes.string,
+  list: PropTypes.arrayOf(PropTypes.string),
 };
 
 ColumnHeaderTooltip.defaultProps = {
