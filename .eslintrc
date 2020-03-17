@@ -10,8 +10,10 @@
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
-    // "prettier/standard",
     "standard",
+    // disables rules that conflict with prettier
+    // must come last
+    "prettier",
   ],
   "plugins": [
     "react"
@@ -24,7 +26,10 @@
       "imports": "always-multiline",
       "exports": "always-multiline",
     }],
-    "quotes": ["error", "double", { "allowTemplateLiterals": true }],
+    "quotes": ["error", "double", {
+      "avoidEscape": true,
+      "allowTemplateLiterals": true
+    }],
     "no-prototype-builtins": "warn",
     "no-unreachable": "warn",
     "react/boolean-prop-naming": "warn",
@@ -45,6 +50,9 @@
     "standard/computed-property-even-spacing": "warn",
   },
   "settings": {
-    "propWrapperFunctions": [ "forbidExtraProps" ]
+    "propWrapperFunctions": [ "forbidExtraProps" ],
+    "react": {
+      "version": "detect"
+    }
   }
 }
