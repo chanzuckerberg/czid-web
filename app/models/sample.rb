@@ -753,8 +753,9 @@ class Sample < ApplicationRecord
     LogUtil.log_err_and_airbrake("Error saving pipeline run: #{err.inspect}")
     # This may cause a message to be shown to the user on the sample page.
     # See app/assets/src/components/utils/sample.js
-    self.upload_error = Sample::UPLOAD_ERROR_PIPELINE_KICKOFF
-    # kickoff_pipeline is assumed to be called in before_save callback
+    # Use low-level update_columns to avoid callbacks, because kickoff_pipeline
+    # may be running in a callback already.
+    update_columns(upload_error: Sample::UPLOAD_ERROR_PIPELINE_KICKOFF) # rubocop:disable SkipsModelValidations
   end
 
   def get_existing_metadatum(key)
