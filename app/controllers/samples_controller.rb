@@ -1431,9 +1431,11 @@ class SamplesController < ApplicationController
 
   def warn_if_large_bulk_upload(samples)
     # 100 is the limit that was chosen during covid19 surge for biohub projects.
+    # At the time, we had successfully handled up to ~1000 uploads per day.
     if samples.length < 100
       return
     end
+    # assume that all samples are in the same project and from the same user
     project = samples.first.project
     uploader = samples.first.user
     msg = "[Datadog] LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name} in project #{project.name}." \
