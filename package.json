@@ -57,7 +57,7 @@
     "file-loader": "^1.1.11",
     "husky": "^1.1.2",
     "import-glob-loader": "^1.1.0",
-    "jest": "^24.8.0",
+    "jest": "^25.1.0",
     "lint-staged": "^9.2.5",
     "node-sass": "^4.13.1",
     "postcss-loader": "^3.0.0",
