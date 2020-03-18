@@ -1046,7 +1046,8 @@ class PipelineRun < ApplicationRecord
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
     job_stats.destroy_all
-    update(job_stats_attributes: stats_array)
+    # Avoid running callbacks in results monitor loop
+    update_columns(job_stats_attributes: stats_array) # rubocop:disable Rails/SkipsModelValidations
     _stdout = Syscall.run("rm", "-f", downloaded_stats_path)
   end
 
@@ -1294,7 +1295,9 @@ class PipelineRun < ApplicationRecord
       Rails.logger.warn("Failed to write compiled stats file: #{stderr}")
     end
 
-    save
+    if has_changes_to_save?
+      save
+    end
   end
 
   # Fetch the unmapped reads count from alignment stage then refined counts from

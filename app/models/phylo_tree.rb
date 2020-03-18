@@ -124,7 +124,7 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_READY
       self.ready_at = Time.current
     end
-    if has_changes_to_save
+    if has_changes_to_save?
       save
     end
 
@@ -153,7 +153,7 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_FAILED
       LogUtil.log_err_and_airbrake("[Datadog] Phylo tree creation failed for #{name} (#{id}). See #{log_url}.")
     end
-    if has_changes_to_save
+    if has_changes_to_save?
       save
     end
   end
