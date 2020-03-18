@@ -24,8 +24,8 @@ import Slider from "~ui/controls/Slider";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import FilterTag from "~ui/controls/FilterTag";
-import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import InfoSIcon from "~/components/ui/icons/InfoSIcon";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import InfoSIcon from "~ui/icons/InfoSIcon";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -417,7 +417,12 @@ export default class SamplesHeatmapControls extends React.Component {
   };
 
   renderFilterStatsInfo = () => {
-    let { filteredTaxaCount, totalTaxaCount } = this.props;
+    const {
+      filteredTaxaCount,
+      totalTaxaCount,
+      prefilterConstants,
+    } = this.props;
+    const { topN, minReads } = prefilterConstants;
     return (
       <span className={cs.reportInfoMsg}>
         Showing {filteredTaxaCount} taxa of {totalTaxaCount} preselected taxa.
@@ -430,8 +435,8 @@ export default class SamplesHeatmapControls extends React.Component {
           content="The data included in this heatmap 
             was preselected based on the following conditions:"
           list={[
-            "The top 1,000 unique taxa per sample",
-            "Only taxa with at least 5 reads",
+            `The top ${topN} unique taxa per sample, based off relative abundance (rPM)`,
+            `Only taxa with at least ${minReads} reads`,
           ]}
         />
       </span>
@@ -443,10 +448,10 @@ export default class SamplesHeatmapControls extends React.Component {
     const { thresholdFilters, categories, subcategories } = selectedOptions;
     // Only display the filter tag row if relevant filters are selected,
     // otherwise an empty row will be rendered.
-    let displayFilterTags =
-      (thresholdFilters && thresholdFilters.length > 0) ||
-      (categories && categories.length > 0) ||
-      (subcategories["Viruses"] && subcategories["Viruses"].length > 0);
+    const displayFilterTags =
+      ((thresholdFilters || []).length ||
+        (categories || []).length ||
+        (subcategories["Viruses"] || []).length) > 0;
 
     return (
       <div className={cs.menu}>
@@ -569,5 +574,6 @@ SamplesHeatmapControls.propTypes = {
   ),
   filteredTaxaCount: PropTypes.number,
   totalTaxaCount: PropTypes.number,
+  prefilterConstants: PropTypes.object,
   displayFilterStats: PropTypes.bool,
 };

@@ -5,25 +5,24 @@ import cs from "./column_header_tooltip.scss";
 
 class ColumnHeaderTooltip extends React.Component {
   render() {
+    const { title, content, list, link } = this.props;
     return (
       <BasicPopup
         {...this.props}
         content={
           <div className={cs.tooltip}>
-            {this.props.title && (
-              <span className={cs.title}>{this.props.title}:</span>
-            )}
-            {this.props.content}
-            {this.props.list &&
-              this.props.list.map(item => {
+            {title && <span className={cs.title}>{title}:</span>}
+            {content}
+            {list &&
+              list.map(item => {
                 return <li key={item}>{item}</li>;
               })}
-            {this.props.link && (
+            {link && (
               <a
                 className={cs.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                href={this.props.link}
+                href={link}
               >
                 Learn more.
               </a>

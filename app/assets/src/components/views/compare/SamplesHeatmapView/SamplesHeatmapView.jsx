@@ -986,6 +986,7 @@ class SamplesHeatmapView extends React.Component {
                 data={this.state.data}
                 filteredTaxaCount={this.state.taxonIds.length}
                 totalTaxaCount={this.state.allTaxonIds.length}
+                prefilterConstants={this.props.prefilterConstants}
                 displayFilterStats={allowedFeatures.includes(
                   "heatmap_filter_fe"
                 )}
@@ -1039,6 +1040,7 @@ SamplesHeatmapView.propTypes = {
   taxonLevels: PropTypes.array,
   thresholdFilters: PropTypes.object,
   heatmapTs: PropTypes.number,
+  prefilterConstants: PropTypes.object,
 };
 
 SamplesHeatmapView.contextType = UserContext;
