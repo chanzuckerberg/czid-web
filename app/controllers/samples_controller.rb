@@ -1434,8 +1434,10 @@ class SamplesController < ApplicationController
     if samples.length < 100
       return
     end
-    msg = "[Datadog] LargeBulkUploadEvent: #{samples.length} samples by #{samples.first.user.role_name} in project #{samples.first.project.name}." \
-      "See: #{project_url(samples.first.project)}"
+    project = samples.first.project
+    uploader = samples.first.user
+    msg = "[Datadog] LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name} in project #{project.name}." \
+      " See: #{project.status_url}"
     LogUtil.log_err_and_airbrake(msg)
   end
 end
