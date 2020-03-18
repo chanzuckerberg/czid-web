@@ -13,16 +13,20 @@ json.targets do
     attr[:gsnap_m8],
     "gsnap.deduped.m8",
     "gsnap.hitsummary.tab",
-    "gsnap_counts.json",
+    "gsnap_counts_with_dcr.json",
   ]
   json.rapsearch2_out [
     attr[:rapsearch_m8],
     "rapsearch2.deduped.m8",
     "rapsearch2.hitsummary.tab",
-    "rapsearch2_counts.json",
+    "rapsearch2_counts_with_dcr.json",
   ]
-  json.taxon_count_out ["taxon_counts.json"]
+  json.taxon_count_out ["taxon_counts_with_dcr.json"]
   json.annotated_out ["annotated_merged.fa", "unidentified.fa"]
+
+  json.cdhitdup_cluster_sizes [
+    "cdhitdup_cluster_sizes.tsv",
+  ]
 end
 
 json.steps do
@@ -58,7 +62,7 @@ json.steps do
   end
 
   steps << {
-    in: ["host_filter_out"],
+    in: ["host_filter_out", "cdhitdup_cluster_sizes"],
     out: "gsnap_out",
     class: "PipelineStepRunAlignmentRemotely",
     module: "idseq_dag.steps.run_alignment_remotely",
@@ -87,7 +91,7 @@ json.steps do
   end
 
   steps << {
-    in: ["host_filter_out"],
+    in: ["host_filter_out", "cdhitdup_cluster_sizes"],
     out: "rapsearch2_out",
     class: "PipelineStepRunAlignmentRemotely",
     module: "idseq_dag.steps.run_alignment_remotely",
@@ -105,7 +109,7 @@ json.steps do
   }
 
   steps << {
-    in: ["host_filter_out", "gsnap_out", "rapsearch2_out"],
+    in: ["host_filter_out", "gsnap_out", "rapsearch2_out", "cdhitdup_cluster_sizes"],
     out: "annotated_out",
     class: "PipelineStepGenerateAnnotatedFasta",
     module: "idseq_dag.steps.generate_annotated_fasta",
@@ -118,6 +122,10 @@ end
 
 json.given_targets do
   json.host_filter_out do
+    json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
+  end
+
+  json.cdhitdup_cluster_sizes do
     json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
   end
 end

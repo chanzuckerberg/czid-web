@@ -162,4 +162,8 @@ class Project < ApplicationRecord
   def add_default_metadata_fields
     metadata_fields.push(MetadataField.where(is_default: 1) - metadata_fields)
   end
+
+  def status_url
+    UrlUtil.absolute_base_url + "/projects/#{id}"
+  end
 end
