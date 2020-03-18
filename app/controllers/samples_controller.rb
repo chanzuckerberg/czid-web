@@ -1438,7 +1438,7 @@ class SamplesController < ApplicationController
     # assume that all samples are in the same project and from the same user
     project = samples.first.project
     uploader = samples.first.user
-    msg = "[Datadog] LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name} in project #{project.name}." \
+    msg = "[Datadog] LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name}." \
       " See: #{project.status_url}"
     LogUtil.log_err_and_airbrake(msg)
   rescue StandardError => e
