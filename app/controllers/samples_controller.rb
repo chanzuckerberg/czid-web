@@ -1444,5 +1444,6 @@ class SamplesController < ApplicationController
   rescue StandardError => e
     # catch all errors because we don't want to ever block uploads
     LogUtil.log_err_and_airbrake("warn_if_large_bulk_upload: #{e}")
+    LogUtil.log_backtrace(e)
   end
 end

@@ -754,6 +754,8 @@ class Sample < ApplicationRecord
     pr.save!
   rescue StandardError => err
     LogUtil.log_err_and_airbrake("Error saving pipeline run: #{err.inspect}")
+    LogUtil.log_backtrace(err)
+    # This may cause a message to be shown to the user on the sample page.
     # This may cause a message to be shown to the user on the sample page.
     # See app/assets/src/components/utils/sample.js
     # HACK ALERT! Use low-level update_columns to avoid callbacks, because
