@@ -20,6 +20,9 @@ import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
 import cs from "./bulk_download_modal.scss";
 
+const DEFAULT_CREATION_ERROR =
+  "An unknown error occurred. Please contact us for help.";
+
 const assembleSelectedDownload = memoize(
   (
     selectedDownloadTypeName,
@@ -274,7 +277,7 @@ class BulkDownloadModal extends React.Component {
       this.setState({
         waitingForCreate: false,
         createStatus: "error",
-        createError: e.error,
+        createError: e.error || DEFAULT_CREATION_ERROR,
       });
       logAnalyticsEvent("BulkDownloadModal_bulk-download-creation_failed");
       return;

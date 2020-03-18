@@ -1,10 +1,16 @@
-task :export_dags, [:sample_id] => :environment do |_, args|
+task :export_dags, [:sample_id, :print, :step] => :environment do |_, args|
   class DAGExporter < PipelineRunStage
+    attr_accessor :args
+
     def upload_dag_json_and_return_job_command(dag_json, *)
-      File.open("#{dag_name}.json", "w") do |f|
-        f.write(dag_json)
+      if args.print
+        puts dag_json
+      else
+        File.open("#{dag_name}.json", "w") do |f|
+          f.write(dag_json)
+        end
+        puts "Exported #{dag_name}.json"
       end
-      puts "Exported #{dag_name}.json"
     end
 
     def aegea_batch_submit_command(*)
@@ -15,9 +21,12 @@ task :export_dags, [:sample_id] => :environment do |_, args|
     end
   end
 
-  if args.sample_id?
+  if args.sample_id
     Sample.find_by(id: args.sample_id).pipeline_runs.each do |pipeline_run|
       PipelineRunStage::STAGE_INFO.each do |step_number, stage_info|
+        if args.step && step_number != args.step.to_i
+          break
+        end
         puts "Exporting DAG #{step_number} for pipeline run #{pipeline_run.id} (sample #{pipeline_run.sample.id})"
         exporter = DAGExporter.new(
           step_number: step_number,
@@ -25,6 +34,7 @@ task :export_dags, [:sample_id] => :environment do |_, args|
           job_command_func: stage_info[:job_command_func],
           pipeline_run: pipeline_run
         )
+        exporter.args = args
         exporter.extract_dag
       end
     end
