@@ -23,6 +23,8 @@ json.targets do
 
   cdhitdup_out = ['dedup1.fa']
   cdhitdup_out << 'dedup2.fa' if attr[:fastq2]
+  cdhitdup_out << 'dedup1.fa.clstr'
+  cdhitdup_out << 'cdhitdup_cluster_sizes.tsv'
   json.cdhitdup_out cdhitdup_out
 
   lzw_out = ['lzw1.fa']
@@ -116,7 +118,7 @@ json.steps do
     },
   }
   steps << {
-    in: ['lzw_out'],
+    in: ['lzw_out', "cdhitdup_out"],
     out: 'bowtie2_out',
     class: 'PipelineStepRunBowtie2',
     module: 'idseq_dag.steps.run_bowtie2',
@@ -126,7 +128,7 @@ json.steps do
     additional_attributes: { output_sam_file: 'bowtie2.sam' },
   }
   steps << {
-    in: ['bowtie2_out'],
+    in: ['bowtie2_out', "cdhitdup_out"],
     out: 'subsampled_out',
     class: 'PipelineStepRunSubsample',
     module: 'idseq_dag.steps.run_subsample',
@@ -136,7 +138,7 @@ json.steps do
 
   if attr[:host_genome] != 'human'
     steps << {
-      in: %w[subsampled_out validate_input_out],
+      in: %w[subsampled_out validate_input_out cdhitdup_out],
       out: 'star_human_out',
       class: 'PipelineStepRunStarDownstream',
       module: 'idseq_dag.steps.run_star_downstream',
@@ -144,7 +146,7 @@ json.steps do
       additional_attributes: {},
     }
     steps << {
-      in: ['star_human_out'],
+      in: ['star_human_out', "cdhitdup_out"],
       out: 'bowtie2_human_out',
       class: 'PipelineStepRunBowtie2',
       module: 'idseq_dag.steps.run_bowtie2',
@@ -154,7 +156,7 @@ json.steps do
   end
 
   steps << {
-    in: [attr[:host_genome] != 'human' ? 'bowtie2_human_out' : 'subsampled_out'],
+    in: [(attr[:host_genome] != 'human' ? 'bowtie2_human_out' : 'subsampled_out'), "cdhitdup_out"],
     out: 'gsnap_filter_out',
     class: 'PipelineStepRunGsnapFilter',
     module: 'idseq_dag.steps.run_gsnap_filter',
