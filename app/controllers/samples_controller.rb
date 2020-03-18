@@ -594,6 +594,8 @@ class SamplesController < ApplicationController
     end
     samples -= removed_samples
 
+    warn_if_large_bulk_upload(samples)
+
     respond_to do |format|
       if samples.count > 0
         tags = %W[client:web type:bulk user_id:#{current_user.id}]
@@ -1425,5 +1427,15 @@ class SamplesController < ApplicationController
       }, status: :unauthorized
       # Rendering halts the filter chain
     end
+  end
+
+  def warn_if_large_bulk_upload(samples)
+    # 100 is the limit that was chosen during covid19 surge for biohub projects.
+    if samples.length < 100
+      return
+    end
+    msg = "[Datadog] LargeBulkUploadEvent: #{samples.length} samples by #{samples.first.user.role_name} in project #{samples.first.project.name}." \
+      "See: #{project_url(samples.first.project)}"
+    LogUtil.log_err_and_airbrake(msg)
   end
 end
