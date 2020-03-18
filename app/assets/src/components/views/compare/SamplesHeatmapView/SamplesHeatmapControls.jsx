@@ -25,7 +25,7 @@ import SequentialLegendVis from "~/components/visualizations/legends/SequentialL
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import FilterTag from "~ui/controls/FilterTag";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import InfoSIcon from "~ui/icons/InfoSIcon";
+import InfoSmallIcon from "~ui/icons/InfoSmallIcon";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -429,7 +429,7 @@ export default class SamplesHeatmapControls extends React.Component {
         <ColumnHeaderTooltip
           trigger={
             <span>
-              <InfoSIcon className={cs.infoIcon} />
+              <InfoSmallIcon className={cs.infoIcon} />
             </span>
           }
           content="The data included in this heatmap 
