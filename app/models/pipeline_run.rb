@@ -58,7 +58,7 @@ class PipelineRun < ApplicationRecord
 
   GSNAP_M8 = "gsnap.m8".freeze
   RAPSEARCH_M8 = "rapsearch2.m8".freeze
-  OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
+  OUTPUT_JSON_NAME = 'taxon_counts_with_dcr.json'.freeze
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   INPUT_VALIDATION_NAME = "validate_input_summary.json".freeze
@@ -68,7 +68,7 @@ class PipelineRun < ApplicationRecord
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
-  REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts.json'.freeze
+  REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts_with_dcr.json'.freeze
   REFINED_TAXID_BYTERANGE_JSON_NAME = 'assembly/refined_taxid_locations_combined.json'.freeze
   READS_PER_GENE_STAR_TAB_NAME = 'reads_per_gene.star.tab'.freeze
 
@@ -812,6 +812,10 @@ class PipelineRun < ApplicationRecord
     acceptable_tax_levels << TaxonCount::TAX_LEVEL_GENUS if multihit?
     acceptable_tax_levels << TaxonCount::TAX_LEVEL_FAMILY if multihit?
     taxon_counts_attributes_filtered = taxon_counts_attributes.select do |tcnt|
+      # Delete attributes that aren't in the DB schema.  These are emitted in versions >= v3.21
+      tcnt.delete "dcr"
+      tcnt.delete "unique_count"
+      tcnt.delete "nonunique_count"
       # TODO:  Better family support.
       acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_family_call?(tcnt)
     end

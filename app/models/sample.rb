@@ -61,11 +61,15 @@ class Sample < ApplicationRecord
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
 
-  # Constants for upload errors.
+  # Constants for upload_error field. NOTE: the name of this field is
+  # inaccurate. The intention of the field is to carry a message (a constant
+  # that refers to a message) to be shown to the user for exceptional
+  # conditions. See app/assets/src/components/utils/sample.js
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_S3_UPLOAD_FAILED = "S3_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_LOCAL_UPLOAD_STALLED = "LOCAL_UPLOAD_STALLED".freeze
   UPLOAD_ERROR_LOCAL_UPLOAD_FAILED = "LOCAL_UPLOAD_FAILED".freeze
+  UPLOAD_ERROR_PIPELINE_KICKOFF = "PIPELINE_KICKOFF_FAILED".freeze
   DO_NOT_PROCESS = "DO_NOT_PROCESS".freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
@@ -747,7 +751,16 @@ class Sample < ApplicationRecord
 
     pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
     pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
-    pr.save
+    pr.save!
+  rescue StandardError => err
+    LogUtil.log_err_and_airbrake("Error saving pipeline run: #{err.inspect}")
+    LogUtil.log_backtrace(err)
+    # This may cause a message to be shown to the user on the sample page.
+    # This may cause a message to be shown to the user on the sample page.
+    # See app/assets/src/components/utils/sample.js
+    # HACK ALERT! Use low-level update_columns to avoid callbacks, because
+    # kickoff_pipeline may be running in a callback already.
+    update_columns(upload_error: Sample::UPLOAD_ERROR_PIPELINE_KICKOFF) # rubocop:disable SkipsModelValidations
   end
 
   def get_existing_metadatum(key)

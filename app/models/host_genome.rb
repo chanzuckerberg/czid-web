@@ -46,6 +46,11 @@ class HostGenome < ApplicationRecord
     HostGenome::ERCC_PATH_PREFIX + HostGenome::S3_BOWTIE2_INDEX_FILE
   end
 
+  def self.all_without_metadata_field(name)
+    exists = joins(:metadata_fields).where(metadata_fields: { name: [name] }).distinct
+    where.not(id: exists)
+  end
+
   def as_json(options = {})
     hash = super(options)
     hash[:ercc_only] = ercc_only?
