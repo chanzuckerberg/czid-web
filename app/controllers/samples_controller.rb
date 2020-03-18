@@ -1439,5 +1439,8 @@ class SamplesController < ApplicationController
     msg = "[Datadog] LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name} in project #{project.name}." \
       " See: #{project.status_url}"
     LogUtil.log_err_and_airbrake(msg)
+  rescue StandardError => e
+    # catch all errors because we don't want to ever block uploads
+    LogUtil.log_err_and_airbrake("warn_if_large_bulk_upload: #{e}")
   end
 end
