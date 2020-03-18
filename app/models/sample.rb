@@ -61,7 +61,10 @@ class Sample < ApplicationRecord
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
 
-  # Constants for upload errors.
+  # Constants for upload_error field. NOTE: the name of this field is
+  # inaccurate. The intention of the field is to carry a message (a constant
+  # that refers to a message) to be shown to the user for exceptional
+  # conditions. See app/assets/src/components/utils/sample.js
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_S3_UPLOAD_FAILED = "S3_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_LOCAL_UPLOAD_STALLED = "LOCAL_UPLOAD_STALLED".freeze
@@ -751,10 +754,13 @@ class Sample < ApplicationRecord
     pr.save!
   rescue StandardError => err
     LogUtil.log_err_and_airbrake("Error saving pipeline run: #{err.inspect}")
-    # This will cause a message to be shown to the user on the sample page.
+    LogUtil.log_backtrace(err)
+    # This may cause a message to be shown to the user on the sample page.
+    # This may cause a message to be shown to the user on the sample page.
     # See app/assets/src/components/utils/sample.js
-    self.upload_error = Sample::UPLOAD_ERROR_PIPELINE_KICKOFF
-    save!
+    # HACK ALERT! Use low-level update_columns to avoid callbacks, because
+    # kickoff_pipeline may be running in a callback already.
+    update_columns(upload_error: Sample::UPLOAD_ERROR_PIPELINE_KICKOFF) # rubocop:disable SkipsModelValidations
   end
 
   def get_existing_metadatum(key)
