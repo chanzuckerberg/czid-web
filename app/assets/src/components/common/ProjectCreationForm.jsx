@@ -14,42 +14,83 @@ import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./project_creation_form.scss";
 
+const ACCESS_LEVEL = Object.freeze({
+  publicAccess: 1,
+  privateAccess: 0,
+  noSelection: -1,
+});
+
 class ProjectCreationForm extends React.Component {
   state = {
     name: "",
-    publicAccess: -1, // No selection by default
+    accessLevel: ACCESS_LEVEL.noSelection, // No selection by default
     error: "",
     description: "",
     showInfo: false,
+    disableCreateButton: true,
   };
 
+  areCreationReqsMet(changed = {}) {
+    const reqs = {
+      name: this.state.name,
+      accessLevel: this.state.accessLevel,
+      description: this.state.description,
+    };
+
+    Object.keys(changed).forEach(requirement => {
+      reqs[requirement] = changed[requirement];
+    });
+
+    if (
+      reqs.name === "" ||
+      reqs.accessLevel === ACCESS_LEVEL.noSelection ||
+      reqs.description.length < 1
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
   handleNameChange = name => {
+    const disableCreateButton = !this.areCreationReqsMet({ name });
     this.setState({
       name,
+      disableCreateButton,
+    });
+  };
+
+  handleAccessLevelChange = accessLevel => {
+    const disableCreateButton = !this.areCreationReqsMet({ accessLevel });
+    this.setState({
+      accessLevel,
+      disableCreateButton,
     });
   };
 
   handleDescriptionChange = description => {
+    const disableCreateButton = !this.areCreationReqsMet({ description });
     this.setState({
       description,
+      disableCreateButton,
     });
   };
 
   handleCreateProject = async () => {
-    if (this.state.name === "" || this.state.publicAccess === -1) {
-      return;
-    }
+    const { onCreate } = this.props;
+    const { name, accessLevel, description } = this.state;
+
     this.setState({
       error: "",
     });
     try {
       const newProject = await createProject({
-        name: this.state.name,
-        public_access: this.state.publicAccess,
-        description: this.state.description,
+        name: name,
+        public_access: accessLevel,
+        description: description,
       });
 
-      this.props.onCreate(newProject);
+      onCreate(newProject);
     } catch (e) {
       if (e[0] === "Name has already been taken") {
         this.setState({
@@ -80,12 +121,14 @@ class ProjectCreationForm extends React.Component {
 
   render() {
     const { onCancel } = this.props;
-    const { showInfo, name, publicAccess, description, error } = this.state;
-
-    let disableCreateButton = false;
-    if (name === "" || publicAccess === -1 || description.length < 1) {
-      disableCreateButton = true;
-    }
+    const {
+      showInfo,
+      name,
+      accessLevel,
+      description,
+      error,
+      disableCreateButton,
+    } = this.state;
 
     return (
       <div className={cs.projectCreationForm}>
@@ -97,10 +140,12 @@ class ProjectCreationForm extends React.Component {
           <div className={cs.label}>Project Sharing</div>
           <div
             className={cs.sharingOption}
-            onClick={() => this.setState({ publicAccess: 1 })}
+            onClick={() =>
+              this.handleAccessLevelChange(ACCESS_LEVEL.publicAccess)
+            }
           >
             <RadioButton
-              selected={publicAccess === 1}
+              selected={accessLevel === ACCESS_LEVEL.publicAccess}
               className={cs.radioButton}
             />
             <PublicProjectIcon className={cs.projectIcon} />
@@ -113,10 +158,12 @@ class ProjectCreationForm extends React.Component {
           </div>
           <div
             className={cs.sharingOption}
-            onClick={() => this.setState({ publicAccess: 0 })}
+            onClick={() =>
+              this.handleAccessLevelChange(ACCESS_LEVEL.privateAccess)
+            }
           >
             <RadioButton
-              selected={publicAccess === 0}
+              selected={accessLevel === ACCESS_LEVEL.privateAccess}
               className={cs.radioButton}
             />
             <PrivateProjectIcon className={cs.projectIcon} />
@@ -184,7 +231,9 @@ class ProjectCreationForm extends React.Component {
                   cs.createButton,
                   disableCreateButton && cs.disabled
                 )}
-                onClick={this.handleCreateProject}
+                onClick={
+                  disableCreateButton ? () => {} : this.handleCreateProject
+                }
               >
                 Create Project
               </div>
