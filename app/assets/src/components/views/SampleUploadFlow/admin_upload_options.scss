@@ -1,0 +1,47 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.subheader {
+  @include font-header-s;
+  margin-top: $space-xxs;
+
+  .toggleLink {
+    @include font-label-s;
+    color: $primary-light;
+    cursor: pointer;
+    margin-left: $space-xxs;
+  }
+}
+
+.adminUploadOptions {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: $space-xxs;
+  padding: $space-m;
+  padding-bottom: 0;
+  background-color: $off-white;
+}
+
+.field {
+  width: calc(33.3% - #{$space-l * 2 / 3});
+  margin-right: $space-l;
+  margin-bottom: $space-m;
+
+  &:nth-child(3n) {
+    margin-right: 0;
+  }
+
+  .label {
+    @include font-body-xs;
+    margin-bottom: 2px;
+  }
+
+  .input {
+    display: flex;
+  }
+
+  .helpIcon {
+    margin-left: $space-xxxs;
+  }
+}

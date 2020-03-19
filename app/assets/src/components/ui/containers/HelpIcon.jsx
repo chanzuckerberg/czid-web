@@ -1,13 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import { Popup } from "semantic-ui-react";
+import BasicPopup from "~/components/BasicPopup";
 import cs from "./help_icon.scss";
 
 class HelpIcon extends React.Component {
   render() {
     return (
-      <Popup
+      <BasicPopup
         trigger={
           <i
             className={cx(
@@ -17,9 +17,12 @@ class HelpIcon extends React.Component {
             )}
           />
         }
-        inverted
-        content={this.props.text}
-        horizontalOffset={13}
+        hoverable
+        inverted={false}
+        basic={false}
+        size="small"
+        position="top center"
+        content={<div className={cs.tooltip}>{this.props.text}</div>}
       />
     );
   }
