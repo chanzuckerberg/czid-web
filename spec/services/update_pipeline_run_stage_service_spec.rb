@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe UpdatePipelineRunStageService do
   let(:pipeline_run_id) { 12_345 }
-  let(:stage_number) { 2 }
+  let(:stage_number) { 1 }
   let(:job_status) { "SUCCEEDED" }
 
   let(:described_service_instance) { described_class.new(pipeline_run_id, stage_number, job_status) }
@@ -32,12 +32,27 @@ RSpec.describe UpdatePipelineRunStageService do
     end
 
     context "#call" do
-      before { expect(described_service_instance.pipeline_run).to receive(:async_update_job_status) }
+      let(:pipeline_run) { described_service_instance.pipeline_run }
 
-      it "updates pipeline_run_stage" do
+      it "updates pipeline_run_stage job_status" do
         described_service_instance.call
-        prs = PipelineRun.find(pipeline_run_id).pipeline_run_stages.find_by(step_number: stage_number)
+        prs = pipeline_run.reload.pipeline_run_stages.find_by(step_number: stage_number)
         expect(prs).to have_attributes(job_status: job_status)
+      end
+
+      context "when step 1 succeeded" do
+        it "updates pipeline_run job_status" do
+          described_service_instance.call
+          expect(pipeline_run.reload).to have_attributes(job_status: "2.GSNAPL/RAPSEARCH alignment-STARTED")
+        end
+      end
+      context "when step 1 failed" do
+        before { expect(described_service_instance.pipeline_run).to receive(:report_failed_pipeline_run_stage) }
+        let(:job_status) { "FAILED" }
+        it "updates pipeline_run job_status" do
+          described_service_instance.call
+          expect(pipeline_run.reload).to have_attributes(job_status: "1.Host Filtering-FAILED")
+        end
       end
     end
   end
