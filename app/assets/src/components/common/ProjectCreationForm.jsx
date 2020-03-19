@@ -30,8 +30,30 @@ class ProjectCreationForm extends React.Component {
     disableCreateButton: true,
   };
 
+  areCreationReqsUnmet(changed = {}) {
+    const reqs = {
+      name: this.state.name,
+      accessLevel: this.state.accessLevel,
+      description: this.state.description,
+    };
+
+    Object.keys(changed).forEach(requirement => {
+      reqs[requirement] = changed[requirement];
+    });
+
+    if (
+      reqs.name === "" ||
+      reqs.accessLevel === ACCESS_LEVEL.noSelection ||
+      reqs.description.length < 1
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
   handleNameChange = name => {
-    const disableCreateButton = name === "";
+    const disableCreateButton = this.areCreationReqsUnmet({ name });
     this.setState({
       name,
       disableCreateButton,
@@ -39,7 +61,7 @@ class ProjectCreationForm extends React.Component {
   };
 
   handleAccessLevelChange = accessLevel => {
-    const disableCreateButton = accessLevel === -1;
+    const disableCreateButton = this.areCreationReqsUnmet({ accessLevel });
     this.setState({
       accessLevel,
       disableCreateButton,
@@ -47,7 +69,7 @@ class ProjectCreationForm extends React.Component {
   };
 
   handleDescriptionChange = description => {
-    const disableCreateButton = description.length < 1;
+    const disableCreateButton = this.areCreationReqsUnmet({ description });
     this.setState({
       description,
       disableCreateButton,
@@ -123,7 +145,7 @@ class ProjectCreationForm extends React.Component {
             }
           >
             <RadioButton
-              selected={accessLevel === 1}
+              selected={accessLevel === ACCESS_LEVEL.publicAccess}
               className={cs.radioButton}
             />
             <PublicProjectIcon className={cs.projectIcon} />
@@ -141,7 +163,7 @@ class ProjectCreationForm extends React.Component {
             }
           >
             <RadioButton
-              selected={accessLevel === 0}
+              selected={accessLevel === ACCESS_LEVEL.privateAccess}
               className={cs.radioButton}
             />
             <PrivateProjectIcon className={cs.projectIcon} />
