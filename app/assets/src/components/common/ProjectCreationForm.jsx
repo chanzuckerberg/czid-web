@@ -30,7 +30,7 @@ class ProjectCreationForm extends React.Component {
     disableCreateButton: true,
   };
 
-  areCreationReqsUnmet(changed = {}) {
+  areCreationReqsMet(changed = {}) {
     const reqs = {
       name: this.state.name,
       accessLevel: this.state.accessLevel,
@@ -46,14 +46,14 @@ class ProjectCreationForm extends React.Component {
       reqs.accessLevel === ACCESS_LEVEL.noSelection ||
       reqs.description.length < 1
     ) {
-      return true;
+      return false;
     }
 
-    return false;
+    return true;
   }
 
   handleNameChange = name => {
-    const disableCreateButton = this.areCreationReqsUnmet({ name });
+    const disableCreateButton = !this.areCreationReqsMet({ name });
     this.setState({
       name,
       disableCreateButton,
@@ -61,7 +61,7 @@ class ProjectCreationForm extends React.Component {
   };
 
   handleAccessLevelChange = accessLevel => {
-    const disableCreateButton = this.areCreationReqsUnmet({ accessLevel });
+    const disableCreateButton = !this.areCreationReqsMet({ accessLevel });
     this.setState({
       accessLevel,
       disableCreateButton,
@@ -69,7 +69,7 @@ class ProjectCreationForm extends React.Component {
   };
 
   handleDescriptionChange = description => {
-    const disableCreateButton = this.areCreationReqsUnmet({ description });
+    const disableCreateButton = !this.areCreationReqsMet({ description });
     this.setState({
       description,
       disableCreateButton,
