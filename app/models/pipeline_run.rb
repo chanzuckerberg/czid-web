@@ -1109,11 +1109,36 @@ class PipelineRun < ApplicationRecord
         # Check for long-running pipeline run and log/alert if needed
         check_and_log_long_run
       end
-      self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
-      self.job_status = "|#{STATUS_READY}" if report_ready?
+      self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status, report_ready?)
     end
     save!
     enqueue_new_pipeline_run if automatic_restart
+  end
+
+  private def format_job_status_text(step_number, name, job_status, report_ready_flag)
+    "#{step_number}.#{name}-#{job_status}" + (report_ready_flag ? "|#{STATUS_READY}" : "")
+  end
+
+  # This method should be renamed to update_job_status after fully transitioning to step functions
+  # and completely removing the polling mechanism and DAG pipeline_execution_strategy
+  def async_update_job_status
+    prs = active_stage
+    if prs.nil?
+      # all stages succeeded
+      self.finalized = 1
+      self.job_status = STATUS_CHECKED
+    else
+      if prs.failed?
+        self.job_status = STATUS_FAILED
+        self.finalized = 1
+        self.known_user_error, self.error_message = check_for_user_error(prs)
+        automatic_restart = false
+        send_to_airbrake = !known_user_error
+        report_failed_pipeline_run_stage(prs, automatic_restart, known_user_error, send_to_airbrake)
+      end
+      self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status || PipelineRunStage::STATUS_STARTED, report_ready?)
+    end
+    save!
   end
 
   private def pipeline_run_stage_error_message(prs, automatic_restart, known_user_error)
