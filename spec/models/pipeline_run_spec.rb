@@ -90,13 +90,13 @@ RSpec.describe PipelineRun, type: :model do
           it "sends error to airbrake" do
             pipeline_run.update_job_status
 
-            expect(pipeline_run).to have_received(:report_failed_pipeline_run_stage).with(instance_of(PipelineRunStage), boolean, anything, true)
+            expect(pipeline_run).to have_received(:report_failed_pipeline_run_stage).with(instance_of(PipelineRunStage), anything, true, boolean)
           end
         else
           it "does not send error to airbrake" do
             pipeline_run.update_job_status
 
-            expect(pipeline_run).to have_received(:report_failed_pipeline_run_stage).with(instance_of(PipelineRunStage), boolean, anything, false)
+            expect(pipeline_run).to have_received(:report_failed_pipeline_run_stage).with(instance_of(PipelineRunStage), anything, false, boolean)
           end
         end
 
@@ -214,14 +214,14 @@ RSpec.describe PipelineRun, type: :model do
     it "sends metric to datadog" do
       allow(MetricUtil).to receive(:put_metric_now)
 
-      pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, true, "SOME_USER_ERROR", false)
+      pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, "SOME_USER_ERROR", false, true)
 
       expect(MetricUtil).to have_received(:put_metric_now).with("samples.failed", 1, ["sample_id:123", "automatic_restart:true", "known_user_error:true", "send_to_airbrake:false"])
     end
 
     context "when send_to_airbrake is true" do
       it "sends error to airbrake and log error" do
-        pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, false, nil, true)
+        pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, nil, true, false)
 
         expect(LogUtil).to have_received(:log_err_and_airbrake).with(match(/SampleFailedEvent:/))
       end
@@ -230,7 +230,7 @@ RSpec.describe PipelineRun, type: :model do
     context "when send_to_airbrake is false" do
       before { allow(Rails.logger).to receive(:warn) }
       it "do not send error to airbrake and log warn" do
-        pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, true, nil, false)
+        pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, nil, false, true)
 
         expect(LogUtil).to_not have_received(:log_err_and_airbrake)
         expect(Rails.logger).to have_received(:warn).with(match(/SampleFailedEvent:/))
@@ -372,6 +372,86 @@ RSpec.describe PipelineRun, type: :model do
     it "should return nil when no valid star_genome" do
       pipeline_run_stage.dag_json = dag_json('no match spaces')
       expect(pipeline_run.host_subtracted).to eq(nil)
+    end
+  end
+
+  context "#async_update_job_status" do
+    NO_USER_ERROR = [false, nil].freeze
+    USER_ERROR = [true, "Insufficient reads"].freeze
+
+    let(:pipeline_run_id) { 12_345 }
+    let(:stage_number) { 1 }
+
+    let(:project) { create(:project) }
+    let(:sample) { create(:sample, project_id: project.id) }
+    let(:pipeline_execution_strategy) { 'step_function' }
+
+    let(:check_for_user_error_response) { NO_USER_ERROR }
+    let(:report_ready_response) { false }
+
+    let(:pipeline_run_stages_statuses) { [nil, nil, nil, nil] }
+
+    subject do
+      pipeline_run = create(:pipeline_run,
+                            id: pipeline_run_id,
+                            sample_id: sample.id,
+                            pipeline_execution_strategy: pipeline_execution_strategy)
+      pipeline_run.pipeline_run_stages.order(step_number: :asc).zip(pipeline_run_stages_statuses).each do |prs, st|
+        prs.update!(job_status: st) unless st.nil?
+      end
+      pipeline_run.async_update_job_status
+      pipeline_run
+    end
+
+    before do
+      allow(subject).to receive(:check_for_user_error).and_return(check_for_user_error_response)
+      allow(subject).to receive(:report_ready?).and_return(report_ready_response)
+    end
+
+    context "when received a single stage update" do
+      context "in order" do
+        context "and stage 1 reported success" do
+          let(:pipeline_run_stages_statuses) { ["SUCCEEDED", nil, nil, nil] }
+          it { is_expected.to have_attributes(job_status: "2.GSNAPL/RAPSEARCH alignment-STARTED", finalized: 0) }
+        end
+        context "and stage 1 reported failure" do
+          let(:pipeline_run_stages_statuses) { ["FAILED", nil, nil, nil] }
+          it { is_expected.to have_attributes(job_status: "1.Host Filtering-FAILED", finalized: 1) }
+        end
+      end
+      context "out of order" do
+        context "and only stage 3 reported success" do
+          let(:pipeline_run_stages_statuses) { [nil, nil, "SUCCEEDED", nil] }
+          it { is_expected.to have_attributes(job_status: "1.Host Filtering-STARTED", finalized: 0) }
+        end
+        context "only stage 3 reported failure" do
+          let(:pipeline_run_stages_statuses) { [nil, nil, "FAILED", nil] }
+          it { is_expected.to have_attributes(job_status: "1.Host Filtering-STARTED", finalized: 0) }
+        end
+      end
+    end
+
+    context "when received multiple stage updates in any order" do
+      context "and stages 1/2/3 reported success" do
+        let(:pipeline_run_stages_statuses) { ["SUCCEEDED", "SUCCEEDED", "SUCCEEDED", nil] }
+        it { is_expected.to have_attributes(job_status: "4.Experimental-STARTED", finalized: 0) }
+      end
+      context "and stages 1/3/4 reported successes but missing staging 2 status" do
+        let(:pipeline_run_stages_statuses) { ["SUCCEEDED", nil, "SUCCEEDED", "SUCCEEDED"] }
+        it { is_expected.to have_attributes(job_status: "2.GSNAPL/RAPSEARCH alignment-STARTED", finalized: 0) }
+      end
+      context "and all stages reported success" do
+        let(:pipeline_run_stages_statuses) { ["SUCCEEDED", "SUCCEEDED", "SUCCEEDED", "SUCCEEDED"] }
+        it { is_expected.to have_attributes(job_status: "CHECKED", finalized: 1) }
+      end
+      context "and stages 1/2 reported success and stage 3 reported failure" do
+        let(:pipeline_run_stages_statuses) { ["SUCCEEDED", "SUCCEEDED", "FAILED", nil] }
+        it { is_expected.to have_attributes(job_status: "3.Post Processing-FAILED", finalized: 1) }
+      end
+      context "and stage 3 reported failure, stage 1 reported success, but missing stage 2 status" do
+        let(:pipeline_run_stages_statuses) { ["SUCCEEDED", nil, "FAILED", nil] }
+        it { is_expected.to have_attributes(job_status: "2.GSNAPL/RAPSEARCH alignment-STARTED", finalized: 0) }
+      end
     end
   end
 end
