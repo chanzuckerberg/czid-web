@@ -1,5 +1,11 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .helpIcon {
-  color: $light-grey;
+  fill: $light-grey;
+}
+
+.tooltip {
+  text-align: left;
+  @include font-body-xs;
 }
