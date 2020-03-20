@@ -524,8 +524,9 @@ class DiscoveryView extends React.Component {
     });
 
     // Set to match 'samples' or 'projects'
-    if (mapSidebarTab !== "summary")
+    if (mapSidebarTab !== "summary") {
       this.setState({ mapSidebarTab: currentTab });
+    }
   };
 
   handleFilterChange = selectedFilters => {

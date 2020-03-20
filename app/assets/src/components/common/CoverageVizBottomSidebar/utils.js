@@ -57,12 +57,12 @@ export const getGenomeVizTooltipData = memoize((hitGroups, dataIndex) => {
   } else if (numReads > 1) {
     name = "Aggregated Loose Reads";
     counts = [["# Loose Reads", numReads]];
-  } else if (numReads == 1) {
+  } else if (numReads === 1) {
     name = "Loose Read";
   } else if (numContigs > 1) {
     name = "Aggregated Contigs";
     counts = [["# Contigs", numContigs], ["Contig Read Count", hitObj[2]]];
-  } else if (numContigs == 1) {
+  } else if (numContigs === 1) {
     name = "Contig";
     counts = [["Contig Read Count", hitObj[2]]];
   }

@@ -80,13 +80,13 @@ export const withAnalytics = (handleEvent, eventName, eventData = {}) => {
     // eslint-disable-next-line no-console
     console.warn(`Missing one part of analytics event name in "${eventName}"`);
   }
-  if (camelCase(componentName) != lowerFirst(componentName)) {
+  if (camelCase(componentName) !== lowerFirst(componentName)) {
     // eslint-disable-next-line no-console
     console.warn(
       `Component name "${componentName}" should be CamelCase in "${eventName}"`
     );
   }
-  if (snakeCase(friendlyName).replace(/_/g, "-") != friendlyName) {
+  if (snakeCase(friendlyName).replace(/_/g, "-") !== friendlyName) {
     // eslint-disable-next-line no-console
     console.warn(
       `Friendly name "${friendlyName}" should be dash-case in "${eventName}"`

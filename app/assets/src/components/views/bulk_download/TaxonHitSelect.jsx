@@ -48,7 +48,7 @@ class TaxonHitSelect extends React.Component {
     );
 
     // If the query has since changed, discard the response.
-    if (query != this._lastQuery) {
+    if (query !== this._lastQuery) {
       return;
     }
 

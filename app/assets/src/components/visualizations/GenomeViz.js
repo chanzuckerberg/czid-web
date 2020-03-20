@@ -44,7 +44,6 @@ export default class GenomeViz {
       .append("svg")
       .attr("width", this.size.width)
       .attr("height", this.size.height);
-    this.svg.remove;
   }
 
   getDomain = () => {
@@ -105,7 +104,7 @@ export default class GenomeViz {
   };
 
   onMouseMove = () => {
-    if (!this.barEndpoints || this.barEndpoints.length == 0) {
+    if (!this.barEndpoints || this.barEndpoints.length === 0) {
       return;
     }
 
@@ -141,7 +140,7 @@ export default class GenomeViz {
   };
 
   onMouseClick = () => {
-    if (!this.barEndpoints || this.barEndpoints.length == 0) {
+    if (!this.barEndpoints || this.barEndpoints.length === 0) {
       return;
     }
 
