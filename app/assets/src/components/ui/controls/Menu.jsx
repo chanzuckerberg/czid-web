@@ -4,10 +4,6 @@ import React from "react";
 import cx from "classnames";
 
 class Menu extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const { className } = this.props;
     return (
@@ -27,10 +23,6 @@ Menu.propTypes = {
 };
 
 class MenuItem extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const { className } = this.props;
     return (

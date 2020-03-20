@@ -17,10 +17,6 @@ const triggersConditionalField = (conditionalField, selectedFields) =>
   );
 
 export default class BulkDownloadModalFooter extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   getSelectedDownloadType = () => {
     const { downloadTypes, selectedDownloadTypeName } = this.props;
 

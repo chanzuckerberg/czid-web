@@ -8,7 +8,7 @@ const BackgroundModelFilter = ({ allBackgrounds, value, onChange }) => {
   let backgroundOptions = allBackgrounds.map(background => {
     return { text: background.name, value: background.id };
   });
-  if (backgroundOptions.length == 0) {
+  if (backgroundOptions.length === 0) {
     backgroundOptions = [
       { text: "No background models to display", value: -1 },
     ];

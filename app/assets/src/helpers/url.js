@@ -50,12 +50,12 @@ export const getURLParamString = params => {
   return flow(
     toPairs,
     map(
+      // Convert array parameters correctly.
+      // Filter out objects and nested arrays within the array.
+      // We only parse one level deep for now.
       ([key, value]) =>
         isArray(value)
-          ? // Convert array parameters correctly.
-            // Filter out objects and nested arrays within the array.
-            // We only parse one level deep for now.
-            filter(val => !isObject(val), value).map(
+          ? filter(val => !isObject(val), value).map(
               eachValue => `${key}[]=${eachValue}`
             )
           : `${key}=${value}`

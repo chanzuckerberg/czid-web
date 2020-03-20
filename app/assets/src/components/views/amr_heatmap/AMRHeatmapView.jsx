@@ -198,8 +198,8 @@ export default class AMRHeatmapView extends React.Component {
     sampleData.forEach(sample => {
       sample.amrCounts.forEach(amrCount => {
         if (
-          amrCount.annotation_gene == null ||
-          amrCount.annotation_gene == undefined
+          amrCount.annotation_gene === null ||
+          amrCount.annotation_gene === undefined
         ) {
           genes[amrCount.gene] = true;
         } else {
@@ -218,7 +218,7 @@ export default class AMRHeatmapView extends React.Component {
     return [geneLabels, alleleLabels];
   }
 
-  //*** Callback methods ***
+  // *** Callback methods ***
 
   updateOptions = options => {
     const { selectedOptions } = this.state;
@@ -266,7 +266,6 @@ export default class AMRHeatmapView extends React.Component {
         selectedGene === geneName)
     ) {
       this.closeSidebar();
-      return;
     } else {
       this.setState({
         selectedGene: geneName,
@@ -303,7 +302,7 @@ export default class AMRHeatmapView extends React.Component {
     });
   };
 
-  //*** Post-update methods ***
+  // *** Post-update methods ***
 
   computeHeatmapValuesForCSV() {
     const { samplesWithAMRCounts } = this.state;
@@ -346,9 +345,8 @@ export default class AMRHeatmapView extends React.Component {
           geneName: selectedGene,
         };
       }
-      default: {
-        return;
-      }
+      default:
+        break;
     }
   }
 
@@ -374,7 +372,7 @@ export default class AMRHeatmapView extends React.Component {
     return [{ text: this.getDownloadCSVLink(), value: "csv" }];
   }
 
-  //*** Render methods ***
+  // *** Render methods ***
 
   renderHeader() {
     const { loading } = this.state;

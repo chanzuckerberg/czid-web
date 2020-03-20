@@ -335,15 +335,17 @@ class TaxonTreeVis extends React.Component {
     const { taxa } = this.props;
     const labels = [];
     taxa.forEach(genusData => {
-      if (genusData.pathogenTag)
+      if (genusData.pathogenTag) {
         labels.push(
           this.renderPathogenLabel(genusData.taxId, genusData.pathogenTag)
         );
+      }
       genusData.filteredSpecies.forEach(speciesData => {
-        if (speciesData.pathogenTag)
+        if (speciesData.pathogenTag) {
           labels.push(
             this.renderPathogenLabel(speciesData.taxId, speciesData.pathogenTag)
           );
+        }
       });
     });
     return labels;

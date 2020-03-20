@@ -8,7 +8,7 @@ class ERCCScatterPlot extends React.Component {
     let data = [];
     if (this.props.ercc_comparison) {
       for (let row of this.props.ercc_comparison) {
-        if (row.actual == 0) {
+        if (row.actual === 0) {
           continue;
         }
         data.push({

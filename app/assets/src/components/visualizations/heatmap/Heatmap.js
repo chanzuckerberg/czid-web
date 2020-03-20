@@ -491,12 +491,12 @@ export default class Heatmap {
     // Define the scrolling boundaries for the svg.
     // Upper limits are determined by the difference between the container and svg sizes,
     // scaled by the zoom factor.
-    let containerWidth = this.container[0][0].offsetWidth,
-      containerHeight = this.container[0][0].offsetHeight;
+    let containerWidth = this.container[0][0].offsetWidth;
+    let containerHeight = this.container[0][0].offsetHeight;
     let xScrollMax =
-        (containerWidth - this.svg.attr("width")) / this.options.zoom,
-      yScrollMax =
-        (containerHeight - this.svg.attr("height")) / this.options.zoom;
+      (containerWidth - this.svg.attr("width")) / this.options.zoom;
+    let yScrollMax =
+      (containerHeight - this.svg.attr("height")) / this.options.zoom;
 
     // Translating the svg:
     let gCurrentTranslate = d3.transform(this.g.attr("transform")).translate;
@@ -591,8 +591,9 @@ export default class Heatmap {
 
       this.columnLabels.forEach(column => {
         let metadatumValue = (column.metadata || {})[metadata.value];
-        if (metadatumValue && !colorMap[metadatumValue])
+        if (metadatumValue && !colorMap[metadatumValue]) {
           colorMap[metadatumValue] = colors[idx++];
+        }
       });
       this.metadataColors[metadata.value] = colorMap;
     });
@@ -696,7 +697,7 @@ export default class Heatmap {
       }
 
       root = stack.pop();
-      if (root.right && stack[stack.length - 1] == root.right) {
+      if (root.right && stack[stack.length - 1] === root.right) {
         stack.pop();
         stack.push(root);
         root = root.right;
@@ -1417,8 +1418,9 @@ export default class Heatmap {
         .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
 
       // setup triggers
-      if (addMetadataTrigger.size())
+      if (addMetadataTrigger.size()) {
         this.addMetadataTrigger = addMetadataTrigger.node();
+      }
 
       // update
       addLink.attr(
@@ -1533,8 +1535,9 @@ export default class Heatmap {
       });
 
     let diagonal = (d, useRectEdges) => {
-      if (useRectEdges === true)
+      if (useRectEdges === true) {
         return `M${d.source.y},${d.source.x}V${d.target.x}H${d.target.y}`;
+      }
 
       let radius = 4;
       let dir = (d.source.x - d.target.x) / Math.abs(d.source.x - d.target.x);

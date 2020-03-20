@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+// Disable since this file is deprecated and there issues that were hard to solve
 import React from "react";
 import axios from "axios";
 import ReactDOM from "react-dom";
@@ -236,19 +238,19 @@ class Samples extends React.Component {
   };
 
   handleSuggestSelect = (e, { result }) => {
-    if (result.category == "Project") {
+    if (result.category === "Project") {
       this.handleProjectSelection(result.id);
-    } else if (result.category == "Sample") {
+    } else if (result.category === "Sample") {
       this.applySuggestFilter(result, "sampleIdsParams", "sample_ids");
-    } else if (result.category == "Tissue") {
+    } else if (result.category === "Tissue") {
       this.applySuggestFilter(result, "selectedTissueFilters", "id");
-    } else if (result.category == "Host") {
+    } else if (result.category === "Host") {
       this.applySuggestFilter(result, "selectedHostIndices", "id");
-    } else if (result.category == "Location") {
+    } else if (result.category === "Location") {
       this.applySuggestFilter(result, "selectedLocations", "id");
-    } else if (result.category == "Taxon") {
+    } else if (result.category === "Taxon") {
       this.applySuggestFilter(result, "selectedTaxids", "taxid");
-    } else if (result.category == "Uploader") {
+    } else if (result.category === "Uploader") {
       this.applySuggestFilter(result, "selectedUploaderIds", "id");
     }
   };
@@ -529,7 +531,7 @@ class Samples extends React.Component {
     });
   }
 
-  //Load more samples on scroll
+  // Load more samples on scroll
   scrollDown() {
     var that = this;
     $(window).scroll(function() {
@@ -537,17 +539,15 @@ class Samples extends React.Component {
         $(window).scrollTop() >
         $(document).height() - $(window).height() - 6000
       ) {
-        {
-          !that.state.isRequesting && !that.state.pageEnd
-            ? that.loadMore()
-            : null;
+        if (!that.state.isRequesting && !that.state.pageEnd) {
+          that.loadMore();
         }
         return false;
       }
     });
   }
 
-  //load more paginated samples
+  // load more paginated samples
   loadMore() {
     const params = this.getParams();
     this.setState({ isRequesting: true });
@@ -630,7 +630,7 @@ class Samples extends React.Component {
   };
 
   allTissueTypes(all_tissues) {
-    return all_tissues.length == 0 || all_tissues.indexOf("Not set") >= 0
+    return all_tissues.length === 0 || all_tissues.indexOf("Not set") >= 0
       ? all_tissues
       : ["Not set", ...all_tissues];
   }
@@ -664,7 +664,7 @@ class Samples extends React.Component {
               ? []
               : prevState.selectedHostIndices,
           displayEmpty: false,
-          checkInUpdate: false, //don't trigger more update if it's from the fetchResults
+          checkInUpdate: false, // don't trigger more update if it's from the fetchResults
           resetTissues: false,
           resetHosts: false,
           // Only change the total count if the project has changed.
@@ -699,7 +699,7 @@ class Samples extends React.Component {
       });
   };
 
-  //handle search when query is passed
+  // handle search when query is passed
   handleSearch(e) {
     if (e.target.value !== "" && e.key === "Enter") {
       this.nanobar.go(30);
@@ -816,7 +816,7 @@ class Samples extends React.Component {
           background_creation_response: response.data,
         });
       })
-      .catch(error => {
+      .catch(() => {
         that.setState({
           background_creation_response: { message: "Something went wrong." },
         });
@@ -917,7 +917,7 @@ class Samples extends React.Component {
       .then(_ => {
         openUrl("/");
       })
-      .catch(err => {});
+      .catch(() => {});
   }
 
   renderTable(sampleMap, sampleIds) {
@@ -1009,7 +1009,7 @@ class Samples extends React.Component {
         <div className="filter-container">
           <MultipleDropdown
             label="Hosts"
-            disabled={this.state.hostGenomes.length == 0}
+            disabled={this.state.hostGenomes.length === 0}
             options={this.state.hostGenomes.map(host => {
               return { text: host.name, value: host.id };
             })}
@@ -1021,7 +1021,7 @@ class Samples extends React.Component {
         <div className="filter-container">
           <MultipleDropdown
             label="Sample Types"
-            disabled={this.state.tissueTypes.length == 0}
+            disabled={this.state.tissueTypes.length === 0}
             options={this.state.tissueTypes.map(tissue => {
               return { text: tissue, value: tissue };
             })}
@@ -1100,7 +1100,7 @@ class Samples extends React.Component {
     }
 
     if (this.state.checkInUpdate) {
-      //fetchResults hasn't run since the host/tissue change
+      // fetchResults hasn't run since the host/tissue change
       if (prevHostIndices.length !== this.state.selectedHostIndices.length) {
         this.setState({
           hostFilterChange: true,
@@ -1228,7 +1228,7 @@ class Samples extends React.Component {
     });
   }
 
-  //handle filtering when a filter is selected from list
+  // handle filtering when a filter is selected from list
   handleStatusFilterSelect = status => {
     this.setState(
       {
@@ -1242,16 +1242,16 @@ class Samples extends React.Component {
   };
 
   selectionToParamsOrNone(selected_options, value_when_empty = "") {
-    return selected_options.length == 0
+    return selected_options.length === 0
       ? value_when_empty
       : selected_options.join(",");
   }
 
-  //set Url based on requests
+  // set Url based on requests
   setUrlLocation(value_when_empty = "") {
     let projectId = parseInt(this.state.selectedProjectId);
     const params = {
-      project_id: projectId ? projectId : null,
+      project_id: projectId || null,
       filter: this.state.filterParams,
       tissue: this.selectionToParamsOrNone(this.state.selectedTissueFilters),
       host: this.selectionToParamsOrNone(this.state.selectedHostIndices),
@@ -1860,7 +1860,7 @@ function ProjectInfoHeading({
           {state.selectedProjectId &&
           canEditProject(state.selectedProjectId) &&
           state.project &&
-          state.project.total_sample_count == 0
+          state.project.total_sample_count === 0
             ? delete_project_button
             : null}
         </div>
@@ -1959,7 +1959,7 @@ function SampleCardCheckboxes({
             key={`sample_${sample.db_sample.id}`}
             className="filled-in checkbox"
             checked={checked}
-            disabled={report_ready != 1}
+            disabled={report_ready !== 1}
           />
           <label
             data-checked={checked}

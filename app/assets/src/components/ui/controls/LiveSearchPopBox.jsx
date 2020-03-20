@@ -204,7 +204,7 @@ class LiveSearchPopBox extends React.Component {
         hideArrow
         items={this.renderDropdownItems()}
         onChange={this.handleResultSelect}
-        open={shouldOpen ? true : false}
+        open={!!shouldOpen}
         trigger={this.renderSearchBox()}
         usePortal
         withinModal

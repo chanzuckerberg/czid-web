@@ -55,7 +55,6 @@ export default class Histogram {
       .append("svg")
       .attr("width", this.size.width)
       .attr("height", this.size.height);
-    this.svg.remove;
   }
 
   parseData(data) {
@@ -196,7 +195,7 @@ export default class Histogram {
 
   // Find the bar x-center that is closest to svgX, within hoverBuffer.
   onMouseMove = () => {
-    if (this.sortedBarCenters.length == 0) {
+    if (this.sortedBarCenters.length === 0) {
       return;
     }
 
