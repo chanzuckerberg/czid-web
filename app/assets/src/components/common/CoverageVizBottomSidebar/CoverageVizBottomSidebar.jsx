@@ -351,12 +351,8 @@ export default class CoverageVizBottomSidebar extends React.Component {
       `;
       return (
         <div className={cs.taxonLabel}>
-          {taxonName} Coverage
-          <span>
-            {" "}
-            - {speciesTaxonName}
-            <HelpIcon text={helpText} className={cs.helpIcon} />
-          </span>
+          {taxonName} Coverage - {speciesTaxonName}
+          <HelpIcon text={helpText} className={cs.helpIcon} />
         </div>
       );
     } else {

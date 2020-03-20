@@ -4,7 +4,7 @@
 
 .subheader {
   @include font-header-s;
-  margin-top: $space-xxs;
+  margin-top: $space-m;
 
   .toggleLink {
     @include font-label-s;
@@ -35,6 +35,8 @@
   .label {
     @include font-body-xs;
     margin-bottom: 2px;
+    display: flex;
+    align-items: center;
   }
 
   .input {
@@ -43,5 +45,6 @@
 
   .helpIcon {
     margin-left: $space-xxxs;
+    height: 14px;
   }
 }
