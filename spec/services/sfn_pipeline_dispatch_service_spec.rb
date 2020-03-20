@@ -143,12 +143,12 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       end
 
       it "returns sfn input containing correct paths to outputs" do
-        expected_output_pathss = PIPELINE_RUN_STAGE_NAMES.map do |stage_name|
+        expected_output_paths = PIPELINE_RUN_STAGE_NAMES.map do |stage_name|
           ["#{stage_name.upcase}_OUTPUT_URI", format(S3_OUTPUT_PATH, project_id: project.id, sample_id: sample.id, stage_name: stage_name)]
         end.to_h
 
         expect(subject).to include_json(
-          sfn_input_json: expected_output_pathss
+          sfn_input_json: expected_output_paths
         )
       end
 
@@ -197,6 +197,21 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
 
         it "returns an exception" do
           expect { subject }.to raise_error(SfnPipelineDispatchService::Idd2WdlError)
+        end
+      end
+
+      context "when start-execution fails" do
+        before do
+          allow(Open3)
+            .to receive(:capture3)
+            .with("aws", "stepfunctions", "start-execution", "--name", sfn_name, "--input", anything, "--state-machine-arn", sfn_arn)
+            .and_return([aws_cli_stdout, idd2wdl_stderr, instance_double(Process::Status, success?: aws_cli_exitstatus == 0, exitstatus: aws_cli_exitstatus)])
+        end
+
+        it "returns nil sfn_arn" do
+          expect(subject).to include_json(
+            sfn_arn: nil
+          )
         end
       end
     end
