@@ -1392,8 +1392,12 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
-    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name, :basespace_dataset_id, :basespace_access_token, :skip_cache, :do_not_process, :pipeline_execution_strategy, :use_taxon_whitelist,
-                                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],])
+    permitted_sample_params = [:name, :project_id, :status, :host_genome_id, :host_genome_name, :basespace_dataset_id, :basespace_access_token, :skip_cache, :do_not_process, :pipeline_execution_strategy, :use_taxon_whitelist,
+                               input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
+
+    permitted_sample_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?
+
+    new_params = params.permit(samples: permitted_sample_params)
     new_params[:samples] if new_params
   end
 
@@ -1401,10 +1405,10 @@ class SamplesController < ApplicationController
     permitted_params = [:name, :project_name, :project_id, :status,
                         :s3_star_index_path, :s3_bowtie2_index_path,
                         :host_genome_id, :host_genome_name,
-                        :sample_notes, :search, :subsample, :max_input_fragments,
+                        :sample_notes, :search,
                         :basespace_dataset_id, :basespace_access_token, :client, :do_not_process, :pipeline_execution_strategy, :use_taxon_whitelist,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
-    permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample]) if current_user.admin?
+    permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)
   end
 
