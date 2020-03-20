@@ -1,5 +1,5 @@
 import React from "react";
-import { compact, getOr, get, keys, map, orderBy } from "lodash/fp";
+import { compact, getOr, get, map, orderBy } from "lodash/fp";
 import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
