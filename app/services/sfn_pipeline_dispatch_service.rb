@@ -172,5 +172,6 @@ class SfnPipelineDispatchService
     else
       LogUtil.log_err_and_airbrake("Command to start SFN execution failed. Error: #{stderr}")
     end
+    return nil
   end
 end
