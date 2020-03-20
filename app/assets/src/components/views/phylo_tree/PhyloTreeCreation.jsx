@@ -577,7 +577,7 @@ class PhyloTreeCreation extends React.Component {
                 onSelectedRowsChanged={this.handleChangedProjectSamples}
               />
             ) : this.state.samplesLoaded &&
-            this.state.projectSamples.length == 0 ? (
+            this.state.projectSamples.length === 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
               <LoadingIcon />
@@ -621,7 +621,7 @@ class PhyloTreeCreation extends React.Component {
                 filter={this.state.otherSamplesFilter}
               />
             ) : this.state.samplesLoaded &&
-            this.state.otherSamples.length == 0 ? (
+            this.state.otherSamples.length === 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
               <LoadingIcon />

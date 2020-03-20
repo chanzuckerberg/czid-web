@@ -74,13 +74,13 @@ class VisualizationsView extends React.Component {
       visualization_type: visualizationType,
       publicAccess,
     } = visualization;
-    if (visualizationType == "heatmap") {
+    if (visualizationType === "heatmap") {
       return publicAccess ? (
         <HeatmapPublic className={cs.icon} />
       ) : (
         <HeatmapPrivate className={cs.icon} />
       );
-    } else if (visualizationType == "phylo_tree") {
+    } else if (visualizationType === "phylo_tree") {
       return publicAccess ? (
         <PhyloTreePublic className={cs.icon} />
       ) : (

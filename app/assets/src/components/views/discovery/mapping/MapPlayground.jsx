@@ -26,7 +26,7 @@ class MapPlayground extends React.Component {
         sampleName: result.name,
         sampleId: result.id,
       };
-      if (locationsToItems.hasOwnProperty(locId)) {
+      if (locationsToItems[locId]) {
         locationsToItems[locId].items.push(item);
       } else {
         locationsToItems[locId] = {

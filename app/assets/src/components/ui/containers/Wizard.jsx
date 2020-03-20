@@ -177,7 +177,7 @@ class Wizard extends React.Component {
                   rounded={false}
                 />
               )}
-              {this.state.currentPage == this.props.children.length - 1 && (
+              {this.state.currentPage === this.props.children.length - 1 && (
                 <PrimaryButton
                   text={this.labels.finish}
                   onClick={this.handleFinishClick}

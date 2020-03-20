@@ -78,7 +78,7 @@ export default class GeneDetailsMode extends React.Component {
     });
   }
 
-  //*** Callback functions ***
+  // *** Callback functions ***
 
   expandOntology = () => {
     const { geneName } = this.props;
@@ -88,7 +88,7 @@ export default class GeneDetailsMode extends React.Component {
     });
   };
 
-  //*** Functions depending on state ***
+  // *** Functions depending on state ***
 
   generateLinkTo(source) {
     const {
@@ -120,7 +120,7 @@ export default class GeneDetailsMode extends React.Component {
     }
   }
 
-  //*** Render methods ***
+  // *** Render methods ***
 
   renderCARDLicense() {
     return (

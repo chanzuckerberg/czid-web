@@ -120,7 +120,7 @@ const processRawSample = sample => {
     ),
     totalRuntime: get("run_info.total_runtime", sample.details),
     waterControl: get("metadata.water_control", sample.details),
-    meanInsertSize: meanInsertSizeString ? meanInsertSizeString : "",
+    meanInsertSize: meanInsertSizeString || "",
   };
   return row;
 };

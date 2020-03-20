@@ -449,7 +449,7 @@ export default class SampleViewV2 extends React.Component {
 
   handlePipelineVersionSelect = newPipelineVersion => {
     const { pipelineRun, sample } = this.state;
-    if (newPipelineVersion != pipelineRun.version) {
+    if (newPipelineVersion !== pipelineRun.version) {
       this.setState(
         {
           pipelineRun: find(
@@ -795,7 +795,7 @@ export default class SampleViewV2 extends React.Component {
 
   filteredMessage = () => {
     const { total, filtered } = this.countReportRows();
-    return filtered != total
+    return filtered !== total
       ? `${filtered} rows passing the above filters, out of ${total} total rows.`
       : `${total} total rows.`;
   };
@@ -817,7 +817,7 @@ export default class SampleViewV2 extends React.Component {
     return (
       subsampledReadsCount &&
       adjustedRemainingReadsCount &&
-      subsampledReadsCount != adjustedRemainingReadsCount &&
+      subsampledReadsCount !== adjustedRemainingReadsCount &&
       `Report values are computed from ${subsampledReadsCount} reads subsampled \
         randomly from the ${adjustedRemainingReadsCount} reads passing host and quality filters.`
     );
@@ -1024,7 +1024,7 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
           )}
-          {view == "tree" &&
+          {view === "tree" &&
             filteredReportData.length > 0 && (
               <div>
                 <TaxonTreeVis

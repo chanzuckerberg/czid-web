@@ -17,7 +17,7 @@ export default class TermsChanges extends React.Component {
           when they use IDseq, as well as how we collect, use and protect their
           data.
         </p>
-        {/*TODO: Fill in a specific date*/}
+        {/* TODO: Fill in a specific date */}
         <p className={cs.large}>
           We are planning to update our Terms of Use and Data Privacy Notice for
           the IDseq service to be effective on June 24, 2019. We encourage our

@@ -41,13 +41,11 @@ export default class ReportsDownloader {
         }
       })
       .catch(() => {
-        () => {
-          // eslint-disable-next-line no-console
-          console.error("ReportsDownloader - Failed report download");
-          this.onDownloadFail &&
-            this.onDownloadFail({ projectId: this.projectId });
-          this.nanobar.go(100);
-        };
+        // eslint-disable-next-line no-console
+        console.error("ReportsDownloader - Failed report download");
+        this.onDownloadFail &&
+          this.onDownloadFail({ projectId: this.projectId });
+        this.nanobar.go(100);
       });
   };
 

@@ -8,10 +8,6 @@ import Accordion from "~/components/layout/Accordion";
 import cs from "./accordion_notification.scss";
 
 export default class AccordionNotification extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const {
       className,

@@ -25,7 +25,7 @@ class CreateUser extends React.Component {
     };
     this.state = {
       submitting: false,
-      isAdmin: this.selectedUser.adminStatus ? true : false,
+      isAdmin: !!this.selectedUser.adminStatus,
       success: false,
       showFailed: false,
       errorMessage: "",
@@ -66,8 +66,8 @@ class CreateUser extends React.Component {
 
   toggleCheckBox(e) {
     this.setState({
-      isAdmin: e.target.value == "true" ? false : true,
-      adminstatus: e.target.value == "true" ? false : true,
+      isAdmin: e.target.value !== "true",
+      adminstatus: e.target.value !== "true",
     });
   }
 

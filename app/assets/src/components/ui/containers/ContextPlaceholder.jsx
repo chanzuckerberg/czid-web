@@ -18,13 +18,15 @@ export default class ContextPlaceholder extends React.PureComponent {
   }
 
   componentDidMount() {
-    if (this.props.closeOnOutsideClick)
+    if (this.props.closeOnOutsideClick) {
       document.addEventListener("mousedown", this.handleOutClick);
+    }
   }
 
   componentWillUnmount() {
-    if (this.props.closeOnOutsideClick)
+    if (this.props.closeOnOutsideClick) {
       document.removeEventListener("mousedown", this.handleOutClick);
+    }
   }
 
   handleOutClick = () => {
@@ -54,10 +56,10 @@ export default class ContextPlaceholder extends React.PureComponent {
     const { pageYOffset, pageXOffset } = window;
     const { clientWidth, clientHeight } = document.documentElement;
 
-    let right = 0,
-      left = 0,
-      top = 0,
-      bottom = 0;
+    let right = 0;
+    let left = 0;
+    let top = 0;
+    let bottom = 0;
 
     if (position.includes("right")) {
       right = Math.round(

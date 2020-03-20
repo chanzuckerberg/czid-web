@@ -18,8 +18,8 @@ class ObjectHelper {
   }
   static sortByKey(arr, key) {
     return arr.sort((a, b) => {
-      const aVal = a[key].toLowerCase(),
-        bVal = b[key].toLowerCase();
+      const aVal = a[key].toLowerCase();
+      const bVal = b[key].toLowerCase();
       return aVal > bVal ? 1 : bVal > aVal ? -1 : 0;
     });
   }

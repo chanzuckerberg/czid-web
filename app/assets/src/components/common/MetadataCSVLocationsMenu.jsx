@@ -32,8 +32,9 @@ export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
   const batchRequests = batches.map(async (batch, batchIndex) => {
     await Promise.all(batch);
     // Sleep after every batch except the last
-    if (batchIndex !== batches.length - 1)
+    if (batchIndex !== batches.length - 1) {
       await sleep(random(REQUEST_DELAY_MIN, REQUEST_DELAY_MAX));
+    }
   });
   await Promise.all(batchRequests);
 

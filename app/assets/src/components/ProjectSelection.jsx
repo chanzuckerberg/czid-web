@@ -58,7 +58,7 @@ class ProjectSelection extends React.Component {
     axios
       .put(
         `/projects/${projectId}/${
-          favStatus == "true" ? "remove_favorite" : "add_favorite"
+          favStatus === "true" ? "remove_favorite" : "add_favorite"
         }?`,
         {
           authenticity_token: this.csrf,
@@ -68,7 +68,7 @@ class ProjectSelection extends React.Component {
         this.nanobar.go(100);
         this.projectInFavorites(projectId, this.state.formattedProjectList);
       })
-      .catch(err => {});
+      .catch(() => {});
   }
 
   reformatProjectList(favorites, allProjects) {
@@ -103,7 +103,7 @@ class ProjectSelection extends React.Component {
   // update
   updateProjectsState(id, projects) {
     let updatedList = projects.map(project => {
-      if (project.id == id) {
+      if (project.id === id) {
         project.favorited = !project.favorited;
       }
 
@@ -129,10 +129,10 @@ class ProjectSelection extends React.Component {
   // remove Projects from favorites list
   removeProjectFromFavorites(id) {
     let updatedFavouriteProjects = this.state.formattedFavProjectList.filter(
-      project => project.id != id
+      project => project.id !== id
     );
     let removedFavouriteProject = this.state.formattedFavProjectList.filter(
-      project => project.id == id
+      project => project.id === id
     );
 
     let favIds = this.state.favIds;
@@ -149,7 +149,7 @@ class ProjectSelection extends React.Component {
 
   // add Projects to favorites list
   addProjectToFavorites(id, projects) {
-    let updatedProject = projects.filter(project => project.id == id);
+    let updatedProject = projects.filter(project => project.id === id);
 
     this.setState({
       formattedFavProjectList: [
@@ -209,7 +209,7 @@ class ProjectSelection extends React.Component {
         <div
           className={
             "project-item " +
-            (parent.props.selectedProjectId == project.id ? "highlight" : "")
+            (parent.props.selectedProjectId === project.id ? "highlight" : "")
           }
           onClick={parent.handleProjectClick}
           data-id={project.id}

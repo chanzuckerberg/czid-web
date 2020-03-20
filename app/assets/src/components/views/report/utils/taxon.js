@@ -7,7 +7,7 @@ export const computeThresholdedTaxons = (candidateTaxons, activeThresholds) => {
   let matchedTaxons = [];
   for (let i = 0; i < candidateTaxons.length; i++) {
     const taxon = candidateTaxons[i];
-    if (taxon.genus_taxid == taxon.tax_id) {
+    if (taxon.genus_taxid === taxon.tax_id) {
       // genus
       if (matchedTaxons.length > 0) {
         resultTaxons.push(genusTaxon);
@@ -50,10 +50,10 @@ export const isTaxonIncluded = (
   return (
     (includedCategories.indexOf(taxon.category_name) >= 0 ||
       includedSubcategoryColumns.some(column => {
-        return taxon[column] == 1;
+        return taxon[column] === 1;
       })) &&
     !excludedSubcategoryColumns.some(column => {
-      return taxon[column] == 1;
+      return taxon[column] === 1;
     })
   );
 };
@@ -92,7 +92,7 @@ export const getTaxonSortComparator = (
     const bSecondaryVal = parseFloat(getTaxonMetric(b, stype, smetric));
 
     // compared at genus level descending and then species level descending
-    if (a.genus_taxid == b.genus_taxid) {
+    if (a.genus_taxid === b.genus_taxid) {
       // same genus
       if (a.tax_level > b.tax_level) {
         return -1;

@@ -163,8 +163,9 @@ class ReportFilters extends React.Component {
             <CategoryFilter
               allCategories={CATEGORIES}
               categoryParentChild={transform((result, category) => {
-                if (category.children)
+                if (category.children) {
                   result[category.name] = category.children;
+                }
               }, {})(CATEGORIES)}
               categoryChildParent={transform((result, category) => {
                 forEach(
@@ -217,7 +218,7 @@ class ReportFilters extends React.Component {
               }
             />
           </div>
-          {view == "tree" && (
+          {view === "tree" && (
             <div className={cs.filterListElement}>
               <MetricPicker
                 options={TREE_METRICS}

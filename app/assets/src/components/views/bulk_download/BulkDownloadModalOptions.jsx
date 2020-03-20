@@ -69,8 +69,9 @@ class BulkDownloadModalOptions extends React.Component {
           downloadType.type === conditionalField.downloadType &&
           !triggersConditionalField(conditionalField, selectedFieldsForType)
       )
-    )
+    ) {
       return;
+    }
 
     // Set different props for the dropdown depending on the field type.
     switch (field.type) {

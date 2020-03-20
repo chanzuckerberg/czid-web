@@ -154,13 +154,11 @@ export default class AMRHeatmapVis extends React.Component {
     }
   }
 
-  /*** On "annotation_gene" vs "gene" ***/
-  /*** 
-  So it's kind of technical, but essentially there's kind
-  of a fuzzy line between a locus and an allele
-  and what gets named a gene. See the documentation
-  for more detail.
-  ***/
+  // On "annotation_gene" vs "gene"
+  // So it's kind of technical, but essentially there's kind
+  // of a fuzzy line between a locus and an allele
+  // and what gets named a gene. See the documentation
+  // for more detail.
 
   findAMRCountForName(rowName, sample) {
     const { selectedOptions } = this.props;
@@ -254,7 +252,7 @@ export default class AMRHeatmapVis extends React.Component {
     this.heatmap.start();
   }
 
-  //*** Callback functions for the heatmap ***
+  // *** Callback functions for the heatmap ***
 
   colorFilter = (value, node, originalColor, _, colorNoValue) => {
     // Leave zero values grey
@@ -322,7 +320,7 @@ export default class AMRHeatmapVis extends React.Component {
     });
   };
 
-  //*** Following functions depend on state and must be called after the component has updated ***
+  // *** Following functions depend on state and must be called after the component has updated ***
 
   getSelectedMetadataFields() {
     const { samplesMetadataTypes } = this.props;
@@ -339,7 +337,7 @@ export default class AMRHeatmapVis extends React.Component {
       .sort(sortByLabel);
   }
 
-  //*** Render functions ***
+  // *** Render functions ***
 
   renderNodeHoverTooltip() {
     const { nodeHoverInfo, tooltipLocation } = this.state;
