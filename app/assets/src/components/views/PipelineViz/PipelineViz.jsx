@@ -189,7 +189,7 @@ class PipelineViz extends React.Component {
       }).name,
     });
 
-    this.graphs.forEach((graph, i) => i != stageIndex && graph.unselectAll());
+    this.graphs.forEach((graph, i) => i !== stageIndex && graph.unselectAll());
     graph.selectNodes([clickedNodeId]);
 
     const inputEdgesInfo = this.getEdgeInfoFor(
@@ -273,8 +273,8 @@ class PipelineViz extends React.Component {
     );
 
     if (
-      stageIndex != this.lastMouseMoveInfo.graphIndex ||
-      nodeId != this.lastMouseMoveInfo.nodeId
+      stageIndex !== this.lastMouseMoveInfo.graphIndex ||
+      nodeId !== this.lastMouseMoveInfo.nodeId
     ) {
       this.handleNodeBlur();
     }
@@ -535,7 +535,7 @@ class PipelineViz extends React.Component {
           const toNodeId = edge.to;
           if (newLevel > nodeToCurrentLevel[toNodeId]) {
             nodeToCurrentLevel[toNodeId] = newLevel;
-            if (toNodeId != END_NODE_ID) {
+            if (toNodeId !== END_NODE_ID) {
               nodeToCurrentLevel[END_NODE_ID] = Math.max(
                 nodeToCurrentLevel[END_NODE_ID],
                 newLevel + 1
@@ -581,7 +581,7 @@ class PipelineViz extends React.Component {
           offsetAmount *
           direction *
           (applyStaggerNodesMultiplier ? staggerLayoutMultiplier : 1);
-        if (direction == -1) {
+        if (direction === -1) {
           offsetAmount += yLayoutInterval;
         }
         direction *= -1;
@@ -707,7 +707,7 @@ class PipelineViz extends React.Component {
     stages.forEach((stageData, stageIndex) => {
       const graph = this.graphs[stageIndex];
       const prevOpened = stagesOpened && stagesOpened[stageIndex];
-      if (!(prevOpened || stageData.jobStatus == "inProgress") && graph) {
+      if (!(prevOpened || stageData.jobStatus === "inProgress") && graph) {
         graph.afterDrawingOnce(() => this.toggleStage(stageIndex, false));
       }
     });

@@ -297,6 +297,8 @@ class SamplesView extends React.Component {
         iconClassName={cx(cs.icon, cs.download)}
         options={downloadOptions}
         onClick={downloadOption => {
+          // TODO(tiago): diabled temporary due to being out of scope of PR. Should fix the pattern.
+          // eslint-disable-next-line no-new
           new ReportsDownloader({
             projectId,
             downloadOption,

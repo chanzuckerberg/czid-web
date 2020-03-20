@@ -40,7 +40,7 @@ export default class DetailCells extends React.Component {
           0,
           true,
           undefined,
-          taxInfo.topScoring == 1,
+          taxInfo.topScoring === 1,
           "score-column"
         )}
         {renderNumber(taxInfo.NT.zscore, taxInfo.NR.zscore, 1)}

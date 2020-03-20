@@ -134,8 +134,8 @@ class ReviewStep extends React.Component {
           </div>
         );
       } else {
-        (sampleData["File Size"] = formatFileSize(sample.file_size)),
-          (sampleData["File Type"] = sample.file_type);
+        sampleData["File Size"] = formatFileSize(sample.file_size);
+        sampleData["File Type"] = sample.file_type;
         sampleData["Basespace Project"] = sample.basespace_project_name;
       }
 

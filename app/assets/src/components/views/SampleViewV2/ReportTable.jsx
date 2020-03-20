@@ -264,7 +264,7 @@ class ReportTable extends React.Component {
           >
             {cellData || rowData.name}
           </span>
-          {rowData.taxLevel == "genus" &&
+          {rowData.taxLevel === "genus" &&
             (rowData.category ? (
               <span className={cs.countInfo}>{`(${
                 rowData.filteredSpecies.length
@@ -292,7 +292,7 @@ class ReportTable extends React.Component {
     const { expandedGenusIds } = this.state;
     return (
       <div className={cs.expandIcon}>
-        {rowData.taxLevel == "genus" ? (
+        {rowData.taxLevel === "genus" ? (
           <i
             className={cx(
               "fa",
@@ -382,13 +382,13 @@ class ReportTable extends React.Component {
     return (
       <div className={cs.stack}>
         <div
-          className={cx(cs.stackElement, dbType == "nt" || cs.lowlightValue)}
+          className={cx(cs.stackElement, dbType === "nt" || cs.lowlightValue)}
           onClick={onClick ? () => onClick[0]("nt") : null}
         >
           {cellData ? cellData[0] : "-"}
         </div>
         <div
-          className={cx(cs.stackElement, dbType == "nr" || cs.lowlightValue)}
+          className={cx(cs.stackElement, dbType === "nr" || cs.lowlightValue)}
           onClick={onClick ? () => onClick[1]("nr") : null}
         >
           {cellData ? cellData[1] : "-"}

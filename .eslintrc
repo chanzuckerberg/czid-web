@@ -8,28 +8,51 @@
   },
   "parser": "babel-eslint",
   "extends": [
-    "standard",
     "eslint:recommended",
-    "plugin:react/recommended"
+    "plugin:react/recommended",
+    "standard",
+    // disables rules that conflict with prettier
+    // must come last
+    "prettier",
   ],
   "plugins": [
     "react"
   ],
   "rules": {
     "camelcase": "warn",
+    "comma-dangle": ["error", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "always-multiline",
+      "exports": "always-multiline",
+    }],
+    "quotes": ["error", "double", {
+      "avoidEscape": true,
+      "allowTemplateLiterals": true
+    }],
+    "no-prototype-builtins": "warn",
     "no-unreachable": "warn",
     "react/boolean-prop-naming": "warn",
-    "standard/object-curly-even-spacing": "warn",
-    "standard/computed-property-even-spacing": "warn",
-    "react/no-deprecated": "warn",
-    "react/no-unescaped-entities": "warn",
-    "react/no-find-dom-node": "warn",
-    "react/no-direct-mutation-state": "warn",
     "react/jsx-key": "warn",
+    "react/no-deprecated": "warn",
+    "react/no-direct-mutation-state": "warn",
+    "react/no-find-dom-node": "warn",
+    "react/no-unescaped-entities": "warn",
     "react/no-string-refs": "warn",
     "react/prop-types": "warn",
+    "semi": ["error", "always"],
+    "space-before-function-paren": ["error", {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "always"
+    }],
+    "standard/object-curly-even-spacing": "warn",
+    "standard/computed-property-even-spacing": "warn",
   },
   "settings": {
-    "propWrapperFunctions": [ "forbidExtraProps" ]
+    "propWrapperFunctions": [ "forbidExtraProps" ],
+    "react": {
+      "version": "detect"
+    }
   }
 }
