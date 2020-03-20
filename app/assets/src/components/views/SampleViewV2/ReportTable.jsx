@@ -1,5 +1,5 @@
 import React from "react";
-import { compact, getOr, keys, map, orderBy } from "lodash/fp";
+import { compact, getOr, get, keys, map, orderBy } from "lodash/fp";
 import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
@@ -474,8 +474,7 @@ class ReportTable extends React.Component {
     const validTaxId =
       rowData.taxId < INVALID_CALL_BASE_TAXID || rowData.taxId > 0;
     const contigVizEnabled =
-      !!keys(getOr({}, "nt.contigs", rowData)).length ||
-      !!keys(getOr({}, "nr.contigs", rowData)).length;
+      get("nt.contigs", rowData) || get("nr.contigs", rowData);
     const coverageVizEnabled =
       alignVizAvailable && validTaxId && getOr(0, "nt.count", rowData) > 0;
     const phyloTreeEnabled =
