@@ -962,6 +962,7 @@ class SamplesHeatmapView extends React.Component {
   };
 
   render() {
+    const { allowedFeatures } = this.context || {};
     return (
       <div className={cs.heatmap}>
         {!this.state.hideFilters && (
@@ -984,6 +985,12 @@ class SamplesHeatmapView extends React.Component {
                 onSelectedOptionsChange={this.handleSelectedOptionsChange}
                 loading={this.state.loading}
                 data={this.state.data}
+                filteredTaxaCount={this.state.taxonIds.length}
+                totalTaxaCount={this.state.allTaxonIds.length}
+                prefilterConstants={this.props.prefilterConstants}
+                displayFilterStats={allowedFeatures.includes(
+                  "heatmap_filter_fe"
+                )}
               />
             </NarrowContainer>
           </div>
@@ -1034,6 +1041,7 @@ SamplesHeatmapView.propTypes = {
   taxonLevels: PropTypes.array,
   thresholdFilters: PropTypes.object,
   heatmapTs: PropTypes.number,
+  prefilterConstants: PropTypes.object,
 };
 
 SamplesHeatmapView.contextType = UserContext;

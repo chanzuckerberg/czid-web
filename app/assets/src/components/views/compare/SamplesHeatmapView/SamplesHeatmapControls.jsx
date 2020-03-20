@@ -24,6 +24,8 @@ import Slider from "~ui/controls/Slider";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import FilterTag from "~ui/controls/FilterTag";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import SmallInfoIcon from "~ui/icons/SmallInfoIcon";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -414,7 +416,43 @@ export default class SamplesHeatmapControls extends React.Component {
     return filterTags;
   };
 
+  renderFilterStatsInfo = () => {
+    const {
+      filteredTaxaCount,
+      totalTaxaCount,
+      prefilterConstants,
+    } = this.props;
+    const { topN, minReads } = prefilterConstants;
+    return (
+      <span className={cs.reportInfoMsg}>
+        Showing {filteredTaxaCount} taxa of {totalTaxaCount} preselected taxa.
+        <ColumnHeaderTooltip
+          trigger={
+            <span>
+              <SmallInfoIcon className={cs.infoIcon} />
+            </span>
+          }
+          content="The data included in this heatmap 
+            was preselected based on the following conditions:"
+          list={[
+            `The top ${topN} unique taxa per sample, based off relative abundance (rPM)`,
+            `Only taxa with at least ${minReads} reads`,
+          ]}
+        />
+      </span>
+    );
+  };
+
   render() {
+    const { selectedOptions, loading, displayFilterStats } = this.props;
+    const { thresholdFilters, categories, subcategories } = selectedOptions;
+    // Only display the filter tag row if relevant filters are selected,
+    // otherwise an empty row will be rendered.
+    const displayFilterTags =
+      ((thresholdFilters || []).length ||
+        (categories || []).length ||
+        (subcategories["Viruses"] || []).length) > 0;
+
     return (
       <div className={cs.menu}>
         <Divider />
@@ -433,9 +471,19 @@ export default class SamplesHeatmapControls extends React.Component {
           <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
           <div className="col s2">{this.renderLegend()}</div>
         </div>
-        <div className={cx(cs.filterTagsList, "row")}>
-          <div className="col">{this.renderFilterTags()}</div>
-        </div>
+        {displayFilterTags && (
+          <div className={cx(cs.filterTagsList, "row")}>
+            <div className="col">{this.renderFilterTags()}</div>
+          </div>
+        )}
+        {!loading &&
+          displayFilterStats && (
+            <div className={cx(cs.filterTagsList, "row")}>
+              <div className={cx(cs.statsRow, "col")}>
+                {this.renderFilterStatsInfo()}
+              </div>
+            </div>
+          )}
         <Divider />
       </div>
     );
@@ -524,4 +572,8 @@ SamplesHeatmapControls.propTypes = {
   data: PropTypes.objectOf(
     PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number))
   ),
+  filteredTaxaCount: PropTypes.number,
+  totalTaxaCount: PropTypes.number,
+  prefilterConstants: PropTypes.object,
+  displayFilterStats: PropTypes.bool,
 };
