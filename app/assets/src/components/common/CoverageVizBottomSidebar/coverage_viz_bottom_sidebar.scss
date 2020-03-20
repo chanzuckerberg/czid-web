@@ -29,6 +29,8 @@ $genome-viz-spacing: $space-xxs;
     .taxonLabel {
       @include font-header-xs;
       color: $medium-grey;
+      display: flex;
+      align-items: center;
     }
 
     .accessionSelectMenu {
@@ -51,6 +53,8 @@ $genome-viz-spacing: $space-xxs;
       @include font-body-xs;
       color: $light-grey;
       height: $accession-count-label-height;
+      display: flex;
+      align-items: center;
     }
 
     .notShownMsg {
@@ -59,6 +63,7 @@ $genome-viz-spacing: $space-xxs;
 
     .helpIcon {
       margin-left: 5px;
+      height: 14px;
     }
   }
 
