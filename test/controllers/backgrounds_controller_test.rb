@@ -23,11 +23,6 @@ class BackgroundsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "should update background" do
-    patch background_url(@background), params: { background: { name: @background.name, pipeline_run_ids: @background.pipeline_runs.map(&:id), sample_ids: @background.samples.pluck(:id) } }
-    assert_redirected_to background_url(@background)
-  end
-
   test "should destroy background" do
     assert_difference('Background.count', -1) do
       delete background_url(@background)
