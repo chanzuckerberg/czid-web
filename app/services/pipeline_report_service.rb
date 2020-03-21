@@ -629,7 +629,7 @@ class PipelineReportService
   def self.report_info_cache_key(path, kvs)
     kvs = kvs.to_h.sort.to_h
     # Increment this if you ever change the response structure of report_info
-    kvs["_cache_key_version"] = 2
+    kvs["_cache_key_version"] = 3
     path + "?" + kvs.to_param
   end
 end
