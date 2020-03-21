@@ -27,4 +27,12 @@ class AppConfig < ApplicationRecord
   # Switch for additional ActiveRecord validations that were added en masse in Feb 2020.
   # Presence of the flag switches on the feature.
   ENABLE_MASS_VALIDATION = 'enable_mass_validation'.freeze
+  # The projects to apply the following two defaults to.
+  # Stored as a JSON array of project_ids.
+  # This is intended to be a temporary short-term mechanism to service critical projects with our partners.
+  SUBSAMPLE_WHITELIST_PROJECT_IDS = 'subsample_whitelist_project_ids'.freeze
+  # Default subsample for special biohub samples.
+  SUBSAMPLE_WHITELIST_DEFAULT_SUBSAMPLE = 'subsample_whitelist_default_subsample'.freeze
+  # Default max_input_fragments for special biohub samples.
+  SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS = 'subsample_whitelist_default_max_input_fragments'.freeze
 end

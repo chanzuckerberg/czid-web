@@ -576,6 +576,27 @@ class SamplesController < ApplicationController
       errors << SampleUploadErrors.invalid_project_id(sample)
     end
 
+    subsample_whitelist_default_subsample = get_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_SUBSAMPLE).to_i
+    subsample_whitelist_default_max_input_fragments = get_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS).to_i
+    subsample_whitelist_project_ids = get_json_app_config(AppConfig::SUBSAMPLE_WHITELIST_PROJECT_IDS)
+
+    # For samples uploaded to biohub project ids, set the alternative default subsample and max_input_fragments values.
+    # Note that we cannot instead set these values on the pipeline run because s3 upload (which uses max_input_fragments)
+    # occurs before the pipeline run is created.
+    # This is intended to be a temporary short-term mechanism to service critical projects with our partners.
+    if subsample_whitelist_project_ids.is_a?(Array)
+      samples_to_upload.each do |sample_attributes|
+        if subsample_whitelist_project_ids.include?(sample_attributes[:project_id].to_i)
+          if subsample_whitelist_default_subsample > 0
+            sample_attributes[:subsample] = subsample_whitelist_default_subsample
+          end
+          if subsample_whitelist_default_max_input_fragments > 0
+            sample_attributes[:max_input_fragments] = subsample_whitelist_default_max_input_fragments
+          end
+        end
+      end
+    end
+
     upload_errors, samples = upload_samples_with_metadata(samples_to_upload, metadata, current_user).values_at("errors", "samples")
 
     errors.concat(upload_errors)
