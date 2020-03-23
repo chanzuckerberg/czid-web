@@ -196,6 +196,21 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
           expect { subject }.to raise_error(SfnPipelineDispatchService::Idd2WdlError)
         end
       end
+
+      context "when start-execution fails" do
+        before do
+          allow(Open3)
+            .to receive(:capture3)
+            .with("aws", "stepfunctions", "start-execution", "--name", sfn_name, "--input", anything, "--state-machine-arn", sfn_arn)
+            .and_return([aws_cli_stdout, idd2wdl_stderr, instance_double(Process::Status, success?: aws_cli_exitstatus == 0, exitstatus: aws_cli_exitstatus)])
+        end
+
+        it "returns nil sfn_arn" do
+          expect(subject).to include_json(
+            sfn_arn: nil
+          )
+        end
+      end
     end
   end
 end

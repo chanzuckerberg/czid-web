@@ -1065,6 +1065,7 @@ class PipelineRun < ApplicationRecord
       return
     rescue => e
       LogUtil.log_err_and_airbrake("Error starting SFN pipeline: #{e}")
+      LogUtil.log_backtrace(e)
       # we will not retry in this case, since we do not know what error occurred
     end
 
