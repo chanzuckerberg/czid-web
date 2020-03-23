@@ -1,25 +1,25 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import { Popup } from "semantic-ui-react";
+import BasicPopup from "~/components/BasicPopup";
+import SmallInfoIcon from "~ui/icons/SmallInfoIcon";
 import cs from "./help_icon.scss";
 
 class HelpIcon extends React.Component {
   render() {
     return (
-      <Popup
+      <BasicPopup
         trigger={
-          <i
-            className={cx(
-              "fa fa-question-circle",
-              cs.helpIcon,
-              this.props.className
-            )}
-          />
+          <div className={this.props.className}>
+            <SmallInfoIcon className={cx(cs.helpIcon)} />
+          </div>
         }
-        inverted
-        content={this.props.text}
-        horizontalOffset={13}
+        hoverable
+        inverted={false}
+        basic={false}
+        size="small"
+        position="top center"
+        content={<div className={cs.tooltip}>{this.props.text}</div>}
       />
     );
   }

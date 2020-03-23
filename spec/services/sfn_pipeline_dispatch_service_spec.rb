@@ -3,12 +3,11 @@ require 'json'
 
 FAKE_SAMPLES_BUCKET = "fake-samples-bucket".freeze
 S3_SAMPLES_KEY_PREFIX = "samples/%<project_id>s/%<sample_id>s".freeze
-S3_SAMPLES_PATH = "s3://#{FAKE_SAMPLES_BUCKET}/#{S3_SAMPLES_KEY_PREFIX}/fastqs/%<input_file_name>s".freeze
+S3_SAMPLES_PATH = "s3://#{FAKE_SAMPLES_BUCKET}/#{S3_SAMPLES_KEY_PREFIX}".freeze
+S3_SAMPLE_INPUT_FILES_PATH = "s3://#{FAKE_SAMPLES_BUCKET}/#{S3_SAMPLES_KEY_PREFIX}/fastqs/%<input_file_name>s".freeze
 S3_DAG_JSON_KEY = "#{S3_SAMPLES_KEY_PREFIX}/sfn-wdl/%<stage_name>s.dag.json".freeze
 S3_WDL_KEY = "#{S3_SAMPLES_KEY_PREFIX}/sfn-wdl/%<stage_name>s.wdl".freeze
 S3_WDL_PATH = "s3://#{FAKE_SAMPLES_BUCKET}/#{S3_WDL_KEY}".freeze
-S3_OUTPUT_KEY = "#{S3_SAMPLES_KEY_PREFIX}/sfn-wdl/%<stage_name>s/output.json".freeze
-S3_OUTPUT_PATH = "s3://#{FAKE_SAMPLES_BUCKET}/#{S3_OUTPUT_KEY}".freeze
 SFN_NAME = "idseq-test-%<project_id>s-%<sample_id>s-%<pipeline_run_id>s-%<time>s".freeze
 FAKE_PIPELINE_VERSION = "9999.9".freeze
 FAKE_ACCOUNT_ID = "fake-account-id".freeze
@@ -124,10 +123,18 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
           sfn_input_json: {
             Input: {
               HostFilter: {
-                fastqs_0: format(S3_SAMPLES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[0].source),
-                fastqs_1: format(S3_SAMPLES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[1].source),
+                fastqs_0: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[0].source),
+                fastqs_1: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[1].source),
               },
             },
+          }
+        )
+      end
+
+      it "returns sfn input containing output prefix" do
+        expect(subject).to include_json(
+          sfn_input_json: {
+            OutputPrefix: sample.sample_output_s3_path,
           }
         )
       end
@@ -139,16 +146,6 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
 
         expect(subject).to include_json(
           sfn_input_json: expected_input_paths
-        )
-      end
-
-      it "returns sfn input containing correct paths to outputs" do
-        expected_output_paths = PIPELINE_RUN_STAGE_NAMES.map do |stage_name|
-          ["#{stage_name.upcase}_OUTPUT_URI", format(S3_OUTPUT_PATH, project_id: project.id, sample_id: sample.id, stage_name: stage_name)]
-        end.to_h
-
-        expect(subject).to include_json(
-          sfn_input_json: expected_output_paths
         )
       end
 

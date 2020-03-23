@@ -45,6 +45,12 @@ export const bulkUploadLocalWithMetadata = async ({
       "do_not_process",
       "pipeline_execution_strategy",
       "use_taxon_whitelist",
+      "max_input_fragments",
+      "subsample",
+      "pipeline_branch",
+      "dag_vars",
+      "alignment_config_name",
+      "s3_preload_result_path",
     ]),
     samples
   );
