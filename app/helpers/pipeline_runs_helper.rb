@@ -107,7 +107,10 @@ module PipelineRunsHelper
     else
       LogUtil.log_err_and_airbrake("Error for update sfn status for record #{run_id} - stage #{stage_number} with error #{stderr}")
       job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"
-      job_status = PipelineRunStage::STATUS_FAILED if stderr =~ /ExecutionDoesNotExist/ # job no longer exists
+      if stderr =~ /ExecutionDoesNotExist/ || stderr =~ /InvalidArn/
+        # job no longer exists or ARN is invalid
+        job_status = PipelineRunStage::STATUS_FAILED
+      end
     end
     [job_status, job_log_id]
   end
