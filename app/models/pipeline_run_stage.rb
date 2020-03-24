@@ -308,7 +308,6 @@ class PipelineRunStage < ApplicationRecord
       chunks_in_flight: PipelineRun::MAX_CHUNKS_IN_FLIGHT,
       gsnap_m8: PipelineRun::GSNAP_M8,
       rapsearch_m8: PipelineRun::RAPSEARCH_M8,
-      use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
     }
     return generate_json(attribute_dict)
   end
@@ -339,6 +338,7 @@ class PipelineRunStage < ApplicationRecord
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
+      use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
     }
     return generate_json(attribute_dict)
   end

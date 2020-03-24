@@ -57,10 +57,6 @@ json.steps do
     additional_attributes["index_dir_suffix"] = attr[:index_dir_suffix]
   end
 
-  if attr[:use_taxon_whitelist]
-    additional_attributes["use_taxon_whitelist"] = attr[:use_taxon_whitelist]
-  end
-
   steps << {
     in: ["host_filter_out", "cdhitdup_cluster_sizes"],
     out: "gsnap_out",
@@ -84,10 +80,6 @@ json.steps do
 
   if attr[:index_dir_suffix]
     additional_attributes["index_dir_suffix"] = attr[:index_dir_suffix]
-  end
-
-  if attr[:use_taxon_whitelist]
-    additional_attributes["use_taxon_whitelist"] = attr[:use_taxon_whitelist]
   end
 
   steps << {
