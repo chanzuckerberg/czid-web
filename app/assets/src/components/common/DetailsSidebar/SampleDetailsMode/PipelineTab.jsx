@@ -116,7 +116,10 @@ class PipelineTab extends React.Component {
     // Special case cdhitdup. All steps after cdhitdup transform their counts by
     // in the pipeline by the compression ratio to return nonunique reads.
     let uniqueReads = null;
-    if (stepKey === "cdhitdup_out") {
+    if (
+      stepKey === "cdhitdup_out" &&
+      this.props.pipelineRun.pipeline_version > "4"
+    ) {
       const previousStep = this.state.pipelineStepDict["steps"]["priceseq_out"];
       uniqueReads = readsAfter;
       readsAfter = previousStep["reads_after"];
