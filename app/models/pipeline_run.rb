@@ -195,6 +195,7 @@ class PipelineRun < ApplicationRecord
   ], }, if: :mass_validation_enabled?
 
   validates :finalized, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
+  validates :total_ercc_reads, numericality: { greater_than_or_equal_to: 0, integer_only: true }, allow_nil: true, if: :mass_validation_enabled?
 
   # State machine for RESULT MONITOR:
   #
