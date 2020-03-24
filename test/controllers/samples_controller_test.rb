@@ -24,40 +24,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test 'should get new' do
-    sign_in @user
-    get new_sample_url
-    assert_response :success
-  end
-
-  test 'should create sample' do
-    req_headers = { 'X-User-Email' => @user.email,
-                    'X-User-Token' => @user.authentication_token, }
-    input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
-                     name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local", },
-                   { source: "RR004_water_2_S23_R2_001.fastq.gz",
-                     name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local", },]
-    assert_difference('Sample.count') do
-      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }, headers: req_headers
-    end
-    assert_redirected_to sample_url(Sample.last)
-  end
-
-  test 'should redirect ' do
-    input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
-                     name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local", },
-                   { source: "RR004_water_2_S23_R2_001.fastq.gz",
-                     name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local", },]
-    assert_difference('Sample.count', 0) do
-      post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
-    end
-    assert_redirected_to new_user_session_url
-  end
-
   test 'pipeline_runs' do
     get pipeline_runs_sample_url(@sample)
     assert :success
