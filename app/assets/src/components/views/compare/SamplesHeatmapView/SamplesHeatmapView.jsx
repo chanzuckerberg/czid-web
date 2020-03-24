@@ -64,6 +64,10 @@ const METRIC_OPTIONS = [
   "NR.rpm",
   "NR.r",
 ];
+const BACKGROUND_METRICS = [
+  { text: "NT Z Score", value: "NT.zscore" },
+  { text: "NR Z Score", value: "NR.zscore" },
+];
 
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
@@ -479,8 +483,8 @@ class SamplesHeatmapView extends React.Component {
 
   async fetchBackground() {
     this.setState({ loading: true });
-    let heatmapData = await this.fetchBackgroundData();
-    let newState = this.extractBackgroundMetrics(heatmapData);
+    let backgroundData = await this.fetchBackgroundData();
+    let newState = this.extractBackgroundMetrics(backgroundData);
 
     this.updateHistoryState();
     this.setState(newState, this.updateFilters);
@@ -489,10 +493,6 @@ class SamplesHeatmapView extends React.Component {
   extractBackgroundMetrics(rawData) {
     let { sampleDetails, allTaxonDetails, allData } = this.state;
 
-    const backgroundMetrics = [
-      { text: "NT Z Score", value: "NT.zscore" },
-      { text: "NR Z Score", value: "NR.zscore" },
-    ];
     // The server should always pass back the same set of samples and taxa,
     // but possibly in a different order, so we need to match them up to their
     // respective indices based on their ids.
@@ -504,7 +504,7 @@ class SamplesHeatmapView extends React.Component {
         let taxon = sample.taxons[j];
         let taxonIndex = allTaxonDetails[taxon.tax_id].index;
 
-        backgroundMetrics.forEach(metric => {
+        BACKGROUND_METRICS.forEach(metric => {
           let [metricType, metricName] = metric.value.split(".");
           allData[metric.value] = allData[metric.value] || [];
           allData[metric.value][taxonIndex] =
