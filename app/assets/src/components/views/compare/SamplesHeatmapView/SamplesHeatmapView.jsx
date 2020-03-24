@@ -21,7 +21,11 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { NarrowContainer } from "~/components/layout";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { processMetadata } from "~utils/metadata";
-import { getSampleTaxons, saveVisualization } from "~/api";
+import {
+  getSampleTaxons,
+  saveVisualization,
+  updateHeatmapBackground,
+} from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
@@ -456,6 +460,64 @@ class SamplesHeatmapView extends React.Component {
     };
   }
 
+  fetchBackgroundData() {
+    if (this.lastRequestToken)
+      this.lastRequestToken.cancel("Parameters changed");
+    this.lastRequestToken = axios.CancelToken.source();
+
+    return updateHeatmapBackground(
+      {
+        sampleIds: this.state.sampleIds,
+        taxonIds: Array.from(this.state.allTaxonIds),
+        removedTaxonIds: Array.from(this.removedTaxonIds),
+        background: this.state.selectedOptions.background,
+        heatmapTs: this.props.heatmapTs,
+      },
+      this.lastRequestToken.token
+    );
+  }
+
+  async fetchBackground() {
+    this.setState({ loading: true });
+    let heatmapData = await this.fetchBackgroundData();
+    let newState = this.extractBackgroundMetrics(heatmapData);
+
+    this.updateHistoryState();
+    this.setState(newState, this.updateFilters);
+  }
+
+  extractBackgroundMetrics(rawData) {
+    let { sampleDetails, allTaxonDetails, allData } = this.state;
+
+    const backgroundMetrics = [
+      { text: "NT Z Score", value: "NT.zscore" },
+      { text: "NR Z Score", value: "NR.zscore" },
+    ];
+    // The server should always pass back the same set of samples and taxa,
+    // but possibly in a different order, so we need to match them up to their
+    // respective indices based on their ids.
+    for (let i = 0; i < rawData.length; i++) {
+      let sample = rawData[i];
+      let sampleIndex = sampleDetails[sample.sample_id].index;
+
+      for (let j = 0; j < sample.taxons.length; j++) {
+        let taxon = sample.taxons[j];
+        let taxonIndex = allTaxonDetails[taxon.tax_id].index;
+
+        backgroundMetrics.forEach(metric => {
+          let [metricType, metricName] = metric.value.split(".");
+          allData[metric.value] = allData[metric.value] || [];
+          allData[metric.value][taxonIndex] =
+            allData[metric.value][taxonIndex] || [];
+          allData[metric.value][taxonIndex][sampleIndex] =
+            taxon[metricType][metricName];
+        });
+      }
+    }
+
+    return { allData };
+  }
+
   filterTaxa() {
     const { allowedFeatures } = this.context || {};
 
@@ -819,7 +881,7 @@ class SamplesHeatmapView extends React.Component {
           loading: shouldRefilterData,
         },
         shouldRefetchData
-          ? this.updateHeatmap
+          ? this.updateBackground
           : shouldRefilterData
             ? this.updateFilters
             : null
@@ -838,6 +900,10 @@ class SamplesHeatmapView extends React.Component {
 
   updateHeatmap() {
     this.fetchViewData();
+  }
+
+  updateBackground() {
+    this.fetchBackground();
   }
 
   updateFilters() {

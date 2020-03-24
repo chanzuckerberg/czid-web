@@ -121,6 +121,26 @@ module HeatmapHelper
     )
   end
 
+  def self.update_background_taxon_metrics(params, samples, background_id, client_filtering_enabled: false)
+    taxon_ids = params[:taxonIds] || []
+    taxon_ids = taxon_ids.compact
+
+    removed_taxon_ids = params[:removedTaxonIds] || []
+    removed_taxon_ids = removed_taxon_ids.compact
+
+    taxon_ids = taxon_ids - removed_taxon_ids
+    results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, [], background_id, update_background_only: true)
+
+    HeatmapHelper.samples_taxons_details(
+      results_by_pr,
+      samples,
+      taxon_ids,
+      1,
+      [],
+      client_filtering_enabled: client_filtering_enabled
+    )
+  end
+
   def self.top_taxons_details(
     results_by_pr,
     num_results,
@@ -386,7 +406,7 @@ module HeatmapHelper
     results.values
   end
 
-  def self.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+  def self.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id, update_background_only: false)
     parent_ids = parent_ids.to_a
     parent_ids_clause = parent_ids.empty? ? "" : " OR taxon_counts.tax_id in (#{parent_ids.join(',')}) "
 
@@ -397,30 +417,55 @@ module HeatmapHelper
     # Note: connection.select_all is TWICE faster than TaxonCount.select
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
     # Had to derive rpm and zscore for each sample
-    sql_results = TaxonCount.connection.select_all("
+    unless update_background_only
+      sql_results = TaxonCount.connection.select_all("
+        SELECT
+          taxon_counts.pipeline_run_id     AS  pipeline_run_id,
+          taxon_counts.tax_id              AS  tax_id,
+          taxon_counts.count_type          AS  count_type,
+          taxon_counts.tax_level           AS  tax_level,
+          taxon_counts.genus_taxid         AS  genus_taxid,
+          taxon_counts.family_taxid        AS  family_taxid,
+          taxon_counts.name                AS  name,
+          taxon_lineages.genus_name        AS  genus_name,
+          taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
+          taxon_counts.is_phage            AS  is_phage,
+          taxon_counts.count               AS  r,
+          taxon_summaries.stdev            AS stdev,
+          taxon_summaries.mean             AS mean,
+          taxon_counts.percent_identity    AS  percentidentity,
+          taxon_counts.alignment_length    AS  alignmentlength,
+          IF(
+            taxon_counts.e_value IS NOT NULL,
+            (0.0 - taxon_counts.e_value),
+            #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}
+          )                                AS  neglogevalue
+        FROM taxon_counts
+        JOIN taxon_lineages ON taxon_counts.tax_id = taxon_lineages.taxid
+        LEFT OUTER JOIN taxon_summaries ON
+          #{background_id.to_i}   = taxon_summaries.background_id   AND
+          taxon_counts.count_type = taxon_summaries.count_type      AND
+          taxon_counts.tax_level  = taxon_summaries.tax_level       AND
+          taxon_counts.tax_id     = taxon_summaries.tax_id
+        WHERE
+          pipeline_run_id IN (#{pr_id_to_sample_id.keys.join(',')})
+          AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
+          AND taxon_counts.count_type IN ('NT', 'NR')
+          AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
+          #{parent_ids_clause}
+          OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
+    else
+      # Only fetch metrics that are affected by the selected background.
+      sql_results = TaxonCount.connection.select_all("
       SELECT
         taxon_counts.pipeline_run_id     AS  pipeline_run_id,
         taxon_counts.tax_id              AS  tax_id,
         taxon_counts.count_type          AS  count_type,
         taxon_counts.tax_level           AS  tax_level,
-        taxon_counts.genus_taxid         AS  genus_taxid,
-        taxon_counts.family_taxid        AS  family_taxid,
-        taxon_counts.name                AS  name,
-        taxon_lineages.genus_name        AS  genus_name,
-        taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
-        taxon_counts.is_phage            AS  is_phage,
         taxon_counts.count               AS  r,
         taxon_summaries.stdev            AS stdev,
-        taxon_summaries.mean             AS mean,
-        taxon_counts.percent_identity    AS  percentidentity,
-        taxon_counts.alignment_length    AS  alignmentlength,
-        IF(
-          taxon_counts.e_value IS NOT NULL,
-          (0.0 - taxon_counts.e_value),
-          #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                AS  neglogevalue
+        taxon_summaries.mean             AS mean
       FROM taxon_counts
-      JOIN taxon_lineages ON taxon_counts.tax_id = taxon_lineages.taxid
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id.to_i}   = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
@@ -430,9 +475,8 @@ module HeatmapHelper
         pipeline_run_id IN (#{pr_id_to_sample_id.keys.join(',')})
         AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
         AND taxon_counts.count_type IN ('NT', 'NR')
-        AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
-         #{parent_ids_clause}
-         OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
+        AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_hash
+    end
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
     result_hash = {}
