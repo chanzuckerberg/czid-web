@@ -3,10 +3,6 @@ import { Input as SemanticInput } from "semantic-ui-react";
 import PropTypes from "prop-types";
 
 class Input extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   handleChange = (_, inputProps) => {
     if (this.props.onChange) {
       this.props.onChange(inputProps.value);

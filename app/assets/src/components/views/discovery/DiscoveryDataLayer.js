@@ -109,7 +109,8 @@ class ObjectCollectionView {
     const key = [startIndex, stopIndex];
     if (this._activePromises[key]) {
       const promiseLoadObjectRows = this._activePromises[key];
-      return await promiseLoadObjectRows;
+      const promiseResponse = await promiseLoadObjectRows;
+      return promiseResponse;
     } else {
       const promiseLoadObjectRows = this.fetchObjectRows({
         startIndex,

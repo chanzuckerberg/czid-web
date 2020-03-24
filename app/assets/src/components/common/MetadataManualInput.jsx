@@ -408,9 +408,8 @@ class MetadataManualInput extends React.Component {
                   this.renderApplyToAll(sample, column)}
               </div>
             );
-          }
-          // Only show a MetadataInput if this metadata field matches the sample's host genome.
-          else if (
+          } else if (
+            // Only show a MetadataInput if this metadata field matches the sample's host genome.
             this.isHostGenomeIdValidForField(sampleHostGenomeId, column)
           ) {
             // host is unknown on initial load

@@ -149,6 +149,13 @@ RSpec.describe PipelineRunsHelper, type: :helper do
       it { is_expected.to eq([PipelineRunStage::STATUS_FAILED, nil]) }
     end
 
+    context "when arn is invalid" do
+      let(:aws_cli_stderr) { "An error occurred (InvalidArn) when calling the GetExecutionHistory operation: Invalid Arn: 'BAD ARN'" }
+      let(:aws_cli_exitstatus) { 255 }
+
+      it { is_expected.to eq([PipelineRunStage::STATUS_FAILED, nil]) }
+    end
+
     context "when arn exists" do
       let(:aws_cli_stdout) { file_fixture("helpers/pipeline_runs_helper/#{fixture_file}").read }
 

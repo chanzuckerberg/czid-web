@@ -216,7 +216,7 @@ class SampleUpload extends React.Component {
   toggleCheckBox(e) {
     this.setState(
       {
-        [e.target.id]: e.target.value == "true" ? false : true,
+        [e.target.id]: e.target.value !== "true",
         /* Note: "[e.target.id]" indicates a "computed property name".
          This allows us to use toggleCheckBox(event) to set different state variables
          depending on the id attached to the event. */
@@ -271,7 +271,7 @@ class SampleUpload extends React.Component {
           }
         );
       })
-      .catch(error => {
+      .catch(() => {
         that.setState({
           invalid: true,
           errors: { selectedProject: "Project already exists or is invalid" },

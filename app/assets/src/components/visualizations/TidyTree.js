@@ -282,18 +282,18 @@ export default class TidyTree {
     textSelection.each((d, idx, textNodes) => {
       let text = select(textNodes[idx]);
       let words = text.text().split(/\s+/);
-      let word,
-        line = [],
-        lineNumber = 1,
-        textHeight = parseFloat(text.style("font-size")),
-        lineHeight = textHeight * 1.2,
-        x = text.attr("x"),
-        tspan = text
-          .text(null)
-          .append("tspan")
-          .attr("x", x);
+      let word;
+      let line = [];
+      let lineNumber = 1;
+      let textHeight = parseFloat(text.style("font-size"));
+      let lineHeight = textHeight * 1.2;
+      let x = text.attr("x");
+      let tspan = text
+        .text(null)
+        .append("tspan")
+        .attr("x", x);
 
-      if (words.length == 1) {
+      if (words.length === 1) {
         tspan.text(words[0]);
       } else {
         while ((word = words.pop())) {

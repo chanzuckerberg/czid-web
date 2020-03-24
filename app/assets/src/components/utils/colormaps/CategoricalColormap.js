@@ -14,8 +14,9 @@ export class CategoricalColormap {
 
   hexToDec(hexColor) {
     let decColors = [];
-    for (let j = 0; j < 3; j++)
+    for (let j = 0; j < 3; j++) {
       decColors.push(parseInt(hexColor.slice(j * 2, j * 2 + 2), 16));
+    }
     return decColors;
   }
 

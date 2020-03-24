@@ -9,7 +9,7 @@ ThresholdMap.isThresholdValid = function(threshold) {
     return (
       threshold.metric.length > 0 &&
       threshold.operator.length > 0 &&
-      (threshold.value != "" && !isNaN(threshold.value))
+      (threshold.value !== "" && !isNaN(threshold.value))
     );
   }
   return false;

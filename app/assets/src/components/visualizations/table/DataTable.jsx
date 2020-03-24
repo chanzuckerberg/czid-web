@@ -55,8 +55,8 @@ class DataTable extends React.Component {
   }
 
   filterRow(row, filter) {
-    for (let column in row) {
-      if (row.hasOwnProperty(column) && !column.startsWith("__")) {
+    row.forEach(column => {
+      if (!column.startsWith("__")) {
         let value =
           row[column] !== undefined &&
           row[column] !== null &&
@@ -65,7 +65,7 @@ class DataTable extends React.Component {
           return true;
         }
       }
-    }
+    });
     return false;
   }
 

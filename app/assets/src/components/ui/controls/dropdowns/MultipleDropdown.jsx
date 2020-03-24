@@ -108,10 +108,11 @@ class MultipleDropdown extends React.Component {
 
   handleOpen = () => {
     const { checkedOnTop } = this.props;
-    if (checkedOnTop)
+    if (checkedOnTop) {
       this.setState({
         valueOnOpen: this.state.value.slice(),
       });
+    }
   };
 
   render() {

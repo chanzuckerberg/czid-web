@@ -150,7 +150,13 @@ class MetadataUpload extends React.Component {
         metadata,
         this.getRequiredLocationMetadataType()
       );
-      onMetadataChange({ metadata: newMetadata });
+      // Here we set issues to null on the assumption that getCSVLocationMatches
+      // is called only when warnings and errors have been dealt with.
+      onMetadataChange({
+        metadata: newMetadata,
+        wasManual: true,
+        issues: null,
+      });
       this.setState({ CSVLocationWarnings: warnings });
     } catch (e) {
       // On failure, locations will remain plain text.

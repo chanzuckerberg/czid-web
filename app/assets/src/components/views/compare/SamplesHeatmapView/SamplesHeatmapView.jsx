@@ -313,8 +313,9 @@ class SamplesHeatmapView extends React.Component {
   }
 
   fetchHeatmapData() {
-    if (this.lastRequestToken)
+    if (this.lastRequestToken) {
       this.lastRequestToken.cancel("Parameters changed");
+    }
     this.lastRequestToken = axios.CancelToken.source();
 
     return getSampleTaxons(
@@ -464,9 +465,9 @@ class SamplesHeatmapView extends React.Component {
       taxonPassesThresholdFilters,
     } = this.getTaxonThresholdFilterState();
     let { allTaxonIds, allTaxonDetails, allData } = this.state;
-    let taxonDetails = {},
-      taxonIds = new Set(),
-      filteredData = {};
+    let taxonDetails = {};
+    let taxonIds = new Set();
+    let filteredData = {};
     if (allowedFeatures.includes("heatmap_filter_fe")) {
       allTaxonIds.forEach(taxonId => {
         let taxon = allTaxonDetails[taxonId];
@@ -597,9 +598,9 @@ class SamplesHeatmapView extends React.Component {
     let { metric, taxonsPerSample } = selectedOptions;
     const { metrics } = this.props;
 
-    let topTaxIds = new Set(),
-      topTaxonDetails = {},
-      filteredData = {};
+    let topTaxIds = new Set();
+    let topTaxonDetails = {};
+    let filteredData = {};
 
     Object.values(sampleDetails).forEach(sample => {
       let filteredTaxaInSample = sample.taxa.filter(taxonId =>
@@ -961,6 +962,7 @@ class SamplesHeatmapView extends React.Component {
   };
 
   render() {
+    const { allowedFeatures } = this.context || {};
     return (
       <div className={cs.heatmap}>
         {!this.state.hideFilters && (
@@ -983,6 +985,12 @@ class SamplesHeatmapView extends React.Component {
                 onSelectedOptionsChange={this.handleSelectedOptionsChange}
                 loading={this.state.loading}
                 data={this.state.data}
+                filteredTaxaCount={this.state.taxonIds.length}
+                totalTaxaCount={this.state.allTaxonIds.length}
+                prefilterConstants={this.props.prefilterConstants}
+                displayFilterStats={allowedFeatures.includes(
+                  "heatmap_filter_fe"
+                )}
               />
             </NarrowContainer>
           </div>
@@ -1033,6 +1041,7 @@ SamplesHeatmapView.propTypes = {
   taxonLevels: PropTypes.array,
   thresholdFilters: PropTypes.object,
   heatmapTs: PropTypes.number,
+  prefilterConstants: PropTypes.object,
 };
 
 SamplesHeatmapView.contextType = UserContext;

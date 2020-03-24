@@ -353,7 +353,7 @@ export default class Dendogram {
   }
 
   formatBase10(multiplier, power) {
-    if (-1 <= power <= 1) {
+    if (power >= -1 && power <= 1) {
       return Number.parseFloat(multiplier * Math.pow(10, power)).toFixed(2) * 1;
     } else {
       return `${multiplier}E${power}`;

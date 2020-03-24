@@ -27,7 +27,10 @@ class ReadViz extends React.Component {
         .join("");
     }
 
-    if ((reversed == 1 && readPart == 1) || (reversed == 0 && readPart == 2)) {
+    if (
+      (reversed === 1 && readPart === 1) ||
+      (reversed === 0 && readPart === 2)
+    ) {
       let m4 = readInfo.metrics[4];
       let m5 = readInfo.metrics[5];
       readInfo.metrics[4] = seqLen - m5 + 1;
@@ -58,7 +61,7 @@ class ReadViz extends React.Component {
     }
 
     if (readInfo.refInfo[2].length > right_portion.length) {
-      //trim refInfo[2]
+      // trim refInfo[2]
       readInfo.refInfo[2] = readInfo.refInfo[2].slice(0, right_portion.length);
     } else {
       while (readInfo.refInfo[2].length < right_portion.length) {

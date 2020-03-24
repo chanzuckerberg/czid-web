@@ -108,12 +108,12 @@ class TaxonTreeVis extends React.Component {
 
   componentDidUpdate() {
     let options = {};
-    if (this.nameType != this.props.nameType) {
+    if (this.nameType !== this.props.nameType) {
       this.nameType = this.props.nameType;
       options.useCommonName = this.isCommonNameActive();
     }
 
-    if (this.metric != this.props.metric) {
+    if (this.metric !== this.props.metric) {
       this.metric = this.props.metric;
       options.attribute = this.props.metric;
     }
@@ -122,7 +122,7 @@ class TaxonTreeVis extends React.Component {
       this.treeVis.setOptions(options);
     }
 
-    if (this.taxa != this.props.taxa) {
+    if (this.taxa !== this.props.taxa) {
       this.taxa = this.props.taxa;
       this.treeVis.setTree(this.createTree(this.props.taxa));
     }
@@ -176,7 +176,7 @@ class TaxonTreeVis extends React.Component {
   }
 
   isCommonNameActive() {
-    return this.nameType.toLowerCase() == "common name";
+    return this.nameType.toLowerCase() === "common name";
   }
 
   fillNodeValues(root) {
@@ -294,7 +294,7 @@ class TaxonTreeVis extends React.Component {
           <li
             key={`tt_${metric}`}
             className={`taxon_tooltip__row ${
-              this.props.metric == metric ? "taxon_tooltip__row--active" : ""
+              this.props.metric === metric ? "taxon_tooltip__row--active" : ""
             }`}
           >
             <div className="taxon_tooltip__row__label">

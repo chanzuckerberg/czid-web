@@ -168,6 +168,10 @@ class VisualizationsController < ApplicationController
       },
       allowedFeatures: current_user.allowed_feature_list,
       heatmapTs: heatmap_ts,
+      prefilterConstants: {
+        topN: HeatmapHelper::CLIENT_FILTERING_TAXA_PER_SAMPLE,
+        minReads: HeatmapHelper::MINIMUM_READ_THRESHOLD,
+      },
     }
   end
 

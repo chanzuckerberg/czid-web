@@ -66,8 +66,8 @@ class AlignmentViz extends React.Component {
                   }
                   position="bottom left"
                   content={`
-                Only alignments of individual reads are listed. Contig assembly is not currently included.
-              `}
+              Only alignments of individual reads are listed. Contig assembly is not currently included.
+            `}
                   inverted
                   wide="very"
                   horizontalOffset={4}

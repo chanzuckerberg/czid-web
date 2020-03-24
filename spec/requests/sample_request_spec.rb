@@ -11,19 +11,20 @@ RSpec.describe "Sample request", type: :request do
     context "with a pre-existing project" do
       before do
         # Sample setup
-        project = create(:public_project, users: [@joe])
+        @project = create(:public_project, users: [@joe])
         create(:alignment_config, name: AlignmentConfig::DEFAULT_NAME)
+        hg = create(:host_genome)
         @sample_params = {
           client: "web",
-          host_genome_id: 1,
-          host_genome_name: "Human",
+          host_genome_id: hg.id,
+          host_genome_name: hg.name,
           input_files_attributes: [
             { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz" },
             { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz" },
           ],
           length: 2,
           name: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17",
-          project_id: project.id,
+          project_id: @project.id,
           do_not_process: false,
         }
 
@@ -146,6 +147,74 @@ RSpec.describe "Sample request", type: :request do
 
           pipeline_run = test_sample.pipeline_runs[0]
           expect(pipeline_run.pipeline_execution_strategy).to eq("step_function")
+        end
+
+        it "should set subsample or max_input_fragments if sample is uploaded to biohub project ids" do
+          AppConfigHelper.set_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_SUBSAMPLE, 100)
+          AppConfigHelper.set_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS, 50)
+          AppConfigHelper.set_json_app_config(AppConfig::SUBSAMPLE_WHITELIST_PROJECT_IDS, [@project.id])
+
+          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          test_sample = Sample.find(sample_id)
+          expect(test_sample.subsample).to eq(100)
+          expect(test_sample.max_input_fragments).to eq(50)
+        end
+
+        it "should set subsample or max_input_fragments if multiple project ids are specified" do
+          AppConfigHelper.set_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_SUBSAMPLE, 100)
+          AppConfigHelper.set_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS, 50)
+          AppConfigHelper.set_json_app_config(AppConfig::SUBSAMPLE_WHITELIST_PROJECT_IDS, [@project.id, @project.id + 1, @project.id + 2, @project.id + 3])
+
+          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          test_sample = Sample.find(sample_id)
+          expect(test_sample.subsample).to eq(100)
+          expect(test_sample.max_input_fragments).to eq(50)
+        end
+
+        it "should not set subsample or max_input_fragments if they are nil" do
+          AppConfigHelper.set_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_SUBSAMPLE, nil)
+          AppConfigHelper.set_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS, nil)
+          AppConfigHelper.set_json_app_config(AppConfig::SUBSAMPLE_WHITELIST_PROJECT_IDS, [@project.id])
+
+          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          test_sample = Sample.find(sample_id)
+          expect(test_sample.max_input_fragments).to eq(nil)
+          expect(test_sample.subsample).to eq(nil)
+        end
+
+        it "should not set subsample or max_input_fragments if sample is uploaded to different project" do
+          AppConfigHelper.set_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_SUBSAMPLE, 100)
+          AppConfigHelper.set_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS, 50)
+          AppConfigHelper.set_json_app_config(AppConfig::SUBSAMPLE_WHITELIST_PROJECT_IDS, [@project.id + 1])
+
+          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          test_sample = Sample.find(sample_id)
+          expect(test_sample.max_input_fragments).to eq(nil)
+          expect(test_sample.subsample).to eq(nil)
         end
       end
     end

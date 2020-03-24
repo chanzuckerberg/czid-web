@@ -351,7 +351,7 @@ class PipelineSampleReport extends React.Component {
       let new_input_taxons = [];
       for (let i = 0; i < input_taxons.length; i++) {
         const taxon = input_taxons[i];
-        if (taxon.genus_taxid == taxon.tax_id) {
+        if (taxon.genus_taxid === taxon.tax_id) {
           if (matched_taxons.length > 0) {
             new_input_taxons.push(genus_taxon);
             new_input_taxons = new_input_taxons.concat(matched_taxons);
@@ -419,15 +419,15 @@ class PipelineSampleReport extends React.Component {
           // In the included categories or subcategories
           selected_taxons.push(taxon);
         } else if (
-          taxon.category_name == "Uncategorized" &&
-          parseInt(taxon.tax_id) == -200
+          taxon.category_name === "Uncategorized" &&
+          parseInt(taxon.tax_id) === -200
         ) {
           // the 'all taxa without genus classification' taxon
           const uncat_taxon = taxon;
           const filtered_children = [];
           i++;
           taxon = input_taxons[i];
-          while (taxon && taxon.genus_taxid == -200) {
+          while (taxon && taxon.genus_taxid === -200) {
             if (
               isTaxonIncluded(
                 taxon,
@@ -474,14 +474,14 @@ class PipelineSampleReport extends React.Component {
 
   updateSpeciesCount = res => {
     for (let i = 0; i < res.length; i++) {
-      let isGenus = res[i].genus_taxid == res[i].tax_id;
+      let isGenus = res[i].genus_taxid === res[i].tax_id;
       if (isGenus) {
         // Find a genus entry and count the number of species entries after it.
         let count = 0;
         for (
           let j = i + 1;
           j < res.length &&
-          res[j].genus_taxid != res[j].tax_id &&
+          res[j].genus_taxid !== res[j].tax_id &&
           res[j].genus_taxid === res[i].genus_taxid;
           j++
         ) {
@@ -520,7 +520,7 @@ class PipelineSampleReport extends React.Component {
     return rows.filter(r => r.tax_level === 1 || r.species_count > 0);
   };
 
-  //Load more samples on scroll
+  // Load more samples on scroll
   scrollDown = () => {
     var that = this;
     $(window).scroll(function() {
@@ -528,10 +528,8 @@ class PipelineSampleReport extends React.Component {
         $(window).scrollTop() >
         $(document).height() - $(window).height() - 6000
       ) {
-        {
-          that.state.rows_total > 0 && !that.state.rendering
-            ? that.renderMore()
-            : null;
+        if (that.state.rows_total > 0 && !that.state.rendering) {
+          that.renderMore();
         }
         return false;
       }
@@ -575,7 +573,7 @@ class PipelineSampleReport extends React.Component {
   };
 
   applySort = sort_by => {
-    if (sort_by.toLowerCase() != this.state.sort_by) {
+    if (sort_by.toLowerCase() !== this.state.sort_by) {
       this.state.sort_by = sort_by.toLowerCase();
       this.sortResults();
     }
@@ -631,7 +629,7 @@ class PipelineSampleReport extends React.Component {
   handleRemoveCategory = categoryToRemove => {
     let newIncludedCategories = this.state.includedCategories.filter(
       category => {
-        return category != categoryToRemove;
+        return category !== categoryToRemove;
       }
     );
     this.handleIncludedCategoriesChange(
@@ -643,7 +641,7 @@ class PipelineSampleReport extends React.Component {
   handleRemoveSubcategory = subcategoryToRemove => {
     let newIncludedSubcategories = this.state.includedSubcategories.filter(
       subcategory => {
-        return subcategory != subcategoryToRemove;
+        return subcategory !== subcategoryToRemove;
       }
     );
     this.handleIncludedCategoriesChange(
@@ -887,8 +885,8 @@ class PipelineSampleReport extends React.Component {
     );
 
     const grayOut =
-      this.props.nameType.toLowerCase() == "common name" &&
-      (!taxCommonName || taxCommonName.trim() == "");
+      this.props.nameType.toLowerCase() === "common name" &&
+      (!taxCommonName || taxCommonName.trim() === "");
     let taxonNameDisplay = (
       <span className={grayOut ? "count-info" : ""}>{taxonName}</span>
     );
@@ -942,7 +940,7 @@ class PipelineSampleReport extends React.Component {
       </span>
     );
     let taxonDescription;
-    if (tax_info.tax_level == 1) {
+    if (tax_info.tax_level === 1) {
       // indent species rows
       taxonDescription = (
         <div className="hover-wrapper">
@@ -955,7 +953,7 @@ class PipelineSampleReport extends React.Component {
     } else {
       // emphasize genus, soften category and species count
       let category_name = "";
-      if (tax_info.tax_id != -200) category_name = tax_info.category_name;
+      if (tax_info.tax_id !== -200) category_name = tax_info.category_name;
       const collapseExpand = (
         <CollapseExpand tax_info={tax_info} parent={this} />
       );
@@ -1038,7 +1036,7 @@ class PipelineSampleReport extends React.Component {
 
   isSortedActive = columnName => {
     const desiredSort = columnName.toLowerCase();
-    return this.state.sort_by == desiredSort ? "active" : "";
+    return this.state.sort_by === desiredSort ? "active" : "";
   };
 
   render_sort_arrow = (column, desiredSortDirection, arrowDirection) => {
@@ -1109,7 +1107,7 @@ class PipelineSampleReport extends React.Component {
   getRowClass = taxInfo => {
     const topScoringRow = taxInfo.topScoring === 1;
 
-    if (taxInfo.tax_level == 2) {
+    if (taxInfo.tax_level === 2) {
       return cx(
         "report-row-genus",
         taxInfo.genus_taxid, // TODO(mark): remove non-styling-related class.
@@ -1213,7 +1211,7 @@ class PipelineSampleReport extends React.Component {
 
     if (!this.fetchParams("background_id") && Cookies.get("background_id")) {
       const cookie_bgid = Cookies.get("background_id");
-      let match = this.all_backgrounds.filter(b => b["id"] == cookie_bgid);
+      let match = this.all_backgrounds.filter(b => b["id"] === cookie_bgid);
       if (match.length > 0) {
         this.props.reportPageParams.background_id = cookie_bgid;
       } else {
@@ -1405,7 +1403,7 @@ class RenderMarkup extends React.Component {
           trigger={
             <Menu.Item
               name="table"
-              active={this.props.view == "table"}
+              active={this.props.view === "table"}
               onClick={this.props.onViewClick}
             >
               <Icon name="table" />
@@ -1419,7 +1417,7 @@ class RenderMarkup extends React.Component {
           trigger={
             <Menu.Item
               name="tree"
-              active={this.props.view == "tree"}
+              active={this.props.view === "tree"}
               onClick={this.props.onViewClick}
             >
               <Icon name="fork" />
@@ -1510,7 +1508,7 @@ class RenderMarkup extends React.Component {
               onChange={parent.handleSpecificityChange}
             />
           </div>
-          {this.props.view == "tree" && (
+          {this.props.view === "tree" && (
             <div className="filter-lists-element">
               <MetricPicker
                 options={parent.treeMetrics}
@@ -1580,8 +1578,8 @@ class RenderMarkup extends React.Component {
                 </div>
                 {filter_row_stats}
               </div>
-              {this.props.view == "table" && this.renderTable()}
-              {this.props.view == "tree" && this.renderTree()}
+              {this.props.view === "table" && this.renderTable()}
+              {this.props.view === "tree" && this.renderTree()}
               {parent.state.loading && (
                 <div className="loading-container">
                   <LoadingLabel />

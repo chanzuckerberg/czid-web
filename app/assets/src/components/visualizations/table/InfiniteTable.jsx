@@ -9,13 +9,22 @@ import cx from "classnames";
 const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
 
+class CanceledPromiseError extends Error {
+  constructor(promise, ...params) {
+    super(...params);
+    this.promise = promise;
+  }
+}
+
 const makeCancelable = promise => {
   let hasCanceled_ = false;
 
   const wrappedPromise = new Promise((resolve, reject) => {
     promise.then(
-      val => (hasCanceled_ ? reject({ isCanceled: true }) : resolve(val)),
-      error => (hasCanceled_ ? reject({ isCanceled: true }) : reject(error))
+      val =>
+        hasCanceled_ ? reject(new CanceledPromiseError(promise)) : resolve(val),
+      error =>
+        hasCanceled_ ? reject(new CanceledPromiseError(promise)) : reject(error)
     );
   });
 
@@ -86,10 +95,8 @@ class InfiniteTable extends React.Component {
         return true;
       })
       .catch(error => {
-        if (!error.isCanceled) {
-          // eslint-disable-next-line no-console
-          console.error("Error loading rows", error);
-        }
+        // eslint-disable-next-line no-console
+        console.error("Error loading rows", error);
       });
     return this.cancelableLoadRowsPromise.promise;
   };

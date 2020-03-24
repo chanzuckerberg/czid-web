@@ -10,7 +10,7 @@ export const inverseTransformDOMCoordinates = (transformedElement, x, y) => {
     .map(str => parseFloat(str))
     .slice(0, 4);
 
-  if (a == 1 && b == 0 && c == 0 && d == 1) {
+  if (a === 1 && b === 0 && c === 0 && d === 1) {
     return { x: x, y: y };
   }
 

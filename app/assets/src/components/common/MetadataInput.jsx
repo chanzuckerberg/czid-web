@@ -43,10 +43,9 @@ class MetadataInput extends React.Component {
       newState.warning = props.warning;
       newState.prevPropsWarning = props.warning;
       newState.warnedValue = props.value;
-    }
-    // If the currently passed value is not equal to the value we have a warning about,
-    // calculate the warning for this value.
-    else if (props.value !== state.warnedValue) {
+    } else if (props.value !== state.warnedValue) {
+      // If the currently passed value is not equal to the value we have a warning about,
+      // calculate the warning for this value.
       newState.warnedValue = props.value;
 
       // warnings passed in as props take precedence.
@@ -94,7 +93,7 @@ class MetadataInput extends React.Component {
       const offLabel = metadataType.options[1];
       return (
         <Toggle
-          initialChecked={value === onLabel ? true : false}
+          initialChecked={value === onLabel}
           onLabel={onLabel}
           offLabel={offLabel}
           onChange={label => onChange(metadataType.key, label, true)}
