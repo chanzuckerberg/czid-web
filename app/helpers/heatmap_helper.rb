@@ -495,8 +495,8 @@ module HeatmapHelper
 
   def self.background_metrics_query(background_id, pr_id_to_sample_id, taxon_ids)
     # Only fetch metrics that are affected by the selected background.
-    TaxonCount.connection.select_all(
-      "SELECT
+    TaxonCount.connection.select_all("
+      SELECT
         taxon_counts.pipeline_run_id     AS  pipeline_run_id,
         taxon_counts.tax_id              AS  tax_id,
         taxon_counts.count_type          AS  count_type,
