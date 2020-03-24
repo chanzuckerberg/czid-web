@@ -226,8 +226,9 @@ module HeatmapHelper
 
     # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
     # fraction_subsampled = 1.0.
+    # The total_ercc_reads can be nil, which we interpret as 0.
     rpm_sql = "count / (
-          (total_reads - total_ercc_reads) *
+          (total_reads - COALESCE(total_ercc_reads, 0)) *
           COALESCE(fraction_subsampled, 1.0)
         ) * 1000 * 1000"
 
