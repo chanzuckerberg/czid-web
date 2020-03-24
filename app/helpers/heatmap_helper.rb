@@ -128,7 +128,7 @@ module HeatmapHelper
     removed_taxon_ids = params[:removedTaxonIds] || []
     removed_taxon_ids = removed_taxon_ids.compact
 
-    taxon_ids = taxon_ids - removed_taxon_ids
+    taxon_ids -= removed_taxon_ids
     results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, [], background_id, update_background_only: true)
 
     HeatmapHelper.samples_taxons_details(
@@ -417,8 +417,30 @@ module HeatmapHelper
     # Note: connection.select_all is TWICE faster than TaxonCount.select
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
     # Had to derive rpm and zscore for each sample
-    unless update_background_only
-      sql_results = TaxonCount.connection.select_all("
+    sql_results = if update_background_only
+      # Only fetch metrics that are affected by the selected background.
+      TaxonCount.connection.select_all("
+      SELECT
+        taxon_counts.pipeline_run_id     AS  pipeline_run_id,
+        taxon_counts.tax_id              AS  tax_id,
+        taxon_counts.count_type          AS  count_type,
+        taxon_counts.tax_level           AS  tax_level,
+        taxon_counts.count               AS  r,
+        taxon_summaries.stdev            AS stdev,
+        taxon_summaries.mean             AS mean
+      FROM taxon_counts
+      LEFT OUTER JOIN taxon_summaries ON
+        #{background_id.to_i}   = taxon_summaries.background_id   AND
+        taxon_counts.count_type = taxon_summaries.count_type      AND
+        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
+        taxon_counts.tax_id     = taxon_summaries.tax_id
+      WHERE
+        pipeline_run_id IN (#{pr_id_to_sample_id.keys.join(',')})
+        AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
+        AND taxon_counts.count_type IN ('NT', 'NR')
+        AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_hash
+    else
+      TaxonCount.connection.select_all("
         SELECT
           taxon_counts.pipeline_run_id     AS  pipeline_run_id,
           taxon_counts.tax_id              AS  tax_id,
@@ -454,28 +476,6 @@ module HeatmapHelper
           AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
           #{parent_ids_clause}
           OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
-    else
-      # Only fetch metrics that are affected by the selected background.
-      sql_results = TaxonCount.connection.select_all("
-      SELECT
-        taxon_counts.pipeline_run_id     AS  pipeline_run_id,
-        taxon_counts.tax_id              AS  tax_id,
-        taxon_counts.count_type          AS  count_type,
-        taxon_counts.tax_level           AS  tax_level,
-        taxon_counts.count               AS  r,
-        taxon_summaries.stdev            AS stdev,
-        taxon_summaries.mean             AS mean
-      FROM taxon_counts
-      LEFT OUTER JOIN taxon_summaries ON
-        #{background_id.to_i}   = taxon_summaries.background_id   AND
-        taxon_counts.count_type = taxon_summaries.count_type      AND
-        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-        taxon_counts.tax_id     = taxon_summaries.tax_id
-      WHERE
-        pipeline_run_id IN (#{pr_id_to_sample_id.keys.join(',')})
-        AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
-        AND taxon_counts.count_type IN ('NT', 'NR')
-        AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_hash
     end
 
     # calculating rpm and zscore, organizing the results by pipeline_run_id
