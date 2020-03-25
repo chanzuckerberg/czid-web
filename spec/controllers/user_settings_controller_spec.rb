@@ -162,8 +162,8 @@ RSpec.describe UserSettingsController, type: :controller do
         stub_mock_user_setting_metadata()
         stub_mock_display_categories()
 
-        get :metadata_by_category, params: { format: "json" }
         expect(controller).not_to receive(:metadata_by_category)
+        get :metadata_by_category, params: { format: "json" }
         expect(response).to redirect_to(root_path)
       end
     end
@@ -173,8 +173,8 @@ RSpec.describe UserSettingsController, type: :controller do
         stub_mock_user_setting_metadata()
         stub_mock_display_categories()
 
-        post :update, params: { format: "json", key: mock_user_setting, value: "true" }
         expect(controller).not_to receive(:update)
+        post :update, params: { format: "json", key: mock_user_setting, value: "true" }
         expect(response).to redirect_to(root_path)
       end
     end
