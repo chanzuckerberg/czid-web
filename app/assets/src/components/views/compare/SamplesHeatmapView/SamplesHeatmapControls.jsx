@@ -50,7 +50,7 @@ export default class SamplesHeatmapControls extends React.Component {
         value={this.props.selectedOptions.species}
         onChange={this.onTaxonLevelChange}
         label="Taxon Level"
-        disabled={!this.props.data}
+        disabled={this.props.loading || !this.props.data}
       />
     );
   }
@@ -85,7 +85,7 @@ export default class SamplesHeatmapControls extends React.Component {
         selectedOptions={this.props.selectedOptions.categories}
         selectedSuboptions={this.props.selectedOptions.subcategories}
         label="Taxon Categories"
-        disabled={!this.props.data}
+        disabled={this.props.loading || !this.props.data}
       />
     );
   }
@@ -110,7 +110,7 @@ export default class SamplesHeatmapControls extends React.Component {
         onChange={this.onMetricChange}
         value={this.props.selectedOptions.metric}
         label="Metric"
-        disabled={!this.props.data}
+        disabled={this.props.loading || !this.props.data}
       />
     );
   }
@@ -140,7 +140,7 @@ export default class SamplesHeatmapControls extends React.Component {
         onChange={this.onBackgroundChange}
         value={this.props.selectedOptions.background}
         label="Background"
-        disabled={!this.props.data}
+        disabled={this.props.loading || !this.props.data}
       />
     );
   }
@@ -165,7 +165,7 @@ export default class SamplesHeatmapControls extends React.Component {
         options={this.props.options.thresholdFilters}
         thresholds={this.props.selectedOptions.thresholdFilters}
         onApply={this.onThresholdFilterApply}
-        disabled={!this.props.data}
+        disabled={this.props.loading || !this.props.data}
       />
     );
   }
@@ -190,7 +190,7 @@ export default class SamplesHeatmapControls extends React.Component {
         value={this.props.selectedOptions.readSpecificity}
         label="Read Specificity"
         onChange={this.onSpecificityChange}
-        disabled={!this.props.data}
+        disabled={this.props.loading || !this.props.data}
       />
     );
   }
@@ -215,7 +215,7 @@ export default class SamplesHeatmapControls extends React.Component {
         value={this.props.selectedOptions.sampleSortType}
         label="Sort Samples"
         onChange={this.onSortSamplesChange}
-        disabled={!this.props.data}
+        disabled={this.props.loading || !this.props.data}
       />
     );
   }
@@ -240,7 +240,7 @@ export default class SamplesHeatmapControls extends React.Component {
         value={this.props.selectedOptions.taxaSortType}
         label="Sort Taxa"
         onChange={this.onSortTaxaChange}
-        disabled={!this.props.data}
+        disabled={this.props.loading || !this.props.data}
       />
     );
   }
@@ -270,7 +270,7 @@ export default class SamplesHeatmapControls extends React.Component {
         onChange={this.onDataScaleChange}
         options={options}
         label="Scale"
-        disabled={!this.props.data}
+        disabled={this.props.loading || !this.props.data}
       />
     );
   }
