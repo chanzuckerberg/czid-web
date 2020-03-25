@@ -347,6 +347,8 @@ class PipelineRun < ApplicationRecord
   end
 
   def ready_for_cache?
+    # TEMPORARILY DISABLE CACHING COMPLETELY - REMOVE EARLY RETURN TO REINSTATE
+    return false
     # This method is used to decide whether a report is ready to be cached, which is only the case
     # once a pipeline run is successful and all results are available.
     #   (1) "results_finalized == FINALIZED_SUCCESS" means all results destined for the DB
