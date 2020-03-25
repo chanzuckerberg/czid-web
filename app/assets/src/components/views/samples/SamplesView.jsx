@@ -16,10 +16,8 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import PropTypes from "~/components/utils/propTypes";
-import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
 import SaveIcon from "~ui/icons/SaveIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
@@ -275,45 +273,6 @@ class SamplesView extends React.Component {
     );
   };
 
-  renderDownloadTrigger = () => {
-    const { projectId, selectedSampleIds } = this.props;
-
-    const downloadOptions = [{ text: "Sample Table", value: "samples_table" }];
-    if (projectId) {
-      downloadOptions.push({
-        text: "Sample Reports",
-        value: "project_reports",
-      });
-    }
-    if (this.props.admin) {
-      downloadOptions.push({
-        text: "Host Gene Counts",
-        value: "host_gene_counts",
-      });
-    }
-    return (
-      <DownloadIconDropdown
-        className={cs.action}
-        iconClassName={cx(cs.icon, cs.download)}
-        options={downloadOptions}
-        onClick={downloadOption => {
-          // TODO(tiago): diabled temporary due to being out of scope of PR. Should fix the pattern.
-          // eslint-disable-next-line no-new
-          new ReportsDownloader({
-            projectId,
-            downloadOption,
-            selectedSampleIds,
-          });
-          logAnalyticsEvent("SamplesView_download-dropdown-option_clicked", {
-            projectId,
-            selectedSamplesCount: selectedSampleIds.size,
-            downloadOption,
-          });
-        }}
-      />
-    );
-  };
-
   renderBulkDownloadTrigger = () => {
     const { selectedSampleIds } = this.props;
     const { bulkDownloadButtonTempTooltip } = this.state;
@@ -366,7 +325,7 @@ class SamplesView extends React.Component {
   };
 
   renderToolbar = () => {
-    const { selectedSampleIds, allowedFeatures } = this.props;
+    const { selectedSampleIds } = this.props;
     return (
       <div className={cs.samplesToolbar}>
         {this.renderDisplaySwitcher()}
@@ -388,9 +347,7 @@ class SamplesView extends React.Component {
           {this.renderCollectionTrigger()}
           {this.renderHeatmapTrigger()}
           {this.renderPhyloTreeTrigger()}
-          {allowedFeatures.includes("bulk_downloads")
-            ? this.renderBulkDownloadTrigger()
-            : this.renderDownloadTrigger()}
+          {this.renderBulkDownloadTrigger()}
         </div>
       </div>
     );
@@ -532,7 +489,7 @@ class SamplesView extends React.Component {
   };
 
   render() {
-    const { currentDisplay, allowedFeatures, selectedSampleIds } = this.props;
+    const { currentDisplay, selectedSampleIds } = this.props;
     const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
     return (
       <div className={cs.container}>
@@ -552,18 +509,17 @@ class SamplesView extends React.Component {
             )}
           />
         )}
-        {allowedFeatures.includes("bulk_downloads") &&
-          bulkDownloadModalOpen && (
-            <BulkDownloadModal
-              open
-              onClose={withAnalytics(
-                this.handleBulkDownloadModalClose,
-                "SamplesView_bulk-download-modal_closed"
-              )}
-              selectedSampleIds={selectedSampleIds}
-              onGenerate={this.handleBulkDownloadGenerate}
-            />
-          )}
+        {bulkDownloadModalOpen && (
+          <BulkDownloadModal
+            open
+            onClose={withAnalytics(
+              this.handleBulkDownloadModalClose,
+              "SamplesView_bulk-download-modal_closed"
+            )}
+            selectedSampleIds={selectedSampleIds}
+            onGenerate={this.handleBulkDownloadGenerate}
+          />
+        )}
       </div>
     );
   }
@@ -585,7 +541,6 @@ SamplesView.defaultProps = {
 SamplesView.propTypes = {
   activeColumns: PropTypes.arrayOf(PropTypes.string),
   admin: PropTypes.bool,
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   currentDisplay: PropTypes.string.isRequired,
   currentTab: PropTypes.string.isRequired,
   mapLevel: PropTypes.string,

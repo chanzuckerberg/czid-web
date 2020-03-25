@@ -398,6 +398,15 @@ const updateUserSetting = (key, value) =>
     value,
   });
 
+const updateHeatmapBackground = (params, cancelToken) =>
+  postWithCSRF("/visualizations/update_heatmap_background.json", {
+    sampleIds: params.sampleIds,
+    taxonIds: params.taxonIds,
+    removedTaxonIds: params.removedTaxonIds,
+    background: params.background,
+    cancelToken,
+  });
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -448,4 +457,5 @@ export {
   getTaxaWithContigsSuggestions,
   uploadedByCurrentUser,
   updateUserSetting,
+  updateHeatmapBackground,
 };
