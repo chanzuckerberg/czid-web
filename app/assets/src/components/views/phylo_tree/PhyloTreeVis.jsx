@@ -37,9 +37,9 @@ class PhyloTreeVis extends React.Component {
         props.defaultMetadata || EXTRA_DROPDOWN_OPTIONS[0].value,
     };
 
-    (this.newick = props.newick),
-      (this.nodeData = props.nodeData),
-      (this.treeVis = null);
+    this.newick = props.newick;
+    this.nodeData = props.nodeData;
+    this.treeVis = null;
 
     this.ncbiFields = [
       { name: "country", label: "Country" },
@@ -70,8 +70,8 @@ class PhyloTreeVis extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (
-      this.props.newick != this.newick ||
-      this.props.nodeData != this.nodeData
+      this.props.newick !== this.newick ||
+      this.props.nodeData !== this.nodeData
     ) {
       this.newick = this.props.newick;
       this.nodeData = this.props.nodeData;
@@ -83,7 +83,7 @@ class PhyloTreeVis extends React.Component {
     }
 
     // Close the sidebar if we switch trees.
-    if (this.props.phyloTreeId != prevProps.phyloTreeId) {
+    if (this.props.phyloTreeId !== prevProps.phyloTreeId) {
       this.handleSidebarClose();
     }
   }

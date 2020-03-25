@@ -295,7 +295,7 @@ const validateSampleNames = (projectId, sampleNames) => {
 };
 
 const validateSampleFiles = sampleFiles => {
-  if (!sampleFiles || sampleFiles.length == 0) {
+  if (!sampleFiles || sampleFiles.length === 0) {
     return Promise.resolve(sampleFiles);
   }
 

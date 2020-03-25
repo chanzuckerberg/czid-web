@@ -7,10 +7,6 @@ import RemoveIcon from "../icons/RemoveIcon";
 import cs from "./modal.scss";
 
 class Modal extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const {
       fixedHeight,

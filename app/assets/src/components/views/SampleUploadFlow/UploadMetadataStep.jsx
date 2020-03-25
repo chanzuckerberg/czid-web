@@ -32,7 +32,8 @@ class UploadMetadataStep extends React.Component {
       metadata,
       issues,
       wasManual,
-      newHostGenomes,
+      // not all callers set newHostGenomes
+      newHostGenomes: newHostGenomes || this.state.newHostGenomes,
     });
 
     const metadataValid = metadata && !(issues && issues.errors.length > 0);

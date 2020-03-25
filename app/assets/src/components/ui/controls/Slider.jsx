@@ -16,7 +16,7 @@ class Slider extends React.Component {
 
   onChange(newValue) {
     this.setState({ value: newValue });
-    if (typeof this.onChangeParent == "function") {
+    if (typeof this.onChangeParent === "function") {
       this.onChangeParent();
     }
   }

@@ -27,10 +27,10 @@ class PhyloTreeDownloadButton extends React.Component {
       location.href = `/phylo_trees/${
         this.props.tree.id
       }/download?output=${option}`;
-    } else if (option == "svg") {
+    } else if (option === "svg") {
       // TODO (gdingle): filename per tree?
       this.svgSaver.asSvg(this.getNode(), "phylo_tree.svg");
-    } else if (option == "png") {
+    } else if (option === "png") {
       // TODO (gdingle): filename per tree?
       this.svgSaver.asPng(this.getNode(), "phylo_tree.png");
     } else {

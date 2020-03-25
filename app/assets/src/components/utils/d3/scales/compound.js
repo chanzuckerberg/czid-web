@@ -20,7 +20,7 @@ export default function compound() {
 
   scale.domain = function() {
     if (arguments.length) {
-      throw "Setting a domain is not supported on compound scales";
+      throw new Error("Setting a domain is not supported on compound scales");
     }
     var values = [].concat.apply(
       [],
@@ -35,7 +35,7 @@ export default function compound() {
 
   scale.range = function() {
     if (arguments.length) {
-      throw "Setting a range is not supported on compound scales";
+      throw new Error("Setting a range is not supported on compound scales");
     }
     var values = [].concat.apply(
       [],

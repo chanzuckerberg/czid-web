@@ -17,12 +17,11 @@ function intersection(r1, r2) {
 }
 
 function rescale(range, domain) {
-  let logScale = d3.scale.log(),
-    d,
-    parts = [];
+  let logScale = d3.scale.log();
+  let parts = [];
 
   // Negative log scale
-  d = intersection(domain, [Number.NEGATIVE_INFINITY, -1]);
+  let d = intersection(domain, [Number.NEGATIVE_INFINITY, -1]);
   if (d) {
     parts.push({
       domain: d,
@@ -78,9 +77,9 @@ function rescale(range, domain) {
 }
 
 export default function symlog() {
-  let scale = compound(d3.scale.linear()),
-    compoundRange = scale.range,
-    compoundDomain = scale.domain;
+  let scale = compound(d3.scale.linear());
+  let compoundRange = scale.range;
+  let compoundDomain = scale.domain;
 
   scale.domain = function(_) {
     return arguments.length

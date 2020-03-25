@@ -321,8 +321,9 @@ class SamplesHeatmapView extends React.Component {
   }
 
   fetchHeatmapData() {
-    if (this.lastRequestToken)
+    if (this.lastRequestToken) {
       this.lastRequestToken.cancel("Parameters changed");
+    }
     this.lastRequestToken = axios.CancelToken.source();
 
     return getSampleTaxons(
@@ -526,9 +527,9 @@ class SamplesHeatmapView extends React.Component {
       taxonPassesThresholdFilters,
     } = this.getTaxonThresholdFilterState();
     let { allTaxonIds, allTaxonDetails, allData } = this.state;
-    let taxonDetails = {},
-      taxonIds = new Set(),
-      filteredData = {};
+    let taxonDetails = {};
+    let taxonIds = new Set();
+    let filteredData = {};
     if (allowedFeatures.includes("heatmap_filter_fe")) {
       allTaxonIds.forEach(taxonId => {
         let taxon = allTaxonDetails[taxonId];
@@ -659,9 +660,9 @@ class SamplesHeatmapView extends React.Component {
     let { metric, taxonsPerSample } = selectedOptions;
     const { metrics } = this.props;
 
-    let topTaxIds = new Set(),
-      topTaxonDetails = {},
-      filteredData = {};
+    let topTaxIds = new Set();
+    let topTaxonDetails = {};
+    let filteredData = {};
 
     Object.values(sampleDetails).forEach(sample => {
       let filteredTaxaInSample = sample.taxa.filter(taxonId =>

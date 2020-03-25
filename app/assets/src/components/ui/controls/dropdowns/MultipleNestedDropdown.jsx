@@ -80,7 +80,7 @@ class MultipleNestedDropdown extends React.Component {
             selectedOptions: [...prevState.selectedOptions, optionValue],
           };
           const optionClicked = this.props.options.find(
-            option => option.value == optionValue
+            option => option.value === optionValue
           );
           if (optionClicked.suboptions) {
             let selectedSuboptions = optionClicked.suboptions.map(
@@ -103,7 +103,7 @@ class MultipleNestedDropdown extends React.Component {
         prevState => {
           return {
             selectedOptions: prevState.selectedOptions.filter(
-              value => value != optionValue
+              value => value !== optionValue
             ),
           };
         },
@@ -138,7 +138,7 @@ class MultipleNestedDropdown extends React.Component {
         prevState => {
           if (prevState.selectedSuboptions[optionValue]) {
             let suboptions = prevState.selectedSuboptions[optionValue].filter(
-              value => value != suboptionValue
+              value => value !== suboptionValue
             );
             prevState.selectedSuboptions[optionValue] = suboptions;
           }

@@ -114,7 +114,7 @@ class UploadSampleStep extends React.Component {
     );
   }
 
-  //*** Basespace-related functions ***
+  // *** Basespace-related functions ***
 
   // Handle the message from the Basespace OAuth popup that authorizes IDseq to read (i.e. download files) from user projects.
   handleBasespaceOAuthMessageEvent = async event => {
@@ -172,7 +172,7 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  //*** Tab-related functions ***
+  // *** Tab-related functions ***
 
   getUploadTabs = () => {
     const { admin, biohubS3UploadEnabled } = this.props;
@@ -200,7 +200,7 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  //*** Project-related functions ***
+  // *** Project-related functions ***
 
   // Modify the project_id in our samples, and validate the sample names again.
   updateSamplesForNewProject = async ({ samples, project }) => {
@@ -318,7 +318,7 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  //*** Sample-related functions ***
+  // *** Sample-related functions ***
 
   // Functions to get the state key by sample type, e.g. this.state.localSamples, this.state.basespaceSamples
   getSelectedSampleIdsKey = sampleType => `${sampleType}SelectedSampleIds`;
@@ -606,7 +606,7 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  //*** Miscellaneous functions ***
+  // *** Miscellaneous functions ***
 
   handleContinue = () => {
     const { currentTab, selectedProject } = this.state;
@@ -644,7 +644,7 @@ class UploadSampleStep extends React.Component {
     };
   };
 
-  //*** Render functions ***
+  // *** Render functions ***
 
   renderTab = () => {
     const { basespaceAccessToken, currentTab, selectedProject } = this.state;

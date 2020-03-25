@@ -26,6 +26,7 @@ import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import cs from "./sample_upload_flow.scss";
 import UploadProgressModal from "./UploadProgressModal";
 import HostOrganismMessage from "./HostOrganismMessage";
+import AdminUploadOptions from "./AdminUploadOptions";
 
 const processMetadataRows = metadataRows =>
   flow(
@@ -42,6 +43,7 @@ class ReviewStep extends React.Component {
     skipSampleProcessing: false,
     useStepFunctionPipeline: false,
     useTaxonWhitelist: false,
+    adminOptions: {},
   };
 
   componentDidMount() {
@@ -134,8 +136,8 @@ class ReviewStep extends React.Component {
           </div>
         );
       } else {
-        (sampleData["File Size"] = formatFileSize(sample.file_size)),
-          (sampleData["File Type"] = sample.file_type);
+        sampleData["File Size"] = formatFileSize(sample.file_size);
+        sampleData["File Type"] = sample.file_type;
         sampleData["Basespace Project"] = sample.basespace_project_name;
       }
 
@@ -181,6 +183,10 @@ class ReviewStep extends React.Component {
       return text.split(/\r*\n/).length;
     }
     return 0;
+  };
+
+  handleAdminOptionsChanged = adminOptions => {
+    this.setState({ adminOptions });
   };
 
   toggleSkipSampleProcessing = () => {
@@ -272,6 +278,7 @@ class ReviewStep extends React.Component {
       consentChecked,
       useStepFunctionPipeline,
       useTaxonWhitelist,
+      adminOptions,
     } = this.state;
 
     const {
@@ -287,7 +294,7 @@ class ReviewStep extends React.Component {
     const shouldTruncateDescription =
       project.description && this.countNewLines(project.description) > 5;
 
-    const { userSettings, allowedFeatures } = this.context || {};
+    const { userSettings, allowedFeatures, admin } = this.context || {};
 
     return (
       <div
@@ -394,6 +401,12 @@ class ReviewStep extends React.Component {
             <div className={cs.tableScrollWrapper}>
               {this.renderReviewTable()}
             </div>
+            {admin && (
+              <AdminUploadOptions
+                adminOptions={adminOptions}
+                onAdminOptionsChanged={this.handleAdminOptionsChanged}
+              />
+            )}
           </div>
         </div>
         <div className={cs.controls}>
@@ -448,6 +461,7 @@ class ReviewStep extends React.Component {
               skipSampleProcessing={skipSampleProcessing}
               useStepFunctionPipeline={useStepFunctionPipeline}
               useTaxonWhitelist={useTaxonWhitelist}
+              adminOptions={adminOptions}
             />
           )}
         </div>

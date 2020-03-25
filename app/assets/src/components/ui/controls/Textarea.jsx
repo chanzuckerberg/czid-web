@@ -5,10 +5,6 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 
 class Textarea extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   handleChange = (_, inputProps) => {
     if (this.props.onChange) {
       this.props.onChange(inputProps.value);

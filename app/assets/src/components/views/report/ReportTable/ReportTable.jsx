@@ -8,10 +8,6 @@ import DetailCells from "./DetailCells";
 import { REPORT_TABLE_COLUMNS } from "./constants";
 
 export default class ReportTable extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   handleTaxonClick = taxonSidebarData => {
     const { taxInfo, backgroundData, taxonName } = taxonSidebarData;
     this.props.onTaxonClick({

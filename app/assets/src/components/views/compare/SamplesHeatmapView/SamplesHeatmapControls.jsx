@@ -116,7 +116,7 @@ export default class SamplesHeatmapControls extends React.Component {
   }
 
   onBackgroundChange = background => {
-    if (background == this.props.selectedOptions.background) {
+    if (background === this.props.selectedOptions.background) {
       return;
     }
 
@@ -246,7 +246,7 @@ export default class SamplesHeatmapControls extends React.Component {
   }
 
   onDataScaleChange = scaleIdx => {
-    if (scaleIdx == this.props.selectedOptions.dataScaleIdx) {
+    if (scaleIdx === this.props.selectedOptions.dataScaleIdx) {
       return;
     }
 

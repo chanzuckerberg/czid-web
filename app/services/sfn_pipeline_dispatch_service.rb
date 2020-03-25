@@ -110,13 +110,13 @@ class SfnPipelineDispatchService
       Input: {
         HostFilter: input_files_paths.each_with_index.map { |path, i| ["fastqs_#{i}", path] }.to_h,
       },
+      OutputPrefix: @sample.sample_output_s3_path,
     }
 
     stage_dags_json.each_pair do |stage_name, stage_dag_json|
       stage_wdl = convert_dag_json_to_wdl(stage_dag_json)
       s3_paths = upload_inputs_and_generate_paths(stage_name, stage_wdl, stage_dag_json)
       sfn_pipeline_input_json["#{stage_name.upcase}_WDL_URI"] = s3_paths[:wdl_input_s3_path]
-      sfn_pipeline_input_json["#{stage_name.upcase}_OUTPUT_URI"] = s3_paths[:wdl_output_s3_path]
     end
     return sfn_pipeline_input_json
   end
@@ -172,5 +172,6 @@ class SfnPipelineDispatchService
     else
       LogUtil.log_err_and_airbrake("Command to start SFN execution failed. Error: #{stderr}")
     end
+    return nil
   end
 end

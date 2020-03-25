@@ -66,12 +66,12 @@ class SampleViewControls extends React.Component {
       this.downloadCSV();
       log();
       return;
-    } else if (option == "taxon_svg") {
+    } else if (option === "taxon_svg") {
       // TODO (gdingle): filename per tree?
       new SvgSaver().asSvg(this.getTaxonTreeNode(), "taxon_tree.svg");
       log();
       return;
-    } else if (option == "taxon_png") {
+    } else if (option === "taxon_png") {
       // TODO (gdingle): filename per tree?
       new SvgSaver().asPng(this.getTaxonTreeNode(), "taxon_tree.png");
       log();
