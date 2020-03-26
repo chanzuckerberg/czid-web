@@ -73,7 +73,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
         format(SFN_NAME, project_id: project.id, sample_id: sample.id, pipeline_run_id: pipeline_run.id, time: Time.now.to_i)
       end
       let(:sfn_input) { anything }
-      let(:sfn_arn) { FAKE_SFN_ARN }
+      let(:sfn_execution_arn) { FAKE_SFN_ARN }
       let(:dag_json_name) { "" }
       let(:PIPELINE_RUN_STAGE_NAMES) { pipeline_run.pipeline_run_stages.pluck(:name).map { |n| [n, {}] }.to_h }
 

@@ -8,7 +8,11 @@ import collections
 parser = argparse.ArgumentParser("idd2wdl", description="Convert an idseq-dag DAG to a WDL workflow")
 parser.add_argument("dag")
 parser.add_argument("--name")
-parser.add_argument("--pipeline-version")
+parser.add_argument("--aws-account-id", default=os.environ["AWS_ACCOUNT_ID"])
+parser.add_argument("--deployment-env", default=os.environ["DEPLOYMENT_ENVIRONMENT"])
+parser.add_argument("--aws-region", default=os.environ["AWS_DEFAULT_REGION"])
+parser.add_argument("--wdl-version", default=os.environ.get("WDL_VERSION", "0"))
+parser.add_argument("--dag-version", default=os.environ.get("DAG_VERSION", "0"))
 args = parser.parse_args()
 workflow_name = args.name or os.path.basename(args.dag).replace(".json", "")
 
@@ -64,7 +68,10 @@ for step in dag["steps"]:
     input_files_local = json.dumps(input_files_local)
     idd_step_output = dag["targets"][step["out"]]
     wdl_step_output = "\n".join('    File {} = "{}"'.format(file_path_to_name(name), name) for name in idd_step_output)
-    s3_wd_uri = os.path.join(dag["output_dir_s3"], "main/sfn-1/wdl-1/dag-" + str(args.pipeline_version))
+    s3_wd_uri = os.path.join(dag["output_dir_s3"],
+                             "idseq-{}-main-1".format(args.deployment_env),
+                             "wdl-" + args.wdl_version,
+                             "dag-" + args.dag_version)
     nha_cluster_ssh_key_uri = ""
     if "environment" in step["additional_attributes"]:
         nha_cluster_ssh_key_uri = "s3://idseq-secrets/idseq-{}.pem".format(step["additional_attributes"]["environment"])
@@ -72,7 +79,7 @@ for step in dag["steps"]:
     print("""
 task {task_name} {{
   runtime {{
-    docker: "{AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows:{STAGE}"
+    docker: "{AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows:{DEPLOYMENT_ENVIRONMENT}"
   }}
   input {{
 {wdl_step_input}
@@ -94,7 +101,7 @@ task {task_name} {{
     ref_dir_local=idseq_dag.util.s3.config["REF_DIR"],
     additional_files={step_additional_files},
     additional_attributes={step_additional_attributes},
-    step_status_local="status.json",
+    step_status_local="{workflow_name}_status.json",
     step_status_lock=contextlib.suppress()
   )
   step_instance.input_files_local = {input_files_local}
@@ -114,7 +121,7 @@ task {task_name} {{
   }}
 }}""".format(task_name=task_name(step),
              AWS_ACCOUNT_ID=os.environ["AWS_ACCOUNT_ID"],
-             STAGE=os.environ["STAGE"],
+             DEPLOYMENT_ENVIRONMENT=os.environ["DEPLOYMENT_ENVIRONMENT"],
              wdl_step_input=wdl_step_input,
              nha_cluster_ssh_key_uri=nha_cluster_ssh_key_uri,
              AWS_DEFAULT_REGION=os.environ["AWS_DEFAULT_REGION"],
@@ -126,6 +133,7 @@ task {task_name} {{
              s3_wd_uri=s3_wd_uri,
              step_additional_files=step["additional_files"],
              step_additional_attributes=step["additional_attributes"],
+             workflow_name=workflow_name,
              input_files_local=input_files_local,
              wdl_step_output=wdl_step_output))
 

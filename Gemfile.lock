@@ -1171,6 +1171,7 @@ DEPENDENCIES
   aws-sdk
   aws-sdk-ecs
   aws-sdk-resources
+  aws-sdk-states
   bcrypt (~> 3.1.7)
   brakeman
   bundler-audit

@@ -8,6 +8,8 @@ end
 gem 'airbrake', '~> 9.5'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
+# step functions sdk
+gem 'aws-sdk-states'
 gem 'brakeman'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
