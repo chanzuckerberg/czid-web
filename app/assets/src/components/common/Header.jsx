@@ -220,23 +220,22 @@ const UserMenuDropDown = ({
   const renderItems = adminUser => {
     let userDropdownItems = [];
 
-    allowedFeatures.includes("bulk_downloads") &&
-      userDropdownItems.push(
-        <BareDropdown.Item
-          key="downloads"
-          text={
-            <a
-              className={cs.option}
-              href="/bulk_downloads"
-              onClick={() =>
-                logAnalyticsEvent("Header_dropdown-downloads-option_clicked")
-              }
-            >
-              Downloads
-            </a>
-          }
-        />
-      );
+    userDropdownItems.push(
+      <BareDropdown.Item
+        key="downloads"
+        text={
+          <a
+            className={cs.option}
+            href="/bulk_downloads"
+            onClick={() =>
+              logAnalyticsEvent("Header_dropdown-downloads-option_clicked")
+            }
+          >
+            Downloads
+          </a>
+        }
+      />
+    );
 
     adminUser &&
       userDropdownItems.push(

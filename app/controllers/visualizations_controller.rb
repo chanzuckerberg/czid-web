@@ -199,6 +199,16 @@ class VisualizationsController < ApplicationController
     render json: @sample_taxons_dict
   end
 
+  def update_heatmap_background
+    @sample_taxons_dict = HeatmapHelper.update_background_taxon_metrics(
+      params,
+      samples_for_heatmap,
+      background_for_heatmap,
+      client_filtering_enabled: current_user.allowed_feature?("heatmap_filter_fe")
+    )
+    render json: @sample_taxons_dict
+  end
+
   private
 
   def visualization_params

@@ -175,15 +175,16 @@ RSpec.describe BenchmarksController, type: :controller do
   context "Joe user" do
     before do
       sign_in @joe
-      get :index, format: :json
     end
 
     describe "GET #index" do
       it "does not call action" do
         expect(controller).not_to receive(:index)
+        get :index, format: :json
       end
 
       it "redirected to home page" do
+        get :index, format: :json
         expect(response).to redirect_to(root_path)
       end
     end
