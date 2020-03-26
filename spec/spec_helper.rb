@@ -100,9 +100,8 @@ end
 require 'rspec/json_expectations'
 require 'simplecov'
 require 'webmock/rspec'
-require 'coveralls'
 
-Coveralls.wear_merged!
+SimpleCov.command_name "RSpec"
 
 WebMock.disable_net_connect!(allow_localhost: true)
 
