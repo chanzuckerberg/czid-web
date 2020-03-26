@@ -97,8 +97,13 @@ RSpec.configure do |config|
   # =end
 end
 
-require "rspec/json_expectations"
-require "webmock/rspec"
+require 'rspec/json_expectations'
+require 'simplecov'
+require 'webmock/rspec'
+require 'coveralls'
+
+Coveralls.wear_merged!
+
 WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |_config|
