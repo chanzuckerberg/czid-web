@@ -852,7 +852,7 @@ export default class Heatmap {
   handleRowLabelMouseEnter = rowLabelEntered => {
     for (let i = 0; i < this.rowLabels.length; i++) {
       // Shade all rows except the one that's being hovered over.
-      this.rowLabels[i].shaded = i != rowLabelEntered.rowIndex;
+      this.rowLabels[i].shaded = i !== rowLabelEntered.rowIndex;
     }
     this.updateLabelHighlights(
       this.gRowLabels.selectAll(`.${cs.rowLabel}`),
@@ -903,7 +903,7 @@ export default class Heatmap {
   handleColumnLabelMouseEnter = columnLabelEntered => {
     for (let i = 0; i < this.columnLabels.length; i++) {
       // Shade all columns except the one that's being hovered over.
-      this.columnLabels[i].shaded = i != columnLabelEntered.columnIndex;
+      this.columnLabels[i].shaded = i !== columnLabelEntered.columnIndex;
     }
     this.updateLabelHighlights(
       this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
