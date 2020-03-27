@@ -27,7 +27,6 @@ class SamplesHeatmapVis extends React.Component {
 
     this.state = {
       addTaxonTrigger: null,
-      selectedTaxa: this.props.selectedTaxa,
       addMetadataTrigger: null,
       nodeHoverInfo: null,
       columnMetadataLegend: null,
@@ -414,7 +413,7 @@ class SamplesHeatmapVis extends React.Component {
     const { onAddTaxon } = this.props;
 
     let intersection = new Set(
-      [...this.state.selectedTaxa].filter(taxon => selectedTaxa.has(taxon))
+      [...this.props.selectedTaxa].filter(taxon => selectedTaxa.has(taxon))
     );
     const current = new Set([...intersection, ...selectedTaxa]);
     this.setState(
@@ -422,7 +421,6 @@ class SamplesHeatmapVis extends React.Component {
         selectedTaxa: current,
       },
       () => {
-        // this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
         onAddTaxon && onAddTaxon(selectedTaxa);
         logAnalyticsEvent("SamplesHeatmapVis_selected-taxa_changed", {
           selectedTaxa: current.length,
@@ -577,7 +575,7 @@ class SamplesHeatmapVis extends React.Component {
         {addTaxonTrigger && (
           <TaxonSelector
             addTaxonTrigger={addTaxonTrigger}
-            selectedTaxa={new Set(this.props.taxonIds)}
+            selectedTaxa={new Set(this.props.taxonIds, this.props.selectedTaxa)}
             availableTaxa={this.getAvailableTaxa()}
             onTaxonSelectionChange={this.handleSelectedTaxaChange}
             onTaxonSelectionClose={() => {

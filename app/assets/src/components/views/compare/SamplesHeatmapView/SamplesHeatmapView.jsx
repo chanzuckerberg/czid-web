@@ -123,6 +123,15 @@ class SamplesHeatmapView extends React.Component {
       addedTaxonIds: new Set(
         this.urlParams.addedTaxonIds || this.props.addedTaxonIds || []
       ),
+      // notifiedFilteredOutTaxa keeps track of the taxon ids for which
+      // we have already notified the user that they have manually added
+      // but did not pass filters.
+      // This is to ensure that we do not notify the user of ALL
+      // manually added taxa that failed filters every time they
+      // make a selection in the Add Taxon dropdown.
+      // This will be reset whenever filters change, so the user will be
+      // notified of which manually added taxa do not pass the new filters.
+      notifiedFilteredOutTaxa: new Set(),
       allTaxonDetails: {},
       taxonDetails: {},
       // allData is an object containing all the metric data for every taxa for each sample.
@@ -537,7 +546,13 @@ class SamplesHeatmapView extends React.Component {
       taxonFilterState,
       taxonPassesThresholdFilters,
     } = this.getTaxonThresholdFilterState();
-    let { allTaxonIds, allTaxonDetails, allData, addedTaxonIds } = this.state;
+    let {
+      allTaxonIds,
+      allTaxonDetails,
+      allData,
+      addedTaxonIds,
+      notifiedFilteredOutTaxa,
+    } = this.state;
     let taxonDetails = {},
       taxonIds = new Set(),
       filteredData = {},
@@ -553,8 +568,14 @@ class SamplesHeatmapView extends React.Component {
             }
           }
         } else {
-          if (addedTaxonIds.has(taxon["id"])) {
-            this.showNotification("taxa filtered out");
+          // Check notifiedFilteredOutTaxa to prevent filtered out taxa from
+          // notifying the user every time a selection is made.
+          if (
+            addedTaxonIds.has(taxon["id"]) &&
+            !notifiedFilteredOutTaxa.has(taxon["id"])
+          ) {
+            this.showNotification("taxa filtered out", taxon);
+            notifiedFilteredOutTaxa.add(taxon["id"]);
           }
         }
       });
@@ -577,6 +598,7 @@ class SamplesHeatmapView extends React.Component {
       taxonIds: taxonIds,
       loading: false,
       data: filteredData,
+      notifiedFilteredOutTaxa,
     });
   }
 
@@ -762,10 +784,18 @@ class SamplesHeatmapView extends React.Component {
   };
 
   handleAddedTaxonChange = selectedTaxonIds => {
-    let { taxonIds } = this.state;
-    let currentAddedTaxa = new Set(
-      [...selectedTaxonIds].filter(taxId => !taxonIds.includes(taxId))
-    );
+    // selectedTaxonIds includes taxa that pass filters
+    // and the taxa manually added by the user.
+    let { taxonIds, addedTaxonIds } = this.state;
+
+    // currentAddedTaxa is all the taxa manually added by the user.
+    let currentAddedTaxa = new Set([
+      ...[...selectedTaxonIds].filter(taxId => !taxonIds.includes(taxId)),
+      ...[...addedTaxonIds].filter(taxId => selectedTaxonIds.has(taxId)),
+    ]);
+
+    // removedTaxonIds are taxa that passed filters
+    // but were manually unselected by the user.
     let removedTaxonIds = new Set(
       [...taxonIds].filter(taxId => !selectedTaxonIds.has(taxId))
     );
@@ -780,7 +810,7 @@ class SamplesHeatmapView extends React.Component {
       this.updateFilters
     );
     logAnalyticsEvent("SamplesHeatmapView_taxon_added", {
-      selected: taxonIds,
+      selected: currentAddedTaxa,
     });
     this.updateHistoryState();
   };
@@ -954,6 +984,9 @@ class SamplesHeatmapView extends React.Component {
         {
           selectedOptions: assign(this.state.selectedOptions, newOptions),
           loading: shouldRefilterData,
+          // Reset notifiedFilteredOutTaxa so the user will be newly
+          // notified if their manually selected taxa do not pass the new filters.
+          notifiedFilteredOutTaxa: new Set(),
         },
         shouldRefetchData
           ? this.updateBackground
@@ -1097,12 +1130,13 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  renderFilteredOutWarning(onClose) {
+  renderFilteredOutWarning(onClose, taxon) {
     return (
       <Notification type={"warn"} displayStyle={"elevated"} onClose={onClose}>
         <div>
           <span className={cs.highlight}>
-            The taxon you added is filtered out by your current filter settings.
+            The taxon {taxon.name} you added is filtered out by your current
+            filter settings.
           </span>{" "}
           Remove some filters to see it appear.
         </div>
@@ -1110,7 +1144,7 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  showNotification(notification) {
+  showNotification(notification, params) {
     if (notification === "invalid samples") {
       showToast(
         ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
@@ -1119,9 +1153,12 @@ class SamplesHeatmapView extends React.Component {
         }
       );
     } else if (notification === "taxa filtered out") {
-      showToast(({ closeToast }) => this.renderFilteredOutWarning(closeToast), {
-        autoClose: 12000,
-      });
+      showToast(
+        ({ closeToast }) => this.renderFilteredOutWarning(closeToast, params),
+        {
+          autoClose: 12000,
+        }
+      );
     }
   }
 
