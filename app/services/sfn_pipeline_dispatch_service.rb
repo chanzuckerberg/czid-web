@@ -15,12 +15,6 @@ class SfnPipelineDispatchService
     "prod" => "production",
   }.freeze
 
-  class PipelineVersionMissingError < StandardError
-    def initialize
-      super("Pipeline Version not set on App Config")
-    end
-  end
-
   class SfnArnMissingError < StandardError
     def initialize
       super("SFN ARN not set on App Config")

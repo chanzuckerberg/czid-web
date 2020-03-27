@@ -9,14 +9,29 @@ S3_DAG_JSON_KEY = "#{S3_SAMPLES_KEY_PREFIX}/sfn-wdl/%<stage_name>s.dag.json".fre
 S3_WDL_KEY = "#{S3_SAMPLES_KEY_PREFIX}/sfn-wdl/%<stage_name>s.wdl".freeze
 S3_WDL_PATH = "s3://#{FAKE_SAMPLES_BUCKET}/#{S3_WDL_KEY}".freeze
 SFN_NAME = "idseq-test-%<project_id>s-%<sample_id>s-%<pipeline_run_id>s-%<time>s".freeze
-FAKE_PIPELINE_VERSION = "9999.9".freeze
 FAKE_ACCOUNT_ID = "fake-account-id".freeze
 FAKE_REGION = "fake-region".freeze
 FAKE_SFN_ARN = "fake:sfn:arn".freeze
 FAKE_SFN_EXECUTION_ARN = "fake:sfn:execution:arn".freeze
 PIPELINE_RUN_STAGE_NAMES = PipelineRunStage::STAGE_INFO.values.pluck(:dag_name)
+FAKE_WDL_VERSION = "999".freeze
+FAKE_DAG_VERSION = "9.999".freeze
 FAKE_S3 = Aws::S3::Client.new(stub_responses: { put_object: {} })
-FAKE_STS = Aws::STS::Client.new(stub_responses: { get_caller_identity: { account: FAKE_ACCOUNT_ID } })
+FAKE_STS_CLIENT = Aws::STS::Client.new(stub_responses: { get_caller_identity: { account: FAKE_ACCOUNT_ID } })
+FAKE_STATES_CLIENT = Aws::States::Client.new(
+  stub_responses: {
+    start_execution: {
+      execution_arn: FAKE_SFN_EXECUTION_ARN,
+      start_date: Time.zone.now,
+    },
+    list_tags_for_resource: {
+      tags: [
+        { key: "wdl_version", value: FAKE_WDL_VERSION },
+        { key: "dag_version", value: FAKE_DAG_VERSION },
+      ],
+    },
+  }
+)
 
 RSpec::Matchers.define(:be_one_of) do |expected|
   match do |actual|
@@ -51,14 +66,49 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       allow(ENV).to receive(:[]).with('AWS_REGION').and_return(FAKE_REGION)
 
       Aws.config[:stub_responses] = true
-      allow(Aws::STS::Client).to receive(:new).and_return(FAKE_STS)
+      stub_const("SfnPipelineDispatchService::STS_CLIENT", FAKE_STS_CLIENT)
       stub_const("S3_CLIENT", FAKE_S3)
       allow(FAKE_S3).to receive(:put_object)
+
+      create(:app_config, key: AppConfig::SFN_ARN, value: FAKE_SFN_ARN)
     end
 
-    context "when no pipeline version is defined" do
+    context "when SFN was no tag for WDL version" do
       it "returns an exception" do
-        expect { subject }.to raise_error(SfnPipelineDispatchService::PipelineVersionMissingError)
+        stub_const(
+          "SfnPipelineDispatchService::SFN_CLIENT",
+          Aws::States::Client.new(
+            stub_responses: {
+              list_tags_for_resource: {
+                tags: [{ key: "dag_version", value: FAKE_DAG_VERSION }],
+              },
+            }
+          )
+        )
+        expect { subject }.to raise_error(SfnPipelineDispatchService::SfnVersionTagsMissingError, /Tags missing: \[:wdl_version\]/)
+      end
+    end
+
+    context "when SFN was no tag for DAG version" do
+      it "returns an exception" do
+        stub_const(
+          "SfnPipelineDispatchService::SFN_CLIENT",
+          Aws::States::Client.new(
+            stub_responses: {
+              list_tags_for_resource: {
+                tags: [{ key: "wdl_version", value: FAKE_WDL_VERSION }],
+              },
+            }
+          )
+        )
+        expect { subject }.to raise_error(SfnPipelineDispatchService::SfnVersionTagsMissingError, /Tags missing: \[:dag_version\]/)
+      end
+    end
+
+    context "when SFN was no version tags" do
+      it "returns an exception" do
+        stub_const("SfnPipelineDispatchService::SFN_CLIENT", Aws::States::Client.new(stub_responses: true))
+        expect { subject }.to raise_error(SfnPipelineDispatchService::SfnVersionTagsMissingError, /Tags missing: \[:wdl_version, :dag_version\]/)
       end
     end
 
@@ -73,15 +123,15 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
         format(SFN_NAME, project_id: project.id, sample_id: sample.id, pipeline_run_id: pipeline_run.id, time: Time.now.to_i)
       end
       let(:sfn_input) { anything }
-      let(:sfn_execution_arn) { FAKE_SFN_ARN }
+      let(:sfn_arn) { FAKE_SFN_ARN }
+      let(:sfn_execution_arn) { FAKE_SFN_EXECUTION_ARN }
       let(:dag_json_name) { "" }
       let(:PIPELINE_RUN_STAGE_NAMES) { pipeline_run.pipeline_run_stages.pluck(:name).map { |n| [n, {}] }.to_h }
 
       before do
         travel_to DateTime.current
 
-        create(:app_config, key: AppConfig::SFN_PIPELINE_VERSION, value: FAKE_PIPELINE_VERSION)
-        create(:app_config, key: AppConfig::SFN_ARN, value: FAKE_SFN_ARN)
+        stub_const("SfnPipelineDispatchService::SFN_CLIENT", FAKE_STATES_CLIENT)
 
         allow(Open3)
           .to receive(:capture3)
@@ -89,27 +139,23 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
             {
               "AWS_ACCOUNT_ID" => FAKE_ACCOUNT_ID,
               "AWS_DEFAULT_REGION" => FAKE_REGION,
-              "STAGE" => "test",
+              "DEPLOYMENT_ENVIRONMENT" => "test",
+              "DAG_VERSION" => FAKE_DAG_VERSION,
+              "WDL_VERSION" => FAKE_WDL_VERSION,
             },
             "app/jobs/idd2wdl.py",
             "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
-            "--pipeline-version", FAKE_PIPELINE_VERSION,
             anything
           )
           .and_return([idd2wdl_stdout, aws_cli_stderr, instance_double(Process::Status, success?: idd2wdl_exitstatus == 0, exitstatus: idd2wdl_exitstatus)])
-
-        allow(Open3)
-          .to receive(:capture3)
-          .with("aws", "stepfunctions", "start-execution", "--name", sfn_name, "--input", anything, "--state-machine-arn", sfn_arn)
-          .and_return([aws_cli_stdout, idd2wdl_stderr, instance_double(Process::Status, success?: aws_cli_exitstatus == 0, exitstatus: aws_cli_exitstatus)])
       end
 
-      it "returns correct a json" do
+      it "returns correct json" do
         expect(subject).to include_json({})
       end
 
-      it "returns pipeline version from app config" do
-        expect(subject).to include_json(pipeline_version: FAKE_PIPELINE_VERSION)
+      it "returns pipeline version from SFN tag" do
+        expect(subject).to include_json(pipeline_version: FAKE_DAG_VERSION)
       end
 
       it "returns stage dag jsons for each pipeline stage" do
@@ -181,11 +227,12 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
               {
                 "AWS_ACCOUNT_ID" => FAKE_ACCOUNT_ID,
                 "AWS_DEFAULT_REGION" => FAKE_REGION,
-                "STAGE" => "test",
+                "DEPLOYMENT_ENVIRONMENT" => "test",
+                "DAG_VERSION" => FAKE_DAG_VERSION,
+                "WDL_VERSION" => FAKE_WDL_VERSION,
               },
               "app/jobs/idd2wdl.py",
               "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
-              "--pipeline-version", FAKE_PIPELINE_VERSION,
               anything
             )
             .and_return([idd2wdl_stdout, aws_cli_stderr, instance_double(Process::Status, success?: idd2wdl_exitstatus == 0, exitstatus: idd2wdl_exitstatus)])
@@ -198,17 +245,20 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       end
 
       context "when start-execution fails" do
-        before do
-          allow(Open3)
-            .to receive(:capture3)
-            .with("aws", "stepfunctions", "start-execution", "--name", sfn_name, "--input", anything, "--state-machine-arn", sfn_arn)
-            .and_return([aws_cli_stdout, idd2wdl_stderr, instance_double(Process::Status, success?: aws_cli_exitstatus == 0, exitstatus: aws_cli_exitstatus)])
-        end
-
-        it "returns nil sfn_arn" do
-          expect(subject).to include_json(
-            sfn_arn: nil
+        it "raises original exception" do
+          client = Aws::States::Client.new(
+            stub_responses: {
+              list_tags_for_resource: {
+                tags: [
+                  { key: "wdl_version", value: FAKE_WDL_VERSION },
+                  { key: "dag_version", value: FAKE_DAG_VERSION },
+                ],
+              },
+            }
           )
+          client.stub_responses(:start_execution, Aws::States::Errors::InvalidArn.new(nil, nil))
+          stub_const("SfnPipelineDispatchService::SFN_CLIENT", client)
+          expect { subject }.to raise_error(Aws::States::Errors::InvalidArn)
         end
       end
     end
