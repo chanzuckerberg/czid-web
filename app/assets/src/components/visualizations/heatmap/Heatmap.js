@@ -320,7 +320,7 @@ export default class Heatmap {
       .style("fill", "white");
 
     this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
-    this.gAddRow = this.g.append("g").attr("class", cs.rowAddContainer);
+    this.gAddRow = this.g.append("g").attr("class", cs.columnMetadata);
     this.gCaption = this.g.append("g").attr("class", cs.captionContainer);
   }
 
@@ -1198,35 +1198,37 @@ export default class Heatmap {
         });
       };
 
-      let addLink = this.gAddRow.selectAll(`.${cs.rowAdd}`).data([1]);
+      let addLink = this.gAddRow
+        .selectAll(`.${cs.columnMetadataAdd}`)
+        .data([1]);
 
       let addLinkEnter = addLink
         .enter()
         .append("g")
-        .attr("class", cs.rowAdd);
+        .attr("class", cs.columnMetadataAdd);
 
       let yPos = this.options.metadataAddLinkHeight / 2;
 
       addLinkEnter.append("rect");
 
-      addLinkEnter.append("line").attr("class", cs.rowAddLine);
+      addLinkEnter.append("line").attr("class", cs.metadataAddLine);
 
       addLinkEnter
         .append("text")
         .text(() => "Add Taxon")
-        .attr("class", cs.rowAddLabel)
+        .attr("class", cs.metadataAddLabel)
         .attr("x", this.rowLabelsWidth - 25)
         .attr("y", 11)
         .on("click", handleAddRowClick);
 
       let addRowTrigger = addLinkEnter
         .append("g")
-        .attr("class", cs.rowAddTrigger)
+        .attr("class", cs.metadataAddTrigger)
         .on("click", handleAddRowClick);
 
       addRowTrigger
         .append("svg:image")
-        .attr("class", cs.rowAddIcon)
+        .attr("class", cs.metadataAddIcon)
         .attr("width", this.options.metadataAddLinkHeight)
         .attr("height", this.options.metadataAddLinkHeight)
         .attr("x", this.rowLabelsWidth - 20)
@@ -1253,7 +1255,7 @@ export default class Heatmap {
         .attr("height", this.options.metadataAddLinkHeight);
 
       addLink
-        .select(`.${cs.rowAddLine}`)
+        .select(`.${cs.metadataAddLine}`)
         .attr("x1", this.rowLabelsWidth)
         .attr(
           "x2",
