@@ -786,13 +786,18 @@ class SamplesHeatmapView extends React.Component {
   handleAddedTaxonChange = selectedTaxonIds => {
     // selectedTaxonIds includes taxa that pass filters
     // and the taxa manually added by the user.
-    let { taxonIds, addedTaxonIds } = this.state;
+    let { taxonIds, addedTaxonIds, notifiedFilteredOutTaxa } = this.state;
 
     // currentAddedTaxa is all the taxa manually added by the user.
     let currentAddedTaxa = new Set([
       ...[...selectedTaxonIds].filter(taxId => !taxonIds.includes(taxId)),
       ...[...addedTaxonIds].filter(taxId => selectedTaxonIds.has(taxId)),
     ]);
+
+    // Update notifiedFilteredOutTaxa to remove taxa that were unselected.
+    let currentFilteredOutTaxa = new Set(
+      [...notifiedFilteredOutTaxa].filter(taxId => currentAddedTaxa.has(taxId))
+    );
 
     // removedTaxonIds are taxa that passed filters
     // but were manually unselected by the user.
@@ -806,6 +811,7 @@ class SamplesHeatmapView extends React.Component {
     this.setState(
       {
         addedTaxonIds: currentAddedTaxa,
+        notifiedFilteredOutTaxa: currentFilteredOutTaxa,
       },
       this.updateFilters
     );
