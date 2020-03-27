@@ -11,6 +11,7 @@ import { getTooltipStyle } from "~/components/utils/tooltip";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
+import TaxonSelector from "~/components/common/Heatmap/TaxonSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -25,6 +26,8 @@ class SamplesHeatmapVis extends React.Component {
     super(props);
 
     this.state = {
+      addTaxonTrigger: null,
+      selectedTaxa: this.props.selectedTaxa,
       addMetadataTrigger: null,
       nodeHoverInfo: null,
       columnMetadataLegend: null,
@@ -79,6 +82,7 @@ class SamplesHeatmapVis extends React.Component {
         onColumnMetadataLabelOut: this.handleColumnMetadataLabelOut,
         onRowGroupEnter: this.handleRowGroupEnter,
         onRowGroupLeave: this.handleRowGroupLeave,
+        onAddRowClick: this.handleAddTaxonClick,
         onRemoveRow: this.props.onRemoveTaxon,
         onCellClick: this.handleCellClick,
         onColumnLabelMove: this.handleMouseHoverMove,
@@ -116,6 +120,18 @@ class SamplesHeatmapVis extends React.Component {
     if (this.props.sampleDetails !== prevProps.sampleDetails) {
       this.heatmap.updateData({
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
+      });
+    }
+    if (this.props.data !== prevProps.data) {
+      this.heatmap.updateData({
+        values: this.props.data[this.props.metric],
+        rowLabels: this.extractTaxonLabels(), // Also includes column metadata.
+      });
+    }
+    if (this.props.taxonIds !== prevProps.taxonIds) {
+      this.heatmap.updateData({
+        values: this.props.data[this.props.metric],
+        rowLabels: this.extractTaxonLabels(), // Also includes column metadata.
       });
     }
     if (this.props.thresholdFilters !== prevProps.thresholdFilters) {
@@ -385,6 +401,50 @@ class SamplesHeatmapVis extends React.Component {
     }
   };
 
+  handleAddTaxonClick = trigger => {
+    this.setState({
+      addTaxonTrigger: trigger,
+    });
+    logAnalyticsEvent("SamplesHeatmapVis_add-taxon_clicked", {
+      addTaxonTrigger: trigger,
+    });
+  };
+
+  handleSelectedTaxaChange = selectedTaxa => {
+    const { onAddTaxon } = this.props;
+
+    let intersection = new Set(
+      [...this.state.selectedTaxa].filter(taxon => selectedTaxa.has(taxon))
+    );
+    const current = new Set([...intersection, ...selectedTaxa]);
+    this.setState(
+      {
+        selectedTaxa: current,
+      },
+      () => {
+        // this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
+        onAddTaxon && onAddTaxon(selectedTaxa);
+        logAnalyticsEvent("SamplesHeatmapVis_selected-taxa_changed", {
+          selectedTaxa: current.length,
+        });
+      }
+    );
+  };
+
+  getAvailableTaxa() {
+    // taxonDetails includes entires mapping both
+    // taxId => taxonDetails and taxName => taxonDetails,
+    // so iterate over allTaxonIds to avoid duplicates.
+    let { allTaxonIds, taxonDetails } = this.props;
+    return allTaxonIds.map(taxId => {
+      return {
+        value: taxId,
+        label: taxonDetails[taxId].name,
+        count: taxonDetails[taxId].sampleCount,
+      };
+    });
+  }
+
   handleAddColumnMetadataClick = trigger => {
     this.setState({
       addMetadataTrigger: trigger,
@@ -448,6 +508,7 @@ class SamplesHeatmapVis extends React.Component {
 
   render() {
     const {
+      addTaxonTrigger,
       tooltipLocation,
       nodeHoverInfo,
       columnMetadataLegend,
@@ -513,6 +574,17 @@ class SamplesHeatmapVis extends React.Component {
             }}
           />
         )}
+        {addTaxonTrigger && (
+          <TaxonSelector
+            addTaxonTrigger={addTaxonTrigger}
+            selectedTaxa={new Set(this.props.taxonIds)}
+            availableTaxa={this.getAvailableTaxa()}
+            onTaxonSelectionChange={this.handleSelectedTaxaChange}
+            onTaxonSelectionClose={() => {
+              this.setState({ addTaxonTrigger: null });
+            }}
+          />
+        )}
         <div
           className={cx(
             cs.bannerContainer,
@@ -546,6 +618,7 @@ SamplesHeatmapVis.propTypes = {
   metadataSortAsc: PropTypes.bool,
   onMetadataSortChange: PropTypes.func,
   onMetadataChange: PropTypes.func,
+  onAddTaxon: PropTypes.func,
   onRemoveTaxon: PropTypes.func,
   onSampleLabelClick: PropTypes.func,
   onTaxonLabelClick: PropTypes.func,
@@ -554,7 +627,9 @@ SamplesHeatmapVis.propTypes = {
   scale: PropTypes.string,
   taxonCategories: PropTypes.array,
   taxonDetails: PropTypes.object,
+  allTaxonIds: PropTypes.array,
   taxonIds: PropTypes.array,
+  selectedTaxa: PropTypes.object,
   thresholdFilters: PropTypes.any,
   sampleSortType: PropTypes.string,
   fullScreen: PropTypes.bool,

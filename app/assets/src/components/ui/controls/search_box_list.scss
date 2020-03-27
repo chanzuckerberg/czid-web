@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~styles/themes/typography";
 
 .searchBoxList {
   background-color: $white;
@@ -38,11 +39,30 @@
       background-color: $medium-grey;
     }
 
+    .listColumnTitles {
+      height: 24px;
+      margin-right: 10px;
+      white-space: nowrap;
+      display: flex;
+      flex-direction: row;
+      flex: 1 0 auto;
+      justify-content: space-between;
+    }
+
+    .listColumnTitle {
+      display: inline-block;
+      color: $dark-grey;
+      font-weight: $font-weight-semibold;
+    }
+
     .listElement {
       cursor: pointer;
       height: 24px;
       margin-right: 10px;
       white-space: nowrap;
+      display: flex;
+      flex-direction: row;
+      flex: 1 0 auto;
     }
 
     .listCheckmark {
@@ -56,6 +76,12 @@
       &:hover {
         color: $primary-light;
       }
+    }
+
+    .listElementCount {
+      color: $medium-grey;
+      display: inline-block;
+      margin-left: auto;
     }
   }
 }

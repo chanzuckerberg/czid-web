@@ -30,6 +30,7 @@ import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import SortIcon from "~ui/icons/SortIcon";
+import Notification from "~ui/notifications/Notification";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { showToast } from "~/components/utils/toast";
 import { validateSampleIds } from "~/api/bulk_downloads";
@@ -119,6 +120,9 @@ class SamplesHeatmapView extends React.Component {
       sampleDetails: {},
       allTaxonIds: [],
       taxonIds: [],
+      addedTaxonIds: new Set(
+        this.urlParams.addedTaxonIds || this.props.addedTaxonIds || []
+      ),
       allTaxonDetails: {},
       taxonDetails: {},
       // allData is an object containing all the metric data for every taxa for each sample.
@@ -190,6 +194,11 @@ class SamplesHeatmapView extends React.Component {
     if (typeof urlParams.sampleIds === "string") {
       urlParams.sampleIds = urlParams.sampleIds.split(",");
     }
+    if (typeof urlParams.addedTaxonIds === "string") {
+      urlParams.addedTaxonIds = new Set(
+        urlParams.addedTaxonIds.split(",").map(parseInt)
+      );
+    }
     if (typeof urlParams.removedTaxonIds === "string") {
       urlParams.removedTaxonIds = new Set(
         urlParams.removedTaxonIds.split(",").map(parseInt)
@@ -257,6 +266,7 @@ class SamplesHeatmapView extends React.Component {
         selectedMetadata: this.state.selectedMetadata,
         metadataSortField: this.metadataSortField,
         metadataSortAsc: this.metadataSortAsc,
+        addedTaxonIds: Array.from(this.state.addedTaxonIds),
         removedTaxonIds: Array.from(this.removedTaxonIds),
         sampleIds: this.state.sampleIds,
       },
@@ -325,7 +335,6 @@ class SamplesHeatmapView extends React.Component {
       this.lastRequestToken.cancel("Parameters changed");
     }
     this.lastRequestToken = axios.CancelToken.source();
-
     return getSampleTaxons(
       {
         sampleIds: this.state.sampleIds,
@@ -362,7 +371,7 @@ class SamplesHeatmapView extends React.Component {
     // If there are failed/waiting samples selected, display a warning
     // to the user that they won't appear in the heatmap.
     if (sampleValidationInfo.invalidSampleNames.length > 0) {
-      this.showNotification();
+      this.showNotification("invalid samples");
     }
 
     let [heatmapData, metadataFields] = await Promise.all([
@@ -422,6 +431,7 @@ class SamplesHeatmapView extends React.Component {
           let taxonIndex;
           if (taxon.tax_id in allTaxonDetails) {
             taxonIndex = allTaxonDetails[taxon.tax_id].index;
+            allTaxonDetails[taxon.tax_id].sampleCount += 1;
           } else {
             taxonIndex = allTaxonIds.length;
             allTaxonIds.push(taxon.tax_id);
@@ -435,6 +445,7 @@ class SamplesHeatmapView extends React.Component {
               phage: !!taxon.is_phage,
               genusName: taxon.genus_name,
               taxLevel: taxon.tax_level,
+              sampleCount: 1,
             };
             allTaxonDetails[taxon.name] = allTaxonDetails[taxon.tax_id];
           }
@@ -526,21 +537,30 @@ class SamplesHeatmapView extends React.Component {
       taxonFilterState,
       taxonPassesThresholdFilters,
     } = this.getTaxonThresholdFilterState();
-    let { allTaxonIds, allTaxonDetails, allData } = this.state;
-    let taxonDetails = {};
-    let taxonIds = new Set();
-    let filteredData = {};
+    let { allTaxonIds, allTaxonDetails, allData, addedTaxonIds } = this.state;
+    let taxonDetails = {},
+      taxonIds = new Set(),
+      filteredData = {},
+      addedTaxonIdsPassingFilters = new Set();
     if (allowedFeatures.includes("heatmap_filter_fe")) {
       allTaxonIds.forEach(taxonId => {
         let taxon = allTaxonDetails[taxonId];
         if (!taxonIds.has(taxonId) && this.taxonPassesSelectedFilters(taxon)) {
           if (taxonPassesThresholdFilters[taxon["index"]]) {
             taxonIds.add(taxon["id"]);
+            if (addedTaxonIds.has(taxon["id"])) {
+              addedTaxonIdsPassingFilters.add(taxon["id"]);
+            }
+          }
+        } else {
+          if (addedTaxonIds.has(taxon["id"])) {
+            this.showNotification("taxa filtered out");
           }
         }
       });
       [taxonIds, taxonDetails, filteredData] = this.getTopTaxaPerSample(
-        taxonIds
+        taxonIds,
+        addedTaxonIdsPassingFilters
       );
       taxonIds = Array.from(taxonIds);
     } else {
@@ -648,7 +668,7 @@ class SamplesHeatmapView extends React.Component {
     return true;
   }
 
-  getTopTaxaPerSample(filteredTaxonIds) {
+  getTopTaxaPerSample(filteredTaxonIds, addedTaxonIds) {
     // Fetch the top N taxa from each sample, sorted by the selected metric,
     // that passed all selected filters.
     let {
@@ -663,6 +683,9 @@ class SamplesHeatmapView extends React.Component {
     let topTaxIds = new Set();
     let topTaxonDetails = {};
     let filteredData = {};
+    // skippedTaxa includes taxa that passed filters but were explicitly
+    // removed by the user, which will still be counted toward the top taxa count.
+    let skippedTaxa = new Set();
 
     Object.values(sampleDetails).forEach(sample => {
       let filteredTaxaInSample = sample.taxa.filter(taxonId =>
@@ -680,21 +703,47 @@ class SamplesHeatmapView extends React.Component {
         if (count >= taxonsPerSample) {
           break;
         } else if (!topTaxIds.has(taxId)) {
-          let taxon = allTaxonDetails[taxId];
-          topTaxIds.add(taxId);
-          topTaxonDetails[taxId] = allTaxonDetails[taxId];
-          topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
+          if (this.removedTaxonIds.has(taxId)) {
+            if (!skippedTaxa.has(taxId)) {
+              skippedTaxa.add(taxId);
+              count++;
+            }
+          } else {
+            let taxon = allTaxonDetails[taxId];
+            topTaxIds.add(taxId);
+            topTaxonDetails[taxId] = allTaxonDetails[taxId];
+            topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
 
-          metrics.forEach(metric => {
-            filteredData[metric.value] = filteredData[metric.value] || [];
-            filteredData[metric.value].push(
-              allData[metric.value][taxon["index"]]
-            );
-          });
-          count++;
+            metrics.forEach(metric => {
+              filteredData[metric.value] = filteredData[metric.value] || [];
+              filteredData[metric.value].push(
+                allData[metric.value][taxon["index"]]
+              );
+            });
+            count++;
+          }
         }
       }
     });
+
+    // Make sure that taxa manually added by the user that pass filters
+    // are included.
+    addedTaxonIds.forEach(taxId => {
+      if (!topTaxIds.has(taxId)) {
+        let taxon = allTaxonDetails[taxId];
+        topTaxIds.add(taxId);
+        topTaxonDetails[taxId] = allTaxonDetails[taxId];
+        topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
+
+        metrics.forEach(metric => {
+          filteredData[metric.value] = filteredData[metric.value] || [];
+          filteredData[metric.value].push(
+            allData[metric.value][taxon["index"]]
+          );
+        });
+      }
+    });
+
     return [topTaxIds, topTaxonDetails, filteredData];
   }
 
@@ -712,6 +761,30 @@ class SamplesHeatmapView extends React.Component {
     window.history.replaceState("", "", this.getUrlForCurrentParams());
   };
 
+  handleAddedTaxonChange = selectedTaxonIds => {
+    let { taxonIds } = this.state;
+    let currentAddedTaxa = new Set(
+      [...selectedTaxonIds].filter(taxId => !taxonIds.includes(taxId))
+    );
+    let removedTaxonIds = new Set(
+      [...taxonIds].filter(taxId => !selectedTaxonIds.has(taxId))
+    );
+    removedTaxonIds.forEach(taxId => this.removedTaxonIds.add(taxId));
+    selectedTaxonIds.forEach(taxId => {
+      this.removedTaxonIds.delete(taxId);
+    });
+    this.setState(
+      {
+        addedTaxonIds: currentAddedTaxa,
+      },
+      this.updateFilters
+    );
+    logAnalyticsEvent("SamplesHeatmapView_taxon_added", {
+      selected: taxonIds,
+    });
+    this.updateHistoryState();
+  };
+
   handleRemoveTaxon = taxonName => {
     let taxonId = this.state.taxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
@@ -719,6 +792,7 @@ class SamplesHeatmapView extends React.Component {
       taxonId,
       taxonName,
     });
+    this.updateFilters();
   };
 
   handleMetadataChange = metadataFields => {
@@ -955,6 +1029,7 @@ class SamplesHeatmapView extends React.Component {
           metric={this.state.selectedOptions.metric}
           onMetadataSortChange={this.handleMetadataSortChange}
           onMetadataChange={this.handleMetadataChange}
+          onAddTaxon={this.handleAddedTaxonChange}
           onRemoveTaxon={this.handleRemoveTaxon}
           onSampleLabelClick={this.handleSampleLabelClick}
           onTaxonLabelClick={this.handleTaxonLabelClick}
@@ -964,9 +1039,13 @@ class SamplesHeatmapView extends React.Component {
           sampleIds={this.state.sampleIds}
           sampleDetails={this.state.sampleDetails}
           scale={SCALE_OPTIONS[scaleIndex][1]}
-          taxonIds={this.state.taxonIds}
+          selectedTaxa={this.state.addedTaxonIds}
+          allTaxonIds={this.state.allTaxonIds}
+          taxonIds={Array.from(
+            new Set(this.state.taxonIds, this.state.addedTaxonIds)
+          )}
           taxonCategories={this.state.selectedOptions.categories}
-          taxonDetails={this.state.taxonDetails}
+          taxonDetails={this.state.allTaxonDetails} // send allTaxonDetails in case of added taxa
           taxonFilterState={this.state.taxonFilterState}
           thresholdFilters={this.state.selectedOptions.thresholdFilters}
           sampleSortType={this.state.selectedOptions.sampleSortType}
@@ -1018,17 +1097,40 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  showNotification = () => {
-    showToast(
-      ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
-      {
-        autoClose: 12000,
-      }
+  renderFilteredOutWarning(onClose) {
+    return (
+      <Notification type={"warn"} displayStyle={"elevated"} onClose={onClose}>
+        <div>
+          <span className={cs.highlight}>
+            The taxon you added is filtered out by your current filter settings.
+          </span>{" "}
+          Remove some filters to see it appear.
+        </div>
+      </Notification>
     );
-  };
+  }
+
+  showNotification(notification) {
+    if (notification === "invalid samples") {
+      showToast(
+        ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
+        {
+          autoClose: 12000,
+        }
+      );
+    } else if (notification === "taxa filtered out") {
+      showToast(({ closeToast }) => this.renderFilteredOutWarning(closeToast), {
+        autoClose: 12000,
+      });
+    }
+  }
 
   render() {
     const { allowedFeatures } = this.context || {};
+    let shownTaxa = new Set(this.state.taxonIds, this.state.addedTaxonIds);
+    shownTaxa = new Set(
+      [...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId))
+    );
     return (
       <div className={cs.heatmap}>
         {!this.state.hideFilters && (
@@ -1051,7 +1153,7 @@ class SamplesHeatmapView extends React.Component {
                 onSelectedOptionsChange={this.handleSelectedOptionsChange}
                 loading={this.state.loading}
                 data={this.state.data}
-                filteredTaxaCount={this.state.taxonIds.length}
+                filteredTaxaCount={shownTaxa.size}
                 totalTaxaCount={this.state.allTaxonIds.length}
                 prefilterConstants={this.props.prefilterConstants}
                 displayFilterStats={allowedFeatures.includes(
