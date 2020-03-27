@@ -68,6 +68,7 @@ for step in dag["steps"]:
     input_files_local = json.dumps(input_files_local)
     idd_step_output = dag["targets"][step["out"]]
     wdl_step_output = "\n".join('    File {} = "{}"'.format(file_path_to_name(name), name) for name in idd_step_output)
+    wdl_step_output += '\n    File? output_read_count = "{}.count"'.format(step["out"])
     s3_wd_uri = os.path.join(dag["output_dir_s3"],
                              "idseq-{}-main-1".format(args.deployment_env),
                              "wdl-" + args.wdl_version,
@@ -110,6 +111,8 @@ task {task_name} {{
   try:
     step_instance.update_status_json_file("running")
     step_instance.run()
+    step_instance.count_reads()
+    step_instance.save_counts()
     step_instance.update_status_json_file("finished_running")
   except Exception as e:
     traceback.print_exc()
@@ -172,5 +175,6 @@ for target, files in dag["targets"].items():
     for i, filename in enumerate(files):
         name = file_path_to_name(filename)
         print("    File {} = {}.{}".format(target_filename(target, i), task_name(targets_to_steps[target]), name))
+    print("    File? {}_count = {}.output_read_count".format(target, task_name(targets_to_steps[target])))
 print("  }")
 print("}")
