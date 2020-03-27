@@ -41,21 +41,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test 'joe can create sample to joe_project' do
-    sign_in(:joe)
-    @joe_project = projects(:joe_project)
-    input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
-                     name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local", },
-                   { source: "RR004_water_2_S23_R2_001.fastq.gz",
-                     name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local", },]
-    assert_difference('Sample.count') do
-      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @joe_project.name, client: "web", input_files_attributes: input_files } }
-    end
-    assert_response :success
-  end
-
   test 'joe can update sample to joe_project' do
     sign_in(:joe)
     @joe_sample = samples(:joe_sample)
@@ -273,21 +258,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test 'joe cannot create sample to public_project' do
-    sign_in(:joe)
-    @public_project = projects(:public_project)
-    input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
-                     name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local", },
-                   { source: "RR004_water_2_S23_R2_001.fastq.gz",
-                     name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local", },]
-    assert_no_difference('Sample.count') do
-      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @public_project.name, client: "web", input_files_attributes: input_files } }
-    end
-    assert_response 422
-  end
-
   test 'joe cannot update sample to public_project' do
     sign_in(:joe)
     @public_sample = samples(:public_sample)
@@ -349,21 +319,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test 'joe cannot create sample to project one' do
-    sign_in(:joe)
-    @project = projects(:one)
-    input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
-                     name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local", },
-                   { source: "RR004_water_2_S23_R2_001.fastq.gz",
-                     name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local", },]
-    assert_no_difference('Sample.count') do
-      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
-    end
-    assert_response 422
-  end
-
   test 'joe cannot update sample to project one' do
     sign_in(:joe)
     @sample = samples(:one)
@@ -390,21 +345,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_raises(ActiveRecord::RecordNotFound) do
       put add_user_project_url(@project), params: { user_email_to_add: "abc@xyz.com" }
     end
-  end
-
-  test 'joe cannot create sample to project two' do
-    sign_in(:joe)
-    @project = projects(:two)
-    input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
-                     name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local", },
-                   { source: "RR004_water_2_S23_R2_001.fastq.gz",
-                     name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local", },]
-    assert_no_difference('Sample.count') do
-      post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
-    end
-    assert_response 422
   end
 
   test 'joe cannot update expired_sample' do

@@ -1,11 +1,10 @@
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
-
-require 'coveralls'
-Coveralls.wear!
-
 require 'minitest/autorun'
 require 'rspec/mocks/minitest_integration'
+require 'simplecov'
+
+SimpleCov.command_name "Rails Tests"
 
 class ActiveSupport::TestCase
   include Warden::Test::Helpers

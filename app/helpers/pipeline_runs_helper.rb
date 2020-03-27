@@ -10,7 +10,7 @@ module PipelineRunsHelper
         "star_out" => "Remove host reads using STAR.",
         "trimmomatic_out" => "Trim Illumina adapters using trimmomatic.",
         "priceseq_out" => "Remove low-quality reads using PriceSeqFilter.",
-        "cdhitdup_out" => "Remove duplicate reads using CD-HIT-DUP.",
+        "cdhitdup_out" => "Identify duplicate reads using CD-HIT-DUP. All reads at this step remain in downstream analysis.",
         "lzw_out" => "Remove low-complexity reads using LZW compression filter.",
         "bowtie2_out" => "Remove remaining host reads using Bowtie2.",
         "star_human_out" => "Remove human reads using STAR.",

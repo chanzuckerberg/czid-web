@@ -27,18 +27,18 @@ class SamplesController < ApplicationController
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat,].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
+  OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user, :taxa_with_contigs_suggestions,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
-  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
+  TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata].freeze
 
   # For API-like access
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
-  before_action :login_required, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
+  before_action :login_required, only: [:bulk_import]
 
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
   power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
@@ -478,13 +478,6 @@ class SamplesController < ApplicationController
     render json: JSON.dump(results)
   end
 
-  # GET /samples/bulk_new
-  # TODO(mark): Remove once we launch the new sample upload flow.
-  def bulk_new
-    @projects = current_power.updatable_projects
-    @host_genomes = host_genomes_list ? host_genomes_list : nil
-  end
-
   def bulk_import
     @project_id = params[:project_id]
     @project = Project.find(@project_id)
@@ -508,39 +501,6 @@ class SamplesController < ApplicationController
         else
           render json: { status: "Sorry, we couldn’t find any valid samples in this s3 bucket. There may be an issue with permissions or the file format. Click the \"More Info\" link above for more detailed instructions." }, status: :unprocessable_entity
         end
-      end
-    end
-  end
-
-  # POST /samples/bulk_upload
-  # Currently only used for web S3 uploads
-  # TODO(mark): Remove once we launch the new sample upload flow.
-  def bulk_upload
-    samples = samples_params || []
-    editable_project_ids = current_power.updatable_projects.pluck(:id)
-    @samples = []
-    @errors = []
-    samples.each do |sample_attributes|
-      sample = Sample.new(sample_attributes)
-      next unless editable_project_ids.include?(sample.project_id)
-      sample.bulk_mode = true
-      sample.user = current_user
-      if sample.save
-        @samples << sample
-      else
-        @errors << sample.errors
-      end
-    end
-
-    respond_to do |format|
-      if @errors.empty? && !@samples.empty?
-        # Send to Datadog (DEPRECATED) and Segment
-        tags = %W[client:web type:bulk user_id:#{current_user.id}]
-        MetricUtil.put_metric_now("samples.created", @samples.count, tags)
-        MetricUtil.log_upload_batch_analytics(@samples, current_user, "web", request)
-        format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
-      else
-        format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
       end
     end
   end
@@ -574,6 +534,27 @@ class SamplesController < ApplicationController
     samples_invalid_projects.each do |sample|
       metadata.delete(sample["name"])
       errors << SampleUploadErrors.invalid_project_id(sample)
+    end
+
+    subsample_whitelist_default_subsample = get_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_SUBSAMPLE).to_i
+    subsample_whitelist_default_max_input_fragments = get_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS).to_i
+    subsample_whitelist_project_ids = get_json_app_config(AppConfig::SUBSAMPLE_WHITELIST_PROJECT_IDS)
+
+    # For samples uploaded to biohub project ids, set the alternative default subsample and max_input_fragments values.
+    # Note that we cannot instead set these values on the pipeline run because s3 upload (which uses max_input_fragments)
+    # occurs before the pipeline run is created.
+    # This is intended to be a temporary short-term mechanism to service critical projects with our partners.
+    if subsample_whitelist_project_ids.is_a?(Array)
+      samples_to_upload.each do |sample_attributes|
+        if subsample_whitelist_project_ids.include?(sample_attributes[:project_id].to_i)
+          if subsample_whitelist_default_subsample > 0
+            sample_attributes[:subsample] = subsample_whitelist_default_subsample
+          end
+          if subsample_whitelist_default_max_input_fragments > 0
+            sample_attributes[:max_input_fragments] = subsample_whitelist_default_max_input_fragments
+          end
+        end
+      end
     end
 
     upload_errors, samples = upload_samples_with_metadata(samples_to_upload, metadata, current_user).values_at("errors", "samples")
@@ -750,7 +731,10 @@ class SamplesController < ApplicationController
     if pipeline_run
       # Don't cache the response until all results for the pipeline run are available
       # so the displayed pipeline run status and report hover actions will be updated correctly.
-      skip_cache = !pipeline_run.ready_for_cache? || params[:skip_cache] || false
+      skip_cache = !pipeline_run.ready_for_cache? ||
+                   params[:skip_cache] ||
+                   AppConfigHelper.get_app_config(AppConfig::DISABLE_REPORT_CACHING) ||
+                   false
 
       report_info_params = pipeline_run.report_info_params
       # If the pipeline_version wasn't passed in from the client-side,
@@ -1070,14 +1054,6 @@ class SamplesController < ApplicationController
     render json: files_valid
   end
 
-  # GET /samples/new
-  # TODO(mark): Remove once we launch the new sample upload flow.
-  def new
-    @sample = nil
-    @projects = current_power.updatable_projects
-    @host_genomes = host_genomes_list || nil
-  end
-
   # GET /samples/upload
   def upload
     @projects = current_power.updatable_projects
@@ -1092,82 +1068,6 @@ class SamplesController < ApplicationController
     @host_genomes = host_genomes_list ? host_genomes_list : nil
     @projects = current_power.updatable_projects
     @input_files = @sample.input_files
-  end
-
-  # POST /samples
-  # POST /samples.json
-  # TODO(mark): Remove once we launch the new sample upload flow.
-  def create
-    # Single sample upload path
-    params = sample_params
-
-    # Check if the client is up-to-date. "web" is always valid whereas the
-    # CLI client should provide a version string to-be-checked against the
-    # minimum version here. Bulk upload from CLI goes to this method.
-    client = params.delete(:client)
-    min_version = Gem::Version.new(MIN_CLI_VERSION)
-    unless client && (client == "web" || Gem::Version.new(client) >= min_version)
-      render json: {
-        message: CLI_DEPRECATION_MSG,
-        # idseq-cli v0.6.0 only checks the 'errors' field, so ensure users see this.
-        errors: [CLI_DEPRECATION_MSG],
-        status: :upgrade_required,
-      }, status: :upgrade_required
-      return
-    end
-
-    if params[:project_name]
-      project_name = params.delete(:project_name)
-      project = Project.find_by(name: project_name)
-      unless project
-        project = Project.create(name: project_name)
-        project.users << current_user if current_user
-      end
-    end
-    if project && !current_power.updatable_project?(project)
-      respond_to do |format|
-        format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
-        format.html { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
-      end
-      return
-    end
-    if params[:host_genome_name]
-      host_genome_name = params.delete(:host_genome_name)
-      host_genome = HostGenome.find_by(name: host_genome_name)
-    end
-
-    params[:input_files_attributes].reject! { |f| f["source"] == '' }
-    params[:alignment_config_name] = AlignmentConfig::DEFAULT_NAME if params[:alignment_config_name].blank?
-    params[:status] = Sample::STATUS_CREATED
-    params[:user] = current_user
-
-    @sample = Sample.new(params)
-    @sample.project = project if project
-    @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
-    @sample.user = current_user
-    @sample.host_genome ||= (host_genome || HostGenome.first)
-
-    respond_to do |format|
-      if @sample.save
-        tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id} client:#{client}]
-        # Currently bulk CLI upload just calls this action repeatedly so we can't
-        # distinguish between bulk or single there. Web bulk goes to bulk_upload.
-        tags << "type:single" if client == "web"
-        # Send to Datadog (DEPRECATED) and Segment
-        MetricUtil.put_metric_now("samples.created", 1, tags)
-        MetricUtil.log_upload_batch_analytics([@sample], current_user, client, request)
-
-        format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
-        format.json { render :show, status: :created, location: @sample }
-      else
-        format.html { render :new }
-        format.json do
-          render json: { sample_errors: @sample.errors.full_messages,
-                         project_errors: project ? project.errors.full_messages : nil, },
-                 status: :unprocessable_entity
-        end
-      end
-    end
   end
 
   # PATCH/PUT /samples/1
