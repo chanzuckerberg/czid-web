@@ -18,9 +18,11 @@ export default class BulkDownloadNotification extends React.Component {
           To check the status of your download, visit the{" "}
           <a
             href="bulk_downloads"
-            onClick={logAnalyticsEvent(
-              "BulkDownloadNotification_downloads-page-link-clicked"
-            )}
+            onClick={() =>
+              logAnalyticsEvent(
+                "BulkDownloadNotification_downloads-page-link-clicked"
+              )
+            }
           >
             Downloads page
           </a>.
