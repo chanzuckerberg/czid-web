@@ -1057,6 +1057,7 @@ class SamplesHeatmapView extends React.Component {
       return <div className={cs.noDataMsg}>No data to render</div>;
     }
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
+    const { allowedFeatures } = this.context || {};
     return (
       <ErrorBoundary>
         <SamplesHeatmapVis
@@ -1068,7 +1069,12 @@ class SamplesHeatmapView extends React.Component {
           metric={this.state.selectedOptions.metric}
           onMetadataSortChange={this.handleMetadataSortChange}
           onMetadataChange={this.handleMetadataChange}
-          onAddTaxon={this.handleAddedTaxonChange}
+          // If client-side filtering is not enabled, don't allow users to manually add taxa.
+          onAddTaxon={
+            allowedFeatures.includes("heatmap_filter_fe")
+              ? this.handleAddedTaxonChange
+              : null
+          }
           onRemoveTaxon={this.handleRemoveTaxon}
           onSampleLabelClick={this.handleSampleLabelClick}
           onTaxonLabelClick={this.handleTaxonLabelClick}

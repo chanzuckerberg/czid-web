@@ -81,7 +81,7 @@ class SamplesHeatmapVis extends React.Component {
         onColumnMetadataLabelOut: this.handleColumnMetadataLabelOut,
         onRowGroupEnter: this.handleRowGroupEnter,
         onRowGroupLeave: this.handleRowGroupLeave,
-        onAddRowClick: this.handleAddTaxonClick,
+        onAddRowClick: this.props.onAddTaxon ? this.handleAddTaxonClick : null,
         onRemoveRow: this.props.onRemoveTaxon,
         onCellClick: this.handleCellClick,
         onColumnLabelMove: this.handleMouseHoverMove,

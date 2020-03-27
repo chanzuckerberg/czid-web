@@ -365,7 +365,11 @@ export default class Heatmap {
       ? this.columnClusterHeight + this.options.spacing * 2
       : 0;
 
-    this.totalRowAddLinkHeight = 2 * this.options.metadataAddLinkHeight;
+    // If there's no option to manually add additional rows, don't make the gap
+    // between metadata and the rest of the heatmap as wide.
+    this.totalRowAddLinkHeight = this.options.onAddRowClick
+      ? 2 * this.options.metadataAddLinkHeight
+      : this.options.metadataAddLinkHeight;
 
     this.width =
       this.options.marginLeft +
