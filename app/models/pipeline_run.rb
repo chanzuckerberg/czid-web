@@ -1089,19 +1089,18 @@ class PipelineRun < ApplicationRecord
         sfn_execution_arn: sfn_service_result[:sfn_execution_arn],
         pipeline_version: sfn_service_result[:pipeline_version]
       )
+      Rails.logger.info("PipelineRun: id=#{id} sfn_execution_arn=#{sfn_service_result[:sfn_execution_arn]}")
     rescue => e
       LogUtil.log_err_and_airbrake("Error starting SFN pipeline: #{e}")
       LogUtil.log_backtrace(e)
       # we will not retry in this case, since we do not know what error occurred
     end
 
-    Rails.logger.info("SFN ARN: #{sfn_service_result[:sfn_execution_arn]}")
     if sfn_service_result[:sfn_execution_arn].blank?
       update(
         job_status: STATUS_FAILED,
         finalized: 1
       )
-      Rails.logger.info("Updating status (to failed?): #{job_status}")
     end
   end
 
@@ -1132,8 +1131,6 @@ class PipelineRun < ApplicationRecord
         # Run job will trigger dag pipeline for a particular stage
         # we're moving on to a new stage
         prs.run_job
-
-        Rails.logger.debug("[PR: #{id}] Job status: #{job_status}")
       else
         # still running
         prs.update_job_status
@@ -1141,10 +1138,8 @@ class PipelineRun < ApplicationRecord
         check_and_log_long_run
       end
       if !step_function? || sfn_execution_arn.present?
-        Rails.logger.info("[PR: #{id}] Setting job status anew: #{format_job_status_text(prs.step_number, prs.name, prs.job_status, report_ready?)}")
         self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status, report_ready?)
       end
-      # unless step_function? && !sfn_execution_arn
     end
     save!
     enqueue_new_pipeline_run if automatic_restart
