@@ -8,9 +8,9 @@ import collections
 parser = argparse.ArgumentParser("idd2wdl", description="Convert an idseq-dag DAG to a WDL workflow")
 parser.add_argument("dag")
 parser.add_argument("--name")
-parser.add_argument("--aws-account-id", default=os.environ["AWS_ACCOUNT_ID"])
-parser.add_argument("--deployment-env", default=os.environ["DEPLOYMENT_ENVIRONMENT"])
-parser.add_argument("--aws-region", default=os.environ["AWS_DEFAULT_REGION"])
+parser.add_argument("--aws-account-id", default=os.environ.get("AWS_ACCOUNT_ID"))
+parser.add_argument("--deployment-env", default=os.environ.get("DEPLOYMENT_ENVIRONMENT"))
+parser.add_argument("--aws-region", default=os.environ.get("AWS_DEFAULT_REGION"))
 parser.add_argument("--wdl-version", default=os.environ.get("WDL_VERSION", "0"))
 parser.add_argument("--dag-version", default=os.environ.get("DAG_VERSION", "0"))
 args = parser.parse_args()
@@ -77,6 +77,19 @@ for step in dag["steps"]:
     if "environment" in step["additional_attributes"]:
         nha_cluster_ssh_key_uri = "s3://idseq-secrets/idseq-{}.pem".format(step["additional_attributes"]["environment"])
 
+    count_input_reads = ""
+    if task_name(step) == "RunValidateInput":
+        count_input_reads = """
+    input_read_count = idseq_dag.util.count.reads_in_group(
+      step_instance.input_files_local[0],
+      max_fragments=max_fragments
+    )
+    counts_dict = dict(fastqs=input_read_count)
+    if input_read_count == len(step_instance.input_files_local) * max_fragments:
+      counts_dict["truncated"] = input_read_count
+    with open("fastqs.count", "w") as count_file:
+      json.dump(counts_dict, count_file)"""
+        wdl_step_output += '\n    File? input_read_count = "fastqs.count"'
     print("""
 task {task_name} {{
   runtime {{
@@ -89,9 +102,10 @@ task {task_name} {{
   python3 <<CODE
   import os, sys, json, contextlib, importlib, threading, logging, subprocess, traceback
   os.environ.update(KEY_PATH_S3="{nha_cluster_ssh_key_uri}", AWS_DEFAULT_REGION="{AWS_DEFAULT_REGION}")
-  import idseq_dag, idseq_dag.util.s3
+  import idseq_dag, idseq_dag.util.s3, idseq_dag.util.count
   logging.basicConfig(level=logging.INFO)
   idseq_dag.util.s3.config["REF_DIR"] = os.getcwd()
+  max_fragments = {max_fragments}
   step = importlib.import_module("{step_module}")
   step_instance = step.{step_class}(
     name="{step_name}",
@@ -109,6 +123,7 @@ task {task_name} {{
   with open(step_instance.step_status_local, "w") as status_file:
     json.dump(dict(), status_file)
   try:
+    {count_input_reads}
     step_instance.update_status_json_file("running")
     step_instance.run()
     step_instance.count_reads()
@@ -123,11 +138,12 @@ task {task_name} {{
 {wdl_step_output}
   }}
 }}""".format(task_name=task_name(step),
-             AWS_ACCOUNT_ID=os.environ["AWS_ACCOUNT_ID"],
-             DEPLOYMENT_ENVIRONMENT=os.environ["DEPLOYMENT_ENVIRONMENT"],
+             AWS_ACCOUNT_ID=args.aws_account_id,
+             DEPLOYMENT_ENVIRONMENT=args.deployment_env,
              wdl_step_input=wdl_step_input,
              nha_cluster_ssh_key_uri=nha_cluster_ssh_key_uri,
-             AWS_DEFAULT_REGION=os.environ["AWS_DEFAULT_REGION"],
+             AWS_DEFAULT_REGION=args.aws_region,
+             max_fragments=dag["given_targets"].get("fastqs", {}).get("max_fragments"),
              step_module=step["module"],
              step_class=step["class"],
              step_name=step["out"],
@@ -138,6 +154,7 @@ task {task_name} {{
              step_additional_attributes=step["additional_attributes"],
              workflow_name=workflow_name,
              input_files_local=input_files_local,
+             count_input_reads=count_input_reads,
              wdl_step_output=wdl_step_output))
 
 print("\nworkflow idseq_{} {{".format(workflow_name))
@@ -176,5 +193,7 @@ for target, files in dag["targets"].items():
         name = file_path_to_name(filename)
         print("    File {} = {}.{}".format(target_filename(target, i), task_name(targets_to_steps[target]), name))
     print("    File? {}_count = {}.output_read_count".format(target, task_name(targets_to_steps[target])))
+if any(task_name(step) == "RunValidateInput" for step in dag["steps"]):
+    print("    File? input_read_count = RunValidateInput.input_read_count")
 print("  }")
 print("}")
