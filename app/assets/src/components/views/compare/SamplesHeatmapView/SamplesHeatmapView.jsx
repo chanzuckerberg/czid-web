@@ -69,6 +69,10 @@ const BACKGROUND_METRICS = [
   { text: "NT Z Score", value: "NT.zscore" },
   { text: "NR Z Score", value: "NR.zscore" },
 ];
+const NOTIFICATION_TYPES = {
+  invalidSamples: "invalid samples",
+  taxaFilteredOut: "taxa filtered out",
+};
 
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
@@ -380,7 +384,7 @@ class SamplesHeatmapView extends React.Component {
     // If there are failed/waiting samples selected, display a warning
     // to the user that they won't appear in the heatmap.
     if (sampleValidationInfo.invalidSampleNames.length > 0) {
-      this.showNotification("invalid samples");
+      this.showNotification(NOTIFICATION_TYPES.invalidSamples);
     }
 
     let [heatmapData, metadataFields] = await Promise.all([
@@ -574,7 +578,7 @@ class SamplesHeatmapView extends React.Component {
             addedTaxonIds.has(taxon["id"]) &&
             !notifiedFilteredOutTaxonIds.has(taxon["id"])
           ) {
-            this.showNotification("taxa filtered out", taxon);
+            this.showNotification(NOTIFICATION_TYPES.taxaFilteredOut, taxon);
             notifiedFilteredOutTaxonIds.add(taxon["id"]);
           }
         }
@@ -1159,14 +1163,14 @@ class SamplesHeatmapView extends React.Component {
   }
 
   showNotification(notification, params) {
-    if (notification === "invalid samples") {
+    if (notification === NOTIFICATION_TYPES.invalidSamples) {
       showToast(
         ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
         {
           autoClose: 12000,
         }
       );
-    } else if (notification === "taxa filtered out") {
+    } else if (notification === NOTIFICATION_TYPES.taxaFilteredOut) {
       showToast(
         ({ closeToast }) => this.renderFilteredOutWarning(closeToast, params),
         {
