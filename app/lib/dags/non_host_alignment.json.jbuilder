@@ -47,10 +47,6 @@ json.steps do
     chunk_size: attr[:gsnap_chunk_size],
     max_concurrent: attr[:gsnap_max_concurrent],
     environment: attr[:rails_env] == "prod" ? "prod" : "staging",
-    max_interval_between_describe_instances: attr[:max_interval_between_describe_instances],
-    job_tag_prefix: attr[:job_tag_prefix],
-    job_tag_refresh_seconds: attr[:job_tag_refresh_seconds],
-    draining_tag: attr[:draining_tag],
   }
 
   if attr[:index_dir_suffix]
@@ -76,10 +72,6 @@ json.steps do
     chunk_size: attr[:rapsearch_chunk_size],
     max_concurrent: attr[:rapsearch_max_concurrent],
     environment: attr[:rails_env] == "prod" ? "prod" : "staging",
-    max_interval_between_describe_instances: attr[:max_interval_between_describe_instances],
-    job_tag_prefix: attr[:job_tag_prefix],
-    job_tag_refresh_seconds: attr[:job_tag_refresh_seconds],
-    draining_tag: attr[:draining_tag],
   }
 
   if attr[:index_dir_suffix]

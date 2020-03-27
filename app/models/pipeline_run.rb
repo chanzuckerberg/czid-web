@@ -230,13 +230,6 @@ class PipelineRun < ApplicationRecord
   # (RM) transition executed by the Result Monitor
   # (Resque Worker) transition executed by the Resque Worker
 
-  # Constants for alignment chunk scheduling,
-  # shared between idseq-web/app/jobs/autoscaling.py and idseq-dag/idseq_dag/util/server.py:
-  MAX_JOB_DISPATCH_LAG_SECONDS = 900
-  JOB_TAG_PREFIX = "RunningIDseqBatchJob_".freeze
-  JOB_TAG_KEEP_ALIVE_SECONDS = 600
-  DRAINING_TAG = "draining".freeze
-
   # Triggers a run for new samples by defining output states and run stages configurations.
   # *Exception* for cloned pipeline runs that already have results and finalized status
   before_create :create_output_states, :create_run_stages, unless: :results_finalized?
@@ -297,40 +290,6 @@ class PipelineRun < ApplicationRecord
       num_chunks_by_run_id[pr_id] = num_chunks
     end
     num_chunks_by_run_id.values.sum
-  end
-
-  def self.count_alignment_chunks_in_progress
-    # Get run ids in progress
-    need_alignment = in_progress_at_stage_1_or_2
-    # Get numbers of non-host reads to estimate total number of chunks
-    in_progress_job_stats = JobStat.where(pipeline_run_id: need_alignment.pluck(:id))
-    last_host_filter_step = "subsampled_out"
-    known_num_reads = Hash[in_progress_job_stats.where(task: last_host_filter_step).pluck(:pipeline_run_id, :reads_after)]
-    # Determine which samples are paired-end to adjust chunk count
-    runs_by_sample_id = need_alignment.index_by(&:sample_id)
-    files_by_sample_id = InputFile.where(sample_id: need_alignment.pluck(:sample_id)).group_by(&:sample_id)
-    is_run_paired = {}
-    runs_by_sample_id.each do |sid, pr|
-      is_run_paired[pr.id] = (files_by_sample_id[sid].count == 2)
-    end
-    # Get number of chunks that have already completed
-    completed_gsnap_chunks = Hash[need_alignment.pluck(:id, :completed_gsnap_chunks)]
-    completed_rapsearch_chunks = Hash[need_alignment.pluck(:id, :completed_rapsearch_chunks)]
-    # Compute number of chunks that still need to be processed
-    count_configs = {
-      gsnap: {
-        chunk_size: GSNAP_CHUNK_SIZE,
-        can_pair_chunks: true, # gsnap can take paired inputs
-        is_run_paired: is_run_paired,
-      },
-      rapsearch: {
-        chunk_size: RAPSEARCH_CHUNK_SIZE,
-        can_pair_chunks: false # rapsearch always takes a single input file
-      },
-    }
-    gsnap_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:gsnap], completed_gsnap_chunks)
-    rapsearch_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:rapsearch], completed_rapsearch_chunks)
-    { gsnap: gsnap_num_chunks, rapsearch: rapsearch_num_chunks }
   end
 
   def self.top_completed_runs
