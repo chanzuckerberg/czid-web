@@ -709,10 +709,6 @@ class SamplesHeatmapView extends React.Component {
     let topTaxIds = new Set();
     let topTaxonDetails = {};
     let filteredData = {};
-    // skippedTaxa includes taxa that passed filters but were explicitly
-    // removed by the user, which will still be counted toward the top taxa count.
-    let skippedTaxa = new Set();
-
     Object.values(sampleDetails).forEach(sample => {
       let filteredTaxaInSample = sample.taxa.filter(taxonId =>
         filteredTaxonIds.has(taxonId)
