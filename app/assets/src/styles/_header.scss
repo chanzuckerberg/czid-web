@@ -1,13 +1,11 @@
 @import "typography";
 @import "themes/colors";
 
-.tooltip,
-.Tipsy {
+.tooltip {
   &.in {
     opacity: 1 !important;
   }
-  .tooltip-inner,
-  .Tipsy-inner {
+  .tooltip-inner {
     font-size: 0.8rem;
     text-align: left;
     max-width: 200px;
