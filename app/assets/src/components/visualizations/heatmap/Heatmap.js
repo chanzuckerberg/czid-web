@@ -1211,8 +1211,6 @@ export default class Heatmap {
 
       addLinkEnter.append("rect");
 
-      addLinkEnter.append("line").attr("class", cs.metadataAddLine);
-
       addLinkEnter
         .append("text")
         .text(() => "Add Taxon")
@@ -1253,16 +1251,6 @@ export default class Heatmap {
           this.rowLabelsWidth + this.columnLabels.length * this.cell.width
         )
         .attr("height", this.options.metadataAddLinkHeight);
-
-      addLink
-        .select(`.${cs.metadataAddLine}`)
-        .attr("x1", this.rowLabelsWidth)
-        .attr(
-          "x2",
-          this.rowLabelsWidth + this.columnLabels.length * this.cell.width - dx
-        )
-        .attr("y1", yPos)
-        .attr("y2", yPos);
     }
   }
 
@@ -1564,8 +1552,6 @@ export default class Heatmap {
 
       addLinkEnter.append("rect");
 
-      addLinkEnter.append("line").attr("class", cs.metadataAddLine);
-
       addLinkEnter
         .append("text")
         .text(() => "Add Metadata")
@@ -1606,16 +1592,6 @@ export default class Heatmap {
           this.rowLabelsWidth + this.columnLabels.length * this.cell.width
         )
         .attr("height", this.options.metadataAddLinkHeight);
-
-      addLink
-        .select(`.${cs.metadataAddLine}`)
-        .attr("x1", this.rowLabelsWidth)
-        .attr(
-          "x2",
-          this.rowLabelsWidth + this.columnLabels.length * this.cell.width - dx
-        )
-        .attr("y1", yPos)
-        .attr("y2", yPos);
     }
   }
 
