@@ -553,10 +553,10 @@ class SamplesHeatmapView extends React.Component {
       addedTaxonIds,
       notifiedFilteredOutTaxa,
     } = this.state;
-    let taxonDetails = {},
-      taxonIds = new Set(),
-      filteredData = {},
-      addedTaxonIdsPassingFilters = new Set();
+    let taxonDetails = {};
+    let taxonIds = new Set();
+    let filteredData = {};
+    let addedTaxonIdsPassingFilters = new Set();
     if (allowedFeatures.includes("heatmap_filter_fe")) {
       allTaxonIds.forEach(taxonId => {
         let taxon = allTaxonDetails[taxonId];

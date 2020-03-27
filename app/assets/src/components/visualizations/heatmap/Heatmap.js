@@ -580,8 +580,8 @@ export default class Heatmap {
   }
 
   placeRowLabelContainers(x) {
-    const totalMetadataHeight = this.totalMetadataHeight,
-      totalRowAddLinkHeight = this.totalRowAddLinkHeight;
+    const totalMetadataHeight = this.totalMetadataHeight;
+    const totalRowAddLinkHeight = this.totalRowAddLinkHeight;
 
     this.gRowLabels.attr(
       "transform",
