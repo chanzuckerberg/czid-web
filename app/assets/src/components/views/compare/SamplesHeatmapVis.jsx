@@ -410,7 +410,7 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   getAvailableTaxa() {
-    // taxonDetails includes entires mapping both
+    // taxonDetails includes entries mapping both
     // taxId => taxonDetails and taxName => taxonDetails,
     // so iterate over allTaxonIds to avoid duplicates.
     let { allTaxonIds, taxonDetails } = this.props;
