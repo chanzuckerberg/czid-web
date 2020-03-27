@@ -409,26 +409,6 @@ class SamplesHeatmapVis extends React.Component {
     });
   };
 
-  handleSelectedTaxaChange = selectedTaxa => {
-    const { onAddTaxon } = this.props;
-
-    let intersection = new Set(
-      [...this.props.selectedTaxa].filter(taxon => selectedTaxa.has(taxon))
-    );
-    const current = new Set([...intersection, ...selectedTaxa]);
-    this.setState(
-      {
-        selectedTaxa: current,
-      },
-      () => {
-        onAddTaxon && onAddTaxon(selectedTaxa);
-        logAnalyticsEvent("SamplesHeatmapVis_selected-taxa_changed", {
-          selectedTaxa: current.length,
-        });
-      }
-    );
-  };
-
   getAvailableTaxa() {
     // taxonDetails includes entires mapping both
     // taxId => taxonDetails and taxName => taxonDetails,
@@ -577,7 +557,7 @@ class SamplesHeatmapVis extends React.Component {
             addTaxonTrigger={addTaxonTrigger}
             selectedTaxa={new Set(this.props.taxonIds, this.props.selectedTaxa)}
             availableTaxa={this.getAvailableTaxa()}
-            onTaxonSelectionChange={this.handleSelectedTaxaChange}
+            onTaxonSelectionChange={this.props.onAddTaxon}
             onTaxonSelectionClose={() => {
               this.setState({ addTaxonTrigger: null });
             }}
