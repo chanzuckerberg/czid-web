@@ -320,7 +320,7 @@ export default class Heatmap {
       .style("fill", "white");
 
     this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
-    this.gAddRow = this.g.append("g").attr("class", cs.columnMetadata);
+    this.gAddRow = this.g.append("g").attr("class", cs.rowAddContainer);
     this.gCaption = this.g.append("g").attr("class", cs.captionContainer);
   }
 
@@ -613,7 +613,10 @@ export default class Heatmap {
 
   placeAddRowLinkContainer(y) {
     this.gAddRow.attr("transform", `translate(0, ${y})`);
-    this.addRowBackground.attr("y", y + this.totalRowAddLinkHeight);
+    this.addRowBackground.attr(
+      "y",
+      y + this.options.columnMetadata.length * this.options.minCellHeight
+    );
   }
 
   processMetadata() {
@@ -1195,37 +1198,35 @@ export default class Heatmap {
         });
       };
 
-      let addLink = this.gAddRow
-        .selectAll(`.${cs.columnMetadataAdd}`)
-        .data([1]);
+      let addLink = this.gAddRow.selectAll(`.${cs.rowAdd}`).data([1]);
 
       let addLinkEnter = addLink
         .enter()
         .append("g")
-        .attr("class", cs.columnMetadataAdd);
+        .attr("class", cs.rowAdd);
 
       let yPos = this.options.metadataAddLinkHeight / 2;
 
       addLinkEnter.append("rect");
 
-      addLinkEnter.append("line").attr("class", cs.metadataAddLine);
+      addLinkEnter.append("line").attr("class", cs.rowAddLine);
 
       addLinkEnter
         .append("text")
         .text(() => "Add Taxon")
-        .attr("class", cs.metadataAddLabel)
+        .attr("class", cs.rowAddLabel)
         .attr("x", this.rowLabelsWidth - 25)
         .attr("y", 11)
         .on("click", handleAddRowClick);
 
       let addRowTrigger = addLinkEnter
         .append("g")
-        .attr("class", cs.metadataAddTrigger)
+        .attr("class", cs.rowAddTrigger)
         .on("click", handleAddRowClick);
 
       addRowTrigger
         .append("svg:image")
-        .attr("class", cs.metadataAddIcon)
+        .attr("class", cs.rowAddIcon)
         .attr("width", this.options.metadataAddLinkHeight)
         .attr("height", this.options.metadataAddLinkHeight)
         .attr("x", this.rowLabelsWidth - 20)
@@ -1239,9 +1240,8 @@ export default class Heatmap {
       // update
       addLink.attr(
         "transform",
-        `translate(${dx}, ${this.options.columnMetadata.length *
-          this.options.minCellHeight *
-          2})`
+        `translate(${dx}, ${(1 + this.options.columnMetadata.length) *
+          this.options.minCellHeight})`
       );
 
       addLink
@@ -1253,7 +1253,7 @@ export default class Heatmap {
         .attr("height", this.options.metadataAddLinkHeight);
 
       addLink
-        .select(`.${cs.metadataAddLine}`)
+        .select(`.${cs.rowAddLine}`)
         .attr("x1", this.rowLabelsWidth)
         .attr(
           "x2",

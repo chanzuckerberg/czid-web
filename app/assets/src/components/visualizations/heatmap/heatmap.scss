@@ -149,6 +149,53 @@
     }
   }
 
+  .rowAddContainer {
+    pointer-events: bounding-box;
+
+    .rowAdd {
+      .rowAddTrigger {
+        cursor: pointer;
+      }
+
+      .rowAddLine {
+        stroke: $light-grey;
+        stroke-width: 1px;
+        fill: transparent;
+      }
+
+      .rowAddIcon {
+        opacity: 0.3;
+      }
+
+      rect {
+        opacity: 0;
+      }
+
+      .rowAddLabel {
+        @include font-label-s;
+        fill: $medium-grey;
+        cursor: pointer;
+        text-anchor: end;
+      }
+
+      &:hover {
+        .rowAddLine {
+          stroke: $primary-light;
+        }
+
+        .rowAddIcon {
+          // The filter is defined in heatmap.js
+          filter: url("#blue");
+          opacity: 1;
+        }
+
+        .rowAddLabel {
+          fill: $primary-light;
+        }
+      }
+    }
+  }
+
   .captionContainer {
     .caption {
       font-size: 12px;
