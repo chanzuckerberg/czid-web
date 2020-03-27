@@ -1323,8 +1323,9 @@ export default class Heatmap {
     let applyFormat = nodes => {
       nodes.attr("transform", (d, idx) => {
         const xOffset = this.getColumnMetadataLabelOffset(d);
-        return `translate(${dx - xOffset}, ${idx *
-          this.options.minCellHeight})`;
+        return `translate(${dx - xOffset}, ${this.options
+          .metadataAddLinkHeight +
+          (1 + idx * this.options.minCellHeight)})`;
       });
     };
 
@@ -1361,7 +1362,7 @@ export default class Heatmap {
       .append("rect")
       .attr("class", cs.hoverTarget)
       .attr("x", -this.options.marginLeft)
-      .attr("y", -1)
+      .attr("y", 0)
       .attr("width", d => {
         const xOffset = this.getColumnMetadataLabelOffset(d);
         return this.rowLabelsWidth + this.options.marginLeft + xOffset;
@@ -1450,7 +1451,9 @@ export default class Heatmap {
     let applyFormatForRows = nodes => {
       nodes.attr(
         "transform",
-        (_, i) => `translate(0, ${this.options.minCellHeight * i})`
+        (_, i) =>
+          `translate(0, ${this.options.metadataAddLinkHeight +
+            this.options.minCellHeight * i})`
       );
     };
 
@@ -1579,11 +1582,7 @@ export default class Heatmap {
       }
 
       // update
-      addLink.attr(
-        "transform",
-        `translate(${dx}, ${this.options.columnMetadata.length *
-          this.options.minCellHeight})`
-      );
+      addLink.attr("transform", `translate(${dx}, 0)`);
 
       addLink
         .select("rect")
