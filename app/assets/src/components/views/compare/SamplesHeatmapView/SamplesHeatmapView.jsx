@@ -123,7 +123,7 @@ class SamplesHeatmapView extends React.Component {
       addedTaxonIds: new Set(
         this.urlParams.addedTaxonIds || this.props.addedTaxonIds || []
       ),
-      // notifiedFilteredOutTaxa keeps track of the taxon ids for which
+      // notifiedFilteredOutTaxonIds keeps track of the taxon ids for which
       // we have already notified the user that they have manually added
       // but did not pass filters.
       // This is to ensure that we do not notify the user of ALL
@@ -131,7 +131,7 @@ class SamplesHeatmapView extends React.Component {
       // make a selection in the Add Taxon dropdown.
       // This will be reset whenever filters change, so the user will be
       // notified of which manually added taxa do not pass the new filters.
-      notifiedFilteredOutTaxa: new Set(),
+      notifiedFilteredOutTaxonIds: new Set(),
       allTaxonDetails: {},
       taxonDetails: {},
       // allData is an object containing all the metric data for every taxa for each sample.
@@ -551,7 +551,7 @@ class SamplesHeatmapView extends React.Component {
       allTaxonDetails,
       allData,
       addedTaxonIds,
-      notifiedFilteredOutTaxa,
+      notifiedFilteredOutTaxonIds,
     } = this.state;
     let taxonDetails = {};
     let taxonIds = new Set();
@@ -568,14 +568,14 @@ class SamplesHeatmapView extends React.Component {
             }
           }
         } else {
-          // Check notifiedFilteredOutTaxa to prevent filtered out taxa from
+          // Check notifiedFilteredOutTaxonIds to prevent filtered out taxa from
           // notifying the user every time a selection is made.
           if (
             addedTaxonIds.has(taxon["id"]) &&
-            !notifiedFilteredOutTaxa.has(taxon["id"])
+            !notifiedFilteredOutTaxonIds.has(taxon["id"])
           ) {
             this.showNotification("taxa filtered out", taxon);
-            notifiedFilteredOutTaxa.add(taxon["id"]);
+            notifiedFilteredOutTaxonIds.add(taxon["id"]);
           }
         }
       });
@@ -598,7 +598,7 @@ class SamplesHeatmapView extends React.Component {
       taxonIds: taxonIds,
       loading: false,
       data: filteredData,
-      notifiedFilteredOutTaxa,
+      notifiedFilteredOutTaxonIds,
     });
   }
 
@@ -786,7 +786,7 @@ class SamplesHeatmapView extends React.Component {
   handleAddedTaxonChange = selectedTaxonIds => {
     // selectedTaxonIds includes taxa that pass filters
     // and the taxa manually added by the user.
-    let { taxonIds, addedTaxonIds, notifiedFilteredOutTaxa } = this.state;
+    let { taxonIds, addedTaxonIds, notifiedFilteredOutTaxonIds } = this.state;
 
     // currentAddedTaxa is all the taxa manually added by the user.
     let currentAddedTaxa = new Set([
@@ -794,9 +794,11 @@ class SamplesHeatmapView extends React.Component {
       ...[...addedTaxonIds].filter(taxId => selectedTaxonIds.has(taxId)),
     ]);
 
-    // Update notifiedFilteredOutTaxa to remove taxa that were unselected.
-    let currentFilteredOutTaxa = new Set(
-      [...notifiedFilteredOutTaxa].filter(taxId => currentAddedTaxa.has(taxId))
+    // Update notifiedFilteredOutTaxonIds to remove taxa that were unselected.
+    let currentFilteredOutTaxonIds = new Set(
+      [...notifiedFilteredOutTaxonIds].filter(taxId =>
+        currentAddedTaxa.has(taxId)
+      )
     );
 
     // removedTaxonIds are taxa that passed filters
@@ -811,7 +813,7 @@ class SamplesHeatmapView extends React.Component {
     this.setState(
       {
         addedTaxonIds: currentAddedTaxa,
-        notifiedFilteredOutTaxa: currentFilteredOutTaxa,
+        notifiedFilteredOutTaxonIds: currentFilteredOutTaxonIds,
       },
       this.updateFilters
     );
@@ -990,9 +992,9 @@ class SamplesHeatmapView extends React.Component {
         {
           selectedOptions: assign(this.state.selectedOptions, newOptions),
           loading: shouldRefilterData,
-          // Reset notifiedFilteredOutTaxa so the user will be newly
+          // Reset notifiedFilteredOutTaxonIds so the user will be newly
           // notified if their manually selected taxa do not pass the new filters.
-          notifiedFilteredOutTaxa: new Set(),
+          notifiedFilteredOutTaxonIds: new Set(),
         },
         shouldRefetchData
           ? this.updateBackground
