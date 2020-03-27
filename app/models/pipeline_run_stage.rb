@@ -339,6 +339,7 @@ class PipelineRunStage < ApplicationRecord
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
+      use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
     }
     return generate_json(attribute_dict)
   end
