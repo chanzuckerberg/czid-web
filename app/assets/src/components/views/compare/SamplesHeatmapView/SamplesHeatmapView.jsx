@@ -709,6 +709,9 @@ class SamplesHeatmapView extends React.Component {
     let topTaxIds = new Set();
     let topTaxonDetails = {};
     let filteredData = {};
+    // skippedTaxa includes taxa that passed filters but were explicitly
+    // removed by the user, which will still be counted toward the top taxa count.
+    let skippedTaxa = new Set();
 
     Object.values(sampleDetails).forEach(sample => {
       let filteredTaxaInSample = sample.taxa.filter(taxonId =>
@@ -726,18 +729,20 @@ class SamplesHeatmapView extends React.Component {
         if (count >= taxonsPerSample) {
           break;
         } else if (!topTaxIds.has(taxId)) {
-          let taxon = allTaxonDetails[taxId];
-          topTaxIds.add(taxId);
-          topTaxonDetails[taxId] = allTaxonDetails[taxId];
-          topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
+          if (!this.removedTaxonIds.has(taxId)) {
+            let taxon = allTaxonDetails[taxId];
+            topTaxIds.add(taxId);
+            topTaxonDetails[taxId] = allTaxonDetails[taxId];
+            topTaxonDetails[taxon["name"]] = allTaxonDetails[taxId];
 
-          metrics.forEach(metric => {
-            filteredData[metric.value] = filteredData[metric.value] || [];
-            filteredData[metric.value].push(
-              allData[metric.value][taxon["index"]]
-            );
-          });
-          count++;
+            metrics.forEach(metric => {
+              filteredData[metric.value] = filteredData[metric.value] || [];
+              filteredData[metric.value].push(
+                allData[metric.value][taxon["index"]]
+              );
+            });
+            count++;
+          }
         }
       }
     });
