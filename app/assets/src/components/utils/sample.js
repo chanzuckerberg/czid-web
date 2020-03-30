@@ -68,14 +68,6 @@ export const sampleNameFromFileName = fname => {
   return base;
 };
 
-export const joinServerError = response => {
-  let joined = "";
-  Object.keys(response).forEach(group => {
-    joined += response[group].join(". ");
-  });
-  return joined;
-};
-
 export const sampleErrorInfo = (sample, pipelineRun) => {
   let status, message, linkText, type, link, pipelineVersionUrlParam;
   switch (

@@ -15,11 +15,6 @@ import {
 import { shortenUrl } from "~/api";
 import copy from "copy-to-clipboard";
 
-export const resetUrl = () => {
-  // remove parameters from url
-  window.history.replaceState({}, document.title, location.pathname);
-};
-
 // See also parseUrlParams in SamplesHeatmapView
 export const parseUrlParams = () => {
   let urlParams = QueryString.parse(location.search, {

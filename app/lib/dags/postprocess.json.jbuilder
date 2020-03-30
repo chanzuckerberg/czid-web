@@ -134,6 +134,12 @@ json.steps do
   if attr[:skip_dedeuterostome_filter] == 0
     additional_files["deuterostome_db"] = attr[:deuterostome_db]
   end
+  additional_attributes = {
+    db_type: "nt",
+  }
+  if attr[:use_taxon_whitelist]
+    additional_attributes["use_taxon_whitelist"] = attr[:use_taxon_whitelist]
+  end
 
   steps << {
     in: ["gsnap_out", "assembly_out", "gsnap_accessions_out", "cdhitdup_cluster_sizes"],
@@ -141,10 +147,15 @@ json.steps do
     class: "PipelineStepBlastContigs",
     module: "idseq_dag.steps.blast_contigs",
     additional_files: additional_files,
-    additional_attributes: {
-      db_type: "nt",
-    },
+    additional_attributes: additional_attributes,
   }
+
+  additional_attributes = {
+    db_type: "nr",
+  }
+  if attr[:use_taxon_whitelist]
+    additional_attributes["use_taxon_whitelist"] = attr[:use_taxon_whitelist]
+  end
 
   steps << {
     in: ["rapsearch2_out", "assembly_out", "rapsearch2_accessions_out", "cdhitdup_cluster_sizes"],
@@ -152,9 +163,7 @@ json.steps do
     class: "PipelineStepBlastContigs",
     module: "idseq_dag.steps.blast_contigs",
     additional_files: additional_files,
-    additional_attributes: {
-      db_type: "nr",
-    },
+    additional_attributes: additional_attributes,
   }
 
   steps << {

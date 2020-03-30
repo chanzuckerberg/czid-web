@@ -97,8 +97,12 @@ RSpec.configure do |config|
   # =end
 end
 
-require "rspec/json_expectations"
-require "webmock/rspec"
+require 'rspec/json_expectations'
+require 'simplecov'
+require 'webmock/rspec'
+
+SimpleCov.command_name "RSpec"
+
 WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |_config|

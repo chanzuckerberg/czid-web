@@ -6,10 +6,6 @@ class BulkDownloadsController < ApplicationController
 
   UPDATE_WITH_TOKEN_ACTIONS = [:success_with_token, :error_with_token, :progress_with_token].freeze
 
-  before_action except: UPDATE_WITH_TOKEN_ACTIONS do
-    allowed_feature_required("bulk_downloads")
-  end
-
   skip_before_action :authenticate_user!, :verify_authenticity_token, only: UPDATE_WITH_TOKEN_ACTIONS
 
   before_action :set_bulk_download_and_validate_access_token, only: UPDATE_WITH_TOKEN_ACTIONS

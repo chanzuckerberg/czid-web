@@ -121,6 +121,26 @@ module HeatmapHelper
     )
   end
 
+  def self.update_background_taxon_metrics(params, samples, background_id, client_filtering_enabled: false)
+    taxon_ids = params[:taxonIds] || []
+    taxon_ids = taxon_ids.compact
+
+    removed_taxon_ids = params[:removedTaxonIds] || []
+    removed_taxon_ids = removed_taxon_ids.compact
+
+    taxon_ids -= removed_taxon_ids
+    results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, [], background_id, update_background_only: true)
+
+    HeatmapHelper.samples_taxons_details(
+      results_by_pr,
+      samples,
+      taxon_ids,
+      1,
+      [],
+      client_filtering_enabled: client_filtering_enabled
+    )
+  end
+
   def self.top_taxons_details(
     results_by_pr,
     num_results,
@@ -226,8 +246,9 @@ module HeatmapHelper
 
     # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
     # fraction_subsampled = 1.0.
+    # The total_ercc_reads can be nil, which we interpret as 0.
     rpm_sql = "count / (
-          (total_reads - total_ercc_reads) *
+          (total_reads - COALESCE(total_ercc_reads, 0)) *
           COALESCE(fraction_subsampled, 1.0)
         ) * 1000 * 1000"
 
@@ -386,7 +407,7 @@ module HeatmapHelper
     results.values
   end
 
-  def self.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+  def self.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id, update_background_only: false)
     parent_ids = parent_ids.to_a
     parent_ids_clause = parent_ids.empty? ? "" : " OR taxon_counts.tax_id in (#{parent_ids.join(',')}) "
 
@@ -397,7 +418,45 @@ module HeatmapHelper
     # Note: connection.select_all is TWICE faster than TaxonCount.select
     # (I/O latency goes from 2 seconds -> 0.8 seconds)
     # Had to derive rpm and zscore for each sample
-    sql_results = TaxonCount.connection.select_all("
+    sql_results =
+      if update_background_only
+        background_metrics_query(background_id, pr_id_to_sample_id, taxon_ids)
+      else
+        samples_taxons_counts_query(background_id, pr_id_to_sample_id, taxon_ids, parent_ids_clause)
+      end
+
+    # calculating rpm and zscore, organizing the results by pipeline_run_id
+    result_hash = {}
+
+    pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
+    pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
+    pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
+
+    sql_results.each do |row|
+      pipeline_run_id = row["pipeline_run_id"]
+      if result_hash[pipeline_run_id]
+        pr = result_hash[pipeline_run_id]["pr"]
+      else
+        pr = pipeline_runs_by_id[pipeline_run_id]
+        result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
+      end
+      if pr.total_reads
+        z_max = ReportHelper::ZSCORE_MAX
+        z_min = ReportHelper::ZSCORE_MIN
+        z_default = ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
+        row["rpm"] = pr.rpm(row["r"])
+        row["zscore"] = row["stdev"].nil? ? z_default : ((row["rpm"] - row["mean"]) / row["stdev"])
+        row["zscore"] = z_max if row["zscore"] > z_max && row["zscore"] != z_default
+        row["zscore"] = z_min if row["zscore"] < z_min
+        result_hash[pipeline_run_id]["taxon_counts"] << row
+      end
+    end
+
+    result_hash
+  end
+
+  def self.samples_taxons_counts_query(background_id, pr_id_to_sample_id, taxon_ids, parent_ids_clause)
+    TaxonCount.connection.select_all("
       SELECT
         taxon_counts.pipeline_run_id     AS  pipeline_run_id,
         taxon_counts.tax_id              AS  tax_id,
@@ -431,37 +490,32 @@ module HeatmapHelper
         AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
         AND taxon_counts.count_type IN ('NT', 'NR')
         AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
-         #{parent_ids_clause}
-         OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
+        #{parent_ids_clause}
+        OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
+  end
 
-    # calculating rpm and zscore, organizing the results by pipeline_run_id
-    result_hash = {}
-
-    pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
-    pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
-    pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
-
-    sql_results.each do |row|
-      pipeline_run_id = row["pipeline_run_id"]
-      if result_hash[pipeline_run_id]
-        pr = result_hash[pipeline_run_id]["pr"]
-      else
-        pr = pipeline_runs_by_id[pipeline_run_id]
-        result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
-      end
-      if pr.total_reads
-        z_max = ReportHelper::ZSCORE_MAX
-        z_min = ReportHelper::ZSCORE_MIN
-        z_default = ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-        row["rpm"] = pr.rpm(row["r"])
-        row["zscore"] = row["stdev"].nil? ? z_default : ((row["rpm"] - row["mean"]) / row["stdev"])
-        row["zscore"] = z_max if row["zscore"] > z_max && row["zscore"] != z_default
-        row["zscore"] = z_min if row["zscore"] < z_min
-        result_hash[pipeline_run_id]["taxon_counts"] << row
-      end
-    end
-
-    result_hash
+  def self.background_metrics_query(background_id, pr_id_to_sample_id, taxon_ids)
+    # Only fetch metrics that are affected by the selected background.
+    TaxonCount.connection.select_all("
+      SELECT
+        taxon_counts.pipeline_run_id     AS  pipeline_run_id,
+        taxon_counts.tax_id              AS  tax_id,
+        taxon_counts.count_type          AS  count_type,
+        taxon_counts.tax_level           AS  tax_level,
+        taxon_counts.count               AS  r,
+        taxon_summaries.stdev            AS stdev,
+        taxon_summaries.mean             AS mean
+      FROM taxon_counts
+      LEFT OUTER JOIN taxon_summaries ON
+        #{background_id.to_i}   = taxon_summaries.background_id   AND
+        taxon_counts.count_type = taxon_summaries.count_type      AND
+        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
+        taxon_counts.tax_id     = taxon_summaries.tax_id
+      WHERE
+        pipeline_run_id IN (#{pr_id_to_sample_id.keys.join(',')})
+        AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
+        AND taxon_counts.count_type IN ('NT', 'NR')
+        AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_hash
   end
 
   def self.only_species_or_genus_counts!(tax_2d, species_selected)

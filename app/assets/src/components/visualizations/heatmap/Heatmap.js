@@ -247,7 +247,9 @@ export default class Heatmap {
 
     this.cells = [];
     for (let i = 0; i < this.rowLabels.length; i++) {
+      this.rowLabels[i].rowIndex = i;
       for (let j = 0; j < this.columnLabels.length; j++) {
+        this.columnLabels[j].columnIndex = j;
         this.cells.push({
           id: `${i},${j}`,
           rowIndex: i,
@@ -848,6 +850,16 @@ export default class Heatmap {
   };
 
   handleRowLabelMouseEnter = rowLabelEntered => {
+    for (let i = 0; i < this.rowLabels.length; i++) {
+      // Shade all rows except the one that's being hovered over.
+      this.rowLabels[i].shaded = i !== rowLabelEntered.rowIndex;
+    }
+    this.updateLabelHighlights(
+      this.gRowLabels.selectAll(`.${cs.rowLabel}`),
+      this.rowLabels
+    );
+    this.updateCellHighlights();
+
     if (this.rowClustering) return;
 
     this.gRowLabels
@@ -871,12 +883,44 @@ export default class Heatmap {
   };
 
   handleRowLabelMouseLeave = rowLabelLeft => {
+    for (let i = 0; i < this.rowLabels.length; i++) {
+      this.rowLabels[i].shaded = false;
+    }
+    this.updateLabelHighlights(
+      this.gRowLabels.selectAll(`.${cs.rowLabel}`),
+      this.rowLabels
+    );
+    this.updateCellHighlights();
+
     if (this.rowClustering) return;
     this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
       .classed(cs.rowLabelHover, false);
 
     this.options.onRowGroupLeave && this.options.onRowGroupLeave(rowLabelLeft);
+  };
+
+  handleColumnLabelMouseEnter = columnLabelEntered => {
+    for (let i = 0; i < this.columnLabels.length; i++) {
+      // Shade all columns except the one that's being hovered over.
+      this.columnLabels[i].shaded = i !== columnLabelEntered.columnIndex;
+    }
+    this.updateLabelHighlights(
+      this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
+      this.columnLabels
+    );
+    this.updateCellHighlights();
+  };
+
+  handleColumnLabelMouseLeave = columnLabelLeft => {
+    for (let i = 0; i < this.columnLabels.length; i++) {
+      this.columnLabels[i].shaded = false;
+    }
+    this.updateLabelHighlights(
+      this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
+      this.columnLabels
+    );
+    this.updateCellHighlights();
   };
 
   handleColumnMetadataLabelClick(value) {
@@ -1117,7 +1161,9 @@ export default class Heatmap {
     let columnLabelEnter = columnLabel
       .enter()
       .append("g")
-      .attr("class", cs.columnLabel);
+      .attr("class", cs.columnLabel)
+      .on("mouseenter", this.handleColumnLabelMouseEnter)
+      .on("mouseleave", this.handleColumnLabelMouseLeave);
 
     columnLabelEnter
       .append("text")
