@@ -32,10 +32,10 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     link: DOC_BASE_LINK + "360034790554-Pipeline-Details#passed-qc",
   },
   duplicateCompressionRatio: {
-    tooltip: `Duplicate Compression Ratio is the ratio of sequences present prior to
-    running cd-hit-dup (duplicate removal) vs after duplicate removal.
-    High values indicate the presence of more duplicate reads, indicating lower
-    library complexity.`,
+    tooltip: `Duplicate Compression Ratio is the ratio of the total number of
+    sequences present prior to running cd-hit-dup (duplicate identification) vs
+    the number of unique sequences. High values indicate the presence of more
+    duplicate reads, which in turn indicates lower library complexity.`,
     link: DOC_BASE_LINK + "360035296613-Project-Page#metrics-meanings",
   },
   erccReads: {
