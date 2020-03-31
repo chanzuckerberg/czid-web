@@ -43,9 +43,7 @@ json.steps do
 
   additional_attributes = {
     service: "gsnap",
-    chunks_in_flight: attr[:chunks_in_flight],
     chunk_size: attr[:gsnap_chunk_size],
-    max_concurrent: attr[:gsnap_max_concurrent],
     environment: attr[:rails_env] == "prod" ? "prod" : "staging",
   }
 
@@ -68,9 +66,7 @@ json.steps do
 
   additional_attributes = {
     service: "rapsearch2",
-    chunks_in_flight: attr[:chunks_in_flight],
     chunk_size: attr[:rapsearch_chunk_size],
-    max_concurrent: attr[:rapsearch_max_concurrent],
     environment: attr[:rails_env] == "prod" ? "prod" : "staging",
   }
 

@@ -305,7 +305,6 @@ class PipelineRunStage < ApplicationRecord
       rapsearch_chunk_size: PipelineRun::RAPSEARCH_CHUNK_SIZE,
       gsnap_max_concurrent: PipelineRun::GSNAP_MAX_CONCURRENT,
       rapsearch_max_concurrent: PipelineRun::RAPSEARCH_MAX_CONCURRENT,
-      chunks_in_flight: PipelineRun::MAX_CHUNKS_IN_FLIGHT,
       gsnap_m8: PipelineRun::GSNAP_M8,
       rapsearch_m8: PipelineRun::RAPSEARCH_M8,
       use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
