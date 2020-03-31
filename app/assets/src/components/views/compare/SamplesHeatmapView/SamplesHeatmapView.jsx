@@ -7,6 +7,7 @@ import {
   map,
   difference,
   intersection,
+  merge,
   keys,
   assign,
   get,
@@ -781,30 +782,28 @@ class SamplesHeatmapView extends React.Component {
   handleAddedTaxonChange = selectedTaxonIds => {
     // selectedTaxonIds includes taxa that pass filters
     // and the taxa manually added by the user.
-    let { taxonIds, addedTaxonIds, notifiedFilteredOutTaxonIds } = this.state;
+    const { taxonIds, addedTaxonIds, notifiedFilteredOutTaxonIds } = this.state;
 
     // currentAddedTaxa is all the taxa manually added by the user.
-    let currentAddedTaxa = new Set([
-      ...[...selectedTaxonIds].filter(taxId => !taxonIds.includes(taxId)),
-      ...[...addedTaxonIds].filter(taxId => selectedTaxonIds.has(taxId)),
+    const newlyAddedTaxa = difference([...selectedTaxonIds], taxonIds);
+    const previouslyAddedTaxa = intersection(addedTaxonIds, [
+      ...selectedTaxonIds,
     ]);
+    const currentAddedTaxa = new Set(newlyAddedTaxa, previouslyAddedTaxa);
 
     // Update notifiedFilteredOutTaxonIds to remove taxa that were unselected.
-    let currentFilteredOutTaxonIds = new Set(
-      [...notifiedFilteredOutTaxonIds].filter(taxId =>
-        currentAddedTaxa.has(taxId)
-      )
+    const currentFilteredOutTaxonIds = new Set(
+      intersection(notifiedFilteredOutTaxonIds, currentAddedTaxa)
     );
 
     // removedTaxonIds are taxa that passed filters
     // but were manually unselected by the user.
-    let removedTaxonIds = new Set(
-      [...taxonIds].filter(taxId => !selectedTaxonIds.has(taxId))
-    );
+    let removedTaxonIds = new Set(difference(taxonIds, [...selectedTaxonIds]));
     removedTaxonIds.forEach(taxId => this.removedTaxonIds.add(taxId));
     selectedTaxonIds.forEach(taxId => {
       this.removedTaxonIds.delete(taxId);
     });
+
     this.setState(
       {
         addedTaxonIds: currentAddedTaxa,
