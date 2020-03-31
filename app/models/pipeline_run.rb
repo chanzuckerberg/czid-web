@@ -68,8 +68,8 @@ class PipelineRun < ApplicationRecord
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
-  REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts_with_dcr.json'.freeze
-  REFINED_TAXID_BYTERANGE_JSON_NAME = 'assembly/refined_taxid_locations_combined.json'.freeze
+  REFINED_TAXON_COUNTS_JSON_NAME = 'refined_taxon_counts_with_dcr.json'.freeze
+  REFINED_TAXID_BYTERANGE_JSON_NAME = 'refined_taxid_locations_combined.json'.freeze
   READS_PER_GENE_STAR_TAB_NAME = 'reads_per_gene.star.tab'.freeze
 
   # Insert size metrics constants
@@ -83,17 +83,17 @@ class PipelineRun < ApplicationRecord
   STANDARD_DEVIATION_NAME = 'STANDARD_DEVIATION'.freeze
   READ_PAIRS_NAME = 'READ_PAIRS'.freeze
 
-  ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
-  ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
-  ASSEMBLED_STATS_NAME = 'assembly/contig_stats.json'.freeze
+  ASSEMBLY_PREFIX = 'refined_'.freeze
+  ASSEMBLED_CONTIGS_NAME = 'contigs.fasta'.freeze
+  ASSEMBLED_STATS_NAME = 'contig_stats.json'.freeze
   COVERAGE_VIZ_SUMMARY_JSON_NAME = 'coverage_viz_summary.json'.freeze
-  CONTIG_SUMMARY_JSON_NAME = 'assembly/combined_contig_summary.json'.freeze
-  CONTIG_NT_TOP_M8 = 'assembly/gsnap.blast.top.m8'.freeze
-  CONTIG_NR_TOP_M8 = 'assembly/rapsearch2.blast.top.m8'.freeze
-  CONTIG_MAPPING_NAME = 'assembly/contig2taxon_lineage.csv'.freeze
+  CONTIG_SUMMARY_JSON_NAME = 'combined_contig_summary.json'.freeze
+  CONTIG_NT_TOP_M8 = 'gsnap.blast.top.m8'.freeze
+  CONTIG_NR_TOP_M8 = 'rapsearch2.blast.top.m8'.freeze
+  CONTIG_MAPPING_NAME = 'contig2taxon_lineage.csv'.freeze
 
-  LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
-  LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
+  LOCAL_JSON_PATH = '/tmp/results_json'.freeze
+  LOCAL_AMR_FULL_RESULTS_PATH = '/tmp/amr_full_results'.freeze
 
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
   MIN_CONTIG_READS = 4 # minimal # reads mapped to the  contig
@@ -526,7 +526,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def coverage_viz_summary_s3_path
-    return "#{postprocess_output_s3_path}/#{COVERAGE_VIZ_SUMMARY_JSON_NAME}" if pipeline_version_has_coverage_viz(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{COVERAGE_VIZ_SUMMARY_JSON_NAME}"
   end
 
   def coverage_viz_data_s3_path(accession_id)
@@ -538,15 +538,15 @@ class PipelineRun < ApplicationRecord
   end
 
   def contigs_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if supports_assembly?
+    return "#{assembly_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if supports_assembly?
   end
 
   def contigs_summary_s3_path
-    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if supports_assembly?
+    return "#{assembly_s3_path}/#{CONTIG_MAPPING_NAME}" if supports_assembly?
   end
 
   def annotated_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if supports_assembly?
+    return "#{assembly_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if supports_assembly?
     return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
     multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
@@ -572,7 +572,7 @@ class PipelineRun < ApplicationRecord
 
   # Unidentified is also referred to as "unmapped"
   def unidentified_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if supports_assembly?
+    return "#{assembly_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if supports_assembly?
     return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
     "#{alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
@@ -614,7 +614,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_m8_mapping(m8_file)
-    m8_s3_path = "#{postprocess_output_s3_path}/#{m8_file}"
+    m8_s3_path = "#{assembly_s3_path}/#{m8_file}"
     m8_local_dir = "#{LOCAL_JSON_PATH}/#{id}"
     m8_local_path = PipelineRun.download_file_with_retries(m8_s3_path, m8_local_dir, 2)
     output = {}
@@ -698,7 +698,7 @@ class PipelineRun < ApplicationRecord
 
   def db_load_contigs(contig2taxid)
     contig_stats_s3_path = s3_file_for("contigs")
-    contig_s3_path = "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}"
+    contig_s3_path = "#{assembly_s3_path}/#{ASSEMBLED_CONTIGS_NAME}"
 
     downloaded_contig_stats = PipelineRun.download_file_with_retries(contig_stats_s3_path,
                                                                      LOCAL_JSON_PATH, 3)
@@ -871,6 +871,35 @@ class PipelineRun < ApplicationRecord
     Syscall.run("rm", "-f", downloaded_byteranges_path)
   end
 
+  def sfn_results_path
+    sfn_results_path_from_sfn = lambda do
+      Rails.logger.info("[SFN] [PR=#{id}] Get path from SFN execution (arn=#{sfn_execution_arn})")
+      sfn_client = Aws::States::Client.new
+
+      execution_resp = sfn_client.describe_execution(execution_arn: sfn_execution_arn)
+
+      sfn_resp = sfn_client.list_tags_for_resource(resource_arn: execution_resp.state_machine_arn)
+
+      tags = sfn_resp.tags.reduce({}) do |h, tag|
+        h.update(tag.key => tag.value)
+      end.symbolize_keys
+
+      # currently use a conventioned path
+      # we will drop this approach once we move to an async model
+      path = File.join(
+        JSON.parse(execution_resp.input)["OutputPrefix"],
+        execution_resp.state_machine_arn.split(':')[-1], # state machine name
+        "wdl-#{tags[:wdl_version]}",
+        "dag-#{tags[:dag_version]}"
+      )
+      Rails.logger.info("[SFN] [PR=#{id}] Output path: #{path}")
+      return path
+    end
+
+    # memoize results path
+    @sfn_results_path ||= sfn_results_path_from_sfn.call
+  end
+
   def s3_file_for(output)
     # This function assumes that pipeline_version has been set and is assembly-enabled (>=3.1) for
     # taxon_counts/taxon_byteranges/contigs/contig_counts.
@@ -885,13 +914,13 @@ class PipelineRun < ApplicationRecord
     when "amr_counts"
       "#{postprocess_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
-      "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
+      "#{assembly_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
     when "taxon_byteranges"
-      "#{postprocess_output_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
+      "#{assembly_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
     when "contigs"
-      "#{postprocess_output_s3_path}/#{ASSEMBLED_STATS_NAME}"
+      "#{assembly_s3_path}/#{ASSEMBLED_STATS_NAME}"
     when "contig_counts"
-      "#{postprocess_output_s3_path}/#{CONTIG_SUMMARY_JSON_NAME}"
+      "#{assembly_s3_path}/#{CONTIG_SUMMARY_JSON_NAME}"
     when "insert_size_metrics"
       "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
     end
@@ -931,11 +960,14 @@ class PipelineRun < ApplicationRecord
     output = output_state.output
     state = output_state.state
     return unless [STATUS_UNKNOWN, STATUS_LOADING_ERROR].include?(state)
+    Rails.logger.info("[PR: #{id}] Checking output - finalized: #{finalized?}, last update: #{pipeline_run_stages.order(:step_number).last.updated_at}")
     if output_ready?(output)
+      Rails.logger.info("[PR: #{id}] Enqueue for resque: #{output}")
       output_state.update(state: STATUS_LOADING_QUEUED)
       Resque.enqueue(ResultMonitorLoader, id, output)
     # check if job is done more than a minute ago
     elsif finalized? && pipeline_run_stages.order(:step_number).last.updated_at < 1.minute.ago
+      Rails.logger.info("[PR: #{id}] Should have been generated: #{output_state.output}")
       checker = CHECKERS_BY_OUTPUT[output_state.output]
       # If there is no checker, the file should have been generated
       # If there is a checker use it to check if the file should have been generated
@@ -974,7 +1006,6 @@ class PipelineRun < ApplicationRecord
     # Except, if the pipeline run is finalized, we have to (this is a failure case).
     update_pipeline_version(self, :pipeline_version, pipeline_version_file) if pipeline_version.blank?
     return if pipeline_version.blank? && !finalized
-
     # Load any new outputs that have become available:
     output_states.each do |o|
       check_and_enqueue(o)
@@ -1057,21 +1088,17 @@ class PipelineRun < ApplicationRecord
     begin
       sfn_service_result = SfnPipelineDispatchService.call(self)
       update(
-        sfn_execution_arn: sfn_service_result[:sfn_arn],
+        sfn_execution_arn: sfn_service_result[:sfn_execution_arn],
         pipeline_version: sfn_service_result[:pipeline_version]
       )
-    rescue SfnPipelineDispatchService::PipelineVersionMissingError => e
-      LogUtil.log_err_and_airbrake("Pipeline version for SFN pipeline not configured: #{e}")
-      # we will retry later since the error is not related to this specific pipeline run
-      # return without changing status
-      return
+      Rails.logger.info("PipelineRun: id=#{id} sfn_execution_arn=#{sfn_service_result[:sfn_execution_arn]}")
     rescue => e
       LogUtil.log_err_and_airbrake("Error starting SFN pipeline: #{e}")
       LogUtil.log_backtrace(e)
       # we will not retry in this case, since we do not know what error occurred
     end
 
-    if sfn_service_result[:sfn_arn].blank?
+    if sfn_service_result[:sfn_execution_arn].blank?
       update(
         job_status: STATUS_FAILED,
         finalized: 1
@@ -1112,7 +1139,9 @@ class PipelineRun < ApplicationRecord
         # Check for long-running pipeline run and log/alert if needed
         check_and_log_long_run
       end
-      self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status, report_ready?)
+      if !step_function? || sfn_execution_arn.present?
+        self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status, report_ready?)
+      end
     end
     save!
     enqueue_new_pipeline_run if automatic_restart
@@ -1553,18 +1582,30 @@ class PipelineRun < ApplicationRecord
   # So you could make a helper function to which you would pass
   #  sample.sample_expt_s3_path as an argument" (Charles)
   def expt_output_s3_path
-    # TODO: deprecate this function. no need for a separate dir for exp results.
-    pipeline_ver_str = ""
-    pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
-    result = "#{sample.sample_expt_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
-    result.chomp("/")
+    if step_function?
+      sfn_results_path
+    else
+      # TODO: deprecate this function. no need for a separate dir for exp results.
+      pipeline_ver_str = ""
+      pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
+      result = "#{sample.sample_expt_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
+      result.chomp("/")
+    end
   end
 
   def postprocess_output_s3_path
-    pipeline_ver_str = ""
-    pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
-    result = "#{sample.sample_postprocess_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
-    result.chomp("/")
+    if step_function?
+      sfn_results_path
+    else
+      pipeline_ver_str = ""
+      pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
+      result = "#{sample.sample_postprocess_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
+      result.chomp("/")
+    end
+  end
+
+  def assembly_s3_path
+    step_function? ? sfn_results_path : "#{postprocess_output_s3_path}/assembly"
   end
 
   def alignment_viz_json_s3(taxon_info)
@@ -1577,11 +1618,13 @@ class PipelineRun < ApplicationRecord
   end
 
   def host_filter_output_s3_path
-    output_s3_path_with_version
+    step_function? ? sfn_results_path : output_s3_path_with_version
   end
 
   def output_s3_path_with_version
-    if pipeline_version
+    if step_function?
+      sfn_results_path
+    elsif pipeline_version
       "#{sample.sample_output_s3_path}/#{pipeline_version}"
     else
       sample.sample_output_s3_path
@@ -1592,21 +1635,24 @@ class PipelineRun < ApplicationRecord
     file_prefix = ''
     file_prefix = ASSEMBLY_PREFIX if supports_assembly?
     # by tax_level and hit_type
-    { TaxonCount::TAX_LEVEL_SPECIES => {
-      'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
-      'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}",
-    },
+    {
+      TaxonCount::TAX_LEVEL_SPECIES => {
+        'NT' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
+        'NR' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}",
+      },
       TaxonCount::TAX_LEVEL_GENUS => {
-        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}",
+        'NT' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
+        'NR' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}",
       },
       TaxonCount::TAX_LEVEL_FAMILY => {
-        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}",
-      }, }
+        'NT' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
+        'NR' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}",
+      },
+    }
   end
 
   def pipeline_version_file
+    # Legacy pipeline only
     "#{sample.sample_output_s3_path}/#{PIPELINE_VERSION_FILE}"
   end
 

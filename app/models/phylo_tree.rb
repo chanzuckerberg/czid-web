@@ -234,8 +234,8 @@ class PhyloTree < ApplicationRecord
     hitsummary2_files = {}
     pipeline_runs.each do |pr|
       hitsummary2_files[pr.id] = [
-        "#{pr.postprocess_output_s3_path}/assembly/gsnap.hitsummary2.tab",
-        "#{pr.postprocess_output_s3_path}/assembly/rapsearch2.hitsummary2.tab",
+        "#{pr.assembly_s3_path}/gsnap.hitsummary2.tab",
+        "#{pr.assembly_s3_path}/rapsearch2.hitsummary2.tab",
       ]
       entry = taxon_byteranges_hash[pr.id]
       entry.keys.each do |hit_type|

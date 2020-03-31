@@ -182,7 +182,7 @@ module PipelineRunsHelper
     stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     return false unless status.exitstatus.zero?
     begin
-      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
+      s3_file_time = Time.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
       return (s3_file_time && record.created_at && s3_file_time > record.created_at)
     rescue
       return nil
@@ -293,18 +293,21 @@ module PipelineRunsHelper
   end
 
   def check_for_user_error(failed_stage)
+    pr = failed_stage.pipeline_run
+    # if SFN run, return no user error if the SFN failed to start
+    return [nil, nil] if pr.step_function? && pr.sfn_execution_arn.blank?
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     return [nil, nil] unless [1, 2].include? failed_stage.step_number
     # We need to set the pipeline version in the failed pipeline run so that the host_filter_output_s3_path includes it,
     # i.e. "/results/3.7" instead of "/results"
     # The pipeline version is usually set in the result monitor, but that is not guaranteed to have run by this point.
-    if failed_stage.pipeline_run.pipeline_version.blank?
+    if pr.pipeline_version.blank?
       update_pipeline_version(
-        failed_stage.pipeline_run, :pipeline_version, failed_stage.pipeline_run.pipeline_version_file
+        pr, :pipeline_version, pr.pipeline_version_file
       )
     end
-    user_input_validation_file = "#{failed_stage.pipeline_run.host_filter_output_s3_path}/#{PipelineRun::INPUT_VALIDATION_NAME}"
-    invalid_step_input_file = "#{failed_stage.pipeline_run.host_filter_output_s3_path}/#{PipelineRun::INVALID_STEP_NAME}"
+    user_input_validation_file = "#{pr.host_filter_output_s3_path}/#{PipelineRun::INPUT_VALIDATION_NAME}"
+    invalid_step_input_file = "#{pr.host_filter_output_s3_path}/#{PipelineRun::INVALID_STEP_NAME}"
     if file_generated_since_run(failed_stage, user_input_validation_file)
       # Case where validation of user input format fails.
       # The code that produces user_input_validation_file lives here:

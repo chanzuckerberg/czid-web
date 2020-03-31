@@ -77,6 +77,20 @@ class SearchBoxList extends React.Component {
           />
         </div>
         <div className={cs.listBox}>
+          {(this.props.labelTitle || this.props.countTitle) && (
+            <div className={cs.listColumnTitles}>
+              {this.props.labelTitle && (
+                <div className={cs.listColumnTitle}>
+                  {this.props.labelTitle}
+                </div>
+              )}
+              {this.props.countTitle && (
+                <div className={cs.listColumnTitle}>
+                  {this.props.countTitle}
+                </div>
+              )}
+            </div>
+          )}
           {this.state.filteredOptions.map(option => (
             <div
               className={cx(cs.listElement, {
@@ -91,6 +105,9 @@ class SearchBoxList extends React.Component {
                 )}
               </div>
               <div className={cs.listLabel}>{option.label}</div>
+              {option.count && (
+                <div className={cs.listElementCount}>{option.count}</div>
+              )}
             </div>
           ))}
         </div>
@@ -101,6 +118,8 @@ class SearchBoxList extends React.Component {
 
 SearchBoxList.defaultProps = {
   selected: [],
+  labelTitle: null,
+  countTitle: null,
 };
 
 SearchBoxList.propTypes = {
@@ -111,6 +130,8 @@ SearchBoxList.propTypes = {
   ]),
   onChange: PropTypes.func,
   title: PropTypes.string,
+  labelTitle: PropTypes.string,
+  countTitle: PropTypes.string,
 };
 
 export default SearchBoxList;

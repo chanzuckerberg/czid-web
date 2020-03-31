@@ -6,17 +6,27 @@ class SfnPipelineDispatchService
 
   include Callable
 
+  STS_CLIENT = Aws::STS::Client.new
+  SFN_CLIENT = Aws::States::Client.new
+
   # Constains SFN deployment stage names that differ from Rails.env
   ENV_TO_DEPLOYMENT_STAGE_NAMES = {
     "development" => "dev",
     "prod" => "production",
   }.freeze
 
-  class PipelineVersionMissingError < StandardError
+  class SfnArnMissingError < StandardError
     def initialize
-      super("Pipeline Version not set on App Config")
+      super("SFN ARN not set on App Config")
     end
   end
+
+  class SfnVersionTagsMissingError < StandardError
+    def initialize(arn, tags)
+      super("WDL version not set for SFN '#{arn}'. Tags missing: #{tags}")
+    end
+  end
+
   class Idd2WdlError < StandardError
     def initialize(error)
       super("Command to convert dag to wdl failed ('idd2wdl.py'). Error: #{error}")
@@ -27,36 +37,44 @@ class SfnPipelineDispatchService
     @pipeline_run = pipeline_run
     @sample = pipeline_run.sample
     @aws_account_id = retrieve_aws_account
-  end
 
-  def retrieve_aws_account
-    sts_client = Aws::STS::Client.new
-    resp = sts_client.get_caller_identity
-    return resp[:account]
+    @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
+    raise SfnArnMissingError if @sfn_arn.blank?
   end
 
   def call
-    # Make sure a version is defined and enforce it on the pipeline run. Although not strictly required since
-    # the SFN pipeline ignores this value, there are several features that depend on
-    # the version, so better to fail the sample.
-    # The JSON generation currently depends on setting this value, so just for backward compatibility we enforce it.
-    # TODO: this is temporary for v0; this value needs to be manually syncronized with the server
-    pipeline_version = AppConfigHelper.get_app_config(AppConfig::SFN_PIPELINE_VERSION)
-    raise PipelineVersionMissingError if pipeline_version.blank?
-    @pipeline_run.update(pipeline_version: pipeline_version)
+    @sfn_tags = retrieve_version_tags
+    @pipeline_run.update(pipeline_version: @sfn_tags[:dag_version])
 
     stage_dags_json = generate_dag_stages_json
     sfn_input_json = generate_wdl_input(stage_dags_json)
-    sfn_arn = dispatch(sfn_input_json)
+    sfn_execution_arn = dispatch(sfn_input_json)
     return {
-      pipeline_version: pipeline_version,
+      pipeline_version: @sfn_tags[:dag_version],
       stage_dags_json: stage_dags_json,
       sfn_input_json: sfn_input_json,
-      sfn_arn: sfn_arn,
+      sfn_execution_arn: sfn_execution_arn,
     }
   end
 
   private
+
+  def retrieve_aws_account
+    resp = STS_CLIENT.get_caller_identity
+    return resp[:account]
+  end
+
+  def retrieve_version_tags
+    resp = SFN_CLIENT.list_tags_for_resource(resource_arn: @sfn_arn)
+    tags = resp.tags.reduce({}) do |h, tag|
+      h.update(tag.key => tag.value)
+    end.symbolize_keys
+
+    missing_tags = [:wdl_version, :dag_version].select { |tag_name| tags[tag_name].blank? }
+    raise SfnVersionTagsMissingError.new(@sfn_arn, missing_tags) if missing_tags.present?
+
+    return tags
+  end
 
   def stage_deployment_name
     return ENV_TO_DEPLOYMENT_STAGE_NAMES[Rails.env] || Rails.env
@@ -89,11 +107,12 @@ class SfnPipelineDispatchService
       {
         "AWS_ACCOUNT_ID" => @aws_account_id,
         "AWS_DEFAULT_REGION" => ENV['AWS_REGION'],
-        "STAGE" => stage_deployment_name,
+        "DEPLOYMENT_ENVIRONMENT" => stage_deployment_name,
+        "WDL_VERSION" => @sfn_tags[:wdl_version],
+        "DAG_VERSION" => @sfn_tags[:dag_version],
       },
       "app/jobs/idd2wdl.py",
       "--name", dag_json['name'].to_s,
-      "--pipeline-version", @pipeline_run.pipeline_version,
       dag_tmp_file.path
     )
     return stdout if status.success?
@@ -142,36 +161,10 @@ class SfnPipelineDispatchService
   def dispatch(sfn_input_json)
     sfn_name = "idseq-#{Rails.env}-#{@sample.project_id}-#{@sample.id}-#{@pipeline_run.id}-#{Time.now.to_i}"
     sfn_input = JSON.dump(sfn_input_json)
-    sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
 
-    # Not using SDK because aws-sdk-sfn is currently on version 1.0.0.rc4,
-    # which in terms requires aws-sdk-core (= 3.0.0.rc1 which is lower than current version
-    # and just an rc version).
-    # Leaving the code as a reference for when dependencies are more open and reliable.
-    #
-    # sfn_client = Aws::SFN::Client.new
-    # resp = sfn_client.start_execution({
-    #   state_machine_arn: AppConfigHelper.get_app_config(AppConfig::SFN_ARN),
-    #   name: "idseq-#{Time.now.to_i}",
-    #   input: JSON.dump(sfn_input_json)
-    # })
-    # return resp[:execution_arn]
-
-    stdout, stderr, status = Open3.capture3(
-      "aws", "stepfunctions", "start-execution",
-      "--name", sfn_name,
-      "--input", sfn_input,
-      "--state-machine-arn", sfn_arn
-    )
-    if status.success?
-      response = JSON.parse(
-        stdout,
-        symbolize_names: true
-      )
-      return response[:executionArn]
-    else
-      LogUtil.log_err_and_airbrake("Command to start SFN execution failed. Error: #{stderr}")
-    end
-    return nil
+    resp = SFN_CLIENT.start_execution(state_machine_arn: @sfn_arn,
+                                      name: sfn_name,
+                                      input: sfn_input)
+    return resp[:execution_arn]
   end
 end
