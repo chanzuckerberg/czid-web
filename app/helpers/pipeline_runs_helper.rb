@@ -182,7 +182,7 @@ module PipelineRunsHelper
     stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     return false unless status.exitstatus.zero?
     begin
-      s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
+      s3_file_time = Time.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
       return (s3_file_time && record.created_at && s3_file_time > record.created_at)
     rescue
       return nil

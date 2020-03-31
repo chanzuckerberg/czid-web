@@ -49,6 +49,19 @@ def target_filename(target, index):
         return target + "_" + file_path_to_name(dag["targets"][target][index])
 
 
+count_input_reads = """
+    input_read_count = idseq_dag.util.count.reads_in_group(
+      step_instance.input_files_local[0],
+      max_fragments=max_fragments
+    )
+    counts_dict = dict(fastqs=input_read_count)
+    if input_read_count == len(step_instance.input_files_local) * max_fragments:
+      counts_dict["truncated"] = input_read_count
+    with open("fastqs.count", "w") as count_file:
+      json.dump(counts_dict, count_file)"""
+
+unaccounted_workflow_outputs = []
+
 for step in dag["steps"]:
     idd_step_input, wdl_step_input, input_files, input_files_local = [], [], [], []
     for target in step["in"]:
@@ -77,19 +90,14 @@ for step in dag["steps"]:
     if "environment" in step["additional_attributes"]:
         nha_cluster_ssh_key_uri = "s3://idseq-secrets/idseq-{}.pem".format(step["additional_attributes"]["environment"])
 
-    count_input_reads = ""
     if task_name(step) == "RunValidateInput":
-        count_input_reads = """
-    input_read_count = idseq_dag.util.count.reads_in_group(
-      step_instance.input_files_local[0],
-      max_fragments=max_fragments
-    )
-    counts_dict = dict(fastqs=input_read_count)
-    if input_read_count == len(step_instance.input_files_local) * max_fragments:
-      counts_dict["truncated"] = input_read_count
-    with open("fastqs.count", "w") as count_file:
-      json.dump(counts_dict, count_file)"""
         wdl_step_output += '\n    File? input_read_count = "fastqs.count"'
+        unaccounted_workflow_outputs.append("    File? input_read_count = RunValidateInput.input_read_count")
+    elif task_name(step) == "RunStar":
+        for attr_name, attr_value in step["additional_attributes"].items():
+            if attr_name.startswith("output_") and attr_name.endswith("_file"):
+                wdl_step_output += '\n    File? {} = "{}"'.format(attr_name, attr_value)
+                unaccounted_workflow_outputs.append("    File? {name} = RunStar.{name}".format(name=attr_name))
     print("""
 task {task_name} {{
   runtime {{
@@ -154,7 +162,7 @@ task {task_name} {{
              step_additional_attributes=step["additional_attributes"],
              workflow_name=workflow_name,
              input_files_local=input_files_local,
-             count_input_reads=count_input_reads,
+             count_input_reads=count_input_reads if task_name(step) == "RunValidateInput" else "",
              wdl_step_output=wdl_step_output))
 
 print("\nworkflow idseq_{} {{".format(workflow_name))
@@ -193,7 +201,7 @@ for target, files in dag["targets"].items():
         name = file_path_to_name(filename)
         print("    File {} = {}.{}".format(target_filename(target, i), task_name(targets_to_steps[target]), name))
     print("    File? {}_count = {}.output_read_count".format(target, task_name(targets_to_steps[target])))
-if any(task_name(step) == "RunValidateInput" for step in dag["steps"]):
-    print("    File? input_read_count = RunValidateInput.input_read_count")
+for output in unaccounted_workflow_outputs:
+    print(output)
 print("  }")
 print("}")
