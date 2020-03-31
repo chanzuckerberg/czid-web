@@ -1,6 +1,7 @@
 {
   "name": "idseq-web",
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "start": "npm install --no-optional && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
     "lint": "./node_modules/.bin/eslint . ./**/*.js",
@@ -23,7 +24,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/core": "^7.5.4",
+    "@babel/core": "^7.8.7",
     "@babel/plugin-proposal-class-properties": "^7.5.0",
     "@babel/plugin-proposal-export-default-from": "^7.5.2",
     "@babel/plugin-proposal-object-rest-spread": "^7.5.4",
@@ -31,14 +32,13 @@
     "@babel/plugin-transform-modules-commonjs": "^7.5.0",
     "@babel/plugin-transform-regenerator": "^7.4.5",
     "@babel/plugin-transform-runtime": "^7.5.0",
-    "@babel/preset-env": "^7.5.4",
+    "@babel/preset-env": "^7.9.0",
     "@babel/preset-react": "^7.0.0",
-    "@babel/register": "^7.4.4",
+    "@babel/register": "^7.8.6",
     "airbnb-prop-types": "^2.10.0",
     "babel-eslint": "^10.1.0",
-    "babel-loader": "^8.0.6",
+    "babel-loader": "^8.1.0",
     "babel-plugin-transform-replace-object-assign": "^2.0.0",
-    "coveralls": "^3.0.0",
     "css-loader": "^3.4.2",
     "cssnano": "^4.1.10",
     "enzyme": "^3.10.0",
@@ -64,9 +64,9 @@
     "prettier": "^1.12.1",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.20.2",
-    "uglifyjs-webpack-plugin": "^1.1.6",
+    "terser-webpack-plugin": "^2.3.5",
     "url-loader": "^1.0.1",
-    "webpack": "^4.41.0",
+    "webpack": "^4.42.1",
     "webpack-cli": "^3.1.0",
     "webpack-merge": "^4.1.2"
   },
@@ -123,7 +123,7 @@
     "semantic-ui-calendar-react": "^0.15.3",
     "semantic-ui-css": "^2.3.0",
     "semantic-ui-react": "^0.88.1",
-    "snyk": "^1.290.1",
+    "snyk": "^1.300.0",
     "svgsaver": "^0.9.0",
     "tar": "^4.4.8",
     "text-width": "^1.2.0",
@@ -132,7 +132,9 @@
     "webpack-node-externals": "^1.7.2"
   },
   "resolutions": {
-    "eslint-scope": "3.7.1"
+    "eslint-scope": "3.7.1",
+    "//": "Avoids use of insecure version of minimist as of 2020/03/30. Revisit.",
+    "minimist": "^1.2.5"
   },
   "snyk": true
 }

@@ -27,7 +27,6 @@ Rails.application.routes.draw do
     get :amr, on: :member
     get :report_info, on: :member
     get :report_csv, on: :member
-    get :bulk_new, on: :collection
     get :bulk_import, on: :collection
     get :upload, on: :collection
     get :nonhost_fasta, on: :member

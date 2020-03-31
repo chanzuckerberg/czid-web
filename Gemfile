@@ -8,6 +8,8 @@ end
 gem 'airbrake', '~> 9.5'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
+# step functions sdk
+gem 'aws-sdk-states'
 gem 'brakeman'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
@@ -103,13 +105,13 @@ group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '~> 2.17', '>= 2.17.0'
-  gem 'coveralls', require: false
   gem 'factory_bot_rails'
   gem 'guard', '~> 2.15'
   gem 'guard-rspec', '~> 4.7'
   gem 'rspec-rails', '>= 3.7.2'
   gem 'rubocop', '=0.49.1'
   gem 'selenium-webdriver'
+  gem 'simplecov', require: false
 end
 
 group :development do
