@@ -989,8 +989,9 @@ class PipelineRun < ApplicationRecord
       compile_stats_file!
       load_stats_file
       load_chunk_stats
-    rescue
-      # TODO: Log this exception
+    rescue => e
+      LogUtil.log_err_and_airbrake("Failure compiling stats: #{e}")
+      LogUtil.log_backtrace(e)
       compiling_stats_failed = true
     end
 
