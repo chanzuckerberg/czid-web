@@ -8,7 +8,11 @@ import collections
 parser = argparse.ArgumentParser("idd2wdl", description="Convert an idseq-dag DAG to a WDL workflow")
 parser.add_argument("dag")
 parser.add_argument("--name")
-parser.add_argument("--pipeline-version")
+parser.add_argument("--aws-account-id", default=os.environ.get("AWS_ACCOUNT_ID"))
+parser.add_argument("--deployment-env", default=os.environ.get("DEPLOYMENT_ENVIRONMENT"))
+parser.add_argument("--aws-region", default=os.environ.get("AWS_DEFAULT_REGION"))
+parser.add_argument("--wdl-version", default=os.environ.get("WDL_VERSION", "0"))
+parser.add_argument("--dag-version", default=os.environ.get("DAG_VERSION", "0"))
 args = parser.parse_args()
 workflow_name = args.name or os.path.basename(args.dag).replace(".json", "")
 
@@ -45,6 +49,19 @@ def target_filename(target, index):
         return target + "_" + file_path_to_name(dag["targets"][target][index])
 
 
+count_input_reads = """
+    input_read_count = idseq_dag.util.count.reads_in_group(
+      step_instance.input_files_local[0],
+      max_fragments=max_fragments
+    )
+    counts_dict = dict(fastqs=input_read_count)
+    if input_read_count == len(step_instance.input_files_local) * max_fragments:
+      counts_dict["truncated"] = input_read_count
+    with open("fastqs.count", "w") as count_file:
+      json.dump(counts_dict, count_file)"""
+
+unaccounted_workflow_outputs = []
+
 for step in dag["steps"]:
     idd_step_input, wdl_step_input, input_files, input_files_local = [], [], [], []
     for target in step["in"]:
@@ -64,15 +81,27 @@ for step in dag["steps"]:
     input_files_local = json.dumps(input_files_local)
     idd_step_output = dag["targets"][step["out"]]
     wdl_step_output = "\n".join('    File {} = "{}"'.format(file_path_to_name(name), name) for name in idd_step_output)
-    s3_wd_uri = os.path.join(dag["output_dir_s3"], "main/sfn-1/wdl-1/dag-" + str(args.pipeline_version))
+    wdl_step_output += '\n    File? output_read_count = "{}.count"'.format(step["out"])
+    s3_wd_uri = os.path.join(dag["output_dir_s3"],
+                             "idseq-{}-main-1".format(args.deployment_env),
+                             "wdl-" + args.wdl_version,
+                             "dag-" + args.dag_version)
     nha_cluster_ssh_key_uri = ""
     if "environment" in step["additional_attributes"]:
         nha_cluster_ssh_key_uri = "s3://idseq-secrets/idseq-{}.pem".format(step["additional_attributes"]["environment"])
 
+    if task_name(step) == "RunValidateInput":
+        wdl_step_output += '\n    File? input_read_count = "fastqs.count"'
+        unaccounted_workflow_outputs.append("    File? input_read_count = RunValidateInput.input_read_count")
+    elif task_name(step) == "RunStar":
+        for attr_name, attr_value in step["additional_attributes"].items():
+            if attr_name.startswith("output_") and attr_name.endswith("_file"):
+                wdl_step_output += '\n    File? {} = "{}"'.format(attr_name, attr_value)
+                unaccounted_workflow_outputs.append("    File? {name} = RunStar.{name}".format(name=attr_name))
     print("""
 task {task_name} {{
   runtime {{
-    docker: "{AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows:{STAGE}"
+    docker: "{AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows:{DEPLOYMENT_ENVIRONMENT}"
   }}
   input {{
 {wdl_step_input}
@@ -81,9 +110,10 @@ task {task_name} {{
   python3 <<CODE
   import os, sys, json, contextlib, importlib, threading, logging, subprocess, traceback
   os.environ.update(KEY_PATH_S3="{nha_cluster_ssh_key_uri}", AWS_DEFAULT_REGION="{AWS_DEFAULT_REGION}")
-  import idseq_dag, idseq_dag.util.s3
+  import idseq_dag, idseq_dag.util.s3, idseq_dag.util.count
   logging.basicConfig(level=logging.INFO)
   idseq_dag.util.s3.config["REF_DIR"] = os.getcwd()
+  max_fragments = {max_fragments}
   step = importlib.import_module("{step_module}")
   step_instance = step.{step_class}(
     name="{step_name}",
@@ -94,15 +124,18 @@ task {task_name} {{
     ref_dir_local=idseq_dag.util.s3.config["REF_DIR"],
     additional_files={step_additional_files},
     additional_attributes={step_additional_attributes},
-    step_status_local="status.json",
+    step_status_local="{workflow_name}_status.json",
     step_status_lock=contextlib.suppress()
   )
   step_instance.input_files_local = {input_files_local}
   with open(step_instance.step_status_local, "w") as status_file:
     json.dump(dict(), status_file)
   try:
+    {count_input_reads}
     step_instance.update_status_json_file("running")
     step_instance.run()
+    step_instance.count_reads()
+    step_instance.save_counts()
     step_instance.update_status_json_file("finished_running")
   except Exception as e:
     traceback.print_exc()
@@ -113,11 +146,12 @@ task {task_name} {{
 {wdl_step_output}
   }}
 }}""".format(task_name=task_name(step),
-             AWS_ACCOUNT_ID=os.environ["AWS_ACCOUNT_ID"],
-             STAGE=os.environ["STAGE"],
+             AWS_ACCOUNT_ID=args.aws_account_id,
+             DEPLOYMENT_ENVIRONMENT=args.deployment_env,
              wdl_step_input=wdl_step_input,
              nha_cluster_ssh_key_uri=nha_cluster_ssh_key_uri,
-             AWS_DEFAULT_REGION=os.environ["AWS_DEFAULT_REGION"],
+             AWS_DEFAULT_REGION=args.aws_region,
+             max_fragments=dag["given_targets"].get("fastqs", {}).get("max_fragments"),
              step_module=step["module"],
              step_class=step["class"],
              step_name=step["out"],
@@ -126,7 +160,9 @@ task {task_name} {{
              s3_wd_uri=s3_wd_uri,
              step_additional_files=step["additional_files"],
              step_additional_attributes=step["additional_attributes"],
+             workflow_name=workflow_name,
              input_files_local=input_files_local,
+             count_input_reads=count_input_reads if task_name(step) == "RunValidateInput" else "",
              wdl_step_output=wdl_step_output))
 
 print("\nworkflow idseq_{} {{".format(workflow_name))
@@ -164,5 +200,8 @@ for target, files in dag["targets"].items():
     for i, filename in enumerate(files):
         name = file_path_to_name(filename)
         print("    File {} = {}.{}".format(target_filename(target, i), task_name(targets_to_steps[target]), name))
+    print("    File? {}_count = {}.output_read_count".format(target, task_name(targets_to_steps[target])))
+for output in unaccounted_workflow_outputs:
+    print(output)
 print("  }")
 print("}")
