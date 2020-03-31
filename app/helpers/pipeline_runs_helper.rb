@@ -10,7 +10,7 @@ module PipelineRunsHelper
         "star_out" => "Remove host reads using STAR.",
         "trimmomatic_out" => "Trim Illumina adapters using trimmomatic.",
         "priceseq_out" => "Remove low-quality reads using PriceSeqFilter.",
-        "cdhitdup_out" => "Remove duplicate reads using CD-HIT-DUP.",
+        "cdhitdup_out" => "Identify duplicate reads using CD-HIT-DUP. All reads at this step remain in downstream analysis.",
         "lzw_out" => "Remove low-complexity reads using LZW compression filter.",
         "bowtie2_out" => "Remove remaining host reads using Bowtie2.",
         "star_human_out" => "Remove human reads using STAR.",
@@ -107,7 +107,10 @@ module PipelineRunsHelper
     else
       LogUtil.log_err_and_airbrake("Error for update sfn status for record #{run_id} - stage #{stage_number} with error #{stderr}")
       job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"
-      job_status = PipelineRunStage::STATUS_FAILED if stderr =~ /ExecutionDoesNotExist/ # job no longer exists
+      if stderr =~ /ExecutionDoesNotExist/ || stderr =~ /InvalidArn/
+        # job no longer exists or ARN is invalid
+        job_status = PipelineRunStage::STATUS_FAILED
+      end
     end
     [job_status, job_log_id]
   end

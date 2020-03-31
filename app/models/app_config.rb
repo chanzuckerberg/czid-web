@@ -38,4 +38,6 @@ class AppConfig < ApplicationRecord
   SUBSAMPLE_WHITELIST_DEFAULT_SUBSAMPLE = 'subsample_whitelist_default_subsample'.freeze
   # Default max_input_fragments for special biohub samples.
   SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS = 'subsample_whitelist_default_max_input_fragments'.freeze
+  # For controlling caching of report page
+  DISABLE_REPORT_CACHING = 'disable_report_caching'.freeze
 end
