@@ -32,7 +32,6 @@
     }],
     "no-prototype-builtins": "warn",
     "no-unreachable": "warn",
-    "no-unused-vars": "warn",
     "react/boolean-prop-naming": "warn",
     "react/jsx-key": "warn",
     "react/no-deprecated": "warn",
