@@ -132,6 +132,7 @@
     "webpack-node-externals": "^1.7.2"
   },
   "resolutions": {
+    "eslint-scope": "3.7.1",
     "//": "Avoids use of insecure version of minimist as of 2020/03/30. Revisit.",
     "minimist": "^1.2.5"
   },
