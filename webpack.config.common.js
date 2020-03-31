@@ -1,6 +1,6 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const TerserPlugin = require("terser-webpack-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 // modules that are not compatible with IE11
 const includedNodeModules = ["query-string", "strict-uri-encode"];
@@ -156,8 +156,8 @@ const config = {
       },
     },
     minimizer: [
-      new TerserPlugin({
-        terserOptions: {
+      new UglifyJsPlugin({
+        uglifyOptions: {
           mangle: true,
           // We need this option for rails react_component.
           keep_fnames: true,
