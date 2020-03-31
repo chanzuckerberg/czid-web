@@ -107,6 +107,42 @@ export default class PublicNcovHomepage extends React.Component {
       </ExternalLink>
     );
 
+    const INSTITUTE_LINK = (
+      <ExternalLink
+        className={cs.link}
+        href={"https://www.pasteur-kh.org/"}
+        onClick={() =>
+          logAnalyticsEvent("PublicNCovHomePage_institute-link_clicked")
+        }
+      >
+        Institut Pasteur du Cambodge
+      </ExternalLink>
+    );
+
+    const GISAID_LINK = (
+      <ExternalLink
+        className={cs.link}
+        href={"https://doi.org/10.26180/5dbf8fc4e4ef0"}
+        onClick={() =>
+          logAnalyticsEvent("PublicNCovHomePage_gisaid-link_clicked")
+        }
+      >
+        GISAID EPI ISL 411902
+      </ExternalLink>
+    );
+
+    const NEXTSTRAIN_LINK = (
+      <ExternalLink
+        className={cs.link}
+        href={"https://nextstrain.org/ncov"}
+        onClick={() =>
+          logAnalyticsEvent("PublicNCovHomePage_nextstrain-link_clicked")
+        }
+      >
+        Nextstrain
+      </ExternalLink>
+    );
+
     return (
       <NarrowContainer className={cs.publicNcovHomepage} size="small">
         <div className={cs.title}>
@@ -174,22 +210,26 @@ export default class PublicNcovHomepage extends React.Component {
         </ol>
         <h2>How was the data generated?</h2>
         <p className={cs.large}>
-          Institut Pasteur Cambodia performed the RNA extraction from a
-          nasopharyngeal swab from the index case. On February 1st, the NIH-CNM
-          team made sequencing libraries from the extracted RNA, sequenced the
-          samples on an iSeq100, demultiplexed the FASTQ files, and the results
-          of the sequencing run were compiled into Illumina’s Basespace. The
-          data was then uploaded to IDseq and processed using the latest IDseq
-          database - updated from NCBI on 2019-09-17. While the reference
-          database did not contain the reference sequences for SARS-CoV-2, which
-          were deposited to NCBI in January 2020, conclusions could still be
-          drawn from the data. IDseq’s NCBI reference database was updated on
-          2019-02-10 with the most recent version of NCBI that included the
-          recently added SARS-CoV-2 sequences. The analysis was rerun using the
-          new NCBI reference database to confirm the match to SARS-CoV-2 in the
-          PCR-positive index case. Further experiments were done {PROTOCOL_LINK}{" "}
-          to isolate a full genome sequence for SARS-CoV-2 from the Index
-          Patient.
+          The {INSTITUTE_LINK}, National Referral Laboratory for COVID-19,
+          performed the RNA extraction from a nasopharyngeal swab from the index
+          case. On February 1st, the NIH-CNM team made sequencing libraries from
+          the extracted RNA, sequenced the samples on an iSeq100, demultiplexed
+          the FASTQ files, and the results of the sequencing run were compiled
+          into Illumina’s Basespace. The data was then uploaded to IDseq and
+          processed using the latest IDseq database - updated from NCBI on
+          2019-09-17. While the reference database did not contain the reference
+          sequences for SARS-CoV-2, which were deposited to NCBI in January
+          2020, conclusions could still be drawn from the data. IDseq’s NCBI
+          reference database was updated on 2019-02-10 with the most recent
+          version of NCBI that included the recently added SARS-CoV-2 sequences.
+          The analysis was rerun using the new NCBI reference database to
+          confirm the match to SARS-CoV-2 in the PCR-positive index case.
+          Further experiments were done {PROTOCOL_LINK} to isolate a full genome
+          sequence for SARS-CoV-2 from the Index Patient. The sequence generated
+          during the current study was submitted to the GISAID repository ({
+            GISAID_LINK
+          }), and is available for comparison with other SARS-CoV-2 sequences,
+          globally, on {NEXTSTRAIN_LINK}.
         </p>
         <h2>What conclusions were drawn from the data?</h2>
         <ol>
@@ -213,7 +253,7 @@ export default class PublicNcovHomepage extends React.Component {
             By using a target enrichment strategy, a full-length contig could be
             assembled {INDEX_CASE_ENRICHMENT_LINK} with an average depth of
             14.9x. The SARS-CoV-2 genome sequence was uploaded to the GISAID
-            repository (accession EPI_ISL_411902).
+            repository ({GISAID_LINK}).
           </li>
           <li>
             As expected, the COVID-19 genome from the Cambodian Index Case was
