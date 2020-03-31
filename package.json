@@ -131,7 +131,7 @@
     "webpack-node-externals": "^1.7.2"
   },
   "resolutions": {
-    "eslint-scope": "3.7.1",
+    "eslint-scope": "3.7.1"
   },
   "snyk": true
 }
