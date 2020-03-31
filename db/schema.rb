@@ -194,7 +194,6 @@ ActiveRecord::Schema.define(version: 20_200_311_225_541) do
 
   create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "task"
-    t.integer "reads_before"
     t.integer "reads_after"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
