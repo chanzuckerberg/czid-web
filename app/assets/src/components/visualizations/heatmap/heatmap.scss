@@ -110,12 +110,6 @@
         cursor: pointer;
       }
 
-      .metadataAddLine {
-        stroke: $light-grey;
-        stroke-width: 1px;
-        fill: transparent;
-      }
-
       .metadataAddIcon {
         opacity: 0.3;
       }
@@ -132,10 +126,6 @@
       }
 
       &:hover {
-        .metadataAddLine {
-          stroke: $primary-light;
-        }
-
         .metadataAddIcon {
           // The filter is defined in heatmap.js
           filter: url("#blue");
