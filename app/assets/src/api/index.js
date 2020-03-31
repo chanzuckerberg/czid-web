@@ -4,7 +4,6 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
 
-import { cleanFilePath } from "~utils/sample";
 import { getURLParamString } from "~/helpers/url";
 
 import { get, postWithCSRF, putWithCSRF, deleteWithCSRF } from "./core";
@@ -41,66 +40,9 @@ const getSummaryContigCounts = (id, minContigReads) =>
     `/samples/${id}/summary_contig_counts?min_contig_reads=${minContigReads}`
   );
 
-// TODO(mark): Remove this method once we launch the new sample upload flow.
-// Send a request to create a single sample. Does not upload the files.
-// sourceType can be "local" or "s3".
-const createSample = (
-  sampleName,
-  projectName,
-  hostId,
-  inputFiles,
-  sourceType,
-  preloadResultsPath = "",
-  alignmentConfig = "",
-  pipelineBranch = "",
-  dagVariables = "{}",
-  maxInputFragments = "",
-  subsample = ""
-) => {
-  const fileAttributes = Array.from(inputFiles, file => {
-    if (sourceType === "local") {
-      return {
-        source_type: sourceType,
-        source: cleanFilePath(file.name),
-        parts: cleanFilePath(file.name),
-      };
-    } else {
-      return {
-        source_type: sourceType,
-        source: file,
-      };
-    }
-  });
-
-  return postWithCSRF("/samples.json", {
-    sample: {
-      name: sampleName,
-      project_name: projectName,
-      host_genome_id: hostId,
-      input_files_attributes: fileAttributes,
-      status: "created",
-      client: "web",
-
-      // Admin options
-      s3_preload_result_path: preloadResultsPath,
-      alignment_config_name: alignmentConfig,
-      pipeline_branch: pipelineBranch,
-      dag_vars: dagVariables,
-      max_input_fragments: maxInputFragments,
-      subsample: subsample,
-    },
-  });
-};
-
 const getAllHostGenomes = () => get("/host_genomes.json");
 
 const getAllSampleTypes = () => get("/sample_types.json");
-
-// TODO(mark): Remove this method once we launch the new sample upload flow.
-const bulkUploadRemoteSamples = samples =>
-  postWithCSRF(`/samples/bulk_upload.json`, {
-    samples,
-  });
 
 const saveVisualization = (type, data) =>
   postWithCSRF(`/visualizations/${type}/save`, {
@@ -409,10 +351,8 @@ const updateHeatmapBackground = (params, cancelToken) =>
 
 export {
   bulkImportRemoteSamples,
-  bulkUploadRemoteSamples,
   createBackground,
   createProject,
-  createSample,
   deleteSample,
   getAlignmentData,
   getAllHostGenomes,

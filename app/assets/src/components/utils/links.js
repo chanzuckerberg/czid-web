@@ -25,12 +25,6 @@ const downloadStringToFile = str => {
   location.href = `${downloadUrl}`;
 };
 
-const openUrlWithTimeout = link => {
-  setTimeout(() => {
-    openUrl(link);
-  }, 2000);
-};
-
 // Opens a new popup window centered to the current window.
 const openUrlInPopupWindow = (url, windowName, windowWidth, windowHeight) => {
   const left = window.screenLeft + (window.outerWidth - windowWidth) / 2;
@@ -67,7 +61,6 @@ export {
   openUrl,
   openUrlInNewTab,
   downloadStringToFile,
-  openUrlWithTimeout,
   openUrlInPopupWindow,
   postToUrlWithCSRF,
 };

@@ -1,21 +1,14 @@
 import { map, keyBy, mapValues, every, pick, sum, difference } from "lodash/fp";
 
-import {
-  bulkUploadRemoteSamples,
-  createSample,
-  markSampleUploaded,
-  uploadFileToUrlWithRetries,
-} from "~/api";
+import { markSampleUploaded, uploadFileToUrlWithRetries } from "~/api";
 
 import { putWithCSRF, postWithCSRF } from "./core";
 
-export const bulkUploadBasespace = async ({ samples, metadata }) =>
+export const bulkUploadBasespace = ({ samples, metadata }) =>
   bulkUploadWithMetadata(samples, metadata);
 
 export const bulkUploadRemote = ({ samples, metadata }) =>
-  metadata
-    ? bulkUploadWithMetadata(samples, metadata)
-    : bulkUploadRemoteSamples(samples);
+  bulkUploadWithMetadata(samples, metadata);
 
 export const bulkUploadLocalWithMetadata = async ({
   samples,
@@ -185,85 +178,6 @@ const bulkUploadWithMetadata = async (samples, metadata) => {
   }
 
   return response;
-};
-
-// TODO(mark): Remove this endpoint once we launch the new sample upload flow
-export const bulkUploadLocal = ({
-  sampleNamesToFiles,
-  project,
-  hostId,
-  onCreateSampleError,
-  onUploadProgress,
-  onUploadError,
-  onAllUploadsComplete,
-  onMarkSampleUploadedError,
-}) => {
-  // Store the upload progress of file names, so we can track when
-  // everything is done.
-  const fileNamesToProgress = {};
-  const markedUploaded = {};
-  let allUploadsCompleteRan = false;
-
-  // This function needs access to fileNamesToProgress.
-  const onFileUploadSuccess = (sampleName, sampleId) => {
-    const sampleFiles = sampleNamesToFiles[sampleName];
-    // If every file for this sample is uploaded, mark it as uploaded.
-    if (
-      !markedUploaded[sampleName] &&
-      sampleFiles.every(f => fileNamesToProgress[f.name] === 100)
-    ) {
-      markedUploaded[sampleName] = true;
-      markSampleUploaded(sampleId)
-        .then(() => {
-          // If every file-to-upload in this batch is done uploading
-          if (
-            !allUploadsCompleteRan &&
-            Object.keys(sampleNamesToFiles).every(
-              sampleName => markedUploaded[sampleName]
-            )
-          ) {
-            allUploadsCompleteRan = true;
-            window.onbeforeunload = null;
-            onAllUploadsComplete();
-          }
-        })
-        .catch(onMarkSampleUploadedError);
-    }
-  };
-
-  // Latest browsers will only show a generic warning
-  window.onbeforeunload = () =>
-    "Uploading is in progress. Are you sure you want to exit?";
-
-  // Send an API call to create new samples with the expected files
-  for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
-    createSample(sampleName, project.name, hostId, files, "local")
-      .then(response => {
-        // After successful sample creation, upload to the presigned URLs returned
-        const sampleId = response.id;
-        startUploadHeartbeat(sampleId);
-        files.map((file, i) => {
-          const url = response.input_files[i].presigned_url;
-
-          uploadFileToUrlWithRetries(file, url, {
-            onUploadProgress: e => {
-              const percent = Math.round(e.loaded * 100 / e.total);
-              fileNamesToProgress[file.name] = percent;
-              if (onUploadProgress) {
-                onUploadProgress(percent, file);
-              }
-            },
-            onSuccess: () => onFileUploadSuccess(sampleName, sampleId),
-            onError: error => onUploadError(file, error),
-          });
-        });
-      })
-      .catch(error => {
-        if (onCreateSampleError) {
-          onCreateSampleError(error, sampleName);
-        }
-      });
-  }
 };
 
 // Local uploads go directly from the browser to S3, so we don't know if an upload was interrupted.
