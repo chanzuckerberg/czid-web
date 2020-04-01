@@ -254,7 +254,7 @@ export default class Heatmap {
     for (let i = 0; i < this.rowLabels.length; i++) {
       this.rowLabels[i].rowIndex = i;
       if (this.focus) {
-        this.rowLabels[i].shaded = this.rowLabels[i] != this.focus;
+        this.rowLabels[i].shaded = this.rowLabels[i] !== this.focus;
       }
       for (let j = 0; j < this.columnLabels.length; j++) {
         this.columnLabels[j].columnIndex = j;

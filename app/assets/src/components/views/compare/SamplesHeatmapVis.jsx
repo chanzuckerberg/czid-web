@@ -174,7 +174,7 @@ class SamplesHeatmapVis extends React.Component {
         taxon.parentId === -200 // MISSING_GENUS_ID
           ? Number.MAX_SAFE_INTEGER
           : taxon.parentId; // parentId is false when taxon level is genus
-      const newlyAdded = focusNewTaxon && id == this.props.newestTaxonId;
+      const newlyAdded = focusNewTaxon && id === this.props.newestTaxonId;
       return {
         label: taxon.name,
         sortKey: sortKey,
