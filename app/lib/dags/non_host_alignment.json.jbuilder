@@ -44,7 +44,6 @@ json.steps do
   additional_attributes = {
     service: "gsnap",
     chunk_size: attr[:gsnap_chunk_size],
-    environment: attr[:rails_env] == "prod" ? "prod" : "staging",
   }
 
   if attr[:index_dir_suffix]
@@ -65,9 +64,8 @@ json.steps do
   }
 
   additional_attributes = {
-    service: "rapsearch2",
+    service: "rapsearch",
     chunk_size: attr[:rapsearch_chunk_size],
-    environment: attr[:rails_env] == "prod" ? "prod" : "staging",
   }
 
   if attr[:index_dir_suffix]
