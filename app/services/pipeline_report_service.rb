@@ -95,6 +95,7 @@ class PipelineReportService
     @pipeline_run = pipeline_run
     @background_id = background_id
     @csv = csv
+    raise 'bad min_contig_reads' unless min_contig_reads
     @min_contig_reads = min_contig_reads
     @parallel = parallel
   end
