@@ -124,13 +124,13 @@ class SamplesHeatmapVis extends React.Component {
     if (this.props.data !== prevProps.data) {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
-        rowLabels: this.extractTaxonLabels(), // Also includes column metadata.
+        rowLabels: this.extractTaxonLabels(),
       });
     }
     if (this.props.taxonIds !== prevProps.taxonIds) {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
-        rowLabels: this.extractTaxonLabels(), // Also includes column metadata.
+        rowLabels: this.extractTaxonLabels(),
       });
     }
     if (this.props.thresholdFilters !== prevProps.thresholdFilters) {
@@ -167,17 +167,19 @@ class SamplesHeatmapVis extends React.Component {
     return value > 0 && filtered ? originalColor : colorNoValue;
   };
 
-  extractTaxonLabels() {
+  extractTaxonLabels(focusNewTaxon = false) {
     return this.props.taxonIds.map(id => {
       const taxon = this.props.taxonDetails[id];
       const sortKey =
         taxon.parentId === -200 // MISSING_GENUS_ID
           ? Number.MAX_SAFE_INTEGER
           : taxon.parentId; // parentId is false when taxon level is genus
+      const newlyAdded = focusNewTaxon && id == this.props.newestTaxonId;
       return {
         label: taxon.name,
         sortKey: sortKey,
         genusName: taxon.genusName,
+        focus: newlyAdded,
       };
     });
   }
@@ -560,6 +562,13 @@ class SamplesHeatmapVis extends React.Component {
             onTaxonSelectionChange={this.props.onAddTaxon}
             onTaxonSelectionClose={() => {
               this.setState({ addTaxonTrigger: null });
+
+              if (this.props.newestTaxonId) {
+                this.heatmap.updateData({
+                  values: this.props.data[this.props.metric],
+                  rowLabels: this.extractTaxonLabels(true), // set focusNewTaxon to true
+                });
+              }
             }}
           />
         )}
@@ -608,6 +617,7 @@ SamplesHeatmapVis.propTypes = {
   allTaxonIds: PropTypes.array,
   taxonIds: PropTypes.array,
   selectedTaxa: PropTypes.object,
+  newestTaxonId: PropTypes.number,
   thresholdFilters: PropTypes.any,
   sampleSortType: PropTypes.string,
   fullScreen: PropTypes.bool,

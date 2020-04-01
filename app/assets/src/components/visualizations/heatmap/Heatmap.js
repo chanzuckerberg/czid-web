@@ -198,6 +198,9 @@ export default class Heatmap {
     for (let i = 0; i < this.rowLabels.length; i++) {
       let label = this.rowLabels[i].label;
       this.rowLabelsWidth = Math.max(this.rowLabelsWidth, labelWidth(label));
+      if (this.rowLabels[i].focus) {
+        this.focus = this.rowLabels[i];
+      }
     }
 
     for (let i = 0; i < this.options.columnMetadata.length; i++) {
@@ -250,6 +253,9 @@ export default class Heatmap {
     this.cells = [];
     for (let i = 0; i < this.rowLabels.length; i++) {
       this.rowLabels[i].rowIndex = i;
+      if (this.focus) {
+        this.rowLabels[i].shaded = this.rowLabels[i] != this.focus;
+      }
       for (let j = 0; j < this.columnLabels.length; j++) {
         this.columnLabels[j].columnIndex = j;
         this.cells.push({
@@ -511,6 +517,12 @@ export default class Heatmap {
 
     // Set up scrolling behavior.
     this.g.on("wheel.zoom", this.scroll.bind(this));
+
+    // If there's a specific row we want to focus on, auto-scroll the heatmap
+    // so the row is centered on screen.
+    if (this.focus) {
+      this.scrollToFocus();
+    }
   }
 
   drag() {
@@ -526,7 +538,25 @@ export default class Heatmap {
     d3.event.stopPropagation();
   }
 
-  pan(deltaX, deltaY) {
+  scrollToFocus() {
+    // If there's a specific row we want to focus on, auto-scroll the heatmap
+    // so the row is centered on screen.
+    const containerHeight = this.container[0][0].offsetHeight;
+    const metadataHeight =
+      this.totalMetadataHeight + this.totalRowAddLinkHeight;
+    const focusOffset =
+      containerHeight / 4 - (this.cellYPosition(this.focus) + metadataHeight);
+    this.pan(0, focusOffset, true);
+    // Briefly highlight the focused row.
+    this.updateCellHighlights();
+    this.focus = null;
+    for (let i = 0; i < this.rowLabels.length; i++) {
+      this.rowLabels[i].shaded = false;
+    }
+    setTimeout(this.updateCellHighlights.bind(this), 2750);
+  }
+
+  pan(deltaX, deltaY, transition = false) {
     // Define the scrolling boundaries for the svg.
     // Upper limits are determined by the difference between the container and svg sizes,
     // scaled by the zoom factor.
@@ -548,7 +578,14 @@ export default class Heatmap {
       this.options.marginTop,
       Math.max(deltaY + gCurrentTranslate[1], yScrollMax)
     );
-    this.g.attr("transform", `translate(${[dx, dy]})`);
+    if (transition) {
+      this.g
+        .transition()
+        .duration(750)
+        .attr("transform", `translate(${[dx, dy]})`);
+    } else {
+      this.g.attr("transform", `translate(${[dx, dy]})`);
+    }
 
     // Translating the row labels in the opposite x direction of the svg.
     let rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
@@ -560,11 +597,10 @@ export default class Heatmap {
     );
     this.placeRowLabelContainers(labelsDx);
 
-    // Translating the metadata labels in the opposite x direction of the svg (same as row labels).
+    // Translating the metadata labels and "Add Metadata link" in
+    // the opposite x direction of the svg (same as row labels).
     // Don't include the transition animation while rendering.
-    this.renderColumnMetadataLabels(labelsDx, false);
-    // Translate the "Add Metadata" link (same as row labels).
-    this.renderColumnMetadataAddLink(labelsDx);
+    this.renderColumnMetadata(labelsDx, false);
     this.renderRowAddLink(labelsDx);
 
     // Translating the column and metadata labels in the opposite y direction of the svg.
@@ -575,8 +611,8 @@ export default class Heatmap {
       this.columnLabelsHeight + this.options.marginTop - yScrollMax,
       columnLabelsCurrent[1] - deltaY
     );
-    this.placeColumnLabelAndMetadataContainers(labelsDy);
-    this.placeAddRowLinkContainer(labelsDy);
+    this.placeColumnLabelAndMetadataContainers(labelsDy, transition);
+    this.placeAddRowLinkContainer(labelsDy, transition);
   }
 
   placeRowLabelContainers(x) {
@@ -597,30 +633,65 @@ export default class Heatmap {
     this.metadataLabelsBackground.attr("x", x - this.options.marginLeft);
   }
 
-  placeColumnLabelAndMetadataContainers(y) {
-    this.gColumnLabels.attr(
-      "transform",
-      `translate(${this.rowLabelsWidth},${y})`
-    );
-    this.gColumnMetadata.attr("transform", `translate(0, ${y})`);
-    // Placing the white background rectangle behind the column labels and metadata.
-    this.columnLabelsBackground.attr(
-      "y",
-      y - this.columnLabelsHeight - this.options.marginTop
-    );
-    // Placing the white rectangle to hide column labels in the top left corner.
-    this.metadataLabelsBackground.attr(
-      "y",
-      y - this.columnLabelsHeight - this.options.marginTop
-    );
+  placeColumnLabelAndMetadataContainers(y, transition = false) {
+    if (transition) {
+      this.gColumnLabels
+        .transition()
+        .duration(750)
+        .attr("transform", `translate(${this.rowLabelsWidth},${y})`);
+      this.gColumnMetadata
+        .transition()
+        .duration(750)
+        .attr("transform", `translate(0, ${y})`);
+      // Placing the white background rectangle behind the column labels and metadata.
+      this.columnLabelsBackground
+        .transition()
+        .duration(750)
+        .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
+      // Placing the white rectangle to hide column labels in the top left corner.
+      this.metadataLabelsBackground
+        .transition()
+        .duration(750)
+        .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
+    } else {
+      this.gColumnLabels.attr(
+        "transform",
+        `translate(${this.rowLabelsWidth},${y})`
+      );
+      this.gColumnMetadata.attr("transform", `translate(0, ${y})`);
+      // Placing the white background rectangle behind the column labels and metadata.
+      this.columnLabelsBackground.attr(
+        "y",
+        y - this.columnLabelsHeight - this.options.marginTop
+      );
+      // Placing the white rectangle to hide column labels in the top left corner.
+      this.metadataLabelsBackground.attr(
+        "y",
+        y - this.columnLabelsHeight - this.options.marginTop
+      );
+    }
   }
 
-  placeAddRowLinkContainer(y) {
-    this.gAddRow.attr("transform", `translate(0, ${y})`);
-    this.addRowBackground.attr(
-      "y",
-      y + this.options.columnMetadata.length * this.options.minCellHeight
-    );
+  placeAddRowLinkContainer(y, transition = false) {
+    if (transition) {
+      this.gAddRow
+        .transition()
+        .duration(750)
+        .attr("transform", `translate(0, ${y})`);
+      this.addRowBackground
+        .transition()
+        .duration(750)
+        .attr(
+          "y",
+          y + this.options.columnMetadata.length * this.options.minCellHeight
+        );
+    } else {
+      this.gAddRow.attr("transform", `translate(0, ${y})`);
+      this.addRowBackground.attr(
+        "y",
+        y + this.options.columnMetadata.length * this.options.minCellHeight
+      );
+    }
   }
 
   processMetadata() {
@@ -1311,10 +1382,10 @@ export default class Heatmap {
     applyFormat(columnLabelEnter);
   }
 
-  renderColumnMetadata() {
+  renderColumnMetadata(dx = 0, transition = true) {
     this.renderColumnMetadataCells();
-    this.renderColumnMetadataAddLink(0);
-    this.renderColumnMetadataLabels(0);
+    this.renderColumnMetadataAddLink(dx);
+    this.renderColumnMetadataLabels(dx, transition);
   }
 
   getColumnMetadataLabelOffset(d) {
