@@ -69,6 +69,7 @@ module PipelineRunsHelper
     command += " --name=idseq-#{Rails.env}-#{sample_id}-#{stage_name} "
     command += " --ecr-image #{Shellwords.escape(docker_image)} --memory #{memory} --queue #{Shellwords.escape(job_queue)} --vcpus #{vcpus} --job-role idseq-pipeline "
     command += " --mount-instance-storage "
+    command += " --environment DEPLOYMENT_ENVIRONMENT=#{Rails.env} PROVISIONING_MODEL=EC2 "
     command
   end
 
