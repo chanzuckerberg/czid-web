@@ -548,12 +548,26 @@ export default class Heatmap {
       containerHeight / 4 - (this.cellYPosition(this.focus) + metadataHeight);
     this.pan(0, focusOffset, true);
     // Briefly highlight the focused row.
+    const focusIndex = this.focus.rowIndex;
+    this.rowLabels[focusIndex].highlighted = true;
+    this.updateLabelHighlights(
+      this.gRowLabels.selectAll(`.${cs.rowLabel}`),
+      this.rowLabels
+    );
     this.updateCellHighlights();
+
     this.focus = null;
     for (let i = 0; i < this.rowLabels.length; i++) {
       this.rowLabels[i].shaded = false;
     }
-    setTimeout(this.updateCellHighlights.bind(this), 2750);
+    setTimeout(() => {
+      this.rowLabels[focusIndex].highlighted = false;
+      this.updateCellHighlights();
+      this.updateLabelHighlights(
+        this.gRowLabels.selectAll(`.${cs.rowLabel}`),
+        this.rowLabels
+      );
+    }, 2750);
   }
 
   pan(deltaX, deltaY, transition = false) {
