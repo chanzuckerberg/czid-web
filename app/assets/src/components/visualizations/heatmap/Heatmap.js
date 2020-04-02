@@ -584,14 +584,10 @@ export default class Heatmap {
       this.options.marginTop,
       Math.max(deltaY + gCurrentTranslate[1], yScrollMax)
     );
-    if (transition) {
-      this.g
-        .transition()
-        .duration(750)
-        .attr("transform", `translate(${[dx, dy]})`);
-    } else {
-      this.g.attr("transform", `translate(${[dx, dy]})`);
-    }
+    this.g
+      .transition()
+      .duration(transition ? 750 : 0)
+      .attr("transform", `translate(${[dx, dy]})`);
 
     // Translating the row labels in the opposite x direction of the svg.
     let rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
@@ -640,64 +636,38 @@ export default class Heatmap {
   }
 
   placeColumnLabelAndMetadataContainers(y, transition = false) {
-    if (transition) {
-      this.gColumnLabels
-        .transition()
-        .duration(750)
-        .attr("transform", `translate(${this.rowLabelsWidth},${y})`);
-      this.gColumnMetadata
-        .transition()
-        .duration(750)
-        .attr("transform", `translate(0, ${y})`);
-      // Placing the white background rectangle behind the column labels and metadata.
-      this.columnLabelsBackground
-        .transition()
-        .duration(750)
-        .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
-      // Placing the white rectangle to hide column labels in the top left corner.
-      this.metadataLabelsBackground
-        .transition()
-        .duration(750)
-        .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
-    } else {
-      this.gColumnLabels.attr(
-        "transform",
-        `translate(${this.rowLabelsWidth},${y})`
-      );
-      this.gColumnMetadata.attr("transform", `translate(0, ${y})`);
-      // Placing the white background rectangle behind the column labels and metadata.
-      this.columnLabelsBackground.attr(
-        "y",
-        y - this.columnLabelsHeight - this.options.marginTop
-      );
-      // Placing the white rectangle to hide column labels in the top left corner.
-      this.metadataLabelsBackground.attr(
-        "y",
-        y - this.columnLabelsHeight - this.options.marginTop
-      );
-    }
+    this.gColumnLabels
+      .transition()
+      .duration(transition ? 750 : 0)
+      .attr("transform", `translate(${this.rowLabelsWidth},${y})`);
+    this.gColumnMetadata
+      .transition()
+      .duration(transition ? 750 : 0)
+      .attr("transform", `translate(0, ${y})`);
+    // Placing the white background rectangle behind the column labels and metadata.
+    this.columnLabelsBackground
+      .transition()
+      .duration(transition ? 750 : 0)
+      .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
+    // Placing the white rectangle to hide column labels in the top left corner.
+    this.metadataLabelsBackground
+      .transition()
+      .duration(transition ? 750 : 0)
+      .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
   }
 
   placeAddRowLinkContainer(y, transition = false) {
-    if (transition) {
-      this.gAddRow
-        .transition()
-        .duration(750)
-        .attr("transform", `translate(0, ${y})`);
-      this.addRowBackground
-        .transition()
-        .duration(750)
-        .attr(
-          "y",
-          y + this.options.columnMetadata.length * this.options.minCellHeight
-        );
-    } else {
-      this.gAddRow.attr("transform", `translate(0, ${y})`);
-      this.addRowBackground.attr(
+    this.gAddRow
+      .transition()
+      .duration(transition ? 750 : 0)
+      .attr("transform", `translate(0, ${y})`);
+    this.addRowBackground
+      .transition()
+      .duration(transition ? 750 : 0)
+      .attr(
         "y",
         y + this.options.columnMetadata.length * this.options.minCellHeight
       );
-    }
   }
 
   processMetadata() {
