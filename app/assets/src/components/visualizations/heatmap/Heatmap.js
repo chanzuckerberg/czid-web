@@ -526,7 +526,43 @@ export default class Heatmap {
     d3.event.stopPropagation();
   }
 
-  pan(deltaX, deltaY) {
+  scrollToRow(label) {
+    // If there's a specific row we want to focus on, auto-scroll the heatmap
+    // so the row is centered on screen.
+    const row = this.rowLabels.filter(rowLabel => rowLabel.label === label)[0];
+    const rowIndex = row.rowIndex;
+
+    const containerHeight = this.container[0][0].offsetHeight;
+    const metadataHeight =
+      this.totalMetadataHeight + this.totalRowAddLinkHeight;
+    const rowOffset =
+      containerHeight / 4 - (this.cellYPosition(row) + metadataHeight);
+    this.pan(0, rowOffset, true);
+
+    // Briefly highlight the focused row.
+    for (let i = 0; i < this.rowLabels.length; i++) {
+      this.rowLabels[i].shaded = i !== rowIndex;
+    }
+    this.updateLabelHighlights(
+      this.gRowLabels.selectAll(`.${cs.rowLabel}`),
+      this.rowLabels
+    );
+    this.updateCellHighlights();
+
+    for (let i = 0; i < this.rowLabels.length; i++) {
+      this.rowLabels[i].shaded = false;
+    }
+    setTimeout(() => {
+      this.rowLabels[rowIndex].highlighted = false;
+      this.updateCellHighlights();
+      this.updateLabelHighlights(
+        this.gRowLabels.selectAll(`.${cs.rowLabel}`),
+        this.rowLabels
+      );
+    }, 2750);
+  }
+
+  pan(deltaX, deltaY, transition = false) {
     // Define the scrolling boundaries for the svg.
     // Upper limits are determined by the difference between the container and svg sizes,
     // scaled by the zoom factor.
@@ -548,7 +584,10 @@ export default class Heatmap {
       this.options.marginTop,
       Math.max(deltaY + gCurrentTranslate[1], yScrollMax)
     );
-    this.g.attr("transform", `translate(${[dx, dy]})`);
+    this.g
+      .transition()
+      .duration(transition ? this.options.transitionDuration : 0)
+      .attr("transform", `translate(${[dx, dy]})`);
 
     // Translating the row labels in the opposite x direction of the svg.
     let rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
@@ -560,11 +599,10 @@ export default class Heatmap {
     );
     this.placeRowLabelContainers(labelsDx);
 
-    // Translating the metadata labels in the opposite x direction of the svg (same as row labels).
+    // Translating the metadata labels and "Add Metadata link" in
+    // the opposite x direction of the svg (same as row labels).
     // Don't include the transition animation while rendering.
-    this.renderColumnMetadataLabels(labelsDx, false);
-    // Translate the "Add Metadata" link (same as row labels).
-    this.renderColumnMetadataAddLink(labelsDx);
+    this.renderColumnMetadata(labelsDx, false);
     this.renderRowAddLink(labelsDx);
 
     // Translating the column and metadata labels in the opposite y direction of the svg.
@@ -575,8 +613,8 @@ export default class Heatmap {
       this.columnLabelsHeight + this.options.marginTop - yScrollMax,
       columnLabelsCurrent[1] - deltaY
     );
-    this.placeColumnLabelAndMetadataContainers(labelsDy);
-    this.placeAddRowLinkContainer(labelsDy);
+    this.placeColumnLabelAndMetadataContainers(labelsDy, transition);
+    this.placeAddRowLinkContainer(labelsDy, transition);
   }
 
   placeRowLabelContainers(x) {
@@ -597,30 +635,39 @@ export default class Heatmap {
     this.metadataLabelsBackground.attr("x", x - this.options.marginLeft);
   }
 
-  placeColumnLabelAndMetadataContainers(y) {
-    this.gColumnLabels.attr(
-      "transform",
-      `translate(${this.rowLabelsWidth},${y})`
-    );
-    this.gColumnMetadata.attr("transform", `translate(0, ${y})`);
+  placeColumnLabelAndMetadataContainers(y, transition = false) {
+    this.gColumnLabels
+      .transition()
+      .duration(transition ? this.options.transitionDuration : 0)
+      .attr("transform", `translate(${this.rowLabelsWidth},${y})`);
+    this.gColumnMetadata
+      .transition()
+      .duration(transition ? this.options.transitionDuration : 0)
+      .attr("transform", `translate(0, ${y})`);
     // Placing the white background rectangle behind the column labels and metadata.
-    this.columnLabelsBackground.attr(
-      "y",
-      y - this.columnLabelsHeight - this.options.marginTop
-    );
+    this.columnLabelsBackground
+      .transition()
+      .duration(transition ? this.options.transitionDuration : 0)
+      .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
     // Placing the white rectangle to hide column labels in the top left corner.
-    this.metadataLabelsBackground.attr(
-      "y",
-      y - this.columnLabelsHeight - this.options.marginTop
-    );
+    this.metadataLabelsBackground
+      .transition()
+      .duration(transition ? this.options.transitionDuration : 0)
+      .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
   }
 
-  placeAddRowLinkContainer(y) {
-    this.gAddRow.attr("transform", `translate(0, ${y})`);
-    this.addRowBackground.attr(
-      "y",
-      y + this.options.columnMetadata.length * this.options.minCellHeight
-    );
+  placeAddRowLinkContainer(y, transition = false) {
+    this.gAddRow
+      .transition()
+      .duration(transition ? this.options.transitionDuration : 0)
+      .attr("transform", `translate(0, ${y})`);
+    this.addRowBackground
+      .transition()
+      .duration(transition ? this.options.transitionDuration : 0)
+      .attr(
+        "y",
+        y + this.options.columnMetadata.length * this.options.minCellHeight
+      );
   }
 
   processMetadata() {
@@ -1311,10 +1358,10 @@ export default class Heatmap {
     applyFormat(columnLabelEnter);
   }
 
-  renderColumnMetadata() {
+  renderColumnMetadata(dx = 0, transition = true) {
     this.renderColumnMetadataCells();
-    this.renderColumnMetadataAddLink(0);
-    this.renderColumnMetadataLabels(0);
+    this.renderColumnMetadataAddLink(dx);
+    this.renderColumnMetadataLabels(dx, transition);
   }
 
   getColumnMetadataLabelOffset(d) {
