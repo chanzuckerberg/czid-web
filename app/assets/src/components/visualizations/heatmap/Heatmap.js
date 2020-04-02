@@ -586,7 +586,7 @@ export default class Heatmap {
     );
     this.g
       .transition()
-      .duration(transition ? 750 : 0)
+      .duration(transition ? this.options.transitionDuration : 0)
       .attr("transform", `translate(${[dx, dy]})`);
 
     // Translating the row labels in the opposite x direction of the svg.
@@ -638,32 +638,32 @@ export default class Heatmap {
   placeColumnLabelAndMetadataContainers(y, transition = false) {
     this.gColumnLabels
       .transition()
-      .duration(transition ? 750 : 0)
+      .duration(transition ? this.options.transitionDuration : 0)
       .attr("transform", `translate(${this.rowLabelsWidth},${y})`);
     this.gColumnMetadata
       .transition()
-      .duration(transition ? 750 : 0)
+      .duration(transition ? this.options.transitionDuration : 0)
       .attr("transform", `translate(0, ${y})`);
     // Placing the white background rectangle behind the column labels and metadata.
     this.columnLabelsBackground
       .transition()
-      .duration(transition ? 750 : 0)
+      .duration(transition ? this.options.transitionDuration : 0)
       .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
     // Placing the white rectangle to hide column labels in the top left corner.
     this.metadataLabelsBackground
       .transition()
-      .duration(transition ? 750 : 0)
+      .duration(transition ? this.options.transitionDuration : 0)
       .attr("y", y - this.columnLabelsHeight - this.options.marginTop);
   }
 
   placeAddRowLinkContainer(y, transition = false) {
     this.gAddRow
       .transition()
-      .duration(transition ? 750 : 0)
+      .duration(transition ? this.options.transitionDuration : 0)
       .attr("transform", `translate(0, ${y})`);
     this.addRowBackground
       .transition()
-      .duration(transition ? 750 : 0)
+      .duration(transition ? this.options.transitionDuration : 0)
       .attr(
         "y",
         y + this.options.columnMetadata.length * this.options.minCellHeight
