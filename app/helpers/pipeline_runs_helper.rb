@@ -65,11 +65,15 @@ module PipelineRunsHelper
                                  docker_image: "idseq_dag",
                                  sample_id: 0,
                                  stage_name: "misc")
+    # TODO: environment values once we use the new pipeline infra
+    #   that new infra uses dev rather than development
+    #   once we switch to that for the pipeline these values won't be needed
+    deployment_environment = Rails.env == "development" ? "dev" : Rails.env
     command = "aegea batch submit --command=#{Shellwords.escape(base_command)} "
     command += " --name=idseq-#{Rails.env}-#{sample_id}-#{stage_name} "
     command += " --ecr-image #{Shellwords.escape(docker_image)} --memory #{memory} --queue #{Shellwords.escape(job_queue)} --vcpus #{vcpus} --job-role idseq-pipeline "
     command += " --mount-instance-storage "
-    command += " --environment DEPLOYMENT_ENVIRONMENT=#{Rails.env} PROVISIONING_MODEL=EC2 PRIORITY_NAME=normal "
+    command += " --environment DEPLOYMENT_ENVIRONMENT=#{deployment_environment} PROVISIONING_MODEL=EC2 PRIORITY_NAME=normal "
     command
   end
 
