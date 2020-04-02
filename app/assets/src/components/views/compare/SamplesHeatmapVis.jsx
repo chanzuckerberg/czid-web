@@ -167,19 +167,17 @@ class SamplesHeatmapVis extends React.Component {
     return value > 0 && filtered ? originalColor : colorNoValue;
   };
 
-  extractTaxonLabels(focusNewTaxon = false) {
+  extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
       const taxon = this.props.taxonDetails[id];
       const sortKey =
         taxon.parentId === -200 // MISSING_GENUS_ID
           ? Number.MAX_SAFE_INTEGER
           : taxon.parentId; // parentId is false when taxon level is genus
-      const newlyAdded = focusNewTaxon && id === this.props.newestTaxonId;
       return {
         label: taxon.name,
         sortKey: sortKey,
         genusName: taxon.genusName,
-        focus: newlyAdded,
       };
     });
   }
@@ -564,10 +562,9 @@ class SamplesHeatmapVis extends React.Component {
               this.setState({ addTaxonTrigger: null });
 
               if (this.props.newestTaxonId) {
-                this.heatmap.updateData({
-                  values: this.props.data[this.props.metric],
-                  rowLabels: this.extractTaxonLabels(true), // set focusNewTaxon to true
-                });
+                this.heatmap.scrollToRow(
+                  this.props.taxonDetails[this.props.newestTaxonId].name
+                );
               }
             }}
           />

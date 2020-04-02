@@ -198,9 +198,6 @@ export default class Heatmap {
     for (let i = 0; i < this.rowLabels.length; i++) {
       let label = this.rowLabels[i].label;
       this.rowLabelsWidth = Math.max(this.rowLabelsWidth, labelWidth(label));
-      if (this.rowLabels[i].focus) {
-        this.focus = this.rowLabels[i];
-      }
     }
 
     for (let i = 0; i < this.options.columnMetadata.length; i++) {
@@ -253,9 +250,6 @@ export default class Heatmap {
     this.cells = [];
     for (let i = 0; i < this.rowLabels.length; i++) {
       this.rowLabels[i].rowIndex = i;
-      if (this.focus) {
-        this.rowLabels[i].shaded = this.rowLabels[i] !== this.focus;
-      }
       for (let j = 0; j < this.columnLabels.length; j++) {
         this.columnLabels[j].columnIndex = j;
         this.cells.push({
@@ -517,12 +511,6 @@ export default class Heatmap {
 
     // Set up scrolling behavior.
     this.g.on("wheel.zoom", this.scroll.bind(this));
-
-    // If there's a specific row we want to focus on, auto-scroll the heatmap
-    // so the row is centered on screen.
-    if (this.focus) {
-      this.scrollToFocus();
-    }
   }
 
   drag() {
@@ -538,30 +526,34 @@ export default class Heatmap {
     d3.event.stopPropagation();
   }
 
-  scrollToFocus() {
+  scrollToRow(label) {
     // If there's a specific row we want to focus on, auto-scroll the heatmap
     // so the row is centered on screen.
+    const row = this.rowLabels.filter(rowLabel => rowLabel.label === label)[0];
+    const rowIndex = row.rowIndex;
+
     const containerHeight = this.container[0][0].offsetHeight;
     const metadataHeight =
       this.totalMetadataHeight + this.totalRowAddLinkHeight;
-    const focusOffset =
-      containerHeight / 4 - (this.cellYPosition(this.focus) + metadataHeight);
-    this.pan(0, focusOffset, true);
+    const rowOffset =
+      containerHeight / 4 - (this.cellYPosition(row) + metadataHeight);
+    this.pan(0, rowOffset, true);
+
     // Briefly highlight the focused row.
-    const focusIndex = this.focus.rowIndex;
-    this.rowLabels[focusIndex].highlighted = true;
+    for (let i = 0; i < this.rowLabels.length; i++) {
+      this.rowLabels[i].shaded = i !== rowIndex;
+    }
     this.updateLabelHighlights(
       this.gRowLabels.selectAll(`.${cs.rowLabel}`),
       this.rowLabels
     );
     this.updateCellHighlights();
 
-    this.focus = null;
     for (let i = 0; i < this.rowLabels.length; i++) {
       this.rowLabels[i].shaded = false;
     }
     setTimeout(() => {
-      this.rowLabels[focusIndex].highlighted = false;
+      this.rowLabels[rowIndex].highlighted = false;
       this.updateCellHighlights();
       this.updateLabelHighlights(
         this.gRowLabels.selectAll(`.${cs.rowLabel}`),
