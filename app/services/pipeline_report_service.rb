@@ -47,8 +47,6 @@ class PipelineReportService
   Z_SCORE_WHEN_ABSENT_FROM_SAMPLE = -100
 
   DEFAULT_SORT_PARAM = :agg_score
-  # See also PipelineRun::MIN_CONTIG_READS
-  DEFAULT_MIN_CONTIG_READS = 0
 
   CATEGORIES = {
     2 => "bacteria",
@@ -91,11 +89,11 @@ class PipelineReportService
     "species_tax_ids",
   ].freeze
 
-  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: DEFAULT_MIN_CONTIG_READS, parallel: true)
+  def initialize(pipeline_run, background_id, csv: false, min_contig_reads: PipelineRun::MIN_CONTIG_READS, parallel: true)
     @pipeline_run = pipeline_run
     @background_id = background_id
     @csv = csv
-    @min_contig_reads = min_contig_reads || DEFAULT_MIN_CONTIG_READS
+    @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS
     @parallel = parallel
   end
 
