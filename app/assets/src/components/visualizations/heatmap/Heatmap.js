@@ -99,6 +99,8 @@ export default class Heatmap {
     this.addMetadataTrigger = null;
     this.columnMetadataSortField = this.options.initialColumnMetadataSortField;
     this.columnMetadataSortAsc = this.options.initialColumnMetadataSortAsc;
+
+    this.addRowTrigger = null;
   }
 
   getScaleType() {
@@ -312,8 +314,13 @@ export default class Heatmap {
       .append("rect")
       .attr("class", "metadataLabelsBackground")
       .style("fill", "white");
+    this.addRowBackground = this.g
+      .append("rect")
+      .attr("class", "addRowBackground")
+      .style("fill", "white");
 
     this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
+    this.gAddRow = this.g.append("g").attr("class", cs.columnMetadata);
     this.gCaption = this.g.append("g").attr("class", cs.captionContainer);
   }
 
@@ -358,6 +365,12 @@ export default class Heatmap {
       ? this.columnClusterHeight + this.options.spacing * 2
       : 0;
 
+    // If there's no option to manually add additional rows, don't make the gap
+    // between metadata and the rest of the heatmap as wide.
+    this.totalRowAddLinkHeight = this.options.onAddRowClick
+      ? 2 * this.options.metadataAddLinkHeight
+      : this.options.metadataAddLinkHeight;
+
     this.width =
       this.options.marginLeft +
       this.rowLabelsWidth +
@@ -369,6 +382,7 @@ export default class Heatmap {
       this.options.marginTop +
       this.columnLabelsHeight +
       this.totalMetadataHeight +
+      this.totalRowAddLinkHeight +
       totalCellHeight +
       totalColumnClusterHeight +
       this.options.marginBottom +
@@ -410,23 +424,45 @@ export default class Heatmap {
       .attr("width", this.rowLabelsWidth + this.options.marginLeft)
       .attr("height", totalColumnLabelsHeight + this.options.marginTop);
     this.placeColumnLabelAndMetadataContainers(this.columnLabelsHeight);
+
+    this.addRowBackground
+      .attr(
+        "width",
+        this.rowLabelsWidth +
+          totalCellWidth +
+          totalRowClusterWidth +
+          this.options.marginRight
+      )
+      .attr(
+        "height",
+        this.totalRowAddLinkHeight + this.options.metadataAddLinkHeight
+      );
+    this.placeAddRowLinkContainer(this.columnLabelsHeight);
+
     this.gCells.attr(
       "transform",
       `translate(${this.rowLabelsWidth},
-        ${totalColumnLabelsHeight + this.totalMetadataHeight})`
+        ${totalColumnLabelsHeight +
+          this.totalMetadataHeight +
+          this.totalRowAddLinkHeight})`
     );
     this.gRowDendogram.attr(
       "transform",
       `translate(
         ${this.rowLabelsWidth + totalCellWidth},
-        ${totalColumnLabelsHeight + this.totalMetadataHeight}
+        ${totalColumnLabelsHeight +
+          this.totalMetadataHeight +
+          this.totalRowAddLinkHeight}
       )`
     );
     this.gColumnDendogram.attr(
       "transform",
       `translate(
         ${this.rowLabelsWidth},
-        ${totalColumnLabelsHeight + this.totalMetadataHeight + totalCellHeight}
+        ${totalColumnLabelsHeight +
+          this.totalMetadataHeight +
+          this.totalRowAddLinkHeight +
+          totalCellHeight}
       )`
     );
     this.gCaption.attr(
@@ -434,6 +470,7 @@ export default class Heatmap {
       `translate(${this.rowLabelsWidth},
         ${totalColumnLabelsHeight +
           this.totalMetadataHeight +
+          this.totalRowAddLinkHeight +
           totalCellHeight +
           totalColumnClusterHeight +
           this.options.spacing}
@@ -528,6 +565,7 @@ export default class Heatmap {
     this.renderColumnMetadataLabels(labelsDx, false);
     // Translate the "Add Metadata" link (same as row labels).
     this.renderColumnMetadataAddLink(labelsDx);
+    this.renderRowAddLink(labelsDx);
 
     // Translating the column and metadata labels in the opposite y direction of the svg.
     let columnLabelsCurrent = d3.transform(this.gColumnLabels.attr("transform"))
@@ -538,14 +576,18 @@ export default class Heatmap {
       columnLabelsCurrent[1] - deltaY
     );
     this.placeColumnLabelAndMetadataContainers(labelsDy);
+    this.placeAddRowLinkContainer(labelsDy);
   }
 
   placeRowLabelContainers(x) {
     const totalMetadataHeight = this.totalMetadataHeight;
+    const totalRowAddLinkHeight = this.totalRowAddLinkHeight;
 
     this.gRowLabels.attr(
       "transform",
-      `translate(${x}, ${this.columnLabelsHeight + totalMetadataHeight})`
+      `translate(${x}, ${this.columnLabelsHeight +
+        totalMetadataHeight +
+        totalRowAddLinkHeight})`
     );
     // Placing the white background rectangle behind the row labels.
     this.rowLabelsBackground
@@ -570,6 +612,14 @@ export default class Heatmap {
     this.metadataLabelsBackground.attr(
       "y",
       y - this.columnLabelsHeight - this.options.marginTop
+    );
+  }
+
+  placeAddRowLinkContainer(y) {
+    this.gAddRow.attr("transform", `translate(0, ${y})`);
+    this.addRowBackground.attr(
+      "y",
+      y + this.options.columnMetadata.length * this.options.minCellHeight
     );
   }
 
@@ -634,6 +684,7 @@ export default class Heatmap {
     this.renderRowLabels();
     this.renderColumnLabels();
     this.renderColumnMetadata();
+    this.renderRowAddLink(0);
 
     if (this.options.clustering) {
       this.renderRowDendrogram();
@@ -1142,6 +1193,71 @@ export default class Heatmap {
     applyFormat(rowLabelEnter);
   }
 
+  renderRowAddLink(dx) {
+    if (this.options.onAddRowClick) {
+      const handleAddRowClick = () => {
+        this.options.onAddRowClick(addRowTrigger.node(), {
+          x: this.rowLabelsWidth - 10,
+          y: yPos,
+        });
+      };
+
+      let addLink = this.gAddRow
+        .selectAll(`.${cs.columnMetadataAdd}`)
+        .data([1]);
+
+      let addLinkEnter = addLink
+        .enter()
+        .append("g")
+        .attr("class", cs.columnMetadataAdd);
+
+      let yPos = this.options.metadataAddLinkHeight / 2;
+
+      addLinkEnter.append("rect");
+
+      addLinkEnter
+        .append("text")
+        .text(() => "Add Taxon")
+        .attr("class", cs.metadataAddLabel)
+        .attr("x", this.rowLabelsWidth - 25)
+        .attr("y", 11)
+        .on("click", handleAddRowClick);
+
+      let addRowTrigger = addLinkEnter
+        .append("g")
+        .attr("class", cs.metadataAddTrigger)
+        .on("click", handleAddRowClick);
+
+      addRowTrigger
+        .append("svg:image")
+        .attr("class", cs.metadataAddIcon)
+        .attr("width", this.options.metadataAddLinkHeight)
+        .attr("height", this.options.metadataAddLinkHeight)
+        .attr("x", this.rowLabelsWidth - 20)
+        .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
+
+      // setup triggers
+      if (addRowTrigger.size()) {
+        this.addRowTrigger = addRowTrigger.node();
+      }
+
+      // update
+      addLink.attr(
+        "transform",
+        `translate(${dx}, ${(1 + this.options.columnMetadata.length) *
+          this.options.minCellHeight})`
+      );
+
+      addLink
+        .select("rect")
+        .attr(
+          "width",
+          this.rowLabelsWidth + this.columnLabels.length * this.cell.width
+        )
+        .attr("height", this.options.metadataAddLinkHeight);
+    }
+  }
+
   renderColumnLabels() {
     let applyFormat = nodes => {
       nodes.attr("transform", d => {
@@ -1211,8 +1327,9 @@ export default class Heatmap {
     let applyFormat = nodes => {
       nodes.attr("transform", (d, idx) => {
         const xOffset = this.getColumnMetadataLabelOffset(d);
-        return `translate(${dx - xOffset}, ${idx *
-          this.options.minCellHeight})`;
+        return `translate(${dx - xOffset}, ${this.options
+          .metadataAddLinkHeight +
+          (1 + idx * this.options.minCellHeight)})`;
       });
     };
 
@@ -1249,7 +1366,7 @@ export default class Heatmap {
       .append("rect")
       .attr("class", cs.hoverTarget)
       .attr("x", -this.options.marginLeft)
-      .attr("y", -1)
+      .attr("y", 0)
       .attr("width", d => {
         const xOffset = this.getColumnMetadataLabelOffset(d);
         return this.rowLabelsWidth + this.options.marginLeft + xOffset;
@@ -1338,7 +1455,9 @@ export default class Heatmap {
     let applyFormatForRows = nodes => {
       nodes.attr(
         "transform",
-        (_, i) => `translate(0, ${this.options.minCellHeight * i})`
+        (_, i) =>
+          `translate(0, ${this.options.metadataAddLinkHeight +
+            this.options.minCellHeight * i})`
       );
     };
 
@@ -1440,8 +1559,6 @@ export default class Heatmap {
 
       addLinkEnter.append("rect");
 
-      addLinkEnter.append("line").attr("class", cs.metadataAddLine);
-
       addLinkEnter
         .append("text")
         .text(() => "Add Metadata")
@@ -1469,11 +1586,7 @@ export default class Heatmap {
       }
 
       // update
-      addLink.attr(
-        "transform",
-        `translate(${dx}, ${this.options.columnMetadata.length *
-          this.options.minCellHeight})`
-      );
+      addLink.attr("transform", `translate(${dx}, 0)`);
 
       addLink
         .select("rect")
@@ -1482,16 +1595,6 @@ export default class Heatmap {
           this.rowLabelsWidth + this.columnLabels.length * this.cell.width
         )
         .attr("height", this.options.metadataAddLinkHeight);
-
-      addLink
-        .select(`.${cs.metadataAddLine}`)
-        .attr("x1", this.rowLabelsWidth)
-        .attr(
-          "x2",
-          this.rowLabelsWidth + this.columnLabels.length * this.cell.width - dx
-        )
-        .attr("y1", yPos)
-        .attr("y2", yPos);
     }
   }
 
