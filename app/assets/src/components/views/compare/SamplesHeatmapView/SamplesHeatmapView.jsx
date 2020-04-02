@@ -557,6 +557,7 @@ class SamplesHeatmapView extends React.Component {
       allData,
       addedTaxonIds,
       notifiedFilteredOutTaxonIds,
+      newestTaxonId,
     } = this.state;
     let taxonDetails = {};
     let taxonIds = new Set();
@@ -581,6 +582,7 @@ class SamplesHeatmapView extends React.Component {
           ) {
             this.showNotification(NOTIFICATION_TYPES.taxaFilteredOut, taxon);
             notifiedFilteredOutTaxonIds.add(taxon["id"]);
+            newestTaxonId = null;
           }
         }
       });
@@ -604,6 +606,7 @@ class SamplesHeatmapView extends React.Component {
       loading: false,
       data: filteredData,
       notifiedFilteredOutTaxonIds,
+      newestTaxonId,
     });
   }
 
@@ -790,6 +793,7 @@ class SamplesHeatmapView extends React.Component {
       ...selectedTaxonIds,
     ]);
     const currentAddedTaxa = new Set(newlyAddedTaxa, previouslyAddedTaxa);
+    const newestTaxonId = newlyAddedTaxa[newlyAddedTaxa.length - 1];
 
     // Update notifiedFilteredOutTaxonIds to remove taxa that were unselected.
     const currentFilteredOutTaxonIds = new Set(
@@ -808,6 +812,7 @@ class SamplesHeatmapView extends React.Component {
       {
         addedTaxonIds: currentAddedTaxa,
         notifiedFilteredOutTaxonIds: currentFilteredOutTaxonIds,
+        newestTaxonId: newestTaxonId,
       },
       this.updateFilters
     );
@@ -1081,6 +1086,7 @@ class SamplesHeatmapView extends React.Component {
           sampleDetails={this.state.sampleDetails}
           scale={SCALE_OPTIONS[scaleIndex][1]}
           selectedTaxa={this.state.addedTaxonIds}
+          newestTaxonId={this.state.newestTaxonId}
           allTaxonIds={this.state.allTaxonIds}
           taxonIds={Array.from(
             new Set(this.state.taxonIds, this.state.addedTaxonIds)

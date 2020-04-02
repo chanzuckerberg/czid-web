@@ -124,13 +124,13 @@ class SamplesHeatmapVis extends React.Component {
     if (this.props.data !== prevProps.data) {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
-        rowLabels: this.extractTaxonLabels(), // Also includes column metadata.
+        rowLabels: this.extractTaxonLabels(),
       });
     }
     if (this.props.taxonIds !== prevProps.taxonIds) {
       this.heatmap.updateData({
         values: this.props.data[this.props.metric],
-        rowLabels: this.extractTaxonLabels(), // Also includes column metadata.
+        rowLabels: this.extractTaxonLabels(),
       });
     }
     if (this.props.thresholdFilters !== prevProps.thresholdFilters) {
@@ -560,6 +560,12 @@ class SamplesHeatmapVis extends React.Component {
             onTaxonSelectionChange={this.props.onAddTaxon}
             onTaxonSelectionClose={() => {
               this.setState({ addTaxonTrigger: null });
+
+              if (this.props.newestTaxonId) {
+                this.heatmap.scrollToRow(
+                  this.props.taxonDetails[this.props.newestTaxonId].name
+                );
+              }
             }}
           />
         )}
@@ -608,6 +614,7 @@ SamplesHeatmapVis.propTypes = {
   allTaxonIds: PropTypes.array,
   taxonIds: PropTypes.array,
   selectedTaxa: PropTypes.object,
+  newestTaxonId: PropTypes.number,
   thresholdFilters: PropTypes.any,
   sampleSortType: PropTypes.string,
   fullScreen: PropTypes.bool,
