@@ -9,6 +9,6 @@ class AwsUtil
 
   def self.get_batch_job_url(job_queue, job_id)
     "https://#{AWS_REGION}.console.aws.amazon.com/batch/home?region=#{AWS_REGION}" \
-      "#/jobs/queue/#{job_queue.replace('/', '~2F')}/job/#{job_id}"
+      "#/jobs/queue/#{job_queue.gsub('/', '~2F')}/job/#{job_id}"
   end
 end
