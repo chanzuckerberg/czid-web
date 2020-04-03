@@ -745,13 +745,8 @@ class SamplesController < ApplicationController
       cache_key = PipelineReportService.report_info_cache_key(
         request.path,
         report_info_params
-          .merge(
-            params
-              .reject { |_, v| v.blank? }
-              .permit(report_info_params.keys)
-          ).merge(
-            background_id: background_id
-          ).symbolize_keys
+          .merge(background_id: background_id)
+          .symbolize_keys
       )
       httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
 
