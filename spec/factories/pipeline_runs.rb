@@ -8,6 +8,7 @@ FactoryBot.define do
       # taxon_counts, amr_counts, output_states, pipeline_run_stage
       # The hash elements will be passed on to their respective factory as keyword arguments.
       taxon_counts_data { [] }
+      contigs_data { [] }
       amr_counts_data { [] }
       output_states_data { [] }
       pipeline_run_stages_data { nil }
@@ -20,6 +21,9 @@ FactoryBot.define do
     after :create do |pipeline_run, options|
       options.taxon_counts_data.each do |taxon_count_data|
         create(:taxon_count, pipeline_run: pipeline_run, **taxon_count_data)
+      end
+      options.contigs_data.each do |contig_data|
+        create(:contig, pipeline_run: pipeline_run, **contig_data)
       end
       options.amr_counts_data.each do |amr_count_data|
         create(:amr_count, pipeline_run: pipeline_run, **amr_count_data)
