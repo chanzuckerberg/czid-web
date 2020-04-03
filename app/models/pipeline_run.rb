@@ -36,11 +36,6 @@ class PipelineRun < ApplicationRecord
   ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta", }.freeze
 
-  GSNAP_CHUNK_SIZE = 60_000
-  RAPSEARCH_CHUNK_SIZE = 80_000
-  GSNAP_MAX_CONCURRENT = 2
-  RAPSEARCH_MAX_CONCURRENT = 8
-
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT = 'taxid_annot_sorted_genus_nt.fasta'.freeze

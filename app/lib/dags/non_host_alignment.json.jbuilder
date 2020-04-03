@@ -42,8 +42,7 @@ json.steps do
   end
 
   additional_attributes = {
-    service: "gsnap",
-    chunk_size: attr[:gsnap_chunk_size],
+    alignment_algorithm: "gsnap",
   }
 
   if attr[:index_dir_suffix]
@@ -64,8 +63,7 @@ json.steps do
   }
 
   additional_attributes = {
-    service: "rapsearch",
-    chunk_size: attr[:rapsearch_chunk_size],
+    alignment_algorithm: "rapsearch",
   }
 
   if attr[:index_dir_suffix]
