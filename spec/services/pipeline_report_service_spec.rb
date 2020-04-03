@@ -3,6 +3,8 @@ require 'json'
 
 RSpec.describe PipelineReportService, type: :service do
   context "converted report test for species taxid 573" do
+    CSV_OUTPUT = "tax_id,tax_level,genus_tax_id,name,common_name,category,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,species_tax_ids\n570,2,570,Klebsiella,,bacteria,2428411764.7058825,99,99,193404.63458110517,217,6,594,99.7014,149.424,89.5822,18.3311,64.2056,99,77540.10695187165,87,6,594,97.9598,46.4253,16.9874,35.0207,238.639,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,2428411764.7058825,99,99,186274.50980392157,209,2,198,99.6995,149.402,89.5641,9.35068,26.4471,99,61497.326203208555,69,2,198,97.8565,46.3623,16.9101,29.9171,236.332,\n".freeze
+
     before do
       ResqueSpec.reset!
 
@@ -59,8 +61,32 @@ RSpec.describe PipelineReportService, type: :service do
                                e_value: -16.9874,
                                genus_taxid: 570,
                                superkingdom_taxid: 2,
+                             },],
+                             contigs_data: [{
+                               species_taxid_nt: 573,
+                               species_taxid_nr: 573,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 573,
+                               species_taxid_nr: 573,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 570,
+                               species_taxid_nr: 570,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 570,
+                               species_taxid_nr: 570,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
                              },])
-
       @background = create(:background,
                            pipeline_run_ids: [
                              create(:pipeline_run,
@@ -136,6 +162,11 @@ RSpec.describe PipelineReportService, type: :service do
       }
 
       expect(JSON.parse(@report)["counts"]["2"]["570"]).to include_json(genus_result)
+    end
+
+    it "should show correct values in CSV in consistent order" do
+      csv_report = PipelineReportService.call(@pipeline_run, @background.id, csv: true)
+      expect(csv_report).to eq(CSV_OUTPUT)
     end
   end
 
