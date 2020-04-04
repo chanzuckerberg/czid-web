@@ -80,10 +80,10 @@ class Sample < ApplicationRecord
 
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 1000
-  DEFAULT_MEMORY_IN_MB = 120_000 # sorry, hacky
+  DEFAULT_MEMORY_IN_MB = 240_000 # sorry, hacky
   HIMEM_IN_MB = 240_000
 
-  DEFAULT_QUEUE = (Rails.env == 'prod' ? 'idseq-prod-lomem' : 'idseq-staging-lomem').freeze
+  DEFAULT_QUEUE = (Rails.env == 'prod' ? 'idseq-prod-himem' : 'idseq-staging-himem').freeze
   DEFAULT_VCPUS = 16
 
   DEFAULT_QUEUE_HIMEM = (Rails.env == 'prod' ? 'idseq-prod-himem' : 'idseq-staging-himem').freeze
