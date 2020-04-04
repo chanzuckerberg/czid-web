@@ -34,6 +34,9 @@ import { Divider } from "~/components/layout";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
+import BannerProjects from "~ui/icons/BannerProjects";
+import BannerSamples from "~ui/icons/BannerSamples";
+import BannerVisualizations from "~ui/icons/BannerVisualizations";
 
 import DiscoveryHeader from "./DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
@@ -130,11 +133,15 @@ class DiscoveryView extends React.Component {
         selectedSampleIds: new Set(),
         showFilters: true,
         showStats: true,
+        userDataCounts: null,
       },
       localState,
       sessionState,
       urlState
     );
+
+    this.loadUserDataStats();
+
     this.dataLayer = new DiscoveryDataLayer(this.props.domain);
     const conditions = this.getConditions();
     this.samples = this.dataLayer.samples.createView({
@@ -477,6 +484,18 @@ class DiscoveryView extends React.Component {
         this.handleMapLevelChange(mapLevel);
       }
     );
+  };
+
+  loadUserDataStats = async () => {
+    const stats = await getDiscoveryStats({
+      domain: DISCOVERY_DOMAIN_MY_DATA,
+    });
+    this.setState({
+      userDataCounts: {
+        sampleCount: stats.sampleStats.count,
+        projectCount: stats.sampleStats.projectCount,
+      },
+    });
   };
 
   computeTabs = () => {
@@ -1012,6 +1031,88 @@ class DiscoveryView extends React.Component {
     }
   };
 
+  renderNoDataBanners = () => {
+    const { currentTab, userDataCounts } = this.state;
+    const { visualizations } = this;
+
+    if (!userDataCounts) return null;
+
+    switch (currentTab) {
+      case "projects":
+        if (userDataCounts.projectCount === 0) {
+          return (
+            <div className={cs.noDataBannerFlexContainer}>
+              <NoResultsBanner
+                className={cs.noDataBannerContainer}
+                icon={<BannerProjects />}
+                link={{
+                  href: "/samples/upload",
+                  text: "Upload your data",
+                }}
+                message="You will see your projects here after you upload data or when you are invited to a project."
+                title="Projects"
+                type="no_projects"
+              />
+            </div>
+          );
+        }
+        break;
+      case "samples":
+        if (userDataCounts.sampleCount === 0) {
+          return (
+            <div className={cs.noDataBannerFlexContainer}>
+              <NoResultsBanner
+                className={cs.noDataBannerContainer}
+                link={{
+                  href: "/samples/upload",
+                  text: "Upload your data",
+                }}
+                message="You will see your samples here after you upload data or when you are invited to a project."
+                title="Samples"
+                type="no_samples"
+              />
+            </div>
+          );
+        }
+        break;
+      case "visualizations":
+        // visualizations are not filtered by conditions (not supported at this time)
+        // thus we use the object collection view from DataDiscoveryDataLayer directly
+        // and we never show the no search results banner.
+        if (!visualizations.isLoading() && visualizations.length === 0) {
+          return (
+            <div className={cs.noDataBannerFlexContainer}>
+              <NoResultsBanner
+                className={cs.noDataBannerContainer}
+                link={{
+                  href: "/learn_more?",
+                  text: "Learn about Visualizations",
+                }}
+                message="You will see your saved Heatmaps and Phylogenetic Trees here. You can create them from the Sample tab."
+                title="Visualizations"
+                type="no_visualizations"
+              />
+            </div>
+          );
+        }
+        break;
+    }
+    return null;
+  };
+
+  renderNoSearchResultsBanner = type => {
+    return (
+      <div className={cs.noDataBannerFlexContainer}>
+        <NoResultsBanner
+          className={cs.noResultsContainer}
+          message="Sorry, no results match your search."
+          suggestion="Try another search"
+          type={type}
+        />
+      </div>
+    );
+  };
+
   renderCenterPaneContent = () => {
     const {
       currentDisplay,
@@ -1019,15 +1120,14 @@ class DiscoveryView extends React.Component {
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
+      projectId,
       sampleActiveColumns,
       selectableSampleIds,
       selectedSampleIds,
-      projectId,
     } = this.state;
 
     const { admin, allowedFeatures, mapTilerKey } = this.props;
     const { projects, samples, visualizations } = this;
-
     return (
       <React.Fragment>
         {currentTab === "projects" && (
@@ -1055,12 +1155,8 @@ class DiscoveryView extends React.Component {
             </div>
             {!projects.length &&
               !projects.isLoading() &&
-              currentDisplay === "table" && (
-                <NoResultsBanner
-                  className={cs.noResultsContainer}
-                  type="projects"
-                />
-              )}
+              currentDisplay === "table" &&
+              this.renderNoSearchResultsBanner("projects")}
           </div>
         )}
         {currentTab === "samples" && (
@@ -1095,12 +1191,8 @@ class DiscoveryView extends React.Component {
             </div>
             {!samples.length &&
               !samples.isLoading() &&
-              currentDisplay === "table" && (
-                <NoResultsBanner
-                  className={cs.noResultsContainer}
-                  type="samples"
-                />
-              )}
+              currentDisplay === "table" &&
+              this.renderNoSearchResultsBanner("samples")}
           </div>
         )}
         {currentTab === "visualizations" && (
@@ -1110,12 +1202,8 @@ class DiscoveryView extends React.Component {
             </div>
             {!visualizations.length &&
               !visualizations.isLoading() &&
-              currentDisplay === "table" && (
-                <NoResultsBanner
-                  className={cs.noResultsContainer}
-                  type="visualizations"
-                />
-              )}
+              currentDisplay === "table" &&
+              this.renderNoSearchResultsBanner("visualizations")}
           </div>
         )}
       </React.Fragment>
@@ -1235,6 +1323,7 @@ class DiscoveryView extends React.Component {
       search,
       showFilters,
       showStats,
+      userDataCounts,
     } = this.state;
     const { domain, allowedFeatures } = this.props;
 
@@ -1287,16 +1376,17 @@ class DiscoveryView extends React.Component {
               )}
           </div>
           <div className={cs.centerPane}>
-            {currentDisplay === "map" &&
-            ["samples", "projects"].includes(currentTab) ? (
-              <div className={cs.viewContainer}>
-                {this.renderCenterPaneContent()}
-              </div>
-            ) : (
-              <NarrowContainer className={cs.viewContainer}>
-                {this.renderCenterPaneContent()}
-              </NarrowContainer>
-            )}
+            {userDataCounts &&
+              (currentDisplay === "map" &&
+              ["samples", "projects"].includes(currentTab) ? (
+                <div className={cs.viewContainer}>
+                  {this.renderNoDataBanners() || this.renderCenterPaneContent()}
+                </div>
+              ) : (
+                <NarrowContainer className={cs.viewContainer}>
+                  {this.renderNoDataBanners() || this.renderCenterPaneContent()}
+                </NarrowContainer>
+              ))}
           </div>
           {this.renderRightPane()}
         </div>

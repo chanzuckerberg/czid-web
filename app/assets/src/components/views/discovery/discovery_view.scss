@@ -86,3 +86,19 @@
     max-height: 400px;
   }
 }
+
+.noDataBannerFlexContainer {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+
+  &::before {
+    content: "";
+    flex: 1 0 auto;
+    max-height: 250px;
+  }
+
+  .noDataBannerContainer {
+    flex: 0 0 auto;
+  }
+}

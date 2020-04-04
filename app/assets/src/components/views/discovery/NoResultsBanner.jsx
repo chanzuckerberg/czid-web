@@ -3,38 +3,60 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 
 import { logAnalyticsEvent } from "~/api/analytics";
+import Link from "~ui/controls/Link";
+import NoResultsIcon from "~ui/icons/NoResultsIcon";
 
 import cs from "./no_results_banner.scss";
-import NoResultsIcon from "../../ui/icons/NoResultsIcon";
 
-const NoResultsBanner = ({ className, message, suggestion, type }) => {
+const NoResultsBanner = ({
+  className,
+  icon,
+  link,
+  message,
+  suggestion,
+  title,
+  type,
+}) => {
   // This is a hack to associate the event with the parent component, DiscoveryView
   logAnalyticsEvent("DiscoveryView_no-results-banner_displayed", {
-    type,
     message,
+    title,
+    type,
   });
+
   return (
     <div className={cx(cs.container, className)}>
-      <div className={cs.text}>
-        <div className={cs.message}>{message}</div>
-        <div className={cs.suggestion}>{suggestion}</div>
+      <div className={cs.content}>
+        {title && <div className={cs.title}>{title}</div>}
+        {message && <div className={cs.message}>{message}</div>}
+        {suggestion && <div className={cs.suggestion}>{suggestion}</div>}
+        {link && (
+          <Link className={cs.link} href={link.href}>
+            {link.text}
+            <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+          </Link>
+        )}
       </div>
-      <div className={cs.icon}>
-        <NoResultsIcon className={cs.icon} />
-      </div>
+      <div className={cs.icon}>{icon}</div>
     </div>
   );
 };
 
 NoResultsBanner.defaultProps = {
-  message: "Sorry, no results match your search.",
-  suggestion: "Try another search",
+  // Defaults to the most commonly used banner settings
+  icon: <NoResultsIcon className={cs.icon} />,
 };
 
 NoResultsBanner.propTypes = {
   className: PropTypes.string,
+  icon: PropTypes.node,
+  link: PropTypes.shape({
+    text: PropTypes.string.isRequired,
+    href: PropTypes.string.isRequired,
+  }),
   message: PropTypes.string,
   suggestion: PropTypes.string,
+  title: PropTypes.string,
   type: PropTypes.string,
 };
 

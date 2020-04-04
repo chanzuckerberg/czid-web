@@ -1,31 +1,54 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 @import "~styles/themes/typography";
 
 .container {
   display: flex;
-  width: 400px;
+  width: 500px;
   align-items: center;
   margin: 0 auto;
 
-  .text {
-    flex: 11 11 0;
+  .content {
+    flex: 1 0 0;
     margin-right: 10%;
 
-    .message {
+    .title {
       @include font-header-l;
 
       color: $black;
     }
 
-    .suggestion {
+    .message {
       @include font-body-s;
 
+      color: $black;
+      margin-top: $space-s;
+    }
+
+    .suggestion {
+      @include font-header-xs;
+
       color: $dark-grey;
-      font-weight: $font-weight-regular;
-      margin-top: 5px;
+      margin-top: $space-s;
+    }
+
+    .link {
+      @include font-header-xs;
+      // Override color: inherit in _header.scss.
+      color: $primary-light !important;
+      display: block;
+      margin-top: $space-s;
+
+      .rightArrow {
+        font-size: 0.75em;
+        margin-left: $space-xxs;
+      }
     }
   }
   .icon {
-    flex: 7 7 0;
+    flex: 0 0 auto;
+    margin-right: $space-s;
+    height: 200px;
+    width: 200px;
   }
 }
