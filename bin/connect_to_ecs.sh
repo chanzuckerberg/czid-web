@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
 
 if [[ $# == 0 ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
     echo "Usage: $0 cluster_name" 1>&2
@@ -10,6 +10,13 @@ fi
 
 cluster=$1
 shift
+
+if [[ -z "$BLESS_CONFIG" ]] && [[ -f "$(dirname $0)/../../idseq-infra/blessconfig.yml" ]]; then
+    export BLESS_CONFIG="$(dirname $0)/../../idseq-infra/blessconfig.yml"
+elif [[ -z "$BLESS_CONFIG" ]]; then
+    echo "Please set the environment variable BLESS_CONFIG to the location of the idseq-infra/blessconfig.yml file" 1>&2
+    exit
+fi
 
 task_arn=$(aegea ecs tasks --cluster $cluster --desired-status RUNNING --json | jq -r .[0].taskArn)
 container_instance_arn=$(aws ecs describe-tasks --cluster prod --tasks $task_arn | jq -r .tasks[0].containerInstanceArn)
