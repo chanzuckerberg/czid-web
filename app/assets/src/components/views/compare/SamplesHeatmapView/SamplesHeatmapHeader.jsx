@@ -50,16 +50,7 @@ export default class SamplesHeatmapHeader extends React.Component {
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
           <ViewHeader.Pretitle>
-            <React.Fragment>
-              Heatmap
-              {allowedFeatures.includes("heatmap_filter_fe") && (
-                <StatusLabel
-                  status="Beta - Client Filtering"
-                  type="info"
-                  inline={true}
-                />
-              )}
-            </React.Fragment>
+            <React.Fragment>Heatmap</React.Fragment>
           </ViewHeader.Pretitle>
           <ViewHeader.Title
             label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
