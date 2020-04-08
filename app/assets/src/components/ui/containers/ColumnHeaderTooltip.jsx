@@ -13,7 +13,6 @@ class ColumnHeaderTooltip extends React.Component {
           <div className={cs.tooltip}>
             {title && <span className={cs.title}>{title}:</span>}
             {content}
-            {/* TODO(julie): fix list styling */}
             {list && (
               <ul className={cs.ul}>
                 {" "}

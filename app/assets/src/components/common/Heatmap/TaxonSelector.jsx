@@ -32,7 +32,6 @@ export default class TaxonSelector extends React.Component {
             title="Select Taxon"
             labelTitle="Taxa"
             countTitle="Samples"
-            minWidth={240}
           />
         </div>
       </ContextPlaceholder>

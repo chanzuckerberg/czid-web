@@ -1237,7 +1237,7 @@ export default class Heatmap {
       .attr(
         "transform",
         `translate(${this.options.spacing},
-        ${this.cell.height / 4})`
+        ${(this.cell.height - this.options.spacing) / 2})`
       )
       .attr("xlink:href", `${this.options.iconPath}/IconCloseSmall.svg`)
       .on("click", this.removeRow);
