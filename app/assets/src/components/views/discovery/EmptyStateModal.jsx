@@ -24,7 +24,7 @@ const EmptyStateModal = ({ onClose }) => {
         iconClassName={cs.iconClassName}
         message={
           <React.Fragment>
-            To get started you can{" "}
+            To get started, you can{" "}
             <Link className={cs.link} href={"/samples/upload"}>
               Upload
             </Link>{" "}
