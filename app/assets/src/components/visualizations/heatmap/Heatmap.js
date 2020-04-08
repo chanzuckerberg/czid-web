@@ -530,36 +530,40 @@ export default class Heatmap {
     // If there's a specific row we want to focus on, auto-scroll the heatmap
     // so the row is centered on screen.
     const row = this.rowLabels.filter(rowLabel => rowLabel.label === label)[0];
-    const rowIndex = row.rowIndex;
+    if (row) {
+      const rowIndex = row.rowIndex;
 
-    const containerHeight = this.container[0][0].offsetHeight;
-    const metadataHeight =
-      this.totalMetadataHeight + this.totalRowAddLinkHeight;
-    const rowOffset =
-      containerHeight / 4 - (this.cellYPosition(row) + metadataHeight);
-    this.pan(0, rowOffset, true);
+      const containerHeight = this.container[0][0].offsetHeight;
+      const metadataHeight =
+        this.totalMetadataHeight + this.totalRowAddLinkHeight;
+      const rowOffset =
+        containerHeight / 4 - (this.cellYPosition(row) + metadataHeight);
+      this.pan(0, rowOffset, true);
 
-    // Briefly highlight the focused row.
-    for (let i = 0; i < this.rowLabels.length; i++) {
-      this.rowLabels[i].shaded = i !== rowIndex;
-    }
-    this.updateLabelHighlights(
-      this.gRowLabels.selectAll(`.${cs.rowLabel}`),
-      this.rowLabels
-    );
-    this.updateCellHighlights();
-
-    for (let i = 0; i < this.rowLabels.length; i++) {
-      this.rowLabels[i].shaded = false;
-    }
-    setTimeout(() => {
-      this.rowLabels[rowIndex].highlighted = false;
-      this.updateCellHighlights();
+      // Briefly highlight the focused row.
+      this.rowLabels[rowIndex].highlighted = true;
+      for (let i = 0; i < this.rowLabels.length; i++) {
+        this.rowLabels[i].shaded = i !== rowIndex;
+      }
       this.updateLabelHighlights(
         this.gRowLabels.selectAll(`.${cs.rowLabel}`),
         this.rowLabels
       );
-    }, 2750);
+      this.updateCellHighlights();
+
+      this.rowLabels[rowIndex].highlighted = false;
+      for (let i = 0; i < this.rowLabels.length; i++) {
+        this.rowLabels[i].shaded = false;
+      }
+      setTimeout(() => {
+        this.rowLabels[rowIndex].highlighted = false;
+        this.updateCellHighlights();
+        this.updateLabelHighlights(
+          this.gRowLabels.selectAll(`.${cs.rowLabel}`),
+          this.rowLabels
+        );
+      }, 2750);
+    }
   }
 
   pan(deltaX, deltaY, transition = false) {
@@ -1226,15 +1230,16 @@ export default class Heatmap {
       });
 
     rowLabelEnter
-      .append("text")
+      .append("svg:image")
       .attr("class", cs.removeIcon)
-      .text("X")
+      .attr("width", this.options.spacing)
+      .attr("height", this.options.spacing)
       .attr(
         "transform",
         `translate(${this.options.spacing},
-        ${this.cell.height / 2})`
+        ${this.cell.height / 4})`
       )
-      .style("dominant-baseline", "central")
+      .attr("xlink:href", `${this.options.iconPath}/IconCloseSmall.svg`)
       .on("click", this.removeRow);
 
     applyFormat(rowLabelEnter);
