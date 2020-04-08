@@ -98,6 +98,11 @@
     max-height: 250px;
   }
 
+  &::after {
+    content: "";
+    flex: 1 0 auto;
+  }
+
   .noDataBannerContainer {
     flex: 0 0 auto;
   }
