@@ -57,6 +57,10 @@ json.targets do
       json.nonhost_fastq_out ["nonhost_R1.fasta"]
     end
   end
+
+  json.cdhitdup_clusters [
+    "dedup1.fa.clstr",
+  ]
 end
 
 json.steps do
@@ -132,7 +136,9 @@ json.steps do
     class: "PipelineStepNonhostFastq",
     module: "idseq_dag.steps.nonhost_fastq",
     additional_files: {},
-    additional_attributes: {},
+    additional_attributes: {
+      use_taxon_whitelist: attr[:use_taxon_whitelist],
+    },
   }
 
   json.array! steps
@@ -161,5 +167,9 @@ json.given_targets do
 
   json.nonhost_fasta do
     json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/postprocess/#{attr[:pipeline_version]}/assembly"
+  end
+
+  json.cdhitdup_clusters do
+    json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
   end
 end
