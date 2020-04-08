@@ -48,7 +48,10 @@
   .icon {
     flex: 0 0 auto;
     margin-right: $space-s;
-    height: 200px;
-    width: 200px;
+
+    svg {
+      height: 200px;
+      width: 200px;
+    }
   }
 }

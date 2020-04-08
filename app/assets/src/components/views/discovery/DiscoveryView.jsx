@@ -29,6 +29,7 @@ import { getSearchSuggestions } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { get } from "~/api/core";
 import { openUrl } from "~utils/links";
+import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
@@ -39,6 +40,7 @@ import BannerSamples from "~ui/icons/BannerSamples";
 import BannerVisualizations from "~ui/icons/BannerVisualizations";
 
 import DiscoveryHeader from "./DiscoveryHeader";
+import EmptyStateModal from "./EmptyStateModal";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
@@ -54,7 +56,7 @@ import {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
 } from "./discovery_api";
-import NoResultsBanner from "./NoResultsBanner";
+import InfoBanner from "./InfoBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 
 import cs from "./discovery_view.scss";
@@ -100,9 +102,10 @@ class DiscoveryView extends React.Component {
       {
         currentDisplay: "table",
         currentTab:
-          projectId || this.props.domain === "all_data"
+          projectId || this.props.domain === DISCOVERY_DOMAIN_ALL_DATA
             ? "samples"
             : "projects",
+        emptyStateModalOpen: this.isFirstTimeUser(),
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredProjectCount: null,
@@ -251,6 +254,10 @@ class DiscoveryView extends React.Component {
 
     // We want to persist some options when user returns to the page on a different session
     localStorage.setItem("DiscoveryViewOptions", JSON.stringify(localState));
+  };
+
+  isFirstTimeUser = () => {
+    return !localStorage.getItem("DiscoveryViewSeenBefore");
   };
 
   preparedFilters = () => {
@@ -1031,18 +1038,30 @@ class DiscoveryView extends React.Component {
     }
   };
 
+  handleEmptyStateModalClose = () => {
+    this.setState({
+      emptyStateModalOpen: false,
+    });
+  };
+
   renderNoDataBanners = () => {
-    const { currentTab, userDataCounts } = this.state;
+    const { currentTab, emptyStateModalOpen, userDataCounts } = this.state;
     const { visualizations } = this;
 
     if (!userDataCounts) return null;
 
+    if (emptyStateModalOpen) {
+      localStorage.setItem("DiscoveryViewSeenBefore", "1");
+    }
+
     switch (currentTab) {
       case "projects":
         if (userDataCounts.projectCount === 0) {
-          return (
+          return emptyStateModalOpen ? (
+            <EmptyStateModal onClose={this.handleEmptyStateModalClose} />
+          ) : (
             <div className={cs.noDataBannerFlexContainer}>
-              <NoResultsBanner
+              <InfoBanner
                 className={cs.noDataBannerContainer}
                 icon={<BannerProjects />}
                 link={{
@@ -1059,10 +1078,13 @@ class DiscoveryView extends React.Component {
         break;
       case "samples":
         if (userDataCounts.sampleCount === 0) {
-          return (
+          return emptyStateModalOpen ? (
+            <EmptyStateModal onClose={this.handleCloseEmptyStateModal} />
+          ) : (
             <div className={cs.noDataBannerFlexContainer}>
-              <NoResultsBanner
+              <InfoBanner
                 className={cs.noDataBannerContainer}
+                icon={<BannerSamples />}
                 link={{
                   href: "/samples/upload",
                   text: "Upload your data",
@@ -1080,12 +1102,15 @@ class DiscoveryView extends React.Component {
         // thus we use the object collection view from DataDiscoveryDataLayer directly
         // and we never show the no search results banner.
         if (!visualizations.isLoading() && visualizations.length === 0) {
-          return (
+          return emptyStateModalOpen ? (
+            <EmptyStateModal onClose={this.handleCloseEmptyStateModal} />
+          ) : (
             <div className={cs.noDataBannerFlexContainer}>
-              <NoResultsBanner
+              <InfoBanner
                 className={cs.noDataBannerContainer}
+                icon={<BannerVisualizations />}
                 link={{
-                  href: "/learn_more?",
+                  href: VISUALIZATIONS_DOC_LINK,
                   text: "Learn about Visualizations",
                 }}
                 message="You will see your saved Heatmaps and Phylogenetic Trees here. You can create them from the Sample tab."
@@ -1103,7 +1128,7 @@ class DiscoveryView extends React.Component {
   renderNoSearchResultsBanner = type => {
     return (
       <div className={cs.noDataBannerFlexContainer}>
-        <NoResultsBanner
+        <InfoBanner
           className={cs.noResultsContainer}
           message="Sorry, no results match your search."
           suggestion="Try another search"
@@ -1211,7 +1236,7 @@ class DiscoveryView extends React.Component {
   };
 
   renderRightPane = () => {
-    const { allowedFeatures } = this.props;
+    const { allowedFeatures, domain } = this.props;
     const {
       currentDisplay,
       currentTab,
@@ -1235,6 +1260,7 @@ class DiscoveryView extends React.Component {
       sampleDimensions,
       search,
       showStats,
+      userDataCounts,
     } = this.state;
     const filterCount = this.getFilterCount();
     const computedProjectDimensions =
@@ -1295,6 +1321,11 @@ class DiscoveryView extends React.Component {
             <DiscoverySidebar
               allowedFeatures={allowedFeatures}
               currentTab={currentTab}
+              noDataAvailable={
+                domain === DISCOVERY_DOMAIN_MY_DATA &&
+                userDataCounts &&
+                !userDataCounts.projectCount
+              }
               loading={loading}
               onFilterClick={this.handleMetadataFilterClick}
               projectDimensions={computedProjectDimensions}
@@ -1380,11 +1411,15 @@ class DiscoveryView extends React.Component {
               (currentDisplay === "map" &&
               ["samples", "projects"].includes(currentTab) ? (
                 <div className={cs.viewContainer}>
-                  {this.renderNoDataBanners() || this.renderCenterPaneContent()}
+                  {(domain === DISCOVERY_DOMAIN_MY_DATA &&
+                    this.renderNoDataBanners()) ||
+                    this.renderCenterPaneContent()}
                 </div>
               ) : (
                 <NarrowContainer className={cs.viewContainer}>
-                  {this.renderNoDataBanners() || this.renderCenterPaneContent()}
+                  {(domain === DISCOVERY_DOMAIN_MY_DATA &&
+                    this.renderNoDataBanners()) ||
+                    this.renderCenterPaneContent()}
                 </NarrowContainer>
               ))}
           </div>

@@ -1,0 +1,20 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.messageClassName {
+  @include font-body-m;
+}
+
+.titleClassName {
+  @include font-header-xl;
+}
+
+.link {
+  color: $primary-light !important;
+}
+
+.iconClassName {
+  svg {
+    fill: $primary-light;
+  }
+}

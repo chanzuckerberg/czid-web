@@ -6,15 +6,18 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import Link from "~ui/controls/Link";
 import NoResultsIcon from "~ui/icons/NoResultsIcon";
 
-import cs from "./no_results_banner.scss";
+import cs from "./info_banner.scss";
 
-const NoResultsBanner = ({
+const InfoBanner = ({
   className,
   icon,
+  iconClassName,
   link,
   message,
+  messageClassName,
   suggestion,
   title,
+  titleClassName,
   type,
 }) => {
   // This is a hack to associate the event with the parent component, DiscoveryView
@@ -27,8 +30,10 @@ const NoResultsBanner = ({
   return (
     <div className={cx(cs.container, className)}>
       <div className={cs.content}>
-        {title && <div className={cs.title}>{title}</div>}
-        {message && <div className={cs.message}>{message}</div>}
+        {title && <div className={cx(cs.title, titleClassName)}>{title}</div>}
+        {message && (
+          <div className={cx(cs.message, messageClassName)}>{message}</div>
+        )}
         {suggestion && <div className={cs.suggestion}>{suggestion}</div>}
         {link && (
           <Link className={cs.link} href={link.href}>
@@ -37,27 +42,30 @@ const NoResultsBanner = ({
           </Link>
         )}
       </div>
-      <div className={cs.icon}>{icon}</div>
+      <div className={cx(cs.icon, iconClassName)}>{icon}</div>
     </div>
   );
 };
 
-NoResultsBanner.defaultProps = {
+InfoBanner.defaultProps = {
   // Defaults to the most commonly used banner settings
   icon: <NoResultsIcon className={cs.icon} />,
 };
 
-NoResultsBanner.propTypes = {
+InfoBanner.propTypes = {
   className: PropTypes.string,
   icon: PropTypes.node,
+  iconClassName: PropTypes.string,
   link: PropTypes.shape({
     text: PropTypes.string.isRequired,
     href: PropTypes.string.isRequired,
   }),
-  message: PropTypes.string,
+  message: PropTypes.node,
+  messageClassName: PropTypes.string,
   suggestion: PropTypes.string,
   title: PropTypes.string,
+  titleClassName: PropTypes.string,
   type: PropTypes.string,
 };
 
-export default NoResultsBanner;
+export default InfoBanner;
