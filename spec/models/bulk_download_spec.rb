@@ -75,6 +75,7 @@ describe BulkDownload, type: :model do
   context "#bulk_download_ecs_task_command" do
     before do
       @joe = create(:joe)
+      @joe.add_allowed_feature("betacoronavirus_fastqs")
       @project = create(:project, users: [@joe], name: "Test Project")
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
                                     pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
