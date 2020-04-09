@@ -18,7 +18,7 @@ class BulkDownloadsController < ApplicationController
     unless current_user.admin?
       download_types = download_types.reject do |type|
         type[:admin_only] ||
-          (type[:required_allowed_feature] && !current_user.allowed_feature?(type.type))
+          (type[:required_allowed_feature] && !current_user.allowed_feature?(type[:type]))
       end
     end
 
