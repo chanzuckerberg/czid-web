@@ -362,7 +362,7 @@ class BulkDownload < ApplicationRecord
     if download_type == BETACORONOVIRUS_BULK_DOWNLOAD_TYPE
       pipeline_runs_ordered = pipeline_runs_ordered.includes(sample: [:input_files])
 
-      download_src_urls = pipeline_runs_ordered.map(&:betacoronavirus_fastq_s3_paths).flatten
+      download_src_urls = pipeline_runs_ordered.map { |pr| pr.nonhost_fastq_s3_paths('betacoronavirus__') }.flatten
       download_tar_names = pipeline_runs_ordered.map do |pipeline_run|
         sample = pipeline_run.sample
         # Inputs for this type we expect to always be fastq but logically both could work

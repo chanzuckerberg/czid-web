@@ -556,35 +556,18 @@ class PipelineRun < ApplicationRecord
     return "#{host_filter_output_s3_path}/#{READS_PER_GENE_STAR_TAB_NAME}"
   end
 
-  def nonhost_fastq_s3_paths
+  def nonhost_fastq_s3_paths(prefix = '')
     input_file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
 
     files = [
-      "#{postprocess_output_s3_path}/nonhost_R1.#{input_file_ext}",
+      "#{postprocess_output_s3_path}/#{prefix}nonhost_R1.#{input_file_ext}",
     ]
 
     if sample.input_files.length == 2
-      files << "#{postprocess_output_s3_path}/nonhost_R2.#{input_file_ext}"
+      files << "#{postprocess_output_s3_path}/#{prefix}nonhost_R2.#{input_file_ext}"
     end
 
     files
-  end
-
-  def betacoronavirus_fastq_s3_paths
-    # must be in sync with naming in idseq_dag/steps/nonhost_fastq.py
-    s3_path = lambda do |name|
-      "#{postprocess_output_s3_path}/betacoronavirus__#{name}"
-    end
-
-    s3_paths = [
-      s3_path.call(sample.input_files[0].without_gz),
-    ]
-
-    if sample.input_files.length == 2
-      s3_paths << s3_path.call(sample.input_files[1].without_gz)
-    end
-
-    s3_paths
   end
 
   # Unidentified is also referred to as "unmapped"

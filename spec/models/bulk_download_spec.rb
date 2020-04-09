@@ -245,15 +245,14 @@ describe BulkDownload, type: :model do
                                 },
                               })
 
-      expect(@sample_one.input_files[0].without_gz.ends_with?('.gz')).to be false
       task_command = [
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/betacoronavirus__#{@sample_one.input_files[0].without_gz}",
-        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/betacoronavirus__#{@sample_one.input_files[1].without_gz}",
-        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/betacoronavirus__#{@sample_two.input_files[0].without_gz}",
-        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/betacoronavirus__#{@sample_two.input_files[1].without_gz}",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/betacoronavirus__nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_one.id}/postprocess/3.12/betacoronavirus__nonhost_R2.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/betacoronavirus__nonhost_R1.fastq",
+        "s3://idseq-samples-prod/samples/#{@project.id}/#{@sample_two.id}/postprocess/3.12/betacoronavirus__nonhost_R2.fastq",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "betacoronavirus_reads_R1.fastq"),
         get_expected_tar_name(@project, @sample_one, "betacoronavirus_reads_R2.fastq"),
