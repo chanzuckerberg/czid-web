@@ -116,6 +116,7 @@ module BulkDownloadTypesHelper
     },
     {
       type: BETACORONOVIRUS_BULK_DOWNLOAD_TYPE,
+      required_allowed_feature: "betacoronavirus_fastqs", # see allowed_features
       display_name: "Betacoronavirus Reads (Paired, Non-Deduplicated)",
       description: "Paired, non-deduplicated, FASTQs of betacoronavirus reads",
       category: "raw",
