@@ -9,6 +9,7 @@ module BulkDownloadTypesHelper
   CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE = "contigs_non_host".freeze
   UNMAPPED_READS_BULK_DOWNLOAD_TYPE = "unmapped_reads".freeze
   ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE = "original_input_file".freeze
+  BETACORONOVIRUS_BULK_DOWNLOAD_TYPE = "betacoronavirus".freeze
 
   RESQUE_EXECUTION_TYPE = "resque".freeze
   VARIABLE_EXECUTION_TYPE = "variable".freeze
@@ -17,6 +18,7 @@ module BulkDownloadTypesHelper
   # The "type" value of the bulk download fields is really the field key.
   # There isn't currently anything that specifies what data type the field is.
   # The front-end is hard-coded to display a select dropdown or a checkbox depending on the field type.
+  # For more documentation, see https://czi.quip.com/TJEaAeFaAewG/Making-a-Bulk-Download-Things-to-Know
   BULK_DOWNLOAD_TYPES = [
     {
       type: SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,
@@ -111,6 +113,14 @@ module BulkDownloadTypesHelper
         },
       ],
       execution_type: VARIABLE_EXECUTION_TYPE,
+    },
+    {
+      type: BETACORONOVIRUS_BULK_DOWNLOAD_TYPE,
+      display_name: "Betacoronavirus Reads (Paired, Non-Deduplicated)",
+      description: "Paired, non-deduplicated, FASTQs of betacoronavirus reads",
+      category: "raw",
+      execution_type: ECS_EXECUTION_TYPE,
+      file_type_display: ".fastq",
     },
     {
       type: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,

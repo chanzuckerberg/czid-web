@@ -570,6 +570,23 @@ class PipelineRun < ApplicationRecord
     files
   end
 
+  def betacoronavirus_fastq_s3_paths
+    # must be in sync with naming in idseq_dag/steps/nonhost_fastq.py
+    s3_path = lambda do |name|
+      "#{postprocess_output_s3_path}/betacoronavirus__#{name.gsub(/.gz$/, '')}"
+    end
+
+    s3_paths = [
+      s3_path.call(sample.input_files[0].name),
+    ]
+
+    if sample.input_files.length == 2
+      s3_paths << s3_path.call(sample.input_files[1].name)
+    end
+
+    s3_paths
+  end
+
   # Unidentified is also referred to as "unmapped"
   def unidentified_fasta_s3_path
     return "#{assembly_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if supports_assembly?
