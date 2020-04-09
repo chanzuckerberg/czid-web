@@ -573,15 +573,15 @@ class PipelineRun < ApplicationRecord
   def betacoronavirus_fastq_s3_paths
     # must be in sync with naming in idseq_dag/steps/nonhost_fastq.py
     s3_path = lambda do |name|
-      "#{postprocess_output_s3_path}/betacoronavirus__#{name.gsub(/.gz$/, '')}"
+      "#{postprocess_output_s3_path}/betacoronavirus__#{name}"
     end
 
     s3_paths = [
-      s3_path.call(sample.input_files[0].name),
+      s3_path.call(sample.input_files[0].without_gz),
     ]
 
     if sample.input_files.length == 2
-      s3_paths << s3_path.call(sample.input_files[1].name)
+      s3_paths << s3_path.call(sample.input_files[1].without_gz)
     end
 
     s3_paths

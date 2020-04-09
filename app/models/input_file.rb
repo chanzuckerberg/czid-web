@@ -43,4 +43,8 @@ class InputFile < ApplicationRecord
   def file_type
     FILE_REGEX.match(name)[1] if FILE_REGEX.match(name)
   end
+
+  def without_gz
+    name.gsub(/.gz$/, '')
+  end
 end
