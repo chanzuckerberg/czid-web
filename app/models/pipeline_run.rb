@@ -556,15 +556,15 @@ class PipelineRun < ApplicationRecord
     return "#{host_filter_output_s3_path}/#{READS_PER_GENE_STAR_TAB_NAME}"
   end
 
-  def nonhost_fastq_s3_paths
+  def nonhost_fastq_s3_paths(prefix = '')
     input_file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
 
     files = [
-      "#{postprocess_output_s3_path}/nonhost_R1.#{input_file_ext}",
+      "#{postprocess_output_s3_path}/#{prefix}nonhost_R1.#{input_file_ext}",
     ]
 
     if sample.input_files.length == 2
-      files << "#{postprocess_output_s3_path}/nonhost_R2.#{input_file_ext}"
+      files << "#{postprocess_output_s3_path}/#{prefix}nonhost_R2.#{input_file_ext}"
     end
 
     files
