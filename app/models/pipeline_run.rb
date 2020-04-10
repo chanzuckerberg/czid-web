@@ -943,7 +943,6 @@ class PipelineRun < ApplicationRecord
       # See https://jira.czi.team/browse/IDSEQ-1924.
       compile_stats_file!
       load_stats_file
-      load_chunk_stats
     rescue => e
       LogUtil.log_err_and_airbrake("Failure compiling stats: #{e}")
       LogUtil.log_backtrace(e)
@@ -1163,17 +1162,6 @@ class PipelineRun < ApplicationRecord
         update(alert_sent: 1)
       end
     end
-  end
-
-  def load_chunk_stats
-    stdout = Syscall.run("aws", "s3", "ls", "#{output_s3_path_with_version}/chunks/")
-    return unless stdout
-    outputs = stdout.split("\n").map { |line| line.split.last }
-    gsnap_outputs = outputs.select { |file_name| file_name.start_with?("multihit-gsnap-out") && file_name.end_with?(".m8") }
-    rapsearch2_outputs = outputs.select { |file_name| file_name.start_with?("multihit-rapsearch2-out") && file_name.end_with?(".m8") }
-    self.completed_gsnap_chunks = gsnap_outputs.length
-    self.completed_rapsearch2_chunks = rapsearch2_outputs.length
-    save
   end
 
   # Generate stats.json from all *.count files in results dir. Example:
