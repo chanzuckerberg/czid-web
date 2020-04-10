@@ -36,12 +36,6 @@ class PipelineRun < ApplicationRecord
   ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta", }.freeze
 
-  GSNAP_CHUNK_SIZE = 60_000
-  RAPSEARCH_CHUNK_SIZE = 80_000
-  GSNAP_MAX_CONCURRENT = 2
-  RAPSEARCH_MAX_CONCURRENT = 8
-  MAX_CHUNKS_IN_FLIGHT = 32
-
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT = 'taxid_annot_sorted_genus_nt.fasta'.freeze
@@ -57,7 +51,7 @@ class PipelineRun < ApplicationRecord
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
 
   GSNAP_M8 = "gsnap.m8".freeze
-  RAPSEARCH_M8 = "rapsearch2.m8".freeze
+  RAPSEARCH2_M8 = "rapsearch2.m8".freeze
   OUTPUT_JSON_NAME = 'taxon_counts_with_dcr.json'.freeze
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
@@ -230,13 +224,6 @@ class PipelineRun < ApplicationRecord
   # (RM) transition executed by the Result Monitor
   # (Resque Worker) transition executed by the Resque Worker
 
-  # Constants for alignment chunk scheduling,
-  # shared between idseq-web/app/jobs/autoscaling.py and idseq-dag/idseq_dag/util/server.py:
-  MAX_JOB_DISPATCH_LAG_SECONDS = 900
-  JOB_TAG_PREFIX = "RunningIDseqBatchJob_".freeze
-  JOB_TAG_KEEP_ALIVE_SECONDS = 600
-  DRAINING_TAG = "draining".freeze
-
   # Triggers a run for new samples by defining output states and run stages configurations.
   # *Exception* for cloned pipeline runs that already have results and finalized status
   before_create :create_output_states, :create_run_stages, unless: :results_finalized?
@@ -268,69 +255,6 @@ class PipelineRun < ApplicationRecord
 
   def self.results_in_progress
     where(results_finalized: IN_PROGRESS)
-  end
-
-  def self.in_progress_at_stage_1_or_2
-    in_progress.where("job_status NOT LIKE '3.%' AND job_status NOT LIKE '4.%'")
-  end
-
-  def self.count_chunks(run_ids, known_num_reads, count_config, completed_chunks)
-    chunk_size = count_config[:chunk_size]
-    can_pair_chunks = count_config[:can_pair_chunks]
-    is_run_paired = count_config[:is_run_paired]
-    num_chunks_by_run_id = {}
-    run_ids.each do |pr_id|
-      # A priori, each run will count for 1 chunk
-      num_chunks = 1
-      # If number of non-host reads is known, we can compute the actual number of chunks from it
-      if known_num_reads[pr_id]
-        num_reads = known_num_reads[pr_id]
-        if can_pair_chunks && is_run_paired[pr_id]
-          num_reads /= 2.0
-        end
-        num_chunks = (num_reads / chunk_size.to_f).ceil
-      end
-      # If any chunks have already completed, we can subtract them
-      num_chunks = [0, num_chunks - completed_chunks[pr_id]].max if completed_chunks[pr_id]
-      # Due to rate limits in idseq-dag, there is a cap on the number of chunks dispatched concurrently by a single job
-      num_chunks = [num_chunks, MAX_CHUNKS_IN_FLIGHT].min
-      num_chunks_by_run_id[pr_id] = num_chunks
-    end
-    num_chunks_by_run_id.values.sum
-  end
-
-  def self.count_alignment_chunks_in_progress
-    # Get run ids in progress
-    need_alignment = in_progress_at_stage_1_or_2
-    # Get numbers of non-host reads to estimate total number of chunks
-    in_progress_job_stats = JobStat.where(pipeline_run_id: need_alignment.pluck(:id))
-    last_host_filter_step = "subsampled_out"
-    known_num_reads = Hash[in_progress_job_stats.where(task: last_host_filter_step).pluck(:pipeline_run_id, :reads_after)]
-    # Determine which samples are paired-end to adjust chunk count
-    runs_by_sample_id = need_alignment.index_by(&:sample_id)
-    files_by_sample_id = InputFile.where(sample_id: need_alignment.pluck(:sample_id)).group_by(&:sample_id)
-    is_run_paired = {}
-    runs_by_sample_id.each do |sid, pr|
-      is_run_paired[pr.id] = (files_by_sample_id[sid].count == 2)
-    end
-    # Get number of chunks that have already completed
-    completed_gsnap_chunks = Hash[need_alignment.pluck(:id, :completed_gsnap_chunks)]
-    completed_rapsearch_chunks = Hash[need_alignment.pluck(:id, :completed_rapsearch_chunks)]
-    # Compute number of chunks that still need to be processed
-    count_configs = {
-      gsnap: {
-        chunk_size: GSNAP_CHUNK_SIZE,
-        can_pair_chunks: true, # gsnap can take paired inputs
-        is_run_paired: is_run_paired,
-      },
-      rapsearch: {
-        chunk_size: RAPSEARCH_CHUNK_SIZE,
-        can_pair_chunks: false # rapsearch always takes a single input file
-      },
-    }
-    gsnap_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:gsnap], completed_gsnap_chunks)
-    rapsearch_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:rapsearch], completed_rapsearch_chunks)
-    { gsnap: gsnap_num_chunks, rapsearch: rapsearch_num_chunks }
   end
 
   def self.top_completed_runs
@@ -1019,7 +943,6 @@ class PipelineRun < ApplicationRecord
       # See https://jira.czi.team/browse/IDSEQ-1924.
       compile_stats_file!
       load_stats_file
-      load_chunk_stats
     rescue => e
       LogUtil.log_err_and_airbrake("Failure compiling stats: #{e}")
       LogUtil.log_backtrace(e)
@@ -1239,17 +1162,6 @@ class PipelineRun < ApplicationRecord
         update(alert_sent: 1)
       end
     end
-  end
-
-  def load_chunk_stats
-    stdout = Syscall.run("aws", "s3", "ls", "#{output_s3_path_with_version}/chunks/")
-    return unless stdout
-    outputs = stdout.split("\n").map { |line| line.split.last }
-    gsnap_outputs = outputs.select { |file_name| file_name.start_with?("multihit-gsnap-out") && file_name.end_with?(".m8") }
-    rapsearch_outputs = outputs.select { |file_name| file_name.start_with?("multihit-rapsearch2-out") && file_name.end_with?(".m8") }
-    self.completed_gsnap_chunks = gsnap_outputs.length
-    self.completed_rapsearch_chunks = rapsearch_outputs.length
-    save
   end
 
   # Generate stats.json from all *.count files in results dir. Example:

@@ -24,7 +24,7 @@ class PipelineRunStage < ApplicationRecord
 
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
-  ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
+  ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH2 alignment'.freeze
   POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze # also known as "assembly"
   EXPT_STAGE_NAME = "Experimental".freeze # Not actually experimental anymore!
 
@@ -301,17 +301,8 @@ class PipelineRunStage < ApplicationRecord
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
-      max_interval_between_describe_instances: PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS,
-      job_tag_prefix: PipelineRun::JOB_TAG_PREFIX,
-      job_tag_refresh_seconds: PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS,
-      draining_tag: PipelineRun::DRAINING_TAG,
-      gsnap_chunk_size: PipelineRun::GSNAP_CHUNK_SIZE,
-      rapsearch_chunk_size: PipelineRun::RAPSEARCH_CHUNK_SIZE,
-      gsnap_max_concurrent: PipelineRun::GSNAP_MAX_CONCURRENT,
-      rapsearch_max_concurrent: PipelineRun::RAPSEARCH_MAX_CONCURRENT,
-      chunks_in_flight: PipelineRun::MAX_CHUNKS_IN_FLIGHT,
       gsnap_m8: PipelineRun::GSNAP_M8,
-      rapsearch_m8: PipelineRun::RAPSEARCH_M8,
+      rapsearch2_m8: PipelineRun::RAPSEARCH2_M8,
       use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
     }
     return generate_json(attribute_dict)

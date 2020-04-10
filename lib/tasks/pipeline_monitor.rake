@@ -61,65 +61,6 @@ class CheckPipelineRuns
     end
   end
 
-  def self.forced_update_interval
-    # Force refresh well before autoscaling.EXPIRATION_PERIOD_MINUTES.
-    # prod does it more often because it needs to pick up updates from
-    # all other environments and adjust the autoscaling groups.
-    cloud_env = ["prod", "staging"].include?(Rails.env)
-    Rails.env == cloud_env ? 60 : 600
-  end
-
-  def self.autoscaling_update(autoscaling_state, t_now)
-    return if Rails.env == "development"
-    unless autoscaling_state
-      autoscaling_state = {
-        t_last: t_now - forced_update_interval,
-        chunk_counts: nil,
-      }
-    end
-    last_chunk_counts = autoscaling_state[:chunk_counts]
-    new_chunk_counts = PipelineRun.count_alignment_chunks_in_progress
-    if last_chunk_counts.nil?
-      Rails.logger.info("[Datadog] Autoscaling update to #{new_chunk_counts} chunks.")
-    else
-      Rails.logger.info("[Datadog] Autoscaling update from #{last_chunk_counts} chunks to #{new_chunk_counts} chunks.")
-    end
-    autoscaling_state[:t_last] = t_now
-    autoscaling_state[:chunk_counts] = new_chunk_counts
-    autoscaling_config = {
-      'mode' => 'update',
-      'gsnapl' => {
-        'num_chunks' => new_chunk_counts[:gsnap],
-        'max_concurrent' => PipelineRun::GSNAP_MAX_CONCURRENT,
-      },
-      'rapsearch2' => {
-        'num_chunks' => new_chunk_counts[:rapsearch],
-        'max_concurrent' => PipelineRun::RAPSEARCH_MAX_CONCURRENT,
-      },
-      'my_environment' => Rails.env,
-      'max_job_dispatch_lag_seconds' => PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS,
-      'job_tag_prefix' => PipelineRun::JOB_TAG_PREFIX,
-      'job_tag_keep_alive_seconds' => PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS,
-      'draining_tag' => PipelineRun::DRAINING_TAG,
-      'batch_configurations' => [
-        {
-          'queue_name' => Sample::DEFAULT_QUEUE,
-          'vcpus' => Sample::DEFAULT_VCPUS,
-          'region' => AWS_DEFAULT_REGION,
-        },
-        {
-          'queue_name' => Sample::DEFAULT_QUEUE_HIMEM,
-          'vcpus' => Sample::DEFAULT_VCPUS_HIMEM,
-          'region' => AWS_DEFAULT_REGION,
-        },
-      ],
-    }
-    c_stdout, c_stderr, c_status = Open3.capture3("app/jobs/autoscaling.py '#{autoscaling_config.to_json}'")
-    Rails.logger.info(c_stdout)
-    Rails.logger.error(c_stderr) unless c_status.success? && c_stderr.blank?
-    autoscaling_state
-  end
-
   def self.benchmark_sample_name(s3_path, timestamp_str, metadata_prefix)
     # Benchmark sample names start with a prefix determined uniquely from the s3 path,
     # like so: "idseq-bench-1|".  This enables finding quickly all samples submitted for
@@ -302,7 +243,6 @@ class CheckPipelineRuns
     t_now = Time.now.to_f # unixtime
     # Will try to return as soon as duration seconds have elapsed, but not any sooner.
     t_end = t_now + duration
-    autoscaling_state = nil
     benchmark_state = nil
     # The duration of the longest update so far.
     max_work_duration = 0
@@ -323,7 +263,6 @@ class CheckPipelineRuns
         shard_id += 1
       end
       fork_pids.each { |p| Process.waitpid(p) }
-      autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
       after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
