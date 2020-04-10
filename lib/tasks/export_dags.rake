@@ -1,4 +1,6 @@
 task :export_dags, [:sample_id, :print, :step] => :environment do |_, args|
+  Logging.logger.root.level = :warn
+
   class DAGExporter < PipelineRunStage
     attr_accessor :args
 
@@ -25,7 +27,7 @@ task :export_dags, [:sample_id, :print, :step] => :environment do |_, args|
     Sample.find_by(id: args.sample_id).pipeline_runs.each do |pipeline_run|
       PipelineRunStage::STAGE_INFO.each do |step_number, stage_info|
         if args.step && step_number != args.step.to_i
-          break
+          next
         end
         puts "Exporting DAG #{step_number} for pipeline run #{pipeline_run.id} (sample #{pipeline_run.sample.id})"
         exporter = DAGExporter.new(
