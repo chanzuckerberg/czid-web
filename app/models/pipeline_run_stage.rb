@@ -24,7 +24,7 @@ class PipelineRunStage < ApplicationRecord
 
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
-  ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
+  ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH2 alignment'.freeze
   POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze # also known as "assembly"
   EXPT_STAGE_NAME = "Experimental".freeze # Not actually experimental anymore!
 
@@ -302,7 +302,7 @@ class PipelineRunStage < ApplicationRecord
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
       gsnap_m8: PipelineRun::GSNAP_M8,
-      rapsearch_m8: PipelineRun::RAPSEARCH_M8,
+      rapsearch2_m8: PipelineRun::RAPSEARCH2_M8,
       use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
     }
     return generate_json(attribute_dict)

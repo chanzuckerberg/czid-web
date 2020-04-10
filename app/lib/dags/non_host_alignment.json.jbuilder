@@ -16,7 +16,7 @@ json.targets do
     "gsnap_counts_with_dcr.json",
   ]
   json.rapsearch2_out [
-    attr[:rapsearch_m8],
+    attr[:rapsearch2_m8],
     "rapsearch2.deduped.m8",
     "rapsearch2.hitsummary.tab",
     "rapsearch2_counts_with_dcr.json",
@@ -63,7 +63,7 @@ json.steps do
   }
 
   additional_attributes = {
-    alignment_algorithm: "rapsearch",
+    alignment_algorithm: "rapsearch2",
   }
 
   if attr[:index_dir_suffix]

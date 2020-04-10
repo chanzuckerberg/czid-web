@@ -51,7 +51,7 @@ class PipelineRun < ApplicationRecord
   HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
 
   GSNAP_M8 = "gsnap.m8".freeze
-  RAPSEARCH_M8 = "rapsearch2.m8".freeze
+  RAPSEARCH2_M8 = "rapsearch2.m8".freeze
   OUTPUT_JSON_NAME = 'taxon_counts_with_dcr.json'.freeze
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
@@ -120,25 +120,25 @@ class PipelineRun < ApplicationRecord
   STATUS_RUNNABLE = 'RUNNABLE'.freeze # TODO: (gdingle): not used anywhere?
   STATUS_READY = 'READY'.freeze
   # NOTE: The current stored job_status are...
-  # +-------------------------------------------+
-  # | job_status                                |
-  # +-------------------------------------------+
-  # | 1.Host Filtering-FAILED                   |
-  # | 1.Host Filtering-FAILED|READY             |
-  # | 2.GSNAPL/RAPSEARCH alignment-FAILED       |
-  # | 2.GSNAPL/RAPSEARCH alignment-FAILED|READY |
-  # | 2.GSNAPL/RAPSEARCH alignment-RUNNING      |
-  # | 3.Post Processing-FAILED                  |
-  # | 3.Post Processing-FAILED|READY            |
-  # | 4.De-Novo Assembly-FAILED|READY           |
-  # | 4.Experimental-FAILED                     |
-  # | 4.Experimental-FAILED|READY               |
-  # | 4.Experimental-SUCCEEDED                  |
-  # | 4.Experimental-SUCCEEDED|READY            |
-  # | CHECKED                                   |
-  # | FAILED                                    |
-  # | LOADED                                    |
-  # +-------------------------------------------+
+  # +--------------------------------------------+
+  # | job_status                                 |
+  # +--------------------------------------------+
+  # | 1.Host Filtering-FAILED                    |
+  # | 1.Host Filtering-FAILED|READY              |
+  # | 2.GSNAPL/RAPSEARCH2 alignment-FAILED       |
+  # | 2.GSNAPL/RAPSEARCH2 alignment-FAILED|READY |
+  # | 2.GSNAPL/RAPSEARCH2 alignment-RUNNING      |
+  # | 3.Post Processing-FAILED                   |
+  # | 3.Post Processing-FAILED|READY             |
+  # | 4.De-Novo Assembly-FAILED|READY            |
+  # | 4.Experimental-FAILED                      |
+  # | 4.Experimental-FAILED|READY                |
+  # | 4.Experimental-SUCCEEDED                   |
+  # | 4.Experimental-SUCCEEDED|READY             |
+  # | CHECKED                                    |
+  # | FAILED                                     |
+  # | LOADED                                     |
+  # +--------------------------------------------+
   # NOTE: kickoff_pipeline does not set a job_status
   validates :job_status, presence: true, allow_nil: true, if: :mass_validation_enabled?
   #
@@ -1170,9 +1170,9 @@ class PipelineRun < ApplicationRecord
     return unless stdout
     outputs = stdout.split("\n").map { |line| line.split.last }
     gsnap_outputs = outputs.select { |file_name| file_name.start_with?("multihit-gsnap-out") && file_name.end_with?(".m8") }
-    rapsearch_outputs = outputs.select { |file_name| file_name.start_with?("multihit-rapsearch2-out") && file_name.end_with?(".m8") }
+    rapsearch2_outputs = outputs.select { |file_name| file_name.start_with?("multihit-rapsearch2-out") && file_name.end_with?(".m8") }
     self.completed_gsnap_chunks = gsnap_outputs.length
-    self.completed_rapsearch_chunks = rapsearch_outputs.length
+    self.completed_rapsearch2_chunks = rapsearch2_outputs.length
     save
   end
 
