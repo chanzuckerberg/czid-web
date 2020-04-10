@@ -46,6 +46,10 @@ const SORT_SAMPLES_OPTIONS = [
   { text: "Alphabetical", value: "alpha" },
   { text: "Cluster", value: "cluster" },
 ];
+const TAXON_LEVEL_OPTIONS = {
+  species: 1,
+  genus: 2,
+};
 const SORT_TAXA_OPTIONS = [
   { text: "Genus", value: "genus" },
   { text: "Cluster", value: "cluster" },
@@ -124,6 +128,8 @@ class SamplesHeatmapView extends React.Component {
       invalidSampleNames: [],
       sampleDetails: {},
       allTaxonIds: [],
+      allSpeciesIds: [],
+      allGeneraIds: [],
       taxonIds: [],
       addedTaxonIds: new Set(
         this.urlParams.addedTaxonIds || this.props.addedTaxonIds || []
@@ -136,9 +142,10 @@ class SamplesHeatmapView extends React.Component {
       // make a selection in the Add Taxon dropdown.
       // This will be reset whenever filters change, so the user will be
       // notified of which manually added taxa do not pass the new filters.
-      notifiedFilteredOutTaxonIds: new Set(),
+      notifiedFilteredOutTaxonIds: new Set(
+        this.urlParams.addedTaxonIds || this.props.addedTaxonIds || []
+      ),
       allTaxonDetails: {},
-      taxonDetails: {},
       // allData is an object containing all the metric data for every taxa for each sample.
       // The key corresponds to the metric type (e.g. NT.rpm), and the value is 2D array;
       // rows correspond to taxa and columns correspond to samples.
@@ -212,10 +219,18 @@ class SamplesHeatmapView extends React.Component {
       urlParams.addedTaxonIds = new Set(
         urlParams.addedTaxonIds.split(",").map(parseInt)
       );
+    } else if (typeof urlParams.addedTaxonIds === "object") {
+      urlParams.addedTaxonIds = new Set(
+        urlParams.addedTaxonIds.map(id => parseInt(id))
+      );
     }
     if (typeof urlParams.removedTaxonIds === "string") {
       urlParams.removedTaxonIds = new Set(
         urlParams.removedTaxonIds.split(",").map(parseInt)
+      );
+    } else if (typeof urlParams.removedTaxonIds === "object") {
+      urlParams.removedTaxonIds = new Set(
+        urlParams.removedTaxonIds.map(id => parseInt(id))
       );
     }
     if (typeof urlParams.categories === "string") {
@@ -345,6 +360,13 @@ class SamplesHeatmapView extends React.Component {
   }
 
   fetchHeatmapData() {
+    // If using client-side filtering, the server should still return info
+    // related to removed taxa in case the user decides to add the taxon back.
+    const { allowedFeatures } = this.context || {};
+    const removedTaxonIds = allowedFeatures.includes("heatmap_filter_fe")
+      ? []
+      : Array.from(this.removedTaxonIds);
+
     if (this.lastRequestToken) {
       this.lastRequestToken.cancel("Parameters changed");
     }
@@ -352,7 +374,7 @@ class SamplesHeatmapView extends React.Component {
     return getSampleTaxons(
       {
         sampleIds: this.state.sampleIds,
-        removedTaxonIds: Array.from(this.removedTaxonIds),
+        removedTaxonIds: removedTaxonIds,
         species: this.state.selectedOptions.species,
         categories: this.state.selectedOptions.categories,
         subcategories: this.state.selectedOptions.subcategories,
@@ -410,6 +432,8 @@ class SamplesHeatmapView extends React.Component {
     let sampleNamesCounts = new Map();
     let sampleDetails = {};
     let allTaxonIds = [];
+    let allSpeciesIds = [];
+    let allGeneraIds = [];
     let allTaxonDetails = {};
     let allData = {};
     let taxonFilterState = {};
@@ -449,6 +473,13 @@ class SamplesHeatmapView extends React.Component {
           } else {
             taxonIndex = allTaxonIds.length;
             allTaxonIds.push(taxon.tax_id);
+
+            if (taxon.tax_level === TAXON_LEVEL_OPTIONS["species"]) {
+              allSpeciesIds.push(taxon.tax_id);
+            } else {
+              allGeneraIds.push(taxon.tax_id);
+            }
+
             allTaxonDetails[taxon.tax_id] = {
               id: taxon.tax_id,
               index: taxonIndex,
@@ -484,6 +515,8 @@ class SamplesHeatmapView extends React.Component {
       sampleIds,
       sampleDetails,
       allTaxonIds,
+      allSpeciesIds,
+      allGeneraIds,
       allTaxonDetails,
       allData,
       taxonFilterState,
@@ -499,7 +532,9 @@ class SamplesHeatmapView extends React.Component {
       {
         sampleIds: this.state.sampleIds,
         taxonIds: Array.from(this.state.allTaxonIds),
-        removedTaxonIds: Array.from(this.removedTaxonIds),
+        // If using client-side filtering, the server should still return info
+        // related to removed taxa in case the user decides to add the taxon back.
+        removedTaxonIds: [],
         background: this.state.selectedOptions.background,
         heatmapTs: this.props.heatmapTs,
       },
@@ -559,7 +594,6 @@ class SamplesHeatmapView extends React.Component {
       notifiedFilteredOutTaxonIds,
       newestTaxonId,
     } = this.state;
-    let taxonDetails = {};
     let taxonIds = new Set();
     let filteredData = {};
     let addedTaxonIdsPassingFilters = new Set();
@@ -586,13 +620,12 @@ class SamplesHeatmapView extends React.Component {
           }
         }
       });
-      [taxonIds, taxonDetails, filteredData] = this.getTopTaxaPerSample(
+      [taxonIds, allTaxonDetails, filteredData] = this.getTopTaxaPerSample(
         taxonIds,
         addedTaxonIdsPassingFilters
       );
       taxonIds = Array.from(taxonIds);
     } else {
-      taxonDetails = allTaxonDetails;
       taxonIds = allTaxonIds;
       filteredData = allData;
     }
@@ -601,7 +634,6 @@ class SamplesHeatmapView extends React.Component {
 
     this.setState({
       taxonFilterState: taxonFilterState,
-      taxonDetails: taxonDetails,
       taxonIds: taxonIds,
       loading: false,
       data: filteredData,
@@ -788,7 +820,10 @@ class SamplesHeatmapView extends React.Component {
     const { taxonIds, addedTaxonIds, notifiedFilteredOutTaxonIds } = this.state;
 
     // currentAddedTaxa is all the taxa manually added by the user.
-    const newlyAddedTaxa = difference([...selectedTaxonIds], taxonIds);
+    const newlyAddedTaxa = difference(
+      [...selectedTaxonIds],
+      [...new Set(taxonIds, addedTaxonIds)]
+    );
     const previouslyAddedTaxa = intersection(addedTaxonIds, [
       ...selectedTaxonIds,
     ]);
@@ -812,7 +847,6 @@ class SamplesHeatmapView extends React.Component {
       {
         addedTaxonIds: currentAddedTaxa,
         notifiedFilteredOutTaxonIds: currentFilteredOutTaxonIds,
-        newestTaxonId: newestTaxonId,
       },
       this.updateFilters
     );
@@ -820,11 +854,15 @@ class SamplesHeatmapView extends React.Component {
       selected: currentAddedTaxa,
     });
     this.updateHistoryState();
+    return newestTaxonId;
   };
 
   handleRemoveTaxon = taxonName => {
-    let taxonId = this.state.taxonDetails[taxonName].id;
+    let { addedTaxonIds } = this.state;
+    let taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
+    addedTaxonIds.delete(taxonId);
+    this.setState({ addedTaxonIds });
     logAnalyticsEvent("SamplesHeatmapView_taxon_removed", {
       taxonId,
       taxonName,
@@ -886,7 +924,7 @@ class SamplesHeatmapView extends React.Component {
   };
 
   handleTaxonLabelClick = taxonName => {
-    const taxonDetails = get(taxonName, this.state.taxonDetails);
+    const taxonDetails = get(taxonName, this.state.allTaxonDetails);
 
     if (!taxonDetails) {
       this.setState({
@@ -991,9 +1029,8 @@ class SamplesHeatmapView extends React.Component {
         {
           selectedOptions: assign(this.state.selectedOptions, newOptions),
           loading: shouldRefilterData,
-          // Reset notifiedFilteredOutTaxonIds so the user will be newly
-          // notified if their manually selected taxa do not pass the new filters.
-          notifiedFilteredOutTaxonIds: new Set(),
+          // Don't re-notify the user if their manually selected taxa do not pass the new filters.
+          notifiedFilteredOutTaxonIds: this.state.addedTaxonIds,
         },
         shouldRefetchData
           ? this.updateBackground
@@ -1048,6 +1085,10 @@ class SamplesHeatmapView extends React.Component {
   }
 
   renderHeatmap() {
+    let shownTaxa = new Set(this.state.taxonIds, this.state.addedTaxonIds);
+    shownTaxa = new Set(
+      [...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId))
+    );
     if (
       this.state.loading ||
       !this.state.data ||
@@ -1086,11 +1127,12 @@ class SamplesHeatmapView extends React.Component {
           sampleDetails={this.state.sampleDetails}
           scale={SCALE_OPTIONS[scaleIndex][1]}
           selectedTaxa={this.state.addedTaxonIds}
-          newestTaxonId={this.state.newestTaxonId}
-          allTaxonIds={this.state.allTaxonIds}
-          taxonIds={Array.from(
-            new Set(this.state.taxonIds, this.state.addedTaxonIds)
-          )}
+          allTaxonIds={
+            this.state.selectedOptions.species
+              ? this.state.allSpeciesIds
+              : this.state.allGeneraIds
+          }
+          taxonIds={Array.from(shownTaxa)}
           taxonCategories={this.state.selectedOptions.categories}
           taxonDetails={this.state.allTaxonDetails} // send allTaxonDetails in case of added taxa
           taxonFilterState={this.state.taxonFilterState}
@@ -1149,8 +1191,7 @@ class SamplesHeatmapView extends React.Component {
       <Notification type={"warn"} displayStyle={"elevated"} onClose={onClose}>
         <div>
           <span className={cs.highlight}>
-            The taxon {taxon.name} you added is filtered out by your current
-            filter settings.
+            {taxon.name} is filtered out by your current filter settings.
           </span>{" "}
           Remove some filters to see it appear.
         </div>
@@ -1205,7 +1246,11 @@ class SamplesHeatmapView extends React.Component {
                 loading={this.state.loading}
                 data={this.state.data}
                 filteredTaxaCount={shownTaxa.size}
-                totalTaxaCount={this.state.allTaxonIds.length}
+                totalTaxaCount={
+                  this.state.selectedOptions.species
+                    ? this.state.allSpeciesIds.length
+                    : this.state.allGeneraIds.length
+                }
                 prefilterConstants={this.props.prefilterConstants}
                 displayFilterStats={allowedFeatures.includes(
                   "heatmap_filter_fe"

@@ -14,10 +14,11 @@ class BulkDownloadsController < ApplicationController
   def types
     download_types = BulkDownloadTypesHelper.bulk_download_types
 
-    # Filter out all types that are admin-only.
+    # Filter out all types that are admin-only or require feature flags.
     unless current_user.admin?
       download_types = download_types.reject do |type|
-        type[:admin_only]
+        type[:admin_only] ||
+          (type[:required_allowed_feature] && !current_user.allowed_feature?(type[:required_allowed_feature]))
       end
     end
 
