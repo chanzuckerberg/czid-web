@@ -366,6 +366,8 @@ class PipelineRunStage < ApplicationRecord
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
       nt_info_db: alignment_config.s3_nt_info_db_path || DEFAULT_S3_NT_INFO_DB_PATH,
+      # This was added for the betacoronavirus fastq download feature
+      use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     return generate_json(attribute_dict)
@@ -380,5 +382,27 @@ class PipelineRunStage < ApplicationRecord
 
     # Dispatch job
     aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_EXPERIMENTAL, sample_id: sample.id)
+  end
+
+  # Gets the URL to the AWS console page of the batch job for display on
+  # admin-only pages.
+  def batch_job_status_url
+    return if job_description.blank?
+
+    job_hash = JSON.parse(job_description)
+    if job_hash && job_hash['jobId']
+      AwsUtil.get_batch_job_url(job_hash['jobQueue'], job_hash['jobId'])
+    end
+  end
+
+  # Returns the exit reason of the AWS batch job. For example: "Essential
+  # container in task exited".
+  def batch_job_status_reason
+    return if job_description.blank?
+
+    job_hash = JSON.parse(job_description)
+    if job_hash
+      job_hash['statusReason']
+    end
   end
 end
