@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import BasicPopup from "~/components/BasicPopup";
-import SmallInfoIcon from "~ui/icons/SmallInfoIcon";
+import InfoIconSmall from "~ui/icons/InfoIconSmall";
 import cs from "./help_icon.scss";
 
 class HelpIcon extends React.Component {
@@ -11,7 +11,7 @@ class HelpIcon extends React.Component {
       <BasicPopup
         trigger={
           <div className={this.props.className}>
-            <SmallInfoIcon className={cx(cs.helpIcon)} />
+            <InfoIconSmall className={cx(cs.helpIcon)} />
           </div>
         }
         hoverable

@@ -9,7 +9,7 @@
   box-shadow: $box-shadow-bottom-right;
   display: inline-block;
   font-size: 13px;
-  min-width: 200px;
+  min-width: 240px;
   padding: 10px;
   text-align: left;
 
@@ -82,6 +82,7 @@
       color: $medium-grey;
       display: inline-block;
       margin-left: auto;
+      padding-left: $space-xl;
     }
   }
 }

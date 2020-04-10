@@ -246,6 +246,9 @@ class BulkDownloadModalOptions extends React.Component {
             {downloadType.admin_only && (
               <StatusLabel inline status="Admin Only" />
             )}
+            {downloadType.required_allowed_feature && (
+              <StatusLabel inline status="Beta" />
+            )}
           </div>
           <div className={cs.description}>{downloadType.description}</div>
           {downloadType.fields &&
