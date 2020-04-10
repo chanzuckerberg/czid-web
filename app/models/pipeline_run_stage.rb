@@ -392,4 +392,26 @@ class PipelineRunStage < ApplicationRecord
     # Dispatch job
     aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_EXPERIMENTAL, sample_id: sample.id)
   end
+
+  # Gets the URL to the AWS console page of the batch job for display on
+  # admin-only pages.
+  def batch_job_status_url
+    return if job_description.blank?
+
+    job_hash = JSON.parse(job_description)
+    if job_hash && job_hash['jobId']
+      AwsUtil.get_batch_job_url(job_hash['jobQueue'], job_hash['jobId'])
+    end
+  end
+
+  # Returns the exit reason of the AWS batch job. For example: "Essential
+  # container in task exited".
+  def batch_job_status_reason
+    return if job_description.blank?
+
+    job_hash = JSON.parse(job_description)
+    if job_hash
+      job_hash['statusReason']
+    end
+  end
 end
