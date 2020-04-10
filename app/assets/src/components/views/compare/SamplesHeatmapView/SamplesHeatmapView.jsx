@@ -1089,7 +1089,10 @@ class SamplesHeatmapView extends React.Component {
           newestTaxonId={this.state.newestTaxonId}
           allTaxonIds={this.state.allTaxonIds}
           taxonIds={Array.from(
-            new Set(this.state.taxonIds, this.state.addedTaxonIds)
+            difference(
+              [...new Set(this.state.taxonIds, this.state.addedTaxonIds)],
+              [...this.removedTaxonIds]
+            )
           )}
           taxonCategories={this.state.selectedOptions.categories}
           taxonDetails={this.state.allTaxonDetails} // send allTaxonDetails in case of added taxa
