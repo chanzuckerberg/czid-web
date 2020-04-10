@@ -47,6 +47,7 @@ module ErrorHelper
     end
   end
 
+  LOCATION_INVALID_ERROR_HUMAN = "Please input a location at the county/district level of higher. (for human samples)".freeze
   LOCATION_INVALID_ERROR = "Please input a location.".freeze
   DATE_INVALID_ERROR_HUMAN = "Please input a date in the format YYYY-MM or MM/YYYY. (for human samples)".freeze
   DATE_INVALID_ERROR = "Please input a date in the format YYYY-MM-DD, YYYY-MM, MM/DD/YY, or MM/YYYY.".freeze
@@ -54,7 +55,11 @@ module ErrorHelper
 
   def get_field_error(field, is_human = false)
     if field.base_type == MetadataField::LOCATION_TYPE
-      return LOCATION_INVALID_ERROR
+      if is_human
+        return LOCATION_INVALID_ERROR_HUMAN
+      else
+        return LOCATION_INVALID_ERROR
+      end
     end
 
     if field.base_type == MetadataField::DATE_TYPE
@@ -187,10 +192,17 @@ module ErrorHelper
       unless @supported_errors[error_type]
         # Automatically determine the kind of error to display based on the field.
         if field.base_type == MetadataField::LOCATION_TYPE
-          @supported_errors[error_type] = {
-            headers: ["Row #", "Sample Name", "Invalid Value"],
-            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{LOCATION_INVALID_ERROR}" },
-          }
+          @supported_errors[error_type] = if is_human
+                                            {
+                                              headers: ["Row #", "Sample Name", "Invalid Value"],
+                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{LOCATION_INVALID_ERROR_HUMAN}" },
+                                            }
+                                          else
+                                            {
+                                              headers: ["Row #", "Sample Name", "Invalid Value"],
+                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{LOCATION_INVALID_ERROR}" },
+                                            }
+                                          end
         end
 
         if field.base_type == MetadataField::DATE_TYPE

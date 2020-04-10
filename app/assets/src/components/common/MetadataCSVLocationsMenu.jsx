@@ -1,5 +1,5 @@
 import React from "react";
-import { uniq, find, chunk, random } from "lodash/fp";
+import { uniq, find, chunk, random, get } from "lodash/fp";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
@@ -139,7 +139,7 @@ class MetadataCSVLocationsMenu extends React.Component {
           metadata: newMetadata,
         });
         this.setState({ applyToAllSample: sampleName });
-        logAnalyticsEvent("MetadataManualInput_input_changed", {
+        logAnalyticsEvent("MetadataCSVLocationsMenu_input_changed", {
           key,
           value,
           sampleName,
@@ -156,7 +156,7 @@ class MetadataCSVLocationsMenu extends React.Component {
             metadataType={locationMetadataType}
             onChange={onChange}
             withinModal={true}
-            isHuman={isRowHuman(row)}
+            taxaCategory={get("taxa_category", this.getHostGenomeForRow(row))}
             warning={CSVLocationWarnings[sampleName]}
           />
           {applyToAllSample === sampleName &&
@@ -166,6 +166,12 @@ class MetadataCSVLocationsMenu extends React.Component {
       ];
     });
   };
+
+  getHostGenomeForRow = row =>
+    find(
+      ["name", row["Host Organism"] || row["Host Genome"]],
+      this.props.hostGenomes
+    );
 
   render() {
     const { metadata, locationMetadataType } = this.props;
@@ -202,6 +208,7 @@ MetadataCSVLocationsMenu.propTypes = {
   }),
   onCSVLocationWarningsChange: PropTypes.func.isRequired,
   onMetadataChange: PropTypes.func.isRequired,
+  hostGenomes: PropTypes.array,
 };
 
 export default MetadataCSVLocationsMenu;
