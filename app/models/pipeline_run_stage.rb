@@ -375,6 +375,8 @@ class PipelineRunStage < ApplicationRecord
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
       nt_info_db: alignment_config.s3_nt_info_db_path || DEFAULT_S3_NT_INFO_DB_PATH,
+      # This was added for the betacoronavirus fastq download feature
+      use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     return generate_json(attribute_dict)
