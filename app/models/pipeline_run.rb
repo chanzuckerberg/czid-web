@@ -120,25 +120,25 @@ class PipelineRun < ApplicationRecord
   STATUS_RUNNABLE = 'RUNNABLE'.freeze # TODO: (gdingle): not used anywhere?
   STATUS_READY = 'READY'.freeze
   # NOTE: The current stored job_status are...
-  # +--------------------------------------------+
-  # | job_status                                 |
-  # +--------------------------------------------+
-  # | 1.Host Filtering-FAILED                    |
-  # | 1.Host Filtering-FAILED|READY              |
-  # | 2.GSNAPL/RAPSEARCH2 alignment-FAILED       |
-  # | 2.GSNAPL/RAPSEARCH2 alignment-FAILED|READY |
-  # | 2.GSNAPL/RAPSEARCH2 alignment-RUNNING      |
-  # | 3.Post Processing-FAILED                   |
-  # | 3.Post Processing-FAILED|READY             |
-  # | 4.De-Novo Assembly-FAILED|READY            |
-  # | 4.Experimental-FAILED                      |
-  # | 4.Experimental-FAILED|READY                |
-  # | 4.Experimental-SUCCEEDED                   |
-  # | 4.Experimental-SUCCEEDED|READY             |
-  # | CHECKED                                    |
-  # | FAILED                                     |
-  # | LOADED                                     |
-  # +--------------------------------------------+
+  # +-------------------------------------------+
+  # | job_status                                |
+  # +-------------------------------------------+
+  # | 1.Host Filtering-FAILED                   |
+  # | 1.Host Filtering-FAILED|READY             |
+  # | 2.GSNAPL/RAPSEARCH alignment-FAILED       |
+  # | 2.GSNAPL/RAPSEARCH alignment-FAILED|READY |
+  # | 2.GSNAPL/RAPSEARCH alignment-RUNNING      |
+  # | 3.Post Processing-FAILED                  |
+  # | 3.Post Processing-FAILED|READY            |
+  # | 4.De-Novo Assembly-FAILED|READY           |
+  # | 4.Experimental-FAILED                     |
+  # | 4.Experimental-FAILED|READY               |
+  # | 4.Experimental-SUCCEEDED                  |
+  # | 4.Experimental-SUCCEEDED|READY            |
+  # | CHECKED                                   |
+  # | FAILED                                    |
+  # | LOADED                                    |
+  # +-------------------------------------------+
   # NOTE: kickoff_pipeline does not set a job_status
   validates :job_status, presence: true, allow_nil: true, if: :mass_validation_enabled?
   #
