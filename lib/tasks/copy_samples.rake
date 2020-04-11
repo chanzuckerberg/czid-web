@@ -27,7 +27,7 @@ DEFAULT_S3_REGION = "us-west-2".freeze
 
 def read_input
   STDIN.binmode
-  tmp_file = Tempfile.new('copy_samples_file', Rails.root.join('tmp'))
+  tmp_file = Tempfile.new('copy_samples_file')
   tmp_file.write(STDIN.read)
   tmp_file.close
 
