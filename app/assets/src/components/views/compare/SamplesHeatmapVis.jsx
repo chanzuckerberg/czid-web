@@ -126,6 +126,7 @@ class SamplesHeatmapVis extends React.Component {
         values: this.props.data[this.props.metric],
         rowLabels: this.extractTaxonLabels(),
       });
+      this.scrollToRow();
     }
     if (this.props.taxonIds !== prevProps.taxonIds) {
       this.heatmap.updateData({
@@ -423,6 +424,14 @@ class SamplesHeatmapVis extends React.Component {
     });
   }
 
+  scrollToRow() {
+    if (this.state.newTaxon) {
+      this.heatmap.scrollToRow(
+        this.props.taxonDetails[this.state.newTaxon].name
+      );
+    }
+  }
+
   handleAddColumnMetadataClick = trigger => {
     this.setState({
       addMetadataTrigger: trigger,
@@ -557,15 +566,12 @@ class SamplesHeatmapVis extends React.Component {
             addTaxonTrigger={addTaxonTrigger}
             selectedTaxa={new Set(this.props.taxonIds, this.props.selectedTaxa)}
             availableTaxa={this.getAvailableTaxa()}
-            onTaxonSelectionChange={this.props.onAddTaxon}
+            onTaxonSelectionChange={selected => {
+              let newTaxon = this.props.onAddTaxon(selected);
+              this.setState({ newTaxon });
+            }}
             onTaxonSelectionClose={() => {
               this.setState({ addTaxonTrigger: null });
-
-              if (this.props.newestTaxonId) {
-                this.heatmap.scrollToRow(
-                  this.props.taxonDetails[this.props.newestTaxonId].name
-                );
-              }
             }}
           />
         )}
@@ -614,7 +620,6 @@ SamplesHeatmapVis.propTypes = {
   allTaxonIds: PropTypes.array,
   taxonIds: PropTypes.array,
   selectedTaxa: PropTypes.object,
-  newestTaxonId: PropTypes.number,
   thresholdFilters: PropTypes.any,
   sampleSortType: PropTypes.string,
   fullScreen: PropTypes.bool,

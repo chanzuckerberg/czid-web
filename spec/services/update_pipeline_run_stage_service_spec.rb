@@ -43,7 +43,7 @@ RSpec.describe UpdatePipelineRunStageService do
       context "when step 1 succeeded" do
         it "updates pipeline_run job_status" do
           described_service_instance.call
-          expect(pipeline_run.reload).to have_attributes(job_status: "2.GSNAPL/RAPSEARCH alignment-STARTED")
+          expect(pipeline_run.reload).to have_attributes(job_status: "2.GSNAPL/RAPSEARCH2 alignment-STARTED")
         end
       end
       context "when step 1 failed" do

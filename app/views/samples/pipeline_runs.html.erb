@@ -56,8 +56,11 @@
                 <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %> </td>
                 <td class="<%= run_stage.job_status == "FAILED" ? "failed" : "" %>">
                   <%= run_stage.job_status %>
+                  <p>
+                    <%= run_stage.batch_job_status_reason %>
+                  </p>
                 </td>
-                <td> <%= run_stage.job_id %></td>
+                <td><u><%= run_stage.job_id ? (link_to run_stage.job_id, run_stage.batch_job_status_url, target: :_blank) : nil %></u></td>
                 <td> <u><%= link_to 'Logs', run_stage.log_url, target: :_blank  %></u></td>
                 <td><%= pipeline_run.adjusted_remaining_reads %> &nbsp;</td>
                 <td><%= pipeline_run.pipeline_version %> &nbsp;</td>

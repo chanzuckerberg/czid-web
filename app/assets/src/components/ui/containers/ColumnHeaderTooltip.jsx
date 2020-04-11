@@ -13,10 +13,18 @@ class ColumnHeaderTooltip extends React.Component {
           <div className={cs.tooltip}>
             {title && <span className={cs.title}>{title}:</span>}
             {content}
-            {list &&
-              list.map(item => {
-                return <li key={item}>{item}</li>;
-              })}
+            {list && (
+              <ul className={cs.ul}>
+                {" "}
+                {list.map(item => {
+                  return (
+                    <li className={cs.li} key={item}>
+                      {item}
+                    </li>
+                  );
+                })}{" "}
+              </ul>
+            )}
             {link && (
               <a
                 className={cs.link}

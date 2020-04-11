@@ -25,7 +25,7 @@ import SequentialLegendVis from "~/components/visualizations/legends/SequentialL
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import FilterTag from "~ui/controls/FilterTag";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import SmallInfoIcon from "~ui/icons/SmallInfoIcon";
+import InfoIconSmall from "~ui/icons/InfoIconSmall";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -425,11 +425,12 @@ export default class SamplesHeatmapControls extends React.Component {
     const { topN, minReads } = prefilterConstants;
     return (
       <span className={cs.reportInfoMsg}>
-        Showing {filteredTaxaCount} taxa of {totalTaxaCount} preselected taxa.
+        Showing top {filteredTaxaCount} taxa of {totalTaxaCount} preselected
+        taxa.
         <ColumnHeaderTooltip
           trigger={
             <span>
-              <SmallInfoIcon className={cs.infoIcon} />
+              <InfoIconSmall className={cs.infoIcon} />
             </span>
           }
           content="The data included in this heatmap 
@@ -478,7 +479,7 @@ export default class SamplesHeatmapControls extends React.Component {
         )}
         {!loading &&
           displayFilterStats && (
-            <div className={cx(cs.filterTagsList, "row")}>
+            <div className={cx(cs.filterRow, "row")}>
               <div className={cx(cs.statsRow, "col")}>
                 {this.renderFilterStatsInfo()}
               </div>

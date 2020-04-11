@@ -47,6 +47,8 @@
         .removeIcon {
           visibility: visible;
           cursor: pointer;
+          // The filter is defined in heatmap.js
+          filter: url("#blue");
         }
       }
     }
@@ -96,7 +98,7 @@
     .columnMetadataLabel {
       font-size: 12px;
       cursor: pointer;
-      font-weight: 700;
+      font-weight: $font-weight-regular;
 
       &:hover {
         text {
@@ -111,7 +113,7 @@
       }
 
       .metadataAddIcon {
-        opacity: 0.3;
+        opacity: 0.65;
       }
 
       rect {
@@ -119,8 +121,7 @@
       }
 
       .metadataAddLabel {
-        @include font-label-s;
-        fill: $medium-grey;
+        @include font-header-xs;
         cursor: pointer;
         text-anchor: end;
       }

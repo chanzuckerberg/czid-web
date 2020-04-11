@@ -22,26 +22,31 @@
 
     .filterRow {
       margin-top: $space-m;
-      margin-bottom: $space-m;
+      margin-bottom: $space-xs;
     }
 
-    .filterTag {
-      margin-right: 6px;
+    .filterTagsList {
+      margin-bottom: $space-m;
+      .filterTag {
+        margin-right: 6px;
 
-      &:last-child {
-        margin-right: 0;
+        &:last-child {
+          margin-right: 0;
+        }
       }
     }
 
     .statsRow {
       @include font-body-xs;
-      color: $medium-grey;
+      color: $dark-grey;
+      margin-left: $space-xxxs;
 
       .infoIcon {
+        margin-top: $space-xxxxs;
         margin-left: $space-xxxs;
         height: 15px;
         width: 15px;
-        fill: $medium-grey;
+        fill: $dark-grey;
         vertical-align: text-top;
       }
     }
