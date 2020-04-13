@@ -16,7 +16,7 @@ json.targets do
     "gsnap_counts_with_dcr.json",
   ]
   json.rapsearch2_out [
-    attr[:rapsearch_m8],
+    attr[:rapsearch2_m8],
     "rapsearch2.deduped.m8",
     "rapsearch2.hitsummary.tab",
     "rapsearch2_counts_with_dcr.json",
@@ -42,15 +42,7 @@ json.steps do
   end
 
   additional_attributes = {
-    service: "gsnap",
-    chunks_in_flight: attr[:chunks_in_flight],
-    chunk_size: attr[:gsnap_chunk_size],
-    max_concurrent: attr[:gsnap_max_concurrent],
-    environment: attr[:rails_env] == "prod" ? "prod" : "staging",
-    max_interval_between_describe_instances: attr[:max_interval_between_describe_instances],
-    job_tag_prefix: attr[:job_tag_prefix],
-    job_tag_refresh_seconds: attr[:job_tag_refresh_seconds],
-    draining_tag: attr[:draining_tag],
+    alignment_algorithm: "gsnap",
   }
 
   if attr[:index_dir_suffix]
@@ -71,15 +63,7 @@ json.steps do
   }
 
   additional_attributes = {
-    service: "rapsearch2",
-    chunks_in_flight: attr[:chunks_in_flight],
-    chunk_size: attr[:rapsearch_chunk_size],
-    max_concurrent: attr[:rapsearch_max_concurrent],
-    environment: attr[:rails_env] == "prod" ? "prod" : "staging",
-    max_interval_between_describe_instances: attr[:max_interval_between_describe_instances],
-    job_tag_prefix: attr[:job_tag_prefix],
-    job_tag_refresh_seconds: attr[:job_tag_refresh_seconds],
-    draining_tag: attr[:draining_tag],
+    alignment_algorithm: "rapsearch2",
   }
 
   if attr[:index_dir_suffix]
