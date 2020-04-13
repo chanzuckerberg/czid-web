@@ -113,6 +113,8 @@ class SfnPipelineDispatchService
       },
       "app/jobs/idd2wdl.py",
       "--name", dag_json['name'].to_s,
+      "--dag-branch", @sample.pipeline_version,
+      "--output-prefix", @sample.sample_output_s3_path,
       dag_tmp_file.path
     )
     return stdout if status.success?
