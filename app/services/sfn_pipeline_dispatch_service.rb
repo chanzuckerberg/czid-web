@@ -103,19 +103,24 @@ class SfnPipelineDispatchService
     dag_tmp_file.write(JSON.dump(dag_json))
     dag_tmp_file.close
 
-    stdout, stderr, status = Open3.capture3(
-      {
-        "AWS_ACCOUNT_ID" => @aws_account_id,
-        "AWS_DEFAULT_REGION" => ENV['AWS_REGION'],
-        "DEPLOYMENT_ENVIRONMENT" => stage_deployment_name,
-        "WDL_VERSION" => @sfn_tags[:wdl_version],
-        "DAG_VERSION" => @sfn_tags[:dag_version],
-      },
-      "app/jobs/idd2wdl.py",
+    idd2wdl_opts = [
       "--name", dag_json['name'].to_s,
-      "--dag-branch", @sample.pipeline_version,
-      "--output-prefix", @sample.sample_output_s3_path,
-      dag_tmp_file.path
+      "--output-prefix",
+      "--aws-account-id", @aws_account_id,
+      "--deployment-env", stage_deployment_name,
+      "--aws-region", ENV['AWS_REGION'],
+      "--wdl-version", @sfn_tags[:wdl_version],
+      "--dag-version", @sfn_tags[:dag_version]
+    ]
+
+    if @pipeline_run.pipeline_branch != "master"
+      idd2wdl_opts += ["--dag-branch", pipeline_run.pipeline_commit]
+    end
+
+    stdout, stderr, status = Open3.capture3(
+      "app/jobs/idd2wdl.py",
+      dag_tmp_file.path,
+      *idd2wdl_opts
     )
     return stdout if status.success?
     raise Idd2WdlError, stderr
