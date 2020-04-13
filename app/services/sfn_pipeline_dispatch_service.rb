@@ -123,7 +123,7 @@ class SfnPipelineDispatchService
 
   def generate_wdl_input(stage_dags_json)
     input_files_paths = @sample.input_files.map do |input_file|
-      File.join(@sample.sample_input_s3_path, input_file.source)
+      File.join(@sample.sample_input_s3_path, input_file.name)
     end
     sfn_pipeline_input_json = {
       Input: {

@@ -890,7 +890,7 @@ class PipelineRun < ApplicationRecord
         JSON.parse(execution_resp.input)["OutputPrefix"],
         execution_resp.state_machine_arn.split(':')[-1], # state machine name
         "wdl-#{tags[:wdl_version]}",
-        "dag-#{tags[:dag_version]}"
+        "dag-#{pipeline_version}"
       )
       Rails.logger.info("[SFN] [PR=#{id}] Output path: #{path}")
       return path
