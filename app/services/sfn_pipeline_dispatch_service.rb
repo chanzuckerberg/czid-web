@@ -114,7 +114,7 @@ class SfnPipelineDispatchService
     ]
 
     if @pipeline_run.pipeline_branch != "master"
-      idd2wdl_opts += ["--dag-branch", pipeline_run.pipeline_commit]
+      idd2wdl_opts += ["--dag-branch", @pipeline_run.pipeline_commit]
     end
 
     stdout, stderr, status = Open3.capture3(
