@@ -12,6 +12,7 @@ class SfnPipelineDispatchService
   # Constains SFN deployment stage names that differ from Rails.env
   ENV_TO_DEPLOYMENT_STAGE_NAMES = {
     "development" => "dev",
+    "staging" => "staging",
     "prod" => "production",
   }.freeze
 
