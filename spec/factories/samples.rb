@@ -41,7 +41,11 @@ FactoryBot.define do
     after :create do |sample, options|
       if MetadataField.table_exists?
         # Make sure the sample's host_genome has the requested metadata fields
-        sample.host_genome.metadata_fields = MetadataField.where(name: options.metadata_fields.keys())
+        MetadataField.where(name: options.metadata_fields.keys()).each do |mf|
+          unless sample.host_genome.metadata_fields.include?(mf)
+            sample.host_genome.metadata_fields << mf
+          end
+        end
       end
 
       options.metadata_fields.each do |key, value|
