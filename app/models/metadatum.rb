@@ -126,13 +126,30 @@ class Metadatum < ApplicationRecord
       return
     end
 
-    # Set to existing Location or create a new one based on the external IDs. For the sake of not
-    # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
-    location = Location.check_and_restrict_specificity(loc, sample.host_genome_name)
-    unless location.is_a?(Location)
-      location = Location.find_or_new_by_fields(loc)
+    # Re-fetch the location if it is specifically marked as "refetch_adjusted_location",
+    # which indicates that we auto-corrected user input that was too specific
+    # in the user-interface (and the user confirmed).
+    location = if loc[:refetch_adjusted_location]
+                 Location.refetch_adjusted_location(loc)
+               else
+                 # Set to existing Location or create a new one based on the external IDs. For the sake of not
+                 # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
+                 Location.find_or_new_by_fields(loc)
+               end
+
+    # If the location is too specific, reject it as invalid.
+    # In theory, the user should never trigger this error, if the front-end is auto-correcting properly.
+    unless Location.specificity_valid?(loc, sample.host_genome_name)
+      LogUtil.log_err_and_airbrake(
+        "Location specificity invalid for host genome #{sample.host_genome_name} #{JSON.dump(loc)}"
+      )
+      LogUtil.log_backtrace(err)
+      raise "Location specificity is invalid for host genome #{sample.host_genome_name}"
     end
+
     unless location.id
+      # Fetch and create any missing locations in the "lineage" of this location.
+      # Example: for a city, make sure the state, country, etc. are also fetched.
       location = Location.check_and_fetch_parents(location)
       location.save!
     end
