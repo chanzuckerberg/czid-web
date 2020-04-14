@@ -1,5 +1,6 @@
 # This is needed to load the constants in PipelineRunStage
 require 'pipeline_run_stage'
+require 'pipeline_runs_helper'
 
 class RenameAlignment < ActiveRecord::Migration[5.1]
   def change
