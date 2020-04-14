@@ -1,8 +1,5 @@
-# This is needed to load the constants in PipelineRunStage
-require 'pipeline_run_stage'
-
 class RenameAlignment < ActiveRecord::Migration[5.1]
   def change
-    PipelineRunStage.where(name: "GSNAPL/RAPSEARCH alignment").find_each { |u| u.update(name: "GSNAPL/RAPSEARCH2 alignment") }
+    ActiveRecord::Base.connection.execute("UPDATE pipeline_run_stages SET name='GSNAPL/RAPSEARCH alignment' WHERE name='GSNAPL/RAPSEARCH alignment'")
   end
 end
