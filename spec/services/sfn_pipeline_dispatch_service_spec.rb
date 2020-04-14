@@ -136,13 +136,6 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
         allow(Open3)
           .to receive(:capture3)
           .with(
-            {
-              "AWS_ACCOUNT_ID" => FAKE_ACCOUNT_ID,
-              "AWS_DEFAULT_REGION" => FAKE_REGION,
-              "DEPLOYMENT_ENVIRONMENT" => "test",
-              "DAG_VERSION" => FAKE_DAG_VERSION,
-              "WDL_VERSION" => FAKE_WDL_VERSION,
-            },
             "app/jobs/idd2wdl.py",
             "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
             anything
@@ -224,13 +217,6 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
           expect(Open3)
             .to receive(:capture3)
             .with(
-              {
-                "AWS_ACCOUNT_ID" => FAKE_ACCOUNT_ID,
-                "AWS_DEFAULT_REGION" => FAKE_REGION,
-                "DEPLOYMENT_ENVIRONMENT" => "test",
-                "DAG_VERSION" => FAKE_DAG_VERSION,
-                "WDL_VERSION" => FAKE_WDL_VERSION,
-              },
               "app/jobs/idd2wdl.py",
               "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
               anything
