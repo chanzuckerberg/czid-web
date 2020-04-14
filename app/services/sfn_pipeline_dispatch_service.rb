@@ -105,7 +105,7 @@ class SfnPipelineDispatchService
 
     idd2wdl_opts = [
       "--name", dag_json['name'].to_s,
-      "--output-prefix",
+      "--output-prefix", @sample.sample_output_s3_path,
       "--aws-account-id", @aws_account_id,
       "--deployment-env", stage_deployment_name,
       "--aws-region", ENV['AWS_REGION'],
