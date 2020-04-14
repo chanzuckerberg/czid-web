@@ -131,9 +131,18 @@ class Location < ApplicationRecord
       success, resp = geosearch_by_osm_id(loc_info[:osm_id], loc_info[:osm_type])
       raise "Couldn't fetch OSM ID #{loc_info[:osm_id]} (#{loc_info[:osm_type]})" unless success
 
-      resp = LocationHelper.adapt_location_iq_response(resp)
-      # 'New' without saving so make sure caller saves.
-      new_from_params(resp)
+      location_fields = LocationHelper.adapt_location_iq_response(resp)
+
+      # Surprisingly, it is possible that adapt_location_iq_response returns location_fields
+      # that are different from loc_info above (where loc_info is passed in from the front-end).
+      # So we need to check for existing AGAIN to avoid creating a duplicate entry in the database.
+      existing = Location.find_with_fields(location_fields)
+      if existing
+        existing
+      else
+        # 'New' without saving so make sure caller saves.
+        new_from_params(location_fields)
+      end
     else
       # If osm_id and osm_type are missing, just use the original params.
       # 'New' without saving so make sure caller saves.
@@ -153,36 +162,41 @@ class Location < ApplicationRecord
     )
   end
 
-  # Restrict Human location specificity to Subdivision, State, Country. Return new Location if
-  # restriction added.
-  def self.check_and_restrict_specificity(location, host_genome_name)
-    # We don't want Human locations with city
-    if host_genome_name == "Human" && location[:city_name].present?
-      # Return our existing entry if found
-      existing = Location.find_by(
-        country_name: location[:country_name],
-        state_name: location[:state_name],
-        subdivision_name: location[:subdivision_name],
-        city_name: ""
-      )
-      return existing if existing
-
-      # Redo the search for just the subdivision/state/country
-      success, resp = geosearch_by_levels(
-        location[:country_name],
-        location[:state_name],
-        location[:subdivision_name]
-      )
-      unless success && !resp.empty?
-        raise "Couldn't find #{location[:country_name]}, #{location[:state_name]}, #{location[:subdivision_name]} (country, state, subdivision)"
-      end
-
-      result = LocationHelper.adapt_location_iq_response(resp[0])
-      return Location.find_with_fields(result) || new_from_params(result)
+  def self.specificity_valid?(location, host_genome_name)
+    if host_genome_name == "Human" && (
+      location[:geo_level] == "city" ||
+      location[:city_name].present?
+    )
+      return false
     end
 
-    # Just return the input hash if no change
-    location
+    return true
+  end
+
+  # Refetch locations that were auto-adjusted for privacy reasons on the client,
+  # restricting location specificity to Subdivision, State, Country.
+  def self.refetch_adjusted_location(location)
+    # If a matching location already exists in the database, return that.
+    existing = Location.find_by(
+      country_name: location[:country_name],
+      state_name: location[:state_name],
+      subdivision_name: location[:subdivision_name],
+      city_name: ""
+    )
+    return existing if existing
+
+    # Redo the search for just the subdivision/state/country
+    success, resp = geosearch_by_levels(
+      location[:country_name],
+      location[:state_name],
+      location[:subdivision_name]
+    )
+    unless success && !resp.empty?
+      raise "Couldn't find #{location[:country_name]}, #{location[:state_name]}, #{location[:subdivision_name]} (country, state, subdivision)"
+    end
+
+    result = LocationHelper.adapt_location_iq_response(resp[0])
+    return Location.find_with_fields(result) || new_from_params(result)
   end
 
   # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
