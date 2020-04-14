@@ -136,16 +136,15 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
         allow(Open3)
           .to receive(:capture3)
           .with(
-            {
-              "AWS_ACCOUNT_ID" => FAKE_ACCOUNT_ID,
-              "AWS_DEFAULT_REGION" => FAKE_REGION,
-              "DEPLOYMENT_ENVIRONMENT" => "test",
-              "DAG_VERSION" => FAKE_DAG_VERSION,
-              "WDL_VERSION" => FAKE_WDL_VERSION,
-            },
-            "app/jobs/idd2wdl.py",
+            "app/jobs/idd2wdl.py", anything,
             "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
-            anything
+            "--output-prefix", anything,
+            "--aws-account-id", FAKE_ACCOUNT_ID,
+            "--deployment-env", "test",
+            "--aws-region", FAKE_REGION,
+            "--wdl-version", FAKE_WDL_VERSION,
+            "--dag-version", FAKE_DAG_VERSION,
+            "--dag-branch", anything
           )
           .and_return([idd2wdl_stdout, aws_cli_stderr, instance_double(Process::Status, success?: idd2wdl_exitstatus == 0, exitstatus: idd2wdl_exitstatus)])
       end
@@ -224,16 +223,15 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
           expect(Open3)
             .to receive(:capture3)
             .with(
-              {
-                "AWS_ACCOUNT_ID" => FAKE_ACCOUNT_ID,
-                "AWS_DEFAULT_REGION" => FAKE_REGION,
-                "DEPLOYMENT_ENVIRONMENT" => "test",
-                "DAG_VERSION" => FAKE_DAG_VERSION,
-                "WDL_VERSION" => FAKE_WDL_VERSION,
-              },
-              "app/jobs/idd2wdl.py",
+              "app/jobs/idd2wdl.py", anything,
               "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
-              anything
+              "--output-prefix", anything,
+              "--aws-account-id", FAKE_ACCOUNT_ID,
+              "--deployment-env", "test",
+              "--aws-region", FAKE_REGION,
+              "--wdl-version", FAKE_WDL_VERSION,
+              "--dag-version", FAKE_DAG_VERSION,
+              "--dag-branch", anything
             )
             .and_return([idd2wdl_stdout, aws_cli_stderr, instance_double(Process::Status, success?: idd2wdl_exitstatus == 0, exitstatus: idd2wdl_exitstatus)])
             .once
