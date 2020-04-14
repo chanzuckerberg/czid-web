@@ -110,7 +110,7 @@ class SfnPipelineDispatchService
       "--deployment-env", stage_deployment_name,
       "--aws-region", ENV['AWS_REGION'],
       "--wdl-version", @sfn_tags[:wdl_version],
-      "--dag-version", @sfn_tags[:dag_version]
+      "--dag-version", @sfn_tags[:dag_version],
     ]
 
     if @pipeline_run.pipeline_branch != "master"
