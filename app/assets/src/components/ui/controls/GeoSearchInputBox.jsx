@@ -15,11 +15,22 @@ export const LOCATION_UNRESOLVED_WARNING =
 // Process location selections and add warnings.
 export const processLocationSelection = (result, isHuman) => {
   let warning = "";
+  // For human samples, drop the city part of the name and show a warning.
+  // NOTE: The backend will redo the geosearch for confirmation and re-apply
+  // this restriction.
   if (isHuman && get("geo_level", result) === "city") {
     result = Object.assign({}, result); // make a copy to avoid side effects
-    // For human samples, drop the city part of the name and show a warning.
-    // NOTE: The backend will redo the geosearch for confirmation and re-apply
-    // this restriction.
+
+    // If the subdivision name is identical to the city name, remove the subdivision name as well to be safe.
+    if (result.subdivision_name === result.city_name) {
+      result.subdivision_name = "";
+    }
+    // Remove the city name.
+    result.city_name = "";
+
+    // Mark the result so that the back-end will know to refetch it.
+    result.refetch_adjusted_location = true;
+
     result.name = compact([
       result.subdivision_name,
       result.state_name,

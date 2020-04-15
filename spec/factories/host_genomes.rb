@@ -12,7 +12,7 @@ FactoryBot.define do
       options.metadata_fields.each do |metadata_field_name|
         metadata_field = MetadataField.find_by(name: metadata_field_name)
         unless metadata_field
-          create(:metadata_field, name: metadata_field_name)
+          metadata_field = create(:metadata_field, name: metadata_field_name)
         end
         host_genome.metadata_fields << metadata_field unless host_genome.metadata_fields.include?(metadata_field)
       end

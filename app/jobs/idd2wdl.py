@@ -8,16 +8,21 @@ import collections
 parser = argparse.ArgumentParser("idd2wdl", description="Convert an idseq-dag DAG to a WDL workflow")
 parser.add_argument("dag")
 parser.add_argument("--name")
+parser.add_argument("--output-prefix")
 parser.add_argument("--aws-account-id", default=os.environ.get("AWS_ACCOUNT_ID"))
 parser.add_argument("--deployment-env", default=os.environ.get("DEPLOYMENT_ENVIRONMENT"))
 parser.add_argument("--aws-region", default=os.environ.get("AWS_DEFAULT_REGION"))
 parser.add_argument("--wdl-version", default=os.environ.get("WDL_VERSION", "0"))
 parser.add_argument("--dag-version", default=os.environ.get("DAG_VERSION", "0"))
+parser.add_argument("--dag-branch", help="Branch of idseq-dag to install at runtime (pipeline_branch/pipeline_commit)")
 args = parser.parse_args()
 workflow_name = args.name or os.path.basename(args.dag).replace(".json", "")
 
 with open(args.dag) as fh:
     dag = json.load(fh)
+
+if args.output_prefix is None:
+    args.output_prefix = dag["output_dir_s3"]
 
 print("version 1.0")
 
@@ -60,6 +65,10 @@ count_input_reads = """
     with open("fastqs.count", "w") as count_file:
       json.dump(counts_dict, count_file)"""
 
+custom_idseq_dag_url = "https://github.com/chanzuckerberg/idseq-dag/archive/{}.tar.gz".format(args.dag_branch)
+pip_install_template = 'subprocess.check_call(["pip3", "install", "--upgrade", "{}"], stdout=sys.stderr.buffer)'
+install_custom_idseq_dag_version = pip_install_template.format(custom_idseq_dag_url)
+
 unaccounted_workflow_outputs = []
 
 for step in dag["steps"]:
@@ -82,7 +91,7 @@ for step in dag["steps"]:
     idd_step_output = dag["targets"][step["out"]]
     wdl_step_output = "\n".join('    File {} = "{}"'.format(file_path_to_name(name), name) for name in idd_step_output)
     wdl_step_output += '\n    File? output_read_count = "{}.count"'.format(step["out"])
-    s3_wd_uri = os.path.join(dag["output_dir_s3"],
+    s3_wd_uri = os.path.join(args.output_prefix,
                              "idseq-{}-main-1".format(args.deployment_env),
                              "wdl-" + args.wdl_version,
                              "dag-" + args.dag_version)
@@ -110,6 +119,7 @@ task {task_name} {{
   python3 <<CODE
   import os, sys, json, contextlib, importlib, threading, logging, subprocess, traceback
   os.environ.update(KEY_PATH_S3="{nha_cluster_ssh_key_uri}", AWS_DEFAULT_REGION="{AWS_DEFAULT_REGION}")
+  {install_custom_idseq_dag_version}
   import idseq_dag, idseq_dag.util.s3, idseq_dag.util.count
   logging.basicConfig(level=logging.INFO)
   idseq_dag.util.s3.config["REF_DIR"] = os.getcwd()
@@ -151,6 +161,7 @@ task {task_name} {{
              wdl_step_input=wdl_step_input,
              nha_cluster_ssh_key_uri=nha_cluster_ssh_key_uri,
              AWS_DEFAULT_REGION=args.aws_region,
+             install_custom_idseq_dag_version=install_custom_idseq_dag_version if args.dag_branch else "",
              max_fragments=dag["given_targets"].get("fastqs", {}).get("max_fragments"),
              step_module=step["module"],
              step_class=step["class"],
