@@ -102,26 +102,35 @@ class Metadatum < ApplicationRecord
     errors.add(:raw_value, MetadataValidationErrors::INVALID_DATE)
   end
 
-  def check_and_set_location_type
-    # Skip if location was already resolved
-    return if location_id && !raw_value
-
+  # Helper function of check_and_set_location_type.
+  # Returns the {location_id, string_validated_value, raw_value} values that should be assigned to the metadata object.
+  # Note: May create Location objects as a side effect.
+  # Important assumptions:
+  # The same raw_value will always cause the same response to be returned.
+  # Location objects in our database may need to be created the first time a new raw_value is processed,
+  # but only the first time.
+  def _determine_location_params(raw_value)
     # Based on our metadata structure, the location details selected by the user will end up in
     # raw_value.
     begin
       loc = JSON.parse(raw_value, symbolize_names: true)
     rescue JSON::ParserError
       # CSV uploads will be unwrapped strings
-      self.string_validated_value = raw_value
-      self.location_id = nil
-      return
+      return {
+        location_id: nil,
+        string_validated_value: raw_value,
+        raw_value: nil,
+      }
     end
 
     unless loc[:locationiq_id]
       # Unresolved plain text selection (wrapped 'name')
       if loc[:name].present?
-        self.string_validated_value = loc[:name]
-        self.location_id = nil
+        return {
+          location_id: nil,
+          string_validated_value: loc[:name],
+          raw_value: nil,
+        }
       end
       return
     end
@@ -154,10 +163,36 @@ class Metadatum < ApplicationRecord
       location.save!
     end
 
+    return {
+      location_id: location.id,
+      string_validated_value: nil,
+      raw_value: nil,
+    }
+  end
+
+  def check_and_set_location_type
+    # Skip if location was already resolved
+    return if location_id && !raw_value
+
+    # Increment this if you ever change the behavior of _determine_location_params or underlying functions.
+    cache_version_key = 1
+    cache_key = "#{raw_value}&_v=#{cache_version_key}"
+
+    # Use a cache for this function so that, if the exact same raw location value is passed for multiple samples
+    # in one request, we only validate it once, which saves time.
+    # Use the raw value as the cache key.
+    # Use a very short cache expiration time because our current performance requirements only require this cache
+    # to persist for the duration of one request.
+    # A short cache expiration time mitigates the risk in case someone forgets to
+    # increment the cache_version_key above when making a change.
+    location_params = Rails.cache.fetch(cache_key, expires_in: 1.minute) do
+      _determine_location_params(raw_value)
+    end
+
     # At this point, discard raw_value (too long to store anyway)
-    self.raw_value = nil
-    self.string_validated_value = nil
-    self.location_id = location.id
+    self.raw_value = location_params[:raw_value]
+    self.string_validated_value = location_params[:string_validated_value]
+    self.location_id = location_params[:location_id]
   rescue => err
     LogUtil.log_err_and_airbrake("Failed to save location metadatum: #{err.message}")
     LogUtil.log_backtrace(err)
