@@ -181,11 +181,11 @@ class Metadatum < ApplicationRecord
     # Use a cache for this function so that, if the exact same raw location value is passed for multiple samples
     # in one request, we only validate it once, which saves time.
     # Use the raw value as the cache key.
-    # Use a very short cache expiration time because our current performance requirements only require this cache
+    # Use a short cache expiration time because our current performance requirements only require this cache
     # to persist for the duration of one request.
     # A short cache expiration time mitigates the risk in case someone forgets to
     # increment the cache_version_key above when making a change.
-    location_params = Rails.cache.fetch(cache_key, expires_in: 1.minute) do
+    location_params = Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
       _determine_location_params(raw_value)
     end
 
