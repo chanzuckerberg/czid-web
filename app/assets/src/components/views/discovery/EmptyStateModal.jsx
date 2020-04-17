@@ -6,8 +6,8 @@ import BacteriaCultureIcon from "~ui/icons/BacteriaCultureIcon";
 import Link from "~ui/controls/Link";
 import Modal from "~ui/containers/Modal";
 
-import cs from "./empty_state_modal.scss";
 import InfoBanner from "./InfoBanner";
+import cs from "./empty_state_modal.scss";
 
 const EmptyStateModal = ({ onClose }) => {
   return (

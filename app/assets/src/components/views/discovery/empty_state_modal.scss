@@ -1,6 +1,18 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
+.emptyStateBanner {
+  height: 380px;
+
+  .iconClassName {
+    svg {
+      fill: $primary-light;
+      height: 150px;
+      width: 150px;
+    }
+  }
+}
+
 .messageClassName {
   @include font-body-m;
 }
@@ -11,10 +23,4 @@
 
 .link {
   color: $primary-light !important;
-}
-
-.iconClassName {
-  svg {
-    fill: $primary-light;
-  }
 }

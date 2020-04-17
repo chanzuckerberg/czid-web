@@ -10,7 +10,7 @@
 
   .content {
     flex: 1 0 0;
-    margin-right: 10%;
+    margin-right: $space-s;
 
     .title {
       @include font-header-l;
@@ -22,7 +22,7 @@
       @include font-body-s;
 
       color: $black;
-      margin-top: $space-s;
+      margin-top: $space-xxxs;
     }
 
     .suggestion {
@@ -50,8 +50,8 @@
     margin-right: $space-s;
 
     svg {
-      height: 200px;
-      width: 200px;
+      height: 250px;
+      width: 250px;
     }
   }
 }

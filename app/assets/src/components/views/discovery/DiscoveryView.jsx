@@ -1111,7 +1111,7 @@ class DiscoveryView extends React.Component {
                 icon={<BannerVisualizations />}
                 link={{
                   href: VISUALIZATIONS_DOC_LINK,
-                  text: "Learn about Visualizations",
+                  text: "Learn about Heatmaps",
                 }}
                 message="You will see your saved Heatmaps and Phylogenetic Trees here. You can create them from the Sample tab."
                 title="Visualizations"

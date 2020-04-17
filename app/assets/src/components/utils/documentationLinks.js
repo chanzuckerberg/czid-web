@@ -1,2 +1,2 @@
 export const VISUALIZATIONS_DOC_LINK =
-  "https://help.idseq.net/hc/en-us/articles/360042578654-Saving-a-Heatmap";
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360043062453-Creating-a-Heatmap";
