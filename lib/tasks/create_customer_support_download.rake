@@ -16,5 +16,5 @@ task create_customer_support_download: :environment do
   puts "BulkDownload record of type customer_support_request has been created."
   puts "Please upload the file you wish to transfer to the following URI:"
   puts "#{ENV['SAMPLES_BUCKET_NAME']}/#{bulk_download.download_output_key}"
-  puts "Once you have done that, you can notify the user that the file is available on the Dwnloads page."
+  puts "Once you have done that, you can notify the user that the file is available on their Downloads page."
 end
