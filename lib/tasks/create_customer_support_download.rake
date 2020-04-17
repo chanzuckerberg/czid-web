@@ -5,7 +5,6 @@ task create_customer_support_download: :environment do
   ### Usage: USER_ID=<int> DOWNLOAD_NAME='my_custom_download_name' rake create_customer_support_download
 
   user_id = ENV['USER_ID'].to_i
-  download_name = ENV['DOWNLOAD_NAME']
 
   user = User.find(user_id)
   puts "Is this the user you wish to send your file to? #{user.name}, #{user.email}"
@@ -18,6 +17,4 @@ task create_customer_support_download: :environment do
   puts "Please upload the file you wish to transfer to the following URI:"
   puts "#{ENV['SAMPLES_BUCKET_NAME']}/#{bulk_download.download_output_key}"
   puts "Once you have done that, you can notify the user that the file is available on the Dwnloads page."
-Please
-
 end
