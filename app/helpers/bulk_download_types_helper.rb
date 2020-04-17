@@ -15,6 +15,7 @@ module BulkDownloadTypesHelper
   RESQUE_EXECUTION_TYPE = "resque".freeze
   VARIABLE_EXECUTION_TYPE = "variable".freeze
   ECS_EXECUTION_TYPE = "ecs".freeze
+  MANUAL_EXECUTION_TYPE = "manual".freeze
 
   # The "type" value of the bulk download fields is really the field key.
   # There isn't currently anything that specifies what data type the field is.
@@ -24,6 +25,7 @@ module BulkDownloadTypesHelper
     {
       type: CUSTOMER_SUPPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Customer Support Request",
+      execution_type: MANUAL_EXECUTION_TYPE,
       admin_created_offline: true,
     },
     {

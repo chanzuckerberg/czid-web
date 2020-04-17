@@ -608,7 +608,7 @@ class BulkDownload < ApplicationRecord
 
   def execution_type
     execution_type = BulkDownloadTypesHelper.bulk_download_type(download_type)[:execution_type]
-    if [RESQUE_EXECUTION_TYPE, ECS_EXECUTION_TYPE]
+    if [RESQUE_EXECUTION_TYPE, ECS_EXECUTION_TYPE, MANUAL_EXECUTION_TYPE]
        .include?(execution_type)
       return execution_type
     end
