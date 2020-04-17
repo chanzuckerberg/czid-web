@@ -1,4 +1,5 @@
 module BulkDownloadTypesHelper
+  CUSTOMER_SUPPORT_BULK_DOWNLOAD_TYPE = "customer_support_request".freeze
   SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE = "sample_overview".freeze
   SAMPLE_METADATA_BULK_DOWNLOAD_TYPE = "sample_metadata".freeze
   SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE = "sample_taxon_report".freeze
@@ -20,6 +21,11 @@ module BulkDownloadTypesHelper
   # The front-end is hard-coded to display a select dropdown or a checkbox depending on the field type.
   # For more documentation, see https://czi.quip.com/TJEaAeFaAewG/Making-a-Bulk-Download-Things-to-Know
   BULK_DOWNLOAD_TYPES = [
+    {
+      type: CUSTOMER_SUPPORT_BULK_DOWNLOAD_TYPE,
+      display_name: "Customer Support Request",
+      admin_created_offline: true,
+    },
     {
       type: SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,
       display_name: "Samples Overview",

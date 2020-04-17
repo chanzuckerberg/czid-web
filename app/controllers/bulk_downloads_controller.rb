@@ -22,6 +22,9 @@ class BulkDownloadsController < ApplicationController
       end
     end
 
+    # Filter out types that should not be part of the creation UI because they are created offline by admins
+    download_types = download_types.reject { |type| type[:admin_created_offline] }
+
     render json: download_types
   end
 
