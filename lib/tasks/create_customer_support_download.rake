@@ -2,7 +2,7 @@ task create_customer_support_download: :environment do
   ### This is a utility that serves as a kind of "customer support dropbox".
   ### The task will create a BulkDownload record that the user can use to download a file you wish to transfer to them.
   ### The task will print instructions on the S3 location where you should put the file you have created for the user offline.
-  ### Usage: USER_ID=<int> DOWNLOAD_NAME='my_custom_download_name' rake create_customer_support_download
+  ### Usage: USER_ID=<int> rake create_customer_support_download
 
   user_id = ENV['USER_ID'].to_i
 
