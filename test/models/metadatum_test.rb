@@ -17,11 +17,6 @@ class MetadatumTest < ActiveSupport::TestCase
     mock_create.verify
   end
 
-  test "should delete cleared out Location values" do
-    loc = Metadatum.new(raw_value: "{}")
-    assert_nil loc.check_and_set_location_type
-  end
-
   test "should raise Location validation/setting errors" do
     loc = metadata(:sample_collection_location_v2)
     loc.raw_value = "{\"locationiq_id\":\"123\"}"
