@@ -24,7 +24,7 @@ class PipelineRunStage < ApplicationRecord
 
   # Stage names
   HOST_FILTERING_STAGE_NAME = 'Host Filtering'.freeze
-  ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH alignment'.freeze
+  ALIGNMENT_STAGE_NAME = 'GSNAPL/RAPSEARCH2 alignment'.freeze
   POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze # also known as "assembly"
   EXPT_STAGE_NAME = "Experimental".freeze # Not actually experimental anymore!
 
@@ -301,17 +301,8 @@ class PipelineRunStage < ApplicationRecord
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
-      max_interval_between_describe_instances: PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS,
-      job_tag_prefix: PipelineRun::JOB_TAG_PREFIX,
-      job_tag_refresh_seconds: PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS,
-      draining_tag: PipelineRun::DRAINING_TAG,
-      gsnap_chunk_size: PipelineRun::GSNAP_CHUNK_SIZE,
-      rapsearch_chunk_size: PipelineRun::RAPSEARCH_CHUNK_SIZE,
-      gsnap_max_concurrent: PipelineRun::GSNAP_MAX_CONCURRENT,
-      rapsearch_max_concurrent: PipelineRun::RAPSEARCH_MAX_CONCURRENT,
-      chunks_in_flight: PipelineRun::MAX_CHUNKS_IN_FLIGHT,
       gsnap_m8: PipelineRun::GSNAP_M8,
-      rapsearch_m8: PipelineRun::RAPSEARCH_M8,
+      rapsearch2_m8: PipelineRun::RAPSEARCH2_M8,
       use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
     }
     return generate_json(attribute_dict)
@@ -375,6 +366,8 @@ class PipelineRunStage < ApplicationRecord
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
       nt_info_db: alignment_config.s3_nt_info_db_path || DEFAULT_S3_NT_INFO_DB_PATH,
+      # This was added for the betacoronavirus fastq download feature
+      use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     return generate_json(attribute_dict)
@@ -389,5 +382,27 @@ class PipelineRunStage < ApplicationRecord
 
     # Dispatch job
     aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_EXPERIMENTAL, sample_id: sample.id)
+  end
+
+  # Gets the URL to the AWS console page of the batch job for display on
+  # admin-only pages.
+  def batch_job_status_url
+    return if job_description.blank?
+
+    job_hash = JSON.parse(job_description)
+    if job_hash && job_hash['jobId']
+      AwsUtil.get_batch_job_url(job_hash['jobQueue'], job_hash['jobId'])
+    end
+  end
+
+  # Returns the exit reason of the AWS batch job. For example: "Essential
+  # container in task exited".
+  def batch_job_status_reason
+    return if job_description.blank?
+
+    job_hash = JSON.parse(job_description)
+    if job_hash
+      job_hash['statusReason']
+    end
   end
 end

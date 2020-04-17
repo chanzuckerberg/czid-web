@@ -32,6 +32,8 @@ class MetadataUpload extends React.Component {
     hostGenomes: [],
     sampleTypes: [],
     validatingCSV: false,
+    fetchingCSVLocationMatches: false,
+    showMetadataCSVLocationsMenu: false,
     CSVLocationWarnings: {},
   };
 
@@ -135,10 +137,17 @@ class MetadataUpload extends React.Component {
         projectId: this.props.project.id,
         projectName: this.props.project.name,
       });
+      // Batch geosearch for locations for the interactive menu
+      const hasErrors = issues && issues.errors.length > 0;
+      if (!hasErrors) {
+        this.getCSVLocationMatches(metadata);
+      }
+    } else {
+      // If the user re-uploads a CSV, hide the locations menu until the CSV validation has no issues.
+      this.setState({
+        showMetadataCSVLocationsMenu: false,
+      });
     }
-    // Batch geosearch for locations for the interactive menu
-    const hasErrors = issues && issues.errors.length > 0;
-    if (!hasErrors) this.getCSVLocationMatches(metadata);
   };
 
   getCSVLocationMatches = async metadata => {
@@ -146,18 +155,26 @@ class MetadataUpload extends React.Component {
     if (!metadata) return;
 
     try {
+      this.setState({
+        fetchingCSVLocationMatches: true,
+      });
       const { newMetadata, warnings } = await geosearchCSVLocations(
         metadata,
         this.getRequiredLocationMetadataType()
       );
       // Here we set issues to null on the assumption that getCSVLocationMatches
       // is called only when warnings and errors have been dealt with.
+      // wasManual will trigger another validation when the Continue button is clicked.
       onMetadataChange({
         metadata: newMetadata,
         wasManual: true,
         issues: null,
       });
-      this.setState({ CSVLocationWarnings: warnings });
+      this.setState({
+        CSVLocationWarnings: warnings,
+        showMetadataCSVLocationsMenu: true,
+        fetchingCSVLocationMatches: false,
+      });
     } catch (e) {
       // On failure, locations will remain plain text.
       // eslint-disable-next-line no-console
@@ -165,12 +182,23 @@ class MetadataUpload extends React.Component {
     }
   };
 
-  // MetadataManualInput doesn't validate metadata before calling onMetadataChangeManual.
-  // This happens when Continue is clicked in the parent component.
-  onMetadataChangeManual = ({ metadata }) => {
+  onMetadataChangeCSVLocationsMenu = ({ metadata }) => {
+    // Disable the Step 3 navigation breadcrumb once a value has changed.
     if (this.props.onDirty) {
       this.props.onDirty();
     }
+    // wasManual will trigger another validation when the Continue button is clicked.
+    this.props.onMetadataChange({ metadata, wasManual: true });
+  };
+
+  // MetadataManualInput doesn't validate metadata before calling onMetadataChangeManual.
+  // This happens when Continue is clicked in the parent component.
+  onMetadataChangeManual = ({ metadata }) => {
+    // Disable the Step 3 navigation breadcrumb once a value has changed.
+    if (this.props.onDirty) {
+      this.props.onDirty();
+    }
+    // wasManual will trigger another validation when the Continue button is clicked.
     this.props.onMetadataChange({ metadata, wasManual: true });
     logAnalyticsEvent("MetadataUpload_manual-metadata_changed", {
       projectId: this.props.project.id,
@@ -267,6 +295,12 @@ class MetadataUpload extends React.Component {
               Validating metadata...
             </div>
           )}
+          {this.state.fetchingCSVLocationMatches && (
+            <div className={cs.validationMessage}>
+              <LoadingIcon className={cs.loadingIcon} />
+              Verifying collection locations...
+            </div>
+          )}
         </React.Fragment>
       );
     }
@@ -304,15 +338,19 @@ class MetadataUpload extends React.Component {
 
     if (!hasErrors && !hasWarnings) return null;
 
+    let error = "Fix the following errors.";
+
+    if (this.state.currentTab === "CSV Upload") {
+      error = this.state.showMetadataCSVLocationsMenu
+        ? "Fix these errors with your location selections."
+        : "Fix the following errors.";
+    }
+
     return (
       <div className={cs.issues}>
         {hasErrors && (
           <div className={cs.errors}>
-            <div className={cs.header}>
-              {this.state.currentTab === "Manual Input"
-                ? "Fix the following errors."
-                : "Fix these errors and upload your CSV again."}
-            </div>
+            <div className={cs.header}>{error}</div>
             <div>
               {issues.errors.map((error, index) =>
                 this.renderIssue(error, "error", index)
@@ -335,20 +373,22 @@ class MetadataUpload extends React.Component {
   };
 
   renderCSVLocationsMenu = () => {
-    const { metadata, onMetadataChange } = this.props;
-    const { CSVLocationWarnings, currentTab } = this.state;
+    const { metadata } = this.props;
+    const {
+      CSVLocationWarnings,
+      currentTab,
+      showMetadataCSVLocationsMenu,
+      hostGenomes,
+    } = this.state;
 
-    const issues = this.props.issues || this.state.issues;
-    const hasErrors = issues && issues.errors.length > 0;
-
-    // Hide if they still have errors that will require re-uploading their CSV.
-    return currentTab === "CSV Upload" && !hasErrors ? (
+    return currentTab === "CSV Upload" && showMetadataCSVLocationsMenu ? (
       <MetadataCSVLocationsMenu
         CSVLocationWarnings={CSVLocationWarnings}
         locationMetadataType={this.getRequiredLocationMetadataType()}
         metadata={metadata}
         onCSVLocationWarningsChange={this.handleCSVLocationWarningsChange}
-        onMetadataChange={onMetadataChange}
+        onMetadataChange={this.onMetadataChangeCSVLocationsMenu}
+        hostGenomes={hostGenomes}
       />
     ) : null;
   };
@@ -425,8 +465,8 @@ class MetadataUpload extends React.Component {
           onChange={this.handleTabChange}
         />
         {this.renderTab()}
-        {this.renderIssues()}
         {this.renderCSVLocationsMenu()}
+        {this.renderIssues()}
       </div>
     );
   }

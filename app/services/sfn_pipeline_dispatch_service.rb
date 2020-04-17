@@ -12,6 +12,7 @@ class SfnPipelineDispatchService
   # Constains SFN deployment stage names that differ from Rails.env
   ENV_TO_DEPLOYMENT_STAGE_NAMES = {
     "development" => "dev",
+    "staging" => "staging",
     "prod" => "production",
   }.freeze
 
@@ -103,17 +104,24 @@ class SfnPipelineDispatchService
     dag_tmp_file.write(JSON.dump(dag_json))
     dag_tmp_file.close
 
-    stdout, stderr, status = Open3.capture3(
-      {
-        "AWS_ACCOUNT_ID" => @aws_account_id,
-        "AWS_DEFAULT_REGION" => ENV['AWS_REGION'],
-        "DEPLOYMENT_ENVIRONMENT" => stage_deployment_name,
-        "WDL_VERSION" => @sfn_tags[:wdl_version],
-        "DAG_VERSION" => @sfn_tags[:dag_version],
-      },
-      "app/jobs/idd2wdl.py",
+    idd2wdl_opts = [
       "--name", dag_json['name'].to_s,
-      dag_tmp_file.path
+      "--output-prefix", @sample.sample_output_s3_path,
+      "--aws-account-id", @aws_account_id,
+      "--deployment-env", stage_deployment_name,
+      "--aws-region", ENV['AWS_REGION'],
+      "--wdl-version", @sfn_tags[:wdl_version],
+      "--dag-version", @sfn_tags[:dag_version],
+    ]
+
+    if @pipeline_run.pipeline_branch != "master"
+      idd2wdl_opts += ["--dag-branch", @pipeline_run.pipeline_commit]
+    end
+
+    stdout, stderr, status = Open3.capture3(
+      "app/jobs/idd2wdl.py",
+      dag_tmp_file.path,
+      *idd2wdl_opts
     )
     return stdout if status.success?
     raise Idd2WdlError, stderr
@@ -123,7 +131,7 @@ class SfnPipelineDispatchService
 
   def generate_wdl_input(stage_dags_json)
     input_files_paths = @sample.input_files.map do |input_file|
-      File.join(@sample.sample_input_s3_path, input_file.source)
+      File.join(@sample.sample_input_s3_path, input_file.name)
     end
     sfn_pipeline_input_json = {
       Input: {
