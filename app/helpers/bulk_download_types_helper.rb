@@ -26,7 +26,6 @@ module BulkDownloadTypesHelper
       type: CUSTOMER_SUPPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Customer Support Request",
       execution_type: MANUAL_EXECUTION_TYPE,
-      admin_created_offline: true,
     },
     {
       type: SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,
