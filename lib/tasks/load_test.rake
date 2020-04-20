@@ -5,7 +5,7 @@
 #     - a csv file (named metadata.csv) containing all necessary metadata file following IDseq's metadata instructions
 #   * create a project
 #   (ATTENTION: samples not referenced on the csv script will be ignored)
-# The script will upload number_test_samples/number_available_samples +- 1 for each sample
+# The script will upload number_test_samples/number_available_samples +- 1 for each sample in round robin fashion.
 # Usage:
 #    rake "load_test:start[<total_samples>,<s3_bucket>,<s3_samples_path>,<project_name>,<user_id>]"
 #    e.g. rake "load_test:start[100,idseq-samples-development,load_test_samples,load-test-project,<user_id>]"
@@ -159,9 +159,16 @@ namespace "load_test" do
       sample.pipeline_execution_strategy = PipelineRun.pipeline_execution_strategies[:step_function]
 
       # add metadata
-      metadata = []
       valid_samples[rr_idx][:metadata].each do |key, value|
-        if ["Sample Name", "Host Organism"].include?(key)
+        # skip
+        if [
+          # used as index
+          "Sample Name",
+          # process separately
+          "Host Organism",
+          # Skip due to issues with processing it as a correct location (not relevant for admin load tests)
+          "Collection Location"
+        ].include?(key)
           next
         end
 
@@ -170,8 +177,8 @@ namespace "load_test" do
           Rails.logger.error("Failed to add metadata: key=#{key} value=#{value}")
           abort("Load test failed")
         end
+        sample.metadata << result[:metadatum]
       end
-      sample.metadata = metadata
 
       samples_to_create << sample
     end
@@ -181,7 +188,6 @@ namespace "load_test" do
       Rails.logger.info("Creating sample '#{sample_attributes[:name]}'")
       begin
         sample.save!
-        sample.metadata.each{|m| m.save!}
       rescue
         Rails.logger.error("Failed to save sample: #{sample.name}")
         if cnt
