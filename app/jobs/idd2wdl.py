@@ -118,10 +118,21 @@ task {task_name} {{
   command<<<
   python3 <<CODE
   import os, sys, json, contextlib, importlib, threading, logging, subprocess, traceback
-  os.environ.update(KEY_PATH_S3="{nha_cluster_ssh_key_uri}", AWS_DEFAULT_REGION="{AWS_DEFAULT_REGION}")
+  os.environ.update(
+    KEY_PATH_S3="{nha_cluster_ssh_key_uri}",
+    AWS_DEFAULT_REGION="{AWS_DEFAULT_REGION}",
+    DEPLOYMENT_ENVIRONMENT="{DEPLOYMENT_ENVIRONMENT}"
+  )
   {install_custom_idseq_dag_version}
   import idseq_dag, idseq_dag.util.s3, idseq_dag.util.count
-  logging.basicConfig(level=logging.INFO)
+
+  root_logger = logging.getLogger()
+  root_logger.setLevel(level=logging.INFO)
+  stream_handler = logging.StreamHandler()
+  stream_handler.setFormatter(idseq_dag.util.log.JsonFormatter())
+  root_logger.addHandler(stream_handler)
+
+  logging.info("idseq-dag %s running %s", idseq_dag.__version__, "{step_module}.{step_class}{dag_branch}")
   idseq_dag.util.s3.config["REF_DIR"] = os.getcwd()
   max_fragments = {max_fragments}
   step = importlib.import_module("{step_module}")
@@ -138,16 +149,25 @@ task {task_name} {{
     step_status_lock=contextlib.suppress()
   )
   step_instance.input_files_local = {input_files_local}
+
   with open(step_instance.step_status_local, "w") as status_file:
     json.dump(dict(), status_file)
+
   try:
     {count_input_reads}
     step_instance.update_status_json_file("running")
     step_instance.run()
     step_instance.count_reads()
     step_instance.save_counts()
-    step_instance.update_status_json_file("finished_running")
+    # temporary until we instrument miniwdl - not yet uploaded, but this is the final status
+    step_instance.update_status_json_file("uploaded")
   except Exception as e:
+    # process exception for status reporting
+    status = "user_errored" if isinstance(e, idseq_dag.engine.pipeline_step.InvalidInputFileError) else "pipeline_errored"
+    try:
+        self.update_status_json_file(status)
+    except:
+        logging.error("Failed to update status to '%s'", status)
     traceback.print_exc()
     exit(json.dumps(dict(wdl_error_message=True, error=type(e).__name__, cause=str(e))))
   CODE
@@ -161,6 +181,7 @@ task {task_name} {{
              wdl_step_input=wdl_step_input,
              nha_cluster_ssh_key_uri=nha_cluster_ssh_key_uri,
              AWS_DEFAULT_REGION=args.aws_region,
+             dag_branch=" (git branch {})".format(args.dag_branch) if args.dag_branch else "",
              install_custom_idseq_dag_version=install_custom_idseq_dag_version if args.dag_branch else "",
              max_fragments=dag["given_targets"].get("fastqs", {}).get("max_fragments"),
              step_module=step["module"],
