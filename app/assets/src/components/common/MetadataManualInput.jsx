@@ -15,6 +15,8 @@ import _fp, {
   pickBy,
   has,
   orderBy,
+  merge,
+  keys,
 } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -71,6 +73,15 @@ const COLUMN_HEADER_TOOLTIPS = {
   preservation_method: "Preservation method of host.",
   sample_unit: "Number of hosts in sample.",
   trap_type: "Trap type used on host.",
+};
+
+// When the auto-populate button is clicked, the following metadata fields will be populated with these values.
+const AUTO_POPULATE_FIELDS = {
+  "Host Organism": "Human",
+  sample_type: "CSF",
+  nucleotide_type: "DNA",
+  collection_date: "2020-05",
+  collection_location_v2: "California, USA",
 };
 
 class MetadataManualInput extends React.Component {
@@ -146,6 +157,27 @@ class MetadataManualInput extends React.Component {
       ...(this.props.samplesAreNew ? ["Host Organism"] : []),
       ...this.state.selectedFieldNames,
     ];
+  };
+
+  autoPopulateMetadata = () => {
+    const { metadataFieldsToEdit, headersToEdit } = this.state;
+
+    const newHeadersToEdit = union(headersToEdit, keys(AUTO_POPULATE_FIELDS));
+    const newMetadataFieldsToEdit = mapValues(
+      metadataFields => merge(AUTO_POPULATE_FIELDS, metadataFields),
+      metadataFieldsToEdit
+    );
+
+    this.setState({
+      metadataFieldsToEdit: newMetadataFieldsToEdit,
+      headersToEdit: newHeadersToEdit,
+      applyToAllCell: {
+        sampleName: null,
+        column: null,
+      },
+    });
+
+    this.onMetadataChange(newHeadersToEdit, newMetadataFieldsToEdit);
   };
 
   // Update metadata field based on user's manual input.
@@ -504,6 +536,8 @@ class MetadataManualInput extends React.Component {
   };
 
   render() {
+    const { admin } = this.context || {};
+    const { samplesAreNew } = this.props;
     const columns = this.getManualInputColumns();
     return (
       <div className={cx(cs.metadataManualInput, this.props.className)}>
@@ -519,6 +553,15 @@ class MetadataManualInput extends React.Component {
           </div>
           {this.renderColumnSelector()}
         </div>
+        {admin &&
+          samplesAreNew && (
+            <div
+              className={cs.autoPopulateButton}
+              onClick={this.autoPopulateMetadata}
+            >
+              Auto-populate metadata (Admin-only)
+            </div>
+          )}
       </div>
     );
   }

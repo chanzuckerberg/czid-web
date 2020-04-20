@@ -73,4 +73,11 @@ $metadata-input-extra-width: 225;
       cursor: pointer;
     }
   }
+
+  .autoPopulateButton {
+    @include font-label-s;
+    color: $primary-light;
+    cursor: pointer;
+    margin-top: $space-xxxs;
+  }
 }
