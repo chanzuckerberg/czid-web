@@ -1337,9 +1337,9 @@ class SamplesController < ApplicationController
     # assume that all samples are in the same project and from the same user
     project = samples.first.project
     uploader = samples.first.user
-    msg = "[Datadog] LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name}." \
+    msg = "LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name}." \
       " See: #{project.status_url}"
-    LogUtil.log_err_and_airbrake(msg)
+    Rails.logger.info(msg)
   rescue StandardError => e
     # catch all errors because we don't want to ever block uploads
     LogUtil.log_err_and_airbrake("warn_if_large_bulk_upload: #{e}")
