@@ -34,12 +34,12 @@ namespace "load_test" do
 
       samples[name] ||= {
         name: name,
-        input_files_attributes: []
+        input_files_attributes: [],
       }
       samples[name][:input_files_attributes][read_idx] = {
         name: filename,
         source: "s3://#{s3_bucket}/#{object.key}",
-        source_type: InputFile::SOURCE_TYPE_S3
+        source_type: InputFile::SOURCE_TYPE_S3,
       }
     end
     return samples
@@ -59,7 +59,7 @@ namespace "load_test" do
       abort("Load test failed")
     end
 
-    user = User.find_by_id(args.user_id)
+    user = User.find_by(id: args.user_id)
     unless user
       Rails.logger.error("Please specify an admin user.")
       abort("Load test failed")
@@ -69,7 +69,7 @@ namespace "load_test" do
       abort("Load test failed")
     end
 
-    project = Project.find_by_name(args.project_name)
+    project = Project.find_by(name: args.project_name)
     unless !project || Sample.where(project: project).empty?
       Rails.logger.error("Please specify a unexistent or empty project. Project '#{project.name}' has samples.")
       abort("Load test failed")
@@ -96,7 +96,7 @@ namespace "load_test" do
     metadata_samples.each do |sample|
       sample_name = sample["Sample Name"]
       sample_host_name = sample["Host Organism"]
-      host = HostGenome.find_by_name(sample_host_name)
+      host = HostGenome.find_by(name: sample_host_name)
       unless s3_samples.include?(sample_name)
         Rails.logger.info("Sample skipped! reason: invalid host '#{sample_host_name}' (sample name=#{name})")
         next
@@ -107,16 +107,14 @@ namespace "load_test" do
       end
 
       valid_samples << {
-        attributes: s3_samples[sample_name].merge({
-          project_id: args.project_id,
-          host_genome_id: host.id,
-          status: 'created'
-        }),
-        metadata: sample
+        attributes: s3_samples[sample_name].merge(project_id: args.project_id,
+                                                  host_genome_id: host.id,
+                                                  status: 'created'),
+        metadata: sample,
       }
     end
 
-    project = Project.find_by_name(args.project_name)
+    project = Project.find_by(name: args.project_name)
     if project
       Rails.logger.info("Samples will be added to '#{args.project_name}'.")
     else
@@ -144,10 +142,10 @@ namespace "load_test" do
     end
 
     samples_to_create = []
-    for i in 0...total_samples
-      rr_idx = i%valid_samples.size
+    (0...total_samples).each do |i|
+      rr_idx = i % valid_samples.size
       sample_attributes = valid_samples[rr_idx][:attributes].clone
-      sample_attributes[:name] = "#{sample_attributes[:name]}_#{(i + 1).to_s.rjust(args.total_samples.to_s.size, "0")}"
+      sample_attributes[:name] = "#{sample_attributes[:name]}_#{(i + 1).to_s.rjust(args.total_samples.to_s.size, '0')}"
 
       Rails.logger.info("Preparing sample '#{sample_attributes[:name]}'")
       sample = Sample.new(sample_attributes)
@@ -167,7 +165,7 @@ namespace "load_test" do
           # process separately
           "Host Organism",
           # Skip due to issues with processing it as a correct location (not relevant for admin load tests)
-          "Collection Location"
+          "Collection Location",
         ].include?(key)
           next
         end
@@ -184,12 +182,12 @@ namespace "load_test" do
     end
 
     cnt = 0
-    samples_to_create.each do |sample|
+    samples_to_create.each do |sample_to_create|
       Rails.logger.info("Creating sample '#{sample_attributes[:name]}'")
       begin
-        sample.save!
+        sample_to_create.save!
       rescue
-        Rails.logger.error("Failed to save sample: #{sample.name}")
+        Rails.logger.error("Failed to save sample: #{sample_to_create.name}")
         if cnt
           abort("Load test failed. [ATTENTION] Some samples might have gone through.")
         else
