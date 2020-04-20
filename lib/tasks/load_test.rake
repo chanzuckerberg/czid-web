@@ -9,6 +9,11 @@
 # Usage:
 #    rake "load_test:start[<total_samples>,<s3_bucket>,<s3_samples_path>,<project_name>,<user_id>]"
 #    e.g. rake "load_test:start[100,idseq-samples-development,load_test_samples,load-test-project,<user_id>]"
+#
+# TODO:
+# * This is currently enforcing SFN runs. Should move that option to a parameter.
+# * Use a specific user to run these tests
+# * Move parameters to a config file for more flexibility and clarity.
 
 namespace "load_test" do
   def parse_samples_from_s3_path(s3, s3_bucket, s3_prefix)
