@@ -161,20 +161,13 @@ task {task_name} {{
     step_instance.save_counts()
     # temporary until we instrument miniwdl - not yet uploaded, but this is the final status
     step_instance.update_status_json_file("uploaded")
-  except:
+  except Exception as e:
     # process exception for status reporting
+    status = "user_errored" if isinstance(e, idseq_dag.engine.pipeline_step.InvalidInputFileError) else "pipeline_errored"
     try:
-      raise
-    except idseq_dag.engine.pipeline_step.InvalidInputFileError as e:
-      try:
-        self.update_status_json_file("user_errored")
-      except:
-        logging.error("Failed to update status to 'user_errored'")
+        self.update_status_json_file(status)
     except:
-      try:
-        self.update_status_json_file("pipeline_errored")
-      except:
-        logging.error("Failed to update status to 'pipeline_errored'")
+        logging.error("Failed to update status to '%s'", status)
     traceback.print_exc()
     exit(json.dumps(dict(wdl_error_message=True, error=type(e).__name__, cause=str(e))))
   CODE
