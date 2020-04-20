@@ -159,7 +159,7 @@ task {task_name} {{
     step_instance.run()
     step_instance.count_reads()
     step_instance.save_counts()
-    # temoorary until we instrument miniwdl - not yet uploaded, but this is the final status
+    # temporary until we instrument miniwdl - not yet uploaded, but this is the final status
     step_instance.update_status_json_file("uploaded")
   except idseq_dag.engine.pipeline_step.InvalidInputFileError as e:
     try:
