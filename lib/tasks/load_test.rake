@@ -3,6 +3,7 @@
 #   * upload to s3:
 #     - all fastq/a files for the samples that you wan to include in your test.
 #     - a csv file (named metadata.csv) containing all necessary metadata file following IDseq's metadata instructions
+#       (template availble at https://idseq.net/metadata/metadata_template_csv)
 #   * create a project
 #   (ATTENTION: samples not referenced on the csv script will be ignored)
 # The script will upload number_test_samples/number_available_samples +- 1 for each sample in round robin fashion.
@@ -76,7 +77,7 @@ namespace "load_test" do
 
     project = Project.find_by(name: args.project_name)
     unless !project || Sample.where(project: project).empty?
-      Rails.logger.error("Please specify a unexistent or empty project. Project '#{project.name}' has samples.")
+      Rails.logger.error("Please specify a nonexistent or empty project. Project '#{project.name}' has samples.")
       abort("Load test failed")
     end
 
