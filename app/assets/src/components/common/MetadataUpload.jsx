@@ -34,7 +34,6 @@ class MetadataUpload extends React.Component {
     validatingCSV: false,
     fetchingCSVLocationMatches: false,
     showMetadataCSVLocationsMenu: false,
-    CSVLocationWarnings: {},
   };
 
   // Define the order in which metadata fields should be render in the upload
@@ -158,7 +157,7 @@ class MetadataUpload extends React.Component {
       this.setState({
         fetchingCSVLocationMatches: true,
       });
-      const { newMetadata, warnings } = await geosearchCSVLocations(
+      const newMetadata = await geosearchCSVLocations(
         metadata,
         this.getRequiredLocationMetadataType()
       );
@@ -171,7 +170,6 @@ class MetadataUpload extends React.Component {
         issues: null,
       });
       this.setState({
-        CSVLocationWarnings: warnings,
         showMetadataCSVLocationsMenu: true,
         fetchingCSVLocationMatches: false,
       });
@@ -225,9 +223,6 @@ class MetadataUpload extends React.Component {
       Object.values(projectMetadataFields)
     );
   };
-
-  handleCSVLocationWarningsChange = CSVLocationWarnings =>
-    this.setState({ CSVLocationWarnings });
 
   renderTab = () => {
     if (this.state.currentTab === "Manual Input") {
@@ -375,7 +370,6 @@ class MetadataUpload extends React.Component {
   renderCSVLocationsMenu = () => {
     const { metadata } = this.props;
     const {
-      CSVLocationWarnings,
       currentTab,
       showMetadataCSVLocationsMenu,
       hostGenomes,
@@ -383,10 +377,8 @@ class MetadataUpload extends React.Component {
 
     return currentTab === "CSV Upload" && showMetadataCSVLocationsMenu ? (
       <MetadataCSVLocationsMenu
-        CSVLocationWarnings={CSVLocationWarnings}
         locationMetadataType={this.getRequiredLocationMetadataType()}
         metadata={metadata}
-        onCSVLocationWarningsChange={this.handleCSVLocationWarningsChange}
         onMetadataChange={this.onMetadataChangeCSVLocationsMenu}
         hostGenomes={hostGenomes}
       />
