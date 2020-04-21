@@ -127,7 +127,7 @@ namespace "load_test" do
       Rails.logger.info("Project '#{args.project_name}' will be created.")
     end
 
-    Rails.logger.info("#{total_samples} will be created by replicating the following samples:")
+    Rails.logger.info("#{total_samples} samples will be created by replicating the following samples:")
     valid_samples.each do |sample|
       Rails.logger.info("\t#{sample[:attributes][:name]}")
     end
@@ -136,6 +136,7 @@ namespace "load_test" do
     input = STDIN.gets.strip
     unless input == "yes"
       Rails.logger.error("Load test aborted by user")
+      abort
     end
 
     unless project
@@ -189,7 +190,7 @@ namespace "load_test" do
 
     cnt = 0
     samples_to_create.each do |sample_to_create|
-      Rails.logger.info("Creating sample '#{sample_attributes[:name]}'")
+      Rails.logger.info("Creating sample '#{sample_to_create.name}'")
       begin
         sample_to_create.save!
       rescue
