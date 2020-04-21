@@ -30,7 +30,7 @@ class SamplesController < ApplicationController
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
-                   :taxa_with_contigs_suggestions, :validate_access_to_sample_ids,].freeze
+                   :taxa_with_contigs_suggestions, :validate_sample_ids,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata].freeze
 
@@ -207,11 +207,21 @@ class SamplesController < ApplicationController
     end
   end
 
-  # POST /samples/validate_access_to_sample_ids
+  # POST /samples/validate_sample_ids
+  #
+  # Validate access to sample ids, and that the samples
+  # have completed and succeeded processing.
+  # Filters out samples with a pipeline run still in progress,
+  # with a failed latest run, and those the user does not have read
+  # access to.
+  #
+  # Returns a list of valid sample ids and the names of samples the
+  # user has access to, but have not successfully completed.
+  #
   # This is a POST route and not a GET request because Puma does not allow
   # query strings longer than a certain amount (1024 * 10 chars), which causes
   # trouble with projects with a large number of samples.
-  def validate_access_to_sample_ids
+  def validate_sample_ids
     queried_sample_ids = params[:sampleIds]
 
     # We want to return valid sample ids, but for invalid samples we need their names to display

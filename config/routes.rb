@@ -52,7 +52,7 @@ Rails.application.routes.draw do
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
     post :validate_sample_files, on: :collection
-    post :validate_access_to_sample_ids, on: :collection
+    post :validate_sample_ids, on: :collection
     put :upload_heartbeat, on: :member
     get :coverage_viz_summary, on: :member
     get :coverage_viz_data, on: :member

@@ -399,7 +399,7 @@ RSpec.describe SamplesController, type: :controller do
       end
     end
 
-    describe "on POST #validate_access_to_sample_ids" do
+    describe "on POST #validate_sample_ids" do
       before do
         @project = create(:project, users: [@joe], name: "Test Project")
         @admin_project = create(:project, users: [@admin])
@@ -430,7 +430,7 @@ RSpec.describe SamplesController, type: :controller do
           sampleIds: [good_sample_one, good_sample_two],
         }
 
-        post :validate_access_to_sample_ids, params: validate_params
+        post :validate_sample_ids, params: validate_params
 
         expect(response).to have_http_status(200)
         json_response = JSON.parse(response.body)
@@ -447,7 +447,7 @@ RSpec.describe SamplesController, type: :controller do
           sampleIds: [good_sample_one, good_sample_two, in_progress_sample],
         }
 
-        post :validate_access_to_sample_ids, params: validate_params
+        post :validate_sample_ids, params: validate_params
 
         expect(response).to have_http_status(200)
         json_response = JSON.parse(response.body)
@@ -464,7 +464,7 @@ RSpec.describe SamplesController, type: :controller do
           sampleIds: [good_sample_one, good_sample_two, failed_sample],
         }
 
-        post :validate_access_to_sample_ids, params: validate_params
+        post :validate_sample_ids, params: validate_params
 
         expect(response).to have_http_status(200)
         json_response = JSON.parse(response.body)
@@ -538,7 +538,7 @@ RSpec.describe SamplesController, type: :controller do
           sampleIds: [different_owner_sample],
         }
 
-        post :validate_access_to_sample_ids, params: validate_params
+        post :validate_sample_ids, params: validate_params
 
         expect(response).to have_http_status(200)
         json_response = JSON.parse(response.body)
