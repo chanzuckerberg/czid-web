@@ -12,7 +12,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
       @project = create(:project, users: [@joe], name: "Test Project")
     end
 
-    describe "POST #validate" do
+    describe "on POST #validate" do
       before do
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
         @admin_project = create(:project, users: [@admin])
@@ -96,7 +96,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         logger = class_double(LogUtil).as_stubbed_const
 
-        expect(logger).to receive(:log_err_and_airbrake).with(/BulkDownloadsImproperAccessEvent: User with id #{@joe.id} made bulk download request for samples they don't have access to: \[#{different_owner_sample.id}\]/)
+        expect(logger).to receive(:log_warning).with(/SampleAccessValidationImproperAccessEvent: User with id #{@joe.id} made a request for samples they don't have access to: \[#{different_owner_sample.id}\]/)
 
         post :validate_sample_ids, params: validate_params
 
