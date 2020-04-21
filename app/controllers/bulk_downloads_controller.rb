@@ -32,11 +32,9 @@ class BulkDownloadsController < ApplicationController
   def validate_sample_ids
     queried_sample_ids = params[:sampleIds]
 
-    validator = BulkDownloadsSampleValidationService.new(queried_sample_ids, current_user)
-
     # We want to return valid sample ids, but for invalid samples we need their names to display
     # to the user. No information is returned on samples they don't have access to.
-    validated_sample_info = validator.validate_samples()
+    validated_sample_info = SampleAccessValidationService.call(queried_sample_ids, current_user)
     viewable_samples = validated_sample_info[:viewable_samples]
     if validated_sample_info[:error].nil?
       valid_sample_ids = get_succeeded_pipeline_runs_for_samples(viewable_samples, false, [:sample_id]).map(&:sample_id)

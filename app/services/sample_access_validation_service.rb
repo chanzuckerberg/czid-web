@@ -1,4 +1,6 @@
-class BulkDownloadsSampleValidationService
+class SampleAccessValidationService
+  include Callable
+
   SAMPLE_ACCESS_ERROR = "Error validating samples. Please contact us for help.".freeze
 
   def initialize(query_ids, current_user)
@@ -6,7 +8,7 @@ class BulkDownloadsSampleValidationService
     @user = current_user
   end
 
-  def validate_samples
+  def call
     error = nil
     result = { viewable_samples: [], error: error }
 
@@ -15,7 +17,7 @@ class BulkDownloadsSampleValidationService
     rescue => e
       # just in case
       LogUtil.log_backtrace(e)
-      LogUtil.log_err_and_airbrake("BulkDownloadsFailedEvent: Unexpected issue validating bulk download: #{e}")
+      LogUtil.log_err_and_airbrake("SampleAccessValidationFailedEvent: Unexpected issue validating sample access: #{e}")
       error = SAMPLE_ACCESS_ERROR
     end
 
@@ -40,7 +42,7 @@ class BulkDownloadsSampleValidationService
     if viewable_samples.length != sample_ids.length
       viewable_ids = viewable_samples.map(&:id)
       private_sample_ids = sample_ids.reject { |id| viewable_ids.include?(id) }
-      LogUtil.log_err_and_airbrake("BulkDownloadsImproperAccessEvent: User with id #{user.id} made bulk download request for samples they don't have access to: #{private_sample_ids}")
+      LogUtil.log_warning("SampleAccessValidationImproperAccessEvent: User with id #{user.id} made a request for samples they don't have access to: #{private_sample_ids}")
     end
 
     return viewable_samples
