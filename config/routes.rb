@@ -52,6 +52,7 @@ Rails.application.routes.draw do
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
     post :validate_sample_files, on: :collection
+    post :validate_access_to_sample_ids, on: :collection
     put :upload_heartbeat, on: :member
     get :coverage_viz_summary, on: :member
     get :coverage_viz_data, on: :member
@@ -137,7 +138,6 @@ Rails.application.routes.draw do
   resources :bulk_downloads, only: [:create, :index, :show] do
     get :types, on: :collection
     get :presigned_output_url, on: :member
-    post :validate_sample_ids, on: :collection
   end
   post 'bulk_downloads/:id/success/:access_token', to: 'bulk_downloads#success_with_token', as: :bulk_downloads_success
   post 'bulk_downloads/:id/error/:access_token', to: 'bulk_downloads#error_with_token', as: :bulk_downloads_error

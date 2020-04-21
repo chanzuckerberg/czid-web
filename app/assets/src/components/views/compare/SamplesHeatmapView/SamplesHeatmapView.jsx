@@ -34,7 +34,7 @@ import SortIcon from "~ui/icons/SortIcon";
 import Notification from "~ui/notifications/Notification";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { showToast } from "~/components/utils/toast";
-import { validateSampleIds } from "~/api/bulk_downloads";
+import { validateSampleIds } from "~/api/access_control";
 import { UserContext } from "~/components/common/UserContext";
 
 import cs from "./samples_heatmap_view.scss";

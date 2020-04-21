@@ -1,3 +1,7 @@
+# SampleAccessValidationService takes an array of sample ids and a user filters out samples that the
+# user does not have access to and samples that are either in processing or failed the last pipeline
+# run. It returns a hash with two keys: viewable_samples, which is an array of Samples (not ids!)
+# that passed the filter; and error, which, if present, will always be the SAMPLE_ACCESS_ERROR string.
 class SampleAccessValidationService
   include Callable
 
