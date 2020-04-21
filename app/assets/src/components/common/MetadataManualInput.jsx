@@ -26,6 +26,7 @@ import PlusIcon from "~ui/icons/PlusIcon";
 import { UserContext } from "~/components/common/UserContext";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 
 import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
@@ -79,7 +80,7 @@ class MetadataManualInput extends React.Component {
     headers: null,
     metadataFieldsToEdit: {},
     headersToEdit: [],
-    hostGenomes: [],
+    hostGenomesByName: {},
     // Which cell the "Apply to All" button should appear on.
     applyToAllCell: {
       sampleName: null,
@@ -98,7 +99,7 @@ class MetadataManualInput extends React.Component {
           "key",
           filter(["is_required", 1], projectMetadataFields)
         ),
-        hostGenomes,
+        hostGenomesByName: keyBy("name", hostGenomes),
         headers: {
           "Sample Name": "Sample Name",
           ...(samplesAreNew ? { "Host Organism": "Host Organism" } : {}),
@@ -180,7 +181,19 @@ class MetadataManualInput extends React.Component {
           overrideExistingValue) ||
         get([curSample.name, column], newFields) === undefined
       ) {
-        newFields = set([curSample.name, column], newValue, newFields);
+        let value = newValue;
+        // If the field is location-type, return a less-specific location if necessary.
+        if (
+          column !== "Host Organism" &&
+          this.state.projectMetadataFields[column].dataType === "location"
+        ) {
+          const isHuman =
+            get("taxa_category", this.getSampleHostGenome(curSample)) ===
+            "human";
+          value = processLocationSelection(newValue, isHuman);
+        }
+
+        newFields = set([curSample.name, column], value, newFields);
       }
     });
 
@@ -332,15 +345,16 @@ class MetadataManualInput extends React.Component {
     this.props.samplesAreNew
       ? get(
           "id",
-          find(
-            ["name", this.getMetadataValue(sample, "Host Organism")],
-            this.props.hostGenomes
-          )
+          this.state.hostGenomesByName[
+            this.getMetadataValue(sample, "Host Organism")
+          ]
         )
       : sample.host_genome_id;
 
   getSampleHostGenome = sample =>
-    find(["id", this.getSampleHostGenomeId(sample)], this.state.hostGenomes);
+    this.state.hostGenomesByName[
+      this.getMetadataValue(sample, "Host Organism")
+    ];
 
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
     // Special-case "Host Organism" (the field that lets you change the Host Genome)
