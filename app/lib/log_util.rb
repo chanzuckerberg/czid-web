@@ -9,8 +9,4 @@ class LogUtil
   def self.log_backtrace(exception)
     Rails.logger.error("Backtrace:\n\t#{exception.backtrace.join("\n\t")}")
   end
-
-  def self.log_warning(msg)
-    Rails.logger.warn(msg)
-  end
 end

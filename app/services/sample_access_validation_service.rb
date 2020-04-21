@@ -42,7 +42,7 @@ class SampleAccessValidationService
     if viewable_samples.length != sample_ids.length
       viewable_ids = viewable_samples.map(&:id)
       private_sample_ids = sample_ids.reject { |id| viewable_ids.include?(id) }
-      LogUtil.log_warning("SampleAccessValidationImproperAccessEvent: User with id #{user.id} made a request for samples they don't have access to: #{private_sample_ids}")
+      Rails.logger.warn("SampleAccessValidationImproperAccessEvent: User with id #{user.id} made a request for samples they don't have access to: #{private_sample_ids}")
     end
 
     return viewable_samples

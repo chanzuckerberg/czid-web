@@ -94,9 +94,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
           sampleIds: [good_sample_one, good_sample_two, different_owner_sample],
         }
 
-        logger = class_double(LogUtil).as_stubbed_const
-
-        expect(logger).to receive(:log_warning).with(/SampleAccessValidationImproperAccessEvent: User with id #{@joe.id} made a request for samples they don't have access to: \[#{different_owner_sample.id}\]/)
+        expect(Rails.logger).to receive(:warn).with(/SampleAccessValidationImproperAccessEvent: User with id #{@joe.id} made a request for samples they don't have access to: \[#{different_owner_sample.id}\]/)
 
         post :validate_sample_ids, params: validate_params
 
