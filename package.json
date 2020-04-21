@@ -1,11 +1,12 @@
 {
   "name": "idseq-web",
+  "license": "MIT",
+  "repository": "https://github.com/chanzuckerberg/idseq-web",
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
     "start": "npm install --no-optional && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
     "lint": "./node_modules/.bin/eslint . ./**/*.js",
-    "precommit": "lint-staged",
     "test": "jest",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
@@ -53,21 +54,21 @@
     "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-react": "^7.10.0",
     "eslint-plugin-standard": "^3.0.1",
-    "extract-text-webpack-plugin": "^3.0.2",
+    "fibers": "^4.0.2",
     "file-loader": "^1.1.11",
     "husky": "^1.1.2",
     "import-glob-loader": "^1.1.0",
     "jest": "^25.1.0",
     "lint-staged": "^9.2.5",
-    "node-sass": "^4.13.1",
     "postcss-loader": "^3.0.0",
     "prettier": "^1.12.1",
-    "sass-loader": "^6.0.6",
+    "sass": "^1.26.3",
+    "sass-loader": "^8.0.2",
     "style-loader": "^0.20.2",
     "terser-webpack-plugin": "^2.3.5",
     "url-loader": "^1.0.1",
     "webpack": "^4.42.1",
-    "webpack-cli": "^3.1.0",
+    "webpack-cli": "^3.3.11",
     "webpack-merge": "^4.1.2"
   },
   "dependencies": {
@@ -118,7 +119,7 @@
     "react-sticky": "^6.0.1",
     "react-table": "^6.8.6",
     "react-tipsy": "^0.6.2",
-    "react-toastify": "^4.5.2",
+    "react-toastify": "^5.5.0",
     "react-virtualized": "^9.21.0",
     "semantic-ui-calendar-react": "^0.15.3",
     "semantic-ui-css": "^2.3.0",
@@ -133,6 +134,7 @@
   },
   "resolutions": {
     "eslint-scope": "3.7.1",
+    "kind-of": "^6.0.2",
     "//": "Avoids use of insecure version of minimist as of 2020/03/30. Revisit.",
     "minimist": "^1.2.5"
   },

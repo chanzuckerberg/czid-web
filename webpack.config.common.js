@@ -23,6 +23,7 @@ const config = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: "dist/[name].bundle.min.css",
+      chunkFilename: 'dist/[id].bundle.min.css',
     }),
   ],
   devtool: "source-map",
@@ -75,7 +76,6 @@ const config = {
           {
             loader: "sass-loader",
             options: {
-              minimize: true,
               sourceMap: true,
             },
           },
@@ -112,7 +112,6 @@ const config = {
           {
             loader: "sass-loader",
             options: {
-              minimize: true,
               sourceMap: true,
             },
           },
