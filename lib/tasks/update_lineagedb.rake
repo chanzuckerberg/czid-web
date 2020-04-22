@@ -42,6 +42,7 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
   Logging.logger.root.level = :info
 
   testrun = args.run_mode == "testrun" ? true : false
+  noverify = args.run_mode == "noverify" ? true : false
   puts "\n\nTEST RUN - LOCAL DATA" if testrun
 
   ncbi_date = ENV['NCBI_DATE']
@@ -61,7 +62,7 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
 
   puts "\n\nStarting import of #{reference_s3_path} ...\n\n"
   importer = LineageDatabaseImporter.new(reference_s3_path, ncbi_date, current_version)
-  importer.import!(testrun)
+  importer.import!(testrun, noverify)
   puts "\n\nDone import of #{reference_s3_path}."
 
   ## Instructions on next steps
@@ -133,7 +134,7 @@ class LineageDatabaseImporter
     Rails.env == 'development' ? '' : '--user=$DB_USERNAME --password=$DB_PASSWORD'
   end
 
-  def import!(testrun = false)
+  def import!(testrun = false, noverify = false)
     setup
 
     if testrun
@@ -151,10 +152,10 @@ class LineageDatabaseImporter
     import_new_names!
     import_new_taxid_lineages!
     affected = build_new_taxon_lineages!
-    upgrade_taxon_lineages!(affected)
+    upgrade_taxon_lineages!(affected, noverify)
   end
 
-  def upgrade_taxon_lineages!(new_count)
+  def upgrade_taxon_lineages!(new_count, noverify = false)
     puts "\nRetire records..."
     retire_ids = retire_records_ids
     puts "#{retire_ids.count} records"
@@ -174,15 +175,18 @@ class LineageDatabaseImporter
     upgrade_ids = (insert_ids + update_ids + unchanged_ids)
     upgrade_count = upgrade_ids.count
 
-    if new_count != upgrade_count
+    if new_count != upgrade_count and !noverify
       # Should be investigated if counts are mismatched before ignoring. You can spot check taxids
       # on NCBI. Ex: Some taxids may have no Rank, so they won't be used in IDseq.
       new_ids = TaxonLineage.connection.select_all("SELECT taxid FROM #{@taxid_table}").pluck("taxid")
 
-      puts "Only in new_ids: ", new_ids - upgrade_ids
-      puts "Only in upgrade_ids: ", upgrade_ids - new_ids
+      puts "Only in new_ids: "
+      (new_ids - upgrade_ids).each { |tax_id| puts "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{tax_id}" }
 
-      raise "Mismatched upgrade counts: #{new_count} and #{upgrade_count}"
+      puts "\nOnly in upgrade_ids: "
+      (upgrade_ids - new_ids).each { |tax_id| puts "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=#{tax_id}" }
+
+      raise "Mismatched upgrade counts: #{new_count} and #{upgrade_count}. Try running update_lineage_db[noverify]."
     end
 
     if upgrade_count == unchanged_ids.count
