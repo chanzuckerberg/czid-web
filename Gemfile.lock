@@ -51,7 +51,7 @@ GEM
       public_suffix (>= 2.0.2, < 5.0)
     airbrake (9.5.5)
       airbrake-ruby (~> 4.8)
-    airbrake-ruby (4.14.0)
+    airbrake-ruby (4.14.1)
       rbtree3 (~> 0.5)
     analytics-ruby (2.0.13)
     arel (9.0.0)
@@ -1409,7 +1409,7 @@ DEPENDENCIES
   rack-cors
   rack-host-redirect
   rack-mini-profiler
-  rails (~> 5.2.4.2)
+  rails (~> 5.2.4)
   rails-controller-testing
   rake
   redis-rails (~> 5)

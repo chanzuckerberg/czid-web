@@ -23,7 +23,6 @@ const config = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: "dist/[name].bundle.min.css",
-      chunkFilename: 'dist/[id].bundle.min.css',
     }),
   ],
   devtool: "source-map",

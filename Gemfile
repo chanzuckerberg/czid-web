@@ -39,7 +39,7 @@ gem 'puma', '~> 3.12'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.2.4.2'
+gem 'rails', '~> 5.2.4'
 gem 'rails-controller-testing'
 gem 'rake'
 # Worker/Scheduler management
