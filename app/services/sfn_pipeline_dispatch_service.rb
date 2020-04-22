@@ -37,7 +37,7 @@ class SfnPipelineDispatchService
   def initialize(pipeline_run)
     @pipeline_run = pipeline_run
     @sample = pipeline_run.sample
-    @aws_account_id = retrieve_aws_account
+    @docker_image_id = retrieve_docker_image_id
 
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
@@ -60,9 +60,9 @@ class SfnPipelineDispatchService
 
   private
 
-  def retrieve_aws_account
+  def retrieve_docker_image_id
     resp = STS_CLIENT.get_caller_identity
-    return resp[:account]
+    return "#{resp[:account]}.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows"
   end
 
   def retrieve_version_tags
@@ -102,7 +102,7 @@ class SfnPipelineDispatchService
     idd2wdl_opts = [
       "--name", dag_json['name'].to_s,
       "--output-prefix", @sample.sample_output_s3_path,
-      "--aws-account-id", @aws_account_id,
+      "--docker-image-id", @docker_image_id,
       "--deployment-env", stage_deployment_name,
       "--aws-region", ENV['AWS_REGION'],
       "--wdl-version", @sfn_tags[:wdl_version],
