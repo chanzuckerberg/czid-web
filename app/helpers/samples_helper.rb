@@ -524,7 +524,7 @@ module SamplesHelper
     # With on_duplicate_key_update, activerecord-import will correctly update existing rows.
     # Rails model validations are also checked.
     update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value, :location_id]
-    results = Metadatum.import metadata_to_save, validate: true, on_duplicate_key_update: update_keys
+    results = Metadatum.bulk_import metadata_to_save, validate: true, on_duplicate_key_update: update_keys
     results.failed_instances.each do |model|
       errors.push(MetadataUploadErrors.save_error(model.key, model.raw_value))
     end
@@ -586,7 +586,6 @@ module SamplesHelper
         metadata.delete(sample_attributes[:name])
       end
     end
-
     metadata_errors = upload_metadata_for_samples(samples, metadata)
 
     errors.concat(metadata_errors)
