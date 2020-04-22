@@ -38,8 +38,14 @@
         <tr>
           <th> Run ID </th>
           <th> Status </th>
-          <th> Job Id </th>
-          <th> Job Log </th>
+          <% if pipeline_run %>
+            <% if pipeline_run.step_function? %>
+              <th>SFN Execution</th>
+            <% else %>
+              <th> Job Id </th>
+              <th> Job Log </th>
+            <% end %>
+          <% end %>
           <th>Remaining reads</th>
           <th>Version</th>
           <th>Job Started</th>
@@ -60,8 +66,15 @@
                     <%= run_stage.batch_job_status_reason %>
                   </p>
                 </td>
-                <td><u><%= run_stage.job_id ? (link_to run_stage.job_id, run_stage.batch_job_status_url, target: :_blank) : nil %></u></td>
-                <td> <u><%= link_to 'Logs', run_stage.log_url, target: :_blank  %></u></td>
+                <% if pipeline_run %>
+
+                  <% if pipeline_run && pipeline_run.step_function? %>
+                    <td><u><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(pipeline_run.sfn_execution_arn), target: :_blank  %></u></td>
+                  <% else %>
+                    <td><u><%= run_stage.job_id ? (link_to run_stage.job_id, run_stage.batch_job_status_url, target: :_blank) : nil %></u></td>
+                    <td><u><%= link_to 'Logs', run_stage.log_url, target: :_blank  %></u></td>
+                  <% end %>
+                <% end %>
                 <td><%= pipeline_run.adjusted_remaining_reads %> &nbsp;</td>
                 <td><%= pipeline_run.pipeline_version %> &nbsp;</td>
                 <td><%= run_stage.created_at %></td>
