@@ -33,6 +33,7 @@ module ApplicationHelper
   def user_context
     {
       admin: current_user ? current_user.role == 1 : false,
+      firstSignIn: current_user && current_user.sign_in_count <= 1,
       allowedFeatures: current_user && current_user.allowed_feature_list,
       appConfig: AppConfigHelper.configs_for_context(),
       userSettings: current_user && current_user.viewable_user_settings,

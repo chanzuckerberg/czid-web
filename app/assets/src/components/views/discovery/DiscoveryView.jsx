@@ -38,6 +38,7 @@ import { publicSampleNotificationsByProject } from "~/components/views/samples/n
 import BannerProjects from "~ui/icons/BannerProjects";
 import BannerSamples from "~ui/icons/BannerSamples";
 import BannerVisualizations from "~ui/icons/BannerVisualizations";
+import { UserContext } from "~/components/common/UserContext";
 
 import DiscoveryHeader from "./DiscoveryHeader";
 import EmptyStateModal from "./EmptyStateModal";
@@ -80,8 +81,8 @@ import cs from "./discovery_view.scss";
 //   - load (A) non-filtered dimensions, (B) filtered dimensions and (C) filtered stats
 //     (synchronous data not needed for now because we do not show projects and visualizations)
 class DiscoveryView extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
 
     const { projectId } = this.props;
 
@@ -257,7 +258,8 @@ class DiscoveryView extends React.Component {
   };
 
   isFirstTimeUser = () => {
-    return !localStorage.getItem("DiscoveryViewSeenBefore");
+    const { firstSignIn } = this.context || {};
+    return firstSignIn && !localStorage.getItem("DiscoveryViewSeenBefore");
   };
 
   preparedFilters = () => {
@@ -1052,14 +1054,13 @@ class DiscoveryView extends React.Component {
 
     if (emptyStateModalOpen) {
       localStorage.setItem("DiscoveryViewSeenBefore", "1");
+      return <EmptyStateModal onClose={this.handleEmptyStateModalClose} />;
     }
 
     switch (currentTab) {
       case "projects":
         if (userDataCounts.projectCount === 0) {
-          return emptyStateModalOpen ? (
-            <EmptyStateModal onClose={this.handleEmptyStateModalClose} />
-          ) : (
+          return (
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
                 className={cs.noDataBannerContainer}
@@ -1078,9 +1079,7 @@ class DiscoveryView extends React.Component {
         break;
       case "samples":
         if (userDataCounts.sampleCount === 0) {
-          return emptyStateModalOpen ? (
-            <EmptyStateModal onClose={this.handleCloseEmptyStateModal} />
-          ) : (
+          return (
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
                 className={cs.noDataBannerContainer}
@@ -1102,9 +1101,7 @@ class DiscoveryView extends React.Component {
         // thus we use the object collection view from DataDiscoveryDataLayer directly
         // and we never show the no search results banner.
         if (!visualizations.isLoading() && visualizations.length === 0) {
-          return emptyStateModalOpen ? (
-            <EmptyStateModal onClose={this.handleCloseEmptyStateModal} />
-          ) : (
+          return (
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
                 className={cs.noDataBannerContainer}
@@ -1441,5 +1438,7 @@ DiscoveryView.propTypes = {
   mapTilerKey: PropTypes.string,
   admin: PropTypes.bool,
 };
+
+DiscoveryView.contextType = UserContext;
 
 export default DiscoveryView;
