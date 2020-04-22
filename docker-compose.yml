@@ -49,7 +49,7 @@ x-honeycomb-variables: &honeycomb-variables
 version: '3.4'
 services:
   elasticsearch:
-    image: elasticsearch:6.4.3
+    image: elasticsearch:7.6.0
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
@@ -58,6 +58,7 @@ services:
       - xpack.monitoring.enabled=false
       - xpack.graph.enabled=false
       - xpack.watcher.enabled=false
+      - discovery.type=single-node
     ulimits:
       memlock:
         soft: -1
