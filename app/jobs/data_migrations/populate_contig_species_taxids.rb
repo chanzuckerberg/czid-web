@@ -34,7 +34,7 @@ class PopulateContigSpeciesTaxids
 
       # Use active-import to update multiple contigs in one query.
       # Just update the taxid fields.
-      results = Contig.import(contigs, validate: false, on_duplicate_key_update: [:species_taxid_nt, :species_taxid_nr, :genus_taxid_nt, :genus_taxid_nr])
+      results = Contig.bulk_import(contigs, validate: false, on_duplicate_key_update: [:species_taxid_nt, :species_taxid_nr, :genus_taxid_nt, :genus_taxid_nr])
       results.failed_instances.each do |contig|
         Rails.logger.error("Contig ID #{contig.id} failed to save. species_taxid_nt #{contig.species_taxid_nt}, species_taxid_nr #{contig.species_taxid_nr}")
         failed_ids << contig.id

@@ -755,7 +755,7 @@ class PipelineRun < ApplicationRecord
       tcnt["count_type"] += "+" if refined
       tcnt.merge!(tcnt_attrs_to_merge)
     end
-    TaxonCount.import!(taxon_counts_attributes_filtered)
+    TaxonCount.bulk_import!(taxon_counts_attributes_filtered)
 
     # aggregate the data at genus level
     generate_aggregate_counts('genus') unless multihit?
