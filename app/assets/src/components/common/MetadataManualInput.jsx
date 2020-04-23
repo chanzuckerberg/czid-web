@@ -160,13 +160,21 @@ class MetadataManualInput extends React.Component {
   };
 
   autoPopulateMetadata = () => {
+    const { samples } = this.props;
     const { metadataFieldsToEdit, headersToEdit } = this.state;
 
+    let newMetadataFieldsToEdit = {};
+
+    // For each sample, merge auto-populate fields into existing fields (which may be empty).
+    // Existing fields take precedence.
+    samples.forEach(sample => {
+      newMetadataFieldsToEdit[sample.name] = merge(
+        AUTO_POPULATE_FIELDS,
+        metadataFieldsToEdit[sample.name] || {}
+      );
+    });
+
     const newHeadersToEdit = union(headersToEdit, keys(AUTO_POPULATE_FIELDS));
-    const newMetadataFieldsToEdit = mapValues(
-      metadataFields => merge(AUTO_POPULATE_FIELDS, metadataFields),
-      metadataFieldsToEdit
-    );
 
     this.setState({
       metadataFieldsToEdit: newMetadataFieldsToEdit,
