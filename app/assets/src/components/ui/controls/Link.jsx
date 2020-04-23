@@ -1,7 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
 import { logAnalyticsEvent } from "~/api/analytics";
+import cs from "./link.scss";
 
 class Link extends React.Component {
   onClick = () => {
@@ -27,7 +29,7 @@ class Link extends React.Component {
     return (
       <a
         href={href}
-        className={className}
+        className={cx(cs.link, className)}
         target={external ? "_blank" : null}
         rel="noopener noreferrer"
         onClick={this.onClick}

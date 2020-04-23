@@ -7,9 +7,9 @@ import Link from "~ui/controls/Link";
 import Modal from "~ui/containers/Modal";
 
 import InfoBanner from "./InfoBanner";
-import cs from "./empty_state_modal.scss";
+import cs from "./modal_first_time_user.scss";
 
-const EmptyStateModal = ({ onClose }) => {
+const ModalFirstTimeUser = ({ onClose }) => {
   return (
     <Modal
       open
@@ -43,8 +43,8 @@ const EmptyStateModal = ({ onClose }) => {
   );
 };
 
-EmptyStateModal.propTypes = {
+ModalFirstTimeUser.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-export default EmptyStateModal;
+export default ModalFirstTimeUser;

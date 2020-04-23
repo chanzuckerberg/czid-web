@@ -41,7 +41,7 @@ import BannerVisualizations from "~ui/icons/BannerVisualizations";
 import { UserContext } from "~/components/common/UserContext";
 
 import DiscoveryHeader from "./DiscoveryHeader";
-import EmptyStateModal from "./EmptyStateModal";
+import ModalFirstTimeUser from "./ModalFirstTimeUser";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
@@ -1040,7 +1040,7 @@ class DiscoveryView extends React.Component {
     }
   };
 
-  handleEmptyStateModalClose = () => {
+  handleModalFirstTimeUserClose = () => {
     this.setState({
       emptyStateModalOpen: false,
     });
@@ -1054,7 +1054,9 @@ class DiscoveryView extends React.Component {
 
     if (emptyStateModalOpen) {
       localStorage.setItem("DiscoveryViewSeenBefore", "1");
-      return <EmptyStateModal onClose={this.handleEmptyStateModalClose} />;
+      return (
+        <ModalFirstTimeUser onClose={this.handleModalFirstTimeUserClose} />
+      );
     }
 
     switch (currentTab) {
