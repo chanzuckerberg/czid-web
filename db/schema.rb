@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_403_194_501) do
+ActiveRecord::Schema.define(version: 20_200_422_181_622) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -359,8 +359,6 @@ ActiveRecord::Schema.define(version: 20_200_403_194_501) do
     t.integer "alert_sent", default: 0
     t.text "dag_vars"
     t.integer "assembled", limit: 2
-    t.integer "completed_gsnap_chunks"
-    t.integer "completed_rapsearch2_chunks"
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
