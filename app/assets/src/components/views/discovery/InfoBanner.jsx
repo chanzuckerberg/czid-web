@@ -4,6 +4,7 @@ import cx from "classnames";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import Link from "~ui/controls/Link";
+import ExternalLink from "~ui/controls/ExternalLink";
 import NoResultsIcon from "~ui/icons/NoResultsIcon";
 
 import cs from "./info_banner.scss";
@@ -36,12 +37,18 @@ const InfoBanner = ({
           <div className={cx(cs.message, messageClassName)}>{message}</div>
         )}
         {suggestion && <div className={cs.suggestion}>{suggestion}</div>}
-        {link && (
-          <Link className={cs.link} href={link.href}>
-            {link.text}
-            <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-          </Link>
-        )}
+        {link &&
+          (link.external ? (
+            <ExternalLink className={cs.link} href={link.href}>
+              {link.text}
+              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+            </ExternalLink>
+          ) : (
+            <Link className={cs.link} href={link.href}>
+              {link.text}
+              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+            </Link>
+          ))}
       </div>
       <div className={cx(cs.icon, iconClassName)}>{icon}</div>
     </div>
@@ -61,6 +68,7 @@ InfoBanner.propTypes = {
   link: PropTypes.shape({
     text: PropTypes.string.isRequired,
     href: PropTypes.string.isRequired,
+    external: PropTypes.bool,
   }),
   message: PropTypes.node,
   messageClassName: PropTypes.string,

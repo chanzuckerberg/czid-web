@@ -1109,6 +1109,7 @@ class DiscoveryView extends React.Component {
                 link={{
                   href: VISUALIZATIONS_DOC_LINK,
                   text: "Learn about Heatmaps",
+                  external: true,
                 }}
                 message="You will see your saved Heatmaps and Phylogenetic Trees here. Create them on the Samples tab."
                 title="Visualizations"
