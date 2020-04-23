@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .emptyStateBanner {
   height: 380px;
@@ -10,6 +11,10 @@
       height: 150px;
       width: 150px;
     }
+  }
+
+  .content {
+    margin-right: $space-xl;
   }
 }
 

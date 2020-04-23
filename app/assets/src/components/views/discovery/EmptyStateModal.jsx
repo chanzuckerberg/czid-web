@@ -20,6 +20,7 @@ const EmptyStateModal = ({ onClose }) => {
     >
       <InfoBanner
         className={cs.emptyStateBanner}
+        contentClassName={cs.content}
         icon={<BacteriaCultureIcon />}
         iconClassName={cs.iconClassName}
         message={

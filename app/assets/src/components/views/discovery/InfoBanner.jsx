@@ -10,6 +10,7 @@ import cs from "./info_banner.scss";
 
 const InfoBanner = ({
   className,
+  contentClassName,
   icon,
   iconClassName,
   link,
@@ -29,7 +30,7 @@ const InfoBanner = ({
 
   return (
     <div className={cx(cs.container, className)}>
-      <div className={cs.content}>
+      <div className={cx(cs.content, contentClassName)}>
         {title && <div className={cx(cs.title, titleClassName)}>{title}</div>}
         {message && (
           <div className={cx(cs.message, messageClassName)}>{message}</div>
@@ -54,6 +55,7 @@ InfoBanner.defaultProps = {
 
 InfoBanner.propTypes = {
   className: PropTypes.string,
+  contentClassName: PropTypes.string,
   icon: PropTypes.node,
   iconClassName: PropTypes.string,
   link: PropTypes.shape({
