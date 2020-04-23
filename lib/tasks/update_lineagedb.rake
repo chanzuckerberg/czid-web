@@ -175,7 +175,7 @@ class LineageDatabaseImporter
     upgrade_ids = (insert_ids + update_ids + unchanged_ids)
     upgrade_count = upgrade_ids.count
 
-    if new_count != upgrade_count and !noverify
+    if new_count != upgrade_count && !noverify
       # Should be investigated if counts are mismatched before ignoring. You can spot check taxids
       # on NCBI. Ex: Some taxids may have no Rank, so they won't be used in IDseq.
       new_ids = TaxonLineage.connection.select_all("SELECT taxid FROM #{@taxid_table}").pluck("taxid")
