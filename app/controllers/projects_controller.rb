@@ -586,7 +586,7 @@ class ProjectsController < ApplicationController
   def project_params
     result = params.require(:project).permit(:name, :public_access, :description, user_ids: [])
     result[:name] = sanitize_project_name(result[:name]) if result[:name]
-    result[:description] = sanitize_project_description(result[:description])
+    result[:description] = sanitize_project_description(result[:description]) if result[:description]
     result
   end
 
