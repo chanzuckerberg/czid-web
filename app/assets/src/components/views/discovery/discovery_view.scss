@@ -92,6 +92,8 @@
   display: flex;
   flex-direction: column;
 
+  // The following before and after attributes center
+  // the div on the available space, while keeping a max-height.
   &::before {
     content: "";
     flex: 1 0 auto;
