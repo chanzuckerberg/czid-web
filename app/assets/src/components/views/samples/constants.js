@@ -55,7 +55,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
       "User-selected metadata field indicating the nucleotide type (RNA, DNA).",
   },
   pipelineVersion: {
-    tooltip: "Pipeline version used for the last run for the sample.",
+    tooltip: "Version of the pipeline used for the last run for the sample.",
   },
   sampleType: {
     tooltip: "User-supplied metadata field indicating the sample type.",
