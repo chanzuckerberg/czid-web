@@ -42,12 +42,20 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
       Consortium) sequences.`,
     link: DOC_BASE_LINK + "360034790834-How-to-Interpret-ERCC-Quality",
   },
+  meanInsertSize: {
+    tooltip:
+      "Mean length of the fragmented nucleic acid sequences input for sequencing.",
+    link: DOC_BASE_LINK + "360034790554#mean-insert-size",
+  },
   notes: {
     tooltip: "User-supplied notes.",
   },
   nucleotideType: {
     tooltip:
       "User-selected metadata field indicating the nucleotide type (RNA, DNA).",
+  },
+  pipelineVersion: {
+    tooltip: "Pipeline version used for the last run for the sample.",
   },
   sampleType: {
     tooltip: "User-supplied metadata field indicating the sample type.",
@@ -64,11 +72,6 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   },
   waterControl: {
     tooltip: "Whether a sample is water-only as a control.",
-  },
-  meanInsertSize: {
-    tooltip:
-      "Mean length of the fragmented nucleic acid sequences input for sequencing.",
-    link: DOC_BASE_LINK + "360034790554#mean-insert-size",
   },
 };
 

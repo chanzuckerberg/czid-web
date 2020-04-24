@@ -77,6 +77,7 @@ const BACKGROUND_METRICS = [
 const NOTIFICATION_TYPES = {
   invalidSamples: "invalid samples",
   taxaFilteredOut: "taxa filtered out",
+  multiplePipelineVersions: "diverse_pipelines",
 };
 
 const parseAndCheckInt = (val, defaultVal) => {
@@ -414,6 +415,13 @@ class SamplesHeatmapView extends React.Component {
       this.fetchHeatmapData(),
       this.fetchMetadataFieldsBySampleIds(),
     ]);
+
+    const pipelineVersionsSet = new Set(map("pipeline_version", heatmapData));
+    if (pipelineVersionsSet.size > 1) {
+      this.showNotification(NOTIFICATION_TYPES.multiplePipelineVersions, [
+        ...pipelineVersionsSet,
+      ]);
+    }
 
     let newState = this.extractData(heatmapData);
 
@@ -1199,21 +1207,50 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
+  renderFilteredMultiplePipelineVersionsWarning(onClose, versions) {
+    return (
+      <Notification type={"warn"} displayStyle={"elevated"} onClose={onClose}>
+        <div>
+          <span className={cs.highlight}>
+            The chosen samples have multiple versions: {versions.join(", ")}.
+          </span>
+        </div>
+      </Notification>
+    );
+  }
+
   showNotification(notification, params) {
-    if (notification === NOTIFICATION_TYPES.invalidSamples) {
-      showToast(
-        ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
-        {
-          autoClose: 12000,
-        }
-      );
-    } else if (notification === NOTIFICATION_TYPES.taxaFilteredOut) {
-      showToast(
-        ({ closeToast }) => this.renderFilteredOutWarning(closeToast, params),
-        {
-          autoClose: 12000,
-        }
-      );
+    switch (notification) {
+      case NOTIFICATION_TYPES.invalidSamples:
+        showToast(
+          ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
+          {
+            autoClose: 12000,
+          }
+        );
+        break;
+      case NOTIFICATION_TYPES.taxaFilteredOut:
+        showToast(
+          ({ closeToast }) => this.renderFilteredOutWarning(closeToast, params),
+          {
+            autoClose: 12000,
+          }
+        );
+        break;
+      case NOTIFICATION_TYPES.multiplePipelineVersions:
+        showToast(
+          ({ closeToast }) =>
+            this.renderFilteredMultiplePipelineVersionsWarning(
+              closeToast,
+              params
+            ),
+          {
+            autoClose: 12000,
+          }
+        );
+        break;
+      default:
+        break;
     }
   }
 
