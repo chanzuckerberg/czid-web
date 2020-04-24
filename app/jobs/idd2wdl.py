@@ -9,12 +9,12 @@ parser = argparse.ArgumentParser("idd2wdl", description="Convert an idseq-dag DA
 parser.add_argument("dag")
 parser.add_argument("--name")
 parser.add_argument("--output-prefix")
-parser.add_argument("--aws-account-id", default=os.environ.get("AWS_ACCOUNT_ID"))
 parser.add_argument("--deployment-env", default=os.environ.get("DEPLOYMENT_ENVIRONMENT"))
 parser.add_argument("--aws-region", default=os.environ.get("AWS_DEFAULT_REGION"))
 parser.add_argument("--wdl-version", default=os.environ.get("WDL_VERSION", "0"))
 parser.add_argument("--dag-version", default=os.environ.get("DAG_VERSION", "0"))
 parser.add_argument("--dag-branch", help="Branch of idseq-dag to install at runtime (pipeline_branch/pipeline_commit)")
+parser.add_argument("--docker-image-id", default=os.environ.get("BATCH_DOCKER_IMAGE"))
 args = parser.parse_args()
 workflow_name = args.name or os.path.basename(args.dag).replace(".json", "")
 
@@ -110,7 +110,7 @@ for step in dag["steps"]:
     print("""
 task {task_name} {{
   runtime {{
-    docker: "{AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows:{DEPLOYMENT_ENVIRONMENT}"
+    docker: "{docker_image_id}:{deployment_env}"
   }}
   input {{
 {wdl_step_input}
@@ -120,8 +120,8 @@ task {task_name} {{
   import os, sys, json, contextlib, importlib, threading, logging, subprocess, traceback
   os.environ.update(
     KEY_PATH_S3="{nha_cluster_ssh_key_uri}",
-    AWS_DEFAULT_REGION="{AWS_DEFAULT_REGION}",
-    DEPLOYMENT_ENVIRONMENT="{DEPLOYMENT_ENVIRONMENT}"
+    AWS_DEFAULT_REGION="{aws_region}",
+    DEPLOYMENT_ENVIRONMENT="{deployment_env}"
   )
   {install_custom_idseq_dag_version}
   import idseq_dag, idseq_dag.util.s3, idseq_dag.util.count
@@ -162,12 +162,12 @@ task {task_name} {{
     # temporary until we instrument miniwdl - not yet uploaded, but this is the final status
     step_instance.update_status_json_file("uploaded")
   except Exception as e:
-    # process exception for status reporting
-    status = "user_errored" if isinstance(e, idseq_dag.engine.pipeline_step.InvalidInputFileError) else "pipeline_errored"
     try:
-        self.update_status_json_file(status)
-    except:
-        logging.error("Failed to update status to '%s'", status)
+      # process exception for status reporting
+      s = "user_errored" if isinstance(e, idseq_dag.engine.pipeline_step.InvalidInputFileError) else "pipeline_errored"
+      step_instance.update_status_json_file(s)
+    except Exception:
+      logging.error("Failed to update status to '%s'", s)
     traceback.print_exc()
     exit(json.dumps(dict(wdl_error_message=True, error=type(e).__name__, cause=str(e))))
   CODE
@@ -176,11 +176,11 @@ task {task_name} {{
 {wdl_step_output}
   }}
 }}""".format(task_name=task_name(step),
-             AWS_ACCOUNT_ID=args.aws_account_id,
-             DEPLOYMENT_ENVIRONMENT=args.deployment_env,
+             docker_image_id=args.docker_image_id,
+             deployment_env=args.deployment_env,
              wdl_step_input=wdl_step_input,
              nha_cluster_ssh_key_uri=nha_cluster_ssh_key_uri,
-             AWS_DEFAULT_REGION=args.aws_region,
+             aws_region=args.aws_region,
              dag_branch=" (git branch {})".format(args.dag_branch) if args.dag_branch else "",
              install_custom_idseq_dag_version=install_custom_idseq_dag_version if args.dag_branch else "",
              max_fragments=dag["given_targets"].get("fastqs", {}).get("max_fragments"),
