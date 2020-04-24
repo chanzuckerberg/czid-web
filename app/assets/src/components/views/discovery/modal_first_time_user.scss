@@ -1,0 +1,27 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.emptyStateBanner {
+  height: 380px;
+
+  .iconClassName {
+    svg {
+      fill: $primary-light;
+      height: 150px;
+      width: 150px;
+    }
+  }
+
+  .content {
+    margin-right: $space-xl;
+  }
+}
+
+.messageClassName {
+  @include font-body-m;
+}
+
+.titleClassName {
+  @include font-header-xl;
+}

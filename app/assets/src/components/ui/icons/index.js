@@ -1,5 +1,9 @@
 import AlertIcon from "./AlertIcon";
 import BacteriaIcon from "./BacteriaIcon";
+import BacteriaCultureIcon from "./BacteriaCultureIcon";
+import BannerProjects from "./BannerProjects";
+import BannerSamples from "./BannerSamples";
+import BannerVisualizations from "./BannerVisualizations";
 import BulletListIcon from "./BulletListIcon";
 import CheckmarkIcon from "./CheckmarkIcon";
 import CircleCheckmarkIcon from "./CircleCheckmarkIcon";
@@ -47,6 +51,10 @@ export default {
   CUSTOM: {
     AlertIcon,
     BacteriaIcon,
+    BacteriaCultureIcon,
+    BannerProjects,
+    BannerSamples,
+    BannerVisualizations,
     CircleCheckmarkIcon,
     CompareIcon,
     CopyIcon,

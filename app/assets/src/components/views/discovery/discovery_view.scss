@@ -86,3 +86,26 @@
     max-height: 400px;
   }
 }
+
+.noDataBannerFlexContainer {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+
+  // The following before and after attributes center
+  // the div on the available space, while keeping a max-height.
+  &::before {
+    content: "";
+    flex: 1 0 auto;
+    max-height: 250px;
+  }
+
+  &::after {
+    content: "";
+    flex: 1 0 auto;
+  }
+
+  .noDataBannerContainer {
+    flex: 0 0 auto;
+  }
+}
