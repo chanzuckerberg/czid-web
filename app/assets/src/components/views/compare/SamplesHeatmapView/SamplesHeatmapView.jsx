@@ -416,10 +416,17 @@ class SamplesHeatmapView extends React.Component {
       this.fetchMetadataFieldsBySampleIds(),
     ]);
 
-    const pipelineVersionsSet = new Set(map("pipeline_version", heatmapData));
-    if (pipelineVersionsSet.size > 1) {
+    const pipelineMajorVersionsSet = new Set(
+      compact(
+        map(data => {
+          if (!data.pipeline_version) return null;
+          return `${data.pipeline_version.split(".")[0]}.x`;
+        }, heatmapData)
+      )
+    );
+    if (pipelineMajorVersionsSet.size > 1) {
       this.showNotification(NOTIFICATION_TYPES.multiplePipelineVersions, [
-        ...pipelineVersionsSet,
+        ...pipelineMajorVersionsSet,
       ]);
     }
 
@@ -1212,8 +1219,11 @@ class SamplesHeatmapView extends React.Component {
       <Notification type={"warn"} displayStyle={"elevated"} onClose={onClose}>
         <div>
           <span className={cs.highlight}>
-            The chosen samples have multiple versions: {versions.join(", ")}.
+            The selected samples come from multiple major pipeline versions:{" "}
+            {versions.join(", ")}.
           </span>
+          There will probably be major differences in pipeline results. We
+          recommend re-running samples on latest major pipeline version.
         </div>
       </Notification>
     );
