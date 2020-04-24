@@ -26,7 +26,7 @@ task create_alignment_config: :environment do
 
     s3_lineage_path: "#{bucket}/taxonomy/#{name}/taxid-lineages.#{db_file_ext}",
     s3_deuterostome_db_path: "#{bucket}/taxonomy/#{name}/deuterostome_taxids.txt",
-    s3_taxon_blacklist_path: "#{bucket}/taxonomy/#{name}/taxon_blacklist.txt",
+    s3_taxon_blacklist_path: "#{bucket}/taxonomy/#{name}/taxon_blacklist.txt"
   )
 
   check_s3_paths!(config)
