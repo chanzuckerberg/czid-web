@@ -130,6 +130,7 @@ json.steps do
 
   additional_files = {
     lineage_db: attr[:lineage_db],
+    taxon_blacklist: attr[:taxon_blacklist],
   }
   if attr[:skip_dedeuterostome_filter] == 0
     additional_files["deuterostome_db"] = attr[:deuterostome_db]

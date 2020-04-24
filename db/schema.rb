@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_423_161_207) do
+ActiveRecord::Schema.define(version: 20200424214217) do
+
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -25,6 +26,7 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
     t.datetime "updated_at", null: false
     t.integer "lineage_version", limit: 2
     t.text "s3_nt_info_db_path"
+    t.string "s3_taxon_blacklist_path", default: "s3://idseq-database/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
   end
 
   create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -108,11 +110,11 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
   create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
-    t.text "sequence", limit: 4_294_967_295
+    t.text "sequence", limit: 4294967295
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "lineage_json"
+    t.text "lineage_json", limit: 16777215
     t.integer "species_taxid_nt"
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
@@ -171,7 +173,7 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type", null: false
+    t.string "source_type"
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
@@ -229,7 +231,7 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false
+    t.string "key", null: false, collation: "latin1_swedish_ci"
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
@@ -286,7 +288,7 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
     t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json", limit: 4_294_967_295
+    t.text "dag_json", limit: 4294967295
     t.text "command_stdout"
     t.text "command_stderr"
     t.string "job_id"
@@ -374,7 +376,7 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1
+    t.integer "public_access", limit: 1, default: 0
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
@@ -419,8 +421,8 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
     t.integer "max_input_fragments"
     t.datetime "client_updated_at"
     t.integer "uploaded_from_basespace", limit: 1, default: 0
-    t.string "basespace_access_token"
     t.string "upload_error"
+    t.string "basespace_access_token"
     t.boolean "do_not_process", default: false, null: false, comment: "If true, sample will skip pipeline processing."
     t.string "pipeline_execution_strategy", default: "directed_acyclic_graph", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
@@ -500,8 +502,8 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.text "summary", limit: 16777215
+    t.text "description", limit: 16777215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -538,8 +540,8 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
     t.string "tax_name"
-    t.integer "version_start", limit: 1
-    t.integer "version_end", limit: 1
+    t.integer "version_start", limit: 2, null: false, comment: "The first version for which the taxon is active"
+    t.integer "version_end", limit: 2, null: false, comment: "The last version for which the taxon is active"
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
@@ -597,14 +599,10 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false
+    t.string "email"
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
@@ -621,7 +619,6 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
     t.integer "phylo_trees_count", default: 0, null: false
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
   create_table "visualizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
