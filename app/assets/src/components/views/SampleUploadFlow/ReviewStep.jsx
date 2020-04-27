@@ -41,7 +41,7 @@ class ReviewStep extends React.Component {
     showLessDescription: true,
     showUploadModal: false,
     skipSampleProcessing: false,
-    useStepFunctionPipeline: false,
+    useStepFunctionPipeline: true,
     useTaxonWhitelist: false,
     adminOptions: {},
   };
