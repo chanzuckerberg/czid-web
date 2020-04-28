@@ -1222,8 +1222,9 @@ class SamplesHeatmapView extends React.Component {
             The selected samples come from multiple major pipeline versions:{" "}
             {versions.join(", ")}.
           </span>
-          There will probably be major differences in pipeline results. We
-          recommend re-running samples on latest major pipeline version.
+          A major change in the pipeline may produce results that are not
+          comparable across all metrics. We recommend re-running samples on the
+          latest major pipeline version.
         </div>
       </Notification>
     );
