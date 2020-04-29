@@ -566,6 +566,7 @@ class SamplesHeatmapVis extends React.Component {
             addTaxonTrigger={addTaxonTrigger}
             selectedTaxa={new Set(this.props.taxonIds, this.props.selectedTaxa)}
             availableTaxa={this.getAvailableTaxa()}
+            sampleIds={this.props.sampleIds}
             onTaxonSelectionChange={selected => {
               let newTaxon = this.props.onAddTaxon(selected);
               this.setState({ newTaxon });

@@ -64,6 +64,15 @@ class SearchBoxList extends React.Component {
   }
 
   render() {
+    const { onFilterChange } = this.props;
+    let { filteredOptions } = this.state;
+    if (onFilterChange) {
+      filteredOptions = this.sortOptions(
+        this.props.options,
+        this.props.selected
+      );
+    }
+
     return (
       <div className={cs.searchBoxList}>
         {this.props.title && <div className={cs.title}>{this.props.title}</div>}
@@ -73,7 +82,7 @@ class SearchBoxList extends React.Component {
             className={cs.searchBox}
             icon="search"
             placeholder="Search"
-            onChange={this.handleFilterChange}
+            onChange={onFilterChange || this.handleFilterChange}
           />
         </div>
         <div className={cs.listBox}>
@@ -91,25 +100,26 @@ class SearchBoxList extends React.Component {
               )}
             </div>
           )}
-          {this.state.filteredOptions.map(option => (
-            <div
-              className={cx(cs.listElement, {
-                active: this.state.selected.has(option.value),
-              })}
-              key={`option-${option.value}`}
-              onClick={() => this.handleOptionClick(option.value)}
-            >
-              <div className={cs.listCheckmark}>
-                {this.state.selected.has(option.value) && (
-                  <CheckmarkIcon size="small" />
+          {filteredOptions.length > 0 &&
+            filteredOptions.map(option => (
+              <div
+                className={cx(cs.listElement, {
+                  active: this.state.selected.has(option.value),
+                })}
+                key={`option-${option.value}`}
+                onClick={() => this.handleOptionClick(option.value)}
+              >
+                <div className={cs.listCheckmark}>
+                  {this.state.selected.has(option.value) && (
+                    <CheckmarkIcon size="small" />
+                  )}
+                </div>
+                <div className={cs.listLabel}>{option.label}</div>
+                {option.count && (
+                  <div className={cs.listElementCount}>{option.count}</div>
                 )}
               </div>
-              <div className={cs.listLabel}>{option.label}</div>
-              {option.count && (
-                <div className={cs.listElementCount}>{option.count}</div>
-              )}
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     );
@@ -129,6 +139,7 @@ SearchBoxList.propTypes = {
     PropTypes.array,
   ]),
   onChange: PropTypes.func,
+  onFilterChange: PropTypes.func,
   title: PropTypes.string,
   labelTitle: PropTypes.string,
   countTitle: PropTypes.string,
