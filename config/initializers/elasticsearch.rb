@@ -2,16 +2,20 @@
 ELASTICSEARCH_ON = (Rails.env != 'test')
 
 # Initialize elasticsearch client
+port = '9200'
+
 case Rails.env
 when "production", "staging", "sandbox"
-  port = '443'
+  port = ':443'
 when "development"
-  port = '9200'
+  port = ''
 end
 
 config = {
-  hosts: [{ host: ENV['ES_ADDRESS'], port: port }],
+  host: "#{ENV['ES_ADDRESS']}#{port}",
   transport_options: { request: { timeout: 200 } },
 }
+
+Rails.logger.info(config)
 
 Elasticsearch::Model.client = Elasticsearch::Client.new(config) if Rails.env != 'test'
