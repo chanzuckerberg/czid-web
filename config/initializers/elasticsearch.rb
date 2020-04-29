@@ -16,6 +16,4 @@ config = {
   transport_options: { request: { timeout: 200 } },
 }
 
-Rails.logger.info(config)
-
 Elasticsearch::Model.client = Elasticsearch::Client.new(config) if Rails.env != 'test'
