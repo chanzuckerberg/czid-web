@@ -1,17 +1,5 @@
 @import "~styles/themes/colors";
 
 .link {
-  background-color: transparent;
-
-  &.primary-light {
-    color: $primary-light;
-  }
-
-  // Materialize has some css that sets the background color
-  // for any .white classes to white, and they put !important
-  // on it for some unfortunate reason. So we have to prevent
-  // a name collision by calling it something else
-  &.primary-white {
-    color: $white;
-  }
+  color: $primary-light !important;
 }
