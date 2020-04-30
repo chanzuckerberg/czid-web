@@ -24,11 +24,12 @@ export default class TaxonSelector extends React.Component {
   // Debounce this function, so it only runs after the user has not typed for a delay.
   loadOptionsForQuery = debounce(AUTOCOMPLETE_DEBOUNCE_DELAY, async query => {
     this._lastQuery = query;
-    const { sampleIds, availableTaxa } = this.props;
+    const { sampleIds, availableTaxa, taxLevel } = this.props;
 
     const searchResults = await getTaxaWithReadsSuggestions(
       query,
-      Array.from(sampleIds)
+      Array.from(sampleIds),
+      { taxLevel }
     );
 
     // If the query has since changed, discard the response.
@@ -91,4 +92,5 @@ TaxonSelector.propTypes = {
   selectedTaxa: PropTypes.object,
   onTaxonSelectionChange: PropTypes.func,
   onTaxonSelectionClose: PropTypes.func,
+  taxLevel: PropTypes.string,
 };

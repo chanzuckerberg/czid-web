@@ -102,6 +102,10 @@ class SamplesHeatmapVis extends React.Component {
     );
     this.heatmap.start();
 
+    if (this.props.newTaxon) {
+      this.scrollToRow();
+    }
+
     document.addEventListener("keydown", this.handleKeyDown, false);
     document.addEventListener("keyup", this.handleKeyUp, false);
   }
@@ -425,9 +429,9 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   scrollToRow() {
-    if (this.state.newTaxon) {
+    if (this.props.newTaxon) {
       this.heatmap.scrollToRow(
-        this.props.taxonDetails[this.state.newTaxon].name
+        this.props.taxonDetails[this.props.newTaxon].name
       );
     }
   }
@@ -568,12 +572,12 @@ class SamplesHeatmapVis extends React.Component {
             availableTaxa={this.getAvailableTaxa()}
             sampleIds={this.props.sampleIds}
             onTaxonSelectionChange={selected => {
-              let newTaxon = this.props.onAddTaxon(selected);
-              this.setState({ newTaxon });
+              this.props.onAddTaxon(selected);
             }}
             onTaxonSelectionClose={() => {
               this.setState({ addTaxonTrigger: null });
             }}
+            taxLevel={this.props.taxLevel}
           />
         )}
         <div
@@ -610,12 +614,14 @@ SamplesHeatmapVis.propTypes = {
   onMetadataSortChange: PropTypes.func,
   onMetadataChange: PropTypes.func,
   onAddTaxon: PropTypes.func,
+  newTaxon: PropTypes.number,
   onRemoveTaxon: PropTypes.func,
   onSampleLabelClick: PropTypes.func,
   onTaxonLabelClick: PropTypes.func,
   sampleDetails: PropTypes.object,
   sampleIds: PropTypes.array,
   scale: PropTypes.string,
+  taxLevel: PropTypes.string,
   taxonCategories: PropTypes.array,
   taxonDetails: PropTypes.object,
   allTaxonIds: PropTypes.array,

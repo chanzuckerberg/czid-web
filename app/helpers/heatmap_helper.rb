@@ -519,6 +519,30 @@ module HeatmapHelper
         AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_hash
   end
 
+  def self.taxa_dict(params, samples, background_id)
+    return {} if samples.empty?
+    taxon_ids = (params[:taxonIds] || []).map do |x|
+      begin
+        Integer(x)
+      rescue ArgumentError
+        nil
+      end
+    end
+
+    unless taxon_ids.empty?
+      results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, [], background_id)
+    end
+
+    HeatmapHelper.samples_taxons_details(
+      results_by_pr,
+      samples,
+      taxon_ids,
+      1,
+      [],
+      client_filtering_enabled: true
+    )
+  end
+
   def self.only_species_or_genus_counts!(tax_2d, species_selected)
     if species_selected # Species selected
       only_species_level_counts!(tax_2d)

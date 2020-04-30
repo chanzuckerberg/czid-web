@@ -26,6 +26,7 @@ import {
   getSampleTaxons,
   saveVisualization,
   updateHeatmapBackground,
+  getAddedTaxaForSamples,
 } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -49,6 +50,12 @@ const SORT_SAMPLES_OPTIONS = [
 const TAXON_LEVEL_OPTIONS = {
   species: 1,
   genus: 2,
+};
+// this.state.selectedOptions.species is 1 if species is selected,
+// 0 otherwise.
+const TAXON_LEVEL_SELECTED = {
+  0: "genus",
+  1: "species",
 };
 const SORT_TAXA_OPTIONS = [
   { text: "Genus", value: "genus" },
@@ -615,12 +622,14 @@ class SamplesHeatmapView extends React.Component {
     if (allowedFeatures.includes("heatmap_filter_fe")) {
       allTaxonIds.forEach(taxonId => {
         let taxon = allTaxonDetails[taxonId];
-        if (!taxonIds.has(taxonId) && this.taxonPassesSelectedFilters(taxon)) {
-          if (taxonPassesThresholdFilters[taxon["index"]]) {
-            taxonIds.add(taxon["id"]);
-            if (addedTaxonIds.has(taxon["id"])) {
-              addedTaxonIdsPassingFilters.add(taxon["id"]);
-            }
+        if (
+          !taxonIds.has(taxonId) &&
+          this.taxonPassesSelectedFilters(taxon) &&
+          taxonPassesThresholdFilters[taxon["index"]]
+        ) {
+          taxonIds.add(taxon["id"]);
+          if (addedTaxonIds.has(taxon["id"])) {
+            addedTaxonIdsPassingFilters.add(taxon["id"]);
           }
         } else {
           // Check notifiedFilteredOutTaxonIds to prevent filtered out taxa from
@@ -829,10 +838,87 @@ class SamplesHeatmapView extends React.Component {
     window.history.replaceState("", "", this.getUrlForCurrentParams());
   };
 
+  fetchNewTaxa(taxaMissingInfo) {
+    if (this.lastRequestToken)
+      this.lastRequestToken.cancel("Parameters changed");
+    this.lastRequestToken = axios.CancelToken.source();
+
+    return getAddedTaxaForSamples(
+      {
+        sampleIds: this.state.sampleIds,
+        taxonIds: taxaMissingInfo,
+        background: this.state.selectedOptions.background,
+        heatmapTs: this.props.heatmapTs,
+      },
+      this.lastRequestToken.token
+    );
+  }
+
+  async updateTaxa(taxaMissingInfo) {
+    this.setState({ loading: true });
+
+    const newTaxaInfo = await this.fetchNewTaxa(taxaMissingInfo);
+    const extractedData = this.extractData(newTaxaInfo);
+    console.log(extractedData);
+
+    let {
+      allData,
+      allGeneraIds,
+      allSpeciesIds,
+      allTaxonIds,
+      allTaxonDetails,
+      sampleDetails,
+    } = this.state;
+    let tempAllData = extractedData.allData;
+
+    allGeneraIds.concat(extractedData.allGeneraIds);
+    allSpeciesIds.concat(extractedData.allSpeciesIds);
+
+    extractedData.allTaxonIds.forEach(taxonId => {
+      let taxon = extractedData.allTaxonDetails[taxonId];
+      let tempTaxonIndex = taxon.index;
+      let taxonIndex = allTaxonIds.length;
+      taxon.index = taxonIndex;
+
+      allTaxonIds.push(taxonId);
+      allTaxonDetails[taxon.id] = taxon;
+      allTaxonDetails[taxon.name] = taxon;
+
+      Object.entries(sampleDetails).map(([sampleId, sample]) => {
+        sample.taxa.concat(extractedData.sampleDetails[sampleId].taxa);
+        let sampleIndex = sample.index;
+        let tempSampleIndex = extractedData.sampleDetails[sampleId].index;
+
+        this.props.metrics.forEach(metric => {
+          allData[metric.value][taxonIndex] =
+            allData[metric.value][taxonIndex] || [];
+          allData[metric.value][taxonIndex][sampleIndex] =
+            tempAllData[metric.value][tempTaxonIndex][tempSampleIndex];
+        });
+      });
+    });
+    this.setState(
+      {
+        allData,
+        allGeneraIds,
+        allSpeciesIds,
+        allTaxonIds,
+        allTaxonDetails,
+        sampleDetails,
+      },
+      this.updateFilters
+    );
+  }
+
   handleAddedTaxonChange = selectedTaxonIds => {
     // selectedTaxonIds includes taxa that pass filters
     // and the taxa manually added by the user.
-    const { taxonIds, addedTaxonIds, notifiedFilteredOutTaxonIds } = this.state;
+    const {
+      taxonIds,
+      addedTaxonIds,
+      notifiedFilteredOutTaxonIds,
+      allTaxonIds,
+    } = this.state;
 
     // currentAddedTaxa is all the taxa manually added by the user.
     const newlyAddedTaxa = difference(
@@ -858,18 +944,28 @@ class SamplesHeatmapView extends React.Component {
       this.removedTaxonIds.delete(taxId);
     });
 
+    // If the user has selected a taxon from the dropdown whose data wasn't initially
+    // loaded in (for example, if the taxon has < 5 reads), then fetch its info.
+    const taxaMissingInfo = difference([...selectedTaxonIds], allTaxonIds);
+
     this.setState(
       {
         addedTaxonIds: currentAddedTaxa,
         notifiedFilteredOutTaxonIds: currentFilteredOutTaxonIds,
+        newestTaxonId,
       },
-      this.updateFilters
+      () => {
+        if (taxaMissingInfo.length > 0) {
+          this.updateTaxa(taxaMissingInfo);
+        } else {
+          this.updateFilters();
+        }
+      }
     );
     logAnalyticsEvent("SamplesHeatmapView_taxon_added", {
       selected: currentAddedTaxa,
     });
     this.updateHistoryState();
-    return newestTaxonId;
   };
 
   handleRemoveTaxon = taxonName => {
@@ -1132,6 +1228,7 @@ class SamplesHeatmapView extends React.Component {
               ? this.handleAddedTaxonChange
               : null
           }
+          newTaxon={this.state.newestTaxonId}
           onRemoveTaxon={this.handleRemoveTaxon}
           onSampleLabelClick={this.handleSampleLabelClick}
           onTaxonLabelClick={this.handleTaxonLabelClick}
@@ -1142,6 +1239,7 @@ class SamplesHeatmapView extends React.Component {
           sampleDetails={this.state.sampleDetails}
           scale={SCALE_OPTIONS[scaleIndex][1]}
           selectedTaxa={this.state.addedTaxonIds}
+          taxLevel={TAXON_LEVEL_SELECTED[this.state.selectedOptions.species]}
           allTaxonIds={
             this.state.selectedOptions.species
               ? this.state.allSpeciesIds

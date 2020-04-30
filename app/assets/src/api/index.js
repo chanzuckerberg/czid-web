@@ -121,6 +121,12 @@ const getSampleTaxons = (params, cancelToken) =>
     cancelToken,
   });
 
+const getAddedTaxaForSamples = (params, cancelToken) =>
+  get("/visualizations/taxa_info.json", {
+    params,
+    cancelToken,
+  });
+
 // TODO(tiago): still needs to accepts field to sort by
 const getSamples = ({
   projectId,
@@ -308,10 +314,11 @@ const getSamplePipelineResults = (sampleId, pipelineVersion) =>
   });
 
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
-const getTaxaWithReadsSuggestions = (query, sampleIds) =>
+const getTaxaWithReadsSuggestions = (query, sampleIds, params) =>
   postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
     query,
     sampleIds,
+    taxLevel: params && params.taxLevel ? params.taxLevel : null,
   });
 
 // Get autocomplete suggestions for "taxa that have contigs" for a set of samples.
@@ -374,6 +381,7 @@ export {
   getSampleStats,
   getSamplesV1,
   getSampleTaxons,
+  getAddedTaxaForSamples,
   getSamplePipelineResults,
   getSearchSuggestions,
   getSummaryContigCounts,
