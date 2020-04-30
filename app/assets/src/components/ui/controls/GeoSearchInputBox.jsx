@@ -12,9 +12,8 @@ export const LOCATION_UNRESOLVED_WARNING =
   // this is the max length to appear on one line
   "No match. Sample will not appear on maps.";
 
-// Process location selections and add warnings.
+// Process location selections.
 export const processLocationSelection = (result, isHuman) => {
-  let warning = "";
   // For human samples, drop the city part of the name and show a warning.
   // NOTE: The backend will redo the geosearch for confirmation and re-apply
   // this restriction.
@@ -44,17 +43,18 @@ export const processLocationSelection = (result, isHuman) => {
     } else if (result.country_name) {
       result.geo_level = "country";
     }
-
-    warning = LOCATION_PRIVACY_WARNING;
-  } else {
-    warning = getLocationWarning(result);
   }
-  return { result, warning };
+
+  return result;
 };
 
 export const getLocationWarning = result => {
   if (!result || !result.geo_level) {
     return LOCATION_UNRESOLVED_WARNING;
+  }
+  // If the result was processed due to privacy reasons, show a warning.
+  if (result.refetch_adjusted_location) {
+    return LOCATION_PRIVACY_WARNING;
   }
   return "";
 };

@@ -410,7 +410,7 @@ class Sample < ApplicationRecord
     self.status = STATUS_UPLOADED
     save! # this triggers pipeline command
   rescue => e
-    LogUtil.log_err_and_airbrake("[Datadog] SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}")
+    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}")
     self.status = STATUS_CHECKED
     self.upload_error = Sample::UPLOAD_ERROR_S3_UPLOAD_FAILED
     save!
@@ -744,7 +744,7 @@ class Sample < ApplicationRecord
     pr.subsample = subsample || PipelineRun::DEFAULT_SUBSAMPLING
     pr.max_input_fragments = max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
-    pr.pipeline_execution_strategy = pipeline_execution_strategy.blank? ? PipelineRun.directed_acyclic_graph : pipeline_execution_strategy
+    pr.pipeline_execution_strategy = pipeline_execution_strategy.blank? ? PipelineRun.step_function : pipeline_execution_strategy
     pr.dag_vars = dag_vars if dag_vars
     pr.use_taxon_whitelist = use_taxon_whitelist
     pr.pipeline_commit = Sample.pipeline_commit(pr.pipeline_branch)

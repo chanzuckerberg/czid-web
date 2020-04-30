@@ -356,7 +356,7 @@ class PipelineRun < ApplicationRecord
 
   def align_viz_available?
     # TODO(tiago): we should not have to access aws. see IDSEQ-2602.
-    align_summary_file = "#{alignment_viz_output_s3_path}.summary"
+    align_summary_file = "#{postprocess_output_s3_path}/align_viz.summary"
     return align_summary_file && get_s3_file(align_summary_file) ? true : false
   end
 
@@ -458,7 +458,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def coverage_viz_output_s3_path
-    "#{postprocess_output_s3_path}/coverage_viz"
+    if step_function?
+      sfn_results_path
+    else
+      "#{postprocess_output_s3_path}/coverage_viz"
+    end
   end
 
   def contigs_fasta_s3_path
@@ -1100,7 +1104,7 @@ class PipelineRun < ApplicationRecord
     automatic_restart_text = automatic_restart ? "Automatic restart is being triggered. " : "** Manual action required **. "
     known_user_error = known_user_error ? "Known user error #{known_user_error}. " : ""
 
-    "[Datadog] SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
+    "SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
       "after #{duration_hrs} hours. #{automatic_restart_text}#{known_user_error}"\
       "See: #{status_url}"
   end
@@ -1156,7 +1160,7 @@ class PipelineRun < ApplicationRecord
       # NOTE (2019-08-02): Based on the last 3000 successful samples, only 0.17% took longer than 12 hours.
       threshold = 12.hours
       if run_time > threshold
-        msg = "[Datadog] LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
+        msg = "LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
           "See: #{status_url}"
         LogUtil.log_err_and_airbrake(msg)
         update(alert_sent: 1)
@@ -1526,7 +1530,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def alignment_viz_output_s3_path
-    "#{postprocess_output_s3_path}/align_viz"
+    if step_function?
+      sfn_results_path
+    else
+      "#{postprocess_output_s3_path}/align_viz"
+    end
   end
 
   def host_filter_output_s3_path

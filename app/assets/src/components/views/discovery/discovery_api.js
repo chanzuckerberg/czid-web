@@ -92,6 +92,7 @@ const processRawSample = sample => {
     ),
     host: get("db_sample.host_genome_name", sample.details),
     id: sample.id,
+    meanInsertSize: meanInsertSizeString || "",
     nonHostReads: {
       value: get(
         "derived_sample_output.summary_stats.adjusted_remaining_reads",
@@ -104,6 +105,10 @@ const processRawSample = sample => {
     },
     notes: get("db_sample.sample_notes", sample.details),
     nucleotideType: get("metadata.nucleotide_type", sample.details),
+    pipelineVersion: get(
+      "derived_sample_output.pipeline_run.pipeline_version",
+      sample.details
+    ),
     privateUntil: sample.private_until,
     qcPercent: get(
       "derived_sample_output.summary_stats.qc_percent",
@@ -120,7 +125,6 @@ const processRawSample = sample => {
     ),
     totalRuntime: get("run_info.total_runtime", sample.details),
     waterControl: get("metadata.water_control", sample.details),
-    meanInsertSize: meanInsertSizeString || "",
   };
   return row;
 };

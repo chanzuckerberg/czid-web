@@ -15,6 +15,8 @@ import _fp, {
   pickBy,
   has,
   orderBy,
+  merge,
+  keys,
 } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -26,6 +28,7 @@ import PlusIcon from "~ui/icons/PlusIcon";
 import { UserContext } from "~/components/common/UserContext";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 
 import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
@@ -72,6 +75,15 @@ const COLUMN_HEADER_TOOLTIPS = {
   trap_type: "Trap type used on host.",
 };
 
+// When the auto-populate button is clicked, the following metadata fields will be populated with these values.
+const AUTO_POPULATE_FIELDS = {
+  "Host Organism": "Human",
+  sample_type: "CSF",
+  nucleotide_type: "DNA",
+  collection_date: "2020-05",
+  collection_location_v2: "California, USA",
+};
+
 class MetadataManualInput extends React.Component {
   state = {
     selectedFieldNames: [],
@@ -79,7 +91,7 @@ class MetadataManualInput extends React.Component {
     headers: null,
     metadataFieldsToEdit: {},
     headersToEdit: [],
-    hostGenomes: [],
+    hostGenomesByName: {},
     // Which cell the "Apply to All" button should appear on.
     applyToAllCell: {
       sampleName: null,
@@ -98,7 +110,7 @@ class MetadataManualInput extends React.Component {
           "key",
           filter(["is_required", 1], projectMetadataFields)
         ),
-        hostGenomes,
+        hostGenomesByName: keyBy("name", hostGenomes),
         headers: {
           "Sample Name": "Sample Name",
           ...(samplesAreNew ? { "Host Organism": "Host Organism" } : {}),
@@ -147,6 +159,27 @@ class MetadataManualInput extends React.Component {
     ];
   };
 
+  autoPopulateMetadata = () => {
+    const { metadataFieldsToEdit, headersToEdit } = this.state;
+
+    const newHeadersToEdit = union(headersToEdit, keys(AUTO_POPULATE_FIELDS));
+    const newMetadataFieldsToEdit = mapValues(
+      metadataFields => merge(AUTO_POPULATE_FIELDS, metadataFields),
+      metadataFieldsToEdit
+    );
+
+    this.setState({
+      metadataFieldsToEdit: newMetadataFieldsToEdit,
+      headersToEdit: newHeadersToEdit,
+      applyToAllCell: {
+        sampleName: null,
+        column: null,
+      },
+    });
+
+    this.onMetadataChange(newHeadersToEdit, newMetadataFieldsToEdit);
+  };
+
   // Update metadata field based on user's manual input.
   updateMetadataField = (key, value, sample) => {
     const newHeaders = union([key], this.state.headersToEdit);
@@ -180,7 +213,19 @@ class MetadataManualInput extends React.Component {
           overrideExistingValue) ||
         get([curSample.name, column], newFields) === undefined
       ) {
-        newFields = set([curSample.name, column], newValue, newFields);
+        let value = newValue;
+        // If the field is location-type, return a less-specific location if necessary.
+        if (
+          column !== "Host Organism" &&
+          this.state.projectMetadataFields[column].dataType === "location"
+        ) {
+          const isHuman =
+            get("taxa_category", this.getSampleHostGenome(curSample)) ===
+            "human";
+          value = processLocationSelection(newValue, isHuman);
+        }
+
+        newFields = set([curSample.name, column], value, newFields);
       }
     });
 
@@ -332,15 +377,16 @@ class MetadataManualInput extends React.Component {
     this.props.samplesAreNew
       ? get(
           "id",
-          find(
-            ["name", this.getMetadataValue(sample, "Host Organism")],
-            this.props.hostGenomes
-          )
+          this.state.hostGenomesByName[
+            this.getMetadataValue(sample, "Host Organism")
+          ]
         )
       : sample.host_genome_id;
 
   getSampleHostGenome = sample =>
-    find(["id", this.getSampleHostGenomeId(sample)], this.state.hostGenomes);
+    this.state.hostGenomesByName[
+      this.getMetadataValue(sample, "Host Organism")
+    ];
 
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
     // Special-case "Host Organism" (the field that lets you change the Host Genome)
@@ -490,6 +536,8 @@ class MetadataManualInput extends React.Component {
   };
 
   render() {
+    const { admin } = this.context || {};
+    const { samplesAreNew } = this.props;
     const columns = this.getManualInputColumns();
     return (
       <div className={cx(cs.metadataManualInput, this.props.className)}>
@@ -505,6 +553,15 @@ class MetadataManualInput extends React.Component {
           </div>
           {this.renderColumnSelector()}
         </div>
+        {admin &&
+          samplesAreNew && (
+            <div
+              className={cs.autoPopulateButton}
+              onClick={this.autoPopulateMetadata}
+            >
+              Auto-populate metadata (Admin-only)
+            </div>
+          )}
       </div>
     );
   }

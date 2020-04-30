@@ -34,7 +34,7 @@ import SortIcon from "~ui/icons/SortIcon";
 import Notification from "~ui/notifications/Notification";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { showToast } from "~/components/utils/toast";
-import { validateSampleIds } from "~/api/bulk_downloads";
+import { validateSampleIds } from "~/api/access_control";
 import { UserContext } from "~/components/common/UserContext";
 
 import cs from "./samples_heatmap_view.scss";
@@ -77,6 +77,7 @@ const BACKGROUND_METRICS = [
 const NOTIFICATION_TYPES = {
   invalidSamples: "invalid samples",
   taxaFilteredOut: "taxa filtered out",
+  multiplePipelineVersions: "diverse_pipelines",
 };
 
 const parseAndCheckInt = (val, defaultVal) => {
@@ -414,6 +415,20 @@ class SamplesHeatmapView extends React.Component {
       this.fetchHeatmapData(),
       this.fetchMetadataFieldsBySampleIds(),
     ]);
+
+    const pipelineMajorVersionsSet = new Set(
+      compact(
+        map(data => {
+          if (!data.pipeline_version) return null;
+          return `${data.pipeline_version.split(".")[0]}.x`;
+        }, heatmapData)
+      )
+    );
+    if (pipelineMajorVersionsSet.size > 1) {
+      this.showNotification(NOTIFICATION_TYPES.multiplePipelineVersions, [
+        ...pipelineMajorVersionsSet,
+      ]);
+    }
 
     let newState = this.extractData(heatmapData);
 
@@ -1199,21 +1214,54 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
+  renderFilteredMultiplePipelineVersionsWarning(onClose, versions) {
+    return (
+      <Notification type={"warn"} displayStyle={"elevated"} onClose={onClose}>
+        <div>
+          <span className={cs.highlight}>
+            The selected samples come from multiple major pipeline versions:{" "}
+            {versions.join(", ")}.
+          </span>
+          A major change in the pipeline may produce results that are not
+          comparable across all metrics. We recommend re-running samples on the
+          latest major pipeline version.
+        </div>
+      </Notification>
+    );
+  }
+
   showNotification(notification, params) {
-    if (notification === NOTIFICATION_TYPES.invalidSamples) {
-      showToast(
-        ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
-        {
-          autoClose: 12000,
-        }
-      );
-    } else if (notification === NOTIFICATION_TYPES.taxaFilteredOut) {
-      showToast(
-        ({ closeToast }) => this.renderFilteredOutWarning(closeToast, params),
-        {
-          autoClose: 12000,
-        }
-      );
+    switch (notification) {
+      case NOTIFICATION_TYPES.invalidSamples:
+        showToast(
+          ({ closeToast }) => this.renderInvalidSamplesWarning(closeToast),
+          {
+            autoClose: 12000,
+          }
+        );
+        break;
+      case NOTIFICATION_TYPES.taxaFilteredOut:
+        showToast(
+          ({ closeToast }) => this.renderFilteredOutWarning(closeToast, params),
+          {
+            autoClose: 12000,
+          }
+        );
+        break;
+      case NOTIFICATION_TYPES.multiplePipelineVersions:
+        showToast(
+          ({ closeToast }) =>
+            this.renderFilteredMultiplePipelineVersionsWarning(
+              closeToast,
+              params
+            ),
+          {
+            autoClose: 12000,
+          }
+        );
+        break;
+      default:
+        break;
     }
   }
 

@@ -2,6 +2,7 @@ import React from "react";
 
 export const UserContext = React.createContext({
   admin: false,
+  firstSignIn: false,
   allowedFeatures: new Set(),
   appConfig: {},
   userSettings: {},

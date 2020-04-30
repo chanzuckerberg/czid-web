@@ -54,7 +54,7 @@ class MonitorPipelineResults
     samples = Sample.current_stalled_local_uploads(18.hours)
     unless samples.empty?
       LogUtil.log_err_and_airbrake(
-        "[Datadog] SampleFailedEvent: Failed to upload local samples after 18 hours #{samples.pluck(:id)}"
+        "SampleFailedEvent: Failed to upload local samples after 18 hours #{samples.pluck(:id)}"
       )
       samples.update_all( # rubocop:disable Rails/SkipsModelValidations
         status: Sample::STATUS_CHECKED,
@@ -79,7 +79,7 @@ class MonitorPipelineResults
     status_urls = samples.map(&:status_url)
     msg = %(LongRunningUploadsEvent: #{samples.length} samples were created more than #{duration_hrs} hours ago by #{role_names} in projects #{project_names}.
       #{client_updated_at ? "Last client ping was at #{client_updated_at}. " : ''} See: #{status_urls})
-    LogUtil.log_err_and_airbrake(msg)
+    Rails.logger.info(msg)
 
     samples.update_all(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED) # rubocop:disable Rails/SkipsModelValidations
   end

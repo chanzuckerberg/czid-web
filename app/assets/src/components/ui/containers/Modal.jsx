@@ -30,6 +30,7 @@ class Modal extends React.Component {
           wide && cs.wide,
           fixedHeight && cs.fixedHeight
         )}
+        dimmer={"inverted"}
         trigger={<span />}
       >
         {this.props.title && (

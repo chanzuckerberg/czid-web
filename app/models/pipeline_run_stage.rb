@@ -35,7 +35,7 @@ class PipelineRunStage < ApplicationRecord
   DAG_NAME_EXPERIMENTAL = "experimental".freeze
 
   # Older alignment configs might not have an s3_nt_info_db_path field, so use a reasonable default in this case.
-  DEFAULT_S3_NT_INFO_DB_PATH = "s3://idseq-database/alignment_data/#{AlignmentConfig::DEFAULT_NAME}/nt_info.sqlite3".freeze
+  DEFAULT_S3_NT_INFO_DB_PATH = "s3://idseq-database/alignment_data/#{AlignmentConfig::DEFAULT_NAME}/nt_info.db".freeze
 
   STAGE_INFO = {
     1 => {
@@ -82,12 +82,17 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def step_status_file_path
-    path_beginning = if step_number <= 2
-                       pipeline_run.sample.sample_output_s3_path
-                     else
-                       pipeline_run.sample.sample_postprocess_s3_path
-                     end
-    "#{path_beginning}/#{pipeline_run.pipeline_version}/#{dag_name}_status.json"
+    json_basename = "#{dag_name}_status.json"
+    if pipeline_run.step_function?
+      "#{pipeline_run.sfn_results_path}/#{json_basename}"
+    else
+      path_beginning = if step_number <= 2
+                         pipeline_run.sample.sample_output_s3_path
+                       else
+                         pipeline_run.sample.sample_postprocess_s3_path
+                       end
+      "#{path_beginning}/#{pipeline_run.pipeline_version}/#{json_basename}"
+    end
   end
 
   def step_statuses
