@@ -28,39 +28,6 @@ class BulkDownloadsController < ApplicationController
     render json: download_types
   end
 
-  # POST /bulk_downloads/validate_sample_ids
-  # This is a POST route and not a GET request because Puma does not allow
-  # query strings longer than a certain amount (1024 * 10 chars), which causes
-  # trouble with projects with a large number of samples.
-  def validate_sample_ids
-    queried_sample_ids = params[:sampleIds]
-
-    validator = BulkDownloadsSampleValidationService.new(queried_sample_ids, current_user)
-
-    # We want to return valid sample ids, but for invalid samples we need their names to display
-    # to the user. No information is returned on samples they don't have access to.
-    validated_sample_info = validator.validate_samples()
-    viewable_samples = validated_sample_info[:viewable_samples]
-    if validated_sample_info[:error].nil?
-      valid_sample_ids = get_succeeded_pipeline_runs_for_samples(viewable_samples, false, [:sample_id]).map(&:sample_id)
-
-      invalid_samples = viewable_samples.reject { |sample| valid_sample_ids.include?(sample.id) }
-      invalid_sample_names = invalid_samples.map(&:name)
-
-      render json: {
-        validSampleIds: valid_sample_ids,
-        invalidSampleNames: invalid_sample_names,
-        error: nil,
-      }
-    else
-      render json: {
-        validSampleIds: [],
-        invalidSampleNames: [],
-        error: id_validation_info[:error],
-      }
-    end
-  end
-
   # POST /bulk_downloads
   def create
     create_params = bulk_download_create_params

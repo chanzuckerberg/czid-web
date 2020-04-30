@@ -116,6 +116,12 @@ class SamplesView extends React.Component {
         className: cs.basicCell,
       },
       {
+        dataKey: "pipelineVersion",
+        label: "Pipeline Version",
+        flexGrow: 1,
+        className: cs.basicCell,
+      },
+      {
         dataKey: "sampleType",
         label: "Sample Type",
         flexGrow: 1,

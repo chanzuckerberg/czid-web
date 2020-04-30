@@ -360,8 +360,6 @@ ActiveRecord::Schema.define(version: 20_200_430_210_801) do
     t.integer "alert_sent", default: 0
     t.text "dag_vars"
     t.integer "assembled", limit: 2
-    t.integer "completed_gsnap_chunks"
-    t.integer "completed_rapsearch2_chunks"
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"

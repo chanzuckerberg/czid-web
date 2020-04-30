@@ -398,27 +398,105 @@ RSpec.describe SamplesController, type: :controller do
                                               ])
       end
     end
-  end
 
-  describe "POST #uploaded_by_current_user" do
-    before do
-      @project = create(:project, users: [@joe, @admin])
-      @sample_one = create(:sample, project: @project, name: "Test Sample One", user: @joe)
-      @sample_two = create(:sample, project: @project, name: "Test Sample Two", user: @joe)
-      @sample_three = create(:sample, project: @project, name: "Test Sample Three", user: @admin)
-      sign_in @joe
+    describe "on POST #validate_sample_ids" do
+      before do
+        @project = create(:project, users: [@joe], name: "Test Project")
+        @admin_project = create(:project, users: [@admin])
+      end
+
+      let(:good_sample_one) do
+        create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:good_sample_two) do
+        create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:in_progress_sample) do
+        create(:sample, project: @project, name: "In Progress Sample", pipeline_runs_data: [{ finalized: 0, job_status: PipelineRun::STATUS_RUNNING }])
+      end
+
+      let(:failed_sample) do
+        create(:sample, project: @project, name: "Failed Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_FAILED }])
+      end
+
+      let(:different_owner_sample) do
+        create(:sample, project: @admin_project, name: "Admin Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      it "should validate successful samples owned by user" do
+        validate_params = {
+          sampleIds: [good_sample_one, good_sample_two],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
+        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["invalidSampleNames"]).to be_empty
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should filter out samples in progress" do
+        validate_params = {
+          sampleIds: [good_sample_one, good_sample_two, in_progress_sample],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
+        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["invalidSampleNames"]).to include(in_progress_sample.name)
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should filter out failed samples" do
+        validate_params = {
+          sampleIds: [good_sample_one, good_sample_two, failed_sample],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
+        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["invalidSampleNames"]).to include(failed_sample.name)
+        expect(json_response["error"]).to be_nil
+      end
     end
 
-    it "should return true if all samples were uploaded by user" do
-      post :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id] }
-      json_response = JSON.parse(response.body)
-      expect(json_response).to include_json(uploaded_by_current_user: true)
-    end
+    describe "POST #uploaded_by_current_user" do
+      before do
+        @project = create(:project, users: [@joe, @admin])
+        @sample_one = create(:sample, project: @project, name: "Test Sample One", user: @joe)
+        @sample_two = create(:sample, project: @project, name: "Test Sample Two", user: @joe)
+        @sample_three = create(:sample, project: @project, name: "Test Sample Three", user: @admin)
+        sign_in @joe
+      end
 
-    it "should return false if some samples were not uploaded by user, even if user belongs to the sample's project" do
-      post :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id] }
-      json_response = JSON.parse(response.body)
-      expect(json_response).to include_json(uploaded_by_current_user: false)
+      it "should return true if all samples were uploaded by user" do
+        post :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id] }
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json(uploaded_by_current_user: true)
+      end
+
+      it "should return false if some samples were not uploaded by user, even if user belongs to the sample's project" do
+        post :uploaded_by_current_user, params: { sampleIds: [@sample_one.id, @sample_two.id, @sample_three.id] }
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json(uploaded_by_current_user: false)
+      end
     end
 
     describe "GET show" do
@@ -427,6 +505,48 @@ RSpec.describe SamplesController, type: :controller do
         sample = create(:sample, project: project)
         get :show, params: { id: sample.id }
         expect(response).to have_http_status :success
+      end
+    end
+  end
+
+  context "Admin user" do
+    # create_users
+    before do
+      sign_in @admin
+      @project = create(:project, users: [@admin], name: "Test Project")
+    end
+
+    describe "POST #validate" do
+      before do
+        @joe_project = create(:project, users: [@joe])
+      end
+
+      let(:good_sample_one) do
+        create(:sample, project: @project, name: "Test Sample One", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:good_sample_two) do
+        create(:sample, project: @project, name: "Test Sample Two", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      let(:different_owner_sample) do
+        create(:sample, project: @joe_project, name: "Joe Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+      end
+
+      it "should validate samples owned by any user" do
+        validate_params = {
+          sampleIds: [different_owner_sample],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(different_owner_sample.id)
+        expect(json_response["invalidSampleNames"]).to be_empty
+        expect(json_response["error"]).to be_nil
       end
     end
   end

@@ -8,11 +8,8 @@ import {
   uploadedByCurrentUser,
   getHeatmapMetrics,
 } from "~/api";
-import {
-  createBulkDownload,
-  getBulkDownloadTypes,
-  validateSampleIds,
-} from "~/api/bulk_downloads";
+import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
+import { validateSampleIds } from "~/api/access_control";
 import { logAnalyticsEvent } from "~/api/analytics";
 import Modal from "~ui/containers/Modal";
 

@@ -254,12 +254,20 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
-    const { className, currentTab, loading, project } = this.props;
+    const {
+      className,
+      currentTab,
+      loading,
+      noDataAvailable,
+      project,
+    } = this.props;
     if (!loading && !this.hasData()) {
       return (
         <div className={cx(className, cs.sidebar)}>
           <div className={cs.noData}>
-            Try another search to see summary info.
+            {noDataAvailable
+              ? "Add data to view summary info."
+              : "Try another search to see summary info."}
           </div>
         </div>
       );
@@ -367,6 +375,7 @@ export default class DiscoverySidebar extends React.Component {
 
 DiscoverySidebar.defaultProps = {
   defaultNumberOfMetadataRows: 4,
+  noDataAvailable: false,
 };
 
 DiscoverySidebar.propTypes = {
@@ -375,6 +384,7 @@ DiscoverySidebar.propTypes = {
   currentTab: PropTypes.string.isRequired,
   defaultNumberOfMetadataRows: PropTypes.number,
   loading: PropTypes.bool,
+  noDataAvailable: PropTypes.bool,
   onFilterClick: PropTypes.func,
   projectDimensions: PropTypes.array,
   projectStats: PropTypes.object,

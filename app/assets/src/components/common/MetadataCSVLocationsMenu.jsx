@@ -40,22 +40,19 @@ export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
 
   // Process results and set warnings.
   let newMetadata = metadata;
-  const allWarnings = {};
   metadata.rows.forEach((row, rowIndex) => {
-    const sampleName = row[NAME_COLUMN];
     const locationName = row[locationMetadataType.name];
 
-    const { result, warning } = processLocationSelection(
+    const result = processLocationSelection(
       matchedLocations[locationName] || locationName,
       isRowHuman(row)
     );
-    if (warning) allWarnings[sampleName] = warning;
 
     if (matchedLocations.hasOwnProperty(locationName)) {
       newMetadata.rows[rowIndex][locationMetadataType.name] = result;
     }
   });
-  return { newMetadata, warnings: allWarnings };
+  return newMetadata;
 };
 
 const isRowHuman = row =>
@@ -89,44 +86,28 @@ class MetadataCSVLocationsMenu extends React.Component {
   };
 
   applyToAll = sample => {
-    const {
-      metadata,
-      locationMetadataType,
-      onMetadataChange,
-      onCSVLocationWarningsChange,
-    } = this.props;
+    const { metadata, locationMetadataType, onMetadataChange } = this.props;
 
     const newValue = (find({ [NAME_COLUMN]: sample }, metadata.rows) || {})[
       locationMetadataType.name
     ];
     const newMetadata = metadata;
-    const allWarnings = {};
 
     // Set all the rows to the newValue
     newMetadata.rows.forEach(row => {
-      const { result, warning } = processLocationSelection(
-        newValue,
-        isRowHuman(row)
-      );
+      const result = processLocationSelection(newValue, isRowHuman(row));
       row[locationMetadataType.name] = result;
-      if (warning) allWarnings[row[NAME_COLUMN]] = warning;
     });
 
     onMetadataChange({
       metadata: newMetadata,
     });
-    onCSVLocationWarningsChange(allWarnings);
     this.setState({ applyToAllSample: null });
   };
 
   // Populate the data table cells
   getManualInputData = () => {
-    const {
-      CSVLocationWarnings,
-      locationMetadataType,
-      metadata,
-      onMetadataChange,
-    } = this.props;
+    const { locationMetadataType, metadata, onMetadataChange } = this.props;
     const { applyToAllSample } = this.state;
 
     return metadata.rows.map((row, rowIndex) => {
@@ -157,7 +138,6 @@ class MetadataCSVLocationsMenu extends React.Component {
             onChange={onChange}
             withinModal={true}
             taxaCategory={get("taxa_category", this.getHostGenomeForRow(row))}
-            warning={CSVLocationWarnings[sampleName]}
           />
           {applyToAllSample === sampleName &&
             this.props.metadata.rows.length > 1 &&
@@ -196,7 +176,6 @@ class MetadataCSVLocationsMenu extends React.Component {
 }
 
 MetadataCSVLocationsMenu.propTypes = {
-  CSVLocationWarnings: PropTypes.objectOf(PropTypes.string),
   metadata: PropTypes.shape({
     headers: PropTypes.arrayOf(PropTypes.string),
     rows: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any)),
@@ -206,7 +185,6 @@ MetadataCSVLocationsMenu.propTypes = {
     key: PropTypes.string,
     name: PropTypes.string,
   }),
-  onCSVLocationWarningsChange: PropTypes.func.isRequired,
   onMetadataChange: PropTypes.func.isRequired,
   hostGenomes: PropTypes.array,
 };

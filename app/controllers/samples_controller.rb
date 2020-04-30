@@ -29,7 +29,8 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user, :taxa_with_contigs_suggestions,].freeze
+                   :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
+                   :taxa_with_contigs_suggestions, :validate_sample_ids,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata].freeze
 
@@ -203,6 +204,47 @@ class SamplesController < ApplicationController
         # TODO(tiago): a lot of the values return by format_sample do not make sense on a sample controller
         render json: results
       end
+    end
+  end
+
+  # POST /samples/validate_sample_ids
+  #
+  # Validate access to sample ids, and that the samples
+  # have completed and succeeded processing.
+  # Filters out samples with a pipeline run still in progress,
+  # with a failed latest run, and those the user does not have read
+  # access to.
+  #
+  # Returns a list of valid sample ids and the names of samples the
+  # user has access to, but have not successfully completed.
+  #
+  # This is a POST route and not a GET request because Puma does not allow
+  # query strings longer than a certain amount (1024 * 10 chars), which causes
+  # trouble with projects with a large number of samples.
+  def validate_sample_ids
+    queried_sample_ids = params[:sampleIds]
+
+    # We want to return valid sample ids, but for invalid samples we need their names to display
+    # to the user. No information is returned on samples they don't have access to.
+    validated_sample_info = SampleAccessValidationService.call(queried_sample_ids, current_user)
+    viewable_samples = validated_sample_info[:viewable_samples]
+    if validated_sample_info[:error].nil?
+      valid_sample_ids = get_succeeded_pipeline_runs_for_samples(viewable_samples, false, [:sample_id]).map(&:sample_id)
+
+      invalid_samples = viewable_samples.reject { |sample| valid_sample_ids.include?(sample.id) }
+      invalid_sample_names = invalid_samples.map(&:name)
+
+      render json: {
+        validSampleIds: valid_sample_ids,
+        invalidSampleNames: invalid_sample_names,
+        error: nil,
+      }
+    else
+      render json: {
+        validSampleIds: [],
+        invalidSampleNames: [],
+        error: id_validation_info[:error],
+      }
     end
   end
 
@@ -1337,9 +1379,9 @@ class SamplesController < ApplicationController
     # assume that all samples are in the same project and from the same user
     project = samples.first.project
     uploader = samples.first.user
-    msg = "[Datadog] LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name}." \
+    msg = "LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name}." \
       " See: #{project.status_url}"
-    LogUtil.log_err_and_airbrake(msg)
+    Rails.logger.info(msg)
   rescue StandardError => e
     # catch all errors because we don't want to ever block uploads
     LogUtil.log_err_and_airbrake("warn_if_large_bulk_upload: #{e}")

@@ -13,7 +13,7 @@ class SfnPipelineDispatchService
   ENV_TO_DEPLOYMENT_STAGE_NAMES = {
     "development" => "dev",
     "staging" => "staging",
-    "prod" => "production",
+    "prod" => "prod",
   }.freeze
 
   class SfnArnMissingError < StandardError
@@ -37,7 +37,7 @@ class SfnPipelineDispatchService
   def initialize(pipeline_run)
     @pipeline_run = pipeline_run
     @sample = pipeline_run.sample
-    @aws_account_id = retrieve_aws_account
+    @docker_image_id = retrieve_docker_image_id
 
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
@@ -60,9 +60,9 @@ class SfnPipelineDispatchService
 
   private
 
-  def retrieve_aws_account
+  def retrieve_docker_image_id
     resp = STS_CLIENT.get_caller_identity
-    return resp[:account]
+    return "#{resp[:account]}.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows"
   end
 
   def retrieve_version_tags
@@ -87,16 +87,11 @@ class SfnPipelineDispatchService
     stages_json = {}
     @pipeline_run.pipeline_run_stages.order(:step_number).each do |prs|
       stage_info = PipelineRunStage::STAGE_INFO[prs.step_number]
-      stages_json[stage_info[:dag_name]] = JSON.parse(prs.send(stage_info[:json_generation_func]))
+      dag_json = prs.send(stage_info[:json_generation_func])
+      stages_json[stage_info[:dag_name]] = JSON.parse(dag_json)
+      prs.update(dag_json: dag_json)
     end
     return stages_json
-  end
-
-  def save_dag_json(stage_dag_jsons)
-    @pipeline_run.pipeline_run_stages.order(:step_number).each do |prs|
-      stage_info = PipelineRunStage::STAGE_INFO[prs.step_number]
-      prs.update(dag_json: stage_dag_jsons[stage_info[:dag_name]])
-    end
   end
 
   def convert_dag_json_to_wdl(dag_json)
@@ -107,7 +102,7 @@ class SfnPipelineDispatchService
     idd2wdl_opts = [
       "--name", dag_json['name'].to_s,
       "--output-prefix", @sample.sample_output_s3_path,
-      "--aws-account-id", @aws_account_id,
+      "--docker-image-id", @docker_image_id,
       "--deployment-env", stage_deployment_name,
       "--aws-region", ENV['AWS_REGION'],
       "--wdl-version", @sfn_tags[:wdl_version],
@@ -115,7 +110,7 @@ class SfnPipelineDispatchService
     ]
 
     if @pipeline_run.pipeline_branch != "master"
-      idd2wdl_opts += ["--dag-branch", @pipeline_run.pipeline_commit]
+      idd2wdl_opts += ["--dag-branch", @pipeline_run.pipeline_branch]
     end
 
     stdout, stderr, status = Open3.capture3(
@@ -167,7 +162,7 @@ class SfnPipelineDispatchService
   end
 
   def dispatch(sfn_input_json)
-    sfn_name = "idseq-#{Rails.env}-#{@sample.project_id}-#{@sample.id}-#{@pipeline_run.id}-#{Time.now.to_i}"
+    sfn_name = "idseq-#{Rails.env}-#{@sample.project_id}-#{@sample.id}-#{@pipeline_run.id}-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}"
     sfn_input = JSON.dump(sfn_input_json)
 
     resp = SFN_CLIENT.start_execution(state_machine_arn: @sfn_arn,
