@@ -113,7 +113,11 @@ export default class CoverageVizBottomSidebar extends React.Component {
       );
     }
 
-    if (!prevState.currentAccessionData && currentAccessionData) {
+    if (
+      !prevState.currentAccessionData &&
+      currentAccessionData &&
+      this.isAccessionDataValid(currentAccessionData)
+    ) {
       this.renderHistogram(currentAccessionData);
       this.renderRefAccessionViz(currentAccessionData);
     }
@@ -151,6 +155,11 @@ export default class CoverageVizBottomSidebar extends React.Component {
       },
     });
   };
+
+  // It's possible that the accessionData failed to load.
+  // For example, the coverage viz s3 files couldn't be found.
+  // In this case, the accessionData is not valid, and we will display an error message.
+  isAccessionDataValid = accessionData => !!accessionData.coverage;
 
   setCurrentAccession = accessionId => {
     const { params } = this.props;
@@ -451,6 +460,20 @@ export default class CoverageVizBottomSidebar extends React.Component {
         <div className={cs.loadingContainer}>
           <div className={cs.loadingMessage}>
             <LoadingIcon className={cs.loadingIcon} />Loading Visualization...
+          </div>
+        </div>
+      );
+    }
+
+    if (!this.isAccessionDataValid(currentAccessionData)) {
+      return (
+        <div className={cs.unknownErrorContainer}>
+          <div className={cs.unknownErrorMessage}>
+            Failed to load data due to an unknown error. Please{" "}
+            <a className={cs.helpLink} href="mailto:help@idseq.net">
+              contact us
+            </a>{" "}
+            for help.
           </div>
         </div>
       );
