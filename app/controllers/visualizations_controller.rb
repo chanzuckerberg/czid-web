@@ -209,6 +209,8 @@ class VisualizationsController < ApplicationController
     render json: @sample_taxons_dict
   end
 
+  # Given a list of taxon ids, samples, and a background, returns the
+  # details for the specified taxa.
   def taxa_info
     @sample_taxons_dict = HeatmapHelper.taxa_dict(
       params,

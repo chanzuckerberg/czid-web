@@ -519,6 +519,8 @@ module HeatmapHelper
         AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_hash
   end
 
+  # Given a list of taxon ids, samples, and a background, returns the
+  # details for the specified taxa.
   def self.taxa_dict(params, samples, background_id)
     return {} if samples.empty?
     taxon_ids = (params[:taxonIds] || []).map do |x|

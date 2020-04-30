@@ -855,6 +855,9 @@ class SamplesHeatmapView extends React.Component {
   }
 
   async updateTaxa(taxaMissingInfo) {
+    // Given a list of taxa for which details are currently missing,
+    // fetch the information for those taxa from the server and
+    // update the appropriate data structures to include the new taxa.
     this.setState({ loading: true });
 
     const newTaxaInfo = await this.fetchNewTaxa(taxaMissingInfo);
