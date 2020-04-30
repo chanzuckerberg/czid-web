@@ -36,7 +36,8 @@
     .link {
       margin-left: 3px;
       text-decoration: underline;
-      color: white;
+      // override styling in the Link component
+      color: white !important;
     }
   }
 
