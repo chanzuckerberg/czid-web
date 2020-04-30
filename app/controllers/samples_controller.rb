@@ -1269,9 +1269,9 @@ class SamplesController < ApplicationController
 
     taxon_list =
       if params[:taxLevel]
-          taxon_search(query, [params[:taxLevel]])
+        taxon_search(query, [params[:taxLevel]])
       else
-        taxon_list = taxon_search(query, ["species", "genus"])
+        taxon_search(query, ["species", "genus"])
       end
     taxon_list = add_sample_count_to_taxa_with_reads(taxon_list, samples)
     taxon_list = taxon_list.select { |taxon| taxon["sample_count"] > 0 }

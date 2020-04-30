@@ -54,7 +54,6 @@ export default class TaxonSelector extends React.Component {
   render() {
     const {
       addTaxonTrigger,
-      availableTaxa,
       onTaxonSelectionChange,
       onTaxonSelectionClose,
       selectedTaxa,
