@@ -100,26 +100,25 @@ class SearchBoxList extends React.Component {
               )}
             </div>
           )}
-          {filteredOptions.length > 0 &&
-            filteredOptions.map(option => (
-              <div
-                className={cx(cs.listElement, {
-                  active: this.state.selected.has(option.value),
-                })}
-                key={`option-${option.value}`}
-                onClick={() => this.handleOptionClick(option.value)}
-              >
-                <div className={cs.listCheckmark}>
-                  {this.state.selected.has(option.value) && (
-                    <CheckmarkIcon size="small" />
-                  )}
-                </div>
-                <div className={cs.listLabel}>{option.label}</div>
-                {option.count && (
-                  <div className={cs.listElementCount}>{option.count}</div>
+          {filteredOptions.map(option => (
+            <div
+              className={cx(cs.listElement, {
+                active: this.state.selected.has(option.value),
+              })}
+              key={`option-${option.value}`}
+              onClick={() => this.handleOptionClick(option.value)}
+            >
+              <div className={cs.listCheckmark}>
+                {this.state.selected.has(option.value) && (
+                  <CheckmarkIcon size="small" />
                 )}
               </div>
-            ))}
+              <div className={cs.listLabel}>{option.label}</div>
+              {option.count && (
+                <div className={cs.listElementCount}>{option.count}</div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     );

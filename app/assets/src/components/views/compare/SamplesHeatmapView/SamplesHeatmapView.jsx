@@ -859,7 +859,6 @@ class SamplesHeatmapView extends React.Component {
 
     const newTaxaInfo = await this.fetchNewTaxa(taxaMissingInfo);
     const extractedData = this.extractData(newTaxaInfo);
-    console.log(extractedData);
 
     let {
       allData,
