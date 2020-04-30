@@ -48,7 +48,9 @@ export default class DetailsTab extends React.Component {
           bottomContentPadding
           open
         >
-          <div className={cs.description}>{bulkDownload.description}</div>
+          {bulkDownload.description && (
+            <div className={cs.description}>{bulkDownload.description}</div>
+          )}
           <FieldList fields={fields} />
         </Accordion>
         <Accordion
