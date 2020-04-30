@@ -11,8 +11,12 @@ task create_customer_support_download: :environment do
                                        "Please verify your DESTINATION_USER_ID and start over")
   exit 2 unless is_user_correct
 
+  puts "Please enter a user-facing description of the file you wish to transfer:"
+  description = ActionController::Base.helpers.strip_tags(STDIN.gets.strip)
+
   bulk_download = BulkDownload.create(download_type: "customer_support_request",
                                       status: BulkDownload::STATUS_WAITING,
+                                      description: description,
                                       user_id: user.id)
   puts "BulkDownload record of type customer_support_request has been created."
   s3_uri = "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{bulk_download.download_output_key}"
