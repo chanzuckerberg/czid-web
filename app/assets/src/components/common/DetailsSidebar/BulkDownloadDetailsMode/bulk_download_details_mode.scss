@@ -51,7 +51,7 @@
 
 .detailsTab {
   .description {
-    padding: $space-s;
+    padding: 0 $space-s $space-s;
     @include font-body-s;
   }
   .samplesList {
