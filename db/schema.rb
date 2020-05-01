@@ -379,6 +379,8 @@ ActiveRecord::Schema.define(version: 20_200_430_210_801) do
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
+    t.integer "subsample_default", comment: "The default value of subsample for newly uploaded samples. Can be overridden by admin options."
+    t.integer "max_input_fragments_default", comment: "The default value of max_input_fragments for newly uploaded samples. Can be overridden by admin options."
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
