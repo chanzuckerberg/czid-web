@@ -133,6 +133,7 @@
     "webpack-node-externals": "^1.7.2"
   },
   "resolutions": {
+    "//": "Avoids using insecure versions of kind-of as of 2020/05/01",
     "kind-of": "^6.0.3"
   },
   "snyk": true
