@@ -356,7 +356,7 @@ class PipelineRun < ApplicationRecord
 
   def align_viz_available?
     # TODO(tiago): we should not have to access aws. see IDSEQ-2602.
-    align_summary_file = "#{alignment_viz_output_s3_path}.summary"
+    align_summary_file = "#{postprocess_output_s3_path}/align_viz.summary"
     return align_summary_file && get_s3_file(align_summary_file) ? true : false
   end
 
@@ -458,7 +458,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def coverage_viz_output_s3_path
-    "#{postprocess_output_s3_path}/coverage_viz"
+    if step_function?
+      sfn_results_path
+    else
+      "#{postprocess_output_s3_path}/coverage_viz"
+    end
   end
 
   def contigs_fasta_s3_path
@@ -1526,7 +1530,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def alignment_viz_output_s3_path
-    "#{postprocess_output_s3_path}/align_viz"
+    if step_function?
+      sfn_results_path
+    else
+      "#{postprocess_output_s3_path}/align_viz"
+    end
   end
 
   def host_filter_output_s3_path

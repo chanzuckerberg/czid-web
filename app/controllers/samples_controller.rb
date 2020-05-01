@@ -570,7 +570,7 @@ class SamplesController < ApplicationController
 
     editable_project_ids = current_power.updatable_projects.pluck(:id)
 
-    samples_to_upload, samples_invalid_projects = samples_to_upload.partition { |sample| editable_project_ids.include?(Integer(sample["project_id"])) }
+    samples_to_upload, samples_invalid_projects = samples_to_upload.partition { |sample| editable_project_ids.include?(Integer(sample[:project_id])) }
 
     # For invalid projects, don't attempt to upload metadata.
     samples_invalid_projects.each do |sample|
@@ -578,6 +578,25 @@ class SamplesController < ApplicationController
       errors << SampleUploadErrors.invalid_project_id(sample)
     end
 
+    # Apply project defaults such as subsample_default and max_input_fragments_default.
+    # Get all projects that are targeted by this upload.
+    sample_projects = Project.where(id: samples_to_upload.pluck(:project_id).uniq)
+    sample_projects_by_id = Hash[sample_projects.pluck(:id).zip(sample_projects)]
+
+    samples_to_upload.each do |sample_attributes|
+      sample_project = sample_projects_by_id[sample_attributes[:project_id].to_i]
+
+      # If the project has a subsample_default, and subsample was not set in admin options, use the project default.
+      if sample_project.subsample_default.present? && sample_attributes[:subsample].nil?
+        sample_attributes[:subsample] = sample_project.subsample_default
+      end
+      # If the project has a max_input_fragments_default, and max_input_fragments was not set in admin options, use the project default.
+      if sample_project.max_input_fragments_default.present? && sample_attributes[:max_input_fragments].nil?
+        sample_attributes[:max_input_fragments] = sample_project.max_input_fragments_default
+      end
+    end
+
+    # TODO(mark): Remove these whitelist app config parameters once the project defaults rolls out.
     subsample_whitelist_default_subsample = get_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_SUBSAMPLE).to_i
     subsample_whitelist_default_max_input_fragments = get_app_config(AppConfig::SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS).to_i
     subsample_whitelist_project_ids = get_json_app_config(AppConfig::SUBSAMPLE_WHITELIST_PROJECT_IDS)
