@@ -575,16 +575,16 @@ class BulkDownload < ApplicationRecord
 
     Rails.logger.info("Success!")
     Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", ActiveSupport::NumberHelper.number_to_human_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
-    mark_success
+    verify_and_mark_success
   rescue
     update(status: STATUS_ERROR)
     raise
   end
 
-  def mark_success
+  def verify_and_mark_success
     update(status: STATUS_SUCCESS)
 
-    output_file_size = fetch_output_file_size
+    output_file_size = fetch_output_file_size # will raise an error if file is not found
 
     if output_file_size
       update(output_file_size: output_file_size)
@@ -608,7 +608,7 @@ class BulkDownload < ApplicationRecord
 
   def execution_type
     execution_type = BulkDownloadTypesHelper.bulk_download_type(download_type)[:execution_type]
-    if [RESQUE_EXECUTION_TYPE, ECS_EXECUTION_TYPE, MANUAL_EXECUTION_TYPE]
+    if [RESQUE_EXECUTION_TYPE, ECS_EXECUTION_TYPE, MANUAL_UPLOAD_TYPE]
        .include?(execution_type)
       return execution_type
     end

@@ -15,7 +15,10 @@ module BulkDownloadTypesHelper
   RESQUE_EXECUTION_TYPE = "resque".freeze
   VARIABLE_EXECUTION_TYPE = "variable".freeze
   ECS_EXECUTION_TYPE = "ecs".freeze
-  MANUAL_EXECUTION_TYPE = "manual".freeze
+  # Bulk downloads of type MANUAL_UPLOAD_TYPE are not auto-generated and the kickoff function will do nothing.
+  # An admin operator will need to manually upload a file to the s3 location designated by download_output_key before calling mark_success.
+  # See lib/tasks/create_customer_support_download.rake.
+  MANUAL_UPLOAD_TYPE = "manual".freeze
 
   # The "type" value of the bulk download fields is really the field key.
   # There isn't currently anything that specifies what data type the field is.
@@ -25,7 +28,8 @@ module BulkDownloadTypesHelper
     {
       type: CUSTOMER_SUPPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Customer Support Request",
-      execution_type: MANUAL_EXECUTION_TYPE,
+      execution_type: MANUAL_UPLOAD_TYPE,
+      hide_in_creation_modal: true,
     },
     {
       type: SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,

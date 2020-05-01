@@ -11,12 +11,14 @@ export default class DetailsTab extends React.Component {
   render() {
     const { bulkDownload, downloadType } = this.props;
 
-    const fields = [
-      {
+    const fields = [];
+
+    if (bulkDownload.num_samples) {
+      fields.push({
         label: "Samples",
         value: bulkDownload.num_samples,
-      },
-    ];
+      });
+    }
 
     if (downloadType.file_type_display) {
       fields.push({
@@ -53,19 +55,21 @@ export default class DetailsTab extends React.Component {
           )}
           <FieldList fields={fields} />
         </Accordion>
-        <Accordion
-          className={cs.accordion}
-          header={<div className={cs.header}>Samples in this Download</div>}
-          bottomContentPadding
-        >
-          <div className={cs.samplesList}>
-            {bulkDownload.pipeline_runs.map(pipelineRun => (
-              <div key={pipelineRun.id} className={cs.sampleName}>
-                {pipelineRun.sample_name}
-              </div>
-            ))}
-          </div>
-        </Accordion>
+        {bulkDownload.pipeline_runs && (
+          <Accordion
+            className={cs.accordion}
+            header={<div className={cs.header}>Samples in this Download</div>}
+            bottomContentPadding
+          >
+            <div className={cs.samplesList}>
+              {bulkDownload.pipeline_runs.map(pipelineRun => (
+                <div key={pipelineRun.id} className={cs.sampleName}>
+                  {pipelineRun.sample_name}
+                </div>
+              ))}
+            </div>
+          </Accordion>
+        )}
       </div>
     );
   }

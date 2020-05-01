@@ -22,8 +22,8 @@ class BulkDownloadsController < ApplicationController
       end
     end
 
-    # Filter out types that should not be part of the creation UI because they are created offline by admins
-    download_types = download_types.reject { |type| type[:execution_type] == MANUAL_EXECUTION_TYPE }
+    # Filter out types that are explicitly marked as needing to be hidden
+    download_types = download_types.reject { |type| type[:hide_in_creation_modal] }
 
     render json: download_types
   end
@@ -126,7 +126,7 @@ class BulkDownloadsController < ApplicationController
   # POST /bulk_downloads/:id/success/:access_token
   def success_with_token
     # set bulk download and validate access token in before_action
-    @bulk_download.mark_success
+    @bulk_download.verify_and_mark_success
 
     # Clear the access token, so it can no longer be used.
     update_params = { access_token: nil }
