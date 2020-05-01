@@ -341,14 +341,13 @@ const updateUserSetting = (key, value) =>
     value,
   });
 
-const getTaxaDetails = (params, cancelToken) =>
+const getTaxaDetails = params =>
   postWithCSRF("/visualizations/taxa_details.json", {
     sampleIds: params.sampleIds,
     taxonIds: params.taxonIds,
     removedTaxonIds: params.removedTaxonIds,
     updateBackgroundOnly: params.updateBackgroundOnly,
     background: params.background,
-    cancelToken,
   });
 
 export {

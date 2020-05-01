@@ -540,23 +540,16 @@ class SamplesHeatmapView extends React.Component {
   }
 
   fetchBackgroundData() {
-    if (this.lastRequestToken)
-      this.lastRequestToken.cancel("Parameters changed");
-    this.lastRequestToken = axios.CancelToken.source();
-
-    return getTaxaDetails(
-      {
-        sampleIds: this.state.sampleIds,
-        taxonIds: Array.from(this.state.allTaxonIds),
-        // If using client-side filtering, the server should still return info
-        // related to removed taxa in case the user decides to add the taxon back.
-        removedTaxonIds: [],
-        background: this.state.selectedOptions.background,
-        updateBackgroundOnly: true,
-        heatmapTs: this.props.heatmapTs,
-      },
-      this.lastRequestToken.token
-    );
+    return getTaxaDetails({
+      sampleIds: this.state.sampleIds,
+      taxonIds: Array.from(this.state.allTaxonIds),
+      // If using client-side filtering, the server should still return info
+      // related to removed taxa in case the user decides to add the taxon back.
+      removedTaxonIds: [],
+      background: this.state.selectedOptions.background,
+      updateBackgroundOnly: true,
+      heatmapTs: this.props.heatmapTs,
+    });
   }
 
   async fetchBackground() {
@@ -834,21 +827,14 @@ class SamplesHeatmapView extends React.Component {
   };
 
   fetchNewTaxa(taxaMissingInfo) {
-    if (this.lastRequestToken)
-      this.lastRequestToken.cancel("Parameters changed");
-    this.lastRequestToken = axios.CancelToken.source();
-
-    return getTaxaDetails(
-      {
-        sampleIds: this.state.sampleIds,
-        taxonIds: taxaMissingInfo,
-        removedTaxonIds: [],
-        background: this.state.selectedOptions.background,
-        updateBackgroundOnly: false,
-        heatmapTs: this.props.heatmapTs,
-      },
-      this.lastRequestToken.token
-    );
+    return getTaxaDetails({
+      sampleIds: this.state.sampleIds,
+      taxonIds: taxaMissingInfo,
+      removedTaxonIds: [],
+      background: this.state.selectedOptions.background,
+      updateBackgroundOnly: false,
+      heatmapTs: this.props.heatmapTs,
+    });
   }
 
   async updateTaxa(taxaMissingInfo) {
