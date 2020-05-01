@@ -121,12 +121,6 @@ const getSampleTaxons = (params, cancelToken) =>
     cancelToken,
   });
 
-const getAddedTaxaForSamples = (params, cancelToken) =>
-  get("/visualizations/taxa_info.json", {
-    params,
-    cancelToken,
-  });
-
 // TODO(tiago): still needs to accepts field to sort by
 const getSamples = ({
   projectId,
@@ -314,11 +308,11 @@ const getSamplePipelineResults = (sampleId, pipelineVersion) =>
   });
 
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
-const getTaxaWithReadsSuggestions = (query, sampleIds, params) =>
+const getTaxaWithReadsSuggestions = (query, sampleIds, taxLevel) =>
   postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
     query,
     sampleIds,
-    taxLevel: params && params.taxLevel ? params.taxLevel : null,
+    taxLevel,
   });
 
 // Get autocomplete suggestions for "taxa that have contigs" for a set of samples.
@@ -347,11 +341,12 @@ const updateUserSetting = (key, value) =>
     value,
   });
 
-const updateHeatmapBackground = (params, cancelToken) =>
-  postWithCSRF("/visualizations/update_heatmap_background.json", {
+const getTaxaDetails = (params, cancelToken) =>
+  postWithCSRF("/visualizations/taxa_details.json", {
     sampleIds: params.sampleIds,
     taxonIds: params.taxonIds,
     removedTaxonIds: params.removedTaxonIds,
+    updateBackgroundOnly: params.updateBackgroundOnly,
     background: params.background,
     cancelToken,
   });
@@ -381,7 +376,6 @@ export {
   getSampleStats,
   getSamplesV1,
   getSampleTaxons,
-  getAddedTaxaForSamples,
   getSamplePipelineResults,
   getSearchSuggestions,
   getSummaryContigCounts,
@@ -405,5 +399,5 @@ export {
   getTaxaWithContigsSuggestions,
   uploadedByCurrentUser,
   updateUserSetting,
-  updateHeatmapBackground,
+  getTaxaDetails,
 };

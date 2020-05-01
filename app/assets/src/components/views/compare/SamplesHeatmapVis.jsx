@@ -11,7 +11,7 @@ import { getTooltipStyle } from "~/components/utils/tooltip";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
-import TaxonSelector from "~/components/common/Heatmap/TaxonSelector";
+import TaxonSelector from "~/components/common/TaxonSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";

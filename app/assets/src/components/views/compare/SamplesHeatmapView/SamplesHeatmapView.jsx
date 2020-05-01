@@ -7,7 +7,6 @@ import {
   map,
   difference,
   intersection,
-  merge,
   keys,
   assign,
   get,
@@ -22,12 +21,7 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { NarrowContainer } from "~/components/layout";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { processMetadata } from "~utils/metadata";
-import {
-  getSampleTaxons,
-  saveVisualization,
-  updateHeatmapBackground,
-  getAddedTaxaForSamples,
-} from "~/api";
+import { getSampleTaxons, saveVisualization, getTaxaDetails } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
@@ -550,7 +544,7 @@ class SamplesHeatmapView extends React.Component {
       this.lastRequestToken.cancel("Parameters changed");
     this.lastRequestToken = axios.CancelToken.source();
 
-    return updateHeatmapBackground(
+    return getTaxaDetails(
       {
         sampleIds: this.state.sampleIds,
         taxonIds: Array.from(this.state.allTaxonIds),
@@ -558,6 +552,7 @@ class SamplesHeatmapView extends React.Component {
         // related to removed taxa in case the user decides to add the taxon back.
         removedTaxonIds: [],
         background: this.state.selectedOptions.background,
+        updateBackgroundOnly: true,
         heatmapTs: this.props.heatmapTs,
       },
       this.lastRequestToken.token
@@ -843,11 +838,13 @@ class SamplesHeatmapView extends React.Component {
       this.lastRequestToken.cancel("Parameters changed");
     this.lastRequestToken = axios.CancelToken.source();
 
-    return getAddedTaxaForSamples(
+    return getTaxaDetails(
       {
         sampleIds: this.state.sampleIds,
         taxonIds: taxaMissingInfo,
+        removedTaxonIds: [],
         background: this.state.selectedOptions.background,
+        updateBackgroundOnly: false,
         heatmapTs: this.props.heatmapTs,
       },
       this.lastRequestToken.token

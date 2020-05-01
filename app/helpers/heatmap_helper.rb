@@ -121,7 +121,7 @@ module HeatmapHelper
     )
   end
 
-  def self.update_background_taxon_metrics(params, samples, background_id, client_filtering_enabled: false)
+  def self.taxa_details(params, samples, background_id, update_background_only, client_filtering_enabled: false)
     taxon_ids = params[:taxonIds] || []
     taxon_ids = taxon_ids.compact
 
@@ -129,7 +129,7 @@ module HeatmapHelper
     removed_taxon_ids = removed_taxon_ids.compact
 
     taxon_ids -= removed_taxon_ids
-    results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, [], background_id, update_background_only: true)
+    results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, [], background_id, update_background_only: update_background_only)
 
     HeatmapHelper.samples_taxons_details(
       results_by_pr,
@@ -517,32 +517,6 @@ module HeatmapHelper
         AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
         AND taxon_counts.count_type IN ('NT', 'NR')
         AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_hash
-  end
-
-  # Given a list of taxon ids, samples, and a background, returns the
-  # details for the specified taxa.
-  def self.taxa_dict(params, samples, background_id)
-    return {} if samples.empty?
-    taxon_ids = (params[:taxonIds] || []).map do |x|
-      begin
-        Integer(x)
-      rescue ArgumentError
-        nil
-      end
-    end
-
-    unless taxon_ids.empty?
-      results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, [], background_id)
-    end
-
-    HeatmapHelper.samples_taxons_details(
-      results_by_pr,
-      samples,
-      taxon_ids,
-      1,
-      [],
-      client_filtering_enabled: true
-    )
   end
 
   def self.only_species_or_genus_counts!(tax_2d, species_selected)

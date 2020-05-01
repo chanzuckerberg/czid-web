@@ -6,7 +6,7 @@ import { ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
 import { getTaxaWithReadsSuggestions } from "~/api";
 
-import cs from "./metadata_selector.scss";
+import cs from "./Heatmap/metadata_selector.scss";
 
 const AUTOCOMPLETE_DEBOUNCE_DELAY = 200;
 
@@ -29,7 +29,7 @@ export default class TaxonSelector extends React.Component {
     const searchResults = await getTaxaWithReadsSuggestions(
       query,
       Array.from(sampleIds),
-      { taxLevel }
+      taxLevel
     );
 
     // If the query has since changed, discard the response.

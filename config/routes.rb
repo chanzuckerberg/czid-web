@@ -116,8 +116,7 @@ Rails.application.routes.draw do
   get 'phylo_trees/validate_name', to: 'phylo_trees#validate_name'
 
   get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
-  post 'visualizations/update_heatmap_background.json', to: 'visualizations#update_heatmap_background'
-  get 'visualizations/taxa_info.json', to: 'visualizations#taxa_info'
+  post 'visualizations/taxa_details.json', to: 'visualizations#taxa_details'
   get 'visualizations/heatmap_metrics.json', to: 'visualizations#heatmap_metrics'
   get 'visualizations/download_heatmap', to: 'visualizations#download_heatmap'
   post 'visualizations/:type/save', to: 'visualizations#save'
