@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_423_161_207) do
+ActiveRecord::Schema.define(version: 20_200_501_044_034) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -378,6 +378,8 @@ ActiveRecord::Schema.define(version: 20_200_423_161_207) do
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
+    t.integer "subsample_default", comment: "The default value of subsample for newly uploaded samples. Can be overridden by admin options."
+    t.integer "max_input_fragments_default", comment: "The default value of max_input_fragments for newly uploaded samples. Can be overridden by admin options."
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
