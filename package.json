@@ -1,5 +1,7 @@
 {
   "name": "idseq-web",
+  "license": "MIT",
+  "repository": "https://github.com/chanzuckerberg/idseq-web",
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
     "start": "npm install --no-optional && webpack --config webpack.config.dev.js --watch",
@@ -53,7 +55,6 @@
     "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-react": "^7.10.0",
     "eslint-plugin-standard": "^3.0.1",
-    "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^1.1.11",
     "husky": "^1.1.2",
     "import-glob-loader": "^1.1.0",
@@ -91,7 +92,7 @@
     "fast-deep-equal": "^2.0.1",
     "font-awesome": "^4.7.0",
     "fstream": "^1.0.12",
-    "jquery": "^3.4.0",
+    "jquery": "^3.5.0",
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.13",
     "materialize-css": "^0.100.2",
@@ -132,9 +133,8 @@
     "webpack-node-externals": "^1.7.2"
   },
   "resolutions": {
-    "eslint-scope": "3.7.1",
-    "//": "Avoids use of insecure version of minimist as of 2020/03/30. Revisit.",
-    "minimist": "^1.2.5"
+    "//": "Avoids using insecure versions of kind-of as of 2020/05/01",
+    "kind-of": "^6.0.3"
   },
   "snyk": true
 }
