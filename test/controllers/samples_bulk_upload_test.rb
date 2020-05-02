@@ -249,7 +249,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     sign_in @user
 
     post bulk_upload_with_metadata_samples_url, params: {
-      client: "0.8.7",
+      client: "0.8.8",
       metadata: {
         "RR004_water_2_S23A" => {
           'sex' => 'Female',
@@ -293,7 +293,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     sign_in @user
 
     post bulk_upload_with_metadata_samples_url, params: {
-      client: "0.8.7",
+      client: "0.8.8",
       metadata: {
         "RR004_water_2_S23A" => {
           'sex' => 'Female',
@@ -394,7 +394,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     assert !@metadata_validation_project.metadata_fields.include?(@core_field)
 
     post bulk_upload_with_metadata_samples_url, params: {
-      client: "0.8.7",
+      client: "0.8.8",
       metadata: {
         "RR004_water_2_S23A" => {
           'sample_type' => 'blood',
@@ -445,7 +445,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     assert @host_genome_human.metadata_fields.pluck(:name).include?("Custom Field 2")
 
     post bulk_upload_with_metadata_samples_url, params: {
-      client: "0.8.7",
+      client: "0.8.8",
       metadata: {
         "RR004_water_2_S23B" => {
           'sample_type' => 'blood',
@@ -498,7 +498,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     assert_equal 0, MetadataField.where(name: "Custom Field").length
 
     post bulk_upload_with_metadata_samples_url, params: {
-      client: "0.8.7",
+      client: "0.8.8",
       metadata: {
         "Human Sample" => {
           'sample_type' => 'blood',
@@ -576,7 +576,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     sign_in @user_nonadmin
 
     post bulk_upload_with_metadata_samples_url, params: {
-      client: "0.8.7",
+      client: "0.8.8",
       metadata: {
         "RR004_water_2_S23A" => {
           'sample_type' => 'blood',
@@ -620,7 +620,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     sign_in @user_nonadmin
 
     post bulk_upload_with_metadata_samples_url, params: {
-      client: "0.8.7",
+      client: "0.8.8",
       metadata: {
         "RR004_water_2_S23A" => {
           'sample_type' => 'blood',
@@ -664,7 +664,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     sign_in @user_nonadmin
 
     post bulk_upload_with_metadata_samples_url, params: {
-      client: "0.8.7",
+      client: "0.8.8",
       metadata: {
         "RR004_water_2_S23A" => {
           'sample_type' => 'blood',
