@@ -234,7 +234,7 @@ class Metadatum < ApplicationRecord
       # The unique key is on sample and metadata.key, so the value fields will
       # be updated if the key exists.
       update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value, :location_id]
-      results = Metadatum.import to_create, on_duplicate_key_update: update_keys
+      results = Metadatum.bulk_import to_create, on_duplicate_key_update: update_keys
       results.failed_instances.each do |model|
         # Show the errors from ActiveRecord
         msg = model.errors.full_messages[0]

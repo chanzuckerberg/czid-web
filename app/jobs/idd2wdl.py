@@ -107,6 +107,13 @@ for step in dag["steps"]:
             if attr_name.startswith("output_") and attr_name.endswith("_file"):
                 wdl_step_output += '\n    File? {} = "{}"'.format(attr_name, attr_value)
                 unaccounted_workflow_outputs.append("    File? {name} = RunStar.{name}".format(name=attr_name))
+    elif task_name(step) == "GenerateCoverageViz":
+        wdl_step_output += '\n    Array[File] coverage_viz = glob("coverage_viz/*_coverage_viz.json")'
+        unaccounted_workflow_outputs.append("    Array[File] coverage_viz = GenerateCoverageViz.coverage_viz")
+    elif task_name(step) == "GenerateAlignmentViz":
+        wdl_step_output += '\n    Array[File] align_viz = glob("align_viz/*.align_viz.json")'
+        unaccounted_workflow_outputs.append("    Array[File] align_viz = GenerateAlignmentViz.align_viz")
+
     print("""
 task {task_name} {{
   runtime {{
