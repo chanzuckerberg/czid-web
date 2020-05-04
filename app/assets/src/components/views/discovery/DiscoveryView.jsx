@@ -29,13 +29,19 @@ import { getSearchSuggestions } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { get } from "~/api/core";
 import { openUrl } from "~utils/links";
+import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
+import BannerProjects from "~ui/icons/BannerProjects";
+import BannerSamples from "~ui/icons/BannerSamples";
+import BannerVisualizations from "~ui/icons/BannerVisualizations";
+import { UserContext } from "~/components/common/UserContext";
 
 import DiscoveryHeader from "./DiscoveryHeader";
+import ModalFirstTimeUser from "./ModalFirstTimeUser";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
@@ -51,7 +57,7 @@ import {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
 } from "./discovery_api";
-import NoResultsBanner from "./NoResultsBanner";
+import InfoBanner from "./InfoBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 
 import cs from "./discovery_view.scss";
@@ -75,8 +81,8 @@ import cs from "./discovery_view.scss";
 //   - load (A) non-filtered dimensions, (B) filtered dimensions and (C) filtered stats
 //     (synchronous data not needed for now because we do not show projects and visualizations)
 class DiscoveryView extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
 
     const { projectId } = this.props;
 
@@ -97,9 +103,10 @@ class DiscoveryView extends React.Component {
       {
         currentDisplay: "table",
         currentTab:
-          projectId || this.props.domain === "all_data"
+          projectId || this.props.domain === DISCOVERY_DOMAIN_ALL_DATA
             ? "samples"
             : "projects",
+        emptyStateModalOpen: this.isFirstTimeUser(),
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredProjectCount: null,
@@ -130,11 +137,15 @@ class DiscoveryView extends React.Component {
         selectedSampleIds: new Set(),
         showFilters: true,
         showStats: true,
+        userDataCounts: null,
       },
       localState,
       sessionState,
       urlState
     );
+
+    this.loadUserDataStats();
+
     this.dataLayer = new DiscoveryDataLayer(this.props.domain);
     const conditions = this.getConditions();
     this.samples = this.dataLayer.samples.createView({
@@ -244,6 +255,11 @@ class DiscoveryView extends React.Component {
 
     // We want to persist some options when user returns to the page on a different session
     localStorage.setItem("DiscoveryViewOptions", JSON.stringify(localState));
+  };
+
+  isFirstTimeUser = () => {
+    const { firstSignIn } = this.context || {};
+    return firstSignIn && !localStorage.getItem("DiscoveryViewSeenBefore");
   };
 
   preparedFilters = () => {
@@ -477,6 +493,18 @@ class DiscoveryView extends React.Component {
         this.handleMapLevelChange(mapLevel);
       }
     );
+  };
+
+  loadUserDataStats = async () => {
+    const stats = await getDiscoveryStats({
+      domain: DISCOVERY_DOMAIN_MY_DATA,
+    });
+    this.setState({
+      userDataCounts: {
+        sampleCount: stats.sampleStats.count,
+        projectCount: stats.sampleStats.projectCount,
+      },
+    });
   };
 
   computeTabs = () => {
@@ -1012,6 +1040,104 @@ class DiscoveryView extends React.Component {
     }
   };
 
+  handleModalFirstTimeUserClose = () => {
+    this.setState({
+      emptyStateModalOpen: false,
+    });
+  };
+
+  renderNoDataBanners = () => {
+    const { currentTab, emptyStateModalOpen, userDataCounts } = this.state;
+    const { visualizations } = this;
+
+    if (!userDataCounts) return null;
+
+    if (emptyStateModalOpen) {
+      localStorage.setItem("DiscoveryViewSeenBefore", "1");
+      return (
+        <ModalFirstTimeUser onClose={this.handleModalFirstTimeUserClose} />
+      );
+    }
+
+    switch (currentTab) {
+      case "projects":
+        if (userDataCounts.projectCount === 0) {
+          return (
+            <div className={cs.noDataBannerFlexContainer}>
+              <InfoBanner
+                className={cs.noDataBannerContainer}
+                icon={<BannerProjects />}
+                link={{
+                  href: "/samples/upload",
+                  text: "Upload your data",
+                }}
+                message="You will see your projects here after you upload data or when you are invited to a project."
+                title="Projects"
+                type="no_projects"
+              />
+            </div>
+          );
+        }
+        break;
+      case "samples":
+        if (userDataCounts.sampleCount === 0) {
+          return (
+            <div className={cs.noDataBannerFlexContainer}>
+              <InfoBanner
+                className={cs.noDataBannerContainer}
+                icon={<BannerSamples />}
+                link={{
+                  href: "/samples/upload",
+                  text: "Upload your data",
+                }}
+                message="You will see your samples here after you upload data or when you are invited to a project."
+                title="Samples"
+                type="no_samples"
+              />
+            </div>
+          );
+        }
+        break;
+      case "visualizations":
+        // visualizations are not filtered by conditions (not supported at this time)
+        // thus we use the object collection view from DataDiscoveryDataLayer directly
+        // and we never show the no search results banner.
+        if (!visualizations.isLoading() && visualizations.length === 0) {
+          return (
+            <div className={cs.noDataBannerFlexContainer}>
+              <InfoBanner
+                className={cs.noDataBannerContainer}
+                icon={<BannerVisualizations />}
+                link={{
+                  href: VISUALIZATIONS_DOC_LINK,
+                  text: "Learn about Heatmaps",
+                  external: true,
+                }}
+                message="You will see your saved Heatmaps and Phylogenetic Trees here. Create them on the Samples tab."
+                title="Visualizations"
+                type="no_visualizations"
+              />
+            </div>
+          );
+        }
+        break;
+    }
+    return null;
+  };
+
+  renderNoSearchResultsBanner = type => {
+    return (
+      <div className={cs.noDataBannerFlexContainer}>
+        <InfoBanner
+          className={cs.noResultsContainer}
+          message="Sorry, no results match your search."
+          suggestion="Try another search"
+          type={type}
+        />
+      </div>
+    );
+  };
+
   renderCenterPaneContent = () => {
     const {
       currentDisplay,
@@ -1019,15 +1145,14 @@ class DiscoveryView extends React.Component {
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
+      projectId,
       sampleActiveColumns,
       selectableSampleIds,
       selectedSampleIds,
-      projectId,
     } = this.state;
 
     const { admin, allowedFeatures, mapTilerKey } = this.props;
     const { projects, samples, visualizations } = this;
-
     return (
       <React.Fragment>
         {currentTab === "projects" && (
@@ -1055,12 +1180,8 @@ class DiscoveryView extends React.Component {
             </div>
             {!projects.length &&
               !projects.isLoading() &&
-              currentDisplay === "table" && (
-                <NoResultsBanner
-                  className={cs.noResultsContainer}
-                  type="projects"
-                />
-              )}
+              currentDisplay === "table" &&
+              this.renderNoSearchResultsBanner("projects")}
           </div>
         )}
         {currentTab === "samples" && (
@@ -1095,12 +1216,8 @@ class DiscoveryView extends React.Component {
             </div>
             {!samples.length &&
               !samples.isLoading() &&
-              currentDisplay === "table" && (
-                <NoResultsBanner
-                  className={cs.noResultsContainer}
-                  type="samples"
-                />
-              )}
+              currentDisplay === "table" &&
+              this.renderNoSearchResultsBanner("samples")}
           </div>
         )}
         {currentTab === "visualizations" && (
@@ -1110,12 +1227,8 @@ class DiscoveryView extends React.Component {
             </div>
             {!visualizations.length &&
               !visualizations.isLoading() &&
-              currentDisplay === "table" && (
-                <NoResultsBanner
-                  className={cs.noResultsContainer}
-                  type="visualizations"
-                />
-              )}
+              currentDisplay === "table" &&
+              this.renderNoSearchResultsBanner("visualizations")}
           </div>
         )}
       </React.Fragment>
@@ -1123,7 +1236,7 @@ class DiscoveryView extends React.Component {
   };
 
   renderRightPane = () => {
-    const { allowedFeatures } = this.props;
+    const { allowedFeatures, domain } = this.props;
     const {
       currentDisplay,
       currentTab,
@@ -1147,6 +1260,7 @@ class DiscoveryView extends React.Component {
       sampleDimensions,
       search,
       showStats,
+      userDataCounts,
     } = this.state;
     const filterCount = this.getFilterCount();
     const computedProjectDimensions =
@@ -1207,6 +1321,11 @@ class DiscoveryView extends React.Component {
             <DiscoverySidebar
               allowedFeatures={allowedFeatures}
               currentTab={currentTab}
+              noDataAvailable={
+                domain === DISCOVERY_DOMAIN_MY_DATA &&
+                userDataCounts &&
+                !userDataCounts.projectCount
+              }
               loading={loading}
               onFilterClick={this.handleMetadataFilterClick}
               projectDimensions={computedProjectDimensions}
@@ -1235,6 +1354,7 @@ class DiscoveryView extends React.Component {
       search,
       showFilters,
       showStats,
+      userDataCounts,
     } = this.state;
     const { domain, allowedFeatures } = this.props;
 
@@ -1287,16 +1407,21 @@ class DiscoveryView extends React.Component {
               )}
           </div>
           <div className={cs.centerPane}>
-            {currentDisplay === "map" &&
-            ["samples", "projects"].includes(currentTab) ? (
-              <div className={cs.viewContainer}>
-                {this.renderCenterPaneContent()}
-              </div>
-            ) : (
-              <NarrowContainer className={cs.viewContainer}>
-                {this.renderCenterPaneContent()}
-              </NarrowContainer>
-            )}
+            {userDataCounts &&
+              (currentDisplay === "map" &&
+              ["samples", "projects"].includes(currentTab) ? (
+                <div className={cs.viewContainer}>
+                  {(domain === DISCOVERY_DOMAIN_MY_DATA &&
+                    this.renderNoDataBanners()) ||
+                    this.renderCenterPaneContent()}
+                </div>
+              ) : (
+                <NarrowContainer className={cs.viewContainer}>
+                  {(domain === DISCOVERY_DOMAIN_MY_DATA &&
+                    this.renderNoDataBanners()) ||
+                    this.renderCenterPaneContent()}
+                </NarrowContainer>
+              ))}
           </div>
           {this.renderRightPane()}
         </div>
@@ -1316,5 +1441,7 @@ DiscoveryView.propTypes = {
   mapTilerKey: PropTypes.string,
   admin: PropTypes.bool,
 };
+
+DiscoveryView.contextType = UserContext;
 
 export default DiscoveryView;

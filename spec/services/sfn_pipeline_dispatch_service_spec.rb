@@ -9,7 +9,7 @@ S3_DAG_JSON_KEY = "#{S3_SAMPLES_KEY_PREFIX}/sfn-wdl/%<stage_name>s.dag.json".fre
 S3_WDL_KEY = "#{S3_SAMPLES_KEY_PREFIX}/sfn-wdl/%<stage_name>s.wdl".freeze
 S3_WDL_PATH = "s3://#{FAKE_SAMPLES_BUCKET}/#{S3_WDL_KEY}".freeze
 SFN_NAME = "idseq-test-%<project_id>s-%<sample_id>s-%<pipeline_run_id>s-%<time>s".freeze
-FAKE_ACCOUNT_ID = "fake-account-id".freeze
+FAKE_DOCKER_IMAGE_ID = "123456789012.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows".freeze
 FAKE_REGION = "fake-region".freeze
 FAKE_SFN_ARN = "fake:sfn:arn".freeze
 FAKE_SFN_EXECUTION_ARN = "fake:sfn:execution:arn".freeze
@@ -17,7 +17,7 @@ PIPELINE_RUN_STAGE_NAMES = PipelineRunStage::STAGE_INFO.values.pluck(:dag_name)
 FAKE_WDL_VERSION = "999".freeze
 FAKE_DAG_VERSION = "9.999".freeze
 FAKE_S3 = Aws::S3::Client.new(stub_responses: { put_object: {} })
-FAKE_STS_CLIENT = Aws::STS::Client.new(stub_responses: { get_caller_identity: { account: FAKE_ACCOUNT_ID } })
+FAKE_STS_CLIENT = Aws::STS::Client.new(stub_responses: { get_caller_identity: { account: "123456789012" } })
 FAKE_STATES_CLIENT = Aws::States::Client.new(
   stub_responses: {
     start_execution: {
@@ -139,7 +139,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
             "app/jobs/idd2wdl.py", anything,
             "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
             "--output-prefix", anything,
-            "--aws-account-id", FAKE_ACCOUNT_ID,
+            "--docker-image-id", FAKE_DOCKER_IMAGE_ID,
             "--deployment-env", "test",
             "--aws-region", FAKE_REGION,
             "--wdl-version", FAKE_WDL_VERSION,
@@ -226,7 +226,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
               "app/jobs/idd2wdl.py", anything,
               "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
               "--output-prefix", anything,
-              "--aws-account-id", FAKE_ACCOUNT_ID,
+              "--docker-image-id", FAKE_DOCKER_IMAGE_ID,
               "--deployment-env", "test",
               "--aws-region", FAKE_REGION,
               "--wdl-version", FAKE_WDL_VERSION,

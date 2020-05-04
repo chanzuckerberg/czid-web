@@ -223,15 +223,21 @@ $genome-viz-spacing: $space-xxs;
   }
 }
 
-.loadingContainer {
+.loadingContainer,
+.unknownErrorContainer {
   display: flex;
   align-items: center;
   justify-content: center;
   height: $body-height;
   color: $medium-grey;
 
-  .loadingMessage {
+  .loadingMessage,
+  .unknownErrorMessage {
     margin-bottom: 20px;
+  }
+
+  .helpLink {
+    color: $primary-light !important;
   }
 
   .loadingIcon {
