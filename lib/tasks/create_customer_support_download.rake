@@ -31,7 +31,7 @@ task create_customer_support_download: :environment do
   end
 
   begin
-    bulk_download.mark_success
+    bulk_download.verify_and_mark_success
     puts "Success! You can now notify the user that the file is available on their Downloads page."
   rescue
     bulk_download.destroy
