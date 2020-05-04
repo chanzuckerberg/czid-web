@@ -121,7 +121,7 @@ module HeatmapHelper
     )
   end
 
-  def self.update_background_taxon_metrics(params, samples, background_id, client_filtering_enabled: false)
+  def self.taxa_details(params, samples, background_id, update_background_only, client_filtering_enabled: false)
     taxon_ids = params[:taxonIds] || []
     taxon_ids = taxon_ids.compact
 
@@ -129,7 +129,7 @@ module HeatmapHelper
     removed_taxon_ids = removed_taxon_ids.compact
 
     taxon_ids -= removed_taxon_ids
-    results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, [], background_id, update_background_only: true)
+    results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, [], background_id, update_background_only: update_background_only)
 
     HeatmapHelper.samples_taxons_details(
       results_by_pr,

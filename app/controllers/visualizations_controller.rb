@@ -199,12 +199,27 @@ class VisualizationsController < ApplicationController
     render json: @sample_taxons_dict
   end
 
-  def update_heatmap_background
-    @sample_taxons_dict = HeatmapHelper.update_background_taxon_metrics(
+  # Given a list of taxon ids, samples, and a background, returns the
+  # details for the specified taxa.
+  # If update_background_only is true, then returned object will only include
+  # metrics affected by the background (e.g. z-score).
+  def taxa_details
+    update_background_only = params[:updateBackgroundOnly]
+    @sample_taxons_dict = HeatmapHelper.taxa_details(
       params,
       samples_for_heatmap,
       background_for_heatmap,
+      update_background_only,
       client_filtering_enabled: current_user.allowed_feature?("heatmap_filter_fe")
+    )
+    render json: @sample_taxons_dict
+  end
+
+  def taxa_info
+    @sample_taxons_dict = HeatmapHelper.taxa_dict(
+      params,
+      samples_for_heatmap,
+      background_for_heatmap
     )
     render json: @sample_taxons_dict
   end
