@@ -1,5 +1,5 @@
 // This file needs to be in sync with webpack.config.prod.js. The first file
-// should contain should contain CSS from node_modules and the second file
+// should contain CSS from node_modules and the second file
 // idseq-written CSS. The order of requires is important!
 
 //= require vendors~main.bundle.min.css
