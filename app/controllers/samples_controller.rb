@@ -993,9 +993,6 @@ class SamplesController < ApplicationController
 
     if contigs_fasta_s3_path
       filename = @sample.name + '_contigs.fasta'
-      bucket, key = parse_s3_path(contigs_fasta_s3_path)
-      pp bucket
-      pp key
       @contigs_fasta_url = get_presigned_s3_url(contigs_fasta_s3_path, filename)
       if @contigs_fasta_url
         redirect_to @contigs_fasta_url
