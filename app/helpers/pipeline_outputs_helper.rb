@@ -189,6 +189,26 @@ module PipelineOutputsHelper
     end
   end
 
+  def get_presigned_s3_url(s3_path, filename)
+    s3 = Aws::S3::Resource.new(client: Client)
+    uri_parts = s3_path.split("/", 4)
+    bucket_name = uri_parts[2]
+    key = uri_parts[3]
+    begin
+      bucket_exists = Client.head_bucket({bucket: bucket_name})
+      if bucket_exists 
+        bucket = s3.bucket(bucket_name)
+        if bucket.object(key).exists?
+          object = bucket.object(key)
+          url = object.presigned_url(:get, response_content_disposition: "attachment; filename=#{filename}")
+          return url
+        end
+      end
+    rescue
+      return nil
+    end
+  end
+
   def status_display_helper(states_by_output_hash, results_finalized_var)
     # Status display for the frontend.
     h = states_by_output_hash

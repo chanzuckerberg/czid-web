@@ -991,8 +991,13 @@ class SamplesController < ApplicationController
     contigs_fasta_s3_path = pr.contigs_fasta_s3_path
 
     if contigs_fasta_s3_path
-      @contigs_fasta = get_s3_file(contigs_fasta_s3_path)
-      send_data @contigs_fasta, filename: @sample.name + '_contigs.fasta'
+      filename =  @sample.name + '_contigs.fasta'
+      @contigs_fasta_url = get_presigned_s3_url(contigs_fasta_s3_path, filename)
+      if @contigs_fasta_url
+        redirect_to @contigs_fasta_url
+      else
+        send_data nil, filename: filename
+      end
     else
       render json: {
         error: "contigs fasta file does not exist for this sample",
@@ -1056,14 +1061,24 @@ class SamplesController < ApplicationController
 
   def nonhost_fasta
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    @nonhost_fasta = get_s3_file(pr.annotated_fasta_s3_path)
-    send_data @nonhost_fasta, filename: @sample.name + '_nonhost.fasta'
+    filename =  @sample.name + '_nonhost.fasta'
+    @nonhost_fasta_url = get_presigned_s3_url(pr.annotated_fasta_s3_path, filename)
+    if @nonhost_fasta_url
+      redirect_to @nonhost_fasta_url
+    else
+      send_data nil, filename: filename
+    end
   end
 
   def unidentified_fasta
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    @unidentified_fasta = get_s3_file(pr.unidentified_fasta_s3_path)
-    send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
+    filename =  @sample.name + 'unidentified.fasta'
+    @unidentified_fasta_url = get_presigned_s3_url(pr.unidentified_fasta_s3_path, filename)
+    if @unidentified_fasta_url
+      redirect_to @unidentified_fasta_url
+    else
+      send_data nil, filename: filename
+    end
   end
 
   def raw_results_folder
