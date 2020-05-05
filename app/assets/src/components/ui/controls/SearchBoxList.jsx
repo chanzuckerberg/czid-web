@@ -64,6 +64,15 @@ class SearchBoxList extends React.Component {
   }
 
   render() {
+    const { onFilterChange } = this.props;
+    let { filteredOptions } = this.state;
+    if (onFilterChange) {
+      filteredOptions = this.sortOptions(
+        this.props.options,
+        this.props.selected
+      );
+    }
+
     return (
       <div className={cs.searchBoxList}>
         {this.props.title && <div className={cs.title}>{this.props.title}</div>}
@@ -73,7 +82,7 @@ class SearchBoxList extends React.Component {
             className={cs.searchBox}
             icon="search"
             placeholder="Search"
-            onChange={this.handleFilterChange}
+            onChange={onFilterChange || this.handleFilterChange}
           />
         </div>
         <div className={cs.listBox}>
@@ -91,7 +100,7 @@ class SearchBoxList extends React.Component {
               )}
             </div>
           )}
-          {this.state.filteredOptions.map(option => (
+          {filteredOptions.map(option => (
             <div
               className={cx(cs.listElement, {
                 active: this.state.selected.has(option.value),
@@ -129,6 +138,7 @@ SearchBoxList.propTypes = {
     PropTypes.array,
   ]),
   onChange: PropTypes.func,
+  onFilterChange: PropTypes.func,
   title: PropTypes.string,
   labelTitle: PropTypes.string,
   countTitle: PropTypes.string,

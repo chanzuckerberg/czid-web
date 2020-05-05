@@ -308,10 +308,11 @@ const getSamplePipelineResults = (sampleId, pipelineVersion) =>
   });
 
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
-const getTaxaWithReadsSuggestions = (query, sampleIds) =>
+const getTaxaWithReadsSuggestions = (query, sampleIds, taxLevel) =>
   postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
     query,
     sampleIds,
+    taxLevel,
   });
 
 // Get autocomplete suggestions for "taxa that have contigs" for a set of samples.
@@ -340,13 +341,13 @@ const updateUserSetting = (key, value) =>
     value,
   });
 
-const updateHeatmapBackground = (params, cancelToken) =>
-  postWithCSRF("/visualizations/update_heatmap_background.json", {
+const getTaxaDetails = params =>
+  postWithCSRF("/visualizations/taxa_details.json", {
     sampleIds: params.sampleIds,
     taxonIds: params.taxonIds,
     removedTaxonIds: params.removedTaxonIds,
+    updateBackgroundOnly: params.updateBackgroundOnly,
     background: params.background,
-    cancelToken,
   });
 
 export {
@@ -397,5 +398,5 @@ export {
   getTaxaWithContigsSuggestions,
   uploadedByCurrentUser,
   updateUserSetting,
-  updateHeatmapBackground,
+  getTaxaDetails,
 };

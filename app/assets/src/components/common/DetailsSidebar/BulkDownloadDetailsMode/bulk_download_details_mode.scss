@@ -50,6 +50,10 @@
 }
 
 .detailsTab {
+  .description {
+    padding: 0 $space-s $space-s;
+    @include font-body-s;
+  }
   .samplesList {
     max-height: 360px;
     overflow: auto;
