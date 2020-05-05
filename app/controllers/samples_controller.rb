@@ -1072,7 +1072,7 @@ class SamplesController < ApplicationController
 
   def unidentified_fasta
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    filename = @sample.name + 'unidentified.fasta'
+    filename = @sample.name + '_unidentified.fasta'
     @unidentified_fasta_url = get_presigned_s3_url(pr.unidentified_fasta_s3_path, filename)
     if @unidentified_fasta_url
       redirect_to @unidentified_fasta_url
