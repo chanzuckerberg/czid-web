@@ -785,9 +785,9 @@ class SamplesHeatmapView extends React.Component {
                 allData[metric.value][taxon["index"]]
               );
             });
-            count++;
           }
         }
+        count++;
       }
     });
 
