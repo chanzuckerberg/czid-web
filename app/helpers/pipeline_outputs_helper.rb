@@ -195,8 +195,8 @@ module PipelineOutputsHelper
     bucket_name = uri_parts[2]
     key = uri_parts[3]
     begin
-      bucket_exists = Client.head_bucket({bucket: bucket_name})
-      if bucket_exists 
+      bucket_exists = Client.head_bucket( bucket: bucket_name )
+      if bucket_exists
         bucket = s3.bucket(bucket_name)
         if bucket.object(key).exists?
           object = bucket.object(key)

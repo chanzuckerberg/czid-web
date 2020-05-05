@@ -991,7 +991,7 @@ class SamplesController < ApplicationController
     contigs_fasta_s3_path = pr.contigs_fasta_s3_path
 
     if contigs_fasta_s3_path
-      filename =  @sample.name + '_contigs.fasta'
+      filename = @sample.name + '_contigs.fasta'
       @contigs_fasta_url = get_presigned_s3_url(contigs_fasta_s3_path, filename)
       if @contigs_fasta_url
         redirect_to @contigs_fasta_url
@@ -1061,7 +1061,7 @@ class SamplesController < ApplicationController
 
   def nonhost_fasta
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    filename =  @sample.name + '_nonhost.fasta'
+    filename = @sample.name + '_nonhost.fasta'
     @nonhost_fasta_url = get_presigned_s3_url(pr.annotated_fasta_s3_path, filename)
     if @nonhost_fasta_url
       redirect_to @nonhost_fasta_url
@@ -1072,7 +1072,7 @@ class SamplesController < ApplicationController
 
   def unidentified_fasta
     pr = select_pipeline_run(@sample, params[:pipeline_version])
-    filename =  @sample.name + 'unidentified.fasta'
+    filename = @sample.name + 'unidentified.fasta'
     @unidentified_fasta_url = get_presigned_s3_url(pr.unidentified_fasta_s3_path, filename)
     if @unidentified_fasta_url
       redirect_to @unidentified_fasta_url
