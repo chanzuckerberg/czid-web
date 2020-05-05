@@ -57,7 +57,7 @@ class SamplesController < ApplicationController
   PAGE_SIZE = 30
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
-  MIN_CLI_VERSION = '0.8.7'.freeze
+  MIN_CLI_VERSION = '0.8.8'.freeze
   CLI_DEPRECATION_MSG = "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git` or with sudo + pip2/pip3 depending on your setup to update and try again.".freeze
 
   SAMPLE_DEFAULT_FIELDS = [
@@ -1286,7 +1286,12 @@ class SamplesController < ApplicationController
       return
     end
 
-    taxon_list = taxon_search(query, ["species", "genus"])
+    taxon_list =
+      if params[:taxLevel]
+        taxon_search(query, [params[:taxLevel]])
+      else
+        taxon_search(query, ["species", "genus"])
+      end
     taxon_list = add_sample_count_to_taxa_with_reads(taxon_list, samples)
     taxon_list = taxon_list.select { |taxon| taxon["sample_count"] > 0 }
 
