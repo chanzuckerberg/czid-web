@@ -8,6 +8,7 @@ class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
   include ReportsHelper
+  include S3Helper
 
   ########################################
   # Note to developers:
@@ -992,11 +993,17 @@ class SamplesController < ApplicationController
 
     if contigs_fasta_s3_path
       filename = @sample.name + '_contigs.fasta'
+      bucket, key = parse_s3_path(contigs_fasta_s3_path)
+      pp bucket
+      pp key
       @contigs_fasta_url = get_presigned_s3_url(contigs_fasta_s3_path, filename)
       if @contigs_fasta_url
         redirect_to @contigs_fasta_url
       else
-        send_data nil, filename: filename
+        LogUtil.log_err_and_airbrake("Contigs fasta file does not exist for sample #{@sample.id}")
+        render json: {
+          error: "contigs fasta file does not exist for this sample",
+        }
       end
     else
       render json: {
@@ -1015,9 +1022,7 @@ class SamplesController < ApplicationController
 
   # TODO(mark): Factor out into S3Helper file.
   def get_s3_file_byterange(s3_path, byterange)
-    uri_parts = s3_path.split("/", 4)
-    bucket = uri_parts[2]
-    key = uri_parts[3]
+    bucket, key = parse_s3_path(s3_path)
     byterange_parts = byterange.split(",")
 
     # get_object fetches the last byte, so we must subtract one.
@@ -1066,7 +1071,10 @@ class SamplesController < ApplicationController
     if @nonhost_fasta_url
       redirect_to @nonhost_fasta_url
     else
-      send_data nil, filename: filename
+      LogUtil.log_err_and_airbrake("Nonhost fasta file does not exist for sample #{@sample.id}")
+      render json: {
+        error: "nonhost fasta file does not exist for this sample",
+      }
     end
   end
 
@@ -1077,7 +1085,10 @@ class SamplesController < ApplicationController
     if @unidentified_fasta_url
       redirect_to @unidentified_fasta_url
     else
-      send_data nil, filename: filename
+      LogUtil.log_err_and_airbrake("Unidentified fasta file does not exist for sample #{@sample.id}")
+      render json: {
+        error: "unidentified fasta file does not exist for this sample",
+      }
     end
   end
 
