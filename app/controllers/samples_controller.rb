@@ -8,7 +8,6 @@ class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
   include ReportsHelper
-  include S3Helper
 
   ########################################
   # Note to developers:
@@ -1017,9 +1016,8 @@ class SamplesController < ApplicationController
     send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
   end
 
-  # TODO(mark): Factor out into S3Helper file.
   def get_s3_file_byterange(s3_path, byterange)
-    bucket, key = parse_s3_path(s3_path)
+    bucket, key = S3Util.parse_s3_path(s3_path)
     byterange_parts = byterange.split(",")
 
     # get_object fetches the last byte, so we must subtract one.

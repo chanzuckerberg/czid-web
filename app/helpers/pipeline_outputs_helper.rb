@@ -1,6 +1,4 @@
 module PipelineOutputsHelper
-  include S3Helper
-
   Client = Aws::S3::Client.new
   MAX_ALGIN_VIZ_READS_PER_ACCESSION = 20
 
@@ -168,7 +166,7 @@ module PipelineOutputsHelper
   def get_taxon_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, hit_type)
     return '' unless pipeline_run
     uri = pipeline_run.s3_paths_for_taxon_byteranges[tax_level][hit_type]
-    bucket, key = parse_s3_path(uri)
+    bucket, key = S3Util.parse_s3_path(uri)
     # Take the last matching taxon_byterange in case there are duplicate records due to a previous
     # bug (see IDSEQ-881)
     taxon_location = pipeline_run.taxon_byteranges.where(taxid: taxid, hit_type: hit_type).last if pipeline_run
@@ -178,7 +176,7 @@ module PipelineOutputsHelper
   end
 
   def get_s3_file(s3_path)
-    bucket, key = parse_s3_path(s3_path)
+    bucket, key = S3Util.parse_s3_path(s3_path)
     begin
       resp = Client.get_object(bucket: bucket, key: key)
       return resp.body.read
@@ -189,7 +187,7 @@ module PipelineOutputsHelper
 
   def get_presigned_s3_url(s3_path, filename)
     s3 = Aws::S3::Resource.new(client: Client)
-    bucket_name, key = parse_s3_path(s3_path)
+    bucket_name, key = S3Util.parse_s3_path(s3_path)
     begin
       bucket_exists = Client.head_bucket(bucket: bucket_name)
       if bucket_exists
