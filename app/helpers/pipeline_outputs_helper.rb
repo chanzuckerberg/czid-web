@@ -168,7 +168,7 @@ module PipelineOutputsHelper
   def get_taxon_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, hit_type)
     return '' unless pipeline_run
     uri = pipeline_run.s3_paths_for_taxon_byteranges[tax_level][hit_type]
-    bucket, name = parse_s3_path(s3_path)
+    bucket, key = parse_s3_path(uri)
     # Take the last matching taxon_byterange in case there are duplicate records due to a previous
     # bug (see IDSEQ-881)
     taxon_location = pipeline_run.taxon_byteranges.where(taxid: taxid, hit_type: hit_type).last if pipeline_run
@@ -190,8 +190,6 @@ module PipelineOutputsHelper
   def get_presigned_s3_url(s3_path, filename)
     s3 = Aws::S3::Resource.new(client: Client)
     bucket_name, key = parse_s3_path(s3_path)
-    pp bucket_name
-    pp key
     begin
       bucket_exists = Client.head_bucket(bucket: bucket_name)
       if bucket_exists
