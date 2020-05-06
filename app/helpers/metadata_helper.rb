@@ -235,7 +235,7 @@ module MetadataHelper
     warning_aggregator = ErrorAggregator.new
 
     # Require a header for every column.
-    if (metadata["headers"].include? "")
+    if metadata["headers"].include? ""
       errors.push(MetadataValidationErrors::MISSING_COLUMN_HEADER)
       return { "errors" => errors, "warnings" => [] }
     end
