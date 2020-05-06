@@ -234,6 +234,12 @@ module MetadataHelper
     error_aggregator.set_metadata("num_cols", metadata["headers"].length)
     warning_aggregator = ErrorAggregator.new
 
+    # Require a header for every column.
+    # if (metadata["headers"].include? "")
+    #   errors.push(MetadataValidationErrors::MISSING_COLUMN_HEADER)
+    #   return { "errors" => errors, "warnings" => [] }
+    # end
+
     # Require sample_name or Sample Name column.
     if (metadata["headers"] & MetadataField::SAMPLE_NAME_SYNONYMS).blank?
       errors.push(MetadataValidationErrors::MISSING_SAMPLE_NAME_COLUMN)
