@@ -35,6 +35,7 @@ json.steps do
   additional_files = {
     lineage_db: attr[:lineage_db],
     accession2taxid_db: attr[:accession2taxid_db],
+    taxon_blacklist: attr[:taxon_blacklist],
   }
 
   if attr[:skip_dedeuterostome_filter] == 0

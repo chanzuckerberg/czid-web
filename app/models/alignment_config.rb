@@ -11,6 +11,7 @@ class AlignmentConfig < ApplicationRecord
   validates :s3_lineage_path, presence: true, if: :mass_validation_enabled?
   validates :s3_accession2taxid_path, presence: true, if: :mass_validation_enabled?
   validates :s3_deuterostome_db_path, presence: true, if: :mass_validation_enabled?
+  validates :s3_taxon_blacklist_path, presence: true, if: :mass_validation_enabled?
   validates :lineage_version, presence: true, numericality: { integer_only: true, greater_than: 0 }, if: -> { respond_to?(:lineage_version) && mass_validation_enabled? } # respond_to? for migrations
 
   # configuration for alignment database for pipelines
