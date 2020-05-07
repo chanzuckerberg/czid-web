@@ -195,7 +195,7 @@ json.steps do
   }
 
   steps << {
-    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out", "cdhitdup_out", "cdhitdup_out", "cdhitdup_cluster_sizes"],
+    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out", "cdhitdup_out", "cdhitdup_cluster_sizes"],
     out: "refined_annotated_out",
     class: "PipelineStepGenerateAnnotatedFasta",
     module: "idseq_dag.steps.generate_annotated_fasta",
