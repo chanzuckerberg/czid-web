@@ -83,7 +83,8 @@ $genome-viz-spacing: $space-xxs;
   }
 }
 
-.vizLink {
+// Used to style multiple links in different locations in coverage viz sidebar.
+.linkWithArrow {
   @include font-header-xxs;
   // Override color: inherit in _header.scss.
   color: $primary-light !important;

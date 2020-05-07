@@ -427,7 +427,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
         <div className={cs.headerControls}>
           <div className={cs.vizLinkContainer}>
             <a
-              className={cs.vizLink}
+              className={cs.linkWithArrow}
               href={params.alignmentVizUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -467,13 +467,32 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
     if (!this.isAccessionDataValid(currentAccessionData)) {
       return (
-        <div className={cs.unknownErrorContainer}>
-          <div className={cs.unknownErrorMessage}>
-            Failed to load data due to an unknown error. Please{" "}
-            <a className={cs.helpLink} href="mailto:help@idseq.net">
-              contact us
-            </a>{" "}
-            for help.
+        <div className={cs.noDataBody}>
+          <div className={cs.noDataContainer}>
+            <div className={cs.text}>
+              <div className={cs.message}>
+                Sorry, we failed to load the coverage data due to an unexpected
+                error.
+              </div>
+              <a
+                className={cs.linkWithArrow}
+                href="mailto:help@idseq.net"
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "CoverageVizBottomSidebar_accession-data-invalid-contact-us_clicked",
+                    {
+                      accessionId: currentAccessionSummary.id,
+                      taxonId: params.taxonId,
+                      sampleId,
+                    }
+                  )
+                }
+              >
+                Contact us for help
+                <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+              </a>
+            </div>
+            <BacteriaIcon className={cs.icon} />
           </div>
         </div>
       );
@@ -617,7 +636,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 with at least one assembled contig in NT.
               </div>
               <a
-                className={cs.vizLink}
+                className={cs.linkWithArrow}
                 href={params.alignmentVizUrl}
                 target="_blank"
                 rel="noopener noreferrer"
