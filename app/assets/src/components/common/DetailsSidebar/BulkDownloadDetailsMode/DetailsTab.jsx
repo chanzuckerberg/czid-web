@@ -55,7 +55,7 @@ export default class DetailsTab extends React.Component {
           )}
           <FieldList fields={fields} />
         </Accordion>
-        {bulkDownload.pipeline_runs && (
+        {bulkDownload.pipeline_runs.length > 0 && (
           <Accordion
             className={cs.accordion}
             header={<div className={cs.header}>Samples in this Download</div>}
