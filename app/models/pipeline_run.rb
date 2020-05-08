@@ -1018,6 +1018,12 @@ class PipelineRun < ApplicationRecord
         sfn_execution_arn: sfn_service_result[:sfn_execution_arn],
         pipeline_version: sfn_service_result[:pipeline_version]
       )
+      # store each stage's WDL workflow
+      stage_wdls = sfn_service_result[:stage_wdls]
+      pipeline_run_stages.each do |stage|
+        wdl = stage_wdls[stage.dag_name]
+        stage.update(wdl: wdl)
+      end
       Rails.logger.info("PipelineRun: id=#{id} sfn_execution_arn=#{sfn_service_result[:sfn_execution_arn]}")
     rescue => e
       LogUtil.log_err_and_airbrake("Error starting SFN pipeline: #{e}")
