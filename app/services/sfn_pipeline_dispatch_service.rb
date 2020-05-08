@@ -48,12 +48,11 @@ class SfnPipelineDispatchService
     @pipeline_run.update(pipeline_version: @sfn_tags[:dag_version])
 
     stage_dags_json = generate_dag_stages_json
-    sfn_input_json, stage_wdls = generate_wdl_input(stage_dags_json)
+    sfn_input_json = generate_wdl_input(stage_dags_json)
     sfn_execution_arn = dispatch(sfn_input_json)
     return {
       pipeline_version: @sfn_tags[:dag_version],
       stage_dags_json: stage_dags_json,
-      stage_wdls: stage_wdls,
       sfn_input_json: sfn_input_json,
       sfn_execution_arn: sfn_execution_arn,
     }
@@ -136,14 +135,12 @@ class SfnPipelineDispatchService
       OutputPrefix: @sample.sample_output_s3_path,
     }
 
-    stage_wdls = {}
     stage_dags_json.each_pair do |stage_name, stage_dag_json|
       stage_wdl = convert_dag_json_to_wdl(stage_dag_json)
-      stage_wdls[stage_name] = stage_wdl
       s3_paths = upload_inputs_and_generate_paths(stage_name, stage_wdl, stage_dag_json)
       sfn_pipeline_input_json["#{stage_name.upcase}_WDL_URI"] = s3_paths[:wdl_input_s3_path]
     end
-    return sfn_pipeline_input_json, stage_wdls
+    return sfn_pipeline_input_json
   end
 
   def upload_inputs_and_generate_paths(stage_name, stage_wdl, stage_dag_json)

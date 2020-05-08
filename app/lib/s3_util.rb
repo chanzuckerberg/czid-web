@@ -47,4 +47,7 @@ module S3Util
     key = uri_parts[3]
     return bucket, key
   end
+
+  def self.download_from_s3(_buckey, _key)
+  end
 end

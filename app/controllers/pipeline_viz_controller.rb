@@ -12,6 +12,7 @@ class PipelineVizController < ApplicationController
     )
 
     if pipeline_run
+      # get wdl files if step function sample
       @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, current_user.id != sample.user_id)
       @pipeline_versions = sample.pipeline_versions
       @last_processed_at = pipeline_run.created_at

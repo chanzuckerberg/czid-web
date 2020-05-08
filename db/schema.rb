@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_508_033_949) do
+ActiveRecord::Schema.define(version: 20_200_501_044_034) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -337,7 +337,6 @@ ActiveRecord::Schema.define(version: 20_200_508_033_949) do
     t.string "name"
     t.text "failed_jobs"
     t.text "dag_json"
-    t.string "wdl"
     t.index ["pipeline_run_id", "step_number"], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
   end
 
