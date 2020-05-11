@@ -46,14 +46,16 @@ class ProjectDescription extends React.Component {
   };
 
   handleDescriptionSave = async () => {
-    if (this.state.changed) {
+    const { changed } = this.state;
+    const { onProjectDescriptionSave } = this.props;
+    if (changed) {
       this.setState(
         {
           changed: false,
         },
         () => {
           this._save(this.props.project.id, this.state.description);
-          this.props.onProjectDescriptionSave(this.state.description);
+          onProjectDescriptionSave(this.state.description);
         }
       );
     }
