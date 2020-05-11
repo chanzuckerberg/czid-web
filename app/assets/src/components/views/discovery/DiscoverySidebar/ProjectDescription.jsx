@@ -53,6 +53,7 @@ class ProjectDescription extends React.Component {
         },
         () => {
           this._save(this.props.project.id, this.state.description);
+          this.props.onProjectDescriptionSave(this.state.description);
         }
       );
     }
