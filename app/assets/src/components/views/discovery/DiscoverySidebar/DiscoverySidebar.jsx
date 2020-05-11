@@ -105,7 +105,7 @@ export default class DiscoverySidebar extends React.Component {
       <div className={cs.histogramContainer}>
         <div className={cs.dateHistogram}>
           {dates.map(entry => {
-            const percent = Math.round(100 * entry.count / total, 0);
+            const percent = Math.round((100 * entry.count) / total, 0);
             const element = (
               <div
                 className={cs.bar}
@@ -207,7 +207,7 @@ export default class DiscoverySidebar extends React.Component {
     const { onFilterClick } = this.props;
     return rows.map((entry, i) => {
       const { count, text, value } = entry;
-      const percent = Math.round(100 * count / total, 0);
+      const percent = Math.round((100 * count) / total, 0);
       const onClick = () => onFilterClick && onFilterClick(field, value);
       return (
         <div className={cs.barChartRow} key={`${value}_row_${i}`}>
@@ -260,6 +260,7 @@ export default class DiscoverySidebar extends React.Component {
       loading,
       noDataAvailable,
       project,
+      onProjectDescriptionSave,
     } = this.props;
     if (!loading && !this.hasData()) {
       return (
@@ -280,7 +281,10 @@ export default class DiscoverySidebar extends React.Component {
       <div className={cx(className, cs.sidebar)}>
         {project && (
           <div className={cs.descriptionContainer}>
-            <ProjectDescription project={project} />
+            <ProjectDescription
+              project={project}
+              onProjectDescriptionSave={onProjectDescriptionSave}
+            />
           </div>
         )}
         <div className={cs.metadataContainer}>
