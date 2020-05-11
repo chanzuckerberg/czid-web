@@ -70,17 +70,8 @@ json.targets do
     "assembly/refined_taxid_locations_combined.json",
   ]
 
-  # NOTE: this should usually be last in input_files. See PipelineCountingStep
-  # in idseq-dag.
   json.cdhitdup_cluster_sizes [
     "cdhitdup_cluster_sizes.tsv",
-  ]
-
-  # These files are generated with the tsv above but are needed in
-  # fewer steps.
-  json.cdhitdup_out [
-    "dedup1.fa.clstr",
-    "dedup1.fa",
   ]
 end
 
@@ -195,7 +186,7 @@ json.steps do
   }
 
   steps << {
-    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out", "cdhitdup_out", "cdhitdup_cluster_sizes"],
+    in: ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out", "cdhitdup_cluster_sizes"],
     out: "refined_annotated_out",
     class: "PipelineStepGenerateAnnotatedFasta",
     module: "idseq_dag.steps.generate_annotated_fasta",
@@ -240,10 +231,6 @@ json.given_targets do
   end
 
   json.cdhitdup_cluster_sizes do
-    json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
-  end
-
-  json.cdhitdup_out do
     json.s3_dir "s3://#{attr[:bucket]}/samples/#{attr[:project_id]}/#{attr[:sample_id]}/results/#{attr[:pipeline_version]}"
   end
 end
