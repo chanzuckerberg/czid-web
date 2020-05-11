@@ -775,6 +775,12 @@ class DiscoveryView extends React.Component {
     }
   };
 
+  handleProjectDescriptionSave = value => {
+    this.setState({
+      project: { ...this.state.project, description: value },
+    });
+  };
+
   getServerSideSuggestions = async query => {
     const { domain } = this.props;
 
@@ -1338,6 +1344,7 @@ class DiscoveryView extends React.Component {
                 count: filteredSampleCount,
               }}
               project={project}
+              onProjectDescriptionSave={this.handleProjectDescriptionSave}
             />
           ))}
       </div>
@@ -1392,19 +1399,18 @@ class DiscoveryView extends React.Component {
         <Divider style="medium" />
         <div className={cs.mainContainer}>
           <div className={cs.leftPane}>
-            {showFilters &&
-              dimensions && (
-                <DiscoveryFilters
-                  {...mapValues(
-                    dim => dim.values,
-                    keyBy("dimension", dimensions)
-                  )}
-                  {...filters}
-                  domain={domain}
-                  onFilterChange={this.handleFilterChange}
-                  allowedFeatures={allowedFeatures}
-                />
-              )}
+            {showFilters && dimensions && (
+              <DiscoveryFilters
+                {...mapValues(
+                  dim => dim.values,
+                  keyBy("dimension", dimensions)
+                )}
+                {...filters}
+                domain={domain}
+                onFilterChange={this.handleFilterChange}
+                allowedFeatures={allowedFeatures}
+              />
+            )}
           </div>
           <div className={cs.centerPane}>
             {userDataCounts &&
