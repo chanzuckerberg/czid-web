@@ -29,14 +29,24 @@ class PipelineVizDataServiceForSfn
   #
   # status: The status of the pipeline.
 
+  # s3 folder for sfn results: pipeline_run.sfn_results_path
+
+  WDL_PARSER = 'app/jobs/parse_wdl_workflow.py'.freeze
+
+  class ParseWdlError < StandardError
+    def initialize(error)
+      super("Command to parse wdl failed (#{WDL_PARSER}). Error: #{error}")
+    end
+  end
+
   def initialize(pipeline_run_id, see_experimental, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
-    @all_wdls = []
+    @all_wdls = retrieve_wdls(@pipeline_run)
+    @parsed_wdls = parse_wdls(@all_wdls)
     @stage_names = []
     @stage_job_statuses = []
     @pipeline_run.pipeline_run_stages.each do |stage|
-      if stage.dag_json && (stage.name != "Experimental" || see_experimental)
-        @all_dag_jsons.push(JSON.parse(stage.dag_json || "{}"))
+      if stage.name != "Experimental" || see_experimental
         @stage_names.push(stage.name)
         @stage_job_statuses.push(stage.job_status)
       end
@@ -254,5 +264,38 @@ class PipelineVizDataServiceForSfn
         edge[:files].each { |file| file[:url] = nil }
       end
     end
+  end
+
+  def retrieve_wdls(pipeline_run)
+    s3_folder = pipeline_run.sample.sample_wdl_s3_path
+    bucket, prefix = S3Util.parse_s3_path(s3_folder)
+    response = S3_CLIENT.list_objects_v2(bucket: bucket,
+                                         prefix: prefix)
+    objects = response.contents.map(&:key)
+    wdl_keys = objects.select { |o| o[/\.wdl$/] }
+    wdls = {}
+    wdl_keys.each do |key|
+      response = S3_CLIENT.get_object(bucket: bucket,
+                                      key: key)
+      wdl = response.body.read
+      stage_name = File.basename(key, '.wdl')
+      wdls[stage_name] = wdl
+    end
+    return wdls
+  end
+
+  def parse_wdls(wdls)
+    parsed = {}
+    wdls.each_pair do |stage, wdl|
+      stdout, _stderr, status = Open3.capture3(
+        WDL_PARSER,
+        stdin_data: wdl
+      )
+      unless status.success?
+        raise ParseWdlError
+      end
+      parsed[stage] = JSON.parse(stdout)
+    end
+    return parsed
   end
 end

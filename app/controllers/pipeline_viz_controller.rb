@@ -13,7 +13,17 @@ class PipelineVizController < ApplicationController
 
     if pipeline_run
       # get wdl files if step function sample
-      @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, current_user.id != sample.user_id)
+      begin
+        case pipeline_run.pipeline_execution_strategy
+        when PipelineRun.step_function
+          @results = PipelineVizDataServiceForSfn.call(pipeline_run.id, @show_experimental, current_user.id != sample.user_id)
+        when PipelineRun.directed_acyclic_graph
+          @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, current_user.id != sample.user_id)
+        end
+      rescue StandardError => e
+        not_found(e)
+      end
+
       @pipeline_versions = sample.pipeline_versions
       @last_processed_at = pipeline_run.created_at
       @pipeline_run_display = curate_pipeline_run_display(pipeline_run)
@@ -27,9 +37,16 @@ class PipelineVizController < ApplicationController
         format.json { render json: @results }
       end
     else
-      render(json: {
-               status: :not_found,
-             }, status: :not_found)
+      not_found()
     end
+  end
+
+  def not_found(error = nil)
+    if error
+      Rails.logger.error(error.message)
+    end
+    render(json: {
+             status: :not_found,
+           }, status: :not_found)
   end
 end
