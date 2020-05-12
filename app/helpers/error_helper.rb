@@ -1,5 +1,6 @@
 module ErrorHelper
   module MetadataValidationErrors
+    MISSING_COLUMN_HEADER = "Missing name for metadata field".freeze
     MISSING_SAMPLE_NAME_COLUMN = "\"Sample Name\" column is required.".freeze
     MISSING_HOST_GENOME_COLUMN = "\"Host Organism\" column is required.".freeze
     SAMPLE_NOT_FOUND = "Sample not found".freeze
