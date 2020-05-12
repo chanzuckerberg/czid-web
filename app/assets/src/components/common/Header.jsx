@@ -194,7 +194,8 @@ const AnnouncementBanner = ({ onClose }) => {
               }
             >
               Help Center
-            </ExternalLink>. Happy Holidays!
+            </ExternalLink>
+            . Happy Holidays!
           </span>
         }
       />
@@ -261,7 +262,7 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="help"
         text={
-          <ExternalLink
+          <a
             className={cs.option}
             href="https://help.idseq.net"
             onClick={() =>
@@ -269,7 +270,7 @@ const UserMenuDropDown = ({
             }
           >
             Help Center
-          </ExternalLink>
+          </a>
         }
       />,
       <BareDropdown.Item
