@@ -157,20 +157,12 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
         expect(subject).to include_json(pipeline_version: FAKE_DAG_VERSION)
       end
 
-      it "returns stage dag jsons for each pipeline stage" do
-        expect(subject).to include_json(
-          stage_dags_json: PIPELINE_RUN_STAGE_NAMES.map { |n| [n, {}] }.to_h
-        )
-      end
-
       it "returns sfn input containing fastq input files" do
         expect(subject).to include_json(
           sfn_input_json: {
             Input: {
-              HostFilter: {
-                fastqs_0: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[0].source),
-                fastqs_1: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[1].source),
-              },
+              fastqs_0: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[0].source),
+              fastqs_1: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[1].source),
             },
           }
         )
@@ -184,62 +176,36 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
         )
       end
 
-      it "returns sfn input containing correct paths to input wdls" do
-        expected_input_paths = PIPELINE_RUN_STAGE_NAMES.map do |stage_name|
-          ["#{stage_name.upcase}_WDL_URI", format(S3_WDL_PATH, project_id: project.id, sample_id: sample.id, stage_name: stage_name)]
-        end.to_h
-
+      it "returns sfn input containing correct sfn parameters" do
         expect(subject).to include_json(
-          sfn_input_json: expected_input_paths
+          sfn_input_json: {
+            Input: {
+              star_genome: %r{s3://.+},
+              bowtie2_genome: %r{s3://.+},
+              max_fragments: nil,
+              max_subsample_frag: nil,
+              nucleotide_type: "",
+              human_star_genome: %r{s3://.+},
+              human_bowtie2_genome: %r{s3://.+},
+              adapter_fasta: %r{s3://.+},
+              skip_dedeuterostome_filter: 0,
+              index_dir_suffix: nil,
+              lineage_db: %r{s3://.+},
+              taxon_blacklist: %r{s3://.+},
+              accession2taxid_db: %r{s3://.+},
+              deuterostome_db: %r{s3://.+},
+              nt_db: %r{s3://.+},
+              nt_loc_db: %r{s3://.+},
+              nr_db: %r{s3://.+},
+              nr_loc_db: %r{s3://.+},
+              gsnap_m8: PipelineRun::GSNAP_M8,
+              rapsearch2_m8: PipelineRun::RAPSEARCH2_M8,
+              use_taxon_whitelist: false,
+              file_ext: "fastq",
+              nt_info_db: %r{s3://.+},
+            },
+          }
         )
-      end
-
-      it "uploads per-stage dag json files" do
-        subject
-        expect(FAKE_S3).to have_received(:put_object)
-          .with(
-            bucket: FAKE_SAMPLES_BUCKET,
-            key: be_one_of(PIPELINE_RUN_STAGE_NAMES.map { |n| format(S3_DAG_JSON_KEY, project_id: project.id, sample_id: sample.id, stage_name: n) }),
-            body: anything
-          )
-          .exactly(pipeline_run.pipeline_run_stages.count).times
-      end
-
-      it "uploads per-stage wdl files" do
-        subject
-        expect(FAKE_S3).to have_received(:put_object)
-          .with(
-            bucket: FAKE_SAMPLES_BUCKET,
-            key: be_one_of(PIPELINE_RUN_STAGE_NAMES.map { |n| format(S3_WDL_KEY, project_id: project.id, sample_id: sample.id, stage_name: n) }),
-            body: anything
-          )
-          .exactly(pipeline_run.pipeline_run_stages.count).times
-      end
-
-      context "when idd2wdl fails" do
-        let(:idd2wdl_exitstatus) { 99 }
-
-        before do
-          expect(Open3)
-            .to receive(:capture3)
-            .with(
-              "app/jobs/idd2wdl.py", anything,
-              "--name", be_one_of(PIPELINE_RUN_STAGE_NAMES),
-              "--output-prefix", anything,
-              "--docker-image-id", FAKE_DOCKER_IMAGE_ID,
-              "--deployment-env", "test",
-              "--aws-region", FAKE_REGION,
-              "--wdl-version", FAKE_WDL_VERSION,
-              "--dag-version", FAKE_DAG_VERSION,
-              "--dag-branch", anything
-            )
-            .and_return([idd2wdl_stdout, aws_cli_stderr, instance_double(Process::Status, success?: idd2wdl_exitstatus == 0, exitstatus: idd2wdl_exitstatus)])
-            .once
-        end
-
-        it "returns an exception" do
-          expect { subject }.to raise_error(SfnPipelineDispatchService::Idd2WdlError)
-        end
       end
 
       context "when start-execution fails" do

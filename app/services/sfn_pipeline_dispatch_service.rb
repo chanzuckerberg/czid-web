@@ -47,12 +47,10 @@ class SfnPipelineDispatchService
     @sfn_tags = retrieve_version_tags
     @pipeline_run.update(pipeline_version: @sfn_tags[:dag_version])
 
-    stage_dags_json = generate_dag_stages_json
-    sfn_input_json = generate_wdl_input(stage_dags_json)
+    sfn_input_json = generate_wdl_input()
     sfn_execution_arn = dispatch(sfn_input_json)
     return {
       pipeline_version: @sfn_tags[:dag_version],
-      stage_dags_json: stage_dags_json,
       sfn_input_json: sfn_input_json,
       sfn_execution_arn: sfn_execution_arn,
     }
@@ -79,19 +77,6 @@ class SfnPipelineDispatchService
 
   def stage_deployment_name
     return ENV_TO_DEPLOYMENT_STAGE_NAMES[Rails.env] || Rails.env
-  end
-
-  def generate_dag_stages_json
-    # For compatibility with the legacy DAG json.
-    # Generates a JSON composed by the jsons of all four stages in the DAG pipeline.
-    stages_json = {}
-    @pipeline_run.pipeline_run_stages.order(:step_number).each do |prs|
-      stage_info = PipelineRunStage::STAGE_INFO[prs.step_number]
-      dag_json = prs.send(stage_info[:json_generation_func])
-      stages_json[stage_info[:dag_name]] = JSON.parse(dag_json)
-      prs.update(dag_json: dag_json)
-    end
-    return stages_json
   end
 
   def convert_dag_json_to_wdl(dag_json)
@@ -124,41 +109,38 @@ class SfnPipelineDispatchService
     dag_tmp_file.unlink if dag_tmp_file
   end
 
-  def generate_wdl_input(stage_dags_json)
-    input_files_paths = @sample.input_files.map do |input_file|
-      File.join(@sample.sample_input_s3_path, input_file.name)
-    end
+  def generate_wdl_input
     sfn_pipeline_input_json = {
       Input: {
-        HostFilter: input_files_paths.each_with_index.map { |path, i| ["fastqs_#{i}", path] }.to_h,
+        fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
+        fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+        star_genome: @sample.s3_star_index_path,
+        bowtie2_genome: @sample.s3_bowtie2_index_path,
+        max_fragments: @pipeline_run.max_input_fragments,
+        max_subsample_frag: @pipeline_run.subsample,
+        nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type").string_validated_value,
+        human_star_genome: HostGenome.find_by(name: "Human").s3_star_index_path,
+        human_bowtie2_genome: HostGenome.find_by(name: "Human").s3_bowtie2_index_path,
+        adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
+        skip_dedeuterostome_filter: @sample.skip_deutero_filter_flag,
+        index_dir_suffix: @pipeline_run.alignment_config.index_dir_suffix,
+        lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
+        taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
+        accession2taxid_db: @pipeline_run.alignment_config.s3_accession2taxid_path,
+        deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
+        nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
+        nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
+        nr_db: @pipeline_run.alignment_config.s3_nr_db_path,
+        nr_loc_db: @pipeline_run.alignment_config.s3_nr_loc_db_path,
+        gsnap_m8: PipelineRun::GSNAP_M8,
+        rapsearch2_m8: PipelineRun::RAPSEARCH2_M8,
+        use_taxon_whitelist: @pipeline_run.use_taxon_whitelist,
+        file_ext: @sample.fasta_input? ? 'fasta' : 'fastq',
+        nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
       },
       OutputPrefix: @sample.sample_output_s3_path,
     }
-
-    stage_dags_json.each_pair do |stage_name, stage_dag_json|
-      stage_wdl = convert_dag_json_to_wdl(stage_dag_json)
-      s3_paths = upload_inputs_and_generate_paths(stage_name, stage_wdl, stage_dag_json)
-      sfn_pipeline_input_json["#{stage_name.upcase}_WDL_URI"] = s3_paths[:wdl_input_s3_path]
-    end
     return sfn_pipeline_input_json
-  end
-
-  def upload_inputs_and_generate_paths(stage_name, stage_wdl, stage_dag_json)
-    samples_prefix = "samples/#{@sample.project.id}/#{@sample.id}"
-    wdl_s3_prefix = "#{samples_prefix}/sfn-wdl"
-    wdl_input_s3_key = "#{wdl_s3_prefix}/#{stage_name}.wdl"
-    wdl_output_s3_key = "#{wdl_s3_prefix}/#{stage_name}/output.json"
-    # Temporary file for debugging purposes
-    dag_json_input_s3_key = "#{wdl_s3_prefix}/#{stage_name}.dag.json"
-
-    S3Util.upload_to_s3(ENV['SAMPLES_BUCKET_NAME'], dag_json_input_s3_key, JSON.dump(stage_dag_json))
-    S3Util.upload_to_s3(ENV['SAMPLES_BUCKET_NAME'], wdl_input_s3_key, stage_wdl)
-
-    # Does not include the dag json path, since it will be used solely for debug
-    return {
-      wdl_input_s3_path: "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{wdl_input_s3_key}",
-      wdl_output_s3_path: "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{wdl_output_s3_key}",
-    }
   end
 
   def dispatch(sfn_input_json)
