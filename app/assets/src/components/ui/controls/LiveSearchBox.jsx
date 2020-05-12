@@ -13,6 +13,7 @@ class LiveSearchBox extends React.Component {
       results: [],
       value: this.props.initialValue,
       selectedResult: null,
+      lastSearchedTerm: null,
     };
 
     this.lastestTimerId = null;
@@ -28,11 +29,20 @@ class LiveSearchBox extends React.Component {
     return null;
   }
 
+  handleOnBlur = () => {
+    const { lastSearchedTerm } = this.state;
+    this.setState({ value: lastSearchedTerm });
+  };
+
   handleKeyDown = keyEvent => {
     const { onEnter, inputMode } = this.props;
-    const { value, selectedResult } = this.state;
+    const { value, selectedResult, lastSearchedTerm } = this.state;
 
     if (keyEvent.key === "Enter") {
+      if (lastSearchedTerm !== value) {
+        this.setState({ lastSearchedTerm: value });
+      }
+
       if (inputMode && !selectedResult) {
         // In input mode, if they didn't select anything, count it as submitting what they entered.
         this.handleResultSelect(keyEvent, { result: value });
@@ -108,6 +118,7 @@ class LiveSearchBox extends React.Component {
           className
         )}
         loading={isLoading}
+        onBlur={this.handleOnBlur}
         onKeyDown={this.handleKeyDown}
         onResultSelect={this.handleResultSelect}
         onSearchChange={this.handleSearchChange}
