@@ -1,9 +1,20 @@
 @import "~styles/themes/colors";
 
+// Deprecated - do not use for new elements
 $box-shadow-bottom-right: 0px 2px 8px $box-shadow-light;
 $box-shadow-dropdown-menu: 0 2px 4px 0 $box-shadow-lighter,
   0 2px 10px 0 $box-shadow-lighter;
 $box-shadow-tab-bottom: 0 2px 2px 0 $box-shadow-light;
+
+$box-shadow-s: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+$box-shadow-m: 0 2px 4px 0 rgba(0, 0, 0, 0.15), 0 2px 10px 0 rgba(0, 0, 0, 0.15);
+$box-shadow-l: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
+
+// Corners
+$border-radius-l: 20px;
+$border-radius-m: 4px;
+$border-radius-s: 2px;
+$border-radius-none: 0px;
 
 $narrow-container-width: 1280px;
 $narrow-container-margin: 14px;
