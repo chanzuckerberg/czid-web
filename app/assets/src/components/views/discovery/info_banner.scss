@@ -22,14 +22,14 @@
       @include font-body-s;
 
       color: $black;
-      margin-top: $space-xxxs;
+      margin-top: $space-xxs;
     }
 
     .suggestion {
       @include font-header-xs;
 
       color: $dark-grey;
-      margin-top: $space-s;
+      margin-top: $space-m;
     }
 
     .link {
@@ -37,17 +37,17 @@
       // Override color: inherit in _header.scss.
       color: $primary-light !important;
       display: block;
-      margin-top: $space-s;
+      margin-top: $space-m;
 
       .rightArrow {
         font-size: 0.75em;
-        margin-left: $space-xxs;
+        margin-left: $space-xs;
       }
     }
   }
   .icon {
     flex: 0 0 auto;
-    margin-right: $space-s;
+    margin-right: $space-m;
 
     svg {
       height: 250px;

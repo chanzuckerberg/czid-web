@@ -24,13 +24,13 @@
     .icon {
       fill: $white;
       height: 20px;
-      margin-right: $space-xs;
+      margin-right: $space-s;
       vertical-align: text-bottom;
     }
 
     .title {
       @include font-header-xs;
-      margin-right: $space-xxxs;
+      margin-right: $space-xxs;
     }
 
     .link {
@@ -45,8 +45,8 @@
     cursor: pointer;
     fill: $dark-grey;
     position: absolute;
-    right: $space-m;
-    top: $space-m;
+    right: $space-l;
+    top: $space-l;
 
     &:hover {
       fill: $black;

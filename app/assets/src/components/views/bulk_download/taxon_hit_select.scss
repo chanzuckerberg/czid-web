@@ -7,7 +7,7 @@
 
   .optionsHeader {
     display: flex;
-    padding: $space-xxs $space-m;
+    padding: $space-xs $space-l;
 
     .header {
       @include font-header-xs;
@@ -22,7 +22,7 @@
 
   .option {
     display: flex;
-    padding: $space-xxs $space-m;
+    padding: $space-xs $space-l;
 
     .taxonName {
       @include font-body-xxs;
