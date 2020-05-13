@@ -46,7 +46,7 @@ $metadata-input-extra-width: 225;
     }
 
     .sampleName {
-      padding: $space-m 0; // align vertically with inputs
+      padding: $space-l 0; // align vertically with inputs
       font-weight: $font-weight-semibold;
     }
 
@@ -55,7 +55,7 @@ $metadata-input-extra-width: 225;
     }
 
     .input {
-      margin: $space-xxs $space-m $space-xxs 0;
+      margin: $space-xs $space-l $space-xs 0;
       width: $metadata-input-width + 0px;
       vertical-align: top; // for host organism to align to others
 
@@ -78,6 +78,6 @@ $metadata-input-extra-width: 225;
     @include font-label-s;
     color: $primary-light;
     cursor: pointer;
-    margin-top: $space-xxxs;
+    margin-top: $space-xxs;
   }
 }

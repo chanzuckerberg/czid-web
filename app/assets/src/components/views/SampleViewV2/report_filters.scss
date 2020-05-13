@@ -3,21 +3,21 @@
 .filterList {
   .filterListElement {
     display: inline-block;
-    margin: $space-xxxs 0;
+    margin: $space-xxs 0;
     vertical-align: top;
 
     &:not(:last-child) {
-      margin-right: $space-s;
+      margin-right: $space-m;
     }
   }
 }
 
 .tagList {
-  margin-top: $space-m;
-  margin-bottom: $space-m;
+  margin-top: $space-l;
+  margin-bottom: $space-l;
 
   .filterTag {
-    margin-right: $space-xxs;
+    margin-right: $space-xs;
 
     &:last-child {
       margin-right: 0;

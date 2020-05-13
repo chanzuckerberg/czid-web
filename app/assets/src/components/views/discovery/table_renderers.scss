@@ -116,7 +116,7 @@
       }
 
       .sampleStatus {
-        margin-left: $space-xxs;
+        margin-left: $space-xs;
       }
     }
 
@@ -128,11 +128,11 @@
       text-align: left;
 
       span:not(:first-child) {
-        margin-left: $space-xxxs;
+        margin-left: $space-xxs;
       }
 
       span:not(:last-child) {
-        margin-right: $space-xxxs;
+        margin-right: $space-xxs;
       }
     }
   }

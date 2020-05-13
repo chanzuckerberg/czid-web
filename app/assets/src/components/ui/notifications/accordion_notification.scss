@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 .listContainer {
-  margin-bottom: $space-s;
+  margin-bottom: $space-m;
   &.error {
     border-color: $error;
     background-color: $error-bg;
@@ -27,12 +27,12 @@
 
 .notificationContainer {
   @include font-body-xxs;
-  margin: $space-xxs 0;
+  margin: $space-xs 0;
 }
 
 .messageContainer {
   max-height: 150px;
   overflow: auto;
-  margin-top: $space-m;
+  margin-top: $space-l;
   word-break: break-word;
 }
