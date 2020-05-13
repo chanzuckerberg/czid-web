@@ -95,24 +95,24 @@ class Landing extends React.Component {
             </a>
           </div>
           <div className="fill" />
-          <div className="hiring-ad">
+          {/* Uncomment when hiring */}
+          {/* <div className="hiring-ad">
             {"Join our team! We're hiring "}
             <ExternalLink
-              // No number because specific position was filled.
-              href="https://boards.greenhouse.io/chanzuckerberginitiative"
+              href="<link to job description>"
               analyticsEventName="Landing_engineer-job-link_clicked"
             >
               engineers
             </ExternalLink>
             {` and `}
             <ExternalLink
-              href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1919743"
+              href="<link to job description>"
               analyticsEventName="Landing_scientist-job-link_clicked"
             >
               scientists
             </ExternalLink>
             !
-          </div>
+          </div> */}
           {this.props.browserInfo.supported ? (
             <div className="sign-in">
               <TransparentButton
@@ -284,7 +284,47 @@ class Landing extends React.Component {
       </div>
     );
 
-    let bulletinBanner;
+    const paperReference = (
+      <div className={cs.paperReferenceBanner}>
+        <Container>
+          <div className={cs.paperReferenceContainer}>
+            {/* move to its own component if needs to be reused */}
+            <div className={cs.paperCard}>
+              <div className={cs.paperCardTitle}>
+                IDseq – An Open Source Cloud-based Pipeline and Analysis Service
+                for Metagenomic Pathogen Detection and Monitoring.
+              </div>
+              <div className={cs.papreCardLogoContainer}>
+                <Image
+                  className={cs.paperCardLogo}
+                  src="/assets/logo-biorxiv.png"
+                />
+              </div>
+            </div>
+            <div className={cs.paperInfo}>
+              <div className={cs.paperInfoTitle}>
+                Read the paper on how IDseq reduces the barrier of entry to
+                metagenomics.
+              </div>
+              <div className={cs.paperInfoBody}>
+                See how scientists, clinicians and bioinformaticians can gain
+                insight from mNGS datasets for both known and novel pathogens.
+              </div>
+              <div>
+                <ExternalLink
+                  href="https://www.biorxiv.org/content/10.1101/2020.04.07.030551v1"
+                  analyticsEventName="Landing_paper-link_clicked"
+                >
+                  <PrimaryButton text="Read the Paper" />
+                </ExternalLink>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </div>
+    );
+
+    let bulletinBanner = null;
     if (this.props.showBulletin) {
       bulletinBanner = (
         <div className="bulletin-banner">
@@ -305,8 +345,6 @@ class Landing extends React.Component {
           </Container>
         </div>
       );
-    } else {
-      bulletinBanner = <Divider />;
     }
 
     const partners = (
@@ -365,7 +403,9 @@ class Landing extends React.Component {
         {header}
         {publicSiteBanner}
         {firstBlock}
+        {paperReference}
         {bulletinBanner}
+        {!paperReference && !bulletinBanner && <Divider />}
         {partners}
         {footer}
       </div>
