@@ -9,7 +9,7 @@
   .downloadIcon {
     width: 30px;
     height: 22px;
-    margin-right: $space-m;
+    margin-right: $space-l;
     fill: $light-grey;
   }
 
@@ -24,7 +24,7 @@
     }
 
     .downloadStatus {
-      margin-left: $space-xxs;
+      margin-left: $space-xs;
     }
 
     .metadata {
@@ -33,7 +33,7 @@
 
       .detailsLink {
         cursor: pointer;
-        margin-right: $space-xxxs;
+        margin-right: $space-xxs;
 
         &:hover {
           color: $black;
@@ -41,7 +41,7 @@
       }
 
       .userName {
-        margin-left: $space-xxxs;
+        margin-left: $space-xxs;
       }
     }
   }
@@ -62,12 +62,12 @@
   }
 
   .messageContainer {
-    margin-bottom: $space-xs;
+    margin-bottom: $space-s;
   }
 
   .icon {
     width: 16px;
-    margin-right: $space-xxs;
+    margin-right: $space-xs;
     fill: $success;
 
     &.warning {
@@ -87,7 +87,7 @@
 
   .separator {
     @include font-body-xxs;
-    margin: 0 $space-xs;
+    margin: 0 $space-s;
     color: $medium-grey;
   }
 

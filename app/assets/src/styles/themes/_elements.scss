@@ -12,14 +12,14 @@ $header-margin-bottom: 10px;
 $header-total-height: $header-height + $header-margin-bottom;
 
 $space-default: 10px;
-$space-xxxxs: 2px;
-$space-xxxs: 4px;
-$space-xxs: 6px;
-$space-xs: 8px;
-$space-s: 10px;
-$space-m: 14px;
-$space-l: 22px;
-$space-xl: 38px;
+$space-xxxs: 2px;
+$space-xxs: 4px;
+$space-xs: 6px;
+$space-s: 8px;
+$space-m: 10px;
+$space-l: 14px;
+$space-xl: 22px;
+$space-xxl: 38px;
 
 // Customized scroll bar
 @mixin scrollable {

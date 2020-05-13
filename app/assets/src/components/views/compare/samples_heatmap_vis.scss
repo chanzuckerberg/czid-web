@@ -71,7 +71,7 @@
 
   .bannerContainer {
     width: 500px;
-    bottom: $space-s;
+    bottom: $space-m;
     left: 50%;
     margin-left: -250px;
     text-align: center;
@@ -98,15 +98,15 @@
       box-shadow: $box-shadow-dropdown-menu;
       cursor: default;
       display: inline-block;
-      margin: $space-xs auto auto;
-      padding: $space-xxxs $space-xs;
+      margin: $space-s auto auto;
+      padding: $space-xxs $space-s;
       text-align: center;
     }
 
     .removeIcon {
       cursor: pointer;
       height: 8px;
-      margin-left: $space-xxs;
+      margin-left: $space-xs;
     }
   }
 }
