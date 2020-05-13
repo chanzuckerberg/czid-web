@@ -294,7 +294,7 @@ class Landing extends React.Component {
                 IDseq – An Open Source Cloud-based Pipeline and Analysis Service
                 for Metagenomic Pathogen Detection and Monitoring.
               </div>
-              <div className={cs.papreCardLogoContainer}>
+              <div className={cs.paperCardLogoContainer}>
                 <Image
                   className={cs.paperCardLogo}
                   src="/assets/logo-biorxiv.png"

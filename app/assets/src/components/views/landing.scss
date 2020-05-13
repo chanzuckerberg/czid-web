@@ -90,6 +90,7 @@
 
 .paperCard {
   background-color: $white;
+  border-radius: $border-radius-m;
   box-shadow: $box-shadow-s;
   display: flex;
   flex-direction: column;
@@ -105,13 +106,15 @@
     padding: $space-l;
   }
 
-  .papreCardLogoContainer {
+  .paperCardLogoContainer {
     background-color: $off-white;
     display: flex;
     flex: 0 0 70px;
     width: 100%;
     align-items: center;
     justify-content: center;
+    border-bottom-left-radius: $border-radius-m;
+    border-bottom-right-radius: $border-radius-m;
 
     .paperCardLogo {
       flex: 0 0 auto;
