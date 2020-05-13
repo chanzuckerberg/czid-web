@@ -480,9 +480,13 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   getAvailableMetadataOptions() {
-    return this.props.metadataTypes.map(metadata => {
-      return { value: metadata.key, label: metadata.name };
-    });
+    return this.props.metadataTypes
+      .filter(metadata => {
+        return metadata.key && metadata.name;
+      })
+      .map(metadata => {
+        return { value: metadata.key, label: metadata.name };
+      });
   }
 
   handleZoom(increment) {

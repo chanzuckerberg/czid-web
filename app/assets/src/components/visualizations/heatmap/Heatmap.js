@@ -932,13 +932,16 @@ export default class Heatmap {
     // This assumes that this.height contains the "normal" height of the heatmap.
     // We temporarily change the svg height to add the caption, and will revert it as
     // soon as the printing is done.
-    this.svg.attr("height", this.height + totalCaptionHeight);
+    this.svg.attr(
+      "height",
+      (this.height + totalCaptionHeight) * this.options.zoom
+    );
     this.renderCaption();
   };
 
   hidePrintCaption = () => {
     // Revert the svg to its previous height, without the caption.
-    this.svg.attr("height", this.height);
+    this.svg.attr("height", this.height * this.options.zoom);
 
     // Remove all captions.
     this.gCaption.selectAll(`.${cs.caption}`).remove();
