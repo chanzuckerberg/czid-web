@@ -18,6 +18,11 @@
       fill: $primary-lighter;
     }
   }
+
+  .noHover {
+    pointer-events: none !important;
+  }
+
   .filtersTrigger {
     align-items: center;
     cursor: pointer;
