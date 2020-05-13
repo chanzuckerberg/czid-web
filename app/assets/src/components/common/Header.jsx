@@ -262,7 +262,7 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="help"
         text={
-          <a
+          <ExternalLink
             className={cs.option}
             href="https://help.idseq.net"
             onClick={() =>
@@ -270,7 +270,7 @@ const UserMenuDropDown = ({
             }
           >
             Help Center
-          </a>
+          </ExternalLink>
         }
       />,
       <BareDropdown.Item
