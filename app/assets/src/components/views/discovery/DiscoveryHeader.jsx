@@ -106,7 +106,6 @@ class DiscoveryHeader extends React.Component {
                 <div className={cs.popupText}>
                   Filters
                   <div className={cs.popupSubtitle}>
-                    {" "}
                     Not available on this tab
                   </div>
                 </div>
@@ -158,7 +157,6 @@ class DiscoveryHeader extends React.Component {
                 <div className={cs.popupText}>
                   Info
                   <div className={cs.popupSubtitle}>
-                    {" "}
                     Not available on this tab
                   </div>
                 </div>
