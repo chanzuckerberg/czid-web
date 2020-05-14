@@ -11,7 +11,7 @@
     .title {
       @include font-header-xl;
       // Reduce the amount of margin at the top of the modal.
-      margin-top: -$space-xs;
+      margin-top: -$space-s;
     }
 
     .tagline {
@@ -25,6 +25,6 @@
   }
 
   .footer {
-    margin-top: $space-m;
+    margin-top: $space-l;
   }
 }

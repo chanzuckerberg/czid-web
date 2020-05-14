@@ -3,21 +3,21 @@
 @import "~styles/themes/elements";
 
 .content {
-  padding: $space-xl $space-l;
+  padding: $space-xxl $space-xl;
   position: relative;
 }
 
 .title,
 .loadingMsg {
   @include font-header-xl;
-  margin: 0 $space-s;
+  margin: 0 $space-m;
   // Leave room for the close button.
   margin-right: 60px;
   word-break: break-all;
 }
 
 .adminDetails {
-  margin: 0 $space-s;
+  margin: 0 $space-m;
   color: $medium-grey;
 
   .logUrl {
@@ -30,7 +30,7 @@
 }
 
 .tabs {
-  margin: $space-l $space-s;
+  margin: $space-xl $space-m;
 }
 
 .notification {
@@ -44,45 +44,45 @@
     @include font-header-accordion;
 
     color: $black;
-    padding: 0 $space-s;
+    padding: 0 $space-m;
     height: 40px;
   }
 }
 
 .detailsTab {
   .description {
-    padding: 0 $space-s $space-s;
+    padding: 0 $space-m $space-m;
     @include font-body-s;
   }
   .samplesList {
     max-height: 360px;
     overflow: auto;
-    padding: 0 $space-m;
+    padding: 0 $space-l;
 
     .sampleName {
       @include font-body-xs;
-      padding: $space-xxxs 0;
+      padding: $space-xxs 0;
       word-break: break-word;
     }
   }
 }
 
 .advancedDownloadTab {
-  margin: 0 $space-s;
+  margin: 0 $space-m;
 
   .header {
     @include font-header-xs;
-    margin-bottom: $space-xxxs;
+    margin-bottom: $space-xxs;
   }
 
   .description {
     @include font-body-xs;
-    margin-bottom: $space-s;
+    margin-bottom: $space-m;
   }
 
   .cloudCommandContainer {
     background-color: $off-white;
-    padding: $space-s;
+    padding: $space-m;
     display: flex;
     align-items: center;
 
