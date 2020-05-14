@@ -21,12 +21,12 @@
     background-color: $white;
 
     .filterRow {
-      margin-top: $space-m;
-      margin-bottom: $space-xs;
+      margin-top: $space-l;
+      margin-bottom: $space-s;
     }
 
     .filterTagsList {
-      margin-bottom: $space-m;
+      margin-bottom: $space-l;
       .filterTag {
         margin-right: 6px;
 
@@ -39,11 +39,11 @@
     .statsRow {
       @include font-body-xs;
       color: $dark-grey;
-      margin-left: $space-xxxs;
+      margin-left: $space-xxs;
 
       .infoIcon {
-        margin-top: $space-xxxxs;
-        margin-left: $space-xxxs;
+        margin-top: $space-xxxs;
+        margin-left: $space-xxs;
         height: 15px;
         width: 15px;
         fill: $dark-grey;
@@ -68,7 +68,7 @@
       color: $dark-grey;
       background-color: $white;
       font-size: $font-size-h4;
-      padding: 0 $space-m;
+      padding: 0 $space-l;
       border-radius: 0 0 4px 4px;
       box-shadow: $box-shadow-tab-bottom;
     }
@@ -91,11 +91,11 @@
 }
 
 .notificationContainer {
-  margin: $space-m 0 $space-m;
+  margin: $space-l 0 $space-l;
 }
 
 .messageLine {
   @include font-body-xxs;
-  padding: $space-xxxs 0;
-  margin-right: $space-l;
+  padding: $space-xxs 0;
+  margin-right: $space-xl;
 }

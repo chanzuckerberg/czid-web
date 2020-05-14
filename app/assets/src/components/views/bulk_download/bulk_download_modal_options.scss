@@ -3,13 +3,13 @@
 @import "~styles/themes/elements";
 
 .downloadTypeContainer {
-  margin-top: $space-m;
+  margin-top: $space-l;
   flex: 1 1 0;
   min-height: 0;
 
   .category {
     &:not(:first-child) {
-      margin-top: $space-l;
+      margin-top: $space-xl;
     }
 
     .title {
@@ -24,7 +24,7 @@
 
   .taxaWithReadsOptionsHeader {
     display: flex;
-    padding: $space-xxs $space-m;
+    padding: $space-xs $space-l;
 
     .header {
       @include font-header-xs;
@@ -39,7 +39,7 @@
 
   .taxaWithReadsOption {
     display: flex;
-    padding: $space-xxs $space-m;
+    padding: $space-xs $space-l;
 
     .taxonName {
       @include font-body-xxs;
@@ -62,9 +62,9 @@
 }
 
 .downloadType {
-  padding: $space-xs $space-s;
-  margin-bottom: $space-xxxs;
-  margin-right: $space-s;
+  padding: $space-s $space-m;
+  margin-bottom: $space-xxs;
+  margin-right: $space-m;
   border-radius: 4px;
   display: flex;
   cursor: pointer;
@@ -89,8 +89,8 @@
   }
 
   .radioButton {
-    margin-right: $space-s;
-    margin-top: $space-xxxs;
+    margin-right: $space-m;
+    margin-top: $space-xxs;
   }
 
   .content {
@@ -114,16 +114,16 @@
 }
 
 .fields {
-  margin-top: $space-s;
-  margin-bottom: $space-xxxs;
+  margin-top: $space-m;
+  margin-bottom: $space-xxs;
   display: flex;
   flex-wrap: wrap;
 
   .field {
-    width: calc(50% - #{$space-l / 2});
+    width: calc(50% - #{$space-xl / 2});
 
     &:nth-child(odd) {
-      margin-right: $space-l;
+      margin-right: $space-xl;
     }
 
     .label {

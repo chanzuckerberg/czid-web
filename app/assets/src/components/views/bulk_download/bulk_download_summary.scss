@@ -4,7 +4,7 @@
 
 .bulkDownloadSummary {
   background-color: $off-white;
-  padding: $space-s $space-m;
+  padding: $space-m $space-l;
 
   .title {
     display: flex;
@@ -21,7 +21,7 @@
 
   .params {
     display: flex;
-    margin-top: $space-m;
+    margin-top: $space-l;
 
     .param {
       flex: 1 1 0;

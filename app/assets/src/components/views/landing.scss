@@ -24,13 +24,13 @@
     .icon {
       fill: $white;
       height: 20px;
-      margin-right: $space-xs;
+      margin-right: $space-s;
       vertical-align: text-bottom;
     }
 
     .title {
       @include font-header-xs;
-      margin-right: $space-xxxs;
+      margin-right: $space-xxs;
     }
 
     .link {
@@ -45,11 +45,81 @@
     cursor: pointer;
     fill: $dark-grey;
     position: absolute;
-    right: $space-m;
-    top: $space-m;
+    right: $space-l;
+    top: $space-l;
 
     &:hover {
       fill: $black;
+    }
+  }
+}
+
+.paperReferenceBanner {
+  background-color: $off-white;
+
+  .paperReferenceContainer {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    margin: auto;
+    max-width: 800px;
+    padding: $space-xl 0;
+
+    .paperImage {
+      flex: 0 0 auto;
+      margin-right: $space-xl;
+    }
+
+    .paperInfo {
+      flex: 1 0 0;
+
+      .paperInfoTitle {
+        @include font-header-xl;
+
+        margin-bottom: $space-m;
+      }
+
+      .paperInfoBody {
+        @include font-body-m;
+
+        margin-bottom: $space-m;
+      }
+    }
+  }
+}
+
+.paperCard {
+  background-color: $white;
+  border-radius: $border-radius-m;
+  box-shadow: $box-shadow-s;
+  display: flex;
+  flex-direction: column;
+  height: 330px;
+  margin-right: $space-xl;
+  width: 260px;
+
+  .paperCardTitle {
+    @include font-header-l;
+
+    flex: 1 0 auto;
+    line-height: 28px;
+    padding: $space-l;
+  }
+
+  .paperCardLogoContainer {
+    background-color: $off-white;
+    display: flex;
+    flex: 0 0 70px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-bottom-left-radius: $border-radius-m;
+    border-bottom-right-radius: $border-radius-m;
+
+    .paperCardLogo {
+      flex: 0 0 auto;
+      max-height: 22px;
+      max-width: 85px;
     }
   }
 }
