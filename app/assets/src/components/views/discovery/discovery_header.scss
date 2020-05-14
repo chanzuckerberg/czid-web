@@ -3,6 +3,7 @@
 
 .header {
   display: flex;
+  cursor: pointer;
   flex-direction: row;
   align-items: center;
   margin-bottom: 10px;
@@ -24,7 +25,6 @@
 
   .filtersTrigger {
     align-items: center;
-    cursor: pointer;
     display: flex;
     flex: 0 0 auto;
     position: relative;
@@ -43,10 +43,10 @@
       right: -12px;
       vertical-align: middle;
     }
+  }
 
-    &.disabled {
-      cursor: default;
-    }
+  .disabled {
+    cursor: default;
   }
 
   .blankFill {
@@ -55,7 +55,6 @@
 
   .statsTrigger {
     align-items: center;
-    cursor: pointer;
     display: flex;
     flex: 0 0 auto;
     margin-left: 25px;
