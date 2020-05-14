@@ -81,11 +81,11 @@ class DiscoveryHeader extends React.Component {
                   className={cx(
                     cs.filtersIcon,
                     cs.icon,
-                    currentTab == "visualizations" && cs.noHover,
+                    currentTab === "visualizations" && cs.noHover,
                     !showFilters && cs.closed
                   )}
                 />
-                {currentTab != "visualizations" && (
+                {currentTab !== "visualizations" && (
                   <Label
                     className={cs.filtersCounter}
                     circular
