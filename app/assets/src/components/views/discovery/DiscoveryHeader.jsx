@@ -73,32 +73,53 @@ class DiscoveryHeader extends React.Component {
 
     return (
       <div className={cs.header}>
-        <div className={cs.filtersTrigger} onClick={onFilterToggle}>
-          <BasicPopup
-            trigger={
-              <div>
-                <FiltersIcon
-                  className={cx(
-                    cs.filtersIcon,
-                    cs.icon,
-                    currentTab === "visualizations" && cs.noHover,
-                    !showFilters && cs.closed
-                  )}
-                />
-                {currentTab !== "visualizations" && (
+        <div
+          className={
+            currentTab === "visualizations"
+              ? cx(cs.noHover, cs.filtersTrigger)
+              : cs.filtersTrigger
+          }
+          onClick={onFilterToggle}
+        >
+          {currentTab === "visualizations" ? (
+            <BasicPopup
+              trigger={
+                <div>
+                  <FiltersIcon
+                    className={cx(
+                      cs.filtersIcon,
+                      cs.icon,
+                      cs.noHover,
+                      !showFilters && cs.closed
+                    )}
+                  />
+                </div>
+              }
+            />
+          ) : (
+            <BasicPopup
+              trigger={
+                <div>
+                  <FiltersIcon
+                    className={cx(
+                      cs.filtersIcon,
+                      cs.icon,
+                      !showFilters && cs.closed
+                    )}
+                  />
                   <Label
                     className={cs.filtersCounter}
                     circular
                     text={filterCount}
                   />
-                )}
-              </div>
-            }
-            content="Filters"
-            mouseEnterDelay={600}
-            mouseLeaveDelay={200}
-            position="bottom center"
-          />
+                </div>
+              }
+              content="Filters"
+              mouseEnterDelay={600}
+              mouseLeaveDelay={200}
+              position="bottom center"
+            />
+          )}
         </div>
         <div className={cs.searchContainer}>
           <LiveSearchBox
