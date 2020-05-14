@@ -1,9 +1,20 @@
 @import "~styles/themes/colors";
 
+// Deprecated - do not use for new elements
 $box-shadow-bottom-right: 0px 2px 8px $box-shadow-light;
 $box-shadow-dropdown-menu: 0 2px 4px 0 $box-shadow-lighter,
   0 2px 10px 0 $box-shadow-lighter;
 $box-shadow-tab-bottom: 0 2px 2px 0 $box-shadow-light;
+
+$box-shadow-s: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+$box-shadow-m: 0 2px 4px 0 rgba(0, 0, 0, 0.15), 0 2px 10px 0 rgba(0, 0, 0, 0.15);
+$box-shadow-l: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
+
+// Corners
+$border-radius-l: 20px;
+$border-radius-m: 4px;
+$border-radius-s: 2px;
+$border-radius-none: 0px;
 
 $narrow-container-width: 1280px;
 $narrow-container-margin: 14px;
@@ -12,14 +23,14 @@ $header-margin-bottom: 10px;
 $header-total-height: $header-height + $header-margin-bottom;
 
 $space-default: 10px;
-$space-xxxxs: 2px;
-$space-xxxs: 4px;
-$space-xxs: 6px;
-$space-xs: 8px;
-$space-s: 10px;
-$space-m: 14px;
-$space-l: 22px;
-$space-xl: 38px;
+$space-xxxs: 2px;
+$space-xxs: 4px;
+$space-xs: 6px;
+$space-s: 8px;
+$space-m: 10px;
+$space-l: 14px;
+$space-xl: 22px;
+$space-xxl: 38px;
 
 // Customized scroll bar
 @mixin scrollable {

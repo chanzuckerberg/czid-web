@@ -9,7 +9,7 @@
 
     .infoLink {
       @include font-label-s;
-      margin-left: $space-xxxs;
+      margin-left: $space-xxs;
       color: $primary-light;
       cursor: pointer;
     }
@@ -23,11 +23,11 @@
   .descriptionTextArea {
     @include font-body-xs;
     margin-top: 5px;
-    padding: $space-m;
+    padding: $space-l;
     height: 100px;
     resize: vertical;
     background-color: $white;
-    text-indent: $space-xxs;
+    text-indent: $space-xs;
   }
 
   .charCounter {
@@ -37,7 +37,7 @@
   }
 
   .field {
-    margin-bottom: $space-xs;
+    margin-bottom: $space-s;
 
     .info {
       background-color: $lightest-grey;

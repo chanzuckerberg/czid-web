@@ -3,13 +3,13 @@
 @import "~styles/themes/colors";
 
 .viewHeader {
-  margin-top: $space-xl;
-  margin-bottom: $space-xl;
+  margin-top: $space-xxl;
+  margin-bottom: $space-xxl;
 }
 
 .error {
   color: $error;
-  margin-bottom: $space-s;
+  margin-bottom: $space-m;
 }
 
 .noResultsMessage {
@@ -22,7 +22,7 @@
   }
 
   .field {
-    padding: $space-s;
+    padding: $space-m;
 
     .preference {
       justify-content: left;

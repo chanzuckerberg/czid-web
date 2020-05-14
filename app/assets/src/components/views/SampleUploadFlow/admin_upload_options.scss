@@ -4,29 +4,29 @@
 
 .subheader {
   @include font-header-s;
-  margin-top: $space-m;
+  margin-top: $space-l;
 
   .toggleLink {
     @include font-label-s;
     color: $primary-light;
     cursor: pointer;
-    margin-left: $space-xxs;
+    margin-left: $space-xs;
   }
 }
 
 .adminUploadOptions {
   display: flex;
   flex-wrap: wrap;
-  margin-top: $space-xxs;
-  padding: $space-m;
+  margin-top: $space-xs;
+  padding: $space-l;
   padding-bottom: 0;
   background-color: $off-white;
 }
 
 .field {
-  width: calc(33.3% - #{$space-l * 2 / 3});
-  margin-right: $space-l;
-  margin-bottom: $space-m;
+  width: calc(33.3% - #{$space-xl * 2 / 3});
+  margin-right: $space-xl;
+  margin-bottom: $space-l;
 
   &:nth-child(3n) {
     margin-right: 0;
@@ -44,7 +44,7 @@
   }
 
   .helpIcon {
-    margin-left: $space-xxxs;
+    margin-left: $space-xxs;
     height: 14px;
   }
 }
