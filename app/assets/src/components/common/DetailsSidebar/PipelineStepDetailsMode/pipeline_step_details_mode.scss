@@ -24,20 +24,20 @@
 }
 
 .statusBox {
-  padding: $space-m;
+  padding: $space-l;
   display: flex;
   border-radius: 4px;
-  margin-bottom: $space-m;
+  margin-bottom: $space-l;
 
   .statusIcon {
     height: 20px;
     width: 20px;
-    margin-top: $space-xxs;
+    margin-top: $space-xs;
     flex-shrink: 0;
   }
 
   .statusText {
-    margin-left: $space-s;
+    margin-left: $space-m;
   }
 
   .statusTitle {

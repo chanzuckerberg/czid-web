@@ -2,8 +2,8 @@
 @import "~styles/themes/elements";
 
 .termsAgreement {
-  margin-top: $space-l;
-  margin-bottom: $space-l;
+  margin-top: $space-xl;
+  margin-bottom: $space-xl;
 
   // Global because Checkbox does not use CSS modules
   :global(.label) {
