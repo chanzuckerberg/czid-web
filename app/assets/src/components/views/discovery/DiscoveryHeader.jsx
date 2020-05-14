@@ -71,55 +71,54 @@ class DiscoveryHeader extends React.Component {
       tabs,
     } = this.props;
 
+    let disabledVisualizations = currentTab === "visualizations";
+
     return (
       <div className={cs.header}>
         <div
-          className={
-            currentTab === "visualizations"
-              ? cx(cs.noHover, cs.filtersTrigger)
-              : cs.filtersTrigger
-          }
-          onClick={onFilterToggle}
+          className={cx(
+            cs.filtersTrigger,
+            disabledVisualizations && cs.disabled
+          )}
+          onClick={disabledVisualizations ? undefined : onFilterToggle}
         >
-          {currentTab === "visualizations" ? (
-            <BasicPopup
-              trigger={
-                <div>
-                  <FiltersIcon
-                    className={cx(
-                      cs.filtersIcon,
-                      cs.icon,
-                      cs.noHover,
-                      !showFilters && cs.closed
-                    )}
-                  />
-                </div>
-              }
-            />
-          ) : (
-            <BasicPopup
-              trigger={
-                <div>
-                  <FiltersIcon
-                    className={cx(
-                      cs.filtersIcon,
-                      cs.icon,
-                      !showFilters && cs.closed
-                    )}
-                  />
+          <BasicPopup
+            trigger={
+              <div>
+                <FiltersIcon
+                  className={cx(
+                    cs.filtersIcon,
+                    cs.icon,
+                    !showFilters && cs.closed
+                  )}
+                />
+                {!disabledVisualizations && (
                   <Label
                     className={cs.filtersCounter}
                     circular
                     text={filterCount}
                   />
+                )}
+              </div>
+            }
+            content={
+              disabledVisualizations ? (
+                <div className={cs.popupText}>
+                  Filters
+                  <div className={cs.popupSubtitle}>
+                    {" "}
+                    Not available on this tab
+                  </div>
                 </div>
-              }
-              content="Filters"
-              mouseEnterDelay={600}
-              mouseLeaveDelay={200}
-              position="bottom center"
-            />
-          )}
+              ) : (
+                "Filters"
+              )
+            }
+            basic={false}
+            mouseEnterDelay={600}
+            mouseLeaveDelay={200}
+            position={disabledVisualizations ? "top left" : "bottom center"}
+          />
         </div>
         <div className={cs.searchContainer}>
           <LiveSearchBox
@@ -137,19 +136,40 @@ class DiscoveryHeader extends React.Component {
           hideBorder
         />
         <div className={cs.blankFill} />
-        <div className={cs.statsTrigger} onClick={onStatsToggle}>
+        <div
+          className={(cs.statsTrigger, disabledVisualizations && cs.disabled)}
+          onClick={disabledVisualizations ? undefined : onStatsToggle}
+        >
           <BasicPopup
             trigger={
               <div>
                 <InfoPanelIcon
-                  className={cx(cs.statsIcon, cs.icon, !showStats && cs.closed)}
+                  className={cx(
+                    cs.statsIcon,
+                    cs.icon,
+                    cs.noHover,
+                    !showStats && cs.closed
+                  )}
                 />
               </div>
             }
-            content="Info"
+            content={
+              disabledVisualizations ? (
+                <div className={cs.popupText}>
+                  Info
+                  <div className={cs.popupSubtitle}>
+                    {" "}
+                    Not available on this tab
+                  </div>
+                </div>
+              ) : (
+                "Info"
+              )
+            }
+            basic={false}
             mouseEnterDelay={600}
             mouseLeaveDelay={200}
-            position="bottom center"
+            position={disabledVisualizations ? "top right" : "bottom center"}
           />
         </div>
       </div>

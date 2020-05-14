@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .header {
   display: flex;
@@ -14,13 +15,11 @@
       fill: $light-grey;
     }
 
-    &:hover {
-      fill: $primary-lighter;
+    &:not(:disabled) {
+      &:hover {
+        fill: $primary-lighter;
+      }
     }
-  }
-
-  .noHover {
-    pointer-events: none !important;
   }
 
   .filtersTrigger {
@@ -44,6 +43,10 @@
       right: -12px;
       vertical-align: middle;
     }
+
+    &.disabled {
+      cursor: default;
+    }
   }
 
   .blankFill {
@@ -65,5 +68,13 @@
 
   .searchContainer {
     margin-right: 25px;
+  }
+}
+
+.popupText {
+  @include font-body-xxs;
+
+  .popupSubtitle {
+    color: $medium-grey;
   }
 }
