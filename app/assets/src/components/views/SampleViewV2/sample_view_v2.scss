@@ -42,12 +42,12 @@
 
       .reportInfoMsg {
         &:not(:first-child) {
-          margin-left: $space-xxxs;
+          margin-left: $space-xxs;
         }
       }
 
       .clearAllFilters {
-        margin-left: $space-xxxs;
+        margin-left: $space-xxs;
         font-weight: $font-weight-semibold;
         white-space: nowrap;
         cursor: pointer;
@@ -83,7 +83,7 @@
   margin-top: 100px;
 
   .textContainer {
-    margin-top: $space-xs;
+    margin-top: $space-s;
     margin-right: 18px;
     width: 330px;
 
@@ -92,7 +92,7 @@
       align-items: center;
       background-color: $error-lightest;
       border-radius: 15px;
-      padding: 3px $space-xs;
+      padding: 3px $space-s;
 
       .icon {
         width: 20px;
@@ -100,7 +100,7 @@
 
       .text {
         @include font-label-s;
-        margin-left: $space-xs;
+        margin-left: $space-s;
         margin-top: 1px;
       }
 
@@ -144,15 +144,15 @@
 
     .message {
       @include font-header-m;
-      margin-bottom: $space-xs;
-      margin-top: $space-xs;
+      margin-bottom: $space-s;
+      margin-top: $space-s;
       margin-left: 2px;
     }
 
     .actionLink {
       @include font-header-xxs;
       color: $primary-light !important;
-      margin-top: $space-s;
+      margin-top: $space-m;
       margin-left: 2px;
 
       .rightArrow {

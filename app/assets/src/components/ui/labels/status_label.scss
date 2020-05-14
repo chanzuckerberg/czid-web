@@ -6,8 +6,8 @@
   @include font-label-xxs;
   line-height: 9px;
   border-radius: 13px;
-  margin-left: $space-xxs;
-  padding: $space-xxxs $space-xxs;
+  margin-left: $space-xs;
+  padding: $space-xxs $space-xs;
 
   &.default {
     background-color: $lightest-grey;
