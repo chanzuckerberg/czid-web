@@ -71,16 +71,13 @@ class DiscoveryHeader extends React.Component {
       tabs,
     } = this.props;
 
-    let disabledVisualizations = currentTab === "visualizations";
+    let disableSidebars = currentTab === "visualizations";
 
     return (
       <div className={cs.header}>
         <div
-          className={cx(
-            cs.filtersTrigger,
-            disabledVisualizations && cs.disabled
-          )}
-          onClick={disabledVisualizations ? undefined : onFilterToggle}
+          className={cx(cs.filtersTrigger, disableSidebars && cs.disabled)}
+          onClick={disableSidebars ? undefined : onFilterToggle}
         >
           <BasicPopup
             trigger={
@@ -88,11 +85,11 @@ class DiscoveryHeader extends React.Component {
                 <FiltersIcon
                   className={cx(
                     cs.filtersIcon,
-                    disabledVisualizations ? cs.disabledIcon : cs.icon,
+                    disableSidebars ? cs.disabledIcon : cs.icon,
                     !showFilters && cs.closed
                   )}
                 />
-                {!disabledVisualizations && (
+                {!disableSidebars && (
                   <Label
                     className={cs.filtersCounter}
                     circular
@@ -102,7 +99,7 @@ class DiscoveryHeader extends React.Component {
               </div>
             }
             content={
-              disabledVisualizations ? (
+              disableSidebars ? (
                 <div className={cs.popupText}>
                   Filters
                   <div className={cs.popupSubtitle}>
@@ -116,7 +113,7 @@ class DiscoveryHeader extends React.Component {
             basic={false}
             mouseEnterDelay={600}
             mouseLeaveDelay={200}
-            position={disabledVisualizations ? "top left" : "bottom center"}
+            position={disableSidebars ? "top left" : "bottom center"}
           />
         </div>
         <div className={cs.searchContainer}>
@@ -136,8 +133,8 @@ class DiscoveryHeader extends React.Component {
         />
         <div className={cs.blankFill} />
         <div
-          className={cx(cs.statsTrigger, disabledVisualizations && cs.disabled)}
-          onClick={disabledVisualizations ? undefined : onStatsToggle}
+          className={cx(cs.statsTrigger, disableSidebars && cs.disabled)}
+          onClick={disableSidebars ? undefined : onStatsToggle}
         >
           <BasicPopup
             trigger={
@@ -145,14 +142,14 @@ class DiscoveryHeader extends React.Component {
                 <InfoPanelIcon
                   className={cx(
                     cs.statsIcon,
-                    disabledVisualizations ? cs.disabledIcon : cs.icon,
+                    disableSidebars ? cs.disabledIcon : cs.icon,
                     !showStats && cs.closed
                   )}
                 />
               </div>
             }
             content={
-              disabledVisualizations ? (
+              disableSidebars ? (
                 <div className={cs.popupText}>
                   Info
                   <div className={cs.popupSubtitle}>
@@ -166,7 +163,7 @@ class DiscoveryHeader extends React.Component {
             basic={false}
             mouseEnterDelay={600}
             mouseLeaveDelay={200}
-            position={disabledVisualizations ? "top right" : "bottom center"}
+            position={disableSidebars ? "top right" : "bottom center"}
           />
         </div>
       </div>
