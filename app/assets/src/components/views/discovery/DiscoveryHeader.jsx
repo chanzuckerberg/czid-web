@@ -136,7 +136,7 @@ class DiscoveryHeader extends React.Component {
         />
         <div className={cs.blankFill} />
         <div
-          className={(cs.statsTrigger, disabledVisualizations && cs.disabled)}
+          className={cx(cs.statsTrigger, disabledVisualizations && cs.disabled)}
           onClick={disabledVisualizations ? undefined : onStatsToggle}
         >
           <BasicPopup

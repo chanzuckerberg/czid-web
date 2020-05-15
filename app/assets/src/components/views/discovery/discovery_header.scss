@@ -21,13 +21,8 @@
   }
 
   .disabledIcon {
-    fill: $primary-light;
-    cursor: default !important;
+    fill: $light-grey;
     width: 30px;
-
-    &.closed {
-      fill: $light-grey;
-    }
   }
 
   .filtersTrigger {
