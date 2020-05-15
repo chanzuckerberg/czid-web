@@ -3,7 +3,6 @@
 
 .header {
   display: flex;
-  cursor: pointer;
   flex-direction: row;
   align-items: center;
   margin-bottom: 10px;
@@ -16,15 +15,24 @@
       fill: $light-grey;
     }
 
-    &:not(:disabled) {
-      &:hover {
-        fill: $primary-lighter;
-      }
+    :hover {
+      fill: $primary-lighter;
+    }
+  }
+
+  .disabledIcon {
+    fill: $primary-light;
+    cursor: default !important;
+    width: 30px;
+
+    &.closed {
+      fill: $light-grey;
     }
   }
 
   .filtersTrigger {
     align-items: center;
+    cursor: pointer;
     display: flex;
     flex: 0 0 auto;
     position: relative;
@@ -45,16 +53,13 @@
     }
   }
 
-  .disabled {
-    cursor: default;
-  }
-
   .blankFill {
     flex: 1 0 auto;
   }
 
   .statsTrigger {
     align-items: center;
+    cursor: pointer;
     display: flex;
     flex: 0 0 auto;
     margin-left: 25px;
@@ -68,6 +73,10 @@
   .searchContainer {
     margin-right: 25px;
   }
+}
+
+.disabled {
+  cursor: default !important;
 }
 
 .popupText {

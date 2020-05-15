@@ -88,7 +88,7 @@ class DiscoveryHeader extends React.Component {
                 <FiltersIcon
                   className={cx(
                     cs.filtersIcon,
-                    cs.icon,
+                    disabledVisualizations ? cs.disabledIcon : cs.icon,
                     !showFilters && cs.closed
                   )}
                 />
@@ -143,7 +143,11 @@ class DiscoveryHeader extends React.Component {
             trigger={
               <div>
                 <InfoPanelIcon
-                  className={cx(cs.statsIcon, cs.icon, !showStats && cs.closed)}
+                  className={cx(
+                    cs.statsIcon,
+                    disabledVisualizations ? cs.disabledIcon : cs.icon,
+                    !showStats && cs.closed
+                  )}
                 />
               </div>
             }
