@@ -8,11 +8,11 @@
 
   .title {
     font-weight: bold;
-    margin-right: $space-xxs;
+    margin-right: $space-xs;
   }
 
   .link {
-    margin-left: $space-xxs;
+    margin-left: $space-xs;
     // override link color `inherit !important` in _header.scss
     color: $primary-lighter !important;
     text-decoration: underline;
@@ -21,12 +21,12 @@
 
   .ul {
     padding-left: 0;
-    margin-top: $space-s;
+    margin-top: $space-m;
     margin-bottom: 0;
 
     .li {
       list-style: disc inside none;
-      margin-bottom: $space-xxxs;
+      margin-bottom: $space-xxs;
     }
   }
 }

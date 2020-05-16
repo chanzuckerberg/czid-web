@@ -8,9 +8,9 @@
   color: $medium-grey;
   justify-content: flex-end;
   text-align: right;
-  margin-right: $space-m;
+  margin-right: $space-l;
   // Push all the headers down except nt/nr selector so the text is aligned.
-  margin-top: $space-m;
+  margin-top: $space-l;
 }
 
 .sortedHeader {
@@ -62,9 +62,9 @@
 
   color: $darkest-grey;
   font-weight: $font-weight-bold;
-  padding: $space-s 0;
+  padding: $space-m 0;
   text-align: right;
-  margin-right: $space-m;
+  margin-right: $space-l;
 }
 
 .stack {
@@ -72,7 +72,7 @@
 
   .stackElement {
     @include font-body-s;
-    line-height: $space-l;
+    line-height: $space-xl;
     font-weight: $font-weight-bold;
 
     &.lowlightValue {
@@ -104,7 +104,7 @@
     .countInfo {
       font-style: italic;
       font-weight: $font-weight-regular;
-      margin-left: $space-xxs;
+      margin-left: $space-xs;
       color: $medium-grey;
       white-space: normal;
     }
@@ -124,8 +124,8 @@
 .speciesRow {
   .nameCell {
     font-weight: $font-weight-regular;
-    margin-left: $space-s;
-    margin-right: $space-xxxs;
+    margin-left: $space-m;
+    margin-right: $space-xxs;
   }
 }
 
@@ -168,7 +168,7 @@
 
   .icon {
     flex: 0 0 auto;
-    margin-right: $space-xxs;
+    margin-right: $space-xs;
   }
 
   .data {

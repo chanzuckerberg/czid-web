@@ -20,7 +20,7 @@
   }
 
   .loadingMessage {
-    margin: $space-xl auto 0;
+    margin: $space-xxl auto 0;
   }
 
   .lightCell {
@@ -30,7 +30,7 @@
 }
 
 .autoUpdateWarning {
-  margin-bottom: $space-xxxs;
+  margin-bottom: $space-xxs;
 
   .link {
     text-decoration: underline;
@@ -39,8 +39,8 @@
 }
 
 .viewHeader {
-  margin-top: $space-xl;
-  margin-bottom: $space-xl;
+  margin-top: $space-xxl;
+  margin-bottom: $space-xxl;
 }
 
 .downloadNameHeader {
@@ -48,9 +48,9 @@
 }
 
 .tableContainer {
-  padding-top: $space-l;
+  padding-top: $space-xl;
 }
 
 .tableRow {
-  padding: 0 $space-l !important;
+  padding: 0 $space-xl !important;
 }

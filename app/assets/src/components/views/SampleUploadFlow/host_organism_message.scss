@@ -3,7 +3,7 @@
 @import "~styles/themes/typography";
 
 .listContainer {
-  margin: $space-s 0;
+  margin: $space-m 0;
 
   background-color: $info-bg;
 
@@ -15,7 +15,7 @@
 .messageContainer {
   @include font-body-xs;
 
-  margin: $space-s 0;
+  margin: $space-m 0;
 
   strong {
     font-weight: $font-weight-bold;
@@ -25,10 +25,10 @@
 .messageLine {
   @include font-body-xs;
 
-  margin: 0 $space-s;
-  padding: $space-s;
+  margin: 0 $space-m;
+  padding: $space-m;
   // .messageContainer margin + .icon margin + .icon width (see notification.scss)
-  margin: 0 calc(#{$space-s} + #{$space-m} + 20px);
+  margin: 0 calc(#{$space-m} + #{$space-l} + 20px);
 
   &:nth-child(odd) {
     background-color: $info-dark;
@@ -45,7 +45,7 @@
   }
 
   &:last-child {
-    margin-bottom: $space-m;
+    margin-bottom: $space-l;
   }
 }
 
