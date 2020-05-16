@@ -71,30 +71,49 @@ class DiscoveryHeader extends React.Component {
       tabs,
     } = this.props;
 
+    let disableSidebars = currentTab === "visualizations";
+
     return (
       <div className={cs.header}>
-        <div className={cs.filtersTrigger} onClick={onFilterToggle}>
+        <div
+          className={cx(cs.filtersTrigger, disableSidebars && cs.disabled)}
+          onClick={disableSidebars ? undefined : onFilterToggle}
+        >
           <BasicPopup
             trigger={
               <div>
                 <FiltersIcon
                   className={cx(
                     cs.filtersIcon,
-                    cs.icon,
+                    disableSidebars ? cs.disabledIcon : cs.icon,
                     !showFilters && cs.closed
                   )}
                 />
-                <Label
-                  className={cs.filtersCounter}
-                  circular
-                  text={filterCount}
-                />
+                {!disableSidebars && (
+                  <Label
+                    className={cs.filtersCounter}
+                    circular
+                    text={filterCount}
+                  />
+                )}
               </div>
             }
-            content="Filters"
+            content={
+              disableSidebars ? (
+                <div className={cs.popupText}>
+                  Filters
+                  <div className={cs.popupSubtitle}>
+                    Not available on this tab
+                  </div>
+                </div>
+              ) : (
+                "Filters"
+              )
+            }
+            basic={false}
             mouseEnterDelay={600}
             mouseLeaveDelay={200}
-            position="bottom center"
+            position={disableSidebars ? "top left" : "bottom center"}
           />
         </div>
         <div className={cs.searchContainer}>
@@ -113,19 +132,38 @@ class DiscoveryHeader extends React.Component {
           hideBorder
         />
         <div className={cs.blankFill} />
-        <div className={cs.statsTrigger} onClick={onStatsToggle}>
+        <div
+          className={cx(cs.statsTrigger, disableSidebars && cs.disabled)}
+          onClick={disableSidebars ? undefined : onStatsToggle}
+        >
           <BasicPopup
             trigger={
               <div>
                 <InfoPanelIcon
-                  className={cx(cs.statsIcon, cs.icon, !showStats && cs.closed)}
+                  className={cx(
+                    cs.statsIcon,
+                    disableSidebars ? cs.disabledIcon : cs.icon,
+                    !showStats && cs.closed
+                  )}
                 />
               </div>
             }
-            content="Info"
+            content={
+              disableSidebars ? (
+                <div className={cs.popupText}>
+                  Info
+                  <div className={cs.popupSubtitle}>
+                    Not available on this tab
+                  </div>
+                </div>
+              ) : (
+                "Info"
+              )
+            }
+            basic={false}
             mouseEnterDelay={600}
             mouseLeaveDelay={200}
-            position="bottom center"
+            position={disableSidebars ? "top right" : "bottom center"}
           />
         </div>
       </div>
