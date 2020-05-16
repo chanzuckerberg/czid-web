@@ -12,16 +12,17 @@ class PipelineVizController < ApplicationController
     )
 
     if pipeline_run
-      # get wdl files if step function sample
+      remove_host_filtering_urls = current_user.id != sample.user_id
       begin
-        case pipeline_run.pipeline_execution_strategy
-        when PipelineRun.step_function
-          @results = PipelineVizDataServiceForSfn.call(pipeline_run.id, @show_experimental, current_user.id != sample.user_id)
-        when PipelineRun.directed_acyclic_graph
-          @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, current_user.id != sample.user_id)
+        if pipeline_run.step_function?
+          @results = PipelineVizDataServiceForSfn.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
+        elsif pipeline_run.directed_acyclic_graph?
+          @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
+        else
+          not_found && return
         end
       rescue StandardError => e
-        not_found(e)
+        not_found(e) && (return)
       end
 
       @pipeline_versions = sample.pipeline_versions
@@ -37,7 +38,7 @@ class PipelineVizController < ApplicationController
         format.json { render json: @results }
       end
     else
-      not_found()
+      not_found && return
     end
   end
 

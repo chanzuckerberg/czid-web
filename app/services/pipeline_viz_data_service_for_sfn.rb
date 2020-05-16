@@ -4,7 +4,7 @@ class PipelineVizDataServiceForSfn
   include PipelineRunsHelper
   include PipelineOutputsHelper
 
-  # Structures dag_json of each stage of the pipeline run into the following in @results for drawing
+  # Structures task definition of each stage of the pipeline run into the following in @results for drawing
   # the pipeline visualization graphs on the React side:
   # stages: An array of stages, each stage being an object with the following fields:
   #     - jobStatus: The job status of the stage
@@ -29,9 +29,54 @@ class PipelineVizDataServiceForSfn
   #
   # status: The status of the pipeline.
 
+  # Should be updated once async notifications are implemented
+
   # s3 folder for sfn results: pipeline_run.sfn_results_path
 
+  FASTQ_VARS = ['fastqs_0', 'fastqs_1'].freeze
+
   WDL_PARSER = 'app/jobs/parse_wdl_workflow.py'.freeze
+
+  SFN_STEP_TO_DAG_STEP_NAME = {
+    PipelineRunStage::HOST_FILTERING_STAGE_NAME => {
+      "RunValidateInput" => "validate_input_out",
+      "RunStar" => "star_out",
+      "RunTrimmomatic" => "trimmomatic_out",
+      "RunPriceSeq" => "priceseq_out",
+      "RunCDHitDup" => "cdhitdup_out",
+      "RunLZW" => "lzw_out",
+      "RunBowtie2" => "bowtie2_out",
+      "RunSubsample" => "subsampled_out",
+      "RunGsnapFilter" => "gsnap_filter_out",
+    },
+    PipelineRunStage::ALIGNMENT_STAGE_NAME => {
+      "RunAlignmentRemotely_gsnap_out" => "gsnap_out",
+      "RunAlignmentRemotely_rapsearch2_out" => "rapsearch2_out",
+      "CombineTaxonCounts" => "taxon_count_out",
+      "GenerateAnnotatedFasta" => "annotated_out",
+    },
+    PipelineRunStage::POSTPROCESS_STAGE_NAME => {
+      "RunAssembly" => "assembly_out",
+      "GenerateCoverageStats" => "coverage_out",
+      "DownloadAccessions_gsnap_accessions_out" => "gsnap_accessions_out",
+      "DownloadAccessions_rapsearch2_accessions_out" => "rapsearch2_accessions_out",
+      "BlastContigs_refined_gsnap_out" => "refined_gsnap_out",
+      "BlastContigs_refined_rapsearch2_out" => "refined_rapsearch2_out",
+      "CombineTaxonCounts" => "refined_taxon_count_out",
+      "CombineJson" => "contig_summary_out",
+      "GenerateAnnotatedFasta" => "refined_annotated_out",
+      "GenerateTaxidFasta" => "refined_taxid_fasta_out",
+      "GenerateTaxidLocator" => "refined_taxid_locator_out",
+    },
+    PipelineRunStage::EXPT_STAGE_NAME => {
+      "GenerateTaxidFasta" => "taxid_fasta_out",
+      "GenerateTaxidLocator" => "taxid_locator_out",
+      "GenerateAlignmentViz" => "alignment_viz_out",
+      "RunSRST2" => "srst2_out",
+      "GenerateCoverageViz" => "coverage_viz_out",
+      "NonhostFastq" => "nonhost_fastq_out",
+    },
+  }.freeze
 
   class ParseWdlError < StandardError
     def initialize(error)
@@ -41,13 +86,25 @@ class PipelineVizDataServiceForSfn
 
   def initialize(pipeline_run_id, see_experimental, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
-    @all_wdls = retrieve_wdls(@pipeline_run)
-    @parsed_wdls = parse_wdls(@all_wdls)
+    s3_folder = @pipeline_run.sample.sample_wdl_s3_path
     @stage_names = []
     @stage_job_statuses = []
+    @all_stage_info = []
+
     @pipeline_run.pipeline_run_stages.each do |stage|
-      if stage.name != "Experimental" || see_experimental
+      if stage.name != PipelineRunStage::EXPT_STAGE_NAME || see_experimental
         @stage_names.push(stage.name)
+        stage_info = {}
+        if stage.step_map.nil? || stage.step_map.blank?
+          Rails.logger.info("Retrieving wdl for #{stage.name}")
+          stage_wdl = retrieve_wdl(stage.dag_name, s3_folder)
+          stage_info = parse_wdl(stage_wdl)
+          Rails.logger.info("Keys for #{stage.name}: #{stage_info.keys}")
+          Rails.logger.info("Steps for #{stage.name}: #{stage_info['steps']}")
+        else
+          stage_info = JSON.parse(stage.step_map)
+        end
+        @all_stage_info.push(stage_info)
         @stage_job_statuses.push(stage.job_status)
       end
     end
@@ -57,7 +114,9 @@ class PipelineVizDataServiceForSfn
 
   def call
     stages = create_stage_nodes_scaffolding
+    Rails.logger.info("Stage Nodes:\n#{stages}")
     edges = create_edges
+    Rails.logger.info("Edges:\n#{edges}")
     populate_nodes_with_edges(stages, edges)
 
     return { stages: stages, edges: edges, status: pipeline_job_status(stages) }
@@ -66,20 +125,29 @@ class PipelineVizDataServiceForSfn
   private
 
   def create_stage_nodes_scaffolding
-    step_statuses_by_stage = @pipeline_run.step_statuses_by_stage
-    stages = @all_dag_jsons.map.with_index do |dag_json, stage_index|
-      stage_step_statuses = step_statuses_by_stage[stage_index]
-      stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
+    all_step_statuses = @pipeline_run.step_statuses_by_stage
+
+    stages = @all_stage_info.map.with_index do |stage_info, stage_index|
+      stage_name = @stage_names[stage_index]
+      step_statuses = all_step_statuses[stage_index]
+      step_descriptions = STEP_DESCRIPTIONS[stage_name]["steps"]
 
       all_redefined_statuses = []
-      steps = dag_json["steps"].map do |step|
-        status_info = stage_step_statuses[step["out"]] || {}
-        description = status_info["description"].blank? ? stage_step_descriptions[step["out"]] : status_info["description"]
+
+      steps = stage_info["steps"].map do |step|
+        # Get dag step name to retrieve step descriptions and status info.
+        # Descriptions for steps may be in the PipelineRunsHelper module,
+        # or in the status.json files on S3.
+        dag_name = SFN_STEP_TO_DAG_STEP_NAME[stage_name][step]
+        status_info = step_statuses[dag_name] || {}
+        description = status_info["description"].blank? ? step_descriptions[dag_name] : status_info["description"]
+
         status = redefine_job_status(status_info["status"], @stage_job_statuses[stage_index])
-        all_redefined_statuses << status
+        all_redefined_statuses.push(status)
+
         {
-          name: modify_step_name(step["out"]),
-          description: description,
+          name: step,
+          description: description || "",
           inputEdges: [],
           outputEdges: [],
           status: status,
@@ -131,103 +199,206 @@ class PipelineVizDataServiceForSfn
 
   def pipeline_job_status(stages)
     existing_stages_status = stage_job_status(stages.map { |stage| stage[:jobStatus] })
-    if existing_stages_status == "finished" && @all_dag_jsons.length != (@see_experimental ? 4 : 3)
+    if existing_stages_status == "finished" && @all_stage_info.length != (@see_experimental ? 4 : 3)
       return "inProgress"
     end
     return existing_stages_status
   end
 
+  # edges: An array of edges, each edge object having the following structure:
+  #     - from: An object containing a stageIndex and stepIndex, denoting the originating node it is from
+  #     - to: An object containing a stageIndex and stepIndex, denoating the node it ends after
+  #     - files: An array of file objects that get passed between the from and to nodes. It is composed of:
+  #           - displayName: A string to display the file as
+  #           - url: An optional string to download the file
   def create_edges
-    file_path_to_info = {}
-    @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version).each do |file_entry|
-      file_path_to_info[file_entry[:key]] = file_entry
-    end
-    edges = input_output_to_file_paths.map do |input_output_json, file_paths|
-      files = file_paths.map { |file_path| file_info(file_path, file_path_to_info) }
-      edge_info = JSON.parse(input_output_json, symbolize_names: true)
-      edge_info.merge(files: files,
-                      isIntraStage: (edge_info.key?(:to) && edge_info.key?(:from) && edge_info[:to][:stageIndex] == edge_info[:from][:stageIndex]) || false)
-    end
-    @remove_host_filtering_urls && remove_host_filtering_urls(edges)
-    return edges
-  end
+    all_edges = {}
 
-  def input_output_to_file_paths
-    file_paths_to_input_outputs = file_path_to_inputting_steps
-                                  .merge(file_path_to_outputting_step) do |_file_path, to_array, from|
-      to_array.map { |to| to.merge(from) }
-    end
+    pr_files = {}
+    pr_file_array = @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version)
+    # store results folder files as a hash, with the display_name as the key
+    pr_file_array.each { |f| pr_files[f[:display_name]] = f }
 
-    input_output_to_file_paths = {}
-    file_paths_to_input_outputs.each do |file_path, input_outputs|
-      # Convert those with only "from" and not "to", which are not arrays due to no conflicting keys in merge.
-      unless input_outputs.is_a? Array
-        input_outputs = [input_outputs]
-      end
+    file_mapping = create_file_mapping
+    step_mapping = create_step_mapping
 
-      input_outputs.each do |input_output|
-        input_output = input_output.to_json
-        unless input_output_to_file_paths.key? input_output
-          input_output_to_file_paths[input_output] = []
-        end
-        input_output_to_file_paths[input_output].push(file_path)
-      end
-    end
-    input_output_to_file_paths
-  end
+    # do the thing
+    file_mapping.each do |file, filemap|
+      Rails.logger.info("Creating edges for #{file}")
+      file_edges = []
+      prototype_edge = {}
 
-  def file_path_to_outputting_step
-    file_path_to_outputting_step = {}
-    step_statuses_by_stage = @pipeline_run.step_statuses_by_stage
-    @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
-      stage_dag_json["steps"].each_with_index do |step, step_index|
-        stage_dag_json["targets"][step["out"]].each do |file_name|
-          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
-          file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
-        end
-        step_statuses = step_statuses_by_stage[stage_index]
-        get_additional_outputs(step_statuses, step["out"]).each do |filename|
-          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{filename}"
-          file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
+      # create the file object
+      file_object = {
+        displayName: file,
+        url: nil,
+      }
+      if filemap[:filename].present?
+        result_file_info = pr_files[filemap[:filename]]
+        if result_file_info.present?
+          file_object[:displayName] = result_file_info[:display_name] || file
+          file_object[:url] = result_file_info[:url]
         end
       end
+      prototype_edge[:files] = [file_object]
+      # all the edges for the file will have the same from
+      if filemap[:from].present?
+        from_step_name = filemap[:from]
+        Rails.logger.info("From: #{from_step_name}")
+        from = step_mapping[from_step_name]
+        prototype_edge[:from] = from
+        # used for the edge key
+        from_stage = from[:stageIndex]
+        from_step = from[:stepIndex]
+        prototype_edge[:key] = "from_#{from_stage}_#{from_step}"
+      end
+      # how many edges we create depends on the number of inputs the
+      # file is used as. Steps are in the :to key.
+      # if this file isn't an imput to anything, just return one edge
+      if filemap[:to].empty?
+        file_edges.push(prototype_edge)
+      else
+        filemap[:to].each do |dest_step_name|
+          Rails.logger.info("To: #{dest_step_name}")
+          new_edge = {}
+          to = step_mapping[dest_step_name]
+          new_edge[:to] = to
+          to_stage = to[:stageIndex]
+          to_step = to[:stepIndex]
+          new_edge[:key] = "_to_#{to_stage}_#{to_step}"
+          if prototype_edge[:from]
+            new_edge[:from] = prototype_edge[:from]
+            new_edge[:key] = prototype_edge[:key] + new_edge[:key]
+          end
+          if prototype_edge[:files]
+            new_edge[:files] = prototype_edge[:files]
+          end
+          file_edges.push(new_edge)
+        end
+      end
+      # now we integrate the edges into our collection
+      file_edges.each do |edge|
+        key = edge[:key]
+        Rails.logger.info("Adding to key #{key}")
+        if all_edges[key]
+          all_edges[key][:files].concat(edge[:files])
+        else
+          all_edges[key] = edge
+        end
+      end
     end
-    file_path_to_outputting_step
+    return all_edges.values
   end
 
-  def file_path_to_inputting_steps
-    file_path_to_inputting_steps = {}
-    @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
-      stage_dag_json["steps"].each_with_index do |step, step_index|
-        step["in"].each do |in_target|
-          stage_dag_json["targets"][in_target].each do |file_name|
-            file_path = if stage_dag_json["given_targets"].key? in_target
-                          "#{stage_dag_json['given_targets'][in_target]['s3_dir']}/#{file_name}"
-                        else
-                          "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
-                        end
+  # Map step names to a stage index and step index
+  def create_step_mapping
+    step_map = {}
+    step_map['SampleUpload'] = {
+      stageIndex: 0,
+      stepIndex: 0,
+    }
+    Rails.logger.info("Creating step map")
+    @all_stage_info.each_with_index do |stage, stage_index|
+      Rails.logger.info("Mapping indices for STAGE: #{stage_index}")
+      stage['steps'].each_with_index do |step, step_index|
+        Rails.logger.info("Mapping indices for STEP: #{step}: #{stage_index}:#{step_index}")
+        step_map[step] = {
+          stageIndex: stage_index,
+          stepIndex: step_index,
+        }
+      end
+    end
+    return step_map
+  end
 
-            unless file_path_to_inputting_steps.key? file_path
-              file_path_to_inputting_steps[file_path] = []
-            end
-            file_path_to_inputting_steps[file_path].push(to: { stageIndex: stage_index, stepIndex: step_index })
+  # Collect information on all inputs and outputs
+  def create_file_mapping
+    files = {}
+    @all_stage_info.each_with_index do |stage, stage_index|
+      stage_files = stage['files']
+      stage_files.each do |file, info|
+        Rails.logger.info("Mapping info for file #{file}")
+        file_var = file
+        from = info['output_from'] || ""
+        to = info['input_to'] || []
+        filename = info['file'] || ""
+
+        if FASTQ_VARS.include?(file)
+          from = "SampleUpload"
+        end
+
+        # check for file aliases
+        if from.blank?
+          search_alias = find_file_alias(file_var, stage_index)
+          if search_alias.present?
+            Rails.logger.info("Alias found: #{search_alias}")
+            file_var = search_alias
           end
         end
+
+        if files.key?(file_var)
+          Rails.logger.info("Adding to existing mapping for #{file_var}")
+          files[file_var][:from] = files[file_var][:from].blank? ? from : files[file_var][:from]
+          files[file_var][:to] = files[file_var][:to].concat(to)
+          files[file_var][:filename] = files[file_var][:filename].blank? ? filename : files[file_var][:filename]
+        else
+          Rails.logger.info("Creating new mapping for #{file_var}")
+          files[file_var] = {
+            from: from,
+            to: to,
+            filename: filename,
+          }
+        end
       end
     end
-    file_path_to_inputting_steps
+    return files
   end
 
-  def remove_bucket_from_s3_path(s3_path)
-    s3_path.split('/', 4).last # Remove s3://idseq-.../ to match key
+  def find_file_alias(file_var, stage_index)
+    if stage_index == 0
+      return ""
+    end
+    previous_stage = stage_index - 1
+    search_key = file_var
+    # check if this file variable appears in previous outputs
+    other_alias = alias_search(search_key, previous_stage)
+    if other_alias.present?
+      return other_alias
+    end
+    # sometimes prefixes are appended to the file variables,
+    # like host_filter_out_ or taxid_fasta_in_
+    if search_key.include?("_in_")
+      search_key = search_key.partition("_in_")[2] # get the tail
+    elsif search_key.include?("_out_")
+      search_key = search_key.partition("_out_")[2]
+    end
+    # one last try
+    if search_key != file_var
+      Rails.logger.info("Trying #{file_var} as #{search_key}")
+    end
+    return suffix_search(search_key, previous_stage)
   end
 
-  def file_info(file_path, file_path_to_info)
-    file_path = remove_bucket_from_s3_path(file_path)
-    file_info = file_path_to_info[file_path]
-    display_name = file_info ? file_info[:display_name] : file_path.split("/").last
-    url = file_info ? file_info[:url] : nil
-    { displayName: display_name, url: url }
+  def alias_search(search_key, previous_stage)
+    # first check if it appears renamed in a stage output
+    previous_stage.downto(0) do |i|
+      prior_outputs = @all_stage_info[i]['outputs']
+      if prior_outputs.key?(search_key)
+        return prior_outputs[search_key]
+      end
+    end
+    return ""
+  end
+
+  def suffix_search(search_key, previous_stage)
+    # then check if it appears in a previous stage's files
+    previous_stage.downto(0) do |i|
+      prior_files = @all_stage_info[i]['files']
+      if prior_files.key?(search_key)
+        return search_key
+      end
+    end
+    return "" # ~~ it is a mystery ~~
   end
 
   def populate_nodes_with_edges(stages_with_nodes, edges)
@@ -243,10 +414,6 @@ class PipelineVizDataServiceForSfn
         stages_with_nodes[to_stage_index][:steps][to_step_index][:inputEdges].push(edge_index)
       end
     end
-  end
-
-  def modify_step_name(step_name)
-    step_name.gsub(/(_out)$/, "").titleize
   end
 
   def remove_host_filtering_urls(edges)
@@ -266,36 +433,24 @@ class PipelineVizDataServiceForSfn
     end
   end
 
-  def retrieve_wdls(pipeline_run)
-    s3_folder = pipeline_run.sample.sample_wdl_s3_path
+  def retrieve_wdl(stage_dag_name, s3_folder)
     bucket, prefix = S3Util.parse_s3_path(s3_folder)
-    response = S3_CLIENT.list_objects_v2(bucket: bucket,
-                                         prefix: prefix)
-    objects = response.contents.map(&:key)
-    wdl_keys = objects.select { |o| o[/\.wdl$/] }
-    wdls = {}
-    wdl_keys.each do |key|
-      response = S3_CLIENT.get_object(bucket: bucket,
-                                      key: key)
-      wdl = response.body.read
-      stage_name = File.basename(key, '.wdl')
-      wdls[stage_name] = wdl
-    end
-    return wdls
+    key = "#{prefix}/#{stage_dag_name}.wdl"
+    response = S3_CLIENT.get_object(bucket: bucket,
+                                    key: key)
+    wdl = response.body.read
+    return wdl
   end
 
-  def parse_wdls(wdls)
-    parsed = {}
-    wdls.each_pair do |stage, wdl|
-      stdout, _stderr, status = Open3.capture3(
-        WDL_PARSER,
-        stdin_data: wdl
-      )
-      unless status.success?
-        raise ParseWdlError
-      end
-      parsed[stage] = JSON.parse(stdout)
+  def parse_wdl(wdl)
+    stdout, _stderr, status = Open3.capture3(
+      WDL_PARSER,
+      stdin_data: wdl
+    )
+    unless status.success?
+      raise ParseWdlError
     end
+    parsed = JSON.parse(stdout)
     return parsed
   end
 end
