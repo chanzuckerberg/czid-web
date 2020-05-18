@@ -289,12 +289,12 @@ module SamplesHelper
     samples.where(id: matching_sample_ids)
   end
 
-  def get_total_runtime(pipeline_run, run_stages)
+  def get_total_runtime(pipeline_run, _run_stages)
     if pipeline_run.finalized?
-      # total processing time (without time spent waiting), for performance evaluation
-      (run_stages || []).map { |rs| rs.updated_at - rs.created_at }.sum
+      # total processing time
+      (pipeline_run.updated_at - pipeline_run.created_at)
     else
-      # time since pipeline kickoff (including time spent waiting), for run diagnostics
+      # time since pipeline kickoff
       (Time.current - pipeline_run.created_at)
     end
   end
