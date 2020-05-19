@@ -247,10 +247,15 @@ class PipelineVizDataServiceForSfn
           to = step_mapping[dest_step_name]
           to_key = "_to_#{to[:stageIndex]}_#{to[:stepIndex]}"
           push_key = key ? key + to_key : to_key
-          file_edges.push(from: from,
-                          to: to,
-                          key: push_key,
-                          files: [{ displayName: display_name, url: url }])
+          new_edge = {
+            to: to,
+            key: push_key,
+            files: [{ displayName: display_name, url: url }],
+          }
+          if from.present?
+            new_edge[:from] = from
+          end
+          file_edges.push(new_edge)
         end
       end
       # now we integrate the edges into our collection
@@ -290,8 +295,7 @@ class PipelineVizDataServiceForSfn
       stage_files = stage['files']
       stage_files.each do |file, info|
         file_key = file
-        var_name = info['var_name']
-        from = info['output_from'] || ""
+        from, var_name = file.split(".")
         to = info['input_to'] || []
         filename = info['filename'] || ""
 
@@ -344,9 +348,11 @@ class PipelineVizDataServiceForSfn
   def alias_search(search_key, previous_stage)
     # first check if it appears renamed in a stage output
     previous_stage.downto(0) do |i|
-      prior_outputs = @all_stage_info[i]['outputs']
-      if prior_outputs.key?(search_key)
-        return prior_outputs[search_key]
+      prior_files = @all_stage_info[i]['files']
+      prior_files.each do |file_key, info|
+        if search_key == info['alias']
+          return file_key
+        end
       end
     end
     return ""
@@ -356,9 +362,10 @@ class PipelineVizDataServiceForSfn
     # then check if it appears in a previous stage's files
     previous_stage.downto(0) do |i|
       prior_files = @all_stage_info[i]['files']
-      prior_files.each do |file_key, file_info|
+      prior_files.each do |file_key, _|
         # some files actually refer to assembly files
-        possible_aliases = [file_info['var_name'], file_info['var_name'].partition("assembly_")[2]]
+        _, var_name = file_key.split(".")
+        possible_aliases = [var_name, var_name.partition("assembly_")[2]]
         if possible_aliases.include?(search_key)
           return file_key
         end
@@ -414,12 +421,12 @@ class PipelineVizDataServiceForSfn
   end
 
   def parse_wdl(wdl)
-    stdout, _stderr, status = Open3.capture3(
+    stdout, stderr, status = Open3.capture3(
       WDL_PARSER,
       stdin_data: wdl
     )
     unless status.success?
-      raise ParseWdlError
+      raise ParseWdlError, stderr
     end
     parsed = JSON.parse(stdout)
     return parsed

@@ -54,9 +54,7 @@ def main():
                 files[key]['input_to'].extend([step.name])
             else:
                 files[key] = {
-                    'output_from': output_from,
                     'input_to': [step.name],
-                    'var_name': output_var
                 }
 
     # collect filenames
@@ -68,19 +66,20 @@ def main():
                 files[key]['filename'] = filename
             else:
                 files[key] = {
-                    'output_from': task.name,
-                    'var_name': var_name,
                     'filename': filename
                 }
 
     # collect stage output aliases
     outputs = {}
-    for output_file in doc.workflow.outputs:
-        outputs[output_file.name] = output_file.expr.expr.name
+    for output in doc.workflow.outputs:
+        if type(output.type) == WDL.Type.File:
+            key = output.expr.expr.name
+            files[key]['alias'] = output.name
 
-    parsed = { 'steps': steps, 'files': files, 'outputs': outputs }
+    parsed = { 'steps': steps, 'files': files }
     # Return to stdout
     print(json.dumps(parsed))
+
 
 
 if __name__ == "__main__":
