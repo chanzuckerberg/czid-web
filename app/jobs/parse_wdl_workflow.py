@@ -20,44 +20,65 @@ def main():
     doc = WDL.load("stdin", read_source=read_stdin)
     assert doc.workflow, "No workflow in WDL document"
 
-    # collect step inputs and outputs
+
+    # collect stage inputs
+    stage_inputs = set()
+    for input_file in doc.workflow.inputs:
+        stage_inputs.add(input_file.name)
+
+    # collect step names and inputs
     steps = []
     files = {}
-    for task in doc.tasks:
-        steps.append(task.name)
-        # collect inputs - they don't have filenames
-        input_names = [task_input.name for task_input in task.inputs if type(task_input.type) == WDL.Type.File]
-        for input_name in input_names:
-            if input_name in files:
-                current_inputs = files[input_name]['input_to']
-                current_inputs.append(task.name)
-                files[input_name]['input_to'] = current_inputs
+    for step in doc.workflow.body:
+        # each object in doc.workflow.body, a WDL.Tree.Call object, is a step
+        steps.append(step.name)
+        for short_name, reference in step.inputs.items():
+            reference_string = str(reference.expr.name) # some references evaluate to a Token
+            expression_components = reference_string.split('.')
+            output_var = None
+            output_from = None
+
+            if len(expression_components) > 1: # The file comes from another step in this stage
+                output_from = expression_components[0]
+                output_var = expression_components[1]
+            elif reference_string in stage_inputs: # The file comes from a previous stage
+                output_from = 'StageInput'
+                output_var = reference_string
             else:
-                files[input_name] = {
-                    'input_to': [task.name]
-                }
-        # collect outputs
-        output_name_mapping = [(output.name, output.expr.parts) for output in task.outputs if type(output.type) == WDL.Type.File]
-        for output_name, filename_parts in output_name_mapping:
-            if output_name in files:
-                files[output_name]['file'] = filename_parts[1] # WDL separates the string into quote chars and the actual path
-                files[output_name]['output_from'] = task.name
+                output_from = 'External'
+                output_var = reference_string
+
+            # add to files list
+            key = '.'.join([output_from, output_var])
+            if key in files:
+                files[key]['input_to'].extend([step.name])
             else:
-                files[output_name] = {
-                    'file': filename_parts[1],
-                    'output_from': task.name,
-                    'input_to': []
+                files[key] = {
+                    'output_from': output_from,
+                    'input_to': [step.name],
+                    'var_name': output_var
                 }
 
-    # translate internal variable names to output names
+    # collect filenames
+    for task in doc.tasks:
+        output_name_mapping = [(output.name, output.expr.parts[1]) for output in task.outputs if type(output.type) == WDL.Type.File]
+        for var_name, filename in output_name_mapping:
+            key = '.'.join([task.name, var_name])
+            if key in files:
+                files[key]['filename'] = filename
+            else:
+                files[key] = {
+                    'output_from': task.name,
+                    'var_name': var_name,
+                    'filename': filename
+                }
+
+    # collect stage output aliases
     outputs = {}
-    for output in doc.workflow.outputs:
-        internal_location = output.expr.expr.name
-        internal_name = internal_location.split('.')[1]
-        outputs[output.name] = internal_name
+    for output_file in doc.workflow.outputs:
+        outputs[output_file.name] = output_file.expr.expr.name
 
     parsed = { 'steps': steps, 'files': files, 'outputs': outputs }
-
     # Return to stdout
     print(json.dumps(parsed))
 

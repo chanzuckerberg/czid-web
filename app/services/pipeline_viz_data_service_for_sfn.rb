@@ -33,8 +33,6 @@ class PipelineVizDataServiceForSfn
 
   # s3 folder for sfn results: pipeline_run.sfn_results_path
 
-  FASTQ_VARS = ['fastqs_0', 'fastqs_1'].freeze
-
   WDL_PARSER = 'app/jobs/parse_wdl_workflow.py'.freeze
 
   SFN_STEP_TO_DAG_STEP_NAME = {
@@ -96,11 +94,8 @@ class PipelineVizDataServiceForSfn
         @stage_names.push(stage.name)
         stage_info = {}
         if stage.step_map.nil? || stage.step_map.blank?
-          Rails.logger.info("Retrieving wdl for #{stage.name}")
           stage_wdl = retrieve_wdl(stage.dag_name, s3_folder)
           stage_info = parse_wdl(stage_wdl)
-          Rails.logger.info("Keys for #{stage.name}: #{stage_info.keys}")
-          Rails.logger.info("Steps for #{stage.name}: #{stage_info['steps']}")
         else
           stage_info = JSON.parse(stage.step_map)
         end
@@ -114,9 +109,7 @@ class PipelineVizDataServiceForSfn
 
   def call
     stages = create_stage_nodes_scaffolding
-    Rails.logger.info("Stage Nodes:\n#{stages}")
     edges = create_edges
-    Rails.logger.info("Edges:\n#{edges}")
     populate_nodes_with_edges(stages, edges)
 
     return { stages: stages, edges: edges, status: pipeline_job_status(stages) }
@@ -224,84 +217,63 @@ class PipelineVizDataServiceForSfn
 
     # do the thing
     file_mapping.each do |file, filemap|
-      Rails.logger.info("Creating edges for #{file}")
       file_edges = []
-      prototype_edge = {}
+      from = nil
+      key = nil
 
-      # create the file object
-      file_object = {
-        displayName: file,
-        url: nil,
-      }
+      display_name = file
+      url = nil
       if filemap[:filename].present?
         result_file_info = pr_files[filemap[:filename]]
         if result_file_info.present?
-          file_object[:displayName] = result_file_info[:display_name] || file
-          file_object[:url] = result_file_info[:url]
+          display_name = result_file_info[:display_name]
+          url = result_file_info[:url]
         end
       end
-      prototype_edge[:files] = [file_object]
       # all the edges for the file will have the same from
-      if filemap[:from].present?
-        from_step_name = filemap[:from]
-        Rails.logger.info("From: #{from_step_name}")
-        from = step_mapping[from_step_name]
-        prototype_edge[:from] = from
-        # used for the edge key
-        from_stage = from[:stageIndex]
-        from_step = from[:stepIndex]
-        prototype_edge[:key] = "from_#{from_stage}_#{from_step}"
+      if filemap[:from].present? && step_mapping[filemap[:from]].present?
+        from = step_mapping[filemap[:from]]
+        key = "from_#{from[:stageIndex]}_#{from[:stepIndex]}"
       end
       # how many edges we create depends on the number of inputs the
       # file is used as. Steps are in the :to key.
-      # if this file isn't an imput to anything, just return one edge
+      # if this file isn't an input to anything, just return one edge
       if filemap[:to].empty?
-        file_edges.push(prototype_edge)
+        file_edges.push(from: from,
+                        key: key,
+                        files: [{ displayName: display_name, url: url }])
       else
         filemap[:to].each do |dest_step_name|
-          Rails.logger.info("To: #{dest_step_name}")
-          new_edge = {}
           to = step_mapping[dest_step_name]
-          new_edge[:to] = to
-          to_stage = to[:stageIndex]
-          to_step = to[:stepIndex]
-          new_edge[:key] = "_to_#{to_stage}_#{to_step}"
-          if prototype_edge[:from]
-            new_edge[:from] = prototype_edge[:from]
-            new_edge[:key] = prototype_edge[:key] + new_edge[:key]
-          end
-          if prototype_edge[:files]
-            new_edge[:files] = prototype_edge[:files]
-          end
-          file_edges.push(new_edge)
+          to_key = "_to_#{to[:stageIndex]}_#{to[:stepIndex]}"
+          push_key = key ? key + to_key : to_key
+          file_edges.push(from: from,
+                          to: to,
+                          key: push_key,
+                          files: [{ displayName: display_name, url: url }])
         end
       end
       # now we integrate the edges into our collection
       file_edges.each do |edge|
-        key = edge[:key]
-        Rails.logger.info("Adding to key #{key}")
-        if all_edges[key]
-          all_edges[key][:files].concat(edge[:files])
+        edge_key = edge[:key]
+        if all_edges[edge_key]
+          all_edges[edge_key][:files].concat(edge[:files])
         else
-          all_edges[key] = edge
+          all_edges[edge_key] = edge
         end
       end
     end
+
+    # filter edges that aren't complete connections
+    # return all_edges.values.select { |edge| edge[:from].present? && edge[:to].present? }
     return all_edges.values
   end
 
   # Map step names to a stage index and step index
   def create_step_mapping
     step_map = {}
-    step_map['SampleUpload'] = {
-      stageIndex: 0,
-      stepIndex: 0,
-    }
-    Rails.logger.info("Creating step map")
     @all_stage_info.each_with_index do |stage, stage_index|
-      Rails.logger.info("Mapping indices for STAGE: #{stage_index}")
       stage['steps'].each_with_index do |step, step_index|
-        Rails.logger.info("Mapping indices for STEP: #{step}: #{stage_index}:#{step_index}")
         step_map[step] = {
           stageIndex: stage_index,
           stepIndex: step_index,
@@ -317,33 +289,24 @@ class PipelineVizDataServiceForSfn
     @all_stage_info.each_with_index do |stage, stage_index|
       stage_files = stage['files']
       stage_files.each do |file, info|
-        Rails.logger.info("Mapping info for file #{file}")
-        file_var = file
+        file_key = file
+        var_name = info['var_name']
         from = info['output_from'] || ""
         to = info['input_to'] || []
-        filename = info['file'] || ""
-
-        if FASTQ_VARS.include?(file)
-          from = "SampleUpload"
-        end
+        filename = info['filename'] || ""
 
         # check for file aliases
-        if from.blank?
-          search_alias = find_file_alias(file_var, stage_index)
+        if from.blank? || from == 'StageInput'
+          search_alias = find_file_alias(var_name, stage_index)
           if search_alias.present?
-            Rails.logger.info("Alias found: #{search_alias}")
-            file_var = search_alias
+            file_key = search_alias
           end
         end
 
-        if files.key?(file_var)
-          Rails.logger.info("Adding to existing mapping for #{file_var}")
-          files[file_var][:from] = files[file_var][:from].blank? ? from : files[file_var][:from]
-          files[file_var][:to] = files[file_var][:to].concat(to)
-          files[file_var][:filename] = files[file_var][:filename].blank? ? filename : files[file_var][:filename]
+        if files.key?(file_key)
+          files[file_key][:to] = files[file_key][:to].concat(to)
         else
-          Rails.logger.info("Creating new mapping for #{file_var}")
-          files[file_var] = {
+          files[file_key] = {
             from: from,
             to: to,
             filename: filename,
@@ -374,7 +337,6 @@ class PipelineVizDataServiceForSfn
     end
     # one last try
     if search_key != file_var
-      Rails.logger.info("Trying #{file_var} as #{search_key}")
     end
     return suffix_search(search_key, previous_stage)
   end
@@ -394,8 +356,12 @@ class PipelineVizDataServiceForSfn
     # then check if it appears in a previous stage's files
     previous_stage.downto(0) do |i|
       prior_files = @all_stage_info[i]['files']
-      if prior_files.key?(search_key)
-        return search_key
+      prior_files.each do |file_key, file_info|
+        # some files actually refer to assembly files
+        possible_aliases = [file_info['var_name'], file_info['var_name'].partition("assembly_")[2]]
+        if possible_aliases.include?(search_key)
+          return file_key
+        end
       end
     end
     return "" # ~~ it is a mystery ~~
@@ -413,6 +379,11 @@ class PipelineVizDataServiceForSfn
         to_step_index = edge[:to][:stepIndex]
         stages_with_nodes[to_stage_index][:steps][to_step_index][:inputEdges].push(edge_index)
       end
+      edge[:isIntraStage] = if from_stage_index && to_stage_index && from_stage_index != to_stage_index
+                              true
+                            else
+                              false
+                            end
     end
   end
 
