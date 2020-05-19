@@ -29,8 +29,8 @@ jobs:
         - redis
       before_install:
         # Install python and dependencies
-        - source ~/virtualenv/python2.7/bin/activate
-        - pip install -r requirements.txt
+        - source ~/virtualenv/python3.7/bin/activate
+        - pip3 install -r requirements.txt
         # Upgrade bundler to v2 - https://docs.travis-ci.com/user/languages/ruby/#bundler-20
         - gem install bundler
       before_script:
@@ -59,8 +59,8 @@ jobs:
         - redis
       before_install:
         # Install python and dependencies
-        - source ~/virtualenv/python2.7/bin/activate
-        - pip install -r requirements.txt
+        - source ~/virtualenv/python3.7/bin/activate
+        - pip3 install -r requirements.txt
         # Upgrade bundler to v2 - https://docs.travis-ci.com/user/languages/ruby/#bundler-20
         - gem install bundler
       before_script: bundle exec rake db:create db:migrate db:seed

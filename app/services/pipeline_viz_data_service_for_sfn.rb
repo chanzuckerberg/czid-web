@@ -271,7 +271,7 @@ class PipelineVizDataServiceForSfn
 
     # filter edges that aren't complete connections
     # return all_edges.values.select { |edge| edge[:from].present? && edge[:to].present? }
-    return all_edges.values
+    return all_edges.values.sort_by { |a| a[:key] }
   end
 
   # Map step names to a stage index and step index
