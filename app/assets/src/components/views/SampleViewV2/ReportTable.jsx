@@ -333,13 +333,11 @@ class ReportTable extends React.Component {
 
   renderNtNrDecimalValues = ({ cellData, decimalPlaces }) => {
     return this.renderNtNrStack({
-      cellData: cellData.map(val => {
-        let needsTruncation = val % 1 !== 0; // Checks if a number has a decimal place/is a whole number
-        let processedValue = needsTruncation
-          ? Number(val).toFixed(2)
-          : Number(val);
-        return TableRenderers.formatNumberWithCommas(processedValue);
-      }),
+      cellData: cellData.map(val =>
+        TableRenderers.formatNumberWithCommas(
+          Number(val).toFixed(decimalPlaces || 0)
+        )
+      ),
     });
   };
 
@@ -588,8 +586,8 @@ class ReportTable extends React.Component {
           rowData.genus
             ? getOr(nullValue, path, rowData)
             : sortDirection === "asc"
-            ? limits[0]
-            : limits[1],
+              ? limits[0]
+              : limits[1],
       ],
       [sortDirection, sortDirection, sortDirection],
       data
