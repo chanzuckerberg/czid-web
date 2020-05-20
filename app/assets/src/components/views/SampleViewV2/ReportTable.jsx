@@ -334,7 +334,7 @@ class ReportTable extends React.Component {
   renderNtNrDecimalValues = ({ cellData, decimalPlaces }) => {
     return this.renderNtNrStack({
       cellData: cellData.map(val => {
-        let needsTruncation = val % 1 != 0; // Checks if a number has a decimal place/is a whole number
+        let needsTruncation = val % 1 !== 0; // Checks if a number has a decimal place/is a whole number
         let processedValue = needsTruncation
           ? Number(val).toFixed(2)
           : Number(val);
