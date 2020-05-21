@@ -346,7 +346,7 @@ export default class SampleViewV2 extends React.Component {
     let parsedMetric = metric.split(":");
     let metricDecimalPlaces = this.getDecimalPlacesFromMetric(parsedMetric[1]);
     let parsedValue = get(parsedMetric, row);
-    return parseFloat(parsedValue).toFixed(metricDecimalPlaces);
+    return parseFloat(parsedValue).toFixed(metricDecimalPlaces || 0);
   };
 
   getDecimalPlacesFromMetric = metric => {
@@ -897,7 +897,8 @@ export default class SampleViewV2 extends React.Component {
       type = "inProgress";
     } else if (
       pipelineRunStatus === "WAITING" &&
-      sample && !sample.upload_error
+      sample &&
+      !sample.upload_error
     ) {
       status = "IN PROGRESS";
       message = jobStatus;
