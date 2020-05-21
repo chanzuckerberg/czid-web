@@ -6,8 +6,10 @@ require 'elasticsearch/model'
 # TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
 
 class Sample < ApplicationRecord
-  include Elasticsearch::Model if ELASTICSEARCH_ON
-  include ElasticsearchCallbacksHelper if ELASTICSEARCH_ON
+  if ELASTICSEARCH_ON
+    include Elasticsearch::Model
+    include ElasticsearchCallbacksHelper
+  end
   include TestHelper
   include MetadataHelper
   include PipelineRunsHelper

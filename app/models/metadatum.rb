@@ -6,8 +6,10 @@ class Metadatum < ApplicationRecord
   include DateHelper
   include LocationHelper
 
-  include Elasticsearch::Model if ELASTICSEARCH_ON
-  include ElasticsearchCallbacksHelper if ELASTICSEARCH_ON
+  if ELASTICSEARCH_ON
+    include Elasticsearch::Model
+    include ElasticsearchCallbacksHelper
+  end
 
   Client = Aws::S3::Client.new
 
