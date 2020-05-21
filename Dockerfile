@@ -1,23 +1,30 @@
-FROM ruby:2.5-stretch
+FROM ruby:2.5-buster
 
 # Install apt based dependencies required to run Rails as
 # well as RubyGems. As the Ruby image itself is based on a
 # Debian image, we use apt-get to install those.
-RUN apt-get update && apt-get install -y build-essential nodejs mysql-client python-dev python-pip apt-transport-https
+RUN apt-get update && \
+    apt-get install -y \
+      build-essential \
+      nodejs \
+      default-mysql-client \
+      python3-dev \
+      python3-pip \
+      apt-transport-https
 
 # Install node + npm
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get update && apt-get install -y nodejs
 
 # Install pip
-RUN pip install --upgrade pip
+RUN pip3 install --upgrade pip
 
 # Install chamber, for pulling secrets into the container.
 RUN curl -L https://github.com/segmentio/chamber/releases/download/v2.2.0/chamber-v2.2.0-linux-amd64 -o /bin/chamber
 RUN chmod +x /bin/chamber
 
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 # Configure the main working directory. This is the base
 # directory used in any further RUN, COPY, and ENTRYPOINT
