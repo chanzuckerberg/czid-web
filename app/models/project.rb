@@ -1,4 +1,5 @@
 class Project < ApplicationRecord
+  include Elasticsearch::Model if ELASTICSEARCH_ON
   include ElasticsearchCallbacksHelper if ELASTICSEARCH_ON
   include ReportHelper
 

@@ -1,9 +1,5 @@
-require 'elasticsearch/model'
-
 # Provides Async Callbacks for Elasticsearch Syncing
 module ElasticsearchCallbacksHelper
-  include Elasticsearch::Model
-
   def self.included(base)
     return unless base.ancestors.include?(::ActiveRecord::Base)
     base.class_eval do
@@ -17,8 +13,8 @@ module ElasticsearchCallbacksHelper
     Resque.enqueue(
       ElasticsearchIndex,
       :index,
-      index_name,
-      document_type,
+      __elasticsearch__.index_name,
+      __elasticsearch__.document_type,
       id,
       __elasticsearch__.as_indexed_json
     )
@@ -27,9 +23,9 @@ module ElasticsearchCallbacksHelper
   def async_elasticsearch_delete
     Resque.enqueue(
       ElasticsearchIndex,
-      :index,
-      index_name,
-      document_type,
+      :delete,
+      __elasticsearch__.index_name,
+      __elasticsearch__.document_type,
       id,
       __elasticsearch__.as_indexed_json
     )

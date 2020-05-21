@@ -6,6 +6,7 @@ class Metadatum < ApplicationRecord
   include DateHelper
   include LocationHelper
 
+  include Elasticsearch::Model if ELASTICSEARCH_ON
   include ElasticsearchCallbacksHelper if ELASTICSEARCH_ON
 
   Client = Aws::S3::Client.new
@@ -232,7 +233,7 @@ class Metadatum < ApplicationRecord
       # The unique key is on sample and metadata.key, so the value fields will
       # be updated if the key exists.
       update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value, :location_id]
-      results = Metadatum.bulk_import to_create, on_duplicate_key_update: update_keys
+      results = Metadatum.bulk_import_safe to_create, on_duplicate_key_update: update_keys
       results.failed_instances.each do |model|
         # Show the errors from ActiveRecord
         msg = model.errors.full_messages[0]
@@ -248,6 +249,19 @@ class Metadatum < ApplicationRecord
       errors << err.message
     end
     errors
+  end
+
+  def self.bulk_import_safe(to_create, opts = {})
+    missing_ids = Set.new
+    results = Metadatum.bulk_import(to_create, opts)
+    results.failed_instances.each do |model|
+      missing_ids.add(model.id)
+    end
+    to_create.each do |metadatum|
+      next if missing_ids.member?(metadatum.id)
+      metadatum.async_elasticsearch_index
+    end
+    results
   end
 
   def self.bulk_log_errors(errors)
