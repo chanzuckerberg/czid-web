@@ -344,8 +344,24 @@ export default class SampleViewV2 extends React.Component {
 
   getTaxonMetricValue = (row, metric) => {
     let parsedMetric = metric.split(":");
+    let metricDecimalPlaces = this.getDecimalPlacesFromMetric(parsedMetric[1]);
     let parsedValue = get(parsedMetric, row);
-    return parsedValue;
+    return parseFloat(parsedValue).toFixed(metricDecimalPlaces);
+  };
+
+  getDecimalPlacesFromMetric = metric => {
+    let metricDecimalPlaces = {
+      agg_score: 0,
+      z_score: 1,
+      rpm: 1,
+      count: 0,
+      contigs: 0,
+      contig_r: 0,
+      percent_identity: 1,
+      alignment_length: 1,
+      e_value: 1,
+    };
+    return metricDecimalPlaces[metric];
   };
 
   filterThresholds = ({ row, thresholds }) => {
@@ -881,7 +897,7 @@ export default class SampleViewV2 extends React.Component {
       type = "inProgress";
     } else if (
       pipelineRunStatus === "WAITING" &&
-      (sample && !sample.upload_error)
+      sample && !sample.upload_error
     ) {
       status = "IN PROGRESS";
       message = jobStatus;
@@ -889,9 +905,7 @@ export default class SampleViewV2 extends React.Component {
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
         linkText = "View Pipeline Visualization";
-        link = `/samples/${sample.id}/pipeline_viz/${
-          pipelineRun.pipeline_version
-        }`;
+        link = `/samples/${sample.id}/pipeline_viz/${pipelineRun.pipeline_version}`;
       }
     } else {
       // Some kind of error or warning has occurred.
@@ -1006,20 +1020,19 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
           )}
-          {view === "tree" &&
-            filteredReportData.length > 0 && (
-              <div>
-                <TaxonTreeVis
-                  lineage={lineageData}
-                  metric={selectedOptions.metric}
-                  nameType={selectedOptions.nameType}
-                  onTaxonClick={this.handleTaxonClick}
-                  sample={sample}
-                  taxa={filteredReportData}
-                  useReportV2Format={true}
-                />
-              </div>
-            )}
+          {view === "tree" && filteredReportData.length > 0 && (
+            <div>
+              <TaxonTreeVis
+                lineage={lineageData}
+                metric={selectedOptions.metric}
+                nameType={selectedOptions.nameType}
+                onTaxonClick={this.handleTaxonClick}
+                sample={sample}
+                taxa={filteredReportData}
+                useReportV2Format={true}
+              />
+            </div>
+          )}
         </div>
       );
     } else {
@@ -1082,8 +1095,9 @@ export default class SampleViewV2 extends React.Component {
             </UserContext.Consumer>
           </div>
           {currentTab === "Report" && this.renderReport()}
-          {currentTab === "Antimicrobial Resistance" &&
-            amrData && <AMRView amr={amrData} />}
+          {currentTab === "Antimicrobial Resistance" && amrData && (
+            <AMRView amr={amrData} />
+          )}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar
