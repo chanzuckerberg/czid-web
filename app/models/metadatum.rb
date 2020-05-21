@@ -258,6 +258,7 @@ class Metadatum < ApplicationRecord
     results.failed_instances.each do |model|
       missing_ids.add(model.id)
     end
+    return results unless ELASTICSEARCH_ON
     to_create.each do |metadatum|
       next if missing_ids.member?(metadatum.id)
       metadatum.async_elasticsearch_index
