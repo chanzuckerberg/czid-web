@@ -251,6 +251,7 @@ class Metadatum < ApplicationRecord
     errors
   end
 
+  # Bulk import safe to use with elasticsearch
   def self.bulk_import_safe(to_create, opts = {})
     missing_ids = Set.new
     results = Metadatum.bulk_import(to_create, opts)
