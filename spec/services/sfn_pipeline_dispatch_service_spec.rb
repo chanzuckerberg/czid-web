@@ -198,8 +198,6 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
               nt_loc_db: %r{s3://.+},
               nr_db: %r{s3://.+},
               nr_loc_db: %r{s3://.+},
-              gsnap_m8: PipelineRun::GSNAP_M8,
-              rapsearch2_m8: PipelineRun::RAPSEARCH2_M8,
               use_taxon_whitelist: false,
               file_ext: "fastq",
               nt_info_db: %r{s3://.+},

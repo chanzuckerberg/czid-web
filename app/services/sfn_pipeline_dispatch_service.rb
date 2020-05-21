@@ -132,8 +132,6 @@ class SfnPipelineDispatchService
         nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
         nr_db: @pipeline_run.alignment_config.s3_nr_db_path,
         nr_loc_db: @pipeline_run.alignment_config.s3_nr_loc_db_path,
-        gsnap_m8: PipelineRun::GSNAP_M8,
-        rapsearch2_m8: PipelineRun::RAPSEARCH2_M8,
         use_taxon_whitelist: @pipeline_run.use_taxon_whitelist,
         file_ext: @sample.fasta_input? ? 'fasta' : 'fastq',
         nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
