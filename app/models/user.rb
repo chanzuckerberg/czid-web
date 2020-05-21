@@ -2,10 +2,7 @@ require 'elasticsearch/model'
 require 'auth0'
 
 class User < ApplicationRecord
-  if ELASTICSEARCH_ON
-    include Elasticsearch::Model
-    include Elasticsearch::Model::Callbacks
-  end
+  include ElasticsearchCallbacksHelper if ELASTICSEARCH_ON
 
   # https://api.rubyonrails.org/classes/ActiveRecord/SecureToken/ClassMethods.html#method-i-has_secure_token
   has_secure_token :authentication_token

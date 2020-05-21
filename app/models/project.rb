@@ -1,8 +1,5 @@
 class Project < ApplicationRecord
-  if ELASTICSEARCH_ON
-    include Elasticsearch::Model
-    include Elasticsearch::Model::Callbacks
-  end
+  include ElasticsearchCallbacksHelper if ELASTICSEARCH_ON
   include ReportHelper
 
   has_and_belongs_to_many :users

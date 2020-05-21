@@ -6,19 +6,7 @@ require 'elasticsearch/model'
 # TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
 
 class Sample < ApplicationRecord
-  if ELASTICSEARCH_ON
-    include Elasticsearch::Model
-    after_commit on: [:create, :update] do
-      __elasticsearch__.index_document
-    end
-    after_commit on: [:destroy] do
-      begin
-        __elasticsearch__.delete_document
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
-        Rails.logger.warn(e)
-      end
-    end
-  end
+  include ElasticsearchCallbacksHelper if ELASTICSEARCH_ON
   include TestHelper
   include MetadataHelper
   include PipelineRunsHelper

@@ -153,6 +153,18 @@ class LineageDatabaseImporter
     import_new_taxid_lineages!
     affected = build_new_taxon_lineages!
     upgrade_taxon_lineages!(affected, noverify)
+    # This is very slow, since this script is using raw SQL the
+    #  elasticsearch index will not be updated, since elasticsearch-model
+    #  relies on callbacks. The safest and easiest way to ensure the
+    #  index is in sync at the end is to refresh the whole thing.
+    #  Since this script is run rarely this shouldn't be a huge deal
+    #  but if it is slow you may want to look into only updating affected ids.
+    import_elasticsearch!
+  end
+
+  def import_elasticsearch!
+    puts "\nRefresh elasticsearch index..."
+    TaxonLineage.__elasticsearch__.import force: true
   end
 
   def upgrade_taxon_lineages!(new_count, noverify = false)
