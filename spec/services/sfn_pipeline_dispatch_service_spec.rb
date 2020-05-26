@@ -45,7 +45,13 @@ end
 
 RSpec.describe SfnPipelineDispatchService, type: :service do
   let(:project) { create(:project) }
-  let(:sample) { create(:sample, project: project, host_genome_name: "Human", pipeline_execution_strategy: PipelineRun.step_function) }
+  let(:sample) do
+    create(:sample,
+           project: project,
+           host_genome_name: "Human",
+           pipeline_execution_strategy: PipelineRun.step_function,
+           metadata_fields: { nucleotide_type: "DNA" })
+  end
   let(:pipeline_run) do
     create(:pipeline_run, sample: sample, pipeline_run_stages_data: [
              { name: "Host Filtering", step_number: 1 },
@@ -161,8 +167,10 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
         expect(subject).to include_json(
           sfn_input_json: {
             Input: {
-              fastqs_0: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[0].source),
-              fastqs_1: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[1].source),
+              HostFilter: {
+                fastqs_0: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[0].source),
+                fastqs_1: format(S3_SAMPLE_INPUT_FILES_PATH, sample_id: sample.id, project_id: project.id, input_file_name: sample.input_files[1].source),
+              },
             },
           }
         )
@@ -180,28 +188,38 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
         expect(subject).to include_json(
           sfn_input_json: {
             Input: {
-              star_genome: %r{s3://.+},
-              bowtie2_genome: %r{s3://.+},
-              max_fragments: nil,
-              max_subsample_frag: nil,
-              nucleotide_type: "",
-              human_star_genome: %r{s3://.+},
-              human_bowtie2_genome: %r{s3://.+},
-              adapter_fasta: %r{s3://.+},
-              skip_dedeuterostome_filter: 0,
-              index_dir_suffix: nil,
-              lineage_db: %r{s3://.+},
-              taxon_blacklist: %r{s3://.+},
-              accession2taxid_db: %r{s3://.+},
-              deuterostome_db: %r{s3://.+},
-              nt_db: %r{s3://.+},
-              nt_loc_db: %r{s3://.+},
-              nr_db: %r{s3://.+},
-              nr_loc_db: %r{s3://.+},
-              use_taxon_whitelist: false,
-              file_ext: "fastq",
-              nt_info_db: %r{s3://.+},
+              HostFilter: {
+                file_ext: "fastq",
+                nucleotide_type: "DNA",
+                host_genome: "human",
+                adapter_fasta: %r{s3://.+},
+                star_genome: %r{s3://.+},
+                bowtie2_genome: %r{s3://.+},
+                human_star_genome: %r{s3://.+},
+                human_bowtie2_genome: %r{s3://.+},
+                max_input_fragments: nil,
+                max_subsample_fragments: nil,
+              }, NonHostAlignment: {
+                lineage_db: %r{s3://.+},
+                accession2taxid_db: %r{s3://.+},
+                taxon_blacklist: %r{s3://.+},
+                index_dir_suffix: nil,
+              }, Postprocess: {
+                nt_db: %r{s3://.+},
+                nt_loc_db: %r{s3://.+},
+                nr_db: %r{s3://.+},
+                nr_loc_db: %r{s3://.+},
+                lineage_db: %r{s3://.+},
+                taxon_blacklist: %r{s3://.+},
+              }, Experimental: {
+                nt_db: %r{s3://.+},
+                nt_loc_db: %r{s3://.+},
+                nt_info_db: %r{s3://.+},
+                file_ext: "fastq",
+                use_taxon_whitelist: false,
+              },
             },
+            dag_branch: nil,
           }
         )
       end
