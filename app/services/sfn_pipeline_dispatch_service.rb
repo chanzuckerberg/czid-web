@@ -146,6 +146,10 @@ class SfnPipelineDispatchService
           use_taxon_whitelist: @pipeline_run.use_taxon_whitelist,
         },
       },
+      HOST_FILTER_WDL_URI: "s3://idseq-workflows/v#{@sfn_tags[:wdl_version]}/main/host_filter.wdl",
+      NON_HOST_ALIGNMENT_WDL_URI: "s3://idseq-workflows/v#{@sfn_tags[:wdl_version]}/main/non_host_alignment.wdl",
+      POSTPROCESS_WDL_URI: "s3://idseq-workflows/v#{@sfn_tags[:wdl_version]}/main/postprocess.wdl",
+      EXPERIMENTAL_WDL_URI: "s3://idseq-workflows/v#{@sfn_tags[:wdl_version]}/main/experimental.wdl",
       OutputPrefix: @sample.sample_output_s3_path,
     }
     return sfn_pipeline_input_json
