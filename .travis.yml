@@ -60,7 +60,11 @@ jobs:
       before_install:
         # Install python and dependencies
         - source ~/virtualenv/python3.7/bin/activate
+<<<<<<< HEAD
         - pip3 install -r requirements.txt
+=======
+        - pip install -r requirements.txt
+>>>>>>> origin/master
         # Upgrade bundler to v2 - https://docs.travis-ci.com/user/languages/ruby/#bundler-20
         - gem install bundler
       before_script: bundle exec rake db:create db:migrate db:seed
@@ -103,7 +107,11 @@ jobs:
     - name: "Python Test"
       language: python
       python: 3.7
+<<<<<<< HEAD
       cache: pip
+=======
+      cache: pip3
+>>>>>>> origin/master
       script:
         - pip3 install mock
         - python3 -m unittest discover -v -s test/ -p 'test_*.py'
