@@ -164,6 +164,11 @@ class LineageDatabaseImporter
 
   def import_elasticsearch!
     puts "\nRefresh elasticsearch index..."
+    # There may be potential to optimize this based on the diff but:
+    # - Going through the ID and calling index would likely be slower
+    #   because import implements batching.
+    # - Using a query import based on updated timestamp misses
+    #   deletions.
     TaxonLineage.__elasticsearch__.import force: true
   end
 

@@ -8,6 +8,10 @@ class Metadatum < ApplicationRecord
 
   if ELASTICSEARCH_ON
     include Elasticsearch::Model
+    # WARNING: using this means you must ensure activerecord callbacks are
+    #  called on all updates. This module updates elasticsearch using these
+    #  callbacks. If you must circumvent them somehow (eg. using raw SQL or
+    #  bulk_import) you must explicitly update elasticsearch appropriately.
     include ElasticsearchCallbacksHelper
   end
 
@@ -235,7 +239,7 @@ class Metadatum < ApplicationRecord
       # The unique key is on sample and metadata.key, so the value fields will
       # be updated if the key exists.
       update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value, :location_id]
-      results = Metadatum.bulk_import_safe to_create, on_duplicate_key_update: update_keys
+      results = Metadatum.bulk_import to_create, on_duplicate_key_update: update_keys
       results.failed_instances.each do |model|
         # Show the errors from ActiveRecord
         msg = model.errors.full_messages[0]
@@ -254,9 +258,9 @@ class Metadatum < ApplicationRecord
   end
 
   # Bulk import safe to use with elasticsearch
-  def self.bulk_import_safe(to_create, opts = {})
+  def self.bulk_import(to_create, opts = {})
     missing_ids = Set.new
-    results = Metadatum.bulk_import(to_create, opts)
+    results = super(to_create, opts)
     results.failed_instances.each do |model|
       missing_ids.add(model.id)
     end
