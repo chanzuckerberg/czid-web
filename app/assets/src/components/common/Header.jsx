@@ -194,7 +194,8 @@ const AnnouncementBanner = ({ onClose }) => {
               }
             >
               Help Center
-            </ExternalLink>. Happy Holidays!
+            </ExternalLink>
+            . Happy Holidays!
           </span>
         }
       />

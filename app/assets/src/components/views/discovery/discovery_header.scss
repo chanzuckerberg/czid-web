@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .header {
   display: flex;
@@ -18,6 +19,12 @@
       fill: $primary-lighter;
     }
   }
+
+  .disabledIcon {
+    fill: $light-grey;
+    width: 30px;
+  }
+
   .filtersTrigger {
     align-items: center;
     cursor: pointer;
@@ -60,5 +67,17 @@
 
   .searchContainer {
     margin-right: 25px;
+  }
+}
+
+.disabled {
+  cursor: default !important;
+}
+
+.popupText {
+  @include font-body-xxs;
+
+  .popupSubtitle {
+    color: $medium-grey;
   }
 }
