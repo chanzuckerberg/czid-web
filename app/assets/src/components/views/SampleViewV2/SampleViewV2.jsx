@@ -211,7 +211,6 @@ export default class SampleViewV2 extends React.Component {
       background: selectedOptions.background,
       pipelineVersion,
     });
-
     const reportData = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     if (rawReportData.sortedGenus) {
@@ -226,14 +225,16 @@ export default class SampleViewV2 extends React.Component {
         const speciesData = childrenSpecies.map(speciesTaxId => {
           const isHighlighted = highlightedTaxIds.has(speciesTaxId);
           hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
-          return merge(
-            rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId],
-            {
-              highlighted: isHighlighted,
-              taxId: speciesTaxId,
-              taxLevel: "species",
-            }
+          const speciesInfo =
+            rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId];
+          let parsedSpeciesMetrics = this.parseSpeciesMetricDecimalPlaces(
+            speciesInfo
           );
+          return merge(parsedSpeciesMetrics, {
+            highlighted: isHighlighted,
+            taxId: speciesTaxId,
+            taxLevel: "species",
+          });
         });
         reportData.push(
           merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
@@ -344,12 +345,12 @@ export default class SampleViewV2 extends React.Component {
 
   getTaxonMetricValue = (row, metric) => {
     let parsedMetric = metric.split(":");
-    let metricDecimalPlaces = this.getDecimalPlacesFromMetric(parsedMetric[1]);
     let parsedValue = get(parsedMetric, row);
-    return parseFloat(parsedValue).toFixed(metricDecimalPlaces || 0);
+    return parsedValue;
   };
 
-  getDecimalPlacesFromMetric = metric => {
+  parseSpeciesMetricDecimalPlaces = species => {
+    let parsedSpeciesMetrics = Object.assign({}, species);
     let metricDecimalPlaces = {
       agg_score: 0,
       z_score: 1,
@@ -361,7 +362,30 @@ export default class SampleViewV2 extends React.Component {
       alignment_length: 1,
       e_value: 1,
     };
-    return metricDecimalPlaces[metric];
+
+    Object.keys(species).forEach(outerMetric => {
+      if (outerMetric in metricDecimalPlaces) {
+        parsedSpeciesMetrics[outerMetric] = parseFloat(
+          species[outerMetric]
+        ).toFixed(metricDecimalPlaces[outerMetric]);
+      } else if (outerMetric === "nt") {
+        Object.keys(species.nt).forEach(
+          innerMetric =>
+            (parsedSpeciesMetrics.nt[innerMetric] = parseFloat(
+              species.nt[innerMetric]
+            ).toFixed(metricDecimalPlaces[innerMetric]))
+        );
+      } else if (outerMetric === "nr") {
+        Object.keys(species.nr).forEach(
+          innerMetric =>
+            (parsedSpeciesMetrics.nr[innerMetric] = parseFloat(
+              species.nr[innerMetric]
+            ).toFixed(metricDecimalPlaces[innerMetric]))
+        );
+      }
+    });
+
+    return parsedSpeciesMetrics;
   };
 
   filterThresholds = ({ row, thresholds }) => {
