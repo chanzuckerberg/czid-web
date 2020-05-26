@@ -1,0 +1,48 @@
+name: idseq-web build Docker image
+
+on:
+  push
+
+env:
+  AWS_DEFAULT_OUTPUT: json
+  DEBIAN_FRONTEND: noninteractive
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  IMDS_URL: http://169.254.169.254/latest
+  
+jobs:
+  build_dev_docker_image:
+    runs-on: [self-hosted, idseq-dev]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache
+          key: ${{runner.os}}-cache
+      - name: Build and push Docker images
+        run: |
+          sudo apt-get -q install --yes awscli
+          export AWS_REGION=$(curl -s $IMDS_URL/dynamic/instance-identity/document | jq -r .region)
+          export AWS_ACCOUNT_ID=$(aws sts get-caller-identity | jq -r .Account)
+          $(aws ecr get-login --no-include-email)
+          bin/build-docker $(basename $GITHUB_REF) ${GITHUB_SHA::8}
+          bin/push-docker $(basename $GITHUB_REF) ${GITHUB_SHA::8}
+  build_prod_docker_image:
+    runs-on: [self-hosted, idseq-prod]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache
+          key: ${{runner.os}}-cache
+      - name: Build and push Docker images
+        run: |
+          sudo apt-get -q install --yes awscli
+          export AWS_REGION=$(curl -s $IMDS_URL/dynamic/instance-identity/document | jq -r .region)
+          export AWS_ACCOUNT_ID=$(aws sts get-caller-identity | jq -r .Account)
+          $(aws ecr get-login --no-include-email)
+          bin/build-docker $(basename $GITHUB_REF) ${GITHUB_SHA::8}
+          bin/push-docker $(basename $GITHUB_REF) ${GITHUB_SHA::8}
