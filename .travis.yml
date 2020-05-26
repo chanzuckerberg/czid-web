@@ -103,11 +103,7 @@ jobs:
     - name: "Python Test"
       language: python
       python: 3.7
-<<<<<<< HEAD
-      cache: pip
-=======
       cache: pip3
->>>>>>> origin/master
       script:
         - pip3 install mock
         - python3 -m unittest discover -v -s test/ -p 'test_*.py'
