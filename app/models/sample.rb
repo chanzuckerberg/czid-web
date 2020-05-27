@@ -8,16 +8,11 @@ require 'elasticsearch/model'
 class Sample < ApplicationRecord
   if ELASTICSEARCH_ON
     include Elasticsearch::Model
-    after_commit on: [:create, :update] do
-      __elasticsearch__.index_document
-    end
-    after_commit on: [:destroy] do
-      begin
-        __elasticsearch__.delete_document
-      rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
-        Rails.logger.warn(e)
-      end
-    end
+    # WARNING: using this means you must ensure activerecord callbacks are
+    #  called on all updates. This module updates elasticsearch using these
+    #  callbacks. If you must circumvent them somehow (eg. using raw SQL or
+    #  bulk_import) you must explicitly update elasticsearch appropriately.
+    include ElasticsearchCallbacksHelper
   end
   include TestHelper
   include MetadataHelper
