@@ -212,75 +212,77 @@ class PipelineVizDataServiceForSfn
   #     - files: An array of file objects that get passed between the from and to nodes. It is composed of:
   #           - displayName: A string to display the file as
   #           - url: An optional string to download the file
-  def create_edges
-    all_edges = {}
+  # -------------------------------------------------------------------------------------------------------
+  # parsed = { 'inputs': stage_inputs, 'step_names': step_names, 'steps': steps, 'basenames': file_basenames, 'outputs': outputs }
+  # def create_edges
+  #   all_edges = {}
 
-    pr_files = {}
-    pr_file_array = @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version)
-    # store results folder files as a hash, with the display_name as the key
-    pr_file_array.each { |f| pr_files[f[:display_name]] = f }
+  #   pr_files = {}
+  #   pr_file_array = @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version)
+  #   # store results folder files as a hash, with the display_name as the key
+  #   pr_file_array.each { |f| pr_files[f[:display_name]] = f }
 
-    file_mapping = create_file_mapping
-    step_mapping = create_step_mapping
+  #   file_mapping = create_file_mapping
+  #   step_mapping = create_step_mapping
 
-    # do the thing
-    file_mapping.each do |file, filemap|
-      file_edges = []
-      from = nil
-      key = nil
+  #   # do the thing
+  #   file_mapping.each do |file, filemap|
+  #     file_edges = []
+  #     from = nil
+  #     key = nil
 
-      display_name = file
-      url = nil
-      if filemap[:filename].present?
-        result_file_info = pr_files[filemap[:filename]]
-        if result_file_info.present?
-          display_name = result_file_info[:display_name]
-          url = result_file_info[:url]
-        end
-      end
-      # all the edges for the file will have the same from
-      if filemap[:from].present? && step_mapping[filemap[:from]].present?
-        from = step_mapping[filemap[:from]]
-        key = "from_#{from[:stageIndex]}_#{from[:stepIndex]}"
-      end
-      # how many edges we create depends on the number of inputs the
-      # file is used as. Steps are in the :to key.
-      # if this file isn't an input to anything, just return one edge
-      if filemap[:to].empty?
-        file_edges.push(from: from,
-                        key: key,
-                        files: [{ displayName: display_name, url: url }])
-      else
-        filemap[:to].each do |dest_step_name|
-          to = step_mapping[dest_step_name]
-          to_key = "_to_#{to[:stageIndex]}_#{to[:stepIndex]}"
-          push_key = key ? key + to_key : to_key
-          new_edge = {
-            to: to,
-            key: push_key,
-            files: [{ displayName: display_name, url: url }],
-          }
-          if from.present?
-            new_edge[:from] = from
-          end
-          file_edges.push(new_edge)
-        end
-      end
-      # now we integrate the edges into our collection
-      file_edges.each do |edge|
-        edge_key = edge[:key]
-        if all_edges[edge_key]
-          all_edges[edge_key][:files].concat(edge[:files])
-        else
-          all_edges[edge_key] = edge
-        end
-      end
-    end
+  #     display_name = file
+  #     url = nil
+  #     if filemap[:filename].present?
+  #       result_file_info = pr_files[filemap[:filename]]
+  #       if result_file_info.present?
+  #         display_name = result_file_info[:display_name]
+  #         url = result_file_info[:url]
+  #       end
+  #     end
+  #     # all the edges for the file will have the same from
+  #     if filemap[:from].present? && step_mapping[filemap[:from]].present?
+  #       from = step_mapping[filemap[:from]]
+  #       key = "from_#{from[:stageIndex]}_#{from[:stepIndex]}"
+  #     end
+  #     # how many edges we create depends on the number of inputs the
+  #     # file is used as. Steps are in the :to key.
+  #     # if this file isn't an input to anything, just return one edge
+  #     if filemap[:to].empty?
+  #       file_edges.push(from: from,
+  #                       key: key,
+  #                       files: [{ displayName: display_name, url: url }])
+  #     else
+  #       filemap[:to].each do |dest_step_name|
+  #         to = step_mapping[dest_step_name]
+  #         to_key = "_to_#{to[:stageIndex]}_#{to[:stepIndex]}"
+  #         push_key = key ? key + to_key : to_key
+  #         new_edge = {
+  #           to: to,
+  #           key: push_key,
+  #           files: [{ displayName: display_name, url: url }],
+  #         }
+  #         if from.present?
+  #           new_edge[:from] = from
+  #         end
+  #         file_edges.push(new_edge)
+  #       end
+  #     end
+  #     # now we integrate the edges into our collection
+  #     file_edges.each do |edge|
+  #       edge_key = edge[:key]
+  #       if all_edges[edge_key]
+  #         all_edges[edge_key][:files].concat(edge[:files])
+  #       else
+  #         all_edges[edge_key] = edge
+  #       end
+  #     end
+  #   end
 
-    # filter edges that aren't complete connections
-    # return all_edges.values.select { |edge| edge[:from].present? && edge[:to].present? }
-    return all_edges.values.sort_by { |a| a[:key] }
-  end
+  #   # filter edges that aren't complete connections
+  #   # return all_edges.values.select { |edge| edge[:from].present? && edge[:to].present? }
+  #   return all_edges.values.sort_by { |a| a[:key] }
+  # end
 
   # Map step names to a stage index and step index
   def create_step_mapping
