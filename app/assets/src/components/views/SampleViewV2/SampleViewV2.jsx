@@ -74,6 +74,18 @@ const LOCAL_STORAGE_FIELDS = {
   selectedOptions: { excludePaths: ["taxon"] },
 };
 
+const METRIC_DECIMAL_PLACES = {
+  agg_score: 0,
+  z_score: 1,
+  rpm: 1,
+  count: 0,
+  contigs: 0,
+  contig_r: 0,
+  percent_identity: 1,
+  alignment_length: 1,
+  e_value: 1,
+};
+
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
@@ -227,10 +239,10 @@ export default class SampleViewV2 extends React.Component {
           hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
           const speciesInfo =
             rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId];
-          let parsedSpeciesMetrics = this.parseSpeciesMetricDecimalPlaces(
+          let speciesWithAdjustedMetricPrecision = this.adjustMetricPrecision(
             speciesInfo
           );
-          return merge(parsedSpeciesMetrics, {
+          return merge(speciesWithAdjustedMetricPrecision, {
             highlighted: isHighlighted,
             taxId: speciesTaxId,
             taxLevel: "species",
@@ -349,43 +361,31 @@ export default class SampleViewV2 extends React.Component {
     return parsedValue;
   };
 
-  parseSpeciesMetricDecimalPlaces = species => {
-    let parsedSpeciesMetrics = Object.assign({}, species);
-    let metricDecimalPlaces = {
-      agg_score: 0,
-      z_score: 1,
-      rpm: 1,
-      count: 0,
-      contigs: 0,
-      contig_r: 0,
-      percent_identity: 1,
-      alignment_length: 1,
-      e_value: 1,
-    };
-
-    Object.keys(species).forEach(outerMetric => {
-      if (outerMetric in metricDecimalPlaces) {
-        parsedSpeciesMetrics[outerMetric] = parseFloat(
-          species[outerMetric]
-        ).toFixed(metricDecimalPlaces[outerMetric]);
-      } else if (outerMetric === "nt") {
-        Object.keys(species.nt).forEach(
-          innerMetric =>
-            (parsedSpeciesMetrics.nt[innerMetric] = parseFloat(
-              species.nt[innerMetric]
-            ).toFixed(metricDecimalPlaces[innerMetric]))
+  adjustMetricPrecision = species => {
+    Object.entries(species).forEach(([countType, metricValue]) => {
+      if (countType in METRIC_DECIMAL_PLACES) {
+        species[countType] = parseFloat(metricValue).toFixed(
+          METRIC_DECIMAL_PLACES[countType]
         );
-      } else if (outerMetric === "nr") {
-        Object.keys(species.nr).forEach(
-          innerMetric =>
-            (parsedSpeciesMetrics.nr[innerMetric] = parseFloat(
-              species.nr[innerMetric]
-            ).toFixed(metricDecimalPlaces[innerMetric]))
-        );
+      } else if (countType === "nt") {
+        Object.entries(species.nt).forEach(([countType, metricValue]) => {
+          if (countType in METRIC_DECIMAL_PLACES) {
+            species.nt[countType] = parseFloat(metricValue).toFixed(
+              METRIC_DECIMAL_PLACES[countType]
+            );
+          }
+        });
+      } else if (countType === "nr") {
+        Object.entries(species.nr).forEach(([countType, metricValue]) => {
+          if (countType in METRIC_DECIMAL_PLACES) {
+            species.nr[countType] = parseFloat(metricValue).toFixed(
+              METRIC_DECIMAL_PLACES[countType]
+            );
+          }
+        });
       }
     });
-
-    return parsedSpeciesMetrics;
+    return species;
   };
 
   filterThresholds = ({ row, thresholds }) => {
