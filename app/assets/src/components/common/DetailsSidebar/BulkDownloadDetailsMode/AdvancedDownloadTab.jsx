@@ -45,7 +45,7 @@ export default class AdvancedDownloadTab extends React.Component {
     }
 
     let currentTimestamp = moment().format("MM-D-YYYY hh-mm-ssa");
-    let bulkDownloadFileName = `${bulkDownload.download_name} - ${currentTimestamp}`;
+    let bulkDownloadFileName = `${bulkDownload.download_name}-${currentTimestamp}`;
 
     return `curl -L "${bulkDownload.presigned_output_url}" > "${bulkDownloadFileName}.tar.gz"\
         && mkdir -p "${bulkDownloadFileName}"\
