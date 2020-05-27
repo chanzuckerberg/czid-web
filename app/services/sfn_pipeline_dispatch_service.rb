@@ -46,6 +46,7 @@ class SfnPipelineDispatchService
   def call
     @sfn_tags = retrieve_version_tags
     @pipeline_run.update(pipeline_version: @sfn_tags[:dag_version])
+    @pipeline_run.update(wdl_version: @sfn_tags[:wdl_version])
 
     stage_dags_json = generate_dag_stages_json
     sfn_input_json = generate_wdl_input(stage_dags_json)

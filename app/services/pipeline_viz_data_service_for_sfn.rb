@@ -34,6 +34,7 @@ class PipelineVizDataServiceForSfn
   # s3 folder for sfn results: pipeline_run.sfn_results_path
 
   WDL_PARSER = 'app/jobs/parse_wdl_workflow.py'.freeze
+  SFN_CLIENT = Aws::States::Client.new
 
   SFN_STEP_TO_DAG_STEP_NAME = {
     PipelineRunStage::HOST_FILTERING_STAGE_NAME => {
@@ -84,7 +85,13 @@ class PipelineVizDataServiceForSfn
 
   def initialize(pipeline_run_id, see_experimental, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
-    s3_folder = @pipeline_run.sample.sample_wdl_s3_path
+
+    # get proper s3 folder
+    wdl_version = @pipeline_run.wdl_version
+    s3_folder = get_wdl_s3_folder(wdl_version)
+    # sample_path = @pipeline_run.sample.sample_path
+    # old_s3_folder = "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/sfn-wdl"
+
     @stage_names = []
     @stage_job_statuses = []
     @all_stage_info = []
@@ -92,14 +99,11 @@ class PipelineVizDataServiceForSfn
     @pipeline_run.pipeline_run_stages.each do |stage|
       if stage.name != PipelineRunStage::EXPT_STAGE_NAME || see_experimental
         @stage_names.push(stage.name)
-        stage_info = {}
-        if stage.step_map.nil? || stage.step_map.blank?
-          stage_wdl = retrieve_wdl(stage.dag_name, s3_folder)
-          stage_info = parse_wdl(stage_wdl)
-        else
-          stage_info = JSON.parse(stage.step_map)
-        end
+
+        stage_wdl = retrieve_wdl(stage.dag_name, s3_folder)
+        stage_info = parse_wdl(stage_wdl)
         @all_stage_info.push(stage_info)
+
         @stage_job_statuses.push(stage.job_status)
       end
     end
@@ -116,6 +120,10 @@ class PipelineVizDataServiceForSfn
   end
 
   private
+
+  def get_wdl_s3_folder(wdl_version)
+    "s3://idseq-workflows/v#{wdl_version}/main"
+  end
 
   def create_stage_nodes_scaffolding
     all_step_statuses = @pipeline_run.step_statuses_by_stage
@@ -414,6 +422,7 @@ class PipelineVizDataServiceForSfn
   def retrieve_wdl(stage_dag_name, s3_folder)
     bucket, prefix = S3Util.parse_s3_path(s3_folder)
     key = "#{prefix}/#{stage_dag_name}.wdl"
+    Rails.logger.info("Bucket: #{bucket}, Key: #{key}")
     response = S3_CLIENT.get_object(bucket: bucket,
                                     key: key)
     wdl = response.body.read
