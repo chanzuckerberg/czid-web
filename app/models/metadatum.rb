@@ -8,7 +8,11 @@ class Metadatum < ApplicationRecord
 
   if ELASTICSEARCH_ON
     include Elasticsearch::Model
-    include Elasticsearch::Model::Callbacks
+    # WARNING: using this means you must ensure activerecord callbacks are
+    #  called on all updates. This module updates elasticsearch using these
+    #  callbacks. If you must circumvent them somehow (eg. using raw SQL or
+    #  bulk_import) you must explicitly update elasticsearch appropriately.
+    include ElasticsearchCallbacksHelper
   end
 
   Client = Aws::S3::Client.new
@@ -230,6 +234,7 @@ class Metadatum < ApplicationRecord
   # validations.
   def self.bulk_load_import(to_create)
     errors = []
+    missing_ids = Set.new
     begin
       # The unique key is on sample and metadata.key, so the value fields will
       # be updated if the key exists.
@@ -239,12 +244,32 @@ class Metadatum < ApplicationRecord
         # Show the errors from ActiveRecord
         msg = model.errors.full_messages[0]
         errors << "#{model.key}: #{msg}"
+        missing_ids.add(model.id)
+      end
+      to_create.each do |metadatum|
+        next if missing_ids.member?(metadatum.id)
+        metadatum.async_elasticsearch_index
       end
     rescue => err
       # Record other errors
       errors << err.message
     end
     errors
+  end
+
+  # Bulk import safe to use with elasticsearch
+  def self.bulk_import(to_create, opts = {})
+    missing_ids = Set.new
+    results = super(to_create, opts)
+    results.failed_instances.each do |model|
+      missing_ids.add(model.id)
+    end
+    return results unless ELASTICSEARCH_ON
+    to_create.each do |metadatum|
+      next if missing_ids.member?(metadatum.id)
+      metadatum.async_elasticsearch_index
+    end
+    results
   end
 
   def self.bulk_log_errors(errors)
