@@ -32,6 +32,11 @@
     white-space: nowrap;
   }
 
+  .badgeCount {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .label {
     font-weight: 600;
     margin-right: 5px;

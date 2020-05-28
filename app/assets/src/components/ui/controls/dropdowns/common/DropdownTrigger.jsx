@@ -17,6 +17,8 @@ class DropdownTrigger extends React.Component {
       placeholder,
     } = this.props;
 
+    const hasBadgeCount =
+      label === "Threshold Filters:" || label === "Categories:";
     return (
       <div
         className={cx(
@@ -29,7 +31,7 @@ class DropdownTrigger extends React.Component {
         )}
         onClick={onClick}
       >
-        <div className={cs.labelContainer}>
+        <div className={cx(cs.labelContainer, hasBadgeCount && cs.badgeCount)}>
           {label && <span className={cs.label}>{label}</span>}
           <span className={cx(value === null && cs.placeholder)}>
             {value || placeholder}

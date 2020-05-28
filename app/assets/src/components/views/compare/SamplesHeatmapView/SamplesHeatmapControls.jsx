@@ -84,7 +84,7 @@ export default class SamplesHeatmapControls extends React.Component {
         onChange={this.onCategoryChange}
         selectedOptions={this.props.selectedOptions.categories}
         selectedSuboptions={this.props.selectedOptions.subcategories}
-        label="Taxon Categories"
+        label="Categories"
         disabled={this.props.loading || !this.props.data}
       />
     );
@@ -160,12 +160,12 @@ export default class SamplesHeatmapControls extends React.Component {
   };
 
   renderThresholdFilterSelect() {
+    const { options, selectedOptions } = this.props;
     return (
       <ThresholdFilterDropdown
-        options={this.props.options.thresholdFilters}
-        thresholds={this.props.selectedOptions.thresholdFilters}
+        options={options.thresholdFilters}
+        thresholds={selectedOptions.thresholdFilters}
         onApply={this.onThresholdFilterApply}
-        disabled={this.props.loading || !this.props.data}
       />
     );
   }
@@ -477,14 +477,13 @@ export default class SamplesHeatmapControls extends React.Component {
             <div className="col">{this.renderFilterTags()}</div>
           </div>
         )}
-        {!loading &&
-          displayFilterStats && (
-            <div className={cx(cs.filterRow, "row")}>
-              <div className={cx(cs.statsRow, "col")}>
-                {this.renderFilterStatsInfo()}
-              </div>
+        {!loading && displayFilterStats && (
+          <div className={cx(cs.filterRow, "row")}>
+            <div className={cx(cs.statsRow, "col")}>
+              {this.renderFilterStatsInfo()}
             </div>
-          )}
+          </div>
+        )}
         <Divider />
       </div>
     );
