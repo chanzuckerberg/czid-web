@@ -1706,6 +1706,19 @@ class PipelineRun < ApplicationRecord
   end
 
   def outputs_by_step(can_see_stage1_results = false)
+    path_to_file = lambda { |file, dag|
+      # TODO: should be refactored as part of https://jira.czi.team/browse/IDSEQ-2295
+      if step_function?
+        # keep everything after bucket name, except trailing '/'
+        s3_key = sfn_results_path.chomp("/").split("/", 4)[3]
+        return File.join(s3_key, file.split("/")[-1])
+      else
+        # keep everything after bucket name, except trailing '/'
+        s3_key = dag["output_dir_s3"].chomp("/").split("/", 4)[3]
+        return File.join(s3_key, pipeline_version, file)
+      end
+    }
+
     # Get map of s3 path to presigned URL and size.
     filename_to_info = {}
     sample.results_folder_files(pipeline_version).each do |entry|
@@ -1723,23 +1736,23 @@ class PipelineRun < ApplicationRecord
         "steps" => {},
       }
       dag_dict = JSON.parse(prs.dag_json)
-      output_dir_s3_key = dag_dict["output_dir_s3"].chomp("/").split("/", 4)[3] # keep everything after bucket name, except trailing '/'
       targets = dag_dict["targets"]
       given_targets = dag_dict["given_targets"]
       num_steps = targets.length
       # Fetch step statuses for this stage
       #   do it before the loop because step_statuses is expensive
       step_statuses = prs.step_statuses
+
       targets.each_with_index do |(target_name, output_list), step_idx|
         next if given_targets.keys.include?(target_name)
 
         file_paths = []
         output_list.each do |output|
-          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{output}"
+          file_paths << path_to_file.call(output, dag_dict)
         end
 
         get_additional_outputs(step_statuses, target_name).each do |filename|
-          file_paths << "#{output_dir_s3_key}/#{pipeline_version}/#{filename}"
+          file_paths << path_to_file.call(filename, dag_dict)
         end
 
         file_info = []
