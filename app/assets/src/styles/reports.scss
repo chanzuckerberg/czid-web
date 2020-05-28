@@ -245,7 +245,7 @@ input[type="number"] {
       font-size: inherit !important;
       padding: 0 !important;
       margin-top: 3px;
-      border-radius: 0.28571429rem !important;
+      border-radius: $border-radius-m;
       border: 1px solid $light-grey;
       box-shadow: 0 2px 3px 0 $light-grey;
       div {
@@ -345,7 +345,7 @@ input[type="number"] {
               position: relative;
               margin: 0;
               height: 20px !important;
-              border-radius: 19px;
+              border-radius: $border-radius-l;
             }
             i {
               color: $medium-grey;

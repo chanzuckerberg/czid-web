@@ -5,13 +5,13 @@
 .liveSearchPopBox {
   &:not(.rectangular) {
     input[type="text"] {
-      border-radius: 19px;
+      border-radius: $border-radius-l;
     }
   }
 
   &:not(.rectangular) {
     input[type="text"] {
-      border-radius: 4px;
+      border-radius: $border-radius-m;
     }
   }
 

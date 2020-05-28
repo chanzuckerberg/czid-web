@@ -1,7 +1,9 @@
+@import "~styles/themes/elements";
+
 .searchBox {
   &.rounded {
     input[type="text"] {
-      border-radius: 19px;
+      border-radius: $border-radius-l;
     }
   }
 }

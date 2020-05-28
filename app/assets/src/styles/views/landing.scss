@@ -99,7 +99,7 @@
 
   .account-form {
     box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $lightest-grey;
-    border-radius: 0.6rem;
+    border-radius: $border-radius-m;
     border: 0.1rem solid $lightest-grey;
 
     .form-header {

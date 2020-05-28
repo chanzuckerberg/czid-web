@@ -1,11 +1,12 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .categorySearchBox {
   margin-bottom: 12px;
 
   :global(.prompt) {
     width: 260px !important;
-    border-radius: 19px !important;
+    border-radius: $border-radius-l !important;
   }
 
   :global(.search) {

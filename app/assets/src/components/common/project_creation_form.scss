@@ -43,7 +43,7 @@
       background-color: $lightest-grey;
       padding: 20px;
       margin-bottom: $space-default;
-      border-radius: 4px;
+      border-radius: $border-radius-m;
 
       .title {
         @include font-header-xs;
@@ -72,7 +72,7 @@
     display: flex;
     align-items: center;
     padding: 10px 0;
-    border-radius: 4px;
+    border-radius: $border-radius-m;
     cursor: pointer;
 
     &:hover {

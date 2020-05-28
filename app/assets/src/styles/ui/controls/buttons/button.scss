@@ -1,6 +1,6 @@
 .idseq-ui.button {
   position: relative;
-  border-radius: 19px;
+  border-radius: $border-radius-l;
   cursor: pointer;
   font-family: $font-family-default;
   font-size: 13px;
@@ -14,7 +14,7 @@
   vertical-align: middle;
 
   &.rectangular {
-    border-radius: 4px;
+    border-radius: $border-radius-m;
   }
 
   div.icon-label {
