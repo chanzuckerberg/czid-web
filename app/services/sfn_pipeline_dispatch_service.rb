@@ -47,7 +47,10 @@ class SfnPipelineDispatchService
     @sfn_tags = retrieve_version_tags
     @pipeline_run.update(pipeline_version: @sfn_tags[:dag_version])
 
-    sfn_input_json = generate_wdl_input()
+    # TODO: remove this call after pipeline visualization is migrated to use WDL (IDSEQ-2677)
+    generate_dag_stages_json
+
+    sfn_input_json = generate_wdl_input
     sfn_execution_arn = dispatch(sfn_input_json)
     return {
       pipeline_version: @sfn_tags[:dag_version],
@@ -107,6 +110,20 @@ class SfnPipelineDispatchService
     raise Idd2WdlError, stderr
   ensure
     dag_tmp_file.unlink if dag_tmp_file
+  end
+
+  # TODO: remove this method after pipeline visualization is migrated to use WDL (IDSEQ-2677)
+  def generate_dag_stages_json
+    # For compatibility with the legacy DAG json.
+    # Generates a JSON composed by the jsons of all four stages in the DAG pipeline.
+    stages_json = {}
+    @pipeline_run.pipeline_run_stages.order(:step_number).each do |prs|
+      stage_info = PipelineRunStage::STAGE_INFO[prs.step_number]
+      dag_json = prs.send(stage_info[:json_generation_func])
+      stages_json[stage_info[:dag_name]] = JSON.parse(dag_json)
+      prs.update(dag_json: dag_json)
+    end
+    return stages_json
   end
 
   def generate_wdl_input
