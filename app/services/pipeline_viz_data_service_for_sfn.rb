@@ -107,6 +107,23 @@ class PipelineVizDataServiceForSfn
         @stage_job_statuses.push(stage.job_status)
       end
     end
+
+    # get results folder files
+    @result_files = {}
+    pr_file_array = @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version)
+    # store results folder files as a hash, with the display_name as the key
+    pr_file_array.each do |f|
+      display_name = f[:display_name]
+      url = f[:url]
+      @result_files[display_name] = {
+        display_name: display_name,
+        url: url,
+      }
+    end
+
+    @file_basenames = {}
+    @all_stage_info.each { |stage| @file_basenames.merge!(stage['basenames']) }
+
     @remove_host_filtering_urls = remove_host_filtering_urls
     @see_experimental = see_experimental
   end
@@ -135,7 +152,7 @@ class PipelineVizDataServiceForSfn
 
       all_redefined_statuses = []
 
-      steps = stage_info["steps"].map do |step|
+      steps = stage_info["step_names"].map do |step|
         # Get dag step name to retrieve step descriptions and status info.
         # Descriptions for steps may be in the PipelineRunsHelper module,
         # or in the status.json files on S3.
@@ -213,175 +230,150 @@ class PipelineVizDataServiceForSfn
   #           - displayName: A string to display the file as
   #           - url: An optional string to download the file
   # -------------------------------------------------------------------------------------------------------
-  # parsed = { 'inputs': stage_inputs, 'step_names': step_names, 'steps': steps, 'basenames': file_basenames, 'outputs': outputs }
-  # def create_edges
-  #   all_edges = {}
+  # stage = { 'inputs': stage_inputs, 'step_names': step_names, 'steps': steps, 'basenames': file_basenames, 'outputs': outputs }
+  def create_edges
+    all_edges = {}
 
-  #   pr_files = {}
-  #   pr_file_array = @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version)
-  #   # store results folder files as a hash, with the display_name as the key
-  #   pr_file_array.each { |f| pr_files[f[:display_name]] = f }
+    # file_mapping = create_file_mapping
+    step_mapping = create_step_mapping
 
-  #   file_mapping = create_file_mapping
-  #   step_mapping = create_step_mapping
+    # helper dict for storing output aliases
+    aliases = {}
+    all_outputs = {}
+    outputs_processed = {}
+    @all_stage_info.each_with_index do |stage, stage_index|
+      stage['steps'].each do |step, inputs|
+        stage_edges = []
+        inputs.each do |input|
+          input_edge = create_input_edge(input, step, stage_index, aliases)
+          stage_edges.push(input_edge)
+          outputs_processed[input] = true
+        end
+        # merge edges
+        merge_edges(stage_edges, all_edges, step_mapping)
+      end
+      # map outputs
+      stage['outputs'].each do |output_alias, source|
+        # map aliases
+        aliases[output_alias] = { original: source, stage: stage_index }
+        if output_alias.include?("_out_")
+          consistent_suffix = output_alias.split("_out_")[1].sub(/assembly_/, "")
+          aliases[consistent_suffix] = { original: source, stage: stage_index }
+        end
+        # tally up outputs
+        all_outputs[source] = stage_index
+      end
+    end
 
-  #   # do the thing
-  #   file_mapping.each do |file, filemap|
-  #     file_edges = []
-  #     from = nil
-  #     key = nil
+    # create edges for outputs that don't connect to another step
+    all_outputs.each do |source, stage_index|
+      if outputs_processed.key?(source)
+        next
+      else
+        all_edges[source] = create_output_edge(source, stage_index, step_mapping)
+      end
+    end
 
-  #     display_name = file
-  #     url = nil
-  #     if filemap[:filename].present?
-  #       result_file_info = pr_files[filemap[:filename]]
-  #       if result_file_info.present?
-  #         display_name = result_file_info[:display_name]
-  #         url = result_file_info[:url]
-  #       end
-  #     end
-  #     # all the edges for the file will have the same from
-  #     if filemap[:from].present? && step_mapping[filemap[:from]].present?
-  #       from = step_mapping[filemap[:from]]
-  #       key = "from_#{from[:stageIndex]}_#{from[:stepIndex]}"
-  #     end
-  #     # how many edges we create depends on the number of inputs the
-  #     # file is used as. Steps are in the :to key.
-  #     # if this file isn't an input to anything, just return one edge
-  #     if filemap[:to].empty?
-  #       file_edges.push(from: from,
-  #                       key: key,
-  #                       files: [{ displayName: display_name, url: url }])
-  #     else
-  #       filemap[:to].each do |dest_step_name|
-  #         to = step_mapping[dest_step_name]
-  #         to_key = "_to_#{to[:stageIndex]}_#{to[:stepIndex]}"
-  #         push_key = key ? key + to_key : to_key
-  #         new_edge = {
-  #           to: to,
-  #           key: push_key,
-  #           files: [{ displayName: display_name, url: url }],
-  #         }
-  #         if from.present?
-  #           new_edge[:from] = from
-  #         end
-  #         file_edges.push(new_edge)
-  #       end
-  #     end
-  #     # now we integrate the edges into our collection
-  #     file_edges.each do |edge|
-  #       edge_key = edge[:key]
-  #       if all_edges[edge_key]
-  #         all_edges[edge_key][:files].concat(edge[:files])
-  #       else
-  #         all_edges[edge_key] = edge
-  #       end
-  #     end
-  #   end
+    return all_edges.values
+  end
 
-  #   # filter edges that aren't complete connections
-  #   # return all_edges.values.select { |edge| edge[:from].present? && edge[:to].present? }
-  #   return all_edges.values.sort_by { |a| a[:key] }
-  # end
+  def create_input_edge(input, step, stage_index, aliases)
+    # check the output step
+    output_step, file = input.split(".")
+    from_stage_index = stage_index
+    if output_step == "StageInput"
+      source = interstage_output_source(file, aliases)
+      if source.present?
+        output_step, file = source[:original].split(".")
+        from_stage_index = source[:stage]
+      end
+    end
+    # get file data
+    actual_input = "#{output_step}.#{file}"
+    file_data = get_result_file_data(actual_input)
+    # create the edge
+    return {
+      from: "#{from_stage_index}.#{output_step}",
+      to: "#{stage_index}.#{step}",
+      file: file_data,
+    }
+  end
+
+  def merge_edges(stage_edges, all_edges, step_mapping)
+    stage_edges.each do |edge|
+      from = edge[:from].include?("StageInput") ? nil : step_mapping[edge[:from]]
+      to = step_mapping[edge[:to]]
+      key_prefix = from.nil? ? "" : "from_#{from[:stageIndex]}_#{from[:stepIndex]}"
+      key = "#{key_prefix}_to_#{to[:stageIndex]}_#{to[:stepIndex]}"
+      if all_edges.key?(key)
+        all_edges[key][:files].push(edge[:file])
+      else
+        all_edges[key] = {
+          to: to,
+          files: [edge[:file]],
+        }
+        if from.present?
+          all_edges[key][:from] = from
+        end
+      end
+    end
+  end
+
+  def create_output_edge(source, stage_index, step_mapping)
+    output_step, _file = source.split(".")
+    # get file data
+    file_data = get_result_file_data(source)
+
+    return {
+      from: step_mapping["#{stage_index}.#{output_step}"],
+      files: [file_data],
+    }
+  end
+
+  def interstage_output_source(file, aliases)
+    source = nil
+    if aliases.key?(file)
+      source = aliases[file]
+    elsif file.include?("_out_") && aliases[file.split("_out_")[1]].present?
+      source = aliases[file.split("_out_")[1]]
+    elsif file.include?("_in_") && aliases[file.split("_in_")[1]].present?
+      source = aliases[file.split("_in_")[1]]
+    end
+    return source
+  end
+
+  def get_result_file_data(input)
+    file_data = nil
+    basenames = @file_basenames
+    input_basename = basenames.key?(input) ? basenames[input].sub(%r{/assembly\//}, "") : nil
+    output_step, file = input.split(".")
+    if input_basename && @result_files.key?(input_basename)
+      file_data = @result_files[input_basename]
+    elsif @result_files.key?("#{output_step}.#{file}")
+      file_data = @result_files["#{output_step}.#{file}"]
+    else
+      key = input_basename || file
+      @result_files[key] = {
+        display_name: key,
+        url: nil,
+      }
+      file_data = @result_files[key]
+    end
+    return file_data
+  end
 
   # Map step names to a stage index and step index
   def create_step_mapping
     step_map = {}
     @all_stage_info.each_with_index do |stage, stage_index|
-      stage['steps'].each_with_index do |step, step_index|
-        step_map[step] = {
+      stage['step_names'].each_with_index do |step, step_index|
+        step_map["#{stage_index}.#{step}"] = {
           stageIndex: stage_index,
           stepIndex: step_index,
         }
       end
     end
     return step_map
-  end
-
-  # Collect information on all inputs and outputs
-  def create_file_mapping
-    files = {}
-    @all_stage_info.each_with_index do |stage, stage_index|
-      stage_files = stage['files']
-      stage_files.each do |file, info|
-        file_key = file
-        from, var_name = file.split(".")
-        to = info['input_to'] || []
-        filename = info['filename'] || ""
-
-        # check for file aliases
-        if from.blank? || from == 'StageInput'
-          search_alias = find_file_alias(var_name, stage_index)
-          if search_alias.present?
-            file_key = search_alias
-          end
-        end
-
-        if files.key?(file_key)
-          files[file_key][:to] = files[file_key][:to].concat(to)
-        else
-          files[file_key] = {
-            from: from,
-            to: to,
-            filename: filename,
-          }
-        end
-      end
-    end
-    return files
-  end
-
-  def find_file_alias(file_var, stage_index)
-    if stage_index == 0
-      return ""
-    end
-    previous_stage = stage_index - 1
-    search_key = file_var
-    # check if this file variable appears in previous outputs
-    other_alias = alias_search(search_key, previous_stage)
-    if other_alias.present?
-      return other_alias
-    end
-    # sometimes prefixes are appended to the file variables,
-    # like host_filter_out_ or taxid_fasta_in_
-    if search_key.include?("_in_")
-      search_key = search_key.partition("_in_")[2] # get the tail
-    elsif search_key.include?("_out_")
-      search_key = search_key.partition("_out_")[2]
-    end
-    # one last try
-    if search_key != file_var
-    end
-    return suffix_search(search_key, previous_stage)
-  end
-
-  def alias_search(search_key, previous_stage)
-    # first check if it appears renamed in a stage output
-    previous_stage.downto(0) do |i|
-      prior_files = @all_stage_info[i]['files']
-      prior_files.each do |file_key, info|
-        if search_key == info['alias']
-          return file_key
-        end
-      end
-    end
-    return ""
-  end
-
-  def suffix_search(search_key, previous_stage)
-    # then check if it appears in a previous stage's files
-    previous_stage.downto(0) do |i|
-      prior_files = @all_stage_info[i]['files']
-      prior_files.each do |file_key, _|
-        # some files actually refer to assembly files
-        _, var_name = file_key.split(".")
-        possible_aliases = [var_name, var_name.partition("assembly_")[2]]
-        if possible_aliases.include?(search_key)
-          return file_key
-        end
-      end
-    end
-    return "" # ~~ it is a mystery ~~
   end
 
   def populate_nodes_with_edges(stages_with_nodes, edges)
@@ -424,7 +416,6 @@ class PipelineVizDataServiceForSfn
   def retrieve_wdl(stage_dag_name, s3_folder)
     bucket, prefix = S3Util.parse_s3_path(s3_folder)
     key = "#{prefix}/#{stage_dag_name}.wdl"
-    Rails.logger.info("Bucket: #{bucket}, Key: #{key}")
     response = S3_CLIENT.get_object(bucket: bucket,
                                     key: key)
     wdl = response.body.read
