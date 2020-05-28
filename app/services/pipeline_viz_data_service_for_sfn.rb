@@ -353,7 +353,8 @@ class PipelineVizDataServiceForSfn
   def get_result_file_data(input)
     file_data = nil
     basenames = @file_basenames
-    input_basename = basenames.key?(input) ? basenames[input].sub(%r{/assembly\//}, "") : nil
+    assembly_sub_regex = Regexp.new('assembly/')
+    input_basename = basenames.key?(input) ? basenames[input].sub(assembly_sub_regex, "") : nil
     output_step, file = input.split(".")
     if input_basename && @result_files.key?(input_basename)
       file_data = @result_files[input_basename]
