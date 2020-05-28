@@ -270,7 +270,15 @@ class PipelineVizDataServiceForSfn
       if outputs_processed.key?(source)
         next
       else
-        all_edges[source] = create_output_edge(source, stage_index, step_mapping)
+        output_edge = create_output_edge(source, stage_index, step_mapping)
+        from_stage_index = output_edge[:from][:stageIndex]
+        from_step_index = output_edge[:from][:stepIndex]
+        key = "from_#{from_stage_index}_#{from_step_index}"
+        if all_edges.key?(key)
+          all_edges[key][:files].concat(output_edge[:files])
+        else
+          all_edges[key] = output_edge
+        end
       end
     end
 
