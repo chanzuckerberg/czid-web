@@ -1210,7 +1210,7 @@ DEPENDENCIES
   rack-cors
   rack-host-redirect
   rack-mini-profiler
-  rails (>= 5.2.4.3)
+  rails (~> 5.2.4)
   rails-controller-testing
   rake
   redis-rails (~> 5)
