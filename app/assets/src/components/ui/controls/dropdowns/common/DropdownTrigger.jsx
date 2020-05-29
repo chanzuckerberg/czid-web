@@ -1,5 +1,7 @@
 import React from "react";
 import cx from "classnames";
+import { get } from "lodash/fp";
+
 import PropTypes from "prop-types";
 import cs from "./dropdown_trigger.scss";
 
@@ -15,10 +17,13 @@ class DropdownTrigger extends React.Component {
       className,
       onClick,
       placeholder,
+      hideIfInsufficientSpace,
     } = this.props;
 
-    const hasBadgeCount =
-      label === "Threshold Filters:" || label === "Categories:";
+    const hasDropdownLabel =
+      get("type.name", this.props.value) === "DropdownLabel";
+    const hideDropdownLabel = hasDropdownLabel && hideIfInsufficientSpace;
+
     return (
       <div
         className={cx(
@@ -31,9 +36,14 @@ class DropdownTrigger extends React.Component {
         )}
         onClick={onClick}
       >
-        <div className={cx(cs.labelContainer, hasBadgeCount && cs.badgeCount)}>
-          {label && <span className={cs.label}>{label}</span>}
-          <span className={cx(value === null && cs.placeholder)}>
+        <div className={cx(cs.labelContainer)}>
+          {label && <span className={cx(cs.label)}>{label}</span>}
+          <span
+            className={cx(
+              hideDropdownLabel && cs.hide,
+              value === null && cs.placeholder
+            )}
+          >
             {value || placeholder}
           </span>
         </div>

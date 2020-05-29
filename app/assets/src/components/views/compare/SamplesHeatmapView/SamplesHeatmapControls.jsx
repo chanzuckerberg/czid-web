@@ -166,6 +166,7 @@ export default class SamplesHeatmapControls extends React.Component {
         options={options.thresholdFilters}
         thresholds={selectedOptions.thresholdFilters}
         onApply={this.onThresholdFilterApply}
+        hideIfInsufficientSpace={true}
       />
     );
   }
@@ -458,19 +459,31 @@ export default class SamplesHeatmapControls extends React.Component {
       <div className={cs.menu}>
         <Divider />
         <div className={`${cs.filterRow} row`}>
-          <div className="col s2">{this.renderTaxonLevelSelect()}</div>
-          <div className="col s2">{this.renderCategoryFilter()}</div>
-          <div className="col s2">{this.renderSortTaxaSelect()}</div>
-          <div className="col s2">{this.renderSortSamplesSelect()}</div>
-          <div className="col s2">{this.renderMetricSelect()}</div>
-          <div className="col s2">{this.renderBackgroundSelect()}</div>
+          <div className={cs.filterElement}>
+            {this.renderTaxonLevelSelect()}
+          </div>
+          <div className={cs.filterElement}>{this.renderCategoryFilter()}</div>
+          <div className={cs.filterElement}>{this.renderSortTaxaSelect()}</div>
+          <div className={cs.filterElement}>
+            {this.renderSortSamplesSelect()}
+          </div>
+          <div className={cs.filterElement}>{this.renderMetricSelect()}</div>
+          <div className={cs.filterElement}>
+            {this.renderBackgroundSelect()}
+          </div>
         </div>
         <div className={`${cs.filterRow} row`}>
-          <div className="col s2">{this.renderThresholdFilterSelect()}</div>
-          <div className="col s2">{this.renderSpecificityFilter()}</div>
-          <div className="col s2">{this.renderScaleSelect()}</div>
-          <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
-          <div className="col s2">{this.renderLegend()}</div>
+          <div className={cx(cs.filterElement)}>
+            {this.renderThresholdFilterSelect()}
+          </div>
+          <div className={cs.filterElement}>
+            {this.renderSpecificityFilter()}
+          </div>
+          <div className={cs.filterElement}>{this.renderScaleSelect()}</div>
+          <div className={cs.filterElement}>
+            {this.renderTaxonsPerSampleSlider()}
+          </div>
+          <div className={cs.filterElement}>{this.renderLegend()}</div>
         </div>
         {displayFilterTags && (
           <div className={cx(cs.filterTagsList, "row")}>
