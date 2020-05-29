@@ -400,7 +400,8 @@ class PipelineVizDataServiceForSfn
         to_step_index = edge[:to][:stepIndex]
         stages_with_nodes[to_stage_index][:steps][to_step_index][:inputEdges].push(edge_index)
       end
-      edge[:isIntraStage] = if from_stage_index && to_stage_index && from_stage_index != to_stage_index
+      # determine intrastage
+      edge[:isIntraStage] = if from_stage_index && to_stage_index && from_stage_index == to_stage_index
                               true
                             else
                               false
