@@ -48,7 +48,7 @@ RSpec.describe "Sample request", type: :request do
       end
 
       describe "when we create a sample via sample upload flow" do
-        it "should properly add the pipeline_execution_strategy flag, step_function, to the sample when no flag is passed" do
+        it "should keep pipeline_execution_strategy flag nil in the sample when no flag is passed" do
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
           expect(response.content_type).to eq("application/json")
@@ -58,7 +58,7 @@ RSpec.describe "Sample request", type: :request do
 
           test_sample = Sample.find(sample_id)
           expect(test_sample.status).to eq(Sample::STATUS_CREATED)
-          expect(test_sample.pipeline_execution_strategy).to eq("step_function")
+          expect(test_sample.pipeline_execution_strategy).to eq(nil)
         end
 
         it "should properly add the pipeline_execution_strategy flag, step_function, to the pipeline run when no flag is passed" do
