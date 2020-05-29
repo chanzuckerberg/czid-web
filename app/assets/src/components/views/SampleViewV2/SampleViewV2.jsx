@@ -368,11 +368,11 @@ export default class SampleViewV2 extends React.Component {
         species[key] = parseFloat(metricValue).toFixed(
           METRIC_DECIMAL_PLACES[key]
         );
-      } else if (key === "nt" || key == "nr") {
-        Object.entries(species[key]).forEach(([countType, metricValue]) => {
-          if (countType in METRIC_DECIMAL_PLACES) {
-            species[key][countType] = parseFloat(metricValue).toFixed(
-              METRIC_DECIMAL_PLACES[countType]
+      } else if (key === "nt" || key === "nr") {
+        Object.entries(species[key]).forEach(([metricKey, metricValue]) => {
+          if (metricKey in METRIC_DECIMAL_PLACES) {
+            species[key][metricKey] = parseFloat(metricValue).toFixed(
+              METRIC_DECIMAL_PLACES[metricKey]
             );
           }
         });
