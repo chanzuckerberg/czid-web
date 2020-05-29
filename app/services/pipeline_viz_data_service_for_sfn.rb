@@ -131,6 +131,9 @@ class PipelineVizDataServiceForSfn
   def call
     stages = create_stage_nodes_scaffolding
     edges = create_edges
+    if @remove_host_filtering_urls
+      remove_host_filtering_urls(edges)
+    end
     populate_nodes_with_edges(stages, edges)
 
     return { stages: stages, edges: edges, status: pipeline_job_status(stages) }
