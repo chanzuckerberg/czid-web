@@ -166,18 +166,27 @@ class RetrievePipelineVizGraphDataService
     input_output_to_file_paths
   end
 
+  def s3_path_to_file(file, s3_dir)
+    # TODO: should be refactored as part of https://jira.czi.team/browse/IDSEQ-2295
+    if @pipeline_run.step_function?
+      return File.join(@pipeline_run.sfn_results_path, file.split("/")[-1])
+    else
+      return File.join(s3_dir, @pipeline_run.pipeline_version, file)
+    end
+  end
+
   def file_path_to_outputting_step
     file_path_to_outputting_step = {}
     step_statuses_by_stage = @pipeline_run.step_statuses_by_stage
     @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
       stage_dag_json["steps"].each_with_index do |step, step_index|
-        stage_dag_json["targets"][step["out"]].each do |file_name|
-          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
+        stage_dag_json["targets"][step["out"]].each do |filename|
+          file_path = s3_path_to_file(filename, stage_dag_json['output_dir_s3'])
           file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end
         step_statuses = step_statuses_by_stage[stage_index]
         get_additional_outputs(step_statuses, step["out"]).each do |filename|
-          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{filename}"
+          file_path = s3_path_to_file(filename, stage_dag_json['output_dir_s3'])
           file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end
       end
@@ -190,11 +199,11 @@ class RetrievePipelineVizGraphDataService
     @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
       stage_dag_json["steps"].each_with_index do |step, step_index|
         step["in"].each do |in_target|
-          stage_dag_json["targets"][in_target].each do |file_name|
+          stage_dag_json["targets"][in_target].each do |filename|
             file_path = if stage_dag_json["given_targets"].key? in_target
-                          "#{stage_dag_json['given_targets'][in_target]['s3_dir']}/#{file_name}"
+                          s3_path_to_file(filename, stage_dag_json['given_targets'][in_target]['s3_dir'])
                         else
-                          "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
+                          s3_path_to_file(filename, stage_dag_json['output_dir_s3'])
                         end
 
             unless file_path_to_inputting_steps.key? file_path
