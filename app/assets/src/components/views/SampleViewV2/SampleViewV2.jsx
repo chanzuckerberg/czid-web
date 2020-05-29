@@ -240,7 +240,7 @@ export default class SampleViewV2 extends React.Component {
           hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
           const speciesInfo =
             rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId];
-          let speciesWithAdjustedMetricPrecision = this.adjustMetricPrecision(
+          const speciesWithAdjustedMetricPrecision = this.adjustMetricPrecision(
             speciesInfo
           );
           return merge(speciesWithAdjustedMetricPrecision, {
@@ -363,23 +363,15 @@ export default class SampleViewV2 extends React.Component {
   };
 
   adjustMetricPrecision = species => {
-    Object.entries(species).forEach(([countType, metricValue]) => {
-      if (countType in METRIC_DECIMAL_PLACES) {
-        species[countType] = parseFloat(metricValue).toFixed(
-          METRIC_DECIMAL_PLACES[countType]
+    Object.entries(species).forEach(([key, metricValue]) => {
+      if (key in METRIC_DECIMAL_PLACES) {
+        species[key] = parseFloat(metricValue).toFixed(
+          METRIC_DECIMAL_PLACES[key]
         );
-      } else if (countType === "nt") {
-        Object.entries(species.nt).forEach(([countType, metricValue]) => {
+      } else if (key === "nt" || key == "nr") {
+        Object.entries(species[key]).forEach(([countType, metricValue]) => {
           if (countType in METRIC_DECIMAL_PLACES) {
-            species.nt[countType] = parseFloat(metricValue).toFixed(
-              METRIC_DECIMAL_PLACES[countType]
-            );
-          }
-        });
-      } else if (countType === "nr") {
-        Object.entries(species.nr).forEach(([countType, metricValue]) => {
-          if (countType in METRIC_DECIMAL_PLACES) {
-            species.nr[countType] = parseFloat(metricValue).toFixed(
+            species[key][countType] = parseFloat(metricValue).toFixed(
               METRIC_DECIMAL_PLACES[countType]
             );
           }
