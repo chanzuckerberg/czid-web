@@ -223,6 +223,7 @@ export default class SampleViewV2 extends React.Component {
       background: selectedOptions.background,
       pipelineVersion,
     });
+
     const reportData = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
     if (rawReportData.sortedGenus) {
