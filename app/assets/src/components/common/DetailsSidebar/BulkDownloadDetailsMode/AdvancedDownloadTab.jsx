@@ -1,6 +1,7 @@
 import React from "react";
 import copy from "copy-to-clipboard";
 import cx from "classnames";
+import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
 import CopyIcon from "~ui/icons/CopyIcon";
@@ -43,13 +44,12 @@ export default class AdvancedDownloadTab extends React.Component {
       return "Failed to generate command. Please contact us for help.";
     }
 
-    return `curl -L "${bulkDownload.presigned_output_url}" > "${
-      bulkDownload.download_name
-    }.tar.gz"\
-        && mkdir -p "${bulkDownload.download_name}"\
-        && tar -zvxf "${bulkDownload.download_name}.tar.gz" -C "${
-      bulkDownload.download_name
-    }"\
+    let currentTimestamp = moment().format("MM-D-YYYY hh-mm-ssa");
+    let bulkDownloadFileName = `${bulkDownload.download_name}-${currentTimestamp}`;
+
+    return `curl -L "${bulkDownload.presigned_output_url}" > "${bulkDownloadFileName}.tar.gz"\
+        && mkdir -p "${bulkDownloadFileName}"\
+        && tar -zvxf "${bulkDownloadFileName}.tar.gz" -C "${bulkDownloadFileName}"\
       `;
   };
 
