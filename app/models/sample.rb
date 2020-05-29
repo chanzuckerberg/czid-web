@@ -523,10 +523,6 @@ class Sample < ApplicationRecord
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/expt"
   end
 
-  def sample_wdl_s3_path
-    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/sfn-wdl"
-  end
-
   def host_genome_name
     host_genome.name if host_genome
   end
