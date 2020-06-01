@@ -166,7 +166,6 @@ export default class SamplesHeatmapControls extends React.Component {
         options={options.thresholdFilters}
         thresholds={selectedOptions.thresholdFilters}
         onApply={this.onThresholdFilterApply}
-        hideIfInsufficientSpace={true}
       />
     );
   }
@@ -473,7 +472,7 @@ export default class SamplesHeatmapControls extends React.Component {
           </div>
         </div>
         <div className={`${cs.filterRow} row`}>
-          <div className={cx(cs.filterElement)}>
+          <div className={cs.filterElement}>
             {this.renderThresholdFilterSelect()}
           </div>
           <div className={cs.filterElement}>

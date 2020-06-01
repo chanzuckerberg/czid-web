@@ -155,7 +155,6 @@ class ThresholdFilterDropdown extends React.Component {
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
-        hideIfInsufficientSpace={hideIfInsufficientSpace}
         label={labelText}
         value={label}
         rounded

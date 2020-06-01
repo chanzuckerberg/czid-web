@@ -5,7 +5,47 @@ import { get } from "lodash/fp";
 import PropTypes from "prop-types";
 import cs from "./dropdown_trigger.scss";
 
+// Set of component names that render labels that contain badge counts
+const DROPDOWN_LABEL_OWNERS_WITH_BADGE_COUNTS = new Set([
+  "ThresholdFilterDropdown",
+  "MultipleNestedDropdown",
+]);
+
 class DropdownTrigger extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.resizeObserver;
+    this.labelContainerRef;
+    this.labelRef;
+
+    this.state = {
+      hideDropdownLabel: false,
+    };
+  }
+
+  componentDidMount() {
+    if (this.labelContainerRef) {
+      this.resizeObserver = new ResizeObserver(this.handleFilterResize);
+      this.resizeObserver.observe(this.labelContainerRef.current);
+    }
+  }
+
+  componentWillUnmount() {
+    this.resizeObserver?.disconnect();
+  }
+
+  handleFilterResize = labelContainers => {
+    const labelContainerWidth = labelContainers[0].contentRect.width - 3.7; // -3.7 removes padding
+    const labelTextWidth = this.labelRef.current.offsetWidth + 1;
+    const badgeCountWidth = 24;
+
+    // If there's not enough space for the labelText + badgeCount hide, else show;
+    labelContainerWidth <= labelTextWidth + badgeCountWidth
+      ? this.setState({ hideDropdownLabel: true })
+      : this.setState({ hideDropdownLabel: false });
+  };
+
   render() {
     const {
       label,
@@ -17,12 +57,18 @@ class DropdownTrigger extends React.Component {
       className,
       onClick,
       placeholder,
-      hideIfInsufficientSpace,
     } = this.props;
 
-    const hasDropdownLabel =
-      get("type.name", this.props.value) === "DropdownLabel";
-    const hideDropdownLabel = hasDropdownLabel && hideIfInsufficientSpace;
+    const hasDropdownLabel = get("type.name", value) === "DropdownLabel";
+    const labelOwner = hasDropdownLabel ? get("_owner.type.name", value) : null;
+    const dropdownLabelHasBadgeCount = DROPDOWN_LABEL_OWNERS_WITH_BADGE_COUNTS.has(
+      labelOwner
+    );
+
+    if (dropdownLabelHasBadgeCount) {
+      this.labelContainerRef = React.createRef();
+      this.labelRef = React.createRef();
+    }
 
     return (
       <div
@@ -36,11 +82,21 @@ class DropdownTrigger extends React.Component {
         )}
         onClick={onClick}
       >
-        <div className={cx(cs.labelContainer)}>
-          {label && <span className={cx(cs.label)}>{label}</span>}
+        <div
+          className={cx(cs.labelContainer)}
+          ref={dropdownLabelHasBadgeCount && this.labelContainerRef}
+        >
+          {label && (
+            <span
+              className={cx(cs.label)}
+              ref={dropdownLabelHasBadgeCount && this.labelRef}
+            >
+              {label}
+            </span>
+          )}
           <span
             className={cx(
-              hideDropdownLabel && cs.hide,
+              this.state.hideDropdownLabel && cs.hide,
               value === null && cs.placeholder
             )}
           >

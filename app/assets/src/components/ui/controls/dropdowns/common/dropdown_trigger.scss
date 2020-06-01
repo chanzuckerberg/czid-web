@@ -1,12 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/typography";
 
-@media screen and (min-width: 0px) and (max-width: 1219px) {
-  .hide {
-    display: none;
-  }
-}
-
 .dropdownTrigger {
   border: 1px solid $light-grey;
   border-radius: 4px;
@@ -54,4 +48,8 @@
       color: $error;
     }
   }
+}
+
+.hide {
+  display: none;
 }
