@@ -586,8 +586,8 @@ class ReportTable extends React.Component {
           rowData.genus
             ? getOr(nullValue, path, rowData)
             : sortDirection === "asc"
-              ? limits[0]
-              : limits[1],
+            ? limits[0]
+            : limits[1],
       ],
       [sortDirection, sortDirection, sortDirection],
       data
