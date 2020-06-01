@@ -116,7 +116,7 @@ class PipelineVizDataServiceForSfn
       display_name = f[:display_name]
       url = f[:url]
       @result_files[display_name] = {
-        display_name: display_name,
+        displayName: display_name,
         url: url,
       }
     end
@@ -366,7 +366,7 @@ class PipelineVizDataServiceForSfn
     else
       key = input_basename || file
       @result_files[key] = {
-        display_name: key,
+        displayName: key,
         url: nil,
       }
       file_data = @result_files[key]
