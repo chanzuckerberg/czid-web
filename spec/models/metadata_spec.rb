@@ -204,7 +204,7 @@ RSpec.describe Metadatum, type: :model do
 
       expect do
         location_metadata.save!
-      end.to raise_error
+      end.to raise_error(ActiveRecord::RecordInvalid)
     end
   end
 end

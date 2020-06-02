@@ -1,6 +1,19 @@
 require 'rails_helper'
 
 RSpec.describe BulkDownloadsController, type: :controller do
+  let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn".freeze }
+  let(:fake_sfn_execution_description) do
+    {
+      execution_arn: "FAKE_SFN_ARN",
+      input: JSON.dump(OutputPrefix: "FAKE_OUTPUT_PREFIX"),
+      start_date: Time.zone.now,
+      state_machine_arn: fake_sfn_execution_arn,
+      status: "FAKE_EXECUTION_STATUS",
+    }
+  end
+  let(:fake_wdl_version) { "999".freeze }
+  let(:fake_dag_version) { "9.999".freeze }
+
   create_users
 
   # Regular user specific behavior
@@ -494,6 +507,17 @@ RSpec.describe BulkDownloadsController, type: :controller do
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 50)
         stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
                                             "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
+        Aws.config[:states] = {
+          stub_responses: {
+            describe_execution: fake_sfn_execution_description,
+            list_tags_for_resource: {
+              tags: [
+                { key: "wdl_version", value: fake_wdl_version },
+                { key: "dag_version", value: fake_dag_version },
+              ],
+            },
+          },
+        }
       end
 
       it "should ignore max samples limit if admin" do
@@ -516,9 +540,17 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
       it "should allow admin-only downloads" do
         @sample_one = create(:sample, project: @project,
-                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+                                      pipeline_runs_data: [{
+                                        finalized: 1,
+                                        job_status: PipelineRun::STATUS_CHECKED,
+                                        sfn_execution_arn: fake_sfn_execution_arn,
+                                      },])
         @sample_two = create(:sample, project: @project,
-                                      pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+                                      pipeline_runs_data: [{
+                                        finalized: 1,
+                                        job_status: PipelineRun::STATUS_CHECKED,
+                                        sfn_execution_arn: fake_sfn_execution_arn,
+                                      },])
 
         # This runs "aegea ecs run", which won't succeed on Travis CI, so we must mock it out.
         allow(Open3).to receive(:capture3)
