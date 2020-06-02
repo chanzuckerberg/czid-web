@@ -36,7 +36,10 @@ GLOB = 'glob'
 
 # We use this custom source reader to pass in input from stdin
 # Expects the entire text of the WDL file in stdin
-async def read_stdin(uri, path, importer):
+# 'path' and 'importer' are required args for a function
+# passed in as the 'read_source' argument when calling WDL.load(),
+# but we don't need them for our use case.
+async def read_stdin(uri, _path, _importer):
   if uri != "stdin":
     raise ValueError("This script only handles input from stdin.")
   wdl = ""
