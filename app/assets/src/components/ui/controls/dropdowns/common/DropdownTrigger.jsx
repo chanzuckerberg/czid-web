@@ -15,9 +15,9 @@ class DropdownTrigger extends React.Component {
   constructor(props) {
     super(props);
 
-    this.resizeObserver;
-    this.labelContainerRef;
-    this.labelRef;
+    this.resizeObserver = null;
+    this.labelContainerRef = null;
+    this.labelRef = null;
 
     this.state = {
       hideDropdownLabel: false,
@@ -32,7 +32,9 @@ class DropdownTrigger extends React.Component {
   }
 
   componentWillUnmount() {
-    this.resizeObserver?.disconnect();
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   }
 
   handleFilterResize = labelContainers => {
