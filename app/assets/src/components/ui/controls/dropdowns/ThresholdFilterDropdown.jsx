@@ -236,6 +236,7 @@ ThresholdFilterDropdown.propTypes = forbidExtraProps({
   thresholds: PropTypes.array,
   onApply: PropTypes.func,
   options: PropTypes.object,
+  hideBadgeIfInsufficientSpace: PropTypes.bool,
 });
 
 const ThresholdFilter = ({

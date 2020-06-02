@@ -10,8 +10,8 @@ class DropdownTrigger extends React.Component {
     super(props);
 
     this.resizeObserver = null;
-    this.labelContainerRef = null;
-    this.labelRef = null;
+    this.labelContainerRef = React.createRef();
+    this.labelRef = React.createRef();
 
     this.state = {
       hideDropdownLabel: false,
@@ -19,7 +19,7 @@ class DropdownTrigger extends React.Component {
   }
 
   componentDidMount() {
-    if (this.labelContainerRef) {
+    if (this.labelContainerRef.current && this.labelRef.current) {
       this.resizeObserver = new ResizeObserver(this.handleFilterResize);
       this.resizeObserver.observe(this.labelContainerRef.current);
     }
@@ -31,16 +31,15 @@ class DropdownTrigger extends React.Component {
     }
   }
 
-  handleFilterResize = labelContainers => {
-    const labelContainerWidth = labelContainers[0].contentRect.width - 3.7; // -3.7 removes padding from container.
+  handleFilterResize = () => {
+    const labelContainerWidth = this.labelContainerRef.current.offsetWidth;
     const labelTextWidth = this.labelRef.current.offsetWidth;
-    // badgeCountWidth is a static 24x24 badge as of now. Would like to add in a ref and dynamically fetch width in future.
-    const badgeCountWidth = 24; 
-    
+    const badgeCountWidth = 24; // badge count width set by semantic-ui
+
     // If there's not enough space for the labelText + badgeCount hide, else show;
-    labelContainerWidth <= labelTextWidth + badgeCountWidth
-      ? this.setState({ hideDropdownLabel: true })
-      : this.setState({ hideDropdownLabel: false });
+    const hideDropdownLabel =
+      labelContainerWidth <= labelTextWidth + badgeCountWidth;
+    this.setState({ hideDropdownLabel });
   };
 
   render() {
@@ -116,6 +115,13 @@ DropdownTrigger.propTypes = {
   disabled: PropTypes.bool,
   erred: PropTypes.bool,
   onClick: PropTypes.func,
+
+  /*
+  This prop is needed because we handle filter layout differently on different pages.
+  On the sample report page, we want the filters to expand instead of hiding the badge.
+  On the heatmap, the filter width is fixed, so we want to hide the badge if the page width gets too narrow.
+  */
+  hideBadgeIfInsufficientSpace: PropTypes.bool,
 };
 
 export default DropdownTrigger;

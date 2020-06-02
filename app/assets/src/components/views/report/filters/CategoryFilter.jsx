@@ -63,6 +63,7 @@ CategoryFilter.propTypes = {
   selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
   selectedSubcategories: PropTypes.arrayOf(PropTypes.string).isRequired,
   onChange: PropTypes.func.isRequired,
+  hideBadgeIfInsufficientSpace: PropTypes.bool.isRequired,
 };
 
 export default CategoryFilter;
