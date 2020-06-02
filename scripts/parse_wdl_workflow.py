@@ -1,5 +1,31 @@
 #!/usr/bin/env python3
 
+## This script parses WDL files, takes information on inputs and outputs useful for
+## pipeline visualization, and outputs this information in JSON format.
+##
+## To use, just pass the full text of a WDL file through stdin - e.g. using Open3
+## for Ruby.
+##
+## The JSON output is as follows:
+## {
+##   'inputs': [], array of strings, external input variables for the WDL workflow
+##   'step_names': [], array of strings, names of each task called by the WDL workflow
+##   'steps': { 'step_name': ['input_names'] }, a dict where each key is a step name
+##            and each value is an array of input variables for that step
+##   'basenames': { 'output_name': 'filename' }, a dict where each key is the name of a step output
+##            and each value is the name of the file as found on disk/s3
+##   'outputs': { 'stage_output_name' : 'internal.name' }, a dict where each key is the name
+##            of a stage output variable and the value is the name of the variable internally
+##            in the workflow
+## }
+##
+## Variables that are files output by a step in the workflow are named according to the scheme
+## 'StepName.variable_name'. Stage inputs and outputs do not have a dot in the name, they are
+## simply 'words_separated_by_underscores'. For consistency and to be explicit about where
+## they come from, stage inputs are prefixed as well: 'StageInput.variable_name'. This is
+## useful to signal to the Rails backend that this input may come from a step defined in a 
+## previous WDL workflow in the run.
+
 import sys
 import WDL
 import json
@@ -9,6 +35,7 @@ SELECT_ALL = 'select_all'
 GLOB = 'glob'
 
 # We use this custom source reader to pass in input from stdin
+# Expects the entire text of the WDL file in stdin
 async def read_stdin(uri, path, importer):
   if uri != "stdin":
     raise ValueError("This script only handles input from stdin.")
@@ -22,7 +49,8 @@ async def read_stdin(uri, path, importer):
 def main():
   # load WDL document
   doc = WDL.load("stdin", read_source=read_stdin)
-  assert doc.workflow, "No workflow in WDL document"
+  if not doc.workflow:
+    raise NoWorkflowError("No valid WDL workflow found.")
 
   # collect stage inputs
   stage_inputs = get_stage_input_information(doc.workflow.inputs)
@@ -155,7 +183,7 @@ def get_file_basenames(tasks):
   return basenames
 
 def get_output_aliases(outputs):
-   # collect stage output aliases
+  # collect stage output aliases
   aliases = {}
   for output in outputs:
     # add parsing for arrays
@@ -163,6 +191,13 @@ def get_output_aliases(outputs):
       alias = output.expr.expr.name
       aliases[output.name] = alias
   return aliases
+
+class NoWorkflowError(Exception):
+  """docstring for NoWorkflowError"""
+  def __init__(self, msg):
+    super(NoWorkflowError, self).__init__(msg)
+    self.msg = msg
+    
 
 if __name__ == "__main__":
   main()
