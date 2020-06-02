@@ -19,18 +19,9 @@ class DropdownTrigger extends React.Component {
   }
 
   componentDidMount() {
-    const { value, hideBadgeIfInsufficientSpace } = this.props;
-
-    if (hideBadgeIfInsufficientSpace) {
-      const hasDropdownLabel = get("type.name", value) === "DropdownLabel";
-      if (
-        hasDropdownLabel &&
-        this.labelContainerRef.current &&
-        this.labelRef.current
-      ) {
-        this.resizeObserver = new ResizeObserver(this.handleFilterResize);
-        this.resizeObserver.observe(this.labelContainerRef.current);
-      }
+    if (this.labelContainerRef.current && this.labelRef.current) {
+      this.resizeObserver = new ResizeObserver(this.handleFilterResize);
+      this.resizeObserver.observe(this.labelContainerRef.current);
     }
   }
 
@@ -41,14 +32,19 @@ class DropdownTrigger extends React.Component {
   }
 
   handleFilterResize = () => {
-    const labelContainerWidth = this.labelContainerRef.current.offsetWidth;
-    const labelTextWidth = this.labelRef.current.offsetWidth;
-    const badgeCountWidth = 24; // badge count width set by semantic-ui
+    const { value } = this.props;
 
-    // If there's not enough space for the labelText + badgeCount hide, else show;
-    const hideDropdownLabel =
-      labelContainerWidth <= labelTextWidth + badgeCountWidth;
-    this.setState({ hideDropdownLabel });
+    const hasDropdownLabel = get("type.name", value) === "DropdownLabel";
+    if (hasDropdownLabel) {
+      const labelContainerWidth = this.labelContainerRef.current.offsetWidth;
+      const labelTextWidth = this.labelRef.current.offsetWidth;
+      const badgeCountWidth = 24; // badge count width set by semantic-ui
+
+      // If there's not enough space for the labelText + badgeCount hide, else show;
+      const hideDropdownLabel =
+        labelContainerWidth <= labelTextWidth + badgeCountWidth;
+      this.setState({ hideDropdownLabel });
+    }
   };
 
   render() {
@@ -118,6 +114,7 @@ DropdownTrigger.propTypes = {
   onClick: PropTypes.func,
 
   /*
+  This prop should only be used when a DropdownLabel (a.k.a. the "badge") is passed in as the value.
   This prop is needed because we handle filter layout differently on different pages.
   On the sample report page, we want the filters to expand instead of hiding the badge.
   On the heatmap, the filter width is fixed, so we want to hide the badge if the page width gets too narrow.
