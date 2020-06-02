@@ -5,12 +5,6 @@ import { get } from "lodash/fp";
 import PropTypes from "prop-types";
 import cs from "./dropdown_trigger.scss";
 
-// Set of component names that render labels that contain badge counts
-const DROPDOWN_LABEL_OWNERS_WITH_BADGE_COUNTS = new Set([
-  "ThresholdFilterDropdown",
-  "MultipleNestedDropdown",
-]);
-
 class DropdownTrigger extends React.Component {
   constructor(props) {
     super(props);
