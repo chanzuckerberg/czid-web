@@ -1,16 +1,16 @@
 require 'rails_helper'
 
 RSpec.describe Metadatum, type: :model do
-  context "#check_and_set_location_type" do
-    location_name_counter = 1
+  let(:memory_store) { ActiveSupport::Cache.lookup_store(:memory_store) }
+  let(:cache) { Rails.cache }
 
-    # Generate a unique mock location name so that we don't trigger the cache.
-    get_unique_mock_location_name = lambda do
-      # Include the current timestamp (in seconds) as part of this name.
-      name = "mock_location_#{location_name_counter}_#{Time.now.to_i}"
-      location_name_counter += 1
-      return name
-    end
+  before do
+    allow(Rails).to receive(:cache).and_return(memory_store)
+    Rails.cache.clear
+  end
+
+  context "#check_and_set_location_type" do
+    let(:location_name) { "test_location" }
 
     before do
       user = create(:user)
@@ -24,8 +24,6 @@ RSpec.describe Metadatum, type: :model do
     end
 
     it "should pass in normal case" do
-      # This needs to be different from all other locations in this file, so as not to trigger the cache.
-      location_name = get_unique_mock_location_name.call()
       location = { name: location_name, locationiq_id: 100 }
 
       # Test with location already created.
@@ -88,8 +86,6 @@ RSpec.describe Metadatum, type: :model do
     end
 
     it "should refetch adjusted location if refetch_adjusted_location is set" do
-      # This needs to be different from all other locations in this file, so as not to trigger the cache.
-      location_name = get_unique_mock_location_name.call()
       location = { name: location_name, locationiq_id: 100, refetch_adjusted_location: true }
 
       # Test with location already created.
@@ -112,8 +108,6 @@ RSpec.describe Metadatum, type: :model do
     end
 
     it "should run check_and_fetch_parents if location isn't already created" do
-      # This needs to be different from all other locations in this file, so as not to trigger the cache.
-      location_name = get_unique_mock_location_name.call()
       location = { name: location_name, locationiq_id: 100, refetch_adjusted_location: true }
 
       # Test with location not yet created.
@@ -141,8 +135,6 @@ RSpec.describe Metadatum, type: :model do
 
     # This tests the cache by saving the same raw_value twice.
     it "should return correct response if called twice with the same raw_value" do
-      # This needs to be different from all other locations in this file, so as not to trigger the cache.
-      location_name = get_unique_mock_location_name.call()
       location = { name: location_name, locationiq_id: 100, refetch_adjusted_location: true }
 
       mock_location = Location.new(name: location_name, locationiq_id: 101, osm_id: 200)
@@ -191,8 +183,6 @@ RSpec.describe Metadatum, type: :model do
       host_genome_human.metadata_fields << @location_metadata_field
       @human_sample = create(:sample, project: @project, name: "Mock sample human", host_genome: host_genome_human)
 
-      # This needs to be different from all other locations in this file, so as not to trigger the cache.
-      location_name = get_unique_mock_location_name.call()
       location = { name: location_name, locationiq_id: 100, city_name: "Mock City", geo_level: "city" }
 
       location_metadata = Metadatum.new(
