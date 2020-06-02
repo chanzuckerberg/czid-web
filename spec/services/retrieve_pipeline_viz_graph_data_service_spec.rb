@@ -2,116 +2,152 @@ require 'rails_helper'
 require 'json'
 
 RSpec.describe RetrievePipelineVizGraphDataService do
-  given_targets_dir = "s3://idseq.../samples/theProjectId/theSampleId/results/1.0"
-  output_dir = "s3://idseq.../samples/theProjectId/theSampleId/results"
+  let(:fake_output_prefix) { "s3://fake-output-prefix" }
+  let(:fake_sfn_name) { "fake_sfn_name" }
+  let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
+  let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
+  let(:fake_sfn_execution_description) do
+    {
+      execution_arn: fake_sfn_arn,
+      input: JSON.dump(OutputPrefix: fake_output_prefix),
+      start_date: Time.zone.now,
+      state_machine_arn: fake_sfn_execution_arn,
+      status: "FAKE_EXECUTION_STATUS",
+    }
+  end
+  let(:fake_wdl_version) { "999".freeze }
+  let(:fake_dag_version) { "9.999".freeze }
 
-  pr_stages_data = [{
-    name: "Host Filtering",
-    dag_json: {
-      output_dir_s3: output_dir,
-      targets: {
-        one: ["unmapped1.fq"],
-        two: ["trimmomatic1.fq"],
-        # Testing partially concated file path and no url available.
-        three: ["file/priceseq1.fa"],
-      },
-      steps: [
-        {
-          in: ["one"],
-          out: "two",
-          class: "step_one",
-        }, {
-          in: ["two"],
-          out: "three",
-          class: "step_two",
-        },
-      ],
-      given_targets: {
-        one: {
-          s3_dir: given_targets_dir,
-        },
-      },
-    }.to_json,
-  }, {
-    name: "Experimental",
-    dag_json: {
-      output_dir_s3: output_dir,
-      targets: {
-        three: ["priceseq1.fa"],
-        four: ["bowtie2_1.fa"],
-      },
-      steps: [
-        {
-          in: ["three"],
-          out: "four",
-          class: "step_three",
-        },
-      ],
-      given_targets: {
-        three: {
-          s3_dir: given_targets_dir + "/file",
-        },
-      },
-    }.to_json,
-  },]
+  let(:given_targets_dir) { "s3://idseq.../samples/theProjectId/theSampleId/results/1.0" }
+  let(:output_dir) { "s3://idseq.../samples/theProjectId/theSampleId/results" }
 
-  step_status_data = {
-    four: {
-      status: "running",
-      description: "This is the description of output four.",
-    },
-  }
-
-  expected_stage_results = {
-    stages: [
-      {
+  let(:pr_stages_data) do
+    [{
+      name: "Host Filtering",
+      dag_json: {
+        output_dir_s3: output_dir,
+        targets: {
+          one: ["unmapped1.fq"],
+          two: ["trimmomatic1.fq"],
+          # Testing partially concated file path and no url available.
+          three: ["file/priceseq1.fa"],
+        },
         steps: [
           {
-            name: "Two",
-            inputEdges: [0],
-            outputEdges: [1],
-          },
-          {
-            name: "Three",
-            inputEdges: [1],
-            outputEdges: [2],
+            in: ["one"],
+            out: "two",
+            class: "step_one",
+          }, {
+            in: ["two"],
+            out: "three",
+            class: "step_two",
           },
         ],
-      }, {
-        steps: [{
-          name: "Four",
-          inputEdges: [2],
-          outputEdges: [3],
-        },],
+        given_targets: {
+          one: {
+            s3_dir: given_targets_dir,
+          },
+        },
+      }.to_json,
+    }, {
+      name: "Experimental",
+      dag_json: {
+        output_dir_s3: output_dir,
+        targets: {
+          three: ["priceseq1.fa"],
+          four: ["bowtie2_1.fa"],
+        },
+        steps: [
+          {
+            in: ["three"],
+            out: "four",
+            class: "step_three",
+          },
+        ],
+        given_targets: {
+          three: {
+            s3_dir: given_targets_dir + "/file",
+          },
+        },
+      }.to_json,
+    },]
+  end
+
+  let(:step_status_data) do
+    {
+      four: {
+        status: "running",
+        description: "This is the description of output four.",
       },
-    ],
-    edges: [
-      {
-        # No "from" field as this is the input file.
-        to: { stageIndex: 0, stepIndex: 0 },
-        files: [{ displayName: "unmapped1.fq", url: "test url" }],
-        isIntraStage: false,
+    }
+  end
+
+  let(:expected_stage_results) do
+    {
+      stages: [
+        {
+          steps: [
+            {
+              name: "Two",
+              inputEdges: [0],
+              outputEdges: [1],
+            },
+            {
+              name: "Three",
+              inputEdges: [1],
+              outputEdges: [2],
+            },
+          ],
+        }, {
+          steps: [{
+            name: "Four",
+            inputEdges: [2],
+            outputEdges: [3],
+          },],
+        },
+      ],
+      edges: [
+        {
+          # No "from" field as this is the input file.
+          to: { stageIndex: 0, stepIndex: 0 },
+          files: [{ displayName: "unmapped1.fq", url: "test url" }],
+          isIntraStage: false,
+        },
+        {
+          from: { stageIndex: 0, stepIndex: 0 },
+          to: { stageIndex: 0, stepIndex: 1 },
+          files: [{ displayName: "trimmomatic1.fq", url: "test url" }],
+          isIntraStage: true,
+        },
+        {
+          from: { stageIndex: 0, stepIndex: 1 },
+          to: { stageIndex: 1, stepIndex: 0 },
+          files: [{ displayName: "priceseq1.fa", url: nil }],
+          isIntraStage: false,
+        },
+        {
+          from: { stageIndex: 1, stepIndex: 0 },
+          files: [{ displayName: "bowtie2_1.fa", url: "test url" }],
+          isIntraStage: false,
+        },
+      ],
+      status: "notStarted",
+    }
+  end
+
+  before do
+    Aws.config[:states] = {
+      stub_responses: {
+        describe_execution: fake_sfn_execution_description,
+        list_tags_for_resource: {
+          tags: [
+            { key: "wdl_version", value: fake_wdl_version },
+            { key: "dag_version", value: fake_dag_version },
+          ],
+        },
       },
-      {
-        from: { stageIndex: 0, stepIndex: 0 },
-        to: { stageIndex: 0, stepIndex: 1 },
-        files: [{ displayName: "trimmomatic1.fq", url: "test url" }],
-        isIntraStage: true,
-      },
-      {
-        from: { stageIndex: 0, stepIndex: 1 },
-        to: { stageIndex: 1, stepIndex: 0 },
-        files: [{ displayName: "priceseq1.fa", url: nil }],
-        isIntraStage: false,
-      },
-      {
-        from: { stageIndex: 1, stepIndex: 0 },
-        files: [{ displayName: "bowtie2_1.fa", url: "test url" }],
-        isIntraStage: false,
-      },
-    ],
-    status: "notStarted",
-  }
+    }
+  end
 
   describe "Retrieving graph" do
     before do
@@ -119,7 +155,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       project = create(:public_project)
       @sample = create(:sample, project: project)
 
-      @pr = create(:pipeline_run, sample: @sample, pipeline_run_stages_data: pr_stages_data)
+      @pr = create(:pipeline_run, sample: @sample, pipeline_run_stages_data: pr_stages_data, sfn_execution_arn: fake_sfn_execution_arn)
     end
 
     it "should be structured correctly" do
@@ -179,7 +215,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
         pr_stages_data_with_missing_dag_json = pr_stages_data.clone
         pr_stages_data_with_missing_dag_json[1] = stage_without_dag_json
 
-        pr = create(:pipeline_run, sample: @sample, pipeline_run_stages_data: pr_stages_data_with_missing_dag_json)
+        pr = create(:pipeline_run, sample: @sample, pipeline_run_stages_data: pr_stages_data_with_missing_dag_json, sfn_execution_arn: fake_sfn_execution_arn)
         results = RetrievePipelineVizGraphDataService.call(pr.id, true, false)
 
         expect(results[:stages].length).to be(1)

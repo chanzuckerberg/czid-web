@@ -49,7 +49,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
     create(:sample,
            project: project,
            host_genome_name: "Human",
-           pipeline_execution_strategy: PipelineRun.step_function,
+           pipeline_execution_strategy: PipelineRun.pipeline_execution_strategies[:step_function],
            metadata_fields: { nucleotide_type: "DNA" })
   end
   let(:pipeline_run) do
