@@ -19,9 +19,17 @@ class DropdownTrigger extends React.Component {
   }
 
   componentDidMount() {
-    if (this.labelContainerRef.current && this.labelRef.current) {
-      this.resizeObserver = new ResizeObserver(this.handleFilterResize);
-      this.resizeObserver.observe(this.labelContainerRef.current);
+    const { hideBadgeIfInsufficientSpace } = this.props;
+
+    if (hideBadgeIfInsufficientSpace) {
+      const hasDropdownLabel = get("type.name", value) === "DropdownLabel";
+      if (
+        (hasDropdownLabel,
+        this.labelContainerRef.current && this.labelRef.current)
+      ) {
+        this.resizeObserver = new ResizeObserver(this.handleFilterResize);
+        this.resizeObserver.observe(this.labelContainerRef.current);
+      }
     }
   }
 
@@ -55,14 +63,6 @@ class DropdownTrigger extends React.Component {
       placeholder,
       hideBadgeIfInsufficientSpace,
     } = this.props;
-
-    if (hideBadgeIfInsufficientSpace) {
-      const hasDropdownLabel = get("type.name", value) === "DropdownLabel";
-      if (hasDropdownLabel) {
-        this.labelContainerRef = React.createRef();
-        this.labelRef = React.createRef();
-      }
-    }
 
     return (
       <div
