@@ -139,7 +139,7 @@ class ThresholdFilterDropdown extends React.Component {
   };
 
   renderLabel() {
-    const { thresholds, disabled, hideIfInsufficientSpace } = this.props;
+    const { thresholds, disabled, hideBadgeIfInsufficientSpace } = this.props;
 
     const label = thresholds.length > 0 && (
       <DropdownLabel
@@ -157,6 +157,7 @@ class ThresholdFilterDropdown extends React.Component {
         className={cs.dropdownTrigger}
         label={labelText}
         value={label}
+        hideBadgeIfInsufficientSpace={hideBadgeIfInsufficientSpace}
         rounded
       />
     );

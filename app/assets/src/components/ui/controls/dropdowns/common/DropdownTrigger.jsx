@@ -38,8 +38,8 @@ class DropdownTrigger extends React.Component {
   }
 
   handleFilterResize = labelContainers => {
-    const labelContainerWidth = labelContainers[0].contentRect.width - 3.7; // -3.7 removes padding
-    const labelTextWidth = this.labelRef.current.offsetWidth + 1;
+    const labelContainerWidth = labelContainers[0].contentRect.width - 3.7; // -3.7 removes padding from container
+    const labelTextWidth = this.labelRef.current.offsetWidth;
     const badgeCountWidth = 24;
 
     // If there's not enough space for the labelText + badgeCount hide, else show;
@@ -59,17 +59,15 @@ class DropdownTrigger extends React.Component {
       className,
       onClick,
       placeholder,
+      hideBadgeIfInsufficientSpace,
     } = this.props;
 
-    const hasDropdownLabel = get("type.name", value) === "DropdownLabel";
-    const labelOwner = hasDropdownLabel ? get("_owner.type.name", value) : null;
-    const dropdownLabelHasBadgeCount = DROPDOWN_LABEL_OWNERS_WITH_BADGE_COUNTS.has(
-      labelOwner
-    );
-
-    if (dropdownLabelHasBadgeCount) {
-      this.labelContainerRef = React.createRef();
-      this.labelRef = React.createRef();
+    if (hideBadgeIfInsufficientSpace) {
+      const hasDropdownLabel = get("type.name", value) === "DropdownLabel";
+      if (hasDropdownLabel) {
+        this.labelContainerRef = React.createRef();
+        this.labelRef = React.createRef();
+      }
     }
 
     return (
@@ -85,13 +83,16 @@ class DropdownTrigger extends React.Component {
         onClick={onClick}
       >
         <div
-          className={cx(cs.labelContainer)}
-          ref={dropdownLabelHasBadgeCount && this.labelContainerRef}
+          className={cs.labelContainer}
+          ref={hideBadgeIfInsufficientSpace && this.labelContainerRef}
         >
           {label && (
             <span
-              className={cx(cs.label)}
-              ref={dropdownLabelHasBadgeCount && this.labelRef}
+              className={cx(
+                cs.label,
+                hideBadgeIfInsufficientSpace && cs.disableMarginRight
+              )}
+              ref={hideBadgeIfInsufficientSpace && this.labelRef}
             >
               {label}
             </span>

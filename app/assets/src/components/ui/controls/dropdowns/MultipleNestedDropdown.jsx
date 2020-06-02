@@ -239,6 +239,7 @@ class MultipleNestedDropdown extends React.Component {
         label={labelText}
         value={label}
         rounded={this.props.rounded}
+        hideBadgeIfInsufficientSpace={this.props.hideBadgeIfInsufficientSpace}
       />
     );
   }
