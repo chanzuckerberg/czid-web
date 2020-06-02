@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_430_210_801) do
+ActiveRecord::Schema.define(version: 20_200_529_171_232) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -110,11 +110,11 @@ ActiveRecord::Schema.define(version: 20_200_430_210_801) do
   create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
-    t.text "sequence", limit: 4294967295
+    t.text "sequence", limit: 4_294_967_295
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "lineage_json", limit: 16777215
+    t.text "lineage_json", limit: 16_777_215
     t.integer "species_taxid_nt"
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
@@ -288,7 +288,7 @@ ActiveRecord::Schema.define(version: 20_200_430_210_801) do
     t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json", limit: 4294967295
+    t.text "dag_json", limit: 4_294_967_295
     t.text "command_stdout"
     t.text "command_stderr"
     t.string "job_id"
@@ -364,7 +364,7 @@ ActiveRecord::Schema.define(version: 20_200_430_210_801) do
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
-    t.string "pipeline_execution_strategy", default: "directed_acyclic_graph", comment: "A soft enum (string) describing which pipeline infrastructure the pipeline run was performed on."
+    t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure the pipeline run was performed on."
     t.string "sfn_execution_arn", comment: "step function execution ARN for pipeline runs using pipeline_execution_strategy=step_function"
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, pipeline processing will filter for a whitelist of taxons."
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
@@ -504,8 +504,8 @@ ActiveRecord::Schema.define(version: 20_200_430_210_801) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary", limit: 16777215
-    t.text "description", limit: 16777215
+    t.text "summary", limit: 16_777_215
+    t.text "description", limit: 16_777_215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
