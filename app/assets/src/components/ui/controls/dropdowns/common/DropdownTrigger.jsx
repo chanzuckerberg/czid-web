@@ -32,10 +32,11 @@ class DropdownTrigger extends React.Component {
   }
 
   handleFilterResize = labelContainers => {
-    const labelContainerWidth = labelContainers[0].contentRect.width - 3.7; // -3.7 removes padding from container
+    const labelContainerWidth = labelContainers[0].contentRect.width - 3.7; // -3.7 removes padding from container.
     const labelTextWidth = this.labelRef.current.offsetWidth;
-    const badgeCountWidth = 24;
-
+    // badgeCountWidth is a static 24x24 badge as of now. Would like to add in a ref and dynamically fetch width in future.
+    const badgeCountWidth = 24; 
+    
     // If there's not enough space for the labelText + badgeCount hide, else show;
     labelContainerWidth <= labelTextWidth + badgeCountWidth
       ? this.setState({ hideDropdownLabel: true })
