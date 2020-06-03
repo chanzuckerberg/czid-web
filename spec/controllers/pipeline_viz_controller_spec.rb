@@ -105,6 +105,53 @@ RSpec.describe PipelineVizController, type: :controller do
     "status" => "notStarted",
   }
 
+  let(:fake_sfn_execution_description) do
+    {
+      execution_arn: "fake_sfn_arn",
+      input: JSON.dump(OutputPrefix: "fake_output_prefix"),
+      start_date: Time.zone.now,
+      state_machine_arn: "fake_sfn_execution_arn",
+      status: "FAKE_EXECUTION_STATUS",
+    }
+  end
+  let(:fake_wdl_version) { "999".freeze }
+  let(:fake_dag_version) { "9.999".freeze }
+
+  before do
+    stub_const('SAMPLES_BUCKET_NAME', "fake_bucket_name")
+    output_dir_s3 = "samples/theProjectId/theSampleId/results/1.0"
+    Aws.config[:s3] = {
+      stub_responses: {
+        list_objects: {
+          contents: %w[
+            unmapped1.fq
+            trimmomatic1.fq
+            priceseq1.fa
+            dedup1.fa
+            lzw1.fa
+            bowtie2_1.fa
+            subsampled_1.fa
+            gsnap_filter_1.fa
+          ].map do |filename|
+            { key: File.join(output_dir_s3.split("/", 4)[-1], filename) }
+          end,
+        },
+      },
+    }
+
+    Aws.config[:states] = {
+      stub_responses: {
+        describe_execution: fake_sfn_execution_description,
+        list_tags_for_resource: {
+          tags: [
+            { key: "wdl_version", value: fake_wdl_version },
+            { key: "dag_version", value: fake_dag_version },
+          ],
+        },
+      },
+    }
+  end
+
   # Admin specific behavior
   context "Admin user" do
     before do
