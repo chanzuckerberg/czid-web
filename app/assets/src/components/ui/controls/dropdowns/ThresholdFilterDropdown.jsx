@@ -139,24 +139,25 @@ class ThresholdFilterDropdown extends React.Component {
   };
 
   renderLabel() {
-    const label = this.props.thresholds.length > 0 && (
+    const { thresholds, disabled, hideBadgeIfInsufficientSpace } = this.props;
+
+    const label = thresholds.length > 0 && (
       <DropdownLabel
         className={cs.dropdownLabel}
-        disabled={this.props.disabled}
-        text={String(this.props.thresholds.length)}
+        disabled={disabled}
+        text={String(thresholds.length)}
       />
     );
 
     const labelText =
-      this.label && this.props.thresholds.length > 0
-        ? this.label + ":"
-        : this.label;
+      this.label && thresholds.length > 0 ? this.label + ":" : this.label;
 
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
         label={labelText}
         value={label}
+        hideBadgeIfInsufficientSpace={hideBadgeIfInsufficientSpace}
         rounded
       />
     );
@@ -235,6 +236,7 @@ ThresholdFilterDropdown.propTypes = forbidExtraProps({
   thresholds: PropTypes.array,
   onApply: PropTypes.func,
   options: PropTypes.object,
+  hideBadgeIfInsufficientSpace: PropTypes.bool,
 });
 
 const ThresholdFilter = ({
