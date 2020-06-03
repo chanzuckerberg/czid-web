@@ -2,10 +2,6 @@
 @import "~styles/typography";
 
 :global(.ui):global(.dropdown).thresholdFilterDropdown {
-  .dropdownLabel {
-    margin-left: 6px;
-  }
-
   &:global(.active) {
     .dropdownTrigger {
       border: 1px solid $primary-light;

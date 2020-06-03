@@ -1066,9 +1066,7 @@ class PipelineRun < ApplicationRecord
         # Check for long-running pipeline run and log/alert if needed
         check_and_log_long_run
       end
-      if !step_function? || sfn_execution_arn.present?
-        self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status, report_ready?)
-      end
+      self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status, report_ready?)
     end
     save!
     enqueue_new_pipeline_run if automatic_restart
