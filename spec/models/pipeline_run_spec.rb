@@ -54,7 +54,23 @@ MALFORMED_AMR_COUNTS = [
   },
 ].freeze # properly handled amr count for problematic results
 
-RSpec.describe PipelineRun, type: :model do
+describe PipelineRun, type: :model do
+  let(:fake_output_prefix) { "s3://fake-output-prefix" }
+  let(:fake_sfn_name) { "fake_sfn_name" }
+  let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
+  let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
+  let(:fake_sfn_execution_description) do
+    {
+      execution_arn: fake_sfn_arn,
+      input: JSON.dump(OutputPrefix: fake_output_prefix),
+      start_date: Time.zone.now,
+      state_machine_arn: fake_sfn_execution_arn,
+      status: "FAKE_EXECUTION_STATUS",
+    }
+  end
+  let(:fake_wdl_version) { "999".freeze }
+  let(:fake_dag_version) { "9.999".freeze }
+
   context "#update_job_status" do
     let(:user) { build_stubbed(:user) }
     let(:sample) { build_stubbed(:sample, user: user) }
@@ -238,11 +254,32 @@ RSpec.describe PipelineRun, type: :model do
     end
   end
 
-  context "ensure that loading amr counts works properly" do
+  context "#db_load_amr_counts" do
     let(:user) { build_stubbed(:user) }
     let(:sample) { build_stubbed(:sample, user: user) }
-    let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample, pipeline_version: "3.9") }
+    let(:pipeline_run) do
+      build_stubbed(
+        :pipeline_run,
+        sample: sample,
+        pipeline_version: "3.9",
+        sfn_execution_arn: fake_sfn_execution_arn
+      )
+    end
     let(:results_path) { "amr_processed_results.csv" }
+
+    before do
+      Aws.config[:states] = {
+        stub_responses: {
+          describe_execution: fake_sfn_execution_description,
+          list_tags_for_resource: {
+            tags: [
+              { key: "wdl_version", value: fake_wdl_version },
+              { key: "dag_version", value: fake_dag_version },
+            ],
+          },
+        },
+      }
+    end
 
     context "No AMR counts file exists on S3 (PipelineRun.download_file() returned nil)" do
       before do

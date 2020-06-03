@@ -22,13 +22,13 @@
 
     .filterRow {
       margin-top: $space-l;
-      margin-bottom: $space-s;
+      margin-bottom: $space-l;
     }
 
     .filterTagsList {
       margin-bottom: $space-l;
       .filterTag {
-        margin-right: 6px;
+        margin-right: $space-xs;
 
         &:last-child {
           margin-right: 0;

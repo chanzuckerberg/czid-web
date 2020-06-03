@@ -253,11 +253,11 @@ class Sample < ApplicationRecord
   end
 
   def list_outputs(s3_path, display_prefix = 1, delimiter = "/")
-    return TEST_RESULT_FOLDER if Rails.env == "test"
+    s3 = Aws::S3::Client.new
     prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
-    file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
-                                       prefix: "#{prefix}/",
-                                       delimiter: delimiter)
+    file_list = s3.list_objects(bucket: SAMPLES_BUCKET_NAME,
+                                prefix: "#{prefix}/",
+                                delimiter: delimiter)
     file_list.contents.map do |f|
       {
         key: f.key,
@@ -739,7 +739,7 @@ class Sample < ApplicationRecord
     pr.subsample = subsample || PipelineRun::DEFAULT_SUBSAMPLING
     pr.max_input_fragments = max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
-    pr.pipeline_execution_strategy = pipeline_execution_strategy.blank? ? PipelineRun.step_function : pipeline_execution_strategy
+    pr.pipeline_execution_strategy = pipeline_execution_strategy.blank? ? PipelineRun.pipeline_execution_strategies[:step_function] : pipeline_execution_strategy
     pr.dag_vars = dag_vars if dag_vars
     pr.use_taxon_whitelist = use_taxon_whitelist
     pr.pipeline_commit = Sample.pipeline_commit(pr.pipeline_branch)
