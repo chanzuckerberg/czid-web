@@ -171,7 +171,7 @@ class RetrievePipelineVizGraphDataService
     if @pipeline_run.step_function?
       return File.join(@pipeline_run.sfn_results_path, file.split("/")[-1])
     else
-      return File.join(s3_dir, @pipeline_run.pipeline_version, file)
+      return File.join(s3_dir, file)
     end
   end
 
@@ -181,12 +181,12 @@ class RetrievePipelineVizGraphDataService
     @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
       stage_dag_json["steps"].each_with_index do |step, step_index|
         stage_dag_json["targets"][step["out"]].each do |filename|
-          file_path = s3_path_to_file(filename, stage_dag_json['output_dir_s3'])
+          file_path = s3_path_to_file(filename, File.join(stage_dag_json['output_dir_s3'], @pipeline_run.pipeline_version))
           file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end
         step_statuses = step_statuses_by_stage[stage_index]
         get_additional_outputs(step_statuses, step["out"]).each do |filename|
-          file_path = s3_path_to_file(filename, stage_dag_json['output_dir_s3'])
+          file_path = s3_path_to_file(filename, File.join(stage_dag_json['output_dir_s3'], @pipeline_run.pipeline_version))
           file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end
       end
@@ -203,7 +203,7 @@ class RetrievePipelineVizGraphDataService
             file_path = if stage_dag_json["given_targets"].key? in_target
                           s3_path_to_file(filename, stage_dag_json['given_targets'][in_target]['s3_dir'])
                         else
-                          s3_path_to_file(filename, stage_dag_json['output_dir_s3'])
+                          s3_path_to_file(filename, File.join(stage_dag_json['output_dir_s3'], @pipeline_run.pipeline_version))
                         end
 
             unless file_path_to_inputting_steps.key? file_path

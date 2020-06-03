@@ -3,6 +3,9 @@ require 'rails_helper'
 RSpec.describe SamplesController, type: :controller do
   create_users
 
+  before do
+    stub_const('SAMPLES_BUCKET_NAME', "fake_bucket_name")
+  end
   # Non-admin, aka Joe, specific behavior
   context "Joe" do
     before do
