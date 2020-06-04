@@ -74,6 +74,18 @@ const LOCAL_STORAGE_FIELDS = {
   selectedOptions: { excludePaths: ["taxon"] },
 };
 
+const METRIC_DECIMAL_PLACES = {
+  agg_score: 0,
+  z_score: 1,
+  rpm: 1,
+  count: 0,
+  contigs: 0,
+  contig_r: 0,
+  percent_identity: 1,
+  alignment_length: 1,
+  e_value: 1,
+};
+
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
@@ -226,14 +238,16 @@ export default class SampleViewV2 extends React.Component {
         const speciesData = childrenSpecies.map(speciesTaxId => {
           const isHighlighted = highlightedTaxIds.has(speciesTaxId);
           hasHighlightedChildren = hasHighlightedChildren || isHighlighted;
-          return merge(
-            rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId],
-            {
-              highlighted: isHighlighted,
-              taxId: speciesTaxId,
-              taxLevel: "species",
-            }
+          const speciesInfo =
+            rawReportData.counts[SPECIES_LEVEL_INDEX][speciesTaxId];
+          const speciesWithAdjustedMetricPrecision = this.adjustMetricPrecision(
+            speciesInfo
           );
+          return merge(speciesWithAdjustedMetricPrecision, {
+            highlighted: isHighlighted,
+            taxId: speciesTaxId,
+            taxLevel: "species",
+          });
         });
         reportData.push(
           merge(rawReportData.counts[GENUS_LEVEL_INDEX][genusTaxId], {
@@ -346,6 +360,25 @@ export default class SampleViewV2 extends React.Component {
     let parsedMetric = metric.split(":");
     let parsedValue = get(parsedMetric, row);
     return parsedValue;
+  };
+
+  adjustMetricPrecision = species => {
+    Object.entries(species).forEach(([key, metricValue]) => {
+      if (key in METRIC_DECIMAL_PLACES) {
+        species[key] = parseFloat(metricValue).toFixed(
+          METRIC_DECIMAL_PLACES[key]
+        );
+      } else if (key === "nt" || key === "nr") {
+        Object.entries(species[key]).forEach(([metricKey, metricValue]) => {
+          if (metricKey in METRIC_DECIMAL_PLACES) {
+            species[key][metricKey] = parseFloat(metricValue).toFixed(
+              METRIC_DECIMAL_PLACES[metricKey]
+            );
+          }
+        });
+      }
+    });
+    return species;
   };
 
   filterThresholds = ({ row, thresholds }) => {
@@ -881,7 +914,8 @@ export default class SampleViewV2 extends React.Component {
       type = "inProgress";
     } else if (
       pipelineRunStatus === "WAITING" &&
-      (sample && !sample.upload_error)
+      sample &&
+      !sample.upload_error
     ) {
       status = "IN PROGRESS";
       message = jobStatus;
@@ -889,9 +923,7 @@ export default class SampleViewV2 extends React.Component {
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
         linkText = "View Pipeline Visualization";
-        link = `/samples/${sample.id}/pipeline_viz/${
-          pipelineRun.pipeline_version
-        }`;
+        link = `/samples/${sample.id}/pipeline_viz/${pipelineRun.pipeline_version}`;
       }
     } else {
       // Some kind of error or warning has occurred.
@@ -1006,20 +1038,19 @@ export default class SampleViewV2 extends React.Component {
               />
             </div>
           )}
-          {view === "tree" &&
-            filteredReportData.length > 0 && (
-              <div>
-                <TaxonTreeVis
-                  lineage={lineageData}
-                  metric={selectedOptions.metric}
-                  nameType={selectedOptions.nameType}
-                  onTaxonClick={this.handleTaxonClick}
-                  sample={sample}
-                  taxa={filteredReportData}
-                  useReportV2Format={true}
-                />
-              </div>
-            )}
+          {view === "tree" && filteredReportData.length > 0 && (
+            <div>
+              <TaxonTreeVis
+                lineage={lineageData}
+                metric={selectedOptions.metric}
+                nameType={selectedOptions.nameType}
+                onTaxonClick={this.handleTaxonClick}
+                sample={sample}
+                taxa={filteredReportData}
+                useReportV2Format={true}
+              />
+            </div>
+          )}
         </div>
       );
     } else {
@@ -1082,8 +1113,9 @@ export default class SampleViewV2 extends React.Component {
             </UserContext.Consumer>
           </div>
           {currentTab === "Report" && this.renderReport()}
-          {currentTab === "Antimicrobial Resistance" &&
-            amrData && <AMRView amr={amrData} />}
+          {currentTab === "Antimicrobial Resistance" && amrData && (
+            <AMRView amr={amrData} />
+          )}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar

@@ -139,7 +139,7 @@ class SfnPipelineDispatchService
           fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
           fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
           file_ext: @sample.fasta_input? ? 'fasta' : 'fastq',
-          nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type").string_validated_value,
+          nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || '',
           host_genome: @sample.host_genome_name.downcase,
           adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
           star_genome: @sample.s3_star_index_path,

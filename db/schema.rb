@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_526_195_025) do
-  create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+ActiveRecord::Schema.define(version: 20_200_529_171_232) do
+  create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
     t.text "s3_nt_db_path"
@@ -114,7 +114,7 @@ ActiveRecord::Schema.define(version: 20_200_526_195_025) do
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "lineage_json"
+    t.text "lineage_json", limit: 16_777_215
     t.integer "species_taxid_nt"
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
@@ -364,7 +364,7 @@ ActiveRecord::Schema.define(version: 20_200_526_195_025) do
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
-    t.string "pipeline_execution_strategy", default: "directed_acyclic_graph", comment: "A soft enum (string) describing which pipeline infrastructure the pipeline run was performed on."
+    t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure the pipeline run was performed on."
     t.string "sfn_execution_arn", comment: "step function execution ARN for pipeline runs using pipeline_execution_strategy=step_function"
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, pipeline processing will filter for a whitelist of taxons."
     t.string "wdl_version"
