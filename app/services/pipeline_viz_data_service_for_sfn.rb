@@ -33,7 +33,7 @@ class PipelineVizDataServiceForSfn
 
   # s3 folder for sfn results: pipeline_run.sfn_results_path
 
-  WDL_PARSER = 'app/jobs/parse_wdl_workflow.py'.freeze
+  WDL_PARSER = 'scripts/parse_wdl_workflow.py'.freeze
   SFN_CLIENT = Aws::States::Client.new
 
   SFN_STEP_TO_DAG_STEP_NAME = {
