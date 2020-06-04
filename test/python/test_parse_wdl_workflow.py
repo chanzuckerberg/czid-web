@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import unittest
+from unittest.mock import patch
 import sys
-import io
+from io import StringIO
 import asyncio
 import json
 
@@ -10,85 +11,44 @@ import WDL
 
 from scripts import parse_wdl_workflow
 
-## Helpers
-## Credit to metatoaster
-## https://gist.github.com/metatoaster/64139971b53ad728dba636e34b8a5558
-
-
-def stub_stdin(testcase_inst, inputs):
-  stdin = sys.stdin
-
-  def cleanup():
-      sys.stdin = stdin
-
-  testcase_inst.addCleanup(cleanup)
-  sys.stdin = StringIO(inputs)
-
-
-class StringIO(io.StringIO):
-  """
-  A "safely" wrapped version
-  """
-  def __init__(self, value=''):
-      value = value.encode('utf8', 'backslashreplace').decode('utf8')
-      io.StringIO.__init__(self, value)
-
-  def write(self, msg):
-      io.StringIO.write(self, msg.encode(
-          'utf8', 'backslashreplace').decode('utf8'))
-
-
-def stub_stdouts(testcase_inst):
-    stderr = sys.stderr
-    stdout = sys.stdout
-
-    def cleanup():
-        sys.stderr = stderr
-        sys.stdout = stdout
-
-    testcase_inst.addCleanup(cleanup)
-    sys.stderr = StringIO()
-    sys.stdout = StringIO()
-
 
 ## Test cases
-
 
 class TestReadAndParseInput(unittest.TestCase):
 
 
   def test_read_stdin_result_type(self):
-    stub_stdin(self, test_wdl)
-    loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(parse_wdl_workflow.read_stdin('stdin', '', ''))
-    self.assertIsInstance(result, WDL.ReadSourceResult)
-    self.assertEqual(result.source_text, test_wdl)
-    self.assertEqual(result.abspath, 'stdin')
+    with patch('sys.stdin', StringIO(test_wdl)) as stdin:
+      loop = asyncio.get_event_loop()
+      result = loop.run_until_complete(parse_wdl_workflow.read_stdin('stdin', '', ''))
+      self.assertIsInstance(result, WDL.ReadSourceResult)
+      self.assertEqual(result.source_text, test_wdl)
+      self.assertEqual(result.abspath, 'stdin')
 
 
   def test_read_stdin_result_parsing(self):
-    stub_stdin(self, test_wdl)
-    doc = WDL.load("stdin", read_source=parse_wdl_workflow.read_stdin)
-    assert doc.workflow
-    self.assertEqual(len(doc.tasks), 3)
-    self.assertEqual(len(doc.workflow.inputs), 4)
-    self.assertEqual(len(doc.workflow.body), 4)
-    self.assertIsInstance(doc.workflow.body[0], WDL.Tree.Call)
-    self.assertIsInstance(doc.workflow.body[1], WDL.Tree.Conditional)
-    self.assertIsInstance(doc.workflow.body[2], WDL.Tree.Decl)
+    with patch('sys.stdin', StringIO(test_wdl)) as stdin:
+      doc = WDL.load("stdin", read_source=parse_wdl_workflow.read_stdin)
+      assert doc.workflow
+      self.assertEqual(len(doc.tasks), 3)
+      self.assertEqual(len(doc.workflow.inputs), 4)
+      self.assertEqual(len(doc.workflow.body), 4)
+      self.assertIsInstance(doc.workflow.body[0], WDL.Tree.Call)
+      self.assertIsInstance(doc.workflow.body[1], WDL.Tree.Conditional)
+      self.assertIsInstance(doc.workflow.body[2], WDL.Tree.Decl)
 
 
 class TestJSONOutput(unittest.TestCase):
 
 
   def setUp(self):
-    stub_stdin(self, test_wdl)
-    stub_stdouts(self)
-    parse_wdl_workflow.main()
-    output = sys.stdout.getvalue()
-    self.json = json.loads(output)
-    self.step_names = frozenset(["RunValidateInput", "RunBowtie2_bowtie2_human_out", "RunGsnapFilter"])
-    self.stage_inputs = ["docker_image_id", "fastqs_0", "fastqs_1", "host_genome"]
+    with patch('sys.stdin', StringIO(test_wdl)) as stdin, \
+          patch('sys.stdout', new_callable=StringIO) as stdout:
+      parse_wdl_workflow.main()
+      output = sys.stdout.getvalue()
+      self.json = json.loads(output)
+      self.step_names = frozenset(["RunValidateInput", "RunBowtie2_bowtie2_human_out", "RunGsnapFilter"])
+      self.stage_inputs = ["docker_image_id", "fastqs_0", "fastqs_1", "host_genome"]
   
 
   def test_stage_inputs(self):
