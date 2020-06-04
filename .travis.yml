@@ -91,8 +91,7 @@ jobs:
       cache: pip3
       before_script:
         # Need to install the AWS command line to authenticate to ECR.
-        # Need to use user to avoid permission error on Travis CI when using shell language.
-        - pip3 install --user awscli
+        - pip3 install awscli
         # Need to set the region to do ECR authentication.
         - aws configure set default.region ${AWS_REGION}
         - $(aws ecr get-login --no-include-email)
