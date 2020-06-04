@@ -253,11 +253,11 @@ class Sample < ApplicationRecord
   end
 
   def list_outputs(s3_path, display_prefix = 1, delimiter = "/")
-    return TEST_RESULT_FOLDER if Rails.env == "test"
+    s3 = Aws::S3::Client.new
     prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
-    file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
-                                       prefix: "#{prefix}/",
-                                       delimiter: delimiter)
+    file_list = s3.list_objects(bucket: SAMPLES_BUCKET_NAME,
+                                prefix: "#{prefix}/",
+                                delimiter: delimiter)
     file_list.contents.map do |f|
       {
         key: f.key,

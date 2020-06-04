@@ -423,8 +423,8 @@ describe BulkDownload, type: :model do
     it "returns the correct task command regardless of the ordering of pipeline run ids" do
       # Here, sample_one.id < sample_two.id, but sample_one.first_pipeline_run.id > sample_two.first_pipeline_run.id
       # This simulates a situation where subsequent pipeline runs are run "out of order".
-      create(:pipeline_run, sample: @sample_two, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version)
-      create(:pipeline_run, sample: @sample_one, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version)
+      create(:pipeline_run, sample: @sample_two, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, sfn_execution_arn: fake_sfn_execution_arn)
+      create(:pipeline_run, sample: @sample_one, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, sfn_execution_arn: fake_sfn_execution_arn)
 
       @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,

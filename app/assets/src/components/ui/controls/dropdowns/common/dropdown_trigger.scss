@@ -34,7 +34,10 @@
 
   .label {
     font-weight: 600;
-    margin-right: 5px;
+
+    &:not(.disableMarginRight) {
+      margin-right: 5px;
+    }
   }
 
   .placeholder {
@@ -48,4 +51,8 @@
       color: $error;
     }
   }
+}
+
+.hide {
+  display: none;
 }
