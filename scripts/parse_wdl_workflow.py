@@ -22,7 +22,7 @@
 ## Variables that are files output by a step in the workflow are named according to the scheme
 ## 'StepName.variable_name'. Stage inputs and outputs do not have a dot in the name, they are
 ## simply 'words_separated_by_underscores'. For consistency and to be explicit about where
-## they come from, stage inputs are prefixed as well: 'StageInput.variable_name'. This is
+## they come from, this script prefixes stage inputs as well: 'StageInput.variable_name'. This is
 ## useful to signal to the Rails backend that this input may come from a step defined in a 
 ## previous WDL workflow in the run.
 

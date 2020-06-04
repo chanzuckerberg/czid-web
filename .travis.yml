@@ -30,7 +30,7 @@ jobs:
       before_install:
         # Install python and dependencies
         - source ~/virtualenv/python3.7/bin/activate
-        - pip install -r requirements.txt
+        - pip3 install -r requirements.txt
         # Upgrade bundler to v2 - https://docs.travis-ci.com/user/languages/ruby/#bundler-20
         - gem install bundler
       before_script:
@@ -60,7 +60,7 @@ jobs:
       before_install:
         # Install python and dependencies
         - source ~/virtualenv/python3.7/bin/activate
-        - pip install -r requirements.txt
+        - pip3 install -r requirements.txt
         # Upgrade bundler to v2 - https://docs.travis-ci.com/user/languages/ruby/#bundler-20
         - gem install bundler
       before_script: bundle exec rake db:create db:migrate db:seed
@@ -87,11 +87,11 @@ jobs:
       language: shell
       services:
         - docker
-      cache: pip
+      cache: pip3
       before_script:
         # Need to install the AWS command line to authenticate to ECR.
         # Need to use user to avoid permission error on Travis CI when using shell language.
-        - pip install --user awscli
+        - pip3 install --user awscli
         # Need to set the region to do ECR authentication.
         - aws configure set default.region ${AWS_REGION}
         - $(aws ecr get-login --no-include-email)
@@ -106,7 +106,7 @@ jobs:
       cache: pip3
       script:
         - pip3 install mock
-        - python3 -m unittest discover -v -s test/ -p 'test_*.py'
+        - python3 -m unittest discover -v -s test/python/ -p 'test_*.py'
 env:
   global:
   - secure: l6JImOInd+PoLwf9hbAl6QmjXE4mShlG7SEkasSKk6XzT4npNTUqqYVVpNewr1f58U97SdHShv6WgxKIiUpX+adIBp9b59CsI7SCKxt1aSp9egyZE6F1ZIoqjmfH6o9U4dUkE32TJdG4Tn/QMd0fj3nCqathFIWFhato6ovqXmJpklJHH9BGbK330bEYG1LoUU3u/hIhBc8bAuNIO15eih1vMltYiSw5ScQxBMjcCskAjEeb8EA7i82pEpyD9iBWcIomw5Mrro0IInjJbudIQ5RukNZtI3zZXiSbR8m8VWzK8A8ixihHKRbBoLXn3X719s13FIJKL2Pn1utxMx4zrLLUx4iMafey2e8iG9C3JYyHu6UoR/E5hcSCdhHDmwiCiIQF8cHt2sZNVE33rEGdEkhsPgwlH16O6kBJmVOqaaihPN/yjzIyjxDoyknPfswpkiRiuqaa9XDXh5dgU0xHDfKic6ioAJvRMn0Ngbo7Ogi90rTaxksFFo7UAL9mChQaB+qtJk+tU0I7PFTR52ie62KcIAfqU3PFOo1jchmw7uEu/k8yNpZM4gar2gnl8gqe5dIVqkTDfNWBTlYX17dTqeHB7ZqCRKZzYcEZK8SVmw9fs/JTouwQK2nXgwEnp7dJdofvZgXhLZ4/ZhNniLn0ObDQauzYKPKgk819CtIb968=
