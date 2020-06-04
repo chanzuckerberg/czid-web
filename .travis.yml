@@ -84,7 +84,8 @@ jobs:
         - ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
         - npm test
     - name: "Docker Build"
-      language: shell
+      language: python
+      python: 3.7
       services:
         - docker
       cache: pip3
