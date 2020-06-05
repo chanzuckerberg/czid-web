@@ -13,7 +13,10 @@ end
 
 env = ARGV.shift
 image = ARGV.shift
-cluster = if env == "sandbox"
+
+aws_account_alias = JSON.parse(`aws iam list-account-aliases --output json --query "AccountAliases[0]"`)
+
+cluster = if env == "sandbox" or aws_account_alias == "idseq-prod"
             "idseq-#{env}-ecs"
           else
             # TODO(2020-01-23): Rename staging/prod clusters to new format (IDSEQ-2155).
