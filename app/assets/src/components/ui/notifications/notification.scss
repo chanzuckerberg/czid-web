@@ -4,7 +4,7 @@
 
 .notification {
   border-left: 5px solid $black;
-  border-radius: 5px;
+  border-radius: $border-radius-m;
   box-shadow: $box-shadow-bottom-right;
   color: $black;
   display: flex;

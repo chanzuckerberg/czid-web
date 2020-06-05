@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .radioButton {
   width: 15px;
   height: 15px;
-  border-radius: 15px;
+  border-radius: $border-radius-l;
   border: 1px solid $medium-grey;
   padding: 2px;
   cursor: pointer;

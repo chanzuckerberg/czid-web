@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .filePicker {
   width: 100%;
   border: 2px $medium-grey dashed;
-  border-radius: 5px;
+  border-radius: $border-radius-m;
   cursor: pointer;
   display: flex;
   align-items: center;
