@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 $tooltip-border-width: 1px;
 $tooltip-border-color: $light-grey;
@@ -12,7 +13,7 @@ $tooltip-tip-size: 8px;
   :global(.mapboxgl-popup-content) {
     padding: 0;
     border: $tooltip-border-width solid $tooltip-border-color;
-    border-radius: 5px;
+    border-radius: $border-radius-m;
     border-bottom: none;
     box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);
 

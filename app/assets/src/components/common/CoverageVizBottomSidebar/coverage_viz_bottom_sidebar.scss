@@ -262,7 +262,7 @@ $genome-viz-spacing: $space-xs;
   background-color: $white;
   box-shadow: $box-shadow-dropdown-menu;
   border: 1px solid $box-shadow-lighter;
-  border-radius: 4px;
+  border-radius: $border-radius-m;
   padding: 5px 10px;
   display: flex;
   align-items: center;

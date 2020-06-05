@@ -91,7 +91,7 @@
       display: inline-flex;
       align-items: center;
       background-color: $error-lightest;
-      border-radius: 15px;
+      border-radius: $border-radius-l;
       padding: 3px $space-s;
 
       .icon {
