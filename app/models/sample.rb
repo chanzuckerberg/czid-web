@@ -255,17 +255,29 @@ class Sample < ApplicationRecord
   def list_outputs(s3_path, display_prefix = 1, delimiter = "/")
     s3 = Aws::S3::Client.new
     prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
-    file_list = s3.list_objects(bucket: SAMPLES_BUCKET_NAME,
-                                prefix: "#{prefix}/",
-                                delimiter: delimiter)
-    file_list.contents.map do |f|
-      {
-        key: f.key,
-        display_name: end_path(f.key, display_prefix),
-        url: Sample.get_signed_url(f.key),
-        size: ActiveSupport::NumberHelper.number_to_human_size(f.size),
-      }
+
+    # Adding pagination to fix a bug where there are too many files for step function pipelines
+    # TODO: A better solution should be planned as part of https://jira.czi.team/browse/IDSEQ-2295
+    continuation_token = nil
+    outputs = []
+    is_truncated = true
+    while is_truncated
+      file_list = s3.list_objects_v2(bucket: SAMPLES_BUCKET_NAME,
+                                     prefix: "#{prefix}/",
+                                     delimiter: delimiter,
+                                     continuation_token: continuation_token)
+      outputs += file_list.contents.map do |f|
+        {
+          key: f.key,
+          display_name: end_path(f.key, display_prefix),
+          url: Sample.get_signed_url(f.key),
+          size: ActiveSupport::NumberHelper.number_to_human_size(f.size),
+        }
+      end
+      is_truncated = file_list.is_truncated
+      continuation_token = file_list.next_continuation_token
     end
+    return outputs
   end
 
   def results_folder_files(pipeline_version = nil)
@@ -273,11 +285,15 @@ class Sample < ApplicationRecord
     return list_outputs(sample_output_s3_path) unless pr
     file_list = []
     if pipeline_version_at_least_2(pr.pipeline_version)
-      file_list = list_outputs(pr.output_s3_path_with_version)
-      file_list += list_outputs(sample_output_s3_path)
-      file_list += list_outputs(pr.postprocess_output_s3_path)
-      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR)
-      file_list += list_outputs(pr.expt_output_s3_path)
+      if pr.step_function?
+        file_list = list_outputs(pr.sfn_results_path)
+      else
+        file_list = list_outputs(pr.output_s3_path_with_version)
+        file_list += list_outputs(sample_output_s3_path)
+        file_list += list_outputs(pr.postprocess_output_s3_path)
+        file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR)
+        file_list += list_outputs(pr.expt_output_s3_path)
+      end
     else
       stage1_files = list_outputs(pr.host_filter_output_s3_path)
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
