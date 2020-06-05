@@ -258,15 +258,13 @@ class Sample < ApplicationRecord
 
     # Adding pagination to fix a bug where there are too many files for step function pipelines
     # TODO: A better solution should be planned as part of https://jira.czi.team/browse/IDSEQ-2295
-    continuation_token = nil
     outputs = []
-    is_truncated = true
-    while is_truncated
-      file_list = s3.list_objects_v2(bucket: SAMPLES_BUCKET_NAME,
-                                     prefix: "#{prefix}/",
-                                     delimiter: delimiter,
-                                     continuation_token: continuation_token)
-      outputs += file_list.contents.map do |f|
+    s3.list_objects_v2(
+      bucket: SAMPLES_BUCKET_NAME,
+      prefix: "#{prefix}/",
+      delimiter: delimiter
+    ).each do |resp|
+      outputs += resp.contents.map do |f|
         {
           key: f.key,
           display_name: end_path(f.key, display_prefix),
@@ -274,8 +272,6 @@ class Sample < ApplicationRecord
           size: ActiveSupport::NumberHelper.number_to_human_size(f.size),
         }
       end
-      is_truncated = file_list.is_truncated
-      continuation_token = file_list.next_continuation_token
     end
     return outputs
   end
