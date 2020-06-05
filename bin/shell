@@ -21,9 +21,6 @@ ec2_client = Aws::EC2::Client.new(region: 'us-west-2')
 iam_client = Aws::IAM::Client.new(region: 'us-west-2')
 aws_account_alias = iam_client.list_account_aliases().account_aliases[0]
 
-puts "***** aws_account_alias = #{aws_account_alias} ****"
-
-
 cluster = if env == "sandbox" or aws_account_alias == "idseq-prod"
             "idseq-#{env}-ecs"
           else
