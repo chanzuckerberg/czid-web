@@ -147,6 +147,27 @@ RSpec.describe RetrievePipelineVizGraphDataService do
         },
       },
     }
+
+    Aws.config[:s3] = {
+      stub_responses: {
+        list_objects_v2: {
+          contents: %w[
+            unmapped1.fq
+            trimmomatic1.fq
+            priceseq1.fa
+            dedup1.fa
+            lzw1.fa
+            bowtie2_1.fa
+            subsampled_1.fa
+            gsnap_filter_1.fa
+          ].map do |filename|
+            { key: File.join(output_dir_s3.split("/", 4)[-1], filename) }
+          end,
+        },
+      },
+    }
+
+    allow(Sample).to receive(:get_signed_url).and_return("test url")
   end
 
   describe "Retrieving graph" do
@@ -171,7 +192,6 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       stub_const("PipelineOutputsHelper::Client", s3)
       # allow(PipelineOutputsHelper).to receive(:get_s3_file).and_return(step_status_data.to_json)
       results = RetrievePipelineVizGraphDataService.call(@pr.id, true, false)
-
       results[:stages][0][:steps].each do |step|
         # Status should be notStarted if no job status data exists for the step
         expect(step[:status]).to eq("notStarted")
