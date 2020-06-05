@@ -3,6 +3,7 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 @import "typography";
 @import "themes/colors";
+@import "themes/elements";
 
 $break-large: 1460px;
 
@@ -11,7 +12,7 @@ $break-large: 1460px;
   margin: 0 auto;
   box-shadow: 1px 2px 5px 2px $lightest-grey;
   margin-top: 150px;
-  border-radius: 4px;
+  border-radius: $border-radius-m;
   .title {
     padding: 25px 35px;
     p.signup {
@@ -38,7 +39,7 @@ $break-large: 1460px;
   .error-info {
     width: 80%;
     background: $error-lightest;
-    border-radius: 5px;
+    border-radius: $border-radius-m;
     color: $error;
     margin: 0 auto;
     padding: 10px 5px;
@@ -50,7 +51,7 @@ $break-large: 1460px;
   .success-info {
     width: 80%;
     background: $success-lightest;
-    border-radius: 5px;
+    border-radius: $border-radius-m;
     color: $success;
     margin: 0 auto;
     padding: 10px 5px;

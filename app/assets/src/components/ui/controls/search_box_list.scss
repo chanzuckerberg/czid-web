@@ -5,7 +5,7 @@
 .searchBoxList {
   background-color: $white;
   border: 1px solid $light-grey;
-  border-radius: 5px;
+  border-radius: $border-radius-m;
   box-shadow: $box-shadow-bottom-right;
   display: inline-block;
   font-size: 13px;
@@ -32,7 +32,7 @@
 
     &::-webkit-scrollbar-track {
       background-color: $lightest-grey;
-      border-radius: 3px;
+      border-radius: $border-radius-m;
     }
 
     &::-webkit-scrollbar-thumb {

@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .plusMinusContainer {
   display: flex;
   flex-direction: column;
-  border-radius: 4px;
+  border-radius: $border-radius-m;
   overflow: hidden;
 
   button {

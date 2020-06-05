@@ -7,7 +7,7 @@ $break-large: 1460px;
   margin: 0 auto;
   box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $lightest-grey;
   margin-top: 150px;
-  border-radius: 10px;
+  border-radius: $border-radius-l;
   label {
     -webkit-transform: none !important;
     transform: none !important;
@@ -64,7 +64,7 @@ $break-large: 1460px;
   .error-info {
     width: 80%;
     background: $error-lightest;
-    border-radius: 5px;
+    border-radius: $border-radius-m;
     color: $error;
     margin: 0 auto;
     padding: 10px 5px;
@@ -79,7 +79,7 @@ $break-large: 1460px;
   .success-info {
     width: 80%;
     background: $success-lightest;
-    border-radius: 5px;
+    border-radius: $border-radius-m;
     color: $success;
     margin: 0 auto;
     padding: 10px 5px;

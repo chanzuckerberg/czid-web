@@ -5,7 +5,7 @@
 .statusLabel {
   @include font-label-xxs;
   line-height: 9px;
-  border-radius: 13px;
+  border-radius: $border-radius-l;
   margin-left: $space-xs;
   padding: $space-xxs $space-xs;
 
