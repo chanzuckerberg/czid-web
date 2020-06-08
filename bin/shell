@@ -4,6 +4,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'aws-sdk-ecs'
 require 'aws-sdk-ec2'
+require 'aws-sdk-iam'
 require 'pp'
 
 env = ARGV.shift
@@ -16,12 +17,17 @@ end
 
 ecs_client = Aws::ECS::Client.new(region: 'us-west-2')
 ec2_client = Aws::EC2::Client.new(region: 'us-west-2')
-cluster = if env == "sandbox"
+
+iam_client = Aws::IAM::Client.new(region: 'us-west-2')
+aws_account_alias = iam_client.list_account_aliases().account_aliases[0]
+
+cluster = if env == "sandbox" or aws_account_alias == "idseq-prod"
             "idseq-#{env}-ecs"
           else
-            # TODO(2020-01-23): Rename staging/prod clusters to new format (IDSEQ-2155).
+            # TODO(2020-01-23): Rename staging clusters to new format (IDSEQ-2155).
             env
           end
+
 service = "idseq-#{env}-web"
 
 task = ecs_client.list_tasks(cluster: cluster, service_name: service).task_arns.first
