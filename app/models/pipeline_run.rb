@@ -799,33 +799,33 @@ class PipelineRun < ApplicationRecord
     Syscall.run("rm", "-f", downloaded_byteranges_path)
   end
 
+  def update_results_path_from_sfn
+    Rails.logger.info("[SFN] [PR=#{id}] Get path from SFN execution (arn=#{sfn_execution_arn})")
+    sfn_client = Aws::States::Client.new
+
+    execution_resp = sfn_client.describe_execution(execution_arn: sfn_execution_arn)
+
+    sfn_resp = sfn_client.list_tags_for_resource(resource_arn: execution_resp.state_machine_arn)
+
+    tags = sfn_resp.tags.reduce({}) do |h, tag|
+      h.update(tag.key => tag.value)
+    end.symbolize_keys
+
+    # currently use a conventioned path
+    # we will drop this approach once we move to an async model
+    path = File.join(
+      JSON.parse(execution_resp.input)["OutputPrefix"],
+      execution_resp.state_machine_arn.split(':')[-1], # state machine name
+      "wdl-#{tags[:wdl_version]}",
+      "dag-#{pipeline_version}"
+    )
+    Rails.logger.info("[SFN] [PR=#{id}] Output path: #{path}")
+
+    self.sfn_results_path = path
+  end
+
   def sfn_results_path
-    sfn_results_path_from_sfn = lambda do
-      Rails.logger.info("[SFN] [PR=#{id}] Get path from SFN execution (arn=#{sfn_execution_arn})")
-      sfn_client = Aws::States::Client.new
-
-      execution_resp = sfn_client.describe_execution(execution_arn: sfn_execution_arn)
-
-      sfn_resp = sfn_client.list_tags_for_resource(resource_arn: execution_resp.state_machine_arn)
-
-      tags = sfn_resp.tags.reduce({}) do |h, tag|
-        h.update(tag.key => tag.value)
-      end.symbolize_keys
-
-      # currently use a conventioned path
-      # we will drop this approach once we move to an async model
-      path = File.join(
-        JSON.parse(execution_resp.input)["OutputPrefix"],
-        execution_resp.state_machine_arn.split(':')[-1], # state machine name
-        "wdl-#{tags[:wdl_version]}",
-        "dag-#{pipeline_version}"
-      )
-      Rails.logger.info("[SFN] [PR=#{id}] Output path: #{path}")
-      return path
-    end
-
-    # memoize results path
-    @sfn_results_path ||= sfn_results_path_from_sfn.call
+    self[:sfn_results_path] || update_results_path_from_sfn
   end
 
   def s3_file_for(output)
