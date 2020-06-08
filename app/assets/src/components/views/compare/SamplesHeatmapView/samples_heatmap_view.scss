@@ -69,7 +69,7 @@
       background-color: $white;
       font-size: $font-size-h4;
       padding: 0 $space-l;
-      border-radius: 0 0 4px 4px;
+      border-radius: 0 0 $border-radius-m $border-radius-m;
       box-shadow: $box-shadow-tab-bottom;
     }
   }

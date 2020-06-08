@@ -93,7 +93,7 @@
     background-color: $white;
     box-shadow: $box-shadow-dropdown-menu;
     border: 1px solid $box-shadow-lighter;
-    border-radius: 4px;
+    border-radius: $border-radius-m;
 
     &:global(.left) {
       .innerMenu {
@@ -142,7 +142,7 @@
     // TODO(mark): Move this to a global CSS file.
     &::-webkit-scrollbar {
       width: 8px;
-      border-radius: 3px;
+      border-radius: $border-radius-s;
     }
 
     &::-webkit-scrollbar-track {

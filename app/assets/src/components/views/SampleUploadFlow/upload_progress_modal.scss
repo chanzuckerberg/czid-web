@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .uploadProgressModal {
   padding: 0;
@@ -116,13 +117,13 @@
       background-color: $lightest-grey;
       height: 8px;
       margin-top: 5px;
-      border-radius: 4px;
+      border-radius: $border-radius-m;
 
       .loadingBar {
         background-color: $primary-light;
         height: 8px;
         width: 0px;
-        border-radius: 4px;
+        border-radius: $border-radius-m;
       }
     }
   }

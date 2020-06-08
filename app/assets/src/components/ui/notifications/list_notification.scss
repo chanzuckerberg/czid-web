@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .listNotification {
   .accordion {
     background-color: $transparent-lightest-grey;
-    border-radius: 5px;
+    border-radius: $border-radius-m;
     margin-top: 10px;
 
     .title {

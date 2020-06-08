@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .checkbox {
   display: flex;
@@ -24,7 +25,7 @@
     width: 16px;
     flex: none;
     border: 1px solid $light-grey;
-    border-radius: 2px;
+    border-radius: $border-radius-s;
     opacity: 100;
 
     &:hover {
@@ -40,7 +41,7 @@
       width: 6px;
       height: 9px;
       border: solid $white;
-      border-radius: 2px;
+      border-radius: $border-radius-s;
       border-width: 0 2px 2px 0;
       -webkit-transform: rotate(40deg);
       -ms-transform: rotate(40deg);
