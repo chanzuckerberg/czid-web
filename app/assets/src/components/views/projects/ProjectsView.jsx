@@ -31,6 +31,7 @@ class ProjectsView extends React.Component {
         dataKey: "project",
         flexGrow: 1,
         width: 350,
+        disableSort: true,
         cellRenderer: ({ cellData }) =>
           TableRenderers.renderItemDetails(
             merge(

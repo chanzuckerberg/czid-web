@@ -40,6 +40,14 @@
   justify-content: center;
   text-align: center;
 
+  .projectHeader {
+    max-width: 100%;
+    display: flex;
+    flex: 1 0 auto;
+    align-items: inherit;
+    justify-content: inherit;
+  }
+
   .sortableHeader {
     max-width: 100%;
     display: flex;

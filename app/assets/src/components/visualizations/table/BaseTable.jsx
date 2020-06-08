@@ -65,9 +65,10 @@ class BaseTable extends React.Component {
     });
   }
 
-  basicHeaderRenderer({ columnData, label }) {
+  basicHeaderRenderer({ dataKey, columnData, label }) {
+    const isProjectHeader = dataKey === "project";
     return (
-      <div>
+      <div className={isProjectHeader && cs.projectHeader}>
         {columnData ? (
           <ColumnHeaderTooltip
             trigger={<span className={cs.label}>{label}</span>}
@@ -113,13 +114,10 @@ class BaseTable extends React.Component {
             content={label}
           />
         )}
-        {/* Commenting out because we don't have any sorting functionality right now.
-          TODO(omar): Uncomment when sorting functionality becomes live.
-          <SortIcon
-            sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
-            className={cx(cs.sortIcon, sortBy === dataKey && cs.active)}
-          />S
-        */}
+        <SortIcon
+          sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
+          className={cx(cs.sortIcon, sortBy === dataKey && cs.active)}
+        />
       </div>
     );
   };
