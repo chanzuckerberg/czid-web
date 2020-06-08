@@ -113,10 +113,13 @@ class BaseTable extends React.Component {
             content={label}
           />
         )}
-        <SortIcon
-          sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
-          className={cx(cs.sortIcon, sortBy === dataKey && cs.active)}
-        />
+        {/* Commenting out because we don't have any sorting functionality right now.
+          TODO(omar): Uncomment when sorting functionality becomes live.
+          <SortIcon
+            sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
+            className={cx(cs.sortIcon, sortBy === dataKey && cs.active)}
+          />S
+        */}
       </div>
     );
   };

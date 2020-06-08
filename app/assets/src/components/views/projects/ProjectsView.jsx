@@ -50,6 +50,7 @@ class ProjectsView extends React.Component {
         dataKey: "created_at",
         label: "Created On",
         width: 120,
+        disableSort: true,
         cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
@@ -68,8 +69,9 @@ class ProjectsView extends React.Component {
       },
       {
         dataKey: "number_of_samples",
-        width: 140,
         label: "No. of Samples",
+        width: 140,
+        disableSort: true,
       },
     ];
 
