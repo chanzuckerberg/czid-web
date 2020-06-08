@@ -1,12 +1,13 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .liveSearchBox {
   input[type="text"] {
     @include font-body-xs;
 
     height: 34px;
-    border-radius: 4px;
+    border-radius: $border-radius-m;
     box-sizing: border-box;
     border: 1px solid $light-grey;
 
@@ -18,14 +19,14 @@
 
   &.rectangular {
     :global(.prompt) {
-      border-radius: 4px;
+      border-radius: $border-radius-m;
     }
   }
 
   &:not(.rectangular) {
     :global(.prompt) {
       width: 260px !important;
-      border-radius: 19px !important;
+      border-radius: $border-radius-l !important;
     }
   }
 

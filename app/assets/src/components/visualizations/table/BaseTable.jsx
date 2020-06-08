@@ -222,7 +222,10 @@ class BaseTable extends React.Component {
     const { activeColumns, columns } = this.state;
     const columnOrder = activeColumns || map("dataKey", columns);
     return (
-      <div className={cs.tableContainer}>
+      <div
+        className={cs.tableContainer}
+        style={{ flexBasis: defaultHeaderHeight }}
+      >
         <AutoSizer>
           {({ width, height }) => (
             <VirtualizedTable

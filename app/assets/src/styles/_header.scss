@@ -1,5 +1,6 @@
 @import "typography";
 @import "themes/colors";
+@import "themes/elements";
 
 .tooltip {
   &.in {
@@ -12,7 +13,7 @@
     padding: 10px 15px;
     color: $off-white !important;
     background: $darkest-grey;
-    border-radius: 3px;
+    border-radius: $border-radius-s;
     box-shadow: 0 1px 3px 0 rgba($black, 0.15);
   }
 }

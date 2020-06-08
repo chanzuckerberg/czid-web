@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/typography";
+@import "~styles/themes/elements";
 
 /* Subheader */
 .viewHeader {
@@ -120,7 +121,7 @@
       display: inline-flex;
       align-items: center;
       background-color: $error-lightest;
-      border-radius: 15px;
+      border-radius: $border-radius-l;
       padding: 3px 8px;
 
       .icon {

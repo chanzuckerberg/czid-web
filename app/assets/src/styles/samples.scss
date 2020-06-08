@@ -352,7 +352,7 @@ $break-large: 1070px;
 
     .wrapper {
       .metadata {
-        border-radius: 40px;
+        border-radius: $border-radius-l;
         border: solid 1px $light-grey;
       }
     }
@@ -364,7 +364,7 @@ $break-large: 1070px;
         margin: 0 10px;
       }
       .search {
-        border-radius: 40px;
+        border-radius: $border-radius-l;
         border: solid 1px $light-grey;
         padding-left: 32px;
         position: relative;
@@ -628,7 +628,7 @@ input[type="button"] {
         }
         .ui.dropdown.link.item {
           padding: 8px 16px;
-          border-radius: 40px;
+          border-radius: $border-radius-l;
           border: solid 1px $primary-light;
           .text {
             color: $primary-light;
@@ -747,7 +747,7 @@ input[type="button"] {
     input {
       border: 1px solid $light-grey;
       padding: 12px;
-      border-radius: 3px;
+      border-radius: $border-radius-m;
       padding-right: 110px;
       &::placeholder {
         color: $light-grey;

@@ -94,7 +94,7 @@
       @include font-body-xxs;
       color: $medium-grey;
       background: $white;
-      border-radius: 4px;
+      border-radius: $border-radius-m;
       box-shadow: $box-shadow-dropdown-menu;
       cursor: default;
       display: inline-block;

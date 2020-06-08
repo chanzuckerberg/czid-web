@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .metadataUpload {
   position: relative;
@@ -57,7 +58,7 @@
 
 .issueGroup {
   margin-top: 6px;
-  border-radius: 4px;
+  border-radius: $border-radius-m;
 
   &:first-child {
     margin-top: 0;
@@ -92,7 +93,7 @@
   display: flex;
   align-items: center;
   padding: 10px;
-  border-radius: 4px;
+  border-radius: $border-radius-m;
   margin-top: 6px;
 
   &:first-child {
