@@ -801,8 +801,8 @@ class PipelineRun < ApplicationRecord
 
   def update_results_path_from_sfn
     Rails.logger.info("[SFN] [PR=#{id}] Get path from SFN execution (arn=#{sfn_execution_arn})")
+    # TODO: move to initializer
     sfn_client = Aws::States::Client.new
-
     execution_resp = sfn_client.describe_execution(execution_arn: sfn_execution_arn)
 
     sfn_resp = sfn_client.list_tags_for_resource(resource_arn: execution_resp.state_machine_arn)
@@ -821,7 +821,8 @@ class PipelineRun < ApplicationRecord
     )
     Rails.logger.info("[SFN] [PR=#{id}] Output path: #{path}")
 
-    self.sfn_results_path = path
+    update(sfn_results_path: path)
+    path
   end
 
   def sfn_results_path
