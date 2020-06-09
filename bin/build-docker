@@ -1,12 +1,12 @@
 #!/bin/bash
 # NOTE: We push all created tags to the Docker repo, but only the commit, branch, and latest tags matter.
 # Cache and compose are noise.
-set -e
+set -euo pipefail
 
 export REPO="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web"
 
 BRANCH="$1"
-BRANCH_CLEANED=`echo $BRANCH | sed 's/\//-/g'`
+BRANCH_CLEANED=$(echo $BRANCH | sed 's/\//-/g')
 COMMIT="$2"
 BRANCH_TAG=$REPO:"branch-$BRANCH_CLEANED"
 CACHE_TAG="$REPO:cache"
@@ -14,22 +14,21 @@ COMMIT_TAG=$REPO:"sha-$COMMIT"
 COMPOSE_TAG="$REPO:compose"
 LATEST_TAG="$REPO:latest"
 
-echo $BRANCH
-echo $COMMIT
-echo $REPO
-echo $TAG
+echo "Branch $BRANCH"
+echo "Commit $COMMIT"
+echo "Repo   $REPO"
 echo '--'
 
 # Try to pull the latest image for this branch, otherwise pull latest image for caching
 if ! ( docker pull $BRANCH_TAG && docker tag $BRANCH_TAG $CACHE_TAG ); then
-  # If we fail to fetch the latest image, continue the build without a cache image.
-  (docker pull $LATEST_TAG && docker tag $LATEST_TAG $CACHE_TAG) || true
+    # If we fail to fetch the latest image, continue the build without a cache image.
+    (docker pull $LATEST_TAG && docker tag $LATEST_TAG $CACHE_TAG) || true
 fi
 
 docker build -t $COMPOSE_TAG --cache-from $CACHE_TAG --build-arg GIT_COMMIT=${COMMIT} .
 
 if [ "$BRANCH" == "master" ]; then
-  docker tag $COMPOSE_TAG $LATEST_TAG
+    docker tag $COMPOSE_TAG $LATEST_TAG
 fi
 docker tag $COMPOSE_TAG $COMMIT_TAG
 docker tag $COMPOSE_TAG $BRANCH_TAG
