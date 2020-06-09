@@ -43,7 +43,7 @@ __check_commit_state() {
 
   declare response_json; response_json=$(
     http --ignore-stdin --timeout 30 --check-status -b \
-      GET "$GITHUB_REPOSITORY_API/commits/$sha/status"
+      GET "$GITHUB_REPOSITORY_API/commits/$sha/status" "Authorization:token $GITHUB_TOKEN"
   )
 
   declare state; state="$(jq -er .state <<< "$response_json")"
