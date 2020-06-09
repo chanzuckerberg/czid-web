@@ -478,8 +478,7 @@ export default class Heatmap {
     );
 
     // Set up space bar+click to pan behavior.
-    d3
-      .select("body")
+    d3.select("body")
       .on("keydown", () => {
         if (d3.event.code === "Space") {
           this.svg.style("cursor", "move");
@@ -522,7 +521,7 @@ export default class Heatmap {
   }
 
   scroll() {
-    this.pan(d3.event.wheelDeltaX, d3.event.wheelDeltaY);
+    this.pan(d3.event.deltaX, d3.event.deltaY);
     d3.event.stopPropagation();
   }
 
@@ -1484,14 +1483,12 @@ export default class Heatmap {
 
     columnMetadataLabel
       .select(".metadataSortIcon")
-      .attr(
-        "xlink:href",
-        d =>
-          d.value === this.columnMetadataSortField
-            ? `${this.options.iconPath}/sort_${
-                this.columnMetadataSortAsc ? "asc" : "desc"
-              }.svg`
-            : ""
+      .attr("xlink:href", d =>
+        d.value === this.columnMetadataSortField
+          ? `${this.options.iconPath}/sort_${
+              this.columnMetadataSortAsc ? "asc" : "desc"
+            }.svg`
+          : ""
       );
   }
 
