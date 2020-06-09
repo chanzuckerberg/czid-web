@@ -126,7 +126,7 @@ class LiveSearchBox extends React.Component {
         placeholder={placeholder}
         results={results}
         showNoResults={false}
-        value={value}
+        value={value || ""}
       />
     );
   }
