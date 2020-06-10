@@ -23,6 +23,11 @@
     "*.rb": [
       "rubocop -R --auto-correct --config .rubocop_todo.yml --display-cop-names --display-style-guide",
       "git add"
+    ],
+    "*.py": [
+      "black --line-length 120",
+      "flake8 --show-source",
+      "git add"
     ]
   },
   "devDependencies": {

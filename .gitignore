@@ -58,3 +58,17 @@ coverage
 # Ignore vim swap files
 *.swp
 *.swo
+
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+/.venv
+/venv/
+/venv.bak/
+
+# Pyre type checker
+.pyre/
