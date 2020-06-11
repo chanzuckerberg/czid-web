@@ -188,7 +188,9 @@ class SamplesController < ApplicationController
       # format_samples loads a lot of information about samples
       # There are many ways we can refactor: multiple endpoints for client to ask for the information
       # they actually need or at least a configurable function to get only certain data
-      details_json = format_samples(limited_samples).as_json()
+      details_json = format_samples(limited_samples).as_json(
+        except: [:sfn_results_path]
+      )
       limited_samples_json.zip(details_json, samples_visibility).map do |sample, details, visibility|
         sample[:public] = visibility
         sample[:details] = details
