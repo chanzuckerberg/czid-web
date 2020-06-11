@@ -70,6 +70,7 @@ describe PipelineRun, type: :model do
   end
   let(:fake_wdl_version) { "999".freeze }
   let(:fake_dag_version) { "9.999".freeze }
+  let(:fake_sfn_results_path) { "#{fake_output_prefix}/#{fake_sfn_name}/#{fake_wdl_version}/#{fake_dag_version}".freeze }
 
   context "#update_job_status" do
     let(:user) { build_stubbed(:user) }
@@ -262,7 +263,8 @@ describe PipelineRun, type: :model do
         :pipeline_run,
         sample: sample,
         pipeline_version: "3.9",
-        sfn_execution_arn: fake_sfn_execution_arn
+        sfn_execution_arn: fake_sfn_execution_arn,
+        sfn_results_path: fake_sfn_results_path
       )
     end
     let(:results_path) { "amr_processed_results.csv" }
