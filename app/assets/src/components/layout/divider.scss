@@ -2,13 +2,13 @@
 
 .divider {
   height: 0px;
-  border-bottom: 2px solid $off-white;
+  border-bottom: 2px solid $gray-off-white;
 
   &.thin {
-    border-bottom: 2px solid $off-white;
+    border-bottom: 2px solid $gray-off-white;
   }
 
   &.medium {
-    border-bottom: 2px solid $lightest-grey;
+    border-bottom: 2px solid $gray-lightest;
   }
 }

@@ -12,7 +12,7 @@
   .secondary-text {
     font-size: 11px;
     font-weight: normal;
-    color: $light-grey;
+    color: $gray-light;
   }
   ul {
     margin-top: 0;
@@ -49,11 +49,11 @@ $break-large: 1070px;
 
   .indicator {
     height: 4px;
-    background: $primary-light !important;
+    background: $primary !important;
   }
 
   .tab a {
-    color: $darkest-grey;
+    color: $gray-darkest;
     font-size: $font-size-base;
     padding: 0 !important;
     margin-right: 30px;
@@ -64,7 +64,7 @@ $break-large: 1070px;
 
 .tab-screen-content {
   .content-title {
-    color: $darkest-grey;
+    color: $gray-darkest;
     font-size: $font-size-h5;
     font-weight: $headings-font-weight;
     margin: 20px 0;
@@ -93,7 +93,7 @@ $break-large: 1070px;
     margin: 0;
   }
   .subheading {
-    color: $dark-grey;
+    color: $gray-dark;
     font-weight: $font-weight-regular;
     text-transform: none;
   }
@@ -117,23 +117,23 @@ $break-large: 1070px;
       position: -webkit-sticky;
       position: sticky;
       top: -1px;
-      color: $darkest-grey;
+      color: $gray-darkest;
     }
     .empty-message {
-      color: $medium-grey;
+      color: $gray-dark;
       padding-top: 20px;
     }
   }
 
   .sample-feed {
     :hover {
-      background: $off-white-blue !important;
+      background: $primary-off-white !important;
     }
   }
 
   .sample-feed,
   .sample-feed-head {
-    border-bottom: 1px solid $light-grey;
+    border-bottom: 1px solid $gray-light;
     z-index: 10;
     .samples-card {
       padding: 2px 20px 2px 20px;
@@ -146,10 +146,10 @@ $break-large: 1070px;
           padding: 8px 35px;
           font-size: 12px;
           &.disabled {
-            color: $light-grey;
+            color: $gray-light;
           }
           &.current {
-            color: $primary-light;
+            color: $primary;
           }
         }
       }
@@ -168,7 +168,7 @@ $break-large: 1070px;
             display: inline-block;
           }
           [type="checkbox"].filled-in:disabled:not(:checked) + label:after {
-            background-color: $light-grey;
+            background-color: $gray-light;
           }
 
           [type="checkbox"] + label {
@@ -200,11 +200,11 @@ $break-large: 1070px;
             .pipeline-status-filter {
               margin-left: 6px;
               opacity: 0;
-              color: $medium-grey;
+              color: $gray-dark;
 
               &.active {
                 opacity: 0.8;
-                color: $primary-light;
+                color: $primary;
               }
             }
 
@@ -235,23 +235,23 @@ $break-large: 1070px;
               }
               font-size: 14px;
               .blank {
-                color: $light-grey;
+                color: $gray-light;
               }
               .time {
                 .duration-label {
-                  color: $medium-grey;
+                  color: $gray-dark;
                   margin-left: 5px;
                   font-size: 12px;
                 }
                 .fa {
-                  color: $medium-grey;
+                  color: $gray-dark;
                 }
               }
               &.data-label {
                 margin-top: 0.15rem;
                 text-align: left;
                 .percent {
-                  color: $medium-grey;
+                  color: $gray-dark;
                   font-size: 12px;
                 }
               }
@@ -260,11 +260,11 @@ $break-large: 1070px;
               }
             }
             &.author {
-              color: $medium-grey;
+              color: $gray-dark;
               font-size: 12px;
             }
             &.sample-name {
-              color: $darkest-grey;
+              color: $gray-darkest;
               font-size: 14px;
               white-space: nowrap;
               overflow: hidden;
@@ -274,7 +274,7 @@ $break-large: 1070px;
               text-align: left;
             }
             .upload-date {
-              color: $medium-grey;
+              color: $gray-dark;
             }
           }
         }
@@ -286,7 +286,7 @@ $break-large: 1070px;
     &:hover {
       cursor: pointer;
       .sample-name {
-        color: $primary-light !important;
+        color: $primary !important;
       }
     }
   }
@@ -319,7 +319,7 @@ $break-large: 1070px;
     i {
       margin-left: 5px;
       &.active {
-        color: $primary-light;
+        color: $primary;
       }
       &.hidden {
         display: none;
@@ -334,7 +334,7 @@ $break-large: 1070px;
   .table-container {
     display: flex;
     margin: 0 10px 7px;
-    color: $darkest-grey;
+    color: $gray-darkest;
     font-weight: 600;
     font-size: 14px;
     .status-dropdown {
@@ -353,7 +353,7 @@ $break-large: 1070px;
     .wrapper {
       .metadata {
         border-radius: $border-radius-l;
-        border: solid 1px $light-grey;
+        border: solid 1px $gray-light;
       }
     }
 
@@ -365,7 +365,7 @@ $break-large: 1070px;
       }
       .search {
         border-radius: $border-radius-l;
-        border: solid 1px $light-grey;
+        border: solid 1px $gray-light;
         padding-left: 32px;
         position: relative;
         top: -18px;
@@ -374,13 +374,13 @@ $break-large: 1070px;
         font-family: $font-family-default;
 
         &::placeholder {
-          color: $medium-grey;
+          color: $gray-dark;
           font-family: $font-family-default;
         }
         &:focus {
-          border-bottom-color: $lightest-grey;
-          box-shadow: 0 1px 0 0 $lightest-grey;
-          border: 1px solid $primary-light;
+          border-bottom-color: $gray-lightest;
+          box-shadow: 0 1px 0 0 $gray-lightest;
+          border: 1px solid $primary;
         }
       }
 
@@ -393,7 +393,7 @@ $break-large: 1070px;
           margin-left: 10px;
           font-size: 18px;
           top: 7px;
-          color: $medium-grey;
+          color: $gray-dark;
         }
       }
     }
@@ -418,7 +418,7 @@ $break-large: 1070px;
       bottom: 0px;
       &:hover,
       &.active {
-        color: $primary-light;
+        color: $primary;
       }
     }
   }
@@ -431,14 +431,14 @@ input[type="button"] {
 
 .no-edit {
   font-size: 10px;
-  color: $medium-grey;
+  color: $gray-dark;
 }
 
 .bottom {
   text-align: center;
   margin: 20px;
   cursor: pointer;
-  color: $darkest-grey;
+  color: $gray-darkest;
   .back {
     text-decoration: underline;
   }
@@ -449,7 +449,7 @@ input[type="button"] {
 
 .no-report {
   .fa-spinner {
-    color: $darkest-grey;
+    color: $gray-darkest;
     cursor: pointer;
     margin-top: 30px;
   }
@@ -463,19 +463,19 @@ input[type="button"] {
 }
 
 .complete {
-  color: $success !important;
+  color: $success-medium !important;
 }
 .failed {
-  color: $error !important;
+  color: $error-medium !important;
 }
 .waiting {
-  color: $primary-light !important;
+  color: $primary !important;
 }
 .initializing {
-  color: $medium-grey !important;
+  color: $gray-dark !important;
 }
 .uploading {
-  color: $warning !important;
+  color: $warning-medium !important;
 }
 
 .filter {
@@ -489,11 +489,11 @@ input[type="button"] {
 
 .content-body {
   .sidebar {
-    background-color: $darkest-grey;
-    border-right: 1px solid $lightest-grey;
+    background-color: $gray-darkest;
+    border-right: 1px solid $gray-lightest;
     width: 15.3em !important;
     .title {
-      color: $medium-grey;
+      color: $gray-dark;
       font-weight: 700;
       font-size: 14px;
       padding: 21px 21px 0;
@@ -503,7 +503,7 @@ input[type="button"] {
     .divider {
       margin: 5px 20px;
       height: 2px;
-      background-color: $lightest-grey;
+      background-color: $gray-lightest;
     }
     .project-wrapper {
       margin-top: 50px;
@@ -537,7 +537,7 @@ input[type="button"] {
           font-size: $font-size-base;
           color: $white;
           &:hover {
-            background: $medium-grey;
+            background: $gray-medium;
             i {
               &.favorite.fa {
                 display: inline;
@@ -545,7 +545,7 @@ input[type="button"] {
             }
           }
           &.highlight {
-            background: $primary-light;
+            background: $primary;
             color: $white;
             font-weight: 600;
             i {
@@ -576,7 +576,7 @@ input[type="button"] {
       font-size: $font-size-small;
       cursor: pointer;
       padding: 0 20px;
-      color: $primary-lighter;
+      color: $primary-light;
       margin-top: 20px;
 
       &:hover {
@@ -594,7 +594,7 @@ input[type="button"] {
       margin-right: 1.5rem;
       .divider {
         height: 3px;
-        border: solid 4px $off-white;
+        border: solid 4px $gray-off-white;
       }
     }
 
@@ -602,8 +602,8 @@ input[type="button"] {
       padding-left: 27px;
       padding-bottom: 12px;
       .label-tags {
-        background: $primary-light !important;
-        border-color: $primary-light !important;
+        background: $primary !important;
+        border-color: $primary !important;
         color: $white;
         margin: 0.4em;
       }
@@ -629,12 +629,12 @@ input[type="button"] {
         .ui.dropdown.link.item {
           padding: 8px 16px;
           border-radius: $border-radius-l;
-          border: solid 1px $primary-light;
+          border: solid 1px $primary;
           .text {
-            color: $primary-light;
+            color: $primary;
           }
           .dropdown {
-            color: $primary-light;
+            color: $primary;
           }
         }
         .visible {
@@ -649,7 +649,7 @@ input[type="button"] {
           padding: 3px 0.05em 0.05em;
         }
         .download-reports {
-          color: $primary-light;
+          color: $primary;
         }
       }
       .download-section-btns {
@@ -679,7 +679,7 @@ input[type="button"] {
 
 .fa-star {
   margin-top: 4px;
-  color: $primary-light;
+  color: $primary;
 }
 
 .fa-star-o {
@@ -689,7 +689,7 @@ input[type="button"] {
 .add-user-modal {
   width: 35% !important;
   box-shadow: 1px 1px 7px 2px $white;
-  color: $darkest-grey;
+  color: $gray-darkest;
   border-radius: 0;
   margin: 0 auto !important;
   top: 30% !important;
@@ -703,7 +703,7 @@ input[type="button"] {
 .project-popup {
   width: 30%;
   box-shadow: 1px 1px 7px 2px $white;
-  color: $darkest-grey;
+  color: $gray-darkest;
   border-radius: 0px;
   top: 25% !important;
   .project_modal_header {
@@ -727,17 +727,17 @@ input[type="button"] {
       font-size: $font-size-base;
       position: relative;
       top: 2px;
-      color: $light-grey;
+      color: $gray-light;
     }
     .label {
-      color: $medium-grey;
+      color: $gray-dark;
       margin-left: 5px;
     }
     a {
       margin-left: 5px;
-      color: $primary-light !important;
+      color: $primary !important;
       &:hover {
-        color: $primary-medium !important;
+        color: $primary-dark !important;
       }
     }
   }
@@ -745,20 +745,20 @@ input[type="button"] {
   .add_member {
     margin-top: 15px;
     input {
-      border: 1px solid $light-grey;
+      border: 1px solid $gray-light;
       padding: 12px;
       border-radius: $border-radius-m;
       padding-right: 110px;
       &::placeholder {
-        color: $light-grey;
+        color: $gray-light;
         font-weight: 400;
       }
       &:focus {
-        border-color: $primary-light !important;
+        border-color: $primary !important;
       }
     }
     .error-message {
-      color: $error;
+      color: $error-medium;
       float: left;
       margin-top: 5px;
       font-size: $font-size-small;
@@ -768,7 +768,7 @@ input[type="button"] {
       width: 100%;
       font-size: $font-size-small;
       margin-top: 5px;
-      color: $dark-grey;
+      color: $gray-dark;
     }
   }
   .members_list {
@@ -791,14 +791,14 @@ input[type="button"] {
 [type="checkbox"].filled-in:not(:checked) + label:after {
   top: 4px;
   background-color: transparent;
-  border: 1px solid $dark-grey;
+  border: 1px solid $gray-dark;
   z-index: 0;
 }
 
 [type="checkbox"].filled-in:checked + label:after {
   top: 4px;
-  border: 1px solid $primary-light;
-  background-color: $primary-light;
+  border: 1px solid $primary;
+  background-color: $primary;
 }
 
 [type="checkbox"].filled-in:checked + label:before {
@@ -819,7 +819,7 @@ input[type="button"] {
 }
 
 .nanobar .bar {
-  background-color: $primary-light;
+  background-color: $primary;
 }
 
 .ui.popup.hidden-popup {

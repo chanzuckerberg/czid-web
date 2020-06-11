@@ -17,11 +17,11 @@
     }
 
     &.boxed {
-      border: 1px solid $medium-grey;
+      border: 1px solid $gray-medium;
       border-radius: $border-radius-s;
 
       &.checked {
-        background-color: $primary-light;
+        background-color: $primary;
 
         .icon {
           color: white;
@@ -31,7 +31,7 @@
 
     &.checked {
       .icon {
-        color: $primary-light;
+        color: $primary;
       }
     }
   }

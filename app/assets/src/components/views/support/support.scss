@@ -39,7 +39,7 @@
   h4.subtitle {
     @include font-body-xxs;
     margin-top: 5px;
-    color: $dark-grey;
+    color: $gray-dark;
   }
 
   .title {
@@ -56,7 +56,7 @@
 
   a {
     // Override _header.scss
-    color: $primary-light !important;
+    color: $primary !important;
   }
 
   ul {
@@ -86,7 +86,7 @@
 }
 
 .faqPage .question {
-  border-bottom: 1px solid $light-grey;
+  border-bottom: 1px solid $gray-light;
 
   h3 {
     margin-top: 0;
@@ -97,7 +97,7 @@
     align-items: center;
 
     &:hover {
-      color: $primary-light;
+      color: $primary;
     }
 
     &.multiLine {

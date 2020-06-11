@@ -20,7 +20,7 @@ $metadata-input-extra-width: 225;
 
     .plusIcon {
       width: 14px;
-      fill: $medium-grey;
+      fill: $gray-medium;
     }
   }
 
@@ -35,7 +35,7 @@ $metadata-input-extra-width: 225;
 
   .requiredMessage {
     @include font-header-xs;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 
   .inputTable {
@@ -51,7 +51,7 @@ $metadata-input-extra-width: 225;
     }
 
     .requiredStar {
-      color: $medium-grey;
+      color: $gray-dark;
     }
 
     .input {
@@ -65,18 +65,18 @@ $metadata-input-extra-width: 225;
     }
 
     .noInput {
-      color: $medium-grey;
+      color: $gray-dark;
     }
 
     .applyToAll {
-      color: $primary-light;
+      color: $primary;
       cursor: pointer;
     }
   }
 
   .autoPopulateButton {
     @include font-label-s;
-    color: $primary-light;
+    color: $primary;
     cursor: pointer;
     margin-top: $space-xxs;
   }

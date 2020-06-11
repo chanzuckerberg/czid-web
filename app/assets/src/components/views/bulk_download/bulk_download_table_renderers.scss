@@ -10,7 +10,7 @@
     width: 30px;
     height: 22px;
     margin-right: $space-l;
-    fill: $light-grey;
+    fill: $gray-light;
   }
 
   .downloadRightPane {
@@ -29,7 +29,7 @@
 
     .metadata {
       @include font-body-xxs;
-      color: $medium-grey;
+      color: $gray-dark;
 
       .detailsLink {
         cursor: pointer;
@@ -68,19 +68,19 @@
   .icon {
     width: 16px;
     margin-right: $space-xs;
-    fill: $success;
+    fill: $success-medium;
 
     &.warning {
-      fill: $warning;
+      fill: $warning-medium;
     }
 
     &.error {
-      fill: $error;
+      fill: $error-medium;
       margin-bottom: 1px;
     }
 
     &.loading {
-      color: $primary-light;
+      color: $primary;
       margin-right: 4px;
     }
   }
@@ -88,13 +88,13 @@
   .separator {
     @include font-body-xxs;
     margin: 0 $space-s;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 
   .link {
     @include font-label-s;
     /* overwrite header.scss */
-    color: $primary-light !important;
+    color: $primary !important;
     cursor: pointer;
   }
 }

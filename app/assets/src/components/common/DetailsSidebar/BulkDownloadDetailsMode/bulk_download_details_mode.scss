@@ -18,7 +18,7 @@
 
 .adminDetails {
   margin: 0 $space-m;
-  color: $medium-grey;
+  color: $gray-dark;
 
   .logUrl {
     text-decoration: underline;
@@ -38,7 +38,7 @@
 }
 
 .accordion {
-  border-bottom: 1px solid $light-grey;
+  border-bottom: 1px solid $gray-light;
 
   .header {
     @include font-header-accordion;
@@ -81,7 +81,7 @@
   }
 
   .cloudCommandContainer {
-    background-color: $off-white;
+    background-color: $gray-off-white;
     padding: $space-m;
     display: flex;
     align-items: center;
@@ -90,7 +90,7 @@
       cursor: pointer;
 
       &:hover {
-        background-color: $lightest-grey;
+        background-color: $gray-lightest;
       }
     }
 
@@ -104,7 +104,7 @@
 
     .icon {
       width: 24px;
-      fill: $medium-grey;
+      fill: $gray-medium;
       margin-left: 16px;
       margin-right: 10px;
     }

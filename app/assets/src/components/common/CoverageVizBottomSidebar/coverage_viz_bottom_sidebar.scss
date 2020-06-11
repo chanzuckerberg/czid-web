@@ -28,7 +28,7 @@ $genome-viz-spacing: $space-xs;
   .headerText {
     .taxonLabel {
       @include font-header-xs;
-      color: $medium-grey;
+      color: $gray-dark;
       display: flex;
       align-items: center;
     }
@@ -51,7 +51,7 @@ $genome-viz-spacing: $space-xs;
 
     .accessionCountLabel {
       @include font-body-xs;
-      color: $light-grey;
+      color: $gray-light;
       height: $accession-count-label-height;
       display: flex;
       align-items: center;
@@ -87,7 +87,7 @@ $genome-viz-spacing: $space-xs;
 .linkWithArrow {
   @include font-header-xxs;
   // Override color: inherit in _header.scss.
-  color: $primary-light !important;
+  color: $primary !important;
 
   .rightArrow {
     font-size: 0.75em;
@@ -127,7 +127,7 @@ $genome-viz-spacing: $space-xs;
       padding: 0 10px;
 
       &:first-child {
-        background-color: $off-white;
+        background-color: $gray-off-white;
       }
 
       .label,
@@ -152,14 +152,14 @@ $genome-viz-spacing: $space-xs;
 
       .ncbiLink {
         // Override color: inherit in _header.scss.
-        color: $primary-light !important;
+        color: $primary !important;
       }
     }
   }
 
   .coverageVizHistogram {
     height: 110px;
-    background-color: $off-white;
+    background-color: $gray-off-white;
   }
 
   .genomeVizRow {
@@ -172,7 +172,7 @@ $genome-viz-spacing: $space-xs;
       width: 170px;
       text-align: right;
       padding-right: 8px;
-      color: $darkest-grey;
+      color: $gray-darkest;
     }
 
     .genomeViz {
@@ -187,7 +187,7 @@ $genome-viz-spacing: $space-xs;
   }
 
   .referenceAccession {
-    background-color: $lightest-grey;
+    background-color: $gray-lightest;
   }
 }
 
@@ -230,7 +230,7 @@ $genome-viz-spacing: $space-xs;
   align-items: center;
   justify-content: center;
   height: $body-height;
-  color: $medium-grey;
+  color: $gray-dark;
 
   .loadingMessage,
   .unknownErrorMessage {
@@ -238,7 +238,7 @@ $genome-viz-spacing: $space-xs;
   }
 
   .helpLink {
-    color: $primary-light !important;
+    color: $primary !important;
   }
 
   .loadingIcon {
@@ -273,12 +273,12 @@ $genome-viz-spacing: $space-xs;
     svg {
       width: 100%;
       height: 100%;
-      fill: $medium-grey;
+      fill: $gray-medium;
     }
 
     &:hover {
       svg {
-        fill: $primary-light;
+        fill: $primary;
       }
     }
   }
@@ -302,12 +302,12 @@ $genome-viz-spacing: $space-xs;
 
   .optionText {
     @include font-body-xs;
-    color: $darkest-grey;
+    color: $gray-darkest;
   }
 
   .optionSubtext {
     @include font-body-xxs;
-    color: $light-grey;
+    color: $gray-light;
     font-weight: $font-weight-regular;
   }
 

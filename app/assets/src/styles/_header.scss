@@ -11,8 +11,8 @@
     text-align: left;
     max-width: 200px;
     padding: 10px 15px;
-    color: $off-white !important;
-    background: $darkest-grey;
+    color: $gray-off-white !important;
+    background: $gray-darkest;
     border-radius: $border-radius-s;
     box-shadow: 0 1px 3px 0 rgba($black, 0.15);
   }
@@ -58,21 +58,21 @@ a {
   }
 
   .user-dropdown {
-    color: $medium-grey;
+    color: $gray-dark;
     margin-right: 10px;
     height: 36px;
     margin-top: 7px;
 
     &:hover {
-      color: $light-grey;
+      color: $gray-light;
     }
 
     &.active {
-      color: $light-grey;
+      color: $gray-light;
 
       /* Override semantic-ui */
       .icon.dropdown:before {
-        color: $light-grey !important;
+        color: $gray-light !important;
       }
     }
   }

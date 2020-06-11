@@ -9,7 +9,7 @@
     @include font-body-xxxs;
     display: inline-block;
 
-    color: $medium-grey;
+    color: $gray-dark;
     margin-top: 14px;
     margin-bottom: 18px;
 
@@ -27,16 +27,16 @@
     cursor: pointer;
 
     &:hover {
-      color: $primary-light;
+      color: $primary;
     }
   }
 
   .legacyLink {
     @include font-body-xxxs;
-    color: $medium-grey;
+    color: $gray-dark;
     padding-left: 2px;
     &:hover {
-      color: $primary-light;
+      color: $primary;
     }
   }
 
@@ -45,7 +45,7 @@
   }
 
   .sampleDetailsLink {
-    color: $primary-light;
+    color: $primary;
     font-weight: $font-weight-semibold;
     cursor: pointer;
 

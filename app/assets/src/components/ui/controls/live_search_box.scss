@@ -9,10 +9,10 @@
     height: 34px;
     border-radius: $border-radius-m;
     box-sizing: border-box;
-    border: 1px solid $light-grey;
+    border: 1px solid $gray-light;
 
     &:focus {
-      border: 1px solid $primary-light;
+      border: 1px solid $primary;
       box-shadow: none !important;
     }
   }

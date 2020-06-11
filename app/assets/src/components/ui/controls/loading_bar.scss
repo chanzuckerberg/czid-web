@@ -2,14 +2,14 @@
 @import "~styles/themes/elements";
 
 .loadingBarBackground {
-  background-color: $lightest-grey;
+  background-color: $gray-lightest;
   height: 8px;
   margin-top: 5px;
   border-radius: $border-radius-m;
   overflow: hidden;
 
   .loadingBar {
-    background-color: $primary-lighter;
+    background-color: $primary-light;
     height: 8px;
     width: 0px;
     border-radius: $border-radius-m;

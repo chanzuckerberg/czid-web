@@ -5,23 +5,23 @@
 .listContainer {
   margin-bottom: $space-m;
   &.error {
-    border-color: $error;
-    background-color: $error-bg;
+    border-color: $error-medium;
+    background-color: $error-off-white;
   }
 
   &.warn {
-    border-color: $warning;
-    background-color: $warning-bg;
+    border-color: $warning-medium;
+    background-color: $warning-off-white;
   }
 
   &.info {
-    border-color: $info;
-    background-color: $info-bg;
+    border-color: $info-medium;
+    background-color: $info-off-white;
   }
 
   &.success {
-    border-color: $success;
-    background-color: $success-bg;
+    border-color: $success-medium;
+    background-color: $success-off-white;
   }
 }
 

@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 .bulkDownloadSummary {
-  background-color: $off-white;
+  background-color: $gray-off-white;
   padding: $space-m $space-l;
 
   .title {
@@ -15,7 +15,7 @@
 
     .numSamples {
       @include font-body-xs;
-      color: $medium-grey;
+      color: $gray-dark;
     }
   }
 
@@ -33,7 +33,7 @@
 
       .value {
         @include font-body-xs;
-        color: $medium-grey;
+        color: $gray-dark;
       }
     }
   }

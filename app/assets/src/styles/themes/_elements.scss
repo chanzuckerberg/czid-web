@@ -47,10 +47,10 @@ $space-xxl: 38px;
 
   &::-webkit-scrollbar-thumb {
     // Overwrite semantic ui.
-    background-color: $transparent-light-grey !important;
+    background-color: $gray-light !important;
 
     &:hover {
-      background-color: $transparent-medium-grey !important;
+      background-color: $gray-medium !important;
     }
   }
 }
@@ -72,10 +72,10 @@ $space-xxl: 38px;
 
   background: linear-gradient(
     to right,
-    $off-white 10%,
-    $lightest-grey 18%,
-    $lightest-grey 22%,
-    $off-white 30%
+    $gray-off-white 10%,
+    $gray-lightest 18%,
+    $gray-lightest 22%,
+    $gray-off-white 30%
   );
   background-position: 0% 0;
   background-size: 200%;

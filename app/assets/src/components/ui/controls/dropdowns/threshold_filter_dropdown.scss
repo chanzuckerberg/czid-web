@@ -4,7 +4,7 @@
 :global(.ui):global(.dropdown).thresholdFilterDropdown {
   &:global(.active) {
     .dropdownTrigger {
-      border: 1px solid $primary-light;
+      border: 1px solid $primary;
     }
   }
 
@@ -43,7 +43,7 @@
       cursor: pointer;
 
       &:hover {
-        color: $primary-light;
+        color: $primary;
       }
     }
 

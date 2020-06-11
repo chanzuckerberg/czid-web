@@ -13,18 +13,18 @@
   inProgressBg: $primary-lightest;
   inProgressHoverBg: hover-state($primary-lightest);
 
-  finishedBg: $success-bg;
-  finishedHoverBg: hover-state($success-bg);
+  finishedBg: $success-off-white;
+  finishedHoverBg: hover-state($success-off-white);
 
-  pipelineErroredBg: $error-bg;
-  pipelineEroredHoverBg: hover-state($error-bg);
+  pipelineErroredBg: $error-off-white;
+  pipelineEroredHoverBg: hover-state($error-off-white);
 
-  userErroredBg: $warning-bg;
-  userErroredHoverBg: hover-state($warning-bg);
+  userErroredBg: $warning-off-white;
+  userErroredHoverBg: hover-state($warning-off-white);
 
-  stageBg: $off-white;
-  defaultEdgeColor: $medium-grey;
-  outputEdgeColor: $primary-light;
+  stageBg: $gray-off-white;
+  defaultEdgeColor: $gray-medium;
+  outputEdgeColor: $primary;
   inputEdgeColor: $black;
 
   nodeShadowColor: $box-shadow-light;
@@ -106,7 +106,7 @@
 
   &.notStarted {
     background-color: $white;
-    color: $dark-grey;
+    color: $gray-dark;
   }
 
   &.inProgress {
@@ -118,7 +118,7 @@
   }
 
   &.userErrored {
-    background-color: $warning-bg;
+    background-color: $warning-off-white;
   }
 }
 
@@ -136,7 +136,7 @@
   }
 
   .inProgressIcon {
-    color: $primary-light;
+    color: $primary;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -145,15 +145,15 @@
   }
 
   .pipelineErroredIcon {
-    fill: $error;
+    fill: $error-medium;
   }
 
   .userErroredIcon {
-    fill: $warning;
+    fill: $warning-medium;
   }
 
   .finishedIcon {
-    fill: $success;
+    fill: $success-medium;
   }
 
   .stageName {
@@ -181,7 +181,7 @@
     position: relative;
     width: calc(100% - 8px);
     padding: 0.5px 0;
-    background-color: $medium-grey;
+    background-color: $gray-medium;
 
     &.fromColoring {
       background-color: $black;
@@ -189,7 +189,7 @@
     }
 
     &.toColoring {
-      background-color: $primary-light;
+      background-color: $primary;
       padding: 1px 0;
     }
   }
@@ -198,14 +198,14 @@
     position: absolute;
     right: 0;
     height: 75%;
-    fill: $medium-grey;
+    fill: $gray-medium;
 
     &.fromColoring {
       fill: $black;
     }
 
     &.toColoring {
-      fill: $primary-medium;
+      fill: $primary-dark;
     }
   }
 }
@@ -223,7 +223,7 @@
 
   .closeIcon {
     box-sizing: content-box;
-    fill: $light-grey;
+    fill: $gray-light;
 
     &:hover {
       fill: $black;
@@ -240,7 +240,7 @@
 }
 
 .openedStage {
-  background-color: $off-white;
+  background-color: $gray-off-white;
   border-radius: $border-radius-m;
   padding: 16px 0;
   display: flex;
@@ -272,14 +272,14 @@
 
 .pipelineInfo {
   @include font-body-xxxs;
-  color: $medium-grey;
+  color: $gray-medium;
   margin-top: 24px;
   margin-bottom: 18px;
 }
 
 .headerDivider {
   height: 3px;
-  background-color: $lightest-grey;
+  background-color: $gray-lightest;
   position: absolute;
   left: 0;
   right: 0;

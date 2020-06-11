@@ -11,7 +11,7 @@
 
     .header {
       @include font-header-xs;
-      color: $dark-grey;
+      color: $gray-dark;
     }
 
     .fill {
@@ -39,7 +39,7 @@
 
     .sampleCount {
       @include font-body-xxs;
-      color: $medium-grey;
+      color: $gray-dark;
     }
   }
 }

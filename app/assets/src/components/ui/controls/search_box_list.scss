@@ -4,7 +4,7 @@
 
 .searchBoxList {
   background-color: $white;
-  border: 1px solid $light-grey;
+  border: 1px solid $gray-light;
   border-radius: $border-radius-m;
   box-shadow: $box-shadow-bottom-right;
   display: inline-block;
@@ -31,12 +31,12 @@
     }
 
     &::-webkit-scrollbar-track {
-      background-color: $lightest-grey;
+      background-color: $gray-lightest;
       border-radius: $border-radius-m;
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: $medium-grey;
+      background-color: $gray-medium;
     }
 
     .listColumnTitles {
@@ -51,7 +51,7 @@
 
     .listColumnTitle {
       display: inline-block;
-      color: $dark-grey;
+      color: $gray-dark;
       font-weight: $font-weight-semibold;
     }
 
@@ -74,12 +74,12 @@
       display: inline-block;
 
       &:hover {
-        color: $primary-light;
+        color: $primary;
       }
     }
 
     .listElementCount {
-      color: $medium-grey;
+      color: $gray-medium;
       display: inline-block;
       margin-left: auto;
       padding-left: $space-xxl;

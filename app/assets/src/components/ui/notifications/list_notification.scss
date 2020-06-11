@@ -3,7 +3,7 @@
 
 .listNotification {
   .accordion {
-    background-color: $transparent-lightest-grey;
+    background-color: $gray-lightest;
     border-radius: $border-radius-m;
     margin-top: 10px;
 
@@ -24,7 +24,7 @@
         padding: 10px;
 
         &:nth-child(odd) {
-          background-color: $transparent-lightest-grey;
+          background-color: $gray-lightest;
         }
       }
     }

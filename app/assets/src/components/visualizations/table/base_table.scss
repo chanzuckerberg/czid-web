@@ -19,11 +19,11 @@
   .plusIcon {
     flex: 1 0 auto;
     width: 14px;
-    fill: $medium-grey;
+    fill: $gray-medium;
     vertical-align: center;
 
     &:hover {
-      fill: $primary-light;
+      fill: $primary;
     }
   }
 }
@@ -32,7 +32,7 @@
   @include font-body-s;
 
   align-self: center;
-  color: $medium-grey;
+  color: $gray-dark;
   font-weight: $font-weight-semibold;
   outline: 0;
   text-transform: none;
@@ -103,14 +103,14 @@
 
 .row {
   &:global(.ReactVirtualized__Table__headerRow) {
-    border-bottom: 3px solid $lightest-grey;
+    border-bottom: 3px solid $gray-lightest;
   }
 
   &:global(.ReactVirtualized__Table__row) {
-    border-bottom: 1px solid $lightest-grey;
+    border-bottom: 1px solid $gray-lightest;
 
     &:hover {
-      background-color: $off-white-blue;
+      background-color: $primary-off-white;
     }
 
     &:focus {

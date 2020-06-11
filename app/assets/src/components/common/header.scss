@@ -53,7 +53,7 @@
     @include font-body-xs;
     margin-right: 100px;
     display: flex;
-    color: $medium-grey;
+    color: $gray-dark;
 
     .item {
       font-weight: $font-weight-semibold;
@@ -96,7 +96,7 @@
     white-space: nowrap;
 
     .icon {
-      fill: $primary-light;
+      fill: $primary;
       height: 20px;
       margin-right: $space-s;
       vertical-align: text-bottom;
@@ -115,7 +115,7 @@
 
   .close {
     cursor: pointer;
-    fill: $dark-grey;
+    fill: $gray-dark;
     position: absolute;
     right: $space-l;
     top: $space-l;

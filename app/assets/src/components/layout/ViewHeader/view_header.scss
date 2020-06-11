@@ -12,7 +12,7 @@
   }
 
   .info {
-    color: $light-grey;
+    color: $gray-light;
     font-size: $font-size-small;
     margin-bottom: 10px;
   }
@@ -45,13 +45,13 @@
     display: inline-block;
 
     &:hover {
-      color: $primary-light;
+      color: $primary;
     }
   }
 
   .pretitle {
     @include font-header-xxs;
-    color: $dark-grey;
+    color: $gray-dark;
     margin-bottom: 3px;
     margin-left: 1px;
     display: flex;
@@ -64,7 +64,7 @@
 
       &:hover {
         /* Overwrite header.scss */
-        color: $primary-light !important;
+        color: $primary !important;
       }
     }
 

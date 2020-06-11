@@ -5,7 +5,7 @@ $break-large: 1460px;
 .login-form {
   width: 30%;
   margin: 0 auto;
-  box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $lightest-grey;
+  box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $gray-lightest;
   margin-top: 150px;
   border-radius: $border-radius-l;
   label {
@@ -21,7 +21,7 @@ $break-large: 1460px;
     p.signup {
       font-size: 24px;
       font-weight: bold;
-      color: $darkest-grey;
+      color: $gray-darkest;
       margin-top: 9px;
       text-align: left;
     }
@@ -34,10 +34,10 @@ $break-large: 1460px;
       font-size: 14px;
     }
     span {
-      color: $primary-light;
+      color: $primary;
       cursor: pointer;
       &:hover {
-        color: $primary-light;
+        color: $primary;
       }
     }
   }
@@ -49,11 +49,11 @@ $break-large: 1460px;
     }
 
     input:focus {
-      border-bottom-color: $primary-light !important;
+      border-bottom-color: $primary !important;
     }
   }
   .login-wrapper {
-    background-color: $primary-light;
+    background-color: $primary;
     padding: 15px;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
@@ -65,10 +65,10 @@ $break-large: 1460px;
     width: 80%;
     background: $error-lightest;
     border-radius: $border-radius-m;
-    color: $error;
+    color: $error-medium;
     margin: 0 auto;
     padding: 10px 5px;
-    border: 1px solid $error;
+    border: 1px solid $error-medium;
     font-size: 12px;
     transition: 0.2s width ease-out;
     text-align: center;
@@ -80,10 +80,10 @@ $break-large: 1460px;
     width: 80%;
     background: $success-lightest;
     border-radius: $border-radius-m;
-    color: $success;
+    color: $success-medium;
     margin: 0 auto;
     padding: 10px 5px;
-    border: 1px solid $success;
+    border: 1px solid $success-medium;
     font-size: 12px;
     transition: 0.2s width ease-out;
     text-align: center;

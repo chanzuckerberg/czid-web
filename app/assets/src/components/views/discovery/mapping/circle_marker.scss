@@ -2,18 +2,18 @@
 
 .circle {
   cursor: pointer;
-  fill: $celery;
+  fill: $secondary;
   fill-opacity: 0.85;
 
   &.hoverable {
     &:hover {
-      fill: $primary-medium;
+      fill: $primary-dark;
       fill-opacity: 1;
     }
   }
 
   &.active {
-    fill: $primary-medium;
+    fill: $primary-dark;
     fill-opacity: 1;
   }
 }

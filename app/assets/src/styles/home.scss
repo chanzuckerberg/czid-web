@@ -5,7 +5,7 @@
 @import "themes/colors";
 
 body {
-  color: $darkest-grey;
+  color: $gray-darkest;
   font-size: $font-size-body;
   font-family: $font-family-sans-serif;
 }
@@ -47,7 +47,7 @@ body {
         padding: 5px;
         margin: 0 13px;
         color: $white;
-        background-color: $primary-light;
+        background-color: $primary;
         cursor: pointer;
       }
       i.fa.fa-flask {
@@ -77,7 +77,7 @@ table {
     th {
       font-style: thin;
       font-size: 14px;
-      color: $light-grey;
+      color: $gray-light;
     }
   }
 }

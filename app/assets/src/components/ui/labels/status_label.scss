@@ -10,28 +10,28 @@
   padding: $space-xxs $space-xs;
 
   &.default {
-    background-color: $lightest-grey;
-    color: $medium-grey;
+    background-color: $gray-lightest;
+    color: $gray-dark;
   }
 
   &.success {
-    background-color: $success-bg;
-    color: $success;
+    background-color: $success-off-white;
+    color: $success-medium;
   }
 
   &.error {
-    background-color: $error-bg;
-    color: $error;
+    background-color: $error-off-white;
+    color: $error-medium;
   }
 
   &.info {
-    background-color: $info-bg;
-    color: $info;
+    background-color: $info-off-white;
+    color: $info-medium;
   }
 
   &.warning {
-    background-color: $warning-bg;
-    color: $warning;
+    background-color: $warning-off-white;
+    color: $warning-medium;
   }
 
   &.inline {

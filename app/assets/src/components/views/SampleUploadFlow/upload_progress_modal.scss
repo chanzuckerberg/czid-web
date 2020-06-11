@@ -30,7 +30,7 @@
       justify-content: center;
 
       .alertIcon {
-        fill: $error;
+        fill: $error-medium;
         width: 18px;
         height: 18px;
         margin-right: 6px;
@@ -40,7 +40,7 @@
         width: 25px;
         height: 25px;
         margin-right: 6px;
-        fill: $success;
+        fill: $success-medium;
       }
     }
 
@@ -48,7 +48,7 @@
       @include font-body-s;
 
       .helpLink {
-        color: $primary-light !important;
+        color: $primary !important;
       }
     }
 
@@ -97,7 +97,7 @@
         white-space: nowrap;
 
         .alertIcon {
-          fill: $error;
+          fill: $error-medium;
           width: 14px;
           height: 14px;
           margin-right: 5px;
@@ -108,19 +108,19 @@
           width: 16px;
           height: 16px;
           margin-right: 5px;
-          fill: $success;
+          fill: $success-medium;
         }
       }
     }
 
     .loadingBarBackground {
-      background-color: $lightest-grey;
+      background-color: $gray-lightest;
       height: 8px;
       margin-top: 5px;
       border-radius: $border-radius-m;
 
       .loadingBar {
-        background-color: $primary-light;
+        background-color: $primary;
         height: 8px;
         width: 0px;
         border-radius: $border-radius-m;

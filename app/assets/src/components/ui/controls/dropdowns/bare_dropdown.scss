@@ -57,7 +57,7 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $transparent-lightest-grey !important;
+      background-color: $gray-lightest !important;
     }
   }
 
@@ -80,7 +80,7 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $transparent-lightest-grey;
+      background-color: $gray-lightest;
     }
 
     &.active {
@@ -128,7 +128,7 @@
   .noResultsMessage {
     @include font-body-xxs;
     padding: $space-xs $space-l;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 
   .innerMenu {
@@ -159,7 +159,7 @@
 
   &:global(.active) {
     & > i:global(.dropdown):global(.icon):before {
-      color: $primary-light;
+      color: $primary;
     }
   }
 }

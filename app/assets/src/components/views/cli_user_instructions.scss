@@ -48,7 +48,7 @@
 }
 
 .codeToEdit {
-  color: $primary-lighter;
+  color: $primary-light;
   font-family: monospace;
   font-weight: $font-weight-bold;
 }
@@ -59,7 +59,7 @@
 }
 
 .uploadQuestion {
-  color: $darkest-grey;
+  color: $gray-darkest;
   font-size: $font-size-small;
   margin-top: 20px;
   margin-bottom: 25px;
@@ -69,12 +69,12 @@
 
     &:hover {
       // Important due to a { color: inherit !important; } in header.scss.
-      color: $primary-light !important;
+      color: $primary !important;
     }
   }
 }
 
 .link {
-  color: $primary-light;
+  color: $primary;
   cursor: pointer;
 }

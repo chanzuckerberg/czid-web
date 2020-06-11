@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 $tooltip-border-width: 1px;
-$tooltip-border-color: $light-grey;
+$tooltip-border-color: $gray-light;
 $tooltip-tip-size: 8px;
 
 .mapTooltip {
@@ -50,7 +50,7 @@ $tooltip-tip-size: 8px;
 
         &.hoverable {
           &:hover {
-            color: $primary-light;
+            color: $primary;
           }
         }
       }

@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 .dropdownTrigger {
-  border: 1px solid $light-grey;
+  border: 1px solid $gray-light;
   border-radius: $border-radius-m;
   background-color: $white;
   color: $black;
@@ -18,12 +18,12 @@
   }
 
   &.active {
-    border: 1px solid $primary-light;
+    border: 1px solid $primary;
   }
 
   &.disabled {
-    border: 1px solid $medium-grey;
-    color: $medium-grey;
+    border: 1px solid $gray-medium;
+    color: $gray-dark;
     opacity: 1 !important;
   }
 
@@ -42,14 +42,14 @@
   }
 
   .placeholder {
-    color: $light-grey;
+    color: $gray-light;
   }
 
   &.erred {
-    border: 1px solid $error;
+    border: 1px solid $error-medium;
 
     .placeholder {
-      color: $error;
+      color: $error-medium;
     }
   }
 }

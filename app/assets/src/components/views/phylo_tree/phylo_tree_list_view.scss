@@ -20,12 +20,12 @@
 .noTreeBanner {
   margin-top: 50px;
   text-align: center;
-  color: $medium-grey;
+  color: $gray-dark;
 }
 
 .taxonName {
   &:hover {
-    color: $primary-light;
+    color: $primary;
     cursor: pointer;
   }
 }

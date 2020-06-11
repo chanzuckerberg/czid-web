@@ -16,7 +16,7 @@
   }
 
   .map {
-    border-top: 2px solid $lightest-grey;
+    border-top: 2px solid $gray-lightest;
   }
 
   .note {
@@ -48,7 +48,7 @@
     flex: 0 0 auto;
 
     .counter {
-      color: $primary-light;
+      color: $primary;
     }
 
     .label {
@@ -64,7 +64,7 @@
     flex: 0 0 auto;
     height: 27px;
     margin: 0 10px 0 20px;
-    border-right: 1px solid $medium-grey;
+    border-right: 1px solid $gray-medium;
   }
 
   .actions {

@@ -17,7 +17,7 @@
     box-sizing: border-box;
 
     &:first-child {
-      border-bottom: 1px solid $lightest-grey;
+      border-bottom: 1px solid $gray-lightest;
     }
 
     &:focus {
@@ -27,5 +27,5 @@
 }
 
 .icon {
-  fill: $darkest-grey;
+  fill: $gray-darkest;
 }

@@ -5,7 +5,7 @@
 .dataTooltip {
   @include font-body-xxs;
   background-color: $white;
-  border: 1px solid $light-grey;
+  border: 1px solid $gray-light;
   border-radius: $border-radius-m;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
   height: auto;
@@ -16,8 +16,8 @@
 
   &Title {
     @include font-label-xs;
-    border-bottom: 1px solid $lightest-grey;
-    color: $medium-grey;
+    border-bottom: 1px solid $gray-lightest;
+    color: $gray-dark;
     margin-bottom: 10px;
   }
 
@@ -28,8 +28,8 @@
 
   &SectionName {
     @include font-label-xs;
-    border-bottom: 1px solid $lightest-grey;
-    color: $medium-grey;
+    border-bottom: 1px solid $gray-lightest;
+    color: $gray-dark;
     margin-bottom: 10px;
   }
 
@@ -39,10 +39,10 @@
     }
 
     &.disabled {
-      color: $light-grey;
+      color: $gray-light;
 
       .dataTooltipSectionName {
-        color: $light-grey;
+        color: $gray-light;
       }
     }
   }

@@ -48,17 +48,17 @@ input[type="number"] {
   .count-type {
     text-align: right;
     font-weight: normal;
-    color: $medium-grey;
+    color: $gray-dark;
     font-size: $font-size-small;
     &.active {
       font-weight: bolder;
-      color: $darkest-grey;
+      color: $gray-darkest;
       font-size: $font-size-base;
     }
   }
   .blank {
     font-style: italic;
-    color: $light-grey !important;
+    color: $gray-light !important;
     font-weight: normal !important;
   }
 
@@ -67,17 +67,17 @@ input[type="number"] {
   tr:hover {
     .hover-wrapper {
       span.taxon-sidebar-link {
-        color: $primary-light;
+        color: $primary;
       }
     }
   }
 
   tr:not(.report-header):hover {
-    background-color: $off-white-blue;
+    background-color: $primary-off-white;
   }
 
   td {
-    border-bottom: 1px solid $light-grey;
+    border-bottom: 1px solid $gray-light;
   }
 
   tr.report-header th {
@@ -94,7 +94,7 @@ input[type="number"] {
     left: 0;
     bottom: 0;
     width: 100%;
-    border-bottom: 1px solid $light-grey;
+    border-bottom: 1px solid $gray-light;
   }
 
   // materialize adds border to all theads
@@ -104,7 +104,7 @@ input[type="number"] {
 }
 
 .report-table .count-info {
-  color: $medium-grey;
+  color: $gray-dark;
 }
 
 .report-table {
@@ -116,7 +116,7 @@ input[type="number"] {
   }
 
   .report-row-genus {
-    background: $off-white;
+    background: $gray-off-white;
     border-left: 5px solid $white;
   }
 
@@ -125,7 +125,7 @@ input[type="number"] {
   }
 
   .top-scoring-row {
-    border-left: 5px solid $primary-light;
+    border-left: 5px solid $primary;
     background-color: $primary-lightest;
   }
 
@@ -156,7 +156,7 @@ input[type="number"] {
       color: $black;
     }
     &.active {
-      color: $primary-light;
+      color: $primary;
     }
   }
   i {
@@ -166,15 +166,15 @@ input[type="number"] {
     cursor: pointer;
     &:hover,
     &.active {
-      color: $primary-light;
+      color: $primary;
     }
   }
   .column-switcher {
-    color: $medium-grey;
+    color: $gray-dark;
     cursor: pointer;
     font-weight: normal;
     &.active {
-      color: $darkest-grey;
+      color: $gray-darkest;
       font-weight: bolder;
     }
   }
@@ -246,8 +246,8 @@ input[type="number"] {
       padding: 0 !important;
       margin-top: 3px;
       border-radius: $border-radius-m;
-      border: 1px solid $light-grey;
-      box-shadow: 0 2px 3px 0 $light-grey;
+      border: 1px solid $gray-light;
+      box-shadow: 0 2px 3px 0 $gray-light;
       div {
         padding: 8px;
         cursor: pointer;
@@ -261,13 +261,13 @@ input[type="number"] {
     }
     input {
       &::placeholder {
-        color: $medium-grey;
+        color: $gray-dark;
         font-family: $font-family-default;
       }
       &:focus {
-        border-bottom-color: $light-grey !important;
-        box-shadow: 0 1px 0 0 $light-grey !important;
-        border: 1px solid $primary-light !important;
+        border-bottom-color: $gray-light !important;
+        box-shadow: 0 1px 0 0 $gray-light !important;
+        border: 1px solid $primary !important;
       }
     }
   }
@@ -287,7 +287,7 @@ input[type="number"] {
 .reports-section {
   padding: 0 !important;
   .filter-message {
-    color: $medium-grey;
+    color: $gray-dark;
     font-size: 12px;
   }
   .report-top-menu {
@@ -304,10 +304,10 @@ input[type="number"] {
     }
     .disable {
       cursor: pointer;
-      color: $medium-grey;
+      color: $gray-dark;
       font-weight: $font-weight-semibold;
       &:hover {
-        color: $primary-light;
+        color: $primary;
       }
     }
     div.text {
@@ -333,14 +333,14 @@ input[type="number"] {
       .filter-lists {
         width: 100%;
         & > div.filter-lists-element > li {
-          color: $darkest-grey;
+          color: $gray-darkest;
           display: inline-block;
           width: 240px;
           font-size: $font-size-large;
           &.search-box {
             input {
               width: 100%;
-              border: 1px solid $light-grey;
+              border: 1px solid $gray-light;
               padding: 6px 31px 6px 14px;
               position: relative;
               margin: 0;
@@ -348,7 +348,7 @@ input[type="number"] {
               border-radius: $border-radius-l;
             }
             i {
-              color: $medium-grey;
+              color: $gray-dark;
               position: relative;
               left: 22px;
             }
@@ -390,7 +390,7 @@ input[type="number"] {
   cursor: pointer;
   &:hover {
     .link-tag {
-      color: $primary-light;
+      color: $primary;
     }
   }
   .link-tag {
@@ -423,7 +423,7 @@ input[type="number"] {
 label {
   font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
   font-size: 1rem;
-  color: $darkest-grey;
+  color: $gray-darkest;
 }
 
 [type="checkbox"] + label {
@@ -431,6 +431,6 @@ label {
 }
 
 .ui.icon.insight-icon {
-  color: $primary-light !important;
+  color: $primary !important;
   font-size: 8pt !important;
 }

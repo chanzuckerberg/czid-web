@@ -5,10 +5,10 @@
 .listContainer {
   margin: $space-m 0;
 
-  background-color: $info-bg;
+  background-color: $info-off-white;
 
   &.warn {
-    background-color: $warning-bg;
+    background-color: $warning-off-white;
   }
 }
 
@@ -31,16 +31,16 @@
   margin: 0 calc(#{$space-m} + #{$space-l} + 20px);
 
   &:nth-child(odd) {
-    background-color: $info-dark;
+    background-color: $info-light;
     &.warn {
-      background-color: $warning-dark;
+      background-color: $warning-light;
     }
   }
 
   &:nth-child(even) {
-    background-color: $info-bg;
+    background-color: $info-off-white;
     &.warn {
-      background-color: $warning-bg;
+      background-color: $warning-off-white;
     }
   }
 
@@ -51,6 +51,6 @@
 
 .link {
   // Overwrite <a> inherit rule in header.scss
-  color: $primary-light !important;
+  color: $primary !important;
   cursor: pointer;
 }

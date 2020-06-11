@@ -2,45 +2,45 @@
 @import "../../../themes/typography";
 
 .idseq-ui.button.secondary {
-  border: 1px solid $primary-light;
+  border: 1px solid $primary;
   background-color: $white;
-  color: $primary-light;
+  color: $primary;
 
   .icon-label {
     svg {
-      fill: $primary-light;
+      fill: $primary;
     }
   }
 
   &:hover,
   &.hover {
-    background: $primary-light;
+    background: $primary;
     color: $white;
   }
 
   &:active,
   &.active {
-    border: 1px solid $primary-medium;
-    background-color: $primary-medium;
+    border: 1px solid $primary-dark;
+    background-color: $primary-dark;
     color: $white;
   }
 
   &:focus,
   &.focus {
-    border: 1px solid $primary-medium;
-    background-color: $primary-medium;
+    border: 1px solid $primary-dark;
+    background-color: $primary-dark;
     color: $white;
   }
 
   &:disabled,
   &.disabled {
-    border: 1px solid $light-grey;
-    background-color: $off-white;
-    color: $light-grey;
+    border: 1px solid $gray-light;
+    background-color: $gray-off-white;
+    color: $gray-light;
 
     .icon-label {
       svg {
-        fill: $light-grey;
+        fill: $gray-light;
       }
     }
   }

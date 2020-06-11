@@ -18,7 +18,7 @@
     min-height: 0;
 
     .leftPane:not(:empty) {
-      border-right: 2px solid $lightest-grey;
+      border-right: 2px solid $gray-lightest;
       flex: 0 0 auto;
       padding: 10px 20px 10px 20px;
       overflow-x: visible;
@@ -39,7 +39,7 @@
     }
 
     .rightPane:not(:empty) {
-      border-left: 2px solid $lightest-grey;
+      border-left: 2px solid $gray-lightest;
       flex: 0 0 auto;
       overflow: overlay;
       padding: 0 5px 0 10px;
@@ -61,7 +61,7 @@
 }
 
 .tabCounter {
-  color: $medium-grey;
+  color: $gray-dark;
   font-size: $font-size;
   font-weight: $font-weight-regular;
 }

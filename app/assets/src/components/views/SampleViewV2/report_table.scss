@@ -5,7 +5,7 @@
 .header {
   @include font-header-xs;
 
-  color: $medium-grey;
+  color: $gray-dark;
   justify-content: flex-end;
   text-align: right;
   margin-right: $space-l;
@@ -14,7 +14,7 @@
 }
 
 .sortedHeader {
-  color: $primary-light;
+  color: $primary;
 }
 
 .taxonHeader {
@@ -50,7 +50,7 @@
 }
 
 .ntnrSelectorHeader {
-  color: $darkest-grey;
+  color: $gray-darkest;
   text-align: center;
   cursor: pointer;
   // Don't push down the text so "NR" is aligned with the other headers.
@@ -60,7 +60,7 @@
 .cell {
   @include font-body-s;
 
-  color: $darkest-grey;
+  color: $gray-darkest;
   font-weight: $font-weight-bold;
   padding: $space-m 0;
   text-align: right;
@@ -78,7 +78,7 @@
     &.lowlightValue {
       @include font-body-xxs;
 
-      color: $medium-grey;
+      color: $gray-dark;
     }
   }
 }
@@ -98,21 +98,21 @@
     }
 
     .missingName {
-      color: $medium-grey;
+      color: $gray-dark;
     }
 
     .countInfo {
       font-style: italic;
       font-weight: $font-weight-regular;
       margin-left: $space-xs;
-      color: $medium-grey;
+      color: $gray-dark;
       white-space: normal;
     }
   }
 
   &:hover {
     .taxonName {
-      color: $primary-light;
+      color: $primary;
     }
   }
 }
@@ -130,7 +130,7 @@
 }
 
 .genusRow {
-  background-color: $off-white;
+  background-color: $gray-off-white;
 }
 
 .genusRow,
@@ -145,7 +145,7 @@
   padding-right: 0px !important;
   &.highlighted {
     background-color: $primary-lightest;
-    border-left: 5px solid $primary-light;
+    border-left: 5px solid $primary;
     padding-left: 0px;
   }
 

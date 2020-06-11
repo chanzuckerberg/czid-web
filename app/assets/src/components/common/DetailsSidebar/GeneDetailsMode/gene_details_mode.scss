@@ -46,12 +46,12 @@
   }
 
   .link {
-    color: $primary-light;
+    color: $primary;
     cursor: pointer;
   }
 
   .expandLink {
-    color: $primary-light;
+    color: $primary;
     margin-top: 10px;
     cursor: pointer;
   }
@@ -60,7 +60,7 @@
 .cardLicense {
   @include font-body-xxs;
   padding-top: 10px;
-  color: $medium-grey;
+  color: $gray-dark;
 
   .cardLink {
     color: $black;

@@ -24,12 +24,12 @@
     height: 16px;
     width: 16px;
     flex: none;
-    border: 1px solid $light-grey;
+    border: 1px solid $gray-light;
     border-radius: $border-radius-s;
     opacity: 100;
 
     &:hover {
-      border: 1px solid $medium-grey;
+      border: 1px solid $gray-medium;
     }
 
     &:after {
@@ -50,7 +50,7 @@
   }
 
   & input:checked ~ .checkmark {
-    background-color: $primary-light;
+    background-color: $primary;
 
     &:after {
       display: block;

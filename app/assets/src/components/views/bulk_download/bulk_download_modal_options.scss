@@ -14,7 +14,7 @@
 
     .title {
       @include font-label-s;
-      color: $medium-grey;
+      color: $gray-dark;
     }
   }
 }
@@ -28,7 +28,7 @@
 
     .header {
       @include font-header-xs;
-      color: $dark-grey;
+      color: $gray-dark;
     }
 
     .fill {
@@ -56,7 +56,7 @@
 
     .sampleCount {
       @include font-body-xxs;
-      color: $medium-grey;
+      color: $gray-dark;
     }
   }
 }
@@ -71,7 +71,7 @@
 
   &:hover,
   &.selected {
-    background-color: $off-white;
+    background-color: $gray-off-white;
   }
 
   &.disabled {
@@ -84,7 +84,7 @@
     .name,
     .description,
     .fileType {
-      color: $light-grey;
+      color: $gray-light;
     }
   }
 
@@ -104,12 +104,12 @@
 
   .description {
     @include font-body-xxs;
-    color: $dark-grey;
+    color: $gray-dark;
   }
 
   .fileType {
     @include font-body-xs;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 }
 
@@ -139,12 +139,12 @@
 
     .info {
       @include font-body-xxs;
-      color: $dark-grey;
+      color: $gray-dark;
     }
   }
 
   .checkboxField {
     @include font-body-xxs;
-    color: $dark-grey;
+    color: $gray-dark;
   }
 }

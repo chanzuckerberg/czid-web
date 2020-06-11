@@ -133,7 +133,11 @@ export default class AMRHeatmapVis extends React.Component {
     return [
       {
         name: "Info",
-        data: [["Sample", sampleName], ["Gene", gene], ["Allele", allele]],
+        data: [
+          ["Sample", sampleName],
+          ["Gene", gene],
+          ["Allele", allele],
+        ],
       },
       {
         name: "Values",
@@ -255,7 +259,7 @@ export default class AMRHeatmapVis extends React.Component {
   // *** Callback functions for the heatmap ***
 
   colorFilter = (value, node, originalColor, _, colorNoValue) => {
-    // Leave zero values grey
+    // Leave zero values gray
     return value > 0 ? originalColor : colorNoValue;
   };
 
@@ -373,13 +377,12 @@ export default class AMRHeatmapVis extends React.Component {
           }}
         />
         {this.renderNodeHoverTooltip()}
-        {columnMetadataLegend &&
-          tooltipLocation && (
-            <MetadataLegend
-              metadataColors={columnMetadataLegend}
-              tooltipLocation={tooltipLocation}
-            />
-          )}
+        {columnMetadataLegend && tooltipLocation && (
+          <MetadataLegend
+            metadataColors={columnMetadataLegend}
+            tooltipLocation={tooltipLocation}
+          />
+        )}
         {addMetadataTrigger && (
           <MetadataSelector
             addMetadataTrigger={addMetadataTrigger}

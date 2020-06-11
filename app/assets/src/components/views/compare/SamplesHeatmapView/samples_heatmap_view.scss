@@ -38,7 +38,7 @@
 
     .statsRow {
       @include font-body-xs;
-      color: $dark-grey;
+      color: $gray-dark;
       margin-left: $space-xxs;
 
       .infoIcon {
@@ -46,7 +46,7 @@
         margin-left: $space-xxs;
         height: 15px;
         width: 15px;
-        fill: $dark-grey;
+        fill: $gray-dark;
         vertical-align: text-top;
       }
     }
@@ -65,7 +65,7 @@
     .arrowIcon {
       display: inline-block;
       cursor: pointer;
-      color: $dark-grey;
+      color: $gray-dark;
       background-color: $white;
       font-size: $font-size-h4;
       padding: 0 $space-l;
@@ -78,7 +78,7 @@
   .noDataMsg {
     margin: 50px;
     text-align: center;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 }
 
@@ -87,7 +87,7 @@
 }
 
 .listContainer {
-  background-color: $warning-bg;
+  background-color: $warning-off-white;
 }
 
 .notificationContainer {

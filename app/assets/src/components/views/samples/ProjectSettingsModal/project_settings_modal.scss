@@ -2,7 +2,7 @@
 @import "~styles/themes/typography";
 
 .projectSettingsTrigger {
-  color: $primary-light;
+  color: $primary;
   cursor: pointer;
 }
 
@@ -23,7 +23,7 @@
     margin-bottom: 10px;
 
     .visibility {
-      color: $medium-grey;
+      color: $gray-dark;
       display: flex;
       align-items: center;
       font-weight: $font-weight-semibold;
@@ -33,7 +33,7 @@
       .icon {
         width: 14px;
         height: 14px;
-        fill: $medium-grey;
+        fill: $gray-medium;
       }
 
       .label {
@@ -42,7 +42,7 @@
 
       .toggle {
         margin-left: 10px;
-        color: $primary-light;
+        color: $primary;
         cursor: pointer;
       }
     }

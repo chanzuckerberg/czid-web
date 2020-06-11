@@ -2,7 +2,7 @@
 @import "~styles/themes/colors";
 
 .hoverActions {
-  color: $primary-light;
+  color: $primary;
   font-size: $font-size-base;
 
   .actionDot {
@@ -12,17 +12,17 @@
   }
 
   .disabled {
-    color: $light-grey;
+    color: $gray-light;
   }
 
   .icon {
     height: 14px;
     width: 14px;
 
-    fill: $primary-light;
+    fill: $primary;
 
     &.disabled {
-      fill: $light-grey;
+      fill: $gray-light;
     }
 
     &:not(.disabled) {

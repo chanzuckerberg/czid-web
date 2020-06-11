@@ -10,7 +10,7 @@
   &__page-3,
   &__page-4 {
     &__subtitle {
-      color: $dark-grey;
+      color: $gray-dark;
       font-weight: 700;
       height: 16px;
       line-height: 16px;
@@ -47,7 +47,7 @@
           }
 
           &.column-view {
-            color: $primary-light;
+            color: $primary;
             font-weight: 700;
           }
         }
@@ -61,7 +61,7 @@
 
   &__page-1 {
     &__action {
-      color: $primary-light;
+      color: $primary;
       font-weight: 700;
     }
   }
@@ -160,6 +160,6 @@
   }
 
   &__error {
-    color: $error;
+    color: $error-medium;
   }
 }

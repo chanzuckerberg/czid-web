@@ -15,7 +15,7 @@
       .optional {
         @include font-body-xxs;
 
-        color: $light-grey;
+        color: $gray-light;
         margin-left: 10px;
       }
     }
@@ -45,7 +45,7 @@
       .sampleDetails {
         @include font-body-xxs;
 
-        color: $light-grey;
+        color: $gray-light;
         margin-left: 10px;
       }
     }
@@ -68,7 +68,7 @@
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $primary-light !important;
+    color: $primary !important;
     cursor: pointer;
   }
 }

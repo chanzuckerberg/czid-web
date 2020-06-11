@@ -9,7 +9,7 @@
 
   .pipelineInfo {
     @include font-body-xxxs;
-    color: $medium-grey;
+    color: $gray-dark;
     margin-top: 14px;
     margin-bottom: 18px;
 
@@ -27,7 +27,7 @@
     cursor: pointer;
 
     &:hover {
-      color: $primary-light;
+      color: $primary;
     }
   }
 
@@ -36,7 +36,7 @@
   }
 
   .sampleDetailsLink {
-    color: $primary-light;
+    color: $primary;
     font-weight: $font-weight-semibold;
     cursor: pointer;
 
@@ -52,7 +52,7 @@
 }
 
 .reportsDivider {
-  background-color: $off-white;
+  background-color: $gray-off-white;
   height: 8px !important;
   border-top: 1px solid $white !important;
 }
@@ -68,7 +68,7 @@
 
 .divider {
   height: 3px;
-  background-color: $lightest-grey;
+  background-color: $gray-lightest;
   position: absolute;
   left: 0;
   right: 0;
@@ -102,7 +102,7 @@
   text-align: center;
 
   .failed {
-    color: $error !important;
+    color: $error-medium !important;
     font-weight: bold;
   }
 }
@@ -135,39 +135,39 @@
       }
 
       &.warning {
-        background-color: $warning-bg;
-        color: $warning;
+        background-color: $warning-off-white;
+        color: $warning-medium;
 
         .icon {
-          fill: $warning;
+          fill: $warning-medium;
         }
       }
 
       &.error {
-        background-color: $error-bg;
-        color: $error;
+        background-color: $error-off-white;
+        color: $error-medium;
 
         .icon {
-          fill: $error;
+          fill: $error-medium;
         }
       }
 
       &.inProgress {
         background-color: $primary-lightest;
-        color: $primary-light;
+        color: $primary;
 
         .icon {
-          fill: $primary-light;
+          fill: $primary;
           font-size: 20px;
         }
       }
 
       &.info {
-        background-color: $info-bg;
-        color: $info;
+        background-color: $info-off-white;
+        color: $info-medium;
 
         .icon {
-          fill: $info;
+          fill: $info-medium;
         }
       }
     }
@@ -181,7 +181,7 @@
 
     .actionLink {
       @include font-header-xxs;
-      color: $primary-light !important;
+      color: $primary !important;
       margin-top: 10px;
       margin-left: 2px;
 

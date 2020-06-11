@@ -37,7 +37,7 @@
     .statsRow {
       @include font-body-xxs;
 
-      color: $medium-grey;
+      color: $gray-dark;
       flex: 1 0 auto;
 
       .reportInfoMsg {
@@ -66,7 +66,7 @@
 
 .divider {
   height: 3px;
-  background-color: $lightest-grey;
+  background-color: $gray-lightest;
   position: absolute;
   left: 0;
   right: 0;
@@ -105,39 +105,39 @@
       }
 
       &.warning {
-        background-color: $warning-bg;
-        color: $warning;
+        background-color: $warning-off-white;
+        color: $warning-medium;
 
         .icon {
-          fill: $warning;
+          fill: $warning-medium;
         }
       }
 
       &.error {
-        background-color: $error-bg;
-        color: $error;
+        background-color: $error-off-white;
+        color: $error-medium;
 
         .icon {
-          fill: $error;
+          fill: $error-medium;
         }
       }
 
       &.inProgress {
         background-color: $primary-lightest;
-        color: $primary-light;
+        color: $primary;
 
         .icon {
-          fill: $primary-light;
+          fill: $primary;
           font-size: 20px;
         }
       }
 
       &.info {
-        background-color: $info-bg;
-        color: $info;
+        background-color: $info-off-white;
+        color: $info-medium;
 
         .icon {
-          fill: $info;
+          fill: $info-medium;
         }
       }
     }
@@ -151,7 +151,7 @@
 
     .actionLink {
       @include font-header-xxs;
-      color: $primary-light !important;
+      color: $primary !important;
       margin-top: $space-m;
       margin-left: 2px;
 

@@ -30,7 +30,7 @@
       margin-top: 4px;
       height: 15px;
       width: 15px;
-      fill: $medium-grey;
+      fill: $gray-medium;
     }
   }
 
@@ -64,13 +64,13 @@
   }
 
   .link {
-    color: $primary-light;
+    color: $primary;
     line-height: 30px;
     cursor: pointer;
   }
 
   .expandLink {
-    color: $primary-light;
+    color: $primary;
     margin-top: 10px;
     cursor: pointer;
   }
@@ -78,7 +78,7 @@
 
 .wikiLicense {
   padding-top: 10px;
-  color: $medium-grey;
+  color: $gray-dark;
   font-size: $font-size-small;
   line-height: $line-height-small;
 

@@ -15,34 +15,33 @@
   }
 
   &.disabled {
-    color: $medium-grey;
+    color: $gray-medium;
   }
 
   .rc-slider {
-    // margin: 0 16px;
     background-color: transparent;
 
     .rc-slider-rail {
-      background-color: $lightest-grey;
+      background-color: $gray-lightest;
     }
 
     .rc-slider-track {
-      background-color: $primary-light;
+      background-color: $primary;
     }
 
     .rc-slider-handle {
-      border: solid 4px $primary-light;
+      border: solid 4px $primary;
     }
 
     &.rc-slider-disabled {
-      color: $medium-grey;
+      color: $gray-medium;
 
       .rc-slider-track {
-        background-color: $light-grey;
+        background-color: $gray-light;
       }
 
       .rc-slider-handle {
-        border: solid 4px $light-grey;
+        border: solid 4px $gray-light;
       }
     }
   }

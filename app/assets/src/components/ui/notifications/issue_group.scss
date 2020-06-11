@@ -4,31 +4,31 @@
   border-bottom: none !important;
 
   &.warning {
-    background-color: $warning-bg;
+    background-color: $warning-off-white;
 
     tbody {
       tr:nth-child(odd) {
-        background-color: $warning-dark;
+        background-color: $warning-light;
       }
     }
   }
 
   &.error {
-    background-color: $error-bg;
+    background-color: $error-off-white;
 
     tbody {
       tr:nth-child(odd) {
-        background-color: $error-dark;
+        background-color: $error-light;
       }
     }
   }
 
   &.info {
-    background-color: $info-bg;
+    background-color: $info-off-white;
 
     tbody {
       tr:nth-child(odd) {
-        background-color: $info-dark;
+        background-color: $info-light;
       }
     }
   }
@@ -45,15 +45,15 @@
     margin-right: 10px;
 
     &.warning {
-      fill: $warning;
+      fill: $warning-medium;
     }
 
     &.error {
-      fill: $error;
+      fill: $error-medium;
     }
 
     &.info {
-      fill: $info;
+      fill: $info-medium;
     }
   }
 }
@@ -71,6 +71,6 @@
   }
 
   th {
-    color: $darkest-grey;
+    color: $gray-darkest;
   }
 }

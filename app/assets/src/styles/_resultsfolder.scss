@@ -6,7 +6,7 @@
     margin: 25px 75px;
     .title {
       font-size: $font-size-h3;
-      color: $primary-light;
+      color: $primary;
       .path {
         margin: 20px;
         color: $black;
@@ -20,23 +20,23 @@
       }
     }
     th {
-      color: $darkest-grey;
+      color: $gray-darkest;
     }
   }
   .file-link {
     cursor: pointer;
-    color: $darkest-grey;
+    color: $gray-darkest;
     &:hover {
-      color: $primary-light;
+      color: $primary;
     }
   }
   tr.disabled-file-link {
-    color: $medium-grey;
+    color: $gray-dark;
   }
   i.fa-file {
     margin-right: 15px;
   }
   .size-tag {
-    color: $light-grey;
+    color: $gray-light;
   }
 }

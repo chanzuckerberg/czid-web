@@ -16,14 +16,14 @@
 .uploadPage {
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $primary-light !important;
+    color: $primary !important;
     cursor: pointer;
   }
 }
 
 .uploadInstructions {
   .backButton {
-    color: $primary-light;
+    color: $primary;
     letter-spacing: 0.4px;
     font-size: 13px;
     cursor: pointer;
@@ -51,7 +51,7 @@
 
     .link {
       // Overwrite <a> inherit rule in header.scss
-      color: $primary-light !important;
+      color: $primary !important;
       cursor: pointer;
     }
   }

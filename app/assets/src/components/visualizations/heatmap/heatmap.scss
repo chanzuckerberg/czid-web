@@ -1,7 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 :export {
-  primaryLight: $primary-light;
+  primaryLight: $primary;
 }
 
 .heatmap {
@@ -10,7 +10,7 @@
       cursor: pointer;
 
       &:hover {
-        stroke: $primary-light;
+        stroke: $primary;
         stroke-width: 1px;
       }
 
@@ -35,12 +35,12 @@
       }
 
       &.highlighted {
-        fill: $primary-light;
+        fill: $primary;
       }
 
       &:hover {
         text {
-          fill: $primary-light;
+          fill: $primary;
           cursor: pointer;
         }
 
@@ -54,7 +54,7 @@
     }
 
     .genusBorder {
-      stroke: $light-grey;
+      stroke: $gray-light;
       stroke-width: 1;
     }
 
@@ -63,7 +63,7 @@
     }
 
     .rowLabelHover rect {
-      fill: $lightest-grey;
+      fill: $gray-lightest;
     }
   }
 
@@ -80,13 +80,13 @@
     .link {
       .linkPath {
         fill: transparent;
-        stroke: $light-grey;
+        stroke: $gray-light;
         stroke-width: 1px;
       }
 
       &.highlighted {
         path {
-          stroke: $primary-light;
+          stroke: $primary;
         }
       }
     }
@@ -102,7 +102,7 @@
 
       &:hover {
         text {
-          fill: $primary-light;
+          fill: $primary;
         }
       }
     }
@@ -134,7 +134,7 @@
         }
 
         .metadataAddLabel {
-          fill: $primary-light;
+          fill: $primary;
         }
       }
     }
@@ -143,7 +143,7 @@
   .captionContainer {
     .caption {
       font-size: 12px;
-      fill: $medium-grey;
+      fill: $gray-medium;
       opacity: 0;
     }
   }

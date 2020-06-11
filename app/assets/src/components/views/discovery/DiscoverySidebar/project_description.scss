@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 .descriptionContainer {
-  color: $dark-grey;
+  color: $gray-dark;
   padding-left: $space-default;
 
   .truncated {
@@ -27,17 +27,17 @@
     text-transform: uppercase;
     display: inline-block;
     margin: $space-xs 0 $space-default 0;
-    color: $primary-light;
+    color: $primary;
     cursor: pointer;
   }
 
   .charCounter {
     @include font-body-xxs;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 
   .error {
     @include font-body-xxs;
-    color: $error;
+    color: $error-medium;
   }
 }

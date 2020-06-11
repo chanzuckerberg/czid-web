@@ -3,7 +3,7 @@
 
 .filePicker {
   width: 100%;
-  border: 2px $medium-grey dashed;
+  border: 2px $gray-medium dashed;
   border-radius: $border-radius-m;
   cursor: pointer;
   display: flex;
@@ -11,13 +11,13 @@
 
   &.active {
     background-color: $primary-lightest;
-    border: 2px dashed $primary-light;
+    border: 2px dashed $primary;
   }
 
   &:hover,
   &.accepted {
     background-color: $primary-lightest;
-    border: 2px dashed $primary-light;
+    border: 2px dashed $primary;
   }
 
   .inner {
@@ -33,7 +33,7 @@
       font-size: 13px;
 
       .checkmarkIcon {
-        color: $primary-light;
+        color: $primary;
       }
 
       &.noTitle {
@@ -51,11 +51,11 @@
 
     .message {
       margin-top: 1rem;
-      color: $primary-light;
+      color: $primary;
     }
 
     .browserLink {
-      color: $primary-light;
+      color: $primary;
     }
   }
 }

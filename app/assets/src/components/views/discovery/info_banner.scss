@@ -28,14 +28,14 @@
     .suggestion {
       @include font-header-xs;
 
-      color: $dark-grey;
+      color: $gray-dark;
       margin-top: $space-m;
     }
 
     .link {
       @include font-header-xs;
       // Override color: inherit in _header.scss.
-      color: $primary-light !important;
+      color: $primary !important;
       display: block;
       margin-top: $space-m;
 

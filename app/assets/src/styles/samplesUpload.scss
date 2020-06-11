@@ -2,7 +2,7 @@
 @import "themes/colors";
 
 .background-cover {
-  background-color: $off-white;
+  background-color: $gray-off-white;
 }
 
 #samplesUploader {
@@ -27,12 +27,12 @@
       }
     }
     .success-message {
-      color: $success;
+      color: $success-medium;
       white-space: pre-wrap;
       margin-bottom: 30px;
     }
     .error-message {
-      color: $error;
+      color: $error-medium;
       white-space: pre-wrap;
       border-radius: $border-radius-l;
     }
@@ -46,17 +46,17 @@
     }
     .form-title {
       font-size: $font-size-h3;
-      color: $darkest-grey;
+      color: $gray-darkest;
       font-weight: $font-weight-bold;
       letter-spacing: 0.28px;
       padding-bottom: 1rem;
     }
     .upload-info {
-      color: $medium-grey;
+      color: $gray-dark;
       font-size: $font-size-base;
     }
     .upload-question {
-      color: $darkest-grey;
+      color: $gray-darkest;
       font-size: $font-size-small;
       margin-top: 20px;
       margin-bottom: 25px;
@@ -64,7 +64,7 @@
         font-weight: $font-weight-semibold;
       }
       a:hover {
-        color: $primary-light !important;
+        color: $primary !important;
       }
     }
     .bulkSubmitForm {
@@ -76,7 +76,7 @@
       }
       .field {
         .validation-info {
-          color: $medium-grey;
+          color: $gray-dark;
         }
 
         .row {
@@ -89,7 +89,7 @@
             .browser-default {
               width: 100%;
               padding: 10px;
-              border: 1px solid $light-grey;
+              border: 1px solid $gray-light;
               background: $white;
               border-radius: $border-radius-l;
               &.new_project_input {
@@ -99,18 +99,18 @@
             .checkbox {
               font-size: $font-size-small;
               font-weight: $font-weight-semibold;
-              color: $dark-grey;
+              color: $gray-dark;
             }
             [disabled] {
-              background-color: $lightest-grey;
-              border: $light-grey;
+              background-color: $gray-lightest;
+              border: $gray-light;
             }
             .input-icon {
               position: absolute;
               margin-left: -108px;
               margin-top: 1px;
               font-size: 13px;
-              background: $lightest-grey;
+              background: $gray-lightest;
               padding: 10.4px;
               height: 36px;
               text-align: center;
@@ -118,7 +118,7 @@
 
               &:hover {
                 cursor: pointer;
-                background: $primary-lighter;
+                background: $primary-light;
                 color: $white;
               }
             }
@@ -136,19 +136,19 @@
             font-size: $font-size-small;
             font-weight: $font-weight-semibold;
             .validation-info {
-              color: $medium-grey;
+              color: $gray-dark;
             }
           }
 
           .field-error {
-            color: $error;
+            color: $error-medium;
             font-size: $font-size-small;
           }
           .no-padding {
             padding: 0;
           }
           .example-link {
-            color: $medium-grey !important;
+            color: $gray-dark !important;
             font-size: $font-size-small;
           }
           .new-button {
@@ -160,33 +160,33 @@
               margin-right: 5px;
             }
             &[disabled] {
-              background-color: $light-grey;
-              border-color: $light-grey;
+              background-color: $gray-light;
+              border-color: $gray-light;
             }
           }
           .secondary-button {
-            background: $light-grey;
-            border-color: $light-grey;
+            background: $gray-light;
+            border-color: $gray-light;
             color: $white;
             i {
-              color: $primary-light;
+              color: $primary;
             }
             &.new-project-button {
               width: 92%;
               float: right;
               font-size: $font-size-base;
               height: 45px;
-              background: $lightest-grey;
-              border-color: $lightest-grey;
+              background: $gray-lightest;
+              border-color: $gray-lightest;
               border-radius: $border-radius-l;
-              color: $medium-grey;
+              color: $gray-dark;
               i {
-                color: $medium-grey;
+                color: $gray-dark;
               }
               &:hover,
               &.active {
-                background: $primary-lighter;
-                border-color: $primary-lighter;
+                background: $primary-light;
+                border-color: $primary-light;
                 color: $white;
                 i {
                   color: $white;
@@ -195,8 +195,8 @@
             }
           }
           .blue-button {
-            background: $primary-light;
-            border-color: $primary-light;
+            background: $primary;
+            border-color: $primary;
             color: $white;
           }
           .upload-samples-button {
@@ -213,18 +213,18 @@
               min-height: 120px;
               min-width: 120px;
               margin-bottom: 10px;
-              background: $lightest-grey;
+              background: $gray-lightest;
               cursor: pointer;
 
               .genome-label {
-                color: $medium-grey;
+                color: $gray-dark;
                 text-align: center;
                 font-size: $font-size-small;
                 margin-top: 5px;
               }
               svg {
                 width: 65px;
-                fill: $medium-grey;
+                fill: $gray-medium;
               }
 
               &.active,
@@ -238,13 +238,13 @@
               }
 
               &.active {
-                background: $primary-light;
-                border-color: $primary-light;
+                background: $primary;
+                border-color: $primary;
               }
 
               &:hover {
-                background: $primary-lighter;
-                border-color: $primary-lighter;
+                background: $primary-light;
+                border-color: $primary-light;
               }
 
               .img-container {
@@ -265,15 +265,15 @@
             }
             .select-dropdown {
               padding-left: 2px;
-              border: 1px solid $light-grey;
+              border: 1px solid $gray-light;
               border-radius: $border-radius-l;
             }
             .caret {
-              color: $medium-grey;
+              color: $gray-dark;
             }
             li {
               span {
-                color: $darkest-grey;
+                color: $gray-darkest;
                 font-size: 13px;
               }
             }
@@ -281,15 +281,15 @@
           .admin-genomes {
             .genome-label {
               font-size: $font-size-small;
-              color: $darkest-grey;
+              color: $gray-darkest;
               display: inline-block;
-              border-right: 1px solid $darkest-grey;
+              border-right: 1px solid $gray-darkest;
               padding-right: 5px;
               margin-left: 5px;
               cursor: pointer;
               &:hover,
               &.active {
-                color: $primary-light;
+                color: $primary;
               }
             }
             .genome-label:last-child {
@@ -313,7 +313,7 @@
       .upload-notes {
         font-size: 12px;
         margin-bottom: 2rem;
-        color: $medium-grey;
+        color: $gray-dark;
         font-weight: 600;
       }
 
@@ -340,7 +340,7 @@
           }
         }
         i {
-          color: $light-grey;
+          color: $gray-light;
           font-weight: $font-weight-semibold;
         }
         svg {
@@ -362,20 +362,20 @@
         }
       }
       .admin-input-title {
-        color: $medium-grey;
+        color: $gray-dark;
         font-size: $font-size-base;
       }
       [type="checkbox"].filled-in:checked + label:after {
-        border: 2px solid $primary-light;
-        background-color: $primary-light;
+        border: 2px solid $primary;
+        background-color: $primary;
       }
 
       [type="checkbox"].filled-in + label:after {
-        border: 2px solid $light-grey;
+        border: 2px solid $gray-light;
         background-color: $white;
       }
       label {
-        color: $darkest-grey;
+        color: $gray-darkest;
       }
 
       .upload-mode-title {

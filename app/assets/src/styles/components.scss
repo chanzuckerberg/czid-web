@@ -20,7 +20,7 @@
 }
 
 .ui.dropdown {
-  border: 1px solid $light-grey;
+  border: 1px solid $gray-light;
   padding: 5px 1.75em 5px 1em;
   border-radius: $border-radius-l;
   &.custom-dropdown {
@@ -55,7 +55,7 @@
     height: 20px;
     line-height: 20px;
     border-radius: $border-radius-l;
-    background-color: $off-white;
+    background-color: $gray-off-white;
     color: $primary-blue;
     font-weight: normal;
     font-size: inherit;

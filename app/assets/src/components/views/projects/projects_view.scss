@@ -26,10 +26,10 @@
     flex: 1 0 auto;
     display: flex;
     flex-direction: column;
-    border-top: 2px solid $lightest-grey;
+    border-top: 2px solid $gray-lightest;
   }
 
   .projectDescription {
-    color: $darkest-grey;
+    color: $gray-darkest;
   }
 }

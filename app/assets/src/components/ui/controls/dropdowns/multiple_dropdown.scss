@@ -4,7 +4,7 @@
 :global(.ui):global(.dropdown).multipleDropdown {
   &:global(.active) {
     .dropdownTrigger {
-      border: 1px solid $primary-light;
+      border: 1px solid $primary;
     }
   }
 }

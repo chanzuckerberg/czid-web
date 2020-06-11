@@ -17,7 +17,7 @@
 
       &:global(.active) {
         // Important due to a { color: inherit !important; } in header.scss.
-        color: $primary-light !important;
+        color: $primary !important;
       }
     }
   }

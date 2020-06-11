@@ -80,13 +80,13 @@ h6,
   font-family: $font-family-sans-serif;
   font-weight: $headings-font-weight;
   line-height: $headings-line-height;
-  color: $darkest-grey;
+  color: $gray-darkest;
 
   small,
   .small {
     font-weight: normal;
     line-height: 1;
-    color: $error;
+    color: $error-medium;
   }
 }
 
@@ -102,7 +102,7 @@ h3,
   margin-top: $line-height-computed;
   margin-bottom: ($line-height-computed / 2);
   font-family: $font-family-sans-serif;
-  color: $darkest-grey;
+  color: $gray-darkest;
 
   small,
   .small {
@@ -173,11 +173,11 @@ p,
 .body-text {
   margin: 0 0 ($line-height-computed / 2);
   font-size: $font-size-body;
-  color: $darkest-grey;
+  color: $gray-darkest;
   font-family: $font-family-sans-serif;
 
   .subdued {
-    color: $dark-grey;
+    color: $gray-dark;
   }
 }
 .caption {
@@ -185,7 +185,7 @@ p,
   font-family: $font-family-sans-serif;
 
   .subdued {
-    color: $dark-grey;
+    color: $gray-dark;
   }
 }
 // Emphasis & misc
@@ -226,5 +226,5 @@ small,
 
 //Contextual colors
 .text-muted {
-  color: $dark-grey;
+  color: $gray-dark;
 }

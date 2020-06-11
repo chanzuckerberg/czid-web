@@ -28,11 +28,11 @@
     @include font-label-s;
 
     background-color: transparent;
-    color: $light-grey;
+    color: $gray-light;
     margin: $space-l $space-l 0;
     padding: $space-xxs 0;
     text-transform: uppercase;
-    border-top: 2px solid $lightest-grey;
+    border-top: 2px solid $gray-lightest;
   }
 
   // skip divider line
@@ -54,7 +54,7 @@
     .description {
       @include font-search-result-description;
 
-      color: $medium-grey;
+      color: $gray-dark;
     }
   }
 }

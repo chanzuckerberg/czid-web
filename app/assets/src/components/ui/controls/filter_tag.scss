@@ -3,7 +3,7 @@
 
 :global(.ui):global(.label).filterTag {
   @include font-tag-s;
-  background: $primary-light !important;
-  border-color: $primary-light !important;
+  background: $primary !important;
+  border-color: $primary !important;
   color: $white !important;
 }

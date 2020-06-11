@@ -61,15 +61,15 @@
     font-size: $font-size-small;
 
     &.errorMessage {
-      color: $error;
+      color: $error-medium;
     }
 
     &.infoMessage {
-      color: $dark-grey;
+      color: $gray-dark;
     }
 
     &.successMessage {
-      color: $success;
+      color: $success-medium;
     }
   }
 }

@@ -2,8 +2,8 @@
 @import "../../../themes/typography";
 
 .idseq-ui.button.primary {
-  border: 1px solid $primary-light;
-  background-color: $primary-light;
+  border: 1px solid $primary;
+  background-color: $primary;
   color: $white;
   margin-right: 0;
 
@@ -16,34 +16,34 @@
 
   &:hover,
   &.hover {
-    border: 1px solid $primary-medium;
-    background: $primary-medium;
+    border: 1px solid $primary-dark;
+    background: $primary-dark;
     color: $white;
   }
 
   &:active,
   &.active {
-    border: 1px solid $primary-dark;
-    background-color: $primary-dark;
+    border: 1px solid $primary-darkest;
+    background-color: $primary-darkest;
     color: $white;
   }
 
   &:focus,
   &.focus {
-    border: 1px solid $primary-dark;
-    background-color: $primary-dark;
+    border: 1px solid $primary-darkest;
+    background-color: $primary-darkest;
     color: $white;
   }
 
   &:disabled,
   &.disabled {
     border: 0;
-    background-color: $light-grey;
-    color: $medium-grey;
+    background-color: $gray-light;
+    color: $gray-dark;
 
     .icon-label {
       svg {
-        fill: $medium-grey;
+        fill: $gray-medium;
       }
     }
   }

@@ -12,7 +12,7 @@
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $primary-light !important;
+    color: $primary !important;
     cursor: pointer;
   }
 
@@ -35,7 +35,7 @@
   }
 
   .info {
-    background-color: $off-white;
+    background-color: $gray-off-white;
     padding: 20px 20px 10px;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -43,7 +43,7 @@
 
   .validationMessage {
     @include font-body-s;
-    color: $medium-grey;
+    color: $gray-dark;
     margin-top: 25px;
 
     .loadingIcon {
@@ -66,11 +66,11 @@
 }
 
 .errors .header {
-  color: $error;
+  color: $error-medium;
 }
 
 .warnings .header {
-  color: $warning;
+  color: $warning-medium;
 }
 
 .errors,
@@ -101,11 +101,11 @@
   }
 
   &.warning {
-    background-color: $warning-bg;
+    background-color: $warning-off-white;
   }
 
   &.error {
-    background-color: $error-bg;
+    background-color: $error-off-white;
   }
 
   .icon {
@@ -114,11 +114,11 @@
     margin-right: 10px;
 
     &.warning {
-      fill: $warning;
+      fill: $warning-medium;
     }
 
     &.error {
-      fill: $error;
+      fill: $error-medium;
     }
   }
 }

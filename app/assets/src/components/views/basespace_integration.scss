@@ -18,7 +18,7 @@
 
     .smallMessage {
       @include font-body-xxs;
-      color: $medium-grey;
+      color: $gray-dark;
       margin-bottom: 15px;
       max-width: 350px;
     }
@@ -31,7 +31,7 @@
 
     .helpLink {
       // Override header.scss.
-      color: $primary-light !important;
+      color: $primary !important;
     }
   }
 }

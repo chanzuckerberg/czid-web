@@ -9,7 +9,7 @@
   .helpText {
     @include font-body-xxs;
     margin-bottom: 10px;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 
   .connectProjectButton {
@@ -24,7 +24,7 @@
 
   .loadingMessage {
     @include font-body-xxs;
-    color: $medium-grey;
+    color: $gray-dark;
     margin-top: 5px;
     margin-left: 2px;
 

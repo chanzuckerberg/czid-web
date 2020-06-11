@@ -3,7 +3,7 @@
 @import "~styles/themes/typography";
 
 .metadataSection {
-  border-bottom: 1px solid $light-grey;
+  border-bottom: 1px solid $gray-light;
 
   .title {
     @include font-header-accordion;
@@ -14,7 +14,7 @@
   }
 
   .editLink {
-    color: $light-grey;
+    color: $gray-light;
     text-decoration: underline;
     font-size: $font-size-small;
     display: none;
@@ -30,7 +30,7 @@
   }
 
   .status {
-    color: $light-grey;
+    color: $gray-light;
     font-size: $font-size-small;
     margin-top: 1px;
   }

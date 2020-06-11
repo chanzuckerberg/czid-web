@@ -2,7 +2,7 @@
 
 .scatterplot {
   .trendline {
-    stroke: $primary-light;
+    stroke: $primary;
     stroke-width: 2;
     fill: none;
   }
@@ -26,7 +26,7 @@
     stroke-width: 1px;
     fill: $white;
     &:hover {
-      fill: $primary-light;
+      fill: $primary;
     }
   }
 }
@@ -65,7 +65,7 @@
 
 #PipelineSampleReads_page {
   .d3-tree {
-    border: 1px solid $lightest-grey;
+    border: 1px solid $gray-lightest;
     margin: 1em 0;
   }
   .data-type-chooser {

@@ -5,7 +5,7 @@
   margin-bottom: 2rem;
 
   .active.item:not(.disabled) {
-    background-color: $primary-light;
+    background-color: $primary;
     // TODO for removing importants from _header.scss
     color: $white !important;
   }

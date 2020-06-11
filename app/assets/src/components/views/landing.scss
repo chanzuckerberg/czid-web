@@ -4,7 +4,7 @@
 
 .publicSiteBanner {
   @include font-body-xs;
-  background: $primary-light;
+  background: $primary;
   color: $white;
   height: 40px;
   position: relative;
@@ -43,7 +43,7 @@
 
   .close {
     cursor: pointer;
-    fill: $dark-grey;
+    fill: $gray-dark;
     position: absolute;
     right: $space-l;
     top: $space-l;
@@ -55,7 +55,7 @@
 }
 
 .paperReferenceBanner {
-  background-color: $off-white;
+  background-color: $gray-off-white;
 
   .paperReferenceContainer {
     align-items: center;
@@ -107,7 +107,7 @@
   }
 
   .paperCardLogoContainer {
-    background-color: $off-white;
+    background-color: $gray-off-white;
     display: flex;
     flex: 0 0 70px;
     width: 100%;

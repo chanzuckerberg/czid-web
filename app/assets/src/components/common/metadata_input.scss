@@ -3,13 +3,13 @@
 
 .warning {
   @include font-body-xxxs;
-  color: $warning;
+  color: $warning-medium;
   display: flex;
 
   .icon {
     width: 14px;
     height: 14px;
     margin-right: 7px;
-    fill: $warning;
+    fill: $warning-medium;
   }
 }

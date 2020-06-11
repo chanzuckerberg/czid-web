@@ -6,12 +6,12 @@
     font-size: 12px;
   }
   .complete {
-    color: $success !important;
+    color: $success-medium !important;
   }
   .failed {
-    color: $error !important;
+    color: $error-medium !important;
   }
   .uploading {
-    color: $warning !important;
+    color: $warning-medium !important;
   }
 }

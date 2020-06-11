@@ -14,12 +14,12 @@
   color: white;
   font-weight: 600;
   a {
-    color: $primary-light !important;
+    color: $primary !important;
   }
 }
 
 .alert-browser-support {
-  color: $medium-grey;
+  color: $gray-dark;
   margin-right: 0.75rem;
   margin-top: 15px;
 
@@ -28,7 +28,7 @@
   }
 
   @media only screen and (max-width: 748px) {
-    color: $dark-grey;
+    color: $gray-dark;
   }
 }
 
@@ -55,7 +55,7 @@
       svg {
         height: 6.5rem;
         display: inline;
-        fill: $primary-light;
+        fill: $primary;
       }
 
       .card-text {
@@ -98,9 +98,9 @@
   }
 
   .account-form {
-    box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $lightest-grey;
+    box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $gray-lightest;
     border-radius: $border-radius-m;
-    border: 0.1rem solid $lightest-grey;
+    border: 0.1rem solid $gray-lightest;
 
     .form-header {
       margin: 2rem 2rem 1rem 2rem;
@@ -115,7 +115,7 @@
       }
 
       a {
-        color: $primary-light !important;
+        color: $primary !important;
       }
     }
 
@@ -130,7 +130,7 @@
         }
 
         input:focus {
-          border-color: $primary-light;
+          border-color: $primary;
         }
 
         textarea {
@@ -138,11 +138,11 @@
         }
 
         textarea:focus {
-          border-color: $primary-light;
+          border-color: $primary;
         }
 
         .optional {
-          color: $light-grey;
+          color: $gray-light;
           font-weight: normal;
           font-size: 0.8rem;
           margin-left: 0.5rem;
@@ -162,11 +162,11 @@
 }
 
 .ui.divider:not(.vertical):not(.horizontal) {
-  border-top: 0.1rem solid $off-white;
+  border-top: 0.1rem solid $gray-off-white;
 }
 
 .bulletin-banner {
-  background: $primary-light;
+  background: $primary;
   color: $white;
   text-align: center;
   padding: 4rem 0;
@@ -210,7 +210,7 @@
     text-align: center;
     letter-spacing: 0.07rem;
     font-weight: 600;
-    color: $medium-grey;
+    color: $gray-dark;
     font-size: 0.8rem;
   }
 
@@ -240,7 +240,7 @@
     a {
       margin: 2rem;
       font-size: 0.8rem;
-      color: $medium-grey !important;
+      color: $gray-dark !important;
     }
   }
 }

@@ -8,20 +8,20 @@
   margin-bottom: 10px;
 
   .icon {
-    fill: $primary-light;
+    fill: $primary;
     width: 30px;
 
     &.closed {
-      fill: $light-grey;
+      fill: $gray-light;
     }
 
     &:hover {
-      fill: $primary-lighter;
+      fill: $primary-light;
     }
   }
 
   .disabledIcon {
-    fill: $light-grey;
+    fill: $gray-light;
     width: 30px;
   }
 
@@ -34,8 +34,8 @@
     margin-right: 25px;
 
     .filtersCounter {
-      background-color: $lightest-grey;
-      color: $primary-light;
+      background-color: $gray-lightest;
+      color: $primary;
       font-size: 11px;
       min-height: 18px;
       min-width: 18px;
@@ -78,6 +78,6 @@
   @include font-body-xxs;
 
   .popupSubtitle {
-    color: $medium-grey;
+    color: $gray-dark;
   }
 }

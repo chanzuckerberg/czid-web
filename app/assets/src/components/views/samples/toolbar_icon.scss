@@ -12,18 +12,18 @@
   // The child icon will contain an <svg>.
   // The 'fill' rule only works when applied on the svg itself, not the parent.
   svg {
-    fill: $light-grey;
+    fill: $gray-light;
   }
 
   &:not(.disabled) {
     cursor: pointer;
 
     &:hover {
-      background-color: $lightest-grey;
+      background-color: $gray-lightest;
     }
 
     svg {
-      fill: $primary-light;
+      fill: $primary;
     }
   }
 }
@@ -32,6 +32,6 @@
   @include font-body-xxs;
 
   .popupSubtitle {
-    color: $medium-grey;
+    color: $gray-dark;
   }
 }

@@ -16,15 +16,15 @@
   }
 
   &:hover {
-    background: $primary-light;
-    border: 1px solid $primary-medium;
+    background: $primary;
+    border: 1px solid $primary-dark;
     color: $white;
   }
 
   &:active,
   &:focus {
-    border: 1px solid $primary-medium;
-    background-color: $primary-medium;
+    border: 1px solid $primary-dark;
+    background-color: $primary-dark;
     color: $white;
   }
 
@@ -34,7 +34,7 @@
 
     .icon-label {
       svg {
-        fill: $medium-grey;
+        fill: $gray-medium;
       }
     }
   }

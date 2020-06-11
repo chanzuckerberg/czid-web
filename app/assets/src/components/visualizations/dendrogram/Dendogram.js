@@ -211,7 +211,7 @@ export default class Dendogram {
     let absentName = this.options.colorGroupAbsentName;
 
     // Set up all attribute values. Colors end up looking like:
-    // Uncolored (grey) | Absent attribute color (e.g. for NCBI References) + Actual seen values..
+    // Uncolored (gray) | Absent attribute color (e.g. for NCBI References) + Actual seen values..
     let allVals = new Set();
     this.root.leaves().forEach(n => {
       if (n.data) {
@@ -376,14 +376,14 @@ export default class Dendogram {
       xRange < this.minTreeSize.height ? this.minTreeSize.height : xRange;
 
     this.root.each(node => {
-      node.x = (node.x - xMin) * finalTreeHeight / xRange;
+      node.x = ((node.x - xMin) * finalTreeHeight) / xRange;
     });
     this.adjustHeight(finalTreeHeight);
   }
 
   adjustYPositions(maxDistance) {
     this.root.each(node => {
-      node.y = this.minTreeSize.width * node.distanceToRoot / maxDistance;
+      node.y = (this.minTreeSize.width * node.distanceToRoot) / maxDistance;
     });
   }
 
@@ -394,7 +394,7 @@ export default class Dendogram {
         ticks.push({
           id: i + 1,
           y: yMin + i * stepSize,
-          multiplier: i % 2 ? undefined : i * multiplier / 2,
+          multiplier: i % 2 ? undefined : (i * multiplier) / 2,
         });
       }
       return ticks;
@@ -411,9 +411,9 @@ export default class Dendogram {
     const tickWidth = 10;
     const initialScaleSize = 100;
 
-    let initialValue = distance * initialScaleSize / width;
+    let initialValue = (distance * initialScaleSize) / width;
     const power = Math.floor(Math.log10(initialValue));
-    let scaleSize = Math.pow(10, power) * initialScaleSize / initialValue;
+    let scaleSize = (Math.pow(10, power) * initialScaleSize) / initialValue;
     const multiplier = Math.round(initialScaleSize / scaleSize);
     if (multiplier) {
       scaleSize *= multiplier;
@@ -468,11 +468,10 @@ export default class Dendogram {
       .append("text")
       .attr("dy", -3)
       .style("text-anchor", "middle")
-      .text(
-        tick =>
-          tick.multiplier === undefined
-            ? ""
-            : this.formatBase10(tick.multiplier, power)
+      .text(tick =>
+        tick.multiplier === undefined
+          ? ""
+          : this.formatBase10(tick.multiplier, power)
       );
 
     ticks
@@ -518,9 +517,7 @@ export default class Dendogram {
     }
 
     function rectEdge(d) {
-      return `M${d.y} ${d.x} L${d.parent.y} ${d.x} L${d.parent.y} ${
-        d.parent.x
-      }`;
+      return `M${d.y} ${d.x} L${d.parent.y} ${d.x} L${d.parent.y} ${d.parent.x}`;
     }
 
     function nodeId(node) {
@@ -616,8 +613,8 @@ export default class Dendogram {
         return d.depth === 0
           ? -(this.getBBox().width + 15)
           : d.children
-            ? -8
-            : 15;
+          ? -8
+          : 15;
       });
 
     let nodeEnter = node
@@ -691,7 +688,7 @@ export default class Dendogram {
         return colors[d.data.colorIndex];
       });
     } else {
-      // Color all the nodes light grey. Default not in CSS because that would
+      // Color all the nodes light gray. Default not in CSS because that would
       // override D3 styling.
       this.viz.selectAll(".node").style("fill", this.options.defaultColor);
     }

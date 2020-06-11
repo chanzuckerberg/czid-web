@@ -15,13 +15,13 @@
 
   &.hoverable {
     &:hover {
-      background-color: $primary-medium;
+      background-color: $primary-dark;
       color: $white;
     }
   }
 
   &.active {
-    background-color: $primary-medium;
+    background-color: $primary-dark;
     color: $white;
   }
 }

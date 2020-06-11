@@ -9,7 +9,7 @@
 }
 
 .accordion {
-  border-bottom: 1px solid $light-grey;
+  border-bottom: 1px solid $gray-light;
 }
 
 .accordionContent {
@@ -50,7 +50,7 @@
 
   a {
     // Use border-bottom instead of text-decoration: underline to give space under text
-    border-bottom: 1px dashed $medium-grey;
+    border-bottom: 1px dashed $gray-medium;
   }
 
   &.inProgress {
@@ -60,30 +60,30 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: $primary-light;
+      color: $primary;
       font-size: 20px;
     }
   }
 
   &.pipelineErrored {
-    background-color: $error-bg;
+    background-color: $error-off-white;
 
     .statusIcon {
-      fill: $error;
+      fill: $error-medium;
     }
   }
 
   &.userErrored {
-    background-color: $warning-bg;
+    background-color: $warning-off-white;
     .statusIcon {
-      fill: $warning;
+      fill: $warning-medium;
     }
   }
 
   &.finished {
-    background-color: $success-bg;
+    background-color: $success-off-white;
     .statusIcon {
-      fill: $success;
+      fill: $success-medium;
     }
   }
 }
@@ -107,29 +107,29 @@
 
   pre {
     padding: 12px 12px 18px;
-    background-color: $off-white;
+    background-color: $gray-off-white;
     margin-left: 15px;
   }
 
   code {
     @include font-code;
-    color: $darkest-grey;
+    color: $gray-darkest;
   }
 
   a {
     // Override color: inherit in _header.scss.
-    color: $primary-light !important;
+    color: $primary !important;
   }
 }
 
 .fileLink {
-  color: $primary-light;
+  color: $primary;
   cursor: pointer;
   margin-bottom: 8px;
 }
 
 .disabledFileLink {
-  color: $medium-grey;
+  color: $gray-dark;
   cursor: default;
   margin-bottom: 8px;
 }
@@ -160,6 +160,6 @@
 
   a {
     // Override color: inherit in _header.scss.
-    color: $primary-light !important;
+    color: $primary !important;
   }
 }

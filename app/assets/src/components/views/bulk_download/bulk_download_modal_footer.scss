@@ -7,7 +7,7 @@
 
   .downloadDisclaimer {
     @include font-body-xxs;
-    color: $medium-grey;
+    color: $gray-dark;
     margin-top: $space-xs;
   }
 }
@@ -17,7 +17,7 @@
 }
 
 .listContainer {
-  background-color: $warning-bg;
+  background-color: $warning-off-white;
   margin-bottom: $space-l;
 }
 

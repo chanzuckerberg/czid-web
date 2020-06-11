@@ -18,7 +18,7 @@
     text-align: center;
 
     .clearAll {
-      color: $primary-light;
+      color: $primary;
       cursor: pointer;
     }
 
@@ -28,7 +28,7 @@
 
     .infoIcon {
       cursor: pointer;
-      fill: $dark-grey;
+      fill: $gray-dark;
       height: 15px;
       margin-left: 5px;
       vertical-align: top;

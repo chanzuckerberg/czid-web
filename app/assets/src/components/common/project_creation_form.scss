@@ -10,14 +10,14 @@
     .infoLink {
       @include font-label-s;
       margin-left: $space-xxs;
-      color: $primary-light;
+      color: $primary;
       cursor: pointer;
     }
   }
 
   .optionalLabel {
     @include font-body-xxs;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 
   .descriptionTextArea {
@@ -32,7 +32,7 @@
 
   .charCounter {
     @include font-body-xxs;
-    color: $medium-grey;
+    color: $gray-dark;
     text-align: right;
   }
 
@@ -40,7 +40,7 @@
     margin-bottom: $space-s;
 
     .info {
-      background-color: $lightest-grey;
+      background-color: $gray-lightest;
       padding: 20px;
       margin-bottom: $space-default;
       border-radius: $border-radius-m;
@@ -76,7 +76,7 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $lightest-grey;
+      background-color: $gray-lightest;
     }
 
     .radioButton {
@@ -105,26 +105,26 @@
   }
 
   .error {
-    color: $error;
+    color: $error-medium;
     margin-left: 10px;
     margin-bottom: 10px;
   }
 
   .createButton {
     @include font-label-s;
-    color: $primary-light;
+    color: $primary;
     margin: 0px 10px;
     cursor: pointer;
 
     &.disabled {
-      color: $medium-grey;
+      color: $gray-dark;
       cursor: default;
     }
   }
 
   .cancelButton {
     @include font-label-s;
-    color: $medium-grey;
+    color: $gray-dark;
     margin: 0px 10px;
     cursor: pointer;
   }

@@ -1,47 +1,48 @@
+$primary-off-white: #f8f9fe;
 $primary-lightest: #eff2fc;
-$primary-lighter: #5887fa;
-$primary-light: #3867fa;
-$primary-medium: #2b52cd;
-$primary-dark: #223f9c;
+$primary-light: #a9bdfc;
+$primary: #3867fa;
+$primary-dark: #2b52cd;
+$primary-darkest: #223f9c;
+
+$secondary: #9bc74e;
 
 $black: #000000;
-$darkest-grey: #333333;
-$dark-grey: #666666;
-$medium-grey: #999999;
-$light-grey: #cccccc;
-$lightest-grey: #eaeaea;
-$off-white: #f8f8f8;
+$gray-darkest: #545454;
+$gray-dark: #767676;
+$gray-medium: #999999;
+$gray-light: #cccccc;
+$gray-lightest: #eaeaea;
+$gray-off-white: #f8f8f8;
 $white: #ffffff;
 
-$transparent-lightest-grey: rgba(0, 0, 0, 0.05);
-$transparent-light-grey: rgba(0, 0, 0, 0.15);
-$transparent-medium-grey: rgba(0, 0, 0, 0.3);
-
+$success-off-white: #ecf5f0;
 $success-lightest: #e6f7ed;
-$success-light: #d3f1df;
-$success: #3cb371;
-$success-bg: $success-lightest;
+$success-light: #e4ede8;
+$success-medium: #3cb371;
+$success-dark: #1c7f48;
 
-$error-lightest: #ffe3e6;
-$error: #d0021b;
-$error-dark: #f2e4e4;
-$error-bg: #f9ebeb;
+$error-off-white: #fef2f2;
+$error-lightest: #fbe8e8;
+$error-light: #f2e4e4;
+$error-medium: #dc132c;
+$error-dark: #b70016;
 
-$off-white-blue: #f8f9fe;
-$warning: #f5a623;
-$warning-dark: #faefdd;
-$warning-bg: #fcf6ec;
+$warning-off-white: #fcf6ec;
+$warning-lightest: #fff3e1;
+$warning-light: #f4eee4;
+$warning-medium: #f5a623;
+$warning-dark: #946314;
 
-$info: $primary-light;
-$info-bg: $primary-lightest;
-$info-dark: #e8ebf5;
+$info-off-white: $primary-lightest;
+$info-lightest: #ebeffc;
+$info-light: #e7eaf4;
+$info-medium: $primary;
+$info-dark: $primary-darkest;
 
 $box-shadow-lighter: rgba(34, 36, 38, 0.15);
 $box-shadow-light: rgba(0, 0, 0, 0.22);
 $box-shadow-dark: rgba(34, 36, 38, 0.5);
-
-$melrose: #a9bdfc;
-$celery: rgba(147, 193, 81, 1);
 
 @function hover-state($base-color) {
   @return darken($base-color, 5%);

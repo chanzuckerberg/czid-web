@@ -24,7 +24,7 @@
 
   .itemDescription {
     @include font-body-s;
-    color: $medium-grey;
+    color: $gray-dark;
     font-weight: $font-weight-regular;
     line-height: 20px;
     margin: 0 0 8px 0;
@@ -40,7 +40,7 @@
   .itemDetails {
     @include font-body-xxs;
 
-    color: $medium-grey;
+    color: $gray-dark;
     font-weight: $font-weight-regular;
 
     span:not(:last-child) {
@@ -66,7 +66,7 @@
 }
 
 .icon {
-  fill: $primary-light;
+  fill: $primary;
   width: 36px;
 }
 
@@ -88,7 +88,7 @@
     margin-right: 12px;
 
     .icon {
-      fill: $primary-light;
+      fill: $primary;
       width: 36px;
     }
   }
@@ -124,7 +124,7 @@
       @include font-body-xxs;
 
       font-weight: $font-weight-regular;
-      color: $medium-grey;
+      color: $gray-dark;
       text-align: left;
 
       span:not(:first-child) {
@@ -175,7 +175,7 @@
     margin-right: 12px;
 
     .icon {
-      fill: $primary-light;
+      fill: $primary;
       width: 36px;
     }
   }

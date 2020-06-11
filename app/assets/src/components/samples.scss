@@ -16,7 +16,7 @@
 }
 
 .warning {
-  color: $warning;
+  color: $warning-medium;
   margin-bottom: 10px;
 
   i {
@@ -32,14 +32,14 @@
   .label {
     font-size: $font-size-h6;
     font-style: italic;
-    color: $medium-grey;
+    color: $gray-dark;
     font-weight: $font-weight-regular;
     text-transform: none;
 
     &:not(:first-child) {
       margin-left: 5px;
       padding-left: 5px;
-      border-left: 1px solid $medium-grey;
+      border-left: 1px solid $gray-medium;
     }
   }
 }

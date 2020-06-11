@@ -3,7 +3,7 @@
 .tidy-tree {
   .node {
     circle {
-      stroke: $primary-light;
+      stroke: $primary;
       stroke-width: 2px;
       fill: white;
 
@@ -17,12 +17,12 @@
       font-size: 8px;
 
       &.name-missing {
-        fill: $medium-grey;
+        fill: $gray-medium;
       }
 
       &:hover {
         cursor: pointer;
-        fill: $primary-light;
+        fill: $primary;
       }
     }
 
@@ -30,10 +30,10 @@
     &__internal {
       &--collapsed {
         circle {
-          fill: $primary-light;
+          fill: $primary;
 
           &:hover {
-            fill: $primary-lighter;
+            fill: $primary-light;
           }
         }
 
@@ -47,10 +47,10 @@
     &__leaf {
       &--collapsed {
         circle {
-          fill: $primary-light;
+          fill: $primary;
 
           &:hover {
-            fill: $primary-lighter;
+            fill: $primary-light;
           }
         }
       }
@@ -59,10 +59,10 @@
 
   .link {
     fill: none;
-    stroke: $medium-grey;
+    stroke: $gray-medium;
 
     &.highlighted {
-      stroke: $primary-light;
+      stroke: $primary;
     }
   }
 }

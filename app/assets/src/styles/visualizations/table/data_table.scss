@@ -8,7 +8,7 @@
     // remove scrollbar width
     display: table;
     width: calc(100% - 10px);
-    border-bottom: 2px solid $lightest-grey;
+    border-bottom: 2px solid $gray-lightest;
 
     th {
       line-height: normal;
@@ -34,7 +34,7 @@
     overflow-y: scroll;
 
     td {
-      border-bottom: 1px solid $lightest-grey;
+      border-bottom: 1px solid $gray-lightest;
       word-wrap: break-word;
       line-height: normal;
       padding: 5px 10px 5px 0;
@@ -50,7 +50,7 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: $medium-grey;
+      background-color: $gray-dark;
     }
   }
 
@@ -87,7 +87,7 @@
     }
 
     tr:nth-child(even) {
-      background-color: $off-white;
+      background-color: $gray-off-white;
     }
 
     td {

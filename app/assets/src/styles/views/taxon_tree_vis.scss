@@ -16,7 +16,7 @@
 
   &__tooltip {
     background-color: $white;
-    border: 1px solid $light-grey;
+    border: 1px solid $gray-light;
     border-radius: $border-radius-m;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     display: none;
@@ -59,8 +59,8 @@
 
       &__title {
         text-transform: uppercase;
-        color: $medium-grey;
-        border-bottom: 1px solid $lightest-grey;
+        color: $gray-dark;
+        border-bottom: 1px solid $gray-lightest;
         margin-bottom: 0.5em;
       }
 

@@ -8,7 +8,7 @@
 
   .toggleLink {
     @include font-label-s;
-    color: $primary-light;
+    color: $primary;
     cursor: pointer;
     margin-left: $space-xs;
   }
@@ -20,7 +20,7 @@
   margin-top: $space-xs;
   padding: $space-l;
   padding-bottom: 0;
-  background-color: $off-white;
+  background-color: $gray-off-white;
 }
 
 .field {

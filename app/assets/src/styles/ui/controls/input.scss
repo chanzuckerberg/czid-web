@@ -8,10 +8,10 @@
     height: 34px;
     border-radius: $border-radius-m;
     box-sizing: border-box;
-    border: 1px solid $light-grey;
+    border: 1px solid $gray-light;
 
     &:focus {
-      border: 1px solid $primary-light;
+      border: 1px solid $primary;
       -webkit-box-shadow: none;
       -moz-box-shadow: none;
       box-shadow: none;
@@ -26,7 +26,7 @@
 
   &.warning {
     input[type="text"] {
-      border: 1px solid $warning;
+      border: 1px solid $warning-medium;
     }
   }
 }

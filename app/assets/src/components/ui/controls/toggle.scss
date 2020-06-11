@@ -37,18 +37,18 @@
 // Place text to the right
 .toggle.toggle.toggle input:indeterminate ~ label {
   padding-left: 34px;
-  color: $dark-grey !important;
+  color: $gray-dark !important;
 }
 
 .toggle.toggle.toggle input:checked ~ label:before {
   background-color: transparent !important; // override semantic-ui
-  border: 1px solid $primary-light;
+  border: 1px solid $primary;
   padding-left: 4px;
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:before {
   background-color: transparent !important; // override semantic-ui
-  border: 1px solid $light-grey;
+  border: 1px solid $gray-light;
 }
 
 .toggle.toggle.toggle label:after {
@@ -61,13 +61,13 @@
 }
 
 .toggle.toggle.toggle input:checked ~ label:after {
-  background-color: $primary-light;
+  background-color: $primary;
   left: calc(
     68px - 9px - 18px
   ); // inner width of toggle minus inner padding minus width of circle
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:after {
-  background: $lightest-grey;
+  background: $gray-lightest;
   left: 2px;
 }

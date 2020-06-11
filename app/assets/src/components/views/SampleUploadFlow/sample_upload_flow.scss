@@ -33,7 +33,7 @@
     .helpText {
       @include font-body-xxs;
       margin-bottom: 10px;
-      color: $medium-grey;
+      color: $gray-dark;
     }
 
     .continueButton {
@@ -53,13 +53,13 @@
   .infoLink {
     @include font-label-s;
     margin-left: 10px;
-    color: $primary-light;
+    color: $primary;
     cursor: pointer;
   }
 }
 
 .headerWrapper {
-  border-bottom: 4px solid $off-white;
+  border-bottom: 4px solid $gray-off-white;
 }
 
 .sampleUploadFlowHeader {
@@ -77,12 +77,12 @@
 
   .subtitle {
     margin-top: 5px;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $primary-lighter !important;
+    color: $primary-light !important;
     cursor: pointer;
     margin-left: 5px;
   }
@@ -98,7 +98,7 @@
 
       &.active .circle {
         color: $white;
-        background-color: $primary-light;
+        background-color: $primary;
       }
 
       &.enabled {
@@ -106,7 +106,7 @@
 
         .circle {
           color: $white;
-          background-color: $primary-light;
+          background-color: $primary;
           opacity: 0.3;
         }
       }
@@ -126,7 +126,7 @@
 
     .text {
       @include font-header-xxs;
-      color: $darkest-grey;
+      color: $gray-darkest;
     }
   }
 }
@@ -142,13 +142,13 @@
 
     .createProjectButton {
       @include font-label-s;
-      color: $primary-light;
+      color: $primary;
       cursor: pointer;
       margin-top: 4px;
     }
 
     .projectCreationContainer {
-      background-color: $off-white;
+      background-color: $gray-off-white;
       padding: 20px;
       margin-top: 20px;
     }
@@ -179,7 +179,7 @@
 
 .remoteFileUpload {
   .info {
-    background-color: $off-white;
+    background-color: $gray-off-white;
     padding: 20px;
     margin-bottom: 10px;
 
@@ -221,7 +221,7 @@
 
 .localFileUpload {
   .info {
-    background-color: $off-white;
+    background-color: $gray-off-white;
     padding: 20px;
     margin-bottom: 10px;
 
@@ -269,7 +269,7 @@
   .uploadMsg {
     @include font-body-m;
     margin-bottom: 40px;
-    color: $medium-grey;
+    color: $gray-dark;
   }
 
   .reviewHeader {
@@ -289,7 +289,7 @@
 
       &.enabled {
         .link {
-          color: $primary-light;
+          color: $primary;
           cursor: pointer;
         }
       }
@@ -299,7 +299,7 @@
       }
 
       .link {
-        color: $light-grey;
+        color: $gray-light;
         cursor: default;
       }
     }
@@ -310,7 +310,7 @@
   }
 
   .project {
-    background-color: $off-white;
+    background-color: $gray-off-white;
     padding: 25px;
     display: flex;
 
@@ -339,7 +339,7 @@
 
       .existingSamples {
         @include font-body-xs;
-        color: $medium-grey;
+        color: $gray-dark;
       }
 
       .truncated {
@@ -355,7 +355,7 @@
         display: inline-block;
         margin-top: 5px;
         margin-bottom: 10px;
-        color: $primary-light;
+        color: $primary;
         font-size: $font-size-smallest;
         letter-spacing: 0.5px;
         cursor: pointer;
@@ -364,7 +364,7 @@
 
     .descriptionContainer {
       @include font-body-s;
-      color: $dark-grey;
+      color: $gray-dark;
       white-space: pre-wrap;
       margin: 10px 0;
     }
@@ -385,11 +385,11 @@
   }
 
   .error {
-    color: $error;
+    color: $error-medium;
   }
 
   .link {
-    color: $primary-light;
+    color: $primary;
   }
 
   .files {
@@ -418,7 +418,7 @@
 
   .uploadMessage,
   .successMessage {
-    color: $medium-grey;
+    color: $gray-dark;
   }
 
   .loadingIcon {

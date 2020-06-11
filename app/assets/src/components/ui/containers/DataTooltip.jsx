@@ -69,7 +69,7 @@ DataTooltip.propTypes = {
       name: PropTypes.string,
       // Array of key-value pairs.
       data: PropTypes.arrayOf(PropTypes.array),
-      // Grey out the section if disabled.
+      // gray out the section if disabled.
       disabled: PropTypes.bool,
     })
   ),

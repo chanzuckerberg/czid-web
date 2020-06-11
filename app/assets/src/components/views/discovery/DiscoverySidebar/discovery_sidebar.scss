@@ -7,13 +7,13 @@
   overflow-y: scroll;
 
   .noData {
-    color: $medium-grey;
+    color: $gray-dark;
     margin: 20px;
   }
 }
 
 .metadataSection {
-  border-bottom: 1px solid $light-grey;
+  border-bottom: 1px solid $gray-light;
 }
 
 .metadataContainer {
@@ -28,7 +28,7 @@
   }
 
   .hasBackground:nth-child(odd) {
-    background-color: $off-white;
+    background-color: $gray-off-white;
   }
 
   // See SampleDetailsMode/metadata_section.scss
@@ -57,12 +57,12 @@
     flex-flow: row nowrap;
     justify-content: space-evenly;
     align-items: flex-end;
-    border-bottom: 1px solid $lightest-grey;
+    border-bottom: 1px solid $gray-lightest;
 
     .bar {
       margin: 0 1px;
       flex: 1 0;
-      background-color: $melrose;
+      background-color: $primary-light;
       max-width: 14px;
     }
   }
@@ -89,7 +89,7 @@
 .descriptionContainer {
   @include font-body-xxs;
   white-space: pre-wrap;
-  color: $dark-grey;
+  color: $gray-dark;
 }
 
 .dataList {
@@ -136,7 +136,7 @@
   }
 
   .bar {
-    background-color: $melrose;
+    background-color: $primary-light;
     color: white;
     cursor: pointer;
     display: inline-block;
@@ -151,14 +151,14 @@
     text-transform: uppercase;
     margin-top: 5px;
     margin-bottom: 10px;
-    color: $primary-light;
+    color: $primary;
     font-size: $font-size-smallest;
     letter-spacing: 0.5px;
     cursor: pointer;
   }
 
   .count {
-    color: $dark-grey;
+    color: $gray-dark;
     font-weight: 600;
     vertical-align: top;
   }

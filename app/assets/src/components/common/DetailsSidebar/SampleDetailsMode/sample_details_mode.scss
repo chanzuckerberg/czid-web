@@ -22,7 +22,7 @@
 }
 
 .noData {
-  color: $light-grey;
+  color: $gray-light;
   margin-left: 10px;
 }
 
@@ -43,24 +43,24 @@
 
     .error {
       @include font-body-xxs;
-      color: $error;
+      color: $error-medium;
       margin-top: 5px;
     }
   }
 
   .metadataValue {
-    color: $dark-grey;
+    color: $gray-dark;
     word-break: break-all;
   }
 
   .emptyValue {
-    color: $light-grey;
+    color: $gray-light;
     font-weight: $font-weight-regular;
   }
 
   .projectLink {
     /* overwrite header.scss */
-    color: $primary-light !important;
+    color: $primary !important;
 
     &:hover {
       /* overwrite header.scss */
@@ -71,7 +71,7 @@
   .vizLink {
     @include font-header-xxs;
     // Override color: inherit in _header.scss.
-    color: $primary-light !important;
+    color: $primary !important;
     margin-left: 15px;
 
     .rightArrow {
@@ -87,7 +87,7 @@
   align-items: center;
 
   &:nth-child(even) {
-    background-color: $off-white;
+    background-color: $gray-off-white;
   }
 
   .label {
@@ -100,13 +100,13 @@
     .labelText {
       width: 120px;
       &:hover {
-        color: $primary-light;
+        color: $primary;
         cursor: default;
       }
     }
 
     .header {
-      color: $medium-grey;
+      color: $gray-dark;
     }
   }
 
@@ -119,12 +119,12 @@
 
     .labelText {
       font-weight: $font-weight-semibold;
-      color: $medium-grey;
+      color: $gray-dark;
     }
   }
 
   .metadataValue {
-    color: $dark-grey;
+    color: $gray-dark;
     word-break: break-all;
   }
 }
@@ -134,7 +134,7 @@
 
   a {
     /* overwrite header.scss */
-    color: $primary-light !important;
+    color: $primary !important;
 
     &:hover {
       /* overwrite header.scss */
@@ -158,7 +158,7 @@
     display: block;
     margin: 5px 0;
     /* overwrite header.scss */
-    color: $primary-light !important;
+    color: $primary !important;
 
     &:hover {
       opacity: 0.5;
@@ -176,7 +176,7 @@
   }
 
   .noData {
-    color: $light-grey;
+    color: $gray-light;
     margin: 20px 10px;
   }
 
