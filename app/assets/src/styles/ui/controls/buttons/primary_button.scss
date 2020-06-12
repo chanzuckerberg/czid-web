@@ -2,7 +2,7 @@
 @import "../../../themes/typography";
 
 .idseq-ui.button.primary {
-  border: 1px solid $primary;
+  border: $border-primary;
   background-color: $primary;
   color: $white;
   margin-right: 0;
@@ -16,21 +16,21 @@
 
   &:hover,
   &.hover {
-    border: 1px solid $primary-dark;
+    border: $border-primary-dark;
     background: $primary-dark;
     color: $white;
   }
 
   &:active,
   &.active {
-    border: 1px solid $primary-darkest;
+    border: $border-primary-darkest;
     background-color: $primary-darkest;
     color: $white;
   }
 
   &:focus,
   &.focus {
-    border: 1px solid $primary-darkest;
+    border: $border-primary-darkest;
     background-color: $primary-darkest;
     color: $white;
   }

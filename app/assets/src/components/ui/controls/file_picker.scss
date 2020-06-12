@@ -3,7 +3,7 @@
 
 .filePicker {
   width: 100%;
-  border: 2px $gray-medium dashed;
+  border: $border-dashed-gray-medium;
   border-radius: $border-radius-m;
   cursor: pointer;
   display: flex;
@@ -11,13 +11,13 @@
 
   &.active {
     background-color: $primary-lightest;
-    border: 2px dashed $primary;
+    border: $border-dashed-primary;
   }
 
   &:hover,
   &.accepted {
     background-color: $primary-lightest;
-    border: 2px dashed $primary;
+    border: $border-dashed-primary;
   }
 
   .inner {

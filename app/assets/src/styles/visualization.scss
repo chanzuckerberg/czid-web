@@ -65,7 +65,7 @@
 
 #PipelineSampleReads_page {
   .d3-tree {
-    border: 1px solid $gray-lightest;
+    border: $border-gray-lightest;
     margin: 1em 0;
   }
   .data-type-chooser {

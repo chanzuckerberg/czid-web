@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 @import "~styles/themes/typography";
 
 // NOTE: Classname .toggle is repeated here as .toggle.toggle.toggle to increase
@@ -42,13 +43,13 @@
 
 .toggle.toggle.toggle input:checked ~ label:before {
   background-color: transparent !important; // override semantic-ui
-  border: 1px solid $primary;
+  border: $border-primary;
   padding-left: 4px;
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:before {
   background-color: transparent !important; // override semantic-ui
-  border: 1px solid $gray-light;
+  border: $border-gray-light;
 }
 
 .toggle.toggle.toggle label:after {

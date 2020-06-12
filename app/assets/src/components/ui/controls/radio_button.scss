@@ -5,7 +5,7 @@
   width: 15px;
   height: 15px;
   border-radius: $border-radius-l;
-  border: 1px solid $gray-medium;
+  border: $border-gray-medium;
   padding: 2px;
   cursor: pointer;
 
@@ -23,11 +23,11 @@
 
   &.disabled {
     cursor: default;
-    border: 1px solid $gray-light;
+    border: $border-gray-light;
 
     &:hover,
     &.selected {
-      border: 1px solid $gray-light;
+      border: $border-gray-light;
     }
   }
 }

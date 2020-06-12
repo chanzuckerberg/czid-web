@@ -3,6 +3,7 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 @import "typography";
 @import "themes/colors";
+@import "themes/elements";
 
 // removing the arrows
 input[type="number"]::-webkit-outer-spin-button,
@@ -246,7 +247,7 @@ input[type="number"] {
       padding: 0 !important;
       margin-top: 3px;
       border-radius: $border-radius-m;
-      border: 1px solid $gray-light;
+      border: $border-gray-light;
       box-shadow: 0 2px 3px 0 $gray-light;
       div {
         padding: 8px;
@@ -267,7 +268,7 @@ input[type="number"] {
       &:focus {
         border-bottom-color: $gray-light !important;
         box-shadow: 0 1px 0 0 $gray-light !important;
-        border: 1px solid $primary !important;
+        border: $border-primary !important;
       }
     }
   }
@@ -340,7 +341,7 @@ input[type="number"] {
           &.search-box {
             input {
               width: 100%;
-              border: 1px solid $gray-light;
+              border: $border-gray-light;
               padding: 6px 31px 6px 14px;
               position: relative;
               margin: 0;

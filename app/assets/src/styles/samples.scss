@@ -1,5 +1,6 @@
 @import "typography";
 @import "themes/colors";
+@import "themes/elements";
 /* TODO: refactor stylesheet into scss */
 
 .background-modal-contents {
@@ -380,7 +381,7 @@ $break-large: 1070px;
         &:focus {
           border-bottom-color: $gray-lightest;
           box-shadow: 0 1px 0 0 $gray-lightest;
-          border: 1px solid $primary;
+          border: $border-primary;
         }
       }
 
@@ -745,7 +746,7 @@ input[type="button"] {
   .add_member {
     margin-top: 15px;
     input {
-      border: 1px solid $gray-light;
+      border: $border-gray-light;
       padding: 12px;
       border-radius: $border-radius-m;
       padding-right: 110px;
@@ -791,13 +792,13 @@ input[type="button"] {
 [type="checkbox"].filled-in:not(:checked) + label:after {
   top: 4px;
   background-color: transparent;
-  border: 1px solid $gray-dark;
+  border: $border-gray-dark;
   z-index: 0;
 }
 
 [type="checkbox"].filled-in:checked + label:after {
   top: 4px;
-  border: 1px solid $primary;
+  border: $border-primary;
   background-color: $primary;
 }
 

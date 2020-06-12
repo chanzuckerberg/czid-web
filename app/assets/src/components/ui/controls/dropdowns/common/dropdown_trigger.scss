@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 .dropdownTrigger {
-  border: 1px solid $gray-light;
+  border: $border-gray-light;
   border-radius: $border-radius-m;
   background-color: $white;
   color: $black;
@@ -18,11 +18,11 @@
   }
 
   &.active {
-    border: 1px solid $primary;
+    border: $border-primary;
   }
 
   &.disabled {
-    border: 1px solid $gray-medium;
+    border: $border-gray-medium;
     color: $gray-dark;
     opacity: 1 !important;
   }
@@ -46,7 +46,7 @@
   }
 
   &.erred {
-    border: 1px solid $error-medium;
+    border: $border-error;
 
     .placeholder {
       color: $error-medium;

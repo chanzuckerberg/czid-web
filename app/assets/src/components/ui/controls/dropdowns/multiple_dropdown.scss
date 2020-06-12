@@ -1,10 +1,9 @@
-@import "~styles/themes/colors";
-@import "~styles/typography";
+@import "~styles/themes/elements";
 
 :global(.ui):global(.dropdown).multipleDropdown {
   &:global(.active) {
     .dropdownTrigger {
-      border: 1px solid $primary;
+      border: $border-primary;
     }
   }
 }

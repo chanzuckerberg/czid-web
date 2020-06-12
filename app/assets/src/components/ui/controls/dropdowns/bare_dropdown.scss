@@ -92,7 +92,7 @@
     min-width: 100%;
     background-color: $white;
     box-shadow: $box-shadow-dropdown-menu;
-    border: 1px solid $box-shadow-lighter;
+    border: $border-gray-light;
     border-radius: $border-radius-m;
 
     &:global(.left) {

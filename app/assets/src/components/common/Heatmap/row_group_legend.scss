@@ -9,7 +9,7 @@
 .tooltip {
   position: absolute;
   box-shadow: $box-shadow-dropdown-menu;
-  border: 1px solid $gray-light;
+  border: $border-gray-light;
   border-radius: $border-radius-m;
   background-color: $white;
   z-index: 0;

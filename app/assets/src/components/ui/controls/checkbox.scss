@@ -24,12 +24,12 @@
     height: 16px;
     width: 16px;
     flex: none;
-    border: 1px solid $gray-light;
+    border: $border-gray-light;
     border-radius: $border-radius-s;
     opacity: 100;
 
     &:hover {
-      border: 1px solid $gray-medium;
+      border: $border-gray-medium;
     }
 
     &:after {

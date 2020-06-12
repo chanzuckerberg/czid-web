@@ -1,10 +1,12 @@
+@import "~styles/themes/elements";
+
 .ui.button {
   padding: 7px 30px;
   border-radius: $border-radius-l;
   cursor: pointer;
   display: inline-block;
   &.primary {
-    border: 1px solid $primary-blue;
+    border: $border-primary;
     background: $primary-blue !important;
     color: $white !important;
     &:hover {
@@ -13,14 +15,14 @@
     }
   }
   &.secondary {
-    border: 1px solid $primary-blue;
+    border: $border-primary;
     background: $white !important;
     color: $primary-blue !important;
   }
 }
 
 .ui.dropdown {
-  border: 1px solid $gray-light;
+  border: $border-gray-light;
   padding: 5px 1.75em 5px 1em;
   border-radius: $border-radius-l;
   &.custom-dropdown {

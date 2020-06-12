@@ -1,5 +1,5 @@
-@import "../../../themes/colors";
-@import "../../../themes/typography";
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .idseq-ui.button.transparent-btn {
   border: 1px solid $white;
@@ -17,13 +17,13 @@
 
   &:hover {
     background: $primary;
-    border: 1px solid $primary-dark;
+    border: $border-primary-dark;
     color: $white;
   }
 
   &:active,
   &:focus {
-    border: 1px solid $primary-dark;
+    border: $border-primary-dark;
     background-color: $primary-dark;
     color: $white;
   }

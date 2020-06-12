@@ -89,7 +89,7 @@
             .browser-default {
               width: 100%;
               padding: 10px;
-              border: 1px solid $gray-light;
+              border: $border-gray-light;
               background: $white;
               border-radius: $border-radius-l;
               &.new_project_input {
@@ -265,7 +265,7 @@
             }
             .select-dropdown {
               padding-left: 2px;
-              border: 1px solid $gray-light;
+              border: $border-gray-light;
               border-radius: $border-radius-l;
             }
             .caret {

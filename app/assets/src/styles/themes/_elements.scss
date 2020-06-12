@@ -16,6 +16,21 @@ $border-radius-m: 4px;
 $border-radius-s: 2px;
 $border-radius-none: 0px;
 
+// Borders
+$border-primary: 1px solid $primary;
+$border-primary-dark: 1px solid $primary-dark;
+$border-primary-darkest: 1px solid $primary-darkest;
+$border-gray-dark: 1px solid $gray-dark;
+$border-gray-medium: 1px solid $gray-medium;
+$border-gray-light: 1px solid $gray-light;
+$border-gray-lightest: 1px solid $gray-lightest;
+$border-gray-off-white: 1px solid $gray-off-white;
+$border-error: 1px solid $error-medium;
+$border-success: 1px solid $success-medium;
+$border-warning: 1px solid $warning-medium;
+$border-dashed-primary: 2px dashed $primary;
+$border-dashed-gray-medium: 2px dashed $gray-medium;
+
 $narrow-container-width: 1280px;
 $narrow-container-margin: 14px;
 $header-height: 50px;
