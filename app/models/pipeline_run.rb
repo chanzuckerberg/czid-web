@@ -33,8 +33,8 @@ class PipelineRun < ApplicationRecord
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
-  ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
-                        "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta", }.freeze
+  ADAPTER_SEQUENCES = { "single-end" => "s3://#{S3_DATABASE_BUCKET}/adapter_sequences/illumina_TruSeq3-SE.fasta",
+                        "paired-end" => "s3://#{S3_DATABASE_BUCKET}/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta", }.freeze
 
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
@@ -524,7 +524,7 @@ class PipelineRun < ApplicationRecord
     return nil unless host_filtering
     star_genome = host_filtering["additional_files"]["star_genome"]
     # Assumes stable URL structure. See HostGenome.rb.
-    matches = star_genome.match(%r{s3://idseq-database/host_filter/(\w+)/})
+    matches = star_genome.match(%r{s3://.+/host_filter/(\w+)/})
     return nil unless matches
     return matches[1] # "ercc" for example
   end

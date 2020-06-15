@@ -1,5 +1,4 @@
 URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/".freeze
-S3_JSON_BUCKET = "idseq-database".freeze
 S3_JSON_PREFIX = "amr/ontology/".freeze
 
 class AmrHeatmapController < ApplicationController
@@ -95,7 +94,7 @@ class AmrHeatmapController < ApplicationController
   private
 
   def fetch_current_ontology_file_key
-    ontology_folder = S3_CLIENT.list_objects_v2(bucket: S3_JSON_BUCKET,
+    ontology_folder = S3_CLIENT.list_objects_v2(bucket: S3_DATABASE_BUCKET,
                                                 prefix: S3_JSON_PREFIX).to_h
     # each time the rake task is run the json file is put in a folder
     # amr/ontology/YYYY-MM-DD/aro.json, so the latest run of the rake task
@@ -106,7 +105,7 @@ class AmrHeatmapController < ApplicationController
 
   def fetch_ontology_entry(s3_key, gene_name)
     sql_expression = "SELECT * FROM S3Object[*].#{gene_name.dump} LIMIT 1"
-    entry = S3Util.s3_select_json(S3_JSON_BUCKET, s3_key, sql_expression)
+    entry = S3Util.s3_select_json(S3_DATABASE_BUCKET, s3_key, sql_expression)
     trimmed_entry = entry.chomp(",")
     ontology = {}
     begin

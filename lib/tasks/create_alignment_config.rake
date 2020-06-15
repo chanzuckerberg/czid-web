@@ -8,7 +8,7 @@ task create_alignment_config: :environment do
   lineage_version = ENV['LINEAGE_VERSION']
   raise "Must have a $LINEAGE_VERSION. Try `TaxonLineage.maximum('version_start')`" unless lineage_version
 
-  bucket = 's3://idseq-database'
+  bucket = "s3://#{S3_DATABASE_BUCKET}"
   # SQLite was reverted because of a concurrency issue
   db_file_ext = 'db'
 

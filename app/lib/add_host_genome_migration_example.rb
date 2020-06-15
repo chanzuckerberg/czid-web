@@ -7,8 +7,9 @@ class AddCarpHost < ActiveRecord::Migration[5.1]
 
     hg = HostGenome.new
     hg.name = "Carp"
-    hg.s3_star_index_path = "s3://idseq-database/host_filter/carp/2019-04-17/STAR_genome.tar"
-    hg.s3_bowtie2_index_path = "s3://idseq-database/host_filter/carp/2019-04-17/bowtie2_genome.tar"
+    ### Note(2020-06-10): This will change to a new bucket name in idseq-prod account.
+    hg.s3_star_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/carp/2019-04-17/STAR_genome.tar"
+    hg.s3_bowtie2_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/carp/2019-04-17/bowtie2_genome.tar"
     hg.skip_deutero_filter = nil # set this to 1 if host is NOT a deuterostome
 
     human_host = HostGenome.find_by(name: "Human")

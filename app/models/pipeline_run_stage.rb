@@ -35,7 +35,7 @@ class PipelineRunStage < ApplicationRecord
   DAG_NAME_EXPERIMENTAL = "experimental".freeze
 
   # Older alignment configs might not have an s3_nt_info_db_path field, so use a reasonable default in this case.
-  DEFAULT_S3_NT_INFO_DB_PATH = "s3://idseq-database/alignment_data/#{AlignmentConfig::DEFAULT_NAME}/nt_info.db".freeze
+  DEFAULT_S3_NT_INFO_DB_PATH = "s3://#{S3_DATABASE_BUCKET}/alignment_data/#{AlignmentConfig::DEFAULT_NAME}/nt_info.db".freeze
 
   STAGE_INFO = {
     1 => {

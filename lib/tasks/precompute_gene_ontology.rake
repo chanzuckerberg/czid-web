@@ -1,6 +1,5 @@
 MASTER_OWL_URI = "https://raw.githubusercontent.com/arpcard/aro/master/aro.owl".freeze
 URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/".freeze
-S3_DB_BUCKET = "idseq-database".freeze
 S3_ARGANNOT_FASTA = "amr/ARGannot_r2.fasta".freeze
 
 DRUG_CLASSES = {
@@ -39,7 +38,7 @@ task precompute_gene_ontology: :environment do
 
   arg_annot_fasta = nil
   begin
-    resp = s3.get_object(bucket: S3_DB_BUCKET, key: S3_ARGANNOT_FASTA)
+    resp = s3.get_object(bucket: S3_DATABASE_BUCKET, key: S3_ARGANNOT_FASTA)
     arg_annot_fasta = resp.body.read
   rescue Aws::S3::Errors => err
     Rails.logger.error("Unable to fetch ARG ANNOT fasta file from S3")
@@ -100,7 +99,7 @@ task precompute_gene_ontology: :environment do
   begin
     s3.put_object(
       body: json_ontology.to_json,
-      bucket: S3_DB_BUCKET,
+      bucket: S3_DATABASE_BUCKET,
       key: S3_JSON_KEY
     )
   rescue Aws::S3::Errors => err

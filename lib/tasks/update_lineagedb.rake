@@ -37,6 +37,7 @@ desc 'Imports NCBI lineage data into IDseq'
 task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
   ### Short Usage: NCBI_DATE=2018-12-01 rake update_lineage_db
   ### Full Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 rake update_lineage_db
+  ### Note(2020-06-10): This will change to a new bucket name in idseq-prod account.
   ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
 
   Logging.logger.root.level = :info
@@ -47,7 +48,7 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
 
   ncbi_date = ENV['NCBI_DATE']
   reference_s3_path = if ncbi_date.present?
-                        "s3://idseq-database/taxonomy/#{ncbi_date}"
+                        "s3://#{S3_DATABASE_BUCKET}/taxonomy/#{ncbi_date}"
                       else
                         ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
                       end
