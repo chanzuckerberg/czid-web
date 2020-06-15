@@ -87,6 +87,8 @@ Rails.application.configure do
     "https://idseq.net",
     "https://www.idseq.net",
     "https://assets.idseq.net",
+    "https://prod.idseq.net",
+    "https://assets.prod.idseq.net",
   ]
 
   config.middleware.use Rack::HostRedirect, 'www.idseq.net' => 'idseq.net'
