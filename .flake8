@@ -1,2 +1,8 @@
 [flake8]
 max-line-length=120
+exclude = 
+  node_modules/,
+  .venv/,
+  venv/,
+  virtualenv/,
+  .git/
