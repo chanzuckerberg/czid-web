@@ -261,8 +261,8 @@ class PipelineRunStage < ApplicationRecord
     attribute_dict = {
       fastq1: sample.input_files[0].name,
       file_ext: file_ext,
-      star_genome: sample.s3_star_index_path,
-      bowtie2_genome: sample.s3_bowtie2_index_path,
+      star_genome: sample.host_genome.s3_star_index_path,
+      bowtie2_genome: sample.host_genome.s3_bowtie2_index_path,
       max_fragments: pipeline_run.max_input_fragments,
       max_subsample_frag: pipeline_run.subsample,
       nucleotide_type: nucleotide_type,
