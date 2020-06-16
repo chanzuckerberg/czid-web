@@ -469,15 +469,13 @@ RSpec.describe ProjectsController, type: :controller do
           end
 
           it "sees private projects when filtering by private visibility" do
-            expected_projects = []
-            # private projects with no samples will be filtered out due to
-            # (1) not being able to access samples directly
-            # (2) we filter both project and samples by visibility
-            # TODO(tiago): refactor to handle this edge case and add to expected
-            create(:project, users: [@user])
+            expected_projects = [
+              create(:project, :with_sample, users: [@user]),
+              create(:project, users: [@user]),
+            ]
             create(:public_project, users: [@user])
             create(:public_project, :with_sample, users: [@user])
-            expected_projects << create(:project, :with_sample, users: [@user])
+            expected_projects.reverse! # default order is descending order, but expected projects are ascending
 
             get :index, params: { format: "json", domain: domain, visibility: "private" }
 
@@ -487,12 +485,12 @@ RSpec.describe ProjectsController, type: :controller do
           end
 
           it "sees public projects when filtering by public visibility" do
-            expected_projects = []
-            # TODO(tiago): should we see public projects without samples with public filter?
-            # Not useful but logically we should - currently we cannot see it due to the same edge case as in the private filter
-            create(:public_project, users: [@user])
-            expected_projects << create(:public_project, :with_sample, users: [@user])
+            expected_projects = [
+              create(:public_project, users: [@user]),
+              create(:public_project, :with_sample, users: [@user]),
+            ]
             create(:project, :with_sample, users: [@user])
+            expected_projects.reverse! # default order is descending order, but expected projects are ascending
 
             get :index, params: { format: "json", domain: domain, visibility: "public" }
 

@@ -75,9 +75,13 @@ class ProjectsController < ApplicationController
         projects = projects.includes(:users).includes(:samples)
         projects = projects.where(id: project_id) if project_id
         projects = projects.search_by_name(search) if search
-        if [:host, :location, :locationV2, :taxon, :time, :tissue, :visibility].any? { |key| params.key? key }
+        if [:host, :location, :locationV2, :taxon, :time, :tissue].any? { |key| params.key? key }
           projects = projects.where(samples: { id: filter_samples(current_power.samples, params) })
+        elsif params.key?(:visibility)
+          access_to_project = params[:visibility] == "public"
+          projects = projects.where(public_access: access_to_project)
         end
+
         projects = projects.order(Hash[order_by => order_dir])
         limited_projects = limit ? projects.offset(offset).limit(limit) : projects
 
@@ -163,10 +167,10 @@ class ProjectsController < ApplicationController
     end
     @timer.split("sample_types")
 
-    # visibility
-    # TODO(tiago): should this be public projects or projects with public samples?
-    public_count = samples.joins(:project).distinct(:project_id).where(projects: { public_access: 1 }).pluck(:project_id).count
-    private_count = samples.distinct(:project_id).pluck(:project_id).count - public_count
+    all_projects = current_power.projects_by_domain(domain)
+    public_count = all_projects.where(public_access: 1).count
+    private_count = all_projects.count - public_count
+
     visibility = [
       { value: "public", text: "Public", count: public_count },
       { value: "private", text: "Private", count: private_count },
