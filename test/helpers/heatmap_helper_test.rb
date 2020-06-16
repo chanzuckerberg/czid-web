@@ -9,7 +9,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     @num_results = HeatmapHelper::DEFAULT_MAX_NUM_TAXONS
     @sort_by = HeatmapHelper::DEFAULT_TAXON_SORT_PARAM
 
-    @categories = []
+    @categories = nil
     @threshold_filters = []
     @read_specificity = true
     @include_phage = false
@@ -29,25 +29,26 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @samples,
       @background.id,
       @categories,
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      @sort_by
+      read_specificity: @read_specificity,
+      include_phage: @include_phage,
+      num_results: @num_results,
+      min_reads: @min_reads,
+      sort_by: @sort_by,
+      client_filtering_enabled: true
     )
-    @top_taxons_details = [{ "tax_id" => 1, "samples" => { 980_190_962 => [1, 1, 100.0, -100], 298_486_374 => [1, 1, 100.0, -100] }, "max_aggregate_score" => 2_000_000.0 }, { "tax_id" => 28_037, "samples" => { 51_848_956 => [1, 1, 100.0, -100] } }, { "tax_id" => 573, "samples" => { 51_848_956 => [2, 1, 100.0, 100.0] } }, { "tax_id" => 1313, "samples" => { 51_848_956 => [3, 1, -100, 100.0] } }].sort_by! { |d| d["tax_id"] }
+    @top_taxons_details = [{ "tax_id" => 1, "samples" => { 980_190_962 => [1, 1, 100.0, -100] }, "genus_taxid" => -200, "max_aggregate_score" => 1_000_000.0 }, { "tax_id" => 28_037, "samples" => { 51_848_956 => [1, 1, 100.0, -100] } }, { "tax_id" => 573, "samples" => { 51_848_956 => [2, 1, 100.0, 100.0] } }, { "tax_id" => 1313, "samples" => { 51_848_956 => [3, 1, -100, 7.7560896] }, "genus_taxid" => 1301 }].sort_by! { |d| d["tax_id"] }
   end
 
   test "sample_taxons_dict defaults" do
     dicts = HeatmapHelper.sample_taxons_dict(@params, @samples, @background.id)
 
     assert_equal @samples.length, dicts.length
-    dict = dicts[0]
+    dict = dicts.find { |d| d[:sample_id] == 51_848_956 }
     assert dict.key?(:taxons)
-    assert_equal 3, dict[:taxons].length
-    taxon = dict[:taxons][0]
-    assert_equal 10, taxon["NT"].length
-    assert_equal 10, taxon["NR"].length
+    assert_equal 2, dict[:taxons].length
+    taxon = dict[:taxons].find { |t| t["tax_id"] == 573 }
+    assert_equal 9, taxon["NT"].length
+    assert_equal 9, taxon["NR"].length
     assert_equal 99, taxon["NT"]["zscore"]
     assert_equal 99, taxon["NR"]["zscore"]
     assert_equal "Klebsiella pneumoniae", taxon["name"]
@@ -94,7 +95,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     )
     details.sort_by! { |d| d["tax_id"] }
     assert_equal 4, details.length
-    assert_equal 2_000_000.0, details[0]["max_aggregate_score"]
+    assert_equal 1_000_000.0, details[0]["max_aggregate_score"]
     assert_equal @top_taxons_details[0], details[0]
     assert_equal @top_taxons_details[2], details[2]
   end
@@ -118,7 +119,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @species_selected,
       @threshold_filters
     )
-    assert_equal 2_000_000.0, details[0]["max_aggregate_score"]
+    assert_equal 1_000_000.0, details[0]["max_aggregate_score"]
   end
 
   test "top_taxons_details species_selected false" do
@@ -129,7 +130,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       false,
       @threshold_filters
     )
-    assert_equal 1_900_000_001 * -1, details[0]["tax_id"]
+    assert_equal 570, details[0]["tax_id"]
   end
 
   test "fetch_top_taxons defaults" do
@@ -137,20 +138,39 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @samples,
       @background.id,
       @categories,
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      @sort_by
+      read_specificity: @read_specificity,
+      include_phage: @include_phage,
+      num_results: @num_results,
+      min_reads: @min_reads,
+      sort_by: @sort_by
     )
-    assert_equal 3, top_taxons.length
-    top_taxon = top_taxons[@samples[0].pipeline_runs[0].id]
+    assert_equal 2, top_taxons.length
+    top_taxon = top_taxons[@samples[0].id]
     taxon_counts = top_taxon["taxon_counts"]
     assert_equal 1, taxon_counts.length
     taxon_count = taxon_counts[0]
-    assert_equal "some species", taxon_count["name"]
     assert_equal 100, taxon_count["zscore"]
     assert_equal 1_000_000, taxon_count["rpm"]
+  end
+
+  test "fetch_top_taxons mass_normalized" do
+    top_taxons = HeatmapHelper.fetch_top_taxons(
+      @samples,
+      backgrounds(:real_background_mass_normalized).id,
+      @categories,
+      read_specificity: @read_specificity,
+      include_phage: @include_phage,
+      num_results: @num_results,
+      min_reads: @min_reads,
+      sort_by: @sort_by
+    )
+    assert_equal 2, top_taxons.length
+    top_taxon = top_taxons[pipeline_runs(:six).id]
+    taxon_counts = top_taxon["taxon_counts"]
+    assert_equal 4, taxon_counts.length
+    taxon_count = taxon_counts[0]
+    assert_equal 0.361884514757802 * -1, taxon_count["zscore"]
+    assert_equal 336_012.8617363344, taxon_count["rpm"]
   end
 
   test "fetch_top_taxons num_results" do
@@ -158,11 +178,11 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @samples,
       @background.id,
       @categories,
-      @read_specificity,
-      @include_phage,
-      0,
-      @min_reads,
-      @sort_by
+      read_specificity: @read_specificity,
+      include_phage: @include_phage,
+      num_results: 0,
+      min_reads: @min_reads,
+      sort_by: @sort_by
     )
     assert_equal 0, top_taxons.length
   end
@@ -172,26 +192,26 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @samples,
       @background.id,
       @categories,
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      "highest_nt_r"
+      read_specificity: @read_specificity,
+      include_phage: @include_phage,
+      num_results: @num_results,
+      min_reads: @min_reads,
+      sort_by: "highest_nt_r"
     )
     top_taxon = top_taxons.first[1]
     taxon_count = top_taxon["taxon_counts"][0]
-    assert_equal "Klebsiella", taxon_count["name"]
-    assert_equal 217, taxon_count["r"]
+    assert_equal "Klebsiella pneumoniae", taxon_count["name"]
+    assert_equal 209, taxon_count["r"]
 
     top_taxons = HeatmapHelper.fetch_top_taxons(
       @samples,
       @background.id,
       @categories,
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      "lowest_nt_r"
+      read_specificity: @read_specificity,
+      include_phage: @include_phage,
+      num_results: @num_results,
+      min_reads: @min_reads,
+      sort_by: "lowest_nt_r"
     )
     top_taxon = top_taxons.first[1]
     taxon_count = top_taxon["taxon_counts"][0]
@@ -204,11 +224,11 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @samples,
       @background.id,
       @categories,
-      @read_specificity,
-      true,
-      @num_results,
-      @min_reads,
-      @sort_by
+      read_specificity: @read_specificity,
+      include_phage: true,
+      num_results: @num_results,
+      min_reads: @min_reads,
+      sort_by: @sort_by
     )
     assert_equal 0, top_taxons.length
   end
@@ -218,23 +238,23 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @samples,
       @background.id,
       ["Uncategorized"],
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      @sort_by
+      read_specificity: @read_specificity,
+      include_phage: @include_phage,
+      num_results: @num_results,
+      min_reads: @min_reads,
+      sort_by: @sort_by
     )
-    assert_equal 2, top_taxons.length
+    assert_equal 1, top_taxons.length
 
     top_taxons = HeatmapHelper.fetch_top_taxons(
       @samples,
       @background.id,
       ["Bacteria"],
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      @sort_by
+      read_specificity: @read_specificity,
+      include_phage: @include_phage,
+      num_results: @num_results,
+      min_reads: @min_reads,
+      sort_by: @sort_by
     )
     assert_equal 1, top_taxons.length
   end
@@ -251,10 +271,10 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     dict = dicts[0]
     assert_equal 3, dict[:taxons].length
     taxon = dict[:taxons][0]
-    assert_equal 10, taxon["NT"].length
-    assert_equal 10, taxon["NR"].length
-    assert_equal 100.0, taxon["NT"]["zscore"]
-    assert_equal 100 * -1, taxon["NR"]["zscore"]
+    assert_equal 9, taxon["NT"].length
+    assert_equal 9, taxon["NR"].length
+    assert_equal 99.0, taxon["NT"]["zscore"]
+    assert_equal 99.0, taxon["NR"]["zscore"]
   end
 
   test "samples_taxons_details species_selected false" do

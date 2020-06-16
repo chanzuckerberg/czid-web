@@ -13,6 +13,8 @@ class PipelineReportService
     :e_value,
     :mean,
     :stdev,
+    :mean_mass_normalized,
+    :stdev_mass_normalized,
     :name,
     :common_name,
     :superkingdom_taxid,
@@ -76,6 +78,8 @@ class PipelineReportService
     "nt_e_value",
     "nt_bg_mean",
     "nt_bg_stdev",
+    "nt_bg_mean_mass_normalized",
+    "nt_bg_stdev_mass_normalized",
     "nr_z_score",
     "nr_rpm",
     "nr_count",
@@ -86,12 +90,14 @@ class PipelineReportService
     "nr_e_value",
     "nr_bg_mean",
     "nr_bg_stdev",
+    "nr_bg_mean_mass_normalized",
+    "nr_bg_stdev_mass_normalized",
     "species_tax_ids",
   ].freeze
 
   def initialize(pipeline_run, background_id, csv: false, min_contig_reads: PipelineRun::MIN_CONTIG_READS, parallel: true)
     @pipeline_run = pipeline_run
-    @background_id = background_id
+    @background = Background.find(background_id)
     @csv = csv
     @min_contig_reads = min_contig_reads || PipelineRun::MIN_CONTIG_READS
     @parallel = parallel
@@ -122,8 +128,8 @@ class PipelineReportService
     if @parallel
       parallel_steps = [
         -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads) },
-        -> { fetch_taxon_counts(@pipeline_run.id, @background_id) },
-        -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id) },
+        -> { fetch_taxon_counts(@pipeline_run.id, @background.id) },
+        -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background.id) },
       ]
       results = nil
       ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
@@ -144,10 +150,10 @@ class PipelineReportService
       contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads)
       @timer.split("get_contig_summary")
 
-      taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run.id, @background_id)
+      taxon_counts_and_summaries = fetch_taxon_counts(@pipeline_run.id, @background.id)
       @timer.split("fetch_taxon_counts_and_summaries")
 
-      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background_id)
+      taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background.id)
       @timer.split("fetch_taxons_absent_from_sample")
     end
 
@@ -257,7 +263,7 @@ class PipelineReportService
       @timer.split("generate_downloadable_csv")
       return csv_output
     else
-      metadata = metadata.merge(backgroundId: @background_id,
+      metadata = metadata.merge(backgroundId: @background.id,
                                 truncatedReadsCount: @pipeline_run.truncated,
                                 adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
                                 subsampledReadsCount: @pipeline_run.subsampled_reads,
@@ -378,7 +384,7 @@ class PipelineReportService
                                   }
                                 )
 
-    return taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)
+    taxons_absent_from_sample.pluck(*FIELDS_TO_PLUCK)
   end
 
   def split_by_tax_level(counts_array)
@@ -405,6 +411,8 @@ class PipelineReportService
         e_value: counts[FIELDS_INDEX[:e_value]].abs,
         bg_mean: counts[FIELDS_INDEX[:mean]],
         bg_stdev: counts[FIELDS_INDEX[:stdev]],
+        bg_mean_mass_normalized: counts[FIELDS_INDEX[:mean_mass_normalized]],
+        bg_stdev_mass_normalized: counts[FIELDS_INDEX[:stdev_mass_normalized]],
       }
     end
     return counts_hash
@@ -443,16 +451,43 @@ class PipelineReportService
     end
   end
 
-  def compute_z_score(rpm, mean, stdev, min_z_score = Z_SCORE_MIN, max_z_score = Z_SCORE_MAX, absent_z_score = Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND)
+  def compute_z_score_mass_normalized(
+    r,
+    mean_mass_normalized,
+    stdev_mass_normalized,
+    total_ercc_reads,
+    min_z_score = Z_SCORE_MIN,
+    max_z_score = Z_SCORE_MAX,
+    absent_z_score = Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND
+  )
+    return absent_z_score unless stdev_mass_normalized
+    r_mass_normalized = r / total_ercc_reads
+    value = (r_mass_normalized - mean_mass_normalized) / stdev_mass_normalized
+    value.clamp(min_z_score, max_z_score)
+  end
+
+  def compute_z_score_standard(
+    rpm,
+    mean,
+    stdev,
+    min_z_score = Z_SCORE_MIN,
+    max_z_score = Z_SCORE_MAX,
+    absent_z_score = Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND
+  )
     return absent_z_score unless stdev
     value = (rpm - mean) / stdev
-    return value.clamp(min_z_score, max_z_score)
+    value.clamp(min_z_score, max_z_score)
   end
 
   def compute_z_scores(taxa_counts)
     taxa_counts.each_value do |taxon_counts|
-      nt_z_score = compute_z_score(taxon_counts[:nt][:rpm], taxon_counts[:nt][:bg_mean], taxon_counts[:nt][:bg_stdev]) if taxon_counts[:nt].present?
-      nr_z_score = compute_z_score(taxon_counts[:nr][:rpm], taxon_counts[:nr][:bg_mean], taxon_counts[:nr][:bg_stdev]) if taxon_counts[:nr].present?
+      if @background.mass_normalized?
+        nt_z_score = compute_z_score_mass_normalized(taxon_counts[:nt][:count], taxon_counts[:nt][:bg_mean_mass_normalized], taxon_counts[:nt][:bg_stdev_mass_normalized], @pipeline_run.total_ercc_reads) if taxon_counts[:nt].present?
+        nr_z_score = compute_z_score_mass_normalized(taxon_counts[:nr][:count], taxon_counts[:nr][:bg_mean_mass_normalized], taxon_counts[:nr][:bg_stdev_mass_normalized], @pipeline_run.total_ercc_reads) if taxon_counts[:nr].present?
+      else
+        nt_z_score = compute_z_score_standard(taxon_counts[:nt][:rpm], taxon_counts[:nt][:bg_mean], taxon_counts[:nt][:bg_stdev]) if taxon_counts[:nt].present?
+        nr_z_score = compute_z_score_standard(taxon_counts[:nr][:rpm], taxon_counts[:nr][:bg_mean], taxon_counts[:nr][:bg_stdev]) if taxon_counts[:nr].present?
+      end
       taxon_counts[:nt][:z_score] = nt_z_score if taxon_counts[:nt].present?
       taxon_counts[:nr][:z_score] = nr_z_score if taxon_counts[:nr].present?
       taxon_counts[:nt][:z_score] = taxon_counts[:nt][:count] != 0 ? nt_z_score : Z_SCORE_WHEN_ABSENT_FROM_SAMPLE if taxon_counts[:nt].present?

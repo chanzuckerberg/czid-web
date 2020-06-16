@@ -8,12 +8,20 @@ class Background < ApplicationRecord
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   # Not sure why this is not a boolean
   validates :ready, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
+  validate :mass_normalized_has_ercc
 
   after_save :submit_store_summary_job
   attr_accessor :just_updated
 
   DEFAULT_BACKGROUND_MODEL_NAME = "default".freeze
   TAXON_SUMMARY_CHUNK_SIZE = 100
+
+  def mass_normalized_has_ercc
+    if mass_normalized &&
+       PipelineRun.where('id in (?) AND (total_ercc_reads = 0 OR total_ercc_reads IS NULL)', pipeline_run_ids).count > 0
+      errors.add(:base, 'cannot create a mass normalized background model from samples without erccs')
+    end
+  end
 
   def self.eligible_pipeline_runs
     PipelineRun.top_completed_runs.order(:sample_id)
@@ -37,6 +45,7 @@ class Background < ApplicationRecord
         tax_id,
         count_type,
         tax_level,
+        total_ercc_reads,
         @adjusted_total_reads := (total_reads - IFNULL(total_ercc_reads, 0)) * IFNULL(fraction_subsampled, 1.0),
         (1.0*1e6*count)/@adjusted_total_reads as rpm,
         (1.0*1e6*count*1e6*count)/(@adjusted_total_reads*@adjusted_total_reads) AS rpm2
@@ -60,7 +69,8 @@ class Background < ApplicationRecord
         end
         # reset the results
         taxon_result = { tax_id: row["tax_id"], count_type: row["count_type"],
-                         tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0, rpm_list: [], }
+                         tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0,
+                         rpm_list: [], total_ercc_reads: row["total_ercc_reads"], }
         key = current_key
       end
       # increment
@@ -79,10 +89,25 @@ class Background < ApplicationRecord
     taxon_result[:created_at] = date
     taxon_result[:updated_at] = date
     taxon_result[:mean] = (taxon_result[:sum_rpm]) / n.to_f
+    if mass_normalized?
+      taxon_result[:mean_mass_normalized] = (taxon_result[:sum_rpm] / taxon_result[:total_ercc_reads]) / n.to_f
+      taxon_result[:stdev_mass_normalized] = compute_stdev(
+        taxon_result[:sum_rpm] / taxon_result[:total_ercc_reads],
+        taxon_result[:sum_rpm2] / taxon_result[:total_ercc_reads],
+        n
+      )
+    else
+      taxon_result[:mean_mass_normalized] = nil
+      taxon_result[:stdev_mass_normalized] = nil
+    end
     taxon_result[:stdev] = compute_stdev(taxon_result[:sum_rpm], taxon_result[:sum_rpm2], n)
 
     # add zeroes to the rpm_list for no presence to complete the list
     taxon_result[:rpm_list] << 0.0 while taxon_result[:rpm_list].size < n
+    if taxon_result[:total_ercc_reads]
+      taxon_result[:rel_abundance_list_mass_normalized] = taxon_result[:rpm_list].map { |rpm| (rpm / taxon_result[:total_ercc_reads]).round(3) }
+      taxon_result[:rel_abundance_list_mass_normalized] = taxon_result[:rel_abundance_list_mass_normalized].to_json
+    end
     taxon_result[:rpm_list] = taxon_result[:rpm_list].to_json
 
     taxon_result
@@ -97,7 +122,7 @@ class Background < ApplicationRecord
       ActiveRecord::Base.connection.execute <<-SQL
       DELETE FROM taxon_summaries WHERE background_id = #{id}
       SQL
-      data = summarize.map { |h| h.slice(:tax_id, :count_type, :tax_level, :background_id, :created_at, :updated_at, :mean, :stdev, :rpm_list) }
+      data = summarize.map { |h| h.slice(:tax_id, :count_type, :tax_level, :background_id, :created_at, :updated_at, :mean, :stdev, :mean_mass_normalized, :stdev_mass_normalized, :rpm_list) }
       data_chunks = data.in_groups_of(TAXON_SUMMARY_CHUNK_SIZE, false)
       data_chunks.each do |chunk|
         columns = chunk.first.keys
@@ -146,5 +171,9 @@ class Background < ApplicationRecord
       condition = [condition_b, condition_a].join(" or ")
       where(condition)
     end
+  end
+
+  def mass_normalized?
+    mass_normalized
   end
 end

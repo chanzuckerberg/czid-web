@@ -43,6 +43,7 @@ six:
   job_status: "CHECKED"
   finalized: 1
   total_reads: 1122
+  total_ercc_reads: 500
   adjusted_remaining_reads: 316
   subsample: 1000000
   alignment_config: one

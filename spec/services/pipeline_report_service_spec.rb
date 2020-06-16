@@ -2,7 +2,8 @@ require 'rails_helper'
 require 'json'
 
 RSpec.describe PipelineReportService, type: :service do
-  let(:csv_output) { "tax_id,tax_level,genus_tax_id,name,common_name,category,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,species_tax_ids\n570,2,570,Klebsiella,,bacteria,2428411764.7058825,99,99,193404.63458110517,217,6,594,99.7014,149.424,89.5822,18.3311,64.2056,99,77540.10695187165,87,6,594,97.9598,46.4253,16.9874,35.0207,238.639,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,2428411764.7058825,99,99,186274.50980392157,209,2,198,99.6995,149.402,89.5641,9.35068,26.4471,99,61497.326203208555,69,2,198,97.8565,46.3623,16.9101,29.9171,236.332,\n".freeze }
+  let(:csv_output_standard_background) { "tax_id,tax_level,genus_tax_id,name,common_name,category,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nt_bg_mean_mass_normalized,nt_bg_stdev_mass_normalized,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,nr_bg_mean_mass_normalized,nr_bg_stdev_mass_normalized,species_tax_ids\n570,2,570,Klebsiella,,bacteria,2428411764.7058825,99,99,193404.63458110517,217,6,594,99.7014,149.424,89.5822,18.3311,64.2056,,,99,77540.10695187165,87,6,594,97.9598,46.4253,16.9874,35.0207,238.639,,,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,2428411764.7058825,99,99,186274.50980392157,209,2,198,99.6995,149.402,89.5641,9.35068,26.4471,,,99,61497.326203208555,69,2,198,97.8565,46.3623,16.9101,29.9171,236.332,,,\n".freeze }
+  let(:csv_output_mass_normalized_background) { "tax_id,tax_level,genus_tax_id,name,common_name,category,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nt_bg_mean_mass_normalized,nt_bg_stdev_mass_normalized,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,nr_bg_mean_mass_normalized,nr_bg_stdev_mass_normalized,species_tax_ids\n570,2,570,Klebsiella,,bacteria,-41185.23607481226,-0.4073385757751987,-0.4073385757751987,193750.0,217,6,594,99.7014,149.424,89.5822,96875.0,137002.0,48437.5,118647.0,-0.40734356145492157,77678.57142857143,87,6,594,97.9598,46.4253,16.9874,38839.3,54927.0,19419.6,47568.2,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,-41185.23607481226,-0.40733856641551375,-0.40733856641551375,186607.14285714287,209,2,198,99.6995,149.402,89.5641,93303.6,131951.0,46651.8,114273.0,-0.40734762037294736,61607.142857142855,69,2,198,97.8565,46.3623,16.9101,30803.6,43562.8,15401.8,37726.5,\n".freeze }
   let(:fake_output_prefix) { "s3://fake-output-prefix" }
   let(:fake_sfn_name) { "fake_sfn_name" }
   let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
@@ -196,7 +197,151 @@ RSpec.describe PipelineReportService, type: :service do
 
     it "should show correct values in CSV in consistent order" do
       csv_report = PipelineReportService.call(@pipeline_run, @background.id, csv: true)
-      expect(csv_report).to eq(csv_output)
+      expect(csv_report).to eq(csv_output_standard_background)
+    end
+  end
+
+  context "converted report test for species taxid 573 with mass normalized background model" do
+    before do
+      ResqueSpec.reset!
+
+      # This sample has reads in NT and NR for species taxid 573,
+      # which belongs to genus 570. It's compared to a background
+      # that also has reads in NT and NR for species taxid 573.
+      # This test checks that the report service calculates the
+      # expected values for aggregate score and z-score when taxons
+      # have NT and NR reads in both the sample and the background model.
+      @pipeline_run = create(:pipeline_run,
+                             sample: create(:sample, project: create(:project)),
+                             sfn_execution_arn: fake_sfn_execution_arn,
+                             job_status: "CHECKED",
+                             finalized: 1,
+                             total_reads: 1122,
+                             total_ercc_reads: 2,
+                             adjusted_remaining_reads: 316,
+                             subsample: 1_000_000,
+                             taxon_counts_data: [{
+                               tax_id: 573,
+                               tax_level: 1,
+                               taxon_name: "Klebsiella pneumoniae",
+                               nt: 209,
+                               percent_identity: 99.6995,
+                               alignment_length: 149.402,
+                               e_value: -89.5641,
+                               genus_taxid: 570,
+                               superkingdom_taxid: 2,
+                             }, {
+                               tax_id: 573,
+                               tax_level: 1,
+                               taxon_name: "Klebsiella pneumoniae",
+                               nr: 69,
+                               percent_identity: 97.8565,
+                               alignment_length: 46.3623,
+                               e_value: -16.9101,
+                               genus_taxid: 570,
+                               superkingdom_taxid: 2,
+                             }, {
+                               tax_id: 570,
+                               tax_level: 2,
+                               nt: 217,
+                               taxon_name: "Klebsiella",
+                               percent_identity: 99.7014,
+                               alignment_length: 149.424,
+                               e_value: -89.5822,
+                               genus_taxid: 570,
+                               superkingdom_taxid: 2,
+                             }, {
+                               tax_id: 570,
+                               tax_level: 2,
+                               nr: 87,
+                               taxon_name: "Klebsiella",
+                               percent_identity: 97.9598,
+                               alignment_length: 46.4253,
+                               e_value: -16.9874,
+                               genus_taxid: 570,
+                               superkingdom_taxid: 2,
+                             },],
+                             contigs_data: [{
+                               species_taxid_nt: 573,
+                               species_taxid_nr: 573,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 573,
+                               species_taxid_nr: 573,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 570,
+                               species_taxid_nr: 570,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             }, {
+                               species_taxid_nt: 570,
+                               species_taxid_nr: 570,
+                               genus_taxid_nt: 570,
+                               genus_taxid_nr: 570,
+                               read_count: 99,
+                             },])
+      @background = create(:background,
+                           pipeline_run_ids: [
+                             create(:pipeline_run,
+                                    total_ercc_reads: 2,
+                                    sample: create(:sample, project: create(:project))).id,
+                             @pipeline_run.id,
+                           ],
+                           mass_normalized: true)
+      @background.store_summary
+      @report = PipelineReportService.call(@pipeline_run, @background.id)
+    end
+
+    it "should get correct values for species 573" do
+      species_result = {
+        "genus_tax_id" => 570,
+        "name" => "Klebsiella pneumoniae",
+        "nt" => {
+          "count" => 209,
+          "rpm" => 186_607.14285714287,
+          "z_score" => -0.40733856641551375,
+        },
+        "nr" => {
+          "count" => 69,
+          "rpm" => 61_607.142857142855,
+          "z_score" => -0.40734762037294736,
+        },
+        "agg_score" => -41_185.23607481226,
+      }
+
+      expect(JSON.parse(@report)["counts"]["1"]["573"]).to include_json(species_result)
+    end
+
+    it "should get correct values for genus 570" do
+      genus_result = {
+        "genus_tax_id" => 570,
+        "nt" => {
+          "count" => 217.0,
+          "rpm" => 193_750.0,
+          "z_score" => -0.4073385757751987,
+          "e_value" => 89.5822,
+        },
+        "nr" => {
+          "count" => 87.0,
+          "rpm" => 77_678.57142857143,
+          "z_score" => -0.40734356145492157,
+          "e_value" => 16.9874,
+        },
+        "agg_score" => -41_185.23607481226,
+      }
+
+      expect(JSON.parse(@report)["counts"]["2"]["570"]).to include_json(genus_result)
+    end
+
+    it "should show correct values in CSV in consistent order" do
+      csv_report = PipelineReportService.call(@pipeline_run, @background.id, csv: true)
+      expect(csv_report).to eq(csv_output_mass_normalized_background)
     end
   end
 

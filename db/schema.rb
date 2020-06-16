@@ -67,6 +67,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.integer "public_access", limit: 1
     t.integer "ready", limit: 1, default: 0
     t.bigint "user_id"
+    t.boolean "mass_normalized", default: false, null: false
     t.index ["name"], name: "index_backgrounds_on_name", unique: true
   end
 
@@ -579,6 +580,9 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "rpm_list"
+    t.float "mean_mass_normalized"
+    t.float "stdev_mass_normalized"
+    t.text "rel_abundance_list_mass_normalized"
     t.index ["background_id", "tax_id", "count_type", "tax_level"], name: "index_bg_tax_ct_level", unique: true
   end
 

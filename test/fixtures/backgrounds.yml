@@ -15,6 +15,11 @@ real_background:
   pipeline_runs: [three, four]
   ready: 1
 
+real_background_mass_normalized:
+  name: "NID human CSF Mass Normalized"
+  pipeline_runs: [three, four, six]
+  ready: 1
+
 public_background:
   name: "public background"
   pipeline_runs: [three, four]

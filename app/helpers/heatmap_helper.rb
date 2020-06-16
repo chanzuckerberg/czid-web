@@ -160,7 +160,6 @@ module HeatmapHelper
 
       tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
       HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected) unless client_filtering_enabled
-
       rows = []
       tax_2d.each do |_tax_id, tax_info|
         rows << tax_info
@@ -252,9 +251,11 @@ module HeatmapHelper
           COALESCE(fraction_subsampled, 1.0)
         ) * 1000 * 1000"
 
+    standard_z_score_sql = "(#{rpm_sql} - mean) / stdev"
+    mass_normalized_zscore_sql = "((count/total_ercc_reads) - mean_mass_normalized) / stdev_mass_normalized"
     zscore_sql = "COALESCE(
         GREATEST(#{ReportHelper::ZSCORE_MIN}, LEAST(#{ReportHelper::ZSCORE_MAX},
-          (#{rpm_sql} - mean) / stdev
+          IF(mean_mass_normalized IS NULL, #{standard_z_score_sql}, #{mass_normalized_zscore_sql})
         )),
         #{ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND})"
 
@@ -274,6 +275,8 @@ module HeatmapHelper
       count               AS  r,
       stdev,
       mean,
+      stdev_mass_normalized,
+      mean_mass_normalized,
       percent_identity    AS  percentidentity,
       alignment_length    AS  alignmentlength,
       COALESCE(0.0 - e_value, #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}) AS neglogevalue,

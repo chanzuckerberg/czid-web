@@ -50,6 +50,7 @@ class BackgroundsController < ApplicationController
     name = params[:name]
     description = params[:description]
     sample_ids = params[:sample_ids].map(&:to_i)
+    mass_normalized = params[:mass_normalized].present?
 
     non_viewable_sample_ids = sample_ids.to_set - current_power.samples.pluck(:id).to_set
     if !non_viewable_sample_ids.empty?
@@ -59,7 +60,13 @@ class BackgroundsController < ApplicationController
       }
     else
       pipeline_run_ids = Background.eligible_pipeline_runs.where(sample_id: sample_ids).pluck(:id)
-      @background = Background.new(user_id: current_user.id, name: name, description: description, pipeline_run_ids: pipeline_run_ids)
+      @background = Background.new(
+        user_id: current_user.id,
+        name: name,
+        description: description,
+        pipeline_run_ids: pipeline_run_ids,
+        mass_normalized: mass_normalized
+      )
       if @background.save
         render json: {
           status: :ok,

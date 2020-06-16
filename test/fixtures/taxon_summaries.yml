@@ -78,3 +78,19 @@ ten:
   mean: 65.9058
   stdev: 374.243
   rpm_list: "[]"
+one_mass_normalized:
+  background: real_background_mass_normalized
+  tax_id: 573
+  count_type: "NR"
+  tax_level: 1
+  mean_mass_normalized: 30.9171
+  stdev_mass_normalized: 237.332
+  rpm_list: "[]"
+two_mass_normalized:
+  background: real_background_mass_normalized
+  tax_id: 573
+  count_type: "NT"
+  tax_level: 1
+  mean_mass_normalized: 10.35068
+  stdev_mass_normalized: 27.4471
+  rpm_list: "[]"

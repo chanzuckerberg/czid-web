@@ -13,10 +13,10 @@ class PipelineRunTest < ActiveSupport::TestCase
     pr = pipeline_runs(:six)
 
     assert_equal 1122, pr.total_reads
-    assert_nil pr.total_ercc_reads
+    assert_equal 500, pr.total_ercc_reads
     assert_equal 1, pr.subsample_fraction
 
-    assert_equal 4456.327985739751, pr.rpm(5)
+    assert_equal 8038.585209003215, pr.rpm(5)
     assert_equal 0.0, pr.rpm(0)
   end
 end
