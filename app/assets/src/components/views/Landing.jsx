@@ -95,24 +95,24 @@ class Landing extends React.Component {
             </a>
           </div>
           <div className="fill" />
-          {/* Uncomment when hiring */}
-          {/* <div className="hiring-ad">
+          <div className="hiring-ad">
             {"Join our team! We're hiring "}
             <ExternalLink
-              href="<link to job description>"
+              href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2215049"
               analyticsEventName="Landing_engineer-job-link_clicked"
             >
               engineers
             </ExternalLink>
-            {` and `}
+            {/* Uncomment when hiring */}
+            {/* {` and `}
             <ExternalLink
               href="<link to job description>"
               analyticsEventName="Landing_scientist-job-link_clicked"
             >
               scientists
-            </ExternalLink>
+            </ExternalLink> */}
             !
-          </div> */}
+          </div>
           {this.props.browserInfo.supported ? (
             <div className="sign-in">
               <TransparentButton
