@@ -58,7 +58,7 @@ def notify_slack(env, image, stage)
         end
       end
     elsif stage=="failure"
-      puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":sob:", "text": "deploy of #{image} to #{env} failed"}' #{slack_hook}`
+      post_slack_message({"icon_emoji": ":sob:", "text": "deploy of #{image} to #{env} failed"}, slack_hook)
     end
   else
     puts "Unable to get Slack hook from AWS Secrets Manager. Please check your configuration."
@@ -66,7 +66,8 @@ def notify_slack(env, image, stage)
 end
 
 def post_slack_message(payload, slack_hook)
-  puts `curl -X POST --data-urlencode payload=#{Shellwords.escape(JSON.dump(payload))} #{slack_hook}`
+  puts "Post slack message: #{payload}"
+  puts `curl -sS -X POST --data-urlencode payload=#{Shellwords.escape(JSON.dump(payload))} #{slack_hook}`
 end
 
 def tags_and_branches(image)
@@ -82,7 +83,7 @@ end
 notify_slack(env, image, "start")
 begin
   os = RbConfig::CONFIG['host_os'] =~ /darwin/ ? 'darwin' : 'linux'
-  system!("curl -L https://github.com/chanzuckerberg/czecs/releases/download/v0.1.1/czecs_0.1.1_#{os}_amd64.tar.gz | tar xz -C /tmp czecs")
+  system!("curl -sS -L https://github.com/chanzuckerberg/czecs/releases/download/v0.1.2/czecs_0.1.2_#{os}_amd64.tar.gz | tar xz -C /tmp czecs")
   aws_account_id = `aws sts get-caller-identity --query="Account" | tr -d '\"'`.strip
   task_definition_arn = `/tmp/czecs register -f balances.json --set tag=#{image} --set env=#{env} --set account_id=#{aws_account_id} czecs.json`.strip
   $?.exitstatus == 0 || abort("\n== Could not register task ==\n")
