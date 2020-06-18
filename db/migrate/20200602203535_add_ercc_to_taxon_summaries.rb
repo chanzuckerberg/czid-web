@@ -1,9 +1,10 @@
 class AddErccToTaxonSummaries < ActiveRecord::Migration[5.2]
   def change
-    add_column :taxon_summaries, :mean_mass_normalized, :float
-    add_column :taxon_summaries, :stdev_mass_normalized, :float
-    add_column :taxon_summaries, :rel_abundance_list_mass_normalized, :text
-
+    change_table :taxon_summaries, bulk: true do |t|
+      t.float :mean_mass_normalized
+      t.float :stdev_mass_normalized
+      t.text :rel_abundance_list_mass_normalized
+    end
     add_column :backgrounds, :mass_normalized, :boolean, null: false, default: false
   end
 end
