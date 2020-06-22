@@ -829,9 +829,9 @@ class PipelineRun < ApplicationRecord
       Rails.logger.info("[SFN] [PR=#{id}] Output path: #{path}")
 
       update!(sfn_results_path: path)
-    rescue
+    rescue => e
       LogUtil.log_err_and_airbrake("Error getting results path (sample=#{sample_id}, pipeline_run=#{id}) - SFN state was probably deleted.")
-      Logutil.log_backtrace(e)
+      LogUtil.log_backtrace(e)
     end
     path
   end

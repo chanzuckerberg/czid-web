@@ -7,6 +7,7 @@ class LogUtil
   end
 
   def self.log_backtrace(exception)
+    Rails.logger.error("Exception message: #{exception.message}")
     Rails.logger.error("Backtrace:\n\t#{exception.backtrace.join("\n\t")}")
   end
 end
