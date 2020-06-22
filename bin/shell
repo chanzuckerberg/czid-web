@@ -7,11 +7,36 @@ require 'aws-sdk-ec2'
 require 'aws-sdk-iam'
 require 'pp'
 
+keep_alive = false
+
+while ARGV.first =~ /^--.+$/
+  opt = ARGV.shift
+  case opt 
+  when "--service-name"
+    service = ARGV.shift
+  when "--keep-alive"
+    keep_alive = true
+  end
+end
+
 env = ARGV.shift
+
+service ||= "idseq-#{env}-web"
+
 command = ARGV.shift || "rails console"
 if !env
-  puts 'Usage: ./bin/shell ENV [COMMAND]'
-  puts '  COMMAND: default is "rails console"'
+  puts 'Usage: ./bin/shell [--service-name <SERVICE_NAME>] [--keep-alive] <env> [command]'
+  puts
+  puts 'positional arguments:'
+  puts '  env       Environment (prod | staging | public | sandbox)'
+  puts '  command   Command to be executed on the container. Default is "rails console"'
+  puts
+  puts 'optional arguments:'
+  puts '  --service-name <SERVICE_NAME>'
+  puts '      When this parameter is omited, defaults to "idseq-{env}-web"'
+  puts '  --keep-alive'
+  puts '      Send keep alives every 60 seconds to prevent disconnections'
+  puts
   abort
 end
 
@@ -28,8 +53,6 @@ cluster = if env == "sandbox" or aws_account_alias == "idseq-prod"
             env
           end
 
-service = "idseq-#{env}-web"
-
 task = ecs_client.list_tasks(cluster: cluster, service_name: service).task_arns.first
 
 tasks = ecs_client.describe_tasks(cluster: cluster, tasks: [task])
@@ -40,4 +63,4 @@ resp = ec2_client.describe_instances(instance_ids: [instances.container_instance
 
 private_ip = resp.reservations.first.instances.first.private_ip_address
 
-exec %(ssh -t #{private_ip} "sudo docker exec -it \\`sudo docker ps | grep ecs-#{service} | head -1 | awk '{print \\$NF}'\\` bin/entrypoint.sh #{command} ")
+exec %(ssh #{keep_alive ? "-o ServerAliveInterval=60" : ""} -t #{private_ip} "sudo docker exec -it \\`sudo docker ps | grep ecs-#{service} | head -1 | awk '{print \\$NF}'\\` bin/entrypoint.sh #{command} ")
