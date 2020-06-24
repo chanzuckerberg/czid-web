@@ -365,14 +365,14 @@ export default class SampleViewV2 extends React.Component {
   adjustMetricPrecision = species => {
     Object.entries(species).forEach(([key, metricValue]) => {
       if (key in METRIC_DECIMAL_PLACES) {
-        species[key] = parseFloat(metricValue).toFixed(
-          METRIC_DECIMAL_PLACES[key]
+        species[key] = parseFloat(
+          metricValue.toFixed(METRIC_DECIMAL_PLACES[key])
         );
       } else if (key === "nt" || key === "nr") {
         Object.entries(species[key]).forEach(([metricKey, metricValue]) => {
           if (metricKey in METRIC_DECIMAL_PLACES) {
-            species[key][metricKey] = parseFloat(metricValue).toFixed(
-              METRIC_DECIMAL_PLACES[metricKey]
+            species[key][metricKey] = parseFloat(
+              metricValue.toFixed(METRIC_DECIMAL_PLACES[metricKey])
             );
           }
         });
