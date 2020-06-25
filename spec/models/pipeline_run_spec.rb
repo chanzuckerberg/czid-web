@@ -59,13 +59,36 @@ describe PipelineRun, type: :model do
   let(:fake_sfn_name) { "fake_sfn_name" }
   let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
+  let(:fake_error) { "fake_error" }
   let(:fake_sfn_execution_description) do
     {
       execution_arn: fake_sfn_arn,
       input: JSON.dump(OutputPrefix: fake_output_prefix),
-      start_date: Time.zone.now,
+      # AWS SDK rounds to second
+      start_date: Time.zone.now.round,
       state_machine_arn: fake_sfn_execution_arn,
-      status: "FAKE_EXECUTION_STATUS",
+      status: "SUCCESS",
+    }
+  end
+  let(:fake_error_sfn_execution_description) do
+    {
+      execution_arn: fake_sfn_arn,
+      input: JSON.dump(OutputPrefix: fake_output_prefix),
+      start_date: Time.zone.now.round,
+      state_machine_arn: fake_sfn_execution_arn,
+      status: "FAILED",
+    }
+  end
+  let(:fake_error_sfn_execution_history) do
+    {
+      events: [
+        {
+          id: 1,
+          execution_failed_event_details: { error: fake_error },
+          timestamp: Time.zone.now,
+          type: "dummy_type",
+        },
+      ],
     }
   end
   let(:fake_wdl_version) { "999".freeze }
@@ -490,6 +513,123 @@ describe PipelineRun, type: :model do
       context "and stage 3 reported failure, stage 1 reported success, but missing stage 2 status" do
         let(:pipeline_run_stages_statuses) { ["SUCCEEDED", nil, "FAILED", nil] }
         it { is_expected.to have_attributes(job_status: "2.GSNAPL/RAPSEARCH2 alignment-STARTED", finalized: 0) }
+      end
+    end
+  end
+
+  context "sfn pipeline" do
+    let(:user) { build_stubbed(:user) }
+    let(:sample) { build_stubbed(:sample, user: user) }
+    let(:pipeline_run) do
+      build_stubbed(
+        :pipeline_run,
+        sample: sample,
+        pipeline_version: "3.9",
+        sfn_execution_arn: fake_sfn_execution_arn,
+        sfn_results_path: fake_sfn_results_path
+      )
+    end
+
+    before do
+      @mock_aws_clients = {
+        s3: Aws::S3::Client.new(stub_responses: true),
+        states: Aws::States::Client.new(stub_responses: true),
+      }
+      allow(AwsClient).to receive(:[]) { |client|
+        @mock_aws_clients[client]
+      }
+    end
+
+    context "#sfn_description" do
+      context "when arn exists" do
+        it "returns description" do
+          @mock_aws_clients[:states].stub_responses(:describe_execution, lambda { |context|
+            context.params[:execution_arn] == fake_sfn_execution_arn ? fake_sfn_execution_description : 'ExecutionDoesNotExist'
+          })
+
+          expect(pipeline_run.sfn_description).to have_attributes(fake_sfn_execution_description)
+        end
+      end
+
+      context "when arn does not exist" do
+        it "returns description from s3" do
+          @mock_aws_clients[:states].stub_responses(:describe_execution, 'ExecutionDoesNotExist')
+          fake_s3_path = File.join(pipeline_run.sample_output_s3_path.split("/", 4)[-1], "sfn-desc", fake_sfn_execution_arn)
+          fake_bucket = { fake_s3_path => { body: JSON.dump(fake_sfn_execution_description) } }
+          @mock_aws_clients[:s3].stub_responses(:get_object, lambda { |context|
+            fake_bucket[context.params[:key]] || 'NoSuchKey'
+          })
+
+          # ATTENTION: if loading a JSON from S3 json time fields will come as strings
+          expected_description = fake_sfn_execution_description.merge(
+            start_date: fake_sfn_execution_description[:start_date].to_s
+          )
+
+          expect(pipeline_run.sfn_description).to eq(expected_description)
+        end
+      end
+    end
+
+    context "#sfn_history" do
+      context "when arn exists" do
+        it "returns history" do
+          @mock_aws_clients[:states].stub_responses(:get_execution_history, lambda { |context|
+            context.params[:execution_arn] == fake_sfn_execution_arn ? fake_error_sfn_execution_history : 'ExecutionDoesNotExist'
+          })
+
+          history = pipeline_run.sfn_history
+
+          history[:events].each_with_index do |event, idx|
+            expect(event).to have_attributes(
+              execution_failed_event_details: have_attributes(fake_error_sfn_execution_history[:events][idx][:execution_failed_event_details])
+            )
+          end
+        end
+      end
+
+      context "when arn does not exist" do
+        it "returns history from s3" do
+          @mock_aws_clients[:states].stub_responses(:get_execution_history, 'ExecutionDoesNotExist')
+          fake_s3_path = File.join(pipeline_run.sample_output_s3_path.split("/", 4)[-1], "sfn-hist", fake_sfn_execution_arn)
+          fake_bucket = { fake_s3_path => { body: JSON.dump(fake_error_sfn_execution_history) } }
+          @mock_aws_clients[:s3].stub_responses(:get_object, lambda { |context|
+            fake_bucket[context.params[:key]] || 'NoSuchKey'
+          })
+
+          # ATTENTION: if loading a JSON from S3 json time fields will come as strings
+          fake_error_sfn_execution_history[:events].map! { |event| event.merge(timestamp: event[:timestamp].to_s) }
+
+          history = pipeline_run.sfn_history
+          expect(history).to eq(fake_error_sfn_execution_history)
+        end
+      end
+    end
+
+    context "#sfn_error" do
+      context "when pipeline is successful" do
+        it "returns nil" do
+          @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
+
+          expect(pipeline_run.sfn_error).to be_nil
+        end
+      end
+
+      context "when pipeline failed" do
+        it "returns error info" do
+          @mock_aws_clients[:states].stub_responses(:describe_execution, fake_error_sfn_execution_description)
+          @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_error_sfn_execution_history)
+
+          expect(pipeline_run.sfn_error).to eq(fake_error)
+        end
+      end
+
+      context "when arn and s3 data does not exist" do
+        it "returns nil" do
+          @mock_aws_clients[:states].stub_responses(:describe_execution, 'ExecutionDoesNotExist')
+          @mock_aws_clients[:s3].stub_responses(:get_object, 'NoSuchKey')
+
+          expect(pipeline_run.sfn_error).to be_nil
+        end
       end
     end
   end

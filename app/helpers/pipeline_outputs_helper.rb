@@ -178,7 +178,7 @@ module PipelineOutputsHelper
   def get_s3_file(s3_path)
     bucket, key = S3Util.parse_s3_path(s3_path)
     begin
-      resp = Client.get_object(bucket: bucket, key: key)
+      resp = AwsClient[:s3].get_object(bucket: bucket, key: key)
       return resp.body.read
     rescue
       return nil

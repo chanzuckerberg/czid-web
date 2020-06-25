@@ -79,36 +79,33 @@ shared_examples "pipeline viz" do
 
   before do
     stub_const('SAMPLES_BUCKET_NAME', fake_bucket_name)
-    Aws.config[:states] = {
-      stub_responses: {
-        describe_execution: fake_sfn_execution_description,
-        list_tags_for_resource: {
-          tags: [
-            { key: "wdl_version", value: fake_wdl_version },
-            { key: "dag_version", value: fake_dag_version },
-          ],
-        },
-      },
+    @mock_aws_clients = {
+      s3: Aws::S3::Client.new(stub_responses: true),
+      states: Aws::States::Client.new(stub_responses: true),
+    }
+    allow(AwsClient).to receive(:[]) { |client|
+      @mock_aws_clients[client]
     }
 
-    Aws.config[:s3] = {
-      stub_responses: {
-        list_objects_v2: {
-          contents: %w[
-            unmapped1.fq
-            trimmomatic1.fq
-            priceseq1.fa
-            dedup1.fa
-            lzw1.fa
-            bowtie2_1.fa
-            subsampled_1.fa
-            gsnap_filter_1.fa
-          ].map do |filename|
-            { key: File.join(output_dir_s3.split("/", 4)[-1], filename) }
-          end,
-        },
-      },
-    }
+    @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
+    @mock_aws_clients[:states].stub_responses(:list_tags_for_resource,
+                                              tags: [
+                                                { key: "wdl_version", value: fake_wdl_version },
+                                                { key: "dag_version", value: fake_dag_version },
+                                              ])
+
+    @mock_aws_clients[:s3].stub_responses(:list_objects_v2, contents: %w[
+      unmapped1.fq
+      trimmomatic1.fq
+      priceseq1.fa
+      dedup1.fa
+      lzw1.fa
+      bowtie2_1.fa
+      subsampled_1.fa
+      gsnap_filter_1.fa
+    ].map do |filename|
+                                                                        { key: File.join(output_dir_s3.split("/", 4)[-1], filename) }
+                                                                      end)
 
     allow(Sample).to receive(:get_signed_url).and_return("test url")
   end
@@ -127,10 +124,8 @@ shared_examples "pipeline viz" do
     end
 
     it "should include step-level status updates" do
-      s3 = Aws::S3::Client.new(stub_responses: true)
-      s3.stub_responses(:get_object, body: step_status_data.to_json)
+      @mock_aws_clients[:s3].stub_responses(:get_object, body: step_status_data.to_json)
 
-      stub_const("PipelineOutputsHelper::Client", s3)
       results = RetrievePipelineVizGraphDataService.call(pr.id, true, false)
 
       results[:stages][0][:steps].each do |step|

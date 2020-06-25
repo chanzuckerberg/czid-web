@@ -235,6 +235,15 @@ class PipelineRun < ApplicationRecord
     step_function: "step_function",
   }
 
+  after_initialize :init_aws_clients
+  attr_accessor :aws_clients
+  def init_aws_clients
+    @aws_clients = {
+      "s3" => Aws::S3::Client.new,
+      "states" => Aws::States::Client.new,
+    }
+  end
+
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
   end
@@ -799,6 +808,29 @@ class PipelineRun < ApplicationRecord
     Syscall.run("rm", "-f", downloaded_byteranges_path)
   end
 
+  def sfn_description
+    AwsClient[:states].describe_execution(execution_arn: sfn_execution_arn)
+  rescue Aws::States::Errors::ExecutionDoesNotExist
+    # Attention: Timestamp fields will be returned as strings
+    description_json = get_s3_file("#{sample_output_s3_path}/sfn-desc/#{sfn_execution_arn}")
+    description_json && JSON.parse(description_json, symbolize_names: true)
+  end
+
+  def sfn_history
+    AwsClient[:states].get_execution_history(execution_arn: sfn_execution_arn)
+  rescue Aws::States::Errors::ExecutionDoesNotExist
+    # Attention: Timestamp fields will be returned as strings
+    history_json = get_s3_file("#{sample_output_s3_path}/sfn-hist/#{sfn_execution_arn}")
+    history_json && JSON.parse(history_json, symbolize_names: true)
+  end
+
+  def sfn_error
+    if sfn_description && sfn_description[:status] == "FAILED"
+      history = sfn_history
+      return history[:events].last["execution_failed_event_details"]["error"]
+    end
+  end
+
   def update_results_path_from_sfn
     Rails.logger.info("[SFN] [PR=#{id}] Get path from SFN execution (arn=#{sfn_execution_arn})")
 
@@ -808,11 +840,9 @@ class PipelineRun < ApplicationRecord
     return path if sfn_execution_arn.blank?
 
     begin
-      # TODO: move to initializer
-      sfn_client = Aws::States::Client.new
-      execution_resp = sfn_client.describe_execution(execution_arn: sfn_execution_arn)
+      execution_resp = AwsClient[:states].describe_execution(execution_arn: sfn_execution_arn)
 
-      sfn_resp = sfn_client.list_tags_for_resource(resource_arn: execution_resp.state_machine_arn)
+      sfn_resp = AwsClient[:states].list_tags_for_resource(resource_arn: execution_resp.state_machine_arn)
 
       tags = sfn_resp.tags.reduce({}) do |h, tag|
         h.update(tag.key => tag.value)

@@ -1,5 +1,3 @@
-require "aws-sdk-s3"
-
 module S3Util
   # select a particular part of a JSON file using Amazon S3 Select SQL syntax
   def self.s3_select_json(bucket, key, expression)
@@ -22,7 +20,7 @@ module S3Util
 
     entry = []
     begin
-      S3_CLIENT.select_object_content(s3_select_params) do |stream|
+      AwsClient[:s3].select_object_content(s3_select_params) do |stream|
         stream.on_records_event do |event|
           entry.push(event.payload.read)
         end
@@ -36,9 +34,9 @@ module S3Util
   end
 
   def self.upload_to_s3(bucket, key, content)
-    S3_CLIENT.put_object(bucket: bucket,
-                         key: key,
-                         body: content)
+    AwsClient[:s3].put_object(bucket: bucket,
+                              key: key,
+                              body: content)
   end
 
   def self.parse_s3_path(s3_path)

@@ -253,13 +253,12 @@ class Sample < ApplicationRecord
   end
 
   def list_outputs(s3_path, display_prefix = 1, delimiter = "/")
-    s3 = Aws::S3::Client.new
     prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
 
     # Adding pagination to fix a bug where there are too many files for step function pipelines
     # TODO: A better solution should be planned as part of https://jira.czi.team/browse/IDSEQ-2295
     outputs = []
-    s3.list_objects_v2(
+    AwsClient[:s3].list_objects_v2(
       bucket: SAMPLES_BUCKET_NAME,
       prefix: "#{prefix}/",
       delimiter: delimiter

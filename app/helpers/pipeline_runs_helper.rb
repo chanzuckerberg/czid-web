@@ -58,6 +58,13 @@ module PipelineRunsHelper
   PIPELINE_RUN_STILL_RUNNING_ERROR = "PIPELINE_RUN_STILL_RUNNING_ERROR".freeze
   PIPELINE_RUN_FAILED_ERROR = "PIPELINE_RUN_FAILED_ERROR".freeze
 
+  SFN_INPUT_ERRORS = {
+    "InvalidInputFileError" => "There was an error parsing one of the input files.",
+    "InsufficientReadsError" => "The number of reads after filtering was insufficient for further analysis.",
+    "BrokenReadPairError" => "There were too many discordant read pairs in the paired-end sample.",
+    "InvalidFileFormatError" => "The input file you provided has a formatting error in it.",
+  }.freeze
+
   def aegea_batch_submit_command(base_command,
                                  memory: Sample::DEFAULT_MEMORY_IN_MB,
                                  vcpus: Sample::DEFAULT_VCPUS,
@@ -302,6 +309,12 @@ module PipelineRunsHelper
     pr = failed_stage.pipeline_run
     # if SFN run, return no user error if the SFN failed to start
     return [nil, nil] if pr.step_function? && pr.sfn_execution_arn.blank?
+
+    if pr.step_function?
+      sfn_error = pr.sfn_error
+      return SFN_INPUT_ERRORS.include? sfn_error ? [pr.sfn_error, SFN_INPUT_ERRORS[pr.sfn_error]] : [nil, nil]
+    end
+
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     return [nil, nil] unless [1, 2].include? failed_stage.step_number
     # We need to set the pipeline version in the failed pipeline run so that the host_filter_output_s3_path includes it,

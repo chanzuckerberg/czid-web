@@ -110,17 +110,20 @@ describe BulkDownload, type: :model do
       stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net",
                                           "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
 
-      Aws.config[:states] = {
-        stub_responses: {
-          describe_execution: fake_sfn_execution_description,
-          list_tags_for_resource: {
-            tags: [
-              { key: "wdl_version", value: fake_wdl_version },
-              { key: "dag_version", value: fake_dag_version },
-            ],
-          },
-        },
+      @mock_aws_clients = {
+        s3: Aws::S3::Client.new(stub_responses: true),
+        states: Aws::States::Client.new(stub_responses: true),
       }
+      allow(AwsClient).to receive(:[]) { |client|
+        @mock_aws_clients[client]
+      }
+
+      @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
+      @mock_aws_clients[:states].stub_responses(:list_tags_for_resource,
+                                                tags: [
+                                                  { key: "wdl_version", value: fake_wdl_version },
+                                                  { key: "dag_version", value: fake_dag_version },
+                                                ])
     end
 
     it "returns the correct task command for original_input_file download type" do
