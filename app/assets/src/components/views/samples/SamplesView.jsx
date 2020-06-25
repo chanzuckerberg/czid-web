@@ -16,7 +16,7 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import PropTypes from "~/components/utils/propTypes";
-import SaveIcon from "~ui/icons/SaveIcon";
+import IconBackgroundModel from "~ui/icons/IconBackgroundModel";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -303,13 +303,15 @@ class SamplesView extends React.Component {
 
     const targetSamples = samples.loaded;
 
-    const saveIcon = <SaveIcon className={cs.icon} />;
+    const backgroundIcon = (
+      <IconBackgroundModel className={cx(cs.icon, cs.background)} />
+    );
 
     return selectedSampleIds.size < 2 ? (
       <ToolbarIcon
         className={cs.action}
         disabled
-        icon={saveIcon}
+        icon={backgroundIcon}
         popupText={"Background Model"}
         popupSubtitle="Select at least 2 samples"
       />
@@ -318,7 +320,7 @@ class SamplesView extends React.Component {
         trigger={
           <ToolbarIcon
             className={cs.action}
-            icon={saveIcon}
+            icon={backgroundIcon}
             popupText={"Background Model"}
           />
         }
@@ -466,9 +468,7 @@ class SamplesView extends React.Component {
       // This is checked in BulkDownloadModal, and the original input file option is disabled if there
       // are too many samples.
       this.setState({
-        bulkDownloadButtonTempTooltip: `No more than ${
-          appConfig.maxSamplesBulkDownload
-        } samples allowed in one download.`,
+        bulkDownloadButtonTempTooltip: `No more than ${appConfig.maxSamplesBulkDownload} samples allowed in one download.`,
       });
     } else {
       this.setState({ bulkDownloadModalOpen: true });
