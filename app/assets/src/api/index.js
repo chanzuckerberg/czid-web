@@ -255,11 +255,12 @@ const getSearchSuggestions = ({ categories, query, domain }) =>
     },
   });
 
-const createBackground = ({ description, name, sampleIds }) =>
+const createBackground = ({ description, name, sampleIds, massNormalized }) =>
   postWithCSRF("/backgrounds", {
     name,
     description,
     sample_ids: sampleIds,
+    mass_normalized: massNormalized || null,
   });
 
 const getBackgrounds = async () => {

@@ -1,0 +1,50 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+:global(.ui):global(.dropdown).dropdown {
+  &:global(.active) {
+    .dropdownTrigger {
+      border: $border-primary;
+    }
+  }
+}
+
+.option {
+  @include font-body-xs;
+  // override the fixed height and flex display from BareDropdown items
+  height: auto !important;
+  display: block !important;
+
+  white-space: normal;
+  margin-top: $space-m;
+  margin-bottom: $space-m;
+  cursor: pointer;
+
+  .optionText {
+    color: $black;
+  }
+
+  .optionSubtext {
+    color: $gray-medium;
+  }
+}
+
+.disabledOption {
+  color: $gray-light;
+  // override cursor from BareDropdown
+  cursor: default !important;
+
+  .optionText {
+    color: $gray-light;
+  }
+
+  .optionSubtext {
+    color: $gray-light;
+  }
+
+  &:hover {
+    // override background color from BareDropdown
+    background-color: $white !important;
+  }
+}

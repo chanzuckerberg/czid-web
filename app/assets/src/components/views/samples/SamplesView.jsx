@@ -27,6 +27,7 @@ import ToolbarIcon from "./ToolbarIcon";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
+import { select } from "d3";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -307,6 +308,15 @@ class SamplesView extends React.Component {
       <IconBackgroundModel className={cx(cs.icon, cs.background)} />
     );
 
+    // Check if all the selected samples have at least one ERCC read,
+    // which enables the created background to be normalized by input mass.
+    let selectedSamplesHaveERCCs = true;
+    selectedSampleIds.forEach(sampleId => {
+      selectedSamplesHaveERCCs =
+        selectedSamplesHaveERCCs &&
+        samples._collection.entries[sampleId].erccReads > 0;
+    });
+
     return selectedSampleIds.size < 2 ? (
       <ToolbarIcon
         className={cs.action}
@@ -328,6 +338,7 @@ class SamplesView extends React.Component {
         fetchedSamples={targetSamples.filter(sample =>
           selectedSampleIds.has(sample.id)
         )}
+        selectedSamplesHaveERCCs={selectedSamplesHaveERCCs}
       />
     );
   };

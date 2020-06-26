@@ -10,6 +10,12 @@ import Textarea from "~ui/controls/Textarea";
 import Modal from "~ui/containers/Modal";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Notification from "~ui/notifications/Notification";
+import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import InfoIconSmall from "~ui/icons/InfoIconSmall";
+import { UserContext } from "~/components/common/UserContext";
+
+import { BACKGROUND_CORRECTION_METHODS } from "./constants";
 
 import cs from "./collection_modal.scss";
 
@@ -23,12 +29,19 @@ class CollectionModal extends React.Component {
     this.state = {
       backgroundCreationResponse: null,
       backgroundDescription: null,
-      backgroundName: null,
+      backgroundName: "",
+      appliedMethod: "",
       modalOpen: false,
     };
   }
 
-  openModal = () => this.setState({ modalOpen: true });
+  openModal = () =>
+    this.setState({
+      modalOpen: true,
+      appliedMethod: this.props.selectedSamplesHaveERCCs
+        ? "massNormalized"
+        : "standard",
+    });
   closeModal = () => this.setState({ modalOpen: false });
 
   renderSampleList = () => {
@@ -51,9 +64,9 @@ class CollectionModal extends React.Component {
           {samplesToDisplay.map(sample => (
             <li key={sample.id}>
               <span className={cs.sampleName}>{sample.sample.name}</span>
-              <span className={cs.sampleDetails}>{`(Project: ${
-                sample.sample.project
-              })`}</span>
+              <span
+                className={cs.sampleDetails}
+              >{`(Project: ${sample.sample.project})`}</span>
             </li>
           ))}
         </ul>
@@ -74,9 +87,13 @@ class CollectionModal extends React.Component {
     this.setState({ backgroundDescription });
   };
 
+  handleMethodChange = appliedMethod => {
+    this.setState({ appliedMethod });
+  };
+
   handleCreateBackground = async () => {
     const { selectedSampleIds } = this.props;
-    const { backgroundName, backgroundDescription } = this.state;
+    const { backgroundName, backgroundDescription, appliedMethod } = this.state;
 
     let backgroundCreationResponse = null;
     try {
@@ -84,6 +101,7 @@ class CollectionModal extends React.Component {
         name: backgroundName,
         description: backgroundDescription,
         sampleIds: Array.from(selectedSampleIds),
+        massNormalized: appliedMethod === "massNormalized",
       });
     } catch (_) {
       backgroundCreationResponse = {
@@ -95,7 +113,17 @@ class CollectionModal extends React.Component {
   };
 
   renderForm = () => {
-    const { numDescriptionRows } = this.props;
+    const { numDescriptionRows, selectedSamplesHaveERCCs } = this.props;
+    const { allowedFeatures = {} } = this.context || {};
+
+    const dropdownOptions = BACKGROUND_CORRECTION_METHODS;
+    if (selectedSamplesHaveERCCs) {
+      dropdownOptions.massNormalized.disabled = false;
+      dropdownOptions.massNormalized.tooltip = null;
+    } else {
+      dropdownOptions.massNormalized.disabled = true;
+      dropdownOptions.massNormalized.tooltip = "Only for ERCC samples";
+    }
 
     return (
       <div className={cs.form}>
@@ -113,6 +141,29 @@ class CollectionModal extends React.Component {
           rows={numDescriptionRows}
           onChange={this.handleDescriptionChange}
         />
+        {allowedFeatures.includes("mass_normalized") && (
+          <div>
+            <div className={cs.label}>
+              Applied Correction Method
+              <ColumnHeaderTooltip
+                trigger={
+                  <span>
+                    <InfoIconSmall className={cs.infoIcon} />
+                  </span>
+                }
+                content="Applied Correction Method is the method used when comparing a chosen set of samples against a background model."
+                link="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035166174-How-do-I-create-and-use-background-models-in-IDseq-"
+              />
+            </div>
+            <SubtextDropdown
+              fluid
+              className={cs.dropdown}
+              options={Object.values(dropdownOptions)}
+              initialSelectedValue={this.state.appliedMethod}
+              onChange={this.handleMethodChange}
+            />
+          </div>
+        )}
         {this.renderSampleList()}
         <div className={cs.buttons}>
           <PrimaryButton
@@ -190,7 +241,8 @@ class CollectionModal extends React.Component {
                 href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035166174-How-do-I-create-and-use-background-models-in-IDseq-"
               >
                 Learn More
-              </ExternalLink>.
+              </ExternalLink>
+              .
             </div>
             {this.renderForm()}
             {backgroundCreationResponse && this.renderStatus()}
@@ -212,6 +264,9 @@ CollectionModal.propTypes = {
   fetchedSamples: PropTypes.array,
   selectedSampleIds: PropTypes.instanceOf(Set),
   trigger: PropTypes.node.isRequired,
+  selectedSamplesHaveERCCs: PropTypes.bool,
 };
+
+CollectionModal.contextType = UserContext;
 
 export default CollectionModal;

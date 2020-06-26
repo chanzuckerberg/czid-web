@@ -5,3 +5,4 @@ export { default as Dropdown } from "./Dropdown";
 export { default as MultipleDropdown } from "./MultipleDropdown";
 export { default as MultipleNestedDropdown } from "./MultipleNestedDropdown";
 export { default as ThresholdFilterDropdown } from "./ThresholdFilterDropdown";
+export { default as SubtextDropdown } from "./SubtextDropdown";

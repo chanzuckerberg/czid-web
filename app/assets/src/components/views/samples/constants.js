@@ -75,6 +75,21 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   },
 };
 
+export const BACKGROUND_CORRECTION_METHODS = {
+  standard: {
+    value: "standard",
+    text: "Standard",
+    subtext:
+      "For samples without ERCCs, background correction done using relative abundances.",
+  },
+  massNormalized: {
+    value: "massNormalized",
+    text: "Normalized by input mass",
+    subtext:
+      "For samples with ERCCs, background correction done using estimates of relative microbe mass.",
+  },
+};
+
 // DEPRECATED
 export const SAMPLE_TABLE_COLUMNS = {
   total_reads: {

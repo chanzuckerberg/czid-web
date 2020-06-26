@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .collectionModal {
   @include font-body-s;
@@ -9,15 +10,32 @@
       @include font-body-s;
 
       margin-top: 20px;
-      margin-bottom: 10px;
+      margin-bottom: $space-m;
       font-weight: $font-weight-semibold;
 
       .optional {
         @include font-body-xxs;
 
         color: $gray-light;
-        margin-left: 10px;
+        margin-left: $space-m;
       }
+
+      .infoIcon {
+        margin-top: $space-xxxs;
+        margin-left: $space-s;
+        height: 15px;
+        width: 15px;
+        fill: $gray-dark;
+        vertical-align: text-top;
+
+        &:hover {
+          fill: $primary;
+        }
+      }
+    }
+
+    .dropdown {
+      margin-bottom: $space-xxl;
     }
 
     .buttons {
@@ -46,7 +64,7 @@
         @include font-body-xxs;
 
         color: $gray-light;
-        margin-left: 10px;
+        margin-left: $space-m;
       }
     }
 
