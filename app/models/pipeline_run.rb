@@ -235,15 +235,6 @@ class PipelineRun < ApplicationRecord
     step_function: "step_function",
   }
 
-  after_initialize :init_aws_clients
-  attr_accessor :aws_clients
-  def init_aws_clients
-    @aws_clients = {
-      "s3" => Aws::S3::Client.new,
-      "states" => Aws::States::Client.new,
-    }
-  end
-
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
   end
