@@ -19,7 +19,7 @@ const BackgroundModelFilter = ({
       subtext: background.mass_normalized
         ? "Normalized by input mass"
         : "Standard",
-      value: background.id,
+      value: background.id || background.value,
       disabled: disabledOption,
       tooltip: disabledOption ? "Only for ERCC samples" : null,
     };

@@ -147,7 +147,7 @@ class VisualizationsController < ApplicationController
       },
       metrics: HeatmapHelper::ALL_METRICS,
       backgrounds: current_power.backgrounds.map do |background|
-        { name: background.name, value: background.id }
+        { name: background.name, value: background.id, mass_normalized: background.mass_normalized }
       end,
       thresholdFilters: {
         targets: [

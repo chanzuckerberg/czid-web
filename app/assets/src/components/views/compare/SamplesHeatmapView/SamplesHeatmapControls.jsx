@@ -18,6 +18,7 @@ import {
   MultipleNestedDropdown,
   ThresholdFilterDropdown,
 } from "~ui/controls/dropdowns";
+import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import { Divider } from "~/components/layout";
 import { logAnalyticsEvent } from "~/api/analytics";
 import Slider from "~ui/controls/Slider";
@@ -128,20 +129,14 @@ export default class SamplesHeatmapControls extends React.Component {
   };
 
   renderBackgroundSelect() {
-    let options = this.props.options.backgrounds.map(background => ({
-      text: background.name,
-      value: background.value,
-    }));
+    const { selectedSamplesHaveERCCs, options, selectedOptions } = this.props;
 
     return (
-      <Dropdown
-        fluid
-        rounded
-        options={options}
+      <BackgroundModelFilter
+        allBackgrounds={options.backgrounds}
+        value={selectedOptions.background}
         onChange={this.onBackgroundChange}
-        value={this.props.selectedOptions.background}
-        label="Background"
-        disabled={this.props.loading || !this.props.data}
+        sampleHasERCCs={selectedSamplesHaveERCCs}
       />
     );
   }
@@ -579,4 +574,5 @@ SamplesHeatmapControls.propTypes = {
   totalTaxaCount: PropTypes.number,
   prefilterConstants: PropTypes.object,
   displayFilterStats: PropTypes.bool,
+  selectedSamplesHaveERCCs: PropTypes.bool,
 };

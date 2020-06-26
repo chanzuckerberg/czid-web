@@ -391,6 +391,7 @@ module HeatmapHelper
           metadata: samples_by_id[sample_id].metadata_with_base_type,
           host_genome_name: samples_by_id[sample_id].host_genome_name,
           taxons: filtered_rows,
+          ercc_count: pr.total_ercc_reads,
         }
       end
     end
@@ -403,6 +404,7 @@ module HeatmapHelper
           name: sample.name,
           metadata: sample.metadata_with_base_type,
           host_genome_name: sample.host_genome_name,
+          ercc_count: 0,
         }
       end
     end

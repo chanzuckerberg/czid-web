@@ -36,7 +36,10 @@ import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 
-const SCALE_OPTIONS = [["Log", "symlog"], ["Lin", "linear"]];
+const SCALE_OPTIONS = [
+  ["Log", "symlog"],
+  ["Lin", "linear"],
+];
 const SORT_SAMPLES_OPTIONS = [
   { text: "Alphabetical", value: "alpha" },
   { text: "Cluster", value: "cluster" },
@@ -453,10 +456,16 @@ class SamplesHeatmapView extends React.Component {
     let allTaxonDetails = {};
     let allData = {};
     let taxonFilterState = {};
+    // Check if all samples have ERCC counts > 0 to enable backgrounds generated
+    // using normalized input mass.
+    let selectedSamplesHaveERCCs = true;
 
     for (let i = 0; i < rawData.length; i++) {
       let sample = rawData[i];
       sampleIds.push(sample.sample_id);
+
+      selectedSamplesHaveERCCs =
+        sample.ercc_count > 0 && selectedSamplesHaveERCCs;
 
       // Keep track of samples with the same name, which may occur if
       // a user selects samples from multiple projects.
@@ -536,6 +545,7 @@ class SamplesHeatmapView extends React.Component {
       allTaxonDetails,
       allData,
       taxonFilterState,
+      selectedSamplesHaveERCCs,
     };
   }
 
@@ -1131,8 +1141,8 @@ class SamplesHeatmapView extends React.Component {
         shouldRefetchData
           ? this.updateBackground
           : shouldRefilterData
-            ? this.updateFilters
-            : null
+          ? this.updateFilters
+          : null
       );
     } else {
       const excluding = ["dataScaleIdx", "sampleSortType", "taxaSortType"];
@@ -1256,7 +1266,8 @@ class SamplesHeatmapView extends React.Component {
           {invalidSampleNames.length} sample
           {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
           heatmap
-        </span>, because they either failed or are still processing:
+        </span>
+        , because they either failed or are still processing:
       </div>
     );
 
@@ -1386,6 +1397,7 @@ class SamplesHeatmapView extends React.Component {
                 displayFilterStats={allowedFeatures.includes(
                   "heatmap_filter_fe"
                 )}
+                selectedSamplesHaveERCCs={this.state.selectedSamplesHaveERCCs}
               />
             </NarrowContainer>
           </div>
