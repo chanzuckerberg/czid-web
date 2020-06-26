@@ -33,7 +33,6 @@ gem 'elasticsearch-model'
 gem 'mysql2'
 gem 'oj'
 gem 'parallel', '1.14.0'
-gem 'prometheus-client', '0.7.1'
 # Use Puma as the app server
 gem 'puma', '~> 3.12'
 # Use Redis adapter to run Action Cable in production
