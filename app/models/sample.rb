@@ -126,6 +126,7 @@ class Sample < ApplicationRecord
         alignment_config_name: pr.alignment_config.name,
         assembled: pr.assembled.to_i,
         adjusted_remaining_reads: pr.adjusted_remaining_reads,
+        total_ercc_reads: pr.total_ercc_reads,
       }
     end
     prvs.values

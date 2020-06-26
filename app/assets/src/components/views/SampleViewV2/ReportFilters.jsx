@@ -106,7 +106,13 @@ class ReportFilters extends React.Component {
   };
 
   render = () => {
-    const { backgrounds, sampleId, selected, view } = this.props;
+    const {
+      backgrounds,
+      sampleId,
+      selected,
+      view,
+      sampleHasERCCs,
+    } = this.props;
     return (
       <React.Fragment>
         <div className={cs.filterList}>
@@ -156,6 +162,7 @@ class ReportFilters extends React.Component {
                   value,
                 })
               }
+              sampleHasERCCs={sampleHasERCCs}
             />
           </div>
           {/* from server */}
@@ -259,6 +266,7 @@ ReportFilters.propTypes = {
   sampleId: PropTypes.number,
   selected: PropTypes.object,
   view: PropTypes.oneOf(["tree", "table"]),
+  sampleHasERCCs: PropTypes.bool,
 };
 
 export default ReportFilters;

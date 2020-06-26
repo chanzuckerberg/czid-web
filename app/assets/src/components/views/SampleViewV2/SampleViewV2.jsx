@@ -994,6 +994,7 @@ export default class SampleViewV2 extends React.Component {
               sampleId={sample && sample.id}
               selected={selectedOptions}
               view={view}
+              sampleHasERCCs={pipelineRun && pipelineRun.total_ercc_reads > 0}
             />
           </div>
           <div className={cs.reportHeader}>
