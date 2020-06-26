@@ -99,6 +99,9 @@ gem 'warden', '~> 1.2'
 # For Access-Control-Allow-Origin and Cloudfront
 gem "rack-cors"
 
+# For structured logging
+gem 'ougai'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'
