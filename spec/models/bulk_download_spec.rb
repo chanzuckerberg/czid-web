@@ -500,18 +500,18 @@ describe BulkDownload, type: :model do
     let(:mock_executable_file_path) { "/tmp/mock_path" }
 
     it "returns the correct aegea ecs submit command" do
-      allow(Rails).to receive(:env).and_return("prod")
-      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
+      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-test",
+                                          "S3_AEGEA_ECS_EXECUTE_BUCKET" => "aegea-ecs-execute-test"))
 
       task_command = [
         "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
-        "--task-role", "idseq-downloads-prod",
+        "--task-role", "idseq-downloads-test",
         "--task-name", BulkDownload::ECS_TASK_NAME,
         "--ecr-image", "idseq-s3-tar-writer:latest",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
-        "--cluster", "idseq-fargate-tasks-prod",
-        "--staging-s3-bucket", "aegea-ecs-execute-prod",
+        "--cluster", "idseq-fargate-tasks-test",
+        "--staging-s3-bucket", "aegea-ecs-execute-test",
       ]
 
       expect(@bulk_download.aegea_ecs_submit_command(executable_file_path: mock_executable_file_path)).to eq(task_command)
@@ -519,36 +519,18 @@ describe BulkDownload, type: :model do
 
     it "allows override of ecr image via AppConfig" do
       AppConfigHelper.set_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE, "idseq-s3-tar-writer:v1.0")
-      allow(Rails).to receive(:env).and_return("prod")
-      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
+      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-test",
+                                          "S3_AEGEA_ECS_EXECUTE_BUCKET" => "aegea-ecs-execute-test"))
 
       task_command = [
         "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
-        "--task-role", "idseq-downloads-prod",
+        "--task-role", "idseq-downloads-test",
         "--task-name", BulkDownload::ECS_TASK_NAME,
         "--ecr-image", "idseq-s3-tar-writer:v1.0",
         "--fargate-cpu", "4096",
         "--fargate-memory", "8192",
-        "--cluster", "idseq-fargate-tasks-prod",
-        "--staging-s3-bucket", "aegea-ecs-execute-prod",
-      ]
-
-      expect(@bulk_download.aegea_ecs_submit_command(executable_file_path: mock_executable_file_path)).to eq(task_command)
-    end
-
-    it "outputs correct command in staging" do
-      allow(Rails).to receive(:env).and_return("staging")
-      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-staging"))
-
-      task_command = [
-        "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
-        "--task-role", "idseq-downloads-staging",
-        "--task-name", BulkDownload::ECS_TASK_NAME,
-        "--ecr-image", "idseq-s3-tar-writer:latest",
-        "--fargate-cpu", "4096",
-        "--fargate-memory", "8192",
-        "--cluster", "idseq-fargate-tasks-staging",
-        "--staging-s3-bucket", "aegea-ecs-execute-staging",
+        "--cluster", "idseq-fargate-tasks-test",
+        "--staging-s3-bucket", "aegea-ecs-execute-test",
       ]
 
       expect(@bulk_download.aegea_ecs_submit_command(executable_file_path: mock_executable_file_path)).to eq(task_command)

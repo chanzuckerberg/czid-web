@@ -142,7 +142,7 @@ class BulkDownload < ApplicationRecord
     executable_file_path: nil,
     task_role: "idseq-downloads-#{Rails.env}",
     ecs_cluster: "idseq-fargate-tasks-#{Rails.env}",
-    executable_s3_bucket: "aegea-ecs-execute-#{Rails.env}",
+    executable_s3_bucket: S3_AEGEA_ECS_EXECUTE_BUCKET,
     ecr_image: "idseq-s3-tar-writer:latest",
     fargate_cpu: "4096",
     fargate_memory: "8192"

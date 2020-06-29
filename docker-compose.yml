@@ -5,6 +5,7 @@
 x-web-variables: &web-variables
   ? SAMPLES_BUCKET_NAME=idseq-samples-development
   ? S3_DATABASE_BUCKET=idseq-database
+  ? S3_AEGEA_ECS_EXECUTE_BUCKET=aegea-ecs-execute-development
   ? ES_ADDRESS=http://elasticsearch:9200
   ? AIRBRAKE_PROJECT_ID
   ? AIRBRAKE_PROJECT_KEY
