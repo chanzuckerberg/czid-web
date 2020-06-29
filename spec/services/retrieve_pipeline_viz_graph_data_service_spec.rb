@@ -2,16 +2,6 @@ require 'rails_helper'
 require 'json'
 
 shared_examples "pipeline viz" do
-  let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
-  let(:fake_sfn_execution_description) do
-    {
-      execution_arn: fake_sfn_arn,
-      input: JSON.dump(OutputPrefix: fake_output_prefix),
-      start_date: Time.zone.now,
-      state_machine_arn: fake_sfn_execution_arn,
-      status: "FAKE_EXECUTION_STATUS",
-    }
-  end
   let(:fake_wdl_version) { "999".freeze }
   let(:fake_dag_version) { "9.999".freeze }
 
@@ -81,18 +71,10 @@ shared_examples "pipeline viz" do
     stub_const('SAMPLES_BUCKET_NAME', fake_bucket_name)
     @mock_aws_clients = {
       s3: Aws::S3::Client.new(stub_responses: true),
-      states: Aws::States::Client.new(stub_responses: true),
     }
     allow(AwsClient).to receive(:[]) { |client|
       @mock_aws_clients[client]
     }
-
-    @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
-    @mock_aws_clients[:states].stub_responses(:list_tags_for_resource,
-                                              tags: [
-                                                { key: "wdl_version", value: fake_wdl_version },
-                                                { key: "dag_version", value: fake_dag_version },
-                                              ])
 
     @mock_aws_clients[:s3].stub_responses(:list_objects_v2, contents: %w[
       unmapped1.fq
@@ -104,8 +86,8 @@ shared_examples "pipeline viz" do
       subsampled_1.fa
       gsnap_filter_1.fa
     ].map do |filename|
-                                                                        { key: File.join(output_dir_s3.split("/", 4)[-1], filename) }
-                                                                      end)
+      { key: File.join(output_dir_s3.split("/", 4)[-1], filename) }
+    end)
 
     allow(Sample).to receive(:get_signed_url).and_return("test url")
   end
@@ -224,9 +206,8 @@ end
 
 RSpec.describe RetrievePipelineVizGraphDataService do
   let(:fake_bucket_name) { "fake-bucket" }
-  let(:fake_output_prefix) { "s3://#{fake_bucket_name}" }
   let(:fake_sfn_name) { "fake_sfn_name" }
-  let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
+  let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}:12345".freeze }
   let(:project) { create(:public_project) }
   let(:sample) { create(:sample, project: project) }
   let(:pr_stages_data) do
@@ -294,12 +275,16 @@ RSpec.describe RetrievePipelineVizGraphDataService do
   end
 
   context "for step function pipeline run" do
+    before do
+      allow_any_instance_of(Sample).to receive(:sample_output_s3_path).and_return(output_dir)
+    end
+
     it_should_behave_like "pipeline viz" do
-      let(:output_dir) { "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}" }
-      let(:output_dir_s3) { output_dir }
-      let(:given_targets_dir) { "#{fake_output_prefix}/results" }
+      let(:output_dir) { "s3://idseq.../prefix" }
+      let(:output_dir_s3) { File.join(output_dir, fake_sfn_name, "wdl-#{fake_wdl_version}", "dag-#{fake_dag_version}") }
+      let(:given_targets_dir) { "#{output_dir}/results" }
       let(:pr) do
-        create(:pipeline_run, sample: sample, pipeline_run_stages_data: pr_stages_data, pipeline_version: fake_dag_version, sfn_execution_arn: fake_sfn_execution_arn)
+        create(:pipeline_run, sample: sample, pipeline_run_stages_data: pr_stages_data, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version, sfn_execution_arn: fake_sfn_execution_arn)
       end
     end
   end

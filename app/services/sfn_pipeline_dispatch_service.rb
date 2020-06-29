@@ -45,7 +45,10 @@ class SfnPipelineDispatchService
 
   def call
     @sfn_tags = retrieve_version_tags
-    @pipeline_run.update(pipeline_version: @sfn_tags[:dag_version])
+    @pipeline_run.update(
+      pipeline_version: @sfn_tags[:dag_version],
+      wdl_version: @sfn_tags[:wdl_version]
+    )
 
     # TODO: remove this call after pipeline visualization is migrated to use WDL (IDSEQ-2677)
     generate_dag_stages_json

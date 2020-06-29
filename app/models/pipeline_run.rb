@@ -822,43 +822,16 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def update_results_path_from_sfn
-    Rails.logger.info("[SFN] [PR=#{id}] Get path from SFN execution (arn=#{sfn_execution_arn})")
-
-    # returning nil in case of error would be more adequate but is currently risky
-    # should reevaluate once conversion to output from sfn state service is completed
-    path = ""
-    return path if sfn_execution_arn.blank?
-
-    begin
-      execution_resp = AwsClient[:states].describe_execution(execution_arn: sfn_execution_arn)
-
-      sfn_resp = AwsClient[:states].list_tags_for_resource(resource_arn: execution_resp.state_machine_arn)
-
-      tags = sfn_resp.tags.reduce({}) do |h, tag|
-        h.update(tag.key => tag.value)
-      end.symbolize_keys
-
-      # currently use a conventioned path
-      # we will drop this approach once we move to an async model
-      path = File.join(
-        JSON.parse(execution_resp.input)["OutputPrefix"],
-        execution_resp.state_machine_arn.split(':')[-1], # state machine name
-        "wdl-#{tags[:wdl_version]}",
-        "dag-#{pipeline_version}"
-      )
-      Rails.logger.info("[SFN] [PR=#{id}] Output path: #{path}")
-
-      update!(sfn_results_path: path)
-    rescue => e
-      LogUtil.log_err_and_airbrake("Error getting results path (sample=#{sample_id}, pipeline_run=#{id}) - SFN state was probably deleted.")
-      LogUtil.log_backtrace(e)
-    end
-    path
-  end
-
   def sfn_results_path
-    self[:sfn_results_path] || update_results_path_from_sfn
+    return "" unless sfn_execution_arn.present? && pipeline_version.present? && wdl_version.present?
+
+    sfn_name = sfn_execution_arn.split(':')[-2]
+    return File.join(
+      sample_output_s3_path,
+      sfn_name,
+      "wdl-#{wdl_version}",
+      "dag-#{pipeline_version}"
+    )
   end
 
   def s3_file_for(output)
@@ -1051,7 +1024,6 @@ class PipelineRun < ApplicationRecord
         sfn_execution_arn: sfn_service_result[:sfn_execution_arn],
         pipeline_version: sfn_service_result[:pipeline_version]
       )
-      update_results_path_from_sfn()
       Rails.logger.info("PipelineRun: id=#{id} sfn_execution_arn=#{sfn_service_result[:sfn_execution_arn]}")
     rescue => e
       LogUtil.log_err_and_airbrake("Error starting SFN pipeline: #{e}")

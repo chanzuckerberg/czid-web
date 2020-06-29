@@ -1,19 +1,9 @@
 require 'rails_helper'
 
 describe BulkDownload, type: :model do
-  let(:fake_output_prefix) { "s3://fake-output-prefix" }
   let(:fake_sfn_name) { "fake_sfn_name" }
-  let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
-  let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
-  let(:fake_sfn_execution_description) do
-    {
-      execution_arn: fake_sfn_arn,
-      input: JSON.dump(OutputPrefix: fake_output_prefix),
-      start_date: Time.zone.now,
-      state_machine_arn: fake_sfn_execution_arn,
-      status: "FAKE_EXECUTION_STATUS",
-    }
-  end
+  # name of the SFN is the second to last element
+  let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}:12345".freeze }
   let(:fake_wdl_version) { "999".freeze }
   let(:fake_dag_version) { "9.999".freeze }
 
@@ -97,6 +87,7 @@ describe BulkDownload, type: :model do
                                       finalized: 1,
                                       job_status: PipelineRun::STATUS_CHECKED,
                                       pipeline_version: fake_dag_version,
+                                      wdl_version: fake_wdl_version,
                                       sfn_execution_arn: fake_sfn_execution_arn,
                                     },])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
@@ -104,26 +95,12 @@ describe BulkDownload, type: :model do
                                       finalized: 1,
                                       job_status: PipelineRun::STATUS_CHECKED,
                                       pipeline_version: fake_dag_version,
+                                      wdl_version: fake_wdl_version,
                                       sfn_execution_arn: fake_sfn_execution_arn,
                                     },])
 
       stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net",
                                           "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
-
-      @mock_aws_clients = {
-        s3: Aws::S3::Client.new(stub_responses: true),
-        states: Aws::States::Client.new(stub_responses: true),
-      }
-      allow(AwsClient).to receive(:[]) { |client|
-        @mock_aws_clients[client]
-      }
-
-      @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
-      @mock_aws_clients[:states].stub_responses(:list_tags_for_resource,
-                                                tags: [
-                                                  { key: "wdl_version", value: fake_wdl_version },
-                                                  { key: "dag_version", value: fake_dag_version },
-                                                ])
     end
 
     it "returns the correct task command for original_input_file download type" do
@@ -170,8 +147,8 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/refined_unidentified.fa",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/refined_unidentified.fa",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/refined_unidentified.fa",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/refined_unidentified.fa",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "unmapped.fasta"),
         get_expected_tar_name(@project, @sample_two, "unmapped.fasta"),
@@ -209,8 +186,8 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/refined_taxid_annot.fasta",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/refined_taxid_annot.fasta",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/refined_taxid_annot.fasta",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/refined_taxid_annot.fasta",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "reads_nh.fasta"),
         get_expected_tar_name(@project, @sample_two, "reads_nh.fasta"),
@@ -248,10 +225,10 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_one, "reads_nh_R2.fastq"),
@@ -291,10 +268,10 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R2.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R2.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R1.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R2.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R1.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R2.fastq",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "betacoronavirus_reads_R1.fastq"),
         get_expected_tar_name(@project, @sample_one, "betacoronavirus_reads_R2.fastq"),
@@ -329,8 +306,8 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/contigs.fasta",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/contigs.fasta",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/contigs.fasta",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/contigs.fasta",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "contigs_nh.fasta"),
         get_expected_tar_name(@project, @sample_two, "contigs_nh.fasta"),
@@ -359,8 +336,8 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/reads_per_gene.star.tab",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/reads_per_gene.star.tab",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/reads_per_gene.star.tab",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/reads_per_gene.star.tab",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "reads_per_gene.star.tab"),
         get_expected_tar_name(@project, @sample_two, "reads_per_gene.star.tab"),
@@ -399,10 +376,10 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_one, "reads_nh_R2.fastq"),
@@ -426,8 +403,8 @@ describe BulkDownload, type: :model do
     it "returns the correct task command regardless of the ordering of pipeline run ids" do
       # Here, sample_one.id < sample_two.id, but sample_one.first_pipeline_run.id > sample_two.first_pipeline_run.id
       # This simulates a situation where subsequent pipeline runs are run "out of order".
-      create(:pipeline_run, sample: @sample_two, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, sfn_execution_arn: fake_sfn_execution_arn)
-      create(:pipeline_run, sample: @sample_one, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, sfn_execution_arn: fake_sfn_execution_arn)
+      create(:pipeline_run, sample: @sample_two, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version, sfn_execution_arn: fake_sfn_execution_arn)
+      create(:pipeline_run, sample: @sample_one, finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version, sfn_execution_arn: fake_sfn_execution_arn)
 
       @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::READS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,
@@ -447,10 +424,10 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_one, "reads_nh_R2.fastq"),
@@ -489,10 +466,10 @@ describe BulkDownload, type: :model do
         "python",
         "s3_tar_writer.py",
         "--src-urls",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
-        "#{fake_output_prefix}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
+        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R1.fastq",
+        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/nonhost_R2.fastq",
         "--tar-names",
         get_expected_tar_name(@project, @sample_one, "reads_nh_R1.fastq"),
         get_expected_tar_name(@project, @sample_one, "reads_nh_R2.fastq"),
@@ -644,9 +621,9 @@ describe BulkDownload, type: :model do
       @project = create(:project, users: [@joe], name: "Test Project")
       @alignment_config = create(:alignment_config, lineage_version: 3)
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, alignment_config_id: @alignment_config.id }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version, alignment_config_id: @alignment_config.id }])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, alignment_config_id: @alignment_config.id }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version, alignment_config_id: @alignment_config.id }])
       unless example.metadata[:skip_s3_client_setup]
         allow(S3_CLIENT).to receive(:head_object).and_return(
           instance_double(Aws::S3::Types::HeadObjectOutput, content_length: mock_file_size)
@@ -991,7 +968,7 @@ describe BulkDownload, type: :model do
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version }])
     end
 
     it "correctly returns the execution type" do
@@ -1038,7 +1015,7 @@ describe BulkDownload, type: :model do
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version }])
     end
 
     it "properly kicks off resque task" do
@@ -1061,7 +1038,7 @@ describe BulkDownload, type: :model do
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version }])
     end
 
     it "properly kicks off ecs task for download with ecs execution type" do
@@ -1097,7 +1074,7 @@ describe BulkDownload, type: :model do
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version }])
     end
 
     it "returns the download type display name in basic case" do
@@ -1172,7 +1149,7 @@ describe BulkDownload, type: :model do
       @joe = create(:joe)
       @project = create(:project, users: [@joe], name: "Test Project")
       @sample_one = create(:sample, project: @project, name: "Test Sample One",
-                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version }])
+                                    pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: fake_dag_version, wdl_version: fake_wdl_version }])
     end
 
     let(:bulk_download) do

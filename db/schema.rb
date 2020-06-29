@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_529_171_232) do
-  create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+ActiveRecord::Schema.define(version: 20_200_629_022_326) do
+  create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
     t.text "s3_nt_db_path"
@@ -28,11 +28,11 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.string "s3_taxon_blacklist_path", default: "s3://idseq-database/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
   end
 
-  create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "amr_counts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "gene"
     t.string "allele"
-    t.float "coverage", limit: 24
-    t.float "depth", limit: 24
+    t.float "coverage"
+    t.float "depth"
     t.bigint "pipeline_run_id"
     t.string "drug_family"
     t.datetime "created_at", null: false
@@ -40,18 +40,18 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.string "annotation_gene"
     t.string "genbank_accession"
     t.integer "total_reads"
-    t.float "rpm", limit: 24
-    t.float "dpm", limit: 24
+    t.float "rpm"
+    t.float "dpm"
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
   end
 
-  create_table "app_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "app_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "key"
     t.text "value"
     t.index ["key"], name: "index_app_configs_on_key", unique: true
   end
 
-  create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "archived_backgrounds", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "archive_of"
     t.text "data"
     t.datetime "created_at", null: false
@@ -59,7 +59,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.string "s3_backup_path"
   end
 
-  create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "backgrounds", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -71,21 +71,21 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["name"], name: "index_backgrounds_on_name", unique: true
   end
 
-  create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "backgrounds_pipeline_runs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "background_id"
     t.bigint "pipeline_run_id"
     t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
     t.index ["pipeline_run_id"], name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
   end
 
-  create_table "backgrounds_samples", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "backgrounds_samples", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "background_id", null: false
     t.bigint "sample_id", null: false
     t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
-  create_table "bulk_downloads", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "bulk_downloads", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.text "params_json", comment: "JSON of the params for this bulk download"
     t.string "download_type", null: false, comment: "The type of bulk download"
     t.string "status", null: false, comment: "The current status of the download, e.g. waiting, running, error, success"
@@ -94,28 +94,28 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "access_token"
-    t.float "progress", limit: 24
+    t.float "progress"
     t.string "ecs_task_arn", comment: "The ecs task arn for this bulk download if applicable"
     t.bigint "output_file_size", comment: "The file size of the generated output file. Can be nil while the file is being generated."
-    t.text "description", comment: "An optional description. May be nil."
+    t.text "description"
     t.index ["user_id"], name: "index_bulk_downloads_on_user_id"
   end
 
-  create_table "bulk_downloads_pipeline_runs", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "bulk_downloads_pipeline_runs", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false
     t.bigint "bulk_download_id", null: false
     t.index ["bulk_download_id"], name: "index_bulk_downloads_pipeline_runs_on_bulk_download_id"
     t.index ["pipeline_run_id"], name: "index_bulk_downloads_pipeline_runs_on_pipeline_run_id"
   end
 
-  create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "contigs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.text "sequence", limit: 4_294_967_295
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "lineage_json", limit: 16_777_215
+    t.text "lineage_json"
     t.integer "species_taxid_nt"
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
@@ -128,7 +128,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["pipeline_run_id", "species_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_nt"
   end
 
-  create_table "ercc_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "ercc_counts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.integer "count"
@@ -137,7 +137,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["pipeline_run_id", "name"], name: "index_ercc_counts_on_pipeline_run_id_and_name", unique: true
   end
 
-  create_table "favorite_projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "favorite_projects", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "project_id"
     t.bigint "user_id"
     t.datetime "created_at", null: false
@@ -146,10 +146,10 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["user_id"], name: "index_favorite_projects_on_user_id"
   end
 
-  create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "host_genomes", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name", null: false, comment: "Friendly name of host genome. May be common name or scientific name of species. Must be unique and start with a capital letter."
-    t.string "s3_star_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
-    t.string "s3_bowtie2_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
+    t.string "s3_star_index_path", default: "s3:///host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
+    t.string "s3_bowtie2_index_path", default: "s3:///host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -161,41 +161,41 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["user_id"], name: "index_host_genomes_on_user_id"
   end
 
-  create_table "host_genomes_metadata_fields", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "host_genomes_metadata_fields", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "host_genome_id", null: false
     t.bigint "metadata_field_id", null: false
     t.index ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields", unique: true
     t.index ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes", unique: true
   end
 
-  create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "input_files", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.text "presigned_url"
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type"
+    t.string "source_type", null: false
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 
-  create_table "insert_size_metric_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "insert_size_metric_sets", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id", null: false
     t.integer "median", null: false
     t.integer "mode", null: false
     t.integer "median_absolute_deviation", null: false
     t.integer "min", null: false
     t.integer "max", null: false
-    t.float "mean", limit: 24, null: false
-    t.float "standard_deviation", limit: 24, null: false
+    t.float "mean", null: false
+    t.float "standard_deviation", null: false
     t.integer "read_pairs", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id"], name: "index_insert_size_metric_sets_on_pipeline_run_id"
   end
 
-  create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "job_stats", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "task"
     t.integer "reads_after"
     t.datetime "created_at", null: false
@@ -205,7 +205,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["task"], name: "index_job_stats_on_task"
   end
 
-  create_table "locations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "locations", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name", default: "", null: false, comment: "Full display name, such as a complete address"
     t.string "geo_level", limit: 20, default: "", null: false, comment: "Level of specificity (country, state, subdivision, or city)"
     t.string "country_name", limit: 100, default: "", null: false, comment: "Country (or equivalent) of this location if available"
@@ -231,8 +231,8 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["osm_type", "osm_id"], name: "index_locations_on_osm_type_and_osm_id"
   end
 
-  create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false, collation: "latin1_swedish_ci"
+  create_table "metadata", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.string "key", null: false
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
@@ -246,7 +246,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
   end
 
-  create_table "metadata_fields", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "metadata_fields", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "display_name"
     t.string "description"
@@ -264,14 +264,14 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["group"], name: "index_metadata_fields_on_group"
   end
 
-  create_table "metadata_fields_projects", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "metadata_fields_projects", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "project_id", null: false
     t.bigint "metadata_field_id", null: false
     t.index ["metadata_field_id"], name: "metadata_fields_projects_metadata_field_id_fk"
     t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
   end
 
-  create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "output_states", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "output"
     t.string "state"
     t.bigint "pipeline_run_id"
@@ -280,7 +280,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["pipeline_run_id", "output"], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
   end
 
-  create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "phylo_trees", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "taxid"
     t.integer "tax_level"
     t.string "tax_name"
@@ -309,14 +309,14 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
   end
 
-  create_table "phylo_trees_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "phylo_trees_pipeline_runs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "phylo_tree_id"
     t.bigint "pipeline_run_id"
     t.index ["phylo_tree_id", "pipeline_run_id"], name: "index_pt_pr_id", unique: true
     t.index ["pipeline_run_id"], name: "phylo_trees_pipeline_runs_pipeline_run_id_fk"
   end
 
-  create_table "pipeline_run_stages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "pipeline_run_stages", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "pipeline_run_id"
     t.integer "step_number"
     t.integer "job_type"
@@ -328,7 +328,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.string "command_status"
     t.text "job_description"
     t.string "job_log_id"
-    t.float "job_progress_pct", limit: 24
+    t.float "job_progress_pct"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "job_command_func"
@@ -341,7 +341,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["pipeline_run_id", "step_number"], name: "index_pipeline_run_stages_on_pipeline_run_id_and_step_number"
   end
 
-  create_table "pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "pipeline_runs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -353,7 +353,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.integer "subsample"
     t.string "pipeline_branch"
     t.integer "total_ercc_reads"
-    t.float "fraction_subsampled", limit: 24
+    t.float "fraction_subsampled"
     t.string "pipeline_version"
     t.string "pipeline_commit"
     t.bigint "truncated"
@@ -365,19 +365,21 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
-    t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure the pipeline run was performed on."
+    t.string "pipeline_execution_strategy", default: "step_function", comment: "A soft enum (string) describing which pipeline infrastructure the pipeline run was performed on."
     t.string "sfn_execution_arn", comment: "step function execution ARN for pipeline runs using pipeline_execution_strategy=step_function"
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, pipeline processing will filter for a whitelist of taxons."
+    t.string "sfn_results_path", comment: "The path to the results folder in s3."
+    t.string "wdl_version"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 
-  create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "projects", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1, default: 0
+    t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.text "description"
@@ -386,14 +388,14 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
-  create_table "projects_users", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "projects_users", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "project_id", null: false
     t.bigint "user_id", null: false
     t.index ["project_id"], name: "index_projects_users_on_project_id"
     t.index ["user_id"], name: "index_projects_users_on_user_id"
   end
 
-  create_table "sample_types", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "sample_types", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name", null: false, comment: "Canonical name of the sample type. This should be immutable after creation. It is used as a key to join with MetadataField sample_type values."
     t.string "group", null: false, comment: "Mutually exclusive grouping of names. Example: \"Organs\"."
     t.boolean "insect_only", default: false, null: false, comment: "Whether a sample type should only be for insects."
@@ -403,7 +405,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["name"], name: "index_sample_types_on_name", unique: true
   end
 
-  create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "samples", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -427,21 +429,21 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.string "upload_error"
     t.string "basespace_access_token"
     t.boolean "do_not_process", default: false, null: false, comment: "If true, sample will skip pipeline processing."
-    t.string "pipeline_execution_strategy", default: "directed_acyclic_graph", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
+    t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
 
-  create_table "samples_visualizations", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "samples_visualizations", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "visualization_id", null: false
     t.bigint "sample_id", null: false
     t.index ["sample_id"], name: "index_samples_visualizations_on_sample_id"
     t.index ["visualization_id"], name: "index_samples_visualizations_on_visualization_id"
   end
 
-  create_table "shortened_urls", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "shortened_urls", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "owner_id"
     t.string "owner_type", limit: 20
     t.text "url", null: false
@@ -454,10 +456,10 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["category"], name: "index_shortened_urls_on_category"
     t.index ["owner_id", "owner_type"], name: "index_shortened_urls_on_owner_id_and_owner_type"
     t.index ["unique_key"], name: "index_shortened_urls_on_unique_key", unique: true
-    t.index ["url"], name: "index_shortened_urls_on_url", length: { url: 254 }
+    t.index ["url"], name: "index_shortened_urls_on_url", length: 254
   end
 
-  create_table "taxon_byteranges", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_byteranges", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "taxid"
     t.bigint "first_byte"
     t.bigint "last_byte"
@@ -469,7 +471,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["taxid"], name: "index_taxon_byteranges_on_taxid"
   end
 
-  create_table "taxon_confirmations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_confirmations", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "taxid"
     t.integer "sample_id"
     t.integer "user_id"
@@ -480,7 +482,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["sample_id", "strength", "taxid"], name: "index_taxon_confirmations_on_sample_id_and_strength_and_taxid"
   end
 
-  create_table "taxon_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_counts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "tax_id"
     t.integer "tax_level"
     t.integer "count"
@@ -488,9 +490,9 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.datetime "updated_at", null: false
     t.string "name"
     t.string "count_type"
-    t.float "percent_identity", limit: 24
-    t.float "alignment_length", limit: 24
-    t.float "e_value", limit: 24
+    t.float "percent_identity"
+    t.float "alignment_length"
+    t.float "e_value"
     t.integer "genus_taxid", default: -200, null: false
     t.integer "superkingdom_taxid", default: -700, null: false
     t.bigint "pipeline_run_id"
@@ -501,18 +503,18 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["tax_id"], name: "index_taxon_counts_on_tax_id"
   end
 
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_descriptions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary", limit: 16_777_215
-    t.text "description", limit: 16_777_215
+    t.text "summary"
+    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
   end
 
-  create_table "taxon_lineages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_lineages", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "taxid", null: false
     t.integer "superkingdom_taxid", default: -700, null: false
     t.integer "phylum_taxid", default: -600, null: false
@@ -537,8 +539,8 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.string "family_common_name", default: "", null: false
     t.string "genus_common_name", default: "", null: false
     t.string "species_common_name", default: "", null: false
-    t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
-    t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
+    t.datetime "started_at", default: "1999-12-31 16:00:00", null: false
+    t.datetime "ended_at", default: "2999-12-31 16:00:00", null: false
     t.integer "kingdom_taxid", default: -650, null: false
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
@@ -561,7 +563,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
   end
 
-  create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_scoring_models", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.text "model_json"
     t.datetime "created_at", null: false
@@ -570,13 +572,13 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["name"], name: "index_taxon_scoring_models_on_name", unique: true
   end
 
-  create_table "taxon_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_summaries", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "background_id"
     t.integer "tax_id"
     t.string "count_type"
     t.integer "tax_level"
-    t.float "mean", limit: 24
-    t.float "stdev", limit: 24
+    t.float "mean"
+    t.float "stdev"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "rpm_list"
@@ -586,9 +588,9 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["background_id", "tax_id", "count_type", "tax_level"], name: "index_bg_tax_ct_level", unique: true
   end
 
-  create_table "ui_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.float "min_nt_z", limit: 24
-    t.float "min_nr_z", limit: 24
+  create_table "ui_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.float "min_nt_z"
+    t.float "min_nr_z"
     t.integer "min_nt_rpm"
     t.integer "min_nr_rpm"
     t.integer "top_n"
@@ -596,7 +598,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "user_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "user_settings", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "user_id"
     t.string "key", comment: "The name of the user setting, e.g. receives_bulk_download_success_emails"
     t.string "serialized_value", comment: "The serialized value of the user setting. The schema of this value (e.g. boolean, number) is determined by the hard-coded data type associated with the key."
@@ -604,8 +606,8 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["user_id"], name: "index_user_settings_on_user_id"
   end
 
-  create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email"
+  create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.string "email", default: "", null: false
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -627,7 +629,7 @@ ActiveRecord::Schema.define(version: 20_200_529_171_232) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
-  create_table "visualizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "visualizations", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.bigint "user_id"
     t.string "visualization_type"
     t.text "data"
