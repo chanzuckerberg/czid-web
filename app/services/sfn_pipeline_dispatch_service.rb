@@ -70,15 +70,17 @@ class SfnPipelineDispatchService
   end
 
   def retrieve_version_tags
-    resp = SFN_CLIENT.list_tags_for_resource(resource_arn: @sfn_arn)
-    tags = resp.tags.reduce({}) do |h, tag|
-      h.update(tag.key => tag.value)
-    end.symbolize_keys
+    cache_key = "#{self.class.name}::#{@sfn_arn}::tags"
+    Rails.cache.fetch(cache_key, expires_in: 1.minute) do
+      resp = SFN_CLIENT.list_tags_for_resource(resource_arn: @sfn_arn)
+      tags = resp.tags.reduce({}) do |h, tag|
+        h.update(tag.key => tag.value)
+      end.symbolize_keys
 
-    missing_tags = [:wdl_version, :dag_version].select { |tag_name| tags[tag_name].blank? }
-    raise SfnVersionTagsMissingError.new(@sfn_arn, missing_tags) if missing_tags.present?
-
-    return tags
+      missing_tags = [:wdl_version, :dag_version].select { |tag_name| tags[tag_name].blank? }
+      raise SfnVersionTagsMissingError.new(@sfn_arn, missing_tags) if missing_tags.present?
+      tags
+    end
   end
 
   def stage_deployment_name
