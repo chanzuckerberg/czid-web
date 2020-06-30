@@ -49,9 +49,9 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.6.0)
       public_suffix (>= 2.0.2, < 4.0)
-    airbrake (9.5.0)
-      airbrake-ruby (~> 4.8)
-    airbrake-ruby (4.8.0)
+    airbrake (10.0.5)
+      airbrake-ruby (~> 4.13)
+    airbrake-ruby (4.15.0)
       rbtree3 (~> 0.5)
     analytics-ruby (2.0.13)
     arel (9.0.0)
@@ -1010,7 +1010,7 @@ GEM
     rb-fsevent (0.10.3)
     rb-inotify (0.10.0)
       ffi (~> 1.0)
-    rbtree3 (0.5.0)
+    rbtree3 (0.6.0)
     redis (4.1.0)
     redis-actionpack (5.0.2)
       actionpack (>= 4.0, < 6)
@@ -1163,7 +1163,7 @@ DEPENDENCIES
   active_record_query_trace
   activerecord-import
   activesupport
-  airbrake (~> 9.5)
+  airbrake (~> 10.0.5)
   analytics-ruby (~> 2.0.0)
   auth0
   aws-sdk
