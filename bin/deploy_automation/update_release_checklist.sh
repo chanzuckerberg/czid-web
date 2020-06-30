@@ -21,8 +21,8 @@ main() {
   declare new_checklist_body="${checklist_body}";
 
   # Check for release fixes
-  # Any commit that is in staging and has never been in master is a release fix
-  source_commit=$(_get_latest_commit "origin/$MASTER_BRANCH")
+  # Check for any commits created after current version initial tag
+  source_commit=$(_get_latest_commit $(_get_current_version_initial_tag staging))
   target_commit=$(_get_latest_commit "origin/$STAGING_BRANCH")
   _trace "Checking release fixes (commits $source_commit..$target_commit)"
   new_checklist_body=$(__add_commits_to_checklist_body "$source_commit" "$target_commit" "$new_checklist_body")
