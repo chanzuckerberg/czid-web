@@ -193,4 +193,34 @@ RSpec.describe PipelineRunsHelper, type: :helper do
       end
     end
   end
+
+  describe "#check_for_user_error" do
+    context "when run is sfn" do
+      before do
+        @joe = create(:joe)
+        @project = create(:project, users: [@joe])
+        @sample = create(:sample, project: @project)
+        @pipeline_run = create(:pipeline_run, sample: @sample, finalized: 1, job_status: PipelineRun::STATUS_RUNNING, sfn_execution_arn: "fake_execution_arn")
+        @pipeline_run_stage = create(:pipeline_run_stage, pipeline_run: @pipeline_run, name: "stage 1", job_status: PipelineRunStage::STATUS_FAILED)
+      end
+
+      subject { helper.check_for_user_error(@pipeline_run_stage) }
+
+      context "and it is user error" do
+        it "returns error with description" do
+          allow(@pipeline_run).to receive(:sfn_error).and_return("InvalidInputFileError")
+          # At this moment, sfn_error is an costly call (can call AWS api twice)
+          @pipeline_run.should_receive(:sfn_error).once
+          is_expected.to eq(["InvalidInputFileError", "There was an error parsing one of the input files."])
+        end
+      end
+
+      context "and it is an unknown error" do
+        it "returns nil structure" do
+          allow(@pipeline_run).to receive(:sfn_error).and_return("SomeOtherError")
+          is_expected.to eq([nil, nil])
+        end
+      end
+    end
+  end
 end

@@ -312,7 +312,7 @@ module PipelineRunsHelper
 
     if pr.step_function?
       sfn_error = pr.sfn_error
-      return SFN_INPUT_ERRORS.include? sfn_error ? [pr.sfn_error, SFN_INPUT_ERRORS[pr.sfn_error]] : [nil, nil]
+      return SFN_INPUT_ERRORS.include?(sfn_error) ? [sfn_error, SFN_INPUT_ERRORS[sfn_error]] : [nil, nil]
     end
 
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
