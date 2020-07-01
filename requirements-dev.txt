@@ -1,2 +1,3 @@
 flake8==3.8.1
 black==19.10.b0
+-r requirements.txt
