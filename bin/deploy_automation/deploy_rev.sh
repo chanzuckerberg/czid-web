@@ -41,14 +41,14 @@ __check_commit_state() {
   declare sha="$1"
   declare branch="$2"
 
-  declare response_json; response_json=$(
-    http --ignore-stdin --timeout 30 --check-status -b \
-      GET "$GITHUB_REPOSITORY_API/commits/$sha/status" "Authorization:token $GITHUB_TOKEN"
-  )
+  response_json=$(http --ignore-stdin --timeout 30 --check-status -b GET \
+                       "$GITHUB_REPOSITORY_API/commits/$sha/check-suites" \
+                       Authorization:"token $GITHUB_TOKEN" \
+                       Accept:application/vnd.github.antiope-preview+json)
 
-  declare state; state="$(jq -er .state <<< "$response_json")"
-  if [ "$state" != "success" ]; then
-    _trace "Invalid state '$state' for commit ${sha} in branch ${branch}. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
+  # Dependabot checks take a long time to complete; skip them when checking commit status
+  if jq -re '.check_suites[] | select(.app.slug != "dependabot") | select(.conclusion != "success")' <<< "$response_json"; then
+    _trace "Status checks failed for commit ${sha} in branch ${branch}. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
     return 1
   fi
 }
