@@ -36,7 +36,7 @@ const BackgroundModelFilter = ({
         currentUser.allowedFeatures.includes("mass_normalized") ? (
           <SubtextDropdown
             options={backgroundOptions}
-            value={value}
+            initialSelectedValue={value}
             disabled={disabled}
             label="Background"
             onChange={onChange}
