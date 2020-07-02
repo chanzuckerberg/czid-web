@@ -451,7 +451,11 @@ module HeatmapHelper
         z_min = ReportHelper::ZSCORE_MIN
         z_default = ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
         row["rpm"] = pr.rpm(row["r"])
-        row["zscore"] = row["stdev"].nil? ? z_default : ((row["rpm"] - row["mean"]) / row["stdev"])
+        row["zscore"] = if row["mean_mass_normalized"]
+                          (row["r"] / pr.total_ercc_reads) - row["mean_mass_normalized"] / row["stdev_mass_normalized"]
+                        else
+                          row["stdev"].nil? ? z_default : ((row["rpm"] - row["mean"]) / row["stdev"])
+                        end
         row["zscore"] = z_max if row["zscore"] > z_max && row["zscore"] != z_default
         row["zscore"] = z_min if row["zscore"] < z_min
         result_hash[pipeline_run_id]["taxon_counts"] << row
@@ -464,26 +468,28 @@ module HeatmapHelper
   def self.samples_taxons_counts_query(background_id, pr_id_to_sample_id, taxon_ids, parent_ids_clause)
     TaxonCount.connection.select_all("
       SELECT
-        taxon_counts.pipeline_run_id     AS  pipeline_run_id,
-        taxon_counts.tax_id              AS  tax_id,
-        taxon_counts.count_type          AS  count_type,
-        taxon_counts.tax_level           AS  tax_level,
-        taxon_counts.genus_taxid         AS  genus_taxid,
-        taxon_counts.family_taxid        AS  family_taxid,
-        taxon_counts.name                AS  name,
-        taxon_lineages.genus_name        AS  genus_name,
-        taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
-        taxon_counts.is_phage            AS  is_phage,
-        taxon_counts.count               AS  r,
-        taxon_summaries.stdev            AS stdev,
-        taxon_summaries.mean             AS mean,
-        taxon_counts.percent_identity    AS  percentidentity,
-        taxon_counts.alignment_length    AS  alignmentlength,
+        taxon_counts.pipeline_run_id          AS  pipeline_run_id,
+        taxon_counts.tax_id                   AS  tax_id,
+        taxon_counts.count_type               AS  count_type,
+        taxon_counts.tax_level                AS  tax_level,
+        taxon_counts.genus_taxid              AS  genus_taxid,
+        taxon_counts.family_taxid             AS  family_taxid,
+        taxon_counts.name                     AS  name,
+        taxon_lineages.genus_name             AS  genus_name,
+        taxon_counts.superkingdom_taxid       AS  superkingdom_taxid,
+        taxon_counts.is_phage                 AS  is_phage,
+        taxon_counts.count                    AS  r,
+        taxon_summaries.stdev                 AS  stdev,
+        taxon_summaries.mean                  AS  mean,
+        taxon_summaries.stdev_mass_normalized AS  stdev_mass_normalized,
+        taxon_summaries.mean_mass_normalized  AS  mean_mass_normalized,
+        taxon_counts.percent_identity         AS  percentidentity,
+        taxon_counts.alignment_length         AS  alignmentlength,
         IF(
           taxon_counts.e_value IS NOT NULL,
           (0.0 - taxon_counts.e_value),
           #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                AS  neglogevalue
+        )                                     AS  neglogevalue
       FROM taxon_counts
       JOIN taxon_lineages ON taxon_counts.tax_id = taxon_lineages.taxid
       LEFT OUTER JOIN taxon_summaries ON
@@ -504,13 +510,15 @@ module HeatmapHelper
     # Only fetch metrics that are affected by the selected background.
     TaxonCount.connection.select_all("
       SELECT
-        taxon_counts.pipeline_run_id     AS  pipeline_run_id,
-        taxon_counts.tax_id              AS  tax_id,
-        taxon_counts.count_type          AS  count_type,
-        taxon_counts.tax_level           AS  tax_level,
-        taxon_counts.count               AS  r,
-        taxon_summaries.stdev            AS stdev,
-        taxon_summaries.mean             AS mean
+        taxon_counts.pipeline_run_id          AS  pipeline_run_id,
+        taxon_counts.tax_id                   AS  tax_id,
+        taxon_counts.count_type               AS  count_type,
+        taxon_counts.tax_level                AS  tax_level,
+        taxon_counts.count                    AS  r,
+        taxon_summaries.stdev_mass_normalized AS  stdev_mass_normalized,
+        taxon_summaries.mean_mass_normalized  AS  mean_mass_normalized,
+        taxon_summaries.stdev                 AS  stdev,
+        taxon_summaries.mean                  AS  mean
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id.to_i}   = taxon_summaries.background_id   AND

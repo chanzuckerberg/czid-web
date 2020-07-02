@@ -215,15 +215,6 @@ class VisualizationsController < ApplicationController
     render json: @sample_taxons_dict
   end
 
-  def taxa_info
-    @sample_taxons_dict = HeatmapHelper.taxa_dict(
-      params,
-      samples_for_heatmap,
-      background_for_heatmap
-    )
-    render json: @sample_taxons_dict
-  end
-
   private
 
   def visualization_params
