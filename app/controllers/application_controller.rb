@@ -62,7 +62,7 @@ class ApplicationController < ActionController::Base
   end
 
   def check_for_maintenance
-    if get_app_config(AppConfig::DISABLE_SITE_FOR_MAINTENANCE) == "1"
+    if disabled_for_maintenance?
       redirect_to maintenance_path
     end
   end
@@ -76,6 +76,10 @@ class ApplicationController < ActionController::Base
 
   def disable_header_navigation
     @disable_header_navigation = true
+  end
+
+  def disabled_for_maintenance?
+    ENV["DISABLE_SITE_FOR_MAINTENANCE"] == "1" || get_app_config(AppConfig::DISABLE_SITE_FOR_MAINTENANCE) == "1"
   end
 
   protected

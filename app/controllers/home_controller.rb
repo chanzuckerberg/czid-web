@@ -123,10 +123,10 @@ class HomeController < ApplicationController
   end
 
   def maintenance
-    if get_app_config(AppConfig::DISABLE_SITE_FOR_MAINTENANCE) != "1"
-      redirect_to root_path
-    else
+    if disabled_for_maintenance?
       @show_blank_header = true
+    else
+      redirect_to root_path
     end
   end
 
