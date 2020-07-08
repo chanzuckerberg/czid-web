@@ -255,7 +255,7 @@ class SamplesController < ApplicationController
     sample_ids = params[:sampleIds]
     samples = Sample.find(sample_ids)
 
-    samples_have_ercc_reads = samples.all? { |sample| sample.first_pipeline_run.total_ercc_reads > 0 }
+    samples_have_ercc_reads = samples.all? { |sample| sample.first_pipeline_run && sample.first_pipeline_run.total_ercc_reads > 0 }
 
     render json: {
       samplesHaveERCCReads: samples_have_ercc_reads,
