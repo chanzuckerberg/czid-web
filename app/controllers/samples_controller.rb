@@ -30,7 +30,7 @@ class SamplesController < ApplicationController
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
-                   :taxa_with_contigs_suggestions, :validate_sample_ids,].freeze
+                   :taxa_with_contigs_suggestions, :validate_sample_ids, :total_ercc_reads,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata].freeze
 
@@ -248,6 +248,18 @@ class SamplesController < ApplicationController
         error: id_validation_info[:error],
       }
     end
+  end
+
+  # POST /samples/total_ercc_reads
+  def total_ercc_reads
+    sample_ids = params[:sampleIds]
+    samples = Sample.find(sample_ids)
+
+    samples_have_ercc_reads = samples.all? { |sample| sample.first_pipeline_run.total_ercc_reads > 0 }
+
+    render json: {
+      samplesHaveERCCReads: samples_have_ercc_reads,
+    }
   end
 
   def dimensions

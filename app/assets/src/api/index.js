@@ -351,6 +351,11 @@ const getTaxaDetails = params =>
     background: params.background,
   });
 
+const getSamplesERCCReads = sampleIds =>
+  postWithCSRF("/samples/total_ercc_reads.json", {
+    sampleIds,
+  });
+
 export {
   bulkImportRemoteSamples,
   createBackground,
@@ -369,6 +374,7 @@ export {
   getProjects,
   getSample,
   getSampleDimensions,
+  getSamplesERCCReads,
   getSampleReportData,
   getSampleReportInfo,
   getSamples,

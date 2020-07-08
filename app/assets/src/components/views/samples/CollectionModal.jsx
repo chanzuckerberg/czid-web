@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { createBackground } from "~/api";
+import { getSamplesERCCReads, createBackground } from "~/api";
 import { withAnalytics } from "~/api/analytics";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
@@ -35,12 +35,20 @@ class CollectionModal extends React.Component {
     };
   }
 
+  componentDidMount() {
+    this.fetchERCCReads();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const prevSamples = prevProps.selectedSampleIds;
+    if (prevSamples !== this.props.selectedSampleIds) {
+      this.fetchERCCReads();
+    }
+  }
+
   openModal = () =>
     this.setState({
       modalOpen: true,
-      appliedMethod: this.props.selectedSamplesHaveERCCs
-        ? "massNormalized"
-        : "standard",
     });
   closeModal = () => this.setState({ modalOpen: false });
 
@@ -112,9 +120,25 @@ class CollectionModal extends React.Component {
     this.setState({ backgroundCreationResponse });
   };
 
+  fetchERCCReads = async () => {
+    const { selectedSampleIds } = this.props;
+    let selectedSamplesHaveERCCs = await getSamplesERCCReads(
+      Array.from(selectedSampleIds)
+    );
+
+    this.setState({
+      selectedSamplesHaveERCCs: selectedSamplesHaveERCCs.samplesHaveERCCReads,
+    });
+  };
+
   renderForm = () => {
-    const { numDescriptionRows, selectedSamplesHaveERCCs } = this.props;
+    const { numDescriptionRows } = this.props;
     const { allowedFeatures = {} } = this.context || {};
+
+    const { selectedSamplesHaveERCCs } = this.state;
+    const appliedMethod = selectedSamplesHaveERCCs
+      ? "massNormalized"
+      : "standard";
 
     const dropdownOptions = BACKGROUND_CORRECTION_METHODS;
     if (selectedSamplesHaveERCCs) {
@@ -159,7 +183,7 @@ class CollectionModal extends React.Component {
               fluid
               className={cs.dropdown}
               options={Object.values(dropdownOptions)}
-              initialSelectedValue={this.state.appliedMethod}
+              initialSelectedValue={appliedMethod}
               onChange={this.handleMethodChange}
             />
           </div>
@@ -264,7 +288,6 @@ CollectionModal.propTypes = {
   fetchedSamples: PropTypes.array,
   selectedSampleIds: PropTypes.instanceOf(Set),
   trigger: PropTypes.node.isRequired,
-  selectedSamplesHaveERCCs: PropTypes.bool,
 };
 
 CollectionModal.contextType = UserContext;
