@@ -75,6 +75,10 @@ const processRawSample = sample => {
         "run_info.result_status_description",
         sample.details
       ).toLowerCase(),
+      tempPipelineWorkflow: get(
+        "db_sample.temp_pipeline_workflow",
+        sample.details
+      ),
     },
     collectionLocation: get("metadata.collection_location", sample.details),
     collectionLocationV2: get(

@@ -31,6 +31,7 @@ import {
 
 import { CONSENSUS_GENOME_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import Tabs from "~/components/ui/controls/Tabs";
 import IssueGroup from "~ui/notifications/IssueGroup";
@@ -59,11 +60,6 @@ const REMOTE_UPLOAD_LABEL = "Upload from S3";
 const BASESPACE_UPLOAD_LABEL = "Upload from Basespace";
 
 const UPLOADSAMPLESTEP_SAMPLE_CHANGED = "UploadSampleStep_sample_changed";
-
-export const WORKFLOWS = {
-  MAIN: "main",
-  CONSENSUS_GENOME: "consensus_genome",
-};
 
 class UploadSampleStep extends React.Component {
   state = {

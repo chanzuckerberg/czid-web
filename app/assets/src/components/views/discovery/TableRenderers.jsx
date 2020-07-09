@@ -1,6 +1,7 @@
 import React from "react";
 
 import cx from "classnames";
+import { get } from "lodash/fp";
 import moment from "moment";
 
 import BasicPopup from "~/components/BasicPopup";
@@ -8,6 +9,7 @@ import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
 import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
 import StatusLabel from "~ui/labels/StatusLabel";
 import { numberWithCommas } from "~/helpers/strings";
+import { WORKFLOWS } from "~/components/utils/workflows";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./table_renderers.scss";
@@ -46,20 +48,18 @@ class TableRenderers extends React.Component {
             trigger={<div className={cs.itemName}>{nameRenderer(item)}</div>}
             content={nameRenderer(item)}
           />
-          {descriptionRenderer &&
-            item &&
-            item.description && (
-              <BasicPopup
-                trigger={
-                  <div className={cs.itemDescription}>
-                    {descriptionRenderer(item)}
-                  </div>
-                }
-                content={descriptionRenderer(item)}
-                wide="very"
-                inverted={false}
-              />
-            )}
+          {descriptionRenderer && item && item.description && (
+            <BasicPopup
+              trigger={
+                <div className={cs.itemDescription}>
+                  {descriptionRenderer(item)}
+                </div>
+              }
+              content={descriptionRenderer(item)}
+              wide="very"
+              inverted={false}
+            />
+          )}
           <div className={cs.itemDetails}>{detailsRenderer(item)}</div>
         </div>
       </div>
@@ -94,6 +94,10 @@ class TableRenderers extends React.Component {
   };
 
   static renderSample = ({ cellData: sample }, full = true) => {
+    const sampleName =
+      get("tempPipelineWorkflow", sample) === WORKFLOWS.CONSENSUS_GENOME
+        ? `[Consensus Genome] ${get("name", sample)}`
+        : get("name", sample);
     return (
       <div className={cs.sample}>
         {full && (
@@ -110,8 +114,8 @@ class TableRenderers extends React.Component {
           {sample ? (
             <div className={cs.sampleNameAndStatus}>
               <BasicPopup
-                trigger={<div className={cs.sampleName}>{sample.name}</div>}
-                content={sample.name}
+                trigger={<div className={cs.sampleName}>{sampleName}</div>}
+                content={sampleName}
               />
               <StatusLabel
                 className={cs.sampleStatus}

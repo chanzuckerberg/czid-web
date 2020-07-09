@@ -5,8 +5,8 @@ import RadioButton from "~ui/controls/RadioButton";
 import IconSample from "~ui/icons/IconSample";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import InfoIconSmall from "~ui/icons/InfoIconSmall";
+import { WORKFLOWS } from "~/components/utils/workflows";
 
-import { WORKFLOWS } from "./UploadSampleStep";
 import cs from "./workflow_selector.scss";
 
 class WorkflowSelector extends React.Component {

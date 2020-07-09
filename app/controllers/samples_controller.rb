@@ -68,6 +68,7 @@ class SamplesController < ApplicationController
     :status,
     :host_genome_id,
     :upload_error,
+    :temp_pipeline_workflow,
   ].freeze
 
   # GET /samples

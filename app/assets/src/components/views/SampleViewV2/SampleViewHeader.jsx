@@ -4,6 +4,7 @@ import { get, map } from "lodash/fp";
 
 import BasicPopup from "~/components/BasicPopup";
 import PropTypes from "~/components/utils/propTypes";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import SampleViewControls from "../SampleView/SampleViewControls";
 import ViewHeader from "~/components/layout/ViewHeader";
 import { UserContext } from "~/components/common/UserContext";
@@ -46,6 +47,12 @@ export default function SampleViewHeader({
     return `${pipelineRunVersionString}${alignmentConfigNameString}`;
   };
 
+  const renderName = sample => {
+    return get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME
+      ? `[Consensus Genome] ${get("name", sample)}`
+      : get("name", sample);
+  };
+
   const onSaveClick = async () => {
     if (view) {
       const params = parseUrlParams();
@@ -53,7 +60,6 @@ export default function SampleViewHeader({
       await saveVisualization(view, params);
     }
   };
-
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>
@@ -98,7 +104,7 @@ export default function SampleViewHeader({
           {project ? project.name : ""}
         </ViewHeader.Pretitle>
         <ViewHeader.Title
-          label={sample && sample.name}
+          label={renderName(sample)}
           id={sample && sample.id}
           options={projectSamples.map(sample => ({
             label: sample.name,
