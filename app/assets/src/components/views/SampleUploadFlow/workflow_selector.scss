@@ -1,0 +1,59 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.workflowSelector {
+  margin-bottom: $space-xxl;
+
+  .header {
+    @include font-header-xl;
+    margin-bottom: $space-default;
+  }
+
+  .workflowOption {
+    align-items: center;
+    border-radius: $border-radius-m;
+    cursor: pointer;
+    display: flex;
+    padding: $space-default $space-xs;
+
+    &:hover {
+      background-color: $gray-off-white;
+    }
+
+    .radioButton {
+      flex-shrink: 0;
+      margin: $space-default $space-l;
+    }
+
+    .iconSample {
+      flex-shrink: 0;
+      height: 35px;
+      margin-right: $space-default;
+      width: 35px;
+    }
+
+    .optionText {
+      .title {
+        @include font-header-s;
+
+        .infoIcon {
+          fill: $gray-dark;
+          height: 15px;
+          margin-left: $space-xxs;
+          margin-top: $space-xxxs;
+          vertical-align: text-top;
+          width: 15px;
+
+          &:hover {
+            fill: $primary;
+          }
+        }
+      }
+
+      .description {
+        @include font-body-s;
+      }
+    }
+  }
+}

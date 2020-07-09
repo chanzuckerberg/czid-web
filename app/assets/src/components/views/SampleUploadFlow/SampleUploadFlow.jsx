@@ -36,6 +36,7 @@ class SampleUploadFlow extends React.Component {
       review: false,
     },
     hostGenomes: [], // set on metadata upload
+    workflows: new Set(),
   };
 
   componentDidMount() {
@@ -53,12 +54,14 @@ class SampleUploadFlow extends React.Component {
     project,
     uploadType,
     sampleNamesToFiles,
+    workflows,
   }) => {
     this.setState({
       samples,
       project,
       uploadType,
       sampleNamesToFiles,
+      workflows,
       currentStep: "uploadMetadata",
       stepsEnabled: set("uploadMetadata", true, this.state.stepsEnabled),
     });
@@ -161,22 +164,21 @@ class SampleUploadFlow extends React.Component {
             onDirty={this.metadataChanged}
           />
         )}
-        {this.state.samples &&
-          this.state.metadata && (
-            <ReviewStep
-              metadata={this.state.metadata}
-              samples={this.state.samples}
-              uploadType={this.state.uploadType}
-              project={this.state.project}
-              sampleNamesToFiles={this.state.sampleNamesToFiles}
-              hostGenomes={this.state.hostGenomes}
-              originalHostGenomes={this.props.hostGenomes}
-              visible={this.state.currentStep === "review"}
-              onUploadStatusChange={this.onUploadStatusChange}
-              onStepSelect={this.handleStepSelect}
-              onUploadComplete={this.onUploadComplete}
-            />
-          )}
+        {this.state.samples && this.state.metadata && (
+          <ReviewStep
+            metadata={this.state.metadata}
+            samples={this.state.samples}
+            uploadType={this.state.uploadType}
+            project={this.state.project}
+            sampleNamesToFiles={this.state.sampleNamesToFiles}
+            hostGenomes={this.state.hostGenomes}
+            originalHostGenomes={this.props.hostGenomes}
+            visible={this.state.currentStep === "review"}
+            onUploadStatusChange={this.onUploadStatusChange}
+            onStepSelect={this.handleStepSelect}
+            onUploadComplete={this.onUploadComplete}
+          />
+        )}
       </div>
     );
   };

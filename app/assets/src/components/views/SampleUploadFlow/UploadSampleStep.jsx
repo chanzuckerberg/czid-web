@@ -29,6 +29,7 @@ import {
   intersection,
 } from "lodash/fp";
 
+import { CONSENSUS_GENOME_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import Tabs from "~/components/ui/controls/Tabs";
@@ -36,12 +37,14 @@ import IssueGroup from "~ui/notifications/IssueGroup";
 import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
+import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 
 import LocalSampleFileUpload from "./LocalSampleFileUpload";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
 import BasespaceSampleImport from "./BasespaceSampleImport";
+import WorkflowSelector from "./WorkflowSelector";
 import cs from "./sample_upload_flow.scss";
 import SampleUploadTable from "./SampleUploadTable";
 import { openBasespaceOAuthPopup } from "./utils";
@@ -56,6 +59,11 @@ const REMOTE_UPLOAD_LABEL = "Upload from S3";
 const BASESPACE_UPLOAD_LABEL = "Upload from Basespace";
 
 const UPLOADSAMPLESTEP_SAMPLE_CHANGED = "UploadSampleStep_sample_changed";
+
+export const WORKFLOWS = {
+  MAIN: "main",
+  CONSENSUS_GENOME: "consensus_genome",
+};
 
 class UploadSampleStep extends React.Component {
   state = {
@@ -75,6 +83,7 @@ class UploadSampleStep extends React.Component {
     removedLocalFiles: [], // Invalid local files that were removed.
     validatingSamples: false, // Disable the "Continue" button while validating samples.
     showNoProjectError: false, // Whether we should show an error if no project is currently selected.
+    selectedWorkflows: new Set([WORKFLOWS.MAIN]),
   };
 
   async componentDidMount() {
@@ -118,7 +127,7 @@ class UploadSampleStep extends React.Component {
 
   // Handle the message from the Basespace OAuth popup that authorizes IDseq to read (i.e. download files) from user projects.
   handleBasespaceOAuthMessageEvent = async event => {
-    const { selectedProject } = this.state;
+    const { selectedProject, selectedWorkflows } = this.state;
     const basespaceSamples = this.getSelectedSamples("basespace");
 
     if (
@@ -142,6 +151,7 @@ class UploadSampleStep extends React.Component {
         samples: samplesWithToken,
         project: selectedProject,
         uploadType: "basespace",
+        workflows: selectedWorkflows,
       });
     }
   };
@@ -316,6 +326,16 @@ class UploadSampleStep extends React.Component {
     this.setState({
       createProjectOpen: false,
     });
+  };
+
+  // *** Pipeline workflow related functions ***
+
+  handleWorkflowToggle = workflow => {
+    let { selectedWorkflows } = this.state;
+    // TODO: Behavior will change to support multiple selectedWorkflows.
+    if (!selectedWorkflows.has(workflow)) {
+      this.setState({ selectedWorkflows: new Set([workflow]) });
+    }
   };
 
   // *** Sample-related functions ***
@@ -609,7 +629,7 @@ class UploadSampleStep extends React.Component {
   // *** Miscellaneous functions ***
 
   handleContinue = () => {
-    const { currentTab, selectedProject } = this.state;
+    const { currentTab, selectedProject, selectedWorkflows } = this.state;
 
     if (this.state.currentTab === BASESPACE_UPLOAD) {
       this.requestBasespaceReadProjectPermissions();
@@ -618,6 +638,7 @@ class UploadSampleStep extends React.Component {
         samples: this.getSelectedSamples(currentTab),
         project: selectedProject,
         uploadType: currentTab,
+        workflows: selectedWorkflows,
       });
     }
 
@@ -684,9 +705,11 @@ class UploadSampleStep extends React.Component {
   };
 
   render() {
+    const { allowedFeatures = {} } = this.context || {};
     const { currentTab } = this.state;
     const readyForBasespaceAuth =
       currentTab === BASESPACE_UPLOAD && this.isValid();
+    const { selectedWorkflows } = this.state;
 
     return (
       <div
@@ -734,6 +757,12 @@ class UploadSampleStep extends React.Component {
               </div>
             )}
           </div>
+          {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) && (
+            <WorkflowSelector
+              onWorkflowToggle={this.handleWorkflowToggle}
+              selectedWorkflows={selectedWorkflows}
+            />
+          )}
           <div className={cs.fileUpload}>
             <div className={cs.title}>Upload Files</div>
             <Tabs
@@ -747,9 +776,7 @@ class UploadSampleStep extends React.Component {
           {this.state.currentTab === LOCAL_UPLOAD &&
             this.state.removedLocalFiles.length > 0 && (
               <IssueGroup
-                caption={`${
-                  this.state.removedLocalFiles.length
-                } files were invalid. Please check the acceptable file formats under "More Info".`}
+                caption={`${this.state.removedLocalFiles.length} files were invalid. Please check the acceptable file formats under "More Info".`}
                 headers={["Invalid File Names"]}
                 rows={this.state.removedLocalFiles.map(file => [file])}
                 type="warning"
@@ -812,5 +839,7 @@ UploadSampleStep.propTypes = {
   basespaceClientId: PropTypes.string.isRequired,
   basespaceOauthRedirectUri: PropTypes.string.isRequired,
 };
+
+UploadSampleStep.contextType = UserContext;
 
 export default UploadSampleStep;
