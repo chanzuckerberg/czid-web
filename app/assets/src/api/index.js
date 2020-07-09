@@ -352,7 +352,7 @@ const getTaxaDetails = params =>
   });
 
 const getSamplesERCCReads = sampleIds =>
-  postWithCSRF("/samples/total_ercc_reads.json", {
+  postWithCSRF("/samples/samples_have_ercc_reads.json", {
     sampleIds,
   });
 

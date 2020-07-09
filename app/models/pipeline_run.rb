@@ -1836,4 +1836,10 @@ class PipelineRun < ApplicationRecord
   private def supports_assembly?
     pipeline_version_has_assembly(pipeline_version)
   end
+
+  # Given a list of samples, returns a list of the latest pipeline run for each of the samples.
+  def self.latest_by_sample(samples)
+    dates = PipelineRun.select("sample_id, MAX(created_at) as created_at").where(sample: samples).group(:sample_id)
+    return where("(sample_id, created_at) IN (?)", dates)
+  end
 end

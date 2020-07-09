@@ -30,7 +30,7 @@ class SamplesController < ApplicationController
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
-                   :taxa_with_contigs_suggestions, :validate_sample_ids, :total_ercc_reads,].freeze
+                   :taxa_with_contigs_suggestions, :validate_sample_ids, :samples_have_ercc_reads,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata].freeze
 
@@ -251,12 +251,12 @@ class SamplesController < ApplicationController
     end
   end
 
-  # POST /samples/total_ercc_reads
-  def total_ercc_reads
+  # POST /samples/samples_have_ercc_reads
+  def samples_have_ercc_reads
     sample_ids = params[:sampleIds]
-    samples = Sample.find(sample_ids)
-
-    samples_have_ercc_reads = samples.all? { |sample| sample.first_pipeline_run && sample.first_pipeline_run.total_ercc_reads > 0 }
+    samples = current_power.samples.where(id: sample_ids)
+    latest_pipeline_runs = PipelineRun.latest_by_sample(samples)
+    samples_have_ercc_reads = (sample_ids.length == latest_pipeline_runs.length) && latest_pipeline_runs.all? { |pr| (pr.total_ercc_reads || 0) > 0 }
 
     render json: {
       samplesHaveERCCReads: samples_have_ercc_reads,

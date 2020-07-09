@@ -49,6 +49,9 @@ class CollectionModal extends React.Component {
   openModal = () =>
     this.setState({
       modalOpen: true,
+      appliedMethod: this.state.selectedSamplesHaveERCCs
+        ? "massNormalized"
+        : "standard",
     });
   closeModal = () => this.setState({ modalOpen: false });
 
@@ -135,10 +138,7 @@ class CollectionModal extends React.Component {
     const { numDescriptionRows } = this.props;
     const { allowedFeatures = {} } = this.context || {};
 
-    const { selectedSamplesHaveERCCs } = this.state;
-    const appliedMethod = selectedSamplesHaveERCCs
-      ? "massNormalized"
-      : "standard";
+    const { selectedSamplesHaveERCCs, appliedMethod } = this.state;
 
     const dropdownOptions = BACKGROUND_CORRECTION_METHODS;
     if (selectedSamplesHaveERCCs) {
