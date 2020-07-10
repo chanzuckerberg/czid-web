@@ -60,7 +60,6 @@ Rails.application.routes.draw do
     post :taxa_with_reads_suggestions, on: :collection
     post :taxa_with_contigs_suggestions, on: :collection
     post :uploaded_by_current_user, on: :collection
-    get :legacy, on: :member
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
@@ -70,7 +69,6 @@ Rails.application.routes.draw do
   get 'cli_user_instructions', to: 'samples#cli_user_instructions'
   get 'select', to: 'home#index'
   get 'home', to: 'home#index'
-  get 'legacy', to: 'home#legacy'
   get 'taxon_descriptions', to: 'home#taxon_descriptions'
   get 'public', to: 'home#public'
   get 'my_data', to: 'home#my_data'

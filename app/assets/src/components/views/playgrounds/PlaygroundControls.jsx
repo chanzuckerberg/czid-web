@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import CompareButton from "~ui/controls/buttons/CompareButton";
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import ButtonDropdown from "~ui/controls/dropdowns/ButtonDropdown";
@@ -72,21 +71,6 @@ class PlaygroundControls extends React.Component {
               text="Submit"
               disabled
               onClick={() => this.setState({ event: "SecondaryButton:Click" })}
-            />
-          </ComponentCard>
-          <ComponentCard title="Icon Button" width={3}>
-            <CompareButton
-              key={0}
-              onClick={() => this.setState({ event: "CompareButton:Click" })}
-            />
-            <CompareButton
-              key={1}
-              disabled
-              onClick={() =>
-                this.setState({
-                  event: "CompareButton:Click: should not show up!",
-                })
-              }
             />
           </ComponentCard>
           <ComponentCard title="Button Dropdown" width={3}>
