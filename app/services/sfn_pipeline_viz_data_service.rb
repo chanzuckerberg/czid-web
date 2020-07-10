@@ -260,6 +260,8 @@ class SfnPipelineVizDataService
       split_var = var_name.split("_out_")
     elsif var_name.include?("_in_")
       split_var = var_name.split("_in_")
+    elsif var_name.include?("/")
+      return File.basename(var_name)
     end
 
     if split_var.nil?
@@ -272,6 +274,8 @@ class SfnPipelineVizDataService
   def get_result_file_data(file)
     if @result_files.key?(file)
       return @result_files[file]
+    elsif @result_files.key?(File.basename(file))
+      return @result_files[File.basename(file)]
     else
       return {
         displayName: file,
