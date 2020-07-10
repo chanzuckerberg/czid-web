@@ -45,13 +45,7 @@ class SfnPipelineDispatchService
 
   def call
     @sfn_tags = retrieve_version_tags
-    @pipeline_run.update(
-      pipeline_version: @sfn_tags[:dag_version],
-      wdl_version: @sfn_tags[:wdl_version]
-    )
-
-    # TODO: remove this call after pipeline visualization is migrated to use WDL (IDSEQ-2677)
-    generate_dag_stages_json
+    @pipeline_run.update(pipeline_version: @sfn_tags[:dag_version], wdl_version: @sfn_tags[:wdl_version])
 
     sfn_input_json = generate_wdl_input
     sfn_execution_arn = dispatch(sfn_input_json)
@@ -87,57 +81,13 @@ class SfnPipelineDispatchService
     return ENV_TO_DEPLOYMENT_STAGE_NAMES[Rails.env] || Rails.env
   end
 
-  def convert_dag_json_to_wdl(dag_json)
-    dag_tmp_file = Tempfile.new
-    dag_tmp_file.write(JSON.dump(dag_json))
-    dag_tmp_file.close
-
-    idd2wdl_opts = [
-      "--name", dag_json['name'].to_s,
-      "--output-prefix", @sample.sample_output_s3_path,
-      "--docker-image-id", @docker_image_id,
-      "--deployment-env", stage_deployment_name,
-      "--aws-region", ENV['AWS_REGION'],
-      "--wdl-version", @sfn_tags[:wdl_version],
-      "--dag-version", @sfn_tags[:dag_version],
-    ]
-
-    if @pipeline_run.pipeline_branch != "master"
-      idd2wdl_opts += ["--dag-branch", @pipeline_run.pipeline_branch]
-    end
-
-    stdout, stderr, status = Open3.capture3(
-      "app/jobs/idd2wdl.py",
-      dag_tmp_file.path,
-      *idd2wdl_opts
-    )
-    return stdout if status.success?
-    raise Idd2WdlError, stderr
-  ensure
-    dag_tmp_file.unlink if dag_tmp_file
-  end
-
-  # TODO: remove this method after pipeline visualization is migrated to use WDL (IDSEQ-2677)
-  def generate_dag_stages_json
-    # For compatibility with the legacy DAG json.
-    # Generates a JSON composed by the jsons of all four stages in the DAG pipeline.
-    stages_json = {}
-    @pipeline_run.pipeline_run_stages.order(:step_number).each do |prs|
-      stage_info = PipelineRunStage::STAGE_INFO[prs.step_number]
-      dag_json = prs.send(stage_info[:json_generation_func])
-      stages_json[stage_info[:dag_name]] = JSON.parse(dag_json)
-      prs.update(dag_json: dag_json)
-    end
-    return stages_json
-  end
-
   def generate_wdl_input
     sfn_pipeline_input_json = {
       dag_branch: @pipeline_run.pipeline_branch != "master" ? @pipeline_run.pipeline_branch : nil,
-      HOST_FILTER_WDL_URI: "s3://idseq-workflows/v#{@sfn_tags[:wdl_version]}/main/host_filter.wdl",
-      NON_HOST_ALIGNMENT_WDL_URI: "s3://idseq-workflows/v#{@sfn_tags[:wdl_version]}/main/non_host_alignment.wdl",
-      POSTPROCESS_WDL_URI: "s3://idseq-workflows/v#{@sfn_tags[:wdl_version]}/main/postprocess.wdl",
-      EXPERIMENTAL_WDL_URI: "s3://idseq-workflows/v#{@sfn_tags[:wdl_version]}/main/experimental.wdl",
+      HOST_FILTER_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{@sfn_tags[:wdl_version]}/main/host_filter.wdl",
+      NON_HOST_ALIGNMENT_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{@sfn_tags[:wdl_version]}/main/non_host_alignment.wdl",
+      POSTPROCESS_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{@sfn_tags[:wdl_version]}/main/postprocess.wdl",
+      EXPERIMENTAL_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{@sfn_tags[:wdl_version]}/main/experimental.wdl",
       Input: {
         HostFilter: {
           fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),

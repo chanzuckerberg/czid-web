@@ -53,58 +53,6 @@ RSpec.describe PipelineVizController, type: :controller do
     }.to_json,
   },]
 
-  expected_stage_results = {
-    "stages" => [
-      {
-        "steps" => [
-          {
-            "name" => "Two",
-            "inputEdges" => [0],
-            "outputEdges" => [1],
-          },
-          {
-            "name" => "Three",
-            "inputEdges" => [1],
-            "outputEdges" => [2],
-          },
-        ],
-      }, {
-        "steps" => [{
-          "name" => "Four",
-          "inputEdges" => [2],
-          "outputEdges" => [3],
-        },],
-      },
-    ],
-    "edges" => [
-      {
-        "to" => { "stageIndex" => 0, "stepIndex" => 0 },
-        "files" => [{ "displayName" => "file1" }],
-        "isIntraStage" => false,
-      },
-      # Edges from inter_stage_edges
-      {
-        "from" => { "stageIndex" => 0, "stepIndex" => 0 },
-        "to" => { "stageIndex" => 0, "stepIndex" => 1 },
-        "files" => [{ "displayName" => "file2" }],
-        "isIntraStage" => true,
-      },
-      {
-        "from" => { "stageIndex" => 0, "stepIndex" => 1 },
-        "to" => { "stageIndex" => 1, "stepIndex" => 0 },
-        "files" => [{ "displayName" => "file3" }],
-        "isIntraStage" => false,
-      },
-      # Edges from add_final_output_edges
-      {
-        "from" => { "stageIndex" => 1, "stepIndex" => 0 },
-        "files" => [{ "displayName" => "file4" }],
-        "isIntraStage" => false,
-      },
-    ],
-    "status" => "notStarted",
-  }
-
   let(:fake_sfn_execution_description) do
     {
       execution_arn: "fake_sfn_arn",
@@ -117,39 +65,113 @@ RSpec.describe PipelineVizController, type: :controller do
   let(:fake_wdl_version) { "999".freeze }
   let(:fake_dag_version) { "9.999".freeze }
 
-  before do
-    stub_const('SAMPLES_BUCKET_NAME', "fake_bucket_name")
-    output_dir_s3 = "samples/theProjectId/theSampleId/results/1.0"
-    Aws.config[:s3] = {
-      stub_responses: {
-        list_objects: {
-          contents: %w[
-            unmapped1.fq
-            trimmomatic1.fq
-            priceseq1.fa
-            dedup1.fa
-            lzw1.fa
-            bowtie2_1.fa
-            subsampled_1.fa
-            gsnap_filter_1.fa
-          ].map do |filename|
-            { key: File.join(output_dir_s3.split("/", 4)[-1], filename) }
-          end,
-        },
-      },
-    }
-
-    Aws.config[:states] = {
-      stub_responses: {
-        describe_execution: fake_sfn_execution_description,
-        list_tags_for_resource: {
-          tags: [
-            { key: "wdl_version", value: fake_wdl_version },
-            { key: "dag_version", value: fake_dag_version },
+  # The step statuses don't make sense from a pipeline view, but this
+  # mimics a missing step status file (for Three), which is important to test.
+  let(:expected_stage_results) do
+    {
+      stages: [
+        {
+          steps: [
+            {
+              name: "Two",
+              description: "This is the description of output two.",
+              input_variables: [{ name: "docker_image_id", type: "String" }],
+              inputEdges: [3],
+              outputEdges: [0],
+              status: "finished",
+              startTime: nil,
+              endTime: nil,
+              resources: [],
+            },
+            {
+              name: "Three",
+              description: "",
+              input_variables: [{ name: "docker_image_id", type: "String" }],
+              inputEdges: [0],
+              outputEdges: [1],
+              status: "notStarted",
+              startTime: nil,
+              endTime: nil,
+              resources: [],
+            },
           ],
+          jobStatus: "inProgress",
         },
-      },
+        {
+          steps: [
+            {
+              name: "Four",
+              description: "This is the description of output four.",
+              input_variables: [{ name: "docker_image_id", type: "String" }],
+              inputEdges: [1],
+              outputEdges: [2],
+              status: "inProgress",
+              startTime: nil,
+              endTime: nil,
+              resources: [],
+            },
+          ],
+          jobStatus: "inProgress",
+        },
+      ],
+      edges: [
+        {
+          to: { stageIndex: 0, stepIndex: 1 },
+          from: { stageIndex: 0, stepIndex: 0 },
+          files: [{ displayName: "trimmomatic1.fq", url: "test url" }],
+          isIntraStage: true,
+        },
+        {
+          to: { stageIndex: 1, stepIndex: 0 },
+          from: { stageIndex: 0, stepIndex: 1 },
+          files: [{ displayName: "priceseq1.fa", url: "test url" }],
+          isIntraStage: false,
+        },
+        {
+          from: { stageIndex: 1, stepIndex: 0 }, # The last output file, no to
+          files: [{ displayName: "bowtie2_1.fa", url: "test url" }],
+          isIntraStage: false,
+        },
+        {
+          to: { stageIndex: 0, stepIndex: 0 }, # The first input file, no from
+          files: [{ displayName: "unmapped1_fq", url: nil }],
+          isIntraStage: false,
+        },
+      ],
+      status: "inProgress",
     }
+  end
+
+  let(:results_no_experimental) do
+    no_exp = expected_stage_results.deep_dup
+    no_exp[:stages].pop
+    return no_exp
+  end
+
+  let(:results_no_host_filter_urls) do
+    no_urls = expected_stage_results.deep_dup
+    no_urls[:edges].each do |edge|
+      if edge[:from].present? && edge[:from][:stageIndex] == 0
+        edge[:files] = edge[:files].map { |f| f[:url] = nil }
+      end
+    end
+    return no_urls
+  end
+
+  let(:results_no_exp_or_host_filter) do
+    no_exp_or_urls = results_no_host_filter_urls.deep_dup
+    no_exp_or_urls[:stages].pop
+    return no_exp_or_urls
+  end
+
+  let(:expected_json) { JSON.parse(JSON.generate(expected_stage_results)) }
+
+  before do
+    allow(SfnPipelineVizDataService).to receive(:call).with(instance_of(Integer), true, false).and_return(expected_stage_results)
+    allow(SfnPipelineVizDataService).to receive(:call).with(instance_of(Integer), true, true).and_return(results_no_host_filter_urls)
+    allow(SfnPipelineVizDataService).to receive(:call).with(instance_of(Integer), false, false).and_return(results_no_experimental)
+    allow(SfnPipelineVizDataService).to receive(:call).with(instance_of(Integer), false, true).and_return(results_no_exp_or_host_filter)
+    allow(Sample).to receive(:get_signed_url).and_return("test url")
   end
 
   # Admin specific behavior
@@ -176,8 +198,8 @@ RSpec.describe PipelineVizController, type: :controller do
         get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(expected_stage_results)
-        expect(json_response.keys).to contain_exactly(*expected_stage_results.keys)
+        expect(json_response).to include_json(expected_json)
+        expect(json_response.keys).to contain_exactly(*expected_json.keys)
       end
     end
 
@@ -211,17 +233,10 @@ RSpec.describe PipelineVizController, type: :controller do
           },]
         )
 
-        expected_stage_results_no_experimental = expected_stage_results.deep_dup
-        expected_stage_results_no_experimental["stages"].pop # Remove experimental stage data
-        expected_stage_results_no_experimental["edges"].pop(2) # Remove edges in and to experimental stage data
-        # Push new outputting edge for first (and now only) stage
-        expected_stage_results_no_experimental["edges"].push("from" => { "stageIndex" => 0, "stepIndex" => 1 },
-                                                             "files" => [{ "displayName" => "file3" }])
-
         get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(expected_stage_results_no_experimental)
+        expect(json_response["stages"].length).to eq(1)
       end
     end
 
@@ -237,17 +252,10 @@ RSpec.describe PipelineVizController, type: :controller do
           },]
         )
 
-        expected_stage_results_no_experimental = expected_stage_results.deep_dup
-        expected_stage_results_no_experimental["stages"].pop # Remove experimental stage data
-        expected_stage_results_no_experimental["edges"].pop(2) # Remove edges in and to experimental stage data
-        # Push new outputting edge for first (and now only) stage
-        expected_stage_results_no_experimental["edges"].push("from" => { "stageIndex" => 0, "stepIndex" => 1 },
-                                                             "files" => [{ "displayName" => "file3" }])
-
         get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(expected_stage_results_no_experimental)
+        expect(json_response["stages"].length).to eq(1)
       end
     end
 
@@ -289,8 +297,9 @@ RSpec.describe PipelineVizController, type: :controller do
         get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(expected_stage_results)
-        expect(json_response.keys).to contain_exactly(*expected_stage_results.keys)
+        correct_json = JSON.parse(JSON.generate(results_no_host_filter_urls))
+        expect(json_response).to include_json(correct_json)
+        expect(json_response.keys).to contain_exactly(*correct_json.keys)
       end
     end
   end

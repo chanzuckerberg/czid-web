@@ -1,6 +1,10 @@
 class PipelineVizController < ApplicationController
   include PipelineOutputsHelper
 
+  STATUS_NOT_FOUND = "Error: No pipeline run found matching requested version.".freeze
+  STATUS_NO_EXECUTION_STRATEGY = "Error: No execution strategy found for pipeline run.".freeze
+  STATUS_OTHER_ERROR = "Error: Unable to retrieve data for pipeline run.".freeze
+
   # GET /sample/:sample_id/pipeline_viz/:pipeline_version
   # GET /sample/:sample_id/pipeline_viz/:pipeline_version.json
   def show
@@ -12,7 +16,40 @@ class PipelineVizController < ApplicationController
     )
 
     if pipeline_run
-      @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, current_user.id != sample.user_id)
+      remove_host_filtering_urls = current_user.id != sample.user_id && !current_user.admin?
+      begin
+        if pipeline_run.step_function?
+          @results = SfnPipelineVizDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
+        elsif pipeline_run.directed_acyclic_graph?
+          @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
+        else
+          LogUtil.log_err_and_airbrake("Error retrieving data for pipeline viz: Pipeline Run #{pipeline_run.id} has no execution strategy")
+          if current_user.admin?
+            render(json: {
+                     status: STATUS_NO_EXECUTION_STRATEGY,
+                   }, status: :internal_server_error)
+          else
+            render(json: {
+                     status: STATUS_OTHER_ERROR,
+                   }, status: :internal_server_error)
+          end
+          return
+        end
+      rescue StandardError => e
+        LogUtil.log_err_and_airbrake("Error retrieving pipeline viz data for Pipeline Run #{pipeline_run.id}: #{e}")
+        if current_user.admin?
+          render(json: {
+                   status: STATUS_OTHER_ERROR,
+                   error: e,
+                 }, status: :internal_server_error)
+        else
+          render(json: {
+                   status: STATUS_OTHER_ERROR,
+                 }, status: :internal_server_error)
+        end
+        return
+      end
+
       @pipeline_versions = sample.pipeline_versions
       @last_processed_at = pipeline_run.created_at
       @pipeline_run_display = curate_pipeline_run_display(pipeline_run)
@@ -27,7 +64,7 @@ class PipelineVizController < ApplicationController
       end
     else
       render(json: {
-               status: :not_found,
+               status: STATUS_NOT_FOUND,
              }, status: :not_found)
     end
   end

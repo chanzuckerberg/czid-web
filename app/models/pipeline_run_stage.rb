@@ -37,28 +37,35 @@ class PipelineRunStage < ApplicationRecord
   # Older alignment configs might not have an s3_nt_info_db_path field, so use a reasonable default in this case.
   DEFAULT_S3_NT_INFO_DB_PATH = "s3://#{S3_DATABASE_BUCKET}/alignment_data/#{AlignmentConfig::DEFAULT_NAME}/nt_info.db".freeze
 
+  DAG_NAME_BY_STAGE_NAME = {
+    HOST_FILTERING_STAGE_NAME => DAG_NAME_HOST_FILTER,
+    ALIGNMENT_STAGE_NAME => DAG_NAME_ALIGNMENT,
+    POSTPROCESS_STAGE_NAME => DAG_NAME_POSTPROCESS,
+    EXPT_STAGE_NAME => DAG_NAME_EXPERIMENTAL,
+  }.freeze
+
   STAGE_INFO = {
     1 => {
       name: HOST_FILTERING_STAGE_NAME,
-      dag_name: DAG_NAME_HOST_FILTER,
+      dag_name: DAG_NAME_BY_STAGE_NAME[HOST_FILTERING_STAGE_NAME],
       job_command_func: 'host_filtering_command'.freeze,
       json_generation_func: 'generate_host_filtering_dag_json'.freeze,
     },
     2 => {
       name: ALIGNMENT_STAGE_NAME,
-      dag_name: DAG_NAME_ALIGNMENT,
+      dag_name: DAG_NAME_BY_STAGE_NAME[ALIGNMENT_STAGE_NAME],
       job_command_func: 'alignment_command'.freeze,
       json_generation_func: 'generate_alignment_dag_json'.freeze,
     },
     3 => {
       name: POSTPROCESS_STAGE_NAME,
-      dag_name: DAG_NAME_POSTPROCESS,
+      dag_name: DAG_NAME_BY_STAGE_NAME[POSTPROCESS_STAGE_NAME],
       job_command_func: 'postprocess_command'.freeze,
       json_generation_func: 'generate_postprocess_dag_json'.freeze,
     },
     4 => {
       name: EXPT_STAGE_NAME,
-      dag_name: DAG_NAME_EXPERIMENTAL,
+      dag_name: DAG_NAME_BY_STAGE_NAME[EXPT_STAGE_NAME],
       job_command_func: 'experimental_command'.freeze,
       json_generation_func: 'generate_experimental_dag_json'.freeze,
     },
@@ -78,7 +85,7 @@ class PipelineRunStage < ApplicationRecord
 
   def dag_name
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
-    STAGE_INFO[step_number][:dag_name]
+    DAG_NAME_BY_STAGE_NAME[name]
   end
 
   def step_status_file_path

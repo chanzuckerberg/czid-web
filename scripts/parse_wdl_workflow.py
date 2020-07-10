@@ -10,7 +10,7 @@
 # {
 #   'inputs': [], array of strings, external input variables for the WDL workflow
 #   'task_names': [], array of strings, names of each task called by the WDL workflow
-#   'tasks': { 'task_name': ['input_names'] }, a dict where each key is a task name
+#   'task_inputs': { 'task_name': ['input_names'] }, a dict where each key is a task name
 #            and each value is an array of input variables for that task
 #   'basenames': { 'task_output_name': 'filename' }, a dict where each key is the name of a task output
 #            and each value is the name of the file as found on disk/s3

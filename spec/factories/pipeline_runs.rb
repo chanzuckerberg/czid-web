@@ -18,6 +18,8 @@ FactoryBot.define do
     results_finalized { 0 }
     job_status { PipelineRun::STATUS_READY }
 
+    pipeline_execution_strategy { PipelineRun.pipeline_execution_strategies[:step_function] }
+
     after :create do |pipeline_run, options|
       options.taxon_counts_data.each do |taxon_count_data|
         create(:taxon_count, pipeline_run: pipeline_run, **taxon_count_data)
