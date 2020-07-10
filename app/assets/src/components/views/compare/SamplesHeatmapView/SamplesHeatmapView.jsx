@@ -28,6 +28,7 @@ import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import SortIcon from "~ui/icons/SortIcon";
 import Notification from "~ui/notifications/Notification";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
+import { CONSENSUS_GENOME_FEATURE } from "~/components/utils/features";
 import { showToast } from "~/components/utils/toast";
 import { validateSampleIds } from "~/api/access_control";
 import { UserContext } from "~/components/common/UserContext";
@@ -1258,6 +1259,7 @@ class SamplesHeatmapView extends React.Component {
   };
 
   renderInvalidSamplesWarning(onClose) {
+    const { allowedFeatures = {} } = this.context || {};
     let { invalidSampleNames } = this.state;
 
     const header = (
@@ -1267,7 +1269,11 @@ class SamplesHeatmapView extends React.Component {
           {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
           heatmap
         </span>
-        , because they either failed or are still processing:
+        , because they{" "}
+        {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE)
+          ? "are either failed, still processing, or not available for Consensus Genomes"
+          : "either failed or are still processing"}
+        :
       </div>
     );
 
