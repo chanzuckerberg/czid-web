@@ -1,6 +1,6 @@
 module Subscribers
   class CacheReadMetricHandler < Base
-    def process
+    def process_event
       event_log = {
         type: "metric",
         source: "backend",
@@ -15,7 +15,7 @@ module Subscribers
         },
       }
 
-      # event.payload[:exception] => array of two elements as value: a string with the name of the exception class, and the exception message.
+      # event.payload[:exception] => ["exception name", "exception message"]
       if event.payload[:exception].present?
         event_log[:details][:exception] = {
           name: event.payload[:exception][0],

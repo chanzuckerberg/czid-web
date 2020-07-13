@@ -1,11 +1,9 @@
-require 'ougai'
-
 ########################################
 # Note to developers:
 # To view the structure of the logs and metrics visit: https://go.czi.team/idseq-sli-metrics
 ##########################################
 
-if Rails.env != "test" && Rails.env != "production"
+if !Rails.env.test? && !Rails.env.production?
   ActiveSupport::Notifications.subscribe("process_action.action_controller", Subscribers::ActionControllerMetricHandler.new)
   ActiveSupport::Notifications.subscribe("sql.active_record", Subscribers::SQLMetricHandler.new)
 

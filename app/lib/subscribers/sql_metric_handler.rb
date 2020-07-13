@@ -1,7 +1,7 @@
 module Subscribers
   class SQLMetricHandler < Base
     # TODO(omar): Would like to find what action controller called which query to give the event some context
-    def process
+    def process_event
       raw_sql_query = event.payload[:sql].frozen? ? event.payload[:sql].dup : event.payload[:sql]
 
       event_log = {
@@ -16,7 +16,7 @@ module Subscribers
         },
       }
 
-      # event.payload[:exception] => array of two elements as value: a string with the name of the exception class, and the exception message.
+      # event.payload[:exception] => ["exception name", "exception message"]
       if event.payload[:exception].present?
         event_log[:details][:exception] = {
           name: event.payload[:exception][0],
