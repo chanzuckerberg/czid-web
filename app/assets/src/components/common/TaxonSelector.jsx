@@ -67,7 +67,7 @@ export default class TaxonSelector extends React.Component {
         horizontalOffset={5}
         verticalOffset={10}
         onClose={onTaxonSelectionClose}
-        position="bottom left"
+        position="top left"
       >
         <div className={cs.metadataContainer}>
           <SearchBoxList
