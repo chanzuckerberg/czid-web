@@ -272,23 +272,24 @@ class ReviewStep extends React.Component {
 
   render() {
     const {
-      showUploadModal,
-      showLessDescription,
-      skipSampleProcessing,
+      adminOptions,
       consentChecked,
+      showLessDescription,
+      showUploadModal,
+      skipSampleProcessing,
       useStepFunctionPipeline,
       useTaxonWhitelist,
-      adminOptions,
     } = this.state;
 
     const {
-      onUploadComplete,
-      uploadType,
-      samples,
       metadata,
-      project,
-      visible,
+      onUploadComplete,
       originalHostGenomes,
+      project,
+      samples,
+      uploadType,
+      visible,
+      workflows,
     } = this.props;
 
     const shouldTruncateDescription =
@@ -453,15 +454,16 @@ class ReviewStep extends React.Component {
           )}
           {showUploadModal && (
             <UploadProgressModal
-              samples={samples}
-              uploadType={uploadType}
-              onUploadComplete={onUploadComplete}
+              adminOptions={adminOptions}
               metadata={processMetadataRows(metadata.rows)}
+              onUploadComplete={onUploadComplete}
               project={project}
+              samples={samples}
               skipSampleProcessing={skipSampleProcessing}
+              uploadType={uploadType}
               useStepFunctionPipeline={useStepFunctionPipeline}
               useTaxonWhitelist={useTaxonWhitelist}
-              adminOptions={adminOptions}
+              workflows={workflows}
             />
           )}
         </div>
@@ -503,6 +505,7 @@ ReviewStep.propTypes = {
   onStepSelect: PropTypes.func,
   onUploadComplete: PropTypes.func.isRequired,
   admin: PropTypes.bool,
+  workflows: PropTypes.instanceOf(Set),
 };
 
 ReviewStep.contextType = UserContext;

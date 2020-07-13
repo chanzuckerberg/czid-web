@@ -32,6 +32,8 @@ class Sample < ApplicationRecord
   has_many :metadata, dependent: :destroy
   has_and_belongs_to_many :visualizations
 
+  SUPPORTED_TEMP_PIPELINE_WORKFLOWS = ["main", "consensus_genome"].freeze
+
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -51,6 +53,7 @@ class Sample < ApplicationRecord
   validates :web_commit, presence: true, allow_blank: true, if: :mass_validation_enabled?
   validates :pipeline_commit, presence: true, allow_blank: true, if: :mass_validation_enabled?
   validates :uploaded_from_basespace, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
+  validates :temp_pipeline_workflow, inclusion: { in: SUPPORTED_TEMP_PIPELINE_WORKFLOWS }
 
   after_create :initiate_input_file_upload
   before_save :check_host_genome, :concatenate_input_parts, :check_status

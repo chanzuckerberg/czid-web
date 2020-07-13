@@ -126,6 +126,7 @@ export default class UploadProgressModal extends React.Component {
       useStepFunctionPipeline,
       useTaxonWhitelist,
       adminOptions,
+      workflows,
     } = this.props;
 
     const pipeline_execution_strategy = useStepFunctionPipeline
@@ -137,6 +138,7 @@ export default class UploadProgressModal extends React.Component {
       do_not_process: skipSampleProcessing,
       pipeline_execution_strategy,
       use_taxon_whitelist: useTaxonWhitelist,
+      workflows: Array.from(workflows),
       ...adminOptions,
     }));
   };
@@ -525,12 +527,13 @@ UploadProgressModal.propTypes = {
       files: PropTypes.objectOf(PropTypes.instanceOf(File)),
     })
   ),
+  adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
   metadata: PropTypes.objectOf(PropTypes.any),
   onUploadComplete: PropTypes.func.isRequired,
-  uploadType: PropTypes.string.isRequired,
   project: PropTypes.Project,
   skipSampleProcessing: PropTypes.bool,
+  uploadType: PropTypes.string.isRequired,
   useStepFunctionPipeline: PropTypes.bool,
   useTaxonWhitelist: PropTypes.bool,
-  adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
+  workflows: PropTypes.instanceOf(Set),
 };

@@ -30,20 +30,21 @@ export const bulkUploadLocalWithMetadata = async ({
   // Only upload these fields from the sample.
   const processedSamples = map(
     pick([
+      "alignment_config_name",
       "client",
+      "dag_vars",
+      "do_not_process",
       "host_genome_id",
       "input_files_attributes",
-      "name",
-      "project_id",
-      "do_not_process",
-      "pipeline_execution_strategy",
-      "use_taxon_whitelist",
       "max_input_fragments",
-      "subsample",
+      "name",
       "pipeline_branch",
-      "dag_vars",
-      "alignment_config_name",
+      "pipeline_execution_strategy",
+      "project_id",
       "s3_preload_result_path",
+      "subsample",
+      "use_taxon_whitelist",
+      "workflows",
     ]),
     samples
   );

@@ -562,6 +562,13 @@ module SamplesHelper
         end
         sample_attributes[:host_genome_id] = hg.id
       end
+
+      if sample_attributes[:workflows].present?
+        workflows = sample_attributes.delete(:workflows)
+        # Only one temp_pipeline_workflow supported at this time (2020-07-10)
+        sample_attributes[:temp_pipeline_workflow] = workflows[0]
+      end
+
       sample = Sample.new(sample_attributes)
       sample.input_files.each { |f| f.name ||= File.basename(f.source) }
 

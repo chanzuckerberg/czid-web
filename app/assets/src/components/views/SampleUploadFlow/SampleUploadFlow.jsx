@@ -144,6 +144,7 @@ class SampleUploadFlow extends React.Component {
   // SLIGHT HACK: Keep steps mounted, so user can return to them if needed.
   // The internal state of some steps is difficult to recover if they are unmounted.
   renderSteps = () => {
+    const { workflows } = this.state;
     return (
       <div>
         <UploadSampleStep
@@ -177,6 +178,7 @@ class SampleUploadFlow extends React.Component {
             onUploadStatusChange={this.onUploadStatusChange}
             onStepSelect={this.handleStepSelect}
             onUploadComplete={this.onUploadComplete}
+            workflows={workflows}
           />
         )}
       </div>

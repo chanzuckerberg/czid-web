@@ -268,6 +268,44 @@ RSpec.describe "Sample request", type: :request do
           expect(test_sample.subsample).to eq(100)
           expect(test_sample.max_input_fragments).to eq(50)
         end
+
+        it "should set the 'main' pipeline workflow by default" do
+          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          test_sample = Sample.find(sample_id)
+          expect(test_sample.temp_pipeline_workflow).to eq("main")
+        end
+
+        it "should properly set the consensus_genome pipeline workflow" do
+          sample_params = @sample_params.dup
+          sample_params[:workflows] = ["consensus_genome"]
+          post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          test_sample = Sample.find(sample_id)
+          expect(test_sample.temp_pipeline_workflow).to eq("consensus_genome")
+        end
+
+        it "should fail with a bogus pipeline workflow selection" do
+          sample_params = @sample_params.dup
+          sample_params[:workflows] = ["foobar"]
+          post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          expect(json_response["sample_ids"]).to be_empty
+          expect(json_response["errors"]).to eq([{ "temp_pipeline_workflow" => ["is not included in the list"] }])
+        end
       end
     end
   end
