@@ -421,6 +421,23 @@ export default class SamplesHeatmapControls extends React.Component {
       prefilterConstants,
     } = this.props;
     const { topN, minReads } = prefilterConstants;
+
+    const content = (
+      <React.Fragment>
+        In order to load the heatmap faster, the data included in this heatmap
+        was preselected based on the following conditions:
+        <ul className={cs.conditionList}>
+          <li
+            className={cs.conditionListItem}
+          >{`The top ${topN} unique taxa per sample, based on relative abundance (rPM)`}</li>
+          <li
+            className={cs.conditionListItem}
+          >{`Only taxa with at least ${minReads} reads`}</li>
+        </ul>
+        You can add taxa under 5 reads using the “Add taxa” button below.
+      </React.Fragment>
+    );
+
     return (
       <span className={cs.reportInfoMsg}>
         Showing top {filteredTaxaCount} taxa of {totalTaxaCount} preselected
@@ -431,12 +448,7 @@ export default class SamplesHeatmapControls extends React.Component {
               <InfoIconSmall className={cs.infoIcon} />
             </span>
           }
-          content="The data included in this heatmap 
-            was preselected based on the following conditions:"
-          list={[
-            `The top ${topN} unique taxa per sample, based off relative abundance (rPM)`,
-            `Only taxa with at least ${minReads} reads`,
-          ]}
+          content={content}
         />
       </span>
     );

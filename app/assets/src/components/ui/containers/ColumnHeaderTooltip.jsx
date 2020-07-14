@@ -5,7 +5,8 @@ import cs from "./column_header_tooltip.scss";
 
 class ColumnHeaderTooltip extends React.Component {
   render() {
-    const { title, content, list, link } = this.props;
+    const { content, link, title } = this.props;
+
     return (
       <BasicPopup
         {...this.props}
@@ -13,18 +14,6 @@ class ColumnHeaderTooltip extends React.Component {
           <div className={cs.tooltip}>
             {title && <span className={cs.title}>{title}:</span>}
             {content}
-            {list && (
-              <ul className={cs.ul}>
-                {" "}
-                {list.map(item => {
-                  return (
-                    <li className={cs.li} key={item}>
-                      {item}
-                    </li>
-                  );
-                })}{" "}
-              </ul>
-            )}
             {link && (
               <a
                 className={cs.link}
@@ -43,10 +32,9 @@ class ColumnHeaderTooltip extends React.Component {
 }
 
 ColumnHeaderTooltip.propTypes = {
-  size: PropTypes.string,
+  content: PropTypes.node,
   title: PropTypes.string,
   link: PropTypes.string,
-  list: PropTypes.arrayOf(PropTypes.string),
 };
 
 ColumnHeaderTooltip.defaultProps = {

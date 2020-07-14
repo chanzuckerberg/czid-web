@@ -18,15 +18,4 @@
     text-decoration: underline;
     text-decoration-style: dashed;
   }
-
-  .ul {
-    padding-left: 0;
-    margin-top: $space-m;
-    margin-bottom: 0;
-
-    .li {
-      list-style: disc inside none;
-      margin-bottom: $space-xxs;
-    }
-  }
 }
