@@ -15,5 +15,7 @@ module CloudWatchUtil
   def self.put_metric_data(namespace, metric_data)
     AwsClient[:CloudWatch].put_metric_data(namespace: namespace,
                                            metric_data: metric_data)
+  rescue Aws::CloudWatch::Errors => e
+    Rails.logger.error("Metric data #{metric_data} in namespace #{namespace} resulted in #{e.message}")
   end
 end

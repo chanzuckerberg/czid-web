@@ -29,33 +29,38 @@ module Subscribers
       else
         process_metric
       end
-
+    ensure
       @logger.info(event_log)
     end
 
     def process_metric
       domain = @event.payload[:params]["domain"]
       clean_path = "/#{@event.payload[:params]['controller']}/#{@event.payload[:params]['action']}"
+      metric_data = []
 
-      metric_data = [
-        CloudWatchUtil.create_metric_datum("Duration", @event.duration, "Milliseconds",
-                                           [
-                                             { name: "Controller", value: @event.payload[:controller] },
-                                             { name: "Path", value: clean_path },
-                                           ]),
+      if @event.duration.present?
+        metric_data << CloudWatchUtil.create_metric_datum("Duration", @event.duration, "Milliseconds",
+                                                          [
+                                                            { name: "Controller", value: @event.payload[:controller] },
+                                                            { name: "Path", value: clean_path },
+                                                          ])
+      end
 
-        CloudWatchUtil.create_metric_datum("DB Runtime", @event.payload[:db_runtime], "Milliseconds",
-                                           [
-                                             { name: "Controller", value: @event.payload[:controller] },
-                                             { name: "Path", value: clean_path },
-                                           ]),
+      if @event.payload[:db_runtime].present?
+        metric_data << CloudWatchUtil.create_metric_datum("DB Runtime", @event.payload[:db_runtime], "Milliseconds",
+                                                          [
+                                                            { name: "Controller", value: @event.payload[:controller] },
+                                                            { name: "Path", value: clean_path },
+                                                          ])
+      end
 
-        CloudWatchUtil.create_metric_datum("Request Status", 1.0, "Count",
-                                           [
-                                             { name: "Status", value: @event.payload[:status].to_s },
-                                             { name: "Path", value: clean_path },
-                                           ]),
-      ]
+      if @event.payload[:status].present?
+        metric_data << CloudWatchUtil.create_metric_datum("Request Status", 1.0, "Count",
+                                                          [
+                                                            { name: "Status", value: @event.payload[:status].to_s },
+                                                            { name: "Path", value: clean_path },
+                                                          ])
+      end
 
       metric_data.map { |metric| metric[:dimensions].append(name: "Domain", value: domain) } if domain.present?
       CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-domain", metric_data)
