@@ -158,7 +158,7 @@ class SamplesHeatmapView extends React.Component {
       // Note that the 2D array is accesed by a taxon's/sample's INDEX, not id.
       allData: {},
       // data is an object containing metric data for only the samples that have passed filters
-      // and are displayed on the heatmap. data is onlyl a subset of allData if client-side
+      // and are displayed on the heatmap. data is only a subset of allData if client-side
       // filtering is enabled, otherwise they should be identical.
       data: {},
       hideFilters: false,
@@ -965,16 +965,20 @@ class SamplesHeatmapView extends React.Component {
   };
 
   handleRemoveTaxon = taxonName => {
+    const { allowedFeatures } = this.context || {};
     let { addedTaxonIds } = this.state;
     let taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
     addedTaxonIds.delete(taxonId);
-    this.setState({ addedTaxonIds });
     logAnalyticsEvent("SamplesHeatmapView_taxon_removed", {
       taxonId,
       taxonName,
     });
-    this.updateFilters();
+    if (allowedFeatures.includes("heatmap_filter_fe")) {
+      this.setState({ addedTaxonIds }, this.updateFilters);
+    } else {
+      this.setState({ addedTaxonIds }, this.updateHeatmap);
+    }
   };
 
   handleMetadataChange = metadataFields => {
