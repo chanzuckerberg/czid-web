@@ -42,20 +42,13 @@ def notify_slack(env, image, stage)
   if slack_hook
     if stage=="start"
       post_slack_message({"icon_emoji": ":ghost:",
-                          "text": "starting to deploy #{image} to #{env}.\n" +
+                          "text": "Starting to deploy #{image} to #{env}.\n" +
                                   "   - refs: #{tags_and_branches(image).join(', ')}"
                          }, slack_hook)
     elsif stage=="end"
-      post_slack_message({"icon_emoji": ":sharkdance:", "text": "finished deploying #{image} to #{env}"}, slack_hook)
+      post_slack_message({"icon_emoji": ":sharkdance:", "text": "Finished deploying #{image} to #{env}."}, slack_hook)
       if env=="staging"
-        begin
-          definition_list = JSON.parse(`aws ecs list-task-definitions --family-prefix idseq-prod-web --sort DESC --max-items 1`)
-          definition = JSON.parse(`aws ecs describe-task-definition --task-definition #{definition_list["taskDefinitionArns"][0]}`)
-          prod_image = definition["taskDefinition"]["containerDefinitions"][0]["image"].split(':')[1]
-          log_history = `git log --graph --pretty=format:'%an -%d %s (%cr) <%h>' --abbrev-commit #{prod_image.split('-')[1]}..#{image.split('-')[1]} | sort`
-          post_slack_message({"icon_emoji": ":sharkdance:", "text": "Please test these changes:\n#{log_history}"}, slack_hook)
-        rescue
-        end
+        post_slack_message({"icon_emoji": ":sharkdance:", "text": "Please test your changes listed at https://go.czi.team/idseq-release-checkoff"}, slack_hook)
       end
     elsif stage=="failure"
       post_slack_message({"icon_emoji": ":sob:", "text": "deploy of #{image} to #{env} failed"}, slack_hook)
