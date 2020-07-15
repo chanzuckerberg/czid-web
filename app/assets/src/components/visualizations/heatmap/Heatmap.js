@@ -521,7 +521,7 @@ export default class Heatmap {
   }
 
   scroll() {
-    this.pan(d3.event.deltaX, d3.event.deltaY);
+    this.pan(-d3.event.deltaX, -d3.event.deltaY);
     d3.event.stopPropagation();
   }
 
