@@ -3,7 +3,7 @@ require 'json'
 
 RSpec.describe PipelineReportService, type: :service do
   let(:csv_output_standard_background) { "tax_id,tax_level,genus_tax_id,name,common_name,category,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nt_bg_mean_mass_normalized,nt_bg_stdev_mass_normalized,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,nr_bg_mean_mass_normalized,nr_bg_stdev_mass_normalized,species_tax_ids\n570,2,570,Klebsiella,,bacteria,2428411764.7058825,99,99,193404.63458110517,217,6,594,99.7014,149.424,89.5822,18.3311,64.2056,,,99,77540.10695187165,87,6,594,97.9598,46.4253,16.9874,35.0207,238.639,,,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,2428411764.7058825,99,99,186274.50980392157,209,2,198,99.6995,149.402,89.5641,9.35068,26.4471,,,99,61497.326203208555,69,2,198,97.8565,46.3623,16.9101,29.9171,236.332,,,\n".freeze }
-  let(:csv_output_mass_normalized_background) { "tax_id,tax_level,genus_tax_id,name,common_name,category,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nt_bg_mean_mass_normalized,nt_bg_stdev_mass_normalized,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,nr_bg_mean_mass_normalized,nr_bg_stdev_mass_normalized,species_tax_ids\n570,2,570,Klebsiella,,bacteria,-41185.23607481226,-0.4073385757751987,-0.4073385757751987,193750.0,217,6,594,99.7014,149.424,89.5822,96875.0,137002.0,48437.5,118647.0,-0.40734356145492157,77678.57142857143,87,6,594,97.9598,46.4253,16.9874,38839.3,54927.0,19419.6,47568.2,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,-41185.23607481226,-0.40733856641551375,-0.40733856641551375,186607.14285714287,209,2,198,99.6995,149.402,89.5641,93303.6,131951.0,46651.8,114273.0,-0.40734762037294736,61607.142857142855,69,2,198,97.8565,46.3623,16.9101,30803.6,43562.8,15401.8,37726.5,\n".freeze }
+  let(:csv_output_mass_normalized_background) { "tax_id,tax_level,genus_tax_id,name,common_name,category,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nt_bg_mean_mass_normalized,nt_bg_stdev_mass_normalized,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,nr_bg_mean_mass_normalized,nr_bg_stdev_mass_normalized,species_tax_ids\n570,2,570,Klebsiella,,bacteria,40260.62461352248,0.40448508108514886,0.40448508108514886,193750.0,217,6,594,99.7014,149.424,89.5822,96875.0,137002.0,54.25,132.885,0.3988632865584011,77678.57142857143,87,6,594,97.9598,46.4253,16.9874,38839.3,54927.0,21.75,53.2764,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,40260.62461352248,0.4043410998077915,0.4043410998077915,186607.14285714287,209,2,198,99.6995,149.402,89.5641,93303.6,131951.0,52.25,127.986,0.39641498850988194,61607.142857142855,69,2,198,97.8565,46.3623,16.9101,30803.6,43562.8,17.25,42.2537,\n".freeze }
   let(:fake_output_prefix) { "s3://fake-output-prefix" }
   let(:fake_sfn_name) { "fake_sfn_name" }
   let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
@@ -305,14 +305,14 @@ RSpec.describe PipelineReportService, type: :service do
         "nt" => {
           "count" => 209,
           "rpm" => 186_607.14285714287,
-          "z_score" => -0.40733856641551375,
+          "z_score" => 0.4043410998077915,
         },
         "nr" => {
           "count" => 69,
           "rpm" => 61_607.142857142855,
-          "z_score" => -0.40734762037294736,
+          "z_score" => 0.39641498850988194,
         },
-        "agg_score" => -41_185.23607481226,
+        "agg_score" => 40_260.62461352248,
       }
 
       expect(JSON.parse(@report)["counts"]["1"]["573"]).to include_json(species_result)
@@ -324,16 +324,16 @@ RSpec.describe PipelineReportService, type: :service do
         "nt" => {
           "count" => 217.0,
           "rpm" => 193_750.0,
-          "z_score" => -0.4073385757751987,
+          "z_score" => 0.40448508108514886,
           "e_value" => 89.5822,
         },
         "nr" => {
           "count" => 87.0,
           "rpm" => 77_678.57142857143,
-          "z_score" => -0.40734356145492157,
+          "z_score" => 0.3988632865584011,
           "e_value" => 16.9874,
         },
-        "agg_score" => -41_185.23607481226,
+        "agg_score" => 40_260.62461352248,
       }
 
       expect(JSON.parse(@report)["counts"]["2"]["570"]).to include_json(genus_result)

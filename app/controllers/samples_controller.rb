@@ -834,6 +834,8 @@ class SamplesController < ApplicationController
       json = PipelineReportService.call(pipeline_run, background_id)
     end
     render json: json
+  rescue PipelineReportService::MassNormalizedBackgroundError => e
+    render json: { error: e.message }, status: :bad_request
   end
 
   def amr

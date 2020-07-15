@@ -43,12 +43,12 @@ class Background < ApplicationRecord
     rows = TaxonCount.connection.select_all("
       SELECT
         tax_id,
+        count,
         count_type,
         tax_level,
         total_ercc_reads,
         @adjusted_total_reads := (total_reads - IFNULL(total_ercc_reads, 0)) * IFNULL(fraction_subsampled, 1.0),
-        (1.0*1e6*count)/@adjusted_total_reads as rpm,
-        (1.0*1e6*count*1e6*count)/(@adjusted_total_reads*@adjusted_total_reads) AS rpm2
+        (1.0*1e6*count)/@adjusted_total_reads as rpm
       FROM `taxon_counts`
       INNER JOIN `pipeline_runs` ON
         `pipeline_runs`.`id` = `taxon_counts`.`pipeline_run_id`
@@ -70,12 +70,15 @@ class Background < ApplicationRecord
         # reset the results
         taxon_result = { tax_id: row["tax_id"], count_type: row["count_type"],
                          tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0,
-                         rpm_list: [], total_ercc_reads: row["total_ercc_reads"], }
+                         rpm_list: [], total_ercc_reads: row["total_ercc_reads"],
+                         sum_count: 0.0, sum_count2: 0.0, }
         key = current_key
       end
       # increment
       taxon_result[:sum_rpm] += row["rpm"]
-      taxon_result[:sum_rpm2] += row["rpm2"]
+      taxon_result[:sum_rpm2] += row["rpm"]**2
+      taxon_result[:sum_count] += row["count"]
+      taxon_result[:sum_count2] += row["count"]**2
       taxon_result[:rpm_list] << row["rpm"].round(3)
     end
     # addd the last result
@@ -90,11 +93,12 @@ class Background < ApplicationRecord
     taxon_result[:updated_at] = date
     taxon_result[:mean] = (taxon_result[:sum_rpm]) / n.to_f
     if mass_normalized?
-      taxon_result[:mean_mass_normalized] = (taxon_result[:sum_rpm] / taxon_result[:total_ercc_reads]) / n.to_f
+      taxon_result[:mean_mass_normalized] = (taxon_result[:sum_count] / taxon_result[:total_ercc_reads]) / n.to_f
       taxon_result[:stdev_mass_normalized] = compute_stdev(
-        taxon_result[:sum_rpm] / taxon_result[:total_ercc_reads],
-        taxon_result[:sum_rpm2] / taxon_result[:total_ercc_reads],
-        n
+        taxon_result[:sum_count],
+        taxon_result[:sum_count2],
+        n,
+        taxon_result[:total_ercc_reads]
       )
     else
       taxon_result[:mean_mass_normalized] = nil
@@ -140,8 +144,8 @@ class Background < ApplicationRecord
     update(ready: 1) # background will be displayed on report page
   end
 
-  def compute_stdev(sum, sum2, n)
-    x = (sum2 - sum**2 / n.to_f) / (n - 1)
+  def compute_stdev(sum, sum2, n, norm = 1)
+    x = ((sum2 / norm) - (sum / norm)**2 / n.to_f) / (n - 1)
     # In theory, x can mathematically be proven to be non-negative.
     # But in practice, rounding errors can make it slightly negative when it should be 0.
     x = [0, x].max

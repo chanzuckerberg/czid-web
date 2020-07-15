@@ -2,6 +2,12 @@ class PipelineReportService
   include Callable
   include ReportsHelper
 
+  class MassNormalizedBackgroundError < StandardError
+    def initialize(background_id, pipeline_run_id)
+      super("background #{background_id} is mass normalized but pipeline run #{pipeline_run_id} has no ERCC reads")
+    end
+  end
+
   FIELDS_TO_PLUCK = [
     :tax_id,
     :genus_taxid,
@@ -122,6 +128,9 @@ class PipelineReportService
       )
     end
 
+    if @background.mass_normalized? && @pipeline_run.total_reads.zero?
+      raise MassNormalizedBackgroundError.new(@background.id, @pipeline_run.id)
+    end
     adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
