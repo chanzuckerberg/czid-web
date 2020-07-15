@@ -1,7 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { getSamplesERCCReads, createBackground } from "~/api";
+import {
+  getMassNormalizedBackgroundAvailability,
+  createBackground,
+} from "~/api";
 import { withAnalytics } from "~/api/analytics";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
@@ -36,20 +39,20 @@ class CollectionModal extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchERCCReads();
+    this.fetchBackgroundAvailability();
   }
 
   componentDidUpdate(prevProps, prevState) {
     const prevSamples = prevProps.selectedSampleIds;
     if (prevSamples !== this.props.selectedSampleIds) {
-      this.fetchERCCReads();
+      this.fetchBackgroundAvailability();
     }
   }
 
   openModal = () =>
     this.setState({
       modalOpen: true,
-      appliedMethod: this.state.selectedSamplesHaveERCCs
+      appliedMethod: this.state.enableMassNormalizedBackgrounds
         ? "massNormalized"
         : "standard",
     });
@@ -123,14 +126,15 @@ class CollectionModal extends React.Component {
     this.setState({ backgroundCreationResponse });
   };
 
-  fetchERCCReads = async () => {
+  fetchBackgroundAvailability = async () => {
     const { selectedSampleIds } = this.props;
-    let selectedSamplesHaveERCCs = await getSamplesERCCReads(
+    let enableMassNormalizedBackgrounds = await getMassNormalizedBackgroundAvailability(
       Array.from(selectedSampleIds)
     );
 
     this.setState({
-      selectedSamplesHaveERCCs: selectedSamplesHaveERCCs.samplesHaveERCCReads,
+      enableMassNormalizedBackgrounds:
+        enableMassNormalizedBackgrounds.massNormalizedBackgroundsAvailable,
     });
   };
 
@@ -138,15 +142,16 @@ class CollectionModal extends React.Component {
     const { numDescriptionRows } = this.props;
     const { allowedFeatures = {} } = this.context || {};
 
-    const { selectedSamplesHaveERCCs, appliedMethod } = this.state;
+    const { enableMassNormalizedBackgrounds, appliedMethod } = this.state;
 
     const dropdownOptions = BACKGROUND_CORRECTION_METHODS;
-    if (selectedSamplesHaveERCCs) {
+    if (enableMassNormalizedBackgrounds) {
       dropdownOptions.massNormalized.disabled = false;
       dropdownOptions.massNormalized.tooltip = null;
     } else {
       dropdownOptions.massNormalized.disabled = true;
-      dropdownOptions.massNormalized.tooltip = "Only for ERCC samples";
+      dropdownOptions.massNormalized.tooltip =
+        "Only for ERCC samples run on Pipeline v4.0 or later";
     }
 
     return (

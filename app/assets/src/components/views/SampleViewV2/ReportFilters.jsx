@@ -111,7 +111,7 @@ class ReportFilters extends React.Component {
       sampleId,
       selected,
       view,
-      sampleHasERCCs,
+      enableMassNormalizedBackgrounds,
     } = this.props;
     return (
       <React.Fragment>
@@ -162,7 +162,7 @@ class ReportFilters extends React.Component {
                   value,
                 })
               }
-              sampleHasERCCs={sampleHasERCCs}
+              enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
             />
           </div>
           {/* from server */}
@@ -266,7 +266,7 @@ ReportFilters.propTypes = {
   sampleId: PropTypes.number,
   selected: PropTypes.object,
   view: PropTypes.oneOf(["tree", "table"]),
-  sampleHasERCCs: PropTypes.bool,
+  enableMassNormalizedBackgrounds: PropTypes.bool,
 };
 
 export default ReportFilters;

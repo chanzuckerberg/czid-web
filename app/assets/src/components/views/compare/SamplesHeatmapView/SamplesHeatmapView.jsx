@@ -84,6 +84,7 @@ const NOTIFICATION_TYPES = {
   taxaFilteredOut: "taxa filtered out",
   multiplePipelineVersions: "diverse_pipelines",
 };
+const MASS_NORMALIZED_PIPELINE_VERSION = 4.0;
 
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
@@ -459,14 +460,17 @@ class SamplesHeatmapView extends React.Component {
     let taxonFilterState = {};
     // Check if all samples have ERCC counts > 0 to enable backgrounds generated
     // using normalized input mass.
-    let selectedSamplesHaveERCCs = true;
+    let enableMassNormalizedBackgrounds = true;
 
     for (let i = 0; i < rawData.length; i++) {
       let sample = rawData[i];
       sampleIds.push(sample.sample_id);
 
-      selectedSamplesHaveERCCs =
-        sample.ercc_count > 0 && selectedSamplesHaveERCCs;
+      enableMassNormalizedBackgrounds =
+        sample.ercc_count > 0 &&
+        parseFloat(sample.pipeline_version) >=
+          MASS_NORMALIZED_PIPELINE_VERSION &&
+        enableMassNormalizedBackgrounds;
 
       // Keep track of samples with the same name, which may occur if
       // a user selects samples from multiple projects.
@@ -546,7 +550,7 @@ class SamplesHeatmapView extends React.Component {
       allTaxonDetails,
       allData,
       taxonFilterState,
-      selectedSamplesHaveERCCs,
+      enableMassNormalizedBackgrounds,
     };
   }
 
@@ -1407,7 +1411,9 @@ class SamplesHeatmapView extends React.Component {
                 displayFilterStats={allowedFeatures.includes(
                   "heatmap_filter_fe"
                 )}
-                selectedSamplesHaveERCCs={this.state.selectedSamplesHaveERCCs}
+                enableMassNormalizedBackgrounds={
+                  this.state.enableMassNormalizedBackgrounds
+                }
               />
             </NarrowContainer>
           </div>

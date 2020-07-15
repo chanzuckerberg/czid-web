@@ -47,7 +47,7 @@ Rails.application.routes.draw do
     get :samples_going_public, on: :collection
     get :index_v2, on: :collection
     get :details, on: :collection
-    post :samples_have_ercc_reads, on: :collection
+    post :enable_mass_normalized_backgrounds, on: :collection
     get :dimensions, on: :collection
     get :stats, on: :collection
     post :save_metadata, on: :member

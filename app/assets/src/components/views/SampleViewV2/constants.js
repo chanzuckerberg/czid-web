@@ -34,3 +34,5 @@ export const CATEGORIES = [
   { name: "Viruses", children: ["Phage"] },
   { name: "Uncategorized" },
 ];
+
+export const MASS_NORMALIZED_PIPELINE_VERSION = 4.0;

@@ -52,7 +52,7 @@ import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 
-import { TREE_METRICS } from "./constants";
+import { TREE_METRICS, MASS_NORMALIZED_PIPELINE_VERSION } from "./constants";
 import ReportViewSelector from "./ReportViewSelector";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
@@ -981,6 +981,11 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
+    const enableMassNormalizedBackgrounds =
+      pipelineRun &&
+      pipelineRun.total_ercc_reads > 0 &&
+      parseFloat(pipelineRun.pipeline_version) >=
+        MASS_NORMALIZED_PIPELINE_VERSION;
     // reportReady is true if the pipeline run hasn't failed and is report-ready
     // (might still be running Experimental, but at least taxon_counts has been loaded).
     if (reportMetadata.reportReady) {
@@ -994,7 +999,7 @@ export default class SampleViewV2 extends React.Component {
               sampleId={sample && sample.id}
               selected={selectedOptions}
               view={view}
-              sampleHasERCCs={pipelineRun && pipelineRun.total_ercc_reads > 0}
+              enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
             />
           </div>
           <div className={cs.reportHeader}>

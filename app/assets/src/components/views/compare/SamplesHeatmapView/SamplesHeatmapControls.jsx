@@ -129,14 +129,18 @@ export default class SamplesHeatmapControls extends React.Component {
   };
 
   renderBackgroundSelect() {
-    const { selectedSamplesHaveERCCs, options, selectedOptions } = this.props;
+    const {
+      enableMassNormalizedBackgrounds,
+      options,
+      selectedOptions,
+    } = this.props;
 
     return (
       <BackgroundModelFilter
         allBackgrounds={options.backgrounds}
         value={selectedOptions.background}
         onChange={this.onBackgroundChange}
-        sampleHasERCCs={selectedSamplesHaveERCCs}
+        enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
       />
     );
   }
@@ -586,5 +590,5 @@ SamplesHeatmapControls.propTypes = {
   totalTaxaCount: PropTypes.number,
   prefilterConstants: PropTypes.object,
   displayFilterStats: PropTypes.bool,
-  selectedSamplesHaveERCCs: PropTypes.bool,
+  enableMassNormalizedBackgrounds: PropTypes.bool,
 };

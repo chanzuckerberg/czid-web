@@ -9,11 +9,12 @@ const BackgroundModelFilter = ({
   allBackgrounds,
   value,
   onChange,
-  sampleHasERCCs,
+  enableMassNormalizedBackgrounds,
 }) => {
   let disabled = false;
   let backgroundOptions = allBackgrounds.map(background => {
-    const disabledOption = !sampleHasERCCs && background.mass_normalized;
+    const disabledOption =
+      !enableMassNormalizedBackgrounds && background.mass_normalized;
     return {
       text: background.name,
       subtext: background.mass_normalized
@@ -21,7 +22,9 @@ const BackgroundModelFilter = ({
         : "Standard",
       value: background.id || background.value,
       disabled: disabledOption,
-      tooltip: disabledOption ? "Only for ERCC samples" : null,
+      tooltip: disabledOption
+        ? "Only for ERCC samples run on Pipeline v4.0 or later"
+        : null,
     };
   });
   if (backgroundOptions.length === 0) {
@@ -61,7 +64,7 @@ BackgroundModelFilter.propTypes = {
   allBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
   value: PropTypes.number,
   onChange: PropTypes.func.isRequired,
-  sampleHasERCCs: PropTypes.bool,
+  enableMassNormalizedBackgrounds: PropTypes.bool,
 };
 
 export default BackgroundModelFilter;

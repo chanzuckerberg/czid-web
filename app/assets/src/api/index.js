@@ -351,8 +351,8 @@ const getTaxaDetails = params =>
     background: params.background,
   });
 
-const getSamplesERCCReads = sampleIds =>
-  postWithCSRF("/samples/samples_have_ercc_reads.json", {
+const getMassNormalizedBackgroundAvailability = sampleIds =>
+  postWithCSRF("/samples/enable_mass_normalized_backgrounds.json", {
     sampleIds,
   });
 
@@ -374,7 +374,7 @@ export {
   getProjects,
   getSample,
   getSampleDimensions,
-  getSamplesERCCReads,
+  getMassNormalizedBackgroundAvailability,
   getSampleReportData,
   getSampleReportInfo,
   getSamples,
