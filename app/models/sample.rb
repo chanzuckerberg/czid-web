@@ -19,6 +19,7 @@ class Sample < ApplicationRecord
   include PipelineRunsHelper
   include BasespaceHelper
   include ErrorHelper
+  include AppConfigHelper
 
   belongs_to :project
   # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
@@ -65,6 +66,7 @@ class Sample < ApplicationRecord
   # conditions. See app/assets/src/components/utils/sample.js
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_S3_UPLOAD_FAILED = "S3_UPLOAD_FAILED".freeze
+  UPLOAD_ERROR_MAX_FILE_SIZE_EXCEEDED = "MAX_FILE_SIZE_EXCEED".freeze
   UPLOAD_ERROR_LOCAL_UPLOAD_STALLED = "LOCAL_UPLOAD_STALLED".freeze
   UPLOAD_ERROR_LOCAL_UPLOAD_FAILED = "LOCAL_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_PIPELINE_KICKOFF = "PIPELINE_KICKOFF_FAILED".freeze
@@ -319,80 +321,40 @@ class Sample < ApplicationRecord
     end
   end
 
-  def initiate_s3_cp
+  def initiate_s3_cp(unlimited_size = false)
     return unless status == STATUS_CREATED
+    self.upload_error = nil
     stderr_array = []
     total_reads_json_path = nil
-    max_lines = 4 * (max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS)
+    # The AppConfig setting is the max file size in gigabytes; default 100; multiply by 10^9 to get bytes
+    s3_upload_file_size_limit = get_app_config(AppConfig::S3_SAMPLE_UPLOAD_FILE_SIZE_LIMIT).to_i || 100
+    max_file_size = s3_upload_file_size_limit * (10**9)
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
-
+      # get bucket and key
+      bucket, key = S3Util.parse_s3_path(fastq)
+      # determine the file size
+      unless unlimited_size
+        input_file_size = S3Util.get_file_size(bucket, key)
+        if input_file_size > max_file_size
+          self.upload_error = Sample::UPLOAD_ERROR_MAX_FILE_SIZE_EXCEEDED
+          raise SampleUploadErrors.max_file_size_exceeded(input_file_size, max_file_size)
+        end
+      end
       # Retry s3 cp up to 3 times
       max_tries = 3
       try = 0
       while try < max_tries
-        # Run the piped commands and save stderr
-        err_read, err_write = IO.pipe
-        if fastq.match?(/\.gz/)
-          proc_download, proc_unzip, proc_cut, proc_head, proc_validation, proc_zip, proc_upload = Open3.pipeline(
-            ["aws", "s3", "cp", fastq, "-"],
-            ["gzip", "-dc"],
-            ["cut", "-c", "-#{Sample::MAX_LINE_LENGTH + 1}"],
-            ["head", "-n", max_lines.to_s],
-            ["awk", "-f", FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT, "-v", "max_line_length=#{Sample::MAX_LINE_LENGTH}"],
-            ["gzip", "-c"],
-            ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
-            err: err_write
-          )
-          to_check = {
-            sig_pipe: [proc_unzip, proc_cut],
-            no_errors: [proc_head, proc_validation, proc_zip, proc_upload],
-          }
-        else
-          proc_download, proc_cut, proc_head, proc_validation, proc_upload = Open3.pipeline(
-            ["aws", "s3", "cp", fastq, "-"],
-            ["cut", "-c", "-#{Sample::MAX_LINE_LENGTH + 1}"],
-            ["head", "-n", max_lines.to_s],
-            ["awk", "-f", FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT, "-v", "max_line_length=#{Sample::MAX_LINE_LENGTH}"],
-            ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
-            err: err_write
-          )
-          to_check = {
-            sig_pipe: [proc_cut],
-            no_errors: [proc_head, proc_validation, proc_upload],
-          }
-        end
-        err_write.close
-        stderr = err_read.read
-
-        # Whenever the file has more lines than the accepted limit,
-        # head command interrupts the stream and all previous commands receive a
-        # SIGPIPE 13 'pipe broken'. This is an expected condition that shouldn't be
-        # considered as an error.
-        if (
-             # exitstatus is 0 when input file is small enough to be read in a single fetch
-             proc_download&.exitstatus&.zero? ||
-             # exitstatus is 1 when input file is too big and aws cp still have its connection open
-             (proc_download&.exitstatus == 1 && stderr.include?(InputFile::S3_CP_PIPE_ERROR))
-        ) &&
-           to_check[:sig_pipe].all? { |p| p&.termsig == 13 } &&
-           to_check[:no_errors].all? { |p| p&.exitstatus&.zero? }
-          # Success
-          break
-        elsif to_check.values.flatten.all? { |p| p&.exitstatus&.zero? }
-          # Success
-          break
-        elsif proc_validation&.exitstatus&.nonzero? && stderr.include?(Sample::PARSE_ERROR_MESSAGE)
-          error_msg = "Error parsing upload of S3 sample '#{name}' (#{id}) file '#{fastq}' failed with: #{stderr}"
-          Rails.logger.error(error_msg)
-          stderr_array << error_msg
+        _stdout, stderr, status = Open3.capture3(
+          ["aws", "s3", "cp", fastq, "#{sample_input_s3_path}/#{input_file.name}"]
+        )
+        if status.success?
           break
         else
           # Try again
           Rails.logger.error("Try ##{try}: Upload of S3 sample '#{name}' (#{id}) file '#{fastq}' failed with: #{stderr}")
           try += 1
-
           # Record final stderr if exceeding max tries
           stderr_array << stderr if try == max_tries
           sleep(Sample::SLEEP_SECONDS_BETWEEN_RETRIES)
@@ -422,7 +384,9 @@ class Sample < ApplicationRecord
   rescue => e
     LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}")
     self.status = STATUS_CHECKED
-    self.upload_error = Sample::UPLOAD_ERROR_S3_UPLOAD_FAILED
+    if upload_error.blank?
+      self.upload_error = Sample::UPLOAD_ERROR_S3_UPLOAD_FAILED
+    end
     save!
   end
 

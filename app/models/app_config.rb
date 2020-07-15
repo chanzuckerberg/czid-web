@@ -40,4 +40,6 @@ class AppConfig < ApplicationRecord
   SUBSAMPLE_WHITELIST_DEFAULT_MAX_INPUT_FRAGMENTS = 'subsample_whitelist_default_max_input_fragments'.freeze
   # For controlling caching of report page
   DISABLE_REPORT_CACHING = 'disable_report_caching'.freeze
+  # Set the size limit for files uploaded from S3, in gigabytes.
+  S3_SAMPLE_UPLOAD_FILE_SIZE_LIMIT = 's3_sample_upload_file_size_limit'.freeze
 end

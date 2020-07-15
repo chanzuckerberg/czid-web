@@ -45,4 +45,15 @@ module S3Util
     key = uri_parts[3]
     return bucket, key
   end
+
+  def self.get_file_size(bucket, key)
+    resp = AwsClient[:s3].list_objects_v2(bucket: bucket,
+                                          prefix: key,
+                                          max_keys: 1)
+    if !resp.contents.empty?
+      return resp.contents[0].size
+    else
+      raise "Cannot get file size for #{s3_path}: unable to find file"
+    end
+  end
 end

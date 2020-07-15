@@ -46,6 +46,10 @@ module ErrorHelper
     def self.upload_from_basespace_failed(sample_name, sample_id, file_name, basespace_dataset_id, max_tries)
       "Upload of sample '#{sample_name}' (#{sample_id}) file '#{file_name}', basespace dataset #{basespace_dataset_id} failed after #{max_tries} retries"
     end
+
+    def self.max_file_size_exceeded(file_size, maximum)
+      "File size of #{file_size} exceeds maximum of #{maximum}GB"
+    end
   end
 
   LOCATION_INVALID_ERROR_HUMAN = "Please input a location at the county/district level of higher. (for human samples)".freeze
