@@ -43,11 +43,16 @@
 
       .infoIcon {
         margin-top: $space-xxxs;
-        margin-left: $space-xxs;
+        margin-left: $space-xxxs;
+        margin-right: $space-xxxs;
         height: 15px;
         width: 15px;
         fill: $gray-dark;
         vertical-align: text-top;
+
+        &:hover {
+          fill: $primary;
+        }
       }
     }
   }
