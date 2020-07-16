@@ -3,7 +3,7 @@
 # To view the structure of the logs and metrics visit: https://go.czi.team/idseq-sli-metrics
 ##########################################
 
-if !Rails.env.test? && !Rails.env.production?
+if !Rails.env.test? && !Rails.env.prod?
   require_all 'lib/subscribers'
 
   ActiveSupport::Notifications.subscribe("process_action.action_controller", Subscribers::ActionControllerMetricHandler.new)
