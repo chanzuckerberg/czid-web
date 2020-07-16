@@ -1,5 +1,20 @@
 <div id="page_header">
-  <% if current_user && current_user.id && !@show_blank_header %>
+  <% if @show_blank_header %>
+    <%= javascript_tag do %>
+      react_component('Header', {
+        userSignedIn: false,
+        showBlank: <%= !!@show_blank_header %>
+      }, 'page_header')
+    <% end %>
+  <% elsif !current_user && !@show_landing_header%>
+    <%= javascript_tag do %>
+      react_component('Header', {
+        userSignedIn: false,
+        disableNavigation: <%= @disable_header_navigation %>,
+        announcementBannerEnabled: <%= @announcement_banner_enabled %>,
+      }, 'page_header')
+    <% end %>
+  <% elsif current_user && current_user.id && !@show_landing_header %>
     <%= javascript_tag do %>
       react_component('Header', {
         adminUser: <%= current_user.admin %>,
@@ -19,13 +34,6 @@
           <%= current_user.id %>,
           <%= raw escape_json(current_user.traits_for_segment) %>);
       <% end %>
-    <% end %>
-  <% else %>
-    <%= javascript_tag do %>
-      react_component('Header', {
-        userSignedIn: false,
-        showBlank: <%= !!@show_blank_header %>
-      }, 'page_header')
     <% end %>
   <% end %>
 </div>

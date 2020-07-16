@@ -31,6 +31,7 @@ class HomeController < ApplicationController
         @show_public_site = true
       end
 
+      @show_landing_header = true
       render 'landing'
     end
   end

@@ -121,42 +121,47 @@ class Header extends React.Component {
     }
 
     return (
-      userSignedIn && (
-        <div>
-          {showAnnouncementBanner && (
-            <AnnouncementBanner
-              onClose={withAnalytics(
-                this.handleAnnouncementBannerClose,
-                "AnnouncementBanner_close_clicked"
-              )}
-            />
+      <div>
+        {showAnnouncementBanner && (
+          <AnnouncementBanner
+            onClose={withAnalytics(
+              this.handleAnnouncementBannerClose,
+              "AnnouncementBanner_close_clicked"
+            )}
+          />
+        )}
+        <div className={cs.header}>
+          <div className={cs.logo}>
+            <a href="/">
+              <LogoIcon className={cs.icon} />
+            </a>
+          </div>
+          <div className={cs.fill} />
+          {!disableNavigation && (
+            <MainMenu adminUser={adminUser} userSignedIn={userSignedIn} />
           )}
-          <div className={cs.header}>
-            <div className={cs.logo}>
-              <a href="/">
-                <LogoIcon className={cs.icon} />
-              </a>
-            </div>
-            <div className={cs.fill} />
-            {!disableNavigation && <MainMenu adminUser={adminUser} />}
-            {!disableNavigation && (
+          {!disableNavigation &&
+            (userSignedIn ? (
               <UserMenuDropDown
                 adminUser={adminUser}
                 allowedFeatures={allowedFeatures}
                 {...userMenuProps}
               />
-            )}
-          </div>
-          {
-            // Initialize the toast container - can be done anywhere (has absolute positioning)
-          }
-          <ToastContainer />
+            ) : (
+              <TermsMenuDropDown />
+            ))}
+        </div>
+        {
+          // Initialize the toast container - can be done anywhere (has absolute positioning)
+        }
+        <ToastContainer />
+        {userSignedIn && (
           <iframe
             className={cs.backgroundRefreshFrame}
             src="/auth0/background_refresh"
           />
-        </div>
-      )
+        )}
+      </div>
     );
   }
 }
@@ -206,6 +211,57 @@ const AnnouncementBanner = ({ onClose }) => {
 
 AnnouncementBanner.propTypes = {
   onClose: PropTypes.func,
+};
+
+const TermsDropdownItem = (
+  <BareDropdown.Item
+    key="terms_of_service"
+    text={
+      <a
+        className={cs.option}
+        target="_blank"
+        rel="noopener noreferrer"
+        href="/terms"
+        onClick={() =>
+          logAnalyticsEvent("Header_dropdown-terms-option_clicked")
+        }
+      >
+        Terms of Use
+      </a>
+    }
+  />
+);
+
+const PrivacyDropdownItem = (
+  <BareDropdown.Item
+    key="privacy_policy"
+    text={
+      <a
+        className={cs.option}
+        target="_blank"
+        rel="noopener noreferrer"
+        href="/privacy"
+        onClick={() =>
+          logAnalyticsEvent("Header_dropdown-privacy-policy-option_clicked")
+        }
+      >
+        Privacy Policy
+      </a>
+    }
+  />
+);
+
+const TermsMenuDropDown = () => {
+  return (
+    <div>
+      <BareDropdown
+        trigger={<div className={cs.terms}>{"Terms"}</div>}
+        className={cs.termsDropdown}
+        items={[TermsDropdownItem, PrivacyDropdownItem]}
+        direction="left"
+      />
+    </div>
+  );
 };
 
 const UserMenuDropDown = ({
@@ -303,38 +359,11 @@ const UserMenuDropDown = ({
 
     userDropdownItems.push(
       <BareDropdown.Divider key="divider_one" />,
-      <BareDropdown.Item
-        key="terms_of_service"
-        text={
-          <a
-            className={cs.option}
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://idseq.net/terms"
-            onClick={() =>
-              logAnalyticsEvent("Header_dropdown-terms-option_clicked")
-            }
-          >
-            Terms of Use
-          </a>
-        }
-      />,
-      <BareDropdown.Item
-        key="privacy_policy"
-        text={
-          <a
-            className={cs.option}
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://idseq.net/privacy"
-            onClick={() =>
-              logAnalyticsEvent("Header_dropdown-privacy-policy-option_clicked")
-            }
-          >
-            Privacy Policy
-          </a>
-        }
-      />,
+      TermsDropdownItem,
+      PrivacyDropdownItem
+    );
+
+    userDropdownItems.push(
       <BareDropdown.Divider key="divider_two" />,
       <BareDropdown.Item
         key="logout"
@@ -369,8 +398,26 @@ UserMenuDropDown.propTypes = forbidExtraProps({
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
 });
 
-const MainMenu = ({ adminUser }) => {
+const MainMenu = ({ adminUser, userSignedIn }) => {
   const isSelected = tab => window.location.pathname.startsWith(`/${tab}`);
+
+  if (!userSignedIn) {
+    return (
+      <div className={cs.loggedOutMainMenu}>
+        {/* Keep referrer links */}
+        <a
+          className={cs.item}
+          href="https://help.idseq.net"
+          rel="noopener"
+          /* eslint-disable-next-line react/jsx-no-target-blank */
+          target="_blank"
+          onClick={() => logAnalyticsEvent("MainMenu_help_clicked")}
+        >
+          Help Center
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className={cs.mainMenu}>
@@ -416,6 +463,7 @@ const MainMenu = ({ adminUser }) => {
 
 MainMenu.propTypes = {
   adminUser: PropTypes.bool,
+  userSignedIn: PropTypes.bool,
 };
 
 export default Header;

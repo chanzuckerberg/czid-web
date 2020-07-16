@@ -49,6 +49,33 @@
     }
   }
 
+  .termsDropdown {
+    flex: 0 0 auto;
+    color: $white;
+
+    .terms {
+      @include font-body-xs;
+
+      align-items: center;
+      display: flex;
+      font-weight: $font-weight-semibold;
+      color: $gray-dark;
+      margin-right: 5px;
+      height: 36px;
+      vertical-align: middle;
+    }
+
+    .option {
+      display: block;
+      width: 100%;
+      color: $black !important;
+    }
+  }
+
+  .termsDropdown i:before {
+    color: $gray-dark !important;
+  }
+
   .mainMenu {
     @include font-body-xs;
     margin-right: 100px;
@@ -65,6 +92,21 @@
 
     .item:not(:last-child) {
       margin-right: 25px;
+    }
+  }
+
+  .loggedOutMainMenu {
+    @include font-body-xs;
+    display: flex;
+    color: $gray-dark;
+
+    .item {
+      font-weight: $font-weight-semibold;
+      margin-right: 25px;
+
+      &.selected {
+        color: $white !important;
+      }
     }
   }
 }
