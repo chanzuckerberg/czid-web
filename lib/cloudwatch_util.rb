@@ -1,4 +1,6 @@
 module CloudWatchUtil
+  @cloudwatch_client = Aws::CloudWatch::Client.new
+
   # metric_name: String, value: Float, unit: String, dimensions: [Hash<name: String, value: String>]
   def self.create_metric_datum(metric_name, value, unit, dimensions)
     return {
@@ -13,8 +15,8 @@ module CloudWatchUtil
 
   # namespace: String, metric_data: [metric_datum]
   def self.put_metric_data(namespace, metric_data)
-    AwsClient[:CloudWatch].put_metric_data(namespace: namespace,
-                                           metric_data: metric_data)
+    @cloudwatch_client.put_metric_data(namespace: namespace,
+                                       metric_data: metric_data)
   rescue Aws::CloudWatch::Errors => e
     Rails.logger.error("Metric data #{metric_data} in namespace #{namespace} resulted in #{e.message}")
   end

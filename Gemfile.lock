@@ -1033,6 +1033,7 @@ GEM
       redis (>= 2.2, < 5)
     request_store (1.4.1)
       rack (>= 1.4)
+    require_all (3.0.0)
     resque (1.27.4)
       mono_logger (~> 1.0)
       multi_json (~> 1.0)
@@ -1215,6 +1216,7 @@ DEPENDENCIES
   rails-controller-testing
   rake
   redis-rails (~> 5)
+  require_all
   resque (>= 1.27.4)
   resque-lock
   resque-scheduler (>= 4.3.1)

@@ -101,6 +101,9 @@ gem "rack-cors"
 # For structured logging
 gem 'ougai'
 
+# For loading all files in a directory
+gem 'require_all'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'

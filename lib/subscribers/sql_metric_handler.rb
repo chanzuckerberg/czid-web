@@ -1,3 +1,5 @@
+require_relative 'base'
+
 module Subscribers
   class SQLMetricHandler < Base
     # TODO(omar): Would like to find what action controller called which query to give the event some context

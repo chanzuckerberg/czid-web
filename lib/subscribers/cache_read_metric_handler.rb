@@ -1,3 +1,5 @@
+require_relative 'base'
+
 module Subscribers
   class CacheReadMetricHandler < Base
     def process_event

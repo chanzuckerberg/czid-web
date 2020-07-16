@@ -1,3 +1,6 @@
+require_relative 'base'
+require './lib/cloudwatch_util'
+
 module Subscribers
   class ActionControllerMetricHandler < Base
     def process_event

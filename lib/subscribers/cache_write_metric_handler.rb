@@ -1,10 +1,12 @@
+require_relative 'base'
+
 module Subscribers
-  class CacheFetchHitMetricHandler < Base
+  class CacheWriteMetricHandler < Base
     def process_event
       event_log = {
         type: "metric",
         source: "backend",
-        msg: "cached_fetch_hit.active_support",
+        msg: "cached_write.active_support",
         v: 1,
         details: {
           name: event.name,
