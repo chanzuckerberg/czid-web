@@ -260,7 +260,7 @@ class SamplesController < ApplicationController
     samples_have_pipeline_runs = (sample_ids.length == latest_pipeline_runs.length)
     samples_have_erccs = latest_pipeline_runs.all? { |pr| ((pr.total_ercc_reads || 0) > 0) }
     samples_have_correct_pr_versions = latest_pipeline_runs.all? { |pr| pipeline_version_at_least(pr.pipeline_version, "4.0") }
-    mass_normalized_backgronds_available = all_samples_have_pipeline_runs && samples_have_erccs && samples_have_correct_pr_versions
+    mass_normalized_backgronds_available = samples_have_pipeline_runs && samples_have_erccs && samples_have_correct_pr_versions
 
     render json: {
       massNormalizedBackgroundsAvailable: mass_normalized_backgronds_available,

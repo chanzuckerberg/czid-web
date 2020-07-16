@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import BasicPopup from "~/components/BasicPopup";
-import StatusLabel from "~ui/labels/StatusLabel";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
@@ -48,16 +47,7 @@ export default class SamplesHeatmapHeader extends React.Component {
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
           <ViewHeader.Pretitle>
-            <React.Fragment>
-              Heatmap
-              {allowedFeatures.includes("heatmap_filter_fe") && (
-                <StatusLabel
-                  status="Beta - Client Filtering"
-                  type="info"
-                  inline={true}
-                />
-              )}
-            </React.Fragment>
+            <React.Fragment>Heatmap</React.Fragment>
           </ViewHeader.Pretitle>
           <ViewHeader.Title
             label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
