@@ -44,4 +44,6 @@ class AppConfig < ApplicationRecord
   DISABLE_REPORT_CACHING = 'disable_report_caching'.freeze
   # Set the size limit for files uploaded from S3, in gigabytes.
   S3_SAMPLE_UPLOAD_FILE_SIZE_LIMIT = 's3_sample_upload_file_size_limit'.freeze
+  # Switch to enable view-only project snapshots that are visible to logged-out users.
+  ENABLE_SNAPSHOT_SHARING = 'enable_snapshot_sharing'.freeze
 end
