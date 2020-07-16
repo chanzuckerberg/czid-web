@@ -29,11 +29,12 @@ class CheckPipelineRuns
     attr_accessor :shutdown_requested
   end
 
-  def self.update_jobs(num_shards, shard_id, pr_ids, pt_ids)
+  def self.update_jobs(num_shards, shard_id, pr_ids, pt_ids, cg_ids)
     ActiveRecord::Base.connection.reconnect! if shard_id > 0
     num_pr = pr_ids.count
     num_pt = pt_ids.count
-    Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr and #{num_pt} pt. shard #{shard_id} out of #{num_shards}")
+    num_cg = cg_ids.count
+    Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr, #{num_pt} pt, and #{num_cg} cg. shard #{shard_id} out of #{num_shards}")
     pr_ids.each do |prid|
       next unless prid % num_shards == shard_id
       pr = PipelineRun.find(prid)
@@ -56,6 +57,19 @@ class CheckPipelineRuns
         pt.monitor_job
       rescue => exception
         LogUtil.log_err_and_airbrake("Monitor job for phylo_tree #{pt.id} failed with exception: #{exception.message}")
+        LogUtil.log_backtrace(exception)
+      end
+    end
+
+    cg_ids.each do |cgid|
+      next unless cgid % num_shards == shard_id
+      cg_sample = Sample.find(cgid)
+      begin
+        break if @shutdown_requested
+        Rails.logger.info("  Checking CG sample #{cgid}")
+        cg_sample.temp_update_workflow_status
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Updating CG sample #{cgid} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -253,12 +267,13 @@ class CheckPipelineRuns
       t_iter_start = t_now
       pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
+      cg_ids = Sample.temp_workflows_in_progress(Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW).pluck(:id)
       num_shards = ((pr_ids.count + pt_ids.count) / MIN_JOBS_PER_SHARD).to_i
       num_shards = [[num_shards, MAX_SHARDS].min, 1].max
       fork_pids = []
       shard_id = 0
       while shard_id < num_shards
-        pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids) }
+        pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids, cg_ids) }
         fork_pids << pid
         shard_id += 1
       end
@@ -273,6 +288,7 @@ class CheckPipelineRuns
         duration: (after_iter_timestamp - before_iter_timestamp),
         pr_id_count: pr_ids.count,
         pt_id_count: pt_ids.count,
+        cg_id_count: cg_ids.count,
         num_shards: num_shards,
       }
       Rails.logger.info(JSON.generate(logger_iteration_data))

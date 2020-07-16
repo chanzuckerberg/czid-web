@@ -79,7 +79,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       create(:app_config, key: AppConfig::SFN_ARN, value: FAKE_SFN_ARN)
     end
 
-    context "when SFN was no tag for WDL version" do
+    context "when SFN has no tag for WDL version" do
       it "returns an exception" do
         stub_const(
           "SfnPipelineDispatchService::SFN_CLIENT",
@@ -95,7 +95,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       end
     end
 
-    context "when SFN was no tag for DAG version" do
+    context "when SFN has no tag for DAG version" do
       it "returns an exception" do
         stub_const(
           "SfnPipelineDispatchService::SFN_CLIENT",
@@ -111,7 +111,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       end
     end
 
-    context "when SFN was no version tags" do
+    context "when SFN has no version tags" do
       it "returns an exception" do
         stub_const("SfnPipelineDispatchService::SFN_CLIENT", Aws::States::Client.new(stub_responses: true))
         expect { subject }.to raise_error(SfnPipelineDispatchService::SfnVersionTagsMissingError, /Tags missing: \[:wdl_version, :dag_version\]/)

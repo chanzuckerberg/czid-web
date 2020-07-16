@@ -14,12 +14,13 @@ class Sample < ApplicationRecord
     #  bulk_import) you must explicitly update elasticsearch appropriately.
     include ElasticsearchCallbacksHelper
   end
-  include TestHelper
-  include MetadataHelper
-  include PipelineRunsHelper
+  include AppConfigHelper
   include BasespaceHelper
   include ErrorHelper
-  include AppConfigHelper
+  include MetadataHelper
+  include PipelineOutputsHelper
+  include PipelineRunsHelper
+  include TestHelper
 
   belongs_to :project
   # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
@@ -33,20 +34,32 @@ class Sample < ApplicationRecord
   has_many :metadata, dependent: :destroy
   has_and_belongs_to_many :visualizations
 
-  SUPPORTED_TEMP_PIPELINE_WORKFLOWS = ["main", "consensus_genome"].freeze
+  MAIN_PIPELINE_WORKFLOW = "main".freeze
+  CONSENSUS_GENOME_PIPELINE_WORKFLOW = "consensus_genome".freeze
+  SUPPORTED_TEMP_PIPELINE_WORKFLOWS = [MAIN_PIPELINE_WORKFLOW, CONSENSUS_GENOME_PIPELINE_WORKFLOW].freeze
 
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
+
+  # Remove when temp_pipeline_workflow is moved off Samples
+  SFN_STATUS = {
+    running: "RUNNING",
+    succeeded: "SUCCEEDED",
+    failed: "FAILED",
+  }.freeze
+
   validates :status, presence: true, inclusion: { in: [
     STATUS_CREATED,
     STATUS_UPLOADED,
     STATUS_RERUN,
     STATUS_RETRY_PR,
     STATUS_CHECKED,
-  ], }, if: :mass_validation_enabled?
+  ], }
+
+  validates :temp_sfn_execution_status, allow_blank: true, inclusion: { in: SFN_STATUS.values }
 
   validate :input_files_checks
   validates :name, presence: true, uniqueness: { scope: :project_id, case_sensitive: false }
@@ -560,6 +573,8 @@ class Sample < ApplicationRecord
 
     if transient_status == STATUS_RETRY_PR && pr
       pr.retry
+    elsif temp_pipeline_workflow == CONSENSUS_GENOME_PIPELINE_WORKFLOW
+      SfnCGPipelineDispatchService.call(self)
     else
       kickoff_pipeline
     end
@@ -947,5 +962,33 @@ class Sample < ApplicationRecord
     else
       scoped
     end
+  end
+
+  # Temp workflow runs in progress (for now only Consensus Genomes)
+  def self.temp_workflows_in_progress(workflow_name)
+    where(temp_pipeline_workflow: workflow_name, temp_sfn_execution_status: SFN_STATUS[:running])
+  end
+
+  # Checking/updating temp workflow runs (for now only Consensus Genomes)
+  def temp_update_workflow_status
+    begin
+      description = AwsClient[:states].describe_execution(execution_arn: temp_sfn_execution_arn)
+    rescue Aws::States::Errors::ExecutionDoesNotExist
+      description_json = get_s3_file("#{sample_output_s3_path}/sfn-desc/#{temp_sfn_execution_arn}")
+      description = description_json && JSON.parse(description_json, symbolize_names: true)
+    end
+
+    status = description[:status]
+    if ["TIMED_OUT", "ABORTED"].include?(status)
+      status = SFN_STATUS[:failed]
+    end
+
+    if status != temp_sfn_execution_status
+      update(temp_sfn_execution_status: status)
+    end
+    # TODO: Add alert to ops on failure
+  rescue => err
+    LogUtil.log_err_and_airbrake("Error checking/updating temp workflow pipeline: #{err}")
+    LogUtil.log_backtrace(err)
   end
 end

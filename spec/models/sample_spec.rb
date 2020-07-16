@@ -268,4 +268,64 @@ describe Sample, type: :model do
       end
     end
   end
+
+  context "Consensus Genomes pipeline" do
+    let(:fake_sfn_name) { "fake_sfn_name" }
+    let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
+    let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
+    let(:fake_sfn_execution_description) do
+      {
+        execution_arn: fake_sfn_execution_arn,
+        input: "{}",
+        # AWS SDK rounds to second
+        start_date: Time.zone.now.round,
+        state_machine_arn: fake_sfn_arn,
+        status: "SUCCESS",
+      }
+    end
+    let(:fake_dispatch_response) do
+      {
+        sfn_input_json: {},
+        sfn_execution_arn: fake_sfn_execution_arn,
+      }
+    end
+
+    before do
+      project = create(:project)
+      @sample = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW)
+      @sample_running = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW, temp_sfn_execution_status: Sample::SFN_STATUS[:running], temp_sfn_execution_arn: fake_sfn_execution_arn)
+
+      @mock_aws_clients = {
+        states: Aws::States::Client.new(stub_responses: true),
+      }
+      allow(AwsClient).to receive(:[]) { |client|
+        @mock_aws_clients[client]
+      }
+
+      AppConfigHelper.set_app_config(AppConfig::SFN_CG_ARN, fake_sfn_arn)
+    end
+
+    context "#temp_workflows_in_progress" do
+      it "loads CG pipelines in progress" do
+        res = Sample.temp_workflows_in_progress(Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW)
+        expect(res).to eq([@sample_running])
+      end
+    end
+
+    context "#temp_update_workflow_status" do
+      it "checks and updates CG pipeline statuses" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
+
+        @sample_running.temp_update_workflow_status
+        expect(@sample_running).to have_attributes(temp_sfn_execution_status: fake_sfn_execution_description[:status])
+      end
+
+      it "reports errors in checking CG pipeline statuses" do
+        allow(@mock_aws_clients[:states]).to receive(:describe_execution).and_raise(StandardError)
+        expect(LogUtil).to receive(:log_err_and_airbrake)
+
+        @sample_running.temp_update_workflow_status
+      end
+    end
+  end
 end
