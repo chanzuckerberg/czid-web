@@ -70,15 +70,15 @@ class Background < ApplicationRecord
         # reset the results
         taxon_result = { tax_id: row["tax_id"], count_type: row["count_type"],
                          tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0,
-                         rpm_list: [], total_ercc_reads: row["total_ercc_reads"],
-                         sum_count: 0.0, sum_count2: 0.0, }
+                         rpm_list: [],
+                         sum_mass_norm_count: 0.0, sum_mass_norm_count2: 0.0, }
         key = current_key
       end
       # increment
       taxon_result[:sum_rpm] += row["rpm"]
       taxon_result[:sum_rpm2] += row["rpm"]**2
-      taxon_result[:sum_count] += row["count"]
-      taxon_result[:sum_count2] += row["count"]**2
+      taxon_result[:sum_mass_norm_count] += row["count"] / row["total_ercc_reads"]
+      taxon_result[:sum_mass_norm_count2] += (row["count"] / row["total_ercc_reads"])**2
       taxon_result[:rpm_list] << row["rpm"].round(3)
     end
     # addd the last result
@@ -91,14 +91,13 @@ class Background < ApplicationRecord
     taxon_result[:background_id] = id
     taxon_result[:created_at] = date
     taxon_result[:updated_at] = date
-    taxon_result[:mean] = (taxon_result[:sum_rpm]) / n.to_f
+    taxon_result[:mean] = taxon_result[:sum_rpm] / n.to_f
     if mass_normalized?
-      taxon_result[:mean_mass_normalized] = (taxon_result[:sum_count] / taxon_result[:total_ercc_reads]) / n.to_f
+      taxon_result[:mean_mass_normalized] = taxon_result[:sum_mass_norm_count] / n.to_f
       taxon_result[:stdev_mass_normalized] = compute_stdev(
-        taxon_result[:sum_count],
-        taxon_result[:sum_count2],
-        n,
-        taxon_result[:total_ercc_reads]
+        taxon_result[:sum_mass_norm_count],
+        taxon_result[:sum_mass_norm_count2],
+        n
       )
     else
       taxon_result[:mean_mass_normalized] = nil
@@ -144,8 +143,8 @@ class Background < ApplicationRecord
     update(ready: 1) # background will be displayed on report page
   end
 
-  def compute_stdev(sum, sum2, n, norm = 1)
-    x = ((sum2 / norm) - (sum / norm)**2 / n.to_f) / (n - 1)
+  def compute_stdev(sum, sum2, n)
+    x = (sum2 - sum**2 / n.to_f) / (n - 1)
     # In theory, x can mathematically be proven to be non-negative.
     # But in practice, rounding errors can make it slightly negative when it should be 0.
     x = [0, x].max
