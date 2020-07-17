@@ -360,7 +360,7 @@ class Sample < ApplicationRecord
       try = 0
       while try < max_tries
         _stdout, stderr, status = Open3.capture3(
-          ["aws", "s3", "cp", fastq, "#{sample_input_s3_path}/#{input_file.name}"]
+          "aws", "s3", "cp", fastq, "#{sample_input_s3_path}/#{input_file.name}"
         )
         if status.success?
           break
