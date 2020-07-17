@@ -340,7 +340,7 @@ class Sample < ApplicationRecord
     stderr_array = []
     total_reads_json_path = nil
     # The AppConfig setting is the max file size in gigabytes; default 100; multiply by 10^9 to get bytes
-    s3_upload_file_size_limit = get_app_config(AppConfig::S3_SAMPLE_UPLOAD_FILE_SIZE_LIMIT).to_i || 100
+    s3_upload_file_size_limit = (get_app_config(AppConfig::S3_SAMPLE_UPLOAD_FILE_SIZE_LIMIT) || 100).to_i
     max_file_size = s3_upload_file_size_limit * (10**9)
     input_files.each do |input_file|
       fastq = input_file.source
