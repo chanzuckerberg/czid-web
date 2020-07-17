@@ -463,6 +463,17 @@ ActiveRecord::Schema.define(version: 20_200_715_004_114) do
     t.index ["url"], name: "index_shortened_urls_on_url", length: 254
   end
 
+  create_table "snapshot_links", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "project_id"
+    t.text "content", null: false, comment: "Content stored as {samples: [<sample_id>: {pipeline_run_id: <pipeline_run_id>}]}"
+    t.string "share_id", limit: 20, null: false, comment: "Used for accessing the SnapshotLink URL"
+    t.bigint "creator_id", comment: "The user_id that created the snapshot."
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_snapshot_links_on_project_id"
+    t.index ["share_id"], name: "index_snapshot_links_on_share_id", unique: true
+  end
+
   create_table "taxon_byteranges", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.integer "taxid"
     t.bigint "first_byte"
