@@ -193,15 +193,6 @@ class ReviewStep extends React.Component {
     const { skipSampleProcessing } = this.state;
     this.setState({
       skipSampleProcessing: !skipSampleProcessing,
-      useStepFunctionPipeline: false,
-    });
-  };
-
-  toggleUseStepFunctionPipeline = () => {
-    const { useStepFunctionPipeline } = this.state;
-    this.setState({
-      useStepFunctionPipeline: !useStepFunctionPipeline,
-      skipSampleProcessing: false,
     });
   };
 
@@ -214,29 +205,13 @@ class ReviewStep extends React.Component {
 
   // This is only for admins and QA testers.
   renderSkipSampleProcessingOption = () => {
-    const { skipSampleProcessing, useStepFunctionPipeline } = this.state;
+    const { skipSampleProcessing } = this.state;
     return (
       <Checkbox
         className={cs.sampleProcessingOption}
-        checked={skipSampleProcessing && !useStepFunctionPipeline}
-        disabled={useStepFunctionPipeline}
+        checked={skipSampleProcessing}
         onChange={this.toggleSkipSampleProcessing}
         label="Skip sample processing after upload is complete."
-      />
-    );
-  };
-
-  // This is only for admins. This option is exclusive with skipping sample processing.
-  // It wouldn't make sense to be able to select both options.
-  renderUseStepFunctionPipelineOption = () => {
-    const { skipSampleProcessing, useStepFunctionPipeline } = this.state;
-    return (
-      <Checkbox
-        className={cs.sampleProcessingOption}
-        checked={useStepFunctionPipeline && !skipSampleProcessing}
-        disabled={skipSampleProcessing}
-        onChange={this.toggleUseStepFunctionPipeline}
-        label="Use wdl / step function pipeline."
       />
     );
   };
@@ -419,8 +394,6 @@ class ReviewStep extends React.Component {
           )}
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
-          {allowedFeatures.includes("step_function_pipeline") &&
-            this.renderUseStepFunctionPipelineOption()}
           {allowedFeatures.includes("taxon_whitelist") &&
             this.renderUseTaxonWhitelist()}
           <TermsAgreement

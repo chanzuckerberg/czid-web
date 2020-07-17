@@ -22,10 +22,6 @@ const ADMIN_OPTIONS = {
     helpText: "The idseq-dag branch to run the samples on.",
     placeholder: "master",
   },
-  dag_vars: {
-    helpText: "Variables to pass to the dag template.",
-    placeholder: "{}",
-  },
   alignment_config_name: {
     helpText: "The name of the alignment config to use for these samples.",
     placeholder: "2019-01-01",

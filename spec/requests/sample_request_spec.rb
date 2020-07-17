@@ -79,41 +79,6 @@ RSpec.describe "Sample request", type: :request do
           expect(pipeline_run.pipeline_execution_strategy).to eq("step_function")
         end
 
-        it "should properly add the pipeline_execution_strategy flag, directed_acyclic_graph, to the sample" do
-          @sample_params[:pipeline_execution_strategy] = "directed_acyclic_graph"
-
-          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
-
-          expect(response.content_type).to eq("application/json")
-          expect(response).to have_http_status(:ok)
-          json_response = JSON.parse(response.body)
-          sample_id = json_response["sample_ids"][0]
-
-          test_sample = Sample.find(sample_id)
-          expect(test_sample.status).to eq(Sample::STATUS_CREATED)
-          expect(test_sample.pipeline_execution_strategy).to eq("directed_acyclic_graph")
-        end
-
-        it "should properly add the pipeline_execution_strategy flag, directed_acyclic_graph, to the pipeline run" do
-          @sample_params[:pipeline_execution_strategy] = "directed_acyclic_graph"
-
-          post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
-
-          expect(response.content_type).to eq("application/json")
-          expect(response).to have_http_status(:ok)
-          json_response = JSON.parse(response.body)
-          sample_id = json_response["sample_ids"][0]
-
-          test_sample = Sample.find(sample_id)
-
-          # we have to call the method manually in testing,
-          # to bypass the file upload process
-          test_sample.kickoff_pipeline
-
-          pipeline_run = test_sample.pipeline_runs[0]
-          expect(pipeline_run.pipeline_execution_strategy).to eq("directed_acyclic_graph")
-        end
-
         it "should properly add the pipeline_execution_strategy flag, step_function, to the sample" do
           @sample_params[:pipeline_execution_strategy] = "step_function"
 
