@@ -5,6 +5,7 @@ import memoize from "memoize-one";
 
 import {
   getBackgrounds,
+  getMassNormalizedBackgroundAvailability,
   uploadedByCurrentUser,
   getHeatmapMetrics,
 } from "~/api";
@@ -80,6 +81,14 @@ class BulkDownloadModal extends React.Component {
 
   componentDidMount() {
     this.fetchSampleOptionsAndValidateSelectedSamples();
+    this.fetchBackgroundAvailability();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const prevSamples = prevProps.selectedSampleIds;
+    if (prevSamples !== this.props.selectedSampleIds) {
+      this.fetchBackgroundAvailability();
+    }
   }
 
   // *** Async requests ***
@@ -169,9 +178,22 @@ class BulkDownloadModal extends React.Component {
     const backgroundOptions = backgrounds.map(background => ({
       text: background.name,
       value: background.id,
+      mass_normalized: background.mass_normalized,
     }));
 
     return backgroundOptions;
+  }
+
+  async fetchBackgroundAvailability() {
+    const { selectedSampleIds } = this.props;
+    const enableMassNormalizedBackgrounds = await getMassNormalizedBackgroundAvailability(
+      Array.from(selectedSampleIds)
+    );
+
+    this.setState({
+      enableMassNormalizedBackgrounds:
+        enableMassNormalizedBackgrounds.massNormalizedBackgroundsAvailable,
+    });
   }
 
   // We use the heatmap metrics as the valid metrics for bulk downloads.
@@ -302,6 +324,7 @@ class BulkDownloadModal extends React.Component {
       waitingForCreate,
       createStatus,
       createError,
+      enableMassNormalizedBackgrounds,
     } = this.state;
 
     const numSamples = validSampleIds.size;
@@ -326,6 +349,7 @@ class BulkDownloadModal extends React.Component {
               selectedFields={selectedFields}
               selectedDownloadTypeName={selectedDownloadTypeName}
               onSelect={this.handleSelectDownloadType}
+              enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
             />
           </div>
           <div className={cs.footer}>

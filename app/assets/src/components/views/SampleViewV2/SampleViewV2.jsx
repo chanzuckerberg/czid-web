@@ -35,6 +35,7 @@ import {
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import {
+  pipelineVersionAtLeast,
   pipelineVersionHasCoverageViz,
   sampleErrorInfo,
 } from "~/components/utils/sample";
@@ -142,9 +143,8 @@ export default class SampleViewV2 extends React.Component {
   }
 
   componentDidMount = () => {
-    this.fetchSample();
+    // fetchBackgrounds will subsequently call fetchSample and fetchSampleReportData.
     this.fetchBackgrounds();
-    this.fetchSampleReportData();
 
     logAnalyticsEvent("PipelineSampleReport_sample_viewed", {
       sampleId: this.props.sampleId,
@@ -185,28 +185,54 @@ export default class SampleViewV2 extends React.Component {
   };
 
   fetchSample = async () => {
+    this.setState({ loadingReport: true });
+
     const { sampleId } = this.props;
-    const { pipelineVersion } = this.state;
+    const { pipelineVersion, backgrounds, selectedOptions } = this.state;
     let { currentTab } = this.state;
     const sample = await getSample({ sampleId });
     sample.id = sampleId;
-
     if (get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME)
       currentTab = TABS.CONSENSUS_GENOME;
+
+    const pipelineRun = find(
+      pipelineVersion
+        ? { pipeline_version: pipelineVersion }
+        : { id: sample.default_pipeline_run_id },
+      sample.pipeline_runs
+    );
+
+    const enableMassNormalizedBackgrounds =
+      pipelineRun &&
+      pipelineRun.total_ercc_reads > 0 &&
+      pipelineVersionAtLeast(
+        pipelineRun.pipeline_version,
+        MASS_NORMALIZED_PIPELINE_VERSION
+      );
+    // If the currently selected background is mass normalized and the sample is incompatible,
+    // then load the report with the default background instead.
+    let newSelectedOptions = { ...selectedOptions };
+    const selectedBackground = backgrounds.find(
+      background => selectedOptions.background === background.id
+    );
+    if (
+      !enableMassNormalizedBackgrounds &&
+      selectedBackground.mass_normalized
+    ) {
+      newSelectedOptions.background = sample.default_background_id;
+    }
 
     this.setState(
       {
         currentTab: currentTab,
         sample: sample,
-        pipelineRun: find(
-          pipelineVersion
-            ? { pipeline_version: pipelineVersion }
-            : { id: sample.default_pipeline_run_id },
-          sample.pipeline_runs
-        ),
+        pipelineRun: pipelineRun,
         project: sample.project,
+        enableMassNormalizedBackgrounds: enableMassNormalizedBackgrounds,
+        selectedOptions: newSelectedOptions,
       },
       () => {
+        this.fetchSampleReportData();
         this.fetchProjectSamples();
         this.fetchCoverageVizData();
       }
@@ -300,8 +326,16 @@ export default class SampleViewV2 extends React.Component {
   };
 
   fetchBackgrounds = async () => {
+    this.setState({ loadingReport: true });
     const backgrounds = await getBackgrounds();
-    this.setState({ backgrounds });
+    this.setState(
+      {
+        backgrounds,
+      },
+      () => {
+        this.fetchSample();
+      }
+    );
   };
 
   fetchCoverageVizData = async () => {
@@ -978,6 +1012,7 @@ export default class SampleViewV2 extends React.Component {
   renderReport = () => {
     const {
       backgrounds,
+      enableMassNormalizedBackgrounds,
       filteredReportData,
       lineageData,
       pipelineRun,
@@ -987,11 +1022,7 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
-    const enableMassNormalizedBackgrounds =
-      pipelineRun &&
-      pipelineRun.total_ercc_reads > 0 &&
-      parseFloat(pipelineRun.pipeline_version) >=
-        MASS_NORMALIZED_PIPELINE_VERSION;
+
     // reportReady is true if the pipeline run hasn't failed and is report-ready
     // (might still be running Experimental, but at least taxon_counts has been loaded).
     if (reportMetadata.reportReady) {

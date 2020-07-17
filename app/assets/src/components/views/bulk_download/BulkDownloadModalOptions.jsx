@@ -6,6 +6,7 @@ import memoize from "memoize-one";
 
 import StatusLabel from "~ui/labels/StatusLabel";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import RadioButton from "~ui/controls/RadioButton";
 import Checkbox from "~ui/controls/Checkbox";
@@ -34,6 +35,7 @@ class BulkDownloadModalOptions extends React.Component {
       onFieldSelect,
       selectedFields,
       selectedDownloadTypeName,
+      enableMassNormalizedBackgrounds,
     } = this.props;
 
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
@@ -154,33 +156,66 @@ class BulkDownloadModalOptions extends React.Component {
     return (
       <div className={cs.field} key={field.type}>
         <div className={cs.label}>{field.display_name}:</div>
-        <Dropdown
-          fluid
-          placeholder={placeholder}
-          options={dropdownOptions}
-          onChange={(value, displayName) => {
-            onFieldSelect(downloadType.type, field.type, value, displayName);
+        {field.type === "background" ? (
+          <BackgroundModelFilter
+            fluid
+            placeholder={placeholder}
+            allBackgrounds={dropdownOptions}
+            onChange={(value, displayName) => {
+              onFieldSelect(downloadType.type, field.type, value, displayName);
 
-            // Reset conditional fields if they are no longer needed.
-            CONDITIONAL_FIELDS.forEach(conditionalField => {
-              if (
-                field.type === conditionalField.dependentField &&
-                downloadType.type === conditionalField.downloadType &&
-                !conditionalField.triggerValues.includes(value)
-              ) {
-                onFieldSelect(
-                  downloadType.type,
-                  conditionalField.field,
-                  undefined,
-                  undefined
-                );
-              }
-            });
-          }}
-          value={selectedField}
-          usePortal
-          withinModal
-        />
+              // Reset conditional fields if they are no longer needed.
+              CONDITIONAL_FIELDS.forEach(conditionalField => {
+                if (
+                  field.type === conditionalField.dependentField &&
+                  downloadType.type === conditionalField.downloadType &&
+                  !conditionalField.triggerValues.includes(value)
+                ) {
+                  onFieldSelect(
+                    downloadType.type,
+                    conditionalField.field,
+                    undefined,
+                    undefined
+                  );
+                }
+              });
+            }}
+            enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+            value={selectedField}
+            usePortal
+            withinModal
+            rounded={false}
+            label={""}
+          />
+        ) : (
+          <Dropdown
+            fluid
+            placeholder={placeholder}
+            options={dropdownOptions}
+            onChange={(value, displayName) => {
+              onFieldSelect(downloadType.type, field.type, value, displayName);
+
+              // Reset conditional fields if they are no longer needed.
+              CONDITIONAL_FIELDS.forEach(conditionalField => {
+                if (
+                  field.type === conditionalField.dependentField &&
+                  downloadType.type === conditionalField.downloadType &&
+                  !conditionalField.triggerValues.includes(value)
+                ) {
+                  onFieldSelect(
+                    downloadType.type,
+                    conditionalField.field,
+                    undefined,
+                    undefined
+                  );
+                }
+              });
+            }}
+            value={selectedField}
+            usePortal
+            withinModal
+          />
+        )}
       </div>
     );
   };
@@ -204,9 +239,7 @@ class BulkDownloadModalOptions extends React.Component {
       !admin
     ) {
       disabled = true;
-      disabledMessage = `To download ${
-        downloadType.display_name
-      }, you must be the original uploader of all selected samples.`;
+      disabledMessage = `To download ${downloadType.display_name}, you must be the original uploader of all selected samples.`;
     } else if (
       downloadType.type === "original_input_file" &&
       appConfig.maxSamplesBulkDownloadOriginalFiles &&
@@ -214,9 +247,7 @@ class BulkDownloadModalOptions extends React.Component {
       !admin
     ) {
       disabled = true;
-      disabledMessage = `No more than ${
-        appConfig.maxSamplesBulkDownloadOriginalFiles
-      } samples
+      disabledMessage = `No more than ${appConfig.maxSamplesBulkDownloadOriginalFiles} samples
         allowed for ${downloadType.display_name} downloads`;
     }
 
@@ -251,14 +282,13 @@ class BulkDownloadModalOptions extends React.Component {
             )}
           </div>
           <div className={cs.description}>{downloadType.description}</div>
-          {downloadType.fields &&
-            selected && (
-              <div className={cs.fields}>
-                {downloadType.fields.map(field =>
-                  this.renderOption(downloadType, field)
-                )}
-              </div>
-            )}
+          {downloadType.fields && selected && (
+            <div className={cs.fields}>
+              {downloadType.fields.map(field =>
+                this.renderOption(downloadType, field)
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -320,6 +350,7 @@ BulkDownloadModalOptions.propTypes = {
   metricsOptions: PropTypes.array,
   allSamplesUploadedByCurrentUser: PropTypes.bool,
   onSelect: PropTypes.func.isRequired,
+  enableMassNormalizedBackgrounds: PropTypes.bool,
 };
 
 BulkDownloadModalOptions.contextType = UserContext;

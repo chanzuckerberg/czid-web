@@ -35,4 +35,4 @@ export const CATEGORIES = [
   { name: "Uncategorized" },
 ];
 
-export const MASS_NORMALIZED_PIPELINE_VERSION = 4.0;
+export const MASS_NORMALIZED_PIPELINE_VERSION = "4.0";
