@@ -18,7 +18,6 @@ import {
   values,
 } from "lodash/fp";
 import deepEqual from "fast-deep-equal";
-import cx from "classnames";
 
 import {
   getBackgrounds,
@@ -42,7 +41,6 @@ import {
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
 import AlertIcon from "~ui/icons/AlertIcon";
 import AMRView from "~/components/AMRView";
-import BacteriaIcon from "~ui/icons/BacteriaIcon";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import LoadingIcon from "~ui/icons/LoadingIcon";
@@ -51,6 +49,9 @@ import PropTypes from "~/components/utils/propTypes";
 import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
+import { WORKFLOWS } from "~/components/utils/workflows";
+import ConsensusGenomeView from "~/components/views/SampleViewV2/ConsensusGenomeView";
+import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
 
 import { TREE_METRICS, MASS_NORMALIZED_PIPELINE_VERSION } from "./constants";
 import ReportViewSelector from "./ReportViewSelector";
@@ -58,6 +59,7 @@ import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
 import TaxonTreeVis from "./TaxonTreeVis";
 import cs from "./sample_view_v2.scss";
+import csSampleMessage from "./sample_message.scss";
 
 const mapValuesWithKey = mapValues.convert({ cap: false });
 
@@ -86,6 +88,12 @@ const METRIC_DECIMAL_PLACES = {
   e_value: 1,
 };
 
+const TABS = {
+  CONSENSUS_GENOME: "Consensus Genome",
+  REPORT: "Report",
+  AMR: "Antimicrobial Resistance",
+};
+
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
@@ -108,7 +116,7 @@ export default class SampleViewV2 extends React.Component {
         coverageVizDataByTaxon: {},
         coverageVizParams: {},
         coverageVizVisible: false,
-        currentTab: "Report",
+        currentTab: TABS.REPORT,
         filteredReportData: [],
         loadingReport: false,
         pipelineRun: null,
@@ -150,7 +158,7 @@ export default class SampleViewV2 extends React.Component {
 
   componentDidUpdate() {
     const { amrData, currentTab } = this.state;
-    if (currentTab === "Antimicrobial Resistance" && !amrData) {
+    if (currentTab === TABS.AMR && !amrData) {
       this.fetchAmrData();
     }
   }
@@ -179,10 +187,16 @@ export default class SampleViewV2 extends React.Component {
   fetchSample = async () => {
     const { sampleId } = this.props;
     const { pipelineVersion } = this.state;
+    let { currentTab } = this.state;
     const sample = await getSample({ sampleId });
     sample.id = sampleId;
+
+    if (get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME)
+      currentTab = TABS.CONSENSUS_GENOME;
+
     this.setState(
       {
+        currentTab: currentTab,
         sample: sample,
         pipelineRun: find(
           pipelineVersion
@@ -910,7 +924,7 @@ export default class SampleViewV2 extends React.Component {
     if (loadingReport) {
       status = "Loading";
       message = "Loading report data.";
-      icon = <LoadingIcon className={cs.icon} />;
+      icon = <LoadingIcon className={csSampleMessage.icon} />;
       type = "inProgress";
     } else if (
       pipelineRunStatus === "WAITING" &&
@@ -919,7 +933,7 @@ export default class SampleViewV2 extends React.Component {
     ) {
       status = "IN PROGRESS";
       message = jobStatus;
-      icon = <LoadingIcon className={cs.icon} />;
+      icon = <LoadingIcon className={csSampleMessage.icon} />;
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
         linkText = "View Pipeline Visualization";
@@ -934,31 +948,23 @@ export default class SampleViewV2 extends React.Component {
           pipelineRun.known_user_error = knownUserError;
           pipelineRun.error_message = errorMessage;
         }
-        ({ status, message, linkText, type, link, icon } = sampleErrorInfo(
+        ({ status, message, linkText, type, link, icon } = sampleErrorInfo({
           sample,
-          pipelineRun
-        ));
+          pipelineRun,
+        }));
       }
-      icon = <AlertIcon className={cs.icon} />;
+      icon = <AlertIcon className={csSampleMessage.icon} />;
     }
 
     return (
-      <div className={cs.sampleMessage}>
-        <div className={cs.textContainer}>
-          <div className={cx(cs.reportStatus, cs[type])}>
-            {icon}
-            <span className={cs.text}>{status}</span>
-          </div>
-          <div className={cs.message}>{message}</div>
-          <a className={cs.actionLink} href={link}>
-            {linkText}
-            {linkText && (
-              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-            )}
-          </a>
-        </div>
-        <BacteriaIcon className={cs.bacteriaIcon} />
-      </div>
+      <SampleMessage
+        icon={icon}
+        link={link}
+        linkText={linkText}
+        message={message}
+        status={status}
+        type={type}
+      />
     );
   };
 
@@ -1106,7 +1112,7 @@ export default class SampleViewV2 extends React.Component {
                 reportMetadata.pipelineRunStatus === "SUCCEEDED" ? (
                   <Tabs
                     className={cs.tabs}
-                    tabs={["Report", "Antimicrobial Resistance"]}
+                    tabs={[TABS.REPORT, TABS.AMR]}
                     value={currentTab}
                     onChange={this.handleTabChange}
                   />
@@ -1118,9 +1124,10 @@ export default class SampleViewV2 extends React.Component {
               }
             </UserContext.Consumer>
           </div>
-          {currentTab === "Report" && this.renderReport()}
-          {currentTab === "Antimicrobial Resistance" && amrData && (
-            <AMRView amr={amrData} />
+          {currentTab === TABS.REPORT && this.renderReport()}
+          {currentTab === TABS.AMR && amrData && <AMRView amr={amrData} />}
+          {currentTab === TABS.CONSENSUS_GENOME && (
+            <ConsensusGenomeView sample={sample} />
           )}
         </NarrowContainer>
         {sample && (

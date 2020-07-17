@@ -26,10 +26,10 @@ class PipelineStepDetailsMode extends React.Component {
         break;
       case "userErrored":
       case "pipelineErrored": {
-        const { message, linkText, link } = sampleErrorInfo(
+        const { message, linkText, link } = sampleErrorInfo({
           sample,
-          pipelineRun
-        );
+          pipelineRun,
+        });
         statusTitle = "Sample failed at this step.";
         statusDescription = (
           <span>

@@ -68,10 +68,11 @@ export const sampleNameFromFileName = fname => {
   return base;
 };
 
-export const sampleErrorInfo = (sample, pipelineRun) => {
+export const sampleErrorInfo = ({ sample, pipelineRun }) => {
   let status, message, linkText, type, link, pipelineVersionUrlParam;
   switch (
-    sample.upload_error || (pipelineRun && pipelineRun.known_user_error)
+    sample.upload_error ||
+    (pipelineRun && pipelineRun.known_user_error)
   ) {
     case "BASESPACE_UPLOAD_FAILED":
       status = "SAMPLE FAILED";
@@ -112,7 +113,7 @@ export const sampleErrorInfo = (sample, pipelineRun) => {
     case "FAULTY_INPUT":
       status = "COMPLETE - ISSUE";
       message = `Sorry, something was wrong with your input file. ${
-        pipelineRun.error_message
+        pipelineRun ? pipelineRun.error_message : ""
       }.`;
       linkText = "Please check your file format and reupload your file.";
       type = "warning";

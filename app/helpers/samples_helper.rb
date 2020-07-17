@@ -19,6 +19,14 @@ module SamplesHelper
   # This regex extracts the sample_id from sample S3 paths.
   SAMPLE_PATH_ID_MATCHER = %r{\A.*samples\/\d*\/(\d*)\/.*\z}
 
+  # Maps SFN execution statuses to classic frontend statuses
+  SFN_STATUS_MAPPING = {
+    Sample::SFN_STATUS[:succeeded] => "COMPLETE",
+    Sample::SFN_STATUS[:failed] => "FAILED",
+    Sample::SFN_STATUS[:running] => "RUNNING",
+    nil => "RUNNING",
+  }.freeze
+
   # If selected_pipeline_runs_by_sample_id is provided, use those pipelines runs instead of the latest pipeline run for each sample.
   def generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: nil, include_all_metadata: false)
     formatted_samples = format_samples(samples, selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
@@ -425,6 +433,10 @@ module SamplesHelper
                                 result_status_description: 'FAILED',
                                 finalized: 0,
                                 report_ready: 0,
+                              }
+                            elsif sample.temp_pipeline_workflow != Sample::MAIN_PIPELINE_WORKFLOW
+                              {
+                                result_status_description: SFN_STATUS_MAPPING[sample.temp_sfn_execution_status],
                               }
                             else
                               pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,

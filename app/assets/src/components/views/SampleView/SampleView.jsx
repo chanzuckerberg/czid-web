@@ -312,16 +312,14 @@ class SampleView extends React.Component {
       type = "inProgress";
       if (pipelineRun && pipelineRun.version && pipelineRun.version.pipeline) {
         linkText = "View Pipeline Visualization";
-        link = `/samples/${sample.id}/pipeline_viz/${
-          pipelineRun.version.pipeline
-        }`;
+        link = `/samples/${sample.id}/pipeline_viz/${pipelineRun.version.pipeline}`;
       }
     } else {
       // Some kind of error or warning has occurred.
-      ({ status, message, linkText, type, link, icon } = sampleErrorInfo(
+      ({ status, message, linkText, type, link, icon } = sampleErrorInfo({
         sample,
-        pipelineRun
-      ));
+        pipelineRun,
+      }));
       icon = <AlertIcon className={cs.icon} />;
     }
 

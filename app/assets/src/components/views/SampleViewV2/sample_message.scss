@@ -1,0 +1,94 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+
+.sampleMessage {
+  display: flex;
+  justify-content: center;
+  margin-top: 100px;
+
+  .textContainer {
+    margin-top: $space-s;
+    margin-right: $space-l;
+    width: 330px;
+
+    .reportStatus {
+      display: inline-flex;
+      align-items: center;
+      background-color: $error-lightest;
+      border-radius: $border-radius-l;
+      padding: $space-xxs $space-s;
+
+      .icon {
+        width: 20px;
+      }
+
+      .text {
+        @include font-label-s;
+        margin-left: $space-s;
+        margin-top: $space-xxxs;
+      }
+
+      &.warning {
+        background-color: $warning-off-white;
+        color: $warning-medium;
+
+        .icon {
+          fill: $warning-medium;
+        }
+      }
+
+      &.error {
+        background-color: $error-off-white;
+        color: $error-medium;
+
+        .icon {
+          fill: $error-medium;
+        }
+      }
+
+      &.inProgress {
+        background-color: $primary-lightest;
+        color: $primary;
+
+        .icon {
+          fill: $primary;
+          font-size: 20px;
+        }
+      }
+
+      &.info {
+        background-color: $info-off-white;
+        color: $info-medium;
+
+        .icon {
+          fill: $info-medium;
+        }
+      }
+    }
+
+    .message {
+      @include font-header-m;
+      margin-bottom: $space-s;
+      margin-top: $space-s;
+      margin-left: $space-xxxs;
+    }
+
+    .actionLink {
+      @include font-header-xxs;
+      color: $primary !important;
+      margin-top: $space-m;
+      margin-left: $space-xxxs;
+
+      .rightArrow {
+        font-size: 8px;
+        margin-left: $space-xxs;
+      }
+    }
+  }
+
+  .bacteriaIcon {
+    width: 105px;
+    height: 128px;
+  }
+}
