@@ -5,6 +5,7 @@ import {
   find,
   flatten,
   get,
+  isEmpty,
   keys,
   map,
   mapValues,
@@ -176,6 +177,7 @@ export default class SampleViewV2 extends React.Component {
 
   defaultSelectedOptions = () => {
     return {
+      background: {},
       categories: {},
       metric: TREE_METRICS[0].value,
       nameType: "Scientific name",
@@ -216,8 +218,8 @@ export default class SampleViewV2 extends React.Component {
       background => selectedOptions.background === background.id
     );
     if (
-      !enableMassNormalizedBackgrounds &&
-      selectedBackground.mass_normalized
+      isEmpty(selectedBackground) ||
+      (!enableMassNormalizedBackgrounds && selectedBackground.mass_normalized)
     ) {
       newSelectedOptions.background = sample.default_background_id;
     }
