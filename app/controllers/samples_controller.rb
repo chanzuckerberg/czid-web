@@ -24,7 +24,7 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat,].freeze
 
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
@@ -38,7 +38,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_ACTIONS
 
-  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
+  before_action :admin_required, only: [:reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :login_required, only: [:bulk_import]
 
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
@@ -1210,23 +1210,6 @@ class SamplesController < ApplicationController
     Resque.enqueue(InitiateS3Cp, @sample.id)
     respond_to do |format|
       format.html { redirect_to @sample, notice: "Sample is being uploaded if it hasn't been." }
-      format.json { head :no_content }
-    end
-  end
-
-  # PUT /samples/:id/resync_prod_data_to_staging
-  def resync_prod_data_to_staging
-    if Rails.env == 'staging'
-      pr_ids = @sample.pipeline_run_ids
-      unless pr_ids.empty?
-        ['taxon_counts', 'taxon_byteranges', 'contigs'].each do |table_name|
-          ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql, ["REPLACE INTO idseq_staging.#{table_name} SELECT * FROM idseq_prod.#{table_name} WHERE pipeline_run_id IN (?)", pr_ids]))
-        end
-      end
-      Resque.enqueue(InitiateS3ProdSyncToStaging, @sample.id)
-    end
-    respond_to do |format|
-      format.html { redirect_to @sample, notice: "S3 data is being synced from prod." }
       format.json { head :no_content }
     end
   end
