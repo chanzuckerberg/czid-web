@@ -148,7 +148,8 @@ Rails.application.routes.draw do
 
   get 'sample_types.json', to: 'sample_types#index'
 
-  get 'pub/:share_id/samples/:id', to: "snapshot_samples#show"
+  get 'pub/:share_id/samples/:id', to: 'snapshot_samples#show'
+  get 'pub/projects/:project_id/create', to: 'snapshot_links#create'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
