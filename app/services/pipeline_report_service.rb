@@ -470,7 +470,7 @@ class PipelineReportService
     absent_z_score = Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND
   )
     return absent_z_score unless stdev_mass_normalized
-    r_mass_normalized = r / total_ercc_reads
+    r_mass_normalized = r / total_ercc_reads.to_f
     value = (r_mass_normalized - mean_mass_normalized) / stdev_mass_normalized
     value.clamp(min_z_score, max_z_score)
   end
