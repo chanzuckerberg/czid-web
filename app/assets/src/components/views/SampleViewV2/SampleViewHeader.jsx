@@ -8,7 +8,7 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import SampleViewControls from "../SampleView/SampleViewControls";
 import ViewHeader from "~/components/layout/ViewHeader";
 import { UserContext } from "~/components/common/UserContext";
-import { SaveButton, ShareButton } from "~ui/controls/buttons";
+import { DownloadButton, SaveButton, ShareButton } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
@@ -60,6 +60,60 @@ export default function SampleViewHeader({
       await saveVisualization(view, params);
     }
   };
+
+  const renderViewHeaderControls = () => {
+    if (get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME) {
+      return (
+        <ViewHeader.Controls>
+          {get("temp_sfn_execution_status", sample) === "SUCCEEDED" && (
+            <DownloadButton text="Download All" primary={true} />
+          )}
+        </ViewHeader.Controls>
+      );
+    }
+
+    return (
+      <ViewHeader.Controls>
+        <BasicPopup
+          trigger={
+            <ShareButton
+              onClick={() => {
+                copyShortUrlToClipboard();
+                logAnalyticsEvent("SampleView_share-button_clicked", {
+                  sampleId: sample && sample.id,
+                });
+              }}
+            />
+          }
+          content="A shareable URL was copied to your clipboard!"
+          on="click"
+          hideOnScroll
+        />{" "}
+        {userContext.admin && (
+          <SaveButton
+            onClick={withAnalytics(
+              onSaveClick,
+              "SampleView_save-button_clicked",
+              {
+                sampleId: sample && sample.id,
+              }
+            )}
+          />
+        )}{" "}
+        <SampleViewControls
+          backgroundId={backgroundId}
+          deletable={deletable}
+          reportPresent={reportPresent}
+          sample={sample}
+          project={project}
+          pipelineRun={pipelineRun}
+          editable={editable}
+          view={view}
+        />
+      </ViewHeader.Controls>
+    );
+  };
+
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>
@@ -132,44 +186,7 @@ export default function SampleViewHeader({
           </span>
         </div>
       </ViewHeader.Content>
-      <ViewHeader.Controls>
-        <BasicPopup
-          trigger={
-            <ShareButton
-              onClick={() => {
-                copyShortUrlToClipboard();
-                logAnalyticsEvent("SampleView_share-button_clicked", {
-                  sampleId: sample && sample.id,
-                });
-              }}
-            />
-          }
-          content="A shareable URL was copied to your clipboard!"
-          on="click"
-          hideOnScroll
-        />{" "}
-        {userContext.admin && (
-          <SaveButton
-            onClick={withAnalytics(
-              onSaveClick,
-              "SampleView_save-button_clicked",
-              {
-                sampleId: sample && sample.id,
-              }
-            )}
-          />
-        )}{" "}
-        <SampleViewControls
-          backgroundId={backgroundId}
-          deletable={deletable}
-          reportPresent={reportPresent}
-          sample={sample}
-          project={project}
-          pipelineRun={pipelineRun}
-          editable={editable}
-          view={view}
-        />
-      </ViewHeader.Controls>
+      {renderViewHeaderControls()}
     </ViewHeader>
   );
 }

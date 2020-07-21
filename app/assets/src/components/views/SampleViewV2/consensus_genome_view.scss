@@ -1,0 +1,24 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+
+.resultsContainer {
+  color: $black;
+
+  .section {
+    margin-bottom: 45px;
+
+    .header {
+      @include font-header-m;
+    }
+
+    .subheader {
+      @include font-header-s;
+    }
+
+    .body {
+      @include font-body-s;
+      margin-bottom: $space-l;
+    }
+  }
+}
