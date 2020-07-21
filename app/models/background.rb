@@ -70,15 +70,20 @@ class Background < ApplicationRecord
         # reset the results
         taxon_result = { tax_id: row["tax_id"], count_type: row["count_type"],
                          tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0,
-                         rpm_list: [],
-                         sum_mass_norm_count: 0.0, sum_mass_norm_count2: 0.0, }
+                         rpm_list: [], rel_abundance_list_mass_normalized: [], }
         key = current_key
       end
       # increment
       taxon_result[:sum_rpm] += row["rpm"]
       taxon_result[:sum_rpm2] += row["rpm"]**2
-      taxon_result[:sum_mass_norm_count] += row["count"] / row["total_ercc_reads"]
-      taxon_result[:sum_mass_norm_count2] += (row["count"] / row["total_ercc_reads"])**2
+      if row["total_ercc_reads"]
+        mass_norm_count = row["count"] / row["total_ercc_reads"].to_f
+        taxon_result[:sum_mass_norm_count] = (taxon_result[:sum_mass_norm_count] || 0.0) + mass_norm_count
+        taxon_result[:sum_mass_norm_count2] = (taxon_result[:sum_mass_norm_count2] || 0.0) + mass_norm_count**2
+        taxon_result[:rel_abundance_list_mass_normalized] << mass_norm_count.round(3)
+      else
+        taxon_result[:rel_abundance_list_mass_normalized] << nil
+      end
       taxon_result[:rpm_list] << row["rpm"].round(3)
     end
     # addd the last result
@@ -105,13 +110,12 @@ class Background < ApplicationRecord
     end
     taxon_result[:stdev] = compute_stdev(taxon_result[:sum_rpm], taxon_result[:sum_rpm2], n)
 
-    # add zeroes to the rpm_list for no presence to complete the list
+    # add zeroes to the rpm_list and rel_abundance_list_mass_normalized for no presence to complete the list
     taxon_result[:rpm_list] << 0.0 while taxon_result[:rpm_list].size < n
-    if taxon_result[:total_ercc_reads]
-      taxon_result[:rel_abundance_list_mass_normalized] = taxon_result[:rpm_list].map { |rpm| (rpm / taxon_result[:total_ercc_reads]).round(3) }
-      taxon_result[:rel_abundance_list_mass_normalized] = taxon_result[:rel_abundance_list_mass_normalized].to_json
+    if taxon_result[:rel_abundance_list_mass_normalized].all?
+      taxon_result[:rel_abundance_list_mass_normalized] << 0.0 while taxon_result[:rel_abundance_list_mass_normalized].size < n
+      taxon_result[:rpm_list] = taxon_result[:rpm_list].to_json
     end
-    taxon_result[:rpm_list] = taxon_result[:rpm_list].to_json
 
     taxon_result
   end
