@@ -1,4 +1,4 @@
-module Subscribers
+module MetricHandlers
   class Base
     attr_reader :event, :logger
 
@@ -12,14 +12,5 @@ module Subscribers
     def process_event
       raise NotImplementedError
     end
-
-    # TODO(omar): Implement these later for all Subscribers
-    # def process_metric
-    #   raise NotImplementedError
-    # end
-
-    # def process_exception_metric
-    #   raise NotImplementedError
-    # end
   end
 end

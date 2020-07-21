@@ -1,4 +1,6 @@
 class RestartPipelineForSample
+  extend InstrumentedJob
+
   @queue = :q03_pipeline_run
 
   def self.perform(sample_id)
@@ -14,5 +16,6 @@ class RestartPipelineForSample
       "RestartPipelineForSample #{sample_id} failed to run. Reason: #{err}"
     )
     LogUtil.log_backtrace(err)
+    raise err # Raise e in order to fire on_failure resque hook in InstrumentedJob
   end
 end

@@ -1,6 +1,6 @@
 require_relative 'base'
 
-module Subscribers
+module MetricHandlers
   class SQLMetricHandler < Base
     # TODO(omar): Would like to find what action controller called which query to give the event some context
     def process_event

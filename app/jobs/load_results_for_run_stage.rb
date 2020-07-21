@@ -1,5 +1,7 @@
 # Jos to initiate database download
 class LoadResultForRunStage
+  extend InstrumentedJob
+
   @queue = :q03_pipeline_run
 
   def self.perform(pipeline_run_stage_id)

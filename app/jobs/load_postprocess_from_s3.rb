@@ -1,6 +1,8 @@
 require 'resque/plugins/lock'
 class LoadPostprocessFromS3
+  extend InstrumentedJob
   extend Resque::Plugins::Lock
+
   @queue = :q03_pipeline_run
   @git_version = ENV['GIT_VERSION'] || ""
   def self.lock(pipeline_run_id)

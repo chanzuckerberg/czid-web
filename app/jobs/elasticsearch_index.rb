@@ -2,8 +2,12 @@ require 'elasticsearch/model'
 
 # Indexes records for elasticsearch record
 class ElasticsearchIndex
-  @queue = :elasticsearch_index
+  extend InstrumentedJob
 
+  # Hash where key == the self.perform parameter you wish to add as extra dimension and value == name of the dimension
+  extra_dimensions operation: "Operation"
+
+  @queue = :elasticsearch_index
   def self.perform(operation, index_name, doc_type, record_id, indexed_json)
     Rails.logger.debug("Elasticsearch: Attempting to #{operation} record: #{record_id} source table: #{index_name}")
     case operation.to_s
@@ -17,9 +21,11 @@ class ElasticsearchIndex
     end
   rescue Elasticsearch::Transport::Transport::Errors::NotFound
     Rails.logger.debug("Elasticsearch: Attempted to delete document: #{record_id} from #{index_name} but it was not found")
-  rescue => e
-    Rails.logger.error(e)
-    LogUtil.log_backtrace(e)
-    LogUtil.log_err_and_airbrake("Elasticsearch failed to #{operation} record: #{record_id} source table: #{index_name}, with error: #{e.message}")
+    raise # Raise error in order to fire on_failure resque hook in InstrumentedJob
+  rescue => err
+    Rails.logger.error(err)
+    LogUtil.log_backtrace(err)
+    LogUtil.log_err_and_airbrake("Elasticsearch failed to #{operation} record: #{record_id} source table: #{index_name}, with error: #{err.message}")
+    raise err # Raise error in order to fire on_failure resque hook in InstrumentedJob
   end
 end

@@ -1,7 +1,9 @@
 # Jos to initiate database download
 require 'resque/plugins/lock'
 class LoadResultsFromS3
+  extend InstrumentedJob
   extend Resque::Plugins::Lock
+
   @queue = :q03_pipeline_run
   @git_version = ENV['GIT_VERSION'] || ""
 

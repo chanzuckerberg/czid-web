@@ -1,4 +1,6 @@
 class GenerateProjectReportsCsv
+  extend InstrumentedJob
+
   @queue = :q03_pipeline_run
   def self.perform(params)
     params = HashWithIndifferentAccess.new(params)

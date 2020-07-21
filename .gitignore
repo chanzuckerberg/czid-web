@@ -72,3 +72,6 @@ __pycache__/
 
 # Pyre type checker
 .pyre/
+
+# Ignore Solargraph
+.solargraph.yml

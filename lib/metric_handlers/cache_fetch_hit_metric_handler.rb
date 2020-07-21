@@ -1,6 +1,6 @@
 require_relative 'base'
 
-module Subscribers
+module MetricHandlers
   class CacheFetchHitMetricHandler < Base
     def process_event
       event_log = {

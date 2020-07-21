@@ -1,5 +1,7 @@
 # Job to upload input files from basespace file to s3 for a particular sample.
 class TransferBasespaceFiles
+  extend InstrumentedJob
+
   @queue = :transfer_basespace_files
 
   # sample_id is the id of the sample we are uploading files to.
@@ -18,20 +20,20 @@ class TransferBasespaceFiles
     if samples_remaining.empty?
       begin
         BasespaceHelper.revoke_access_token(basespace_access_token)
-      rescue HttpHelper::HttpError => e
+      rescue HttpHelper::HttpError => err
         # If revoke_access_token is called multiple times, it will fail on the subsequent calls. This is okay.
-        if e.status_code == 401
+        if err.status_code == 401
           Rails.logger.warn("Revoke access token failed for sample #{sample_id}. Likely called multiple times by samples sharing the same token.")
         else
-          raise e
+          raise err
         end
       end
 
       # This verification call will work even if called multiple times.
       BasespaceHelper.verify_access_token_revoked(basespace_access_token, sample_id)
     end
-  rescue => e
-    LogUtil.log_err_and_airbrake("Error transferring basespace files for sample #{sample_id}. Reason: #{e}")
-    raise e
+  rescue => err
+    LogUtil.log_err_and_airbrake("Error transferring basespace files for sample #{sample_id}. Reason: #{err}")
+    raise err
   end
 end
