@@ -60,17 +60,19 @@ module MetricHandlers
     end
 
     def process_exception_metric
-      domain = @event.payload[:params]["domain"]
       clean_path = "/#{@event.payload[:params]['controller']}/#{@event.payload[:params]['action']}"
 
       metric_data = [
         CloudWatchUtil.create_metric_datum("Exception Occurences", 1.0, "Count", [
-                                             { name: "Path", value: clean_path }, { name: "Exception Name", value: @event.payload[:exception][0] },
-                                             { name: "Exception Message", value: @event.payload[:exception][1] },
+                                             { name: "Path", value: clean_path },
+                                             { name: "Exception Name", value: @event.payload[:exception][0] },
                                            ]),
       ]
 
-      metric_data.map { |metric| metric[:dimensions].append(name: "Domain", value: domain) } if domain.present?
+      metric_data.map do |metric|
+        metric[:dimensions].append(name: "Domain", value: @event.payload[:params]["domain"]) if @event.payload[:params]["domain"].present?
+        metric[:dimensions].append(name: "Status", value: @event.payload[:params]["status"].to_s) if @event.payload[:params]["status"].present?
+      end
       CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-exceptions", metric_data)
     end
   end
