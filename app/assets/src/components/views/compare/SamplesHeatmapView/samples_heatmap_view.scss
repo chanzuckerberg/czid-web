@@ -64,7 +64,7 @@
     .filterLine {
       height: 0px;
       border-bottom: 10px solid $white;
-      box-shadow: $box-shadow-dropdown-menu;
+      box-shadow: $box-shadow-m;
     }
 
     .arrowIcon {
@@ -75,7 +75,7 @@
       font-size: $font-size-h4;
       padding: 0 $space-l;
       border-radius: 0 0 $border-radius-m $border-radius-m;
-      box-shadow: $box-shadow-tab-bottom;
+      box-shadow: $box-shadow-s;
     }
   }
 

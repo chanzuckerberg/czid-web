@@ -1,11 +1,12 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 :global(.ui):global(.sidebar).sidebar {
   background-color: white;
   transition: transform 0.5s ease;
 
   &:global(.visible) {
-    box-shadow: 0 0 25px $box-shadow-dark;
+    box-shadow: $box-shadow-l;
   }
 
   &.left,

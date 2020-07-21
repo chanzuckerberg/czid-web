@@ -248,7 +248,7 @@ input[type="number"] {
       margin-top: 3px;
       border-radius: $border-radius-m;
       border: $border-gray-light;
-      box-shadow: 0 2px 3px 0 $gray-light;
+      box-shadow: $box-shadow-m;
       div {
         padding: 8px;
         cursor: pointer;
@@ -267,7 +267,7 @@ input[type="number"] {
       }
       &:focus {
         border-bottom-color: $gray-light !important;
-        box-shadow: 0 1px 0 0 $gray-light !important;
+        box-shadow: $box-shadow-s !important;
         border: $border-primary !important;
       }
     }

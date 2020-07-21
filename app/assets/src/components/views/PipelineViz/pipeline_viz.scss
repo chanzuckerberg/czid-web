@@ -90,7 +90,7 @@
   border-radius: $border-radius-m;
   padding: 6px 8px;
   cursor: pointer;
-  box-shadow: $box-shadow-bottom-right;
+  box-shadow: $box-shadow-s;
   display: flex;
   align-items: center;
   white-space: nowrap;
@@ -256,7 +256,7 @@
   position: fixed;
   bottom: 50px;
   right: 15px;
-  box-shadow: $box-shadow-dropdown-menu;
+  box-shadow: $box-shadow-m;
   svg:hover {
     background-color: darken(white, 5%);
   }

@@ -5,7 +5,7 @@ $break-large: 1460px;
 .login-form {
   width: 30%;
   margin: 0 auto;
-  box-shadow: 0.1rem 0.2rem 0.6rem 0.2rem $gray-lightest;
+  box-shadow: $box-shadow-m;
   margin-top: 150px;
   border-radius: $border-radius-l;
   label {

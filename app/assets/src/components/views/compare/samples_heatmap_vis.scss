@@ -10,7 +10,7 @@
     // need to be adjusted if the position of the controls changes.
     top: 360px;
     right: 40px;
-    box-shadow: $box-shadow-dropdown-menu;
+    box-shadow: $box-shadow-m;
 
     background-color: white;
     svg:hover {
@@ -95,7 +95,7 @@
       color: $gray-dark;
       background: $white;
       border-radius: $border-radius-m;
-      box-shadow: $box-shadow-dropdown-menu;
+      box-shadow: $box-shadow-m;
       cursor: default;
       display: inline-block;
       margin: $space-s auto auto;

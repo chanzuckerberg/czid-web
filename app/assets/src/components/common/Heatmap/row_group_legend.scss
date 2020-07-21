@@ -8,7 +8,7 @@
 
 .tooltip {
   position: absolute;
-  box-shadow: $box-shadow-dropdown-menu;
+  box-shadow: $box-shadow-m;
   border: $border-gray-light;
   border-radius: $border-radius-m;
   background-color: $white;
@@ -35,7 +35,7 @@
     margin-top: -5px;
     transform: rotate(45deg);
     z-index: -1;
-    box-shadow: $box-shadow-dropdown-menu;
+    box-shadow: $box-shadow-m;
     border-radius: 0 0 $border-radius-s 0; // this is different from semantic-ui
   }
 }
