@@ -1,13 +1,14 @@
 import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import { sampleErrorInfo } from "~/components/utils/sample";
 import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import AlertIcon from "~ui/icons/AlertIcon";
 import LoadingIcon from "~ui/icons/LoadingIcon";
+import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import { openUrlInNewTab } from "~utils/links";
+import PropTypes from "~utils/propTypes";
+import { sampleErrorInfo } from "~utils/sample";
 
 import cs from "./consensus_genome_view.scss";
 import csSampleMessage from "./sample_message.scss";
@@ -53,8 +54,7 @@ class ConsensusGenomeView extends React.Component {
           </div>
           <div>
             <SecondaryButton
-              // TODO: Insert real article when ready.
-              onClick={() => openUrlInNewTab("https://help.idseq.net")}
+              onClick={() => openUrlInNewTab(CONSENSUS_GENOME_DOC_LINK)}
               text="View Help Docs"
             />
           </div>
@@ -73,8 +73,7 @@ class ConsensusGenomeView extends React.Component {
       return (
         <SampleMessage
           icon={<LoadingIcon className={csSampleMessage.icon} />}
-          // TODO: Insert specific article when ready.
-          link={"https://help.idseq.net"}
+          link={CONSENSUS_GENOME_DOC_LINK}
           linkText={"Learn about Consensus Genomes"}
           message={"Your Consensus Genome is being generated!"}
           status={"IN PROGRESS"}

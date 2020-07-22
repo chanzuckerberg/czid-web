@@ -1,11 +1,12 @@
 import React from "react";
-import PropTypes from "~/components/utils/propTypes";
 
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import RadioButton from "~ui/controls/RadioButton";
 import IconSample from "~ui/icons/IconSample";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import InfoIconSmall from "~ui/icons/InfoIconSmall";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
+import PropTypes from "~utils/propTypes";
+import { WORKFLOWS } from "~utils/workflows";
 
 import cs from "./workflow_selector.scss";
 
@@ -50,8 +51,7 @@ class WorkflowSelector extends React.Component {
                   </span>
                 }
                 content="Consensus genome aligns short reads to a SARS-CoV-2 reference genome."
-                // TODO: Insert real link
-                link="https://chanzuckerberg.zendesk.com/hc/en-us"
+                link={CONSENSUS_GENOME_DOC_LINK}
               />
             </div>
             <div className={cs.description}>
