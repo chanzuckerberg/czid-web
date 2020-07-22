@@ -452,7 +452,7 @@ module HeatmapHelper
         z_default = ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
         row["rpm"] = pr.rpm(row["r"])
         row["zscore"] = if row["mean_mass_normalized"]
-                          (row["r"] / pr.total_ercc_reads.to_f) - row["mean_mass_normalized"] / row["stdev_mass_normalized"]
+                          ((row["r"] / pr.total_ercc_reads.to_f) - row["mean_mass_normalized"]) / row["stdev_mass_normalized"]
                         else
                           row["stdev"].nil? ? z_default : ((row["rpm"] - row["mean"]) / row["stdev"])
                         end
