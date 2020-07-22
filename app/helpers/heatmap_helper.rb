@@ -252,7 +252,7 @@ module HeatmapHelper
         ) * 1000 * 1000"
 
     standard_z_score_sql = "(#{rpm_sql} - mean) / stdev"
-    mass_normalized_zscore_sql = "((count/(total_ercc_reads * 1.0)) - mean_mass_normalized) / stdev_mass_normalized"
+    mass_normalized_zscore_sql = "((count/total_ercc_reads) - mean_mass_normalized) / stdev_mass_normalized"
     zscore_sql = "COALESCE(
         GREATEST(#{ReportHelper::ZSCORE_MIN}, LEAST(#{ReportHelper::ZSCORE_MAX},
           IF(mean_mass_normalized IS NULL, #{standard_z_score_sql}, #{mass_normalized_zscore_sql})
@@ -452,7 +452,7 @@ module HeatmapHelper
         z_default = ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
         row["rpm"] = pr.rpm(row["r"])
         row["zscore"] = if row["mean_mass_normalized"]
-                          (row["r"] / pr.total_ercc_reads) - row["mean_mass_normalized"] / row["stdev_mass_normalized"]
+                          (row["r"] / pr.total_ercc_reads.to_f) - row["mean_mass_normalized"] / row["stdev_mass_normalized"]
                         else
                           row["stdev"].nil? ? z_default : ((row["rpm"] - row["mean"]) / row["stdev"])
                         end
