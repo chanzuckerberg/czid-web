@@ -22,7 +22,7 @@ module MetricHandlers
         },
       }
 
-      # @event.payload[:exception] => ["exception name", "exception message"]
+      # Format of event.payload[:exception]: ["exception name", "exception message"]
       if @event.payload[:exception].present?
         event_log[:details][:exception] = {
           name: @event.payload[:exception][0],
@@ -52,10 +52,10 @@ module MetricHandlers
                                                             { name: "Path", value: clean_path },
                                                           ])
       end
-      metric_data << CloudWatchUtil.create_metric_datum("Duration", @event.duration, "Milliseconds", common_dimensions) if @event.duration.present?
-      metric_data << CloudWatchUtil.create_metric_datum("DB Runtime", @event.payload[:db_runtime], "Milliseconds", common_dimensions) if @event.payload[:db_runtime].present?
+      metric_data << CloudWatchUtil.create_metric_datum("Duration", @event.duration, "Milliseconds", common_dimensions.dup) if @event.duration.present?
+      metric_data << CloudWatchUtil.create_metric_datum("DB Runtime", @event.payload[:db_runtime], "Milliseconds", common_dimensions.dup) if @event.payload[:db_runtime].present?
 
-      metric_data.map { |metric| metric[:dimensions].append(name: "Domain", value: domain) } if domain.present?
+      metric_data.map { |metric| metric[:dimensions] << { name: "Domain", value: domain } if domain.present? }
       CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-domain", metric_data)
     end
 
@@ -70,8 +70,8 @@ module MetricHandlers
       ]
 
       metric_data.map do |metric|
-        metric[:dimensions].append(name: "Domain", value: @event.payload[:params]["domain"]) if @event.payload[:params]["domain"].present?
-        metric[:dimensions].append(name: "Status", value: @event.payload[:params]["status"].to_s) if @event.payload[:params]["status"].present?
+        metric[:dimensions] << { name: "Domain", value: @event.payload[:params]["domain"] } if @event.payload[:params]["domain"].present?
+        metric[:dimensions] << { name: "Status", value: @event.payload[:params]["status"].to_s } if @event.payload[:params]["status"].present?
       end
       CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-exceptions", metric_data)
     end

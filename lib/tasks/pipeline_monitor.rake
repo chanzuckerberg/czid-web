@@ -281,17 +281,20 @@ class CheckPipelineRuns
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
       after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      # HACK: This logger isn't really meant to deal with nested json
-      #  this will appear under the message key at the top level
-      logger_iteration_data = {
-        message: "Pipeline Monitor Iteration Complete",
-        duration: (after_iter_timestamp - before_iter_timestamp),
-        pr_id_count: pr_ids.count,
-        pt_id_count: pt_ids.count,
-        cg_id_count: cg_ids.count,
-        num_shards: num_shards,
-      }
-      Rails.logger.info(JSON.generate(logger_iteration_data))
+      ActiveSupport::Notifications.instrument("run.pipeline_monitor", args: { duration: duration, min_refresh_interval: min_refresh_interval }) do |payload|
+        logger_iteration_data = {
+          message: "Pipeline Monitor Iteration Complete",
+          duration: (after_iter_timestamp - before_iter_timestamp),
+          pr_id_count: pr_ids.count,
+          pt_id_count: pt_ids.count,
+          cg_id_count: cg_ids.count,
+          num_shards: num_shards,
+        }
+        payload[:logger_iteration_data] = logger_iteration_data
+        # HACK: This logger isn't really meant to deal with nested json
+        #  this will appear under the message key at the top level
+        Rails.logger.info(JSON.generate(logger_iteration_data))
+      end
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
       break unless t_iter_end + max_work_duration < t_end

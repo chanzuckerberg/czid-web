@@ -17,6 +17,7 @@ module MetricHandlers
         },
       }
 
+      # Format of event.payload[:exception]: ["exception name", "exception message"]
       if @event.payload[:exception].present?
         event_log[:details][:exception] = {
           name: @event.payload[:exception][0],
