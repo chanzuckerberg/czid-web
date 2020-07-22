@@ -2,30 +2,26 @@
   <strong>Name:</strong>
   <%= @sample.name %>
 </p>
-
 <p>
   <strong>Project:</strong>
   <u><%= link_to @sample.project.name, @sample.project %></u>
 </p>
-
 <p>
   <strong>Date created:</strong>
   <%= @sample.created_at %>
 </p>
-
 <% if @sample.user %>
-<p>
-  <strong>Sample owner:</strong>
-  <%= @sample.user.name %>
-  (<%= @sample.user.email %>)
-</p>
+  <p>
+    <strong>Sample owner:</strong>
+    <%= @sample.user.name %>
+    (<%= @sample.user.email %>)
+  </p>
 <% end %>
-
 <% if @sample.upload_error %>
-<p>
-  <strong>Upload error:</strong>
-  <strong class="failed"><%= @sample.upload_error %></strong>
-</p>
+  <p>
+    <strong>Upload error:</strong>
+    <strong class="failed"><%= @sample.upload_error %></strong>
+  </p>
 <% end %>
 
 <% pipeline_run = @sample.first_pipeline_run %>
@@ -33,65 +29,64 @@
   <%= button_to 'rerun from top', kickoff_pipeline_sample_path(@sample), method: :put, form: {target: '_blank'} %>
 <% end %>
 
-<table class="table table-condensed">
-      <thead>
-        <tr>
-          <th> Run ID </th>
-          <th> Status </th>
-          <% if pipeline_run %>
-            <% if pipeline_run.step_function? %>
-              <th>SFN Execution</th>
-            <% else %>
-              <th> Job Id </th>
-              <th> Job Log </th>
+<% if @sample.temp_pipeline_workflow == Sample::MAIN_PIPELINE_WORKFLOW %>
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th> Run ID </th>
+        <th> Status </th>
+        <% if pipeline_run %>
+          <% if pipeline_run.step_function? %>
+            <th>SFN Execution</th>
+          <% else %>
+            <th> Job Id </th>
+            <th> Job Log </th>
+          <% end %>
+        <% end %>
+        <th>Remaining reads</th>
+        <th>Version</th>
+        <th>Job Started</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @sample.pipeline_runs.each do |pipeline_run| %>
+        <% if pipeline_run.pipeline_run_stages.present? %>
+          <% prs = pipeline_run.pipeline_run_stages %>
+          <% prs.each do |run_stage| %>
+            <tr>
+              <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %> </td>
+              <td class="<%= run_stage.job_status == "FAILED" ? "failed" : "" %>">
+                <%= run_stage.job_status %>
+                <p>
+                  <%= run_stage.batch_job_status_reason %>
+                </p>
+              </td>
+              <% if pipeline_run %>
+                <% if pipeline_run && pipeline_run.step_function? %>
+                  <td><u><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(pipeline_run.sfn_execution_arn), target: :_blank  %></u></td>
+                <% else %>
+                  <td><u><%= run_stage.job_id ? (link_to run_stage.job_id, run_stage.batch_job_status_url, target: :_blank) : nil %></u></td>
+                  <td><u><%= link_to 'Logs', run_stage.log_url, target: :_blank  %></u></td>
+                <% end %>
+              <% end %>
+              <td><%= pipeline_run.adjusted_remaining_reads %> &nbsp;</td>
+              <td><%= pipeline_run.pipeline_version %> &nbsp;</td>
+              <td><%= run_stage.created_at %></td>
+              <td><%= run_stage.duration_hrs %></td>
+            </tr>
+          <% end %>
+          <% if pipeline_run.output_states.present? %>
+            <% pipeline_run.output_states.each do |output_state| %>
+              <tr>
+                <td>  <%= "#{pipeline_run.id} - Output - #{output_state.output}" %> </td>
+                <td> <%= output_state.state %> </td>
+                <td colspan=4> &nbsp; </td>
+                <td> <%= output_state.updated_at %> </td>
+              </tr>
             <% end %>
           <% end %>
-          <th>Remaining reads</th>
-          <th>Version</th>
-          <th>Job Started</th>
-          <th>Duration</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @sample.pipeline_runs.each do |pipeline_run| %>
-          <% if pipeline_run.pipeline_run_stages.present? %>
-            <% prs = pipeline_run.pipeline_run_stages %>
-            <% prs.each do |run_stage| %>
-              <tr>
-
-                <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %> </td>
-                <td class="<%= run_stage.job_status == "FAILED" ? "failed" : "" %>">
-                  <%= run_stage.job_status %>
-                  <p>
-                    <%= run_stage.batch_job_status_reason %>
-                  </p>
-                </td>
-                <% if pipeline_run %>
-
-                  <% if pipeline_run && pipeline_run.step_function? %>
-                    <td><u><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(pipeline_run.sfn_execution_arn), target: :_blank  %></u></td>
-                  <% else %>
-                    <td><u><%= run_stage.job_id ? (link_to run_stage.job_id, run_stage.batch_job_status_url, target: :_blank) : nil %></u></td>
-                    <td><u><%= link_to 'Logs', run_stage.log_url, target: :_blank  %></u></td>
-                  <% end %>
-                <% end %>
-                <td><%= pipeline_run.adjusted_remaining_reads %> &nbsp;</td>
-                <td><%= pipeline_run.pipeline_version %> &nbsp;</td>
-                <td><%= run_stage.created_at %></td>
-                <td><%= run_stage.duration_hrs %></td>
-               </tr>
-            <% end %>
-            <% if pipeline_run.output_states.present? %>
-              <% pipeline_run.output_states.each do |output_state| %>
-                <tr>
-                    <td>  <%= "#{pipeline_run.id} - Output - #{output_state.output}" %> </td>
-                    <td> <%= output_state.state %> </td>
-                    <td colspan=4> &nbsp; </td>
-                    <td> <%= output_state.updated_at %> </td>
-                </tr>
-              <% end %>
-            <% end %>
-          <% else %>
+        <% else %>
           <tr>
             <td> <%= pipeline_run.id %> </td>
             <td> <%= pipeline_run.job_status %></td>
@@ -100,13 +95,28 @@
             <td><%= pipeline_run.adjusted_remaining_reads %> &nbsp;</td>
             <td><%= pipeline_run.pipeline_version %> &nbsp;</td>
             <td><%= pipeline_run.created_at %></td>
-           </tr>
-          <% end %>
-          <tr><td>&nbsp;</td></tr>
+          </tr>
         <% end %>
-      </tbody>
-</table>
+        <tr>
+          <td>&nbsp;</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<% if @sample.temp_pipeline_workflow == Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW %>
+  <br>
+  <p><strong>Consensus Genome Workflow:</strong></p>
+  <p><strong>Status:</strong> <%= @sample.temp_sfn_execution_status %></p>
+  <% if @sample.temp_sfn_execution_arn %>
+    <p><u><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(@sample.temp_sfn_execution_arn), target: :_blank  %></u></p>
+  <% else %>
+    <p>Missing SFN Execution ARN</p>
+  <% end %>
+  <br>
+<% end %>
 
 <p>
-<u><%= link_to 'See all samples', samples_path %></u> |
+  <u><%= link_to 'See all samples', samples_path %></u>
 </p>
