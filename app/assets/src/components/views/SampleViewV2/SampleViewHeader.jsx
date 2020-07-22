@@ -134,7 +134,8 @@ export default function SampleViewHeader({
           }
         >
           <span className={cs.pipelineRunVersion}>
-            Pipeline {renderVersion()}
+            {get("temp_pipeline_workflow", sample) === WORKFLOWS.MAIN &&
+              `Pipeline ${renderVersion()}`}
           </span>
           <PipelineVersionSelect
             pipelineRun={pipelineRun}
