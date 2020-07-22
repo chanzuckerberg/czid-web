@@ -21,7 +21,7 @@ import StringHelper from "../../helpers/StringHelper";
 import DiscoverIcon from "../ui/icons/DiscoverIcon";
 import DetectIcon from "../ui/icons/DetectIcon";
 import DecipherIcon from "../ui/icons/DecipherIcon";
-import LogoIcon from "../ui/icons/LogoIcon";
+import LogoReversed from "../ui/icons/LogoReversed";
 import logAnalyticsEvent from "~/api/analytics";
 
 import cs from "./landing.scss";
@@ -90,7 +90,7 @@ class Landing extends React.Component {
           <div className="left brand-details">
             <a href="/">
               <span className="logo-icon">
-                <LogoIcon />
+                <LogoReversed />
               </span>
             </a>
           </div>

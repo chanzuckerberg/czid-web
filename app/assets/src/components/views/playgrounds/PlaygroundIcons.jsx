@@ -18,8 +18,11 @@ class PlaygroundIcons extends React.Component {
       ) /* eslint-disable-line */
     );
     const logoIcons = values(Icons.LOGO).map(IconComponent => (
+      <IconComponent /* eslint-disable-line */ className={cs.logoIcon} />
+    ));
+    const logoReversedIcons = values(Icons.LOGO_REVERSED).map(IconComponent => (
       <IconComponent /* eslint-disable-line */
-        className={cx(cs.icon, cs.loadingIcon)}
+        className={cx(cs.icon, cs.logoReversedIcon)}
       />
     ));
 
@@ -49,6 +52,12 @@ class PlaygroundIcons extends React.Component {
         <div className={cs.title}>Logo</div>
         <div className={cs.playgroundIcons}>
           {logoIcons.map(iconInstance => (
+            <div className={cs.iconContainer} key={iconInstance.type.name}>
+              {iconInstance}
+              <span className={cs.iconLabel}>{iconInstance.type.name}</span>
+            </div>
+          ))}
+          {logoReversedIcons.map(iconInstance => (
             <div className={cs.iconContainer} key={iconInstance.type.name}>
               {iconInstance}
               <span className={cs.iconLabel}>{iconInstance.type.name}</span>

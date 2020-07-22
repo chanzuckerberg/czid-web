@@ -27,7 +27,12 @@ import InsightIcon from "./InsightIcon";
 import LargeDownloadIcon from "./LargeDownloadIcon";
 import LoadingIcon from "./LoadingIcon";
 import LockIcon from "./LockIcon";
-import LogoIcon from "./LogoIcon";
+import LogoColor from "./LogoColor";
+import LogoMarkColor from "./LogoMarkColor";
+import LogoMarkReversed from "./LogoMarkReversed";
+import LogoLockupColor from "./LogoLockupColor";
+import LogoLockupReversed from "./LogoLockupReversed";
+import LogoReversed from "./LogoReversed";
 import MinusControlIcon from "./MinusControlIcon";
 import NoResultsIcon from "./NoResultsIcon";
 import PhyloTreeIcon from "./PhyloTreeIcon";
@@ -100,6 +105,13 @@ export default {
     SortIcon,
   },
   LOGO: {
-    LogoIcon,
+    LogoColor,
+    LogoMarkColor,
+    LogoLockupColor,
+  },
+  LOGO_REVERSED: {
+    LogoReversed,
+    LogoMarkReversed,
+    LogoLockupReversed,
   },
 };

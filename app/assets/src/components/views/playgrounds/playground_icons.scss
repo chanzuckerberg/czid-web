@@ -28,7 +28,12 @@
     fill: $primary;
   }
 
-  .loadingIcon {
+  .logoIcon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .logoReversedIcon {
     background-color: $black;
     width: 100px;
     height: 100px;

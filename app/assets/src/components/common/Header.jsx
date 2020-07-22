@@ -11,7 +11,7 @@ import Notification from "~ui/notifications/Notification";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import AlertIcon from "~ui/icons/AlertIcon";
-import LogoIcon from "~ui/icons/LogoIcon";
+import LogoReversed from "~ui/icons/LogoReversed";
 import RemoveIcon from "~ui/icons/RemoveIcon";
 import {
   DISCOVERY_DOMAIN_MY_DATA,
@@ -114,7 +114,7 @@ class Header extends React.Component {
       return (
         <div className={cs.header}>
           <div className={cs.logo}>
-            <LogoIcon className={cs.icon} />
+            <LogoReversed className={cs.icon} />
           </div>
         </div>
       );
@@ -133,7 +133,7 @@ class Header extends React.Component {
         <div className={cs.header}>
           <div className={cs.logo}>
             <a href="/">
-              <LogoIcon className={cs.icon} />
+              <LogoReversed className={cs.icon} />
             </a>
           </div>
           <div className={cs.fill} />

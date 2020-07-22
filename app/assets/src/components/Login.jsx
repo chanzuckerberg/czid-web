@@ -5,7 +5,7 @@ import $ from "jquery";
 import { openUrl } from "~utils/links";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
-import LogoIcon from "./ui/icons/LogoIcon";
+import LogoReversed from "./ui/icons/LogoReversed";
 
 class Login extends React.Component {
   constructor(props, context) {
@@ -130,7 +130,7 @@ class Login extends React.Component {
           <div className="left brand-details">
             <a href="/">
               <span className="logo-icon">
-                <LogoIcon />
+                <LogoReversed />
               </span>
             </a>
           </div>
@@ -163,7 +163,8 @@ class Login extends React.Component {
               </div>
               <div className="mail">
                 <p>
-                  To request access to the IDseq platform, sign up<span
+                  To request access to the IDseq platform, sign up
+                  <span
                     onClick={() => {
                       openUrl("/");
                       logAnalyticsEvent("Login_sign-up-link_clicked");
