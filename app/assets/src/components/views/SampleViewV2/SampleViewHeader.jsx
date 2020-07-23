@@ -13,6 +13,7 @@ import { openUrl } from "~utils/links";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import { saveVisualization } from "~/api";
+import { getConsensusGenomeZipLink } from "~/components/views/report/utils/download";
 
 import PipelineVersionSelect from "../SampleView/PipelineVersionSelect";
 import cs from "./sample_view_header.scss";
@@ -66,7 +67,11 @@ export default function SampleViewHeader({
       return (
         <ViewHeader.Controls>
           {get("temp_sfn_execution_status", sample) === "SUCCEEDED" && (
-            <DownloadButton text="Download All" primary={true} />
+            <DownloadButton
+              text="Download All"
+              primary={true}
+              onClick={() => openUrl(getConsensusGenomeZipLink(sample.id))}
+            />
           )}
         </ViewHeader.Controls>
       );

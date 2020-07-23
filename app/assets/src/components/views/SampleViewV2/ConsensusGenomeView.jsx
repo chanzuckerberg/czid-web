@@ -1,12 +1,13 @@
 import React from "react";
 
+import { getConsensusGenomeZipLink } from "~/components/views/report/utils/download";
 import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import AlertIcon from "~ui/icons/AlertIcon";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
-import { openUrlInNewTab } from "~utils/links";
+import { openUrl, openUrlInNewTab } from "~utils/links";
 import PropTypes from "~utils/propTypes";
 import { sampleErrorInfo } from "~utils/sample";
 
@@ -15,6 +16,7 @@ import csSampleMessage from "./sample_message.scss";
 
 class ConsensusGenomeView extends React.Component {
   renderResults() {
+    const { sample } = this.props;
     return (
       <div className={cs.resultsContainer}>
         <div className={cs.section}>
@@ -41,7 +43,10 @@ class ConsensusGenomeView extends React.Component {
             <div>vcf.gz</div>
           </div>
           <div>
-            <DownloadButton text="Download All" />
+            <DownloadButton
+              text="Download All"
+              onClick={() => openUrl(getConsensusGenomeZipLink(sample.id))}
+            />
           </div>
         </div>
         <div className={cs.section}>

@@ -23,7 +23,8 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_v2, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
-                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
+                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary,
+                  :coverage_viz_data, :consensus_genome_zip_link,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat,].freeze
 
@@ -1362,6 +1363,35 @@ class SamplesController < ApplicationController
 
     render json: {
       uploaded_by_current_user: sample_ids.length == samples.length,
+    }
+  end
+
+  # GET /samples/:id/consensus_genome_zip_link
+  # Zipped download of select Consensus Genome run result files.
+  def consensus_genome_zip_link
+    output_name = Sample::TEMP_CONSENSUS_GENOME_OUTPUTS[:output_zip]
+
+    description = @sample.temp_sfn_description
+    if description
+      result_mapping = JSON.parse(description[:output])
+      result_mapping = result_mapping["Result"]
+    else
+      raise "No SFN description"
+    end
+
+    s3_path = result_mapping[output_name]
+    raise "Output not found in results" unless s3_path
+
+    download_url = get_presigned_s3_url(s3_path, "#{@sample.name}_#{output_name}")
+    if download_url
+      redirect_to download_url
+    else
+      raise "Output file not found on S3"
+    end
+  rescue => err
+    LogUtil.log_err_and_airbrake("Error loading #{output_name} for sample #{@sample.id}: #{err}")
+    render json: {
+      error: "#{output_name} does not exist for this sample",
     }
   end
 

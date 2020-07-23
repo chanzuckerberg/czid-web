@@ -38,6 +38,10 @@ class Sample < ApplicationRecord
   CONSENSUS_GENOME_PIPELINE_WORKFLOW = "consensus_genome".freeze
   SUPPORTED_TEMP_PIPELINE_WORKFLOWS = [MAIN_PIPELINE_WORKFLOW, CONSENSUS_GENOME_PIPELINE_WORKFLOW].freeze
 
+  TEMP_CONSENSUS_GENOME_OUTPUTS = {
+    output_zip: "consensus_genome.zip_outputs_out_output_zip",
+  }.freeze
+
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -971,14 +975,7 @@ class Sample < ApplicationRecord
 
   # Checking/updating temp workflow runs (for now only Consensus Genomes)
   def temp_update_workflow_status
-    begin
-      description = AwsClient[:states].describe_execution(execution_arn: temp_sfn_execution_arn)
-    rescue Aws::States::Errors::ExecutionDoesNotExist
-      description_json = get_s3_file("#{sample_output_s3_path}/sfn-desc/#{temp_sfn_execution_arn}")
-      description = description_json && JSON.parse(description_json, symbolize_names: true)
-    end
-
-    status = description[:status]
+    status = temp_sfn_description[:status]
     if ["TIMED_OUT", "ABORTED"].include?(status)
       status = SFN_STATUS[:failed]
     end
@@ -990,5 +987,14 @@ class Sample < ApplicationRecord
   rescue => err
     LogUtil.log_err_and_airbrake("Error checking/updating temp workflow pipeline: #{err}")
     LogUtil.log_backtrace(err)
+  end
+
+  # SFN description for temp workflow runs (for now only Consensus Genomes)
+  def temp_sfn_description
+    AwsClient[:states].describe_execution(execution_arn: temp_sfn_execution_arn)
+  rescue Aws::States::Errors::ExecutionDoesNotExist
+    # Attention: Timestamp fields will be returned as strings
+    description_json = get_s3_file("#{sample_output_s3_path}/sfn-desc/#{temp_sfn_execution_arn}")
+    description_json && JSON.parse(description_json, symbolize_names: true)
   end
 end

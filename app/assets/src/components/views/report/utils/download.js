@@ -76,3 +76,7 @@ export const getDownloadLinks = (sampleId, pipelineRun) => {
     newPage: downloadLinkInfoMap[option].newPage,
   }));
 };
+
+export const getConsensusGenomeZipLink = sampleId => {
+  return `/samples/${sampleId}/consensus_genome_zip_link`;
+};

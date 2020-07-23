@@ -292,10 +292,11 @@ describe Sample, type: :model do
 
     before do
       project = create(:project)
-      @sample = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW)
+      @sample = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW, temp_sfn_execution_arn: fake_sfn_execution_arn)
       @sample_running = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW, temp_sfn_execution_status: Sample::SFN_STATUS[:running], temp_sfn_execution_arn: fake_sfn_execution_arn)
 
       @mock_aws_clients = {
+        s3: Aws::S3::Client.new(stub_responses: true),
         states: Aws::States::Client.new(stub_responses: true),
       }
       allow(AwsClient).to receive(:[]) { |client|
@@ -325,6 +326,35 @@ describe Sample, type: :model do
         expect(LogUtil).to receive(:log_err_and_airbrake)
 
         @sample_running.temp_update_workflow_status
+      end
+    end
+
+    context "#temp_sfn_description" do
+      context "when arn exists" do
+        it "returns description" do
+          @mock_aws_clients[:states].stub_responses(:describe_execution, lambda { |context|
+            context.params[:execution_arn] == fake_sfn_execution_arn ? fake_sfn_execution_description : 'ExecutionDoesNotExist'
+          })
+
+          expect(@sample.temp_sfn_description).to have_attributes(fake_sfn_execution_description)
+        end
+      end
+
+      context "when arn does not exist" do
+        it "returns description from s3" do
+          @mock_aws_clients[:states].stub_responses(:describe_execution, 'ExecutionDoesNotExist')
+          fake_s3_path = File.join(@sample.sample_output_s3_path.split("/", 4)[-1], "sfn-desc", fake_sfn_execution_arn)
+          fake_bucket = { fake_s3_path => { body: JSON.dump(fake_sfn_execution_description) } }
+          @mock_aws_clients[:s3].stub_responses(:get_object, lambda { |context|
+            fake_bucket[context.params[:key]] || 'NoSuchKey'
+          })
+
+          # ATTENTION: if loading a JSON from S3 json time fields will come as strings
+          expected_description = fake_sfn_execution_description.merge(
+            start_date: fake_sfn_execution_description[:start_date].to_s
+          )
+          expect(@sample.temp_sfn_description).to eq(expected_description)
+        end
       end
     end
   end
