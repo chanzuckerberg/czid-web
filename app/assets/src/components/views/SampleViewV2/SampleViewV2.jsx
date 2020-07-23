@@ -949,13 +949,20 @@ export default class SampleViewV2 extends React.Component {
 
   renderSampleMessage = () => {
     const { loadingReport, pipelineRun, reportMetadata, sample } = this.state;
-    const {
-      errorMessage,
-      knownUserError,
-      pipelineRunStatus,
-      jobStatus,
-    } = reportMetadata;
+    const { pipelineRunStatus, jobStatus } = reportMetadata;
     let status, message, linkText, type, link, icon;
+    // Error messages were previously sent from the server in the reportMetadata,
+    // but after the switch to SFN are now sent as part of the sample's information.
+    // Try to extract the error messages from the sample if possible, then try the
+    // reportMetadata for older samples.
+    const errorMessage =
+      sample && sample.error_message
+        ? sample.error_message
+        : reportMetadata.errorMessage;
+    const knownUserError =
+      sample && sample.known_user_error
+        ? sample.known_user_error
+        : reportMetadata.knownUserError;
 
     if (loadingReport) {
       status = "Loading";

@@ -74,6 +74,43 @@ export const sampleErrorInfo = ({ sample, pipelineRun }) => {
     sample.upload_error ||
     (pipelineRun && pipelineRun.known_user_error)
   ) {
+    // For samples run using SFN, error messages are sent from the server;
+    // this function just sets the status, error type, and followup link
+    // for frontend display.
+    case "InvalidInputFileError":
+      status = "COMPLETE - ISSUE";
+      message = pipelineRun.error_message;
+      linkText = "Please check your file format and reupload your file.";
+      type = "warning";
+      link = "/samples/upload";
+      break;
+    case "InvalidFileFormatError":
+      status = "COMPLETE - ISSUE";
+      message = pipelineRun.error_message;
+      linkText = "Please check your file format and reupload your file.";
+      type = "warning";
+      link = "/samples/upload";
+      break;
+    case "InsufficientReadsError":
+      status = "COMPLETE - ISSUE";
+      message = pipelineRun.error_message;
+      linkText = "Check where your reads were filtered out.";
+      type = "warning";
+      pipelineVersionUrlParam =
+        pipelineRun && pipelineRun.pipeline_version
+          ? `?pipeline_version=${pipelineRun.pipeline_version}`
+          : "";
+      link = `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
+      break;
+    case "BrokenReadPairError":
+      status = "COMPLETE - ISSUE";
+      message = pipelineRun.error_message;
+      linkText = "Please fix the read pairing, then reupload.";
+      type = "warning";
+      link = "/samples/upload";
+      break;
+    // The following cases are for older samples that do not have the error messages
+    // sent from the server.
     case "BASESPACE_UPLOAD_FAILED":
       status = "SAMPLE FAILED";
       message =
@@ -137,7 +174,7 @@ export const sampleErrorInfo = ({ sample, pipelineRun }) => {
         "Sorry, something was wrong with your input files. " +
         "Either the paired reads were not named using the same identifiers in both files, " +
         "or some reads were missing a mate.";
-      linkText = "Please fix the read pairing, then reupload";
+      linkText = "Please fix the read pairing, then reupload.";
       type = "warning";
       link = "/samples/upload";
       break;
