@@ -271,6 +271,42 @@ RSpec.describe "Sample request", type: :request do
           expect(json_response["sample_ids"]).to be_empty
           expect(json_response["errors"]).to eq([{ "temp_pipeline_workflow" => ["is not included in the list"] }])
         end
+
+        it "should properly set the selected wetlab protocol" do
+          sample_params = @sample_params.dup
+          sample_params[:wetlab_protocol] = Sample::TEMP_WETLAB_PROTOCOL[:artic]
+          post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          sample_id = json_response["sample_ids"][0]
+
+          test_sample = Sample.find(sample_id)
+          expect(test_sample.temp_wetlab_protocol).to eq(Sample::TEMP_WETLAB_PROTOCOL[:artic])
+        end
+
+        it "should fail with a bogus wetlab protocol" do
+          sample_params = @sample_params.dup
+          sample_params[:wetlab_protocol] = "bananas"
+          post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          expect(json_response["sample_ids"]).to be_empty
+          expect(json_response["errors"]).to eq([{ "temp_wetlab_protocol" => ["is not included in the list"] }])
+        end
+
+        it "should succeed without a wetlab protocol for mNGS runs" do
+          sample_params = @sample_params.dup
+          sample_params[:workflows] = [Sample::MAIN_PIPELINE_WORKFLOW]
+          sample_params[:wetlab_protocol] = nil
+          post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
+
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+        end
       end
     end
   end

@@ -80,6 +80,7 @@ class UploadSampleStep extends React.Component {
     validatingSamples: false, // Disable the "Continue" button while validating samples.
     showNoProjectError: false, // Whether we should show an error if no project is currently selected.
     selectedWorkflows: new Set([WORKFLOWS.MAIN]),
+    selectedWetlabProtocol: null,
   };
 
   async componentDidMount() {
@@ -123,7 +124,11 @@ class UploadSampleStep extends React.Component {
 
   // Handle the message from the Basespace OAuth popup that authorizes IDseq to read (i.e. download files) from user projects.
   handleBasespaceOAuthMessageEvent = async event => {
-    const { selectedProject, selectedWorkflows } = this.state;
+    const {
+      selectedProject,
+      selectedWorkflows,
+      selectedWetlabProtocol,
+    } = this.state;
     const basespaceSamples = this.getSelectedSamples("basespace");
 
     if (
@@ -144,9 +149,10 @@ class UploadSampleStep extends React.Component {
       );
 
       this.props.onUploadSamples({
-        samples: samplesWithToken,
         project: selectedProject,
+        samples: samplesWithToken,
         uploadType: "basespace",
+        wetlabProtocol: selectedWetlabProtocol,
         workflows: selectedWorkflows,
       });
     }
@@ -330,9 +336,15 @@ class UploadSampleStep extends React.Component {
     let { selectedWorkflows } = this.state;
     // TODO: Behavior will change to support multiple selectedWorkflows.
     if (!selectedWorkflows.has(workflow)) {
-      this.setState({ selectedWorkflows: new Set([workflow]) });
+      this.setState({
+        selectedWorkflows: new Set([workflow]),
+        selectedWetlabProtocol: null,
+      });
     }
   };
+
+  handleWetlabProtocolChange = selected =>
+    this.setState({ selectedWetlabProtocol: selected });
 
   // *** Sample-related functions ***
 
@@ -625,15 +637,21 @@ class UploadSampleStep extends React.Component {
   // *** Miscellaneous functions ***
 
   handleContinue = () => {
-    const { currentTab, selectedProject, selectedWorkflows } = this.state;
+    const {
+      currentTab,
+      selectedProject,
+      selectedWorkflows,
+      selectedWetlabProtocol,
+    } = this.state;
 
     if (this.state.currentTab === BASESPACE_UPLOAD) {
       this.requestBasespaceReadProjectPermissions();
     } else {
       this.props.onUploadSamples({
-        samples: this.getSelectedSamples(currentTab),
         project: selectedProject,
+        samples: this.getSelectedSamples(currentTab),
         uploadType: currentTab,
+        wetlabProtocol: selectedWetlabProtocol,
         workflows: selectedWorkflows,
       });
     }
@@ -648,10 +666,25 @@ class UploadSampleStep extends React.Component {
   };
 
   // Whether the current user input is valid. Determines whether the Continue button is enabled.
-  isValid = () =>
-    this.state.selectedProject !== null &&
-    size(this.getSelectedSamples(this.state.currentTab)) > 0 &&
-    !this.state.validatingSamples;
+  isValid = () => {
+    const {
+      currentTab,
+      selectedProject,
+      selectedWetlabProtocol,
+      selectedWorkflows,
+      validatingSamples,
+    } = this.state;
+
+    const workflowsValid = selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME)
+      ? !!selectedWetlabProtocol
+      : true;
+    return (
+      selectedProject !== null &&
+      size(this.getSelectedSamples(currentTab)) > 0 &&
+      !validatingSamples &&
+      workflowsValid
+    );
+  };
 
   getAnalyticsContext = () => {
     const project = this.state.selectedProject;
@@ -702,10 +735,14 @@ class UploadSampleStep extends React.Component {
 
   render() {
     const { allowedFeatures = {} } = this.context || {};
-    const { currentTab } = this.state;
+    const {
+      currentTab,
+      selectedWorkflows,
+      selectedWetlabProtocol,
+    } = this.state;
+
     const readyForBasespaceAuth =
       currentTab === BASESPACE_UPLOAD && this.isValid();
-    const { selectedWorkflows } = this.state;
 
     return (
       <div
@@ -755,8 +792,10 @@ class UploadSampleStep extends React.Component {
           </div>
           {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) && (
             <WorkflowSelector
+              onWetlabProtocolChange={this.handleWetlabProtocolChange}
               onWorkflowToggle={this.handleWorkflowToggle}
               selectedWorkflows={selectedWorkflows}
+              selectedWetlabProtocol={selectedWetlabProtocol}
             />
           )}
           <div className={cs.fileUpload}>

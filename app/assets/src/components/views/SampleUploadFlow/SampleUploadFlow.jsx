@@ -37,6 +37,7 @@ class SampleUploadFlow extends React.Component {
     },
     hostGenomes: [], // set on metadata upload
     workflows: new Set(),
+    wetlabProtocol: null,
   };
 
   componentDidMount() {
@@ -55,15 +56,17 @@ class SampleUploadFlow extends React.Component {
     uploadType,
     sampleNamesToFiles,
     workflows,
+    wetlabProtocol,
   }) => {
     this.setState({
-      samples,
-      project,
-      uploadType,
-      sampleNamesToFiles,
-      workflows,
       currentStep: "uploadMetadata",
+      project,
+      sampleNamesToFiles,
+      samples,
       stepsEnabled: set("uploadMetadata", true, this.state.stepsEnabled),
+      uploadType,
+      wetlabProtocol,
+      workflows,
     });
   };
 
@@ -144,7 +147,7 @@ class SampleUploadFlow extends React.Component {
   // SLIGHT HACK: Keep steps mounted, so user can return to them if needed.
   // The internal state of some steps is difficult to recover if they are unmounted.
   renderSteps = () => {
-    const { workflows } = this.state;
+    const { workflows, wetlabProtocol } = this.state;
     return (
       <div>
         <UploadSampleStep
@@ -167,17 +170,18 @@ class SampleUploadFlow extends React.Component {
         )}
         {this.state.samples && this.state.metadata && (
           <ReviewStep
-            metadata={this.state.metadata}
-            samples={this.state.samples}
-            uploadType={this.state.uploadType}
-            project={this.state.project}
-            sampleNamesToFiles={this.state.sampleNamesToFiles}
             hostGenomes={this.state.hostGenomes}
-            originalHostGenomes={this.props.hostGenomes}
-            visible={this.state.currentStep === "review"}
-            onUploadStatusChange={this.onUploadStatusChange}
+            metadata={this.state.metadata}
             onStepSelect={this.handleStepSelect}
             onUploadComplete={this.onUploadComplete}
+            onUploadStatusChange={this.onUploadStatusChange}
+            originalHostGenomes={this.props.hostGenomes}
+            project={this.state.project}
+            sampleNamesToFiles={this.state.sampleNamesToFiles}
+            samples={this.state.samples}
+            uploadType={this.state.uploadType}
+            visible={this.state.currentStep === "review"}
+            wetlabProtocol={wetlabProtocol}
             workflows={workflows}
           />
         )}

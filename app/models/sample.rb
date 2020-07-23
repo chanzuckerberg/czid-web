@@ -55,6 +55,11 @@ class Sample < ApplicationRecord
     failed: "FAILED",
   }.freeze
 
+  TEMP_WETLAB_PROTOCOL = {
+    artic: "artic",
+    msspe: "msspe",
+  }.freeze
+
   validates :status, presence: true, inclusion: { in: [
     STATUS_CREATED,
     STATUS_UPLOADED,
@@ -64,6 +69,7 @@ class Sample < ApplicationRecord
   ], }
 
   validates :temp_sfn_execution_status, allow_blank: true, inclusion: { in: SFN_STATUS.values }
+  validates :temp_wetlab_protocol, allow_blank: true, inclusion: { in: TEMP_WETLAB_PROTOCOL.values }
 
   validate :input_files_checks
   validates :name, presence: true, uniqueness: { scope: :project_id, case_sensitive: false }

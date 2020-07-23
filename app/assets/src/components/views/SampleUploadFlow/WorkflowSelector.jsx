@@ -1,6 +1,7 @@
 import React from "react";
 
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import RadioButton from "~ui/controls/RadioButton";
 import IconSample from "~ui/icons/IconSample";
 import InfoIconSmall from "~ui/icons/InfoIconSmall";
@@ -10,7 +11,34 @@ import { WORKFLOWS } from "~utils/workflows";
 
 import cs from "./workflow_selector.scss";
 
+const WETLAB_OPTIONS = [
+  {
+    text: "ARTIC v3",
+    value: "artic",
+  },
+  {
+    text: "MSSPE",
+    value: "msspe",
+  },
+];
+
 class WorkflowSelector extends React.Component {
+  renderWetlabSelector = () => {
+    const { onWetlabProtocolChange, selectedWetlabProtocol } = this.props;
+    return (
+      <div className={cs.wetlabOption}>
+        <div className={cs.title}>Wetlab protocol:</div>
+        <Dropdown
+          className={cs.dropdown}
+          onChange={value => onWetlabProtocolChange(value)}
+          options={WETLAB_OPTIONS}
+          placeholder="Select"
+          value={selectedWetlabProtocol}
+        ></Dropdown>
+      </div>
+    );
+  };
+
   render() {
     const { onWorkflowToggle, selectedWorkflows = new Set() } = this.props;
     return (
@@ -56,9 +84,11 @@ class WorkflowSelector extends React.Component {
             </div>
             <div className={cs.description}>
               Run your samples through our new pipeline to get consensus genomes
-              for SARS-CoV-2. Our assembly supports wet lab protocols MSSPE and
-              ARTIC v3.
+              for SARS-CoV-2. Our assembly supports wet lab protocols ARTIC v3
+              and MSSPE.
             </div>
+            {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME) &&
+              this.renderWetlabSelector()}
           </div>
         </div>
       </div>
@@ -67,7 +97,9 @@ class WorkflowSelector extends React.Component {
 }
 
 WorkflowSelector.propTypes = {
+  onWetlabProtocolChange: PropTypes.func,
   onWorkflowToggle: PropTypes.func,
+  selectedWetlabProtocol: PropTypes.string,
   selectedWorkflows: PropTypes.instanceOf(Set),
 };
 

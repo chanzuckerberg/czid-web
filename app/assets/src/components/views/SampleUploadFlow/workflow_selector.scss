@@ -11,11 +11,10 @@
   }
 
   .workflowOption {
-    align-items: center;
     border-radius: $border-radius-m;
     cursor: pointer;
     display: flex;
-    padding: $space-default $space-xs;
+    padding: $space-l $space-xs;
 
     &:hover {
       background-color: $gray-off-white;
@@ -23,12 +22,13 @@
 
     .radioButton {
       flex-shrink: 0;
-      margin: $space-default $space-l;
+      margin: $space-l;
     }
 
     .iconSample {
       flex-shrink: 0;
       height: 35px;
+      margin-top: $space-xxs;
       margin-right: $space-default;
       width: 35px;
     }
@@ -53,6 +53,19 @@
 
       .description {
         @include font-body-s;
+      }
+
+      .wetlabOption {
+        margin-top: $space-xl;
+
+        .title {
+          @include font-header-xs;
+          margin-bottom: $space-xxs;
+        }
+
+        .dropdown {
+          min-width: 140px;
+        }
       }
     }
   }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_715_004_114) do
+ActiveRecord::Schema.define(version: 20_200_723_032_107) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -435,6 +435,7 @@ ActiveRecord::Schema.define(version: 20_200_715_004_114) do
     t.string "temp_sfn_execution_arn", comment: "Step Function execution ARN for samples using temp_pipeline_workflow=consensus_genome. To be removed when temp_pipeline_workflow is moved."
     t.string "temp_sfn_execution_status", comment: "Step Function execution status for samples using temp_pipeline_workflow=consensus_genome. To be removed when temp_pipeline_workflow is moved."
     t.string "temp_wdl_version", comment: "WDL version for samples using temp_pipeline_workflow=consensus_genome. To be removed when temp_pipeline_workflow is moved."
+    t.string "temp_wetlab_protocol", comment: "A soft enum (string) for the wetlab protocol. Required for temp_pipeline_workflow=consensus_genome."
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"

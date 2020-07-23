@@ -581,6 +581,10 @@ module SamplesHelper
         sample_attributes[:temp_pipeline_workflow] = workflows[0]
       end
 
+      if sample_attributes.key?(:wetlab_protocol)
+        sample_attributes[:temp_wetlab_protocol] = sample_attributes.delete(:wetlab_protocol)
+      end
+
       sample = Sample.new(sample_attributes)
       sample.input_files.each { |f| f.name ||= File.basename(f.source) }
 

@@ -264,6 +264,7 @@ class ReviewStep extends React.Component {
       samples,
       uploadType,
       visible,
+      wetlabProtocol,
       workflows,
     } = this.props;
 
@@ -436,6 +437,7 @@ class ReviewStep extends React.Component {
               uploadType={uploadType}
               useStepFunctionPipeline={useStepFunctionPipeline}
               useTaxonWhitelist={useTaxonWhitelist}
+              wetlabProtocol={wetlabProtocol}
               workflows={workflows}
             />
           )}
@@ -479,6 +481,7 @@ ReviewStep.propTypes = {
   onUploadComplete: PropTypes.func.isRequired,
   admin: PropTypes.bool,
   workflows: PropTypes.instanceOf(Set),
+  wetlabProtocol: PropTypes.string,
 };
 
 ReviewStep.contextType = UserContext;

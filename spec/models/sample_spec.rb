@@ -292,7 +292,7 @@ describe Sample, type: :model do
 
     before do
       project = create(:project)
-      @sample = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW, temp_sfn_execution_arn: fake_sfn_execution_arn)
+      @sample = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW, temp_sfn_execution_arn: fake_sfn_execution_arn, temp_wetlab_protocol: Sample::TEMP_WETLAB_PROTOCOL[:artic])
       @sample_running = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW, temp_sfn_execution_status: Sample::SFN_STATUS[:running], temp_sfn_execution_arn: fake_sfn_execution_arn)
 
       @mock_aws_clients = {

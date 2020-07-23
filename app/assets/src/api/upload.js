@@ -44,6 +44,7 @@ export const bulkUploadLocalWithMetadata = async ({
       "s3_preload_result_path",
       "subsample",
       "use_taxon_whitelist",
+      "wetlab_protocol",
       "workflows",
     ]),
     samples
