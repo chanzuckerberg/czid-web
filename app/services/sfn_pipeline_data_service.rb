@@ -1,11 +1,13 @@
-class SfnPipelineVizDataService
+class SfnPipelineDataService
   include Callable
   # PipelineRunsHelper includes default descriptions, before we can get them from the dag
   include PipelineRunsHelper
-  include PipelineOutputsHelper
+
+  attr_reader :stage_names
 
   # Structures task definition of each stage of the pipeline run into the following in @results for drawing
-  # the pipeline visualization graphs on the React side:
+  # the pipeline visualization graphs on the React side.
+  # Also used by the results_folder endpoint on the samples controller.
   # stages: An array of stages, each stage being an object with the following fields:
   #     - jobStatus: The job status of the stage
   #     - steps: Array of objects, each one defining a node in that stage's graph. This object
@@ -96,10 +98,14 @@ class SfnPipelineVizDataService
     @stage_names = []
     @stage_job_statuses = []
     @stages_wdl_info = []
+    @host_filtering_stage_index = nil
 
-    @pipeline_run.pipeline_run_stages.each do |stage|
+    @pipeline_run.pipeline_run_stages.each_with_index do |stage, stage_index|
       if stage.name != PipelineRunStage::EXPT_STAGE_NAME || see_experimental
         @stage_names.push(stage.name)
+        if stage.name == PipelineRunStage::HOST_FILTERING_STAGE_NAME
+          @host_filtering_stage_index = stage_index
+        end
 
         stage_wdl = retrieve_wdl(stage.dag_name, s3_folder)
         stage_info = parse_wdl(stage_wdl)
@@ -117,6 +123,8 @@ class SfnPipelineVizDataService
       @result_files[f[:display_name]] = {
         displayName: f[:display_name],
         url: f[:url],
+        size: f[:size],
+        key: f[:key],
       }
     end
 
@@ -125,14 +133,16 @@ class SfnPipelineVizDataService
   end
 
   def call
-    stages, file_source_map = create_stage_nodes_scaffolding
+    stages = create_stage_nodes_scaffolding
+    file_source_map = map_files_to_sources
+    stages_with_output_files = add_output_files_to_steps(stages, file_source_map)
     file_source_map_with_destinations = map_files_to_output_steps(stages, file_source_map)
     edges = create_edges(file_source_map_with_destinations)
     if @remove_host_filtering_urls
-      remove_host_filtering_urls(edges)
+      remove_host_filtering_urls(stages_with_output_files, edges)
     end
-    populate_nodes_with_edges(stages, edges)
-    data = { stages: stages, edges: edges, status: pipeline_job_status(stages) }
+    populate_nodes_with_edges(stages_with_output_files, edges)
+    data = { stages: stages_with_output_files, edges: edges, status: pipeline_job_status(stages) }
     return data
   end
 
@@ -145,8 +155,6 @@ class SfnPipelineVizDataService
   def create_stage_nodes_scaffolding
     step_statuses_by_stage = @pipeline_run.step_statuses_by_stage
 
-    file_source_map = {}
-
     stages = @stages_wdl_info.map.with_index do |stage_info, stage_index|
       stage_name = @stage_names[stage_index]
       step_statuses = step_statuses_by_stage[stage_index]
@@ -154,9 +162,7 @@ class SfnPipelineVizDataService
 
       all_redefined_statuses = []
 
-      output_file_map = collect_step_output_files(stage_info)
-
-      steps = stage_info["task_names"].map.with_index do |step, step_index|
+      steps = stage_info["task_names"].map.with_index do |step, _step_index|
         # Get dag step name to retrieve step descriptions and status info.
         # Descriptions for steps may be in the PipelineRunsHelper module,
         # or in the status.json files on S3.
@@ -168,27 +174,13 @@ class SfnPipelineVizDataService
 
         # Retrieve variable and file information
         input_variables, input_files = retrieve_step_inputs(stage_info, step)
-        output_files = output_file_map[step]
-
-        # Store indexing information for edge creation
-        step_indexing_info = {
-          stageIndex: stage_index,
-          stepIndex: step_index,
-        }
-
-        output_files.each do |file|
-          file[:from] = step_indexing_info
-          file[:to] = []
-          file[:data] = get_result_file_data(file[:file])
-          file_source_map[file[FILE_SOURCE_MAP_KEY]] = file
-        end
 
         {
-          name: modify_step_name(step),
+          name: step,
           description: description || "",
-          input_variables: input_variables,
-          input_files: input_files,
-          output_files: output_files,
+          inputVariables: input_variables,
+          inputFiles: input_files,
+          outputFiles: [],
           inputEdges: [],
           outputEdges: [],
           status: status,
@@ -203,7 +195,7 @@ class SfnPipelineVizDataService
         jobStatus: stage_job_status(all_redefined_statuses),
       }
     end
-    return stages, file_source_map
+    return stages
   end
 
   def retrieve_step_inputs(stage_info, step)
@@ -215,7 +207,6 @@ class SfnPipelineVizDataService
       # if type information is not in inputs, it's a file
       output_step, var_name = input.split(".")
       input_info = {
-        # output_step: output_step,
         name: var_name,
         type: "File",
       }
@@ -223,7 +214,7 @@ class SfnPipelineVizDataService
       if output_step == WORKFLOW_INPUT_PREFIX
         input_info[:type] = stage_info["inputs"][var_name]
       else
-        input_info[:file] = stage_info["basenames"][input]
+        input_info[:file] = File.basename(stage_info["basenames"][input])
       end
 
       case input_info[:type]
@@ -234,6 +225,32 @@ class SfnPipelineVizDataService
       end
     end
     return variables, files
+  end
+
+  # Unites the output files declared by the WDL workflow
+  # with the result files found in sample.results_folder_files
+  # and adds the stage and step index it came from
+  def map_files_to_sources
+    file_source_map = {}
+    @stages_wdl_info.each_with_index do |stage_info, stage_index|
+      output_file_map = collect_step_output_files(stage_info)
+      stage_info["task_names"].each_with_index do |step, step_index|
+        # Store indexing information for edge creation
+        step_indexing_info = {
+          stageIndex: stage_index,
+          stepIndex: step_index,
+        }
+
+        output_files = output_file_map[step]
+        output_files.each do |file|
+          file[:from] = step_indexing_info
+          file[:to] = []
+          file[:data] = get_result_file_data(file[:file])
+          file_source_map[file[FILE_SOURCE_MAP_KEY]] = file
+        end
+      end
+    end
+    return file_source_map
   end
 
   def collect_step_output_files(stage_info)
@@ -249,6 +266,17 @@ class SfnPipelineVizDataService
       output_file_map[output_step].push(output_info)
     end
     return output_file_map
+  end
+
+  def add_output_files_to_steps(stage_nodes, file_source_map)
+    file_source_map.each do |_key, file|
+      if file[:from].present?
+        stage_index, step_index = file[:from].values
+        step = stage_nodes[stage_index][:steps][step_index]
+        step[:outputFiles].push(file[:data])
+      end
+    end
+    return stage_nodes
   end
 
   # This is just a workaround until we incorporate SFN execution history
@@ -282,10 +310,6 @@ class SfnPipelineVizDataService
         url: nil,
       }
     end
-  end
-
-  def modify_step_name(step_name)
-    step_name.gsub(/(_out)$/, "").titleize
   end
 
   def redefine_job_status(step_status, stage_status)
@@ -334,7 +358,7 @@ class SfnPipelineVizDataService
       steps.each_with_index do |step, step_index|
         # For each input file, we find the file in the file source map
         # and add the index of this step to its :to array.
-        step[:input_files].each do |input_file|
+        step[:inputFiles].each do |input_file|
           filename = input_file[:name]
           destination = { stageIndex: stage_index, stepIndex: step_index } # the current step
           file_map_key = find_file_map_key(filename, file_source_map)
@@ -349,8 +373,7 @@ class SfnPipelineVizDataService
             file_source_map[file_map_key][:to].push(destination)
           end
         end
-        step.delete(:input_files)
-        step.delete(:output_files)
+        step.delete(:inputFiles)
       end
     end
     return file_source_map
@@ -442,9 +465,17 @@ class SfnPipelineVizDataService
     end
   end
 
-  def remove_host_filtering_urls(edges)
+  def remove_host_filtering_urls(stages, edges)
     # Removing host filtering URLs is important because the host filtering files
     #  may contain PGI. Removing the urls stops them from being downloadable.
+    if @host_filtering_stage_index.present?
+      stages[@host_filtering_stage_index][:steps].each do |step|
+        step[:outputFiles].each do |file|
+          file[:url] = nil
+          file[:key] = nil
+        end
+      end
+    end
     edges.each do |edge|
       to_host_filtering = edge[:to] && edge[:to][:stageIndex].zero?
       from_nowhere = edge[:from].nil?
@@ -462,8 +493,8 @@ class SfnPipelineVizDataService
   def retrieve_wdl(stage_dag_name, s3_folder)
     bucket, prefix = S3Util.parse_s3_path(s3_folder)
     key = "#{prefix}/#{stage_dag_name}.wdl"
-    response = S3_CLIENT.get_object(bucket: bucket,
-                                    key: key)
+    response = AwsClient[:s3].get_object(bucket: bucket,
+                                         key: key)
     wdl = response.body.read
     return wdl
   end

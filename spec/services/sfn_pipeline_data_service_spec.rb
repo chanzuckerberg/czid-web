@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe SfnPipelineVizDataService do
+RSpec.describe SfnPipelineDataService do
   let(:fake_samples_bucket) { "fake-bucket" }
   let(:fake_workflows_bucket) { "fake-workflows-bucket" }
   let(:fake_output_prefix) { "s3://#{fake_samples_bucket}" }
@@ -169,7 +169,7 @@ RSpec.describe SfnPipelineVizDataService do
             {
               name: "Two",
               description: "This is the description of output two.",
-              input_variables: [{ name: "docker_image_id", type: "String" }],
+              inputVariables: [{ name: "docker_image_id", type: "String" }],
               inputEdges: [3],
               outputEdges: [0],
               status: "finished",
@@ -180,7 +180,7 @@ RSpec.describe SfnPipelineVizDataService do
             {
               name: "Three",
               description: "",
-              input_variables: [{ name: "docker_image_id", type: "String" }],
+              inputVariables: [{ name: "docker_image_id", type: "String" }],
               inputEdges: [0],
               outputEdges: [1],
               status: "notStarted",
@@ -196,7 +196,7 @@ RSpec.describe SfnPipelineVizDataService do
             {
               name: "Four",
               description: "This is the description of output four.",
-              input_variables: [{ name: "docker_image_id", type: "String" }],
+              inputVariables: [{ name: "docker_image_id", type: "String" }],
               inputEdges: [1],
               outputEdges: [2],
               status: "inProgress",
@@ -288,9 +288,6 @@ RSpec.describe SfnPipelineVizDataService do
       }
     )
 
-    stub_const("PipelineOutputsHelper::Client", @mock_aws_clients[:s3])
-    stub_const("SfnPipelineVizDataService::S3_CLIENT", @mock_aws_clients[:s3])
-
     stubbed_env = { "SAMPLES_BUCKET_NAME" => fake_samples_bucket }
     stub_const("ENV", ENV.to_hash.merge(stubbed_env))
     stub_const("S3_WORKFLOWS_BUCKET", fake_workflows_bucket)
@@ -305,14 +302,14 @@ RSpec.describe SfnPipelineVizDataService do
         "Four" => "four",
       },
     }
-    stub_const("SfnPipelineVizDataService::SFN_STEP_TO_DAG_STEP_NAME", stubbed_dag_names)
+    stub_const("SfnPipelineDataService::SFN_STEP_TO_DAG_STEP_NAME", stubbed_dag_names)
 
     allow(Sample).to receive(:get_signed_url).and_return("test url")
   end
 
   describe "retrieving graph" do
     context "with admin privileges" do
-      subject { SfnPipelineVizDataService.call(pr.id, true, false) }
+      subject { SfnPipelineDataService.call(pr.id, true, false) }
 
       it "should be structured correctly" do
         expect(subject).to include_json(expected_stage_results)
@@ -334,7 +331,7 @@ RSpec.describe SfnPipelineVizDataService do
     context "with see_experimental flag" do
       it "sees all stage results" do
         see_experimental = true
-        results = SfnPipelineVizDataService.call(pr.id, see_experimental, false)
+        results = SfnPipelineDataService.call(pr.id, see_experimental, false)
 
         # Host filtering and experimental; other stages omitted for brevity.
         expect(results[:stages].length).to be(2)
@@ -344,7 +341,7 @@ RSpec.describe SfnPipelineVizDataService do
     context "without see_experimental flag" do
       it "sees all stage results except experimental" do
         see_experimental = false
-        results = SfnPipelineVizDataService.call(pr.id, see_experimental, false)
+        results = SfnPipelineDataService.call(pr.id, see_experimental, false)
 
         # Only host filtering (other stages omitted for brevity)
         expect(results[:stages].length).to be(1)
@@ -353,7 +350,7 @@ RSpec.describe SfnPipelineVizDataService do
 
     context "without host filtering urls" do
       it "does not include host filtering urls" do
-        results = SfnPipelineVizDataService.call(pr.id, true, true)
+        results = SfnPipelineDataService.call(pr.id, true, true)
 
         # Get files in each edge in Host Filtering stage (except final output) and check for no url
         edges = results[:edges]
@@ -373,7 +370,7 @@ RSpec.describe SfnPipelineVizDataService do
 
     context "with host filtering urls" do
       it "includes host filtering urls" do
-        results = SfnPipelineVizDataService.call(pr.id, true, false)
+        results = SfnPipelineDataService.call(pr.id, true, false)
 
         # Get files in each edge in Host Filtering stage (except final output) and check for url
         edges = results[:edges]

@@ -1139,7 +1139,7 @@ class SamplesController < ApplicationController
         render template: "samples/folder"
       end
       format.json do
-        render json: { displayed_data: @file_list }
+        render json: { displayedData: @file_list }
       end
     end
   end

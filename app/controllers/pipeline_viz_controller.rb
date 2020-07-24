@@ -1,5 +1,6 @@
 class PipelineVizController < ApplicationController
   include PipelineOutputsHelper
+  include StringUtil
 
   STATUS_NOT_FOUND = "Error: No pipeline run found matching requested version.".freeze
   STATUS_NO_EXECUTION_STRATEGY = "Error: No execution strategy found for pipeline run.".freeze
@@ -19,7 +20,9 @@ class PipelineVizController < ApplicationController
       remove_host_filtering_urls = current_user.id != sample.user_id && !current_user.admin?
       begin
         if pipeline_run.step_function?
-          @results = SfnPipelineVizDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
+          @results = SfnPipelineDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
+          # Give step names spaces between words and strip "out" from them
+          @results[:stages].each { |stage| stage[:steps].each { |step| step[:name] = StringUtil.humanize_step_name(step[:name]) } }
         elsif pipeline_run.directed_acyclic_graph?
           @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
         else

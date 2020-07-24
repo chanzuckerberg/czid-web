@@ -10,6 +10,12 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import { getSamplePipelineResults } from "~/api";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
+import {
+  RESULTS_FOLDER_STAGE_KEYS,
+  RESULTS_FOLDER_STEP_KEYS,
+  CDHITDUP_KEYS,
+  RESULTS_FOLDER_ROOT_KEY,
+} from "~/components/utils/resultsFolder";
 
 import { PIPELINE_INFO_FIELDS, HOST_FILTERING_WIKI } from "./constants";
 import MetadataSection from "./MetadataSection";
@@ -63,18 +69,17 @@ class PipelineTab extends React.Component {
     const { pipelineInfo } = this.props;
     const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
-    const metadataLink = linkLabel &&
-      link && (
-        <a
-          className={cs.vizLink}
-          href={link}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {linkLabel}
-          <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-        </a>
-      );
+    const metadataLink = linkLabel && link && (
+      <a
+        className={cs.vizLink}
+        href={link}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {linkLabel}
+        <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+      </a>
+    );
 
     return {
       label: field.name,
@@ -97,35 +102,51 @@ class PipelineTab extends React.Component {
       pipelineRun && pipelineRun.pipeline_version
     );
 
-    if (pipelineResults && pipelineResults["displayed_data"]) {
+    if (pipelineResults && pipelineResults[RESULTS_FOLDER_ROOT_KEY]) {
+      const hostFilteringStageKey = Object.keys(
+        pipelineResults[RESULTS_FOLDER_ROOT_KEY]
+      )[0];
       this.setState({
-        pipelineStepDict: pipelineResults["displayed_data"]["Host Filtering"],
+        pipelineStepDict:
+          pipelineResults[RESULTS_FOLDER_ROOT_KEY][hostFilteringStageKey],
       });
     }
   };
 
   renderReadCountsTable = stepKey => {
-    // Humanize step name and remove "_out",
-    // e.g. "validate_input_out" -> "Validate Input"
-    let stepName = humanize(stepKey).slice(0, -4);
-    let step = this.state.pipelineStepDict["steps"][stepKey];
+    const { pipelineRun } = this.props;
+    const { pipelineStepDict } = this.state;
+    const { stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
+    const {
+      stepNameKey,
+      readsAfterKey,
+      stepDescriptionKey,
+    } = RESULTS_FOLDER_STEP_KEYS;
 
-    const totalReads = this.props.pipelineRun.total_reads;
-    let readsAfter = step["reads_after"];
+    const step = pipelineStepDict[stepsKey][stepKey];
+    const stepName = step[stepNameKey];
+
+    const totalReads = pipelineRun.total_reads;
+    let readsAfter = step[readsAfterKey];
+    if (readsAfter === null) {
+      return;
+    }
 
     // Special case cdhitdup. All steps after cdhitdup transform their counts by
     // in the pipeline by the compression ratio to return nonunique reads.
     let uniqueReads = null;
-    if (
-      stepKey === "cdhitdup_out" &&
-      this.props.pipelineRun.pipeline_version > "4"
-    ) {
-      const previousStep = this.state.pipelineStepDict["steps"]["priceseq_out"];
+    const cdhitdupKeys = CDHITDUP_KEYS;
+    if (cdhitdupKeys.includes(stepKey) && pipelineRun.pipeline_version > "4") {
+      // Property order is predictable in JavaScript objects since ES2015
+      const stepKeys = Object.keys(pipelineStepDict[stepsKey]);
+      const previousStepKey =
+        stepKeys[stepKeys.findIndex(key => key === stepKey) - 1];
+      const previousStep = pipelineStepDict[stepsKey][previousStepKey];
       uniqueReads = readsAfter;
-      readsAfter = previousStep["reads_after"];
+      readsAfter = previousStep[readsAfterKey];
     }
 
-    let percentReads = (readsAfter / totalReads * 100).toFixed(2);
+    const percentReads = ((readsAfter / totalReads) * 100).toFixed(2);
 
     return (
       <div className={cs.readsRemainingRow}>
@@ -133,7 +154,7 @@ class PipelineTab extends React.Component {
           <ColumnHeaderTooltip
             position="top left"
             trigger={<div className={cs.labelText}>{stepName}</div>}
-            content={step["step_description"]}
+            content={step[stepDescriptionKey]}
             title={stepName}
           />
         </div>
@@ -157,6 +178,7 @@ class PipelineTab extends React.Component {
     const pipelineInfoFields = PIPELINE_INFO_FIELDS.map(
       this.getPipelineInfoField
     );
+    const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
 
     return (
       <div>
@@ -193,7 +215,7 @@ class PipelineTab extends React.Component {
                         Host Filtering Step
                       </div>
                     }
-                    content={this.state.pipelineStepDict["stage_description"]}
+                    content={this.state.pipelineStepDict[stageDescriptionKey]}
                     title="Host Filtering"
                     link={HOST_FILTERING_WIKI}
                   />
@@ -205,7 +227,7 @@ class PipelineTab extends React.Component {
                   <div className={cs.labelText}>% Reads Remaining</div>
                 </div>
               </div>
-              {Object.keys(this.state.pipelineStepDict["steps"]).map(
+              {Object.keys(this.state.pipelineStepDict[stepsKey]).map(
                 this.renderReadCountsTable
               )}
             </div>

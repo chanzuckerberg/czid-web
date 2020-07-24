@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'support/results_folder_constants'
 
 RSpec.describe SamplesController, type: :controller do
   create_users
@@ -40,8 +41,8 @@ RSpec.describe SamplesController, type: :controller do
         project = create(:project, users: [@joe])
         sample_one = create(:sample, project: project, name: "Test Sample One", user: @joe,
                                      pipeline_runs_data: [
-                                       { finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.10" },
-                                       { finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" },
+                                       { finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.10", pipeline_execution_strategy: PipelineRun.pipeline_execution_strategies[:directed_acyclic_graph] },
+                                       { finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12", pipeline_execution_strategy: PipelineRun.pipeline_execution_strategies[:directed_acyclic_graph] },
                                      ])
         expect_any_instance_of(Sample).to receive(:results_folder_files).with("3.10").exactly(1).times.and_return({})
 
@@ -55,6 +56,23 @@ RSpec.describe SamplesController, type: :controller do
         sample = create(:sample, project: project)
         get :results_folder, params: { id: sample.id }
         expect(response).to have_http_status :success
+      end
+
+      it "cannot see host filtering urls on another user's sample" do
+        allow_any_instance_of(PipelineRun).to receive(:sfn_outputs_by_step).with(true).and_return(ResultsFolderConstants::SFN_RESULTS_FOLDER_UPLOADER_RESPONSE)
+        allow_any_instance_of(PipelineRun).to receive(:sfn_outputs_by_step).with(false).and_return(ResultsFolderConstants::SFN_RESULTS_FOLDER_NONOWNER_RESPONSE)
+
+        project = create(:project, users: [@joe])
+        sample = create(:sample, project: project, pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "3.12" }])
+        get :results_folder, params: { id: sample.id, format: 'json' }
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        host_filter_data = json_response["displayedData"]["hostFiltering"]
+        host_filter_data["steps"].each do |_step, step_data|
+          urls = step_data["fileList"].map { |f| f[:url] }
+          urls.each { |url| expect(url).to be(nil) }
+        end
       end
     end
 

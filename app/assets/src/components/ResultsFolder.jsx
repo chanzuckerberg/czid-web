@@ -2,6 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import Divider from "./layout/Divider";
 import { openUrl, downloadStringToFile } from "./utils/links";
+import {
+  RESULTS_FOLDER_STAGE_KEYS,
+  RESULTS_FOLDER_STEP_KEYS,
+} from "~/components/utils/resultsFolder";
 
 class OutputFile extends React.Component {
   constructor(props, context) {
@@ -23,7 +27,7 @@ class OutputFile extends React.Component {
       >
         <td>
           <i className="fa fa-file" />
-          {this.file["display_name"]}
+          {this.file["displayName"]}
           <span className="size-tag"> -- {this.file["size"]}</span>
         </td>
       </tr>
@@ -65,19 +69,26 @@ const ResultsFolderStepDivider = () => {
 class ResultsFolderStep extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.stepName = props.stepName;
     this.step = props.step;
   }
 
   render() {
-    let description = this.step["step_description"];
-    let readsAfter = this.step["reads_after"];
-    let fileList = this.step["file_list"];
+    const {
+      stepDescriptionKey,
+      readsAfterKey,
+      filesKey,
+      stepNameKey,
+    } = RESULTS_FOLDER_STEP_KEYS;
+
+    const description = this.step[stepDescriptionKey];
+    const readsAfter = this.step[readsAfterKey];
+    const fileList = this.step[filesKey];
+    const stepName = this.step[stepNameKey];
     return (
       <tbody>
         <tr key="first">
           <td>
-            Step <b>{this.stepName}</b>: {description}{" "}
+            Step <b>{stepName}</b>: {description}{" "}
             {readsAfter ? (
               <span>
                 (<b>{readsAfter}</b> reads remained.)
@@ -101,9 +112,9 @@ class ResultsFolderStepList extends React.Component {
   }
 
   render() {
-    return Object.keys(this.stepDict).map((stepName, i) => {
-      let step = this.stepDict[stepName];
-      return <ResultsFolderStep stepName={stepName} step={step} key={i} />;
+    return Object.keys(this.stepDict).map((stepKey, i) => {
+      const step = this.stepDict[stepKey];
+      return <ResultsFolderStep step={step} key={i} />;
     });
   }
 }
@@ -124,6 +135,12 @@ class ResultsFolder extends React.Component {
   }
 
   render() {
+    const {
+      stageDescriptionKey,
+      stageDagJsonKey,
+      stepsKey,
+      stageNameKey,
+    } = RESULTS_FOLDER_STAGE_KEYS;
     return (
       <div className="results-folder">
         <div className="header">
@@ -155,11 +172,12 @@ class ResultsFolder extends React.Component {
         <div className="header">
           {!Object.keys(this.stageDict).length
             ? "No files to show"
-            : Object.keys(this.stageDict).map((stageName, k) => {
-                let stage = this.stageDict[stageName];
-                let stageDescription = stage["stage_description"];
-                let stageDagJson = stage["stage_dag_json"];
-                let stepDict = stage["steps"];
+            : Object.keys(this.stageDict).map((stageKey, k) => {
+                const stage = this.stageDict[stageKey];
+                const stageDescription = stage[stageDescriptionKey];
+                const stageDagJson = stage[stageDagJsonKey] || "None";
+                const stepDict = stage[stepsKey];
+                const stageName = stage[stageNameKey];
                 return (
                   <table key={k}>
                     <thead>

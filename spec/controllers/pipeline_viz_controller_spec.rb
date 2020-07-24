@@ -167,10 +167,10 @@ RSpec.describe PipelineVizController, type: :controller do
   let(:expected_json) { JSON.parse(JSON.generate(expected_stage_results)) }
 
   before do
-    allow(SfnPipelineVizDataService).to receive(:call).with(instance_of(Integer), true, false).and_return(expected_stage_results)
-    allow(SfnPipelineVizDataService).to receive(:call).with(instance_of(Integer), true, true).and_return(results_no_host_filter_urls)
-    allow(SfnPipelineVizDataService).to receive(:call).with(instance_of(Integer), false, false).and_return(results_no_experimental)
-    allow(SfnPipelineVizDataService).to receive(:call).with(instance_of(Integer), false, true).and_return(results_no_exp_or_host_filter)
+    allow(SfnPipelineDataService).to receive(:call).with(instance_of(Integer), true, false).and_return(expected_stage_results)
+    allow(SfnPipelineDataService).to receive(:call).with(instance_of(Integer), true, true).and_return(results_no_host_filter_urls)
+    allow(SfnPipelineDataService).to receive(:call).with(instance_of(Integer), false, false).and_return(results_no_experimental)
+    allow(SfnPipelineDataService).to receive(:call).with(instance_of(Integer), false, true).and_return(results_no_exp_or_host_filter)
     allow(Sample).to receive(:get_signed_url).and_return("test url")
   end
 

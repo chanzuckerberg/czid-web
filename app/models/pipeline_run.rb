@@ -6,6 +6,7 @@ class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
   include PipelineRunsHelper
+  include StringUtil
 
   belongs_to :sample
   belongs_to :alignment_config
@@ -1710,6 +1711,61 @@ class PipelineRun < ApplicationRecord
   end
 
   def outputs_by_step(can_see_stage1_results = false)
+    if step_function?
+      return sfn_outputs_by_step(can_see_stage1_results)
+    elsif directed_acyclic_graph?
+      return dag_outputs_by_step(can_see_stage1_results)
+    end
+    return {}
+  end
+
+  def sfn_outputs_by_step(can_see_stage1_results = false)
+    result_files = {}
+
+    remove_stage1_urls = !can_see_stage1_results
+
+    sfn_data_service = SfnPipelineDataService.new(id, true, remove_stage1_urls)
+    stage_names = sfn_data_service.stage_names
+    sfn_data = sfn_data_service.call
+
+    # Get read counts
+    job_stats_by_task = job_stats.index_by(&:task)
+
+    # Because string.titleize.camelize breaks on "GSNAPL/RAPSEARCH2 alignment"
+    camel_case = ->(string) { string.titleize.delete(" ").sub(string.chr, string.chr.downcase) }
+
+    sfn_data[:stages].each_with_index do |stage, stage_index|
+      stage_name = stage_names[stage_index]
+      stage_description = STEP_DESCRIPTIONS[stage_name]["stage"]
+      steps = {}
+
+      # Collect step information
+      stage[:steps].each do |step|
+        # Trying not to rely on pipeline_run_stages for stage names, to make future development easier
+        dag_name = SfnPipelineDataService::SFN_STEP_TO_DAG_STEP_NAME[stage_name][step[:name]]
+        step_dict = {
+          name: StringUtil.humanize_step_name(step[:name]),
+          stepDescription: step[:description],
+          fileList: step[:outputFiles],
+          readsAfter: (job_stats_by_task[dag_name] || {})["reads_after"],
+        }
+        # Convert to camelCase
+        step_key = camel_case.call(step[:name])
+        steps[step_key] = step_dict
+      end
+
+      stage_key = camel_case.call(stage_name)
+      result_files[stage_key] = {
+        name: stage_name,
+        stageDescription: stage_description,
+        steps: steps,
+      }
+    end
+
+    return result_files
+  end
+
+  def dag_outputs_by_step(can_see_stage1_results = false)
     path_to_file = lambda { |file, dag|
       # TODO: should be refactored as part of https://jira.czi.team/browse/IDSEQ-2295
       if step_function?
@@ -1735,8 +1791,9 @@ class PipelineRun < ApplicationRecord
     pipeline_run_stages.each_with_index do |prs, stage_idx|
       next unless prs.dag_json && STEP_DESCRIPTIONS[prs.name]
       result[prs.name] = {
-        "stage_description" => STEP_DESCRIPTIONS[prs.name]["stage"],
-        "stage_dag_json" => prs.redacted_dag_json,
+        "stageDescription" => STEP_DESCRIPTIONS[prs.name]["stage"],
+        "stageDagJson" => prs.redacted_dag_json,
+        "name" => StringUtil.humanize_step_name(prs.name),
         "steps" => {},
       }
       dag_dict = JSON.parse(prs.dag_json)
@@ -1772,9 +1829,10 @@ class PipelineRun < ApplicationRecord
 
         if file_info.present?
           result[prs.name]["steps"][target_name] = {
-            "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
-            "file_list" => file_info,
-            "reads_after" => (job_stats_by_task[target_name] || {})["reads_after"],
+            "stepDescription" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
+            "name" => StringUtil.humanize_step_name(target_name),
+            "fileList" => file_info,
+            "readsAfter" => (job_stats_by_task[target_name] || {})["reads_after"],
           }
         end
       end
