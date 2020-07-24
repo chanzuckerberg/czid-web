@@ -20,5 +20,15 @@
       @include font-body-s;
       margin-bottom: $space-l;
     }
+
+    .offsetBody {
+      @include font-body-s;
+      margin-bottom: $space-l;
+      margin-left: $space-xl;
+
+      .emphasis {
+        font-weight: $font-weight-semibold;
+      }
+    }
   }
 }

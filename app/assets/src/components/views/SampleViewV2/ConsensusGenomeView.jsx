@@ -26,21 +26,19 @@ class ConsensusGenomeView extends React.Component {
             all in a .zip file.
           </div>
           <div className={cs.subheader}>This is what you'll get:</div>
-          <div className={cs.body}>
+          <div className={cs.offsetBody}>
             {/* TODO: Migrate to come from an output file listing what went into the ZIP. */}
-            <div>consensus.fa</div>
-            <div>depths.png</div>
+            <div className={cs.emphasis}>consensus.fa</div>
+            <div className={cs.emphasis}>depths.png</div>
+            <div className={cs.emphasis}>report.txt</div>
+            <div>aligned_reads.bam</div>
+            <div>ercc_stats.txt</div>
             <div>no_host_1.fq.gz</div>
             <div>no_host_2.fq.gz</div>
             <div>primertrimmed.bai</div>
             <div>primertrimmed.bam</div>
-            <div>realigned.bai</div>
-            <div>realigned.bam</div>
-            <div>report.txt</div>
-            <div>sample.bam</div>
-            <div>sample.ercc_stats</div>
             <div>stats.json</div>
-            <div>vcf.gz</div>
+            <div>variants.vcf.gz</div>
           </div>
           <div>
             <DownloadButton
