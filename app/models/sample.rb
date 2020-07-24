@@ -613,7 +613,9 @@ class Sample < ApplicationRecord
   end
 
   def self.viewable(user)
-    if user.admin?
+    if user.nil?
+      snapshot_samples
+    elsif user.admin?
       all
     else
       project_ids = Project.editable(user).select("id").pluck(:id)
@@ -626,7 +628,9 @@ class Sample < ApplicationRecord
   end
 
   def self.editable(user)
-    if user.admin?
+    if user.nil?
+      nil
+    elsif user.admin?
       all
     else
       my_data(user)
@@ -636,6 +640,11 @@ class Sample < ApplicationRecord
   def self.my_data(user)
     project_ids = user.projects.pluck(:id)
     where("project_id in (?)", project_ids)
+  end
+
+  def self.snapshot_samples
+    snapshot_project_ids = SnapshotLink.all.pluck(:project_id)
+    where("project_id in (?)", snapshot_project_ids)
   end
 
   def deletable?(user)

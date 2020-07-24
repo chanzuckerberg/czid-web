@@ -38,6 +38,7 @@ class BackgroundModelFilter extends React.Component {
     return (
       <UserContext.Consumer>
         {currentUser =>
+          currentUser.allowedFeatures &&
           currentUser.allowedFeatures.includes("mass_normalized") ? (
             <SubtextDropdown
               {...this.props}

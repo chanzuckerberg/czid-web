@@ -189,10 +189,10 @@ export default class SampleViewV2 extends React.Component {
   fetchSample = async () => {
     this.setState({ loadingReport: true });
 
-    const { sampleId } = this.props;
+    const { snapshotShareId, sampleId } = this.props;
     const { pipelineVersion, backgrounds, selectedOptions } = this.state;
     let { currentTab } = this.state;
-    const sample = await getSample({ sampleId });
+    const sample = await getSample({ snapshotShareId, sampleId });
     sample.id = sampleId;
     if (get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME)
       currentTab = TABS.CONSENSUS_GENOME;
@@ -256,11 +256,12 @@ export default class SampleViewV2 extends React.Component {
   };
 
   fetchSampleReportData = async () => {
-    const { sampleId } = this.props;
+    const { snapshotShareId, sampleId } = this.props;
     const { pipelineVersion, selectedOptions } = this.state;
 
     this.setState({ loadingReport: true });
     const rawReportData = await getSampleReportData({
+      snapshotShareId,
       sampleId,
       background: selectedOptions.background,
       pipelineVersion,
@@ -328,8 +329,9 @@ export default class SampleViewV2 extends React.Component {
   };
 
   fetchBackgrounds = async () => {
+    const { snapshotShareId, sampleId } = this.props;
     this.setState({ loadingReport: true });
-    const backgrounds = await getBackgrounds();
+    const backgrounds = await getBackgrounds(snapshotShareId);
     this.setState(
       {
         backgrounds,
@@ -1148,6 +1150,7 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.tabsContainer}>
             <UserContext.Consumer>
               {currentUser =>
+                currentUser.allowedFeatures &&
                 currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) &&
                 reportMetadata.pipelineRunStatus === "SUCCEEDED" ? (
                   <Tabs
@@ -1207,6 +1210,9 @@ export default class SampleViewV2 extends React.Component {
   };
 }
 
+SampleViewV2.contextType = UserContext;
+
 SampleViewV2.propTypes = {
   sampleId: PropTypes.number,
+  snapshotShareId: PropTypes.string,
 };

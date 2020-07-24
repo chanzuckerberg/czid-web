@@ -27,9 +27,15 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
-const getSampleReportData = ({ sampleId, background, pipelineVersion }) =>
+const getSampleReportData = ({
+  snapshotShareId,
+  sampleId,
+  background,
+  pipelineVersion,
+}) =>
   get(
-    `/samples/${sampleId}/report_v2.json?background=${background}&pipeline_version=${pipelineVersion}`
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+      `/samples/${sampleId}/report_v2.json?background=${background}&pipeline_version=${pipelineVersion}`
   );
 
 const getSampleReportInfo = (id, params) =>
@@ -168,7 +174,11 @@ const getSampleStats = ({ domain, filters, projectId, search }) =>
     },
   });
 
-const getSample = ({ sampleId }) => get(`/samples/${sampleId}.json`);
+const getSample = ({ snapshotShareId, sampleId }) =>
+  get(
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+      `/samples/${sampleId}.json`
+  );
 
 const getProjectDimensions = ({ domain, filters, projectId, search }) =>
   get("/projects/dimensions.json", {
@@ -263,8 +273,10 @@ const createBackground = ({ description, name, sampleIds, massNormalized }) =>
     mass_normalized: massNormalized || null,
   });
 
-const getBackgrounds = async () => {
-  const response = await get("/backgrounds.json");
+const getBackgrounds = async snapshotShareId => {
+  const response = await get(
+    (snapshotShareId ? "/pub" : "") + "/backgrounds.json"
+  );
   return response.backgrounds;
 };
 

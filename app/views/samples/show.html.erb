@@ -2,6 +2,7 @@
   <%= javascript_tag do %>
     react_component('SampleViewV2', {
       sampleId: <%= @sample.id %>,
+      snapshotShareId: '<%= @share_id %>',
     }, 'sample_view_v2', JSON.parse('<%= raw escape_json(user_context)%>'));
   <% end %>
 </div>

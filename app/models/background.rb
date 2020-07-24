@@ -161,7 +161,7 @@ class Background < ApplicationRecord
   end
 
   def self.viewable(user)
-    if user.admin?
+    if user.present? && user.admin?
       all
     else
       # Background is viewable by user if either

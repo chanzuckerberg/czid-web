@@ -148,8 +148,11 @@ Rails.application.routes.draw do
 
   get 'sample_types.json', to: 'sample_types#index'
 
+  # Routes related to SnapshotLink sharing
   get 'pub/:share_id/samples/:id', to: 'snapshot_samples#show'
+  get 'pub/:share_id/samples/:id/report_v2', to: 'snapshot_samples#report_v2'
   get 'pub/projects/:project_id/create', to: 'snapshot_links#create'
+  get 'pub/backgrounds', to: 'snapshot_samples#backgrounds'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
