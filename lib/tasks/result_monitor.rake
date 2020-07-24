@@ -1,5 +1,6 @@
 # Check for pipeline results and load them if available
 require 'English'
+require './lib/instrument'
 
 class MonitorPipelineResults
   @sleep_quantum = 5.0
@@ -11,42 +12,51 @@ class MonitorPipelineResults
   end
 
   def self.update_jobs
-    PipelineRun.results_in_progress.each do |pr|
-      begin
-        break if @shutdown_requested
-        Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
-        pr.monitor_results
-      rescue => exception
-        LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
-        LogUtil.log_backtrace(exception)
+    instrumentation_namespace = "#{Rails.env}-result-monitor"
+    Instrument.snippet(name: "Update Jobs", cloudwatch_namespace: instrumentation_namespace, extra_dimensions: [{ name: "Monitor Type", value: "Result Monitor" }]) do
+      Instrument.snippet(name: "Pipeline Run Loop", cloudwatch_namespace: instrumentation_namespace) do
+        PipelineRun.results_in_progress.each do |pr|
+          begin
+            break if @shutdown_requested
+            Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
+            pr.monitor_results
+          rescue => exception
+            LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
+            LogUtil.log_backtrace(exception)
+          end
+        end
       end
-    end
 
-    PhyloTree.in_progress.each do |pt|
-      begin
-        break if @shutdown_requested
-        Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
-        pt.monitor_results
-      rescue => exception
-        LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
-        LogUtil.log_backtrace(exception)
+      Instrument.snippet(name: "PhyloTree Loop", cloudwatch_namespace: instrumentation_namespace) do
+        PhyloTree.in_progress.each do |pt|
+          begin
+            break if @shutdown_requested
+            Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
+            pt.monitor_results
+          rescue => exception
+            LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
+            LogUtil.log_backtrace(exception)
+          end
+        end
       end
-    end
 
-    # "stalled uploads" are not pipeline jobs, but they fit in here better than
-    # anywhere else.
-    begin
-      MonitorPipelineResults.alert_stalled_uploads!
-    rescue => exception
-      LogUtil.log_err_and_airbrake("Failed to alert on stalled uploads: #{exception.message}")
-      LogUtil.log_backtrace(exception)
-    end
+      Instrument.snippet(name: "Failed/Stalled Uploads", cloudwatch_namespace: instrumentation_namespace) do
+        # "stalled uploads" are not pipeline jobs, but they fit in here better than
+        # anywhere else.
+        begin
+          MonitorPipelineResults.alert_stalled_uploads!
+        rescue => exception
+          LogUtil.log_err_and_airbrake("Failed to alert on stalled uploads: #{exception.message}")
+          LogUtil.log_backtrace(exception)
+        end
 
-    begin
-      MonitorPipelineResults.fail_stalled_uploads!
-    rescue => exception
-      LogUtil.log_err_and_airbrake("Failed to fail stalled uploads: #{exception.message}")
-      LogUtil.log_backtrace(exception)
+        begin
+          MonitorPipelineResults.fail_stalled_uploads!
+        rescue => exception
+          LogUtil.log_err_and_airbrake("Failed to fail stalled uploads: #{exception.message}")
+          LogUtil.log_backtrace(exception)
+        end
+      end
     end
   end
 

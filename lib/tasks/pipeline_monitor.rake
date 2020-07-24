@@ -2,6 +2,8 @@
 require 'English'
 require 'thread/pool'
 require 'json'
+require './lib/instrument'
+require './lib/cloudwatch_util'
 
 # Benchmark status will not be updated faster than this.
 IDSEQ_BENCH_UPDATE_FREQUENCY_SECONDS = 600
@@ -261,27 +263,28 @@ class CheckPipelineRuns
     # The duration of the longest update so far.
     max_work_duration = 0
     iter_count = 0
+    t_iter_end = 0
     until @shutdown_requested
-      before_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      iter_count += 1
-      t_iter_start = t_now
-      pr_ids = PipelineRun.in_progress.pluck(:id)
-      pt_ids = PhyloTree.in_progress.pluck(:id)
-      cg_ids = Sample.temp_workflows_in_progress(Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW).pluck(:id)
-      num_shards = ((pr_ids.count + pt_ids.count) / MIN_JOBS_PER_SHARD).to_i
-      num_shards = [[num_shards, MAX_SHARDS].min, 1].max
-      fork_pids = []
-      shard_id = 0
-      while shard_id < num_shards
-        pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids, cg_ids) }
-        fork_pids << pid
-        shard_id += 1
-      end
-      fork_pids.each { |p| Process.waitpid(p) }
-      benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
-      t_now = Time.now.to_f
-      after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      ActiveSupport::Notifications.instrument("run.pipeline_monitor", args: { duration: duration, min_refresh_interval: min_refresh_interval }) do |payload|
+      Instrument.snippet(name: "Pipeline Iteration Data", cloudwatch_namespace: "#{Rails.env}-pipeline-monitor", extra_dimensions: [{ name: "Monitor Type", value: "Pipeline Monitor" }]) do |payload|
+        before_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        iter_count += 1
+        t_iter_start = t_now
+        pr_ids = PipelineRun.in_progress.pluck(:id)
+        pt_ids = PhyloTree.in_progress.pluck(:id)
+        cg_ids = Sample.temp_workflows_in_progress(Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW).pluck(:id)
+        num_shards = ((pr_ids.count + pt_ids.count) / MIN_JOBS_PER_SHARD).to_i
+        num_shards = [[num_shards, MAX_SHARDS].min, 1].max
+        fork_pids = []
+        shard_id = 0
+        while shard_id < num_shards
+          pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids, cg_ids) }
+          fork_pids << pid
+          shard_id += 1
+        end
+        fork_pids.each { |p| Process.waitpid(p) }
+        benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
+        t_now = Time.now.to_f
+        after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         logger_iteration_data = {
           message: "Pipeline Monitor Iteration Complete",
           duration: (after_iter_timestamp - before_iter_timestamp),
@@ -290,13 +293,20 @@ class CheckPipelineRuns
           cg_id_count: cg_ids.count,
           num_shards: num_shards,
         }
+        payload[:args] = { duration: duration, min_refresh_interval: min_refresh_interval }
         payload[:logger_iteration_data] = logger_iteration_data
+        payload[:extra_metrics] = [
+          CloudWatchUtil.create_metric_datum("Pipeline Run Count", logger_iteration_data[:pr_id_count], "Count"),
+          CloudWatchUtil.create_metric_datum("Phylo Tree Run Count", logger_iteration_data[:pt_id_count], "Count"),
+          CloudWatchUtil.create_metric_datum("Consensus Genome Run Count", logger_iteration_data[:cg_id_count], "Count"),
+          CloudWatchUtil.create_metric_datum("Number of Shards", logger_iteration_data[:num_shards], "Count"),
+        ]
         # HACK: This logger isn't really meant to deal with nested json
         #  this will appear under the message key at the top level
         Rails.logger.info(JSON.generate(logger_iteration_data))
+        max_work_duration = [t_now - t_iter_start, max_work_duration].max
+        t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
       end
-      max_work_duration = [t_now - t_iter_start, max_work_duration].max
-      t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
       break unless t_iter_end + max_work_duration < t_end
       while t_now < t_iter_end && !@shutdown_requested
         # Ensure no iteration is shorter than min_refresh_interval.

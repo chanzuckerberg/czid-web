@@ -13,7 +13,7 @@ if !Rails.env.test? && !Rails.env.prod?
   ActiveSupport::Notifications.subscribe("cache_fetch_hit.active_support", MetricHandlers::CacheFetchHitMetricHandler.new)
   ActiveSupport::Notifications.subscribe("process_action.action_controller", MetricHandlers::ActionControllerMetricHandler.new)
   ActiveSupport::Notifications.subscribe(/resque/, MetricHandlers::ResqueJobMetricHandler.new)
-  ActiveSupport::Notifications.subscribe("run.pipeline_monitor", MetricHandlers::PipelineMonitorMetricHandler.new)
+  ActiveSupport::Notifications.subscribe(/snippet/, MetricHandlers::SnippetMetricHandler.new)
   # Commenting out until more context is provided to sql queries
   # ActiveSupport::Notifications.subscribe("sql.active_record", MetricHandlers::SQLMetricHandler.new)
 end

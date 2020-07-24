@@ -10,4 +10,10 @@ class ArrayUtil
     end
     list_a.zip(list_b).flatten.compact
   end
+
+  # Merges two arrays and removes duplicates. Results are unsorted
+  def self.merge_arrays_uniq(arr1, arr2)
+    raise ArgumentError, "One or both input arguments are not of type Array" unless arr1.is_a?(Array) && arr2.is_a?(Array)
+    return (arr1 + arr2).uniq
+  end
 end
