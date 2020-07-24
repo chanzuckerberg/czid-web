@@ -1372,11 +1372,11 @@ class SamplesController < ApplicationController
     output_name = Sample::TEMP_CONSENSUS_GENOME_OUTPUTS[:output_zip]
 
     description = @sample.temp_sfn_description
-    if description
+    if description && description[:output]
       result_mapping = JSON.parse(description[:output])
       result_mapping = result_mapping["Result"]
     else
-      raise "No SFN description"
+      raise "No SFN description or output"
     end
 
     s3_path = result_mapping[output_name]
