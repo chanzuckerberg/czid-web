@@ -283,6 +283,16 @@ describe Sample, type: :model do
         status: "SUCCESS",
       }
     end
+    let(:fake_failed_sfn_execution_description) do
+      {
+        execution_arn: fake_sfn_execution_arn,
+        input: "{}",
+        # AWS SDK rounds to second
+        start_date: Time.zone.now.round,
+        state_machine_arn: fake_sfn_arn,
+        status: "FAILED",
+      }
+    end
     let(:fake_dispatch_response) do
       {
         sfn_input_json: {},
@@ -324,6 +334,13 @@ describe Sample, type: :model do
       it "reports errors in checking CG pipeline statuses" do
         allow(@mock_aws_clients[:states]).to receive(:describe_execution).and_raise(StandardError)
         expect(LogUtil).to receive(:log_err_and_airbrake)
+
+        @sample_running.temp_update_workflow_status
+      end
+
+      it "reports CG pipeline failures" do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
+        expect(LogUtil).to receive(:log_err_and_airbrake).with(match(/SampleFailedEvent/))
 
         @sample_running.temp_update_workflow_status
       end

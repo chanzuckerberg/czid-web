@@ -989,7 +989,10 @@ class Sample < ApplicationRecord
     if status != temp_sfn_execution_status
       update(temp_sfn_execution_status: status)
     end
-    # TODO: Add alert to ops on failure
+
+    if status == SFN_STATUS[:failed]
+      LogUtil.log_err_and_airbrake("SampleFailedEvent: Sample #{id} by #{user.role_name} failed Consensus Genome pipeline. See: #{status_url}")
+    end
   rescue => err
     LogUtil.log_err_and_airbrake("Error checking/updating temp workflow pipeline: #{err}")
     LogUtil.log_backtrace(err)
