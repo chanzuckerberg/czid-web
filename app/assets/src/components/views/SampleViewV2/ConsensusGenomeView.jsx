@@ -10,6 +10,7 @@ import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl, openUrlInNewTab } from "~utils/links";
 import PropTypes from "~utils/propTypes";
 import { sampleErrorInfo } from "~utils/sample";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./consensus_genome_view.scss";
 import csSampleMessage from "./sample_message.scss";
@@ -44,7 +45,15 @@ class ConsensusGenomeView extends React.Component {
           <div>
             <DownloadButton
               text="Download All"
-              onClick={() => openUrl(getConsensusGenomeZipLink(sample.id))}
+              onClick={() =>
+                withAnalytics(
+                  openUrl(getConsensusGenomeZipLink(sample.id)),
+                  "ConsensusGenomeView_download-all-button_clicked",
+                  {
+                    sampleId: sample.id,
+                  }
+                )
+              }
             />
           </div>
         </div>
@@ -58,7 +67,12 @@ class ConsensusGenomeView extends React.Component {
           </div>
           <div>
             <SecondaryButton
-              onClick={() => openUrlInNewTab(CONSENSUS_GENOME_DOC_LINK)}
+              onClick={() =>
+                withAnalytics(
+                  openUrlInNewTab(CONSENSUS_GENOME_DOC_LINK),
+                  "ConsensusGenomeView_view-help-docs-button_clicked"
+                )
+              }
               text="View Help Docs"
             />
           </div>
@@ -82,6 +96,11 @@ class ConsensusGenomeView extends React.Component {
           message={"Your Consensus Genome is being generated!"}
           status={"IN PROGRESS"}
           type={"inProgress"}
+          onClick={() =>
+            logAnalyticsEvent(
+              "ConsensusGenomeView_consenus-genome-doc-link_clicked"
+            )
+          }
         />
       );
     } else {
@@ -97,6 +116,11 @@ class ConsensusGenomeView extends React.Component {
           message={message}
           status={status}
           type={type}
+          onClick={() =>
+            logAnalyticsEvent(
+              "ConsensusGenomeView_sample-error-info-link_clicked"
+            )
+          }
         />
       );
     }

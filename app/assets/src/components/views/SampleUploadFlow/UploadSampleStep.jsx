@@ -661,6 +661,8 @@ class UploadSampleStep extends React.Component {
       remoteSamples: this.state.remoteSamples.length,
       basespaceSamples: this.state.basespaceSamples.length,
       currentTab: this.state.currentTab,
+      wetlabProtocol: selectedWetlabProtocol,
+      workflows: selectedWorkflows,
       ...this.getAnalyticsContext(),
     });
   };

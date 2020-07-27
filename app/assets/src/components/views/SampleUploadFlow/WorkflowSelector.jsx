@@ -8,6 +8,7 @@ import InfoIconSmall from "~ui/icons/InfoIconSmall";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import PropTypes from "~utils/propTypes";
 import { WORKFLOWS } from "~utils/workflows";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./workflow_selector.scss";
 
@@ -30,7 +31,15 @@ class WorkflowSelector extends React.Component {
         <div className={cs.title}>Wetlab protocol:</div>
         <Dropdown
           className={cs.dropdown}
-          onChange={value => onWetlabProtocolChange(value)}
+          onChange={value =>
+            withAnalytics(
+              onWetlabProtocolChange(value),
+              "WorkflowSelector_wetlab-protocol_selected",
+              {
+                wetlabOption: value,
+              }
+            )
+          }
           options={WETLAB_OPTIONS}
           placeholder="Select"
           value={selectedWetlabProtocol}
@@ -80,6 +89,11 @@ class WorkflowSelector extends React.Component {
                 }
                 content="Consensus genome aligns short reads to a SARS-CoV-2 reference genome."
                 link={CONSENSUS_GENOME_DOC_LINK}
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "WorkflowSelector_consensus-genome-doc-link_clicked"
+                  )
+                }
               />
             </div>
             <div className={cs.description}>
