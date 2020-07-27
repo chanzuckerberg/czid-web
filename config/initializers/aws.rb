@@ -8,9 +8,9 @@ module AwsClient
   end
 
   CLIENT_INITIALIZERS = {
-    CloudWatch: -> { Aws::CloudWatch::Client.new },
     s3: -> { Aws::S3::Client.new },
     states: -> { Aws::States::Client.new },
+    sts: -> { Aws::STS::Client.new },
   }.freeze
 
   @clients = {}

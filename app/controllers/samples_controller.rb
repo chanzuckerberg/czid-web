@@ -1382,7 +1382,7 @@ class SamplesController < ApplicationController
     s3_path = result_mapping[output_name]
     raise "Output not found in results" unless s3_path
 
-    download_url = get_presigned_s3_url(s3_path, "#{@sample.name}_#{output_name}")
+    download_url = get_presigned_s3_url(s3_path, "#{@sample.name}_outputs.zip")
     if download_url
       redirect_to download_url
     else

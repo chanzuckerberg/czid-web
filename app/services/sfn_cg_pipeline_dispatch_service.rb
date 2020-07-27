@@ -7,7 +7,7 @@ class SfnCGPipelineDispatchService
 
   class SfnArnMissingError < StandardError
     def initialize
-      super("SFN CG ARN not set on App Config")
+      super("SFN_CG_ARN not set on App Config")
     end
   end
 
@@ -53,6 +53,12 @@ class SfnCGPipelineDispatchService
 
   private
 
+  def retrieve_docker_image_id
+    resp = AwsClient[:sts].get_caller_identity
+    # TODO(JIRA:IDSEQ-3164): do not use hardcoded docker image
+    return "#{resp[:account]}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:sha-f47fb6c2f7ffc961"
+  end
+
   def retrieve_version_tags
     cache_key = "#{self.class.name}::#{@sfn_arn}::tags"
     Rails.cache.fetch(cache_key, expires_in: 1.minute) do
@@ -67,15 +73,35 @@ class SfnCGPipelineDispatchService
     end
   end
 
+  def primer_file
+    case @sample.temp_wetlab_protocol
+    when Sample::TEMP_WETLAB_PROTOCOL[:msspe]
+      "msspe_primers.bed"
+    when Sample::TEMP_WETLAB_PROTOCOL[:artic]
+      "artic_v3_primers.bed"
+    else
+      "msspe_primers.bed"
+    end
+  end
+
   def generate_wdl_input
     sfn_pipeline_input_json = {
+      # TODO(JIRA:IDSEQ-3163): do not use hardcoded version (outputs will still be here in the SFN version returned by the tag)
+      RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v1-consensus-genome/consensus-genome/run.wdl",
       Input: {
-        ConsensusGenome: {
-          # TODO: Add real input when WDL workflow is ready.
+        Run: {
+          docker_image_id: retrieve_docker_image_id,
           fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
           fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+          sample: @sample.name,
+          ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
+          ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/human_chr1.fa",
+          kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",
+          primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{primer_file}",
+          ercc_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ercc_sequences.fasta",
         },
       },
+      OutputPrefix: @sample.sample_output_s3_path,
     }
     return sfn_pipeline_input_json
   end

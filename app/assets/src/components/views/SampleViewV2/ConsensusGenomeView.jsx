@@ -31,6 +31,7 @@ class ConsensusGenomeView extends React.Component {
             <div className={cs.emphasis}>consensus.fa</div>
             <div className={cs.emphasis}>depths.png</div>
             <div className={cs.emphasis}>report.txt</div>
+            <div className={cs.emphasis}>report.tsv</div>
             <div>aligned_reads.bam</div>
             <div>ercc_stats.txt</div>
             <div>no_host_1.fq.gz</div>
