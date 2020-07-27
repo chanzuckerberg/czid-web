@@ -1,9 +1,7 @@
 import React from "react";
 
-import { UserContext } from "~/components/common/UserContext";
 import PropTypes from "../../../utils/propTypes";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
 
 class BackgroundModelFilter extends React.Component {
   render() {
@@ -36,28 +34,13 @@ class BackgroundModelFilter extends React.Component {
       disabled = true;
     }
     return (
-      <UserContext.Consumer>
-        {currentUser =>
-          currentUser.allowedFeatures &&
-          currentUser.allowedFeatures.includes("mass_normalized") ? (
-            <SubtextDropdown
-              {...this.props}
-              options={backgroundOptions}
-              initialSelectedValue={value}
-              disabled={disabled}
-              onChange={onChange}
-            />
-          ) : (
-            <Dropdown
-              {...this.props}
-              options={backgroundOptions}
-              value={value}
-              disabled={disabled}
-              onChange={onChange}
-            />
-          )
-        }
-      </UserContext.Consumer>
+      <SubtextDropdown
+        {...this.props}
+        options={backgroundOptions}
+        initialSelectedValue={value}
+        disabled={disabled}
+        onChange={onChange}
+      />
     );
   }
 }

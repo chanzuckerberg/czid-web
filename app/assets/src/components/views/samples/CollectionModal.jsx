@@ -140,7 +140,6 @@ class CollectionModal extends React.Component {
 
   renderForm = () => {
     const { numDescriptionRows } = this.props;
-    const { allowedFeatures = {} } = this.context || {};
 
     const { enableMassNormalizedBackgrounds, appliedMethod } = this.state;
 
@@ -170,29 +169,30 @@ class CollectionModal extends React.Component {
           rows={numDescriptionRows}
           onChange={this.handleDescriptionChange}
         />
-        {allowedFeatures.includes("mass_normalized") && (
-          <div>
-            <div className={cs.label}>
-              Applied Correction Method
-              <ColumnHeaderTooltip
-                trigger={
-                  <span>
-                    <InfoIconSmall className={cs.infoIcon} />
-                  </span>
-                }
-                content="Applied Correction Method is the method used when comparing a chosen set of samples against a background model."
-                link="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360035166174-How-do-I-create-and-use-background-models-in-IDseq-"
-              />
-            </div>
-            <SubtextDropdown
-              fluid
-              className={cs.dropdown}
-              options={Object.values(dropdownOptions)}
-              initialSelectedValue={appliedMethod}
-              onChange={this.handleMethodChange}
+        <div>
+          <div className={cs.label}>
+            Applied Correction Method
+            <ColumnHeaderTooltip
+              trigger={
+                <span>
+                  <InfoIconSmall className={cs.infoIcon} />
+                </span>
+              }
+              content="Applied Correction Method is the method used when comparing a chosen set of samples against a background model."
+              link="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054#h_01ECWXA46KAHRF7N61D7SE1M1F"
             />
           </div>
-        )}
+          <SubtextDropdown
+            fluid
+            className={cs.dropdown}
+            options={Object.values(dropdownOptions)}
+            initialSelectedValue={appliedMethod}
+            onChange={withAnalytics(
+              this.handleMethodChange,
+              "CollectionModal_applied-correction-method_changed"
+            )}
+          />
+        </div>
         {this.renderSampleList()}
         <div className={cs.buttons}>
           <PrimaryButton
