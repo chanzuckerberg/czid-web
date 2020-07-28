@@ -5,7 +5,7 @@ source "$SCRIPT_DIR/_global_vars.sh"
 source "$SCRIPT_DIR/_shared_functions.sh"
 
 # Start a new release cycle:
-# - Create a new staging tag, pointing to HEAD of master branch. 
+# - Create a new staging tag, pointing to HEAD of main branch. 
 #   The name of this tag bumps minor version from previous staging tag
 #   (ex: if previous staging version is v0.24.1_staging_...,
 #        this step will create tag v0.25_staging_...)
@@ -34,10 +34,10 @@ main() {
     _exit_with_err_msg "$msg"
   fi
 
-  # check if there is any commit in master
-  declare commit_count; commit_count=$(git rev-list "origin/$STAGING_BRANCH".."origin/$MASTER_BRANCH" | wc -l)
+  # check if there is any commit in main
+  declare commit_count; commit_count=$(git rev-list "origin/$STAGING_BRANCH".."origin/$MAIN_BRANCH" | wc -l)
   if [ "$commit_count" -eq "0" ]; then
-    _exit_with_err_msg "origin/${MASTER_BRANCH} doesn't seem to have any additional commits after origin/${STAGING_BRANCH}." \
+    _exit_with_err_msg "origin/${MAIN_BRANCH} doesn't seem to have any additional commits after origin/${STAGING_BRANCH}." \
                        "Cannot start a new release cycle."
   fi
  
@@ -45,12 +45,12 @@ main() {
   declare next_version; next_version=$(_bump_version_string "$staging_tag_version" 2)
   _log "Bumping $STAGING_BRANCH from version $staging_tag_version to $next_version"
 
-  # create a new tag to make staging point to latest commit from master
+  # create a new tag to make staging point to latest commit from main
   declare tag; tag="$(_format_version_tag "${next_version}" "${STAGING_ENV}")"
-  _log "Creating tag ${tag} pointing to the top of ${MASTER_BRANCH} branch..."
-  git tag -a -m "Started release cycle $next_version" "${tag}" "origin/$MASTER_BRANCH"
+  _log "Creating tag ${tag} pointing to the top of ${MAIN_BRANCH} branch..."
+  git tag -a -m "Started release cycle $next_version" "${tag}" "origin/$MAIN_BRANCH"
 
-  # point staging branch head to master
+  # point staging branch head to main
   declare sha; sha=$(git log -n1 "${tag}" --format=%h --abbrev=8)
   _log "Pointing ${STAGING_BRANCH} branch to tag ${tag}..."
   git branch -f "${STAGING_BRANCH}" "${sha}"

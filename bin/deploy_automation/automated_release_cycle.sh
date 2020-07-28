@@ -14,7 +14,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 #   - Set HEAD of prod branch to this new tag
 # - prod branch is now ready to be deployed (note: we are currently executing this step after starting a new release cycle, because it is more convenient when executing it manually)
 # - Start a new release cycle
-#   - Create a new staging tag, pointing to HEAD of master branch. The name of this tag bumps minor version from previous staging tag  (ex: if previous staging version is v0.24.1_staging_..., this step will create tag v0.25_staging_...)
+#   - Create a new staging tag, pointing to HEAD of main branch. The name of this tag bumps minor version from previous staging tag  (ex: if previous staging version is v0.24.1_staging_..., this step will create tag v0.25_staging_...)
 #   - Set HEAD of staging branch to point to this new tag
 #   - Create new release checklist with all changes that are now in staging and not yet in prod
 # - Staging branch is now ready to be deployed (note we are deploying both prod and staging versions here, because it is more convenient when executing it manually)

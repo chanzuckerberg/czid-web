@@ -3,7 +3,7 @@ name: idseq-web sync tasks
 on:
   push:
     branches:
-      master
+      main
 
 jobs:
   sync_repo:

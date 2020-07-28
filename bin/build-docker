@@ -27,7 +27,7 @@ fi
 
 docker build -t $COMPOSE_TAG --cache-from $CACHE_TAG --build-arg GIT_COMMIT=${COMMIT} .
 
-if [ "$BRANCH" == "master" ]; then
+if [ "$BRANCH" == "main" ]; then
     docker tag $COMPOSE_TAG $LATEST_TAG
 fi
 docker tag $COMPOSE_TAG $COMMIT_TAG
