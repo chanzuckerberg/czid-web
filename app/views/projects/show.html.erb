@@ -50,9 +50,6 @@
             <% if sample.status.to_s == 'created' and sample.created_at < 30.minutes.ago %>
                 <%= button_to 'reupload', reupload_source_sample_path(sample), method: :put %>
             <% end %>
-            <% if Rails.env == 'staging' %>
-                <%= button_to 'sync to prod', resync_prod_data_to_staging_sample_path(sample), method: :put %>
-            <% end %>
           </td>
           <td>
             <% pipeline_run = sample.first_pipeline_run %>
