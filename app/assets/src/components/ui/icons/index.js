@@ -20,6 +20,7 @@ import GlobeLinedIcon from "./GlobeLinedIcon";
 import HeatmapIcon from "./HeatmapIcon";
 import HeatmapPrivate from "./HeatmapPrivate";
 import HeatmapPublic from "./HeatmapPublic";
+import IconChartSmall from "./IconChartSmall";
 import InfoCircleIcon from "./InfoCircleIcon";
 import InfoIcon from "./InfoIcon";
 import InfoPanelIcon from "./InfoPanelIcon";
@@ -73,6 +74,7 @@ export default {
     HeatmapIcon,
     HeatmapPrivate,
     HeatmapPublic,
+    IconChartSmall,
     InfoCircleIcon,
     InfoIcon,
     InfoPanelIcon,

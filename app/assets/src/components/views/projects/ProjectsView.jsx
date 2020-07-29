@@ -3,7 +3,7 @@ import { merge, pick } from "lodash/fp";
 
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-import MapToggle from "~/components/views/discovery/mapping/MapToggle";
+import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PropTypes from "~/components/utils/propTypes";
@@ -130,7 +130,7 @@ class ProjectsView extends React.Component {
     const { currentDisplay, onDisplaySwitch } = this.props;
     const renderContent = () => (
       <div className={cs.toggleContainer}>
-        <MapToggle
+        <DiscoveryViewToggle
           currentDisplay={currentDisplay}
           onDisplaySwitch={display => {
             onDisplaySwitch(display);

@@ -7,11 +7,12 @@ import { showBulkDownloadNotification } from "~/components/views/bulk_download/B
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import QualityControl from "~/components/views/discovery/QualityControl";
 import DownloadIcon from "~ui/icons/DownloadIcon";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
-import MapToggle from "~/components/views/discovery/mapping/MapToggle";
+import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
@@ -27,7 +28,6 @@ import ToolbarIcon from "./ToolbarIcon";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
-import { select } from "d3";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -402,14 +402,17 @@ class SamplesView extends React.Component {
   };
 
   renderDisplaySwitcher = () => {
-    const { currentDisplay, onDisplaySwitch } = this.props;
+    const { currentDisplay, onDisplaySwitch, projectId } = this.props;
+    const { allowedFeatures = {} } = this.context || {};
+
     return (
-      <MapToggle
+      <DiscoveryViewToggle
         currentDisplay={currentDisplay}
         onDisplaySwitch={display => {
           onDisplaySwitch(display);
           logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
         }}
+        includePLQC={!!projectId && allowedFeatures.includes("plqc")}
       />
     );
   };
@@ -444,6 +447,19 @@ class SamplesView extends React.Component {
         />
       </div>
     );
+  };
+
+  renderQualityControl = () => {
+    return <QualityControl />;
+  };
+
+  renderDisplay = () => {
+    const { currentDisplay } = this.props;
+    return currentDisplay === "table"
+      ? this.renderTable()
+      : currentDisplay === "map"
+      ? this.renderMap()
+      : this.renderQualityControl();
   };
 
   handlePhyloModalOpen = () => {
@@ -500,12 +516,12 @@ class SamplesView extends React.Component {
     const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
     return (
       <div className={cs.container}>
-        {currentDisplay === "table" ? (
+        {currentDisplay === "table" || currentDisplay === "plqc" ? (
           this.renderToolbar()
         ) : (
           <NarrowContainer>{this.renderToolbar()}</NarrowContainer>
         )}
-        {currentDisplay === "table" ? this.renderTable() : this.renderMap()}
+        {this.renderDisplay()}
         {phyloTreeCreationModalOpen && (
           <PhyloTreeCreationModal
             // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this

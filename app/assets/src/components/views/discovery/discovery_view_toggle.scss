@@ -12,12 +12,12 @@
       padding: 5px 15px;
 
       .icon {
-        font-size: 15px;
-      }
+        fill: $gray-darkest;
+        height: 14px;
 
-      &:global(.active) {
-        // Important due to a { color: inherit !important; } in header.scss.
-        color: $primary !important;
+        &.active {
+          fill: $primary;
+        }
       }
     }
   }

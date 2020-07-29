@@ -144,6 +144,13 @@ class DiscoveryView extends React.Component {
       urlState
     );
 
+    // If a user had previously selected the PLQC view for a specific project,
+    // ensure that currentDisplay defaults to "table" if they switch to a different view,
+    // since the PLQC display only exists when viewing a single project.
+    if (this.state.currentDisplay === "plqc" && !projectId) {
+      this.state.currentDisplay = "table";
+    }
+
     this.loadUserDataStats();
 
     this.dataLayer = new DiscoveryDataLayer(this.props.domain);
@@ -1279,7 +1286,7 @@ class DiscoveryView extends React.Component {
       <div className={cs.rightPane}>
         {showStats &&
           currentTab !== "visualizations" &&
-          (currentDisplay === "map" ? (
+          (currentDisplay !== "table" ? (
             <MapPreviewSidebar
               allowedFeatures={allowedFeatures}
               currentTab={mapSidebarTab}
