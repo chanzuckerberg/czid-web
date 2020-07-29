@@ -95,7 +95,7 @@ class SfnCGPipelineDispatchService
           fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
           sample: @sample.name,
           ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
-          ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/human_chr1.fa",
+          ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
           kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",
           primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{primer_file}",
           ercc_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ercc_sequences.fasta",
