@@ -46,12 +46,12 @@ if ENV['AIRBRAKE_PROJECT_ID'] && ENV['AIRBRAKE_PROJECT_KEY']
     # A list of parameters that should be filtered out of what is sent to
     # Airbrake. By default, all "password" attributes will have their contents
     # replaced.
-    # https://github.com/airbrake/airbrake-ruby#blacklist_keys
-    c.blacklist_keys = [/password/i, /authorization/i]
+    # https://github.com/airbrake/airbrake-ruby#blocklist_keys
+    c.blocklist_keys = [/password/i, /authorization/i]
 
     # Alternatively, you can integrate with Rails' filter_parameters.
     # Read more: https://goo.gl/gqQ1xS
-    # c.blacklist_keys = Rails.application.config.filter_parameters
+    # c.blocklist_keys = Rails.application.config.filter_parameters
 
     # For Performance Dashboard
     c.performance_stats = true
