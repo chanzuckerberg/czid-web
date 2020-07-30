@@ -60,7 +60,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     results = JSON.parse(@response.body)
     loc = locations(:swamp)
     actual_object = results[loc.id.to_s]
-    expected_object = { "id" => loc.id, "name" => loc.name, "geo_level" => loc.geo_level, "country_name" => loc.country_name, "state_name" => loc.state_name, "subdivision_name" => loc.subdivision_name, "city_name" => loc.city_name, "lat" => loc.lat.to_s, "lng" => loc.lng.to_s, "country_id" => nil, "state_id" => nil, "subdivision_id" => nil, "city_id" => nil, "sample_ids" => [samples(:joe_project_sample_mosquito).id, samples(:joe_sample).id], "project_ids" => [projects(:joe_project).id] }
+    expected_object = { "id" => loc.id, "name" => loc.name, "geo_level" => loc.geo_level, "country_name" => loc.country_name, "state_name" => loc.state_name, "subdivision_name" => loc.subdivision_name, "city_name" => loc.city_name, "lat" => loc.lat.to_s, "lng" => loc.lng.to_s, "country_id" => nil, "state_id" => nil, "subdivision_id" => nil, "city_id" => nil, "sample_ids" => [samples(:joe_project_sample_mosquito).id], "project_ids" => [projects(:joe_project).id] }
 
     assert_equal actual_object, expected_object
   end

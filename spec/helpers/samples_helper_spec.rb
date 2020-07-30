@@ -282,4 +282,39 @@ RSpec.describe SamplesHelper, type: :helper do
       expect(headers.include?("custom_field_two")).to be true
     end
   end
+
+  describe "#filter_by_workflow" do
+    before do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe])
+      @sample_one = create(:sample, project: @project, name: "Test Sample One", temp_pipeline_workflow: "main")
+      @sample_two = create(:sample, project: @project, name: "Test Sample Two", temp_pipeline_workflow: "consensus_genome")
+      @sample_three = create(:sample, project: @project, name: "Test Sample Three", temp_pipeline_workflow: "main")
+      @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
+    end
+
+    it "properly returns only samples with the main workflow" do
+      query = ["main"]
+      results = helper.send(:filter_by_workflow, @samples_input, query)
+      expect(results.pluck(:id)).to eq([@sample_one.id, @sample_three.id])
+    end
+
+    it "properly returns only samples with the consensus_genome workflow" do
+      query = ["consensus_genome"]
+      results = helper.send(:filter_by_workflow, @samples_input, query)
+      expect(results.pluck(:id)).to eq([@sample_two.id])
+    end
+
+    it "properly returns samples with the main and consensus_genome workflows" do
+      query = ["main", "consensus_genome"]
+      results = helper.send(:filter_by_workflow, @samples_input, query)
+      expect(results.pluck(:id)).to eq([@sample_one.id, @sample_two.id, @sample_three.id])
+    end
+
+    it "returns an empty response if no sample workflows match the query" do
+      query = ["fake_workflow"]
+      results = helper.send(:filter_by_workflow, @samples_input, query)
+      expect(results).to eq([])
+    end
+  end
 end

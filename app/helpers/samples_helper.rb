@@ -241,6 +241,11 @@ module SamplesHelper
     project_id = params[:projectId]
     search_string = params[:search]
     requested_sample_ids = params[:sampleIds]
+    # TODO: Update to support params from frontend filtering
+    workflow = []
+    if current_user && !current_user.allowed_feature?("consensus_genome")
+      workflow = ["main"]
+    end
 
     samples = samples.where(project_id: project_id) if project_id.present?
     samples = filter_by_taxid(samples, taxon) if taxon.present?
@@ -252,6 +257,7 @@ module SamplesHelper
     samples = filter_by_visibility(samples, visibility) if visibility.present?
     samples = filter_by_search_string(samples, search_string) if search_string.present?
     samples = filter_by_sample_ids(samples, requested_sample_ids) if requested_sample_ids.present?
+    samples = filter_by_workflow(samples, workflow) if workflow.present?
 
     return samples
   end
@@ -804,5 +810,9 @@ module SamplesHelper
   def filter_by_sample_ids(samples, requested_sample_ids)
     requested_sample_ids.class.name
     samples.where(id: requested_sample_ids.is_a?(Array) ? requested_sample_ids : JSON.parse(requested_sample_ids))
+  end
+
+  def filter_by_workflow(samples, query)
+    samples.where(temp_pipeline_workflow: query)
   end
 end

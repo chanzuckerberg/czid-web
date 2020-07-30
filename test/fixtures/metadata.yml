@@ -83,7 +83,7 @@ sample_human_collection_location_v2:
   key: "collection_location_v2"
   raw_value: "{\"locationiq_id\":\"123\",\"osm_id\":\"321\",\"osm_type\":\"Way\"}"
   metadata_field: collection_location_v2
-  location_id: 1
+  location_id: 2
   sample: joe_sample
 
 sample_collection_location_v2_kurigram:
