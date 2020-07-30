@@ -15,7 +15,7 @@ class ElasticsearchIndex
       Elasticsearch::Model.client.index(index: index_name, type: doc_type, id: record_id, body: indexed_json)
       Rails.logger.debug("Elasticsearch: Successfully indexed record: #{record_id} source table: #{index_name}")
     when /delete/
-      Elasticsearch::Model.client.delete(index: index_name, type: index_type, id: record_id)
+      Elasticsearch::Model.client.delete(index: index_name, type: doc_type, id: record_id)
       Rails.logger.debug("Elasticsearch: Successfully deleted record: #{record_id} source table: #{index_name}")
     else raise ArgumentError, "Unknown operation '#{operation}'"
     end
