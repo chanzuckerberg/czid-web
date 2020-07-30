@@ -17,4 +17,4 @@ jobs:
           eval $(ssh-agent)
           echo "${{secrets.IDSEQ_WEB_SYNC}}" | ssh-add -
           git remote add idseq-web git@github.com:chanzuckerberg/idseq-web.git
-          git push idseq-web $(basename $GITHUB_REF)
+          git push --force idseq-web $(basename $GITHUB_REF)
