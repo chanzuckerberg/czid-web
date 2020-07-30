@@ -61,12 +61,14 @@ class MultipleDropdown extends React.Component {
     let checkedOptions = propsValue || stateValue;
 
     if (checkedOnTop) {
-      const checked = valueOnOpen.map(optionValue =>
-        this.renderMenuItem(
-          find({ value: optionValue }, options),
-          includes(optionValue, checkedOptions)
-        )
-      );
+      const checked = valueOnOpen
+        .filter(optionValue => find({ value: optionValue }, options))
+        .map(optionValue =>
+          this.renderMenuItem(
+            find({ value: optionValue }, options),
+            includes(optionValue, checkedOptions)
+          )
+        );
       const unchecked = options
         .filter(option => !includes(option.value, valueOnOpen))
         .map(option =>
@@ -88,14 +90,13 @@ class MultipleDropdown extends React.Component {
     const labelText =
       !hideCounter && value.length > 0 && label ? label + ":" : label;
 
-    const counterLabel = !hideCounter &&
-      value.length > 0 && (
-        <DropdownLabel
-          className={cs.dropdownLabel}
-          disabled={disabled}
-          text={String(value.length)}
-        />
-      );
+    const counterLabel = !hideCounter && value.length > 0 && (
+      <DropdownLabel
+        className={cs.dropdownLabel}
+        disabled={disabled}
+        text={String(value.length)}
+      />
+    );
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
