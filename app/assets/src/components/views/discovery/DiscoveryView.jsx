@@ -53,6 +53,7 @@ import {
   getDiscoveryDimensions,
   getDiscoveryStats,
   getDiscoveryLocations,
+  DISCOVERY_DOMAINS,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
@@ -1389,6 +1390,7 @@ class DiscoveryView extends React.Component {
           )}
           <DiscoveryHeader
             currentTab={currentTab}
+            domain={domain}
             filterCount={filterCount}
             onFilterToggle={this.handleFilterToggle}
             onStatsToggle={this.handleStatsToggle}
@@ -1444,11 +1446,7 @@ class DiscoveryView extends React.Component {
 }
 
 DiscoveryView.propTypes = {
-  domain: PropTypes.oneOf([
-    DISCOVERY_DOMAIN_ALL_DATA,
-    DISCOVERY_DOMAIN_MY_DATA,
-    DISCOVERY_DOMAIN_PUBLIC,
-  ]).isRequired,
+  domain: PropTypes.oneOf(DISCOVERY_DOMAINS).isRequired,
   projectId: PropTypes.number,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   mapTilerKey: PropTypes.string,

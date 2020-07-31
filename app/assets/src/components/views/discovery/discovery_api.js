@@ -14,6 +14,12 @@ const DISCOVERY_DOMAIN_MY_DATA = "my_data";
 const DISCOVERY_DOMAIN_ALL_DATA = "all_data";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
 
+const DISCOVERY_DOMAINS = [
+  DISCOVERY_DOMAIN_ALL_DATA,
+  DISCOVERY_DOMAIN_MY_DATA,
+  DISCOVERY_DOMAIN_PUBLIC,
+];
+
 const getDiscoveryDimensions = async ({
   domain,
   filters,
@@ -228,6 +234,7 @@ const getDiscoveryLocations = async ({
 };
 
 export {
+  DISCOVERY_DOMAINS,
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_PUBLIC,

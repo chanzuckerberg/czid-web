@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
+import { startCase } from "lodash/fp";
 
 import FiltersIcon from "~ui/icons/FiltersIcon";
 import InfoPanelIcon from "~ui/icons/InfoPanelIcon";
@@ -8,6 +9,7 @@ import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import BasicPopup from "~/components/BasicPopup";
+import { DISCOVERY_DOMAINS } from "./discovery_api";
 
 import cs from "./discovery_header.scss";
 
@@ -60,6 +62,7 @@ class DiscoveryHeader extends React.Component {
   render() {
     const {
       currentTab,
+      domain,
       filterCount,
       searchValue,
       onFilterToggle,
@@ -121,6 +124,7 @@ class DiscoveryHeader extends React.Component {
             onSearchTriggered={onSearchTriggered}
             onResultSelect={this.handleSearchResultSelected}
             onEnter={this.handleSearchEnterPressed}
+            placeholder={`Search ${startCase(domain)}...`}
             value={searchValue}
           />
         </div>
@@ -178,6 +182,7 @@ DiscoveryHeader.defaultProps = {
 
 DiscoveryHeader.propTypes = {
   currentTab: PropTypes.string,
+  domain: PropTypes.oneOf(DISCOVERY_DOMAINS).isRequired,
   filterCount: PropTypes.number,
   onFilterToggle: PropTypes.func,
   onStatsToggle: PropTypes.func,
