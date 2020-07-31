@@ -7,6 +7,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
   let(:s3_sample_input_files_path) { "s3://#{fake_samples_bucket}/#{s3_samples_key_prefix}/fastqs/%<input_file_name>s" }
   let(:sfn_name) { "idseq-test-%<project_id>s-%<sample_id>s-cg-%<time>s" }
   let(:fake_account_id) { "123456789012" }
+  let(:fake_tag) { "docker-image-tag" }
   let(:fake_sfn_arn) { "fake:sfn:arn" }
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn" }
   let(:fake_wdl_version) { "999" }
@@ -101,11 +102,12 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
       end
 
       it "returns sfn input containing correct default sfn parameters" do
+        stub_const("SfnCGPipelineDispatchService::DOCKER_IMAGE_TAG", fake_tag)
         expect(subject).to include_json(
           sfn_input_json: {
             Input: {
               Run: {
-                docker_image_id: "#{fake_account_id}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:sha-f47fb6c2f7ffc961",
+                docker_image_id: "#{fake_account_id}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:#{fake_tag}",
                 sample: sample.name,
                 ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
                 ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",

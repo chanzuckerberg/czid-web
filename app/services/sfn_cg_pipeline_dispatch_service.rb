@@ -5,6 +5,8 @@ class SfnCGPipelineDispatchService
 
   include Callable
 
+  DOCKER_IMAGE_TAG = "sha-c84fa941046b164e".freeze
+
   class SfnArnMissingError < StandardError
     def initialize
       super("SFN_CG_ARN not set on App Config")
@@ -56,7 +58,7 @@ class SfnCGPipelineDispatchService
   def retrieve_docker_image_id
     resp = AwsClient[:sts].get_caller_identity
     # TODO(JIRA:IDSEQ-3164): do not use hardcoded docker image
-    return "#{resp[:account]}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:sha-f47fb6c2f7ffc961"
+    return "#{resp[:account]}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:#{DOCKER_IMAGE_TAG}"
   end
 
   def retrieve_version_tags
