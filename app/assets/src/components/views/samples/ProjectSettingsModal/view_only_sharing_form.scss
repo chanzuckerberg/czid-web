@@ -1,0 +1,125 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.viewOnlySharingForm {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  .highlight {
+    font-weight: $font-weight-semibold;
+  }
+
+  .note {
+    @include font-body-xs;
+    color: $gray-dark;
+  }
+
+  .background {
+    background-color: $gray-off-white;
+    border-radius: $border-radius-m;
+  }
+
+  .viewOnlySharingHeader {
+    display: flex;
+    flex-direction: row;
+
+    .title {
+      @include font-header-m;
+      color: black;
+      display: flex;
+      align-items: center;
+      min-height: 20px;
+      margin-bottom: $space-xxs;
+    }
+
+    .toggle {
+      margin-left: $space-xl;
+      margin-right: 34px; // half the toggle width
+    }
+  }
+
+  .viewOnlySharingBody {
+    padding: $space-l;
+    margin-top: $space-l;
+
+    .label {
+      @include font-header-s;
+      color: black;
+      margin-bottom: $space-xxs;
+    }
+
+    .settingsForm {
+      margin-left: $space-xl;
+      margin-right: $space-xl;
+
+      .settingsFormDropdown {
+        margin-top: $space-l;
+
+        .backgroundModelLabel {
+          @include font-header-s;
+          margin-top: $space-l;
+          margin-bottom: $space-xxs;
+          display: flex;
+          align-items: center;
+        }
+
+        .dropdown {
+          width: 190px;
+          color: $primary;
+
+          span {
+            color: $gray-dark;
+          }
+        }
+
+        .helpIcon {
+          margin-left: $space-xs;
+          height: 20px;
+
+          &:hover {
+            svg {
+              fill: $primary;
+            }
+          }
+        }
+      }
+
+      .settingsFormCheckbox {
+        display: flex;
+        margin-top: $space-l;
+
+        .checkboxLabel {
+          @include font-body-xs;
+          margin-left: $space-m;
+        }
+      }
+    }
+
+    .shareableLink {
+      display: flex;
+      margin-top: $space-l;
+
+      .shareableLinkField:first-child {
+        flex: 1;
+      }
+
+      .shareableLinkField:last-child {
+        flex: 0 0 auto;
+        margin-left: $space-m;
+      }
+
+      .input {
+        input[type="text"] {
+          color: $gray-dark;
+        }
+      }
+
+      .button {
+        min-width: 75px;
+      }
+    }
+  }
+}

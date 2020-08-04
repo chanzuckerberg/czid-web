@@ -9,10 +9,12 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import ShareButton from "~ui/controls/buttons/ShareButton";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import { UserContext } from "~/components/common/UserContext";
 import Divider from "~/components/layout/Divider";
 
 import UserManagementForm from "./UserManagementForm";
 import PublicProjectConfirmationModal from "./PublicProjectConfirmationModal";
+import ViewOnlySharingForm from "./ViewOnlySharingForm";
 import cs from "./project_settings_modal.scss";
 
 class ProjectSettingsModal extends React.Component {
@@ -49,6 +51,7 @@ class ProjectSettingsModal extends React.Component {
       users,
     } = this.props;
     const { statusMessage, statusClass, email, name } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
 
     return (
       <div>
@@ -134,7 +137,7 @@ class ProjectSettingsModal extends React.Component {
                 )}
               </div>
               <Divider style="thin" />
-              <div className={cs.userManagementFormContainer}>
+              <div className={cs.formContainer}>
                 <UserManagementForm
                   csrf={csrf}
                   onUserAdded={onUserAdded}
@@ -142,6 +145,14 @@ class ProjectSettingsModal extends React.Component {
                   users={users}
                 />
               </div>
+              {allowedFeatures.includes("edit_snapshot_links") && (
+                <div>
+                  <Divider />
+                  <div className={cs.formContainer}>
+                    <ViewOnlySharingForm />
+                  </div>
+                </div>
+              )}
             </div>
           </Modal>
         )}
@@ -162,5 +173,7 @@ ProjectSettingsModal.propTypes = {
   nextPublicSampleDate: PropTypes.string,
   users: PropTypes.array,
 };
+
+ProjectSettingsModal.contextType = UserContext;
 
 export default ProjectSettingsModal;

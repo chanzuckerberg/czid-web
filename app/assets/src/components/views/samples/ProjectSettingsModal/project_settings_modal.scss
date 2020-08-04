@@ -2,6 +2,10 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 
+.projectSettingsModal {
+  max-height: 75vh;
+}
+
 .projectSettingsTrigger {
   color: $primary;
   cursor: pointer;
@@ -72,9 +76,13 @@
     }
   }
 
-  .userManagementFormContainer {
+  .formContainer {
     margin-top: $space-xl;
     flex: 1;
     display: flex;
+  }
+
+  .formContainer:not(:last-child) {
+    margin-bottom: $space-xl;
   }
 }
