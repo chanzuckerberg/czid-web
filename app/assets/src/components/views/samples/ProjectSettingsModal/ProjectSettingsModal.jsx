@@ -1,11 +1,14 @@
 import React from "react";
+import cx from "classnames";
 import PropTypes from "prop-types";
 import axios from "axios";
 
 import { withAnalytics } from "~/api/analytics";
 import Modal from "~ui/containers/Modal";
-import GlobeIcon from "~ui/icons/GlobeIcon";
-import LockIcon from "~ui/icons/LockIcon";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import ShareButton from "~ui/controls/buttons/ShareButton";
+import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
+import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import Divider from "~/components/layout/Divider";
 
 import UserManagementForm from "./UserManagementForm";
@@ -45,10 +48,11 @@ class ProjectSettingsModal extends React.Component {
       project,
       users,
     } = this.props;
+    const { statusMessage, statusClass, email, name } = this.state;
 
     return (
       <div>
-        <div
+        <ShareButton
           className={cs.projectSettingsTrigger}
           onClick={withAnalytics(
             this.openModal,
@@ -58,9 +62,7 @@ class ProjectSettingsModal extends React.Component {
               projectName: project.name,
             }
           )}
-        >
-          Settings
-        </div>
+        />
         {this.state.modalOpen && (
           <Modal
             open
@@ -77,43 +79,61 @@ class ProjectSettingsModal extends React.Component {
           >
             <div className={cs.projectSettingsContent}>
               <div className={cs.title}>
-                <span className={cs.highlight}>{project.name}</span> members and
-                access control
+                Share <span className={cs.highlight}>{project.name}</span>
               </div>
-              <div className={cs.projectVisibility}>
+              <div className={cx(cs.background, cs.projectVisibility)}>
                 {project.public_access ? (
                   <div className={cs.visibility}>
-                    <GlobeIcon className={cs.icon} />
-                    <span className={cs.label}>Public Project</span>
+                    <PublicProjectIcon className={cs.icon} />
+                    <div className={cs.text}>
+                      <div className={cs.label}>Public Project</div>
+                      <div className={cs.note}>
+                        This project is viewable and searchable to anyone in
+                        IDseq, and they’ll be able to perform actions like
+                        create heatmaps and download.
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className={cs.visibility}>
-                    <LockIcon className={cs.icon} />
-                    <span className={cs.label}>Private Project</span>
-                    <span className={cs.toggle}>
-                      <PublicProjectConfirmationModal
-                        onConfirm={withAnalytics(
-                          this.makeProjectPublic,
-                          "ProjectSettingsModal_public-button_confirmed",
-                          {
-                            projectId: project.id,
-                            projectName: project.name,
-                          }
+                    <PrivateProjectIcon className={cs.icon} />
+                    <div className={cs.text}>
+                      <div className={cs.header}>
+                        <div className={cs.label}>Private Project</div>
+                        <div className={cs.toggle}>
+                          <PublicProjectConfirmationModal
+                            onConfirm={withAnalytics(
+                              this.makeProjectPublic,
+                              "ProjectSettingsModal_public-button_confirmed",
+                              {
+                                projectId: project.id,
+                                projectName: project.name,
+                              }
+                            )}
+                            project={project}
+                            trigger={
+                              <ColumnHeaderTooltip
+                                trigger={<span>Change to public</span>}
+                                content="Changing this project to Public will allow anyone signed into IDseq to view and use your samples."
+                              />
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className={cs.note}>
+                        {nextPublicSampleDate && (
+                          <span>
+                            {" "}
+                            Next project sample will become public on{" "}
+                            {nextPublicSampleDate}.
+                          </span>
                         )}
-                        project={project}
-                        trigger={<div>Make public</div>}
-                      />
-                    </span>
-                  </div>
-                )}
-                {nextPublicSampleDate && (
-                  <div className={cs.note}>
-                    Next project sample will become public on{" "}
-                    {nextPublicSampleDate}.
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
-              <Divider />
+              <Divider style="thin" />
               <div className={cs.userManagementFormContainer}>
                 <UserManagementForm
                   csrf={csrf}

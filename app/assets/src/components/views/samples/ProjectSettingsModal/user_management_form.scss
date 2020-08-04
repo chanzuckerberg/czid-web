@@ -9,67 +9,90 @@
   width: 100%;
 
   .title {
+    @include font-header-m;
+    color: black;
     display: flex;
     align-items: center;
-    font-size: $font-size-h5;
-    font-weight: $font-weight-semibold;
     min-height: 20px;
-
-    .icon {
-      margin-right: 10px;
-      height: 20px;
-    }
+    margin-bottom: $space-xxs;
   }
 
-  .userList {
-    margin-top: 10px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-
-    .userEntry {
-      font-size: $font-size;
-      line-height: 25px;
-    }
+  .note {
+    @include font-body-xs;
+    color: $gray-dark;
+    margin-bottom: $space-l;
   }
 
-  .addMemberForm {
-    margin-top: 5px;
-    display: flex;
-
-    .addMemberFormField:not(:first-child) {
-      margin-left: 10px;
-    }
-
-    .addMemberFormField:not(:last-child) {
-      flex-grow: 1;
-    }
-
-    .addMemberFormField:last-child {
-      flex: 0 0 auto;
-    }
+  .background {
+    background-color: $gray-off-white;
+    border-radius: $border-radius-m;
   }
 
-  .fillIn {
-    flex: 1;
-  }
+  .userManagementBody {
+    padding: $space-l;
 
-  .statusMessage {
-    margin-top: 10px;
-    height: 16px;
-    font-size: $font-size-small;
+    .userList {
+      margin-top: $space-l;
+      width: 100%;
+      max-height: 150px;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
 
-    &.errorMessage {
-      color: $error-medium;
+      .userEntry {
+        @include font-body-xs;
+        color: black;
+      }
+
+      .userEntry:not(:first-child) {
+        margin-top: $space-xs;
+      }
     }
 
-    &.infoMessage {
-      color: $gray-dark;
+    .addMemberForm {
+      display: flex;
+
+      .label {
+        @include font-header-s;
+        color: black;
+        margin-bottom: $space-xxs;
+      }
+
+      .button {
+        min-width: 75px;
+      }
+
+      .addMemberFormField:not(:first-child) {
+        margin-left: $space-m;
+      }
+
+      .addMemberFormField:not(:last-child) {
+        flex: 1;
+      }
+
+      .addMemberFormField:last-child {
+        flex: 0 0 auto;
+        align-self: flex-end;
+        margin-bottom: 0;
+      }
     }
 
-    &.successMessage {
-      color: $success-medium;
+    .statusMessage {
+      @include font-body-xxs;
+      margin-top: $space-m;
+      height: 16px;
+
+      &.errorMessage {
+        color: $error-medium;
+      }
+
+      &.infoMessage {
+        color: $gray-dark;
+      }
+
+      &.successMessage {
+        color: $success-medium;
+      }
     }
   }
 }

@@ -3,10 +3,9 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import axios from "axios";
 
-import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
+import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import { Input } from "~ui/controls";
 import StringHelper from "~/helpers/StringHelper";
-import UserIcon from "~ui/icons/UserIcon";
 import { withAnalytics } from "~/api/analytics";
 
 import cs from "./user_management_form.scss";
@@ -81,58 +80,62 @@ class UserManagementForm extends React.Component {
 
   render() {
     const { users } = this.props;
+    const { statusMessage, statusClass, email, name } = this.state;
+
     return (
       <div className={cs.userManagementForm}>
-        <div className={cs.title}>
-          <UserIcon className={cs.icon} />
-          Project Members
+        <div className={cs.title}>Project Members</div>
+        <div className={cs.note}>
+          Project members have full access to editing your project and project
+          actions.
         </div>
-        <div className={cs.userList}>
-          {users.length > 0 ? (
-            users.map(user => {
+        <div className={cx(cs.userManagementBody, cs.background)}>
+          <div className={cs.addMemberForm}>
+            <div className={cs.addMemberFormField}>
+              <div className={cs.label}>Full Name</div>
+              <Input
+                fluid
+                type="text"
+                id="fullName"
+                onChange={this.handleChangeName}
+                value={name}
+              />
+            </div>
+            <div className={cs.addMemberFormField}>
+              <div className={cs.label}>Email</div>
+              <Input
+                fluid
+                type="text"
+                id="email"
+                onChange={this.handleChangeEmail}
+                value={email}
+              />
+            </div>
+            <div className={cs.addMemberFormField}>
+              <SecondaryButton
+                className={cs.button}
+                text="Add"
+                rounded={false}
+                onClick={withAnalytics(
+                  this.handleAddUser,
+                  "UserManagementForm_add-member-button_clicked"
+                )}
+              />
+            </div>
+          </div>
+          {statusMessage && (
+            <div className={cx(cs.statusMessage, statusClass)}>
+              {statusMessage}
+            </div>
+          )}
+          <div className={cs.userList}>
+            {users.map(user => {
               return (
                 <div className={cs.userEntry} key={user.email}>
                   {user.name} ({user.email})
                 </div>
               );
-            })
-          ) : (
-            <div className={cs.userEntry} key="None">
-              None
-            </div>
-          )}
-        </div>
-        <div className={cs.fillIn} />
-        <div className={cx(cs.statusMessage, this.state.statusClass)}>
-          {this.state.statusMessage}
-        </div>
-        <div className={cs.addMemberForm}>
-          <div className={cs.addMemberFormField}>
-            <Input
-              fluid
-              type="text"
-              placeholder="Full Name"
-              onChange={this.handleChangeName}
-              value={this.state.name}
-            />
-          </div>
-          <div className={cs.addMemberFormField}>
-            <Input
-              fluid
-              type="text"
-              placeholder="Email"
-              onChange={this.handleChangeEmail}
-              value={this.state.email}
-            />
-          </div>
-          <div className={cs.addMemberFormField}>
-            <PrimaryButton
-              text="Add member"
-              onClick={withAnalytics(
-                this.handleAddUser,
-                "UserManagementForm_add-member-button_clicked"
-              )}
-            />
+            })}
           </div>
         </div>
       </div>

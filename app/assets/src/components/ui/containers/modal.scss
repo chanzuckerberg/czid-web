@@ -1,5 +1,7 @@
+@import "~styles/themes/elements";
+
 .modal {
-  padding: 40px;
+  padding: $space-xxl;
   max-height: 70vh;
   left: auto;
   right: auto;

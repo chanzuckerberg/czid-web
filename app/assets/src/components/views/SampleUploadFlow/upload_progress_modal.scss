@@ -17,6 +17,7 @@
 
     .title {
       @include font-header-l;
+      color: black;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;

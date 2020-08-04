@@ -1,9 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .publicProjectConfirmation {
   .title {
-    font-size: $font-size-h4;
+    @include font-body-xl;
+    color: black;
   }
 
   .highlight {
@@ -11,11 +13,12 @@
   }
 
   .text {
-    margin-top: 10px;
+    @include font-body-xs;
+    margin-top: $space-m;
     margin-bottom: 30px;
 
     p:not(:first-child) {
-      margin-top: 10px;
+      margin-top: $space-m;
     }
 
     .link {
@@ -26,17 +29,16 @@
   }
 
   .actions {
-    margin-top: 10px;
+    margin-top: $space-m;
     display: flex;
-    justify-content: center;
 
     .item {
       &:not(:first-child) {
-        margin-left: 5px;
+        margin-left: $space-xs;
       }
 
       &:not(:last-child) {
-        margin-right: 5px;
+        margin-right: $space-xs;
       }
     }
   }

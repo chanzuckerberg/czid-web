@@ -10,6 +10,7 @@
   .header {
     .title {
       @include font-header-xl;
+      color: black;
       // Reduce the amount of margin at the top of the modal.
       margin-top: -$space-s;
     }

@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .projectSettingsTrigger {
   color: $primary;
@@ -12,50 +13,67 @@
   flex-direction: column;
 
   .title {
-    font-size: $font-size-h4;
+    @include font-body-xl;
+    color: black;
 
     .highlight {
       font-weight: $font-weight-semibold;
     }
   }
 
+  .background {
+    background-color: $gray-off-white;
+    border-radius: $border-radius-m;
+  }
+
   .projectVisibility {
-    margin-bottom: 10px;
+    margin-top: $space-xl;
+    margin-bottom: $space-xl;
 
     .visibility {
-      color: $gray-dark;
       display: flex;
       align-items: center;
-      font-weight: $font-weight-semibold;
-      margin-top: 8px;
-      height: 22px;
+      position: relative;
+      padding: $space-l;
 
       .icon {
-        width: 14px;
-        height: 14px;
-        fill: $gray-medium;
+        width: 32px;
+        flex-shrink: 0;
+        align-self: flex-start;
       }
 
-      .label {
-        margin-left: 8px;
-      }
+      .text {
+        flex-grow: 100;
+        margin-left: $space-l;
 
-      .toggle {
-        margin-left: 10px;
-        color: $primary;
-        cursor: pointer;
-      }
-    }
+        .label {
+          @include font-header-s;
+          color: black;
+        }
 
-    .note {
-      margin-top: 4px;
-      font-size: $font-size-small;
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          .toggle {
+            @include font-caps-xxxs;
+            color: $primary;
+            cursor: pointer;
+          }
+        }
+
+        .note {
+          @include font-body-xs;
+          margin-top: $space-xxs;
+          color: $gray-dark;
+        }
+      }
     }
   }
 
   .userManagementFormContainer {
-    height: 300px;
-    margin-top: 10px;
+    margin-top: $space-xl;
     flex: 1;
     display: flex;
   }

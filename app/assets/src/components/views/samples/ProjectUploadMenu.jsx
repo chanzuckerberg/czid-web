@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import { logAnalyticsEvent } from "~/api/analytics";
 
 import MetadataUploadModal from "./MetadataUploadModal";
@@ -25,8 +26,7 @@ class ProjectUploadMenu extends React.Component {
 
     const trigger = (
       <div className={cs.trigger}>
-        <i className="fa fa-plus-circle" />
-        <span className={cs.label}>Upload</span>
+        <SecondaryButton text="Upload" />
       </div>
     );
 
