@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_723_032_107) do
+ActiveRecord::Schema.define(version: 20_200_805_183_152) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -368,7 +368,6 @@ ActiveRecord::Schema.define(version: 20_200_723_032_107) do
     t.string "pipeline_execution_strategy", default: "step_function", comment: "A soft enum (string) describing which pipeline infrastructure the pipeline run was performed on."
     t.string "sfn_execution_arn", comment: "step function execution ARN for pipeline runs using pipeline_execution_strategy=step_function"
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, pipeline processing will filter for a whitelist of taxons."
-    t.string "sfn_results_path", comment: "The path to the results folder in s3."
     t.string "wdl_version"
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
