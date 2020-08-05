@@ -154,6 +154,8 @@ Rails.application.routes.draw do
   get 'pub/projects/:project_id/create', to: 'snapshot_links#create'
   get 'pub/backgrounds', to: 'snapshot_samples#backgrounds'
 
+  resources :frontend_metrics, only: :create
+
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 

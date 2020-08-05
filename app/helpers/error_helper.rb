@@ -22,6 +22,12 @@ module ErrorHelper
     end
   end
 
+  module FrontendMetricErrors
+    def self.invalid_route(url, method)
+      return "No route matches '#{url}' with http method '#{method}'"
+    end
+  end
+
   module SampleUploadErrors
     def self.invalid_project_id(sample)
       "Could not save sample '#{sample['name']}'. Invalid project id."
