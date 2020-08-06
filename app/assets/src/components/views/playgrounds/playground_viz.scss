@@ -1,7 +1,76 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~styles/themes/colors";
+
 .vizContainer {
   margin-top: 100px;
 }
 
 .tabs {
   margin: 30px 65px;
+}
+
+.barChartContainer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 100px;
+  max-width: 980px;
+
+  .barChartXTitleContainer {
+    text-align: center;
+    margin-bottom: $space-s;
+
+    .barChartXTitle {
+      @include font-body-xxs;
+      color: $black;
+      display: inline-block;
+    }
+  }
+
+  .hzbc {
+    // css for the actual component
+
+    .xAxisText {
+      @include font-body-xxs;
+      fill: $black;
+    }
+
+    .xGrid {
+      fill: none;
+      stroke: $gray-lightest;
+    }
+
+    .canvas {
+      @include scrollable;
+      max-height: calc(85vh - 100px);
+      overflow-y: scroll;
+      overflow-x: visible;
+
+      .yAxisText {
+        @include font-body-xxs;
+        fill: $black;
+
+        &:hover {
+          fill: $primary;
+          cursor: pointer;
+        }
+      }
+
+      .emptyBarSpace {
+        &:hover ~ .fullBar {
+          fill-opacity: 1;
+        }
+      }
+
+      .fullBar {
+        fill: $success-medium;
+      }
+
+      .barPiece {
+        &:hover {
+          fill: $primary;
+        }
+      }
+    }
+  }
 }

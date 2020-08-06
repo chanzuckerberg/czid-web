@@ -1,0 +1,52 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+@import "~styles/themes/colors";
+
+// these defaults can be overridden by passing in your
+// own class names and css to the component.
+
+.hzbc {
+}
+
+.xAxisText {
+  @include font-body-xxs;
+  fill: $black;
+}
+
+.xGrid {
+  fill: none;
+  stroke: $gray-lightest;
+}
+
+.canvas {
+  @include scrollable;
+  max-height: calc(85vh - 100px);
+  overflow-y: scroll;
+  overflow-x: visible;
+}
+
+.yAxisText {
+  @include font-body-xxs;
+  fill: $black;
+
+  &:hover {
+    fill: $primary;
+    cursor: pointer;
+  }
+}
+
+.emptyBarSpace {
+  &:hover ~ .fullBar {
+    fill-opacity: 1;
+  }
+}
+
+.fullBar {
+  fill: $success-medium;
+}
+
+.barPiece {
+  &:hover {
+    fill: $primary;
+  }
+}
