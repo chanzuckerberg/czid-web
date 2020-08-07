@@ -70,7 +70,15 @@ export default function SampleViewHeader({
             <DownloadButton
               text="Download All"
               primary={true}
-              onClick={() => openUrl(getConsensusGenomeZipLink(sample.id))}
+              onClick={() =>
+                withAnalytics(
+                  openUrl(getConsensusGenomeZipLink(sample.id)),
+                  "SampleViewHeader_consensus-genome-download-all-button_clicked",
+                  {
+                    sampleId: sample.id,
+                  }
+                )
+              }
             />
           )}
         </ViewHeader.Controls>
