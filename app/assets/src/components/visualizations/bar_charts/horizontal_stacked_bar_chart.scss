@@ -36,17 +36,21 @@
 }
 
 .emptyBarSpace {
+  &:hover {
+    fill: $gray-off-white;
+    fill-opacity: 0.9;
+  }
   &:hover ~ .fullBar {
-    fill-opacity: 1;
+    stroke: $primary;
   }
 }
 
 .fullBar {
-  fill: $success-medium;
+  fill: none;
 }
 
 .barPiece {
   &:hover {
-    fill: $primary;
+    stroke: $primary;
   }
 }

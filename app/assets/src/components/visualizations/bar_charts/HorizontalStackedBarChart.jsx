@@ -54,8 +54,10 @@ const defaults = {
   bars: {
     height: 22,
     padding: 6,
+    strokeWidth: 2,
     groupClassName: null,
     stackPieceClassName: cs.barPiece,
+    stackPieceHighlightClassName: cs.highlightPiece,
     fullBarClassName: cs.fullBar,
     emptySpaceClassName: cs.emptyBarSpace,
   },
@@ -182,6 +184,7 @@ export default class HorizontalStackedBarChart extends React.Component {
       dataKeys,
       stackedData,
       barHeight,
+      mouseOverBar,
       x,
       y,
       z,
@@ -196,7 +199,7 @@ export default class HorizontalStackedBarChart extends React.Component {
           const xRight = stackPieceRange[1];
           const yPosition = y(yAttribute);
           const xPosition = x(xLeft);
-          let width = x(xRight - xLeft);
+          let width = x(xRight - xLeft) - options.bars.strokeWidth;
 
           // keep bars at least 1 pixel wide so they're visible
           if (width < 1) {
@@ -206,22 +209,29 @@ export default class HorizontalStackedBarChart extends React.Component {
           const valueForStackPiece = data[stackIndex][key];
 
           return (
-            <rect
-              y={yPosition}
-              x={xPosition}
-              width={width}
-              height={barHeight}
-              key={`${yAttribute}+${keyIndex}`}
-              className={options.bars.stackPieceClassName}
-              onMouseOver={() =>
-                events.onBarStackHover(yAttribute, key, valueForStackPiece)
-              }
-            />
+            <g key={`${yAttribute}+${key}`}>
+              <rect
+                y={yPosition}
+                x={xPosition}
+                width={width}
+                height={barHeight}
+                key={`${yAttribute}+${keyIndex}`}
+                className={options.bars.stackPieceClassName}
+                onMouseOver={() =>
+                  events.onBarStackHover(yAttribute, key, valueForStackPiece)
+                }
+              />
+            </g>
           );
         }
       );
       return (
-        <g fill={color} key={`${color}+${keyIndex}`}>
+        <g
+          fill={color}
+          stroke={color}
+          strokeWidth={options.bars.strokeWidth}
+          key={`${color}+${keyIndex}`}
+        >
           {colorStackComponent}
         </g>
       );
@@ -261,7 +271,7 @@ export default class HorizontalStackedBarChart extends React.Component {
         const fullXPosition = x(xLeft);
         const emptyXPosition = x(xMid);
 
-        let fullWidth = x(xMid - xLeft);
+        let fullWidth = x(xMid - xLeft) - options.bars.strokeWidth;
         if (fullWidth < 1) {
           fullWidth = 1;
         }
@@ -280,7 +290,6 @@ export default class HorizontalStackedBarChart extends React.Component {
               x={emptyXPosition}
               width={emptyWidth}
               height={barHeight}
-              fillOpacity={0}
               key={`${yAttribute}+emptybar`}
               className={options.bars.emptySpaceClassName}
               onMouseOver={() =>
@@ -295,7 +304,6 @@ export default class HorizontalStackedBarChart extends React.Component {
                 x={fullXPosition}
                 width={fullWidth}
                 height={barHeight}
-                fillOpacity={0}
                 key={`${yAttribute}+fullbar`}
                 className={options.bars.fullBarClassName}
               />
@@ -305,7 +313,15 @@ export default class HorizontalStackedBarChart extends React.Component {
       }
     );
 
-    return <g key={"invisibleStack"}>{invisibleStackComponents}</g>;
+    return (
+      <g
+        key={"invisibleStack"}
+        fillOpacity={0}
+        strokeWidth={options.bars.strokeWidth}
+      >
+        {invisibleStackComponents}
+      </g>
+    );
   }
 
   renderYAxis() {
@@ -354,7 +370,6 @@ export default class HorizontalStackedBarChart extends React.Component {
 
   renderXAxis() {
     const { options, x, canvasWidth, xAxisHeight } = this.state;
-    console.log(options);
 
     const tickCount = Math.floor(canvasWidth / options.x.tickSpacing);
     const tickFormat = x.tickFormat(tickCount, "~s");
