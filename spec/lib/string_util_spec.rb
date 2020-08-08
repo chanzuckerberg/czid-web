@@ -22,6 +22,11 @@ RSpec.describe StringUtil do
       expect(StringUtil.canonicalize_url(url, :get)).to eq("/samples/X")
     end
 
+    it "should replace all variable fields with an X and remove format" do
+      url = "/samples/20169/pipeline_viz/4.11.json"
+      expect(StringUtil.canonicalize_url(url, :get)).to eq("/samples/X/pipeline_viz/X")
+    end
+
     it "should not include params in canonicalized URL" do
       url = "/samples/123/coverage_viz_data?accessionId=456"
       expect(StringUtil.canonicalize_url(url, :get)).to eq("/samples/X/coverage_viz_data")

@@ -15,10 +15,11 @@ module StringUtil
   def self.canonicalize_url(url, method)
     raise ActionController::RoutingError, "The url provided is an empty string" if url.blank?
     # returns the route's parameter shell
-    param_shell = Rails.application.routes.recognize_path(url, method: method)
-    url_for_args = { controller: param_shell[:controller], action: param_shell[:action], only_path: true }
-    url_for_args[:id] = "X" if param_shell.key?(:id)
-    return Rails.application.routes.url_for(url_for_args)
+    param_shell = Rails.application.routes.recognize_path(url, method: method).reject { |key, _| key == :format }
+    uncanonicalized_keys = Set[:action, :controller]
+    param_shell.each { |key, _| param_shell[key] = "X" unless uncanonicalized_keys.include?(key) }
+    param_shell[:only_path] = true
+    return Rails.application.routes.url_for(param_shell)
   rescue ActionController::RoutingError, ActionController::UnknownHttpMethod => err
     Rails.logger.error(ErrorHelper::FrontendMetricErrors.invalid_route(url, method))
     LogUtil.log_backtrace(err)
