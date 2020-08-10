@@ -19,7 +19,8 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     tooltip: "User-defined location from which the sample was collected.",
   },
   totalReads: {
-    tooltip: "The total number of single-end reads uploaded.",
+    tooltip:
+      "The total number of single-end reads uploaded. Each of the paired-end reads count as one read.",
   },
   nonHostReads: {
     tooltip: `The percentage of reads that came out of step (8) of the host filtration
@@ -44,7 +45,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   },
   meanInsertSize: {
     tooltip:
-      "Mean length of the fragmented nucleic acid sequences input for sequencing.",
+      "The average length of the nucleotide sequence that is inserted between the adapters.",
     link: DOC_BASE_LINK + "360034790554#mean-insert-size",
   },
   notes: {

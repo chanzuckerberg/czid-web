@@ -37,7 +37,7 @@ export default class Histogram {
         refValues: [],
         // If true, the data is already binned, i.e. the data is an array of
         // { x0, length }
-        skipBin: false,
+        skipBins: false,
         hoverBuffer: 5,
         xScaleLog: false,
       },
@@ -68,12 +68,10 @@ export default class Histogram {
   }
 
   xAxis(g, x) {
-    g
-      .attr(
-        "transform",
-        `translate(0,${this.size.height - this.margins.bottom})`
-      )
-      .call(axisBottom(x).tickSizeOuter(0));
+    g.attr(
+      "transform",
+      `translate(0,${this.size.height - this.margins.bottom})`
+    ).call(axisBottom(x).tickSizeOuter(0));
 
     // if using log10 scale, set the number of ticks according to the size of
     // the domain (in powers of 10) to prevent extra labels from showing up
@@ -82,14 +80,17 @@ export default class Histogram {
       g.call(axisBottom(x).ticks(nTicks));
     }
 
-    g
-      .append("text")
+    if (this.options.xTickFormat) {
+      g.call(axisBottom(x).tickFormat(d => this.options.xTickFormat(d)));
+    }
+
+    g.append("text")
       .attr("x", (this.size.width + this.margins.left) / 2 - 2)
       .attr("y", +30)
       .attr("fill", "#000")
       .attr("font-weight", 600)
       .attr("text-anchor", "end")
-      .attr("class", cs.labelX)
+      .attr("class", cx(cs.labelX, this.options.simple && cs.simple))
       .text(this.options.labelX);
 
     g.select(".domain").attr("class", cs.xAxis);
@@ -110,16 +111,27 @@ export default class Histogram {
 
     g.selectAll(".tick text").attr("class", cs.yAxisTickText);
     g.selectAll(".tick line").attr("class", cs.yAxisTickLine);
+    if (this.options.showGridlines) {
+      g.selectAll(".tick line")
+        .attr("x1", -6)
+        .attr("x2", this.size.width - this.margins.left - this.margins.right);
+    }
 
-    g
-      .select(".tick:last-of-type text")
+    g.select(".tick:last-of-type text")
       .clone()
-      .attr("x", 12)
-      .attr("y", -30 - (this.options.labelYOffset || 0))
+      .attr("x", 12 - (this.options.labelYVerticalOffset || 0))
+      .attr("y", -30 - (this.options.labelYHorizontalOffset || 0))
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "end")
       .attr("font-weight", 600)
-      .attr("class", cx(cs.labelY, this.options.labelYLarge && cs.large))
+      .attr(
+        "class",
+        cx(
+          cs.labelY,
+          this.options.labelYLarge && cs.large,
+          this.options.simple && cs.simple
+        )
+      )
       .text(this.options.labelY);
   }
 
@@ -157,7 +169,7 @@ export default class Histogram {
     for (let i = 0; i < this.data.length; i++) {
       bins[i] = histogram()
         .domain(x.domain())
-        .thresholds(x.ticks(20))(this.data[i]);
+        .thresholds(x.ticks())(this.data[i]);
     }
     return bins;
   };
@@ -175,9 +187,12 @@ export default class Histogram {
       return (x(bin.x1) - x(bin.x0)) / 2;
     }
 
+    let numBins = max([x.ticks().length - 1, 2]);
+    // If there should be gaps between the bars, subtract 1px from the bar width.
+    const barInsideTicks = this.options.simple ? 1 : 0;
     return (
-      (this.size.width - this.margins.right - this.margins.left) /
-      (this.data.length * 20)
+      (this.size.width - this.margins.right - this.margins.left) / numBins -
+      barInsideTicks
     );
   };
 
@@ -220,7 +235,7 @@ export default class Histogram {
     }
 
     // Only return if we are at most hoverBuffer away from the closest bar.
-    const buffer = this.getBarWidth() / 2 + this.options.hoverBuffer;
+    const buffer = this.barWidth / 2 + this.options.hoverBuffer;
 
     const dataIndices =
       Math.abs(closestX - svgX) < buffer
@@ -297,8 +312,7 @@ export default class Histogram {
     const domain = this.getDomain();
 
     let x = this.options.xScaleLog ? scaleLog() : scaleLinear();
-    x
-      .domain(domain)
+    x.domain(domain)
       .nice()
       .range([this.margins.left, this.size.width - this.margins.right]);
 
@@ -319,6 +333,9 @@ export default class Histogram {
     const barCentersToIndices = {};
     const barCenters = [];
 
+    // If there should be gaps between the bars, offset the bar positions by 1px.
+    const barInsideTicks = this.options.simple ? 1 : 0;
+
     for (let i = 0; i < bins.length; i++) {
       this.svg
         .append("g")
@@ -329,7 +346,7 @@ export default class Histogram {
         .enter()
         .append("rect")
         .attr("class", (_, index) => `rect-${index}`)
-        .attr("x", d => x(d.x0) + i * this.getBarWidth(x, d))
+        .attr("x", d => barInsideTicks + x(d.x0) + i * this.getBarWidth(x, d))
         .attr("width", d => this.getBarWidth(x, d))
         .attr("y", d => y(d.length))
         .attr("height", d => y(0) - y(d.length))
@@ -337,6 +354,7 @@ export default class Histogram {
 
       bins[i].forEach((bin, index) => {
         let barWidth = this.getBarWidth(x, bin);
+        this.barWidth = this.getBarWidth(x, bin);
         const xMidpoint = x(bin.x0) + i * barWidth + barWidth / 2;
         barCentersToIndices[xMidpoint] = [i, index];
         barCenters.push(xMidpoint);

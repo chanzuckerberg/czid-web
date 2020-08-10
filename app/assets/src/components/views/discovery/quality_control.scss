@@ -1,0 +1,59 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.content {
+  @include scrollable;
+  max-height: calc(85vh - 110px);
+  overflow: scroll;
+  padding-right: $space-l;
+  padding-left: $space-l;
+
+  .statsRow {
+    @include font-body-xxs;
+    color: $black;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: $space-xl;
+
+    .chartContainer {
+      color: $black;
+      width: 50%;
+
+      &:first-child {
+        margin-right: $space-xl;
+      }
+
+      .title {
+        @include font-header-l;
+        margin-bottom: $space-l;
+        margin-top: $space-l;
+      }
+
+      .histogramContainer {
+        padding: $space-l 0 $space-default $space-l;
+        border: $border-gray-light;
+        border-radius: $border-radius-m;
+
+        .subtitle {
+          @include font-header-s;
+        }
+      }
+    }
+  }
+
+  .infoIcon {
+    margin: $space-xxxs $space-xxs 0 $space-xxs;
+    height: 14px;
+    width: 14px;
+    fill: $gray-dark;
+    vertical-align: text-top;
+
+    &:hover {
+      fill: $primary;
+    }
+  }
+}

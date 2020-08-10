@@ -232,7 +232,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
           bottom: 30,
         },
         numTicksY: 2,
-        labelYOffset: 15,
+        labelYHorizontalOffset: 15,
         labelYLarge: true,
         onHistogramBarHover: this.handleHistogramBarHover,
         onHistogramBarEnter: this.handleHistogramBarEnter,
@@ -296,9 +296,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
         trigger={
           <div className={cs.ncbiLinkWrapper}>
             <a
-              href={`https://www.ncbi.nlm.nih.gov/nuccore/${
-                currentAccessionSummary.id
-              }?report=genbank`}
+              href={`https://www.ncbi.nlm.nih.gov/nuccore/${currentAccessionSummary.id}?report=genbank`}
               target="_blank"
               rel="noopener noreferrer"
               className={cs.ncbiLink}
@@ -318,9 +316,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
           </div>
         }
         inverted
-        content={`${currentAccessionSummary.id} - ${
-          currentAccessionSummary.name
-        }`}
+        content={`${currentAccessionSummary.id} - ${currentAccessionSummary.name}`}
         horizontalOffset={13}
       />
     );
@@ -459,7 +455,8 @@ export default class CoverageVizBottomSidebar extends React.Component {
       return (
         <div className={cs.loadingContainer}>
           <div className={cs.loadingMessage}>
-            <LoadingIcon className={cs.loadingIcon} />Loading Visualization...
+            <LoadingIcon className={cs.loadingIcon} />
+            Loading Visualization...
           </div>
         </div>
       );
@@ -542,9 +539,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
             trigger={
               <a
                 className={cx(cs.refAccessionVizLink, cs.genomeViz)}
-                href={`https://www.ncbi.nlm.nih.gov/nuccore/${
-                  currentAccessionSummary.id
-                }?report=genbank`}
+                href={`https://www.ncbi.nlm.nih.gov/nuccore/${currentAccessionSummary.id}?report=genbank`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() =>

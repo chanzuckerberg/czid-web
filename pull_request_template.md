@@ -5,6 +5,7 @@
 # Notes
 
 *Optional observations, comments or explanations.*
+*If implementing a new feature, note any relevant analytics added.*
 
 # Tests
 

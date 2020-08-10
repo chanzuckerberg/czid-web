@@ -37,7 +37,7 @@ SampleMessage.propTypes = {
   message: PropTypes.string,
   status: PropTypes.string,
   type: PropTypes.string,
-  onClick: PropTypes.function,
+  onClick: PropTypes.func,
 };
 
 export default SampleMessage;

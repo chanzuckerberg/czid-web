@@ -450,7 +450,8 @@ class SamplesView extends React.Component {
   };
 
   renderQualityControl = () => {
-    return <QualityControl />;
+    const { projectId } = this.props;
+    return <QualityControl projectId={projectId} />;
   };
 
   renderDisplay = () => {
