@@ -5,6 +5,7 @@ require 'aws-sdk-s3'
 module SamplesHelper
   include PipelineOutputsHelper
   include PipelineRunsHelper
+  include SnapshotSamplesHelper
   include ErrorHelper
 
   # We set S3_GLOBAL_ENDPOINT to enable cross-region listing in
@@ -406,7 +407,7 @@ module SamplesHelper
     end
   end
 
-  def format_samples(samples, selected_pipeline_runs_by_sample_id: nil, use_csv_compatible_values: false)
+  def format_samples(samples, selected_pipeline_runs_by_sample_id: nil, use_csv_compatible_values: false, is_snapshot: false)
     formatted_samples = []
     return formatted_samples if samples.empty?
 
@@ -415,8 +416,10 @@ module SamplesHelper
     top_pipeline_run_by_sample_id = selected_pipeline_runs_by_sample_id || top_pipeline_runs_multiget(sample_ids)
     pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     job_stats_by_pipeline_run_id = job_stats_multiget(pipeline_run_ids)
-    report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
-    pipeline_run_stages_by_pipeline_run_id = dependent_records_multiget(PipelineRunStage, :pipeline_run_id, pipeline_run_ids)
+    unless is_snapshot
+      pipeline_run_stages_by_pipeline_run_id = dependent_records_multiget(PipelineRunStage, :pipeline_run_id, pipeline_run_ids)
+      report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
+    end
     output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
     metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids, use_raw_date_strings: true, use_csv_compatible_values: use_csv_compatible_values)
 
@@ -444,11 +447,17 @@ module SamplesHelper
                               {
                                 result_status_description: SFN_STATUS_MAPPING[sample.temp_sfn_execution_status],
                               }
+                            elsif is_snapshot
+                              snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id)
                             else
                               pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
                                                 pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
                             end
       job_info[:uploader] = sample_uploader(sample)
+      if is_snapshot
+        [:project, :input_files, :db_sample].each { |param| job_info.delete(param) }
+        job_info[:derived_sample_output].delete(:pipeline_run)
+      end
       formatted_samples.push(job_info)
     end
     formatted_samples

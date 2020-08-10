@@ -1,12 +1,17 @@
 class SnapshotSamplesController < SamplesController
-  SNAPSHOT_ACTIONS = [:show, :report_v2, :backgrounds].freeze
+  include SamplesHelper
+  include SnapshotSamplesHelper
+
+  SNAPSHOT_ACTIONS = [:show, :report_v2, :index_v2, :backgrounds].freeze
 
   # Snapshot endpoints are publicly accessible but access control is checked by set_snapshot_sample and share_id
   skip_before_action :authenticate_user!, :set_sample, :check_access, only: SNAPSHOT_ACTIONS
 
   before_action :app_config_required
-  before_action :set_snapshot_sample, except: [:backgrounds]
+  before_action :set_snapshot_sample, except: [:backgrounds, :index_v2]
   before_action :block_action, except: SNAPSHOT_ACTIONS
+
+  MAX_PAGE_SIZE_V2 = 100
 
   # GET /pub/:share_id/samples/:id
   def show
@@ -38,6 +43,47 @@ class SnapshotSamplesController < SamplesController
     super
   end
 
+  # GET /pub/:share_id/samples/index_v2.json
+  def index_v2
+    share_id = snapshot_sample_params[:share_id]
+    order_by = snapshot_sample_params[:orderBy] || :id
+    order_dir = snapshot_sample_params[:orderDir] || :desc
+    limit = snapshot_sample_params[:limit] ? snapshot_sample_params[:limit].to_i : MAX_PAGE_SIZE_V2
+    offset = snapshot_sample_params[:offset].to_i
+
+    list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(snapshot_sample_params[:listAllIds])
+    samples = samples_by_share_id(share_id)
+
+    if samples.present?
+      samples = filter_samples(samples, snapshot_sample_params)
+      samples = samples.order(Hash[order_by => order_dir])
+
+      limited_samples = samples.offset(offset).limit(limit)
+      limited_samples_json = limited_samples.includes(:project).as_json(
+        only: [:id, :name, :host_genome_id, :created_at],
+        methods: []
+      )
+
+      basic = ActiveModel::Type::Boolean.new.cast(snapshot_sample_params[:basic])
+      unless basic
+        sample_ids = (samples || []).map(&:id)
+        pipeline_runs_by_sample_id = snapshot_pipeline_runs_multiget(sample_ids, share_id)
+        details_json = format_samples(limited_samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, is_snapshot: true).as_json(
+          except: [:sfn_results_path]
+        )
+        limited_samples_json.zip(details_json).map do |sample, details|
+          sample[:details] = details
+        end
+      end
+
+      results = { samples: limited_samples_json }
+      results[:all_samples_ids] = samples.pluck(:id) if list_all_sample_ids
+      render json: results
+    else
+      block_action
+    end
+  end
+
   # GET /pub/backgrounds.json
   def backgrounds
     @backgrounds = Background.where(public_access: 1)
@@ -64,14 +110,14 @@ class SnapshotSamplesController < SamplesController
       #   [{1: {"pipeline_run_id": 12345}},
       #    {2: {"pipeline_run_id": 12345}}]
       # }
-      content = JSON.parse(snapshot.content, symbolize_names: true)
-      content[:samples].each do |sample|
+      content = JSON.parse(snapshot.content)
+      content["samples"].each do |sample|
         sample.each do |id, info|
-          if id == snapshot_sample_params[:id].to_sym
+          if id.to_i == snapshot_sample_params[:id].to_i
             # TODO(ihan) add support for the "Update samples if they're rerun" option
-            @sample = Sample.find(snapshot_sample_params[:id])
+            @sample = Sample.find(id.to_i)
             @share_id = snapshot_sample_params[:share_id]
-            @pipeline_run_id = info[:pipeline_run_id]
+            @pipeline_run_id = info["pipeline_run_id"]
             break
           end
         end
@@ -84,7 +130,7 @@ class SnapshotSamplesController < SamplesController
   end
 
   def snapshot_sample_params
-    permitted_params = [:share_id, :id]
+    permitted_params = [:share_id, :id, :orderBy, :orderDir, :limit, :offset, :listAllIds, :basic, :host, :location, :locationV2, :taxon, :time, :tissue, :search, :sampleIds]
     params.permit(*permitted_params)
   end
 end

@@ -137,22 +137,27 @@ const getSamples = ({
   filters,
   listAllIds,
   sampleIds,
+  snapshotShareId,
   basic = false,
 } = {}) =>
-  get("/samples/index_v2.json", {
-    params: {
-      projectId,
-      search,
-      domain,
-      limit,
-      offset,
-      listAllIds,
-      basic, // if true, then don't include extra details (ex: metadata) for each sample
-      // &sampleIds=[1,2] instead of default &sampleIds[]=1&sampleIds[]=2 format.
-      sampleIds: JSON.stringify(sampleIds),
-      ...filters,
-    },
-  });
+  get(
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+      "/samples/index_v2.json",
+    {
+      params: {
+        projectId,
+        search,
+        domain,
+        limit,
+        offset,
+        listAllIds,
+        basic, // if true, then don't include extra details (ex: metadata) for each sample
+        // &sampleIds=[1,2] instead of default &sampleIds[]=1&sampleIds[]=2 format.
+        sampleIds: JSON.stringify(sampleIds),
+        ...filters,
+      },
+    }
+  );
 
 const getSampleDimensions = ({ domain, filters, projectId, search }) =>
   get("/samples/dimensions.json", {

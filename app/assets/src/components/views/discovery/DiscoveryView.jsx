@@ -85,7 +85,7 @@ class DiscoveryView extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    const { projectId } = this.props;
+    const { projectId, domain } = this.props;
 
     this.urlParser = new UrlQueryParser({
       sampleActiveColumns: "object",
@@ -104,7 +104,7 @@ class DiscoveryView extends React.Component {
       {
         currentDisplay: "table",
         currentTab:
-          projectId || this.props.domain === DISCOVERY_DOMAIN_ALL_DATA
+          projectId || domain === DISCOVERY_DOMAIN_ALL_DATA
             ? "samples"
             : "projects",
         emptyStateModalOpen: this.isFirstTimeUser(),
@@ -154,7 +154,7 @@ class DiscoveryView extends React.Component {
 
     this.loadUserDataStats();
 
-    this.dataLayer = new DiscoveryDataLayer(this.props.domain);
+    this.dataLayer = new DiscoveryDataLayer(domain);
     const conditions = this.getConditions();
     this.samples = this.dataLayer.samples.createView({
       conditions,

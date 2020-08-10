@@ -243,11 +243,13 @@ export default class SampleViewV2 extends React.Component {
 
   fetchProjectSamples = async () => {
     const { project } = this.state;
+    const { snapshotShareId } = this.props;
 
     if (project) {
       // only really need sample names and ids, so request the basic version without extra details
       const projectSamples = await getSamples({
         projectId: project.id,
+        snapshotShareId: snapshotShareId,
         basic: true,
       });
 
