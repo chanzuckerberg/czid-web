@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_805_183_152) do
+ActiveRecord::Schema.define(version: 20_200_810_233_048) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -653,6 +653,20 @@ ActiveRecord::Schema.define(version: 20_200_805_183_152) do
     t.integer "public_access", limit: 1
     t.string "name"
     t.index ["user_id"], name: "index_visualizations_on_user_id"
+  end
+
+  create_table "workflow_runs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "sample_id"
+    t.string "status", default: "CREATED", null: false, comment: "A soft enum (string) describing the execution status."
+    t.string "workflow", null: false, comment: "Name of the workflow to use, e.g. consensus-genome."
+    t.string "wdl_version", comment: "Version of the WDL used in execution."
+    t.string "dag_version", comment: "idseq-dag version. Legacy field needed for sfn_results_path for now."
+    t.string "sfn_execution_arn", comment: "Step Function execution ARN."
+    t.datetime "executed_at", comment: "Self-managed field to track the time of kickoff and dispatch."
+    t.boolean "deprecated", default: false, null: false, comment: "If true, don't surface the run to the user."
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
   end
 
   add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
