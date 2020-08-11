@@ -1,7 +1,7 @@
 import React from "react";
 import { upperFirst } from "lodash/fp";
 
-import BacteriaIcon from "~ui/icons/BacteriaIcon";
+import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import PropTypes from "~/components/utils/propTypes";
 
@@ -20,7 +20,7 @@ class Auth0Error extends React.Component {
               Contact us for help
             </a>
           }
-          icon={<BacteriaIcon className={cs.bacteriaIcon} />}
+          icon={<ImgMicrobeSecondary className={cs.imgMicrobe} />}
         />
       </div>
     );

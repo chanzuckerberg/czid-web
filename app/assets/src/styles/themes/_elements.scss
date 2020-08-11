@@ -31,6 +31,7 @@ $header-height: 50px;
 $header-margin-bottom: 10px;
 $header-total-height: $header-height + $header-margin-bottom;
 
+// Spaces
 $space-default: 10px;
 $space-xxxs: 2px;
 $space-xxs: 4px;
@@ -40,6 +41,11 @@ $space-m: 10px;
 $space-l: 14px;
 $space-xl: 22px;
 $space-xxl: 38px;
+
+// Image and illustration sizes
+$img-s: 80px;
+$img-m: 150px;
+$img-l: 200px;
 
 // Customized scroll bar
 @mixin scrollable {

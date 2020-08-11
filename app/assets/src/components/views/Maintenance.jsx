@@ -1,6 +1,6 @@
 import React from "react";
 
-import BacteriaIcon from "~ui/icons/BacteriaIcon";
+import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 
 import cs from "./maintenance.scss";
@@ -14,7 +14,7 @@ class Maintenance extends React.Component {
           for the inconvenience!`}
           textWidth={300}
           tagline={`We'll be back online soon.`}
-          icon={<BacteriaIcon className={cs.bacteriaIcon} />}
+          icon={<ImgMicrobeSecondary className={cs.imgMicrobe} />}
         />
       </div>
     );

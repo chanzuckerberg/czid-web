@@ -18,11 +18,11 @@ import ExternalLink from "~ui/controls/ExternalLink";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
 import StringHelper from "../../helpers/StringHelper";
-import DiscoverIcon from "../ui/icons/DiscoverIcon";
-import DetectIcon from "../ui/icons/DetectIcon";
-import DecipherIcon from "../ui/icons/DecipherIcon";
 import LogoReversed from "../ui/icons/LogoReversed";
 import logAnalyticsEvent from "~/api/analytics";
+import ImgBacteriaPrimary from "~ui/illustrations/ImgBacteriaPrimary";
+import ImgDetectPrimary from "~ui/illustrations/ImgDetectPrimary";
+import ImgDecipherPrimary from "~ui/illustrations/ImgDecipherPrimary";
 
 import cs from "./landing.scss";
 
@@ -173,7 +173,7 @@ class Landing extends React.Component {
       <Container>
         <div className="action-cards">
           <div className="action-card">
-            <DiscoverIcon />
+            <ImgBacteriaPrimary />
             <div className="card-text">
               <div className="card-title">Discover</div>
               <div className="card-description">
@@ -182,7 +182,7 @@ class Landing extends React.Component {
             </div>
           </div>
           <div className="action-card">
-            <DetectIcon />
+            <ImgDetectPrimary />
             <div className="card-text">
               <div className="card-title">Detect</div>
               <div className="card-description">
@@ -191,10 +191,8 @@ class Landing extends React.Component {
             </div>
           </div>
           <div className="action-card">
-            <span className="icon-decipher">
-              <DecipherIcon />
-            </span>
-            <div className="decipher-card-text">
+            <ImgDecipherPrimary />
+            <div className="card-text">
               <div className="card-title">Decipher</div>
               <div className="card-description">
                 Find potential infecting organisms in large datasets

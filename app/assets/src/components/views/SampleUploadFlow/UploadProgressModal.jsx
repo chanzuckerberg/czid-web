@@ -17,9 +17,9 @@ import Modal from "~ui/containers/Modal";
 import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { formatFileSize } from "~/components/utils/format";
+import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
 import AlertIcon from "~ui/icons/AlertIcon";
 import CircleCheckmarkIcon from "~ui/icons/CircleCheckmarkIcon";
-import UploadIcon from "~ui/icons/UploadIcon";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import LoadingBar from "~/components/ui/controls/LoadingBar";
 import {
@@ -473,7 +473,7 @@ export default class UploadProgressModal extends React.Component {
     return (
       <Modal open tall narrow className={cs.uploadProgressModal}>
         <div className={cs.header}>
-          <UploadIcon className={cs.uploadIcon} />
+          <ImgUploadPrimary className={cs.uploadImg} />
           {this.renderTitle()}
         </div>
         {uploadType === "local" && (

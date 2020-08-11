@@ -5,7 +5,7 @@ import cx from "classnames";
 import { logAnalyticsEvent } from "~/api/analytics";
 import Link from "~ui/controls/Link";
 import ExternalLink from "~ui/controls/ExternalLink";
-import NoResultsIcon from "~ui/icons/NoResultsIcon";
+import ImgSearchSecondary from "~ui/illustrations/ImgSearchSecondary";
 
 import cs from "./info_banner.scss";
 
@@ -57,7 +57,7 @@ const InfoBanner = ({
 
 InfoBanner.defaultProps = {
   // Defaults to the most commonly used banner settings
-  icon: <NoResultsIcon className={cs.icon} />,
+  icon: <ImgSearchSecondary className={cs.icon} />,
 };
 
 InfoBanner.propTypes = {

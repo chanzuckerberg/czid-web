@@ -2,7 +2,7 @@ import cx from "classnames";
 import React from "react";
 
 import PropTypes from "~/components/utils/propTypes";
-import BacteriaIcon from "~ui/icons/BacteriaIcon";
+import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 
 import cs from "./sample_message.scss";
 
@@ -24,7 +24,7 @@ class SampleMessage extends React.Component {
             )}
           </a>
         </div>
-        <BacteriaIcon className={cs.bacteriaIcon} />
+        <ImgMicrobeSecondary className={cs.imgMicrobe} />
       </div>
     );
   }

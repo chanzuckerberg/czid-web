@@ -1,5 +1,4 @@
 import AlertIcon from "./AlertIcon";
-import BacteriaIcon from "./BacteriaIcon";
 import BacteriaCultureIcon from "./BacteriaCultureIcon";
 import BannerProjects from "./BannerProjects";
 import BannerSamples from "./BannerSamples";
@@ -10,9 +9,6 @@ import CircleCheckmarkIcon from "./CircleCheckmarkIcon";
 import CompareIcon from "./CompareIcon";
 import CopyIcon from "./CopyIcon";
 import CoverageIcon from "./CoverageIcon";
-import DecipherIcon from "./DecipherIcon";
-import DetectIcon from "./DetectIcon";
-import DiscoverIcon from "./DiscoverIcon";
 import DownloadIcon from "./DownloadIcon";
 import FiltersIcon from "./FiltersIcon";
 import GlobeIcon from "./GlobeIcon";
@@ -35,7 +31,6 @@ import LogoLockupColor from "./LogoLockupColor";
 import LogoLockupReversed from "./LogoLockupReversed";
 import LogoReversed from "./LogoReversed";
 import MinusControlIcon from "./MinusControlIcon";
-import NoResultsIcon from "./NoResultsIcon";
 import PhyloTreeIcon from "./PhyloTreeIcon";
 import PhyloTreePrivate from "./PhyloTreePrivate";
 import PhyloTreePublic from "./PhyloTreePublic";
@@ -50,13 +45,11 @@ import SamplePublicIcon from "./SamplePublicIcon";
 import SaveIcon from "./SaveIcon";
 import SortIcon from "./SortIcon";
 import InfoIconSmall from "./InfoIconSmall";
-import UploadIcon from "./UploadIcon";
 import UserIcon from "./UserIcon";
 
 export default {
   CUSTOM: {
     AlertIcon,
-    BacteriaIcon,
     BacteriaCultureIcon,
     BannerProjects,
     BannerSamples,
@@ -65,9 +58,6 @@ export default {
     CompareIcon,
     CopyIcon,
     CoverageIcon,
-    DecipherIcon,
-    DetectIcon,
-    DiscoverIcon,
     DownloadIcon,
     FiltersIcon,
     GlobeIcon,
@@ -81,7 +71,6 @@ export default {
     LargeDownloadIcon,
     LockIcon,
     MinusControlIcon,
-    NoResultsIcon,
     PhyloTreeIcon,
     PhyloTreePrivate,
     PhyloTreePublic,
@@ -95,7 +84,6 @@ export default {
     SamplePublicIcon,
     SaveIcon,
     InfoIconSmall,
-    UploadIcon,
     UserIcon,
   },
   FONT_AWESOME: {

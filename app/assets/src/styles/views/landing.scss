@@ -1,4 +1,5 @@
-@import "../themes/colors";
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .sign-in {
   margin-top: 0.4rem;
@@ -53,7 +54,7 @@
       margin-top: 3rem;
 
       svg {
-        height: 6.5rem;
+        width: $img-s;
         display: inline;
         fill: $primary;
       }
@@ -62,13 +63,6 @@
         display: inline-block;
         margin-top: 0.7rem;
         margin-left: 2.4rem;
-        vertical-align: top;
-      }
-
-      .decipher-card-text {
-        display: inline-block;
-        margin-top: 0.7rem;
-        margin-left: 1.7rem;
         vertical-align: top;
       }
 
@@ -81,18 +75,6 @@
         font-size: 1.1rem;
         margin-top: 1.1rem;
         word-wrap: break-word;
-      }
-
-      .icon-decipher {
-        width: 6.5rem;
-        height: 6rem;
-
-        svg {
-          margin-left: 0.6rem;
-          margin-top: 0.6rem;
-          height: 5rem;
-          display: inline;
-        }
       }
     }
   }

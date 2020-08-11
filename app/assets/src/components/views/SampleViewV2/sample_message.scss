@@ -9,7 +9,7 @@
 
   .textContainer {
     margin-top: $space-s;
-    margin-right: $space-l;
+    margin-right: $space-xl;
     width: 330px;
 
     .reportStatus {
@@ -87,8 +87,8 @@
     }
   }
 
-  .bacteriaIcon {
-    width: 105px;
-    height: 128px;
+  .imgMicrobe {
+    width: $img-m;
+    height: $img-m;
   }
 }

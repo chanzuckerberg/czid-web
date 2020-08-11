@@ -2,6 +2,7 @@ import React from "react";
 import cx from "classnames";
 import { values } from "lodash/fp";
 import Icons from "~ui/icons";
+import Illustrations from "~ui/illustrations";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import cs from "./playground_icons.scss";
 
@@ -24,6 +25,9 @@ class PlaygroundIcons extends React.Component {
       <IconComponent /* eslint-disable-line */
         className={cx(cs.icon, cs.logoReversedIcon)}
       />
+    ));
+    const illustrations = values(Illustrations).map(IconComponent => (
+      <IconComponent /* eslint-disable-line */ className={cs.logoIcon} />
     ));
 
     return (
@@ -58,6 +62,15 @@ class PlaygroundIcons extends React.Component {
             </div>
           ))}
           {logoReversedIcons.map(iconInstance => (
+            <div className={cs.iconContainer} key={iconInstance.type.name}>
+              {iconInstance}
+              <span className={cs.iconLabel}>{iconInstance.type.name}</span>
+            </div>
+          ))}
+        </div>
+        <div className={cs.title}>Illustrations</div>
+        <div className={cs.playgroundIcons}>
+          {illustrations.map(iconInstance => (
             <div className={cs.iconContainer} key={iconInstance.type.name}>
               {iconInstance}
               <span className={cs.iconLabel}>{iconInstance.type.name}</span>

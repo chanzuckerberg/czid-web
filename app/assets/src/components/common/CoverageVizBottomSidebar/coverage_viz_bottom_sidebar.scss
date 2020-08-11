@@ -204,8 +204,8 @@ $genome-viz-spacing: $space-xs;
   }
 
   .text {
-    margin-top: 8px;
-    margin-right: 18px;
+    margin-top: $space-xl;
+    margin-right: $space-xl;
     width: 350px;
 
     .message {
@@ -219,8 +219,9 @@ $genome-viz-spacing: $space-xs;
   }
 
   .icon {
-    width: 105px;
-    height: 128px;
+    fill: $gray-lightest;
+    width: $img-m;
+    height: $img-m;
   }
 }
 

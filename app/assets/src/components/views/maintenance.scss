@@ -5,8 +5,8 @@
 .maintenance {
   height: calc(100vh - #{$header-total-height});
 
-  .bacteriaIcon {
-    width: 140px;
-    height: 140px;
+  .imgMicrobe {
+    width: $img-m;
+    height: $img-m;
   }
 }
