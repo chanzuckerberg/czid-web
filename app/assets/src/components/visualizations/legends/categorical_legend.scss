@@ -1,0 +1,24 @@
+@import "~styles/themes/elements";
+
+.legendContainer {
+  margin-bottom: $space-l;
+
+  .category {
+    display: inline-block;
+    margin-right: $space-xl;
+
+    svg {
+      vertical-align: middle;
+      width: 10px;
+      height: 10px;
+
+      circle {
+        r: 5px;
+      }
+    }
+
+    .label {
+      margin-left: $space-xxs;
+    }
+  }
+}
