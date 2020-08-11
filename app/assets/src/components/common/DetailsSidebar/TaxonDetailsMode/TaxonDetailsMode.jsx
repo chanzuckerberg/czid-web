@@ -91,13 +91,15 @@ export default class TaxonDetailsMode extends React.Component {
         This article uses material from the Wikipedia article{" "}
         <a href={wikiUrl} className={cs.wikiLink}>
           {taxonName}
-        </a>, which is released under the{" "}
+        </a>
+        , which is released under the{" "}
         <a
           href="https://creativecommons.org/licenses/by-sa/3.0/"
           className={cs.wikiLink}
         >
           Creative Commons Attribution-Share-Alike License 3.0
-        </a>.
+        </a>
+        .
       </div>
     );
   }
@@ -208,17 +210,13 @@ export default class TaxonDetailsMode extends React.Component {
     let url = null;
     switch (source) {
       case "ncbi":
-        url = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${
-          this.props.taxonId
-        }`;
+        url = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${this.props.taxonId}`;
         break;
       case "google":
         url = `http://www.google.com/search?q=${this.props.taxonName}`;
         break;
       case "pubmed":
-        url = `https://www.ncbi.nlm.nih.gov/pubmed/?term=${
-          this.props.taxonName
-        }`;
+        url = `https://www.ncbi.nlm.nih.gov/pubmed/?term=${this.props.taxonName}`;
         break;
       case "wikipedia":
         url = this.state.wikiUrl;
@@ -372,6 +370,7 @@ export default class TaxonDetailsMode extends React.Component {
   };
 
   render() {
+    const { taxonId, taxonName } = this.props;
     const { loading } = this.state;
 
     return (
@@ -379,7 +378,10 @@ export default class TaxonDetailsMode extends React.Component {
         {loading ? (
           <div className={cs.loadingMsg}>Loading...</div>
         ) : (
-          <div className={cs.title}>{this.props.taxonName}</div>
+          <React.Fragment>
+            <div className={cs.title}>{taxonName}</div>
+            <div className={cs.subTitle}>Taxonomy ID: {taxonId}</div>
+          </React.Fragment>
         )}
         {!loading && this.renderTaxonContents()}
       </div>

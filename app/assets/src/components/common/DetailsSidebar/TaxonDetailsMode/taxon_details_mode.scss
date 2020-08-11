@@ -1,4 +1,4 @@
-@import "~styles/typography";
+@import "~styles/themes/typography";
 @import "~styles/themes/colors";
 
 .content {
@@ -8,12 +8,18 @@
 
 .title,
 .loadingMsg {
-  font-size: $font-size-h4;
-  font-weight: $font-weight-semibold;
+  @include font-header-xl;
+
   margin: 0 10px;
   margin-right: 60px;
   word-break: break-all;
-  line-height: 1.4em;
+}
+
+.subTitle {
+  @include font-body-xs;
+
+  color: $gray-dark;
+  margin: 0 10px;
 }
 
 .taxonContents {
@@ -77,10 +83,10 @@
 }
 
 .wikiLicense {
+  @include font-body-xxs;
+
   padding-top: 10px;
   color: $gray-dark;
-  font-size: $font-size-small;
-  line-height: $line-height-small;
 
   .wikiLink {
     color: $black !important;
