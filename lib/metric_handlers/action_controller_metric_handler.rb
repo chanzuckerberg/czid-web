@@ -12,6 +12,7 @@ module MetricHandlers
         details: {
           controller: @event.payload[:controller],
           action: @event.payload[:action],
+          method: @event.payload[:method],
           params: @event.payload[:params],
           path: @event.payload[:path],
           request: @event.payload[:request],
@@ -37,12 +38,14 @@ module MetricHandlers
     end
 
     def process_metric
-      domain = @event.payload[:params]["domain"]
+      extra_dimensions = Set["domain", "format"]
       clean_path = "/#{@event.payload[:params]['controller']}/#{@event.payload[:params]['action']}"
       metric_data = []
       common_dimensions = [
         { name: "Controller", value: @event.payload[:controller] },
         { name: "Path", value: clean_path },
+        { name: "Method", value: @event.payload[:method] },
+        { name: "Action", value: @event.payload[:params]["action"] },
       ]
 
       if @event.payload[:status].present?
@@ -55,7 +58,22 @@ module MetricHandlers
       metric_data << CloudWatchUtil.create_metric_datum("Duration", @event.duration, "Milliseconds", common_dimensions.dup) if @event.duration.present?
       metric_data << CloudWatchUtil.create_metric_datum("DB Runtime", @event.payload[:db_runtime], "Milliseconds", common_dimensions.dup) if @event.payload[:db_runtime].present?
 
-      metric_data.map { |metric| metric[:dimensions] << { name: "Domain", value: domain } if domain.present? }
+      extra_dimensions.each do |dim|
+        if @event.payload[:params][dim].present?
+          metric_data.map do |metric|
+            metric[:dimensions] << { name: dim.titleize, value: @event.payload[:params][dim] }
+          end
+        end
+      end
+
+      # Send a metric with a domain and without a domain for querying purposes
+      if @event.payload[:params]["domain"].present?
+        CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-domain", metric_data)
+        metric_data.map do |metric|
+          metric[:dimensions].delete_if { |dim| dim.value?("Domain") }
+        end
+      end
+
       CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-domain", metric_data)
     end
 
