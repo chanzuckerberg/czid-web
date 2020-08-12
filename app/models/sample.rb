@@ -33,10 +33,7 @@ class Sample < ApplicationRecord
   validates_associated :input_files
   has_many :metadata, dependent: :destroy
   has_and_belongs_to_many :visualizations
-
-  MAIN_PIPELINE_WORKFLOW = "main".freeze
-  CONSENSUS_GENOME_PIPELINE_WORKFLOW = "consensus_genome".freeze
-  SUPPORTED_TEMP_PIPELINE_WORKFLOWS = [MAIN_PIPELINE_WORKFLOW, CONSENSUS_GENOME_PIPELINE_WORKFLOW].freeze
+  has_many :workflow_runs, dependent: :destroy
 
   TEMP_CONSENSUS_GENOME_OUTPUTS = {
     output_zip: "consensus_genome.zip_outputs_out_output_zip",
@@ -47,13 +44,6 @@ class Sample < ApplicationRecord
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
-
-  # Remove when temp_pipeline_workflow is moved off Samples
-  SFN_STATUS = {
-    running: "RUNNING",
-    succeeded: "SUCCEEDED",
-    failed: "FAILED",
-  }.freeze
 
   TEMP_WETLAB_PROTOCOL = {
     artic: "artic",
@@ -68,7 +58,6 @@ class Sample < ApplicationRecord
     STATUS_CHECKED,
   ], }
 
-  validates :temp_sfn_execution_status, allow_blank: true, inclusion: { in: SFN_STATUS.values }
   validates :temp_wetlab_protocol, allow_blank: true, inclusion: { in: TEMP_WETLAB_PROTOCOL.values }
 
   validate :input_files_checks
@@ -77,7 +66,7 @@ class Sample < ApplicationRecord
   validates :web_commit, presence: true, allow_blank: true, if: :mass_validation_enabled?
   validates :pipeline_commit, presence: true, allow_blank: true, if: :mass_validation_enabled?
   validates :uploaded_from_basespace, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
-  validates :temp_pipeline_workflow, inclusion: { in: SUPPORTED_TEMP_PIPELINE_WORKFLOWS }
+  validates :temp_pipeline_workflow, inclusion: { in: WorkflowRun::WORKFLOW.values }
 
   after_create :initiate_input_file_upload
   before_save :check_host_genome, :concatenate_input_parts, :check_status
@@ -581,12 +570,15 @@ class Sample < ApplicationRecord
     transient_status = status
     self.status = STATUS_CHECKED
 
+    # TODO: Support retry status on WorkflowRuns
     if transient_status == STATUS_RETRY_PR && pr
       pr.retry
-    elsif temp_pipeline_workflow == CONSENSUS_GENOME_PIPELINE_WORKFLOW
-      SfnCGPipelineDispatchService.call(self)
-    else
+    elsif temp_pipeline_workflow == WorkflowRun::WORKFLOW[:main]
       kickoff_pipeline
+    else
+      # TODO: Move creation to a WorkflowRun factory
+      workflow_run = WorkflowRun.create(sample: self, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+      workflow_run.dispatch
     end
   end
 
@@ -960,6 +952,10 @@ class Sample < ApplicationRecord
     pipeline_runs.order(created_at: :desc).first
   end
 
+  def first_workflow_run(workflow_name)
+    workflow_runs.where(workflow: workflow_name, deprecated: false).order(executed_at: :desc).first
+  end
+
   # Gets the URL for the admin-only sample status page for printing in internal
   # error messages.
   def status_url
@@ -981,38 +977,5 @@ class Sample < ApplicationRecord
     else
       scoped
     end
-  end
-
-  # Temp workflow runs in progress (for now only Consensus Genomes)
-  def self.temp_workflows_in_progress(workflow_name)
-    where(temp_pipeline_workflow: workflow_name, temp_sfn_execution_status: SFN_STATUS[:running])
-  end
-
-  # Checking/updating temp workflow runs (for now only Consensus Genomes)
-  def temp_update_workflow_status
-    status = temp_sfn_description[:status]
-    if ["TIMED_OUT", "ABORTED"].include?(status)
-      status = SFN_STATUS[:failed]
-    end
-
-    if status != temp_sfn_execution_status
-      update(temp_sfn_execution_status: status)
-    end
-
-    if status == SFN_STATUS[:failed]
-      LogUtil.log_err_and_airbrake("SampleFailedEvent: Sample #{id} by #{user.role_name} failed Consensus Genome pipeline. See: #{status_url}")
-    end
-  rescue => err
-    LogUtil.log_err_and_airbrake("Error checking/updating temp workflow pipeline: #{err}")
-    LogUtil.log_backtrace(err)
-  end
-
-  # SFN description for temp workflow runs (for now only Consensus Genomes)
-  def temp_sfn_description
-    AwsClient[:states].describe_execution(execution_arn: temp_sfn_execution_arn)
-  rescue Aws::States::Errors::ExecutionDoesNotExist
-    # Attention: Timestamp fields will be returned as strings
-    description_json = get_s3_file("#{sample_output_s3_path}/sfn-desc/#{temp_sfn_execution_arn}")
-    description_json && JSON.parse(description_json, symbolize_names: true)
   end
 end

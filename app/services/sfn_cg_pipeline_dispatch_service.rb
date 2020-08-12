@@ -19,8 +19,10 @@ class SfnCGPipelineDispatchService
     end
   end
 
-  def initialize(sample)
-    @sample = sample
+  def initialize(workflow_run)
+    @workflow_run = workflow_run
+    @sample = workflow_run.sample
+
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_CG_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
   end
@@ -31,14 +33,15 @@ class SfnCGPipelineDispatchService
     sfn_execution_arn = dispatch(sfn_input_json)
 
     if sfn_execution_arn.blank?
-      @sample.update(temp_sfn_execution_status: Sample::SFN_STATUS[:failed])
+      @workflow_run.update(status: WorkflowRun::STATUS[:failed])
     else
-      @sample.update(
-        temp_sfn_execution_arn: sfn_execution_arn,
-        temp_sfn_execution_status: Sample::SFN_STATUS[:running],
-        temp_wdl_version: @sfn_tags[:wdl_version]
+      @workflow_run.update(
+        executed_at: Time.now.utc,
+        sfn_execution_arn: sfn_execution_arn,
+        status: WorkflowRun::STATUS[:running],
+        wdl_version: @sfn_tags[:wdl_version]
       )
-      Rails.logger.info("CG Sample: id=#{@sample.id} sfn_execution_arn=#{sfn_execution_arn}")
+      Rails.logger.info("WorkflowRun: id=#{@workflow_run.id} sfn_execution_arn=#{sfn_execution_arn}")
     end
 
     return {
@@ -47,8 +50,8 @@ class SfnCGPipelineDispatchService
     }
   rescue => err
     # Set to failed and re-raise
-    @sample.update(temp_sfn_execution_status: Sample::SFN_STATUS[:failed])
-    LogUtil.log_err_and_airbrake("Error starting CG SFN pipeline for Sample #{@sample.id}: #{err}")
+    @workflow_run.update(status: WorkflowRun::STATUS[:failed])
+    LogUtil.log_err_and_airbrake("Error starting CG SFN pipeline for WorkflowRun #{@workflow_run.id}: #{err}")
     LogUtil.log_backtrace(err)
     raise
   end
@@ -109,7 +112,7 @@ class SfnCGPipelineDispatchService
   end
 
   def dispatch(sfn_input_json)
-    sfn_name = "idseq-#{Rails.env}-#{@sample.project_id}-#{@sample.id}-cg-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}"
+    sfn_name = "idseq-#{Rails.env}-#{@sample.project_id}-#{@sample.id}-#{@workflow_run.id}-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}"
     sfn_input = JSON.dump(sfn_input_json)
 
     resp = AwsClient[:states].start_execution(state_machine_arn: @sfn_arn,

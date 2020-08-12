@@ -269,110 +269,31 @@ describe Sample, type: :model do
     end
   end
 
-  context "Consensus Genomes pipeline" do
-    let(:fake_sfn_name) { "fake_sfn_name" }
-    let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
-    let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
-    let(:fake_sfn_execution_description) do
-      {
-        execution_arn: fake_sfn_execution_arn,
-        input: "{}",
-        # AWS SDK rounds to second
-        start_date: Time.zone.now.round,
-        state_machine_arn: fake_sfn_arn,
-        status: "SUCCESS",
-      }
-    end
-    let(:fake_failed_sfn_execution_description) do
-      {
-        execution_arn: fake_sfn_execution_arn,
-        input: "{}",
-        # AWS SDK rounds to second
-        start_date: Time.zone.now.round,
-        state_machine_arn: fake_sfn_arn,
-        status: "FAILED",
-      }
-    end
-    let(:fake_dispatch_response) do
-      {
-        sfn_input_json: {},
-        sfn_execution_arn: fake_sfn_execution_arn,
-      }
-    end
-
+  context "#first_workflow_run" do
     before do
-      project = create(:project)
-      @sample = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW, temp_sfn_execution_arn: fake_sfn_execution_arn, temp_wetlab_protocol: Sample::TEMP_WETLAB_PROTOCOL[:artic])
-      @sample_running = create(:sample, project: project, temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW, temp_sfn_execution_status: Sample::SFN_STATUS[:running], temp_sfn_execution_arn: fake_sfn_execution_arn)
+      project = create(:public_project)
+      @sample = create(:sample, project: project)
+      @workflow_run = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: Time.now.utc)
+      @second_workflow_run = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: 1.day.ago)
 
-      @mock_aws_clients = {
-        s3: Aws::S3::Client.new(stub_responses: true),
-        states: Aws::States::Client.new(stub_responses: true),
-      }
-      allow(AwsClient).to receive(:[]) { |client|
-        @mock_aws_clients[client]
-      }
-
-      AppConfigHelper.set_app_config(AppConfig::SFN_CG_ARN, fake_sfn_arn)
+      @second_sample = create(:sample, project: project)
+      @deprecated_workflow_run = create(:workflow_run, sample: @second_sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], deprecated: true)
     end
 
-    context "#temp_workflows_in_progress" do
-      it "loads CG pipelines in progress" do
-        res = Sample.temp_workflows_in_progress(Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW)
-        expect(res).to eq([@sample_running])
-      end
+    subject { @sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome]) }
+
+    it "returns the correct top workflow run" do
+      expect(subject).to eq(@workflow_run)
     end
 
-    context "#temp_update_workflow_status" do
-      it "checks and updates CG pipeline statuses" do
-        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
-
-        @sample_running.temp_update_workflow_status
-        expect(@sample_running).to have_attributes(temp_sfn_execution_status: fake_sfn_execution_description[:status])
-      end
-
-      it "reports errors in checking CG pipeline statuses" do
-        allow(@mock_aws_clients[:states]).to receive(:describe_execution).and_raise(StandardError)
-        expect(LogUtil).to receive(:log_err_and_airbrake)
-
-        @sample_running.temp_update_workflow_status
-      end
-
-      it "reports CG pipeline failures" do
-        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
-        expect(LogUtil).to receive(:log_err_and_airbrake).with(match(/SampleFailedEvent/))
-
-        @sample_running.temp_update_workflow_status
-      end
+    it "does not return deprecated workflow runs" do
+      result = @second_sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
+      expect(result).to eq(nil)
     end
 
-    context "#temp_sfn_description" do
-      context "when arn exists" do
-        it "returns description" do
-          @mock_aws_clients[:states].stub_responses(:describe_execution, lambda { |context|
-            context.params[:execution_arn] == fake_sfn_execution_arn ? fake_sfn_execution_description : 'ExecutionDoesNotExist'
-          })
-
-          expect(@sample.temp_sfn_description).to have_attributes(fake_sfn_execution_description)
-        end
-      end
-
-      context "when arn does not exist" do
-        it "returns description from s3" do
-          @mock_aws_clients[:states].stub_responses(:describe_execution, 'ExecutionDoesNotExist')
-          fake_s3_path = File.join(@sample.sample_output_s3_path.split("/", 4)[-1], "sfn-desc", fake_sfn_execution_arn)
-          fake_bucket = { fake_s3_path => { body: JSON.dump(fake_sfn_execution_description) } }
-          @mock_aws_clients[:s3].stub_responses(:get_object, lambda { |context|
-            fake_bucket[context.params[:key]] || 'NoSuchKey'
-          })
-
-          # ATTENTION: if loading a JSON from S3 json time fields will come as strings
-          expected_description = fake_sfn_execution_description.merge(
-            start_date: fake_sfn_execution_description[:start_date].to_s
-          )
-          expect(@sample.temp_sfn_description).to eq(expected_description)
-        end
-      end
+    it "returns only the workflow runs with the workflow name" do
+      result = @sample.first_workflow_run("fake_workflow_name")
+      expect(result).to eq(nil)
     end
   end
 end

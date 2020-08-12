@@ -40,12 +40,18 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
   let(:sample) do
     create(:sample,
            project: project,
-           temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW)
+           temp_pipeline_workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+  end
+  let(:workflow_run) do
+    create(:workflow_run,
+           workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+           status: WorkflowRun::STATUS[:created],
+           sample: sample)
   end
 
   describe "#call" do
     subject do
-      SfnCGPipelineDispatchService.call(sample)
+      SfnCGPipelineDispatchService.call(workflow_run)
     end
 
     before do
@@ -128,16 +134,16 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         )
       end
 
-      it "kicks off the CG run and updates the sample as expected" do
+      it "kicks off the CG run and updates the WorkflowRun as expected" do
         subject
-        expect(sample).to have_attributes(temp_sfn_execution_arn: fake_sfn_execution_arn, temp_sfn_execution_status: Sample::SFN_STATUS[:running])
+        expect(workflow_run).to have_attributes(sfn_execution_arn: fake_sfn_execution_arn, status: WorkflowRun::STATUS[:running])
       end
 
       context "when start-execution or dispatch fails" do
         it "raises original exception" do
           @mock_aws_clients[:states].stub_responses(:start_execution, Aws::States::Errors::InvalidArn.new(nil, nil))
           expect { subject }.to raise_error(Aws::States::Errors::InvalidArn)
-          expect(sample).to have_attributes(temp_sfn_execution_arn: nil, temp_sfn_execution_status: Sample::SFN_STATUS[:failed])
+          expect(workflow_run).to have_attributes(sfn_execution_arn: nil, status: WorkflowRun::STATUS[:failed])
         end
       end
 
@@ -145,7 +151,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         let(:sample) do
           create(:sample,
                  project: project,
-                 temp_pipeline_workflow: Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW,
+                 temp_pipeline_workflow: WorkflowRun::WORKFLOW[:consensus_genome],
                  temp_wetlab_protocol: Sample::TEMP_WETLAB_PROTOCOL[:artic])
         end
         it "returns sfn input with artic primer" do

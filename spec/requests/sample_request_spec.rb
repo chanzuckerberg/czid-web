@@ -300,7 +300,7 @@ RSpec.describe "Sample request", type: :request do
 
         it "should succeed without a wetlab protocol for mNGS runs" do
           sample_params = @sample_params.dup
-          sample_params[:workflows] = [Sample::MAIN_PIPELINE_WORKFLOW]
+          sample_params[:workflows] = [WorkflowRun::WORKFLOW[:main]]
           sample_params[:wetlab_protocol] = nil
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 

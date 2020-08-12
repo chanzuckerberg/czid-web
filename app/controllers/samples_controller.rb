@@ -70,7 +70,14 @@ class SamplesController < ApplicationController
     :host_genome_id,
     :upload_error,
     :temp_pipeline_workflow,
-    :temp_sfn_execution_status,
+  ].freeze
+
+  WORKFLOW_RUN_DEFAULT_FIELDS = [
+    :id,
+    :status,
+    :workflow,
+    :executed_at,
+    :deprecated,
   ].freeze
 
   # GET /samples
@@ -774,11 +781,12 @@ class SamplesController < ApplicationController
               },
             }
           ).merge(
-            default_pipeline_run_id: @sample.first_pipeline_run.present? ? @sample.first_pipeline_run.id : nil,
             default_background_id: @sample.default_background_id,
-            pipeline_runs: @sample.pipeline_runs_info,
+            default_pipeline_run_id: @sample.first_pipeline_run.present? ? @sample.first_pipeline_run.id : nil,
             deletable: @sample.deletable?(current_user),
-            editable: current_power.updatable_sample?(@sample)
+            editable: current_power.updatable_sample?(@sample),
+            pipeline_runs: @sample.pipeline_runs_info,
+            workflow_runs: @sample.workflow_runs.as_json(only: WORKFLOW_RUN_DEFAULT_FIELDS)
           )
       end
     end
@@ -1371,7 +1379,10 @@ class SamplesController < ApplicationController
   def consensus_genome_zip_link
     output_name = Sample::TEMP_CONSENSUS_GENOME_OUTPUTS[:output_zip]
 
-    description = @sample.temp_sfn_description
+    workflow_run = @sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
+    raise "No valid WorkflowRun found" unless workflow_run
+
+    description = workflow_run.sfn_description
     if description && description[:output]
       result_mapping = JSON.parse(description[:output])
       result_mapping = result_mapping["Result"]
@@ -1392,7 +1403,7 @@ class SamplesController < ApplicationController
     LogUtil.log_err_and_airbrake("Error loading #{output_name} for sample #{@sample.id}: #{err}")
     render json: {
       error: "#{output_name} does not exist for this sample",
-    }
+    }, status: :not_found
   end
 
   # Use callbacks to share common setup or constraints between actions.

@@ -1,5 +1,8 @@
+import { filter, get, head } from "lodash/fp";
 import React from "react";
 
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import { getConsensusGenomeZipLink } from "~/components/views/report/utils/download";
 import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
@@ -10,7 +13,6 @@ import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl, openUrlInNewTab } from "~utils/links";
 import PropTypes from "~utils/propTypes";
 import { sampleErrorInfo } from "~utils/sample";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./consensus_genome_view.scss";
 import csSampleMessage from "./sample_message.scss";
@@ -83,7 +85,12 @@ class ConsensusGenomeView extends React.Component {
 
   render() {
     const { sample } = this.props;
-    const executionStatus = sample.temp_sfn_execution_status;
+    const executionStatus = get(
+      "status",
+      head(
+        filter({ workflow: WORKFLOWS.CONSENSUS_GENOME }, sample.workflow_runs)
+      )
+    );
 
     if (executionStatus === "SUCCEEDED") {
       return this.renderResults();

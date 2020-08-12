@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import cx from "classnames";
-import { get, map } from "lodash/fp";
+import { get, filter, head, map } from "lodash/fp";
 
 import BasicPopup from "~/components/BasicPopup";
 import PropTypes from "~/components/utils/propTypes";
@@ -64,9 +64,15 @@ export default function SampleViewHeader({
 
   const renderViewHeaderControls = () => {
     if (get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME) {
+      const status = get(
+        "status",
+        head(
+          filter({ workflow: WORKFLOWS.CONSENSUS_GENOME }, sample.workflow_runs)
+        )
+      );
       return (
         <ViewHeader.Controls>
-          {get("temp_sfn_execution_status", sample) === "SUCCEEDED" && (
+          {status === "SUCCEEDED" && (
             <DownloadButton
               text="Download All"
               primary={true}

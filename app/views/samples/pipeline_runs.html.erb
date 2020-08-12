@@ -29,7 +29,7 @@
   <%= button_to 'rerun from top', kickoff_pipeline_sample_path(@sample), method: :put, form: {target: '_blank'} %>
 <% end %>
 
-<% if @sample.temp_pipeline_workflow == Sample::MAIN_PIPELINE_WORKFLOW %>
+<% if @sample.first_pipeline_run %>
   <table class="table table-condensed">
     <thead>
       <tr>
@@ -105,12 +105,13 @@
   </table>
 <% end %>
 
-<% if @sample.temp_pipeline_workflow == Sample::CONSENSUS_GENOME_PIPELINE_WORKFLOW %>
+<% @sample.workflow_runs.each do |workflow_run| %>
   <br>
-  <p><strong>Consensus Genome Workflow:</strong></p>
-  <p><strong>Status:</strong> <%= @sample.temp_sfn_execution_status %></p>
-  <% if @sample.temp_sfn_execution_arn %>
-    <p><u><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(@sample.temp_sfn_execution_arn), target: :_blank  %></u></p>
+  <p><strong>WorkflowRun (ID: <%= workflow_run.id %>)</strong></p>
+  <p><strong>Workflow:</strong> <%= workflow_run.workflow %></p>
+  <p><strong>Status:</strong> <%= workflow_run.status %></p>
+  <% if workflow_run.sfn_execution_arn %>
+    <p><u><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(workflow_run.sfn_execution_arn), target: :_blank  %></u></p>
   <% else %>
     <p>Missing SFN Execution ARN</p>
   <% end %>

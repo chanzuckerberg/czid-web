@@ -22,10 +22,11 @@ module SamplesHelper
 
   # Maps SFN execution statuses to classic frontend statuses
   SFN_STATUS_MAPPING = {
-    Sample::SFN_STATUS[:succeeded] => "COMPLETE",
-    Sample::SFN_STATUS[:failed] => "FAILED",
-    Sample::SFN_STATUS[:running] => "RUNNING",
-    nil => "RUNNING",
+    WorkflowRun::STATUS[:created] => "CREATED",
+    WorkflowRun::STATUS[:running] => "RUNNING",
+    WorkflowRun::STATUS[:succeeded] => "COMPLETE",
+    WorkflowRun::STATUS[:succeeded_with_issue] => "COMPLETE - ISSUE",
+    WorkflowRun::STATUS[:failed] => "FAILED",
   }.freeze
 
   # If selected_pipeline_runs_by_sample_id is provided, use those pipelines runs instead of the latest pipeline run for each sample.
@@ -443,9 +444,10 @@ module SamplesHelper
                                 finalized: 0,
                                 report_ready: 0,
                               }
-                            elsif sample.temp_pipeline_workflow != Sample::MAIN_PIPELINE_WORKFLOW
+                            elsif sample.temp_pipeline_workflow == WorkflowRun::WORKFLOW[:consensus_genome]
+                              workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
                               {
-                                result_status_description: SFN_STATUS_MAPPING[sample.temp_sfn_execution_status],
+                                result_status_description: workflow_run ? SFN_STATUS_MAPPING[workflow_run.status] : "RUNNING",
                               }
                             elsif is_snapshot
                               snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id)
