@@ -126,6 +126,7 @@
     "react-tipsy": "^0.6.2",
     "react-toastify": "^4.5.2",
     "react-virtualized": "^9.21.0",
+    "serialize-javascript": "^4.0.0",
     "semantic-ui-calendar-react": "^0.15.3",
     "semantic-ui-css": "^2.3.0",
     "semantic-ui-react": "^0.88.1",
