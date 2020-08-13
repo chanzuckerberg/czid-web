@@ -175,16 +175,6 @@ module PipelineOutputsHelper
     resp.body.read
   end
 
-  def get_s3_file(s3_path)
-    bucket, key = S3Util.parse_s3_path(s3_path)
-    begin
-      resp = AwsClient[:s3].get_object(bucket: bucket, key: key)
-      return resp.body.read
-    rescue
-      return nil
-    end
-  end
-
   def get_presigned_s3_url(s3_path, filename)
     s3 = Aws::S3::Resource.new(client: Client)
     bucket_name, key = S3Util.parse_s3_path(s3_path)

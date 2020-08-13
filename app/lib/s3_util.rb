@@ -33,6 +33,16 @@ module S3Util
     return entry.join
   end
 
+  def self.get_s3_file(s3_path)
+    bucket, key = parse_s3_path(s3_path)
+    begin
+      resp = AwsClient[:s3].get_object(bucket: bucket, key: key)
+      return resp.body.read
+    rescue
+      return nil
+    end
+  end
+
   def self.upload_to_s3(bucket, key, content)
     AwsClient[:s3].put_object(bucket: bucket,
                               key: key,

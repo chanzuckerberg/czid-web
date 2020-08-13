@@ -6,6 +6,7 @@ class SfnCGPipelineDispatchService
   include Callable
 
   DOCKER_IMAGE_TAG = "sha-c84fa941046b164e".freeze
+  WORKFLOW_VERSION = "consensus-genome-1.2.1".freeze
 
   class SfnArnMissingError < StandardError
     def initialize
@@ -92,7 +93,7 @@ class SfnCGPipelineDispatchService
   def generate_wdl_input
     sfn_pipeline_input_json = {
       # TODO(JIRA:IDSEQ-3163): do not use hardcoded version (outputs will still be here in the SFN version returned by the tag)
-      RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v1-consensus-genome/consensus-genome/run.wdl",
+      RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{WORKFLOW_VERSION}/consensus-genome/run.wdl",
       Input: {
         Run: {
           docker_image_id: retrieve_docker_image_id,

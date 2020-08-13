@@ -58,13 +58,6 @@ module PipelineRunsHelper
   PIPELINE_RUN_STILL_RUNNING_ERROR = "PIPELINE_RUN_STILL_RUNNING_ERROR".freeze
   PIPELINE_RUN_FAILED_ERROR = "PIPELINE_RUN_FAILED_ERROR".freeze
 
-  SFN_INPUT_ERRORS = {
-    "InvalidInputFileError" => "There was an error parsing one of the input files.",
-    "InsufficientReadsError" => "The number of reads after filtering was insufficient for further analysis.",
-    "BrokenReadPairError" => "There were too many discordant read pairs in the paired-end sample.",
-    "InvalidFileFormatError" => "The input file you provided has a formatting error in it.",
-  }.freeze
-
   def aegea_batch_submit_command(base_command,
                                  memory: Sample::DEFAULT_MEMORY_IN_MB,
                                  vcpus: Sample::DEFAULT_VCPUS,
@@ -312,7 +305,7 @@ module PipelineRunsHelper
 
     if pr.step_function?
       sfn_error = pr.sfn_error
-      return SFN_INPUT_ERRORS.include?(sfn_error) ? [sfn_error, SFN_INPUT_ERRORS[sfn_error]] : [nil, nil]
+      return WorkflowRun::INPUT_ERRORS.include?(sfn_error) ? [sfn_error, WorkflowRun::INPUT_ERRORS[sfn_error]] : [nil, nil]
     end
 
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.

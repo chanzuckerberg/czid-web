@@ -358,7 +358,7 @@ class PipelineRun < ApplicationRecord
   def align_viz_available?
     # TODO(tiago): we should not have to access aws. see IDSEQ-2602.
     align_summary_file = "#{postprocess_output_s3_path}/align_viz.summary"
-    return align_summary_file && get_s3_file(align_summary_file) ? true : false
+    return align_summary_file && S3Util.get_s3_file(align_summary_file) ? true : false
   end
 
   # NOTE: not clear whether this is the complement of report_ready? method
@@ -800,27 +800,8 @@ class PipelineRun < ApplicationRecord
     Syscall.run("rm", "-f", downloaded_byteranges_path)
   end
 
-  def sfn_description
-    AwsClient[:states].describe_execution(execution_arn: sfn_execution_arn)
-  rescue Aws::States::Errors::ExecutionDoesNotExist
-    # Attention: Timestamp fields will be returned as strings
-    description_json = get_s3_file("#{sample_output_s3_path}/sfn-desc/#{sfn_execution_arn}")
-    description_json && JSON.parse(description_json, symbolize_names: true)
-  end
-
-  def sfn_history
-    AwsClient[:states].get_execution_history(execution_arn: sfn_execution_arn)
-  rescue Aws::States::Errors::ExecutionDoesNotExist
-    # Attention: Timestamp fields will be returned as strings
-    history_json = get_s3_file("#{sample_output_s3_path}/sfn-hist/#{sfn_execution_arn}")
-    history_json && JSON.parse(history_json, symbolize_names: true)
-  end
-
   def sfn_error
-    if sfn_description && sfn_description[:status] == "FAILED"
-      history = sfn_history
-      return history[:events].last["execution_failed_event_details"]["error"]
-    end
+    SfnExecution.new(sfn_execution_arn, sample_output_s3_path).sfn_error
   end
 
   def sfn_results_path

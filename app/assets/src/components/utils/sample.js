@@ -1,4 +1,4 @@
-import { last } from "lodash/fp";
+import { isEmpty, last } from "lodash/fp";
 
 export const pipelineVersionAtLeast = (pipelineVersion, testVersion) => {
   if (!pipelineVersion) return false;
@@ -68,43 +68,48 @@ export const sampleNameFromFileName = fname => {
   return base;
 };
 
-export const sampleErrorInfo = ({ sample, pipelineRun }) => {
+export const sampleErrorInfo = ({ sample, pipelineRun = {}, error = {} }) => {
   let status, message, linkText, type, link, pipelineVersionUrlParam;
   switch (
     sample.upload_error ||
-    (pipelineRun && pipelineRun.known_user_error)
+    (pipelineRun && pipelineRun.known_user_error) ||
+    error.label
   ) {
     // For samples run using SFN, error messages are sent from the server;
     // this function just sets the status, error type, and followup link
     // for frontend display.
     case "InvalidInputFileError":
       status = "COMPLETE - ISSUE";
-      message = pipelineRun.error_message;
+      message = pipelineRun.error_message || error.message;
       linkText = "Please check your file format and reupload your file.";
       type = "warning";
       link = "/samples/upload";
       break;
     case "InvalidFileFormatError":
       status = "COMPLETE - ISSUE";
-      message = pipelineRun.error_message;
+      message = pipelineRun.error_message || error.message;
       linkText = "Please check your file format and reupload your file.";
       type = "warning";
       link = "/samples/upload";
       break;
     case "InsufficientReadsError":
       status = "COMPLETE - ISSUE";
-      message = pipelineRun.error_message;
-      linkText = "Check where your reads were filtered out.";
+      message = pipelineRun.error_message || error.message;
+      linkText = isEmpty(pipelineRun)
+        ? "Contact us for help."
+        : "Check where your reads were filtered out.";
       type = "warning";
       pipelineVersionUrlParam =
         pipelineRun && pipelineRun.pipeline_version
           ? `?pipeline_version=${pipelineRun.pipeline_version}`
           : "";
-      link = `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
+      link = isEmpty(pipelineRun)
+        ? "mailto:help@idseq.net"
+        : `/samples/${sample.id}/results_folder${pipelineVersionUrlParam}`;
       break;
     case "BrokenReadPairError":
       status = "COMPLETE - ISSUE";
-      message = pipelineRun.error_message;
+      message = pipelineRun.error_message || error.message;
       linkText = "Please fix the read pairing, then reupload.";
       type = "warning";
       link = "/samples/upload";

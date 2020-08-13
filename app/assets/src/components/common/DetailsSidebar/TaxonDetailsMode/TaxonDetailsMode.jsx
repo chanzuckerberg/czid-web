@@ -380,7 +380,9 @@ export default class TaxonDetailsMode extends React.Component {
         ) : (
           <React.Fragment>
             <div className={cs.title}>{taxonName}</div>
-            <div className={cs.subTitle}>Taxonomy ID: {taxonId}</div>
+            {taxonId > 0 && (
+              <div className={cs.subTitle}>Taxonomy ID: {taxonId}</div>
+            )}
           </React.Fragment>
         )}
         {!loading && this.renderTaxonContents()}

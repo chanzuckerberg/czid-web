@@ -85,16 +85,14 @@ class ConsensusGenomeView extends React.Component {
 
   render() {
     const { sample } = this.props;
-    const executionStatus = get(
-      "status",
+    const workflow =
       head(
         filter({ workflow: WORKFLOWS.CONSENSUS_GENOME }, sample.workflow_runs)
-      )
-    );
+      ) || {};
 
-    if (executionStatus === "SUCCEEDED") {
+    if (workflow.status === "SUCCEEDED") {
       return this.renderResults();
-    } else if (executionStatus === "RUNNING" || !executionStatus) {
+    } else if (workflow.status === "RUNNING" || !workflow.status) {
       return (
         <SampleMessage
           icon={<LoadingIcon className={csSampleMessage.icon} />}
@@ -114,6 +112,7 @@ class ConsensusGenomeView extends React.Component {
       // FAILED
       const { link, linkText, message, status, type } = sampleErrorInfo({
         sample,
+        error: workflow.input_error,
       });
       return (
         <SampleMessage

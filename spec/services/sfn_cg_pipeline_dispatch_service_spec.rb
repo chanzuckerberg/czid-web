@@ -129,7 +129,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
       it "returns sfn input containing wdl workflow" do
         expect(subject).to include_json(
           sfn_input_json: {
-            RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v1-consensus-genome/consensus-genome/run.wdl",
+            RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{SfnCGPipelineDispatchService::WORKFLOW_VERSION}/consensus-genome/run.wdl",
           }
         )
       end

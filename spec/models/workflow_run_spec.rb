@@ -24,6 +24,30 @@ describe WorkflowRun, type: :model do
       status: "FAILED",
     }
   end
+  let(:fake_error_sfn_execution_history) do
+    {
+      events: [
+        {
+          id: 1,
+          execution_failed_event_details: { error: "dummy_error" },
+          timestamp: Time.zone.now,
+          type: "dummy_type",
+        },
+      ],
+    }
+  end
+  let(:fake_bad_input_sfn_execution_history) do
+    {
+      events: [
+        {
+          id: 1,
+          execution_failed_event_details: { error: "InsufficientReadsError" },
+          timestamp: Time.zone.now,
+          type: "dummy_type",
+        },
+      ],
+    }
+  end
   let(:fake_dispatch_response) do
     {
       sfn_input_json: {},
@@ -73,9 +97,20 @@ describe WorkflowRun, type: :model do
 
     it "reports run failures" do
       @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
+      @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_error_sfn_execution_history)
       expect(LogUtil).to receive(:log_err_and_airbrake).with(match(/SampleFailedEvent/))
 
       @workflow_running.update_status
+      expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:failed])
+    end
+
+    it "detects input errors and does not report error" do
+      @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
+      @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_bad_input_sfn_execution_history)
+      expect(LogUtil).not_to receive(:log_err_and_airbrake).with(match(/SampleFailedEvent/))
+
+      @workflow_running.update_status
+      expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded_with_issue])
     end
   end
 

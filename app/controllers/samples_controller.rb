@@ -786,7 +786,10 @@ class SamplesController < ApplicationController
             deletable: @sample.deletable?(current_user),
             editable: current_power.updatable_sample?(@sample),
             pipeline_runs: @sample.pipeline_runs_info,
-            workflow_runs: @sample.workflow_runs.as_json(only: WORKFLOW_RUN_DEFAULT_FIELDS)
+            workflow_runs: @sample.workflow_runs.as_json(
+              only: WORKFLOW_RUN_DEFAULT_FIELDS,
+              methods: [:input_error]
+            )
           )
       end
     end
@@ -996,7 +999,7 @@ class SamplesController < ApplicationController
         begin
           resp = Client.head_object(bucket: bucket, key: key)
           if resp.content_length < 10_000_000
-            alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
+            alignment_data = JSON.parse(S3Util.get_s3_file(s3_file_path) || "{}")
             flattened_data = {}
             parse_tree(flattened_data, @taxid, alignment_data, true)
             output_array = []
@@ -1274,7 +1277,7 @@ class SamplesController < ApplicationController
     coverage_viz_summary_s3_path = pr.coverage_viz_summary_s3_path
 
     if coverage_viz_summary_s3_path
-      @coverage_viz_summary = get_s3_file(coverage_viz_summary_s3_path)
+      @coverage_viz_summary = S3Util.get_s3_file(coverage_viz_summary_s3_path)
       render json: @coverage_viz_summary
     else
       render json: {
@@ -1293,7 +1296,7 @@ class SamplesController < ApplicationController
     coverage_viz_data_s3_path = pr.coverage_viz_data_s3_path(params[:accessionId])
 
     if coverage_viz_data_s3_path
-      @coverage_viz_data = get_s3_file(coverage_viz_data_s3_path)
+      @coverage_viz_data = S3Util.get_s3_file(coverage_viz_data_s3_path)
       render json: @coverage_viz_data
     else
       render json: {
@@ -1377,6 +1380,7 @@ class SamplesController < ApplicationController
   # GET /samples/:id/consensus_genome_zip_link
   # Zipped download of select Consensus Genome run result files.
   def consensus_genome_zip_link
+    # TODO: remove direct access to SFN description in `workflow_run` once we refactor this
     output_name = Sample::TEMP_CONSENSUS_GENOME_OUTPUTS[:output_zip]
 
     workflow_run = @sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])

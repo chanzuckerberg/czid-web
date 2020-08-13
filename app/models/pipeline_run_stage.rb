@@ -103,7 +103,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def step_statuses
-    JSON.parse(get_s3_file(step_status_file_path) || "{}")
+    JSON.parse(S3Util.get_s3_file(step_status_file_path) || "{}")
   rescue JSON::ParserError
     {}
   end
