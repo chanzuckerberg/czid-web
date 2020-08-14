@@ -3,8 +3,10 @@ import PropTypes from "~/components/utils/propTypes";
 
 import d3 from "d3";
 import { getSamples } from "~/api";
+import InfoBanner from "./InfoBanner";
 import Histogram from "~/components/visualizations/Histogram";
 import InfoIconSmall from "~/components/ui/icons/InfoIconSmall";
+import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
@@ -30,14 +32,18 @@ class QualityControl extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const {
       loading,
-      samples,
+      validSamples,
       totalReads,
       qualityReads,
       DCR,
       meanInsertSize,
     } = this.state;
 
-    if (samples !== prevState.samples && !loading) {
+    if (
+      !loading &&
+      validSamples.length > 0 &&
+      validSamples !== prevState.validSamples
+    ) {
       const totalReadsFormat = d3.format(".2s");
 
       this.totalReadsHistogram = this.renderHistogram(
@@ -186,16 +192,18 @@ class QualityControl extends React.Component {
 
   renderLoading() {
     return (
-      <p className={cs.loadingIndicator}>
-        <i className="fa fa-spinner fa-pulse fa-fw" />
-        Loading...
-      </p>
+      <div className={cs.content}>
+        <p className={cs.loadingIndicator}>
+          <i className="fa fa-spinner fa-pulse fa-fw" />
+          Loading...
+        </p>
+      </div>
     );
   }
 
   renderHistograms() {
     return (
-      <div>
+      <div className={cs.content}>
         {this.renderSampleStatsInfo()}
         <div className={cs.row}>
           <div className={cs.chartContainer}>
@@ -343,13 +351,35 @@ class QualityControl extends React.Component {
     );
   };
 
-  render() {
-    // TODO(julie): fix resizing content when sidebars open/close
+  renderBlankState() {
     return (
-      <div className={cs.content}>
-        {this.state.loading ? this.renderLoading() : this.renderHistograms()}
+      <div className={cs.noDataBannerFlexContainer}>
+        <InfoBanner
+          className={cs.noDataBannerContainer}
+          icon={<ImgVizSecondary />}
+          link={{
+            href: "https://help.idseq.net",
+            text: "Learn about sample QC",
+          }}
+          message="You can visually check your QC metrics after your samples have successfully processed."
+          title="Sample QC Visualizations"
+          type="no_successful_samples"
+        />
       </div>
     );
+  }
+
+  renderVisualization() {
+    const { loading, validSamples } = this.state;
+    const showBlankState = !loading && validSamples.length === 0;
+
+    return showBlankState ? this.renderBlankState() : this.renderHistograms();
+  }
+
+  render() {
+    const { loading } = this.state;
+    // TODO(julie): fix resizing content when sidebars open/close
+    return loading ? this.renderLoading() : this.renderVisualization();
   }
 }
 
