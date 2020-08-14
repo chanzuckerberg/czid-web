@@ -7,11 +7,11 @@ import {
 
 class ObjectCollection {
   constructor(
-    // domain of the collection (my data, all data, public)
+    // domain of the collection (my data, all data, public, snapshot)
     domain,
     // function to fetch data from server
-    // should take the following parametes:
-    // - domain: my_data, public, all_data
+    // should take the following parameters:
+    // - domain: my_data, public, all_data, snapshot
     // - ...conditions: any callback specific filters
     // - limit: maximum number of results
     // - offset: number of results to skip

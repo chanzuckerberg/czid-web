@@ -606,7 +606,7 @@ class Sample < ApplicationRecord
 
   def self.viewable(user)
     if user.nil?
-      snapshot_samples
+      Sample.none
     elsif user.admin?
       all
     else
@@ -632,11 +632,6 @@ class Sample < ApplicationRecord
   def self.my_data(user)
     project_ids = user.projects.pluck(:id)
     where("project_id in (?)", project_ids)
-  end
-
-  def self.snapshot_samples
-    snapshot_project_ids = SnapshotLink.all.pluck(:project_id)
-    where("project_id in (?)", snapshot_project_ids)
   end
 
   def deletable?(user)

@@ -151,6 +151,7 @@ const getSamples = ({
         limit,
         offset,
         listAllIds,
+        snapshotShareId,
         basic, // if true, then don't include extra details (ex: metadata) for each sample
         // &sampleIds=[1,2] instead of default &sampleIds[]=1&sampleIds[]=2 format.
         sampleIds: JSON.stringify(sampleIds),
@@ -159,25 +160,46 @@ const getSamples = ({
     }
   );
 
-const getSampleDimensions = ({ domain, filters, projectId, search }) =>
-  get("/samples/dimensions.json", {
-    params: {
-      domain,
-      projectId,
-      search,
-      ...filters,
-    },
-  });
+const getSampleDimensions = ({
+  domain,
+  filters,
+  projectId,
+  snapshotShareId,
+  search,
+}) =>
+  get(
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+      "/samples/dimensions.json",
+    {
+      params: {
+        domain,
+        projectId,
+        snapshotShareId,
+        search,
+        ...filters,
+      },
+    }
+  );
 
-const getSampleStats = ({ domain, filters, projectId, search }) =>
-  get("/samples/stats.json", {
-    params: {
-      domain,
-      projectId,
-      search,
-      ...filters,
-    },
-  });
+const getSampleStats = ({
+  domain,
+  filters,
+  projectId,
+  snapshotShareId,
+  search,
+}) =>
+  get(
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") + "/samples/stats.json",
+    {
+      params: {
+        domain,
+        projectId,
+        snapshotShareId,
+        search,
+        ...filters,
+      },
+    }
+  );
 
 const getSample = ({ snapshotShareId, sampleId }) =>
   get(
@@ -308,15 +330,26 @@ const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 const validatePhyloTreeName = name =>
   get(`/phylo_trees/validate_name?name=${name}`);
 
-const getSamplesLocations = ({ domain, filters, projectId, search }) =>
-  get("/locations/sample_locations.json", {
-    params: {
-      domain,
-      search,
-      projectId,
-      ...filters,
-    },
-  });
+const getSamplesLocations = ({
+  domain,
+  filters,
+  projectId,
+  search,
+  snapshotShareId,
+}) =>
+  get(
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+      "/locations/sample_locations.json",
+    {
+      params: {
+        domain,
+        search,
+        projectId,
+        snapshotShareId,
+        ...filters,
+      },
+    }
+  );
 
 const getSamplePipelineResults = (sampleId, pipelineVersion) =>
   get(`/samples/${sampleId}/results_folder.json`, {

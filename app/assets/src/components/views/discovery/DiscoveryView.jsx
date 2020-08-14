@@ -57,6 +57,7 @@ import {
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
+  DISCOVERY_DOMAIN_SNAPSHOT,
 } from "./discovery_api";
 import InfoBanner from "./InfoBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
@@ -152,7 +153,7 @@ class DiscoveryView extends React.Component {
       this.state.currentDisplay = "table";
     }
 
-    this.loadUserDataStats();
+    domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.loadUserDataStats();
 
     this.dataLayer = new DiscoveryDataLayer(domain);
     const conditions = this.getConditions();
@@ -180,16 +181,18 @@ class DiscoveryView extends React.Component {
     this.mapPreviewSidebar = null;
 
     // preload first pages
-    this.projects.loadPage(0);
+    domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.projects.loadPage(0);
     this.samples.loadPage(0);
-    this.visualizations.loadPage(0);
+    domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.visualizations.loadPage(0);
 
     this.updateBrowsingHistory("replace");
   }
 
   async componentDidMount() {
+    const { domain } = this.props;
+
     this.initialLoad();
-    this.checkPublicSamples();
+    domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.checkPublicSamples();
 
     window.onpopstate = () => {
       this.setState(history.state, () => {
@@ -212,7 +215,7 @@ class DiscoveryView extends React.Component {
   };
 
   updateBrowsingHistory = (action = "push") => {
-    const { domain } = this.props;
+    const { domain, snapshotShareId } = this.props;
 
     const localFields = ["sampleActiveColumns", "showFilters", "showStats"];
 
@@ -238,6 +241,7 @@ class DiscoveryView extends React.Component {
     if (urlQuery) {
       urlQuery = `?${urlQuery}`;
     }
+    let prefix = snapshotShareId ? this.getSnapshotPrefix() : `/${domain}`;
 
     // History state may include some small fields that enable direct loading of previous pages
     // from browser history without having to request those fields from server (e.g. project)
@@ -245,13 +249,13 @@ class DiscoveryView extends React.Component {
       history.pushState(
         historyState,
         `DiscoveryView:${domain}`,
-        `/${domain}${urlQuery}`
+        `${prefix}${urlQuery}`
       );
     } else {
       history.replaceState(
         historyState,
         `DiscoveryView:${domain}`,
-        `/${domain}${urlQuery}`
+        `${prefix}${urlQuery}`
       );
     }
 
@@ -373,7 +377,7 @@ class DiscoveryView extends React.Component {
   };
 
   refreshDimensions = async () => {
-    const { domain } = this.props;
+    const { domain, snapshotShareId } = this.props;
     const { projectId } = this.state;
 
     this.setState({
@@ -386,6 +390,7 @@ class DiscoveryView extends React.Component {
     } = await getDiscoveryDimensions({
       domain,
       projectId,
+      snapshotShareId,
     });
 
     this.setState({
@@ -396,7 +401,7 @@ class DiscoveryView extends React.Component {
   };
 
   refreshFilteredStats = async () => {
-    const { domain } = this.props;
+    const { domain, snapshotShareId } = this.props;
     const { projectId, search } = this.state;
 
     this.setState({
@@ -406,6 +411,7 @@ class DiscoveryView extends React.Component {
     const { sampleStats: filteredSampleStats } = await getDiscoveryStats({
       domain,
       projectId,
+      snapshotShareId,
       filters: this.preparedFilters(),
       search,
     });
@@ -451,7 +457,7 @@ class DiscoveryView extends React.Component {
   };
 
   refreshFilteredDimensions = async () => {
-    const { domain } = this.props;
+    const { domain, snapshotShareId } = this.props;
     const { projectId, search } = this.state;
 
     this.setState({
@@ -464,6 +470,7 @@ class DiscoveryView extends React.Component {
     } = await getDiscoveryDimensions({
       domain,
       projectId,
+      snapshotShareId,
       filters: this.preparedFilters(),
       search,
     });
@@ -476,7 +483,7 @@ class DiscoveryView extends React.Component {
   };
 
   refreshFilteredLocations = async () => {
-    const { domain } = this.props;
+    const { domain, snapshotShareId } = this.props;
     const { mapLevel, projectId, search } = this.state;
 
     this.setState({
@@ -486,6 +493,7 @@ class DiscoveryView extends React.Component {
     const mapLocationData = await getDiscoveryLocations({
       domain,
       projectId,
+      snapshotShareId,
       filters: this.preparedFilters(),
       search,
     });
@@ -695,9 +703,11 @@ class DiscoveryView extends React.Component {
 
   getConditions = () => {
     const { projectId, search } = this.state;
+    const { snapshotShareId } = this.props;
 
     return {
       projectId,
+      snapshotShareId,
       search,
       filters: this.preparedFilters(),
     };
@@ -725,7 +735,13 @@ class DiscoveryView extends React.Component {
   };
 
   handleSampleSelected = ({ sample, currentEvent }) => {
-    openUrl(`/samples/${sample.id}`, currentEvent);
+    let url = this.getSnapshotPrefix() + `/samples/${sample.id}`;
+    openUrl(url, currentEvent);
+  };
+
+  getSnapshotPrefix = () => {
+    const { snapshotShareId } = this.props;
+    return snapshotShareId ? `/pub/${snapshotShareId}` : "";
   };
 
   handleProjectUpdated = ({ project }) => {
@@ -1165,7 +1181,7 @@ class DiscoveryView extends React.Component {
       selectedSampleIds,
     } = this.state;
 
-    const { admin, allowedFeatures, mapTilerKey } = this.props;
+    const { admin, allowedFeatures, mapTilerKey, snapshotShareId } = this.props;
     const { projects, samples, visualizations } = this;
     return (
       <React.Fragment>
@@ -1222,6 +1238,7 @@ class DiscoveryView extends React.Component {
                 onSampleSelected={this.handleSampleSelected}
                 onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
                 projectId={projectId}
+                snapshotShareId={snapshotShareId}
                 ref={samplesView => (this.samplesView = samplesView)}
                 samples={samples}
                 selectableIds={selectableSampleIds}
@@ -1371,7 +1388,7 @@ class DiscoveryView extends React.Component {
       showStats,
       userDataCounts,
     } = this.state;
-    const { domain, allowedFeatures } = this.props;
+    const { domain, allowedFeatures, snapshotProjectName } = this.props;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -1383,6 +1400,7 @@ class DiscoveryView extends React.Component {
           {projectId && (
             <ProjectHeader
               project={project || {}}
+              snapshotProjectName={snapshotProjectName}
               fetchedSamples={this.samples.loaded}
               onProjectUpdated={this.handleProjectUpdated}
               onMetadataUpdated={this.refreshDataFromProjectChange}
@@ -1437,6 +1455,11 @@ class DiscoveryView extends React.Component {
                     this.renderCenterPaneContent()}
                 </NarrowContainer>
               ))}
+            {domain === DISCOVERY_DOMAIN_SNAPSHOT && (
+              <NarrowContainer className={cs.viewContainer}>
+                {this.renderNoDataBanners() || this.renderCenterPaneContent()}
+              </NarrowContainer>
+            )}
           </div>
           {this.renderRightPane()}
         </div>
@@ -1448,6 +1471,8 @@ class DiscoveryView extends React.Component {
 DiscoveryView.propTypes = {
   domain: PropTypes.oneOf(DISCOVERY_DOMAINS).isRequired,
   projectId: PropTypes.number,
+  snapshotProjectName: PropTypes.string,
+  snapshotShareId: PropTypes.string,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   mapTilerKey: PropTypes.string,
   admin: PropTypes.bool,

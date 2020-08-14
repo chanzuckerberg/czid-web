@@ -104,14 +104,13 @@ class DiscoveryFilters extends React.Component {
 
     const tags = selectedOptions
       // check if filter is on option format or just value (taxon are hashes with text and value)
-      .map(
-        option =>
-          option.text
-            ? option
-            : find({ value: option }, options) || {
-                text: option,
-                value: option,
-              }
+      .map(option =>
+        option.text
+          ? option
+          : find({ value: option }, options) || {
+              text: option,
+              value: option,
+            }
       )
       // create the filter tag
       .map(option => {
@@ -156,25 +155,30 @@ class DiscoveryFilters extends React.Component {
 
     return (
       <div className={cx(cs.filtersContainer, className)}>
-        <div className={cs.filterContainer}>
-          <TaxonFilter
-            domain={domain}
-            onChange={this.handleChange.bind(this, "taxonSelected")}
-            selectedOptions={taxonSelected}
-          />
-          {this.renderTags("taxon")}
-        </div>
-        <div className={cs.filterContainer}>
-          <LocationFilter
-            onChange={this.handleChange.bind(this, "locationV2Selected")}
-            selected={
-              locationV2 && locationV2.length ? locationV2Selected : null
-            }
-            options={locationV2}
-            label="Location"
-          />
-          {this.renderTags("locationV2")}
-        </div>
+        {/* TODO(ihan): enable taxon and location filter for snapshot view */}
+        {domain !== "snapshot" && (
+          <div className={cs.filterContainer}>
+            <TaxonFilter
+              domain={domain}
+              onChange={this.handleChange.bind(this, "taxonSelected")}
+              selectedOptions={taxonSelected}
+            />
+            {this.renderTags("taxon")}
+          </div>
+        )}
+        {domain !== "snapshot" && (
+          <div className={cs.filterContainer}>
+            <LocationFilter
+              onChange={this.handleChange.bind(this, "locationV2Selected")}
+              selected={
+                locationV2 && locationV2.length ? locationV2Selected : null
+              }
+              options={locationV2}
+              label="Location"
+            />
+            {this.renderTags("locationV2")}
+          </div>
+        )}
         <div className={cs.filterContainer}>
           <BaseSingleFilter
             label="Timeframe"

@@ -12,6 +12,7 @@ import cx from "classnames";
 
 const ProjectHeader = ({
   project,
+  snapshotProjectName,
   fetchedSamples,
   onProjectUpdated,
   onMetadataUpdated,
@@ -46,7 +47,7 @@ const ProjectHeader = ({
 
   return (
     <div className={cs.projectHeader}>
-      <div className={cs.name}>{project.name}</div>
+      <div className={cs.name}>{project.name || snapshotProjectName}</div>
       <div className={cs.fillIn} />
       {project.public_access ? (
         <div className={cs.item}>
@@ -98,6 +99,7 @@ ProjectHeader.propTypes = {
   onMetadataUpdated: PropTypes.func,
   onProjectUpdated: PropTypes.func,
   project: PropTypes.object.isRequired,
+  snapshotProjectName: PropTypes.string,
 };
 
 export default ProjectHeader;

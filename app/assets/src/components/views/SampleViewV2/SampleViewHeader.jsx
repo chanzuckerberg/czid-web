@@ -29,6 +29,7 @@ export default function SampleViewHeader({
   projectSamples,
   reportPresent,
   sample,
+  snapshotShareId,
   view,
 }) {
   const userContext = useContext(UserContext);
@@ -133,6 +134,13 @@ export default function SampleViewHeader({
     );
   };
 
+  const getBreadcrumbLink = () => {
+    if (!project) return;
+    return snapshotShareId
+      ? `/pub/${snapshotShareId}`
+      : `/home?project_id=${project.id}`;
+  };
+
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>
@@ -172,9 +180,7 @@ export default function SampleViewHeader({
             }}
           />
         </div>
-        <ViewHeader.Pretitle
-          breadcrumbLink={project && `/home?project_id=${project.id}`}
-        >
+        <ViewHeader.Pretitle breadcrumbLink={getBreadcrumbLink()}>
           {project ? project.name : ""}
         </ViewHeader.Pretitle>
         <ViewHeader.Title
@@ -229,5 +235,6 @@ SampleViewHeader.propTypes = {
   projectSamples: PropTypes.arrayOf(PropTypes.Sample),
   reportPresent: PropTypes.bool,
   sample: PropTypes.Sample,
+  snapshotShareId: PropTypes.string,
   view: PropTypes.string.isRequired,
 };

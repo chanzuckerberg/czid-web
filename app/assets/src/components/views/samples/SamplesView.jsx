@@ -335,6 +335,7 @@ class SamplesView extends React.Component {
 
   renderToolbar = () => {
     const { selectedSampleIds } = this.props;
+
     return (
       <div className={cs.samplesToolbar}>
         {this.renderDisplaySwitcher()}
@@ -369,6 +370,7 @@ class SamplesView extends React.Component {
       onLoadRows,
       protectedColumns,
       selectedSampleIds,
+      snapshotShareId,
     } = this.props;
 
     // TODO(tiago): replace by automated cell height computing
@@ -392,7 +394,7 @@ class SamplesView extends React.Component {
           onRowClick={this.handleRowClick}
           protectedColumns={protectedColumns}
           rowClassName={cs.tableDataRow}
-          selectableKey="id"
+          selectableKey={snapshotShareId ? null : "id"}
           selected={selectedSampleIds}
           selectAllChecked={selectAllChecked}
           selectableCellClassName={cs.selectableCell}
@@ -513,12 +515,12 @@ class SamplesView extends React.Component {
   };
 
   render() {
-    const { currentDisplay, selectedSampleIds } = this.props;
+    const { currentDisplay, selectedSampleIds, snapshotShareId } = this.props;
     const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
     return (
       <div className={cs.container}>
         {currentDisplay === "table" || currentDisplay === "plqc" ? (
-          this.renderToolbar()
+          !snapshotShareId && this.renderToolbar()
         ) : (
           <NarrowContainer>{this.renderToolbar()}</NarrowContainer>
         )}
@@ -582,6 +584,7 @@ SamplesView.propTypes = {
   onSampleSelected: PropTypes.func,
   onSelectedSamplesUpdate: PropTypes.func,
   projectId: PropTypes.number,
+  snapshotShareId: PropTypes.string,
   protectedColumns: PropTypes.array,
   samples: PropTypes.instanceOf(ObjectCollectionView),
   selectableIds: PropTypes.array.isRequired,

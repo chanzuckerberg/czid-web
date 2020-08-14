@@ -120,13 +120,16 @@ class DiscoveryHeader extends React.Component {
           />
         </div>
         <div className={cs.searchContainer}>
-          <LiveSearchBox
-            onSearchTriggered={onSearchTriggered}
-            onResultSelect={this.handleSearchResultSelected}
-            onEnter={this.handleSearchEnterPressed}
-            placeholder={`Search ${startCase(domain)}...`}
-            value={searchValue}
-          />
+          {/* TODO(ihan): enable search box for snapshot view */}
+          {domain !== "snapshot" && (
+            <LiveSearchBox
+              onSearchTriggered={onSearchTriggered}
+              onResultSelect={this.handleSearchResultSelected}
+              onEnter={this.handleSearchEnterPressed}
+              placeholder={`Search ${startCase(domain)}...`}
+              value={searchValue}
+            />
+          )}
         </div>
         <Tabs
           className={cs.tabs}

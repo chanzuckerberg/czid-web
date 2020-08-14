@@ -13,24 +13,36 @@ import {
 const DISCOVERY_DOMAIN_MY_DATA = "my_data";
 const DISCOVERY_DOMAIN_ALL_DATA = "all_data";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
+const DISCOVERY_DOMAIN_SNAPSHOT = "snapshot";
 
 const DISCOVERY_DOMAINS = [
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
+  DISCOVERY_DOMAIN_SNAPSHOT,
 ];
 
 const getDiscoveryDimensions = async ({
   domain,
   filters,
   projectId,
+  snapshotShareId,
   search,
 }) => {
   try {
     const actions = [
-      getSampleDimensions({ domain, filters, projectId, search }),
-      getProjectDimensions({ domain, filters, projectId, search }),
+      getSampleDimensions({
+        domain,
+        filters,
+        projectId,
+        snapshotShareId,
+        search,
+      }),
     ];
+    if (!snapshotShareId)
+      actions.push(
+        getProjectDimensions({ domain, filters, projectId, search })
+      );
     const [sampleDimensions, projectDimensions] = await Promise.all(actions);
     return { sampleDimensions, projectDimensions };
   } catch (error) {
@@ -40,12 +52,19 @@ const getDiscoveryDimensions = async ({
   }
 };
 
-const getDiscoveryStats = async ({ domain, filters, projectId, search }) => {
+const getDiscoveryStats = async ({
+  domain,
+  filters,
+  projectId,
+  snapshotShareId,
+  search,
+}) => {
   try {
     const sampleStats = await getSampleStats({
       domain,
       filters,
       projectId,
+      snapshotShareId,
       search,
     });
     return { sampleStats };
@@ -143,6 +162,7 @@ const getDiscoverySamples = async ({
   domain,
   filters,
   projectId,
+  snapshotShareId,
   search,
   limit = 100,
   offset = 0,
@@ -153,6 +173,7 @@ const getDiscoverySamples = async ({
     domain,
     filters,
     projectId,
+    snapshotShareId,
     search,
     limit,
     offset,
@@ -217,6 +238,7 @@ const getDiscoveryLocations = async ({
   domain,
   filters,
   projectId,
+  snapshotShareId,
   search,
 }) => {
   try {
@@ -224,6 +246,7 @@ const getDiscoveryLocations = async ({
       domain,
       filters,
       projectId,
+      snapshotShareId,
       search,
     });
   } catch (error) {
@@ -238,6 +261,7 @@ export {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
+  DISCOVERY_DOMAIN_SNAPSHOT,
   getDiscoveryDimensions,
   getDiscoveryLocations,
   getDiscoveryProjects,

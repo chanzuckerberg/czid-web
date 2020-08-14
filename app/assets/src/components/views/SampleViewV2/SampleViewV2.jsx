@@ -1130,6 +1130,7 @@ export default class SampleViewV2 extends React.Component {
       sidebarMode,
       view,
     } = this.state;
+    const { snapshotShareId } = this.props;
 
     return (
       <React.Fragment>
@@ -1146,6 +1147,7 @@ export default class SampleViewV2 extends React.Component {
               projectSamples={projectSamples}
               reportPresent={!!reportMetadata.reportReady}
               sample={sample}
+              snapshotShareId={snapshotShareId}
               view={view}
             />
           </div>

@@ -2,13 +2,14 @@ class SnapshotSamplesController < SamplesController
   include SamplesHelper
   include SnapshotSamplesHelper
 
-  SNAPSHOT_ACTIONS = [:show, :report_v2, :index_v2, :backgrounds].freeze
+  SNAPSHOT_ACTIONS = [:show, :report_v2, :index_v2, :backgrounds, :sample_locations, :stats, :dimensions].freeze
 
   # Snapshot endpoints are publicly accessible but access control is checked by set_snapshot_sample and share_id
   skip_before_action :authenticate_user!, :set_sample, :check_access, only: SNAPSHOT_ACTIONS
 
   before_action :app_config_required
-  before_action :set_snapshot_sample, except: [:backgrounds, :index_v2]
+  before_action :check_snapshot_exists, except: [:backgrounds]
+  before_action :set_snapshot_sample, only: [:show, :report_v2]
   before_action :block_action, except: SNAPSHOT_ACTIONS
 
   MAX_PAGE_SIZE_V2 = 100
@@ -43,6 +44,8 @@ class SnapshotSamplesController < SamplesController
     super
   end
 
+  # TODO(ihan): surface Host name on Discovery Table
+  # Previously, Host name was under db_sample. Now, it's under derived_sample_output.
   # GET /pub/:share_id/samples/index_v2.json
   def index_v2
     share_id = snapshot_sample_params[:share_id]
@@ -54,34 +57,31 @@ class SnapshotSamplesController < SamplesController
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(snapshot_sample_params[:listAllIds])
     samples = samples_by_share_id(share_id)
 
-    if samples.present?
-      samples = filter_samples(samples, snapshot_sample_params)
-      samples = samples.order(Hash[order_by => order_dir])
+    samples = filter_samples(samples, snapshot_sample_params)
+    samples = samples.order(Hash[order_by => order_dir])
 
-      limited_samples = samples.offset(offset).limit(limit)
-      limited_samples_json = limited_samples.includes(:project).as_json(
-        only: [:id, :name, :host_genome_id, :created_at],
-        methods: []
+    limited_samples = samples.offset(offset).limit(limit)
+    limited_samples_json = limited_samples.includes(:project).as_json(
+      only: [:id, :name, :host_genome_id, :created_at],
+      methods: []
+    )
+
+    # if basic is true, this endpoint only returns basic sample info (id, name, created_at, host_genome_id)
+    basic = ActiveModel::Type::Boolean.new.cast(snapshot_sample_params[:basic])
+    unless basic
+      sample_ids = (samples || []).map(&:id)
+      pipeline_runs_by_sample_id = snapshot_pipeline_runs_multiget(sample_ids, share_id)
+      details_json = format_samples(limited_samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, is_snapshot: true).as_json(
+        except: [:sfn_results_path]
       )
-
-      basic = ActiveModel::Type::Boolean.new.cast(snapshot_sample_params[:basic])
-      unless basic
-        sample_ids = (samples || []).map(&:id)
-        pipeline_runs_by_sample_id = snapshot_pipeline_runs_multiget(sample_ids, share_id)
-        details_json = format_samples(limited_samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, is_snapshot: true).as_json(
-          except: [:sfn_results_path]
-        )
-        limited_samples_json.zip(details_json).map do |sample, details|
-          sample[:details] = details
-        end
+      limited_samples_json.zip(details_json).map do |sample, details|
+        sample[:details] = details
       end
-
-      results = { samples: limited_samples_json }
-      results[:all_samples_ids] = samples.pluck(:id) if list_all_sample_ids
-      render json: results
-    else
-      block_action
     end
+
+    results = { samples: limited_samples_json }
+    results[:all_samples_ids] = samples.pluck(:id) if list_all_sample_ids
+    render json: results
   end
 
   # GET /pub/backgrounds.json
@@ -90,41 +90,61 @@ class SnapshotSamplesController < SamplesController
     render json: { backgrounds: @backgrounds }
   end
 
-  private
-
-  def app_config_required
-    unless get_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING) == "1"
-      redirect_to root_path
-    end
+  # GET /pub/:share_id/locations/sample_locations.json
+  def sample_locations
+    # TODO(ihan): either enable or remove sample_locations endpoint
+    render json: {}
   end
+
+  # GET /pub/:share_id/samples/stats.json
+  def stats
+    super
+  end
+
+  # GET /pub/:share_id/samples/dimensions.json
+  def dimensions
+    super
+  end
+
+  private
 
   def block_action
     redirect_to root_path
   end
 
+  def app_config_required
+    unless get_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING) == "1"
+      block_action
+    end
+  end
+
+  def check_snapshot_exists
+    @snapshot = SnapshotLink.find_by(share_id: snapshot_sample_params[:share_id])
+    if @snapshot.blank?
+      block_action
+    end
+  end
+
   def set_snapshot_sample
-    snapshot = SnapshotLink.find_by(share_id: snapshot_sample_params[:share_id])
-    if snapshot.present?
-      # content stored as
-      # {"samples":
-      #   [{1: {"pipeline_run_id": 12345}},
-      #    {2: {"pipeline_run_id": 12345}}]
-      # }
-      content = JSON.parse(snapshot.content)
-      content["samples"].each do |sample|
-        sample.each do |id, info|
-          if id.to_i == snapshot_sample_params[:id].to_i
-            # TODO(ihan) add support for the "Update samples if they're rerun" option
-            @sample = Sample.find(id.to_i)
-            @share_id = snapshot_sample_params[:share_id]
-            @pipeline_run_id = info["pipeline_run_id"]
-            break
-          end
+    # content stored as
+    # {"samples":
+    #   [{1: {"pipeline_run_id": 12345}},
+    #    {2: {"pipeline_run_id": 12345}}]
+    # }
+    content = JSON.parse(@snapshot.content)
+    content["samples"].each do |sample|
+      sample.each do |id, info|
+        if id.to_i == snapshot_sample_params[:id].to_i
+          # TODO(ihan) add support for the "Update samples if they're rerun" option
+          @sample = Sample.find(id.to_i)
+          @share_id = snapshot_sample_params[:share_id]
+          @pipeline_run_id = info["pipeline_run_id"]
+          break
         end
       end
     end
 
-    if @sample.nil?
+    if @sample.blank?
       block_action
     end
   end

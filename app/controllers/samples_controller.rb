@@ -286,9 +286,10 @@ class SamplesController < ApplicationController
 
     # TODO(tiago): consider split into specific controllers / models
     domain = params[:domain]
+    share_id = params[:share_id]
     param_sample_ids = (params[:sampleIds] || []).map(&:to_i)
     # Access control enforced within samples_by_domain
-    samples = samples_by_domain(domain)
+    samples = domain == "snapshot" ? samples_by_share_id(share_id) : samples_by_domain(domain)
     unless param_sample_ids.empty?
       samples = samples.where(id: param_sample_ids)
     end
@@ -399,8 +400,9 @@ class SamplesController < ApplicationController
 
   def stats
     domain = params[:domain]
+    share_id = params[:share_id]
 
-    samples = samples_by_domain(domain)
+    samples = domain == "snapshot" ? samples_by_share_id(share_id) : samples_by_domain(domain)
     samples = filter_samples(samples, params)
     sample_data = samples.pluck(:id, :project_id)
     sample_ids = sample_data.map { |s| s[0] }
@@ -1431,7 +1433,7 @@ class SamplesController < ApplicationController
     permitted_sample_params = [:name, :project_id, :status, :host_genome_id, :host_genome_name,
                                :basespace_dataset_id, :basespace_access_token, :skip_cache,
                                :do_not_process, :pipeline_execution_strategy, :use_taxon_whitelist,
-                               :wetlab_protocol,
+                               :wetlab_protocol, :share_id,
                                workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
     permitted_sample_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?
 
@@ -1444,7 +1446,7 @@ class SamplesController < ApplicationController
                         :s3_bowtie2_index_path, :host_genome_id, :host_genome_name, :sample_notes,
                         :search, :basespace_dataset_id, :basespace_access_token, :client,
                         :do_not_process, :pipeline_execution_strategy, :use_taxon_whitelist,
-                        :wetlab_protocol,
+                        :wetlab_protocol, :share_id,
                         workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)
