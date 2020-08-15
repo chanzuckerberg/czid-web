@@ -47,15 +47,13 @@ class ConsensusGenomeView extends React.Component {
           <div>
             <DownloadButton
               text="Download All"
-              onClick={() =>
-                withAnalytics(
-                  openUrl(getConsensusGenomeZipLink(sample.id)),
-                  "ConsensusGenomeView_download-all-button_clicked",
-                  {
-                    sampleId: sample.id,
-                  }
-                )
-              }
+              onClick={withAnalytics(
+                openUrl(getConsensusGenomeZipLink(sample.id)),
+                "ConsensusGenomeView_download-all-button_clicked",
+                {
+                  sampleId: sample.id,
+                }
+              )}
             />
           </div>
         </div>
@@ -69,12 +67,10 @@ class ConsensusGenomeView extends React.Component {
           </div>
           <div>
             <SecondaryButton
-              onClick={() =>
-                withAnalytics(
-                  openUrlInNewTab(CONSENSUS_GENOME_DOC_LINK),
-                  "ConsensusGenomeView_view-help-docs-button_clicked"
-                )
-              }
+              onClick={withAnalytics(
+                openUrlInNewTab(CONSENSUS_GENOME_DOC_LINK),
+                "ConsensusGenomeView_view-help-docs-button_clicked"
+              )}
               text="View Help Docs"
             />
           </div>
