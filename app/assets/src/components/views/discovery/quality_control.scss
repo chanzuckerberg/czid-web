@@ -4,7 +4,8 @@
 
 .content {
   @include scrollable;
-  max-height: calc(85vh - 110px);
+  // window height minus the header and toolbars
+  max-height: calc(100vh - #{$header-total-height} - 172px);
   overflow: scroll;
   padding-right: $space-l;
   padding-left: $space-l;
@@ -14,18 +15,15 @@
     color: $black;
   }
 
-  .row {
+  .chartsContainer {
     display: flex;
-    flex-direction: row;
-    margin-bottom: $space-xl;
+    flex-flow: row wrap;
 
-    .chartContainer {
+    .chart {
       color: $black;
       width: 50%;
-
-      &:first-child {
-        margin-right: $space-xl;
-      }
+      padding-right: $space-xl;
+      padding-bottom: $space-xl;
 
       .title {
         @include font-header-l;
@@ -34,12 +32,13 @@
       }
 
       .histogramContainer {
-        padding: $space-l 0 $space-default $space-l;
+        padding: $space-xl;
         border: $border-gray-light;
         border-radius: $border-radius-m;
 
         .subtitle {
           @include font-header-s;
+          margin-bottom: $space-xxl;
         }
       }
     }

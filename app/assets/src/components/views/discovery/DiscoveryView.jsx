@@ -910,6 +910,51 @@ class DiscoveryView extends React.Component {
     }
   };
 
+  handlePLQCHistogramBarClick = sampleIds => {
+    this.setState(
+      {
+        plqcPreviewedSamples: sampleIds,
+        showStats: true,
+      },
+      () => {
+        this.refreshPLQCPreviewedSamples();
+      }
+    );
+  };
+
+  refreshPLQCPreviewedSamples = async () => {
+    const { plqcPreviewedSamples } = this.state;
+    const { domain } = this.props;
+
+    if (plqcPreviewedSamples.length > 0) {
+      const conditions = this.getConditions();
+      conditions.sampleIds = plqcPreviewedSamples;
+      this.mapPreviewSamples = this.dataLayer.samples.createView({
+        conditions,
+        onViewChange: this.refreshMapSidebarSampleData,
+        displayName: "MapPreviewSamplesView",
+      });
+      this.mapPreviewSamples.loadPage(0);
+
+      const { sampleStats } = await getDiscoveryStats({
+        domain,
+        ...conditions,
+      });
+      this.setState({
+        mapSidebarSampleStats: sampleStats,
+        mapSidebarSampleCount: plqcPreviewedSamples.length,
+      });
+    } else {
+      // if no sample ids, then display all samples
+      this.mapPreviewSamples = this.samples;
+      this.setState({
+        mapSidebarSampleStats: {},
+        mapSidebarSampleCount: null,
+      });
+    }
+    this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
+  };
+
   refreshMapPreviewedProjects = async () => {
     const { mapLocationData, mapPreviewedLocationId } = this.state;
 
@@ -1179,6 +1224,8 @@ class DiscoveryView extends React.Component {
       sampleActiveColumns,
       selectableSampleIds,
       selectedSampleIds,
+      showFilters,
+      showStats,
     } = this.state;
 
     const { admin, allowedFeatures, mapTilerKey, snapshotShareId } = this.props;
@@ -1231,6 +1278,7 @@ class DiscoveryView extends React.Component {
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
                 onLoadRows={samples.handleLoadObjectRows}
+                onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}
                 onMapClick={this.clearMapPreview}
                 onMapLevelChange={this.handleMapLevelChange}
                 onMapMarkerClick={this.handleMapMarkerClick}
@@ -1243,6 +1291,8 @@ class DiscoveryView extends React.Component {
                 samples={samples}
                 selectableIds={selectableSampleIds}
                 selectedSampleIds={selectedSampleIds}
+                filtersSidebarOpen={showFilters}
+                sampleStatsSidebarOpen={showStats}
               />
             </div>
             {!samples.length &&
@@ -1286,6 +1336,7 @@ class DiscoveryView extends React.Component {
       mapSidebarSampleStats,
       selectedSampleIds,
       mapSidebarTab,
+      plqcPreviewedSamples,
       projectDimensions,
       project,
       sampleDimensions,
@@ -1336,7 +1387,7 @@ class DiscoveryView extends React.Component {
               }
               samples={this.mapPreviewSamples}
               sampleStats={
-                !mapPreviewedLocationId
+                !mapPreviewedLocationId && !plqcPreviewedSamples
                   ? {
                       ...filteredSampleStats,
                       count: filteredSampleCount,

@@ -187,6 +187,7 @@ const getSampleStats = ({
   projectId,
   snapshotShareId,
   search,
+  sampleIds,
 }) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") + "/samples/stats.json",
@@ -196,6 +197,7 @@ const getSampleStats = ({
         projectId,
         snapshotShareId,
         search,
+        sampleIds: JSON.stringify(sampleIds),
         ...filters,
       },
     }

@@ -208,12 +208,7 @@ export default class Histogram {
     return this.options.barOpacity || 0.8;
   };
 
-  // Find the bar x-center that is closest to svgX, within hoverBuffer.
-  onMouseMove = () => {
-    if (this.sortedBarCenters.length === 0) {
-      return;
-    }
-
+  getHighlightedBar = () => {
     // svgX is an x coordinate relative to the svg container.
     // All the bar "endpoints" are within this same coordinate space.
     const svgX = mouse(this.svg.node())[0];
@@ -246,6 +241,17 @@ export default class Histogram {
       ? this.barCentersToIndices[this.lastHoveredBarX]
       : null;
 
+    return { dataIndices, lastDataIndices, closestX };
+  };
+
+  // Find the bar x-center that is closest to svgX, within hoverBuffer.
+  onMouseMove = () => {
+    if (this.sortedBarCenters.length === 0) {
+      return;
+    }
+
+    const { dataIndices, lastDataIndices, closestX } = this.getHighlightedBar();
+
     if (this.lastHoveredBarX !== closestX && dataIndices !== null) {
       if (this.options.onHistogramBarEnter) {
         this.options.onHistogramBarEnter(dataIndices);
@@ -267,6 +273,16 @@ export default class Histogram {
         currentEvent.clientX,
         currentEvent.clientY
       );
+    }
+  };
+
+  onMouseClick = () => {
+    const { dataIndices } = this.getHighlightedBar();
+
+    if (dataIndices !== null && this.options.onHistogramBarClick) {
+      const [seriesIndex, barIndex] = dataIndices;
+
+      this.options.onHistogramBarClick(this.data[seriesIndex], barIndex);
     }
   };
 
@@ -298,6 +314,28 @@ export default class Histogram {
       .attr("fill", highlightColor);
   };
 
+  onMouseDown = () => {
+    const { dataIndices } = this.getHighlightedBar();
+    this.selectBar(dataIndices, true);
+  };
+
+  selectBar = dataIndices => {
+    if (!dataIndices || !this.options.clickColors) {
+      return;
+    }
+
+    const [seriesIndex, barIndex] = dataIndices;
+
+    this.svg
+      .select(`.bar-${seriesIndex} .rect-${barIndex}`)
+      .attr("fill", this.options.clickColors[seriesIndex]);
+  };
+
+  onMouseUp = () => {
+    const { dataIndices } = this.getHighlightedBar();
+    this.highlightBar(dataIndices, true);
+  };
+
   update() {
     if (!this.data) return;
 
@@ -317,6 +355,7 @@ export default class Histogram {
       .range([this.margins.left, this.size.width - this.margins.right]);
 
     const bins = this.getBins(x);
+    this.bins = bins;
 
     let y = scaleLinear()
       .domain([0, max(bins.map(seriesBins => max(seriesBins, d => d.length)))])
@@ -433,7 +472,10 @@ export default class Histogram {
       .attr("width", this.size.width - this.margins.right - this.margins.left)
       .attr("height", this.size.height - this.margins.top - this.margins.bottom)
       .on("mousemove", this.onMouseMove)
-      .on("mouseleave", this.onMouseLeave);
+      .on("mouseleave", this.onMouseLeave)
+      .on("mousedown", this.options.clickColors && this.onMouseDown)
+      .on("mouseup", this.options.clickColors && this.onMouseUp)
+      .on("click", this.options.onHistogramBarClick && this.onMouseClick);
 
     if (this.options.seriesNames) {
       let legend = this.svg

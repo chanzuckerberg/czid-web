@@ -58,6 +58,7 @@ const getDiscoveryStats = async ({
   projectId,
   snapshotShareId,
   search,
+  sampleIds,
 }) => {
   try {
     const sampleStats = await getSampleStats({
@@ -66,6 +67,7 @@ const getDiscoveryStats = async ({
       projectId,
       snapshotShareId,
       search,
+      sampleIds,
     });
     return { sampleStats };
   } catch (error) {

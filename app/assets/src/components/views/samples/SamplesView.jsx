@@ -452,8 +452,22 @@ class SamplesView extends React.Component {
   };
 
   renderQualityControl = () => {
-    const { projectId } = this.props;
-    return <QualityControl projectId={projectId} />;
+    const {
+      projectId,
+      onPLQCHistogramBarClick,
+      filtersSidebarOpen,
+      sampleStatsSidebarOpen,
+    } = this.props;
+    return (
+      <div className={cs.table}>
+        <QualityControl
+          projectId={projectId}
+          handleBarClick={onPLQCHistogramBarClick}
+          filtersSidebarOpen={filtersSidebarOpen}
+          sampleStatsSidebarOpen={sampleStatsSidebarOpen}
+        />
+      </div>
+    );
   };
 
   renderDisplay = () => {
@@ -577,6 +591,7 @@ SamplesView.propTypes = {
   onActiveColumnsChange: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
+  onPLQCHistogramBarClick: PropTypes.func,
   onMapClick: PropTypes.func,
   onMapLevelChange: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
@@ -589,6 +604,8 @@ SamplesView.propTypes = {
   samples: PropTypes.instanceOf(ObjectCollectionView),
   selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
+  filtersSidebarOpen: PropTypes.bool,
+  sampleStatsSidebarOpen: PropTypes.bool,
 };
 
 SamplesView.contextType = UserContext;
