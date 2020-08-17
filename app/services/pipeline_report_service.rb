@@ -72,6 +72,7 @@ class PipelineReportService
     "name",
     "common_name",
     "category",
+    "is_phage",
     "agg_score",
     "max_z_score",
     "nt_z_score",
@@ -412,6 +413,9 @@ class PipelineReportService
       }
       if counts[FIELDS_INDEX[:is_phage]] == 1
         counts_hash[tax_id][:subcategories] = ["phage"]
+        counts_hash[tax_id][:is_phage] = true
+      else
+        counts_hash[tax_id][:is_phage] = false
       end
       counts_hash[tax_id][counts[FIELDS_INDEX[:count_type]].downcase!.to_sym] = {
         count: counts[FIELDS_INDEX[:count]],
