@@ -1426,6 +1426,9 @@ class SamplesController < ApplicationController
   def set_sample
     @sample = samples_scope.find(params[:id])
     assert_access
+  rescue ActiveRecord::RecordNotFound
+    Rails.logger.error("Sample #{params[:id]} was requested but not in samples_scope")
+    render json: { error: "Oh no! This page isn't available." }, status: :not_found
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

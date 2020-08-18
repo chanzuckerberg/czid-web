@@ -166,17 +166,17 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot delete public_sample' do
     sign_in(:joe)
     @public_sample = samples(:public_sample)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      delete sample_url(@public_sample)
-    end
+
+    delete sample_url(@public_sample)
+    assert_response :not_found
   end
 
   test 'joe cannot delete expired_sample' do
     sign_in(:joe)
     @expired_sample = samples(:expired_sample)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      delete sample_url(@expired_sample)
-    end
+
+    delete sample_url(@expired_sample)
+    assert_response :not_found
   end
 
   # search suggestions
@@ -261,9 +261,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot update sample to public_project' do
     sign_in(:joe)
     @public_sample = samples(:public_sample)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      post "#{save_metadata_sample_url(@public_sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
-    end
+
+    post "#{save_metadata_sample_url(@public_sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
+    assert_response :not_found
+
     @public_sample.reload
     assert @public_sample.sample_notes != 'Test note'
   end
@@ -302,9 +303,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot update sample to project one' do
     sign_in(:joe)
     @sample = samples(:one)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
-    end
+
+    post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
+    assert_response :not_found
+
     @sample.reload
     assert @sample.sample_notes != 'Test note'
   end
@@ -312,9 +314,9 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot see sample one' do
     sign_in(:joe)
     @sample = samples(:one)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get sample_url(@sample)
-    end
+
+    get sample_url(@sample)
+    assert_response :not_found
   end
 
   # visible samples in private project
@@ -330,9 +332,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot update expired_sample' do
     sign_in(:joe)
     @sample = samples(:expired_sample)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
-    end
+
+    post "#{save_metadata_sample_url(@sample)}.json", params: { field: 'sample_notes', value: 'Test note' }
+    assert_response :not_found
+
     @sample.reload
     assert @sample.sample_notes != 'Test note'
   end

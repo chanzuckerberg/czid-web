@@ -553,9 +553,9 @@ RSpec.describe SamplesController, type: :controller do
       it "properly denies access to non-collaborators" do
         project = create(:project, users: [])
         sample = create(:sample, project: project)
-        expect do
-          get :consensus_genome_zip_link, params: { id: sample.id }
-        end.to raise_error(ActiveRecord::RecordNotFound)
+        get :consensus_genome_zip_link, params: { id: sample.id }
+
+        expect(response).to have_http_status(404)
       end
 
       it "returns an error message if the file was not found" do

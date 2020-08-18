@@ -200,9 +200,8 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot fetch metadata for another user\'s private samples' do
     sign_in @user_nonadmin
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get metadata_sample_url(@metadata_validation_sample_human_existing_metadata)
-    end
+    get metadata_sample_url(@metadata_validation_sample_human_existing_metadata)
+    assert_response :not_found
   end
 
   test 'joe can fetch the metadata fields for a public sample' do
@@ -275,23 +274,21 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot save metadata to a public sample' do
     sign_in @user_nonadmin
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      post save_metadata_v2_sample_url(@sample_human_existing_metadata_public), params: {
-        field: "sample_type",
-        value: "Foobar Sample Type",
-      }
-    end
+    post save_metadata_v2_sample_url(@sample_human_existing_metadata_public), params: {
+      field: "sample_type",
+      value: "Foobar Sample Type",
+    }
+    assert_response :not_found
   end
 
   test 'joe cannot save metadata to an expired sample' do
     sign_in @user_nonadmin
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      post save_metadata_v2_sample_url(@sample_human_existing_metadata_expired), params: {
-        field: "sample_type",
-        value: "Foobar Sample Type",
-      }
-    end
+    post save_metadata_v2_sample_url(@sample_human_existing_metadata_expired), params: {
+      field: "sample_type",
+      value: "Foobar Sample Type",
+    }
+    assert_response :not_found
   end
 
   test 'joe can save metadata to his own private sample' do
@@ -310,12 +307,11 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'joe cannot save metadata to another user\'s private sample' do
     sign_in @user_nonadmin
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      post save_metadata_v2_sample_url(@metadata_validation_sample_human_existing_metadata), params: {
-        field: "sample_type",
-        value: "Foobar Sample Type",
-      }
-    end
+    post save_metadata_v2_sample_url(@metadata_validation_sample_human_existing_metadata), params: {
+      field: "sample_type",
+      value: "Foobar Sample Type",
+    }
+    assert_response :not_found
   end
 
   test 'report_info should return cached copy on second request' do
@@ -374,13 +370,12 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
       test_miss("pipeline_version")
     end
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get "/samples/123456789/report_info.json"
-    end
+    get "/samples/123456789/report_info.json"
+    assert_response :not_found
+
     # Make sure not cached
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get "/samples/123456789/report_info.json"
-    end
+    get "/samples/123456789/report_info.json"
+    assert_response :not_found
   end
 
   test 'report_info cache should invalidate on change of relevant params' do
