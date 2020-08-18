@@ -1,7 +1,7 @@
 import { filter, get, head } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent } from "~/api/analytics";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { getConsensusGenomeZipLink } from "~/components/views/report/utils/download";
 import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
@@ -47,13 +47,15 @@ class ConsensusGenomeView extends React.Component {
           <div>
             <DownloadButton
               text="Download All"
-              onClick={withAnalytics(
-                openUrl(getConsensusGenomeZipLink(sample.id)),
-                "ConsensusGenomeView_download-all-button_clicked",
-                {
-                  sampleId: sample.id,
-                }
-              )}
+              onClick={() => {
+                openUrl(getConsensusGenomeZipLink(sample.id));
+                logAnalyticsEvent(
+                  "ConsensusGenomeView_download-all-button_clicked",
+                  {
+                    sampleId: sample.id,
+                  }
+                );
+              }}
             />
           </div>
         </div>
@@ -67,10 +69,12 @@ class ConsensusGenomeView extends React.Component {
           </div>
           <div>
             <SecondaryButton
-              onClick={withAnalytics(
-                openUrlInNewTab(CONSENSUS_GENOME_DOC_LINK),
-                "ConsensusGenomeView_view-help-docs-button_clicked"
-              )}
+              onClick={() => {
+                openUrlInNewTab(CONSENSUS_GENOME_DOC_LINK);
+                logAnalyticsEvent(
+                  "ConsensusGenomeView_view-help-docs-button_clicked"
+                );
+              }}
               text="View Help Docs"
             />
           </div>
