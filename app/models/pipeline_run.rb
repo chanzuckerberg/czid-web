@@ -801,7 +801,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def sfn_error
-    SfnExecution.new(sfn_execution_arn, sample_output_s3_path).sfn_error
+    SfnExecution.new(sfn_execution_arn, sample_output_s3_path).error
   end
 
   def sfn_results_path

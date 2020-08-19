@@ -157,7 +157,7 @@ RSpec.describe SfnExecution do
     end
   end
 
-  context "#sfn_error" do
+  context "#error" do
     context "when pipeline is successful" do
       it "returns nil" do
         @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
