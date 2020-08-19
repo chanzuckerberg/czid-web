@@ -155,7 +155,8 @@ Rails.application.routes.draw do
   get 'pub/:share_id/locations/sample_locations.json', to: 'snapshot_samples#sample_locations'
   get 'pub/:share_id/samples/:id', to: 'snapshot_samples#show'
   get 'pub/:share_id/samples/:id/report_v2', to: 'snapshot_samples#report_v2'
-  get 'pub/projects/:project_id/create', to: 'snapshot_links#create'
+  delete 'pub/:share_id/destroy', to: 'snapshot_links#destroy'
+  post 'pub/projects/:project_id/create', to: 'snapshot_links#create'
   get 'pub/backgrounds', to: 'snapshot_samples#backgrounds'
   get 'pub/:share_id', to: 'snapshot_links#show'
 
