@@ -1,7 +1,7 @@
 // Dropdown that fetches list of updatable projects for the current user.
 import React from "react";
 import { find, sortBy } from "lodash/fp";
-import { Dropdown } from "~ui/controls/dropdowns";
+import { SubtextDropdown } from "~ui/controls/dropdowns";
 import PropTypes from "~/components/utils/propTypes";
 
 class ProjectSelect extends React.Component {
@@ -9,6 +9,7 @@ class ProjectSelect extends React.Component {
     (sortBy("name", this.props.projects) || []).map(project => ({
       value: project.id,
       text: project.name,
+      subtext: project.public_access ? "Public Project" : "Private Project",
     }));
 
   onChange = projectId => {
@@ -18,7 +19,7 @@ class ProjectSelect extends React.Component {
   render() {
     const { disabled, erred } = this.props;
     return (
-      <Dropdown
+      <SubtextDropdown
         fluid
         options={this.getOptions()}
         onChange={val => this.onChange(val)}
@@ -27,6 +28,7 @@ class ProjectSelect extends React.Component {
         search
         disabled={disabled}
         erred={erred}
+        showSelectedItemSubtext={true}
       />
     );
   }

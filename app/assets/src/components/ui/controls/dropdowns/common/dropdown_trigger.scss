@@ -1,5 +1,5 @@
 @import "~styles/themes/colors";
-@import "~styles/typography";
+@import "~styles/themes/typography";
 @import "~styles/themes/elements";
 
 .dropdownTrigger {
@@ -39,6 +39,12 @@
     &:not(.disableMarginRight) {
       margin-right: 5px;
     }
+  }
+
+  .itemSubtext {
+    @include font-body-xxs;
+    color: $gray-dark;
+    margin-left: $space-xs;
   }
 
   .placeholder {

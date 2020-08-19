@@ -26,7 +26,8 @@
   }
 
   .optionSubtext {
-    color: $gray-medium;
+    @include font-body-xxs;
+    color: $gray-dark;
   }
 }
 

@@ -1,6 +1,7 @@
 import React from "react";
 import BareDropdown from "./BareDropdown";
 import DropdownTrigger from "./common/DropdownTrigger";
+import { isNil } from "lodash/fp";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import cs from "./dropdown.scss";
@@ -37,6 +38,10 @@ class Dropdown extends React.Component {
         labelMap[option.value.toString()] = option.text;
         return labelMap;
       }, {}),
+      subtexts: this.props.options.reduce((subtextMap, option) => {
+        subtextMap[option.value.toString()] = option.subtext;
+        return subtextMap;
+      }, {}),
     });
   };
 
@@ -46,17 +51,22 @@ class Dropdown extends React.Component {
   };
 
   renderTrigger = () => {
-    const text =
-      this.state.value !== undefined && this.state.value !== null
-        ? this.state.labels[this.state.value.toString()]
-        : null;
+    const text = !isNil(this.state.value)
+      ? this.state.labels[this.state.value.toString()]
+      : null;
 
     const labelText =
       this.props.label && text ? this.props.label + ":" : this.props.label;
 
+    const itemSubtext =
+      this.props.showSelectedItemSubtext && !isNil(this.state.value)
+        ? this.state.subtexts[this.state.value.toString()]
+        : "";
+
     return (
       <DropdownTrigger
         label={labelText}
+        itemSubtext={itemSubtext}
         value={text}
         rounded={this.props.rounded}
         className={cs.dropdownTrigger}
@@ -128,6 +138,7 @@ Dropdown.propTypes = {
   withinModal: PropTypes.bool,
   onFilterChange: PropTypes.func,
   showNoResultsMessage: PropTypes.bool,
+  showSelectedItemSubtext: PropTypes.bool,
   // Don't show the no results message if search options are still loading.
   // TODO(mark): Visually indicate that search options are loading even if
   // there are old search results to display.

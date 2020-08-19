@@ -50,6 +50,7 @@ class DropdownTrigger extends React.Component {
   render() {
     const {
       label,
+      itemSubtext,
       value,
       rounded,
       active,
@@ -96,6 +97,7 @@ class DropdownTrigger extends React.Component {
           >
             {value || placeholder}
           </span>
+          {itemSubtext && <span className={cs.itemSubtext}>{itemSubtext}</span>}
         </div>
       </div>
     );
@@ -105,6 +107,7 @@ class DropdownTrigger extends React.Component {
 DropdownTrigger.propTypes = {
   className: PropTypes.string,
   label: PropTypes.string,
+  itemSubtext: PropTypes.string,
   value: PropTypes.node,
   placeholder: PropTypes.string,
   rounded: PropTypes.bool,

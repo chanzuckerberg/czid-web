@@ -45,6 +45,7 @@ class SubtextDropdown extends React.Component {
     const dropdownOptions = options.map(option => ({
       text: option.text,
       value: option.value,
+      subtext: option.subtext,
       customNode: this.renderMenuItem(option),
     }));
     return dropdownOptions;
