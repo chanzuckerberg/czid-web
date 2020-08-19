@@ -1,0 +1,12 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.text {
+  @include font-body-xxs;
+  fill: $black;
+
+  &:hover {
+    fill: $primary;
+    cursor: pointer;
+  }
+}

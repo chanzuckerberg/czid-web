@@ -1,11 +1,13 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import PropTypes from "~/components/utils/propTypes";
+import { maxBy } from "lodash";
 import { scaleLinear, scaleBand, scaleOrdinal } from "d3-scale";
 import { stack } from "d3-shape";
 import { max } from "d3-array";
 import cx from "classnames";
 
+import XAxis from "./XAxis";
+import YAxis from "./YAxis";
 import cs from "./horizontal_stacked_bar_chart.scss";
 
 // Data passed into this chart should be an array of objects in the form:
@@ -17,6 +19,9 @@ import cs from "./horizontal_stacked_bar_chart.scss";
 // ]
 // an example object:
 // { item: "Donuts", MondaySales: 10, TuesdaySales: 7, total: 17 }
+
+// We don't want labels on the Y-axis to take up any more than 30% of the width of the chart.
+const MAX_Y_AXIS_AREA_RATIO = 0.3;
 
 // This object shows all the settings you can pass into the options object.
 // These are used as defaults.
@@ -35,37 +40,29 @@ const defaults = {
   ],
   sort: null,
   x: {
-    axisHeight: 10,
     pathVisible: true,
     ticksVisible: true,
     gridVisible: true,
+    tickSize: 6,
     tickSpacing: 45,
-    canvasClassName: null,
-    axisClassName: null,
-    gridClassName: cs.xGrid,
-    textClassName: cs.xAxisText,
+    axisTitle: null,
+    axisTitleClassName: null,
+    gridClassName: null,
+    textClassName: null,
   },
   y: {
     pathVisible: true,
     ticksVisible: true,
-    axisClassName: null,
-    textClassName: cs.yAxisText,
+    tickSize: 6,
+    textClassName: null,
   },
   bars: {
     height: 22,
     padding: 6,
     strokeWidth: 2,
-    groupClassName: null,
-    stackPieceClassName: cs.barPiece,
-    stackPieceHighlightClassName: cs.highlightPiece,
-    fullBarClassName: cs.fullBar,
-    emptySpaceClassName: cs.emptyBarSpace,
-  },
-  margin: {
-    top: 20,
-    right: 20,
-    bottom: 30,
-    left: 40,
+    stackPieceClassName: null,
+    fullBarClassName: null,
+    emptySpaceClassName: null,
   },
 };
 
@@ -87,35 +84,6 @@ export default class HorizontalStackedBarChart extends React.Component {
     const stackGenerator = stack().keys(dataKeys);
     const stackedData = stackGenerator(stateData);
 
-    const {
-      height,
-      canvasWidth,
-      canvasHeight,
-      xAxisHeight,
-    } = this.createMeasurements(stateData, width, mergedOptions);
-
-    const { x, y, z } = this.createDimensions(
-      canvasWidth,
-      canvasHeight,
-      dataKeys,
-      mergedOptions
-    );
-
-    y.domain(
-      stateData.map(d => {
-        return d[yAxisKey];
-      })
-    );
-
-    x.domain([
-      0,
-      max(stateData, d => {
-        return d.total;
-      }),
-    ]).nice();
-
-    z.domain(dataKeys);
-
     this.state = {
       data: stateData,
       options: mergedOptions,
@@ -123,16 +91,64 @@ export default class HorizontalStackedBarChart extends React.Component {
       keys,
       dataKeys,
       mouseOverBar: null,
-      height,
-      canvasWidth,
-      canvasHeight,
+      measurementsTaken: false,
+    };
+
+    this.references = { x: null, y: [], w: null, ellipsis: null };
+  }
+
+  componentDidMount() {
+    const { width, yAxisKey } = this.props;
+    const { data, dataKeys, options } = this.state;
+
+    const { xTextHeight, xTextWidth } = this.measureXAxisText();
+    const yTextWidthPairs = this.measureYAxisText();
+    const [wideGlyphTextWidth, ellipsisTextWidth] = ["w", "ellipsis"].map(
+      ref => this.references[ref].clientWidth
+    );
+
+    const { barCanvasHeight, xAxisHeight } = this.measureHeights(xTextHeight);
+    let { barCanvasWidth, yAxisWidth, truncatedLabels } = this.measureWidths(
+      xTextWidth,
+      yTextWidthPairs,
+      wideGlyphTextWidth,
+      ellipsisTextWidth
+    );
+
+    const { x, y, z } = this.createDimensions(barCanvasWidth, barCanvasHeight);
+
+    y.domain(
+      data.map(d => {
+        return d[yAxisKey];
+      })
+    );
+
+    x.domain([
+      0,
+      max(data, d => {
+        return d.total;
+      }),
+    ]).nice();
+
+    z.domain(dataKeys);
+
+    const labels = truncatedLabels.length > 0 ? truncatedLabels : y.domain();
+
+    this.setState({
       xAxisHeight,
+      barCanvasHeight,
+      barCanvasWidth,
+      yAxisWidth,
+      labels,
       barHeight: y.bandwidth(),
       x,
       y,
       z,
-    };
+      measurementsTaken: true,
+    });
   }
+
+  /* --- pre-mount functions --- */
 
   mergeOptionsWithDefaults(defaults, options) {
     const mergedOptions = {};
@@ -151,30 +167,167 @@ export default class HorizontalStackedBarChart extends React.Component {
     return mergedOptions;
   }
 
-  createMeasurements(data, width, options) {
-    const height = data.length * (options.bars.height + options.bars.padding);
-    const canvasWidth = width - options.margin.left - options.margin.right;
-    const canvasHeight = height - options.margin.bottom;
-    const xAxisHeight =
-      10 * (options.x.ticksVisible || options.x.pathVisible) +
-      options.x.axisHeight +
-      options.margin.top;
+  /* --- post-mount functions --- */
 
-    return { height, canvasWidth, canvasHeight, xAxisHeight };
+  measureHeights(xTextHeight) {
+    const { data, options } = this.state;
+
+    const xAxisHeight =
+      options.x.tickSize * (options.x.ticksVisible || options.x.pathVisible) +
+      xTextHeight;
+    const barCanvasHeight =
+      data.length * (options.bars.height + options.bars.padding);
+
+    return { barCanvasHeight, xAxisHeight };
   }
 
-  createDimensions(width, height, dataKeys, options) {
+  measureWidths(
+    xTextWidth,
+    yTextWidthPairs,
+    wideGlyphTextWidth,
+    ellipsisTextWidth
+  ) {
+    const { width } = this.props;
+    const { options } = this.state;
+
+    let truncatedLabels = [];
+    const longestLabel = maxBy(yTextWidthPairs, pair => pair[1]);
+    const longestLabelLength = longestLabel[1];
+
+    // Since x-axis labels are centered on their tick mark, we need to make sure
+    // the last tick mark appears before the right end of the canvas with enough
+    // space for the label
+    const canvasWidth = width - xTextWidth;
+    let yAxisWidth = Math.min(
+      longestLabelLength,
+      canvasWidth * MAX_Y_AXIS_AREA_RATIO
+    );
+
+    if (longestLabelLength > yAxisWidth) {
+      const truncatedLabelWidth = yAxisWidth - ellipsisTextWidth;
+
+      yTextWidthPairs.forEach(pair => {
+        const [label, labelWidth] = pair;
+
+        let modifiedLabel = label;
+
+        if (labelWidth > yAxisWidth) {
+          const lengthToTruncate = Math.ceil(
+            (labelWidth - (yAxisWidth + ellipsisTextWidth)) / wideGlyphTextWidth
+          );
+          const truncatedLabelSliceIndex = label.length - lengthToTruncate - 1;
+          modifiedLabel = label.slice(0, truncatedLabelSliceIndex) + "...";
+        }
+
+        truncatedLabels.push(modifiedLabel);
+      });
+    }
+
+    const barCanvasWidth = canvasWidth - yAxisWidth;
+    // properly translate the canvas to the right
+    yAxisWidth = yAxisWidth + xTextWidth / 2;
+
+    return { barCanvasWidth, yAxisWidth, truncatedLabels };
+  }
+
+  createDimensions(barCanvasWidth, barCanvasHeight, xTextWidth) {
+    const { options } = this.state;
+
     const paddingScalar = options.bars.padding / options.bars.height;
 
-    const x = scaleLinear().range([0, width]);
+    const x = scaleLinear().range([0, barCanvasWidth]);
     const y = scaleBand()
-      .range([0, height])
+      .range([0, barCanvasHeight])
       .paddingInner(paddingScalar)
-      .paddingOuter(paddingScalar / 2);
+      .paddingOuter(paddingScalar / 4);
     const z = scaleOrdinal().range(options.colors);
 
     return { x, y, z };
   }
+
+  /* --- measure baseline text dimensions from client rendering --- */
+
+  renderAxisBaselines() {
+    const { yAxisKey } = this.props;
+    const { data, options } = this.state;
+
+    const elements = data.map(datum => {
+      const yAttribute = datum[yAxisKey];
+      return (
+        <div
+          className={cx(cs.test, options.y.textClassName, cs.yAxisText)}
+          key={yAttribute}
+          ref={ref => {
+            this.references.y.push([yAttribute, ref]);
+          }}
+        >
+          {yAttribute}
+        </div>
+      );
+    });
+
+    // measure how wide the glyph "W" is, since this is
+    // almost always the widest glyph, and also
+    // measure how wide an ellipsis is, because we need to
+    // truncate text shorter than the width of the y-axis
+    // area to add ellipses at the end.
+    elements.push(
+      <div
+        className={cx(cs.test, options.y.textClassName, cs.yAxisText)}
+        key={"W"}
+        ref={ref => {
+          this.references.w = ref;
+        }}
+      >
+        {"W"}
+      </div>,
+      <div
+        className={cx(cs.test, options.x.textClassName, cs.xAxisText)}
+        key={"x-axis-text"}
+        ref={ref => {
+          this.references.x = ref;
+        }}
+      >
+        {"999M" /* for the x-axis */}
+      </div>,
+      <div
+        className={cx(cs.test, options.y.textClassName, cs.yAxisText)}
+        key={"ellipsis"}
+        ref={ref => {
+          this.references.ellipsis = ref;
+        }}
+      >
+        {"..."}
+      </div>
+    );
+
+    return elements;
+  }
+
+  measureXAxisText() {
+    return {
+      xTextHeight: this.references.x.clientHeight,
+      xTextWidth: this.references.x.clientWidth,
+    };
+  }
+
+  measureYAxisText() {
+    return this.references.y.map(keyRefPair => [
+      keyRefPair[0],
+      keyRefPair[1].clientWidth,
+    ]);
+  }
+
+  /* --- callbacks --- */
+
+  handleYAxisLabelClick = (yAttribute, index) => {
+    const { events } = this.props;
+    const { data } = this.state;
+
+    events.onYAxisLabelClick(yAttribute, data[index]);
+  };
+
+  /* --- rendering --- */
 
   renderVisibleStackedBars() {
     const { events, yAxisKey } = this.props;
@@ -216,7 +369,7 @@ export default class HorizontalStackedBarChart extends React.Component {
                 width={width}
                 height={barHeight}
                 key={`${yAttribute}+${keyIndex}`}
-                className={options.bars.stackPieceClassName}
+                className={cx(options.bars.stackPieceClassName, cs.barPiece)}
                 onMouseOver={() =>
                   events.onBarStackHover(yAttribute, key, valueForStackPiece)
                 }
@@ -247,7 +400,7 @@ export default class HorizontalStackedBarChart extends React.Component {
       options,
       dataKeys,
       stackedData,
-      canvasWidth,
+      barCanvasWidth,
       barHeight,
       mouseOverBar,
       x,
@@ -265,7 +418,7 @@ export default class HorizontalStackedBarChart extends React.Component {
         const yAttribute = data[stackIndex][yAxisKey];
         const xLeft = 0;
         const xMid = stackPieceRange[1];
-        const xRight = canvasWidth;
+        const xRight = barCanvasWidth;
         const yPosition = y(yAttribute);
 
         const fullXPosition = x(xLeft);
@@ -291,7 +444,7 @@ export default class HorizontalStackedBarChart extends React.Component {
               width={emptyWidth}
               height={barHeight}
               key={`${yAttribute}+emptybar`}
-              className={options.bars.emptySpaceClassName}
+              className={cx(options.bars.emptySpaceClassName, cs.emptyBarSpace)}
               onMouseOver={() =>
                 events.onBarEmptySpaceHover(yAttribute, dataForStack)
               }
@@ -305,7 +458,7 @@ export default class HorizontalStackedBarChart extends React.Component {
                 width={fullWidth}
                 height={barHeight}
                 key={`${yAttribute}+fullbar`}
-                className={options.bars.fullBarClassName}
+                className={cx(options.bars.fullBarClassName, cs.fullBar)}
               />
             )}
           </g>
@@ -324,109 +477,18 @@ export default class HorizontalStackedBarChart extends React.Component {
     );
   }
 
-  renderYAxis() {
-    const { events } = this.props;
-    const { options, y, canvasHeight, barHeight } = this.state;
-
-    const textOffset = `translate(-${7 +
-      10 * (options.y.ticksVisible || options.y.pathVisible)}, 0)`;
-
-    const tickMap = y.domain().map(yAttribute => {
-      const yPosition = y(yAttribute);
-      return (
-        <g
-          key={yAttribute}
-          transform={`translate(0, ${yPosition + barHeight / 2})`}
-        >
-          {options.y.ticksVisible && <line x1={-6} stroke={"currentColor"} />}
-          <text
-            className={options.y.textClassName}
-            key={yAttribute}
-            textAnchor={"end"}
-            alignmentBaseline={"middle"}
-            dominantBaseline={"middle"}
-            transform={textOffset}
-            onClick={() => events.onYAxisKeyClick(yAttribute)}
-          >
-            {yAttribute}
-          </text>
-        </g>
-      );
-    });
-
-    return (
-      <React.Fragment>
-        {options.y.pathVisible && (
-          <path
-            d={["M", 0, 0, "v", canvasHeight].join(" ")}
-            fill={"none"}
-            stroke={"currentColor"}
-          />
-        )}
-        {tickMap}
-      </React.Fragment>
-    );
-  }
-
-  renderXAxis() {
-    const { options, x, canvasWidth, xAxisHeight } = this.state;
-
-    const tickCount = Math.floor(canvasWidth / options.x.tickSpacing);
-    const tickFormat = x.tickFormat(tickCount, "~s");
-    const ticks = x.ticks(tickCount, "s").map(value => ({
-      value,
-      formatted: tickFormat(value),
-      xOffset: x(value),
-    }));
-
-    const range = x.range();
-
-    const textOffset = `translate(0, -${xAxisHeight - options.x.axisHeight})`;
-
-    const tickMap = ticks.map(({ value, formatted, xOffset }) => {
-      return (
-        <g key={value} transform={`translate(${xOffset}, 0)`}>
-          {options.x.ticksVisible && <line y2={-6} stroke={"currentColor"} />}
-          <text
-            key={value}
-            textAnchor={"middle"}
-            transform={textOffset}
-            className={options.x.textClassName}
-          >
-            {formatted}
-          </text>
-        </g>
-      );
-    });
-
-    return (
-      <React.Fragment>
-        {options.x.pathVisible && (
-          <path
-            d={["M", range[0], 6, "v", -6, "H", range[1], "v", 6].join(" ")}
-            fill={"none"}
-            stroke={"currentColor"}
-          />
-        )}
-        {tickMap}
-      </React.Fragment>
-    );
-  }
-
   renderXGrid() {
-    const { options, x, canvasWidth, canvasHeight } = this.state;
+    const { options, x, barCanvasWidth, barCanvasHeight } = this.state;
 
-    const tickCount = Math.floor(canvasWidth / options.x.tickSpacing);
+    const tickCount = Math.floor(barCanvasWidth / options.x.tickSpacing);
     const xOffsets = x.ticks(tickCount, "s").map(value => x(value));
 
     const xGrid = xOffsets.map(xOffset => {
       return (
         <path
-          d={`M ${xOffset} 0 v ${canvasHeight}`}
-          // fill={"none"}
-          // stroke={"#eaeaea"} example value; define in CSS
+          d={`M ${xOffset} 0 v ${barCanvasHeight}`}
           key={`${xOffset}-grid-path`}
-          className={options.x.gridClassName}
+          className={cx(options.x.gridClassName, cs.xGrid)}
         />
       );
     });
@@ -436,38 +498,73 @@ export default class HorizontalStackedBarChart extends React.Component {
 
   render() {
     const { className, width } = this.props;
-    const { options, height, xAxisHeight } = this.state;
-    return (
-      <div className={className || cs.hzbc}>
-        <div className={options.x.canvasClassName}>
-          <svg width={width} height={xAxisHeight}>
-            <g
-              transform={`translate(${options.margin.left}, ${options.margin
-                .top + xAxisHeight})`}
-            >
-              <g
-                className={options.x.axisClassName}
-                transform={`translate(0, -1)`}
-              >
-                {this.renderXAxis()}
-              </g>
-            </g>
-          </svg>
+    const {
+      x,
+      y,
+      options,
+      labels,
+      xAxisHeight,
+      barHeight,
+      barCanvasHeight,
+      barCanvasWidth,
+      yAxisWidth,
+      measurementsTaken,
+    } = this.state;
+
+    if (measurementsTaken) {
+      return (
+        <div className={cx(className, cs.chart)}>
+          <XAxis
+            x={x}
+            width={width}
+            height={xAxisHeight}
+            marginLeft={yAxisWidth}
+            title={options.x.axisTitle}
+            tickSize={options.x.tickSize}
+            tickSpacing={options.x.tickSpacing}
+            ticksVisible={options.x.ticksVisible}
+            pathVisible={options.x.pathVisible}
+            titleClassName={cx(options.x.axisTitleClassName, cs.xAxisTitle)}
+            textClassName={cx(options.x.textClassName, cs.xAxisText)}
+            barCanvasWidth={barCanvasWidth}
+          />
+          <div className={cx(options.canvasClassName, cs.canvas)}>
+            <div className={cs.yAxis}>
+              <YAxis
+                y={y}
+                labels={labels}
+                width={yAxisWidth}
+                height={barCanvasHeight}
+                barHeight={barHeight}
+                tickSize={options.y.tickSize}
+                ticksVisible={options.y.ticksVisible}
+                pathVisible={options.y.pathVisible}
+                textClassName={cx(options.y.textClassName, cs.yAxisText)}
+                onYAxisLabelClick={this.handleYAxisLabelClick}
+              />
+            </div>
+            <div className={cs.barCanvas}>
+              <svg width={width - yAxisWidth} height={barCanvasHeight}>
+                <g>
+                  {options.x.gridVisible && this.renderXGrid()}
+                  {this.renderVisibleStackedBars()}
+                  {this.renderInvisibleStackedBars()}
+                </g>
+              </svg>
+            </div>
+          </div>
         </div>
-        <div className={options.canvasClassName}>
-          <svg width={width} height={height}>
-            <g transform={`translate(${options.margin.left}, 0)`}>
-              <g>{options.x.gridVisible && this.renderXGrid()}</g>
-              <g className={options.groupClassName}>
-                {this.renderVisibleStackedBars()}
-                {this.renderInvisibleStackedBars()}
-              </g>
-              <g className={options.y.axisClassName}>{this.renderYAxis()}</g>
-            </g>
-          </svg>
+      );
+    } else {
+      // First determine the pixel length and height of the
+      // x-axis and y-axis labels, so as to properly size the
+      // dimensions of the chart.
+      return (
+        <div className={cx(className, cs.chart)}>
+          {this.renderAxisBaselines()}
         </div>
-      </div>
-    );
+      );
+    }
   }
 }
 
@@ -478,11 +575,12 @@ HorizontalStackedBarChart.defaultProps = {
 HorizontalStackedBarChart.propTypes = {
   data: PropTypes.array,
   keys: PropTypes.array,
+  width: PropTypes.number,
   options: PropTypes.object,
   events: PropTypes.shape({
-    onYAxisKeyClick: PropTypes.function,
-    onBarStackHover: PropTypes.function,
-    onBarEmptySpaceHover: PropTypes.function,
+    onYAxisLabelClick: PropTypes.func,
+    onBarStackHover: PropTypes.func,
+    onBarEmptySpaceHover: PropTypes.func,
   }),
   yAxisKey: PropTypes.string,
   className: PropTypes.string,

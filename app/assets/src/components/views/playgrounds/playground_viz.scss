@@ -13,64 +13,12 @@
 .barChartContainer {
   display: flex;
   flex-direction: column;
-  margin-top: 100px;
-  max-width: 980px;
+  margin-top: $space-s;
 
-  .barChartXTitleContainer {
-    text-align: center;
-    margin-bottom: $space-s;
-
-    .barChartXTitle {
-      @include font-body-xxs;
-      color: $black;
-      display: inline-block;
-    }
-  }
-
-  .hzbc {
-    // css for the actual component
-
-    .xAxisText {
-      @include font-body-xxs;
-      fill: $black;
-    }
-
-    .xGrid {
-      fill: none;
-      stroke: $gray-lightest;
-    }
-
-    .canvas {
-      @include scrollable;
-      max-height: calc(85vh - 100px);
-      overflow-y: scroll;
-      overflow-x: visible;
-
-      .yAxisText {
-        @include font-body-xxs;
-        fill: $black;
-
-        &:hover {
-          fill: $primary;
-          cursor: pointer;
-        }
-      }
-
-      .emptyBarSpace {
-        &:hover ~ .fullBar {
-          stroke: $primary;
-        }
-      }
-
-      .fullBar {
-        fill: none;
-      }
-
-      .barPiece {
-        &:hover {
-          stroke: $primary;
-        }
-      }
-    }
+  .canvas {
+    @include scrollable;
+    max-height: calc(85vh - 100px);
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
 }

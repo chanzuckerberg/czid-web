@@ -94,39 +94,20 @@ export default class PlaygroundViz extends React.Component {
 
     const options = {
       canvasClassName: cs.canvas,
-      // colors: STACKED_COLORS_2,
       sort: sort,
       x: {
-        // axisHeight: 10,
-        pathVisible: false,
-        ticksVisible: false,
-        // gridVisible: true,
-        // tickSpacing: 45,
-        // gridClassName: cs.xGrid,
-        // textClassName: cs.xAxisText,
+        pathVisible: true,
+        ticksVisible: true,
+        axisTitle: "Population",
       },
       y: {
-        pathVisible: false,
-        ticksVisible: false,
-        // textClassName: cs.yAxisText,
-      },
-      bars: {
-        // height: 22,
-        // padding: 6,
-        // stackPieceClassName: cs.barPiece,
-        // fullBarClassName: cs.fullBar,
-        // emptySpaceClassName: cs.emptyBarSpace,
-      },
-      margin: {
-        top: 0,
-        //   right: 20,
-        //   bottom: 30,
-        //   left: 40,
+        pathVisible: true,
+        ticksVisible: true,
       },
     };
 
     const events = {
-      onYAxisKeyClick: console.log,
+      onYAxisLabelClick: console.log,
       onBarStackHover: console.log,
       onBarEmptySpaceHover: console.log,
     };
@@ -135,9 +116,6 @@ export default class PlaygroundViz extends React.Component {
 
     return (
       <div className={cs.barChartContainer}>
-        <div className={cs.barChartXTitleContainer}>
-          <p className={cs.barChartXTitle}>{"Population"}</p>
-        </div>
         <HorizontalStackedBarChart
           data={data}
           keys={keys}
@@ -145,7 +123,7 @@ export default class PlaygroundViz extends React.Component {
           options={options}
           events={events}
           yAxisKey={keys[0]}
-          className={cs.hzbc}
+          className={cs.chart}
         />
       </div>
     );

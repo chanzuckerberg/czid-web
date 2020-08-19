@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_810_233_048) do
+ActiveRecord::Schema.define(version: 20_200_818_171_409) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -148,8 +148,8 @@ ActiveRecord::Schema.define(version: 20_200_810_233_048) do
 
   create_table "host_genomes", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name", null: false, comment: "Friendly name of host genome. May be common name or scientific name of species. Must be unique and start with a capital letter."
-    t.string "s3_star_index_path", default: "s3:///host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
-    t.string "s3_bowtie2_index_path", default: "s3:///host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
+    t.string "s3_star_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
+    t.string "s3_bowtie2_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -375,7 +375,7 @@ ActiveRecord::Schema.define(version: 20_200_810_233_048) do
   end
 
   create_table "projects", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "name"
+    t.string "name", collation: "utf8_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
@@ -405,7 +405,7 @@ ActiveRecord::Schema.define(version: 20_200_810_233_048) do
   end
 
   create_table "samples", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "name"
+    t.string "name", collation: "utf8_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
@@ -431,9 +431,6 @@ ActiveRecord::Schema.define(version: 20_200_810_233_048) do
     t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
     t.string "temp_pipeline_workflow", default: "main", null: false, comment: "A soft enum (string) describing which pipeline workflow should run. Main is the classic mNGS pipeline. To be moved to a pipeline run model."
-    t.string "temp_sfn_execution_arn", comment: "Step Function execution ARN for samples using temp_pipeline_workflow=consensus_genome. To be removed when temp_pipeline_workflow is moved."
-    t.string "temp_sfn_execution_status", comment: "Step Function execution status for samples using temp_pipeline_workflow=consensus_genome. To be removed when temp_pipeline_workflow is moved."
-    t.string "temp_wdl_version", comment: "WDL version for samples using temp_pipeline_workflow=consensus_genome. To be removed when temp_pipeline_workflow is moved."
     t.string "temp_wetlab_protocol", comment: "A soft enum (string) for the wetlab protocol. Required for temp_pipeline_workflow=consensus_genome."
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
@@ -503,7 +500,7 @@ ActiveRecord::Schema.define(version: 20_200_810_233_048) do
     t.integer "count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name"
+    t.string "name", collation: "utf8_general_ci"
     t.string "count_type"
     t.float "percent_identity"
     t.float "alignment_length"
@@ -522,8 +519,8 @@ ActiveRecord::Schema.define(version: 20_200_810_233_048) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.text "summary", limit: 16_777_215
+    t.text "description", limit: 16_777_215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -554,8 +551,8 @@ ActiveRecord::Schema.define(version: 20_200_810_233_048) do
     t.string "family_common_name", default: "", null: false
     t.string "genus_common_name", default: "", null: false
     t.string "species_common_name", default: "", null: false
-    t.datetime "started_at", default: "1999-12-31 16:00:00", null: false
-    t.datetime "ended_at", default: "2999-12-31 16:00:00", null: false
+    t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
+    t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
     t.integer "kingdom_taxid", default: -650, null: false
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
@@ -622,16 +619,16 @@ ActiveRecord::Schema.define(version: 20_200_810_233_048) do
   end
 
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
-    t.string "email", default: "", null: false
-    t.string "name"
+    t.string "email", default: "", null: false, collation: "utf8_general_ci"
+    t.string "name", collation: "utf8_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip"
-    t.string "last_sign_in_ip"
-    t.string "authentication_token", limit: 30
+    t.string "current_sign_in_ip", collation: "utf8_general_ci"
+    t.string "last_sign_in_ip", collation: "utf8_general_ci"
+    t.string "authentication_token", limit: 30, collation: "utf8_general_ci"
     t.integer "role"
     t.text "allowed_features"
     t.string "institution", limit: 100
@@ -703,6 +700,8 @@ ActiveRecord::Schema.define(version: 20_200_810_233_048) do
   add_foreign_key "samples", "users", name: "samples_user_id_fk"
   add_foreign_key "samples_visualizations", "samples", name: "samples_visualizations_sample_id_fk"
   add_foreign_key "samples_visualizations", "visualizations", name: "samples_visualizations_visualization_id_fk"
+  add_foreign_key "snapshot_links", "projects"
   add_foreign_key "user_settings", "users"
   add_foreign_key "visualizations", "users", name: "visualizations_user_id_fk"
+  add_foreign_key "workflow_runs", "samples"
 end

@@ -5,12 +5,26 @@
 // these defaults can be overridden by passing in your
 // own class names and css to the component.
 
-.hzbc {
+.chart {
+  margin: 0px $space-xl $space-xxl $space-xl;
+  min-width: max-content;
+  line-height: 0px;
 }
 
-.xAxisText {
+.xAxisTitle {
   @include font-body-xxs;
-  fill: $black;
+  color: $black;
+  margin-bottom: $space-s;
+
+  div {
+    display: inline-block;
+    text-align: center;
+  }
+}
+
+.xAxis {
+  margin: 0px;
+  padding: 0px;
 }
 
 .xGrid {
@@ -20,19 +34,19 @@
 
 .canvas {
   @include scrollable;
-  max-height: calc(85vh - 100px);
   overflow-y: scroll;
-  overflow-x: visible;
+  overflow-x: hidden;
+  display: inline-block;
 }
 
-.yAxisText {
-  @include font-body-xxs;
-  fill: $black;
+.yAxis {
+  float: left;
+  margin: 0px;
+  padding: 0px;
+}
 
-  &:hover {
-    fill: $primary;
-    cursor: pointer;
-  }
+.barCanvas {
+  float: right;
 }
 
 .emptyBarSpace {
@@ -53,4 +67,10 @@
   &:hover {
     stroke: $primary;
   }
+}
+
+.test {
+  display: inline-block;
+  visibility: hidden;
+  line-height: normal;
 }
