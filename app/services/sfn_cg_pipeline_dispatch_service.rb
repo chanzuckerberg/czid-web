@@ -6,7 +6,7 @@ class SfnCGPipelineDispatchService
   include Callable
 
   DOCKER_IMAGE_TAG = "sha-c84fa941046b164e".freeze
-  WORKFLOW_VERSION = "consensus-genome-1.2.1".freeze
+  WORKFLOW_VERSION = "consensus-genome-1.2.2".freeze
 
   class SfnArnMissingError < StandardError
     def initialize
