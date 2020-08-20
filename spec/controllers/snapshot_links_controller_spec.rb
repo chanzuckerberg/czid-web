@@ -43,14 +43,12 @@ RSpec.describe SnapshotLinksController, type: :controller do
         content = JSON.parse(new_snapshot["content"])
         expect(content).to eq(expected_content)
 
-        # check for expected json_response
+        # check for expected http_status
         expect(response).to have_http_status(:ok)
-        json_response = JSON.parse(response.body)
-        expect(json_response["share_id"]).to eq(share_id)
-        expect(json_response["created_at"]).to eq(new_snapshot.created_at.to_s)
       end
 
       it "should redirect to root path, if the feature is disabled" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "0")
         sign_in @user
         post :create, params: { project_id: @project.id }
         expect(response).to redirect_to root_path
@@ -63,6 +61,8 @@ RSpec.describe SnapshotLinksController, type: :controller do
 
         post :create, params: { project_id: @project.id }
         expect(response).to have_http_status(:unauthorized)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")
       end
     end
 
@@ -94,6 +94,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
       end
 
       it "should redirect to root path, if the snapshot sharing is disabled" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "0")
         @user.add_allowed_feature("edit_snapshot_links")
         sign_in @user
 
@@ -116,6 +117,61 @@ RSpec.describe SnapshotLinksController, type: :controller do
 
         delete :destroy, params: { share_id: @snapshot_link.share_id }
         expect(response).to have_http_status(:unauthorized)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")
+      end
+    end
+
+    describe "GET #info" do
+      before do
+        @snapshot_link = create(:snapshot_link,
+                                project_id: @project.id,
+                                share_id: "test_id",
+                                content: { samples: [{ @sample.id => { pipeline_run_id: @sample.first_pipeline_run.id } }] }.to_json)
+      end
+
+      it "should return the correct json_response, if snapshot sharing is enabled" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
+        sign_in @user
+
+        get :info, params: { project_id: @snapshot_link.project_id }
+        expect(response).to have_http_status(:success)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["share_id"]).to eq(@snapshot_link.share_id)
+        expect(json_response["num_samples"]).to eq(1)
+        expect(json_response["pipeline_versions"]).to eq([@sample.first_pipeline_run.pipeline_version])
+        expect(json_response["timestamp"]).to eq(@snapshot_link.created_at.strftime("%b %d, %Y, %-I:%M%P"))
+      end
+
+      it "should return not_found for non-existent snapshot, if snapshot sharing is enabled" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
+        sign_in @user
+        project_two = create(:project, users: [@user])
+
+        get :info, params: { project_id: project_two.id }
+        expect(response).to have_http_status(:not_found)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq({})
+      end
+
+      it "should redirect to root path, if snapshot sharing is disabled" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "0")
+        sign_in @user
+
+        get :info, params: { project_id: @snapshot_link.project_id }
+        expect(response).to redirect_to root_path
+      end
+
+      it "should return unauthorized if user doesn't have edit access to the project" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
+        sign_in @unauthorized_user
+
+        get :info, params: { project_id: @snapshot_link.project_id }
+        expect(response).to have_http_status(:unauthorized)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")
       end
     end
   end

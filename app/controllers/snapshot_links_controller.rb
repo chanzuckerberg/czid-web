@@ -1,5 +1,8 @@
 class SnapshotLinksController < ApplicationController
   include SamplesHelper
+  include SnapshotSamplesHelper
+
+  NO_EDIT_ACCESS_ERROR = "You are not authorized to edit view-only sharing settings.".freeze
 
   before_action :app_config_required
   before_action :check_snapshot_exists, only: [:show, :destroy]
@@ -16,28 +19,51 @@ class SnapshotLinksController < ApplicationController
     render template: "home/snapshot"
   end
 
+  # GET /pub/projects/:project_id/info.json
+  def info
+    project_id = snapshot_links_params[:project_id]
+    unless edit_access?(project_id)
+      render json: {
+        error: NO_EDIT_ACCESS_ERROR,
+      }, status: :unauthorized
+      return
+    end
+
+    snapshot = SnapshotLink.find_by(project_id: project_id)
+    if snapshot.present?
+      # timestamp formatted as: "Aug 19, 2020, 1:14pm"
+      render json: {
+        share_id: snapshot.share_id,
+        num_samples: JSON.parse(snapshot.content)["samples"].length,
+        pipeline_versions: snapshot_pipeline_versions(snapshot),
+        timestamp: snapshot.created_at.strftime("%b %d, %Y, %-I:%M%P"),
+      }
+    else
+      render json: {}, status: :not_found
+    end
+  end
+
   # POST /pub/projects/:project_id/create
   def create
     project_id = snapshot_links_params[:project_id]
-    editable_project = current_power.updatable_projects.find_by(id: project_id)
-    if editable_project.nil?
+    unless edit_access?(project_id)
       render json: {
-        error: "You are not authorized to turn on view-only sharing.",
+        error: NO_EDIT_ACCESS_ERROR,
       }, status: :unauthorized
-    else
-      share_id = SnapshotLink.generate_random_share_id
-      content = format_snapshot_content(project_id)
-
-      snapshot_link = SnapshotLink.new(
-        share_id: share_id,
-        project_id: project_id,
-        creator_id: current_user.id,
-        content: content
-      )
-
-      snapshot_link.save!
-      render json: { share_id: share_id, created_at: snapshot_link.created_at.to_s }, status: :ok
+      return
     end
+
+    share_id = SnapshotLink.generate_random_share_id
+    content = format_snapshot_content(project_id)
+    snapshot_link = SnapshotLink.new(
+      share_id: share_id,
+      project_id: project_id,
+      creator_id: current_user.id,
+      content: content
+    )
+
+    snapshot_link.save!
+    render json: {}, status: :ok
   rescue => e
     LogUtil.log_backtrace(e)
     LogUtil.log_err_and_airbrake("Unexpected issue creating snapshot: #{e}")
@@ -47,15 +73,15 @@ class SnapshotLinksController < ApplicationController
   # DELETE /pub/:share_id/destroy
   def destroy
     project_id = @snapshot.project_id
-    editable_project = current_power.updatable_projects.find_by(id: project_id)
-    if editable_project.nil?
+    unless edit_access?(project_id)
       render json: {
-        error: "You are not authorized to turn off view-only sharing.",
+        error: NO_EDIT_ACCESS_ERROR,
       }, status: :unauthorized
-    else
-      @snapshot.destroy!
-      render json: { head: :no_content }
+      return
     end
+
+    @snapshot.destroy!
+    render json: { head: :no_content }
   rescue => e
     LogUtil.log_backtrace(e)
     LogUtil.log_err_and_airbrake("Unexpected issue deleting snapshot: #{e}")
@@ -79,6 +105,11 @@ class SnapshotLinksController < ApplicationController
     if @snapshot.blank?
       block_action
     end
+  end
+
+  def edit_access?(project_id)
+    editable_project = current_power.updatable_projects.find_by(id: project_id)
+    editable_project.present?
   end
 
   def format_snapshot_content(project_id)

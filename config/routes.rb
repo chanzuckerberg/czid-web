@@ -157,6 +157,7 @@ Rails.application.routes.draw do
   get 'pub/:share_id/samples/:id/report_v2', to: 'snapshot_samples#report_v2'
   delete 'pub/:share_id/destroy', to: 'snapshot_links#destroy'
   post 'pub/projects/:project_id/create', to: 'snapshot_links#create'
+  get 'pub/projects/:project_id/info.json', to: 'snapshot_links#info'
   get 'pub/backgrounds', to: 'snapshot_samples#backgrounds'
   get 'pub/:share_id', to: 'snapshot_links#show'
 

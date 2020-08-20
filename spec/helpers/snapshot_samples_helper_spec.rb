@@ -83,6 +83,32 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
     end
   end
 
+  context "#snapshot_pipeline_versions" do
+    it "should return 0 pipeline versions when the snapshot is empty" do
+      response = helper.snapshot_pipeline_versions(@empty_snapshot_link)
+      expect(response).to eq(Set[])
+    end
+
+    it "should return the correct pipeline versions" do
+      response = helper.snapshot_pipeline_versions(@snapshot_link)
+      pipeline_versions = Set[@sample_one.first_pipeline_run.pipeline_version, @sample_two.first_pipeline_run.pipeline_version]
+      expect(response).to eq(pipeline_versions)
+    end
+  end
+
+  context "#snapshot_pipeline_run_ids" do
+    it "should return 0 pipeline run ids when the snapshot is empty" do
+      response = helper.snapshot_pipeline_run_ids(@empty_snapshot_link)
+      expect(response).to eq([])
+    end
+
+    it "should return the correct pipeline run ids" do
+      response = helper.snapshot_pipeline_run_ids(@snapshot_link)
+      pipeline_runs_ids = [@sample_one.first_pipeline_run.id, @sample_two.first_pipeline_run.id]
+      expect(response).to eq(pipeline_runs_ids)
+    end
+  end
+
   context "#format_samples" do
     describe "for non-snapshot samples" do
       it "should return 0 formatted samples when samples is empty" do
