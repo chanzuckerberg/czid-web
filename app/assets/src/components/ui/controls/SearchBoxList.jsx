@@ -66,12 +66,6 @@ class SearchBoxList extends React.Component {
   render() {
     const { onFilterChange } = this.props;
     let { filteredOptions } = this.state;
-    if (onFilterChange) {
-      filteredOptions = this.sortOptions(
-        this.props.options,
-        this.props.selected
-      );
-    }
 
     return (
       <div className={cs.searchBoxList}>

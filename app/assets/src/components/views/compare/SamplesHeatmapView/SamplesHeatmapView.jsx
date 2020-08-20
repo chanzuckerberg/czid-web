@@ -923,12 +923,16 @@ class SamplesHeatmapView extends React.Component {
     // currentAddedTaxa is all the taxa manually added by the user.
     const newlyAddedTaxa = difference(
       [...selectedTaxonIds],
-      [...new Set(taxonIds, addedTaxonIds)]
+      [...new Set([...taxonIds, ...addedTaxonIds])]
     );
-    const previouslyAddedTaxa = intersection(addedTaxonIds, [
-      ...selectedTaxonIds,
+    const previouslyAddedTaxa = intersection(
+      [...addedTaxonIds],
+      [...selectedTaxonIds]
+    );
+    const currentAddedTaxa = new Set([
+      ...newlyAddedTaxa,
+      ...previouslyAddedTaxa,
     ]);
-    const currentAddedTaxa = new Set(newlyAddedTaxa, previouslyAddedTaxa);
     const newestTaxonId = newlyAddedTaxa[newlyAddedTaxa.length - 1];
 
     // Update notifiedFilteredOutTaxonIds to remove taxa that were unselected.
