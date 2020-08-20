@@ -1,6 +1,7 @@
 require_relative 'base'
 require './lib/cloudwatch_util'
 
+METRIC_VERSION = 0
 module MetricHandlers
   class ActionControllerMetricHandler < Base
     def process_event
@@ -8,7 +9,7 @@ module MetricHandlers
         type: "metric",
         source: "backend",
         msg: "process_action.action_controller",
-        v: 1,
+        v: METRIC_VERSION,
         details: {
           controller: @event.payload[:controller],
           action: @event.payload[:action],
@@ -38,60 +39,58 @@ module MetricHandlers
     end
 
     def process_metric
-      extra_dimensions = Set["domain", "format"]
-      clean_path = "/#{@event.payload[:params]['controller']}/#{@event.payload[:params]['action']}"
       metric_data = []
       common_dimensions = [
         { name: "Controller", value: @event.payload[:controller] },
-        { name: "Path", value: clean_path },
-        { name: "Method", value: @event.payload[:method] },
         { name: "Action", value: @event.payload[:params]["action"] },
       ]
 
       if @event.payload[:status].present?
         metric_data << CloudWatchUtil.create_metric_datum("Request Status", 1.0, "Count",
                                                           [
+                                                            { name: "Controller", value: @event.payload[:controller] },
+                                                            { name: "Action", value: @event.payload[:params]["action"] },
                                                             { name: "Status", value: @event.payload[:status].to_s },
-                                                            { name: "Path", value: clean_path },
                                                           ])
       end
       metric_data << CloudWatchUtil.create_metric_datum("Duration", @event.duration, "Milliseconds", common_dimensions.dup) if @event.duration.present?
       metric_data << CloudWatchUtil.create_metric_datum("DB Runtime", @event.payload[:db_runtime], "Milliseconds", common_dimensions.dup) if @event.payload[:db_runtime].present?
 
-      extra_dimensions.each do |dim|
-        if @event.payload[:params][dim].present?
-          metric_data.map do |metric|
-            metric[:dimensions] << { name: dim.titleize, value: @event.payload[:params][dim] }
-          end
-        end
-      end
+      # Send a metric with & without extra dimensions for querying purposes
+      CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-#{METRIC_VERSION}", metric_data)
 
-      # Send a metric with a domain and without a domain for querying purposes
-      if @event.payload[:params]["domain"].present?
-        CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-domain", metric_data)
+      extra_dimensions = {
+        "Format" => @event.payload[:params]["format"].nil? ? "None" : @event.payload[:params]["format"],
+        "Method" => @event.payload[:method],
+      }
+      extra_dimensions["Domain"] = @event.payload[:params]["domain"] if @event.payload[:params]["domain"].present?
+
+      extra_dimensions.each do |dim, val|
         metric_data.map do |metric|
-          metric[:dimensions].delete_if { |dim| dim.value?("Domain") }
+          metric[:dimensions] << { name: dim, value: val }
         end
       end
 
-      CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-domain", metric_data)
+      CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-extra-dimensions-#{METRIC_VERSION}", metric_data)
     end
 
     def process_exception_metric
-      clean_path = "/#{@event.payload[:params]['controller']}/#{@event.payload[:params]['action']}"
-
-      metric_data = [
-        CloudWatchUtil.create_metric_datum("Exception Occurences", 1.0, "Count", [
-                                             { name: "Path", value: clean_path },
-                                             { name: "Exception Name", value: @event.payload[:exception][0] },
-                                           ]),
+      metric_data = []
+      common_dimensions = [
+        { name: "Controller", value: @event.payload[:controller] },
+        { name: "Action", value: @event.payload[:params]["action"] },
+        { name: "Exception", value: @event.payload[:exception][0] },
       ]
+
+      metric_data << CloudWatchUtil.create_metric_datum("Occurrences", 1.0, "Count", common_dimensions.dup)
+      metric_data << CloudWatchUtil.create_metric_datum("Duration", @event.duration, "Milliseconds", common_dimensions.dup)
 
       metric_data.map do |metric|
         metric[:dimensions] << { name: "Domain", value: @event.payload[:params]["domain"] } if @event.payload[:params]["domain"].present?
         metric[:dimensions] << { name: "Status", value: @event.payload[:params]["status"].to_s } if @event.payload[:params]["status"].present?
       end
-      CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-exceptions", metric_data)
+
+      CloudWatchUtil.put_metric_data("#{Rails.env}-web-action_controller-exceptions-#{METRIC_VERSION}", metric_data)
     end
   end
 end
