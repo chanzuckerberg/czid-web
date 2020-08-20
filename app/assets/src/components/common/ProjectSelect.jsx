@@ -23,7 +23,7 @@ class ProjectSelect extends React.Component {
         fluid
         options={this.getOptions()}
         onChange={val => this.onChange(val)}
-        value={this.props.value}
+        initialSelectedValue={this.props.value}
         placeholder="Select project"
         search
         disabled={disabled}
