@@ -726,6 +726,9 @@ class SamplesController < ApplicationController
         ercc_comparison: ercc_comparison,
         pipeline_run: pr_display,
         summary_stats: summary_stats,
+        # TODO: IDSEQ-3285: Move these when splitting into per-workflow fields.
+        workflow: @sample.temp_pipeline_workflow,
+        wetlab_protocol: @sample.temp_wetlab_protocol,
       },
     }
   end

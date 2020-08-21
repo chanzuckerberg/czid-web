@@ -1,11 +1,17 @@
 import moment from "moment";
-import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
+import {
+  humanize,
+  numberWithCommas,
+  numberWithPlusOrMinus,
+} from "~/helpers/strings";
 
 // Compute display values for Pipeline Info from server response.
 export const processPipelineInfo = additionalInfo => {
   const {
     pipeline_run: pipelineRun,
     summary_stats: summaryStats,
+    wetlab_protocol: wetlabProtocol,
+    workflow,
   } = additionalInfo;
 
   const pipelineInfo = {};
@@ -20,8 +26,7 @@ export const processPipelineInfo = additionalInfo => {
     const erccPercent =
       pipelineRun.total_ercc_reads && pipelineRun.total_reads
         ? ` (${(
-            100.0 *
-            pipelineRun.total_ercc_reads /
+            (100.0 * pipelineRun.total_ercc_reads) /
             pipelineRun.total_reads
           ).toFixed(2)}%)`
         : "";
@@ -34,9 +39,7 @@ export const processPipelineInfo = additionalInfo => {
       pipelineInfo.pipelineVersion = {
         text: `v${pipelineRun.version.pipeline}`,
         linkLabel: "View Pipeline Visualization",
-        link: `/samples/${pipelineRun.sample_id}/pipeline_viz/${
-          pipelineRun.version.pipeline
-        }`,
+        link: `/samples/${pipelineRun.sample_id}/pipeline_viz/${pipelineRun.version.pipeline}`,
       };
     }
     pipelineInfo.hostSubtracted = { text: pipelineRun.host_subtracted };
@@ -82,6 +85,11 @@ export const processPipelineInfo = additionalInfo => {
       pipelineInfo.meanInsertSize = { text: meanInsertSize };
     }
   }
+
+  if (workflow) pipelineInfo.workflow = { text: humanize(workflow) };
+
+  if (wetlabProtocol)
+    pipelineInfo.wetlabProtocol = { text: humanize(wetlabProtocol) };
 
   return pipelineInfo;
 };

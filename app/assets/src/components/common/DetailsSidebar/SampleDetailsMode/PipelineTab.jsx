@@ -1,10 +1,10 @@
 import React from "react";
-import { isEmpty, set } from "lodash/fp";
+import { get, isEmpty, lowerCase, set } from "lodash/fp";
 import cx from "classnames";
 
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import PropTypes from "~/components/utils/propTypes";
-import { humanize } from "~/helpers/strings";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { getSamplePipelineResults } from "~/api";
@@ -17,7 +17,11 @@ import {
   RESULTS_FOLDER_ROOT_KEY,
 } from "~/components/utils/resultsFolder";
 
-import { PIPELINE_INFO_FIELDS, HOST_FILTERING_WIKI } from "./constants";
+import {
+  PIPELINE_INFO_FIELDS,
+  WORKFLOW_INFO_FIELDS,
+  HOST_FILTERING_WIKI,
+} from "./constants";
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
@@ -174,10 +178,14 @@ class PipelineTab extends React.Component {
   };
 
   render() {
-    const { pipelineRun, sampleId } = this.props;
-    const pipelineInfoFields = PIPELINE_INFO_FIELDS.map(
-      this.getPipelineInfoField
-    );
+    const { pipelineInfo, pipelineRun, sampleId } = this.props;
+
+    let fields = PIPELINE_INFO_FIELDS;
+    if (lowerCase(get(["workflow", "text"], pipelineInfo)) !== WORKFLOWS.MAIN) {
+      fields = WORKFLOW_INFO_FIELDS.concat(fields);
+    }
+    const pipelineInfoFields = fields.map(this.getPipelineInfoField);
+
     const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
 
     return (

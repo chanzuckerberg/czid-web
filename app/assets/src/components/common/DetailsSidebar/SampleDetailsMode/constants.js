@@ -60,5 +60,16 @@ export const PIPELINE_INFO_FIELDS = [
   },
 ];
 
+export const WORKFLOW_INFO_FIELDS = [
+  {
+    name: "Analysis Type",
+    key: "workflow",
+  },
+  {
+    name: "Wetlab Protocol",
+    key: "wetlabProtocol",
+  },
+];
+
 export const HOST_FILTERING_WIKI =
   "https://github.com/chanzuckerberg/idseq-dag/wiki/IDseq-Pipeline-Stage-%231:-Host-Filtering-and-QC";
