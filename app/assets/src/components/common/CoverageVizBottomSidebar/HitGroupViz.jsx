@@ -9,8 +9,7 @@ import { withAnalytics } from "~/api/analytics";
 import { DataTooltip } from "~ui/containers";
 import BasicPopup from "~/components/BasicPopup";
 import GenomeViz from "~/components/visualizations/GenomeViz";
-import DownloadIcon from "~ui/icons/DownloadIcon";
-import CopyIcon from "~ui/icons/CopyIcon";
+import { CopyIcon, IconDownload } from "~ui/icons";
 import { getURLParamString } from "~/helpers/url";
 import { getContigsSequencesByByteranges } from "~/api";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -154,9 +153,7 @@ export default class HitGroupViz extends React.Component {
         ),
         pipelineVersion: this.props.pipelineVersion,
       });
-      location.href = `/samples/${
-        this.props.sampleId
-      }/contigs_fasta_by_byteranges?${params}`;
+      location.href = `/samples/${this.props.sampleId}/contigs_fasta_by_byteranges?${params}`;
     }
   };
 
@@ -229,7 +226,7 @@ export default class HitGroupViz extends React.Component {
                 }
               )}
             >
-              <DownloadIcon />
+              <IconDownload />
             </div>
           }
           inverted

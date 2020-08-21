@@ -18,8 +18,7 @@ import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { formatFileSize } from "~/components/utils/format";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
-import AlertIcon from "~ui/icons/AlertIcon";
-import CircleCheckmarkIcon from "~ui/icons/CircleCheckmarkIcon";
+import { CircleCheckmarkIcon, IconAlert } from "~ui/icons";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import LoadingBar from "~/components/ui/controls/LoadingBar";
 import {
@@ -317,7 +316,7 @@ export default class UploadProgressModal extends React.Component {
     if (sampleUploadStatuses[sample.name] === "error") {
       return (
         <React.Fragment>
-          <AlertIcon className={cs.alertIcon} />
+          <IconAlert className={cs.alertIcon} type="error" />
           Upload failed
         </React.Fragment>
       );
@@ -350,7 +349,7 @@ export default class UploadProgressModal extends React.Component {
     return (
       <React.Fragment>
         <div className={cs.titleWithIcon}>
-          <AlertIcon className={cs.alertIcon} />
+          <IconAlert className={cs.alertIcon} type="error" />
           {numFailedSamples} sample{numFailedSamples === 1 ? "" : "s"} failed to
           upload
         </div>

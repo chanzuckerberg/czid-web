@@ -8,16 +8,18 @@ import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModa
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import QualityControl from "~/components/views/discovery/QualityControl";
-import DownloadIcon from "~ui/icons/DownloadIcon";
-import HeatmapIcon from "~ui/icons/HeatmapIcon";
+import {
+  HeatmapIcon,
+  IconBackgroundModel,
+  IconDownload,
+  PhyloTreeIcon,
+} from "~ui/icons";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
-import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import PropTypes from "~/components/utils/propTypes";
-import IconBackgroundModel from "~ui/icons/IconBackgroundModel";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -283,7 +285,7 @@ class SamplesView extends React.Component {
   renderBulkDownloadTrigger = () => {
     const { selectedSampleIds } = this.props;
     const { bulkDownloadButtonTempTooltip } = this.state;
-    const downloadIcon = <DownloadIcon className={cx(cs.icon, cs.download)} />;
+    const downloadIcon = <IconDownload className={cx(cs.icon, cs.download)} />;
     return (
       <ToolbarIcon
         className={cs.action}

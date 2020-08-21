@@ -13,9 +13,8 @@ import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import TaxonSelector from "~/components/common/TaxonSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
-import AlertIcon from "~ui/icons/AlertIcon";
+import { IconAlertSmall, RemoveIcon } from "~ui/icons";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
-import RemoveIcon from "~ui/icons/RemoveIcon";
 
 import cs from "./samples_heatmap_vis.scss";
 
@@ -348,7 +347,7 @@ class SamplesHeatmapVis extends React.Component {
     if (subtitle) {
       subtitle = (
         <div className={cs.warning}>
-          <AlertIcon className={cs.warningIcon} />
+          <IconAlertSmall type="warning" />
           <div className={cs.warningText}>{subtitle}</div>
         </div>
       );
@@ -536,27 +535,25 @@ class SamplesHeatmapVis extends React.Component {
             this.heatmapContainer = container;
           }}
         />
-        {nodeHoverInfo &&
-          tooltipLocation && (
-            <div
-              className={cx(cs.tooltip, nodeHoverInfo && cs.visible)}
-              style={getTooltipStyle(tooltipLocation, {
-                buffer: 20,
-                below: true,
-                // so we can show the tooltip above the cursor if need be
-                height: nodeHoverInfo.nodeHasData ? 300 : 180,
-              })}
-            >
-              <DataTooltip {...nodeHoverInfo} />
-            </div>
-          )}
-        {columnMetadataLegend &&
-          tooltipLocation && (
-            <MetadataLegend
-              metadataColors={columnMetadataLegend}
-              tooltipLocation={tooltipLocation}
-            />
-          )}
+        {nodeHoverInfo && tooltipLocation && (
+          <div
+            className={cx(cs.tooltip, nodeHoverInfo && cs.visible)}
+            style={getTooltipStyle(tooltipLocation, {
+              buffer: 20,
+              below: true,
+              // so we can show the tooltip above the cursor if need be
+              height: nodeHoverInfo.nodeHasData ? 300 : 180,
+            })}
+          >
+            <DataTooltip {...nodeHoverInfo} />
+          </div>
+        )}
+        {columnMetadataLegend && tooltipLocation && (
+          <MetadataLegend
+            metadataColors={columnMetadataLegend}
+            tooltipLocation={tooltipLocation}
+          />
+        )}
         {rowGroupLegend && <RowGroupLegend {...rowGroupLegend} />}
         {addMetadataTrigger && (
           <MetadataSelector

@@ -1302,7 +1302,7 @@ class SamplesHeatmapView extends React.Component {
         header={header}
         content={content}
         open={false}
-        type={"warn"}
+        type={"warning"}
         displayStyle={"elevated"}
         onClose={onClose}
       />
@@ -1311,7 +1311,7 @@ class SamplesHeatmapView extends React.Component {
 
   renderFilteredOutWarning(onClose, taxon) {
     return (
-      <Notification type={"warn"} displayStyle={"elevated"} onClose={onClose}>
+      <Notification type="warning" displayStyle="elevated" onClose={onClose}>
         <div>
           <span className={cs.highlight}>
             {taxon.name} is filtered out by your current filter settings.
@@ -1324,7 +1324,7 @@ class SamplesHeatmapView extends React.Component {
 
   renderFilteredMultiplePipelineVersionsWarning(onClose, versions) {
     return (
-      <Notification type={"warn"} displayStyle={"elevated"} onClose={onClose}>
+      <Notification type="warning" displayStyle="elevated" onClose={onClose}>
         <div>
           <span className={cs.highlight}>
             The selected samples come from multiple major pipeline versions:{" "}

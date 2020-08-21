@@ -5,49 +5,47 @@ import { zipObject } from "lodash/fp";
 
 import Accordion from "~/components/layout/Accordion";
 import DataTable from "~/components/visualizations/table/DataTable";
-import AlertIcon from "~ui/icons/AlertIcon";
-import CircleCheckmarkIcon from "~ui/icons/CircleCheckmarkIcon";
+import { CircleCheckmarkIcon, IconAlert } from "~ui/icons";
 
 import cs from "./issue_group.scss";
 
-class IssueGroup extends React.Component {
-  render() {
-    const { initialOpen, type, getColumnWidth } = this.props;
+const IssueGroup = ({
+  className,
+  getColumnWidth,
+  headers,
+  initialOpen,
+  rows,
+  type,
+}) => {
+  const rowObject = rows.map(row => zipObject(headers, row));
 
-    const rowObject = this.props.rows.map(row =>
-      zipObject(this.props.headers, row)
-    );
-
-    return (
-      <Accordion
-        className={cx(cs.issueGroup, cs[this.props.type], this.props.className)}
-        bottomContentPadding
-        header={
-          <div className={cs.header}>
-            {type === "info" ? (
-              <CircleCheckmarkIcon
-                className={cx(cs.icon, cs[this.props.type])}
-              />
-            ) : (
-              <AlertIcon className={cx(cs.icon, cs[this.props.type])} />
-            )}
-            {this.props.caption}
-          </div>
-        }
-        open={initialOpen}
-      >
-        <div className={cs.tableContainer}>
-          <DataTable
-            columns={this.props.headers}
-            data={rowObject}
-            getColumnWidth={getColumnWidth}
-            striped={false}
-          />
+  return (
+    <Accordion
+      className={cx(cs.issueGroup, cs[type], className)}
+      bottomContentPadding
+      header={
+        <div className={cs.header}>
+          {type === "info" ? (
+            <CircleCheckmarkIcon className={cx(cs.icon, cs[type])} />
+          ) : (
+            <IconAlert className={cx(cs.icon, cs[type])} />
+          )}
+          {this.props.caption}
         </div>
-      </Accordion>
-    );
-  }
-}
+      }
+      open={initialOpen}
+    >
+      <div className={cs.tableContainer}>
+        <DataTable
+          columns={headers}
+          data={rowObject}
+          getColumnWidth={getColumnWidth}
+          striped={false}
+        />
+      </div>
+    </Accordion>
+  );
+};
 
 IssueGroup.propTypes = {
   caption: PropTypes.string,

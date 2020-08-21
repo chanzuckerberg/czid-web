@@ -1,33 +1,35 @@
 import React from "react";
 import cx from "classnames";
 import { values } from "lodash/fp";
-import Icons from "~ui/icons";
+import { ICONS_TAXONOMY } from "~ui/icons";
 import Illustrations from "~ui/illustrations";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import cs from "./playground_icons.scss";
+import { IconAlert, IconAlertSmall } from "../../ui/icons";
 
 class PlaygroundIcons extends React.Component {
   render() {
-    const customIcons = values(Icons.CUSTOM).map(
-      IconComponent => (
-        <IconComponent className={cs.icon} />
-      ) /* eslint-disable-line */
-    );
-    const fontAwesomeIcons = values(Icons.FONT_AWESOME).map(
-      IconComponent => (
-        <IconComponent className={cs.icon} />
-      ) /* eslint-disable-line */
-    );
-    const logoIcons = values(Icons.LOGO).map(IconComponent => (
-      <IconComponent /* eslint-disable-line */ className={cs.logoIcon} />
+    const customIcons = values(ICONS_TAXONOMY.CUSTOM).map(IconComponent => (
+      <IconComponent key={IconComponent.name} className={cs.icon} />
     ));
-    const logoReversedIcons = values(Icons.LOGO_REVERSED).map(IconComponent => (
-      <IconComponent /* eslint-disable-line */
+    const fontAwesomeIcons = values(
+      ICONS_TAXONOMY.FONT_AWESOME
+    ).map(IconComponent => (
+      <IconComponent key={IconComponent.name} className={cs.icon} />
+    ));
+    const logoIcons = values(ICONS_TAXONOMY.LOGO).map(IconComponent => (
+      <IconComponent key={IconComponent.name} className={cs.logoIcon} />
+    ));
+    const logoReversedIcons = values(
+      ICONS_TAXONOMY.LOGO_REVERSED
+    ).map(IconComponent => (
+      <IconComponent
+        key={IconComponent.name}
         className={cx(cs.icon, cs.logoReversedIcon)}
       />
     ));
     const illustrations = values(Illustrations).map(IconComponent => (
-      <IconComponent /* eslint-disable-line */ className={cs.logoIcon} />
+      <IconComponent key={IconComponent.name} className={cs.logoIcon} />
     ));
 
     return (

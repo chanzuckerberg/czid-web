@@ -7,7 +7,7 @@ import MetadataCSVLocationsMenu, {
   geosearchCSVLocations,
 } from "~/components/common/MetadataCSVLocationsMenu";
 import PropTypes from "~/components/utils/propTypes";
-import AlertIcon from "~ui/icons/AlertIcon";
+import { IconAlert } from "~ui/icons";
 import Tabs from "~/components/ui/controls/Tabs";
 import { getAllHostGenomes, getAllSampleTypes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
@@ -50,13 +50,15 @@ class MetadataUpload extends React.Component {
   };
 
   async componentDidMount() {
-    const [projectMetadataFields, hostGenomes, sampleTypes] = await Promise.all(
-      [
-        getProjectMetadataFields(this.props.project.id),
-        getAllHostGenomes(),
-        getAllSampleTypes(),
-      ]
-    );
+    const [
+      projectMetadataFields,
+      hostGenomes,
+      sampleTypes,
+    ] = await Promise.all([
+      getProjectMetadataFields(this.props.project.id),
+      getAllHostGenomes(),
+      getAllSampleTypes(),
+    ]);
     this.setState({
       projectMetadataFields: this.processProjectMetadataFields(
         projectMetadataFields
@@ -319,7 +321,7 @@ class MetadataUpload extends React.Component {
       // Some issues are still plain strings.
       return (
         <div className={cx(cs.issue, cs[issueType])} key={index}>
-          <AlertIcon className={cx(cs.icon, cs[issueType])} />
+          <IconAlert className={cs.icon} type={cs[issueType]} />
           {issue}
         </div>
       );
@@ -417,7 +419,8 @@ class MetadataUpload extends React.Component {
                 }
               >
                 View Full Metadata Dictionary
-              </a>.
+              </a>
+              .
             </div>
             <div className={cs.details}>
               <span
@@ -427,7 +430,8 @@ class MetadataUpload extends React.Component {
                 hostGenomes
                   .filter(h => !h.ercc_only)
                   .map(h => h.name)
-                  .join(", ")}.
+                  .join(", ")}
+              .
             </div>
           </div>
         )}

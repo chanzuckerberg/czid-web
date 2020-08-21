@@ -7,8 +7,7 @@ import { getConsensusGenomeZipLink } from "~/components/views/report/utils/downl
 import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
-import AlertIcon from "~ui/icons/AlertIcon";
-import LoadingIcon from "~ui/icons/LoadingIcon";
+import { IconAlert, LoadingIcon } from "~ui/icons";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl, openUrlInNewTab } from "~utils/links";
 import PropTypes from "~utils/propTypes";
@@ -116,7 +115,7 @@ class ConsensusGenomeView extends React.Component {
       });
       return (
         <SampleMessage
-          icon={<AlertIcon className={csSampleMessage.icon} />}
+          icon={<IconAlert type={type} />}
           link={link}
           linkText={linkText}
           message={message}

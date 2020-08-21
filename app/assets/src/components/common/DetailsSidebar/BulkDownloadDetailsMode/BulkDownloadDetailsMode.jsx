@@ -85,7 +85,7 @@ export default class BulkDownloadDetailsMode extends React.Component {
     ) {
       return (
         <Notification
-          type="warn"
+          type="warning"
           displayStyle="flat"
           className={cs.notification}
         >
@@ -130,24 +130,23 @@ export default class BulkDownloadDetailsMode extends React.Component {
         ) : (
           <div className={cs.title}>{bulkDownloadDetails.download_name}</div>
         )}
-        {!loading &&
-          admin && (
-            <div className={cs.adminDetails}>
-              ID: {bulkDownloadDetails.id}, run in:{" "}
-              {bulkDownloadDetails.execution_type}
-              {bulkDownloadDetails.log_url && (
-                <span>
-                  ,{" "}
-                  <ExternalLink
-                    className={cs.logUrl}
-                    href={bulkDownloadDetails.log_url}
-                  >
-                    log url
-                  </ExternalLink>
-                </span>
-              )}
-            </div>
-          )}
+        {!loading && admin && (
+          <div className={cs.adminDetails}>
+            ID: {bulkDownloadDetails.id}, run in:{" "}
+            {bulkDownloadDetails.execution_type}
+            {bulkDownloadDetails.log_url && (
+              <span>
+                ,{" "}
+                <ExternalLink
+                  className={cs.logUrl}
+                  href={bulkDownloadDetails.log_url}
+                >
+                  log url
+                </ExternalLink>
+              </span>
+            )}
+          </div>
+        )}
         {!loading && this.renderNotifications()}
         {!loading && (
           <Tabs

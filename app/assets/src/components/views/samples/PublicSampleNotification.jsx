@@ -15,12 +15,13 @@ class PublicSampleNotification extends React.Component {
       <React.Fragment>
         <span className={cs.highlight}>
           {samples.length} sample{samples.length > 1 ? "s" : ""}
-        </span>&nbsp;of project{" "}
-        <span className={cs.highlight}>{projectName}</span> will become public
-        soon starting on &nbsp;
+        </span>
+        &nbsp;of project <span className={cs.highlight}>{projectName}</span>{" "}
+        will become public soon starting on &nbsp;
         <span className={cs.highlight}>
           {moment(minTimestamp.private_until).format("MMM Do, YYYY")}
-        </span>. If you have any questions, please refer to IDseq's&nbsp;
+        </span>
+        . If you have any questions, please refer to IDseq's&nbsp;
         <a
           className={cs.policyLink}
           onClick={() => window.open("https://idseq.net/privacy")}
@@ -38,7 +39,7 @@ class PublicSampleNotification extends React.Component {
       <ListNotification
         className={cs.publicSampleNotification}
         onClose={onClose}
-        type="warn"
+        type="warning"
         label={label}
         listItemName="sample"
         listItems={map("name", samples)}

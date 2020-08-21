@@ -123,7 +123,7 @@ export default class BulkDownloadModalFooter extends React.Component {
         header={header}
         content={content}
         open={false}
-        type={"warn"}
+        type={"warning"}
         displayStyle={"flat"}
       />
     );

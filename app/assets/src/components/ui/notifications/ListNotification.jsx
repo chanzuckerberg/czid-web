@@ -52,7 +52,7 @@ ListNotification.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node,
   onClose: PropTypes.func,
-  type: PropTypes.oneOf(["success", "info", "warn", "error"]),
+  type: PropTypes.oneOf(["success", "info", "warning", "error"]),
   label: PropTypes.node,
   listItems: PropTypes.arrayOf(PropTypes.string),
   listItemName: PropTypes.string,

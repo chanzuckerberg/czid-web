@@ -1,0 +1,13 @@
+@import "~styles/themes/colors";
+
+.error {
+  fill: $error-medium;
+}
+
+.warning {
+  fill: $warning-medium;
+}
+
+.info {
+  fill: $primary;
+}

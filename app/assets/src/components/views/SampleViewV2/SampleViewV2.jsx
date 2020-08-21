@@ -41,11 +41,10 @@ import {
   sampleErrorInfo,
 } from "~/components/utils/sample";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
-import AlertIcon from "~ui/icons/AlertIcon";
+import { IconAlert, LoadingIcon } from "~ui/icons";
 import AMRView from "~/components/AMRView";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
-import LoadingIcon from "~ui/icons/LoadingIcon";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import SampleViewHeader from "./SampleViewHeader";
@@ -1000,7 +999,7 @@ export default class SampleViewV2 extends React.Component {
           pipelineRun,
         }));
       }
-      icon = <AlertIcon className={csSampleMessage.icon} />;
+      icon = <IconAlert className={csSampleMessage.icon} type={type} />;
     }
 
     return (

@@ -32,19 +32,11 @@
       &.warning {
         background-color: $warning-off-white;
         color: $warning-medium;
-
-        .icon {
-          fill: $warning-medium;
-        }
       }
 
       &.error {
         background-color: $error-off-white;
         color: $error-medium;
-
-        .icon {
-          fill: $error-medium;
-        }
       }
 
       &.inProgress {
@@ -60,10 +52,6 @@
       &.info {
         background-color: $info-off-white;
         color: $info-medium;
-
-        .icon {
-          fill: $info-medium;
-        }
       }
     }
 

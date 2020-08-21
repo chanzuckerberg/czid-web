@@ -47,19 +47,11 @@
   &.error {
     border-color: $error-medium;
     background-color: $error-off-white;
-
-    .icon {
-      fill: $error-medium;
-    }
   }
 
-  &.warn {
+  &.warning {
     border-color: $warning-medium;
     background-color: $warning-off-white;
-
-    .icon {
-      fill: $warning-medium;
-    }
   }
 
   &.info {

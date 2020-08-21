@@ -231,7 +231,7 @@ class BulkDownloadList extends React.Component {
         {autoUpdateCount >= AUTO_UPDATE_MAX_COUNT &&
           this.hasInProgressBulkDownloads() && (
             <Notification
-              type="warn"
+              type="warning"
               displayStyle="flat"
               className={cs.autoUpdateWarning}
             >

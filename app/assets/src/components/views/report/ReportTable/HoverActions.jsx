@@ -4,7 +4,14 @@ import cx from "classnames";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
-import CoverageIcon from "~ui/icons/CoverageIcon";
+import {
+  IconAlignmentSmall,
+  IconBrowserSmall,
+  IconContigSmall,
+  IconCoverage,
+  IconDownloadSmall,
+  IconPhyloTreeSmall,
+} from "~ui/icons";
 import PropTypes from "~/components/utils/propTypes";
 import { pipelineVersionHasCoverageViz } from "~/components/utils/sample";
 
@@ -39,7 +46,7 @@ class HoverActions extends React.Component {
       {
         key: `taxonomy_browser_${params.taxId}`,
         message: "NCBI Taxonomy Browser",
-        icon: "fa-link",
+        iconComponentClass: IconBrowserSmall,
         handleClick: this.props.onNcbiActionClick,
         enabled: this.props.ncbiEnabled,
         disabledMessage: "NCBI Taxonomy Not Found",
@@ -48,7 +55,7 @@ class HoverActions extends React.Component {
       {
         key: `fasta_download_${params.taxId}`,
         message: "FASTA Download",
-        icon: "fa-download",
+        iconComponentClass: IconDownloadSmall,
         handleClick: this.props.onFastaActionClick,
         enabled: this.props.fastaEnabled,
         disabledMessage: "FASTA Download Not Available",
@@ -57,7 +64,7 @@ class HoverActions extends React.Component {
       {
         key: `contigs_download_${params.taxId}`,
         message: "Contigs Download",
-        icon: "fa-puzzle-piece",
+        iconComponentClass: IconContigSmall,
         handleClick: this.props.onContigVizClick,
         enabled: this.props.contigVizEnabled,
         disabledMessage: "No Contigs Available",
@@ -67,7 +74,7 @@ class HoverActions extends React.Component {
         ? {
             key: `coverage_viz_${params.taxId}`,
             message: "Coverage Visualization",
-            iconComponentClass: CoverageIcon,
+            iconComponentClass: IconCoverage,
             handleClick: this.props.onCoverageVizClick,
             enabled: this.props.coverageVizEnabled,
             disabledMessage:
@@ -77,7 +84,7 @@ class HoverActions extends React.Component {
         : {
             key: `alignment_viz_${params.taxId}`,
             message: "Alignment Visualization",
-            icon: "fa-bars",
+            iconComponentClass: IconAlignmentSmall,
             handleClick: this.props.onCoverageVizClick,
             enabled: this.props.coverageVizEnabled,
             disabledMessage:
@@ -91,7 +98,7 @@ class HoverActions extends React.Component {
             Phylogenetic Analysis <BetaLabel />
           </div>
         ),
-        icon: "fa-code-fork",
+        iconComponentClass: IconPhyloTreeSmall,
         handleClick: this.handlePhyloModalOpen,
         enabled: this.props.phyloTreeEnabled,
         disabledMessage:
@@ -106,35 +113,18 @@ class HoverActions extends React.Component {
     const IconComponent = hoverAction.iconComponentClass;
     if (hoverAction.enabled) {
       const onClickFn = () => hoverAction.handleClick(hoverAction.params || {});
-      if (IconComponent) {
-        trigger = (
-          <div onClick={onClickFn} className={cs.actionDot}>
-            <IconComponent className={cs.icon} />
-          </div>
-        );
-      } else {
-        trigger = (
-          <i
-            onClick={onClickFn}
-            className={cx("fa", hoverAction.icon, cs.actionDot)}
-          />
-        );
-      }
+      trigger = (
+        <div onClick={onClickFn} className={cs.actionDot}>
+          <IconComponent className={cs.icon} />
+        </div>
+      );
       tooltipMessage = hoverAction.message;
     } else {
-      if (IconComponent) {
-        trigger = (
-          <div className={cs.actionDot}>
-            <IconComponent className={cx(cs.icon, cs.disabled)} />
-          </div>
-        );
-      } else {
-        trigger = (
-          <i
-            className={cx("fa", hoverAction.icon, cs.actionDot, cs.disabled)}
-          />
-        );
-      }
+      trigger = (
+        <div className={cs.actionDot}>
+          <IconComponent className={cx(cs.icon, cs.disabled)} />
+        </div>
+      );
 
       tooltipMessage = hoverAction.disabledMessage;
     }

@@ -11,7 +11,7 @@ import GeoSearchInputBox, {
   getLocationWarning,
 } from "~ui/controls/GeoSearchInputBox";
 import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
-import AlertIcon from "~ui/icons/AlertIcon";
+import { IconAlertSmall } from "~ui/icons";
 import Toggle from "~ui/controls/Toggle";
 
 import cs from "./metadata_input.scss";
@@ -135,15 +135,14 @@ class MetadataInput extends React.Component {
             }}
             value={value}
           />
-          {warning &&
-            value && (
-              <div className={cs.warning}>
-                <div className={cs.icon}>
-                  <AlertIcon />
-                </div>
-                <div>{warning}</div>
+          {warning && value && (
+            <div className={cs.warning}>
+              <div className={cs.icon}>
+                <IconAlertSmall type="warning" />
               </div>
-            )}
+              <div>{warning}</div>
+            </div>
+          )}
         </React.Fragment>
       );
     } else {

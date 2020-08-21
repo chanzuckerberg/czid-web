@@ -1,6 +1,6 @@
 import React from "react";
 
-import DownloadIcon from "~ui/icons/DownloadIcon";
+import { IconDownload } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import LoadingBar from "~ui/controls/LoadingBar";
 
@@ -14,7 +14,7 @@ export default class BulkDownloadTableRenderers extends React.Component {
 
     return (
       <div className={cs.downloadCell}>
-        <DownloadIcon className={cs.downloadIcon} />
+        <IconDownload className={cs.downloadIcon} />
         <div className={cs.downloadRightPane}>
           <div className={cs.downloadNameContainer}>
             <div className={cs.downloadName}>{rowData.download_name}</div>

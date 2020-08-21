@@ -1,17 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import AlertIcon from "~ui/icons/AlertIcon";
-import InfoIcon from "~ui/icons/InfoIcon";
-import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
+import { CheckmarkIcon, IconAlert, InfoIcon } from "~ui/icons";
 import cs from "./notification.scss";
 import cx from "classnames";
 
 class Notification extends React.Component {
   getIcon(type) {
     switch (type) {
-      case "warn":
+      case "warning":
       case "error":
-        return <AlertIcon />;
+        return <IconAlert type={type} />;
       case "info":
         return <InfoIcon />;
       case "success":
@@ -51,7 +49,7 @@ Notification.propTypes = {
   children: PropTypes.node,
   displayStyle: PropTypes.oneOf(["flat", "elevated"]),
   onClose: PropTypes.func,
-  type: PropTypes.oneOf(["success", "info", "warn", "error"]).isRequired,
+  type: PropTypes.oneOf(["success", "info", "warning", "error"]).isRequired,
 };
 
 export default Notification;

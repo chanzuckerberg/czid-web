@@ -428,13 +428,12 @@ class PhyloTreeCreation extends React.Component {
       const samplesWithFewReads = this.getNumberOfSamplesWithFewReads();
       if (samplesWithFewReads > 0) {
         return (
-          <Notification type="warn" displayStyle="flat">
-            You have {samplesWithFewReads} sample{samplesWithFewReads > 1
-              ? "s"
-              : ""}{" "}
-            that ha{samplesWithFewReads > 1 ? "ve" : "s"} too few reads (NT or
-            NR under {PhyloTreeChecks.RECOMMENDED_MIN_READS}). Tree creation
-            might fail or produce inaccurate results.
+          <Notification type="warning" displayStyle="flat">
+            You have {samplesWithFewReads} sample
+            {samplesWithFewReads > 1 ? "s" : ""} that ha
+            {samplesWithFewReads > 1 ? "ve" : "s"} too few reads (NT or NR under{" "}
+            {PhyloTreeChecks.RECOMMENDED_MIN_READS}). Tree creation might fail
+            or produce inaccurate results.
           </Notification>
         );
       }
@@ -532,9 +531,7 @@ class PhyloTreeCreation extends React.Component {
       selectNameAndProjectSamples: (
         <Wizard.Page
           key="wizard__page_3"
-          title={`Name phylogenetic tree and select samples from project '${
-            this.state.projectName
-          }'`}
+          title={`Name phylogenetic tree and select samples from project '${this.state.projectName}'`}
           onLoad={this.loadNewTreeContext}
           onContinueAsync={this.canContinueWithTreeName}
         >
@@ -577,7 +574,7 @@ class PhyloTreeCreation extends React.Component {
                 onSelectedRowsChanged={this.handleChangedProjectSamples}
               />
             ) : this.state.samplesLoaded &&
-            this.state.projectSamples.length === 0 ? (
+              this.state.projectSamples.length === 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
               <LoadingIcon />
@@ -591,9 +588,7 @@ class PhyloTreeCreation extends React.Component {
       addIdseqSamples: (
         <Wizard.Page
           key="wizard__page_4"
-          title={`Add additional samples from IDseq that contain ${
-            this.state.taxonName
-          }?`}
+          title={`Add additional samples from IDseq that contain ${this.state.taxonName}?`}
         >
           <div className="wizard__page-4__subtitle" />
           <div className="wizard__page-4__searchbar">
@@ -621,7 +616,7 @@ class PhyloTreeCreation extends React.Component {
                 filter={this.state.otherSamplesFilter}
               />
             ) : this.state.samplesLoaded &&
-            this.state.otherSamples.length === 0 ? (
+              this.state.otherSamples.length === 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
               <LoadingIcon />

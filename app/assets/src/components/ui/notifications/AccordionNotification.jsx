@@ -55,7 +55,7 @@ AccordionNotification.propTypes = {
   header: PropTypes.node,
   content: PropTypes.node,
   open: PropTypes.bool,
-  type: PropTypes.oneOf(["success", "info", "warn", "error"]),
+  type: PropTypes.oneOf(["success", "info", "warning", "error"]),
   displayStyle: PropTypes.oneOf(["flat", "elevated"]),
   onClose: PropTypes.func,
 };

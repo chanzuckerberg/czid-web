@@ -7,7 +7,7 @@
 
   background-color: $info-off-white;
 
-  &.warn {
+  &.warning {
     background-color: $warning-off-white;
   }
 }
@@ -32,14 +32,14 @@
 
   &:nth-child(odd) {
     background-color: $info-light;
-    &.warn {
+    &.warning {
       background-color: $warning-light;
     }
   }
 
   &:nth-child(even) {
     background-color: $info-off-white;
-    &.warn {
+    &.warning {
       background-color: $warning-off-white;
     }
   }

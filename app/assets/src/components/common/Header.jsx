@@ -10,9 +10,7 @@ import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import AlertIcon from "~ui/icons/AlertIcon";
-import LogoReversed from "~ui/icons/LogoReversed";
-import RemoveIcon from "~ui/icons/RemoveIcon";
+import { IconAlert, LogoReversed, RemoveIcon } from "~ui/icons";
 import {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
@@ -39,7 +37,7 @@ const showPrivacyUpdateNotification = () => {
   if (daysLeft > 0) {
     showToast(({ closeToast }) => (
       <Notification
-        type="warn"
+        type="warning"
         onClose={() => {
           setPrivacyUpdateNotificationViewed();
           closeToast();
@@ -187,7 +185,7 @@ const AnnouncementBanner = ({ onClose }) => {
         wide="very"
         trigger={
           <span className={cs.content}>
-            <AlertIcon className={cs.icon} />
+            <IconAlert className={cs.icon} />
             <span className={cs.title}>Low-Support Mode:</span>
             We will only be responding to highly urgent issues from 12/21–12/29.
             For now, check out our

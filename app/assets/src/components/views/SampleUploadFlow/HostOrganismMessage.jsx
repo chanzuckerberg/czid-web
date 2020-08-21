@@ -28,7 +28,7 @@ export default class HostOrganismMessage extends React.Component {
   renderOneHost(host, count) {
     return (
       <Notification
-        type={this.hasMatch(host) ? "info" : "warn"}
+        type={this.hasMatch(host) ? "info" : "warning"}
         displayStyle="flat"
         className={cs.messageContainer}
       >
@@ -70,7 +70,8 @@ export default class HostOrganismMessage extends React.Component {
           <span>we will only remove ERCCs</span>
         )}
         {host.toLowerCase() !== "human" &&
-          " and reads that align to the human genome"}.
+          " and reads that align to the human genome"}
+        .
       </span>
     );
   }
@@ -90,7 +91,8 @@ export default class HostOrganismMessage extends React.Component {
             that you indicated {count > 1 ? "are" : "is"} from a{" "}
             <strong>{host}</strong> Host Organism
           </span>
-        )},
+        )}
+        ,
       </span>
     );
   }
@@ -102,7 +104,7 @@ export default class HostOrganismMessage extends React.Component {
     const color = { [cs.warn]: isWarn };
     const header = (
       <Notification
-        type={isWarn ? "warn" : "info"}
+        type={isWarn ? "warning" : "info"}
         displayStyle="flat"
         className={cs.messageContainer}
       >

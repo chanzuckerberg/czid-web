@@ -69,7 +69,7 @@ class CollectionModal extends React.Component {
       <div className={cs.sampleList}>
         <div className={cs.label}>Selected samples:</div>
         <div className={cs.warning}>
-          <Notification className={cs.notification} type="warn">
+          <Notification className={cs.notification} type="warning">
             A large number of samples may increase the processing time before
             your background can be used in reports.
           </Notification>

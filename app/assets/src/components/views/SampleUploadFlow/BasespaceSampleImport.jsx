@@ -152,7 +152,7 @@ export default class BasespaceSampleImport extends React.Component {
     if (isEmpty(samples)) {
       this.setState({
         error: `No valid samples could be found in project ${currentProjectName}`,
-        errorType: "warn",
+        errorType: "warning",
       });
     }
 

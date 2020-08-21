@@ -1,10 +1,13 @@
 // SVG generated with Sketch, from Jenn
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
-const AlertIcon = props => {
+import cs from "./icon_alert.scss";
+
+const IconAlert = ({ className, type }) => {
   return (
-    <svg className={props.className} viewBox="0 0 24 24">
+    <svg className={cx(className, cs[type])} viewBox="0 0 24 24">
       <g stroke="none" strokeWidth="1" fillRule="evenodd">
         <g transform="translate(-484.000000, -784.000000)" fillRule="nonzero">
           <g transform="translate(484.000000, 784.000000)">
@@ -19,8 +22,13 @@ const AlertIcon = props => {
   );
 };
 
-AlertIcon.propTypes = {
-  className: PropTypes.string,
+IconAlert.defaultProps = {
+  type: "info",
 };
 
-export default AlertIcon;
+IconAlert.propTypes = {
+  className: PropTypes.string,
+  type: PropTypes.oneOf(["info", "warning", "error"]),
+};
+
+export default IconAlert;

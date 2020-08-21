@@ -12,13 +12,12 @@ import {
 } from "semantic-ui-react";
 
 import BasicPopup from "~/components/BasicPopup";
-import AlertIcon from "~ui/icons/AlertIcon";
+import { IconAlert, LogoReversed } from "~ui/icons";
 import Container from "../ui/containers/Container";
 import ExternalLink from "~ui/controls/ExternalLink";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
 import StringHelper from "../../helpers/StringHelper";
-import LogoReversed from "../ui/icons/LogoReversed";
 import logAnalyticsEvent from "~/api/analytics";
 import ImgBacteriaPrimary from "~ui/illustrations/ImgBacteriaPrimary";
 import ImgDetectPrimary from "~ui/illustrations/ImgDetectPrimary";
@@ -143,7 +142,7 @@ class Landing extends React.Component {
             wide="very"
             trigger={
               <span className={cs.content}>
-                <AlertIcon className={cs.icon} />
+                <IconAlert className={cs.icon} />
                 <span className={cs.title}>COVID-19:</span>
                 <ExternalLink
                   className={cs.link}
@@ -171,30 +170,30 @@ class Landing extends React.Component {
 
     const actionCards = (
       <Container>
-        <div className="action-cards">
-          <div className="action-card">
-            <ImgBacteriaPrimary />
-            <div className="card-text">
-              <div className="card-title">Discover</div>
-              <div className="card-description">
+        <div className={cs.actionCards}>
+          <div className={cs.actionCard}>
+            <ImgBacteriaPrimary className={cs.illustration} />
+            <div className={cs.cardText}>
+              <div className={cs.cardTitle}>Discover</div>
+              <div className={cs.cardDescription}>
                 Identify the pathogen landscape
               </div>
             </div>
           </div>
-          <div className="action-card">
-            <ImgDetectPrimary />
-            <div className="card-text">
-              <div className="card-title">Detect</div>
-              <div className="card-description">
+          <div className={cs.actionCard}>
+            <ImgDetectPrimary className={cs.illustration} />
+            <div className={cs.cardText}>
+              <div className={cs.cardTitle}>Detect</div>
+              <div className={cs.cardDescription}>
                 Monitor and review potential outbreaks
               </div>
             </div>
           </div>
-          <div className="action-card">
-            <ImgDecipherPrimary />
-            <div className="card-text">
-              <div className="card-title">Decipher</div>
-              <div className="card-description">
+          <div className={cs.actionCard}>
+            <ImgDecipherPrimary className={cs.illustration} />
+            <div className={cs.cardText}>
+              <div className={cs.cardTitle}>Decipher</div>
+              <div className={cs.cardDescription}>
                 Find potential infecting organisms in large datasets
               </div>
             </div>

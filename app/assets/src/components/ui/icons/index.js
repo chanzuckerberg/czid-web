@@ -1,4 +1,3 @@
-import AlertIcon from "./AlertIcon";
 import BacteriaCultureIcon from "./BacteriaCultureIcon";
 import BannerProjects from "./BannerProjects";
 import BannerSamples from "./BannerSamples";
@@ -8,15 +7,23 @@ import CheckmarkIcon from "./CheckmarkIcon";
 import CircleCheckmarkIcon from "./CircleCheckmarkIcon";
 import CompareIcon from "./CompareIcon";
 import CopyIcon from "./CopyIcon";
-import CoverageIcon from "./CoverageIcon";
-import DownloadIcon from "./DownloadIcon";
 import FiltersIcon from "./FiltersIcon";
 import GlobeIcon from "./GlobeIcon";
 import GlobeLinedIcon from "./GlobeLinedIcon";
 import HeatmapIcon from "./HeatmapIcon";
 import HeatmapPrivate from "./HeatmapPrivate";
 import HeatmapPublic from "./HeatmapPublic";
+import IconAlert from "./IconAlert";
+import IconAlertSmall from "./IconAlertSmall";
+import IconAlignmentSmall from "./IconAlignmentSmall";
+import IconBackgroundModel from "./IconBackgroundModel";
+import IconBrowserSmall from "./IconBrowserSmall";
 import IconChartSmall from "./IconChartSmall";
+import IconContigSmall from "./IconContigSmall";
+import IconCoverage from "./IconCoverage";
+import IconDownload from "./IconDownload";
+import IconDownloadSmall from "./IconDownloadSmall";
+import IconPhyloTreeSmall from "./IconPhyloTreeSmall";
 import InfoCircleIcon from "./InfoCircleIcon";
 import InfoIcon from "./InfoIcon";
 import InfoPanelIcon from "./InfoPanelIcon";
@@ -47,9 +54,8 @@ import SortIcon from "./SortIcon";
 import InfoIconSmall from "./InfoIconSmall";
 import UserIcon from "./UserIcon";
 
-export default {
+export const ICONS_TAXONOMY = {
   CUSTOM: {
-    AlertIcon,
     BacteriaCultureIcon,
     BannerProjects,
     BannerSamples,
@@ -57,14 +63,22 @@ export default {
     CircleCheckmarkIcon,
     CompareIcon,
     CopyIcon,
-    CoverageIcon,
-    DownloadIcon,
     FiltersIcon,
     GlobeIcon,
     HeatmapIcon,
     HeatmapPrivate,
     HeatmapPublic,
+    IconAlert,
+    IconAlertSmall,
+    IconAlignmentSmall,
+    IconBackgroundModel,
+    IconBrowserSmall,
     IconChartSmall,
+    IconContigSmall,
+    IconCoverage,
+    IconDownload,
+    IconDownloadSmall,
+    IconPhyloTreeSmall,
     InfoCircleIcon,
     InfoIcon,
     InfoPanelIcon,
@@ -105,3 +119,9 @@ export default {
     LogoLockupReversed,
   },
 };
+
+const icons = Object.values(ICONS_TAXONOMY).reduce((result, components) => {
+  return Object.assign(result, components);
+}, {});
+
+module.exports = Object.assign(icons, { ICONS_TAXONOMY });
