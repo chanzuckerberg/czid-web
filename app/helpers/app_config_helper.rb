@@ -2,9 +2,7 @@ module AppConfigHelper
   module_function
 
   def get_app_config(key, default_value = nil)
-    app_config = AppConfig.find_by(key: key)
-
-    return app_config.present? ? app_config.value : default_value
+    AppConfig.find_by(key: key).presence&.value || default_value
   end
 
   def set_app_config(key, value)
@@ -47,5 +45,13 @@ module AppConfigHelper
       maxSamplesBulkDownload: app_configs[AppConfig::MAX_SAMPLES_BULK_DOWNLOAD].to_i,
       maxSamplesBulkDownloadOriginalFiles: app_configs[AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES].to_i,
     }
+  end
+
+  def get_workflow_version(workflow_name)
+    return get_app_config(format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: workflow_name))
+  end
+
+  def set_workflow_version(workflow_name, workflow_version)
+    return set_app_config(format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: workflow_name), workflow_version)
   end
 end

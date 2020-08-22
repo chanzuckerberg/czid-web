@@ -161,8 +161,9 @@ export default function SampleViewHeader({
           }
         >
           <span className={cs.pipelineRunVersion}>
-            {get("temp_pipeline_workflow", sample) === WORKFLOWS.MAIN &&
-              `Pipeline ${renderVersion()}`}
+            {[WORKFLOWS.MAIN, WORKFLOWS.SHORT_READ_MNGS].includes(
+              get("temp_pipeline_workflow", sample)
+            ) && `Pipeline ${renderVersion()}`}
           </span>
           <PipelineVersionSelect
             pipelineRun={pipelineRun}

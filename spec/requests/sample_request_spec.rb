@@ -243,12 +243,12 @@ RSpec.describe "Sample request", type: :request do
           sample_id = json_response["sample_ids"][0]
 
           test_sample = Sample.find(sample_id)
-          expect(test_sample.temp_pipeline_workflow).to eq("main")
+          expect(test_sample.temp_pipeline_workflow).to eq("short-read-mngs")
         end
 
         it "should properly set the consensus_genome pipeline workflow" do
           sample_params = @sample_params.dup
-          sample_params[:workflows] = ["consensus_genome"]
+          sample_params[:workflows] = ["consensus-genome"]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
           expect(response.content_type).to eq("application/json")
@@ -257,7 +257,7 @@ RSpec.describe "Sample request", type: :request do
           sample_id = json_response["sample_ids"][0]
 
           test_sample = Sample.find(sample_id)
-          expect(test_sample.temp_pipeline_workflow).to eq("consensus_genome")
+          expect(test_sample.temp_pipeline_workflow).to eq("consensus-genome")
         end
 
         it "should fail with a bogus pipeline workflow selection" do
@@ -300,7 +300,7 @@ RSpec.describe "Sample request", type: :request do
 
         it "should succeed without a wetlab protocol for mNGS runs" do
           sample_params = @sample_params.dup
-          sample_params[:workflows] = [WorkflowRun::WORKFLOW[:main]]
+          sample_params[:workflows] = [WorkflowRun::WORKFLOW[:short_read_mngs]]
           sample_params[:wetlab_protocol] = nil
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 

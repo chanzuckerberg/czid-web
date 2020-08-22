@@ -91,9 +91,8 @@ class SfnPipelineDataService
   def initialize(pipeline_run_id, see_experimental, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
 
-    # get proper s3 folder
-    wdl_version = @pipeline_run.wdl_version
-    s3_folder = get_wdl_s3_folder(wdl_version)
+    # get the idseq-workflow s3 folder
+    s3_folder = @pipeline_run.wdl_s3_folder
 
     @stage_names = []
     @stage_job_statuses = []
@@ -147,10 +146,6 @@ class SfnPipelineDataService
   end
 
   private
-
-  def get_wdl_s3_folder(wdl_version)
-    "s3://#{S3_WORKFLOWS_BUCKET}/v#{wdl_version}/main"
-  end
 
   def create_stage_nodes_scaffolding
     step_statuses_by_stage = @pipeline_run.step_statuses_by_stage

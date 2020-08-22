@@ -4,8 +4,8 @@ describe BulkDownload, type: :model do
   let(:fake_sfn_name) { "fake_sfn_name" }
   # name of the SFN is the second to last element
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}:12345".freeze }
-  let(:fake_wdl_version) { "999".freeze }
-  let(:fake_dag_version) { "9.999".freeze }
+  let(:fake_wdl_version) { "4".freeze }
+  let(:fake_dag_version) { "4.999".freeze }
 
   context "#success_url" do
     before do

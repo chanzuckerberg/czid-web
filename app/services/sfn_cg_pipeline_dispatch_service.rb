@@ -5,18 +5,15 @@ class SfnCGPipelineDispatchService
 
   include Callable
 
-  DOCKER_IMAGE_TAG = "sha-c84fa941046b164e".freeze
-  WORKFLOW_VERSION = "consensus-genome-1.2.2".freeze
-
   class SfnArnMissingError < StandardError
     def initialize
-      super("SFN_CG_ARN not set on App Config")
+      super("SFN_CG_ARN not set on App Config.")
     end
   end
 
-  class SfnVersionTagsMissingError < StandardError
-    def initialize(arn, tags)
-      super("WDL version not set for SFN '#{arn}'. Tags missing: #{tags}")
+  class SfnVersionMissingError < StandardError
+    def initialize(workflow)
+      super("WDL version for '#{workflow}' not set.")
     end
   end
 
@@ -26,21 +23,28 @@ class SfnCGPipelineDispatchService
 
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_CG_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
+
+    @wdl_version = AppConfigHelper.get_workflow_version(@workflow_run.workflow)
+    raise SfnVersionMissingError, @workflow_run.workflow if @wdl_version.blank?
+
+    @workflow_run.update(
+      wdl_version: @wdl_version
+    )
   end
 
   def call
-    @sfn_tags = retrieve_version_tags
     sfn_input_json = generate_wdl_input
     sfn_execution_arn = dispatch(sfn_input_json)
 
     if sfn_execution_arn.blank?
-      @workflow_run.update(status: WorkflowRun::STATUS[:failed])
+      @workflow_run.update(
+        status: WorkflowRun::STATUS[:failed]
+      )
     else
       @workflow_run.update(
         executed_at: Time.now.utc,
         sfn_execution_arn: sfn_execution_arn,
-        status: WorkflowRun::STATUS[:running],
-        wdl_version: @sfn_tags[:wdl_version]
+        status: WorkflowRun::STATUS[:running]
       )
       Rails.logger.info("WorkflowRun: id=#{@workflow_run.id} sfn_execution_arn=#{sfn_execution_arn}")
     end
@@ -62,21 +66,7 @@ class SfnCGPipelineDispatchService
   def retrieve_docker_image_id
     resp = AwsClient[:sts].get_caller_identity
     # TODO(JIRA:IDSEQ-3164): do not use hardcoded docker image
-    return "#{resp[:account]}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:#{DOCKER_IMAGE_TAG}"
-  end
-
-  def retrieve_version_tags
-    cache_key = "#{self.class.name}::#{@sfn_arn}::tags"
-    Rails.cache.fetch(cache_key, expires_in: 1.minute) do
-      resp = AwsClient[:states].list_tags_for_resource(resource_arn: @sfn_arn)
-      tags = resp.tags.reduce({}) do |h, tag|
-        h.update(tag.key => tag.value)
-      end.symbolize_keys
-
-      missing_tags = [:wdl_version].select { |tag_name| tags[tag_name].blank? }
-      raise SfnVersionTagsMissingError.new(@sfn_arn, missing_tags) if missing_tags.present?
-      tags
-    end
+    return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/idseq-consensus-genome:v#{@workflow_run.wdl_version}"
   end
 
   def primer_file
@@ -93,7 +83,7 @@ class SfnCGPipelineDispatchService
   def generate_wdl_input
     sfn_pipeline_input_json = {
       # TODO(JIRA:IDSEQ-3163): do not use hardcoded version (outputs will still be here in the SFN version returned by the tag)
-      RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{WORKFLOW_VERSION}/consensus-genome/run.wdl",
+      RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@workflow_run.workflow_version_tag}/run.wdl",
       Input: {
         Run: {
           docker_image_id: retrieve_docker_image_id,
@@ -115,7 +105,6 @@ class SfnCGPipelineDispatchService
   def dispatch(sfn_input_json)
     sfn_name = "idseq-#{Rails.env}-#{@sample.project_id}-#{@sample.id}-#{@workflow_run.id}-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}"
     sfn_input = JSON.dump(sfn_input_json)
-
     resp = AwsClient[:states].start_execution(state_machine_arn: @sfn_arn,
                                               name: sfn_name,
                                               input: sfn_input)

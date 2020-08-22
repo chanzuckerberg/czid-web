@@ -570,10 +570,13 @@ class Sample < ApplicationRecord
     transient_status = status
     self.status = STATUS_CHECKED
 
+    # Since this method is called in `before_save` hook, if there is any errors,
+    # the pipeline run / workflow run creation is rolled back, leaving the sample in a weird waiting state.
     # TODO: Support retry status on WorkflowRuns
     if transient_status == STATUS_RETRY_PR && pr
       pr.retry
-    elsif temp_pipeline_workflow == WorkflowRun::WORKFLOW[:main]
+    # TODO: remove main
+    elsif [WorkflowRun::WORKFLOW[:main], WorkflowRun::WORKFLOW[:short_read_mngs]].include?(temp_pipeline_workflow)
       kickoff_pipeline
     else
       # TODO: Move creation to a WorkflowRun factory

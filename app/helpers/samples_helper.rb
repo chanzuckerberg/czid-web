@@ -246,7 +246,7 @@ module SamplesHelper
     # TODO: Update to support params from frontend filtering
     workflow = []
     if current_user && !current_user.allowed_feature?("consensus_genome")
-      workflow = ["main"]
+      workflow = ["main", "short-read-mngs"]
     end
 
     samples = samples.where(project_id: project_id) if project_id.present?

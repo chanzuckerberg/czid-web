@@ -6,7 +6,8 @@ class WorkflowRun < ApplicationRecord
   WORKFLOW = {
     # NOTE: 'main' is not yet supported in WorkflowRuns.
     main: "main",
-    consensus_genome: "consensus_genome",
+    consensus_genome: "consensus-genome",
+    short_read_mngs: "short-read-mngs",
   }.freeze
 
   STATUS = {
@@ -36,6 +37,10 @@ class WorkflowRun < ApplicationRecord
     scope = where(status: STATUS[:running])
     scope = scope.where(workflow: workflow_name) if workflow_name.present?
     scope
+  end
+
+  def workflow_version_tag
+    return "#{workflow}-v#{wdl_version}"
   end
 
   def sfn_description

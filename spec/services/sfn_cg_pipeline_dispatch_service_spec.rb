@@ -7,10 +7,11 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
   let(:s3_sample_input_files_path) { "s3://#{fake_samples_bucket}/#{s3_samples_key_prefix}/fastqs/%<input_file_name>s" }
   let(:sfn_name) { "idseq-test-%<project_id>s-%<sample_id>s-cg-%<time>s" }
   let(:fake_account_id) { "123456789012" }
-  let(:fake_tag) { "docker-image-tag" }
+  let(:fake_samples_bucket) { "fake-samples-bucket" }
   let(:fake_sfn_arn) { "fake:sfn:arn" }
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn" }
-  let(:fake_wdl_version) { "999" }
+  let(:test_workflow_name) { WorkflowRun::WORKFLOW[:consensus_genome] }
+  let(:fake_wdl_version) { "10.0.0" }
   let(:fake_states_client) do
     Aws::States::Client.new(
       stub_responses: {
@@ -40,11 +41,11 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
   let(:sample) do
     create(:sample,
            project: project,
-           temp_pipeline_workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+           temp_pipeline_workflow: test_workflow_name)
   end
   let(:workflow_run) do
     create(:workflow_run,
-           workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+           workflow: test_workflow_name,
            status: WorkflowRun::STATUS[:created],
            sample: sample)
   end
@@ -69,25 +70,18 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
       allow(AwsClient).to receive(:[]) { |client|
         @mock_aws_clients[client]
       }
-
-      # Rails.cache.clear
     end
 
-    context "when SFN has no version tags" do
+    context "when workflow has no version" do
       it "returns an exception" do
         @mock_aws_clients[:states].stub_responses(:list_tags_for_resource, tags: [])
-        expect { subject }.to raise_error(SfnCGPipelineDispatchService::SfnVersionTagsMissingError, /Tags missing: \[:wdl_version\]/)
+        expect { subject }.to raise_error(SfnCGPipelineDispatchService::SfnVersionMissingError, /WDL version for '#{test_workflow_name}' not set/)
       end
     end
 
-    context "with correct settings" do
+    context "with workflow version" do
       before do
-        @mock_aws_clients[:states].stub_responses(:list_tags_for_resource, tags: [
-                                                    { key: "wdl_version", value: fake_wdl_version },
-                                                  ])
-        allow(AwsClient).to receive(:[]) { |client|
-          @mock_aws_clients[client]
-        }
+        create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: test_workflow_name), value: fake_wdl_version)
       end
 
       it "returns correct json" do
@@ -108,12 +102,11 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
       end
 
       it "returns sfn input containing correct default sfn parameters" do
-        stub_const("SfnCGPipelineDispatchService::DOCKER_IMAGE_TAG", fake_tag)
         expect(subject).to include_json(
           sfn_input_json: {
             Input: {
               Run: {
-                docker_image_id: "#{fake_account_id}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:#{fake_tag}",
+                docker_image_id: "#{fake_account_id}.dkr.ecr.us-west-2.amazonaws.com/idseq-consensus-genome:v#{fake_wdl_version}",
                 sample: sample.name,
                 ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
                 ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
@@ -129,7 +122,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
       it "returns sfn input containing wdl workflow" do
         expect(subject).to include_json(
           sfn_input_json: {
-            RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{SfnCGPipelineDispatchService::WORKFLOW_VERSION}/consensus-genome/run.wdl",
+            RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{workflow_run.workflow_version_tag}/run.wdl",
           }
         )
       end
@@ -151,7 +144,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         let(:sample) do
           create(:sample,
                  project: project,
-                 temp_pipeline_workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+                 temp_pipeline_workflow: test_workflow_name,
                  temp_wetlab_protocol: Sample::TEMP_WETLAB_PROTOCOL[:artic])
         end
         it "returns sfn input with artic primer" do

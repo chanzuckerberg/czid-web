@@ -6,9 +6,6 @@ class SfnPipelineDispatchService
 
   include Callable
 
-  STS_CLIENT = Aws::STS::Client.new
-  SFN_CLIENT = Aws::States::Client.new
-
   # Constains SFN deployment stage names that differ from Rails.env
   ENV_TO_DEPLOYMENT_STAGE_NAMES = {
     "development" => "dev",
@@ -16,66 +13,44 @@ class SfnPipelineDispatchService
     "prod" => "prod",
   }.freeze
 
+  WORKFLOW_NAME = WorkflowRun::WORKFLOW[:short_read_mngs]
+
   class SfnArnMissingError < StandardError
     def initialize
       super("SFN ARN not set on App Config")
     end
   end
 
-  class SfnVersionTagsMissingError < StandardError
-    def initialize(arn, tags)
-      super("WDL version not set for SFN '#{arn}'. Tags missing: #{tags}")
-    end
-  end
-
-  class Idd2WdlError < StandardError
-    def initialize(error)
-      super("Command to convert dag to wdl failed ('idd2wdl.py'). Error: #{error}")
+  class SfnVersionMissingError < StandardError
+    def initialize(workflow)
+      super("WDL version for '#{workflow}' not set.")
     end
   end
 
   def initialize(pipeline_run)
     @pipeline_run = pipeline_run
     @sample = pipeline_run.sample
-    @docker_image_id = retrieve_docker_image_id
 
     @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
+
+    @wdl_version = AppConfigHelper.get_workflow_version(WORKFLOW_NAME)
+    raise SfnVersionMissingError, WORKFLOW_NAME if @wdl_version.blank?
   end
 
   def call
-    @sfn_tags = retrieve_version_tags
-    @pipeline_run.update(pipeline_version: @sfn_tags[:dag_version], wdl_version: @sfn_tags[:wdl_version])
+    @pipeline_run.update(pipeline_version: @wdl_version[/\d+\.\d+/], wdl_version: @wdl_version)
 
     sfn_input_json = generate_wdl_input
     sfn_execution_arn = dispatch(sfn_input_json)
     return {
-      pipeline_version: @sfn_tags[:dag_version],
+      pipeline_version: @pipeline_run.pipeline_version,
       sfn_input_json: sfn_input_json,
       sfn_execution_arn: sfn_execution_arn,
     }
   end
 
   private
-
-  def retrieve_docker_image_id
-    resp = STS_CLIENT.get_caller_identity
-    return "#{resp[:account]}.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows"
-  end
-
-  def retrieve_version_tags
-    cache_key = "#{self.class.name}::#{@sfn_arn}::tags"
-    Rails.cache.fetch(cache_key, expires_in: 1.minute) do
-      resp = SFN_CLIENT.list_tags_for_resource(resource_arn: @sfn_arn)
-      tags = resp.tags.reduce({}) do |h, tag|
-        h.update(tag.key => tag.value)
-      end.symbolize_keys
-
-      missing_tags = [:wdl_version, :dag_version].select { |tag_name| tags[tag_name].blank? }
-      raise SfnVersionTagsMissingError.new(@sfn_arn, missing_tags) if missing_tags.present?
-      tags
-    end
-  end
 
   def stage_deployment_name
     return ENV_TO_DEPLOYMENT_STAGE_NAMES[Rails.env] || Rails.env
@@ -84,10 +59,10 @@ class SfnPipelineDispatchService
   def generate_wdl_input
     sfn_pipeline_input_json = {
       dag_branch: @pipeline_run.pipeline_branch != "master" ? @pipeline_run.pipeline_branch : nil,
-      HOST_FILTER_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{@sfn_tags[:wdl_version]}/main/host_filter.wdl",
-      NON_HOST_ALIGNMENT_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{@sfn_tags[:wdl_version]}/main/non_host_alignment.wdl",
-      POSTPROCESS_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{@sfn_tags[:wdl_version]}/main/postprocess.wdl",
-      EXPERIMENTAL_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/v#{@sfn_tags[:wdl_version]}/main/experimental.wdl",
+      HOST_FILTER_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/host_filter.wdl",
+      NON_HOST_ALIGNMENT_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/non_host_alignment.wdl",
+      POSTPROCESS_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/postprocess.wdl",
+      EXPERIMENTAL_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@pipeline_run.workflow_version_tag}/experimental.wdl",
       Input: {
         HostFilter: {
           fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
@@ -137,9 +112,9 @@ class SfnPipelineDispatchService
     sfn_name = "idseq-#{Rails.env}-#{@sample.project_id}-#{@sample.id}-#{@pipeline_run.id}-#{Time.zone.now.strftime('%Y%m%d%H%M%S')}"
     sfn_input = JSON.dump(sfn_input_json)
 
-    resp = SFN_CLIENT.start_execution(state_machine_arn: @sfn_arn,
-                                      name: sfn_name,
-                                      input: sfn_input)
+    resp = AwsClient[:states].start_execution(state_machine_arn: @sfn_arn,
+                                              name: sfn_name,
+                                              input: sfn_input)
     return resp[:execution_arn]
   end
 end

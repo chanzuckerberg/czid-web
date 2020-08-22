@@ -804,16 +804,40 @@ class PipelineRun < ApplicationRecord
     SfnExecution.new(sfn_execution_arn, sample_output_s3_path).error
   end
 
-  def sfn_results_path
-    return "" unless sfn_execution_arn.present? && pipeline_version.present? && wdl_version.present?
+  def workflow_version_tag
+    # the tag used for docker container and idseq workflows definition
+    return "#{WorkflowRun::WORKFLOW[:short_read_mngs]}-v#{wdl_version}"
+  end
 
-    sfn_name = sfn_execution_arn.split(':')[-2]
-    return File.join(
-      sample_output_s3_path,
-      sfn_name,
-      "wdl-#{wdl_version}",
-      "dag-#{pipeline_version}"
-    )
+  def version_key_subpath
+    # the s3 subpath based on wdl version used to store results
+    return "#{WorkflowRun::WORKFLOW[:short_read_mngs]}-#{wdl_version.split('.')[0]}"
+  end
+
+  def wdl_s3_folder
+    if pipeline_version_at_least(pipeline_version, "5.0.0")
+      "s3://#{S3_WORKFLOWS_BUCKET}/#{WorkflowRun::WORKFLOW[:short_read_mngs]}-v#{wdl_version}"
+    else
+      "s3://#{S3_WORKFLOWS_BUCKET}/v#{wdl_version}/#{WorkflowRun::WORKFLOW[:main]}"
+    end
+  end
+
+  def sfn_results_path
+    return "" if sfn_execution_arn.blank?
+
+    if pipeline_version_at_least(pipeline_version, "5.0.0")
+      return File.join(sample_output_s3_path, version_key_subpath)
+    else
+      return "" unless pipeline_version.present? && wdl_version.present?
+
+      sfn_name = sfn_execution_arn.split(':')[-2]
+      return File.join(
+        sample_output_s3_path,
+        sfn_name,
+        "wdl-#{wdl_version}",
+        "dag-#{pipeline_version}"
+      )
+    end
   end
 
   def s3_file_for(output)

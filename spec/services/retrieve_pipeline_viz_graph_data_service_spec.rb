@@ -2,8 +2,8 @@ require 'rails_helper'
 require 'json'
 
 shared_examples "pipeline viz" do
-  let(:fake_wdl_version) { "999".freeze }
-  let(:fake_dag_version) { "9.999".freeze }
+  let(:fake_wdl_version) { "4".freeze }
+  let(:fake_dag_version) { "4.999".freeze }
 
   let(:step_status_data) do
     {

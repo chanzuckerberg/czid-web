@@ -791,7 +791,7 @@ class SamplesController < ApplicationController
             deletable: @sample.deletable?(current_user),
             editable: current_power.updatable_sample?(@sample),
             pipeline_runs: @sample.pipeline_runs_info,
-            workflow_runs: @sample.workflow_runs.as_json(
+            workflow_runs: @sample.workflow_runs.reverse.as_json(
               only: WORKFLOW_RUN_DEFAULT_FIELDS,
               methods: [:input_error]
             )

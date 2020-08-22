@@ -55,10 +55,10 @@ class WorkflowSelector extends React.Component {
         <div className={cs.header}>Analysis Type</div>
         <div
           className={cs.workflowOption}
-          onClick={() => onWorkflowToggle(WORKFLOWS.MAIN)}
+          onClick={() => onWorkflowToggle(WORKFLOWS.SHORT_READ_MNGS)}
         >
           <RadioButton
-            selected={selectedWorkflows.has(WORKFLOWS.MAIN)}
+            selected={selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS)}
             className={cs.radioButton}
           />
           <IconSample className={cs.iconSample} />
