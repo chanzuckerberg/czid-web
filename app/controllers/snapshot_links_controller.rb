@@ -120,9 +120,11 @@ class SnapshotLinksController < ApplicationController
     # }
     samples = []
     sample_ids = current_power.samples.where(project_id: project_id).pluck(:id)
-    top_pipeline_run_by_sample_id = top_pipeline_runs_multiget(sample_ids)
-    top_pipeline_run_by_sample_id.each do |sample_id, pipeline_run|
-      samples << { sample_id.to_s => { "pipeline_run_id" => pipeline_run.id } }
+    if sample_ids.present?
+      top_pipeline_run_by_sample_id = top_pipeline_runs_multiget(sample_ids)
+      top_pipeline_run_by_sample_id.each do |sample_id, pipeline_run|
+        samples << { sample_id.to_s => { "pipeline_run_id" => pipeline_run.id } }
+      end
     end
     { "samples" => samples }.to_json
   end

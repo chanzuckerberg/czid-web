@@ -50,7 +50,6 @@ class ProjectSettingsModal extends React.Component {
       project,
       users,
     } = this.props;
-    const { statusMessage, statusClass, email, name } = this.state;
     const { allowedFeatures = [] } = this.context || {};
 
     return (
@@ -149,7 +148,7 @@ class ProjectSettingsModal extends React.Component {
                 <div>
                   <Divider />
                   <div className={cs.formContainer}>
-                    <ViewOnlySharingForm />
+                    <ViewOnlySharingForm project={project} />
                   </div>
                 </div>
               )}

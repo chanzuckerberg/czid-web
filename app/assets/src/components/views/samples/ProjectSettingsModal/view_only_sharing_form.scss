@@ -28,7 +28,7 @@
 
     .title {
       @include font-header-m;
-      color: black;
+      color: $black;
       display: flex;
       align-items: center;
       min-height: 20px;
@@ -36,6 +36,11 @@
     }
 
     .toggle {
+      margin-left: $space-xl;
+      margin-right: 34px; // half the toggle width
+    }
+
+    .loadingIcon {
       margin-left: $space-xl;
       margin-right: 34px; // half the toggle width
     }
@@ -47,8 +52,17 @@
 
     .label {
       @include font-header-s;
-      color: black;
+      color: $black;
       margin-bottom: $space-xxs;
+    }
+
+    .pipelineVersionTooltip {
+      color: $black;
+
+      &:hover {
+        color: $primary;
+        cursor: default;
+      }
     }
 
     .settingsForm {
@@ -60,6 +74,7 @@
 
         .backgroundModelLabel {
           @include font-header-s;
+          color: $black;
           margin-top: $space-l;
           margin-bottom: $space-xxs;
           display: flex;
@@ -87,13 +102,19 @@
         }
       }
 
-      .settingsFormCheckbox {
+      .settingsFormField {
         display: flex;
         margin-top: $space-l;
+        margin-right: $space-l;
 
-        .checkboxLabel {
-          @include font-body-xs;
-          margin-left: $space-m;
+        .formFieldText {
+          margin-right: $space-l;
+
+          .formFieldLabel {
+            @include font-header-xs;
+            margin-bottom: $space-xxs;
+            color: $black;
+          }
         }
       }
     }

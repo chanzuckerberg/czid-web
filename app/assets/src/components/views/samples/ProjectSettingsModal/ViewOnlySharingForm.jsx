@@ -1,12 +1,22 @@
 import React from "react";
 import cx from "classnames";
+import PropTypes from "prop-types";
 
+import {
+  createSnapshot,
+  getSnapshotInfo,
+  deleteSnapshot,
+} from "~/api/snapshot_links";
+import { copyUrlToClipboard } from "~/helpers/url";
+import BasicPopup from "~/components/BasicPopup";
+import LoadingMessage from "~/components/common/LoadingMessage";
 import HelpIcon from "~ui/containers/HelpIcon";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
-import Checkbox from "~ui/controls/Checkbox";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import Toggle from "~ui/controls/Toggle";
 import { Input } from "~ui/controls";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./view_only_sharing_form.scss";
 
@@ -14,8 +24,15 @@ class ViewOnlySharingForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoading: false,
       sharingEnabled: false,
+      automaticUpdateEnabled: false,
+      snapshotShareId: "",
+      snapshotNumSamples: 0,
+      snapshotPipelineVersions: [],
+      snapshotTimestamp: "",
     };
+    // TODO(ihan): fill dropdown options with real values
     this.dropdownOptions = [
       { text: "NID Human CSF v3", value: "0" },
       { text: "Background Model 1", value: "1" },
@@ -23,13 +40,137 @@ class ViewOnlySharingForm extends React.Component {
     ];
   }
 
-  handleSharingStatusChange = () => {
+  async componentDidMount() {
+    this.setState({ isLoading: true });
+    await this.fetchSnapshotInfo();
+    this.setState({ isLoading: false });
+  }
+
+  fetchSnapshotInfo = async () => {
+    const { project } = this.props;
+    try {
+      const snapshot = await getSnapshotInfo(project.id);
+      this.setState({
+        sharingEnabled: true,
+        snapshotShareId: snapshot.share_id,
+        snapshotNumSamples: snapshot.num_samples,
+        snapshotPipelineVersions: snapshot.pipeline_versions,
+        snapshotTimestamp: snapshot.timestamp,
+      });
+    } catch (_) {
+      this.clearSnapshotInfo();
+    }
+  };
+
+  clearSnapshotInfo = () => {
+    this.setState({
+      sharingEnabled: false,
+      snapshotShareId: "",
+      snapshotNumSamples: 0,
+      snapshotPipelineVersions: [],
+      snapshotTimestamp: "",
+    });
+  };
+
+  // TODO(ihan): implement automatic update feature
+  handleAutomaticUpdateChange = () => {
+    const { automaticUpdateEnabled } = this.state;
+    this.setState({ automaticUpdateEnabled: !automaticUpdateEnabled });
+  };
+
+  handleSharingToggle = () => {
     const { sharingEnabled } = this.state;
-    this.setState({ sharingEnabled: !sharingEnabled });
+    if (sharingEnabled) {
+      this.handleDisableSharing();
+    } else {
+      this.handleEnableSharing();
+    }
+  };
+
+  handleEnableSharing = async () => {
+    const { snapshotShareId } = this.state;
+    const { project } = this.props;
+    try {
+      await createSnapshot(project.id);
+      await this.fetchSnapshotInfo();
+      logAnalyticsEvent("ViewOnlySharingForm_on-toggle_clicked", {
+        snapshotShareId: snapshotShareId,
+        projectId: project.id,
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      logAnalyticsEvent("ViewOnlySharingForm_snapshot_creation-failed", {
+        projectId: project.id,
+      });
+    }
+  };
+
+  handleDisableSharing = async () => {
+    const { snapshotShareId } = this.state;
+    const { project } = this.props;
+    try {
+      await deleteSnapshot(snapshotShareId);
+      this.clearSnapshotInfo();
+      logAnalyticsEvent("ViewOnlySharingForm_off-toggle_clicked", {
+        projectId: project.id,
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      logAnalyticsEvent("ViewOnlySharingForm_snapshot_deletion-failed", {
+        projectId: project.id,
+      });
+    }
+  };
+
+  renderNumSamples = () => {
+    const { snapshotNumSamples } = this.state;
+    return (
+      snapshotNumSamples + " Sample" + (snapshotNumSamples === 1 ? "" : "s")
+    );
+  };
+
+  renderPipelineVersions = () => {
+    const { snapshotPipelineVersions } = this.state;
+    const numPipelineVersions = snapshotPipelineVersions.length;
+    if (numPipelineVersions === 0) return "No pipeline versions";
+    if (numPipelineVersions === 1) {
+      return "Pipeline version " + snapshotPipelineVersions[0];
+    }
+
+    // Ex: Pipeline versions 3.1, 3.2 or 3.3
+    let result = "Pipeline versions ";
+    if (numPipelineVersions <= 3) {
+      result += snapshotPipelineVersions.slice(0, -1).join(", ");
+      result += " or " + snapshotPipelineVersions.slice(-1)[0];
+      return result;
+    }
+
+    // Ex: Pipeline versions 3.1, 3.2 or more
+    result += snapshotPipelineVersions.slice(0, 2).join(", ");
+    result += " or ";
+    return (
+      <span>
+        {result}
+        <ColumnHeaderTooltip
+          trigger={<span className={cs.pipelineVersionTooltip}>more</span>}
+          content={snapshotPipelineVersions.slice(2).join(", ")}
+        />
+      </span>
+    );
   };
 
   render() {
-    const { sharingEnabled } = this.state;
+    const {
+      isLoading,
+      sharingEnabled,
+      automaticUpdateEnabled,
+      snapshotShareId,
+      snapshotTimestamp,
+    } = this.state;
+    const { project } = this.props;
+    const shareableLink = window.location.origin + "/pub/" + snapshotShareId;
     return (
       <div className={cs.viewOnlySharingForm}>
         <div className={cs.viewOnlySharingHeader}>
@@ -40,19 +181,24 @@ class ViewOnlySharingForm extends React.Component {
               version, including logged out users.
             </div>
           </div>
-          <Toggle
-            className={cs.toggle}
-            onLabel="On"
-            offLabel="Off"
-            initialChecked={sharingEnabled}
-            onChange={this.handleSharingStatusChange}
-          />
+          {isLoading ? (
+            <LoadingMessage className={cs.loadingIcon} />
+          ) : (
+            <Toggle
+              className={cs.toggle}
+              onLabel="On"
+              offLabel="Off"
+              initialChecked={sharingEnabled}
+              onChange={this.handleSharingToggle}
+            />
+          )}
         </div>
         {sharingEnabled && (
           <div className={cx(cs.viewOnlySharingBody, cs.background)}>
             <div className={cs.label}>Details for View-Only</div>
             <div className={cs.note}>
-              123 Samples run on pipeline version 3.18 or 4.0
+              {this.renderNumSamples()} | {this.renderPipelineVersions()} |{" "}
+              {snapshotTimestamp}
             </div>
             <div className={cs.settingsForm}>
               <div className={cs.settingsFormDropdown}>
@@ -73,27 +219,25 @@ class ViewOnlySharingForm extends React.Component {
                   onChange={() => console.log("background model")}
                 />
               </div>
-              <div className={cs.settingsFormCheckbox}>
-                <Checkbox
-                  checked={false}
-                  onChange={() => console.log("pipeline versioning")}
-                />
-                <div className={cs.checkboxLabel}>
-                  <span className={cs.highlight}>Pipeline Versioning: </span>
-                  Automatically update samples if they’re rerun on future
-                  pipeline versions.
+              <div className={cs.settingsFormField}>
+                <div className={cs.formFieldText}>
+                  <div className={cs.formFieldLabel}>Automatically update</div>
+                  <div className={cs.note}>
+                    Samples
+                    <span className={cs.highlight}>
+                      {automaticUpdateEnabled ? " will " : " will not "}
+                    </span>
+                    update if run on a newer pipeline or if samples are added to
+                    the project.
+                  </div>
                 </div>
-              </div>
-              <div className={cs.settingsFormCheckbox}>
-                <Checkbox
-                  checked={false}
-                  onChange={() => console.log("update sample list")}
+                <Toggle
+                  className={cs.toggle}
+                  onLabel="On"
+                  offLabel="Off"
+                  initialChecked={automaticUpdateEnabled}
+                  onChange={this.handleAutomaticUpdateChange}
                 />
-                <div className={cs.checkboxLabel}>
-                  <span className={cs.highlight}>Update Sample List: </span>
-                  Automatically update samples list if samples are added to the
-                  project.
-                </div>
               </div>
             </div>
             <div className={cs.shareableLink}>
@@ -103,14 +247,31 @@ class ViewOnlySharingForm extends React.Component {
                   fluid
                   type="text"
                   id="shareableLink"
-                  value={"https://idseq.net/R6Y103D5MSX#/425025826"}
+                  value={shareableLink}
                 />
               </div>
               <div className={cs.shareableLinkField}>
-                <SecondaryButton
-                  className={cs.button}
-                  text="Copy"
-                  rounded={false}
+                <BasicPopup
+                  trigger={
+                    <SecondaryButton
+                      className={cs.button}
+                      text="Copy"
+                      rounded={false}
+                      onClick={() => {
+                        copyUrlToClipboard(shareableLink);
+                        logAnalyticsEvent(
+                          "ViewOnlySharingForm_copy-button_clicked",
+                          {
+                            snapshotShareId: snapshotShareId,
+                            projectId: project.id,
+                          }
+                        );
+                      }}
+                    />
+                  }
+                  content="A shareable URL was copied to your clipboard!"
+                  on="click"
+                  hideOnScroll
                 />
               </div>
             </div>
@@ -121,6 +282,10 @@ class ViewOnlySharingForm extends React.Component {
   }
 }
 
-ViewOnlySharingForm.propTypes = {};
+ViewOnlySharingForm.propTypes = {
+  project: PropTypes.shape({
+    id: PropTypes.number,
+  }).isRequired,
+};
 
 export default ViewOnlySharingForm;

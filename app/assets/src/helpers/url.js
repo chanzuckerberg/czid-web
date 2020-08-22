@@ -65,3 +65,8 @@ export const copyShortUrlToClipboard = async url => {
   const shortUrl = await shortenUrl(url);
   copy(window.location.origin + "/" + shortUrl.unique_key);
 };
+
+export const copyUrlToClipboard = async url => {
+  url = url || window.location.href;
+  copy(url);
+};
