@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
+import cx from "classnames";
 
 import d3 from "d3";
 import { head, sortBy } from "lodash/fp";
@@ -9,6 +10,7 @@ import Histogram from "~/components/visualizations/Histogram";
 import InfoIconSmall from "~/components/ui/icons/InfoIconSmall";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import Notification from "~ui/notifications/Notification";
 
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
 import cs from "./quality_control.scss";
@@ -24,6 +26,7 @@ class QualityControl extends React.Component {
     this.state = {
       loading: true,
       samples: [],
+      showProcessingSamplesMessage: true,
     };
   }
 
@@ -435,40 +438,71 @@ class QualityControl extends React.Component {
     );
   }
 
+  hideprocessingSamplesMessage = () => {
+    this.setState({ showProcessingSamplesMessage: false });
+  };
+
   renderSampleStatsInfo = () => {
-    const { samples, validSamples, runningSamples, failedSamples } = this.state;
+    const {
+      samples,
+      validSamples,
+      runningSamples,
+      failedSamples,
+      showProcessingSamplesMessage,
+    } = this.state;
 
     const content = (
-      <div>
-        <div>
-          {samples.length}{" "}
-          {samples.length === 1 ? "sample has" : "samples have"} been uploaded.
-        </div>
-        <div>
-          {runningSamples.length}{" "}
-          {runningSamples.length === 1 ? "sample is" : "samples are"} still
-          being processed.
-        </div>
-        <div>
-          {failedSamples.length}{" "}
-          {failedSamples.length === 1 ? "sample" : "samples"} failed to process.
-          Failed samples are not displayed in the charts below.
-        </div>
-      </div>
+      <React.Fragment>
+        <ul className={cs.statusList}>
+          <li className={cs.statusListItem}>
+            {samples.length}{" "}
+            {samples.length === 1 ? "sample has" : "samples have"} been
+            uploaded.
+          </li>
+          <li className={cs.statusListItem}>
+            {runningSamples.length}{" "}
+            {runningSamples.length === 1 ? "sample is" : "samples are"} still
+            being processed.
+          </li>
+          <li className={cs.statusListItem}>
+            {failedSamples.length}{" "}
+            {failedSamples.length === 1 ? "sample" : "samples"} failed to
+            process. Failed samples are not displayed in the charts below.
+          </li>
+        </ul>
+      </React.Fragment>
     );
 
     return (
-      <span className={cs.statsRow}>
-        Showing {validSamples.length} of {samples.length} samples.
-        <ColumnHeaderTooltip
-          trigger={
-            <span>
-              <InfoIconSmall className={cs.infoIcon} />
-            </span>
-          }
-          content={content}
-        />
-      </span>
+      <div>
+        {showProcessingSamplesMessage && runningSamples.length > 0 && (
+          <Notification
+            className={cx(
+              cs.notification,
+              showProcessingSamplesMessage ? cs.show : cs.hide
+            )}
+            type="info"
+            displayStyle="flat"
+            onClose={this.hideprocessingSamplesMessage}
+            closeWithDismiss={false}
+          >
+            {runningSamples.length}{" "}
+            {runningSamples.length === 1 ? "sample is" : "samples are"} still
+            being processed.
+          </Notification>
+        )}
+        <span className={cs.statsRow}>
+          Showing {validSamples.length} of {samples.length} samples.
+          <ColumnHeaderTooltip
+            trigger={
+              <span>
+                <InfoIconSmall className={cs.infoIcon} />
+              </span>
+            }
+            content={content}
+          />
+        </span>
+      </div>
     );
   };
 

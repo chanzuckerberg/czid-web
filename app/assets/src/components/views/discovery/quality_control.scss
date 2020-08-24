@@ -10,6 +10,19 @@
   padding-right: $space-l;
   padding-left: $space-l;
 
+  .notification {
+    margin-bottom: $space-s;
+    margin-right: $space-xl;
+
+    &.show {
+      display: flex;
+    }
+
+    &.hide {
+      display: none;
+    }
+  }
+
   .statsRow {
     @include font-body-xxs;
     color: $black;
@@ -54,6 +67,16 @@
     &:hover {
       fill: $primary;
     }
+  }
+}
+
+.statusList {
+  padding-left: 0;
+  margin: 0;
+
+  .statusListItem {
+    list-style: disc inside none;
+    margin-bottom: $space-xxs;
   }
 }
 

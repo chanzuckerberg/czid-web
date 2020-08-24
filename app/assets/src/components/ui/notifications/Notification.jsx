@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { CheckmarkIcon, IconAlert, InfoIcon } from "~ui/icons";
+import { CheckmarkIcon, IconAlert, InfoIcon, RemoveIcon } from "~ui/icons";
 import cs from "./notification.scss";
 import cx from "classnames";
 
@@ -21,7 +21,14 @@ class Notification extends React.Component {
   }
 
   render() {
-    const { children, className, displayStyle, onClose, type } = this.props;
+    const {
+      children,
+      className,
+      displayStyle,
+      onClose,
+      type,
+      closeWithDismiss,
+    } = this.props;
     return (
       <div
         className={cx(className, cs.notification, cs[type], cs[displayStyle])}
@@ -29,12 +36,15 @@ class Notification extends React.Component {
         <div className={cs.icon}>{this.getIcon(type)}</div>
         <div className={cs.content}>
           <div>{children}</div>
-          {onClose && (
+          {onClose && closeWithDismiss && (
             <div className={cs.actions} onClick={onClose}>
               Dismiss
             </div>
           )}
         </div>
+        {onClose && !closeWithDismiss && (
+          <RemoveIcon className={cs.removeIcon} onClick={onClose} />
+        )}
       </div>
     );
   }
@@ -42,6 +52,7 @@ class Notification extends React.Component {
 
 Notification.defaultProps = {
   displayStyle: "elevated",
+  closeWithDismiss: true,
 };
 
 Notification.propTypes = {
@@ -50,6 +61,7 @@ Notification.propTypes = {
   displayStyle: PropTypes.oneOf(["flat", "elevated"]),
   onClose: PropTypes.func,
   type: PropTypes.oneOf(["success", "info", "warning", "error"]).isRequired,
+  closeWithDismiss: PropTypes.bool,
 };
 
 export default Notification;

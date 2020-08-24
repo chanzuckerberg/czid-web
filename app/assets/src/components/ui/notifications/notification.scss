@@ -38,6 +38,16 @@
     margin-top: 1px;
   }
 
+  .removeIcon {
+    cursor: pointer;
+    height: 14px;
+    width: 14px;
+    fill: $gray-darkest;
+    margin-right: $space-l;
+    padding-top: $space-xxs;
+    margin-left: auto;
+  }
+
   .actions {
     @include font-caps-xxs;
     font-weight: 600;
