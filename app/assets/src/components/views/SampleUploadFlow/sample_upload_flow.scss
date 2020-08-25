@@ -82,7 +82,7 @@
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $primary !important;
+    color: $primary;
     cursor: pointer;
     margin-left: 5px;
   }
@@ -126,7 +126,7 @@
 
     .text {
       @include font-header-xxs;
-      color: $gray-darkest;
+      color: $black;
     }
   }
 }
@@ -320,6 +320,7 @@
 
     .publicAccess {
       @include font-body-s;
+      color: $gray-darkest;
       margin-left: 10px;
     }
 

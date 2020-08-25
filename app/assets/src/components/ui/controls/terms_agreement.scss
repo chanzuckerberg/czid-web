@@ -4,6 +4,7 @@
 .termsAgreement {
   margin-top: $space-xl;
   margin-bottom: $space-xl;
+  color: $gray-darkest;
 
   // Global because Checkbox does not use CSS modules
   :global(.label) {
