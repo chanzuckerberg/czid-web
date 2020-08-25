@@ -30,7 +30,7 @@ class HoverActions extends React.Component {
 
   // Metadata for each of the hover actions.
   getHoverActions = () => {
-    const { pipelineVersion } = this.props;
+    const { pipelineVersion, snapshotShareId } = this.props;
     const hasCoverageViz = pipelineVersionHasCoverageViz(pipelineVersion);
 
     const params = {
@@ -42,7 +42,7 @@ class HoverActions extends React.Component {
       taxSpecies: this.props.taxSpecies,
     };
 
-    return [
+    const basicHoverAction = [
       {
         key: `taxonomy_browser_${params.taxId}`,
         message: "NCBI Taxonomy Browser",
@@ -52,6 +52,9 @@ class HoverActions extends React.Component {
         disabledMessage: "NCBI Taxonomy Not Found",
         params,
       },
+    ];
+
+    const hoverActions = [
       {
         key: `fasta_download_${params.taxId}`,
         message: "FASTA Download",
@@ -105,6 +108,10 @@ class HoverActions extends React.Component {
           "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR",
       },
     ];
+
+    return snapshotShareId
+      ? basicHoverAction
+      : [...basicHoverAction, ...hoverActions];
   };
 
   // Render the hover action according to metadata.
@@ -164,6 +171,7 @@ HoverActions.propTypes = {
   onPhyloTreeModalOpened: PropTypes.func,
   phyloTreeEnabled: PropTypes.bool,
   pipelineVersion: PropTypes.string,
+  snapshotShareId: PropTypes.string,
   taxCommonName: PropTypes.string,
   taxId: PropTypes.number,
   taxLevel: PropTypes.number,

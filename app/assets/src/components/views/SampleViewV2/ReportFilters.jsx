@@ -112,34 +112,38 @@ class ReportFilters extends React.Component {
       selected,
       view,
       enableMassNormalizedBackgrounds,
+      snapshotShareId,
     } = this.props;
     return (
       <React.Fragment>
         <div className={cs.filterList}>
-          <div className={cs.filterListElement}>
-            <SearchBox
-              clearOnSelect
-              rounded
-              levelLabel
-              serverSearchAction="choose_taxon"
-              serverSearchActionArgs={{
-                // TODO (gdingle): change backend to support filter by sampleId
-                args: "species,genus",
-                sample_id: sampleId,
-              }}
-              onResultSelect={(_, { result }) => {
-                return this.handleFilterChange({
-                  key: "taxon",
-                  value: {
-                    taxId: result.taxid,
-                    taxLevel: result.level,
-                    name: result.title,
-                  },
-                });
-              }}
-              placeholder="Taxon name"
-            />
-          </div>
+          {/* TODO(ihan): expose the Taxon search box */}
+          {!snapshotShareId && (
+            <div className={cs.filterListElement}>
+              <SearchBox
+                clearOnSelect
+                rounded
+                levelLabel
+                serverSearchAction="choose_taxon"
+                serverSearchActionArgs={{
+                  // TODO (gdingle): change backend to support filter by sampleId
+                  args: "species,genus",
+                  sample_id: sampleId,
+                }}
+                onResultSelect={(_, { result }) => {
+                  return this.handleFilterChange({
+                    key: "taxon",
+                    value: {
+                      taxId: result.taxid,
+                      taxLevel: result.level,
+                      name: result.title,
+                    },
+                  });
+                }}
+                placeholder="Taxon name"
+              />
+            </div>
+          )}
           <div className={cs.filterListElement}>
             <NameTypeFilter
               value={selected.nameType}
@@ -267,6 +271,7 @@ ReportFilters.propTypes = {
   selected: PropTypes.object,
   view: PropTypes.oneOf(["tree", "table"]),
   enableMassNormalizedBackgrounds: PropTypes.bool,
+  snapshotShareId: PropTypes.string,
 };
 
 export default ReportFilters;

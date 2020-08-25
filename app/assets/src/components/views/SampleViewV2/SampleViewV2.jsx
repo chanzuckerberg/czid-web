@@ -1034,6 +1034,7 @@ export default class SampleViewV2 extends React.Component {
       selectedOptions,
       view,
     } = this.state;
+    const { snapshotShareId } = this.props;
 
     // reportReady is true if the pipeline run hasn't failed and is report-ready
     // (might still be running Experimental, but at least taxon_counts has been loaded).
@@ -1049,6 +1050,7 @@ export default class SampleViewV2 extends React.Component {
               selected={selectedOptions}
               view={view}
               enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+              snapshotShareId={snapshotShareId}
             />
           </div>
           <div className={cs.reportHeader}>
@@ -1090,6 +1092,7 @@ export default class SampleViewV2 extends React.Component {
                 projectId={project && project.id}
                 projectName={project && project.name}
                 sampleId={sample && sample.id}
+                snapshotShareId={snapshotShareId}
               />
             </div>
           )}
@@ -1136,7 +1139,11 @@ export default class SampleViewV2 extends React.Component {
         <NarrowContainer className={cs.sampleViewContainer}>
           <div className={cs.sampleViewHeader}>
             <SampleViewHeader
-              backgroundId={selectedOptions.background}
+              backgroundId={
+                isNaN(selectedOptions.background)
+                  ? null
+                  : selectedOptions.background
+              }
               deletable={sample ? sample.deletable : false}
               editable={sample ? sample.editable : false}
               onDetailsClick={this.toggleSampleDetailsSidebar}

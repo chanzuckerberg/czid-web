@@ -469,12 +469,14 @@ class ReportTable extends React.Component {
       pipelineVersion,
       projectId,
       sampleId,
+      snapshotShareId,
     } = this.props;
 
     const validTaxId =
       rowData.taxId < INVALID_CALL_BASE_TAXID || rowData.taxId > 0;
-    const contigVizEnabled =
-      get("nt.contigs", rowData) || get("nr.contigs", rowData);
+    const contigVizEnabled = !!(
+      get("nt.contigs", rowData) || get("nr.contigs", rowData)
+    );
     const coverageVizEnabled =
       alignVizAvailable && validTaxId && getOr(0, "nt.count", rowData) > 0;
     const phyloTreeEnabled =
@@ -531,6 +533,7 @@ class ReportTable extends React.Component {
           analyticsContext
         )}
         pipelineVersion={pipelineVersion}
+        snapshotShareId={snapshotShareId}
       />
     );
   };
@@ -719,6 +722,7 @@ ReportTable.propTypes = {
   projectId: PropTypes.number,
   projectName: PropTypes.string,
   sampleId: PropTypes.number,
+  snapshotShareId: PropTypes.string,
 };
 
 export default ReportTable;

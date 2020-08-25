@@ -147,9 +147,12 @@ export default function SampleViewHeader({
         <div
           className={cx(
             cs.pipelineInfo,
-            get("pipeline_version", pipelineRun) && cs.linkToPipelineViz
+            !snapshotShareId &&
+              get("pipeline_version", pipelineRun) &&
+              cs.linkToPipelineViz
           )}
-          onClick={() =>
+          onClick={snapshotShareId =>
+            !snapshotShareId &&
             get("pipeline_version", pipelineRun) &&
             openUrl(
               `/samples/${sample.id}/pipeline_viz/${get(
@@ -213,7 +216,7 @@ export default function SampleViewHeader({
           </span>
         </div>
       </ViewHeader.Content>
-      {renderViewHeaderControls()}
+      {!snapshotShareId && renderViewHeaderControls()}
     </ViewHeader>
   );
 }
