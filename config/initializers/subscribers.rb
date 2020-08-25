@@ -3,7 +3,7 @@
 # To view the structure of the logs and metrics visit: https://go.czi.team/idseq-sli-metrics
 ##########################################
 
-if !Rails.env.test? && !Rails.env.prod?
+unless Rails.env.test?
   require_all 'lib/metric_handlers'
 
   # We were currently unable to find any cached_read.active_support, cached_write.active_support, and cache_fetch_hit.active_support
