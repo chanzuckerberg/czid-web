@@ -10,6 +10,7 @@ import { CircleCheckmarkIcon, IconAlert } from "~ui/icons";
 import cs from "./issue_group.scss";
 
 const IssueGroup = ({
+  caption,
   className,
   getColumnWidth,
   headers,
@@ -30,7 +31,7 @@ const IssueGroup = ({
           ) : (
             <IconAlert className={cx(cs.icon, cs[type])} />
           )}
-          {this.props.caption}
+          {caption}
         </div>
       }
       open={initialOpen}
