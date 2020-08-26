@@ -560,7 +560,7 @@ RSpec.describe SamplesController, type: :controller do
 
       it "returns an error message if the file was not found" do
         allow_any_instance_of(PipelineOutputsHelper).to receive(:get_presigned_s3_url).and_return(nil)
-        expect(LogUtil).to receive(:log_err_and_airbrake)
+        expect(LogUtil).to receive(:log_err)
         get :consensus_genome_zip_link, params: { id: @sample.id }
 
         expect(response).to have_http_status(404)
@@ -569,7 +569,7 @@ RSpec.describe SamplesController, type: :controller do
       end
 
       it "returns an error message if a WorkflowRun was not found" do
-        expect(LogUtil).to receive(:log_err_and_airbrake).with(/No valid WorkflowRun found/)
+        expect(LogUtil).to receive(:log_err).with(/No valid WorkflowRun found/)
         get :consensus_genome_zip_link, params: { id: @sample_without_workflow_run.id }
 
         expect(response).to have_http_status(404)

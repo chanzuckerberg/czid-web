@@ -46,6 +46,8 @@ gem 'resque', '>= 1.27.4'
 gem 'resque-lock'
 gem 'resque-scheduler', '>= 4.3.1'
 gem 'thread'
+# SentryIO
+gem "sentry-raven"
 # Use SCSS for stylesheets
 gem 'sprockets-es6'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks

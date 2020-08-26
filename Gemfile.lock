@@ -1093,6 +1093,8 @@ GEM
     selenium-webdriver (3.141.0)
       childprocess (~> 0.5)
       rubyzip (~> 1.2, >= 1.2.2)
+    sentry-raven (2.13.0)
+      faraday (>= 0.7.6, < 1.0)
     shellany (0.0.1)
     shortener (0.8.0)
       voight_kampff (~> 1.1.2)
@@ -1225,6 +1227,7 @@ DEPENDENCIES
   rspec-rails (>= 3.7.2)
   rubocop (= 0.49.1)
   selenium-webdriver
+  sentry-raven
   shortener
   silencer
   simplecov

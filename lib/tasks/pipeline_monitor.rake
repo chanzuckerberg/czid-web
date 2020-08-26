@@ -45,7 +45,7 @@ class CheckPipelineRuns
         Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
         pr.update_job_status
       rescue => exception
-        LogUtil.log_err_and_airbrake("Updating pipeline run #{pr.id} failed with exception: #{exception.message}")
+        LogUtil.log_err("Updating pipeline run #{pr.id} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -58,7 +58,7 @@ class CheckPipelineRuns
         Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
         pt.monitor_job
       rescue => exception
-        LogUtil.log_err_and_airbrake("Monitor job for phylo_tree #{pt.id} failed with exception: #{exception.message}")
+        LogUtil.log_err("Monitor job for phylo_tree #{pt.id} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -71,7 +71,7 @@ class CheckPipelineRuns
         Rails.logger.info("  Checking WorkflowRun #{wrid} for sample #{wr.sample_id}")
         wr.update_status
       rescue => exception
-        LogUtil.log_err_and_airbrake("Updating Workflow #{wrid} failed with exception: #{exception.message}")
+        LogUtil.log_err("Updating Workflow #{wrid} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -235,7 +235,7 @@ class CheckPipelineRuns
       begin
         create_sample_for_benchmark(s3_bucket, s3_key, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_proj, bm_host, bm_comment, t_now)
       rescue => exception
-        LogUtil.log_err_and_airbrake("Creating sample for benchmark #{s3_path} failed with exception: #{exception.message}")
+        LogUtil.log_err("Creating sample for benchmark #{s3_path} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -247,7 +247,7 @@ class CheckPipelineRuns
       begin
         benchmark_update(t_now)
       rescue => exception
-        LogUtil.log_err_and_airbrake("Updating benchmarks failed with error: #{exception.message}")
+        LogUtil.log_err("Updating benchmarks failed with error: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end

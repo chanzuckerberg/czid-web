@@ -153,7 +153,7 @@ class Metadatum < ApplicationRecord
     # If the location is too specific, reject it as invalid.
     # In theory, the user should never trigger this error, if the front-end is auto-correcting properly.
     unless Location.specificity_valid?(loc, sample.host_genome_name)
-      LogUtil.log_err_and_airbrake(
+      LogUtil.log_err(
         "Location specificity invalid for host genome #{sample.host_genome_name} #{JSON.dump(loc)}"
       )
       LogUtil.log_backtrace(err)
@@ -198,7 +198,7 @@ class Metadatum < ApplicationRecord
     self.string_validated_value = location_params[:string_validated_value]
     self.location_id = location_params[:location_id]
   rescue => err
-    LogUtil.log_err_and_airbrake("Failed to save location metadatum: #{err.message}")
+    LogUtil.log_err("Failed to save location metadatum: #{err.message}")
     LogUtil.log_backtrace(err)
     errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
   end

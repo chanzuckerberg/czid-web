@@ -149,7 +149,7 @@ class PipelineReportService
               lambda.call()
             end
           rescue => e
-            LogUtil.log_err_and_airbrake("Parallel fetch failed")
+            LogUtil.log_err("Parallel fetch failed")
             raise e
           end
         end

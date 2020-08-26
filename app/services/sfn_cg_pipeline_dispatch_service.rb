@@ -56,7 +56,7 @@ class SfnCGPipelineDispatchService
   rescue => err
     # Set to failed and re-raise
     @workflow_run.update(status: WorkflowRun::STATUS[:failed])
-    LogUtil.log_err_and_airbrake("Error starting CG SFN pipeline for WorkflowRun #{@workflow_run.id}: #{err}")
+    LogUtil.log_err("Error starting CG SFN pipeline for WorkflowRun #{@workflow_run.id}: #{err}")
     LogUtil.log_backtrace(err)
     raise
   end

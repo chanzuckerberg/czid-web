@@ -1039,7 +1039,7 @@ class SamplesController < ApplicationController
       if @contigs_fasta_url
         redirect_to @contigs_fasta_url
       else
-        LogUtil.log_err_and_airbrake("Contigs fasta file does not exist for sample #{@sample.id}")
+        LogUtil.log_err("Contigs fasta file does not exist for sample #{@sample.id}")
         render json: {
           error: "contigs fasta file does not exist for this sample",
         }
@@ -1109,7 +1109,7 @@ class SamplesController < ApplicationController
     if @nonhost_fasta_url
       redirect_to @nonhost_fasta_url
     else
-      LogUtil.log_err_and_airbrake("Nonhost fasta file does not exist for sample #{@sample.id}")
+      LogUtil.log_err("Nonhost fasta file does not exist for sample #{@sample.id}")
       render json: {
         error: "nonhost fasta file does not exist for this sample",
       }
@@ -1123,7 +1123,7 @@ class SamplesController < ApplicationController
     if @unidentified_fasta_url
       redirect_to @unidentified_fasta_url
     else
-      LogUtil.log_err_and_airbrake("Unidentified fasta file does not exist for sample #{@sample.id}")
+      LogUtil.log_err("Unidentified fasta file does not exist for sample #{@sample.id}")
       render json: {
         error: "unidentified fasta file does not exist for this sample",
       }
@@ -1326,7 +1326,7 @@ class SamplesController < ApplicationController
 
     # User should not be querying for unviewable samples.
     if samples.length != sample_ids.length
-      LogUtil.log_err_and_airbrake("Get taxa with reads error: Unauthorized access of samples")
+      LogUtil.log_err("Get taxa with reads error: Unauthorized access of samples")
       render json: {
         error: "There was an error fetching the taxa with reads for samples.",
       }, status: :unauthorized
@@ -1356,7 +1356,7 @@ class SamplesController < ApplicationController
 
     # User should not be querying for unviewable samples.
     if samples.length != sample_ids.length
-      LogUtil.log_err_and_airbrake("Get taxa with contigs error: Unauthorized access of samples")
+      LogUtil.log_err("Get taxa with contigs error: Unauthorized access of samples")
       render json: {
         error: "There was an error fetching the taxa with contigs for samples.",
       }, status: :unauthorized
@@ -1409,7 +1409,7 @@ class SamplesController < ApplicationController
       raise "Output file not found on S3"
     end
   rescue => err
-    LogUtil.log_err_and_airbrake("Error loading #{output_name} for sample #{@sample.id}: #{err}")
+    LogUtil.log_err("Error loading #{output_name} for sample #{@sample.id}: #{err}")
     render json: {
       error: "#{output_name} does not exist for this sample",
     }, status: :not_found
@@ -1493,7 +1493,7 @@ class SamplesController < ApplicationController
     Rails.logger.info(msg)
   rescue StandardError => e
     # catch all errors because we don't want to ever block uploads
-    LogUtil.log_err_and_airbrake("warn_if_large_bulk_upload: #{e}")
+    LogUtil.log_err("warn_if_large_bulk_upload: #{e}")
     LogUtil.log_backtrace(e)
   end
 end

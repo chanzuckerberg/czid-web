@@ -23,7 +23,7 @@ module BasespaceHelper
     fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token, {}, true)
 
     # If we reach this step, the access token must not have been revoked.
-    LogUtil.log_err_and_airbrake("BasespaceAccessTokenError: Failed to revoke access token for sample id #{sample_id}")
+    LogUtil.log_err("BasespaceAccessTokenError: Failed to revoke access token for sample id #{sample_id}")
   rescue HttpHelper::HttpError => e
     # We expect the API endpoint to return a 401.
     if e.status_code == 401
@@ -51,14 +51,14 @@ module BasespaceHelper
 
       if response.dig("Response", "Items").nil?
         if response.dig("ResponseStatus", "Message").present?
-          LogUtil.log_err_and_airbrake("Fetch Basespace projects failed with error: #{response['ResponseStatus']['Message']}")
+          LogUtil.log_err("Fetch Basespace projects failed with error: #{response['ResponseStatus']['Message']}")
         else
-          LogUtil.log_err_and_airbrake("Failed to fetch Basespace projects")
+          LogUtil.log_err("Failed to fetch Basespace projects")
         end
         return nil
       end
     rescue
-      LogUtil.log_err_and_airbrake("Failed to fetch Basespace projects")
+      LogUtil.log_err("Failed to fetch Basespace projects")
       return nil
     end
 
@@ -77,14 +77,14 @@ module BasespaceHelper
 
       if response["Items"].nil?
         if response["ErrorMessage"].present?
-          LogUtil.log_err_and_airbrake("Fetch samples for Basespace project failed with error: #{response['ErrorMessage']}")
+          LogUtil.log_err("Fetch samples for Basespace project failed with error: #{response['ErrorMessage']}")
         else
-          LogUtil.log_err_and_airbrake("Failed to fetch samples for Basespace project")
+          LogUtil.log_err("Failed to fetch samples for Basespace project")
         end
         return nil
       end
     rescue
-      LogUtil.log_err_and_airbrake("Failed to fetch samples for Basespace project")
+      LogUtil.log_err("Failed to fetch samples for Basespace project")
       return nil
     end
 
@@ -111,14 +111,14 @@ module BasespaceHelper
 
       if response["Items"].nil?
         if response["ErrorMessage"].present?
-          LogUtil.log_err_and_airbrake("Fetch files for Basespace dataset failed with error: #{response['ErrorMessage']}")
+          LogUtil.log_err("Fetch files for Basespace dataset failed with error: #{response['ErrorMessage']}")
         else
-          LogUtil.log_err_and_airbrake("Failed to fetch files for basespace dataset")
+          LogUtil.log_err("Failed to fetch files for basespace dataset")
         end
         return nil
       end
     rescue
-      LogUtil.log_err_and_airbrake("Failed to fetch files for basespace dataset")
+      LogUtil.log_err("Failed to fetch files for basespace dataset")
       return nil
     end
 
@@ -143,7 +143,7 @@ module BasespaceHelper
       ["aws", "s3", "cp", "-", "#{s3_path}/#{file_name}"]
     )
 
-    LogUtil.log_err_and_airbrake("Failed to transfer file from basespace to #{s3_path} for #{file_name}: #{stderr}") unless success
+    LogUtil.log_err("Failed to transfer file from basespace to #{s3_path} for #{file_name}: #{stderr}") unless success
 
     return success
   end

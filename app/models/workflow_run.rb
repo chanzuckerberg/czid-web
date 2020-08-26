@@ -61,7 +61,7 @@ class WorkflowRun < ApplicationRecord
       if input_error.present?
         remote_status = STATUS[:succeeded_with_issue]
       else
-        LogUtil.log_err_and_airbrake("SampleFailedEvent: Sample #{sample.id} by " \
+        LogUtil.log_err("SampleFailedEvent: Sample #{sample.id} by " \
           "#{sample.user.role_name} failed WorkflowRun #{id} (#{workflow}). See: #{sample.status_url}")
       end
     end

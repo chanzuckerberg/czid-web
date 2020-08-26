@@ -21,7 +21,7 @@ class SampleAccessValidationService
     rescue => e
       # just in case
       LogUtil.log_backtrace(e)
-      LogUtil.log_err_and_airbrake("SampleAccessValidationFailedEvent: Unexpected issue validating sample access: #{e}")
+      LogUtil.log_err("SampleAccessValidationFailedEvent: Unexpected issue validating sample access: #{e}")
       error = SAMPLE_ACCESS_ERROR
     end
 

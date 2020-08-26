@@ -21,7 +21,7 @@ class MonitorPipelineResults
             Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
             pr.monitor_results
           rescue => exception
-            LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
+            LogUtil.log_err("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
             LogUtil.log_backtrace(exception)
           end
         end
@@ -34,7 +34,7 @@ class MonitorPipelineResults
             Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
             pt.monitor_results
           rescue => exception
-            LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
+            LogUtil.log_err("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
             LogUtil.log_backtrace(exception)
           end
         end
@@ -46,14 +46,14 @@ class MonitorPipelineResults
         begin
           MonitorPipelineResults.alert_stalled_uploads!
         rescue => exception
-          LogUtil.log_err_and_airbrake("Failed to alert on stalled uploads: #{exception.message}")
+          LogUtil.log_err("Failed to alert on stalled uploads: #{exception.message}")
           LogUtil.log_backtrace(exception)
         end
 
         begin
           MonitorPipelineResults.fail_stalled_uploads!
         rescue => exception
-          LogUtil.log_err_and_airbrake("Failed to fail stalled uploads: #{exception.message}")
+          LogUtil.log_err("Failed to fail stalled uploads: #{exception.message}")
           LogUtil.log_backtrace(exception)
         end
       end
@@ -63,7 +63,7 @@ class MonitorPipelineResults
   def self.fail_stalled_uploads!
     samples = Sample.current_stalled_local_uploads(18.hours)
     unless samples.empty?
-      LogUtil.log_err_and_airbrake(
+      LogUtil.log_err(
         "SampleFailedEvent: Failed to upload local samples after 18 hours #{samples.pluck(:id)}"
       )
       samples.update_all( # rubocop:disable Rails/SkipsModelValidations

@@ -96,7 +96,7 @@ class BulkDownload < ApplicationRecord
                                         key: download_output_key,
                                         expires_in: OUTPUT_DOWNLOAD_EXPIRATION).to_s
     rescue StandardError => e
-      LogUtil.log_err_and_airbrake("BulkDownloadPresignError: #{e.inspect}")
+      LogUtil.log_err("BulkDownloadPresignError: #{e.inspect}")
     end
     nil
   end
@@ -215,7 +215,7 @@ class BulkDownload < ApplicationRecord
     return s3_response.content_length
   rescue => e
     LogUtil.log_backtrace(e)
-    LogUtil.log_err_and_airbrake("BulkDownloadsFileSizeError: Failed to get file size for bulk download id #{id}: #{e}")
+    LogUtil.log_err("BulkDownloadsFileSizeError: Failed to get file size for bulk download id #{id}: #{e}")
   end
 
   # The s3 url that the tar.gz file will be uploaded to.
@@ -517,7 +517,7 @@ class BulkDownload < ApplicationRecord
     end
 
     unless failed_sample_ids.empty?
-      LogUtil.log_err_and_airbrake("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{failed_sample_ids}")
+      LogUtil.log_err("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{failed_sample_ids}")
       update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % failed_sample_ids.length)
     end
   end
@@ -551,7 +551,7 @@ class BulkDownload < ApplicationRecord
       s3_tar_writer.add_file_with_data("combined_sample_taxon_results_#{metric}.csv", result[:csv_str])
 
       unless result[:failed_sample_ids].empty?
-        LogUtil.log_err_and_airbrake("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{result[:failed_sample_ids]}")
+        LogUtil.log_err("BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{result[:failed_sample_ids]}")
         update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % result[:failed_sample_ids].length)
       end
     elsif download_type == SAMPLE_METADATA_BULK_DOWNLOAD_TYPE

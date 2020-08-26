@@ -33,13 +33,13 @@ module BenchmarksHelper
     s3_response = S3_CLIENT.get_object(bucket: IDSEQ_BENCH_BUCKET, key: IDSEQ_BENCH_KEY)
     return JSON.parse(s3_response.body.read, symbolize_names: true)
   rescue Aws::S3::Errors::NoSuchKey
-    LogUtil.log_err_and_airbrake("Config file not found - '#{IDSEQ_BENCH_KEY}'")
+    LogUtil.log_err("Config file not found - '#{IDSEQ_BENCH_KEY}'")
     return nil
   rescue JSON::ParserError
-    LogUtil.log_err_and_airbrake("Invalid config file - '#{IDSEQ_BENCH_KEY}'")
+    LogUtil.log_err("Invalid config file - '#{IDSEQ_BENCH_KEY}'")
     return nil
   rescue => e
-    LogUtil.log_err_and_airbrake("Unknown error - '#{e.message}'")
+    LogUtil.log_err("Unknown error - '#{e.message}'")
     return nil
   end
 

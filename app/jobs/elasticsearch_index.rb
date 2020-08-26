@@ -25,7 +25,7 @@ class ElasticsearchIndex
   rescue => err
     Rails.logger.error(err)
     LogUtil.log_backtrace(err)
-    LogUtil.log_err_and_airbrake("Elasticsearch failed to #{operation} record: #{record_id} source table: #{index_name}, with error: #{err.message}")
+    LogUtil.log_err("Elasticsearch failed to #{operation} record: #{record_id} source table: #{index_name}, with error: #{err.message}")
     raise err # Raise error in order to fire on_failure resque hook in InstrumentedJob
   end
 end

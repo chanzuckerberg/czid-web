@@ -68,7 +68,7 @@ class MetricUtil
       )
     end
   rescue => err
-    LogUtil.log_err_and_airbrake("Failed to log to Segment '#{event}': #{err}")
+    LogUtil.log_err("Failed to log to Segment '#{event}': #{err}")
   end
 
   # Log analytics from a batch of new samples from an upload session

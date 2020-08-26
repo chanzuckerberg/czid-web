@@ -33,7 +33,7 @@ module BulkDownloadsHelper
       elsif e.message == PipelineRunsHelper::PIPELINE_RUN_FAILED_ERROR
         raise SAMPLE_FAILED_ERROR
       else
-        LogUtil.log_err_and_airbrake("BulkDownloadsFailedEvent: Unexpected issue getting valid pipeline runs for samples: #{e}")
+        LogUtil.log_err("BulkDownloadsFailedEvent: Unexpected issue getting valid pipeline runs for samples: #{e}")
         raise
       end
     end

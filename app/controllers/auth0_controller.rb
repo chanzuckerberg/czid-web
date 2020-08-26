@@ -52,7 +52,7 @@ class Auth0Controller < ApplicationController
     error_type = (params["error"] || "").to_sym
     error_code = (params["error_description"] || "").to_sym
     unless params["error"] && params["error_description"]
-      LogUtil.log_err_and_airbrake("omniauth_failure called with missing error or error_description. error=#{error_type}, error_description=#{error_code}")
+      LogUtil.log_err("omniauth_failure called with missing error or error_description. error=#{error_type}, error_description=#{error_code}")
     end
     Rails.logger.info("Auth0 omniauth_failure: #{error_type}: #{error_code}")
 

@@ -14,7 +14,7 @@ class ApplicationRecord < ActiveRecord::Base
 
   def log_errors
     msg = errors.full_messages.join("\n")
-    LogUtil.log_err_and_airbrake(msg)
+    LogUtil.log_err(msg)
     Rails.logger.error("Backtrace:\n\t#{caller.join("\n\t")}")
   end
 

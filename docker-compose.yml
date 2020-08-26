@@ -24,6 +24,7 @@ x-web-variables: &web-variables
   ? RAILS_ENV
   ? SEGMENT_JS_ID
   ? SEGMENT_RUBY_ID
+  ? SENTRY_DSN_BACKEND
   ? SERVER_DOMAIN
 
 x-auth0-variables: &auth0-variables

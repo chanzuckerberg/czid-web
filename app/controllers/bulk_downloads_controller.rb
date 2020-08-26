@@ -39,7 +39,7 @@ class BulkDownloadsController < ApplicationController
       # Throw an error if any sample doesn't have a valid pipeline run.
       # The user should never see this error, because the validation step should catch any issues.
       LogUtil.log_backtrace(e)
-      LogUtil.log_err_and_airbrake("BulkDownloadsFailedEvent: Unexpected issue creating bulk download: #{e}")
+      LogUtil.log_err("BulkDownloadsFailedEvent: Unexpected issue creating bulk download: #{e}")
       render json: { error: e }, status: :unprocessable_entity
       return
     end
@@ -63,14 +63,14 @@ class BulkDownloadsController < ApplicationController
         # If the kickoff failed, set to error.
         bulk_download.update(status: BulkDownload::STATUS_ERROR)
         LogUtil.log_backtrace(e)
-        LogUtil.log_err_and_airbrake("BulkDownloadsKickoffError: Unexpected issue kicking off bulk download: #{e}")
+        LogUtil.log_err("BulkDownloadsKickoffError: Unexpected issue kicking off bulk download: #{e}")
         render json: {
           error: BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE,
           bulk_download: bulk_download,
         }, status: :internal_server_error
       end
     else
-      LogUtil.log_err_and_airbrake(
+      LogUtil.log_err(
         "BulkDownloadsFailedEvent: Failed to save bulk download for type #{create_params[:download_type]} with #{pipeline_run_ids.length} samples.
         #{bulk_download.errors.full_messages} #{params}"
       )
@@ -132,7 +132,7 @@ class BulkDownloadsController < ApplicationController
     update_params = { access_token: nil }
 
     if params[:error_type] == "FailedSrcUrlError"
-      LogUtil.log_err_and_airbrake("BulkDownloadFailedSrcUrlError (id #{@bulk_download.id}): The following paths failed to process: #{params[:error_data]}")
+      LogUtil.log_err("BulkDownloadFailedSrcUrlError (id #{@bulk_download.id}): The following paths failed to process: #{params[:error_data]}")
       sample_count = SamplesHelper.get_sample_count_from_sample_paths(params[:error_data])
       update_params[:error_message] = FAILED_SAMPLES_ERROR_TEMPLATE % sample_count
     end
@@ -147,7 +147,7 @@ class BulkDownloadsController < ApplicationController
     # set bulk download and validate access token in before_action
     # Clear the access token, so it can no longer be used.
     @bulk_download.update(status: BulkDownload::STATUS_ERROR, error_message: params[:error_message], access_token: nil)
-    LogUtil.log_err_and_airbrake("BulkDownloadFailedError (id #{@bulk_download.id}), #{params[:error_message]}")
+    LogUtil.log_err("BulkDownloadFailedError (id #{@bulk_download.id}), #{params[:error_message]}")
     render json: { status: "success" }
   end
 

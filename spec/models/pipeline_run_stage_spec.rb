@@ -18,7 +18,7 @@ RSpec.describe PipelineRunStage, type: :model do
         let(:sfn_execution_arn) {}
 
         it "notifies Airbrake with Invalid precondition" do
-          expect(LogUtil).to receive(:log_err_and_airbrake).with(match(/Invalid precondition/))
+          expect(LogUtil).to receive(:log_err).with(match(/Invalid precondition/))
           subject.update_job_status
         end
       end

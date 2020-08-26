@@ -91,7 +91,7 @@ module PipelineRunsHelper
         job_log_id = job_hash['container']['logStreamName']
       end
     else
-      LogUtil.log_err_and_airbrake("Error for update job status for record #{run_id} with error #{stderr}")
+      LogUtil.log_err("Error for update job status for record #{run_id} with error #{stderr}")
       job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"
       job_status = PipelineRunStage::STATUS_FAILED if stderr =~ /IndexError/ # job no longer exists
     end
@@ -111,7 +111,7 @@ module PipelineRunsHelper
       sfn_hash = parse_sfn_execution_history_hash(sfn_execution_history_hash)
       job_status = sfn_hash.dig(stage_number.to_s, "status") || "PENDING"
     else
-      LogUtil.log_err_and_airbrake("Error for update sfn status for record #{run_id} - stage #{stage_number} with error #{stderr}")
+      LogUtil.log_err("Error for update sfn status for record #{run_id} - stage #{stage_number} with error #{stderr}")
       job_status = PipelineRunStage::STATUS_ERROR # transient error, job is still "in progress"
       if stderr =~ /ExecutionDoesNotExist/ || stderr =~ /InvalidArn/
         # job no longer exists or ARN is invalid

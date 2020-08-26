@@ -139,7 +139,7 @@ RSpec.describe BasespaceController, type: :controller do
         end
 
         it "returns an error" do
-          expect(LogUtil).to receive(:log_err_and_airbrake).with("Fetch Basespace projects failed with error: Failed to list projects").exactly(1).times
+          expect(LogUtil).to receive(:log_err).with("Fetch Basespace projects failed with error: Failed to list projects").exactly(1).times
           get :projects, params: { access_token: "123" }
 
           json_response = JSON.parse(response.body)
@@ -238,7 +238,7 @@ RSpec.describe BasespaceController, type: :controller do
         end
 
         it "returns an error" do
-          expect(LogUtil).to receive(:log_err_and_airbrake).with("Fetch samples for Basespace project failed with error: Failed to get samples for project").exactly(1).times
+          expect(LogUtil).to receive(:log_err).with("Fetch samples for Basespace project failed with error: Failed to get samples for project").exactly(1).times
           get :samples_for_project, params: { access_token: "123", basespace_project_id: 77 }
 
           json_response = JSON.parse(response.body)

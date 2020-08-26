@@ -256,7 +256,7 @@ class Sample < ApplicationRecord
                                           expires_in: SAMPLE_DOWNLOAD_EXPIRATION).to_s
       end
     rescue StandardError => e
-      LogUtil.log_err_and_airbrake("AWS presign error: #{e.inspect}")
+      LogUtil.log_err("AWS presign error: #{e.inspect}")
     end
     nil
   end
@@ -394,7 +394,7 @@ class Sample < ApplicationRecord
     self.status = STATUS_UPLOADED
     save! # this triggers pipeline command
   rescue => e
-    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}")
+    LogUtil.log_err("SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}")
     self.status = STATUS_CHECKED
     if upload_error.blank?
       self.upload_error = Sample::UPLOAD_ERROR_S3_UPLOAD_FAILED
@@ -453,7 +453,7 @@ class Sample < ApplicationRecord
     save!
   rescue => e
     Rails.logger.info(e)
-    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: #{e}")
+    LogUtil.log_err("SampleUploadFailedEvent: #{e}")
 
     self.status = STATUS_CHECKED
     self.upload_error = Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED
@@ -560,7 +560,7 @@ class Sample < ApplicationRecord
         end
       end
     rescue
-      LogUtil.log_err_and_airbrake("Failed to concatenate input parts for sample #{id}")
+      LogUtil.log_err("Failed to concatenate input parts for sample #{id}")
     end
   end
 
@@ -751,7 +751,7 @@ class Sample < ApplicationRecord
     pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
     pr.save!
   rescue StandardError => err
-    LogUtil.log_err_and_airbrake("Error saving pipeline run: #{err.inspect}")
+    LogUtil.log_err("Error saving pipeline run: #{err.inspect}")
     LogUtil.log_backtrace(err)
     # This may cause a message to be shown to the user on the sample page.
     # This may cause a message to be shown to the user on the sample page.

@@ -248,7 +248,7 @@ describe PipelineRun, type: :model do
     let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample) }
     let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage, pipeline_run: pipeline_run) }
 
-    before { allow(LogUtil).to receive(:log_err_and_airbrake) }
+    before { allow(LogUtil).to receive(:log_err) }
 
     it "sends metric to datadog" do
       allow(MetricUtil).to receive(:put_metric_now)
@@ -262,7 +262,7 @@ describe PipelineRun, type: :model do
       it "sends error to airbrake and log error" do
         pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, nil, true, false)
 
-        expect(LogUtil).to have_received(:log_err_and_airbrake).with(match(/SampleFailedEvent:/))
+        expect(LogUtil).to have_received(:log_err).with(match(/SampleFailedEvent:/))
       end
     end
 
@@ -271,7 +271,7 @@ describe PipelineRun, type: :model do
       it "do not send error to airbrake and log warn" do
         pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, nil, false, true)
 
-        expect(LogUtil).to_not have_received(:log_err_and_airbrake)
+        expect(LogUtil).to_not have_received(:log_err)
         expect(Rails.logger).to have_received(:warn).with(match(/SampleFailedEvent:/))
       end
     end

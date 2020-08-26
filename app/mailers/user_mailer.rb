@@ -7,7 +7,7 @@ class UserMailer < ApplicationMailer
     @shared_project_id = email_arguments[:shared_project_id]
     mail(to: @new_user_email, subject: email_arguments[:email_subject])
   rescue
-    LogUtil.log_err_and_airbrake("added_to_projects_email(#{email_arguments}) failed")
+    LogUtil.log_err("added_to_projects_email(#{email_arguments}) failed")
   end
 
   def landing_sign_up_email(body)

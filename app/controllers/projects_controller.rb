@@ -569,7 +569,7 @@ class ProjectsController < ApplicationController
                                             reset_url).deliver_now
     end
   rescue => exception
-    LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}. #{exception.message}")
+    LogUtil.log_err("Failed to send 'new user on project' password instructions to #{email}. #{exception.message}")
     LogUtil.log_backtrace(exception)
   end
 

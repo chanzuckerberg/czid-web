@@ -114,7 +114,7 @@ describe Sample, type: :model do
         expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(2).times.and_return(2)
         expect(@sample).to receive(:kickoff_pipeline).exactly(0).times
         # Check that the proper error message is logged.
-        expect(LogUtil).to receive(:log_err_and_airbrake).with(
+        expect(LogUtil).to receive(:log_err).with(
           "SampleUploadFailedEvent: Validation failed: Input files have identical read 1 source and read 2 source"
         ).exactly(1).times
 
@@ -147,7 +147,7 @@ describe Sample, type: :model do
         expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(3).times.and_return(2)
         expect(@sample).to receive(:kickoff_pipeline).exactly(0).times
         # Check that the proper error message is logged.
-        expect(LogUtil).to receive(:log_err_and_airbrake).with(
+        expect(LogUtil).to receive(:log_err).with(
           "SampleUploadFailedEvent: Validation failed: Input files invalid number (3)"
         ).exactly(1).times
 
@@ -166,7 +166,7 @@ describe Sample, type: :model do
         expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(0).times
         expect(@sample).to receive(:kickoff_pipeline).exactly(0).times
         # Check that the proper error message is logged.
-        expect(LogUtil).to receive(:log_err_and_airbrake).with(
+        expect(LogUtil).to receive(:log_err).with(
           "SampleUploadFailedEvent: #{ErrorHelper::SampleUploadErrors.error_fetching_basespace_files_for_dataset(fake_dataset_id, @sample.name, @sample.id)}"
         ).exactly(1).times
 
@@ -185,7 +185,7 @@ describe Sample, type: :model do
         expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(0).times
         expect(@sample).to receive(:kickoff_pipeline).exactly(0).times
         # Check that the proper error message is logged.
-        expect(LogUtil).to receive(:log_err_and_airbrake).with(
+        expect(LogUtil).to receive(:log_err).with(
           "SampleUploadFailedEvent: #{ErrorHelper::SampleUploadErrors.no_files_in_basespace_dataset(fake_dataset_id, @sample.name, @sample.id)}"
         ).exactly(1).times
 
@@ -207,7 +207,7 @@ describe Sample, type: :model do
         expect(Kernel).to receive(:sleep).with(60).ordered
         expect(Kernel).to receive(:sleep).with(300).ordered
         # Check that the proper error message is logged.
-        expect(LogUtil).to receive(:log_err_and_airbrake).with(
+        expect(LogUtil).to receive(:log_err).with(
           "SampleUploadFailedEvent: #{ErrorHelper::SampleUploadErrors.upload_from_basespace_failed(@sample.name, @sample.id, file_one_name, fake_dataset_id, 3)}"
         ).exactly(1).times
 

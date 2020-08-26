@@ -98,7 +98,7 @@ describe WorkflowRun, type: :model do
     it "reports run failures" do
       @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
       @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_error_sfn_execution_history)
-      expect(LogUtil).to receive(:log_err_and_airbrake).with(match(/SampleFailedEvent/))
+      expect(LogUtil).to receive(:log_err).with(match(/SampleFailedEvent/))
 
       @workflow_running.update_status
       expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:failed])
@@ -107,7 +107,7 @@ describe WorkflowRun, type: :model do
     it "detects input errors and does not report error" do
       @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
       @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_bad_input_sfn_execution_history)
-      expect(LogUtil).not_to receive(:log_err_and_airbrake).with(match(/SampleFailedEvent/))
+      expect(LogUtil).not_to receive(:log_err).with(match(/SampleFailedEvent/))
 
       @workflow_running.update_status
       expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded_with_issue])

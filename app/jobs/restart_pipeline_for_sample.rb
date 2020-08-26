@@ -12,7 +12,7 @@ class RestartPipelineForSample
     raise "not restarted" unless s.kickoff_pipeline
     Rails.logger.info("RestartPipelineForSample #{sample_id} has started. ")
   rescue => err
-    LogUtil.log_err_and_airbrake(
+    LogUtil.log_err(
       "RestartPipelineForSample #{sample_id} failed to run. Reason: #{err}"
     )
     LogUtil.log_backtrace(err)

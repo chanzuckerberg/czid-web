@@ -75,7 +75,7 @@ RSpec.describe BasespaceHelper, type: :helper do
       end
 
       it "returns nil" do
-        expect(LogUtil).to receive(:log_err_and_airbrake).with("Fetch files for Basespace dataset failed with error: Failed to get files").exactly(1).times
+        expect(LogUtil).to receive(:log_err).with("Fetch files for Basespace dataset failed with error: Failed to get files").exactly(1).times
         files = helper.files_for_basespace_dataset(fake_dataset_id, fake_access_token)
 
         expect(files).to eq(nil)
@@ -96,7 +96,7 @@ RSpec.describe BasespaceHelper, type: :helper do
         ).exactly(1).times.and_return([
                                         true, "",
                                       ])
-        expect(LogUtil).to receive(:log_err_and_airbrake).exactly(0).times
+        expect(LogUtil).to receive(:log_err).exactly(0).times
 
         success = helper.upload_from_basespace_to_s3(fake_basespace_path, fake_s3_path, fake_file_name)
         expect(success).to be true
@@ -115,7 +115,7 @@ RSpec.describe BasespaceHelper, type: :helper do
                                       ])
 
         # If the syscall fails, we should log the error.
-        expect(LogUtil).to receive(:log_err_and_airbrake).with(
+        expect(LogUtil).to receive(:log_err).with(
           "Failed to transfer file from basespace to #{fake_s3_path} for #{fake_file_name}: #{fake_std_err}"
         ).exactly(1).times
 
@@ -140,8 +140,8 @@ RSpec.describe BasespaceHelper, type: :helper do
       it "should call Basespace API to test access token" do
         expect(HttpHelper).to receive(:get_json).with(anything, anything, { "Authorization" => "Bearer #{fake_access_token}" }, anything)
                                                 .exactly(1).times.and_raise(HttpHelper::HttpError.new("HTTP Get request failed", 401))
-        expect(LogUtil).to receive(:log_err_and_airbrake).with("BasespaceAccessTokenError: Failed to revoke access token for sample id 123abc")
-                                                         .exactly(0).times
+        expect(LogUtil).to receive(:log_err).with("BasespaceAccessTokenError: Failed to revoke access token for sample id 123abc")
+                                            .exactly(0).times
         expect(Rails.logger).to receive(:info).with("Revoke access token check succeeded").exactly(1).times
 
         BasespaceHelper.verify_access_token_revoked(fake_access_token, "123abc")
@@ -150,8 +150,8 @@ RSpec.describe BasespaceHelper, type: :helper do
       it "should log an error if Basespace API call unexpectedly succeeds" do
         expect(HttpHelper).to receive(:get_json).with(anything, anything, { "Authorization" => "Bearer #{fake_access_token}" }, anything)
                                                 .exactly(1).times.and_return("foo" => "bar")
-        expect(LogUtil).to receive(:log_err_and_airbrake).with("BasespaceAccessTokenError: Failed to revoke access token for sample id 123abc")
-                                                         .exactly(1).times
+        expect(LogUtil).to receive(:log_err).with("BasespaceAccessTokenError: Failed to revoke access token for sample id 123abc")
+                                            .exactly(1).times
         expect(Rails.logger).to receive(:info).with("Revoke access token check succeeded").exactly(0).times
 
         BasespaceHelper.verify_access_token_revoked(fake_access_token, "123abc")

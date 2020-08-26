@@ -26,7 +26,7 @@ class PipelineVizController < ApplicationController
         elsif pipeline_run.directed_acyclic_graph?
           @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, @show_experimental, remove_host_filtering_urls)
         else
-          LogUtil.log_err_and_airbrake("Error retrieving data for pipeline viz: Pipeline Run #{pipeline_run.id} has no execution strategy")
+          LogUtil.log_err("Error retrieving data for pipeline viz: Pipeline Run #{pipeline_run.id} has no execution strategy")
           if current_user.admin?
             render(json: {
                      status: STATUS_NO_EXECUTION_STRATEGY,
@@ -39,7 +39,7 @@ class PipelineVizController < ApplicationController
           return
         end
       rescue StandardError => e
-        LogUtil.log_err_and_airbrake("Error retrieving pipeline viz data for Pipeline Run #{pipeline_run.id}: #{e}")
+        LogUtil.log_err("Error retrieving pipeline viz data for Pipeline Run #{pipeline_run.id}: #{e}")
         if current_user.admin?
           render(json: {
                    status: STATUS_OTHER_ERROR,

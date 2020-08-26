@@ -428,7 +428,7 @@ class PipelineRun < ApplicationRecord
     end
     if tsv_lines.length != 2
       error_message = "Pipeline run ##{id} has an insert size metrics file but metrics could not be found"
-      LogUtil.log_err_and_airbrake(error_message)
+      LogUtil.log_err(error_message)
       raise error_message
     end
     insert_size_metrics = {}
@@ -783,7 +783,7 @@ class PipelineRun < ApplicationRecord
     output_json_s3_path = s3_file_for("taxon_counts")
     downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
                                                                   local_json_path, 3)
-    LogUtil.log_err_and_airbrake("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
+    LogUtil.log_err("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
     return unless downloaded_json_path
     load_taxons(downloaded_json_path, false)
   end
@@ -796,7 +796,7 @@ class PipelineRun < ApplicationRecord
 
     Syscall.run_in_dir(local_json_path, "sed", "-e", "s/$/,#{id}/", "-i", "taxon_byteranges")
     success = Syscall.run_in_dir(local_json_path, "mysqlimport --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --fields-terminated-by=',' --replace --local --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id idseq_#{Rails.env} taxon_byteranges")
-    LogUtil.log_err_and_airbrake("PipelineRun #{id} failed db_load_byteranges import") unless success
+    LogUtil.log_err("PipelineRun #{id} failed db_load_byteranges import") unless success
     Syscall.run("rm", "-f", downloaded_byteranges_path)
   end
 
@@ -845,7 +845,7 @@ class PipelineRun < ApplicationRecord
     # taxon_counts/taxon_byteranges/contigs/contig_counts.
     unless pipeline_version.present? || finalized
       # No need to warn if finalized (likely failed)
-      LogUtil.log_err_and_airbrake("s3_file_for was called without a pipeline_version for PR #{id}")
+      LogUtil.log_err("s3_file_for was called without a pipeline_version for PR #{id}")
     end
 
     case output
@@ -960,7 +960,7 @@ class PipelineRun < ApplicationRecord
       compile_stats_file!
       load_stats_file
     rescue => e
-      LogUtil.log_err_and_airbrake("Failure compiling stats: #{e}")
+      LogUtil.log_err("Failure compiling stats: #{e}")
       LogUtil.log_backtrace(e)
       compiling_stats_failed = true
     end
@@ -1032,7 +1032,7 @@ class PipelineRun < ApplicationRecord
       )
       Rails.logger.info("PipelineRun: id=#{id} sfn_execution_arn=#{sfn_service_result[:sfn_execution_arn]}")
     rescue => e
-      LogUtil.log_err_and_airbrake("Error starting SFN pipeline: #{e}")
+      LogUtil.log_err("Error starting SFN pipeline: #{e}")
       LogUtil.log_backtrace(e)
       # we will not retry in this case, since we do not know what error occurred
     end
@@ -1122,7 +1122,7 @@ class PipelineRun < ApplicationRecord
   private def report_failed_pipeline_run_stage(prs, known_user_error, send_to_airbrake, automatic_restart = false)
     log_message = pipeline_run_stage_error_message(prs, automatic_restart, known_user_error)
     if send_to_airbrake
-      LogUtil.log_err_and_airbrake(log_message)
+      LogUtil.log_err(log_message)
     else
       Rails.logger.warn(log_message)
     end
@@ -1172,7 +1172,7 @@ class PipelineRun < ApplicationRecord
       if run_time > threshold
         msg = "LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
           "See: #{status_url}"
-        LogUtil.log_err_and_airbrake(msg)
+        LogUtil.log_err(msg)
         update(alert_sent: 1)
       end
     end
