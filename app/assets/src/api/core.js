@@ -9,8 +9,6 @@ const postToFrontendMetrics = async (url, resp, duration) =>
       response_time: duration,
       http_method: resp.config.method,
       http_status: resp.status,
-      // Fetch the CSRF token from the DOM.
-      authenticity_token: document.getElementsByName("csrf-token")[0].content,
     })
     .catch(e => Promise.reject(e.response.data));
 

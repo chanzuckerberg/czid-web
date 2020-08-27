@@ -3,6 +3,8 @@ require './lib/cloudwatch_util'
 class FrontendMetricsController < ApplicationController
   include ErrorHelper
 
+  skip_before_action :verify_authenticity_token, only: :create
+
   class InvalidParametersError < StandardError
     def initialize(invalid_params)
       super("Provided invalid parameters #{invalid_params}")
