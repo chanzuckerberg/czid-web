@@ -38,6 +38,10 @@ export default class Histogram {
         // If true, the data is already binned, i.e. the data is an array of
         // { x0, length }
         skipBins: false,
+        // hoverBuffer is used to determine how far away the cursor can be
+        // to activate a bar's hover behavior (e.g. coverage viz).
+        // If 0, then hover behavior is activated only when the bar itself
+        // is directly hovered over (e.g. PLQC histograms).
         hoverBuffer: 5,
         xScaleLog: false,
       },
@@ -208,6 +212,52 @@ export default class Histogram {
     return this.options.barOpacity || 0.8;
   };
 
+  onBarMouseMove = () => {
+    this.options.onHistogramBarHover(
+      currentEvent.clientX,
+      currentEvent.clientY
+    );
+  };
+
+  onBarMouseOver = (bin, seriesIndex, barIndex) => {
+    if (this.options.onHistogramBarEnter) {
+      this.options.onHistogramBarEnter(bin, this.data[seriesIndex]);
+    }
+    if (this.options.hoverColors) {
+      this.svg
+        .select(`.rect-${barIndex}`)
+        .attr("fill", this.options.hoverColors[seriesIndex]);
+    }
+  };
+
+  onBarMouseOut = (seriesIndex, barIndex) => {
+    const colors = this.getColors();
+    this.svg.select(`.rect-${barIndex}`).attr("fill", colors[seriesIndex]);
+    this.options.onHistogramBarHover();
+  };
+
+  onBarMouseDown = (seriesIndex, barIndex) => {
+    if (this.options.clickColors) {
+      this.svg
+        .select(`.rect-${barIndex}`)
+        .attr("fill", this.options.clickColors[seriesIndex]);
+    }
+  };
+
+  onBarMouseUp = (seriesIndex, barIndex) => {
+    if (this.options.hoverColors) {
+      this.svg
+        .select(`.rect-${barIndex}`)
+        .attr("fill", this.options.hoverColors[seriesIndex]);
+    }
+  };
+
+  onBarClick = (seriesIndex, barIndex) => {
+    if (this.options.onHistogramBarClick) {
+      this.options.onHistogramBarClick(this.data[seriesIndex], barIndex);
+    }
+  };
+
   getHighlightedBar = () => {
     // svgX is an x coordinate relative to the svg container.
     // All the bar "endpoints" are within this same coordinate space.
@@ -276,16 +326,6 @@ export default class Histogram {
     }
   };
 
-  onMouseClick = () => {
-    const { dataIndices } = this.getHighlightedBar();
-
-    if (dataIndices !== null && this.options.onHistogramBarClick) {
-      const [seriesIndex, barIndex] = dataIndices;
-
-      this.options.onHistogramBarClick(this.data[seriesIndex], barIndex);
-    }
-  };
-
   onMouseLeave = () => {
     if (this.options.onHistogramBarExit) {
       this.options.onHistogramBarExit();
@@ -312,28 +352,6 @@ export default class Histogram {
     this.svg
       .select(`.bar-${seriesIndex} .rect-${barIndex}`)
       .attr("fill", highlightColor);
-  };
-
-  onMouseDown = () => {
-    const { dataIndices } = this.getHighlightedBar();
-    this.selectBar(dataIndices, true);
-  };
-
-  selectBar = dataIndices => {
-    if (!dataIndices || !this.options.clickColors) {
-      return;
-    }
-
-    const [seriesIndex, barIndex] = dataIndices;
-
-    this.svg
-      .select(`.bar-${seriesIndex} .rect-${barIndex}`)
-      .attr("fill", this.options.clickColors[seriesIndex]);
-  };
-
-  onMouseUp = () => {
-    const { dataIndices } = this.getHighlightedBar();
-    this.highlightBar(dataIndices, true);
   };
 
   update() {
@@ -365,6 +383,8 @@ export default class Histogram {
     this.svg.append("g").call(this.xAxis.bind(this), x);
     this.svg.append("g").call(this.yAxis.bind(this), y);
 
+    this.svg.on("click", this.options.onHistogramEmptyClick);
+
     const barOpacity = this.getBarOpacity();
 
     // Maps from x-coordinate to the data plotted at that x-coordinate.
@@ -389,7 +409,18 @@ export default class Histogram {
         .attr("width", d => this.getBarWidth(x, d))
         .attr("y", d => y(d.length))
         .attr("height", d => y(0) - y(d.length))
-        .style("opacity", barOpacity);
+        .style("opacity", barOpacity)
+        .on("mousemove", this.onBarMouseMove)
+        .on("mouseover", (d, index) => {
+          this.onBarMouseOver(d, i, index);
+        })
+        .on("mouseleave", (_, index) => this.onBarMouseOut(i, index))
+        .on("mousedown", (_, index) => this.onBarMouseDown(i, index))
+        .on("mouseup", (_, index) => this.onBarMouseUp(i, index))
+        .on("click", (_, index) => {
+          this.onBarClick(i, index);
+          currentEvent.stopPropagation();
+        });
 
       bins[i].forEach((bin, index) => {
         let barWidth = this.getBarWidth(x, bin);
@@ -465,17 +496,22 @@ export default class Histogram {
     this.barCentersToIndices = barCentersToIndices;
     this.sortedBarCenters = barCenters.sort((a, b) => a - b);
 
-    this.svg
-      .append("rect")
-      .attr("class", cs.hoverRect)
-      .attr("transform", `translate(${this.margins.left}, ${this.margins.top})`)
-      .attr("width", this.size.width - this.margins.right - this.margins.left)
-      .attr("height", this.size.height - this.margins.top - this.margins.bottom)
-      .on("mousemove", this.onMouseMove)
-      .on("mouseleave", this.onMouseLeave)
-      .on("mousedown", this.options.clickColors && this.onMouseDown)
-      .on("mouseup", this.options.clickColors && this.onMouseUp)
-      .on("click", this.options.onHistogramBarClick && this.onMouseClick);
+    if (this.options.hoverBuffer > 0) {
+      this.svg
+        .append("rect")
+        .attr("class", cs.hoverRect)
+        .attr(
+          "transform",
+          `translate(${this.margins.left}, ${this.margins.top})`
+        )
+        .attr("width", this.size.width - this.margins.right - this.margins.left)
+        .attr(
+          "height",
+          this.size.height - this.margins.top - this.margins.bottom
+        )
+        .on("mousemove", this.onMouseMove)
+        .on("mouseleave", this.onMouseLeave);
+    }
 
     if (this.options.seriesNames) {
       let legend = this.svg

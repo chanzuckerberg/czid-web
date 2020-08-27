@@ -926,7 +926,7 @@ class DiscoveryView extends React.Component {
     const { plqcPreviewedSamples } = this.state;
     const { domain } = this.props;
 
-    if (plqcPreviewedSamples.length > 0) {
+    if (plqcPreviewedSamples && plqcPreviewedSamples.length > 0) {
       const conditions = this.getConditions();
       conditions.sampleIds = plqcPreviewedSamples;
       this.mapPreviewSamples = this.dataLayer.samples.createView({

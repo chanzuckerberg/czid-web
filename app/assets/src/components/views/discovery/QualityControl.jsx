@@ -230,13 +230,8 @@ class QualityControl extends React.Component {
     const extractedBin = [];
 
     for (let binIndex = 0; binIndex < histogramData.length; binIndex++) {
-      const bin = {};
-      // TODO(julie): use min/max for tooltip displaying bin range
-      bin.min = histogramData[binIndex].x0;
-      bin.max = histogramData[binIndex].x1;
-
       const endIndex = startIndex + histogramData[binIndex].length;
-      bin.samples = samples.slice(startIndex, endIndex);
+      const bin = samples.slice(startIndex, endIndex);
       startIndex = endIndex;
       extractedBin[binIndex] = bin;
     }
@@ -267,52 +262,37 @@ class QualityControl extends React.Component {
     } else if (data === meanInsertSize) {
       bin = meanInsertSizeBins[binIndex];
     }
-    handleBarClick(bin.samples);
+    handleBarClick(bin);
   };
 
-  handleHistogramBarEnter = (hoverData, data) => {
-    const {
-      totalReads,
-      totalReadsBins,
-      qualityReads,
-      qcPercentBins,
-      dcr,
-      dcrBins,
-      meanInsertSize,
-      meanInsertSizeBins,
-    } = this.state;
+  handleHistogramBarEnter = (bin, data) => {
+    const { totalReads, qualityReads, dcr, meanInsertSize } = this.state;
 
     let histogramTooltipData = {};
-    if (hoverData && hoverData[0] === 0) {
-      if (data === totalReads) {
-        histogramTooltipData = this.getHistogramTooltipData({
-          bins: totalReadsBins,
-          binIndex: hoverData[1],
-          label: "Total Reads",
-          format: d3.format(".2s"),
-        });
-      } else if (data === qualityReads) {
-        histogramTooltipData = this.getHistogramTooltipData({
-          bins: qcPercentBins,
-          binIndex: hoverData[1],
-          label: "Passed QC",
-          format: d => {
-            return d + "%";
-          },
-        });
-      } else if (data === dcr) {
-        histogramTooltipData = this.getHistogramTooltipData({
-          bins: dcrBins,
-          binIndex: hoverData[1],
-          label: "Ratio Number",
-        });
-      } else if (data === meanInsertSize) {
-        histogramTooltipData = this.getHistogramTooltipData({
-          bins: meanInsertSizeBins,
-          binIndex: hoverData[1],
-          label: "Base Pairs",
-        });
-      }
+    if (data === totalReads) {
+      histogramTooltipData = this.getHistogramTooltipData({
+        bin: bin,
+        label: "Total Reads",
+        format: d3.format(".2s"),
+      });
+    } else if (data === qualityReads) {
+      histogramTooltipData = this.getHistogramTooltipData({
+        bin: bin,
+        label: "Passed QC",
+        format: d => {
+          return d + "%";
+        },
+      });
+    } else if (data === dcr) {
+      histogramTooltipData = this.getHistogramTooltipData({
+        bin: bin,
+        label: "Ratio Number",
+      });
+    } else if (data === meanInsertSize) {
+      histogramTooltipData = this.getHistogramTooltipData({
+        bin: bin,
+        label: "Base Pairs",
+      });
     }
 
     this.setState({
@@ -320,18 +300,17 @@ class QualityControl extends React.Component {
     });
   };
 
-  getHistogramTooltipData = memoize(({ bins, binIndex, label, format }) => {
-    const bin = bins[binIndex];
-    const binMin = format ? format(bin.min) : bin.min;
-    const binMax = format ? format(bin.max) : bin.max;
-    const samplesText = bin.samples.length === 1 ? "sample" : "samples";
+  getHistogramTooltipData = memoize(({ bin, label, format }) => {
+    const binMin = format ? format(bin.x0) : bin.x0;
+    const binMax = format ? format(bin.x1) : bin.x1;
+    const samplesText = bin.length === 1 ? "sample" : "samples";
 
     return [
       {
         name: "Info",
         data: [
           [`${label}`, `${binMin}-${binMax}`],
-          ["Number", `${bin.samples.length} ${samplesText}`],
+          ["Number", `${bin.length} ${samplesText}`],
         ],
         disabled: false,
         compact: true,
@@ -340,12 +319,9 @@ class QualityControl extends React.Component {
   });
 
   handleHistogramBarHover = (clientX, clientY) => {
-    this.setState({
-      histogramTooltipLocation: {
-        left: clientX,
-        top: clientY,
-      },
-    });
+    const histogramTooltipLocation =
+      clientX && clientY ? { left: clientX, top: clientY } : null;
+    this.setState({ histogramTooltipLocation });
   };
 
   handleHistogramBarExit = () => {
@@ -353,6 +329,11 @@ class QualityControl extends React.Component {
       histogramTooltipLocation: null,
       histogramTooltipData: null,
     });
+  };
+
+  handleHistogramEmptyClick = () => {
+    const { handleBarClick } = this.props;
+    handleBarClick([]);
   };
 
   renderHistogram = (container, data, labelX, labelY, tickFormat) => {
@@ -364,6 +345,7 @@ class QualityControl extends React.Component {
       colors: [BAR_FILL_COLOR],
       hoverColors: [HOVER_BAR_FILL_COLOR],
       clickColors: [BAR_CLICK_FILL_COLOR],
+      hoverBuffer: 0,
       simple: true,
       showGridlines: true,
       numTicksY: 5,
@@ -379,6 +361,7 @@ class QualityControl extends React.Component {
       onHistogramBarHover: this.handleHistogramBarHover,
       onHistogramBarEnter: this.handleHistogramBarEnter,
       onHistogramBarExit: this.handleHistogramBarExit,
+      onHistogramEmptyClick: this.handleHistogramEmptyClick,
     });
     histogram.update();
     return histogram;
@@ -618,7 +601,7 @@ class QualityControl extends React.Component {
 
 QualityControl.propTypes = {
   projectId: PropTypes.number,
-  handleBarClick: PropTypes.func,
+  handleBarClick: PropTypes.func.isRequired,
   sampleStatsSidebarOpen: PropTypes.bool,
   filtersSidebarOpen: PropTypes.bool,
 };
