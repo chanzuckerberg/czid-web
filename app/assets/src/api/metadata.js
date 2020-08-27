@@ -4,21 +4,31 @@ import { get, postWithCSRF } from "./core";
 
 // Get metadata for a particular sample.
 // We might be able to deprecate this...
-const getSampleMetadata = (id, pipelineVersion) => {
-  return get(
-    pipelineVersion
-      ? `/samples/${id}/metadata?pipeline_version=${pipelineVersion}`
-      : `/samples/${id}/metadata`
-  );
+const getSampleMetadata = (id, pipelineVersion, snapshotShareId) => {
+  if (snapshotShareId) {
+    return get(
+      `/pub/${snapshotShareId}/samples/${id}/metadata?pipeline_version=${pipelineVersion}`
+    );
+  } else {
+    return get(
+      pipelineVersion
+        ? `/samples/${id}/metadata?pipeline_version=${pipelineVersion}`
+        : `/samples/${id}/metadata`
+    );
+  }
 };
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
-const getSampleMetadataFields = ids =>
-  get("/samples/metadata_fields", {
-    params: {
-      sampleIds: flatten([ids]),
-    },
-  });
+const getSampleMetadataFields = (ids, snapshotShareId) =>
+  get(
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+      "/samples/metadata_fields",
+    {
+      params: {
+        sampleIds: flatten([ids]),
+      },
+    }
+  );
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
 const getProjectMetadataFields = ids =>

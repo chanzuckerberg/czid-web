@@ -2,14 +2,14 @@ class SnapshotSamplesController < SamplesController
   include SamplesHelper
   include SnapshotSamplesHelper
 
-  SNAPSHOT_ACTIONS = [:show, :report_v2, :index_v2, :backgrounds, :sample_locations, :stats, :dimensions].freeze
+  SNAPSHOT_ACTIONS = [:show, :report_v2, :index_v2, :backgrounds, :sample_locations, :stats, :dimensions, :metadata, :metadata_fields].freeze
 
   # Snapshot endpoints are publicly accessible but access control is checked by set_snapshot_sample and share_id
   skip_before_action :authenticate_user!, :set_sample, :check_access, only: SNAPSHOT_ACTIONS
 
   before_action :app_config_required
   before_action :check_snapshot_exists, except: [:backgrounds]
-  before_action :set_snapshot_sample, only: [:show, :report_v2]
+  before_action :set_snapshot_sample, only: [:show, :report_v2, :metadata]
   before_action :block_action, except: SNAPSHOT_ACTIONS
 
   MAX_PAGE_SIZE_V2 = 100
@@ -106,6 +106,21 @@ class SnapshotSamplesController < SamplesController
     super
   end
 
+  # GET /pub/:share_id/samples/:id/metadata
+  def metadata
+    super
+  end
+
+  # GET /pub/:share_id/samples/metadata_fields
+  def metadata_fields
+    share_id = snapshot_sample_params[:share_id]
+    sample_ids = (snapshot_sample_params[:sampleIds] || []).map(&:to_i)
+    snapshot_samples = samples_by_share_id(share_id)
+    sample = snapshot_samples.find_by(id: sample_ids[0])
+    results = sample.present? ? sample.metadata_fields_info : []
+    render json: results
+  end
+
   private
 
   def block_action
@@ -150,7 +165,7 @@ class SnapshotSamplesController < SamplesController
   end
 
   def snapshot_sample_params
-    permitted_params = [:share_id, :id, :orderBy, :orderDir, :limit, :offset, :listAllIds, :basic, :host, :location, :locationV2, :taxon, :time, :tissue, :search, :sampleIds]
+    permitted_params = [:share_id, :id, :orderBy, :orderDir, :limit, :offset, :listAllIds, :basic, :host, :location, :locationV2, :taxon, :time, :tissue, :search, [sampleIds: []]]
     params.permit(*permitted_params)
   end
 end

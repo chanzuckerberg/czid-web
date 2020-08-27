@@ -140,6 +140,7 @@ class MetadataTab extends React.Component {
       additionalInfo,
       onMetadataChange,
       onMetadataSave,
+      snapshotShareId,
     } = this.props;
     const { sectionEditing } = this.state;
 
@@ -150,6 +151,10 @@ class MetadataTab extends React.Component {
 
     const metadataFields = [];
 
+    const projectLink = snapshotShareId
+      ? `/pub/${snapshotShareId}`
+      : `/home?project_id=${additionalInfo.project_id}`;
+
     // Special Sample Info fields.
     // TODO: Consider refactoring so SAMPLE_ADDITIONAL_INFO doesn't have to be special.
     if (section.name === "Sample Info" && !isSectionEditing) {
@@ -158,10 +163,7 @@ class MetadataTab extends React.Component {
           label: info.name,
           value:
             info.key === "project_name" ? (
-              <a
-                className={cs.projectLink}
-                href={`/home?project_id=${additionalInfo.project_id}`}
-              >
+              <a className={cs.projectLink} href={projectLink}>
                 {additionalInfo[info.key]}
               </a>
             ) : (
@@ -241,6 +243,7 @@ MetadataTab.propTypes = {
   }).isRequired,
   metadataErrors: PropTypes.objectOf(PropTypes.string),
   sampleTypes: PropTypes.arrayOf(PropTypes.SampleTypeProps).isRequired,
+  snapshotShareId: PropTypes.string,
 };
 
 export default MetadataTab;

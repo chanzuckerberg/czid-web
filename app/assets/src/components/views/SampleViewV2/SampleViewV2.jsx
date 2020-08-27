@@ -826,6 +826,7 @@ export default class SampleViewV2 extends React.Component {
       sidebarMode,
       sidebarTaxonData,
     } = this.state;
+    const { snapshotShareId } = this.props;
 
     if (sidebarMode === "taxonDetails") {
       return {
@@ -841,6 +842,7 @@ export default class SampleViewV2 extends React.Component {
     } else if (sidebarMode === "sampleDetails") {
       return {
         sampleId: sample.id,
+        snapshotShareId: snapshotShareId,
         pipelineVersion: pipelineRun ? pipelineRun.pipeline_version : null,
         onMetadataUpdate: this.handleMetadataUpdate,
       };

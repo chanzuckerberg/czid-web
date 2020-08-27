@@ -2,10 +2,16 @@ require 'rails_helper'
 
 RSpec.describe SnapshotSamplesController, type: :controller do
   before do
+    create(:metadata_field, name: "collection_location", base_type: 0)
+    create(:metadata_field, name: "collection_location_v2", base_type: 3)
+    create(:metadata_field, name: "sample_type", base_type: 0)
+    nucleotide_type = create(:metadata_field, name: "nucleotide_type", base_type: 0)
+
     user = create(:user)
-    project = create(:project, users: [user])
+    project = create(:project, users: [user], metadata_fields: [nucleotide_type])
     @sample_one = create(:sample,
                          project: project,
+                         metadata_fields: { "nucleotide_type" => nil },
                          pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
     @sample_two = create(:sample,
                          project: project,
@@ -66,6 +72,20 @@ RSpec.describe SnapshotSamplesController, type: :controller do
         expect(response).to redirect_to(root_path)
       end
     end
+
+    describe "GET #metadata" do
+      it "should redirect to root_path" do
+        get :metadata, params: { id: @sample_one.id, share_id: @snapshot_link.share_id }
+        expect(response).to redirect_to(root_path)
+      end
+    end
+
+    describe "GET #metadata_fields" do
+      it "should redirect to root_path" do
+        get :metadata_fields, params: { sampleIds: [@sample_one.id], share_id: @snapshot_link.share_id }
+        expect(response).to redirect_to(root_path)
+      end
+    end
   end
 
   context "when snapshot sharing is enabled" do
@@ -75,9 +95,6 @@ RSpec.describe SnapshotSamplesController, type: :controller do
                                     @sample_one.first_pipeline_run.id,
                                     @sample_two.first_pipeline_run.id,
                                   ])
-      @location_metadata_field = create(:metadata_field, name: "collection_location", base_type: 0)
-      @location_v2_metadata_field = create(:metadata_field, name: "collection_location_v2", base_type: 3)
-      @sample_type_metadata_field = create(:metadata_field, name: "sample_type", base_type: 0)
     end
 
     describe "GET #show" do
@@ -247,13 +264,6 @@ RSpec.describe SnapshotSamplesController, type: :controller do
         expect(json_response.second).to include_json(expected_location_v2)
         expect(json_response.last).to include_json(expected_tissue)
       end
-    end
-
-    describe "GET #dimensions" do
-      it "should redirect to root_path for invalid share_id" do
-        get :dimensions, params: { share_id: "invalid_id", domain: "snapshot", project_id: @snapshot_link.project_id }
-        expect(response).to redirect_to(root_path)
-      end
 
       it "should return the correct json_response for valid share_id" do
         get :dimensions, params: { share_id: @snapshot_link.share_id, domain: "snapshot", project_id: @snapshot_link.project_id }
@@ -278,6 +288,73 @@ RSpec.describe SnapshotSamplesController, type: :controller do
         expect(json_response.first).to include_json(expected_location)
         expect(json_response.second).to include_json(expected_location_v2)
         expect(json_response.last).to include_json(expected_tissue)
+      end
+    end
+
+    describe "GET #metadata" do
+      it "should redirect to root_path for invalid share_id" do
+        get :metadata, params: { id: @sample_one.id, share_id: "invalid_id" }
+        expect(response).to redirect_to(root_path)
+      end
+
+      it "should redirect to root_path for non-snapshot sample" do
+        get :metadata, params: { id: @sample_two.id, share_id: @snapshot_link.share_id }
+        expect(response).to redirect_to(root_path)
+      end
+
+      it "should return the correct json_response for valid share_id" do
+        get :metadata, params: { id: @sample_one.id, share_id: @snapshot_link.share_id }
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+
+        # check for expected keys
+        expected_additional_info_keys = ["editable", "ercc_comparison", "host_genome_name", "host_genome_taxa_category", "name",
+                                         "notes", "pipeline_run", "project_id", "project_name", "summary_stats", "upload_date",
+                                         "wetlab_protocol", "workflow",]
+        expected_pipeline_run_keys = ["adjusted_remaining_reads", "alert_sent", "alignment_config_id", "assembled", "created_at",
+                                      "dag_vars", "error_message", "finalized", "fraction_subsampled", "id", "job_status",
+                                      "known_user_error", "max_input_fragments", "pipeline_branch", "pipeline_commit",
+                                      "pipeline_execution_strategy", "pipeline_version", "results_finalized", "sample_id",
+                                      "sfn_execution_arn", "subsample", "total_ercc_reads", "total_reads", "truncated",
+                                      "unmapped_reads", "updated_at", "use_taxon_whitelist", "version", "wdl_version",]
+        expected_pipeline_version_keys = ["alignment_db", "pipeline"]
+        expect(json_response.keys).to contain_exactly("metadata", "additional_info")
+        expect(json_response["additional_info"].keys).to match_array(expected_additional_info_keys)
+        expect(json_response["additional_info"]["pipeline_run"].keys).to match_array(expected_pipeline_run_keys)
+        expect(json_response["additional_info"]["pipeline_run"]["version"].keys).to match_array(expected_pipeline_version_keys)
+
+        # check for expected snapshot info
+        expect(json_response["additional_info"]["project_id"]).to eq(@snapshot_link.project_id)
+        expect(json_response["additional_info"]["pipeline_run"]["sample_id"]).to eq(@sample_one.id)
+        expect(json_response["additional_info"]["pipeline_run"]["id"]).to eq(@sample_one.first_pipeline_run.id)
+      end
+    end
+
+    describe "GET #metadata_fields" do
+      it "should redirect to root_path for invalid share_id" do
+        get :metadata_fields, params: { sampleIds: [@sample_one.id], share_id: "invalid_id" }
+        expect(response).to redirect_to(root_path)
+      end
+
+      it "should exclude non-snapshot sample for valid share_id" do
+        # excludes sample_two
+        get :metadata_fields, params: { sampleIds: [@sample_two.id], share_id: @snapshot_link.share_id }
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq([])
+
+        get :metadata_fields, params: { sampleIds: [@sample_one.id, @sample_two.id], share_id: @snapshot_link.share_id }
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response.first["key"]).to eq("nucleotide_type")
+      end
+
+      it "should return the correct json_response for valid share_id" do
+        get :metadata_fields, params: { sampleIds: [@sample_one.id], share_id: @snapshot_link.share_id }
+        expect(response).to have_http_status(:success)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.first["key"]).to eq("nucleotide_type")
       end
     end
   end

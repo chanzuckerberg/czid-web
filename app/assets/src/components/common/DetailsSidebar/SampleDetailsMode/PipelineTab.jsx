@@ -39,8 +39,9 @@ class PipelineTab extends React.Component {
   };
 
   componentDidMount() {
+    const { snapshotShareId } = this.props;
     this.updateGraphDimensions();
-    this.getReadCounts();
+    !snapshotShareId && this.getReadCounts();
   }
 
   componentDidUpdate() {
@@ -70,10 +71,10 @@ class PipelineTab extends React.Component {
   };
 
   getPipelineInfoField = field => {
-    const { pipelineInfo } = this.props;
+    const { pipelineInfo, snapshotShareId } = this.props;
     const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
-    const metadataLink = linkLabel && link && (
+    const metadataLink = !snapshotShareId && linkLabel && link && (
       <a
         className={cs.vizLink}
         href={link}
@@ -178,7 +179,7 @@ class PipelineTab extends React.Component {
   };
 
   render() {
-    const { pipelineInfo, pipelineRun, sampleId } = this.props;
+    const { pipelineInfo, pipelineRun, sampleId, snapshotShareId } = this.props;
 
     let fields = PIPELINE_INFO_FIELDS;
     if (lowerCase(get(["workflow", "text"], pipelineInfo)) !== WORKFLOWS.MAIN) {
@@ -201,92 +202,98 @@ class PipelineTab extends React.Component {
             className={cs.pipelineInfoFields}
           />
         </MetadataSection>
-        <MetadataSection
-          toggleable
-          onToggle={() => this.toggleSection("readsRemaining")}
-          open={this.state.sectionOpen.readsRemaining}
-          title="Reads Remaining"
-        >
-          {!pipelineRun ||
-          !pipelineRun.total_reads ||
-          isEmpty(this.state.pipelineStepDict) ||
-          isEmpty(this.state.pipelineStepDict["steps"]) ? (
-            <div className={cs.noData}>No data</div>
-          ) : (
-            <div>
-              <div className={cs.readsRemainingRow}>
-                <div className={cs.label}>
-                  <ColumnHeaderTooltip
-                    position="top left"
-                    trigger={
-                      <div className={cx(cs.labelText, cs.header)}>
-                        Host Filtering Step
-                      </div>
-                    }
-                    content={this.state.pipelineStepDict[stageDescriptionKey]}
-                    title="Host Filtering"
-                    link={HOST_FILTERING_WIKI}
-                  />
+        {!snapshotShareId && (
+          <React.Fragment>
+            <MetadataSection
+              toggleable
+              onToggle={() => this.toggleSection("readsRemaining")}
+              open={this.state.sectionOpen.readsRemaining}
+              title="Reads Remaining"
+            >
+              {!pipelineRun ||
+              !pipelineRun.total_reads ||
+              isEmpty(this.state.pipelineStepDict) ||
+              isEmpty(this.state.pipelineStepDict["steps"]) ? (
+                <div className={cs.noData}>No data</div>
+              ) : (
+                <div>
+                  <div className={cs.readsRemainingRow}>
+                    <div className={cs.label}>
+                      <ColumnHeaderTooltip
+                        position="top left"
+                        trigger={
+                          <div className={cx(cs.labelText, cs.header)}>
+                            Host Filtering Step
+                          </div>
+                        }
+                        content={
+                          this.state.pipelineStepDict[stageDescriptionKey]
+                        }
+                        title="Host Filtering"
+                        link={HOST_FILTERING_WIKI}
+                      />
+                    </div>
+                    <div className={cs.narrowMetadataValueContainer}>
+                      <div className={cs.labelText}>Reads Remaining</div>
+                    </div>
+                    <div className={cs.narrowMetadataValueContainer}>
+                      <div className={cs.labelText}>% Reads Remaining</div>
+                    </div>
+                  </div>
+                  {Object.keys(this.state.pipelineStepDict[stepsKey]).map(
+                    this.renderReadCountsTable
+                  )}
                 </div>
-                <div className={cs.narrowMetadataValueContainer}>
-                  <div className={cs.labelText}>Reads Remaining</div>
-                </div>
-                <div className={cs.narrowMetadataValueContainer}>
-                  <div className={cs.labelText}>% Reads Remaining</div>
-                </div>
-              </div>
-              {Object.keys(this.state.pipelineStepDict[stepsKey]).map(
-                this.renderReadCountsTable
               )}
-            </div>
-          )}
-        </MetadataSection>
-        <MetadataSection
-          toggleable
-          onToggle={() => this.toggleSection("erccScatterplot")}
-          open={this.state.sectionOpen.erccScatterplot}
-          title="ERCC Spike-In Counts"
-          className={cs.erccScatterplotSection}
-        >
-          <div
-            ref={c => (this._graphContainer = c)}
-            className={cs.graphContainer}
-          >
-            <ERCCScatterPlot
-              ercc_comparison={this.props.erccComparison}
-              width={this.state.graphWidth}
-              height={0.7 * this.state.graphWidth}
-            />
-          </div>
-        </MetadataSection>
-        <MetadataSection
-          toggleable
-          onToggle={() => this.toggleSection("downloads")}
-          open={this.state.sectionOpen.downloads}
-          title="Downloads"
-        >
-          <div className={cs.downloadSectionContent}>
-            {pipelineRun &&
-              getDownloadLinks(sampleId, pipelineRun).map(option => (
-                <a
-                  key={option.label}
-                  className={cs.downloadLink}
-                  href={option.path}
-                  target={option.newPage ? "_blank" : "_self"}
-                  onClick={() =>
-                    logAnalyticsEvent("PipelineTab_download-link_clicked", {
-                      newPage: option.newPage,
-                      label: option.label,
-                      href: option.path,
-                      sampleId: this.props.sampleId,
-                    })
-                  }
-                >
-                  {option.label}
-                </a>
-              ))}
-          </div>
-        </MetadataSection>
+            </MetadataSection>
+            <MetadataSection
+              toggleable
+              onToggle={() => this.toggleSection("erccScatterplot")}
+              open={this.state.sectionOpen.erccScatterplot}
+              title="ERCC Spike-In Counts"
+              className={cs.erccScatterplotSection}
+            >
+              <div
+                ref={c => (this._graphContainer = c)}
+                className={cs.graphContainer}
+              >
+                <ERCCScatterPlot
+                  ercc_comparison={this.props.erccComparison}
+                  width={this.state.graphWidth}
+                  height={0.7 * this.state.graphWidth}
+                />
+              </div>
+            </MetadataSection>
+            <MetadataSection
+              toggleable
+              onToggle={() => this.toggleSection("downloads")}
+              open={this.state.sectionOpen.downloads}
+              title="Downloads"
+            >
+              <div className={cs.downloadSectionContent}>
+                {pipelineRun &&
+                  getDownloadLinks(sampleId, pipelineRun).map(option => (
+                    <a
+                      key={option.label}
+                      className={cs.downloadLink}
+                      href={option.path}
+                      target={option.newPage ? "_blank" : "_self"}
+                      onClick={() =>
+                        logAnalyticsEvent("PipelineTab_download-link_clicked", {
+                          newPage: option.newPage,
+                          label: option.label,
+                          href: option.path,
+                          sampleId: this.props.sampleId,
+                        })
+                      }
+                    >
+                      {option.label}
+                    </a>
+                  ))}
+              </div>
+            </MetadataSection>
+          </React.Fragment>
+        )}
       </div>
     );
   }
@@ -301,6 +308,7 @@ PipelineTab.propTypes = {
     })
   ).isRequired,
   sampleId: PropTypes.number.isRequired,
+  snapshotShareId: PropTypes.string,
   erccComparison: PropTypes.ERCCComparison,
   pipelineRun: PropTypes.PipelineRun,
 };

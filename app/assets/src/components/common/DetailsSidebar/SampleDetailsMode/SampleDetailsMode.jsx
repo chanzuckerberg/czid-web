@@ -55,7 +55,7 @@ class SampleDetailsMode extends React.Component {
   }
 
   fetchMetadata = async () => {
-    const { sampleId, pipelineVersion } = this.props;
+    const { sampleId, pipelineVersion, snapshotShareId } = this.props;
     this.setState({
       metadata: null,
       additionalInfo: null,
@@ -67,9 +67,9 @@ class SampleDetailsMode extends React.Component {
     }
 
     const [metadata, metadataTypes, sampleTypes] = await Promise.all([
-      getSampleMetadata(sampleId, pipelineVersion),
-      getSampleMetadataFields(sampleId),
-      getAllSampleTypes(),
+      getSampleMetadata(sampleId, pipelineVersion, snapshotShareId),
+      getSampleMetadataFields(sampleId, snapshotShareId),
+      !snapshotShareId && getAllSampleTypes(),
     ]);
 
     const processedMetadata = processMetadata(metadata.metadata, true);
@@ -199,6 +199,7 @@ class SampleDetailsMode extends React.Component {
       metadataErrors,
       sampleTypes,
     } = this.state;
+    const { snapshotShareId } = this.props;
 
     const savePending = some(metadataSavePending);
 
@@ -212,7 +213,8 @@ class SampleDetailsMode extends React.Component {
           onMetadataSave={this.handleMetadataSave}
           savePending={savePending}
           metadataErrors={metadataErrors}
-          sampleTypes={sampleTypes}
+          sampleTypes={sampleTypes || []}
+          snapshotShareId={snapshotShareId}
         />
       );
     }
@@ -223,6 +225,7 @@ class SampleDetailsMode extends React.Component {
           erccComparison={additionalInfo.ercc_comparison}
           pipelineRun={pipelineRun}
           sampleId={this.props.sampleId}
+          snapshotShareId={snapshotShareId}
         />
       );
     }
@@ -253,12 +256,11 @@ class SampleDetailsMode extends React.Component {
         ) : (
           <div className={cs.title}>{additionalInfo.name}</div>
         )}
-        {!loading &&
-          showReportLink && (
-            <div className={cs.reportLink}>
-              <a href={`/samples/${sampleId}`}>See Report</a>
-            </div>
-          )}
+        {!loading && showReportLink && (
+          <div className={cs.reportLink}>
+            <a href={`/samples/${sampleId}`}>See Report</a>
+          </div>
+        )}
         {!loading && (
           <Tabs
             className={cs.tabs}
@@ -278,6 +280,7 @@ SampleDetailsMode.propTypes = {
   pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,
   showReportLink: PropTypes.bool,
+  snapshotShareId: PropTypes.string,
 };
 
 export default SampleDetailsMode;
