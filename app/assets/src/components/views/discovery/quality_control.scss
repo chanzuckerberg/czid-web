@@ -57,6 +57,11 @@
     }
   }
 
+  .hoverTooltip {
+    position: fixed;
+    z-index: 1;
+  }
+
   .infoIcon {
     margin: $space-xxxs $space-xxs 0 $space-xxs;
     height: 14px;

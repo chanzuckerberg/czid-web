@@ -6,7 +6,7 @@ import copy from "copy-to-clipboard";
 import { get, map, sum, size } from "lodash/fp";
 
 import { withAnalytics } from "~/api/analytics";
-import { DataTooltip } from "~ui/containers";
+import { TooltipVizTable } from "~ui/containers";
 import BasicPopup from "~/components/BasicPopup";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import { CopyIcon, IconDownload } from "~ui/icons";
@@ -187,7 +187,7 @@ export default class HitGroupViz extends React.Component {
         style={getTooltipStyle(genomeVizTooltipLocation)}
         className={cs.hoverTooltip}
       >
-        <DataTooltip data={genomeVizTooltipData} />
+        <TooltipVizTable data={genomeVizTooltipData} />
       </div>,
       document.body
     );

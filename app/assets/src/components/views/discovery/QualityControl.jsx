@@ -3,6 +3,7 @@ import PropTypes from "~/components/utils/propTypes";
 import cx from "classnames";
 
 import d3 from "d3";
+import memoize from "memoize-one";
 import { head, sortBy } from "lodash/fp";
 import { getSamples } from "~/api";
 import InfoBanner from "./InfoBanner";
@@ -10,6 +11,8 @@ import Histogram from "~/components/visualizations/Histogram";
 import InfoIconSmall from "~/components/ui/icons/InfoIconSmall";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { TooltipVizTable } from "~ui/containers";
+import { getTooltipStyle } from "~/components/utils/tooltip";
 import Notification from "~ui/notifications/Notification";
 
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
@@ -267,9 +270,74 @@ class QualityControl extends React.Component {
     handleBarClick(bin.samples);
   };
 
-  handleHistogramBarEnter = hoverData => {
-    console.log();
+  handleHistogramBarEnter = (hoverData, data) => {
+    const {
+      totalReads,
+      totalReadsBins,
+      qualityReads,
+      qcPercentBins,
+      dcr,
+      dcrBins,
+      meanInsertSize,
+      meanInsertSizeBins,
+    } = this.state;
+
+    let histogramTooltipData = {};
+    if (hoverData && hoverData[0] === 0) {
+      if (data === totalReads) {
+        histogramTooltipData = this.getHistogramTooltipData({
+          bins: totalReadsBins,
+          binIndex: hoverData[1],
+          label: "Total Reads",
+          format: d3.format(".2s"),
+        });
+      } else if (data === qualityReads) {
+        histogramTooltipData = this.getHistogramTooltipData({
+          bins: qcPercentBins,
+          binIndex: hoverData[1],
+          label: "Passed QC",
+          format: d => {
+            return d + "%";
+          },
+        });
+      } else if (data === dcr) {
+        histogramTooltipData = this.getHistogramTooltipData({
+          bins: dcrBins,
+          binIndex: hoverData[1],
+          label: "Ratio Number",
+        });
+      } else if (data === meanInsertSize) {
+        histogramTooltipData = this.getHistogramTooltipData({
+          bins: meanInsertSizeBins,
+          binIndex: hoverData[1],
+          label: "Base Pairs",
+        });
+      }
+    }
+
+    this.setState({
+      histogramTooltipData,
+    });
   };
+
+  getHistogramTooltipData = memoize(({ bins, binIndex, label, format }) => {
+    const bin = bins[binIndex];
+    const binMin = format ? format(bin.min) : bin.min;
+    const binMax = format ? format(bin.max) : bin.max;
+    const samplesText = bin.samples.length === 1 ? "sample" : "samples";
+
+    return [
+      {
+        name: "Info",
+        data: [
+          [`${label}`, `${binMin}-${binMax}`],
+          ["Number", `${bin.samples.length} ${samplesText}`],
+        ],
+        disabled: false,
+        compact: true,
+      },
+    ];
+  });
 
   handleHistogramBarHover = (clientX, clientY) => {
     this.setState({
@@ -328,6 +396,8 @@ class QualityControl extends React.Component {
   }
 
   renderHistograms() {
+    const { histogramTooltipData, histogramTooltipLocation } = this.state;
+
     return (
       <div className={cs.content}>
         {this.renderSampleStatsInfo()}
@@ -434,6 +504,14 @@ class QualityControl extends React.Component {
             </div>
           </div>
         </div>
+        {histogramTooltipLocation && histogramTooltipData && (
+          <div
+            style={getTooltipStyle(histogramTooltipLocation)}
+            className={cs.hoverTooltip}
+          >
+            <TooltipVizTable data={histogramTooltipData} />
+          </div>
+        )}
       </div>
     );
   }

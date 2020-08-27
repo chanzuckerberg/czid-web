@@ -5,7 +5,7 @@ import cx from "classnames";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
-import { DataTooltip } from "~ui/containers";
+import { TooltipVizTable } from "~ui/containers";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import { logAnalyticsEvent } from "~/api/analytics";
 
@@ -356,7 +356,7 @@ export default class AMRHeatmapVis extends React.Component {
           below: true,
         })}
       >
-        <DataTooltip data={nodeHoverInfo} />
+        <TooltipVizTable data={nodeHoverInfo} />
       </div>
     );
   }

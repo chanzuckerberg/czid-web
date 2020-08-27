@@ -1,0 +1,77 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.table {
+  @include font-body-xxs;
+  background-color: $white;
+  border-radius: $border-radius-m;
+  border: $border-gray-light;
+  box-shadow: $box-shadow-m;
+  pointer-events: none;
+  padding: 0 $space-m;
+
+  .title {
+    @include font-label-xs;
+    border-bottom: $border-gray-lightest;
+    color: $gray-dark;
+    margin-bottom: $space-m;
+  }
+
+  .subtitle {
+    @include font-body-xxs;
+    padding-top: $space-l;
+  }
+
+  .section {
+    display: flex;
+    flex-direction: column;
+    padding: $space-l 0;
+
+    &:not(:last-child) {
+      border-bottom: $border-gray-lightest;
+    }
+
+    &.disabled {
+      color: $gray-light;
+    }
+
+    .name {
+      @include font-caps-xxxxs;
+      color: $gray-dark;
+      margin-bottom: $space-m;
+
+      &.disabled {
+        color: $gray-light;
+      }
+    }
+
+    .data {
+      display: flex;
+
+      .labelColumn {
+        display: flex;
+        flex-direction: column;
+        margin-right: $space-l;
+
+        .label {
+          @include font-header-xs;
+          width: 160px;
+        }
+
+        .compact {
+          width: auto;
+        }
+      }
+
+      .valueColumn {
+        display: flex;
+        flex-direction: column;
+
+        .value {
+          @include font-body-xs;
+        }
+      }
+    }
+  }
+}

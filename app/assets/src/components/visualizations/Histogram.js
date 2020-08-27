@@ -254,7 +254,7 @@ export default class Histogram {
 
     if (this.lastHoveredBarX !== closestX && dataIndices !== null) {
       if (this.options.onHistogramBarEnter) {
-        this.options.onHistogramBarEnter(dataIndices);
+        this.options.onHistogramBarEnter(dataIndices, this.data[0]);
       }
       this.highlightBar(dataIndices, true);
       this.highlightBar(lastDataIndices, false);

@@ -16,7 +16,7 @@ import LoadingIcon from "~ui/icons/LoadingIcon";
 import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
-import { DataTooltip } from "~ui/containers";
+import { TooltipVizTable } from "~ui/containers";
 import { getCoverageVizData } from "~/api";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 
@@ -606,7 +606,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
               style={getTooltipStyle(histogramTooltipLocation)}
               className={cs.hoverTooltip}
             >
-              <DataTooltip data={histogramTooltipData} />
+              <TooltipVizTable data={histogramTooltipData} />
             </div>,
             document.body
           )}

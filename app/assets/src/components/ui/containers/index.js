@@ -1,2 +1,2 @@
 export { default as ContextPlaceholder } from "./ContextPlaceholder";
-export { default as DataTooltip } from "./DataTooltip";
+export { default as TooltipVizTable } from "./TooltipVizTable";

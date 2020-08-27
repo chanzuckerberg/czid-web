@@ -4,7 +4,7 @@ import cx from "classnames";
 import { size, map, keyBy, isEmpty } from "lodash/fp";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
-import { DataTooltip } from "~ui/containers";
+import { TooltipVizTable } from "~ui/containers";
 import { openUrlInNewTab } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -545,7 +545,7 @@ class SamplesHeatmapVis extends React.Component {
               height: nodeHoverInfo.nodeHasData ? 300 : 180,
             })}
           >
-            <DataTooltip {...nodeHoverInfo} />
+            <TooltipVizTable {...nodeHoverInfo} />
           </div>
         )}
         {columnMetadataLegend && tooltipLocation && (
