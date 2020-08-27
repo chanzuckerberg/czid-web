@@ -1,0 +1,8 @@
+<% if ENV["SENTRY_DSN_FRONTEND"] %>
+  <!-- Loads environment variables into window so app/assets/src/index.jsx can use them to initialize Sentry -->
+  <script>
+    window.SENTRY_DSN_FRONTEND = "<%= ENV["SENTRY_DSN_FRONTEND"] %>";
+    window.ENVIRONMENT = "<%= Rails.env %>";
+    window.GIT_VERSION = "<%= ENV["GIT_VERSION"] %>";
+  </script>
+<% end %>

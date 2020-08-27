@@ -11,7 +11,6 @@ if ENV['SENTRY_DSN_BACKEND']
     config.dsn = ENV['SENTRY_DSN_BACKEND']
 
     # Sentry automatically sets the current environment to RAILS_ENV.
-    # To test Sentry in development, add 'development' into config.environments
     # We only want to send events to Sentry in staging and prod environments
     config.environments = ['staging', 'prod']
   end

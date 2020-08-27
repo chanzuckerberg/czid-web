@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { UserContext } from "~/components/common/UserContext";
+import * as Sentry from "@sentry/react";
 import "url-search-params-polyfill";
 import "materialize-css";
 import "materialize-css/dist/css/materialize.css";
@@ -8,6 +9,13 @@ import "font-awesome/scss/font-awesome.scss";
 import "semantic-ui-css/semantic.min.css";
 import "./loader.scss";
 import "./styles/core.scss";
+
+// Sentry Basic Configuration Options: https://docs.sentry.io/platforms/javascript/guides/react/config/basics/
+Sentry.init({
+  dsn: window.SENTRY_DSN_FRONTEND,
+  environment: window.ENVIRONMENT,
+  release: window.GIT_VERSION,
+});
 
 if (!function f() {}.name) {
   // eslint-disable-next-line no-extend-native
@@ -41,9 +49,11 @@ const react_component = (componentName, props, target, userContext) => {
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
     ReactDOM.render(
-      <UserContext.Provider value={userContext || {}}>
-        {React.createElement(matchedComponent, props)}
-      </UserContext.Provider>,
+      <Sentry.ErrorBoundary fallback={"An error has occured"}>
+        <UserContext.Provider value={userContext || {}}>
+          {React.createElement(matchedComponent, props)}
+        </UserContext.Provider>
+      </Sentry.ErrorBoundary>,
       document.getElementById(target)
     );
   } else {
