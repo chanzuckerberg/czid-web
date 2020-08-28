@@ -151,7 +151,7 @@ export default function SampleViewHeader({
               get("pipeline_version", pipelineRun) &&
               cs.linkToPipelineViz
           )}
-          onClick={snapshotShareId =>
+          onClick={() =>
             !snapshotShareId &&
             get("pipeline_version", pipelineRun) &&
             openUrl(
