@@ -5,6 +5,7 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import RadioButton from "~ui/controls/RadioButton";
 import IconSample from "~ui/icons/IconSample";
 import InfoIconSmall from "~ui/icons/InfoIconSmall";
+import StatusLabel from "~ui/labels/StatusLabel";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import PropTypes from "~utils/propTypes";
 import { WORKFLOWS } from "~utils/workflows";
@@ -95,6 +96,7 @@ class WorkflowSelector extends React.Component {
                   )
                 }
               />
+              <StatusLabel inline status="Beta" type="beta" />
             </div>
             <div className={cs.description}>
               Run your samples through our new pipeline to get consensus genomes

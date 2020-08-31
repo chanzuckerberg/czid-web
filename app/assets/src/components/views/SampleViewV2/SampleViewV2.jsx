@@ -42,6 +42,7 @@ import {
 } from "~/components/utils/sample";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
 import { IconAlert, LoadingIcon } from "~ui/icons";
+import StatusLabel from "~ui/labels/StatusLabel";
 import AMRView from "~/components/AMRView";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -91,7 +92,7 @@ const METRIC_DECIMAL_PLACES = {
 
 const TABS = {
   CONSENSUS_GENOME: "Consensus Genome",
-  REPORT: "Report",
+  SHORT_READ_MNGS: "Metagenomic",
   AMR: "Antimicrobial Resistance",
 };
 
@@ -117,7 +118,7 @@ export default class SampleViewV2 extends React.Component {
         coverageVizDataByTaxon: {},
         coverageVizParams: {},
         coverageVizVisible: false,
-        currentTab: TABS.REPORT,
+        currentTab: TABS.SHORT_READ_MNGS,
         filteredReportData: [],
         loadingReport: false,
         pipelineRun: null,
@@ -952,6 +953,35 @@ export default class SampleViewV2 extends React.Component {
     return numFilters;
   };
 
+  computeWorkflowTabs = () => {
+    const { reportMetadata, sample } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
+
+    const consensusGenomeTab = {
+      value: TABS.CONSENSUS_GENOME,
+      label: (
+        <React.Fragment>
+          {TABS.CONSENSUS_GENOME}
+          <StatusLabel
+            className={cs.statusLabel}
+            inline
+            status="Beta"
+            type="beta"
+          />
+        </React.Fragment>
+      ),
+    };
+    return compact([
+      get("temp_pipeline_workflow", sample) === WORKFLOWS.SHORT_READ_MNGS &&
+        TABS.SHORT_READ_MNGS,
+      get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME &&
+        consensusGenomeTab,
+      allowedFeatures.includes(AMR_TABLE_FEATURE) &&
+        reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
+        TABS.AMR,
+    ]);
+  };
+
   renderSampleMessage = () => {
     const { loadingReport, pipelineRun, reportMetadata, sample } = this.state;
     const { pipelineRunStatus, jobStatus } = reportMetadata;
@@ -1135,6 +1165,7 @@ export default class SampleViewV2 extends React.Component {
       view,
     } = this.state;
     const { snapshotShareId } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
 
     return (
       <React.Fragment>
@@ -1160,26 +1191,20 @@ export default class SampleViewV2 extends React.Component {
             />
           </div>
           <div className={cs.tabsContainer}>
-            <UserContext.Consumer>
-              {currentUser =>
-                currentUser.allowedFeatures &&
-                currentUser.allowedFeatures.includes(AMR_TABLE_FEATURE) &&
-                reportMetadata.pipelineRunStatus === "SUCCEEDED" ? (
-                  <Tabs
-                    className={cs.tabs}
-                    tabs={[TABS.REPORT, TABS.AMR]}
-                    value={currentTab}
-                    onChange={this.handleTabChange}
-                  />
-                ) : (
-                  <div className={cs.dividerContainer}>
-                    <div className={cs.divider} />
-                  </div>
-                )
-              }
-            </UserContext.Consumer>
+            {this.computeWorkflowTabs().length ? (
+              <Tabs
+                className={cs.tabs}
+                tabs={this.computeWorkflowTabs()}
+                value={currentTab}
+                onChange={this.handleTabChange}
+              />
+            ) : (
+              <div className={cs.dividerContainer}>
+                <div className={cs.divider} />
+              </div>
+            )}
           </div>
-          {currentTab === TABS.REPORT && this.renderReport()}
+          {currentTab === TABS.SHORT_READ_MNGS && this.renderReport()}
           {currentTab === TABS.AMR && amrData && <AMRView amr={amrData} />}
           {currentTab === TABS.CONSENSUS_GENOME && (
             <ConsensusGenomeView sample={sample} />

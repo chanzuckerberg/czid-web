@@ -37,4 +37,9 @@
   &.inline {
     display: inline-block;
   }
+
+  &.beta {
+    background-color: $beta-lightest;
+    color: $beta-dark;
+  }
 }
