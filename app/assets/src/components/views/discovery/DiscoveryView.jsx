@@ -305,11 +305,14 @@ class DiscoveryView extends React.Component {
   };
 
   resetData = ({ callback } = {}) => {
+    const { domain } = this.props;
     const conditions = this.getConditions();
 
     this.samples.reset({ conditions, loadFirstPage: true });
-    this.projects.reset({ conditions, loadFirstPage: true });
-    this.visualizations.reset({ conditions, loadFirstPage: true });
+    if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
+      this.projects.reset({ conditions, loadFirstPage: true });
+      this.visualizations.reset({ conditions, loadFirstPage: true });
+    }
     if (this.mapPreviewSamples !== this.samples) {
       this.mapPreviewSamples.reset({ conditions, loadFirstPage: true });
     }
@@ -1344,6 +1347,7 @@ class DiscoveryView extends React.Component {
       showStats,
       userDataCounts,
     } = this.state;
+    const { snapshotShareId, snapshotProjectDescription } = this.props;
     const filterCount = this.getFilterCount();
     const computedProjectDimensions =
       filterCount || search ? filteredProjectDimensions : projectDimensions;
@@ -1360,6 +1364,7 @@ class DiscoveryView extends React.Component {
               allowedFeatures={allowedFeatures}
               currentTab={mapSidebarTab}
               discoveryCurrentTab={currentTab}
+              domain={domain}
               loading={loading}
               onFilterClick={this.handleMetadataFilterClick}
               onProjectSelected={this.handleProjectSelected}
@@ -1411,15 +1416,26 @@ class DiscoveryView extends React.Component {
               loading={loading}
               onFilterClick={this.handleMetadataFilterClick}
               projectDimensions={computedProjectDimensions}
-              projectStats={{
-                count: filteredProjectCount,
-              }}
+              projectStats={
+                // if no filtered samples are present, setting the project count to null
+                // will display the no results sidebar
+                domain === DISCOVERY_DOMAIN_SNAPSHOT
+                  ? { count: filteredSampleCount ? 1 : null }
+                  : { count: filteredProjectCount }
+              }
               sampleDimensions={computedSampleDimensions}
               sampleStats={{
                 ...filteredSampleStats,
                 count: filteredSampleCount,
               }}
-              project={project}
+              project={
+                !snapshotShareId
+                  ? project
+                  : {
+                      editable: false,
+                      description: snapshotProjectDescription,
+                    }
+              }
               onProjectDescriptionSave={this.handleProjectDescriptionSave}
             />
           ))}
@@ -1523,6 +1539,7 @@ DiscoveryView.propTypes = {
   domain: PropTypes.oneOf(DISCOVERY_DOMAINS).isRequired,
   projectId: PropTypes.number,
   snapshotProjectName: PropTypes.string,
+  snapshotProjectDescription: PropTypes.string,
   snapshotShareId: PropTypes.string,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   mapTilerKey: PropTypes.string,

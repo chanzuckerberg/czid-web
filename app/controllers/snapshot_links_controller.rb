@@ -15,7 +15,9 @@ class SnapshotLinksController < ApplicationController
   def show
     @share_id = snapshot_links_params[:share_id]
     @project_id = @snapshot.project_id
-    @project_name = Project.find(@snapshot.project_id).name
+    project = Project.find(@snapshot.project_id)
+    @project_name = project.name
+    @project_description = project.description
     render template: "home/snapshot"
   end
 

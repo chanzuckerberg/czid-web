@@ -70,6 +70,11 @@
   width: 36px;
 }
 
+.iconSample {
+  fill: $gray-light;
+  width: 30px;
+}
+
 .numberValueAndPercentage {
   .percentage {
     @include font-body-xxs;

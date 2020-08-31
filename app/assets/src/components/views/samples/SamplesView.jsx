@@ -42,12 +42,15 @@ class SamplesView extends React.Component {
       bulkDownloadButtonTempTooltip: null,
     };
 
+    const { snapshotShareId } = this.props;
+
     this.columns = [
       {
         dataKey: "sample",
         flexGrow: 1,
         width: 350,
-        cellRenderer: TableRenderers.renderSample,
+        cellRenderer: (cellData, basicIcon = !!snapshotShareId) =>
+          TableRenderers.renderSample(cellData, true, basicIcon),
         headerClassName: cs.sampleHeader,
       },
       {

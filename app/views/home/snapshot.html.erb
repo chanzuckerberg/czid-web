@@ -3,6 +3,7 @@
     domain: "snapshot",
     snapshotShareId: '<%= @share_id %>',
     snapshotProjectName: '<%= @project_name %>',
+    snapshotProjectDescription: '<%= @project_description %>',
     projectId: <%= @project_id %>,
   }, 'page_content', JSON.parse('<%= raw escape_json(user_context)%>'));
 <% end %>

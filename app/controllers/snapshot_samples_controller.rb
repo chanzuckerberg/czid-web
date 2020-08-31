@@ -165,7 +165,8 @@ class SnapshotSamplesController < SamplesController
   end
 
   def snapshot_sample_params
-    permitted_params = [:share_id, :id, :orderBy, :orderDir, :limit, :offset, :listAllIds, :basic, :host, :location, :locationV2, :taxon, :time, :tissue, :search, [sampleIds: []]]
+    permitted_params = [:share_id, :id, :orderBy, :orderDir, :limit, :offset, :listAllIds, :basic, :host,
+                        :location, :locationV2, :taxon, :time, :tissue, :search, sampleIds: [], time: [], tissue: [],]
     params.permit(*permitted_params)
   end
 end

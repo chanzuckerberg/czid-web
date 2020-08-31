@@ -7,6 +7,7 @@ import moment from "moment";
 import BasicPopup from "~/components/BasicPopup";
 import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
 import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
+import IconSample from "~ui/icons/IconSample";
 import StatusLabel from "~ui/labels/StatusLabel";
 import { numberWithCommas } from "~/helpers/strings";
 import { WORKFLOWS } from "~/components/utils/workflows";
@@ -93,7 +94,11 @@ class TableRenderers extends React.Component {
     );
   };
 
-  static renderSample = ({ cellData: sample }, full = true) => {
+  static renderSample = (
+    { cellData: sample },
+    full = true,
+    basicIcon = false
+  ) => {
     const sampleName =
       get("tempPipelineWorkflow", sample) === WORKFLOWS.CONSENSUS_GENOME
         ? `[Consensus Genome] ${get("name", sample)}`
@@ -103,7 +108,9 @@ class TableRenderers extends React.Component {
         {full && (
           <div className={cs.visibility}>
             {sample &&
-              (sample.publicAccess ? (
+              (basicIcon ? (
+                <IconSample className={cx(cs.iconSample)} />
+              ) : sample.publicAccess ? (
                 <SamplePublicIcon className={cx(cs.icon)} />
               ) : (
                 <SamplePrivateIcon className={cx(cs.icon)} />

@@ -11,6 +11,7 @@ import {
   TaxonFilter,
 } from "~/components/common/filters";
 import FilterTag from "~ui/controls/FilterTag";
+import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
 
 import cs from "./discovery_filters.scss";
 
@@ -156,28 +157,28 @@ class DiscoveryFilters extends React.Component {
     return (
       <div className={cx(cs.filtersContainer, className)}>
         {/* TODO(ihan): enable taxon and location filter for snapshot view */}
-        {domain !== "snapshot" && (
-          <div className={cs.filterContainer}>
-            <TaxonFilter
-              domain={domain}
-              onChange={this.handleChange.bind(this, "taxonSelected")}
-              selectedOptions={taxonSelected}
-            />
-            {this.renderTags("taxon")}
-          </div>
-        )}
-        {domain !== "snapshot" && (
-          <div className={cs.filterContainer}>
-            <LocationFilter
-              onChange={this.handleChange.bind(this, "locationV2Selected")}
-              selected={
-                locationV2 && locationV2.length ? locationV2Selected : null
-              }
-              options={locationV2}
-              label="Location"
-            />
-            {this.renderTags("locationV2")}
-          </div>
+        {domain !== DISCOVERY_DOMAIN_SNAPSHOT && (
+          <React.Fragment>
+            <div className={cs.filterContainer}>
+              <TaxonFilter
+                domain={domain}
+                onChange={this.handleChange.bind(this, "taxonSelected")}
+                selectedOptions={taxonSelected}
+              />
+              {this.renderTags("taxon")}
+            </div>
+            <div className={cs.filterContainer}>
+              <LocationFilter
+                onChange={this.handleChange.bind(this, "locationV2Selected")}
+                selected={
+                  locationV2 && locationV2.length ? locationV2Selected : null
+                }
+                options={locationV2}
+                label="Location"
+              />
+              {this.renderTags("locationV2")}
+            </div>
+          </React.Fragment>
         )}
         <div className={cs.filterContainer}>
           <BaseSingleFilter
@@ -188,15 +189,19 @@ class DiscoveryFilters extends React.Component {
           />
           {this.renderTags("time")}
         </div>
-        <div className={cs.filterContainer}>
-          <BaseSingleFilter
-            label="Visibility"
-            options={visibility}
-            onChange={this.handleChange.bind(this, "visibilitySelected")}
-            value={visibility && visibility.length ? visibilitySelected : null}
-          />
-          {this.renderTags("visibility")}
-        </div>
+        {domain !== DISCOVERY_DOMAIN_SNAPSHOT && (
+          <div className={cs.filterContainer}>
+            <BaseSingleFilter
+              label="Visibility"
+              options={visibility}
+              onChange={this.handleChange.bind(this, "visibilitySelected")}
+              value={
+                visibility && visibility.length ? visibilitySelected : null
+              }
+            />
+            {this.renderTags("visibility")}
+          </div>
+        )}
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
             onChange={this.handleChange.bind(this, "hostSelected")}
