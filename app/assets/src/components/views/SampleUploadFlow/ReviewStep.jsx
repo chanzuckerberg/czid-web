@@ -14,6 +14,7 @@ import {
 import { UserContext } from "~/components/common/UserContext";
 import { getProjectMetadataFields } from "~/api/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
+import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import PropTypes from "~/components/utils/propTypes";
 import { formatFileSize } from "~/components/utils/format";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -311,6 +312,9 @@ class ReviewStep extends React.Component {
                       ? "Public Project"
                       : "Private Project"}
                   </div>
+                  <ProjectInfoIconTooltip
+                    isPublic={project.public_access === 1}
+                  />
                 </div>
                 {project.description && (
                   <div className={cs.descriptionContainer}>

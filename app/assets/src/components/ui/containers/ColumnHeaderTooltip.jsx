@@ -1,5 +1,6 @@
 import React from "react";
 import BasicPopup from "~/components/BasicPopup";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PropTypes from "prop-types";
 import cs from "./column_header_tooltip.scss";
 
@@ -14,16 +15,7 @@ class ColumnHeaderTooltip extends React.Component {
           <div className={cs.tooltip}>
             {title && <span className={cs.title}>{title}:</span>}
             {content}
-            {link && (
-              <a
-                className={cs.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                href={link}
-              >
-                Learn more.
-              </a>
-            )}
+            {link && <ExternalLink href={link}>Learn more.</ExternalLink>}
           </div>
         }
       />

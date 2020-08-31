@@ -10,12 +10,4 @@
     font-weight: bold;
     margin-right: $space-xs;
   }
-
-  .link {
-    margin-left: $space-xs;
-    // override link color `inherit !important` in _header.scss
-    color: $primary !important;
-    text-decoration: underline;
-    text-decoration-style: dashed;
-  }
 }

@@ -1,0 +1,15 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.projectInfoIcon {
+  margin: 5px $space-xxs 5px $space-xxs;
+  height: 14px;
+  width: 14px;
+  fill: $gray-dark;
+  vertical-align: text-top;
+
+  &:hover {
+    fill: $primary;
+  }
+}
