@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 @import "~styles/themes/typography";
 
 .layout {
@@ -78,6 +79,19 @@
 
     &:not(:only-child) {
       flex: 0 0 50px;
+    }
+
+    .workflowTabs {
+      margin-top: $space-xs;
+      margin-bottom: $space-xs;
+
+      .tabLabel {
+        @include font-header-xs;
+      }
+
+      .tabCounter {
+        @include font-header-xs;
+      }
     }
   }
 

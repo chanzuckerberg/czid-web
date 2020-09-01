@@ -182,7 +182,10 @@ class PipelineTab extends React.Component {
     const { pipelineInfo, pipelineRun, sampleId, snapshotShareId } = this.props;
 
     let fields = PIPELINE_INFO_FIELDS;
-    if (lowerCase(get(["workflow", "text"], pipelineInfo)) !== WORKFLOWS.MAIN) {
+    if (
+      lowerCase(get(["workflow", "text"], pipelineInfo)) !==
+      WORKFLOWS.SHORT_READ_MNGS.value
+    ) {
       fields = WORKFLOW_INFO_FIELDS.concat(fields);
     }
     const pipelineInfoFields = fields.map(this.getPipelineInfoField);

@@ -56,10 +56,10 @@ class WorkflowSelector extends React.Component {
         <div className={cs.header}>Analysis Type</div>
         <div
           className={cs.workflowOption}
-          onClick={() => onWorkflowToggle(WORKFLOWS.SHORT_READ_MNGS)}
+          onClick={() => onWorkflowToggle(WORKFLOWS.SHORT_READ_MNGS.value)}
         >
           <RadioButton
-            selected={selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS)}
+            selected={selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)}
             className={cs.radioButton}
           />
           <IconSample className={cs.iconSample} />
@@ -72,10 +72,10 @@ class WorkflowSelector extends React.Component {
         </div>
         <div
           className={cs.workflowOption}
-          onClick={() => onWorkflowToggle(WORKFLOWS.CONSENSUS_GENOME)}
+          onClick={() => onWorkflowToggle(WORKFLOWS.CONSENSUS_GENOME.value)}
         >
           <RadioButton
-            selected={selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME)}
+            selected={selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)}
             className={cs.radioButton}
           />
           <IconSample className={cs.iconSample} />
@@ -103,7 +103,7 @@ class WorkflowSelector extends React.Component {
               for SARS-CoV-2. Our assembly supports wet lab protocols ARTIC v3
               and MSSPE.
             </div>
-            {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME) &&
+            {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
               this.renderWetlabSelector()}
           </div>
         </div>

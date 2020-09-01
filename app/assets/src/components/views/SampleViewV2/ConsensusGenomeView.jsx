@@ -86,7 +86,10 @@ class ConsensusGenomeView extends React.Component {
     const { sample } = this.props;
     const workflow =
       head(
-        filter({ workflow: WORKFLOWS.CONSENSUS_GENOME }, sample.workflow_runs)
+        filter(
+          { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
+          sample.workflow_runs
+        )
       ) || {};
 
     if (workflow.status === "SUCCEEDED") {

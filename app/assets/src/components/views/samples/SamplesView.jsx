@@ -338,13 +338,10 @@ class SamplesView extends React.Component {
     );
   };
 
-  renderToolbar = () => {
+  renderTriggers = () => {
     const { selectedSampleIds } = this.props;
-
     return (
-      <div className={cs.samplesToolbar}>
-        {this.renderDisplaySwitcher()}
-        <div className={cs.fluidBlank} />
+      <React.Fragment>
         <div className={cs.counterContainer}>
           <Label
             circular
@@ -364,6 +361,17 @@ class SamplesView extends React.Component {
           {this.renderPhyloTreeTrigger()}
           {this.renderBulkDownloadTrigger()}
         </div>
+      </React.Fragment>
+    );
+  };
+
+  renderToolbar = () => {
+    const { hideTriggers } = this.props;
+    return (
+      <div className={cs.samplesToolbar}>
+        {this.renderDisplaySwitcher()}
+        <div className={cs.fluidBlank} />
+        {!hideTriggers && this.renderTriggers()}
       </div>
     );
   };
@@ -371,11 +379,11 @@ class SamplesView extends React.Component {
   renderTable = () => {
     const {
       activeColumns,
+      hideTriggers,
       onActiveColumnsChange,
       onLoadRows,
       protectedColumns,
       selectedSampleIds,
-      snapshotShareId,
     } = this.props;
 
     // TODO(tiago): replace by automated cell height computing
@@ -399,7 +407,7 @@ class SamplesView extends React.Component {
           onRowClick={this.handleRowClick}
           protectedColumns={protectedColumns}
           rowClassName={cs.tableDataRow}
-          selectableKey={snapshotShareId ? null : "id"}
+          selectableKey={hideTriggers ? null : "id"}
           selected={selectedSampleIds}
           selectAllChecked={selectAllChecked}
           selectableCellClassName={cs.selectableCell}
@@ -588,29 +596,30 @@ SamplesView.propTypes = {
   admin: PropTypes.bool,
   currentDisplay: PropTypes.string.isRequired,
   currentTab: PropTypes.string.isRequired,
+  filtersSidebarOpen: PropTypes.bool,
+  hideTriggers: PropTypes.bool,
   mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
   mapTilerKey: PropTypes.string,
-  onClearFilters: PropTypes.func,
   onActiveColumnsChange: PropTypes.func,
+  onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
-  onPLQCHistogramBarClick: PropTypes.func,
   onMapClick: PropTypes.func,
   onMapLevelChange: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
+  onPLQCHistogramBarClick: PropTypes.func,
   onSampleSelected: PropTypes.func,
   onSelectedSamplesUpdate: PropTypes.func,
   projectId: PropTypes.number,
-  snapshotShareId: PropTypes.string,
   protectedColumns: PropTypes.array,
   samples: PropTypes.instanceOf(ObjectCollectionView),
+  sampleStatsSidebarOpen: PropTypes.bool,
   selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
-  filtersSidebarOpen: PropTypes.bool,
-  sampleStatsSidebarOpen: PropTypes.bool,
+  snapshotShareId: PropTypes.string,
 };
 
 SamplesView.contextType = UserContext;

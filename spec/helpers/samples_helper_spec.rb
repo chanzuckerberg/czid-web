@@ -308,7 +308,7 @@ RSpec.describe SamplesHelper, type: :helper do
     it "properly returns samples with the short-read-mngs and consensus-genome workflows" do
       query = ["short-read-mngs", "consensus-genome"]
       results = helper.send(:filter_by_workflow, @samples_input, query)
-      expect(results.pluck(:id)).to eq([@sample_one.id, @sample_two.id, @sample_three.id])
+      expect(results.pluck(:id)).to include(@sample_one.id, @sample_two.id, @sample_three.id)
     end
 
     it "returns an empty response if no sample workflows match the query" do

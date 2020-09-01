@@ -79,7 +79,7 @@ class UploadSampleStep extends React.Component {
     removedLocalFiles: [], // Invalid local files that were removed.
     validatingSamples: false, // Disable the "Continue" button while validating samples.
     showNoProjectError: false, // Whether we should show an error if no project is currently selected.
-    selectedWorkflows: new Set([WORKFLOWS.SHORT_READ_MNGS]),
+    selectedWorkflows: new Set([WORKFLOWS.SHORT_READ_MNGS.value]),
     selectedWetlabProtocol: null,
   };
 
@@ -677,7 +677,9 @@ class UploadSampleStep extends React.Component {
       validatingSamples,
     } = this.state;
 
-    const workflowsValid = selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME)
+    const workflowsValid = selectedWorkflows.has(
+      WORKFLOWS.CONSENSUS_GENOME.value
+    )
       ? !!selectedWetlabProtocol
       : true;
     return (

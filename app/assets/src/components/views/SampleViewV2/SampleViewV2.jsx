@@ -91,8 +91,8 @@ const METRIC_DECIMAL_PLACES = {
 };
 
 const TABS = {
-  CONSENSUS_GENOME: "Consensus Genome",
-  SHORT_READ_MNGS: "Metagenomic",
+  CONSENSUS_GENOME: WORKFLOWS.CONSENSUS_GENOME.label,
+  SHORT_READ_MNGS: WORKFLOWS.SHORT_READ_MNGS.label,
   AMR: "Antimicrobial Resistance",
 };
 
@@ -194,7 +194,9 @@ export default class SampleViewV2 extends React.Component {
     let { currentTab } = this.state;
     const sample = await getSample({ snapshotShareId, sampleId });
     sample.id = sampleId;
-    if (get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME)
+    if (
+      get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
+    )
       currentTab = TABS.CONSENSUS_GENOME;
 
     const pipelineRun = find(
@@ -972,10 +974,10 @@ export default class SampleViewV2 extends React.Component {
       ),
     };
     return compact([
-      get("temp_pipeline_workflow", sample) === WORKFLOWS.SHORT_READ_MNGS &&
-        TABS.SHORT_READ_MNGS,
-      get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME &&
-        consensusGenomeTab,
+      get("temp_pipeline_workflow", sample) ===
+        WORKFLOWS.SHORT_READ_MNGS.value && TABS.SHORT_READ_MNGS,
+      get("temp_pipeline_workflow", sample) ===
+        WORKFLOWS.CONSENSUS_GENOME.value && consensusGenomeTab,
       allowedFeatures.includes(AMR_TABLE_FEATURE) &&
         reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
         TABS.AMR,

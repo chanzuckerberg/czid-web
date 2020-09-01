@@ -50,7 +50,8 @@ export default function SampleViewHeader({
   };
 
   const renderName = sample => {
-    return get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME
+    return get("temp_pipeline_workflow", sample) ===
+      WORKFLOWS.CONSENSUS_GENOME.value
       ? `[Consensus Genome] ${get("name", sample)}`
       : get("name", sample);
   };
@@ -64,11 +65,16 @@ export default function SampleViewHeader({
   };
 
   const renderViewHeaderControls = () => {
-    if (get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME) {
+    if (
+      get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
+    ) {
       const status = get(
         "status",
         head(
-          filter({ workflow: WORKFLOWS.CONSENSUS_GENOME }, sample.workflow_runs)
+          filter(
+            { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
+            sample.workflow_runs
+          )
         )
       );
       return (
@@ -164,7 +170,7 @@ export default function SampleViewHeader({
           }
         >
           <span className={cs.pipelineRunVersion}>
-            {[WORKFLOWS.MAIN, WORKFLOWS.SHORT_READ_MNGS].includes(
+            {[WORKFLOWS.SHORT_READ_MNGS.value].includes(
               get("temp_pipeline_workflow", sample)
             ) && `Pipeline ${renderVersion()}`}
           </span>

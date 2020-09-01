@@ -18,6 +18,7 @@ import {
   partition,
   pick,
   replace,
+  size,
   sumBy,
   union,
   values,
@@ -28,17 +29,20 @@ import {
 import { getSearchSuggestions } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { get } from "~/api/core";
-import { openUrl } from "~utils/links";
-import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
-import NarrowContainer from "~/components/layout/NarrowContainer";
+import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import { CONSENSUS_GENOME_FEATURE } from "~/components/utils/features";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
+import Tabs from "~ui/controls/Tabs";
 import BannerProjects from "~ui/icons/BannerProjects";
 import BannerSamples from "~ui/icons/BannerSamples";
 import BannerVisualizations from "~ui/icons/BannerVisualizations";
-import { UserContext } from "~/components/common/UserContext";
+import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
+import { openUrl } from "~utils/links";
 
 import DiscoveryHeader from "./DiscoveryHeader";
 import ModalFirstTimeUser from "./ModalFirstTimeUser";
@@ -109,10 +113,10 @@ class DiscoveryView extends React.Component {
             ? "samples"
             : "projects",
         emptyStateModalOpen: this.isFirstTimeUser(),
-        filteredProjectDimensions: [],
-        filteredSampleDimensions: [],
         filteredProjectCount: null,
+        filteredProjectDimensions: [],
         filteredSampleCount: null,
+        filteredSampleDimensions: [],
         filteredSampleStats: {},
         filteredVisualizationCount: null,
         filters: {},
@@ -140,6 +144,7 @@ class DiscoveryView extends React.Component {
         showFilters: true,
         showStats: true,
         userDataCounts: null,
+        workflow: WORKFLOWS.SHORT_READ_MNGS.value,
       },
       localState,
       sessionState,
@@ -175,6 +180,8 @@ class DiscoveryView extends React.Component {
     this.mapPreviewProjects = this.projects;
     this.mapPreviewSamples = this.samples;
 
+    this.samplesByWorkflow = this.constructSamplesByWorkflow();
+
     // hold references to the views to allow resetting the tables
     this.projectsView = null;
     this.samplesView = null;
@@ -187,6 +194,24 @@ class DiscoveryView extends React.Component {
 
     this.updateBrowsingHistory("replace");
   }
+
+  // Special case to support per-workflow tab views
+  constructSamplesByWorkflow = () => {
+    const result = {};
+    [WORKFLOWS.SHORT_READ_MNGS.value, WORKFLOWS.CONSENSUS_GENOME.value].forEach(
+      workflow => {
+        const conditions = this.getConditions();
+        conditions.filters.workflow = workflow;
+        result[workflow] = this.dataLayer.samples.createView({
+          conditions,
+          onViewChange: this.refreshSampleData,
+          displayName: workflow,
+        });
+        result[workflow].loadPage(0);
+      }
+    );
+    return result;
+  };
 
   async componentDidMount() {
     const { domain } = this.props;
@@ -309,6 +334,11 @@ class DiscoveryView extends React.Component {
     const conditions = this.getConditions();
 
     this.samples.reset({ conditions, loadFirstPage: true });
+    for (const [name, view] of Object.entries(this.samplesByWorkflow)) {
+      const conditions = this.getConditions();
+      conditions.filters.workflow = name;
+      view.reset({ conditions, loadFirstPage: true });
+    }
     if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
       this.projects.reset({ conditions, loadFirstPage: true });
       this.visualizations.reset({ conditions, loadFirstPage: true });
@@ -435,9 +465,10 @@ class DiscoveryView extends React.Component {
   };
 
   refreshSampleData = () => {
+    const { workflow } = this.state;
     this.setState({
       filteredSampleCount: this.samples.length,
-      selectableSampleIds: this.samples.getIds(),
+      selectableSampleIds: this.samplesByWorkflow[workflow].getIds(),
     });
   };
 
@@ -725,6 +756,7 @@ class DiscoveryView extends React.Component {
         currentTab: "samples",
         mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
         projectId: project.id,
+        workflow: WORKFLOWS.SHORT_READ_MNGS.value,
         search: null,
       },
       () => {
@@ -1216,6 +1248,57 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  renderWorkflowTabs = () => {
+    const { workflow } = this.state;
+    return (
+      <Tabs
+        className={cs.workflowTabs}
+        tabs={this.computeWorkflowTabs()}
+        value={this.samplesByWorkflow[workflow].displayName}
+        onChange={this.handleWorkflowTabChange}
+        hideBorder
+      />
+    );
+  };
+
+  handleWorkflowTabChange = workflow => {
+    const view = this.samplesByWorkflow[workflow];
+    this.setState(
+      {
+        workflow,
+        selectableSampleIds: view.getIds(),
+      },
+      () => this.samplesView && this.samplesView.reset()
+    );
+  };
+
+  computeWorkflowTabs = () => {
+    const renderTab = (label, count) => {
+      return (
+        <div>
+          <span className={cs.tabLabel}>{label}</span>
+          <span className={cs.tabCounter}>{count}</span>
+        </div>
+      );
+    };
+    return compact([
+      {
+        label: renderTab(
+          `${WORKFLOWS.SHORT_READ_MNGS.label}s`,
+          this.samplesByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value].length || "-"
+        ),
+        value: WORKFLOWS.SHORT_READ_MNGS.value,
+      },
+      {
+        label: renderTab(
+          `${WORKFLOWS.CONSENSUS_GENOME.label}s`,
+          this.samplesByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value].length || "-"
+        ),
+        value: WORKFLOWS.CONSENSUS_GENOME.value,
+      },
+    ]);
+  };
+
   renderCenterPaneContent = () => {
     const {
       currentDisplay,
@@ -1229,10 +1312,13 @@ class DiscoveryView extends React.Component {
       selectedSampleIds,
       showFilters,
       showStats,
+      workflow,
     } = this.state;
 
     const { admin, allowedFeatures, mapTilerKey, snapshotShareId } = this.props;
-    const { projects, samples, visualizations } = this;
+    const { projects, visualizations } = this;
+
+    const samples = this.samplesByWorkflow[workflow];
     return (
       <React.Fragment>
         {currentTab === "projects" && (
@@ -1267,6 +1353,11 @@ class DiscoveryView extends React.Component {
         {currentTab === "samples" && (
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
+              {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) &&
+                currentDisplay === "table" &&
+                size(this.samplesByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value]) >
+                  0 &&
+                this.renderWorkflowTabs()}
               <SamplesView
                 activeColumns={sampleActiveColumns}
                 admin={admin}
@@ -1296,6 +1387,12 @@ class DiscoveryView extends React.Component {
                 selectedSampleIds={selectedSampleIds}
                 filtersSidebarOpen={showFilters}
                 sampleStatsSidebarOpen={showStats}
+                hideTriggers={
+                  snapshotShareId ||
+                  (workflow &&
+                    this.samplesByWorkflow[workflow].displayName ===
+                      WORKFLOWS.CONSENSUS_GENOME.value)
+                }
               />
             </div>
             {!samples.length &&

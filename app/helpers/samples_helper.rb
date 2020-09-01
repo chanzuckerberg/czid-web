@@ -243,8 +243,9 @@ module SamplesHelper
     project_id = params[:projectId]
     search_string = params[:search]
     requested_sample_ids = params[:sampleIds]
-    # TODO: Update to support params from frontend filtering
-    workflow = []
+    workflow = params[:workflow]
+
+    # Remove this check once consensus genomes is released.
     if current_user && !current_user.allowed_feature?("consensus_genome")
       workflow = ["main", "short-read-mngs"]
     end

@@ -1,6 +1,5 @@
 // Pipeline workflow options
 export const WORKFLOWS = {
-  MAIN: "main",
-  CONSENSUS_GENOME: "consensus-genome",
-  SHORT_READ_MNGS: "short-read-mngs",
+  CONSENSUS_GENOME: { label: "Consensus Genome", value: "consensus-genome" },
+  SHORT_READ_MNGS: { label: "Metagenomic", value: "short-read-mngs" },
 };

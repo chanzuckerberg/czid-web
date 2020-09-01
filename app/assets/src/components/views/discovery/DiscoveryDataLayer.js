@@ -72,11 +72,15 @@ class ObjectCollectionView {
     return (this._orderedIds || []).length;
   }
 
+  get displayName() {
+    return this._displayName;
+  }
+
   get = id => this._collection.entries[id];
 
   getIds = () => this._orderedIds || [];
 
-  getCollectionLength = () => {
+  getViewLength = () => {
     return Object.keys(this._collection.entries).length;
   };
 
@@ -161,10 +165,11 @@ class ObjectCollectionView {
       // of objects in these views increases
       if (fetchedObjectIds) {
         this._orderedIds = fetchedObjectIds;
+        this._loading = false;
         this._onViewChange && this._onViewChange();
+      } else {
+        this._loading = false;
       }
-
-      this._loading = false;
     }
 
     return range(startIndex, minStopIndex + 1)
