@@ -314,6 +314,10 @@ class ReviewStep extends React.Component {
                   </div>
                   <ProjectInfoIconTooltip
                     isPublic={project.public_access === 1}
+                    // Offset required to align the carrot of the tooltip accurately on top of the InfoIconSmall.
+                    // This issue is caused by nested div containers being passed to the prop "content" in the BasicPopup component
+                    offset="-7px, 0px"
+                    position="top left"
                   />
                 </div>
                 {project.description && (

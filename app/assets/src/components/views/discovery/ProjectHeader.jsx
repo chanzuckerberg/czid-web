@@ -5,6 +5,7 @@ import { assign, find, min } from "lodash/fp";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
 import UserIcon from "~ui/icons/UserIcon";
+import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
 import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
 import cs from "./project_header.scss";
@@ -59,6 +60,10 @@ const ProjectHeader = ({
             <LockIcon className={cs.smallIcon} /> Private project
           </div>
         ))}
+      <ProjectInfoIconTooltip
+        isPublic={project.public_access === 1}
+        position="bottom center"
+      />
       {project.editable && (
         <div className={cs.item}>
           <UserIcon className={cx(cs.smallIcon, cs.userIcon)} />{" "}

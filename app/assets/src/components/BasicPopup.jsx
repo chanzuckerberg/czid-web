@@ -13,7 +13,7 @@ class BasicPopup extends React.Component {
 
 BasicPopup.propTypes = {
   size: PropTypes.string,
-  wide: PropTypes.string,
+  wide: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
 };
 
 BasicPopup.defaultProps = {
