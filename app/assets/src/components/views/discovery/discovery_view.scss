@@ -92,6 +92,11 @@
       .tabCounter {
         @include font-header-xs;
       }
+
+      .statusLabel {
+        margin-bottom: $space-xxxs;
+        vertical-align: middle;
+      }
     }
   }
 

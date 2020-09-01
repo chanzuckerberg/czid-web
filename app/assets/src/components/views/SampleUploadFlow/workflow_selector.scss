@@ -49,6 +49,11 @@
             fill: $primary;
           }
         }
+
+        .statusLabel {
+          vertical-align: middle;
+          margin-bottom: $space-xxxs;
+        }
       }
 
       .description {

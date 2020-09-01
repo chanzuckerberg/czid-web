@@ -96,7 +96,12 @@ class WorkflowSelector extends React.Component {
                   )
                 }
               />
-              <StatusLabel inline status="Beta" type="beta" />
+              <StatusLabel
+                className={cs.statusLabel}
+                inline
+                status="Beta"
+                type="beta"
+              />
             </div>
             <div className={cs.description}>
               Run your samples through our new pipeline to get consensus genomes

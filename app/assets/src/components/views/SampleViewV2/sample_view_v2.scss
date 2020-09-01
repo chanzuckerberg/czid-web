@@ -64,7 +64,10 @@
   margin: 25px 0;
 
   .statusLabel {
-    vertical-align: middle;
+    margin-left: $space-xs;
+    // To center without offsetting "indicator" line
+    margin-top: $space-xxxs;
+    vertical-align: text-top;
   }
 }
 

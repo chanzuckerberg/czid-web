@@ -33,7 +33,7 @@ import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { CONSENSUS_GENOME_FEATURE } from "~/components/utils/features";
-import { WORKFLOWS } from "~/components/utils/workflows";
+import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
@@ -41,6 +41,7 @@ import Tabs from "~ui/controls/Tabs";
 import BannerProjects from "~ui/icons/BannerProjects";
 import BannerSamples from "~ui/icons/BannerSamples";
 import BannerVisualizations from "~ui/icons/BannerVisualizations";
+import StatusLabel from "~ui/labels/StatusLabel";
 import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 
@@ -198,18 +199,18 @@ class DiscoveryView extends React.Component {
   // Special case to support per-workflow tab views
   constructSamplesByWorkflow = () => {
     const result = {};
-    [WORKFLOWS.SHORT_READ_MNGS.value, WORKFLOWS.CONSENSUS_GENOME.value].forEach(
-      workflow => {
-        const conditions = this.getConditions();
-        conditions.filters.workflow = workflow;
-        result[workflow] = this.dataLayer.samples.createView({
-          conditions,
-          onViewChange: this.refreshSampleData,
-          displayName: workflow,
-        });
-        result[workflow].loadPage(0);
-      }
-    );
+    WORKFLOW_ORDER.forEach(name => {
+      const workflow = WORKFLOWS[name].value;
+      const conditions = this.getConditions();
+      conditions.filters.workflow = workflow;
+
+      result[workflow] = this.dataLayer.samples.createView({
+        conditions,
+        onViewChange: this.refreshSampleData,
+        displayName: workflow,
+      });
+      result[workflow].loadPage(0);
+    });
     return result;
   };
 
@@ -1273,30 +1274,25 @@ class DiscoveryView extends React.Component {
   };
 
   computeWorkflowTabs = () => {
-    const renderTab = (label, count) => {
-      return (
+    return WORKFLOW_ORDER.map(name => ({
+      label: (
         <div>
-          <span className={cs.tabLabel}>{label}</span>
-          <span className={cs.tabCounter}>{count}</span>
+          <span className={cs.tabLabel}>{`${WORKFLOWS[name].label}s`}</span>
+          <span className={cs.tabCounter}>
+            {this.samplesByWorkflow[WORKFLOWS[name].value].length || "-"}
+          </span>
+          {WORKFLOWS[name].beta ? (
+            <StatusLabel
+              className={cs.statusLabel}
+              inline
+              status="Beta"
+              type="beta"
+            />
+          ) : null}
         </div>
-      );
-    };
-    return compact([
-      {
-        label: renderTab(
-          `${WORKFLOWS.SHORT_READ_MNGS.label}s`,
-          this.samplesByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value].length || "-"
-        ),
-        value: WORKFLOWS.SHORT_READ_MNGS.value,
-      },
-      {
-        label: renderTab(
-          `${WORKFLOWS.CONSENSUS_GENOME.label}s`,
-          this.samplesByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value].length || "-"
-        ),
-        value: WORKFLOWS.CONSENSUS_GENOME.value,
-      },
-    ]);
+      ),
+      value: WORKFLOWS[name].value,
+    }));
   };
 
   renderCenterPaneContent = () => {
