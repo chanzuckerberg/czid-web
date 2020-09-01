@@ -49,13 +49,6 @@ export default function SampleViewHeader({
     return `${pipelineRunVersionString}${alignmentConfigNameString}`;
   };
 
-  const renderName = sample => {
-    return get("temp_pipeline_workflow", sample) ===
-      WORKFLOWS.CONSENSUS_GENOME.value
-      ? `[Consensus Genome] ${get("name", sample)}`
-      : get("name", sample);
-  };
-
   const onSaveClick = async () => {
     if (view) {
       const params = parseUrlParams();
@@ -194,7 +187,7 @@ export default function SampleViewHeader({
           {project ? project.name : ""}
         </ViewHeader.Pretitle>
         <ViewHeader.Title
-          label={renderName(sample)}
+          label={get("name", sample)}
           id={sample && sample.id}
           options={projectSamples.map(sample => ({
             label: sample.name,

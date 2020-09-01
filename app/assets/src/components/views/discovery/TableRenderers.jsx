@@ -99,10 +99,7 @@ class TableRenderers extends React.Component {
     full = true,
     basicIcon = false
   ) => {
-    const sampleName =
-      get("tempPipelineWorkflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
-        ? `[Consensus Genome] ${get("name", sample)}`
-        : get("name", sample);
+    const sampleName = get("name", sample);
     return (
       <div className={cs.sample}>
         {full && (
