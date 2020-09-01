@@ -114,7 +114,7 @@ class ConsensusGenomeView extends React.Component {
       // FAILED
       const { link, linkText, message, status, type } = sampleErrorInfo({
         sample,
-        error: workflow.input_error,
+        error: workflow.input_error || {},
       });
       return (
         <SampleMessage
