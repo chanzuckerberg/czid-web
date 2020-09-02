@@ -70,7 +70,7 @@
 
   .sharingOption {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     padding: 10px 0;
     border-radius: $border-radius-m;
     cursor: pointer;
@@ -79,14 +79,21 @@
       background-color: $gray-lightest;
     }
 
-    .radioButton {
-      margin: 10px 15px;
-    }
+    .radioButtonAndProjectIcon {
+      display: flex;
+      align-items: center;
 
-    .projectIcon {
-      height: 40px;
-      width: 40px;
-      margin-right: 10px;
+      .radioButton {
+        margin: 10px 15px;
+        flex: 1 0 auto;
+      }
+
+      .projectIcon {
+        flex: 1 0 auto;
+        height: 32px;
+        width: 32px;
+        margin-right: 10px;
+      }
     }
 
     .optionText {

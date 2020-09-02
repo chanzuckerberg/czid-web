@@ -3,6 +3,7 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 
 import BasicPopup from "~/components/BasicPopup";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
 import RadioButton from "~ui/controls/RadioButton";
@@ -144,15 +145,23 @@ class ProjectCreationForm extends React.Component {
               this.handleAccessLevelChange(ACCESS_LEVEL.publicAccess)
             }
           >
-            <RadioButton
-              selected={accessLevel === ACCESS_LEVEL.publicAccess}
-              className={cs.radioButton}
-            />
-            <PublicProjectIcon className={cs.projectIcon} />
+            <div className={cs.radioButtonAndProjectIcon}>
+              <RadioButton
+                selected={accessLevel === ACCESS_LEVEL.publicAccess}
+                className={cs.radioButton}
+              />
+              <PublicProjectIcon className={cs.projectIcon} />
+            </div>
             <div className={cs.optionText}>
               <div className={cs.title}>Public Project</div>
               <div className={cs.description}>
-                Viewable by all users of IDseq
+                This project is viewable and searchable by anyone in IDseq.
+                They’ll be able to perform actions like create heatmaps and
+                download results. Public projects can’t be changed to Private.
+                <ExternalLink href="https://help.idseq.net">
+                  {" "}
+                  Learn more.
+                </ExternalLink>
               </div>
             </div>
           </div>
@@ -162,16 +171,24 @@ class ProjectCreationForm extends React.Component {
               this.handleAccessLevelChange(ACCESS_LEVEL.privateAccess)
             }
           >
-            <RadioButton
-              selected={accessLevel === ACCESS_LEVEL.privateAccess}
-              className={cs.radioButton}
-            />
-            <PrivateProjectIcon className={cs.projectIcon} />
+            <div className={cs.radioButtonAndProjectIcon}>
+              <RadioButton
+                selected={accessLevel === ACCESS_LEVEL.privateAccess}
+                className={cs.radioButton}
+              />
+              <PrivateProjectIcon className={cs.projectIcon} />
+            </div>
             <div className={cs.optionText}>
               <div className={cs.title}>Private Project</div>
               <div className={cs.description}>
-                Only viewable by you and users you specify. Individual samples
-                will become public after one year.
+                Samples added to this project will be private by default,
+                visible only to you and other project members. Private samples
+                will become public 1 year after their upload date. You can
+                change a Private project to Public at any time.
+                <ExternalLink href="https://help.idseq.net">
+                  {" "}
+                  Learn more.
+                </ExternalLink>
               </div>
             </div>
           </div>
@@ -204,9 +221,10 @@ class ProjectCreationForm extends React.Component {
                 </li>
               </ul>
               <p>
-                <span className={cs.title}>Example project description: </span>Investigation
-                of pathogen diversity in healthy vs. diseased dogs in
-                California. Sequenced RNA extracted from dog stool with a MiSeq.
+                <span className={cs.title}>Example project description: </span>
+                Investigation of pathogen diversity in healthy vs. diseased dogs
+                in California. Sequenced RNA extracted from dog stool with a
+                MiSeq.
               </p>
             </div>
           )}
