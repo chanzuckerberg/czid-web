@@ -2,19 +2,18 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 
-.viewOnlySharingForm {
+.viewOnlyLinkForm {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 100%;
-
-  .highlight {
-    font-weight: $font-weight-semibold;
-  }
 
   .note {
     @include font-body-xs;
     color: $gray-dark;
+  }
+
+  .noteContainer {
+    margin-top: $space-xxs;
+    margin-right: 100px;
   }
 
   .background {
@@ -22,31 +21,55 @@
     border-radius: $border-radius-m;
   }
 
-  .viewOnlySharingHeader {
-    display: flex;
-    flex-direction: row;
+  .helpIcon {
+    fill: $gray-light;
+    margin-left: $space-xs;
+    display: inline-flex;
+    vertical-align: middle;
 
-    .title {
-      @include font-header-m;
-      color: $black;
-      display: flex;
-      align-items: center;
-      min-height: 20px;
-      margin-bottom: $space-xxs;
-    }
-
-    .toggle {
-      margin-left: $space-xl;
-      margin-right: 34px; // half the toggle width
-    }
-
-    .loadingIcon {
-      margin-left: $space-xl;
-      margin-right: 34px; // half the toggle width
+    &:hover {
+      svg {
+        fill: $primary;
+      }
     }
   }
 
-  .viewOnlySharingBody {
+  .toggleContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .loadingIcon {
+      // width and height of toggle
+      width: 68px;
+      height: 28px;
+      justify-content: center;
+    }
+
+    .linkToggle {
+      margin-right: $space-m;
+    }
+
+    .automaticUpdateToggle {
+      margin-right: $space-xl;
+    }
+  }
+
+  .viewOnlyLinkHeader {
+    .titleContainer {
+      height: 22px; // title height
+
+      .title {
+        @include font-header-m;
+      }
+    }
+
+    .note {
+      display: inline;
+    }
+  }
+
+  .viewOnlyLinkBody {
     padding: $space-l;
     margin-top: $space-l;
 
@@ -57,7 +80,8 @@
     }
 
     .pipelineVersionTooltip {
-      color: $black;
+      text-decoration: underline;
+      text-decoration-style: dashed;
 
       &:hover {
         color: $primary;
@@ -67,14 +91,12 @@
 
     .settingsForm {
       margin-left: $space-xl;
-      margin-right: $space-xl;
 
       .settingsFormDropdown {
         margin-top: $space-l;
 
         .backgroundModelLabel {
           @include font-header-s;
-          color: $black;
           margin-top: $space-l;
           margin-bottom: $space-xxs;
           display: flex;
@@ -89,31 +111,18 @@
             color: $gray-dark;
           }
         }
-
-        .helpIcon {
-          margin-left: $space-xs;
-          height: 20px;
-
-          &:hover {
-            svg {
-              fill: $primary;
-            }
-          }
-        }
       }
 
       .settingsFormField {
         display: flex;
+        flex-direction: column;
         margin-top: $space-l;
-        margin-right: $space-l;
 
-        .formFieldText {
-          margin-right: $space-l;
+        .formFieldLabelContainer {
+          height: 24px; // formFieldLabel height
 
           .formFieldLabel {
-            @include font-header-xs;
-            margin-bottom: $space-xxs;
-            color: $black;
+            @include font-header-s;
           }
         }
       }
@@ -142,5 +151,22 @@
         min-width: 75px;
       }
     }
+  }
+}
+
+.highlight {
+  @include font-header-xs;
+}
+
+// Override materialize.css
+.conditionList {
+  padding-left: 0;
+  margin-top: $space-m;
+  margin-bottom: 0;
+  @include font-body-xs;
+
+  .conditionListItem {
+    list-style: disc inside none;
+    margin-bottom: $space-xxs;
   }
 }

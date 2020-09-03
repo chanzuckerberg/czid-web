@@ -1167,7 +1167,6 @@ export default class SampleViewV2 extends React.Component {
       view,
     } = this.state;
     const { snapshotShareId } = this.props;
-    const { allowedFeatures = [] } = this.context || {};
 
     return (
       <React.Fragment>

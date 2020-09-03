@@ -14,7 +14,7 @@ import Divider from "~/components/layout/Divider";
 
 import UserManagementForm from "./UserManagementForm";
 import PublicProjectConfirmationModal from "./PublicProjectConfirmationModal";
-import ViewOnlySharingForm from "./ViewOnlySharingForm";
+import ViewOnlyLinkForm from "./ViewOnlyLinkForm";
 import cs from "./project_settings_modal.scss";
 
 class ProjectSettingsModal extends React.Component {
@@ -123,9 +123,11 @@ class ProjectSettingsModal extends React.Component {
                         </div>
                       </div>
                       <div className={cs.note}>
+                        Samples added will be private by default, visible only
+                        to project members. Private samples will become public 1
+                        year after upload date.{" "}
                         {nextPublicSampleDate && (
                           <span>
-                            {" "}
                             Next project sample will become public on{" "}
                             {nextPublicSampleDate}.
                           </span>
@@ -148,7 +150,7 @@ class ProjectSettingsModal extends React.Component {
                 <div>
                   <Divider />
                   <div className={cs.formContainer}>
-                    <ViewOnlySharingForm project={project} />
+                    <ViewOnlyLinkForm project={project} />
                   </div>
                 </div>
               )}

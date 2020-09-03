@@ -50,20 +50,23 @@ const ProjectHeader = ({
     <div className={cs.projectHeader}>
       <div className={cs.name}>{project.name || snapshotProjectName}</div>
       <div className={cs.fillIn} />
-      {!snapshotProjectName &&
-        (project.public_access ? (
-          <div className={cs.item}>
-            <GlobeIcon className={cs.smallIcon} /> Public project
-          </div>
-        ) : (
-          <div className={cs.item}>
-            <LockIcon className={cs.smallIcon} /> Private project
-          </div>
-        ))}
-      <ProjectInfoIconTooltip
-        isPublic={project.public_access === 1}
-        position="bottom center"
-      />
+      {!snapshotProjectName && (
+        <React.Fragment>
+          {project.public_access ? (
+            <div className={cs.item}>
+              <GlobeIcon className={cs.smallIcon} /> Public project
+            </div>
+          ) : (
+            <div className={cs.item}>
+              <LockIcon className={cs.smallIcon} /> Private project
+            </div>
+          )}
+          <ProjectInfoIconTooltip
+            isPublic={project.public_access === 1}
+            position="bottom center"
+          />
+        </React.Fragment>
+      )}
       {project.editable && (
         <div className={cs.item}>
           <UserIcon className={cx(cs.smallIcon, cs.userIcon)} />{" "}

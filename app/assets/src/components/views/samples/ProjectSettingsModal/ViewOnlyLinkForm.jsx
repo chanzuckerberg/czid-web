@@ -16,11 +16,12 @@ import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import Toggle from "~ui/controls/Toggle";
 import { Input } from "~ui/controls";
+import InfoIconSmall from "~ui/icons/InfoIconSmall";
 import { logAnalyticsEvent } from "~/api/analytics";
 
-import cs from "./view_only_sharing_form.scss";
+import cs from "./view_only_link_form.scss";
 
-class ViewOnlySharingForm extends React.Component {
+class ViewOnlyLinkForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -93,14 +94,14 @@ class ViewOnlySharingForm extends React.Component {
     try {
       await createSnapshot(project.id);
       await this.fetchSnapshotInfo();
-      logAnalyticsEvent("ViewOnlySharingForm_on-toggle_clicked", {
+      logAnalyticsEvent("ViewOnlyLinkForm_on-toggle_clicked", {
         snapshotShareId: snapshotShareId,
         projectId: project.id,
       });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
-      logAnalyticsEvent("ViewOnlySharingForm_snapshot_creation-failed", {
+      logAnalyticsEvent("ViewOnlyLinkForm_snapshot_creation-failed", {
         projectId: project.id,
       });
     }
@@ -112,13 +113,13 @@ class ViewOnlySharingForm extends React.Component {
     try {
       await deleteSnapshot(snapshotShareId);
       this.clearSnapshotInfo();
-      logAnalyticsEvent("ViewOnlySharingForm_off-toggle_clicked", {
+      logAnalyticsEvent("ViewOnlyLinkForm_off-toggle_clicked", {
         projectId: project.id,
       });
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
-      logAnalyticsEvent("ViewOnlySharingForm_snapshot_deletion-failed", {
+      logAnalyticsEvent("ViewOnlyLinkForm_snapshot_deletion-failed", {
         projectId: project.id,
       });
     }
@@ -170,31 +171,59 @@ class ViewOnlySharingForm extends React.Component {
       snapshotTimestamp,
     } = this.state;
     const { project } = this.props;
+
+    const viewOnlyHelpText = (
+      <React.Fragment>
+        <span>
+          Users viewing this link <span className={cs.highlight}>can not</span>:
+        </span>
+        <ul className={cs.conditionList}>
+          <li className={cs.conditionListItem}>Upload samples</li>
+          <li className={cs.conditionListItem}>Edit metadata</li>
+          <li className={cs.conditionListItem}>
+            Download non-host reads/ contigs or unmapped reads
+          </li>
+        </ul>
+      </React.Fragment>
+    );
+    const backgroundModelHelpText =
+      "You can select our default or one created from samples you uploaded.";
     const shareableLink = window.location.origin + "/pub/" + snapshotShareId;
+
     return (
-      <div className={cs.viewOnlySharingForm}>
-        <div className={cs.viewOnlySharingHeader}>
-          <div className={cs.headerText}>
-            <div className={cs.title}>View-Only Sharing</div>
-            <div className={cs.note}>
-              Anyone with a link to your project will be able to see a View-Only
-              version, including logged out users.
-            </div>
+      <div className={cs.viewOnlyLinkForm}>
+        <div className={cs.viewOnlyLinkHeader}>
+          <div className={cx(cs.toggleContainer, cs.titleContainer)}>
+            <div className={cs.title}>View-Only Link</div>
+            {isLoading ? (
+              <LoadingMessage className={cs.loadingIcon} />
+            ) : (
+              <Toggle
+                className={cs.linkToggle}
+                onLabel="On"
+                offLabel="Off"
+                initialChecked={sharingEnabled}
+                onChange={this.handleSharingToggle}
+              />
+            )}
           </div>
-          {isLoading ? (
-            <LoadingMessage className={cs.loadingIcon} />
-          ) : (
-            <Toggle
-              className={cs.toggle}
-              onLabel="On"
-              offLabel="Off"
-              initialChecked={sharingEnabled}
-              onChange={this.handleSharingToggle}
+          <div className={cs.noteContainer}>
+            <div className={cs.note}>
+              Anyone, including non-IDseq users, can use this link to access a
+              View-Only version of your project.
+            </div>
+            <ColumnHeaderTooltip
+              trigger={
+                <span>
+                  <InfoIconSmall className={cs.helpIcon} />
+                </span>
+              }
+              content={viewOnlyHelpText}
             />
-          )}
+          </div>
         </div>
         {sharingEnabled && (
-          <div className={cx(cs.viewOnlySharingBody, cs.background)}>
+          <div className={cx(cs.viewOnlyLinkBody, cs.background)}>
             <div className={cs.label}>Details for View-Only</div>
             <div className={cs.note}>
               {this.renderNumSamples()} | {this.renderPipelineVersions()} |{" "}
@@ -205,9 +234,7 @@ class ViewOnlySharingForm extends React.Component {
                 <div className={cs.backgroundModelLabel}>
                   <span>Background Model</span>
                   <HelpIcon
-                    text={
-                      "For View-Only Sharing, you can add a default background model or one created with samples you uploaded."
-                    }
+                    text={backgroundModelHelpText}
                     className={cs.helpIcon}
                   />
                 </div>
@@ -220,24 +247,28 @@ class ViewOnlySharingForm extends React.Component {
                 />
               </div>
               <div className={cs.settingsFormField}>
-                <div className={cs.formFieldText}>
+                <div
+                  className={cx(cs.toggleContainer, cs.formFieldLabelContainer)}
+                >
                   <div className={cs.formFieldLabel}>Automatically update</div>
+                  <Toggle
+                    className={cs.automaticUpdateToggle}
+                    onLabel="On"
+                    offLabel="Off"
+                    initialChecked={automaticUpdateEnabled}
+                    onChange={this.handleAutomaticUpdateChange}
+                  />
+                </div>
+                <div className={cs.noteContainer}>
                   <div className={cs.note}>
-                    Samples
+                    View-only link
                     <span className={cs.highlight}>
                       {automaticUpdateEnabled ? " will " : " will not "}
                     </span>
-                    update if run on a newer pipeline or if samples are added to
-                    the project.
+                    update to include new pipeline runs or new samples added to
+                    this project.
                   </div>
                 </div>
-                <Toggle
-                  className={cs.toggle}
-                  onLabel="On"
-                  offLabel="Off"
-                  initialChecked={automaticUpdateEnabled}
-                  onChange={this.handleAutomaticUpdateChange}
-                />
               </div>
             </div>
             <div className={cs.shareableLink}>
@@ -260,7 +291,7 @@ class ViewOnlySharingForm extends React.Component {
                       onClick={() => {
                         copyUrlToClipboard(shareableLink);
                         logAnalyticsEvent(
-                          "ViewOnlySharingForm_copy-button_clicked",
+                          "ViewOnlyLinkForm_copy-button_clicked",
                           {
                             snapshotShareId: snapshotShareId,
                             projectId: project.id,
@@ -282,10 +313,10 @@ class ViewOnlySharingForm extends React.Component {
   }
 }
 
-ViewOnlySharingForm.propTypes = {
+ViewOnlyLinkForm.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
   }).isRequired,
 };
 
-export default ViewOnlySharingForm;
+export default ViewOnlyLinkForm;
