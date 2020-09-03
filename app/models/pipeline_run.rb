@@ -1058,8 +1058,7 @@ class PipelineRun < ApplicationRecord
         self.finalized = 1
         self.known_user_error, self.error_message = check_for_user_error(prs)
         automatic_restart = automatic_restart_allowed? unless known_user_error
-        send_to_airbrake = !known_user_error
-        report_failed_pipeline_run_stage(prs, known_user_error, send_to_airbrake, automatic_restart)
+        report_failed_pipeline_run_stage(prs, known_user_error, automatic_restart)
       elsif !prs.started?
         # Note: this is not ideally place to initialize an SFN pipeline but
         # in order to preserve most of the logic of the old pipeline we decided
@@ -1101,8 +1100,7 @@ class PipelineRun < ApplicationRecord
         self.job_status = STATUS_FAILED
         self.finalized = 1
         self.known_user_error, self.error_message = check_for_user_error(prs)
-        send_to_airbrake = !known_user_error
-        report_failed_pipeline_run_stage(prs, known_user_error, send_to_airbrake)
+        report_failed_pipeline_run_stage(prs, known_user_error)
       end
       self.job_status = format_job_status_text(prs.step_number, prs.name, prs.job_status || PipelineRunStage::STATUS_STARTED, report_ready?)
     end
@@ -1119,14 +1117,10 @@ class PipelineRun < ApplicationRecord
       "See: #{status_url}"
   end
 
-  private def report_failed_pipeline_run_stage(prs, known_user_error, send_to_airbrake, automatic_restart = false)
+  private def report_failed_pipeline_run_stage(prs, known_user_error, automatic_restart = false)
     log_message = pipeline_run_stage_error_message(prs, automatic_restart, known_user_error)
-    if send_to_airbrake
-      LogUtil.log_err(log_message)
-    else
-      Rails.logger.warn(log_message)
-    end
-    tags = ["sample_id:#{sample.id}", "automatic_restart:#{automatic_restart}", "known_user_error:#{known_user_error ? true : false}", "send_to_airbrake:#{send_to_airbrake}"]
+    Rails.logger.error(log_message)
+    tags = ["sample_id:#{sample.id}", "automatic_restart:#{automatic_restart}", "known_user_error:#{known_user_error ? true : false}"]
     MetricUtil.put_metric_now("samples.failed", 1, tags)
   end
 

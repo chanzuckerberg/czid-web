@@ -126,16 +126,10 @@ describe PipelineRun, type: :model do
         end
 
         if reports_error
-          it "sends error to airbrake" do
+          it "logs SampleFailedEvent error" do
             pipeline_run.update_job_status
 
-            expect(pipeline_run).to have_received(:report_failed_pipeline_run_stage).with(instance_of(PipelineRunStage), anything, true, boolean)
-          end
-        else
-          it "does not send error to airbrake" do
-            pipeline_run.update_job_status
-
-            expect(pipeline_run).to have_received(:report_failed_pipeline_run_stage).with(instance_of(PipelineRunStage), anything, false, boolean)
+            expect(pipeline_run).to have_received(:report_failed_pipeline_run_stage).with(instance_of(PipelineRunStage), anything, boolean)
           end
         end
 
@@ -248,32 +242,12 @@ describe PipelineRun, type: :model do
     let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample) }
     let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage, pipeline_run: pipeline_run) }
 
-    before { allow(LogUtil).to receive(:log_err) }
+    before { allow(Rails.logger).to receive(:error) }
 
-    it "sends metric to datadog" do
-      allow(MetricUtil).to receive(:put_metric_now)
+    it "logs errors" do
+      pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, nil, false)
 
-      pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, "SOME_USER_ERROR", false, true)
-
-      expect(MetricUtil).to have_received(:put_metric_now).with("samples.failed", 1, ["sample_id:123", "automatic_restart:true", "known_user_error:true", "send_to_airbrake:false"])
-    end
-
-    context "when send_to_airbrake is true" do
-      it "sends error to airbrake and log error" do
-        pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, nil, true, false)
-
-        expect(LogUtil).to have_received(:log_err).with(match(/SampleFailedEvent:/))
-      end
-    end
-
-    context "when send_to_airbrake is false" do
-      before { allow(Rails.logger).to receive(:warn) }
-      it "do not send error to airbrake and log warn" do
-        pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, nil, false, true)
-
-        expect(LogUtil).to_not have_received(:log_err)
-        expect(Rails.logger).to have_received(:warn).with(match(/SampleFailedEvent:/))
-      end
+      expect(Rails.logger).to have_received(:error).with(match(/SampleFailedEvent:/))
     end
   end
 
