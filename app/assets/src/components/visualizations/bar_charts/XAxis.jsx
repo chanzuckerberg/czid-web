@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "~/components/utils/propTypes";
 import cx from "classnames";
 
+import { numberWithSiPrefix } from "~/helpers/strings";
+
 import cs from "./x_axis.scss";
 
 export default function XAxis({
@@ -20,14 +22,11 @@ export default function XAxis({
 }) {
   const renderAxis = () => {
     const tickCount = Math.floor(barCanvasWidth / tickSpacing);
-    const tickFormat = x.tickFormat(tickCount, "~s");
     const ticks = x.ticks(tickCount, "s").map(value => ({
       value,
-      formatted: tickFormat(value),
+      formatted: numberWithSiPrefix(value),
       xOffset: x(value),
     }));
-
-    const range = x.range();
 
     const tickMapping = ticks.map(({ value, formatted, xOffset }) => {
       return (

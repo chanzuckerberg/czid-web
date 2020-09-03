@@ -5,7 +5,7 @@ import cx from "classnames";
 import d3 from "d3";
 import memoize from "memoize-one";
 import { head, sortBy } from "lodash/fp";
-import { getSamples } from "~/api";
+import { getSamples, getSamplePipelineResults } from "~/api";
 import InfoBanner from "./InfoBanner";
 import Histogram from "~/components/visualizations/Histogram";
 import InfoIconSmall from "~/components/ui/icons/InfoIconSmall";
@@ -14,13 +14,22 @@ import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip"
 import { TooltipVizTable } from "~ui/containers";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import Notification from "~ui/notifications/Notification";
+import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";
+import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
+import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
+import BasicPopup from "~/components/BasicPopup";
 
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
+import {
+  BAR_FILL_COLOR,
+  HOVER_BAR_FILL_COLOR,
+  BAR_CLICK_FILL_COLOR,
+  READS_LOST_STACK_COLORS,
+  READS_REMAINING_COLOR,
+  READS_REMAINING,
+  HUMAN_READABLE_STEP_NAMES,
+} from "./constants.js";
 import cs from "./quality_control.scss";
-
-const BAR_FILL_COLOR = "#A9BDFC";
-const HOVER_BAR_FILL_COLOR = "#3867FA";
-const BAR_CLICK_FILL_COLOR = "#223F9C";
 
 class QualityControl extends React.Component {
   constructor(props) {
@@ -30,11 +39,17 @@ class QualityControl extends React.Component {
       loading: true,
       samples: [],
       showProcessingSamplesMessage: true,
+      sidebarVisible: false,
+      sidebarParams: {
+        sampleId: null,
+      },
+      histogramTooltipData: null,
+      readsLostTooltipData: null,
     };
   }
 
   componentDidMount() {
-    this.fetchProjectSamples();
+    this.fetchProjectData();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -97,8 +112,7 @@ class QualityControl extends React.Component {
     }
   }
 
-  fetchProjectSamples = async () => {
-    this.setState({ loading: true });
+  fetchProjectData = async () => {
     const { projectId } = this.props;
 
     const projectSamples = await getSamples({
@@ -106,6 +120,16 @@ class QualityControl extends React.Component {
     });
 
     let data = this.extractData(projectSamples.samples);
+
+    const pipelineResultFetchers = data.validSamples.map(sample =>
+      this.getPipelineResultForSample(sample)
+    );
+    const pipelineResults = await Promise.all(pipelineResultFetchers);
+
+    const { categories, legendColors, readsLostData } = this.stackReadsLostData(
+      pipelineResults
+    );
+    const chartColors = legendColors.map(({ color, label }) => color);
 
     this.setState({
       loading: false,
@@ -118,7 +142,80 @@ class QualityControl extends React.Component {
       qualityReads: data.qualityReads,
       dcr: data.dcr,
       meanInsertSize: data.meanInsertSize,
+      readsLostData: readsLostData,
+      readsLostLegendColors: legendColors,
+      readsLostCategories: categories,
+      readsLostChartColors: chartColors,
     });
+  };
+
+  stackReadsLostData(pipelineResults) {
+    const categories = pipelineResults.reduce((accum, current) => {
+      current.steps.forEach((step, index) => {
+        if (!accum.includes(step.name)) {
+          accum.splice(index, 0, step.name);
+        }
+      });
+      return accum;
+    }, []);
+
+    categories.push("Reads remaining");
+
+    const legendColors = categories.map((category, index) => {
+      const colorIndex = index % READS_LOST_STACK_COLORS.length;
+      return {
+        color:
+          category === READS_REMAINING
+            ? READS_REMAINING_COLOR
+            : READS_LOST_STACK_COLORS[colorIndex],
+        label: category,
+      };
+    });
+
+    const readsLostData = pipelineResults.map(sample => {
+      const dataRow = {};
+      let readsRemaining = sample.initialReads;
+      let total = 0;
+      sample.steps.forEach(step => {
+        let readsAfter = step.readsAfter || readsRemaining;
+        // The readsAfter column for CD Hit Dup returns the number of unique reads,
+        // not the reads remaining. (FUN)
+        if (step.name === "Identify duplicates") {
+          readsAfter = readsRemaining;
+        }
+        const readsLost = readsRemaining - readsAfter;
+        dataRow[step.name] = readsLost;
+        total += readsLost;
+        readsRemaining = readsAfter;
+      });
+      dataRow.total = sample.initialReads;
+      dataRow.name = sample.name;
+      dataRow[READS_REMAINING] = readsRemaining;
+
+      return dataRow;
+    });
+
+    return { categories, legendColors, readsLostData };
+  }
+
+  getPipelineResultForSample = async sample => {
+    const result = await getSamplePipelineResults(sample.id);
+    const qualityControlStage = result.displayedData.hostFiltering.steps;
+    const qualityControlSteps = Object.keys(qualityControlStage);
+    const initialReadsStep = qualityControlSteps.shift();
+    const initialReads = qualityControlStage[initialReadsStep].readsAfter;
+    const stepData = qualityControlSteps.map(step => ({
+      name:
+        HUMAN_READABLE_STEP_NAMES[qualityControlStage[step].name] ||
+        qualityControlStage[step].name,
+      readsAfter: qualityControlStage[step].readsAfter,
+    }));
+    const data = {
+      name: sample.name,
+      initialReads: initialReads,
+      steps: stepData,
+    };
+    return data;
   };
 
   extractData(samples) {
@@ -313,20 +410,20 @@ class QualityControl extends React.Component {
           ["Number", `${bin.length} ${samplesText}`],
         ],
         disabled: false,
-        compact: true,
       },
     ];
   });
 
-  handleHistogramBarHover = (clientX, clientY) => {
-    const histogramTooltipLocation =
+  handleChartElementHover = (clientX, clientY) => {
+    const tooltipLocation =
       clientX && clientY ? { left: clientX, top: clientY } : null;
-    this.setState({ histogramTooltipLocation });
+    this.setState({ tooltipLocation });
   };
 
-  handleHistogramBarExit = () => {
+  handleChartElementExit = () => {
     this.setState({
-      histogramTooltipLocation: null,
+      tooltipLocation: null,
+      tooltipClass: null,
       histogramTooltipData: null,
     });
   };
@@ -335,6 +432,135 @@ class QualityControl extends React.Component {
     const { handleBarClick } = this.props;
     handleBarClick([]);
   };
+
+  handleSingleBarStackEnter = (sampleName, stepName, readsLost) => {
+    const { readsLostLegendColors } = this.state;
+
+    const stepLegend = readsLostLegendColors.find(
+      legendData => legendData.label === stepName
+    );
+
+    const histogramTooltipData = [
+      {
+        name: "Info",
+        data: [
+          [
+            <CategoricalLegend
+              className={cs.inlineLegend}
+              data={[stepLegend]}
+            />,
+            readsLost.toLocaleString(),
+          ],
+        ],
+        disabled: false,
+      },
+    ];
+
+    this.setState({
+      histogramTooltipData,
+    });
+  };
+
+  handleEmptyBarSpaceEnter = (sampleName, readsLostData) => {
+    const { readsLostLegendColors, readsLostCategories } = this.state;
+
+    const readsRemainingLegend = readsLostLegendColors.find(
+      legendData => legendData.label === READS_REMAINING
+    );
+    const readsLostSummary = [];
+    readsLostCategories.forEach(category => {
+      if (category === READS_REMAINING) {
+        return;
+      }
+      const categoryLegend = readsLostLegendColors.find(
+        legendData => legendData.label === category
+      );
+      readsLostSummary.push([
+        <CategoricalLegend
+          className={cs.inlineLegend}
+          data={[categoryLegend]}
+          key={`${category}-summary-tooltip`}
+        />,
+        readsLostData[category].toLocaleString(),
+      ]);
+    });
+
+    const histogramTooltipData = [
+      {
+        name: "Total reads",
+        data: [["Total reads", readsLostData.total.toLocaleString()]],
+        disabled: false,
+      },
+      {
+        name: "Reads lost",
+        data: readsLostSummary,
+        disabled: false,
+      },
+      {
+        name: READS_REMAINING,
+        data: [
+          [
+            <CategoricalLegend
+              className={cs.inlineLegend}
+              data={[readsRemainingLegend]}
+              key={`${READS_REMAINING}-summary-tooltip`}
+            />,
+            readsLostData[READS_REMAINING].toLocaleString(),
+          ],
+        ],
+        disabled: false,
+      },
+    ];
+
+    this.setState({
+      histogramTooltipData,
+      tooltipClass: cs.summaryTooltip,
+    });
+  };
+
+  handleSampleLabelEnter = sampleName => {
+    const histogramTooltipData = [
+      {
+        name: "Info",
+        data: [["Sample Name", sampleName]],
+        disabled: false,
+      },
+    ];
+
+    this.setState({
+      histogramTooltipData,
+    });
+  };
+
+  handleSampleLabelClick = sampleName => {
+    const { validSamples, sidebarParams, sidebarVisible } = this.state;
+
+    const sampleId = validSamples.find(sample => sample.name === sampleName).id;
+
+    if (sampleId === sidebarParams.sampleId && sidebarVisible === true) {
+      this.closeSidebar();
+      return;
+    }
+
+    this.setState({
+      sidebarVisible: true,
+      sidebarParams: {
+        sampleId: sampleId,
+      },
+    });
+  };
+
+  closeSidebar = () => {
+    this.setState({
+      sidebarVisible: false,
+    });
+  };
+
+  hideprocessingSamplesMessage = () => {
+    this.setState({ showProcessingSamplesMessage: false });
+  };
+
+  /* --- render functions --- */
 
   renderHistogram = (container, data, labelX, labelY, tickFormat) => {
     let histogram = new Histogram(container, data, {
@@ -358,9 +584,9 @@ class QualityControl extends React.Component {
         left: 35,
       },
       onHistogramBarClick: this.handleHistogramBarClick,
-      onHistogramBarHover: this.handleHistogramBarHover,
+      onHistogramBarHover: this.handleChartElementHover,
       onHistogramBarEnter: this.handleHistogramBarEnter,
-      onHistogramBarExit: this.handleHistogramBarExit,
+      onHistogramBarExit: this.handleChartElementExit,
       onHistogramEmptyClick: this.handleHistogramEmptyClick,
     });
     histogram.update();
@@ -379,13 +605,13 @@ class QualityControl extends React.Component {
   }
 
   renderHistograms() {
-    const { histogramTooltipData, histogramTooltipLocation } = this.state;
+    const { histogramTooltipData, tooltipLocation } = this.state;
 
     return (
-      <div className={cs.content}>
+      <div>
         {this.renderSampleStatsInfo()}
         <div className={cs.chartsContainer}>
-          <div className={cs.chart}>
+          <div className={cs.halfPageChart}>
             <div className={cs.title}>
               Do my samples have enough total reads?
             </div>
@@ -409,7 +635,7 @@ class QualityControl extends React.Component {
               />
             </div>
           </div>
-          <div className={cs.chart}>
+          <div className={cs.halfPageChart}>
             <div className={cs.title}>
               Do my samples have enough quality reads?
             </div>
@@ -434,7 +660,7 @@ class QualityControl extends React.Component {
               />
             </div>
           </div>
-          <div className={cs.chart}>
+          <div className={cs.halfPageChart}>
             <div className={cs.title}>
               Do my samples have enough sequence diversity?
             </div>
@@ -461,7 +687,7 @@ class QualityControl extends React.Component {
               />
             </div>
           </div>
-          <div className={cs.chart}>
+          <div className={cs.halfPageChart}>
             <div className={cs.title}>
               Do my samples have sufficient insert lengths?
             </div>
@@ -487,21 +713,77 @@ class QualityControl extends React.Component {
             </div>
           </div>
         </div>
-        {histogramTooltipLocation && histogramTooltipData && (
-          <div
-            style={getTooltipStyle(histogramTooltipLocation)}
-            className={cs.hoverTooltip}
-          >
-            <TooltipVizTable data={histogramTooltipData} />
-          </div>
-        )}
       </div>
     );
   }
 
-  hideprocessingSamplesMessage = () => {
-    this.setState({ showProcessingSamplesMessage: false });
-  };
+  renderReadsLostChart() {
+    const {
+      readsLostData,
+      readsLostCategories,
+      readsLostChartColors,
+      readsLostLegendColors,
+    } = this.state;
+
+    const options = {
+      colors: readsLostChartColors,
+      x: {
+        pathVisible: false,
+        ticksVisible: false,
+        axisTitle: "Number of reads",
+      },
+      y: {
+        pathVisible: false,
+        ticksVisible: false,
+      },
+    };
+
+    const events = {
+      onYAxisLabelClick: this.handleSampleLabelClick,
+      onYAxisLabelEnter: this.handleSampleLabelEnter,
+      onBarStackEnter: this.handleSingleBarStackEnter,
+      onBarEmptySpaceEnter: this.handleEmptyBarSpaceEnter,
+      onChartHover: this.handleChartElementHover,
+      onChartElementExit: this.handleChartElementExit,
+    };
+
+    return (
+      <div className={cs.chartsContainer}>
+        <div className={cs.fullPageChart}>
+          <div className={cs.title}>
+            How did my samples go through the pipeline?
+          </div>
+          <div className={cs.histogramContainer}>
+            <div className={cs.subtitle}>
+              Reads Lost
+              <ColumnHeaderTooltip
+                trigger={
+                  <span>
+                    <InfoIconSmall className={cs.infoIcon} />
+                  </span>
+                }
+                title="Reads Lost"
+                content={SAMPLE_TABLE_COLUMNS_V2.readsLost.tooltip}
+                link={SAMPLE_TABLE_COLUMNS_V2.readsLost.link}
+              />
+            </div>
+            <CategoricalLegend
+              className={cs.legend}
+              data={readsLostLegendColors}
+            />
+            <HorizontalStackedBarChart
+              data={readsLostData}
+              keys={readsLostCategories}
+              options={options}
+              events={events}
+              yAxisKey={"name"}
+              className={cs.stackedBarChart}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   renderSampleStatsInfo = () => {
     const {
@@ -586,10 +868,41 @@ class QualityControl extends React.Component {
   }
 
   renderVisualization() {
-    const { loading, validSamples } = this.state;
+    const {
+      loading,
+      validSamples,
+      sidebarVisible,
+      sidebarParams,
+      tooltipLocation,
+      histogramTooltipData,
+      tooltipClass,
+    } = this.state;
     const showBlankState = !loading && validSamples.length === 0;
 
-    return showBlankState ? this.renderBlankState() : this.renderHistograms();
+    if (showBlankState) {
+      return this.renderBlankState();
+    }
+
+    return (
+      <div className={cs.content}>
+        {this.renderHistograms()}
+        {this.renderReadsLostChart()}
+        <DetailsSidebar
+          visible={sidebarVisible}
+          mode="sampleDetails"
+          params={sidebarParams}
+          onClose={this.closeSidebar}
+        />
+        {tooltipLocation && histogramTooltipData && (
+          <div
+            style={getTooltipStyle(tooltipLocation)}
+            className={cx(cs.hoverTooltip, tooltipClass)}
+          >
+            <TooltipVizTable data={histogramTooltipData} />
+          </div>
+        )}
+      </div>
+    );
   }
 
   render() {

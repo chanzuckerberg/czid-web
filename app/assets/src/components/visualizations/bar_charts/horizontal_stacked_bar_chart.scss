@@ -6,8 +6,7 @@
 // own class names and css to the component.
 
 .chart {
-  margin: 0px $space-xl $space-xxl $space-xl;
-  min-width: max-content;
+  width: 100%;
   line-height: 0px;
 }
 
@@ -37,12 +36,18 @@
   overflow-y: scroll;
   overflow-x: hidden;
   display: inline-block;
+  margin: 0px;
+  padding: 0px;
+
+  svg,
+  div {
+    margin: 0px;
+    padding: 0px;
+  }
 }
 
 .yAxis {
   float: left;
-  margin: 0px;
-  padding: 0px;
 }
 
 .barCanvas {
@@ -67,6 +72,11 @@
   &:hover {
     stroke: $primary;
   }
+}
+
+.faded {
+  stroke-opacity: 0;
+  fill-opacity: 0.1;
 }
 
 .test {

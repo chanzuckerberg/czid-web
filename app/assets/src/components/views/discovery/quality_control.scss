@@ -32,34 +32,45 @@
     display: flex;
     flex-flow: row wrap;
 
-    .chart {
+    .halfPageChart {
       color: $black;
       width: 50%;
       padding-right: $space-xl;
       padding-bottom: $space-xl;
+    }
 
-      .title {
-        @include font-header-l;
-        margin-bottom: $space-l;
-        margin-top: $space-l;
-      }
+    .fullPageChart {
+      color: $black;
+      width: 100%;
+      padding-right: $space-xl;
+      padding-bottom: $space-xl;
 
-      .histogramContainer {
-        padding: $space-xl;
-        border: $border-gray-light;
-        border-radius: $border-radius-m;
-
-        .subtitle {
-          @include font-header-s;
-          margin-bottom: $space-xxl;
-        }
+      .stackedBarChart {
+        margin: 0px;
       }
     }
-  }
 
-  .hoverTooltip {
-    position: fixed;
-    z-index: 1;
+    .histogramContainer {
+      padding: $space-xl;
+      border: $border-gray-light;
+      border-radius: $border-radius-m;
+    }
+
+    .title {
+      @include font-header-l;
+      margin-bottom: $space-l;
+      margin-top: $space-l;
+    }
+
+    .subtitle {
+      @include font-header-s;
+      margin-bottom: $space-xxl;
+    }
+
+    .legend {
+      @include font-body-xxs;
+      margin-bottom: $space-l;
+    }
   }
 
   .infoIcon {
@@ -107,4 +118,17 @@
   .noDataBannerContainer {
     flex: 0 0 auto;
   }
+}
+
+.hoverTooltip {
+  position: fixed;
+  z-index: 1;
+}
+
+.summaryTooltip {
+  transform: translateY(-100%);
+}
+
+.inlineLegend {
+  margin: 0px;
 }

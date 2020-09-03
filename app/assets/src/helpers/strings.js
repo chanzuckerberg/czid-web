@@ -72,3 +72,16 @@ export function numberWithPlusOrMinus(x, y) {
     Math.round(y)
   )}`;
 }
+
+// Convert a value into a string with at most 4 characters, 3 for the number and one for
+// either thousands ("K") or millions ("M")
+export function numberWithSiPrefix(value) {
+  let formatted = "NaN";
+  if (value < 1000000) {
+    // display value in thousands, without decimals
+    formatted = ((value / 1000) >>> 0).toString().concat("K");
+  } else {
+    formatted = (value / 1000000).toString().concat("M");
+  }
+  return formatted;
+}

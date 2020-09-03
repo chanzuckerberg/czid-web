@@ -15,6 +15,8 @@ export default function YAxis({
   pathVisible,
   textClassName,
   onYAxisLabelClick,
+  onYAxisLabelEnter,
+  onYAxisLabelExit,
 }) {
   const renderText = () => {
     const textOffset = `translate(-${7 +
@@ -37,6 +39,8 @@ export default function YAxis({
             dominantBaseline={"middle"}
             transform={textOffset}
             onClick={() => onYAxisLabelClick(yAttribute, index)}
+            onMouseEnter={() => onYAxisLabelEnter(yAttribute)}
+            onMouseLeave={() => onYAxisLabelExit()}
           >
             {displayName}
           </text>
@@ -73,4 +77,6 @@ YAxis.propTypes = {
   pathVisible: PropTypes.bool,
   textClassName: PropTypes.string,
   onYAxisLabelClick: PropTypes.func,
+  onYAxisLabelEnter: PropTypes.func,
+  onYAxisLabelExit: PropTypes.func,
 };

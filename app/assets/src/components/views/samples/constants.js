@@ -58,6 +58,13 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   pipelineVersion: {
     tooltip: "Version of the pipeline used for the last run of the sample.",
   },
+  readsLost: {
+    tooltip:
+      "Reads filtered during each step of the pipeline. The full length of the bar represents total reads, and reads remaining represents the reads that passed quality control and filtering steps.",
+    link:
+      DOC_BASE_LINK +
+      "360034790554-Pipeline-Details#host-filtering-and-quality-control",
+  },
   sampleType: {
     tooltip: "User-supplied metadata field indicating the sample type.",
   },

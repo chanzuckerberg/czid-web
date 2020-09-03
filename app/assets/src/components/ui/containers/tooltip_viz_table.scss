@@ -56,7 +56,7 @@
 
         .label {
           @include font-header-xs;
-          width: 160px;
+          width: auto;
         }
 
         .compact {
