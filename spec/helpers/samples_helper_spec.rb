@@ -100,9 +100,6 @@ RSpec.describe SamplesHelper, type: :helper do
       before do
         @project = create(:public_project)
         @admin = create(:admin)
-        # Because of initial admin only gating. See
-        # https://jira.czi.team/browse/IDSEQ-2051
-        @admin.add_allowed_feature("host_genome_free_text")
       end
 
       def sample_attributes(host_genome_name)

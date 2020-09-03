@@ -21,7 +21,6 @@ RSpec.describe BulkDownloadsController, type: :controller do
     # create_users
     before do
       sign_in @joe
-      @joe.add_allowed_feature("bulk_downloads")
       @project = create(:project, users: [@joe], name: "Test Project")
     end
 
@@ -450,7 +449,6 @@ RSpec.describe BulkDownloadsController, type: :controller do
     # create_users
     before do
       sign_in @admin
-      @admin.add_allowed_feature("bulk_downloads")
       @project = create(:project, users: [@admin], name: "Test Project")
     end
 

@@ -434,30 +434,17 @@ class MetadataManualInput extends React.Component {
           );
 
           const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
-          // TODO (gdingle): remove allowedFeatures after launch of sample type, 2020-01-15.
-          // See https://jira.czi.team/browse/IDSEQ-2051.
           if (this.props.samplesAreNew && column === "Host Organism") {
             return (
               <div>
-                {allowedFeatures.includes("host_genome_free_text") ? (
-                  <HostOrganismSearchBox
-                    className={inputClasses}
-                    value={this.getMetadataValue(sample, column)}
-                    onResultSelect={({ result }) => {
-                      this.updateHostGenome(result.name || result, sample);
-                    }}
-                    hostGenomes={this.props.hostGenomes || []}
-                  />
-                ) : (
-                  <Dropdown
-                    className={inputClasses}
-                    options={this.getHostGenomeOptions()}
-                    value={sampleHostGenomeId}
-                    onChange={id => this.updateHostGenome(id, sample)}
-                    usePortal
-                    withinModal={this.props.withinModal}
-                  />
-                )}
+                <HostOrganismSearchBox
+                  className={inputClasses}
+                  value={this.getMetadataValue(sample, column)}
+                  onResultSelect={({ result }) => {
+                    this.updateHostGenome(result.name || result, sample);
+                  }}
+                  hostGenomes={this.props.hostGenomes || []}
+                />
                 {this.props.samples.length > 1 &&
                   this.renderApplyToAll(sample, column)}
               </div>
@@ -561,15 +548,14 @@ class MetadataManualInput extends React.Component {
           </div>
           {this.renderColumnSelector()}
         </div>
-        {admin &&
-          samplesAreNew && (
-            <div
-              className={cs.autoPopulateButton}
-              onClick={this.autoPopulateMetadata}
-            >
-              Auto-populate metadata (Admin-only)
-            </div>
-          )}
+        {admin && samplesAreNew && (
+          <div
+            className={cs.autoPopulateButton}
+            onClick={this.autoPopulateMetadata}
+          >
+            Auto-populate metadata (Admin-only)
+          </div>
+        )}
       </div>
     );
   }

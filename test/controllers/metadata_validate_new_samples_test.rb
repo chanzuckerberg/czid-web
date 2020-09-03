@@ -220,11 +220,10 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
-  # TODO: (gdingle): This behavior will change after removal of admin-only of new host genome input.
-  # See https://jira.czi.team/browse/IDSEQ-2051.
   test 'missing or invalid host genome' do
     sign_in @user_nonadmin
 
+    # Note: Free text Host Genomes are now supported.
     post validate_csv_for_new_samples_metadata_url, params: {
       metadata: {
         headers: HEADERS_2 + ['blood_fed'],
@@ -248,10 +247,8 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal 2, @response.parsed_body['issues']['errors'].length
-    # Error should throw if host genome is invalid for a row.
     assert @response.parsed_body['issues']['errors'][0]['isGroup']
-    assert_equal ErrorAggregator::ERRORS[:row_invalid_host_genome][:title].call(1, nil), @response.parsed_body['issues']['errors'][0]['caption']
-    assert_equal [[1, "Test Sample", "Fake Genome"]], @response.parsed_body['issues']['errors'][0]['rows']
+    assert_equal [[1, "Test Sample", "Fake Genome", "sample_type"], [1, "Test Sample", "Fake Genome", "nucleotide_type"], [1, "Test Sample", "Fake Genome", "blood_fed"]], @response.parsed_body['issues']['errors'][0]['rows']
     # Error should throw if host genome is missing for a row.
     assert @response.parsed_body['issues']['errors'][1]['isGroup']
     assert_equal ErrorAggregator::ERRORS[:row_missing_host_genome][:title].call(1, nil), @response.parsed_body['issues']['errors'][1]['caption']

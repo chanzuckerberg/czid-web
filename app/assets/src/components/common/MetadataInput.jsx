@@ -58,14 +58,8 @@ class MetadataInput extends React.Component {
       sampleTypes,
     } = this.props;
     const { warning } = this.state;
-    const { allowedFeatures } = this.context || {};
 
-    // TODO (gdingle): remove allowedFeatures after launch of sample type, 2020-01-15.
-    // See https://jira.czi.team/browse/IDSEQ-2051.
-    if (
-      metadataType.key === "sample_type" &&
-      allowedFeatures.includes("sample_type_free_text")
-    ) {
+    if (metadataType.key === "sample_type") {
       return (
         <SampleTypeSearchBox
           className={className}

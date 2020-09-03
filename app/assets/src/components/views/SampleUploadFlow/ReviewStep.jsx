@@ -395,12 +395,10 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          {allowedFeatures.includes("host_genome_free_text") && (
-            <HostOrganismMessage
-              hostGenomes={originalHostGenomes}
-              samples={samples}
-            />
-          )}
+          <HostOrganismMessage
+            hostGenomes={originalHostGenomes}
+            samples={samples}
+          />
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
           {allowedFeatures.includes("taxon_whitelist") &&
