@@ -5,7 +5,8 @@ export const READS_LOST_STACK_COLORS = [
   "#AABDFC",
   "#DF87B0",
   "#88D0CA",
-  "#6b486b",
+  "#F08080",
+  "#FFD700",
   "#2C8CB5",
   "#E58740",
   "#D43A81",
@@ -14,7 +15,7 @@ export const READS_LOST_STACK_COLORS = [
 ];
 export const READS_REMAINING_COLOR = "#693BAC";
 export const READS_REMAINING = "Reads remaining";
-
+export const HOST_FILTER_STAGE_NAME = "Host Filtering";
 export const HUMAN_READABLE_STEP_NAMES = {
   Star: "Filter host (STAR)",
   Trimmomatic: "Trim adapters",

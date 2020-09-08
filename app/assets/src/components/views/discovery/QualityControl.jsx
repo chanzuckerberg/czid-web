@@ -28,6 +28,7 @@ import {
   READS_REMAINING_COLOR,
   READS_REMAINING,
   HUMAN_READABLE_STEP_NAMES,
+  HOST_FILTER_STAGE_NAME,
 } from "./constants.js";
 import cs from "./quality_control.scss";
 
@@ -125,7 +126,6 @@ class QualityControl extends React.Component {
       this.getPipelineResultForSample(sample)
     );
     const pipelineResults = await Promise.all(pipelineResultFetchers);
-
     const { categories, legendColors, readsLostData } = this.stackReadsLostData(
       pipelineResults
     );
@@ -159,7 +159,7 @@ class QualityControl extends React.Component {
       return accum;
     }, []);
 
-    categories.push("Reads remaining");
+    categories.push(READS_REMAINING);
 
     const legendColors = categories.map((category, index) => {
       const colorIndex = index % READS_LOST_STACK_COLORS.length;
@@ -188,6 +188,12 @@ class QualityControl extends React.Component {
         total += readsLost;
         readsRemaining = readsAfter;
       });
+      // account for every category
+      categories.forEach(category => {
+        if (!dataRow[category]) {
+          dataRow[category] = 0;
+        }
+      });
       dataRow.total = sample.initialReads;
       dataRow.name = sample.name;
       dataRow[READS_REMAINING] = readsRemaining;
@@ -200,15 +206,32 @@ class QualityControl extends React.Component {
 
   getPipelineResultForSample = async sample => {
     const result = await getSamplePipelineResults(sample.id);
-    const qualityControlStage = result.displayedData.hostFiltering.steps;
-    const qualityControlSteps = Object.keys(qualityControlStage);
-    const initialReadsStep = qualityControlSteps.shift();
-    const initialReads = qualityControlStage[initialReadsStep].readsAfter;
-    const stepData = qualityControlSteps.map(step => ({
+    // the key we want depends on if the sample went through a WDL pipeline or DAG pipeline
+    const qualityControlSteps = Object.keys(result.displayedData).reduce(
+      (accum, current) => {
+        if (result.displayedData[current].name === HOST_FILTER_STAGE_NAME) {
+          accum = result.displayedData[current].steps;
+        }
+        return accum;
+      },
+      {}
+    );
+    // check that step data exists
+    if (!qualityControlSteps || Object.keys(qualityControlSteps).length === 0) {
+      return {
+        name: sample.name,
+        initialReads: 0,
+        steps: [],
+      };
+    }
+    const qualityControlStepNames = Object.keys(qualityControlSteps);
+    const initialReads =
+      sample.details.derived_sample_output.pipeline_run.total_reads;
+    const stepData = qualityControlStepNames.map(step => ({
       name:
-        HUMAN_READABLE_STEP_NAMES[qualityControlStage[step].name] ||
-        qualityControlStage[step].name,
-      readsAfter: qualityControlStage[step].readsAfter,
+        HUMAN_READABLE_STEP_NAMES[qualityControlSteps[step].name] ||
+        qualityControlSteps[step].name,
+      readsAfter: qualityControlSteps[step].readsAfter,
     }));
     const data = {
       name: sample.name,
