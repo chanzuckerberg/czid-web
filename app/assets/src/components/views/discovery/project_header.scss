@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .projectHeader {
   display: flex;
@@ -17,20 +18,20 @@
 
   .item {
     @include font-body-s;
-
+    color: $gray-dark;
     display: flex;
     align-items: center;
 
     &:not(:first-child) {
-      margin-left: 10px;
+      margin-left: $space-l;
     }
   }
 }
 
 .smallIcon {
   height: 16px;
-  margin-right: 5px;
-  fill: black;
+  margin-right: $space-xs;
+  fill: $gray-dark;
 
   .userIcon {
     height: 14px;

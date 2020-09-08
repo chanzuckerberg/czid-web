@@ -986,6 +986,7 @@ export default class SampleViewV2 extends React.Component {
 
   renderSampleMessage = () => {
     const { loadingReport, pipelineRun, reportMetadata, sample } = this.state;
+    const { snapshotShareId } = this.props;
     const { pipelineRunStatus, jobStatus } = reportMetadata;
     let status, message, linkText, type, link, icon;
     // Error messages were previously sent from the server in the reportMetadata,
@@ -1034,6 +1035,11 @@ export default class SampleViewV2 extends React.Component {
         }));
       }
       icon = <IconAlert className={csSampleMessage.icon} type={type} />;
+    }
+    // Hide sample message links on snapshot pages.
+    if (snapshotShareId) {
+      link = "";
+      linkText = "";
     }
 
     return (

@@ -5,6 +5,7 @@ import { assign, find, min } from "lodash/fp";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
 import UserIcon from "~ui/icons/UserIcon";
+import IconViewSmall from "~ui/icons/IconViewSmall";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
 import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
@@ -50,45 +51,45 @@ const ProjectHeader = ({
     <div className={cs.projectHeader}>
       <div className={cs.name}>{project.name || snapshotProjectName}</div>
       <div className={cs.fillIn} />
-      {!snapshotProjectName && (
+      {snapshotProjectName ? (
+        <div className={cs.item}>
+          <IconViewSmall className={cs.smallIcon} /> View-only version
+        </div>
+      ) : project.public_access ? (
+        <div className={cs.item}>
+          <GlobeIcon className={cs.smallIcon} /> Public project
+        </div>
+      ) : (
+        <div className={cs.item}>
+          <LockIcon className={cs.smallIcon} /> Private project
+        </div>
+      )}
+      {project.editable && (
         <React.Fragment>
-          {project.public_access ? (
-            <div className={cs.item}>
-              <GlobeIcon className={cs.smallIcon} /> Public project
-            </div>
-          ) : (
-            <div className={cs.item}>
-              <LockIcon className={cs.smallIcon} /> Private project
-            </div>
-          )}
           <ProjectInfoIconTooltip
             isPublic={project.public_access === 1}
             position="bottom center"
           />
+          <div className={cs.item}>
+            <UserIcon className={cx(cs.smallIcon, cs.userIcon)} />{" "}
+            {project.users.length
+              ? `${project.users.length} member${
+                  project.users.length > 1 ? "s" : ""
+                }`
+              : "No members"}
+          </div>
+          <div className={cs.item}>
+            <ProjectSettingsModal
+              // TODO(tiago): remove csrf by restructuring api calls within ProjectSettingsModal
+              csrf={document.getElementsByName("csrf-token")[0].content}
+              nextPublicSampleDate={nextPublicSampleDate}
+              onUserAdded={handleProjectUserAdded}
+              onProjectPublished={handleProjectPublished}
+              project={project}
+              users={project.users}
+            />
+          </div>
         </React.Fragment>
-      )}
-      {project.editable && (
-        <div className={cs.item}>
-          <UserIcon className={cx(cs.smallIcon, cs.userIcon)} />{" "}
-          {project.users.length
-            ? `${project.users.length} member${
-                project.users.length > 1 ? "s" : ""
-              }`
-            : "No members"}
-        </div>
-      )}
-      {project.editable && (
-        <div className={cs.item}>
-          <ProjectSettingsModal
-            // TODO(tiago): remove csrf by restructuring api calls within ProjectSettingsModal
-            csrf={document.getElementsByName("csrf-token")[0].content}
-            nextPublicSampleDate={nextPublicSampleDate}
-            onUserAdded={handleProjectUserAdded}
-            onProjectPublished={handleProjectPublished}
-            project={project}
-            users={project.users}
-          />
-        </div>
       )}
 
       {project.editable && (
