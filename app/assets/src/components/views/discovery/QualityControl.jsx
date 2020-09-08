@@ -4,8 +4,8 @@ import cx from "classnames";
 
 import d3 from "d3";
 import memoize from "memoize-one";
-import { head, sortBy } from "lodash/fp";
 import { getSamples, getSamplePipelineResults } from "~/api";
+import { ceil, isInteger, last, max, sortBy } from "lodash/fp";
 import InfoBanner from "./InfoBanner";
 import Histogram from "~/components/visualizations/Histogram";
 import InfoIconSmall from "~/components/ui/icons/InfoIconSmall";
@@ -17,7 +17,6 @@ import Notification from "~ui/notifications/Notification";
 import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
-import BasicPopup from "~/components/BasicPopup";
 
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
 import {
@@ -29,6 +28,8 @@ import {
   READS_REMAINING,
   HUMAN_READABLE_STEP_NAMES,
   HOST_FILTER_STAGE_NAME,
+  MIN_NUM_BINS,
+  MIN_BIN_WIDTH,
 } from "./constants.js";
 import cs from "./quality_control.scss";
 
@@ -54,14 +55,7 @@ class QualityControl extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const {
-      loading,
-      validSamples,
-      totalReads,
-      qualityReads,
-      dcr,
-      meanInsertSize,
-    } = this.state;
+    const { loading, validSamples } = this.state;
 
     const { filtersSidebarOpen, sampleStatsSidebarOpen } = this.props;
 
@@ -76,40 +70,50 @@ class QualityControl extends React.Component {
         sampleStatsSidebarOpen === prevProps.sampleStatsSidebarOpen
       )
     ) {
-      const totalReadsFormat = d3.format(".2s");
+      const {
+        totalReadsBins,
+        qcPercentBins,
+        dcrBins,
+        meanInsertSizeBins,
+      } = this.getBins();
 
-      this.totalReadsHistogram = this.renderHistogram(
-        this.totalReadsHistogramContainer,
-        totalReads,
-        "Total Reads",
-        "Number of Samples",
-        d => {
+      const totalReadsFormat = d => {
+        if (d === 0) {
+          return 0;
+        } else {
+          return d3.format(".2s")(d);
+        }
+      };
+      this.totalReadsHistogram = this.renderHistogram({
+        container: this.totalReadsHistogramContainer,
+        data: totalReadsBins,
+        labelX: "Total Reads",
+        labelY: "Number of Samples",
+        tickFormat: d => {
           return totalReadsFormat(d);
-        }
-      );
-      this.qualityReadsHistogram = this.renderHistogram(
-        this.qualityReadsHistogramContainer,
-        qualityReads,
-        "Percentage",
-        "Number of Samples",
-        d => {
+        },
+      });
+      this.qualityReadsHistogram = this.renderHistogram({
+        container: this.qualityReadsHistogramContainer,
+        data: qcPercentBins,
+        labelX: "Percentage",
+        labelY: "Number of Samples",
+        tickFormat: d => {
           return d + "%";
-        }
-      );
-      this.dcrHistogram = this.renderHistogram(
-        this.dcrHistogramContainer,
-        dcr,
-        "DCR",
-        "Number of Samples"
-      );
-      this.meanInsertSizeHistogram = this.renderHistogram(
-        this.meanInsertSizeHistogramContainer,
-        meanInsertSize,
-        "Base pairs",
-        "Number of Samples"
-      );
-
-      this.getBins();
+        },
+      });
+      this.dcrHistogram = this.renderHistogram({
+        container: this.dcrHistogramContainer,
+        data: dcrBins,
+        labelX: "DCR",
+        labelY: "Number of Samples",
+      });
+      this.meanInsertSizeHistogram = this.renderHistogram({
+        container: this.meanInsertSizeHistogramContainer,
+        data: meanInsertSizeBins,
+        labelX: "Base pairs",
+        labelY: "Number of Samples",
+      });
     }
   }
 
@@ -138,10 +142,6 @@ class QualityControl extends React.Component {
       runningSamples: data.runningSamples,
       failedSamples: data.failedSamples,
       samplesDict: data.samplesDict,
-      totalReads: data.totalReads,
-      qualityReads: data.qualityReads,
-      dcr: data.dcr,
-      meanInsertSize: data.meanInsertSize,
       readsLostData: readsLostData,
       readsLostLegendColors: legendColors,
       readsLostCategories: categories,
@@ -245,16 +245,10 @@ class QualityControl extends React.Component {
     const validSamples = [];
     const runningSamples = [];
     const failedSamples = [];
-    const totalReads = [];
-    const qualityReads = [];
-    const dcr = [];
-    const meanInsertSize = [];
     const samplesDict = {};
 
     samples.forEach(sample => {
       const runInfo = sample.details.run_info;
-      const pipelineRun = sample.details.derived_sample_output.pipeline_run;
-      const summaryStats = sample.details.derived_sample_output.summary_stats;
 
       if (
         runInfo.result_status_description === "FAILED" ||
@@ -264,11 +258,6 @@ class QualityControl extends React.Component {
         failedSamples.push(sample);
       } else if (runInfo.report_ready) {
         validSamples.push(sample);
-        totalReads.push(pipelineRun.total_reads);
-        qualityReads.push(summaryStats.qc_percent);
-        dcr.push(summaryStats.compression_ratio);
-        meanInsertSize.push(summaryStats.insert_size_mean || 0);
-
         samplesDict[sample.id] = sample;
       } else {
         runningSamples.push(sample);
@@ -280,122 +269,179 @@ class QualityControl extends React.Component {
       runningSamples,
       failedSamples,
       samplesDict,
-      totalReads,
-      qualityReads,
-      dcr,
-      meanInsertSize,
     };
   }
 
   getBins = () => {
-    const { samplesDict } = this.state;
-    const sampleIds = Object.keys(samplesDict);
+    const sortedReads = this.sortSamplesByMetric(sample => {
+      return sample.details.derived_sample_output.pipeline_run.total_reads;
+    });
+    const [totalReadsBins, samplesByTotalReads] = this.extractBins({
+      data: sortedReads,
+      numBins: MIN_NUM_BINS,
+      minBinWidth: MIN_BIN_WIDTH.totalReads,
+    });
 
-    // Sort sample ids by the desired metric.
-    const samplesByTotalReads = sortBy(
-      id =>
-        samplesDict[id].details.derived_sample_output.pipeline_run.total_reads,
-      sampleIds
-    );
-    const samplesByQCPercent = sortBy(
-      id =>
-        samplesDict[id].details.derived_sample_output.summary_stats.qc_percent,
-      sampleIds
-    );
-    const samplesBydcr = sortBy(
-      id =>
-        samplesDict[id].details.derived_sample_output.summary_stats
-          .compression_ratio,
-      sampleIds
-    );
-    const samplesByInsertSize = sortBy(
-      id =>
-        samplesDict[id].details.derived_sample_output.summary_stats
-          .insert_size_mean,
-      sampleIds
-    );
+    const sortedQC = this.sortSamplesByMetric(sample => {
+      return sample.details.derived_sample_output.summary_stats.qc_percent;
+    });
+    const [qcPercentBins, samplesByQCPercent] = this.extractBins({
+      data: sortedQC,
+      numBins: MIN_NUM_BINS,
+      minBinWidth: MIN_BIN_WIDTH.qc,
+    });
 
-    // For each histogram, bin the sample ids according to the bins generated by the underlying Histogram component.
-    const totalReadsBins = this.extractBinData(
-      head(this.totalReadsHistogram.bins),
-      samplesByTotalReads
-    );
-    const qcPercentBins = this.extractBinData(
-      head(this.qualityReadsHistogram.bins),
-      samplesByQCPercent
-    );
-    const dcrBins = this.extractBinData(
-      head(this.dcrHistogram.bins),
-      samplesBydcr
-    );
-    const meanInsertSizeBins = this.extractBinData(
-      head(this.meanInsertSizeHistogram.bins),
-      samplesByInsertSize
-    );
+    const sortedDCR = this.sortSamplesByMetric(sample => {
+      return sample.details.derived_sample_output.summary_stats
+        .compression_ratio;
+    });
+    const [dcrBins, samplesByDCR] = this.extractBins({
+      data: sortedDCR,
+      numBins: MIN_NUM_BINS,
+      minBinWidth: MIN_BIN_WIDTH.dcr,
+    });
+
+    const sortedInsertSize = this.sortSamplesByMetric(sample => {
+      return (
+        sample.details.derived_sample_output.summary_stats.insert_size_mean || 0
+      );
+    });
+    const [meanInsertSizeBins, samplesByInsertSize] = this.extractBins({
+      data: sortedInsertSize,
+      numBins: MIN_NUM_BINS,
+      minBinWidth: MIN_BIN_WIDTH.meanInsertSize,
+    });
 
     this.setState({
       totalReadsBins,
+      samplesByTotalReads,
+      qcPercentBins,
+      samplesByQCPercent,
+      dcrBins,
+      samplesByDCR,
+      meanInsertSizeBins,
+      samplesByInsertSize,
+    });
+
+    return {
+      totalReadsBins,
       qcPercentBins,
       dcrBins,
       meanInsertSizeBins,
-    });
+    };
   };
 
-  extractBinData(histogramData, samples) {
-    if (!histogramData) {
-      return;
+  sortSamplesByMetric = fetchMetric => {
+    const { samplesDict } = this.state;
+    const sampleIds = Object.keys(samplesDict);
+    return sortBy(
+      valuePair => valuePair.value,
+      sampleIds.map(sampleId => ({
+        id: sampleId,
+        value: fetchMetric(samplesDict[sampleId]),
+      }))
+    );
+  };
+
+  extractBins = ({ data, numBins, minBinWidth }) => {
+    // data is an array of {id, value} pairs, sorted by value
+    const minVal = 0;
+    const maxVal = ceil(
+      max([last(data).value, minVal + numBins * minBinWidth])
+    );
+    let binWidth = (maxVal - minVal) / numBins;
+    // if binWidth is not an integer, round it up to the next multiple of 0.5
+    if (!isInteger(binWidth)) {
+      binWidth = ceil(binWidth * 2) / 2;
     }
 
-    let startIndex = 0;
-    const extractedBin = [];
+    const dataBins = [];
+    const sampleBins = [];
+    let x0 = minVal;
+    let x1 = minVal + binWidth;
+    let sampleIndex = 0;
 
-    for (let binIndex = 0; binIndex < histogramData.length; binIndex++) {
-      const endIndex = startIndex + histogramData[binIndex].length;
-      const bin = samples.slice(startIndex, endIndex);
-      startIndex = endIndex;
-      extractedBin[binIndex] = bin;
+    for (let i = 0; i < numBins; i++) {
+      let binLength = 0;
+      const sampleBin = [];
+      while (sampleIndex < data.length) {
+        const value = data[sampleIndex].value;
+        const sampleId = data[sampleIndex].id;
+        if (x0 <= value && value < x1) {
+          sampleBin.push(sampleId);
+          binLength++;
+          sampleIndex++;
+        } else if (i === numBins - 1 && value === x1) {
+          // If this is the last bin and the value is equal to bin's upper limit,
+          // then include it in the last bin.
+          sampleBin.push(sampleId);
+          binLength++;
+          sampleIndex++;
+        } else {
+          break;
+        }
+      }
+      sampleBins.push(sampleBin);
+      dataBins.push({
+        x0: x0,
+        x1: x1,
+        length: binLength,
+      });
+      x0 = x1;
+      x1 = x1 + binWidth;
     }
 
-    return extractedBin;
-  }
+    return [dataBins, sampleBins];
+  };
 
   handleHistogramBarClick = (data, binIndex) => {
     const {
-      totalReads,
       totalReadsBins,
-      qualityReads,
+      samplesByTotalReads,
       qcPercentBins,
-      dcr,
+      samplesByQCPercent,
       dcrBins,
-      meanInsertSize,
+      samplesByDCR,
       meanInsertSizeBins,
+      samplesByInsertSize,
     } = this.state;
     const { handleBarClick } = this.props;
 
     let bin = [];
-    if (data === totalReads) {
-      bin = totalReadsBins[binIndex];
-    } else if (data === qualityReads) {
-      bin = qcPercentBins[binIndex];
-    } else if (data === dcr) {
-      bin = dcrBins[binIndex];
-    } else if (data === meanInsertSize) {
-      bin = meanInsertSizeBins[binIndex];
+    if (data === totalReadsBins) {
+      bin = samplesByTotalReads[binIndex];
+    } else if (data === qcPercentBins) {
+      bin = samplesByQCPercent[binIndex];
+    } else if (data === dcrBins) {
+      bin = samplesByDCR[binIndex];
+    } else if (data === meanInsertSizeBins) {
+      bin = samplesByInsertSize[binIndex];
     }
     handleBarClick(bin);
   };
 
   handleHistogramBarEnter = (bin, data) => {
-    const { totalReads, qualityReads, dcr, meanInsertSize } = this.state;
+    const {
+      totalReadsBins,
+      qcPercentBins,
+      dcrBins,
+      meanInsertSizeBins,
+    } = this.state;
 
     let histogramTooltipData = {};
-    if (data === totalReads) {
+    if (data === totalReadsBins) {
       histogramTooltipData = this.getHistogramTooltipData({
         bin: bin,
         label: "Total Reads",
-        format: d3.format(".2s"),
+        format: d => {
+          if (d === 0) {
+            return 0;
+          } else {
+            return d3.format(".2s")(d);
+          }
+        },
       });
-    } else if (data === qualityReads) {
+    } else if (data === qcPercentBins) {
       histogramTooltipData = this.getHistogramTooltipData({
         bin: bin,
         label: "Passed QC",
@@ -403,12 +449,12 @@ class QualityControl extends React.Component {
           return d + "%";
         },
       });
-    } else if (data === dcr) {
+    } else if (data === dcrBins) {
       histogramTooltipData = this.getHistogramTooltipData({
         bin: bin,
         label: "Ratio Number",
       });
-    } else if (data === meanInsertSize) {
+    } else if (data === meanInsertSizeBins) {
       histogramTooltipData = this.getHistogramTooltipData({
         bin: bin,
         label: "Base Pairs",
@@ -585,26 +631,37 @@ class QualityControl extends React.Component {
 
   /* --- render functions --- */
 
-  renderHistogram = (container, data, labelX, labelY, tickFormat) => {
+  renderHistogram = ({ container, data, labelX, labelY, tickFormat }) => {
+    const tickValues = data.map(d => d.x0);
+    tickValues.push(last(data).x1);
+
     let histogram = new Histogram(container, data, {
+      skipBins: true,
+      domain: [0, last(data).x1],
+      tickValues: tickValues,
       labelX: labelX,
       labelY: labelY,
+      labelsLarge: true,
+      labelYHorizontalOffset: 4,
+      labelYVerticalOffset: 122,
+      labelXVerticalOffset: 4,
+      yTickFilter: isInteger,
+      yTickFormat: d3.format(""),
+      showGridlines: true,
+      xTickFormat: tickFormat,
       showStatistics: false,
+      spacedBars: true,
       barOpacity: 1,
       colors: [BAR_FILL_COLOR],
       hoverColors: [HOVER_BAR_FILL_COLOR],
       clickColors: [BAR_CLICK_FILL_COLOR],
       hoverBuffer: 0,
       simple: true,
-      showGridlines: true,
-      numTicksY: 5,
-      labelYVerticalOffset: 122,
-      xTickFormat: tickFormat,
       margins: {
         top: 10,
         right: 15,
-        bottom: 35,
-        left: 35,
+        bottom: 40,
+        left: 40,
       },
       onHistogramBarClick: this.handleHistogramBarClick,
       onHistogramBarHover: this.handleChartElementHover,

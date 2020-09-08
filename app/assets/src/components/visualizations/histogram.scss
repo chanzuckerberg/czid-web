@@ -7,9 +7,8 @@
 
 .xAxisTickText,
 .yAxisTickText {
-  @include viz-label;
+  @include font-body-xxxs;
   color: $gray-dark;
-  font-family: $font-family-sans-serif;
 }
 
 .yAxisTickLine,
@@ -17,25 +16,14 @@
   color: $gray-light;
 }
 
-.labelX {
-  font-family: $font-family-sans-serif;
-
-  &.simple {
-    color: $gray-dark;
-    font-weight: $font-weight-regular;
-  }
-}
-
+.labelX,
 .labelY {
   color: $black;
   font-family: $font-family-sans-serif;
+  font-weight: $font-weight-regular;
 
   &.large {
     @include font-body-xxs;
-    font-weight: $font-weight-regular;
-  }
-
-  &.simple {
     font-weight: $font-weight-regular;
   }
 }

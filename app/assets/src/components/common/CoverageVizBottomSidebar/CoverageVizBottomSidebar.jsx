@@ -233,7 +233,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
         },
         numTicksY: 2,
         labelYHorizontalOffset: 15,
-        labelYLarge: true,
+        labelsLarge: true,
         onHistogramBarHover: this.handleHistogramBarHover,
         onHistogramBarEnter: this.handleHistogramBarEnter,
         onHistogramBarExit: this.handleHistogramBarExit,

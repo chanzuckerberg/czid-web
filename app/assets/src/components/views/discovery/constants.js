@@ -27,3 +27,10 @@ export const HUMAN_READABLE_STEP_NAMES = {
   "Star Downstream": "Filter human (STAR)",
   "Bowtie2 Bowtie2 Human": "Filter human (Bowtie2)",
 };
+export const MIN_NUM_BINS = 10;
+export const MIN_BIN_WIDTH = {
+  totalReads: 1000,
+  qc: 10,
+  dcr: 0.5,
+  meanInsertSize: 50,
+};

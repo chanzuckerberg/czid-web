@@ -4,7 +4,7 @@ import cx from "classnames";
 
 import cs from "./tooltip_viz_table.scss";
 
-class TooltipDVTable extends React.Component {
+class TooltipVizTable extends React.Component {
   renderLabels(data, compact) {
     return (
       <div className={cs.labelColumn}>
@@ -71,7 +71,7 @@ class TooltipDVTable extends React.Component {
   }
 }
 
-TooltipDVTable.propTypes = {
+TooltipVizTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
@@ -82,4 +82,4 @@ TooltipDVTable.propTypes = {
   ),
 };
 
-export default TooltipDVTable;
+export default TooltipVizTable;

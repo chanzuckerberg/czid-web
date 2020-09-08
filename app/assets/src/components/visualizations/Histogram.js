@@ -72,29 +72,33 @@ export default class Histogram {
   }
 
   xAxis(g, x) {
+    const axis = this.options.xTickFormat
+      ? axisBottom(x).tickFormat(d => this.options.xTickFormat(d))
+      : axisBottom(x);
+
     g.attr(
       "transform",
       `translate(0,${this.size.height - this.margins.bottom})`
-    ).call(axisBottom(x).tickSizeOuter(0));
+    ).call(axis.tickSizeOuter(0));
 
     // if using log10 scale, set the number of ticks according to the size of
     // the domain (in powers of 10) to prevent extra labels from showing up
     if (this.options.xScaleLog) {
       let nTicks = Math.log10(x.domain()[1]) + 1;
-      g.call(axisBottom(x).ticks(nTicks));
+      g.call(axis.ticks(nTicks));
     }
 
-    if (this.options.xTickFormat) {
-      g.call(axisBottom(x).tickFormat(d => this.options.xTickFormat(d)));
+    if (this.options.tickValues) {
+      g.call(axis.tickValues(this.options.tickValues));
     }
 
     g.append("text")
       .attr("x", (this.size.width + this.margins.left) / 2 - 2)
-      .attr("y", +30)
+      .attr("y", 30 + (this.options.labelXVerticalOffset || 0))
       .attr("fill", "#000")
       .attr("font-weight", 600)
       .attr("text-anchor", "end")
-      .attr("class", cx(cs.labelX, this.options.simple && cs.simple))
+      .attr("class", cx(cs.labelX, this.options.labelsLarge && cs.large))
       .text(this.options.labelX);
 
     g.select(".domain").attr("class", cs.xAxis);
@@ -108,6 +112,18 @@ export default class Histogram {
     const axis = this.options.numTicksY
       ? axisLeft(y).ticks(this.options.numTicksY)
       : axisLeft(y);
+
+    if (this.options.yTickFormat) {
+      axis.tickFormat(this.options.yTickFormat);
+    }
+
+    if (this.options.yTickFilter) {
+      let tickVals = this.options.numTicksY
+        ? axis.scale().ticks(this.options.numTicksY)
+        : axis.scale().ticks();
+      tickVals = tickVals.filter(this.options.yTickFilter);
+      axis.tickValues(tickVals);
+    }
 
     g.attr("transform", `translate(${this.margins.left},0)`).call(axis);
 
@@ -128,14 +144,7 @@ export default class Histogram {
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "end")
       .attr("font-weight", 600)
-      .attr(
-        "class",
-        cx(
-          cs.labelY,
-          this.options.labelYLarge && cs.large,
-          this.options.simple && cs.simple
-        )
-      )
+      .attr("class", cx(cs.labelY, this.options.labelsLarge && cs.large))
       .text(this.options.labelY);
   }
 
@@ -179,21 +188,19 @@ export default class Histogram {
   };
 
   getBarWidth = (x, bin) => {
-    if (this.options.skipBins) {
-      return (
-        (this.size.width - this.margins.right - this.margins.left) /
-        (this.options.numBins ||
-          max(map(seriesData => seriesData.length, this.data)))
-      );
-    }
-
     if (this.options.xScaleLog) {
       return (x(bin.x1) - x(bin.x0)) / 2;
     }
 
-    let numBins = max([x.ticks().length - 1, 2]);
+    let numBins = this.options.numBins;
+    if (this.options.skipBins) {
+      numBins = numBins || max(map(seriesData => seriesData.length, this.data));
+    } else {
+      numBins = numBins || max([x.ticks().length - 1, 2]);
+    }
+
     // If there should be gaps between the bars, subtract 1px from the bar width.
-    const barInsideTicks = this.options.simple ? 1 : 0;
+    const barInsideTicks = this.options.spacedBars ? 1 : 0;
     return (
       (this.size.width - this.margins.right - this.margins.left) / numBins -
       barInsideTicks
@@ -368,9 +375,18 @@ export default class Histogram {
     const domain = this.getDomain();
 
     let x = this.options.xScaleLog ? scaleLog() : scaleLinear();
-    x.domain(domain)
-      .nice()
-      .range([this.margins.left, this.size.width - this.margins.right]);
+    // If there are explicit tick values, don't call .nice() since it may modify the domain
+    // to differ from the given ticks.
+    if (this.options.tickValues) {
+      x.domain(domain).range([
+        this.margins.left,
+        this.size.width - this.margins.right,
+      ]);
+    } else {
+      x.domain(domain)
+        .nice()
+        .range([this.margins.left, this.size.width - this.margins.right]);
+    }
 
     const bins = this.getBins(x);
     this.bins = bins;
@@ -393,7 +409,7 @@ export default class Histogram {
     const barCenters = [];
 
     // If there should be gaps between the bars, offset the bar positions by 1px.
-    const barInsideTicks = this.options.simple ? 1 : 0;
+    const barInsideTicks = this.options.spacedBars ? 1 : 0;
 
     for (let i = 0; i < bins.length; i++) {
       this.svg
