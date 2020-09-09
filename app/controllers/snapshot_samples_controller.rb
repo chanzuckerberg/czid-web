@@ -2,7 +2,7 @@ class SnapshotSamplesController < SamplesController
   include SamplesHelper
   include SnapshotSamplesHelper
 
-  SNAPSHOT_ACTIONS = [:show, :report_v2, :index_v2, :backgrounds, :sample_locations, :stats, :dimensions, :metadata, :metadata_fields].freeze
+  SNAPSHOT_ACTIONS = [:show, :report_v2, :index_v2, :backgrounds, :stats, :dimensions, :metadata, :metadata_fields].freeze
 
   # Snapshot endpoints are publicly accessible but access control is checked by set_snapshot_sample and share_id
   skip_before_action :authenticate_user!, :set_sample, :check_access, only: SNAPSHOT_ACTIONS
@@ -44,8 +44,6 @@ class SnapshotSamplesController < SamplesController
     super
   end
 
-  # TODO(ihan): surface Host name on Discovery Table
-  # Previously, Host name was under db_sample. Now, it's under derived_sample_output.
   # GET /pub/:share_id/samples/index_v2.json
   def index_v2
     share_id = snapshot_sample_params[:share_id]
@@ -88,12 +86,6 @@ class SnapshotSamplesController < SamplesController
   def backgrounds
     @backgrounds = Background.where(public_access: 1)
     render json: { backgrounds: @backgrounds }
-  end
-
-  # GET /pub/:share_id/locations/sample_locations.json
-  def sample_locations
-    # TODO(ihan): either enable or remove sample_locations endpoint
-    render json: {}
   end
 
   # GET /pub/:share_id/samples/stats.json
@@ -166,7 +158,7 @@ class SnapshotSamplesController < SamplesController
 
   def snapshot_sample_params
     permitted_params = [:share_id, :id, :orderBy, :orderDir, :limit, :offset, :listAllIds, :basic, :host,
-                        :location, :locationV2, :taxon, :time, :tissue, :search, sampleIds: [], time: [], tissue: [],]
+                        :location, :locationV2, :taxon, :time, :tissue, :search, sampleIds: [], time: [], tissue: [], host: [],]
     params.permit(*permitted_params)
   end
 end

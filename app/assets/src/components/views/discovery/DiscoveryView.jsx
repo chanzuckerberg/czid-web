@@ -374,24 +374,30 @@ class DiscoveryView extends React.Component {
 
   initialLoad = () => {
     const { project } = this.state;
+    const { domain } = this.props;
     // * Initial load:
     //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
     this.refreshDimensions();
     this.refreshFilteredStats();
-    this.refreshFilteredLocations();
+    if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
+      this.refreshFilteredLocations();
+    }
     //   * if filter or project is set
     //     - load (B) filtered dimensions
     (this.getFilterCount() || project) && this.refreshFilteredDimensions();
   };
 
   resetDataFromFilterChange = () => {
+    const { domain } = this.props;
     this.resetData({
       callback: () => {
         // * On filter change:
         //   - load (B) filtered dimensions, (C) filtered stats, (D) filtered locations
         this.refreshFilteredDimensions();
         this.refreshFilteredStats();
-        this.refreshFilteredLocations();
+        if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
+          this.refreshFilteredLocations();
+        }
       },
     });
   };
@@ -518,7 +524,7 @@ class DiscoveryView extends React.Component {
   };
 
   refreshFilteredLocations = async () => {
-    const { domain, snapshotShareId } = this.props;
+    const { domain } = this.props;
     const { mapLevel, projectId, search } = this.state;
 
     this.setState({
@@ -528,7 +534,6 @@ class DiscoveryView extends React.Component {
     const mapLocationData = await getDiscoveryLocations({
       domain,
       projectId,
-      snapshotShareId,
       filters: this.preparedFilters(),
       search,
     });

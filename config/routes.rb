@@ -152,7 +152,6 @@ Rails.application.routes.draw do
   get 'pub/:share_id/samples/stats.json', to: 'snapshot_samples#stats'
   get 'pub/:share_id/samples/dimensions.json', to: 'snapshot_samples#dimensions'
   get 'pub/:share_id/samples/index_v2.json', to: 'snapshot_samples#index_v2'
-  get 'pub/:share_id/locations/sample_locations.json', to: 'snapshot_samples#sample_locations'
   get 'pub/:share_id/samples/metadata_fields', to: 'snapshot_samples#metadata_fields'
   get 'pub/:share_id/samples/:id', to: 'snapshot_samples#show'
   get 'pub/:share_id/samples/:id/report_v2', to: 'snapshot_samples#report_v2'

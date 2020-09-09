@@ -339,19 +339,14 @@ const getSamplesLocations = ({
   search,
   snapshotShareId,
 }) =>
-  get(
-    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
-      "/locations/sample_locations.json",
-    {
-      params: {
-        domain,
-        search,
-        projectId,
-        snapshotShareId,
-        ...filters,
-      },
-    }
-  );
+  get("/locations/sample_locations.json", {
+    params: {
+      domain,
+      search,
+      projectId,
+      ...filters,
+    },
+  });
 
 const getSamplePipelineResults = (sampleId, pipelineVersion) =>
   get(`/samples/${sampleId}/results_folder.json`, {

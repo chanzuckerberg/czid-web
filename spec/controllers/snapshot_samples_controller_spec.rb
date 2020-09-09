@@ -52,13 +52,6 @@ RSpec.describe SnapshotSamplesController, type: :controller do
       end
     end
 
-    describe "GET #sample_locations" do
-      it "should redirect to root_path" do
-        get :sample_locations, params: { share_id: @snapshot_link.share_id, domain: "snapshot", project_id: @snapshot_link.project_id }
-        expect(response).to redirect_to(root_path)
-      end
-    end
-
     describe "GET #stats" do
       it "should redirect to root_path" do
         get :stats, params: { share_id: @snapshot_link.share_id, domain: "snapshot", project_id: @snapshot_link.project_id }
@@ -185,29 +178,6 @@ RSpec.describe SnapshotSamplesController, type: :controller do
         first_sample = json_response["samples"].first
         expect(first_sample).to include_json(id: @sample_one.id)
         expect(first_sample.keys).to contain_exactly("id", "name", "created_at", "host_genome_id", "details")
-      end
-    end
-
-    describe "GET #sample_locations" do
-      it "should redirect to root_path for invalid share_id" do
-        get :sample_locations, params: { share_id: "invalid_id", domain: "snapshot", project_id: @snapshot_link.project_id }
-        expect(response).to redirect_to(root_path)
-      end
-
-      it "should return the correct json_response for valid share_id and empty project" do
-        get :sample_locations, params: { share_id: @empty_snapshot_link.share_id, domain: "snapshot", project_id: @empty_snapshot_link.project_id }
-        expect(response).to have_http_status(:success)
-
-        json_response = JSON.parse(response.body)
-        expect(json_response).to eq({})
-      end
-
-      it "should return the correct json_response for valid share_id" do
-        get :sample_locations, params: { share_id: @snapshot_link.share_id, domain: "snapshot", project_id: @snapshot_link.project_id }
-        expect(response).to have_http_status(:success)
-
-        json_response = JSON.parse(response.body)
-        expect(json_response).to eq({})
       end
     end
 

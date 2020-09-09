@@ -121,7 +121,7 @@ const processRawSample = sample => {
       "derived_sample_output.pipeline_run.total_ercc_reads",
       sample.details
     ),
-    host: get("db_sample.host_genome_name", sample.details),
+    host: get("derived_sample_output.host_genome_name", sample.details),
     id: sample.id,
     meanInsertSize: meanInsertSizeString || "",
     nonHostReads: {
