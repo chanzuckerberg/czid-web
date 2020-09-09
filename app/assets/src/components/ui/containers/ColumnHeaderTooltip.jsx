@@ -15,7 +15,12 @@ class ColumnHeaderTooltip extends React.Component {
           <div className={cs.tooltip}>
             {title && <span className={cs.title}>{title}:</span>}
             {content}
-            {link && <ExternalLink href={link}>Learn more.</ExternalLink>}
+            {link && (
+              <React.Fragment>
+                {" "}
+                <ExternalLink href={link}>Learn more.</ExternalLink>
+              </React.Fragment>
+            )}
           </div>
         }
       />
