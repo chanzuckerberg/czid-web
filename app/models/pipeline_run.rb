@@ -1166,7 +1166,7 @@ class PipelineRun < ApplicationRecord
       if run_time > threshold
         msg = "LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
           "See: #{status_url}"
-        LogUtil.log_err(msg)
+        Rails.logger.error(msg)
         update(alert_sent: 1)
       end
     end
