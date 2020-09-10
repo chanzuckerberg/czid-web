@@ -1,4 +1,7 @@
 import moment from "moment";
+import { find, get } from "lodash/fp";
+
+import { WORKFLOWS } from "~/components/utils/workflows";
 import {
   humanize,
   numberWithCommas,
@@ -86,7 +89,11 @@ export const processPipelineInfo = additionalInfo => {
     }
   }
 
-  if (workflow) pipelineInfo.workflow = { text: humanize(workflow) };
+  if (workflow) {
+    pipelineInfo.workflow = {
+      text: get("label", find({ value: workflow }, Object.values(WORKFLOWS))),
+    };
+  }
 
   if (wetlabProtocol)
     pipelineInfo.wetlabProtocol = { text: humanize(wetlabProtocol) };

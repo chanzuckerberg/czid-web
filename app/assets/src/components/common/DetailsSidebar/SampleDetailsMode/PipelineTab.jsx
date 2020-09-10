@@ -1,5 +1,5 @@
 import React from "react";
-import { get, isEmpty, lowerCase, set } from "lodash/fp";
+import { get, isEmpty, set } from "lodash/fp";
 import cx from "classnames";
 
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
@@ -183,8 +183,8 @@ class PipelineTab extends React.Component {
 
     let fields = PIPELINE_INFO_FIELDS;
     if (
-      lowerCase(get(["workflow", "text"], pipelineInfo)) !==
-      WORKFLOWS.SHORT_READ_MNGS.value
+      get(["workflow", "text"], pipelineInfo) !==
+      WORKFLOWS.SHORT_READ_MNGS.label
     ) {
       fields = WORKFLOW_INFO_FIELDS.concat(fields);
     }
