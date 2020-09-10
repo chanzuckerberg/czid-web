@@ -7,10 +7,17 @@ RSpec.describe SfnExecution do
   let(:fake_s3_path) { "s3://fake_bucket/fake/path".freeze }
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
   let(:fake_error) { "fake_error" }
+  let(:fake_outputs) do
+    {
+      "output_key_1" => "s3://path/output_1",
+      "output_key_2" => "s3://path/output_2",
+    }
+  end
   let(:fake_sfn_execution_description) do
     {
       execution_arn: fake_sfn_execution_arn,
       input: "{}",
+      output: JSON.dump("Result": fake_outputs),
       # AWS SDK rounds to second
       start_date: Time.zone.now.round,
       state_machine_arn: fake_sfn_arn,
@@ -100,7 +107,7 @@ RSpec.describe SfnExecution do
     end
   end
 
-  context "#history" do
+  describe "#history" do
     context "when arn exists" do
       it "returns history" do
         @mock_aws_clients[:states].stub_responses(:get_execution_history, lambda { |context|
@@ -157,7 +164,7 @@ RSpec.describe SfnExecution do
     end
   end
 
-  context "#error" do
+  describe "#error" do
     context "when pipeline is successful" do
       it "returns nil" do
         @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
@@ -180,6 +187,37 @@ RSpec.describe SfnExecution do
         @mock_aws_clients[:states].stub_responses(:describe_execution, 'ExecutionDoesNotExist')
         @mock_aws_clients[:s3].stub_responses(:get_object, 'NoSuchKey')
         expect(sfn_execution.error).to be_nil
+      end
+    end
+  end
+
+  describe "#output_path" do
+    context "when description does not exist" do
+      before do
+        expect(sfn_execution).to receive(:description) { nil }
+      end
+
+      it "raises an exception" do
+        expect { sfn_execution.output_path(fake_outputs.keys.first) }.to raise_error(SfnExecution::SfnDescriptionNotFoundError, /SFN description not found. Path: #{fake_s3_path}/)
+      end
+    end
+
+    context "when description exists" do
+      before do
+        @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
+      end
+
+      context "when output does not exist" do
+        it "raises an exception" do
+          expect { sfn_execution.output_path("non-existent-output") }.to raise_error(SfnExecution::OutputNotFoundError)
+        end
+      end
+
+      context "when outputs exists" do
+        it "returns output path" do
+          test_key = fake_outputs.keys.first
+          expect(sfn_execution.output_path(test_key)).to eq(fake_outputs[test_key])
+        end
       end
     end
   end

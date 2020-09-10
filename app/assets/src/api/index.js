@@ -315,6 +315,9 @@ const getCoverageVizSummary = sampleId =>
 const getCoverageVizData = (sampleId, accessionId) =>
   get(`/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`);
 
+const getWorkflowRunResults = workflowRunId =>
+  get(`/workflow_runs/${workflowRunId}/results`);
+
 const getContigsSequencesByByteranges = (
   sampleId,
   byteranges,
@@ -436,6 +439,7 @@ export {
   getTaxonDistributionForBackground,
   getUserSettingMetadataByCategory,
   getVisualizations,
+  getWorkflowRunResults,
   markSampleUploaded,
   saveProjectDescription,
   saveSampleName,

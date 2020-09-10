@@ -72,6 +72,8 @@ class Sample < ApplicationRecord
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
 
+  delegate :consensus_genomes, to: :workflow_runs
+
   # Constants for upload_error field. NOTE: the name of this field is
   # inaccurate. The intention of the field is to carry a message (a constant
   # that refers to a message) to be shown to the user for exceptional

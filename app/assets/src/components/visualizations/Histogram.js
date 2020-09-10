@@ -44,6 +44,7 @@ export default class Histogram {
         // is directly hovered over (e.g. PLQC histograms).
         hoverBuffer: 5,
         xScaleLog: false,
+        yScaleLog: false,
       },
       options
     );
@@ -148,7 +149,7 @@ export default class Histogram {
       .text(this.options.labelY);
   }
 
-  getDomain = () => {
+  getXDomain = () => {
     if (this.options.domain) {
       return this.options.domain;
     }
@@ -372,18 +373,18 @@ export default class Histogram {
         this.data[i] = this.data[i].map(d => d + 1);
       }
     }
-    const domain = this.getDomain();
+    const xDomain = this.getXDomain();
 
     let x = this.options.xScaleLog ? scaleLog() : scaleLinear();
     // If there are explicit tick values, don't call .nice() since it may modify the domain
     // to differ from the given ticks.
     if (this.options.tickValues) {
-      x.domain(domain).range([
+      x.domain(xDomain).range([
         this.margins.left,
         this.size.width - this.margins.right,
       ]);
     } else {
-      x.domain(domain)
+      x.domain(xDomain)
         .nice()
         .range([this.margins.left, this.size.width - this.margins.right]);
     }
@@ -391,8 +392,11 @@ export default class Histogram {
     const bins = this.getBins(x);
     this.bins = bins;
 
-    let y = scaleLinear()
-      .domain([0, max(bins.map(seriesBins => max(seriesBins, d => d.length)))])
+    let y = this.options.yScaleLog ? scaleLog() : scaleLinear();
+    y.domain([
+      this.options.yScaleLog ? 1 : 0,
+      max(bins.map(seriesBins => max(seriesBins, d => d.length))),
+    ])
       .nice()
       .range([this.size.height - this.margins.bottom, this.margins.top]);
 
@@ -424,7 +428,7 @@ export default class Histogram {
         .attr("x", d => barInsideTicks + x(d.x0) + i * this.getBarWidth(x, d))
         .attr("width", d => this.getBarWidth(x, d))
         .attr("y", d => y(d.length))
-        .attr("height", d => y(0) - y(d.length))
+        .attr("height", d => y(this.options.yScaleLog ? 1 : 0) - y(d.length))
         .style("opacity", barOpacity)
         .on("mousemove", this.onBarMouseMove)
         .on("mouseover", (d, index) => {

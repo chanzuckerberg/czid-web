@@ -193,6 +193,7 @@ export default class SampleViewV2 extends React.Component {
     const { pipelineVersion, backgrounds, selectedOptions } = this.state;
     let { currentTab } = this.state;
     const sample = await getSample({ snapshotShareId, sampleId });
+
     sample.id = sampleId;
     if (
       get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
@@ -333,7 +334,7 @@ export default class SampleViewV2 extends React.Component {
   };
 
   fetchBackgrounds = async () => {
-    const { snapshotShareId, sampleId } = this.props;
+    const { snapshotShareId } = this.props;
     this.setState({ loadingReport: true });
     const backgrounds = await getBackgrounds(snapshotShareId);
     this.setState(

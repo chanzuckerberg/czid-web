@@ -142,4 +142,18 @@ describe WorkflowRun, type: :model do
       end
     end
   end
+
+  describe "#output" do
+    context "when output exists" do
+      it "returns output content" do
+      end
+    end
+
+    context "when output does not exist" do
+      context "in s3" do
+        it "returns nil" do
+        end
+      end
+    end
+  end
 end

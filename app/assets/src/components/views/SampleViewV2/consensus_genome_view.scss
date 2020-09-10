@@ -2,6 +2,8 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
 
+$body-height: 248px;
+
 .resultsContainer {
   color: $black;
 
@@ -10,6 +12,8 @@
 
     .header {
       @include font-header-m;
+
+      display: flex;
     }
 
     .subheader {
@@ -30,5 +34,74 @@
         font-weight: $font-weight-semibold;
       }
     }
+
+    .helpIcon {
+      margin-bottom: 4px;
+      margin-left: 5px;
+      height: 14px;
+    }
   }
+
+  .coverageContents {
+    margin-top: 30px;
+    margin-bottom: 40px;
+    text-align: left;
+
+    .body {
+      height: $body-height;
+
+      .metrics {
+        display: flex;
+        margin-bottom: 30px;
+
+        .column {
+          flex: 1 1 0;
+          min-width: 0;
+          margin-right: $space-m;
+
+          &:last-child {
+            margin-right: 0;
+          }
+        }
+
+        .metric {
+          display: flex;
+          align-items: center;
+          height: 30px;
+          padding: 0 $space-m;
+
+          &:first-child {
+            background-color: $gray-off-white;
+          }
+
+          .label,
+          .value {
+            flex: 1 1 0;
+            min-width: 0;
+          }
+
+          .label {
+            @include font-header-xxs;
+          }
+
+          .value {
+            @include font-body-xxs;
+          }
+        }
+      }
+
+      .coverageVizHistogram {
+        height: 170px;
+        background-color: $gray-off-white;
+      }
+    }
+  }
+}
+
+.hoverTooltip {
+  position: fixed;
+  background-color: $white;
+  z-index: 104;
+  // So the tooltip appears on the top-right instead of bottom-right of mouse.
+  transform: translateY(-100%);
 }

@@ -191,6 +191,10 @@ Rails.application.routes.draw do
     get :sample_locations, on: :collection
   end
 
+  resources :workflow_runs, only: [:show] do
+    get :results, on: :member
+  end
+
   authenticate :auth0_user, ->(u) { u.admin? } do
     mount RESQUE_SERVER, at: "/resque"
   end

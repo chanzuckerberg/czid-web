@@ -70,6 +70,10 @@ class Power
     Visualization.viewable(@user)
   end
 
+  power :workflow_runs do
+    WorkflowRun.viewable(@user)
+  end
+
   power :viewable_bulk_downloads do
     BulkDownload.viewable(@user)
   end

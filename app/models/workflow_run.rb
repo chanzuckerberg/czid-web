@@ -10,6 +10,10 @@ class WorkflowRun < ApplicationRecord
     short_read_mngs: "short-read-mngs",
   }.freeze
 
+  WORKFLOW_CLASS = {
+    WORKFLOW[:consensus_genome] => ConsensusGenomeWorkflowRun,
+  }.freeze
+
   STATUS = {
     created: "CREATED",
     running: "RUNNING",
@@ -27,16 +31,12 @@ class WorkflowRun < ApplicationRecord
 
   validates :status, inclusion: { in: STATUS.values }
 
+  scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
+
   def dispatch
     if workflow == WORKFLOW[:consensus_genome]
       SfnCGPipelineDispatchService.call(self)
     end
-  end
-
-  def self.in_progress(workflow_name = nil)
-    scope = where(status: STATUS[:running])
-    scope = scope.where(workflow: workflow_name) if workflow_name.present?
-    scope
   end
 
   def workflow_version_tag
@@ -79,6 +79,21 @@ class WorkflowRun < ApplicationRecord
         message: INPUT_ERRORS[sfn_error],
       }
     end
+  end
+
+  def output(output_key)
+    path = sfn_execution.output_path(output_key)
+    return S3Util.get_s3_file(path)
+  end
+
+  def self.in_progress(workflow_name = nil)
+    scope = where(status: STATUS[:running])
+    scope = scope.where(workflow: workflow_name) if workflow_name.present?
+    scope
+  end
+
+  def self.viewable(user)
+    where(sample: Sample.viewable(user))
   end
 
   private

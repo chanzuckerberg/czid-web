@@ -6,6 +6,7 @@
 }
 
 .tooltip {
-  text-align: left;
   @include font-body-xs;
+
+  text-align: left;
 }
