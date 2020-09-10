@@ -11,6 +11,7 @@ import {
   without,
 } from "lodash/fp";
 
+import { WORKFLOWS } from "~/components/utils/workflows";
 import { UserContext } from "~/components/common/UserContext";
 import { getProjectMetadataFields } from "~/api/metadata";
 import DataTable from "~/components/visualizations/table/DataTable";
@@ -395,10 +396,12 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          <HostOrganismMessage
-            hostGenomes={originalHostGenomes}
-            samples={samples}
-          />
+          {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) || (
+            <HostOrganismMessage
+              hostGenomes={originalHostGenomes}
+              samples={samples}
+            />
+          )}
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
           {allowedFeatures.includes("taxon_whitelist") &&
