@@ -80,6 +80,13 @@ begin
   aws_account_id = `aws sts get-caller-identity --query="Account" | tr -d '\"'`.strip
   task_definition_arn = `/tmp/czecs register -f balances.json --set tag=#{image} --set env=#{env} --set account_id=#{aws_account_id} czecs.json`.strip
   $?.exitstatus == 0 || abort("\n== Could not register task ==\n")
+  # resque workers can be interrupted safely, doing this will prevent errors from migrating while old versions are running and speed up deployment
+  puts 'scaling down resque workers'
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count 0")
+  unless env == "sandbox"
+    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 0")
+    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 0")
+  end
   puts 'running migrations'
   system!("/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json")
   system!("/tmp/czecs upgrade --task-definition-arn #{task_definition_arn} #{cluster} idseq-#{env}-web")
@@ -87,6 +94,13 @@ begin
   unless env == "sandbox"
     system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-pipeline-monitor --set rake_command=pipeline_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-pipeline-monitor czecs-resque.json")
     system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-result-monitor --set rake_command=result_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-result-monitor czecs-resque.json")
+  end
+  puts 'scaling up resque workers'
+  resque_count = env == "prod" ? 10 : 2
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count #{resque_count}")
+  unless env == "sandbox"
+    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 1")
+    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 1")
   end
   notify_slack(env, image, "end")
 rescue Exception  # Even on abort/SystemExit
