@@ -3,6 +3,8 @@ import ReactTable from "react-table";
 import "react-table/react-table.css";
 import _ from "lodash";
 
+import cs from "./amr_view.scss";
+
 const columns = [
   {
     Header: "Antibiotic Class",
@@ -54,7 +56,7 @@ class AMRView extends React.Component {
   }
   render() {
     return (
-      <div>
+      <div className={cs.tableContainer}>
         <ReactTable
           filterable
           defaultFilterMethod={(filter, row, column) => {

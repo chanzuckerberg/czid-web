@@ -1,0 +1,7 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+
+.icon {
+  @include font-label-xs;
+  margin-left: $space-xxxs;
+}

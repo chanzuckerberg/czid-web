@@ -65,25 +65,34 @@ class BaseTable extends React.Component {
     });
   }
 
-  basicHeaderRenderer({ columnData, label }) {
+  basicHeaderRenderer = ({ columnData, label }) => {
+    const { headerLabelClassName } = this.props;
     return (
       <div>
         {columnData ? (
           <ColumnHeaderTooltip
-            trigger={<span className={cs.label}>{label}</span>}
+            trigger={
+              <span className={cx(cs.label, headerLabelClassName)}>
+                {label}
+              </span>
+            }
             title={label}
             content={columnData.tooltip}
             link={columnData.link}
           />
         ) : (
           <BasicPopup
-            trigger={<span className={cs.label}>{label}</span>}
+            trigger={
+              <span className={cx(cs.label, headerLabelClassName)}>
+                {label}
+              </span>
+            }
             content={label}
           />
         )}
       </div>
     );
-  }
+  };
 
   _sortableHeaderRenderer = ({
     columnData,
@@ -202,6 +211,7 @@ class BaseTable extends React.Component {
       defaultRowHeight,
       defaultSelectColumnWidth,
       forwardRef,
+      gridClassName,
       headerClassName,
       initialActiveColumns,
       onRowClick,
@@ -229,7 +239,7 @@ class BaseTable extends React.Component {
         <AutoSizer>
           {({ width, height }) => (
             <VirtualizedTable
-              gridClassName={cs.grid}
+              gridClassName={cx(cs.grid, gridClassName)}
               headerClassName={cx(cs.header, headerClassName)}
               headerHeight={defaultHeaderHeight}
               height={height}
@@ -326,7 +336,9 @@ BaseTable.propTypes = {
   defaultHeaderHeight: PropTypes.number,
   defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
   defaultSelectColumnWidth: PropTypes.number,
+  gridClassName: PropTypes.string,
   headerClassName: PropTypes.string,
+  headerLabelClassName: PropTypes.string,
   // Set of dataKeys of columns to be shown by default
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   onActiveColumnsChange: PropTypes.func,

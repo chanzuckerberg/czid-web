@@ -14,12 +14,14 @@
 
 .tabsContainer {
   flex: 0 0 auto;
+  height: 60px;
 }
 
 .reportViewContainer {
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
+  margin-top: $space-xl;
 
   .reportFilters {
     flex: 0 0 auto;

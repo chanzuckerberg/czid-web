@@ -1,5 +1,11 @@
 @import "~styles/themes/colors";
 
+// !important uses needed to override materialize.css
 .link {
   color: $primary !important;
+
+  &:hover,
+  &:active {
+    color: $primary-darkest !important;
+  }
 }

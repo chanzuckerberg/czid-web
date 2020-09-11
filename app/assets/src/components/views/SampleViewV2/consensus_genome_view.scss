@@ -10,6 +10,20 @@ $body-height: 248px;
   .section {
     margin-bottom: 45px;
 
+    .title {
+      @include font-header-l;
+      margin-bottom: $space-l;
+
+      .helpIcon {
+        display: inline;
+        margin-left: $space-xxs;
+
+        svg:hover {
+          fill: $primary;
+        }
+      }
+    }
+
     .header {
       @include font-header-m;
 
@@ -39,6 +53,52 @@ $body-height: 248px;
       margin-bottom: 4px;
       margin-left: 5px;
       height: 14px;
+    }
+
+    .metricsTable {
+      height: 110px;
+      padding: $space-xl;
+
+      .tableHeader {
+        border-bottom: 1px solid $gray-lightest;
+
+        .tableHeaderRow {
+          border-bottom: 1px solid $gray-lightest;
+        }
+
+        .tableHeaderLabel {
+          @include font-header-xs;
+          vertical-align: inherit;
+        }
+      }
+
+      .tableGrid {
+        overflow: hidden !important;
+        outline: none;
+      }
+
+      .tableRow {
+        border-bottom: 0;
+
+        // Override base_table.scss
+        &:global(.ReactVirtualized__Table__headerRow) {
+          border-bottom: 1px solid $gray-lightest;
+        }
+
+        &:hover {
+          background-color: inherit;
+        }
+
+        .cell {
+          @include font-header-s;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      .primaryHeader {
+        text-align: left;
+      }
     }
   }
 
@@ -96,6 +156,14 @@ $body-height: 248px;
       }
     }
   }
+
+  .learnMoreContainer {
+    text-align: right;
+
+    .learnMoreLink {
+      @include font-header-xxs;
+    }
+  }
 }
 
 .hoverTooltip {
@@ -104,4 +172,10 @@ $body-height: 248px;
   z-index: 104;
   // So the tooltip appears on the top-right instead of bottom-right of mouse.
   transform: translateY(-100%);
+}
+
+.raisedContainer {
+  border-radius: $border-radius-m;
+  border: 1px solid $gray-lightest;
+  box-shadow: $box-shadow-s;
 }

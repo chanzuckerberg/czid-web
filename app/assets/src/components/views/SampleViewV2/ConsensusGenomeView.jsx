@@ -1,6 +1,7 @@
-import { filter, head } from "lodash/fp";
+import { filter, head, isEmpty } from "lodash/fp";
 import React from "react";
 import memoize from "memoize-one";
+import cx from "classnames";
 
 import { getWorkflowRunResults } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -13,10 +14,11 @@ import { getConsensusGenomeZipLink } from "~/components/views/report/utils/downl
 import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
 import Histogram from "~/components/visualizations/Histogram";
 import { HelpIcon, TooltipVizTable } from "~ui/containers";
+import { Table } from "~/components/visualizations/table";
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import ExternalLink from "~ui/controls/ExternalLink";
-import { IconAlert, LoadingIcon } from "~ui/icons";
+import { IconAlert, LoadingIcon, IconArrowRight } from "~ui/icons";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl, openUrlInNewTab } from "~utils/links";
 import PropTypes from "~utils/propTypes";
@@ -114,6 +116,18 @@ class ConsensusGenomeView extends React.Component {
     return (
       <React.Fragment>
         <div className={cs.resultsContainer}>
+          <div className={cs.learnMoreContainer}>
+            <ExternalLink
+              className={cs.learnMoreLink}
+              href={CONSENSUS_GENOME_DOC_LINK}
+              onClick={() =>
+                logAnalyticsEvent("ConsensusGenomeView_learn-more-link_clicked")
+              }
+            >
+              Learn more about consensus genomes <IconArrowRight />
+            </ExternalLink>
+          </div>
+          {data && !isEmpty(data.quality_metrics) && this.renderMetricsTable()}
           <div className={cs.section}>
             <div className={cs.header}>Download Consensus Genome Results</div>
             <div className={cs.body}>
@@ -353,6 +367,139 @@ class ConsensusGenomeView extends React.Component {
         </div>
       </NarrowContainer>
     );
+  };
+
+  renderMetricsTable = () => {
+    const { data } = this.state;
+    const metricsData = data.quality_metrics;
+
+    const helpText = (
+      <React.Fragment>
+        These metrics help determine the quality of the reference genome.{" "}
+        <ExternalLink
+          href={CONSENSUS_GENOME_DOC_LINK}
+          onClick={() =>
+            logAnalyticsEvent(
+              "ConsensusGenomeView_quality-metrics-help-link_clicked"
+            )
+          }
+        >
+          Learn more.
+        </ExternalLink>
+      </React.Fragment>
+    );
+    return (
+      <div className={cs.section}>
+        <div className={cs.title}>
+          Is my consensus genome complete?
+          <HelpIcon text={helpText} className={cs.helpIcon} />
+        </div>
+        <div className={cx(cs.metricsTable, cs.raisedContainer)}>
+          <Table
+            columns={this.computeQualityMetricColumns()}
+            data={[metricsData]}
+            defaultRowHeight={55}
+            gridClassName={cs.tableGrid}
+            headerClassName={cs.tableHeader}
+            headerRowClassName={cs.tableHeaderRow}
+            headerHeight={25}
+            headerLabelClassName={cs.tableHeaderLabel}
+            rowClassName={cs.tableRow}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  computeQualityMetricColumns = () => {
+    const renderRowCell = ({ cellData }, options = {}) => (
+      <div className={cs.cell}>
+        {cellData}
+        {options && options.percent ? "%" : null}
+      </div>
+    );
+    return [
+      {
+        cellRenderer: renderRowCell,
+        dataKey: "taxon_name",
+        flexGrow: 1,
+        headerClassName: cs.primaryHeader,
+        label: "Taxon",
+        width: 315,
+      },
+      {
+        cellRenderer: renderRowCell,
+        columnData: {
+          tooltip:
+            "Number of reads aligning to the taxon in the NCBI NT/NR database.",
+        },
+        dataKey: "total_reads",
+        flexGrow: 1,
+        label: "Reads",
+      },
+      {
+        cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
+        columnData: {
+          tooltip:
+            "The percentage of bases that are either guanine (G) or cytosine (C).",
+        },
+        dataKey: "gc_percent",
+        flexGrow: 1,
+        label: "GC Content",
+      },
+      {
+        cellRenderer: renderRowCell,
+        columnData: {
+          tooltip:
+            "The number of single nucleotide polymorphisms (SNPs) - locations where the nucleotide of the consensus genome does not match the base of the reference genome",
+        },
+        dataKey: "ref_snps",
+        flexGrow: 1,
+        label: "SNPs",
+      },
+      {
+        cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
+        columnData: {
+          tooltip:
+            "The percentage of nucleotides of the consensus genome that are identical to those in the reference genome.",
+        },
+        dataKey: "percent_identity",
+        flexGrow: 1,
+        label: "%id",
+      },
+      {
+        cellRenderer: renderRowCell,
+        columnData: {
+          tooltip: "The number of nucleotides that are A,T,C, or G.",
+        },
+        dataKey: "n_actg",
+        flexGrow: 1,
+        label: "Informative Nucleotides",
+        width: 150,
+      },
+      {
+        cellRenderer: renderRowCell,
+        columnData: {
+          tooltip:
+            "The number of bases that are N's because they could not be called.",
+        },
+        dataKey: "n_missing",
+        flexGrow: 1,
+        label: "Missing Bases",
+        width: 100,
+      },
+      {
+        cellRenderer: renderRowCell,
+        columnData: {
+          tooltip:
+            "The number of bases that could not be specified due to multiple observed alleles of single-base polymorphisms.",
+        },
+        dataKey: "n_ambiguous",
+        flexGrow: 1,
+        label: "Ambiguous Bases",
+        width: 100,
+      },
+    ];
   };
 
   render() {
