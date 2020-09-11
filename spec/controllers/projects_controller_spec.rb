@@ -602,6 +602,26 @@ RSpec.describe ProjectsController, type: :controller do
           end
         end
       end
+
+      describe "POST create to create a project" do
+        let(:fake_name) { "Test Name" }
+        let(:fake_access) { 0 }
+        let(:fake_description) { "Test Description" }
+        let(:create_params) do
+          { name: fake_name, public_access: fake_access, description: fake_description }
+        end
+
+        it "successfully creates a project with provided params" do
+          post :create, params: { format: "json", project: create_params }
+          expect(response).to have_http_status(:success)
+
+          created = Project.last
+          expect(created.name).to eq(fake_name)
+          expect(created.public_access).to eq(fake_access)
+          expect(created.description).to eq(fake_description)
+          expect(created.creator_id).to eq(@user.id)
+        end
+      end
     end
   end
 end
