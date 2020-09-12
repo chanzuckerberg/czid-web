@@ -30,8 +30,8 @@ class ConsensusGenomeMetricsService
     allowed_keys = [:total_reads, :ref_snps, :n_actg, :n_missing, :n_ambiguous]
     metrics = metrics.slice(*allowed_keys)
 
-    metrics[:qc_percent] = quast_data["GC (%)"].to_f
     metrics[:percent_identity] = ((metrics[:n_actg] - metrics[:ref_snps]) / metrics[:n_actg].to_f * 100).round(1)
+    metrics[:gc_percent] = quast_data["GC (%)"].to_f
     return metrics
   end
 end

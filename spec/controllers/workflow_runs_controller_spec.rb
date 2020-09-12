@@ -93,7 +93,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
           expect(response).to have_http_status :ok
           json = JSON.parse(response.body, symbolize_names: true)
-          expect(json.keys).to contain_exactly(:coverage_viz)
+          expect(json.keys).to contain_exactly(:coverage_viz, :quality_metrics, :taxon_name)
         end
       end
 

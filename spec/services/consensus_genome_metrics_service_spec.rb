@@ -22,7 +22,7 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
       n_ambiguous: 0,
       n_missing: 20,
       percent_identity: 91.9,
-      qc_percent: 38.0,
+      gc_percent: 38.0,
       ref_snps: 1000,
       total_reads: 654_321,
     }

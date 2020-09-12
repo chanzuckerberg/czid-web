@@ -90,7 +90,7 @@ class ConsensusGenomeView extends React.Component {
 
   componentDidUpdate = (prevProps, prevState) => {
     const { data } = this.state;
-    if (data && data.coverageViz && data !== prevState.data) {
+    if (data && data.coverage_viz && data !== prevState.data) {
       this.renderHistogram();
     }
   };
@@ -185,7 +185,7 @@ class ConsensusGenomeView extends React.Component {
               />
             </div>
           </div>
-          {data && data.coverageViz && (
+          {data && data.coverage_viz && (
             <div className={cs.section}>
               <div className={cs.header}>
                 How good is the coverage?
@@ -371,7 +371,10 @@ class ConsensusGenomeView extends React.Component {
 
   renderMetricsTable = () => {
     const { data } = this.state;
-    const metricsData = data.quality_metrics;
+    const metricsData = {
+      taxon_name: data.taxon_name,
+      ...data.quality_metrics,
+    };
 
     const helpText = (
       <React.Fragment>

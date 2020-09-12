@@ -35,4 +35,26 @@ RSpec.describe ConsensusGenomeWorkflowRun, type: :model do
       )
     end
   end
+
+  describe "#quality_metrics" do
+    it "calls metrics service and returns result" do
+      mock_result = { test: true }
+      expect(ConsensusGenomeMetricsService).to receive(:call).with(consensus_genome_workflow_run) { mock_result }
+      expect(subject.send(:quality_metrics)).to eq(mock_result)
+    end
+
+    context "when consensus genome metrics service fails with exception" do
+      it "logs exception and returns nil" do
+        expect(ConsensusGenomeMetricsService).to receive(:call).with(consensus_genome_workflow_run).and_raise(RuntimeError)
+        expect(LogUtil).to receive(:log_error).with(
+          "Error loading quality metrics",
+          exception: RuntimeError,
+          details: {
+            workflow_run_id: consensus_genome_workflow_run.id,
+          }
+        )
+        expect(subject.send(:quality_metrics)).to eq(nil)
+      end
+    end
+  end
 end
