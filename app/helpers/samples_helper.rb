@@ -12,7 +12,7 @@ module SamplesHelper
   # parsed_samples_for_s3_path. By default S3::Client sets a regional endpoint
   # such as s3.us-west-2.amazonaws.com (from the config) and errs if you use a
   # bucket in a different region.
-  S3_CLIENT_LOCAL = Aws::S3::Client.new(endpoint: S3_GLOBAL_ENDPOINT)
+  S3_CLIENT_LOCAL = Aws::S3::Client.new(endpoint: S3_GLOBAL_ENDPOINT, stub_responses: ENV['RAILS_ENV'] == 'test')
   # Limit the number of objects we scan in a bucket to avoid timeouts and memory issues.
   S3_OBJECT_LIMIT = 10_000
 

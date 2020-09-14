@@ -15,6 +15,8 @@ module CloudWatchUtil
 
   # namespace: String, metric_data: [metric_datum]
   def self.put_metric_data(namespace, metric_data)
+    # TODO: stub and test this
+    return if ENV['RAILS_ENV'] == 'test'
     raise ArgumentError, "Namespace is not a String" unless namespace.is_a? String
 
     @cloudwatch_client.put_metric_data(namespace: namespace,

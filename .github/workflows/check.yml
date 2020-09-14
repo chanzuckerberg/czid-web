@@ -1,0 +1,172 @@
+name: idseq-web check
+
+on:
+  push
+
+jobs:
+  ruby_test:
+    name: Ruby Test
+    runs-on: ubuntu-latest
+    container: ruby:2.5
+    env:
+      DB_USERNAME: test_user
+      DB_PASSWORD: test_password
+      RAILS_ENV: test
+      AWS_REGION: us-west-2
+      AWS_ACCOUNT_ID: test
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      db:
+        image: bitnami/mysql:5.7
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache Ruby Dependencies
+      uses: actions/cache@v2
+      with:
+        path: vendor/bundle
+        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-gems
+    - name: Install Ruby Dependencies
+      run: |
+        gem install bundler
+        bundle config path vendor/bundle
+        bundle install --jobs 4 --retry 3
+    - name: Cache Python Dependencies
+      uses: actions/cache@v2
+      with:
+        path: /root/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip
+    - name: Install Extra Dependencies
+      run: |
+        apt-get update && apt-get install -y python3-pip nodejs
+        pip3 install --upgrade pip
+        pip3 install --cache-dir /root/.cache/pip -r requirements.txt
+    - name: Setup Dummy Static Files
+      # Create dummy versions of our javascript and css bundle
+      #   The actual files are not required for testing ruby, just the presence of the files
+      run: |
+        mkdir -p app/assets/dist
+        echo foo > app/assets/dist/main.bundle.min.css
+        echo foo > app/assets/dist/main.bundle.min.js
+        echo foo > app/assets/dist/vendors~main.bundle.min.css
+        echo foo > app/assets/dist/vendors~main.bundle.min.js
+    - name: Initialize Database
+      run: bundle exec rake db:create db:migrate db:seed
+    - name: RSpec
+      run: bundle exec rspec
+    - name: Rails Test
+      run: bundle exec rails test
+      env:
+        SAMPLES_BUCKET_NAME: idseq-samples-development
+        ALIGNMENT_CONFIG_DEFAULT_NAME: "2020-02-03"
+
+  ruby_code_analysis:
+    name: Ruby Code Analysis
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-ruby@v1
+    - name: Cache Ruby Dependencies
+      uses: actions/cache@v2
+      with:
+        path: vendor/bundle
+        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-gem
+    - name: Install Ruby Dependencies
+      run: |
+        gem install bundler
+        bundle config path vendor/bundle
+        bundle install --jobs 4 --retry 3
+    - name: Rubocop
+      # no annotations yet unfortunately
+      #  There are rubocop github actions but they are buggy
+      #  This one: https://github.com/andrewmcodes/rubocop-linter-action
+      #    uses a strange mechanism in which it creates a new check and
+      #    adds annotations to it. It creates this check in the wrong
+      #    workflow which breaks.
+      #  This one: https://github.com/gimenete/rubocop-action
+      #   offers literally no customization and we want to pin our
+      #   rubocop version.
+      run: bundle exec rubocop -R
+    - name: Brakeman
+      run: bundle exec brakeman --no-pager -w3
+      # TODO (https://app.clubhouse.io/idseq/story/17337/clean-up-brakeman-warnings-and-enable-annotations)
+      #  This is a good action but we have > 50 brakeman warnings
+      #  which maxes out the annotations API breaking the action.
+      #  We should clean these up and enable it.
+      # use: devmasx/brakeman-linter-action@v1.0.0
+      # env:
+      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  javascript:
+    name: Javascript
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Cache Node Dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - name: Install Dependencies
+      run: npm install
+    - name: Test
+      run: npm test
+      env:
+        CI: true
+    - name: Lint
+      # setup-node automatically creates annotations from this output
+      run: ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx
+
+  python:
+    name: Python
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+    - name: Cache Python Dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+    - name: Flake8
+      uses: julianwachholz/flake8-action@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Test
+      run: python3 -m unittest discover -v -s test/python/ -p 'test_*.py'
