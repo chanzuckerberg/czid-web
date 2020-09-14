@@ -1,4 +1,4 @@
-module ResultsFolderConstants
+module SamplesControllerConstants
   SFN_RESULTS_FOLDER_UPLOADER_RESPONSE = {
     hostFiltering: {
       name: "Host Filtering",
@@ -124,6 +124,7 @@ module ResultsFolderConstants
       },
     },
   }.freeze
+
   SFN_RESULTS_FOLDER_NONOWNER_RESPONSE = lambda {
     response = SFN_RESULTS_FOLDER_UPLOADER_RESPONSE.deep_dup
     response[:hostFiltering][:steps].each do |_step, step_data|
@@ -133,4 +134,49 @@ module ResultsFolderConstants
     end
     return response
   }.call
+
+  READS_STATS_SERVICE_VALID_RESPONSE = {
+    54 => {
+      steps: [
+        {
+          name: "Validate Input",
+          readsAfter: 2_338_106,
+        },
+        {
+          name: "Star",
+          readsAfter: 2_337_106,
+        },
+        {
+          name: "Trimmomatic",
+          readsAfter: 1_697_052,
+        },
+        {
+          name: "Priceseq",
+          readsAfter: 1_533_632,
+        },
+        {
+          name: "Cdhitdup",
+          readsAfter: 37_936,
+        },
+        {
+          name: "Lzw",
+          readsAfter: 1_533_576,
+        },
+        {
+          name: "Bowtie2",
+          readsAfter: 1_533_460,
+        },
+        {
+          name: "Subsampled",
+          readsAfter: 1_533_460,
+        },
+        {
+          name: "Gsnap Filter",
+          readsAfter: 1_533_368,
+        },
+      ],
+      initialReads: 2_338_106,
+      sampleId: 54,
+    },
+  }.freeze
 end

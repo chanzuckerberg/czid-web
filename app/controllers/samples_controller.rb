@@ -31,7 +31,7 @@ class SamplesController < ApplicationController
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
-                   :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds,].freeze
+                   :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata].freeze
 
@@ -847,8 +847,8 @@ class SamplesController < ApplicationController
       cache_key = PipelineReportService.report_info_cache_key(
         request.path,
         report_info_params
-          .merge(background_id: background_id)
-          .symbolize_keys
+        .merge(background_id: background_id)
+        .symbolize_keys
       )
       httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
 
@@ -894,8 +894,8 @@ class SamplesController < ApplicationController
     cache_key = ReportHelper.report_info_cache_key(
       request.path,
       params
-        .permit(report_info_params.keys)
-        .merge(pipeline_run_id: pipeline_run.id)
+      .permit(report_info_params.keys)
+      .merge(pipeline_run_id: pipeline_run.id)
     )
 
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
@@ -1160,6 +1160,27 @@ class SamplesController < ApplicationController
     end
   end
 
+  # GET samples/reads_stats.json
+  def reads_stats
+    queried_sample_ids = params[:sampleIds]
+
+    # No information is returned on samples they don't have access to.
+    validated_sample_info = SampleAccessValidationService.call(queried_sample_ids, current_user)
+    viewable_samples = validated_sample_info[:viewable_samples]
+
+    results = {}
+    if validated_sample_info[:error].nil?
+      results = ReadsStatsService.call(viewable_samples)
+    else
+      raise :internal_server_error
+    end
+
+    render json: results
+  rescue => error
+    LogUtil.log_error("Error while calling samples/reads_stats.json", exception: error)
+    render json: { status: "Internal server error" }, status: :internal_server_error
+  end
+
   def validate_sample_files
     sample_files = params[:sample_files]
 
@@ -1289,7 +1310,7 @@ class SamplesController < ApplicationController
         error: "coverage viz summary file does not exist for this sample",
       }
     end
-  # For safety.
+    # For safety.
   rescue
     render json: {
       error: "There was an error fetching the coverage viz summary file.",
@@ -1308,7 +1329,7 @@ class SamplesController < ApplicationController
         error: "coverage viz data file does not exist for this sample and accession id",
       }
     end
-  # For safety.
+    # For safety.
   rescue
     render json: {
       error: "There was an error fetching the coverage viz data file.",
@@ -1489,7 +1510,7 @@ class SamplesController < ApplicationController
     project = samples.first.project
     uploader = samples.first.user
     msg = "LargeBulkUploadEvent: #{samples.length} samples by #{uploader.role_name}." \
-      " See: #{project.status_url}"
+    " See: #{project.status_url}"
     Rails.logger.info(msg)
   rescue StandardError => e
     # catch all errors because we don't want to ever block uploads
