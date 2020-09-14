@@ -8,11 +8,11 @@ class TooltipVizTable extends React.Component {
   renderLabels(data, compact) {
     return (
       <div className={cs.labelColumn}>
-        {data.map(keyValuePair => {
+        {data.map((keyValuePair, index) => {
           return (
             <div
               className={cx(cs.label, compact && cs.compact)}
-              key={`label-${keyValuePair}`}
+              key={`label-${keyValuePair}-${index}`}
             >
               {keyValuePair[0]}
             </div>
@@ -25,9 +25,9 @@ class TooltipVizTable extends React.Component {
   renderValues(data) {
     return (
       <div className={cs.valueColumn}>
-        {data.map(keyValuePair => {
+        {data.map((keyValuePair, index) => {
           return (
-            <div className={cs.value} key={`value-${keyValuePair}`}>
+            <div className={cs.value} key={`value-${keyValuePair}-${index}`}>
               {keyValuePair[1]}
             </div>
           );

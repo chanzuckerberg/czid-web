@@ -91,7 +91,8 @@ export default class HorizontalStackedBarChart extends React.Component {
       keys,
       dataKeys,
       mouseOverBar: null,
-      measurementsTaken: false,
+      measurements: {},
+      redrawNeeded: true,
     };
 
     this.references = {
@@ -104,13 +105,70 @@ export default class HorizontalStackedBarChart extends React.Component {
   }
 
   componentDidMount() {
+    this.updateClientMeasurements();
+    window.addEventListener("resize", this.handleWindowResize);
+  }
+
+  componentDidUpdate() {
+    const { redrawNeeded } = this.state;
+    if (redrawNeeded) {
+      this.updateChartDimensions();
+      this.setState({ redrawNeeded: false });
+    }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleWindowResize);
+  }
+
+  /* --- pre-mount functions --- */
+
+  mergeOptionsWithDefaults(defaults, options) {
+    const mergedOptions = {};
+    const valueOptionKeys = ["canvasClassName", "colors", "sort"];
+    valueOptionKeys.forEach(option => {
+      mergedOptions[option] = options[option] || defaults[option];
+    });
+
+    const referenceOptionKeys = ["x", "y", "bars", "margin"];
+    referenceOptionKeys.forEach(option => {
+      mergedOptions[option] = {
+        ...defaults[option],
+        ...options[option],
+      };
+    });
+    return mergedOptions;
+  }
+
+  /* --- mount functions --- */
+
+  updateClientMeasurements() {
+    const { xTextHeight, xTextWidth } = this.measureXAxisText();
+    const yTextWidthPairs = this.measureYAxisText();
+    const wideGlyphTextWidth = this.references.wRef.clientWidth;
+    const ellipsisTextWidth = this.references.ellipsis.clientWidth;
+
+    this.setState({
+      measurements: {
+        xTextHeight,
+        xTextWidth,
+        yTextWidthPairs,
+        wideGlyphTextWidth,
+        ellipsisTextWidth,
+      },
+    });
+  }
+
+  /* --- post-mount functions --- */
+
+  updateChartDimensions() {
     const { yAxisKey } = this.props;
     const { data, dataKeys, options } = this.state;
 
     // allow for autoselection of width
-    // 99% container width to account for floating point math rounding
-    const width =
-      this.props.width || this.references.container.clientWidth * 0.99;
+    // 98% container width to account for floating point math rounding
+    // and variation among browsers and operating systems
+    const width = this.references.container.clientWidth * 0.98;
 
     const { barCanvasHeight, xAxisHeight } = this.measureHeights();
     let { barCanvasWidth, yAxisWidth, truncatedLabels } = this.measureWidths(
@@ -146,41 +204,16 @@ export default class HorizontalStackedBarChart extends React.Component {
       x,
       y,
       z,
-      measurementsTaken: true,
       width,
     });
   }
 
-  /* --- pre-mount functions --- */
-
-  mergeOptionsWithDefaults(defaults, options) {
-    const mergedOptions = {};
-    const valueOptionKeys = ["canvasClassName", "colors", "sort"];
-    valueOptionKeys.forEach(option => {
-      mergedOptions[option] = options[option] || defaults[option];
-    });
-
-    const referenceOptionKeys = ["x", "y", "bars", "margin"];
-    referenceOptionKeys.forEach(option => {
-      mergedOptions[option] = {
-        ...defaults[option],
-        ...options[option],
-      };
-    });
-    return mergedOptions;
-  }
-
-  /* --- post-mount functions --- */
-
   measureHeights() {
-    const { data, options } = this.state;
-    const { xRef } = this.references;
-
-    const xTextHeight = xRef.clientHeight;
+    const { data, options, measurements } = this.state;
 
     const xAxisHeight =
       options.x.tickSize * (options.x.ticksVisible || options.x.pathVisible) +
-      xTextHeight;
+      measurements.xTextHeight;
     const barCanvasHeight =
       data.length * (options.bars.height + options.bars.padding);
 
@@ -188,41 +221,33 @@ export default class HorizontalStackedBarChart extends React.Component {
   }
 
   measureWidths(width) {
-    const { options } = this.state;
-    const { xRef, yRef, wRef, ellipsis } = this.references;
-
-    const yTextWidthPairs = yRef.map(keyRefPair => [
-      keyRefPair[0],
-      keyRefPair[1].clientWidth,
-    ]);
-    const xTextWidth = xRef.clientWidth;
-    const wideGlyphTextWidth = wRef.clientWidth;
-    const ellipsisTextWidth = ellipsis.clientWidth;
+    const { options, measurements } = this.state;
 
     let truncatedLabels = [];
-    const longestLabel = maxBy(yTextWidthPairs, pair => pair[1]);
+    const longestLabel = maxBy(measurements.yTextWidthPairs, pair => pair[1]);
     const longestLabelLength = longestLabel[1];
 
     // Since x-axis labels are centered on their tick mark, we need to make sure
     // the last tick mark appears before the right end of the canvas with enough
     // space for the label
-    const canvasWidth = width - xTextWidth;
+    const canvasWidth = width - measurements.xTextWidth;
     let yAxisWidth = Math.min(
       longestLabelLength,
       canvasWidth * MAX_Y_AXIS_AREA_RATIO
     );
 
     if (longestLabelLength > yAxisWidth) {
-      const truncatedLabelWidth = yAxisWidth - ellipsisTextWidth;
+      const truncatedLabelWidth = yAxisWidth - measurements.ellipsisTextWidth;
 
-      yTextWidthPairs.forEach(pair => {
+      measurements.yTextWidthPairs.forEach(pair => {
         const [label, labelWidth] = pair;
 
         let modifiedLabel = label;
 
         if (labelWidth > yAxisWidth) {
           const lengthToTruncate = Math.ceil(
-            (labelWidth - (yAxisWidth + ellipsisTextWidth)) / wideGlyphTextWidth
+            (labelWidth - (yAxisWidth + measurements.ellipsisTextWidth)) /
+              measurements.wideGlyphTextWidth
           );
           const truncatedLabelSliceIndex = label.length - lengthToTruncate - 1;
           modifiedLabel = label.slice(0, truncatedLabelSliceIndex) + "...";
@@ -234,12 +259,12 @@ export default class HorizontalStackedBarChart extends React.Component {
 
     const barCanvasWidth = canvasWidth - yAxisWidth;
     // properly translate the canvas to the right
-    yAxisWidth = yAxisWidth + xTextWidth / 2;
+    yAxisWidth = yAxisWidth + measurements.xTextWidth / 2;
 
     return { barCanvasWidth, yAxisWidth, truncatedLabels };
   }
 
-  createDimensions(barCanvasWidth, barCanvasHeight, xTextWidth) {
+  createDimensions(barCanvasWidth, barCanvasHeight) {
     const { options } = this.state;
 
     const paddingScalar = options.bars.padding / options.bars.height;
@@ -267,7 +292,14 @@ export default class HorizontalStackedBarChart extends React.Component {
           className={cx(cs.test, options.y.textClassName, cs.yAxisText)}
           key={yAttribute}
           ref={ref => {
-            this.references.yRef.push([yAttribute, ref]);
+            const refLocation = this.references.yRef.findIndex(
+              ref => ref[0] === yAttribute
+            );
+            if (refLocation >= 0 && ref !== null) {
+              this.references.yRef[refLocation][1] = ref;
+            } else if (ref !== null) {
+              this.references.yRef.push([yAttribute, ref]);
+            }
           }}
         >
           {yAttribute}
@@ -315,16 +347,20 @@ export default class HorizontalStackedBarChart extends React.Component {
 
   measureXAxisText() {
     return {
-      xTextHeight: this.references.x.clientHeight,
-      xTextWidth: this.references.x.clientWidth,
+      xTextHeight: this.references.xRef.clientHeight,
+      xTextWidth: this.references.xRef.clientWidth,
     };
   }
 
   measureYAxisText() {
-    return this.references.y.map(keyRefPair => [
+    const yAxisRefs = this.references.yRef.filter(
+      refPair => refPair[1] !== null
+    );
+    const measured = yAxisRefs.map(keyRefPair => [
       keyRefPair[0],
       keyRefPair[1].clientWidth,
     ]);
+    return measured;
   }
 
   /* --- callbacks --- */
@@ -341,6 +377,10 @@ export default class HorizontalStackedBarChart extends React.Component {
     const { data } = this.state;
 
     events.onYAxisLabelEnter(yAttribute, data[index]);
+  };
+
+  handleWindowResize = () => {
+    this.setState({ redrawNeeded: true });
   };
 
   /* --- rendering --- */
@@ -538,10 +578,10 @@ export default class HorizontalStackedBarChart extends React.Component {
       barCanvasHeight,
       barCanvasWidth,
       yAxisWidth,
-      measurementsTaken,
+      redrawNeeded,
     } = this.state;
 
-    if (measurementsTaken) {
+    if (!redrawNeeded) {
       return (
         <div
           className={cx(className, cs.chart)}
@@ -552,6 +592,7 @@ export default class HorizontalStackedBarChart extends React.Component {
             events.onChartHover(event.clientX, event.clientY);
             events.onChartElementExit();
           }}
+          ref={ref => (this.references.container = ref)}
         >
           <XAxis
             x={x}
@@ -619,7 +660,6 @@ HorizontalStackedBarChart.defaultProps = {
 HorizontalStackedBarChart.propTypes = {
   data: PropTypes.array,
   keys: PropTypes.array,
-  width: PropTypes.number,
   options: PropTypes.object,
   events: PropTypes.shape({
     onYAxisLabelClick: PropTypes.func,
