@@ -2,8 +2,6 @@
 @import "~styles/themes/elements";
 @import "~styles/themes/typography";
 
-$body-height: 248px;
-
 .resultsContainer {
   color: $black;
 
@@ -22,12 +20,6 @@ $body-height: 248px;
           fill: $primary;
         }
       }
-    }
-
-    .header {
-      @include font-header-m;
-
-      display: flex;
     }
 
     .subheader {
@@ -102,58 +94,53 @@ $body-height: 248px;
     }
   }
 
-  .coverageContents {
-    margin-top: 30px;
-    margin-bottom: 40px;
-    text-align: left;
+  .coverageContainer {
+    height: 255px;
+    padding: $space-xl;
 
-    .body {
-      height: $body-height;
+    .metrics {
+      display: flex;
+      margin-bottom: $space-m;
 
-      .metrics {
+      .column {
+        flex: 1 1 0;
+        min-width: 0;
+        margin-right: $space-m;
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+
+      .metric {
         display: flex;
-        margin-bottom: 30px;
+        align-items: center;
+        height: 30px;
+        padding: 0 $space-m;
 
-        .column {
+        &:first-child {
+          background-color: $gray-off-white;
+        }
+
+        .label,
+        .value {
           flex: 1 1 0;
           min-width: 0;
-          margin-right: $space-m;
-
-          &:last-child {
-            margin-right: 0;
-          }
         }
 
-        .metric {
-          display: flex;
-          align-items: center;
-          height: 30px;
-          padding: 0 $space-m;
+        .label {
+          @include font-header-xxs;
+        }
 
-          &:first-child {
-            background-color: $gray-off-white;
-          }
-
-          .label,
-          .value {
-            flex: 1 1 0;
-            min-width: 0;
-          }
-
-          .label {
-            @include font-header-xxs;
-          }
-
-          .value {
-            @include font-body-xxs;
-          }
+        .value {
+          @include font-body-xxs;
         }
       }
+    }
 
-      .coverageVizHistogram {
-        height: 170px;
-        background-color: $gray-off-white;
-      }
+    .coverageVizHistogram {
+      height: 170px;
+      background-color: $gray-off-white;
     }
   }
 
@@ -169,7 +156,7 @@ $body-height: 248px;
 .hoverTooltip {
   position: fixed;
   background-color: $white;
-  z-index: 104;
+  z-index: 100;
   // So the tooltip appears on the top-right instead of bottom-right of mouse.
   transform: translateY(-100%);
 }

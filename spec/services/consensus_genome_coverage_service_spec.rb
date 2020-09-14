@@ -43,14 +43,6 @@ RSpec.describe ConsensusGenomeCoverageService, type: :service do
       )
     end
 
-    it "returns correct taxa information" do
-      expect(subject.call).to include(
-        accession_id: "MN985325.1",
-        accession_name: "Severe acute respiratory syndrome coronavirus 2 isolate SARS-CoV-2/human/USA/WA-CDC-WA1/2020, complete genome",
-        taxon_id: 2_697_049
-      )
-    end
-
     context "when depths size is smaller than number of bins" do
       let(:depths) { [1, 2, 3, 4, 5] }
       let(:max_num_bins) { 3 }

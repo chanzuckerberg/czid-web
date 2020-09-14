@@ -6,21 +6,16 @@ import cx from "classnames";
 import { getWorkflowRunResults } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import NarrowContainer from "~/components/layout/NarrowContainer";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
-import { getConsensusGenomeZipLink } from "~/components/views/report/utils/download";
 import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
 import Histogram from "~/components/visualizations/Histogram";
 import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import { Table } from "~/components/visualizations/table";
-import DownloadButton from "~ui/controls/buttons/DownloadButton";
-import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import ExternalLink from "~ui/controls/ExternalLink";
 import { IconAlert, LoadingIcon, IconArrowRight } from "~ui/icons";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
-import { openUrl, openUrlInNewTab } from "~utils/links";
 import PropTypes from "~utils/propTypes";
 import { sampleErrorInfo } from "~utils/sample";
 
@@ -96,23 +91,8 @@ class ConsensusGenomeView extends React.Component {
   };
 
   renderResults() {
-    const { sample } = this.props;
     const { data, histogramTooltipData, histogramTooltipLocation } = this.state;
 
-    const helpText = (
-      <React.Fragment>
-        These metrics and chart help determine the coverage of the reference
-        genome.
-        <ExternalLink
-          href={CONSENSUS_GENOME_DOC_LINK}
-          onClick={() =>
-            logAnalyticsEvent("ConsensusGenomeView_help-link_clicked")
-          }
-        >
-          Learn more.
-        </ExternalLink>
-      </React.Fragment>
-    );
     return (
       <React.Fragment>
         <div className={cs.resultsContainer}>
@@ -128,72 +108,7 @@ class ConsensusGenomeView extends React.Component {
             </ExternalLink>
           </div>
           {data && !isEmpty(data.quality_metrics) && this.renderMetricsTable()}
-          <div className={cs.section}>
-            <div className={cs.header}>Download Consensus Genome Results</div>
-            <div className={cs.body}>
-              These are your consensus genome result files. You can download
-              them all in a .zip file.
-            </div>
-            <div className={cs.subheader}>This is what you'll get:</div>
-            <div className={cs.offsetBody}>
-              {/* TODO: Migrate to come from an output file listing what went into the ZIP. */}
-              <div className={cs.emphasis}>consensus.fa</div>
-              <div className={cs.emphasis}>depths.png</div>
-              <div className={cs.emphasis}>report.tsv</div>
-              <div className={cs.emphasis}>report.txt</div>
-              <div>aligned_reads.bam</div>
-              <div>ercc_stats.txt</div>
-              <div>no_host_1.fq.gz</div>
-              <div>no_host_2.fq.gz</div>
-              <div>primertrimmed.bam.bai</div>
-              <div>primertrimmed.bam</div>
-              <div>stats.json</div>
-              <div>variants.vcf.gz</div>
-            </div>
-            <div>
-              <DownloadButton
-                text="Download All"
-                onClick={() => {
-                  openUrl(getConsensusGenomeZipLink(sample.id));
-                  logAnalyticsEvent(
-                    "ConsensusGenomeView_download-all-button_clicked",
-                    {
-                      sampleId: sample.id,
-                    }
-                  );
-                }}
-              />
-            </div>
-          </div>
-          <div className={cs.section}>
-            <div className={cs.header}>
-              Learn more about Consensus Genomes in our Help Center
-            </div>
-            <div className={cs.body}>
-              We'll show you how to analyze your samples, how our pipeline
-              works, and how to upload them to public repositories.
-            </div>
-            <div>
-              <SecondaryButton
-                onClick={() => {
-                  openUrlInNewTab(CONSENSUS_GENOME_DOC_LINK);
-                  logAnalyticsEvent(
-                    "ConsensusGenomeView_view-help-docs-button_clicked"
-                  );
-                }}
-                text="View Help Docs"
-              />
-            </div>
-          </div>
-          {data && data.coverage_viz && (
-            <div className={cs.section}>
-              <div className={cs.header}>
-                How good is the coverage?
-                <HelpIcon text={helpText} className={cs.helpIcon} />
-              </div>
-              <div>{this.renderCoverage()}</div>
-            </div>
-          )}
+          {data && !isEmpty(data.coverage_viz) && this.renderCoverageView()}
         </div>
         {histogramTooltipLocation && histogramTooltipData && (
           <div
@@ -260,6 +175,14 @@ class ConsensusGenomeView extends React.Component {
     });
   };
 
+  formatYAxisLabel = value => {
+    const superscript = "²³⁴⁵⁶⁷⁸⁹";
+    if (value > 10) {
+      return `10${superscript[value.toString().length - 3]}`;
+    }
+    return value;
+  };
+
   renderHistogram = () => {
     const { data } = this.state;
 
@@ -276,14 +199,16 @@ class ConsensusGenomeView extends React.Component {
         colors: [FILL_COLOR],
         domain: [0, data.coverage_viz.total_length],
         hoverColors: [HOVER_FILL_COLOR],
+        labelsLarge: true,
+        labelX: "Reference Genome",
         labelY: "Coverage",
         labelYHorizontalOffset: 15,
         labelYLarge: true,
         margins: {
           left: 100,
-          right: 40,
-          top: 30,
-          bottom: 30,
+          right: 50,
+          top: 40,
+          bottom: 70,
         },
         numBins: Math.round(
           data.coverage_viz.total_length / data.coverage_viz.coverage_bin_size
@@ -292,6 +217,7 @@ class ConsensusGenomeView extends React.Component {
         showStatistics: false,
         skipBins: true,
         yScaleLog: true,
+        yTickFormat: this.formatYAxisLabel,
         onHistogramBarHover: this.handleHistogramBarHover,
         onHistogramBarEnter: this.handleHistogramBarEnter,
         onHistogramBarExit: this.handleHistogramBarExit,
@@ -309,37 +235,57 @@ class ConsensusGenomeView extends React.Component {
         trigger={
           <div className={cs.ncbiLinkWrapper}>
             <ExternalLink
-              href={`https://www.ncbi.nlm.nih.gov/nuccore/${data.coverage_viz.accession_id}?report=genbank`}
+              href={`https://www.ncbi.nlm.nih.gov/nuccore/${data.taxon_info.accession_id}?report=genbank`}
               onClick={() =>
                 logAnalyticsEvent("ConsensusGenomeView_ncbi-link_clicked", {
-                  accessionId: data.coverage_viz.accession_id,
-                  taxonId: data.coverage_viz.taxonId,
+                  accessionId: data.taxon_info.accession_id,
+                  taxonId: data.taxon_info.taxonId,
                   sampleId: sample.id,
                 })
               }
             >
-              {data.coverage_viz.accession_id}
+              {data.taxon_info.accession_id}
             </ExternalLink>
           </div>
         }
         inverted
-        content={`${data.coverage_viz.accession_id} - ${data.coverage_viz.accession_name}`}
+        content={data.taxon_info.taxon_name}
       />
     );
 
     return {
       referenceNCBIEntry,
       referenceLength: data.coverage_viz.total_length,
-      coverageDepth: `${data.coverage_viz.coverage_depth}x`,
+      coverageDepth: `${data.coverage_viz.coverage_depth.toFixed(1)}x`,
       coverageBreadth: formatPercent(data.coverage_viz.coverage_breadth),
     };
   };
 
-  renderCoverage = () => {
+  renderCoverageView = () => {
+    const helpText = (
+      <React.Fragment>
+        These metrics and chart help determine the coverage of the reference
+        genome.{" "}
+        <ExternalLink
+          href={CONSENSUS_GENOME_DOC_LINK}
+          onClick={() =>
+            logAnalyticsEvent("ConsensusGenomeView_help-link_clicked")
+          }
+        >
+          Learn more.
+        </ExternalLink>
+      </React.Fragment>
+    );
+
     const metrics = this.getAccessionMetrics();
+
     return (
-      <NarrowContainer className={cs.coverageContents}>
-        <div className={cs.body}>
+      <div className={cs.section}>
+        <div className={cs.title}>
+          How good is the coverage?
+          <HelpIcon text={helpText} className={cs.helpIcon} />
+        </div>
+        <div className={cx(cs.coverageContainer, cs.raisedContainer)}>
           <div className={cs.metrics}>
             {CONSENSUS_GENOME_VIEW_METRIC_COLUMNS.map((col, index) => (
               <div className={cs.column} key={index}>
@@ -365,14 +311,14 @@ class ConsensusGenomeView extends React.Component {
             }}
           />
         </div>
-      </NarrowContainer>
+      </div>
     );
   };
 
   renderMetricsTable = () => {
     const { data } = this.state;
     const metricsData = {
-      taxon_name: data.taxon_name,
+      taxon_name: data.taxon_info.taxon_name,
       ...data.quality_metrics,
     };
 
@@ -505,12 +451,24 @@ class ConsensusGenomeView extends React.Component {
     ];
   };
 
+  renderLoader = () => {
+    return (
+      <SampleMessage
+        icon={<LoadingIcon className={csSampleMessage.icon} />}
+        message={"Loading report data."}
+        status={"Loading"}
+        type={"inProgress"}
+      />
+    );
+  };
+
   render() {
+    const { data } = this.state;
     const { sample } = this.props;
     const { workflow } = this;
 
     if (workflow.status === "SUCCEEDED") {
-      return this.renderResults();
+      return data ? this.renderResults() : this.renderLoader();
     } else if (workflow.status === "RUNNING" || !workflow.status) {
       return (
         <SampleMessage

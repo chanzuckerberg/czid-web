@@ -29,9 +29,14 @@ export default class Histogram {
 
     this.options = Object.assign(
       {
+        barOpacity: 0.8,
         colormap: "viridis",
+        labelsLarge: false,
         labelX: "",
+        labelXVerticalOffset: 10,
         labelY: "",
+        labelYHorizontalOffset: 0,
+        labelYVerticalOffset: 0,
         seriesNames: null,
         showStatistics: true,
         refValues: [],
@@ -95,7 +100,7 @@ export default class Histogram {
 
     g.append("text")
       .attr("x", (this.size.width + this.margins.left) / 2 - 2)
-      .attr("y", 30 + (this.options.labelXVerticalOffset || 0))
+      .attr("y", 30 + this.options.labelXVerticalOffset)
       .attr("fill", "#000")
       .attr("font-weight", 600)
       .attr("text-anchor", "end")
@@ -127,7 +132,6 @@ export default class Histogram {
     }
 
     g.attr("transform", `translate(${this.margins.left},0)`).call(axis);
-
     g.select(".domain").remove();
 
     g.selectAll(".tick text").attr("class", cs.yAxisTickText);
@@ -140,8 +144,8 @@ export default class Histogram {
 
     g.select(".tick:last-of-type text")
       .clone()
-      .attr("x", 12 - (this.options.labelYVerticalOffset || 0))
-      .attr("y", -30 - (this.options.labelYHorizontalOffset || 0))
+      .attr("x", 12 - this.options.labelYVerticalOffset)
+      .attr("y", -30 - this.options.labelYHorizontalOffset)
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "end")
       .attr("font-weight", 600)
@@ -217,7 +221,7 @@ export default class Histogram {
   };
 
   getBarOpacity = () => {
-    return this.options.barOpacity || 0.8;
+    return this.options.barOpacity;
   };
 
   onBarMouseMove = () => {

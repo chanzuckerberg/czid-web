@@ -81,13 +81,9 @@ class ConsensusGenomeCoverageService
 
     return {
       total_length: depths.size,
-      # TODO: hardcoded for now since it is the unique reference
-      accession_id: "MN985325.1",
-      accession_name: "Severe acute respiratory syndrome coronavirus 2 isolate SARS-CoV-2/human/USA/WA-CDC-WA1/2020, complete genome",
-      taxon_id: 2_697_049,
       coverage: coverage,
       coverage_bin_size: bin_size,
-      # TODO: verify what this should be
+      # TODO: fix to match longer alignment
       max_aligned_length: depths.size,
       coverage_depth: depths.select { |d| d > 0 }.sum(0.0) / depths.size,
       coverage_breadth: depths.select { |d| d > 0 }.size.to_f / depths.size,

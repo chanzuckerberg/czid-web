@@ -26,12 +26,33 @@ RSpec.describe ConsensusGenomeWorkflowRun, type: :model do
   end
 
   describe "#results" do
-    it "includes coverage viz result" do
-      mock_result = { test: true }
-      expect(consensus_genome_workflow_run).to receive(:coverage_viz) { mock_result }
+    before do
+      @coverage_mock_result = { coverage: true }
+      @quality_mock_result = { coverage: true }
+      expect(consensus_genome_workflow_run).to receive(:coverage_viz) { @coverage_mock_result }
+      expect(consensus_genome_workflow_run).to receive(:quality_metrics) { @quality_mock_result }
+    end
 
+    it "includes coverage viz result" do
       expect(subject.results).to include(
-        coverage_viz: mock_result
+        coverage_viz: @coverage_mock_result
+      )
+    end
+
+    it "includes quality metrics result" do
+      expect(subject.results).to include(
+        quality_metrics: @quality_mock_result
+      )
+    end
+
+    it "includes taxon info" do
+      expect(subject.results).to include(
+        taxon_info: {
+          accession_id: "MN985325.1",
+          accession_name: "Severe acute respiratory syndrome coronavirus 2 isolate SARS-CoV-2/human/USA/WA-CDC-WA1/2020, complete genome",
+          taxon_id: 2_697_049,
+          taxon_name: "Severe acute respiratory syndrome coronavirus 2",
+        }
       )
     end
   end
