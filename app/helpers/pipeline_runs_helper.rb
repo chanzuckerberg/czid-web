@@ -356,7 +356,7 @@ module PipelineRunsHelper
       raise PIPELINE_RUN_STILL_RUNNING_ERROR
     end
 
-    valid_pipeline_runs = valid_pipeline_runs.select(&:succeeded?)
+    valid_pipeline_runs = valid_pipeline_runs.where(job_status: PipelineRun::STATUS_CHECKED)
     if strict && valid_pipeline_runs.length != samples.length
       raise PIPELINE_RUN_FAILED_ERROR
     end
