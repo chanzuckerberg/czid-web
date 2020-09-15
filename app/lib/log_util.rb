@@ -24,7 +24,7 @@ class LogUtil
       Raven.capture_exception(
         exception,
         message: message,
-        **details
+        extra: details
       )
       Airbrake.notify(exception,
                       details.merge(
