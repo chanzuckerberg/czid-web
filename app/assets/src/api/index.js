@@ -6,7 +6,13 @@ import axiosRetry from "axios-retry";
 
 import { getURLParamString } from "~/helpers/url";
 
-import { get, postWithCSRF, putWithCSRF, deleteWithCSRF } from "./core";
+import {
+  get,
+  postWithCSRF,
+  putWithCSRF,
+  deleteWithCSRF,
+  MAX_SAMPLES_FOR_GET_REQUEST,
+} from "./core";
 
 // Save fields on the sample model (NOT sample metadata)
 const saveSampleField = (id, field, value) =>
@@ -358,6 +364,35 @@ const getSamplePipelineResults = (sampleId, pipelineVersion) =>
     },
   });
 
+// Limits requests to MAX_SAMPLES_FOR_GET_REQUEST samples at a time, per Puma limits.
+const getSamplesReadStats = async sampleIds => {
+  const binLength = MAX_SAMPLES_FOR_GET_REQUEST;
+  const fetchBins = [[]];
+  let binIndex = 0;
+  sampleIds.forEach((sampleId, index) => {
+    if (index % binLength === 0 && index > 0) {
+      fetchBins.push([]);
+      binIndex += 1;
+    }
+    fetchBins[binIndex].push(sampleId);
+  });
+
+  const requests = fetchBins.map(bin =>
+    get("/samples/reads_stats.json", {
+      params: {
+        sampleIds: bin,
+      },
+    })
+  );
+
+  const response = await Promise.all(requests);
+  // flatten into one object
+  const result = response.flat().reduce((accum, current) => {
+    return Object.assign(accum, current);
+  }, {});
+  return result;
+};
+
 // Get autocomplete suggestions for "taxa that have reads" for a set of samples.
 const getTaxaWithReadsSuggestions = (query, sampleIds, taxLevel) =>
   postWithCSRF("/samples/taxa_with_reads_suggestions.json", {
@@ -457,4 +492,5 @@ export {
   uploadedByCurrentUser,
   updateUserSetting,
   getTaxaDetails,
+  getSamplesReadStats,
 };

@@ -4,7 +4,7 @@ import cx from "classnames";
 
 import d3 from "d3";
 import memoize from "memoize-one";
-import { getSamples, getSamplePipelineResults } from "~/api";
+import { getSamples, getSamplesReadStats } from "~/api";
 import { ceil, isInteger, last, max, sortBy } from "lodash/fp";
 import InfoBanner from "./InfoBanner";
 import Histogram from "~/components/visualizations/Histogram";
@@ -126,12 +126,11 @@ class QualityControl extends React.Component {
 
     let data = this.extractData(projectSamples.samples);
 
-    const pipelineResultFetchers = data.validSamples.map(sample =>
-      this.getPipelineResultForSample(sample)
+    const samplesReadsStats = await getSamplesReadStats(
+      data.validSamples.map(sample => sample.id)
     );
-    const pipelineResults = await Promise.all(pipelineResultFetchers);
     const { categories, legendColors, readsLostData } = this.stackReadsLostData(
-      pipelineResults
+      samplesReadsStats
     );
     const chartColors = legendColors.map(({ color, label }) => color);
 
@@ -149,9 +148,13 @@ class QualityControl extends React.Component {
     });
   };
 
-  stackReadsLostData(pipelineResults) {
-    const categories = pipelineResults.reduce((accum, current) => {
-      current.steps.forEach((step, index) => {
+  stackReadsLostData(samplesReadsStats) {
+    const sampleIds = Object.keys(samplesReadsStats);
+
+    // Collect all step names and humanize them
+    const categories = sampleIds.reduce((accum, sampleId) => {
+      samplesReadsStats[sampleId].steps.forEach((step, index) => {
+        step.name = HUMAN_READABLE_STEP_NAMES[step.name] || step.name;
         if (!accum.includes(step.name)) {
           accum.splice(index, 0, step.name);
         }
@@ -172,11 +175,11 @@ class QualityControl extends React.Component {
       };
     });
 
-    const readsLostData = pipelineResults.map(sample => {
+    const readsLostData = sampleIds.map(sampleId => {
       const dataRow = {};
-      let readsRemaining = sample.initialReads;
+      let readsRemaining = samplesReadsStats[sampleId].initialReads;
       let total = 0;
-      sample.steps.forEach(step => {
+      samplesReadsStats[sampleId].steps.forEach(step => {
         let readsAfter = step.readsAfter || readsRemaining;
         // The readsAfter column for CD Hit Dup returns the number of unique reads,
         // not the reads remaining. (FUN)
@@ -194,8 +197,8 @@ class QualityControl extends React.Component {
           dataRow[category] = 0;
         }
       });
-      dataRow.total = sample.initialReads;
-      dataRow.name = sample.name;
+      dataRow.total = samplesReadsStats[sampleId].initialReads;
+      dataRow.name = samplesReadsStats[sampleId].name;
       dataRow[READS_REMAINING] = readsRemaining;
 
       return dataRow;
@@ -203,43 +206,6 @@ class QualityControl extends React.Component {
 
     return { categories, legendColors, readsLostData };
   }
-
-  getPipelineResultForSample = async sample => {
-    const result = await getSamplePipelineResults(sample.id);
-    // the key we want depends on if the sample went through a WDL pipeline or DAG pipeline
-    const qualityControlSteps = Object.keys(result.displayedData).reduce(
-      (accum, current) => {
-        if (result.displayedData[current].name === HOST_FILTER_STAGE_NAME) {
-          accum = result.displayedData[current].steps;
-        }
-        return accum;
-      },
-      {}
-    );
-    // check that step data exists
-    if (!qualityControlSteps || Object.keys(qualityControlSteps).length === 0) {
-      return {
-        name: sample.name,
-        initialReads: 0,
-        steps: [],
-      };
-    }
-    const qualityControlStepNames = Object.keys(qualityControlSteps);
-    const initialReads =
-      sample.details.derived_sample_output.pipeline_run.total_reads;
-    const stepData = qualityControlStepNames.map(step => ({
-      name:
-        HUMAN_READABLE_STEP_NAMES[qualityControlSteps[step].name] ||
-        qualityControlSteps[step].name,
-      readsAfter: qualityControlSteps[step].readsAfter,
-    }));
-    const data = {
-      name: sample.name,
-      initialReads: initialReads,
-      steps: stepData,
-    };
-    return data;
-  };
 
   extractData(samples) {
     const validSamples = [];

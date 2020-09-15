@@ -8,12 +8,15 @@ class ReadsStatsService
     select_params = [:sample_id, :wdl_version, :pipeline_version, :pipeline_execution_strategy, :sfn_execution_arn]
     @viewable_pipeline_runs = get_succeeded_pipeline_runs_for_samples(samples, false, select_params)
     @viewable_pipeline_run_ids = @viewable_pipeline_runs.map(&:id)
+    @sample_names = {}
+    samples.each { |sample| @sample_names[sample.id] = sample.name }
   end
 
   def call
     reads_stats = get_job_stats(@viewable_pipeline_run_ids)
     step_orders = get_step_orders(@viewable_pipeline_runs)
     results = order_stats(@viewable_pipeline_runs, reads_stats, step_orders)
+    results.each { |sample_id, stats| stats[:name] = @sample_names[sample_id] }
     return results
   end
 

@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const INSTRUMENTATION_ENDPOINT = "/frontend_metrics";
+const MAX_SAMPLES_FOR_GET_REQUEST = 256;
 
 const postToFrontendMetrics = async (url, resp, duration) =>
   axios
@@ -90,4 +91,11 @@ const deleteWithCSRF = instrument(async url => {
   }
 });
 
-export { get, postWithCSRF, putWithCSRF, deleteAsync, deleteWithCSRF };
+export {
+  get,
+  postWithCSRF,
+  putWithCSRF,
+  deleteAsync,
+  deleteWithCSRF,
+  MAX_SAMPLES_FOR_GET_REQUEST,
+};
