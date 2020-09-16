@@ -18,7 +18,13 @@ class ColumnHeaderTooltip extends React.Component {
             {link && (
               <React.Fragment>
                 {" "}
-                <ExternalLink href={link}>Learn more.</ExternalLink>
+                <ExternalLink
+                  href={link}
+                  analyticsEventName={`Tooltip_${title}-learn-more-link_clicked`}
+                  analyticsEventData={{ link }}
+                >
+                  Learn more.
+                </ExternalLink>
               </React.Fragment>
             )}
           </div>

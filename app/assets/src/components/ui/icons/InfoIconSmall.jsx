@@ -11,6 +11,7 @@ const SmallInfoIcon = props => {
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
+      {...props}
     >
       <g id="Icons" stroke="none" strokeWidth="1" fillRule="evenodd">
         <g id="icon-/-small-/-icon-s-info">

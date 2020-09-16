@@ -5,6 +5,7 @@ import cx from "classnames";
 import d3 from "d3";
 import memoize from "memoize-one";
 import { getSamples, getSamplesReadStats } from "~/api";
+import { logAnalyticsEvent } from "~/api/analytics";
 import { ceil, isInteger, last, max, sortBy } from "lodash/fp";
 import InfoBanner from "./InfoBanner";
 import Histogram from "~/components/visualizations/Histogram";
@@ -383,6 +384,9 @@ class QualityControl extends React.Component {
     } else if (data === meanInsertSizeBins) {
       bin = samplesByInsertSize[binIndex];
     }
+    logAnalyticsEvent(`QualityControl_histogram-bar_clicked`, {
+      bin,
+    });
     handleBarClick(bin);
   };
 
@@ -427,6 +431,9 @@ class QualityControl extends React.Component {
       });
     }
 
+    logAnalyticsEvent(`QualityControl_histogram-bar_hovered`, {
+      bin,
+    });
     this.setState({
       histogramTooltipData,
     });
@@ -452,6 +459,7 @@ class QualityControl extends React.Component {
   handleChartElementHover = (clientX, clientY) => {
     const tooltipLocation =
       clientX && clientY ? { left: clientX, top: clientY } : null;
+    logAnalyticsEvent(`QualityControl_stacked-bar-chart-bar_hovered`);
     this.setState({ tooltipLocation });
   };
 
@@ -465,6 +473,7 @@ class QualityControl extends React.Component {
 
   handleHistogramEmptyClick = () => {
     const { handleBarClick } = this.props;
+    logAnalyticsEvent(`QualityControl_histogram-empty-space_clicked`);
     handleBarClick([]);
   };
 
@@ -562,6 +571,10 @@ class QualityControl extends React.Component {
       },
     ];
 
+    logAnalyticsEvent(`QualityControl_stacked-bar-chart-label_hovered`, {
+      sampleName,
+    });
+
     this.setState({
       histogramTooltipData,
     });
@@ -576,6 +589,10 @@ class QualityControl extends React.Component {
       this.closeSidebar();
       return;
     }
+
+    logAnalyticsEvent(`QualityControl_stacked-bar-chart-label_clicked`, {
+      sampleName,
+    });
 
     this.setState({
       sidebarVisible: true,
@@ -667,7 +684,14 @@ class QualityControl extends React.Component {
                 <ColumnHeaderTooltip
                   trigger={
                     <span>
-                      <InfoIconSmall className={cs.infoIcon} />
+                      <InfoIconSmall
+                        className={cs.infoIcon}
+                        onMouseOver={() => {
+                          logAnalyticsEvent(
+                            "QualityControl_total-reads-info-icon_hovered"
+                          );
+                        }}
+                      />
                     </span>
                   }
                   title="Total Reads"
@@ -691,7 +715,14 @@ class QualityControl extends React.Component {
                 <ColumnHeaderTooltip
                   trigger={
                     <span>
-                      <InfoIconSmall className={cs.infoIcon} />
+                      <InfoIconSmall
+                        className={cs.infoIcon}
+                        onMouseOver={() => {
+                          logAnalyticsEvent(
+                            "QualityControl_passed-qc-info-icon_hovered"
+                          );
+                        }}
+                      />
                     </span>
                   }
                   title="Quality Reads"
@@ -716,7 +747,14 @@ class QualityControl extends React.Component {
                 <ColumnHeaderTooltip
                   trigger={
                     <span>
-                      <InfoIconSmall className={cs.infoIcon} />
+                      <InfoIconSmall
+                        className={cs.infoIcon}
+                        onMouseOver={() => {
+                          logAnalyticsEvent(
+                            "QualityControl_dcr-info-icon_hovered"
+                          );
+                        }}
+                      />
                     </span>
                   }
                   title="DCR"
@@ -743,7 +781,14 @@ class QualityControl extends React.Component {
                 <ColumnHeaderTooltip
                   trigger={
                     <span>
-                      <InfoIconSmall className={cs.infoIcon} />
+                      <InfoIconSmall
+                        className={cs.infoIcon}
+                        onMouseOver={() => {
+                          logAnalyticsEvent(
+                            "QualityControl_mean-insert-size-info-icon_hovered"
+                          );
+                        }}
+                      />
                     </span>
                   }
                   title="Mean Insert Size"
@@ -805,7 +850,14 @@ class QualityControl extends React.Component {
               <ColumnHeaderTooltip
                 trigger={
                   <span>
-                    <InfoIconSmall className={cs.infoIcon} />
+                    <InfoIconSmall
+                      className={cs.infoIcon}
+                      onMouseOver={() => {
+                        logAnalyticsEvent(
+                          "QualityControl_stacked-bar-chart-info-icon_hovered"
+                        );
+                      }}
+                    />
                   </span>
                 }
                 title="Reads Lost"
