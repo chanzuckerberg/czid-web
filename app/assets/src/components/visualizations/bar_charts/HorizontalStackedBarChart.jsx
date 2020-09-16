@@ -432,7 +432,7 @@ export default class HorizontalStackedBarChart extends React.Component {
                 key={`${yAttribute}+${keyIndex}`}
                 className={cx(options.bars.stackPieceClassName, visibility)}
                 onMouseEnter={() =>
-                  events.onBarStackEnter(yAttribute, key, valueForStackPiece)
+                  events.onBarStackEnter(key, valueForStackPiece)
                 }
                 onMouseLeave={() => events.onChartElementExit()}
               />
@@ -510,7 +510,7 @@ export default class HorizontalStackedBarChart extends React.Component {
               onMouseEnter={() =>
                 this.setState(
                   { mouseOverBar: yAttribute },
-                  events.onBarEmptySpaceEnter(yAttribute, dataForStack)
+                  events.onBarEmptySpaceEnter(dataForStack)
                 )
               }
               onMouseLeave={() =>
