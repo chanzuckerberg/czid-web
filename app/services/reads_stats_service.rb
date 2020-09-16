@@ -68,7 +68,9 @@ class ReadsStatsService
       step_order = step_orders[wdl_version][pipeline_version]
       stats_hash[:steps] = step_order.map do |step|
         step_stats = stats_hash[:steps].find { |step_hash| step_hash[:name] == step }
-        { name: StringUtil.humanize_step_name(step), readsAfter: step_stats[:reads_after] }
+        # Frontend can handle a nil case if step is not found
+        reads_after = step_stats.nil? ? nil : step_stats[:reads_after]
+        { name: StringUtil.humanize_step_name(step), readsAfter: reads_after }
       end
       results[pr.sample_id] = stats_hash
     end
