@@ -30,6 +30,7 @@ import ToolbarIcon from "./ToolbarIcon";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
+import { WORKFLOWS } from "../../utils/workflows";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -417,7 +418,7 @@ class SamplesView extends React.Component {
   };
 
   renderDisplaySwitcher = () => {
-    const { currentDisplay, onDisplaySwitch, projectId } = this.props;
+    const { currentDisplay, onDisplaySwitch, projectId, workflow } = this.props;
     const { allowedFeatures = {} } = this.context || {};
 
     return (
@@ -427,7 +428,11 @@ class SamplesView extends React.Component {
           onDisplaySwitch(display);
           logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
         }}
-        includePLQC={!!projectId && allowedFeatures.includes("plqc")}
+        includePLQC={
+          !!projectId &&
+          workflow !== WORKFLOWS.CONSENSUS_GENOME.value &&
+          allowedFeatures.includes("plqc")
+        }
       />
     );
   };
@@ -622,6 +627,7 @@ SamplesView.propTypes = {
   selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
   snapshotShareId: PropTypes.string,
+  workflow: PropTypes.string,
 };
 
 SamplesView.contextType = UserContext;

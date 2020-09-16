@@ -37,6 +37,8 @@
       width: 50%;
       padding-right: $space-xl;
       padding-bottom: $space-xl;
+      display: flex;
+      flex-direction: column;
     }
 
     .fullPageChart {
@@ -54,6 +56,7 @@
       padding: $space-xl;
       border: $border-gray-light;
       border-radius: $border-radius-m;
+      height: 100%;
     }
 
     .title {
@@ -65,6 +68,20 @@
     .subtitle {
       @include font-header-s;
       margin-bottom: $space-xxl;
+
+      .message {
+        @include font-body-xxs;
+      }
+
+      .information {
+        @include font-body-xs;
+        margin-top: $space-xxl;
+        color: $gray-dark;
+      }
+
+      &.messageIncluded {
+        margin-bottom: $space-xl;
+      }
     }
 
     .legend {

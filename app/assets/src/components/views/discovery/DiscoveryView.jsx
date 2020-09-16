@@ -985,6 +985,7 @@ class DiscoveryView extends React.Component {
         ...conditions,
       });
       this.setState({
+        mapSidebarTab: "samples",
         mapSidebarSampleStats: sampleStats,
         mapSidebarSampleCount: plqcPreviewedSamples.length,
       });
@@ -992,6 +993,7 @@ class DiscoveryView extends React.Component {
       // if no sample ids, then display all samples
       this.mapPreviewSamples = this.samples;
       this.setState({
+        mapSidebarTab: "samples",
         mapSidebarSampleStats: {},
         mapSidebarSampleCount: null,
       });
@@ -1301,10 +1303,17 @@ class DiscoveryView extends React.Component {
 
   handleWorkflowTabChange = workflow => {
     const view = this.samplesByWorkflow[workflow];
+    // PLQC is currently only available for mNGS samples.
+    let { currentDisplay } = this.state;
+    currentDisplay =
+      currentDisplay === "plqc" && workflow === WORKFLOWS.CONSENSUS_GENOME.value
+        ? "table"
+        : currentDisplay;
     this.setState(
       {
         workflow,
         selectableSampleIds: view.getIds(),
+        currentDisplay,
       },
       () => this.samplesView && this.samplesView.reset()
     );
@@ -1390,7 +1399,7 @@ class DiscoveryView extends React.Component {
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) &&
-                currentDisplay === "table" &&
+                currentDisplay !== "map" &&
                 this.renderWorkflowTabs()}
               {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) &&
               userDataCounts &&
@@ -1433,6 +1442,7 @@ class DiscoveryView extends React.Component {
                       this.samplesByWorkflow[workflow].displayName ===
                         WORKFLOWS.CONSENSUS_GENOME.value)
                   }
+                  workflow={workflow}
                 />
               )}
             </div>

@@ -6,7 +6,16 @@ import d3 from "d3";
 import memoize from "memoize-one";
 import { getProject, getSamples, getSamplesReadStats } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { ceil, isEqual, isInteger, last, max, sortBy } from "lodash/fp";
+import {
+  ceil,
+  compact,
+  flatten,
+  isEqual,
+  isInteger,
+  last,
+  max,
+  sortBy,
+} from "lodash/fp";
 import InfoBanner from "./InfoBanner";
 import Histogram from "~/components/visualizations/Histogram";
 import InfoIconSmall from "~/components/ui/icons/InfoIconSmall";
@@ -28,9 +37,9 @@ import {
   READS_REMAINING_COLOR,
   READS_REMAINING,
   HUMAN_READABLE_STEP_NAMES,
-  HOST_FILTER_STAGE_NAME,
   MIN_NUM_BINS,
   MIN_BIN_WIDTH,
+  MISSING_INSERT_SIZE_WARNING,
 } from "./constants.js";
 import cs from "./quality_control.scss";
 
@@ -110,12 +119,14 @@ class QualityControl extends React.Component {
         labelX: "DCR",
         labelY: "Number of Samples",
       });
-      this.meanInsertSizeHistogram = this.renderHistogram({
-        container: this.meanInsertSizeHistogramContainer,
-        data: meanInsertSizeBins,
-        labelX: "Base pairs",
-        labelY: "Number of Samples",
-      });
+      if (meanInsertSizeBins) {
+        this.meanInsertSizeHistogram = this.renderHistogram({
+          container: this.meanInsertSizeHistogramContainer,
+          data: meanInsertSizeBins,
+          labelX: "Base pairs",
+          labelY: "Number of Samples",
+        });
+      }
     }
   }
 
@@ -231,7 +242,10 @@ class QualityControl extends React.Component {
         runInfo.result_status_description === "COMPLETE*"
       ) {
         failedSamples.push(sample);
-      } else if (runInfo.report_ready) {
+      } else if (
+        runInfo.report_ready &&
+        sample.details.derived_sample_output.summary_stats
+      ) {
         validSamples.push(sample);
         samplesDict[sample.id] = sample;
       } else {
@@ -277,9 +291,8 @@ class QualityControl extends React.Component {
     });
 
     const sortedInsertSize = this.sortSamplesByMetric(sample => {
-      return (
-        sample.details.derived_sample_output.summary_stats.insert_size_mean || 0
-      );
+      return sample.details.derived_sample_output.summary_stats
+        .insert_size_mean;
     });
     const [meanInsertSizeBins, samplesByInsertSize] = this.extractBins({
       data: sortedInsertSize,
@@ -311,14 +324,23 @@ class QualityControl extends React.Component {
     const sampleIds = Object.keys(samplesDict);
     return sortBy(
       valuePair => valuePair.value,
-      sampleIds.map(sampleId => ({
-        id: sampleId,
-        value: fetchMetric(samplesDict[sampleId]),
-      }))
+      compact(
+        sampleIds.map(sampleId => {
+          if (fetchMetric(samplesDict[sampleId])) {
+            return {
+              id: sampleId,
+              value: fetchMetric(samplesDict[sampleId]),
+            };
+          }
+        })
+      )
     );
   };
 
   extractBins = ({ data, numBins, minBinWidth }) => {
+    if (!data.length) {
+      return [null, null];
+    }
     // data is an array of {id, value} pairs, sorted by value
     const minVal = 0;
     const maxVal = ceil(
@@ -676,6 +698,14 @@ class QualityControl extends React.Component {
   }
 
   renderHistograms() {
+    const { validSamples, samplesByInsertSize } = this.state;
+    const numSamplesWithInsertSize = this.meanInsertSizeHistogram
+      ? flatten(samplesByInsertSize).length
+      : 0;
+    const showMeanInsertSizeWarning =
+      this.meanInsertSizeHistogram &&
+      numSamplesWithInsertSize < validSamples.length;
+
     return (
       <div>
         {this.renderSampleStatsInfo()}
@@ -782,7 +812,12 @@ class QualityControl extends React.Component {
               Do my samples have sufficient insert lengths?
             </div>
             <div className={cs.histogramContainer}>
-              <div className={cs.subtitle}>
+              <div
+                className={cx(
+                  cs.subtitle,
+                  showMeanInsertSizeWarning && cs.messageIncluded
+                )}
+              >
                 Mean Insert Size
                 <ColumnHeaderTooltip
                   trigger={
@@ -801,6 +836,33 @@ class QualityControl extends React.Component {
                   content={SAMPLE_TABLE_COLUMNS_V2.meanInsertSize.tooltip}
                   link={SAMPLE_TABLE_COLUMNS_V2.meanInsertSize.link}
                 />
+                {showMeanInsertSizeWarning && (
+                  <div className={cs.message}>
+                    Showing {numSamplesWithInsertSize} of {validSamples.length}{" "}
+                    samples.
+                    <ColumnHeaderTooltip
+                      trigger={
+                        <span>
+                          <InfoIconSmall
+                            className={cs.infoIcon}
+                            onMouseOver={() => {
+                              logAnalyticsEvent(
+                                "QualityControl_mean-insert-size-info-icon_hovered"
+                              );
+                            }}
+                          />
+                        </span>
+                      }
+                      content={MISSING_INSERT_SIZE_WARNING}
+                    />
+                  </div>
+                )}
+                {!this.meanInsertSizeHistogram && (
+                  <div className={cs.information}>
+                    Mean Insert Size is not available.{" "}
+                    {MISSING_INSERT_SIZE_WARNING}
+                  </div>
+                )}
               </div>
               <div
                 ref={histogramContainer => {
