@@ -169,7 +169,9 @@ class QualityControl extends React.Component {
       return accum;
     }, []);
 
-    categories.push(READS_REMAINING);
+    if (categories.length > 0) {
+      categories.push(READS_REMAINING);
+    }
 
     const legendColors = categories.map((category, index) => {
       const colorIndex = index % READS_LOST_STACK_COLORS.length;

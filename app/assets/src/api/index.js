@@ -366,6 +366,9 @@ const getSamplePipelineResults = (sampleId, pipelineVersion) =>
 
 // Limits requests to MAX_SAMPLES_FOR_GET_REQUEST samples at a time, per Puma limits.
 const getSamplesReadStats = async sampleIds => {
+  if (!Array.isArray(sampleIds) || sampleIds.length < 1) {
+    return {};
+  }
   const binLength = MAX_SAMPLES_FOR_GET_REQUEST;
   const fetchBins = [[]];
   let binIndex = 0;

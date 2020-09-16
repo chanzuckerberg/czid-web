@@ -8,7 +8,12 @@ class SampleAccessValidationService
   SAMPLE_ACCESS_ERROR = "Error validating samples. Please contact us for help.".freeze
 
   def initialize(query_ids, current_user)
-    @query_ids = query_ids.map(&:to_i)
+    if query_ids.nil?
+      Rails.logger.warn("SampleAccessValidationService called with query_ids = nil")
+      @query_ids = []
+    else
+      @query_ids = query_ids.map(&:to_i)
+    end
     @user = current_user
   end
 

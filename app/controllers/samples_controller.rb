@@ -1163,7 +1163,7 @@ class SamplesController < ApplicationController
 
   # GET samples/reads_stats.json
   def reads_stats
-    queried_sample_ids = params[:sampleIds]
+    queried_sample_ids = (params[:sampleIds] || []).map(&:to_i)
 
     # No information is returned on samples they don't have access to.
     validated_sample_info = SampleAccessValidationService.call(queried_sample_ids, current_user)
