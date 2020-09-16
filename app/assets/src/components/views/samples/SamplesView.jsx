@@ -468,6 +468,7 @@ class SamplesView extends React.Component {
     const {
       projectId,
       onPLQCHistogramBarClick,
+      filters,
       filtersSidebarOpen,
       sampleStatsSidebarOpen,
     } = this.props;
@@ -476,6 +477,7 @@ class SamplesView extends React.Component {
         <QualityControl
           projectId={projectId}
           handleBarClick={onPLQCHistogramBarClick}
+          filters={filters}
           filtersSidebarOpen={filtersSidebarOpen}
           sampleStatsSidebarOpen={sampleStatsSidebarOpen}
         />

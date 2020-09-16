@@ -1403,6 +1403,7 @@ class DiscoveryView extends React.Component {
                   allowedFeatures={allowedFeatures}
                   currentDisplay={currentDisplay}
                   currentTab={currentTab}
+                  filters={this.preparedFilters()}
                   mapLevel={mapLevel}
                   mapLocationData={mapLocationData}
                   mapPreviewedLocationId={mapPreviewedLocationId}

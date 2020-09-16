@@ -4,9 +4,9 @@ import cx from "classnames";
 
 import d3 from "d3";
 import memoize from "memoize-one";
-import { getSamples, getSamplesReadStats } from "~/api";
+import { getProject, getSamples, getSamplesReadStats } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { ceil, isInteger, last, max, sortBy } from "lodash/fp";
+import { ceil, isEqual, isInteger, last, max, sortBy } from "lodash/fp";
 import InfoBanner from "./InfoBanner";
 import Histogram from "~/components/visualizations/Histogram";
 import InfoIconSmall from "~/components/ui/icons/InfoIconSmall";
@@ -58,9 +58,10 @@ class QualityControl extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const { loading, validSamples } = this.state;
 
-    const { filtersSidebarOpen, sampleStatsSidebarOpen } = this.props;
-
-    if (
+    const { filtersSidebarOpen, sampleStatsSidebarOpen, filters } = this.props;
+    if (!isEqual(filters, prevProps.filters)) {
+      this.fetchProjectData();
+    } else if (
       // Do not render histograms if loading or there are no samples to display
       (!loading &&
         validSamples.length > 0 &&
@@ -119,10 +120,14 @@ class QualityControl extends React.Component {
   }
 
   fetchProjectData = async () => {
-    const { projectId } = this.props;
+    this.setState({ loading: true });
+    const { projectId, filters } = this.props;
+    const project = await getProject({ projectId });
 
     const projectSamples = await getSamples({
       projectId: projectId,
+      filters: filters,
+      limit: project.total_sample_count,
     });
 
     let data = this.extractData(projectSamples.samples);
@@ -146,6 +151,7 @@ class QualityControl extends React.Component {
       readsLostLegendColors: legendColors,
       readsLostCategories: categories,
       readsLostChartColors: chartColors,
+      totalSampleCount: project.total_sample_count,
     });
   };
 
@@ -477,7 +483,7 @@ class QualityControl extends React.Component {
     handleBarClick([]);
   };
 
-  handleSingleBarStackEnter = (sampleName, stepName, readsLost) => {
+  handleSingleBarStackEnter = (stepName, readsLost) => {
     const { readsLostLegendColors } = this.state;
 
     const stepLegend = readsLostLegendColors.find(
@@ -505,7 +511,7 @@ class QualityControl extends React.Component {
     });
   };
 
-  handleEmptyBarSpaceEnter = (sampleName, readsLostData) => {
+  handleEmptyBarSpaceEnter = readsLostData => {
     const { readsLostLegendColors, readsLostCategories } = this.state;
 
     const readsRemainingLegend = readsLostLegendColors.find(
@@ -668,8 +674,6 @@ class QualityControl extends React.Component {
   }
 
   renderHistograms() {
-    const { histogramTooltipData, tooltipLocation } = this.state;
-
     return (
       <div>
         {this.renderSampleStatsInfo()}
@@ -890,6 +894,7 @@ class QualityControl extends React.Component {
       runningSamples,
       failedSamples,
       showProcessingSamplesMessage,
+      totalSampleCount,
     } = this.state;
 
     const content = (
@@ -933,7 +938,7 @@ class QualityControl extends React.Component {
           </Notification>
         )}
         <span className={cs.statsRow}>
-          Showing {validSamples.length} of {samples.length} samples.
+          Showing {validSamples.length} of {totalSampleCount} samples.
           <ColumnHeaderTooltip
             trigger={
               <span>
@@ -1005,7 +1010,6 @@ class QualityControl extends React.Component {
 
   render() {
     const { loading } = this.state;
-    // TODO(julie): fix resizing content when sidebars open/close
     return loading ? this.renderLoading() : this.renderVisualization();
   }
 }
