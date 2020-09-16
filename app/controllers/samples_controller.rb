@@ -422,6 +422,7 @@ class SamplesController < ApplicationController
     respond_to do |format|
       format.json do
         render json: {
+          countByWorkflow: samples.group(:temp_pipeline_workflow).count,
           count: sample_ids.count,
           projectCount: project_ids.count,
           avgTotalReads: avg_total_reads.present? ? avg_total_reads : 0,

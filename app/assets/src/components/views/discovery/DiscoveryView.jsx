@@ -18,7 +18,6 @@ import {
   partition,
   pick,
   replace,
-  size,
   sumBy,
   union,
   values,
@@ -552,11 +551,15 @@ class DiscoveryView extends React.Component {
   };
 
   loadUserDataStats = async () => {
+    const { projectId } = this.state;
+
     const stats = await getDiscoveryStats({
       domain: DISCOVERY_DOMAIN_MY_DATA,
+      projectId,
     });
     this.setState({
       userDataCounts: {
+        sampleCountByWorkflow: stats.sampleStats.countByWorkflow,
         sampleCount: stats.sampleStats.count,
         projectCount: stats.sampleStats.projectCount,
       },
@@ -1163,7 +1166,12 @@ class DiscoveryView extends React.Component {
   };
 
   renderNoDataBanners = () => {
-    const { currentTab, emptyStateModalOpen, userDataCounts } = this.state;
+    const {
+      currentTab,
+      emptyStateModalOpen,
+      userDataCounts,
+      projectId,
+    } = this.state;
     const { visualizations } = this;
 
     if (!userDataCounts) return null;
@@ -1206,7 +1214,11 @@ class DiscoveryView extends React.Component {
                   href: "/samples/upload",
                   text: "Upload your data",
                 }}
-                message="You will see your samples here after you upload data or when you are invited to a project."
+                message={`You will see your samples here after you upload data ${
+                  projectId
+                    ? "to your project"
+                    : "or when you are invited to a project"
+                }.`}
                 title="Samples"
                 type="no_samples"
               />
@@ -1239,6 +1251,26 @@ class DiscoveryView extends React.Component {
         break;
     }
     return null;
+  };
+
+  renderNoDataWorkflowBanner = workflow => {
+    const workflowLabel =
+      workflow === WORKFLOWS.SHORT_READ_MNGS.value
+        ? WORKFLOWS.SHORT_READ_MNGS.label
+        : WORKFLOWS.CONSENSUS_GENOME.label;
+    return (
+      <InfoBanner
+        className={cs.noResultsContainer}
+        icon={<BannerSamples />}
+        link={{
+          href: "/samples/upload",
+          text: `Run ${workflowLabel}s`,
+        }}
+        message={`No samples were processed by the ${workflowLabel} Pipeline.`}
+        title={`0 ${workflowLabel} Samples`}
+        type={workflow}
+      />
+    );
   };
 
   renderNoSearchResultsBanner = type => {
@@ -1281,10 +1313,10 @@ class DiscoveryView extends React.Component {
   computeWorkflowTabs = () => {
     return WORKFLOW_ORDER.map(name => ({
       label: (
-        <div>
+        <React.Fragment>
           <span className={cs.tabLabel}>{`${WORKFLOWS[name].label}s`}</span>
           <span className={cs.tabCounter}>
-            {this.samplesByWorkflow[WORKFLOWS[name].value].length || "-"}
+            {this.samplesByWorkflow[WORKFLOWS[name].value].length || "0"}
           </span>
           {WORKFLOWS[name].beta ? (
             <StatusLabel
@@ -1294,7 +1326,7 @@ class DiscoveryView extends React.Component {
               type="beta"
             />
           ) : null}
-        </div>
+        </React.Fragment>
       ),
       value: WORKFLOWS[name].value,
     }));
@@ -1313,6 +1345,7 @@ class DiscoveryView extends React.Component {
       selectedSampleIds,
       showFilters,
       showStats,
+      userDataCounts,
       workflow,
     } = this.state;
 
@@ -1320,6 +1353,8 @@ class DiscoveryView extends React.Component {
     const { projects, visualizations } = this;
 
     const samples = this.samplesByWorkflow[workflow];
+    const tableHasLoaded = !samples.isLoading() && currentDisplay === "table";
+
     return (
       <React.Fragment>
         {currentTab === "projects" && (
@@ -1356,49 +1391,54 @@ class DiscoveryView extends React.Component {
             <div className={cs.dataContainer}>
               {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) &&
                 currentDisplay === "table" &&
-                size(this.samplesByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value]) >
-                  0 &&
                 this.renderWorkflowTabs()}
-              <SamplesView
-                activeColumns={sampleActiveColumns}
-                admin={admin}
-                allowedFeatures={allowedFeatures}
-                currentDisplay={currentDisplay}
-                currentTab={currentTab}
-                mapLevel={mapLevel}
-                mapLocationData={mapLocationData}
-                mapPreviewedLocationId={mapPreviewedLocationId}
-                mapTilerKey={mapTilerKey}
-                onActiveColumnsChange={this.handleSampleActiveColumnsChange}
-                onClearFilters={this.handleClearFilters}
-                onDisplaySwitch={this.handleDisplaySwitch}
-                onLoadRows={samples.handleLoadObjectRows}
-                onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}
-                onMapClick={this.clearMapPreview}
-                onMapLevelChange={this.handleMapLevelChange}
-                onMapMarkerClick={this.handleMapMarkerClick}
-                onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
-                onSampleSelected={this.handleSampleSelected}
-                onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
-                projectId={projectId}
-                snapshotShareId={snapshotShareId}
-                ref={samplesView => (this.samplesView = samplesView)}
-                samples={samples}
-                selectableIds={selectableSampleIds}
-                selectedSampleIds={selectedSampleIds}
-                filtersSidebarOpen={showFilters}
-                sampleStatsSidebarOpen={showStats}
-                hideTriggers={
-                  !!snapshotShareId ||
-                  (workflow &&
-                    this.samplesByWorkflow[workflow].displayName ===
-                      WORKFLOWS.CONSENSUS_GENOME.value)
-                }
-              />
+              {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) &&
+              userDataCounts &&
+              !userDataCounts.sampleCountByWorkflow[workflow] ? (
+                this.renderNoDataWorkflowBanner(workflow)
+              ) : (
+                <SamplesView
+                  activeColumns={sampleActiveColumns}
+                  admin={admin}
+                  allowedFeatures={allowedFeatures}
+                  currentDisplay={currentDisplay}
+                  currentTab={currentTab}
+                  mapLevel={mapLevel}
+                  mapLocationData={mapLocationData}
+                  mapPreviewedLocationId={mapPreviewedLocationId}
+                  mapTilerKey={mapTilerKey}
+                  onActiveColumnsChange={this.handleSampleActiveColumnsChange}
+                  onClearFilters={this.handleClearFilters}
+                  onDisplaySwitch={this.handleDisplaySwitch}
+                  onLoadRows={samples.handleLoadObjectRows}
+                  onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}
+                  onMapClick={this.clearMapPreview}
+                  onMapLevelChange={this.handleMapLevelChange}
+                  onMapMarkerClick={this.handleMapMarkerClick}
+                  onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
+                  onSampleSelected={this.handleSampleSelected}
+                  onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
+                  projectId={projectId}
+                  snapshotShareId={snapshotShareId}
+                  ref={samplesView => (this.samplesView = samplesView)}
+                  samples={samples}
+                  selectableIds={selectableSampleIds}
+                  selectedSampleIds={selectedSampleIds}
+                  filtersSidebarOpen={showFilters}
+                  sampleStatsSidebarOpen={showStats}
+                  hideTriggers={
+                    !!snapshotShareId ||
+                    (workflow &&
+                      this.samplesByWorkflow[workflow].displayName ===
+                        WORKFLOWS.CONSENSUS_GENOME.value)
+                  }
+                />
+              )}
             </div>
-            {!samples.length &&
-              !samples.isLoading() &&
-              currentDisplay === "table" &&
+            {userDataCounts &&
+              userDataCounts.sampleCountByWorkflow[workflow] &&
+              !samples.length &&
+              tableHasLoaded &&
               this.renderNoSearchResultsBanner("samples")}
           </div>
         )}
