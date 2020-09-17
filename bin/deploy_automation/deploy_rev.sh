@@ -47,7 +47,8 @@ __check_commit_state() {
                        Accept:application/vnd.github.antiope-preview+json)
 
   # Dependabot checks take a long time to complete; skip them when checking commit status
-  if jq -re '.check_suites[] | select(.app.slug != "dependabot") | select(.conclusion != "success")' <<< "$response_json"; then
+  # We no longer use Travis CI
+  if jq -re '.check_suites[] | select(.app.slug != "dependabot" and .app.slug != "travis-ci") | select(.conclusion != "success")' <<< "$response_json"; then
     _trace "Status checks failed for commit ${sha} in branch ${branch}. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
     return 1
   fi
