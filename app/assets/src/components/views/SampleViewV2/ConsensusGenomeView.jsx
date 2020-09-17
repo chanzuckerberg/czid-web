@@ -100,9 +100,7 @@ class ConsensusGenomeView extends React.Component {
             <ExternalLink
               className={cs.learnMoreLink}
               href={CONSENSUS_GENOME_DOC_LINK}
-              onClick={() =>
-                logAnalyticsEvent("ConsensusGenomeView_learn-more-link_clicked")
-              }
+              analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
             >
               Learn more about consensus genomes <IconArrowRight />
             </ExternalLink>
@@ -236,13 +234,12 @@ class ConsensusGenomeView extends React.Component {
           <div className={cs.ncbiLinkWrapper}>
             <ExternalLink
               href={`https://www.ncbi.nlm.nih.gov/nuccore/${data.taxon_info.accession_id}?report=genbank`}
-              onClick={() =>
-                logAnalyticsEvent("ConsensusGenomeView_ncbi-link_clicked", {
-                  accessionId: data.taxon_info.accession_id,
-                  taxonId: data.taxon_info.taxonId,
-                  sampleId: sample.id,
-                })
-              }
+              analyticsEventName={"ConsensusGenomeView_ncbi-link_clicked"}
+              analyticsEventData={{
+                accessionId: data.taxon_info.accession_id,
+                taxonId: data.taxon_info.taxonId,
+                sampleId: sample.id,
+              }}
             >
               {data.taxon_info.accession_id}
             </ExternalLink>
@@ -268,9 +265,7 @@ class ConsensusGenomeView extends React.Component {
         genome.{" "}
         <ExternalLink
           href={CONSENSUS_GENOME_DOC_LINK}
-          onClick={() =>
-            logAnalyticsEvent("ConsensusGenomeView_help-link_clicked")
-          }
+          analyticsEventName={"ConsensusGenomeView_help-link_clicked"}
         >
           Learn more.
         </ExternalLink>
@@ -283,7 +278,13 @@ class ConsensusGenomeView extends React.Component {
       <div className={cs.section}>
         <div className={cs.title}>
           How good is the coverage?
-          <HelpIcon text={helpText} className={cs.helpIcon} />
+          <HelpIcon
+            text={helpText}
+            className={cs.helpIcon}
+            analyticsEventName={
+              "ConsensusGenomeView_coverage-viz-help-icon_hovered"
+            }
+          />
         </div>
         <div className={cx(cs.coverageContainer, cs.raisedContainer)}>
           <div className={cs.metrics}>
@@ -309,6 +310,11 @@ class ConsensusGenomeView extends React.Component {
             ref={coverageVizContainer => {
               this.coverageVizContainer = coverageVizContainer;
             }}
+            onMouseEnter={() =>
+              logAnalyticsEvent(
+                "ConsensusGenomeView_coverage-viz-histogram_hovered"
+              )
+            }
           />
         </div>
       </div>
@@ -327,10 +333,8 @@ class ConsensusGenomeView extends React.Component {
         These metrics help determine the quality of the reference genome.{" "}
         <ExternalLink
           href={CONSENSUS_GENOME_DOC_LINK}
-          onClick={() =>
-            logAnalyticsEvent(
-              "ConsensusGenomeView_quality-metrics-help-link_clicked"
-            )
+          analyticsEventName={
+            "ConsensusGenomeView_quality-metrics-help-link_clicked"
           }
         >
           Learn more.
@@ -341,7 +345,13 @@ class ConsensusGenomeView extends React.Component {
       <div className={cs.section}>
         <div className={cs.title}>
           Is my consensus genome complete?
-          <HelpIcon text={helpText} className={cs.helpIcon} />
+          <HelpIcon
+            text={helpText}
+            className={cs.helpIcon}
+            analyticsEventName={
+              "ConsensusGenomeView_quality-metrics-help-icon_hovered"
+            }
+          />
         </div>
         <div className={cx(cs.metricsTable, cs.raisedContainer)}>
           <Table

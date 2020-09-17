@@ -192,9 +192,7 @@ const AnnouncementBanner = ({ onClose }) => {
             <ExternalLink
               className={cs.link}
               href="https://help.idseq.net"
-              onClick={() =>
-                logAnalyticsEvent("AnnouncementBanner_link_clicked")
-              }
+              analyticsEventName={"AnnouncementBanner_link_clicked"}
             >
               Help Center
             </ExternalLink>
@@ -319,9 +317,7 @@ const UserMenuDropDown = ({
           <ExternalLink
             className={cs.option}
             href="https://help.idseq.net"
-            onClick={() =>
-              logAnalyticsEvent("Header_dropdown-help-option_clicked")
-            }
+            analyticsEventName={"Header_dropdown-help-option_clicked"}
           >
             Help Center
           </ExternalLink>

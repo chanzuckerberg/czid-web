@@ -340,11 +340,14 @@ class UploadSampleStep extends React.Component {
         selectedWorkflows: new Set([workflow]),
         selectedWetlabProtocol: null,
       });
+      logAnalyticsEvent(`UploadSampleStep_${workflow}-workflow_selected`);
     }
   };
 
-  handleWetlabProtocolChange = selected =>
+  handleWetlabProtocolChange = selected => {
     this.setState({ selectedWetlabProtocol: selected });
+    logAnalyticsEvent(`UploadSampleStep_${selected}-protocol_selected`);
+  };
 
   // *** Sample-related functions ***
 

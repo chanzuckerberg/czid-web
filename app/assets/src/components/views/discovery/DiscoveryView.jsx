@@ -1317,6 +1317,7 @@ class DiscoveryView extends React.Component {
       },
       () => this.samplesView && this.samplesView.reset()
     );
+    logAnalyticsEvent(`DiscoveryView_${workflow}-tab_clicked`);
   };
 
   computeWorkflowTabs = () => {

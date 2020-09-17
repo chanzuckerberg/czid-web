@@ -147,9 +147,7 @@ class Landing extends React.Component {
                 <ExternalLink
                   className={cs.link}
                   href="https://public.idseq.net/covid-19?utm_source=idseq&utm_medium=banner&utm_campaign=covid-19"
-                  onClick={() =>
-                    logAnalyticsEvent("Landing_public-site-link_clicked")
-                  }
+                  analyticsEventName={"Landing_public-site-link_clicked"}
                 >
                   Learn how researchers in Cambodia used IDseq to sequence
                   SARS-CoV-2
