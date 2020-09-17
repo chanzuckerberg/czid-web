@@ -1,5 +1,6 @@
 class WorkflowRunsController < ApplicationController
-  before_action :set_workflow_run, only: [:show, :results]
+  before_action :set_workflow_run, only: [:show, :results, :rerun]
+  before_action :admin_required, only: [:rerun]
 
   def show
     render(
@@ -18,6 +19,17 @@ class WorkflowRunsController < ApplicationController
       json: { status: "Workflow Run action not supported" },
       status: :not_found
     )
+  end
+
+  def rerun
+    @workflow_run.rerun
+    render json: { status: "success" }, status: :ok
+  rescue => e
+    LogUtil.log_error("Rerun trigger failed", exception: e, workflow_id: @workflow_run.id)
+    render json: {
+      status: "error",
+      message: e.message,
+    }, status: :ok
   end
 
   private

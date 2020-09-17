@@ -15,9 +15,7 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     LogUtil.log_error(
       "Error loading coverage viz",
       exception: exception,
-      details: {
-        workflow_run_id: id,
-      }
+      workflow_run_id: id
     )
     return nil
   end
@@ -28,9 +26,7 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     LogUtil.log_error(
       "Error loading quality metrics",
       exception: exception,
-      details: {
-        workflow_run_id: id,
-      }
+      workflow_run_id: id
     )
     return nil
   end

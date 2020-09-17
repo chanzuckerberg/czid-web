@@ -144,15 +144,80 @@ describe WorkflowRun, type: :model do
   end
 
   describe "#output" do
+    let(:fake_output_wdl_key) { "fake_output_wdl_key" }
+    let(:fake_output_s3_key) { "fake_output_key" }
+    let(:fake_output_s3_path) { "s3://fake_bucket/#{fake_output_s3_key}" }
+    let(:workflow_run) { build_stubbed(:workflow_run) }
+
+    subject { workflow_run.output(fake_output_wdl_key) }
+
     context "when output exists" do
       it "returns output content" do
+        allow_any_instance_of(SfnExecution).to receive(:output_path) { fake_output_s3_path }
+        fake_body = "fake body"
+        fake_bucket = { fake_output_s3_key => { body: "fake body" } }
+        @mock_aws_clients[:s3].stub_responses(:get_object, lambda { |context|
+          fake_bucket[context.params[:key]] || 'NoSuchKey'
+        })
+
+        expect(subject).to eq(fake_body)
       end
     end
 
-    context "when output does not exist" do
-      context "in s3" do
-        it "returns nil" do
-        end
+    context "when output does not exist in wdl" do
+      it "returns nil" do
+        allow_any_instance_of(SfnExecution).to receive(:output_path).and_raise(SfnExecution::OutputNotFoundError.new(fake_output_wdl_key, ['key_1', 'key_2']))
+
+        expect { subject }.to raise_error(SfnExecution::OutputNotFoundError)
+      end
+    end
+
+    context "when output does not exist in s3" do
+      it "returns nil" do
+        allow_any_instance_of(SfnExecution).to receive(:output_path) { fake_output_s3_path }
+        @mock_aws_clients[:s3].stub_responses(:get_object, 'NoSuchKey')
+
+        expect(subject).to be_nil
+      end
+    end
+  end
+
+  describe "#rerun" do
+    let(:project) { create(:project) }
+    let(:sample) { create(:sample, project: project) }
+    let(:workflow_run) { create(:workflow_run, sample: sample) }
+
+    subject { workflow_run.rerun }
+
+    context "workflow is deprecated" do
+      let(:workflow_run) { create(:workflow_run, sample: sample, deprecated: true) }
+
+      it "raises an error" do
+        expect { subject }.to raise_error(WorkflowRun::RerunDeprecatedWorkflowError)
+      end
+    end
+
+    context "workflow is active" do
+      before do
+        allow(SfnCGPipelineDispatchService).to receive(:call) {
+                                                 {
+                                                   sfn_input_json: {},
+                                                   sfn_execution_arn: "fake_sfn_execution_arn",
+                                                 } }
+      end
+
+      it "updates current workflow run to deprecated" do
+        subject
+        expect(workflow_run.deprecated?).to be(true)
+      end
+
+      it "creates and returns new workflow run with same workflow type" do
+        expect(subject.workflow).to eq(workflow_run.workflow)
+        expect(sample.workflow_runs.count).to eq(2)
+      end
+
+      it "creates and returns new workflow run that references previous workflow" do
+        expect(subject.rerun_from).to eq(workflow_run.id)
       end
     end
   end

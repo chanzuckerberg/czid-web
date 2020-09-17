@@ -16,9 +16,7 @@ RSpec.describe ConsensusGenomeWorkflowRun, type: :model do
         expect(LogUtil).to receive(:log_error).with(
           "Error loading coverage viz",
           exception: ConsensusGenomeCoverageService::NoDepthDataError,
-          details: {
-            workflow_run_id: consensus_genome_workflow_run.id,
-          }
+          workflow_run_id: consensus_genome_workflow_run.id
         )
         expect(subject.send(:coverage_viz)).to eq(nil)
       end
@@ -70,9 +68,7 @@ RSpec.describe ConsensusGenomeWorkflowRun, type: :model do
         expect(LogUtil).to receive(:log_error).with(
           "Error loading quality metrics",
           exception: RuntimeError,
-          details: {
-            workflow_run_id: consensus_genome_workflow_run.id,
-          }
+          workflow_run_id: consensus_genome_workflow_run.id
         )
         expect(subject.send(:quality_metrics)).to eq(nil)
       end

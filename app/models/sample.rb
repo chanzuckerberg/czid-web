@@ -581,10 +581,14 @@ class Sample < ApplicationRecord
     elsif [WorkflowRun::WORKFLOW[:main], WorkflowRun::WORKFLOW[:short_read_mngs]].include?(temp_pipeline_workflow)
       kickoff_pipeline
     else
-      # TODO: Move creation to a WorkflowRun factory
-      workflow_run = WorkflowRun.create(sample: self, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
-      workflow_run.dispatch
+      create_and_dispatch_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
     end
+  end
+
+  def create_and_dispatch_workflow_run(workflow, rerun_from: nil)
+    workflow_run = WorkflowRun.create(sample: self, workflow: workflow, rerun_from: rerun_from)
+    workflow_run.dispatch
+    workflow_run
   end
 
   # Delay determined based on query of historical upload times, where 80%

@@ -1,4 +1,14 @@
 class WorkflowRun < ApplicationRecord
+  # WorklfowRun model manages the run of a generic workflow type through our pipeline
+  # and access to the results
+  # WorkflowRun includes a *deprecated* attribute. Notes on deprecation:
+  # * Deprecated runs are runs that were rerun, and superseded by other runs.
+  # * Deprecated runs make it easier to select active runs (`where(deprecated: false)`),
+  #   as opposed to having to sort by execution.
+  # * The benefits are even more obvious if we start supporting multiple workflow runs per sample.
+  #   In that case, the date of execution would not be enough to identify valid runs.
+  # * For views that require all the versions, the deprecated field can be ignored.
+  #   The wdl_version and executed_at fields might be used to select the relevant runs in that case.
   include PipelineOutputsHelper
 
   belongs_to :sample
@@ -32,6 +42,12 @@ class WorkflowRun < ApplicationRecord
   validates :status, inclusion: { in: STATUS.values }
 
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
+
+  class RerunDeprecatedWorkflowError < StandardError
+    def initialize
+      super("Cannot rerun deprecated workflow runs.")
+    end
+  end
 
   def dispatch
     if workflow == WORKFLOW[:consensus_genome]
@@ -84,6 +100,12 @@ class WorkflowRun < ApplicationRecord
   def output(output_key)
     path = sfn_execution.output_path(output_key)
     return S3Util.get_s3_file(path)
+  end
+
+  def rerun
+    raise RerunDeprecatedWorkflowError if deprecated?
+    update!(deprecated: true)
+    sample.create_and_dispatch_workflow_run(workflow, rerun_from: id)
   end
 
   def self.in_progress(workflow_name = nil)

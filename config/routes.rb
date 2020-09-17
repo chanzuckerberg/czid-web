@@ -194,6 +194,7 @@ Rails.application.routes.draw do
 
   resources :workflow_runs, only: [:show] do
     get :results, on: :member
+    put :rerun, on: :member
   end
 
   authenticate :auth0_user, ->(u) { u.admin? } do

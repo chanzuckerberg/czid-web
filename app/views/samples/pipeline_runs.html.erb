@@ -105,17 +105,42 @@
   </table>
 <% end %>
 
-<% @sample.workflow_runs.each do |workflow_run| %>
-  <br>
-  <p><strong>WorkflowRun (ID: <%= workflow_run.id %>)</strong></p>
-  <p><strong>Workflow:</strong> <%= workflow_run.workflow %></p>
-  <p><strong>Status:</strong> <%= workflow_run.status %></p>
-  <% if workflow_run.sfn_execution_arn %>
-    <p><u><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(workflow_run.sfn_execution_arn), target: :_blank  %></u></p>
-  <% else %>
-    <p>Missing SFN Execution ARN</p>
-  <% end %>
-  <br>
+<% if @sample.workflow_runs.size > 0 %>
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>WorkflowRun ID</th>
+        <th>Workflow</th>
+        <th>Status</th>
+        <th>SFN Execution</th>
+        <th>Job Started</th>
+        <th>Rerun?</th>
+        <th>Deprecated?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @sample.workflow_runs.each do |workflow_run| %>
+        <tr>
+          <td><%= workflow_run.id %></td>
+          <td><%= workflow_run.workflow %></td>
+          <td><%= workflow_run.status %></td>
+          <% if workflow_run.sfn_execution_arn %>
+            <td><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(workflow_run.sfn_execution_arn), target: :_blank  %></td>
+          <% else %>
+            <td>Missing SFN Execution ARN</td>
+          <% end %>
+          <td><%= workflow_run.executed_at %></td>
+          <td><%= workflow_run.deprecated ? "DEPRECATED" : "ACTIVE" %></td>
+          <td><%= workflow_run.rerun_from || "NO" %></td>
+          <td>
+            <% if !workflow_run.deprecated %>
+              <%= button_to 'rerun', rerun_workflow_run_path(workflow_run), method: :put, form: {target: '_blank'} %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 <% end %>
 
 <p>
