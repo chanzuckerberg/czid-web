@@ -933,18 +933,36 @@ class QualityControl extends React.Component {
                 link={SAMPLE_TABLE_COLUMNS_V2.readsLost.link}
               />
             </div>
-            <CategoricalLegend
-              className={cs.legend}
-              data={readsLostLegendColors}
-            />
-            <HorizontalStackedBarChart
-              data={readsLostData}
-              keys={readsLostCategories}
-              options={options}
-              events={events}
-              yAxisKey={"name"}
-              className={cs.stackedBarChart}
-            />
+            {readsLostCategories.length > 0 ? (
+              <React.Fragment>
+                <CategoricalLegend
+                  className={cs.legend}
+                  data={readsLostLegendColors}
+                />
+                <HorizontalStackedBarChart
+                  data={readsLostData}
+                  keys={readsLostCategories}
+                  options={options}
+                  events={events}
+                  yAxisKey={"name"}
+                  className={cs.stackedBarChart}
+                />
+              </React.Fragment>
+            ) : (
+              <div className={cs.noDataBannerFlexContainer}>
+                <InfoBanner
+                  className={cs.noDataBannerContainer}
+                  icon={<ImgVizSecondary />}
+                  link={{
+                    href: "https://help.idseq.net",
+                    text: "Learn about sample QC",
+                  }}
+                  message="No reads lost data could be found for your samples."
+                  title="Reads Lost Visualization"
+                  type="no_reads_lost_step_data"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
