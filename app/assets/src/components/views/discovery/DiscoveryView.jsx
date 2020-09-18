@@ -552,13 +552,14 @@ class DiscoveryView extends React.Component {
   };
 
   loadUserDataStats = async () => {
+    const { domain } = this.props;
     const { projectId } = this.state;
 
     this.setState({
       userDataCounts: null,
     });
     const stats = await getDiscoveryStats({
-      domain: DISCOVERY_DOMAIN_MY_DATA,
+      domain: domain,
       projectId,
     });
     this.setState({
