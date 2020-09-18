@@ -158,8 +158,6 @@ class DiscoveryView extends React.Component {
       this.state.currentDisplay = "table";
     }
 
-    domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.loadUserDataStats();
-
     this.dataLayer = new DiscoveryDataLayer(domain);
     const conditions = this.getConditions();
     this.samples = this.dataLayer.samples.createView({
@@ -374,6 +372,8 @@ class DiscoveryView extends React.Component {
   initialLoad = () => {
     const { project } = this.state;
     const { domain } = this.props;
+
+    domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.loadUserDataStats();
     // * Initial load:
     //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
     this.refreshDimensions();
