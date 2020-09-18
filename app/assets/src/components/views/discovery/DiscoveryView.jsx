@@ -407,6 +407,7 @@ class DiscoveryView extends React.Component {
         // * On project selected
         //   - load (A) non-filtered dimensions, (B) filtered dimensions and (C) filtered stats
         //     (synchronous data not needed for now because we do not show projects and visualizations)
+        this.loadUserDataStats();
         this.refreshDimensions();
         this.refreshFilteredDimensions();
         this.refreshFilteredStats();
@@ -553,6 +554,9 @@ class DiscoveryView extends React.Component {
   loadUserDataStats = async () => {
     const { projectId } = this.state;
 
+    this.setState({
+      userDataCounts: null,
+    });
     const stats = await getDiscoveryStats({
       domain: DISCOVERY_DOMAIN_MY_DATA,
       projectId,
