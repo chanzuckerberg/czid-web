@@ -766,7 +766,7 @@ class QualityControl extends React.Component {
                       />
                     </span>
                   }
-                  title="Quality Reads"
+                  title="Passed QC"
                   content={SAMPLE_TABLE_COLUMNS_V2.qcPercent.tooltip}
                   link={SAMPLE_TABLE_COLUMNS_V2.qcPercent.link}
                 />
@@ -959,7 +959,7 @@ class QualityControl extends React.Component {
                   className={cs.noDataBannerContainer}
                   icon={<ImgVizSecondary />}
                   link={{
-                    href: "https://help.idseq.net",
+                    href: SAMPLE_TABLE_COLUMNS_V2.readsLost.link,
                     text: "Learn about sample QC",
                   }}
                   message="No reads lost data could be found for your samples."

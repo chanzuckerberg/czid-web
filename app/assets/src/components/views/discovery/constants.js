@@ -14,13 +14,13 @@ export const READS_LOST_STACK_COLORS = [
   "#1E968B",
 ];
 export const READS_REMAINING_COLOR = "#693BAC";
-export const READS_REMAINING = "Reads remaining";
+export const READS_REMAINING = "Passed Filters";
 export const HOST_FILTER_STAGE_NAME = "Host Filtering";
 export const HUMAN_READABLE_STEP_NAMES = {
   Star: "Filter host (STAR)",
   Trimmomatic: "Trim adapters",
   Priceseq: "Filter low quality",
-  Cdhitdup: "Identify duplicates",
+  Cdhitdup: "Filter duplicates",
   Lzw: "Filter low complexity",
   Bowtie2: "Filter host (Bowtie2)",
   Subsampled: "Subsampling",
