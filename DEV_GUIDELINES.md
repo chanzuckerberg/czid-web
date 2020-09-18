@@ -224,4 +224,4 @@ Be aware of shared style files, particularly [`_color.scss`](https://github.com/
 
 ## _JSON_
 
-* Use camelCase for properties in JSON object (even if writing in Ruby).
+* Use camelCase for properties in JSON objects (even if writing in Ruby).
