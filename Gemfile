@@ -5,7 +5,6 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
-gem 'airbrake', '~> 10.0.5'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 # step functions sdk

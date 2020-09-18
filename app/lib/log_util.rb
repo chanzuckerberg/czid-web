@@ -3,7 +3,6 @@
 class LogUtil
   def self.log_err(msg)
     Rails.logger.error(msg)
-    Airbrake.notify(msg)
     Raven.capture_message(msg)
   end
 
@@ -26,10 +25,6 @@ class LogUtil
         message: message,
         extra: details
       )
-      Airbrake.notify(exception,
-                      details.merge(
-                        message: message
-                      ))
     end
   end
 end
