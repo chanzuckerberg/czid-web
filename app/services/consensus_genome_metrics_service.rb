@@ -1,9 +1,6 @@
 class ConsensusGenomeMetricsService
   include Callable
 
-  OUTPUT_QUAST = "consensus_genome.quast_out_quast_tsv".freeze
-  OUTPUT_STATS = "consensus_genome.compute_stats_out_output_stats".freeze
-
   def initialize(workflow_run)
     @workflow_run = workflow_run
   end
@@ -17,8 +14,8 @@ class ConsensusGenomeMetricsService
   def generate
     cache_key = "cg_metrics-#{@workflow_run.id}-#{@workflow_run.status}"
     Rails.cache.fetch(cache_key, expires_in: 30.days) do
-      quast_data = @workflow_run.output(OUTPUT_QUAST)
-      stats_data = @workflow_run.output(OUTPUT_STATS)
+      quast_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_QUAST)
+      stats_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_STATS)
       format_metrics(quast_data, stats_data)
     end
   end

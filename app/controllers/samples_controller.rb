@@ -1408,7 +1408,7 @@ class SamplesController < ApplicationController
   # Zipped download of select Consensus Genome run result files.
   def consensus_genome_zip_link
     # TODO: remove direct access to SFN description in `workflow_run` once we refactor this
-    output_name = Sample::TEMP_CONSENSUS_GENOME_OUTPUTS[:output_zip]
+    output_name = ConsensusGenomeWorkflowRun::OUTPUT_ZIP
 
     workflow_run = @sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
     raise "No valid WorkflowRun found" unless workflow_run

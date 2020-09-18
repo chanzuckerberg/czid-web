@@ -1,8 +1,6 @@
 class ConsensusGenomeCoverageService
   include Callable
 
-  OUTPUT_DEPTHS = "consensus_genome.compute_stats_out_sam_depths".freeze
-
   # Maximum number of bins (will be used)
   MAX_NUM_BINS = 500
 
@@ -32,7 +30,7 @@ class ConsensusGenomeCoverageService
   end
 
   def fetch_depths_data
-    depths = @workflow_run.output(OUTPUT_DEPTHS)
+    depths = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_DEPTHS)
     raise NoDepthDataError, @workflow_run unless depths
 
     depths = depths.split(/\n+/).map(&:to_i)

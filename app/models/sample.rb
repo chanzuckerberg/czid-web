@@ -35,10 +35,6 @@ class Sample < ApplicationRecord
   has_and_belongs_to_many :visualizations
   has_many :workflow_runs, dependent: :destroy
 
-  TEMP_CONSENSUS_GENOME_OUTPUTS = {
-    output_zip: "consensus_genome.zip_outputs_out_output_zip",
-  }.freeze
-
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze

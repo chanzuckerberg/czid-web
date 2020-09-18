@@ -565,7 +565,7 @@ RSpec.describe SamplesController, type: :controller do
 
     describe "GET #consensus_genome_zip_link" do
       let(:fake_sfn_description) do
-        { output: { "Result": { Sample::TEMP_CONSENSUS_GENOME_OUTPUTS[:output_zip] => "fake_s3_uri" } }.to_json }
+        { output: { "Result": { ConsensusGenomeWorkflowRun::OUTPUT_ZIP => "fake_s3_uri" } }.to_json }
       end
 
       before do

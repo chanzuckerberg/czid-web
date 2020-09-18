@@ -59,8 +59,8 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
 
     it "fetches and formats metrics using a cache" do
       # Test that methods are only called ONCE to show the cache is working.
-      allow(workflow_run).to receive(:output).with(ConsensusGenomeMetricsService::OUTPUT_QUAST).exactly(1).times.and_return(quast_data)
-      allow(workflow_run).to receive(:output).with(ConsensusGenomeMetricsService::OUTPUT_STATS).exactly(1).times.and_return(stats_data)
+      allow(workflow_run).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_QUAST).exactly(1).times.and_return(quast_data)
+      allow(workflow_run).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_STATS).exactly(1).times.and_return(stats_data)
       expect(subject).to receive(:format_metrics).with(quast_data, stats_data).exactly(1).times
 
       subject.send(:generate)

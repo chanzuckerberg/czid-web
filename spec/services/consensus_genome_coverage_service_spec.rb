@@ -16,7 +16,7 @@ RSpec.describe ConsensusGenomeCoverageService, type: :service do
   describe "#fetch_depths_data" do
     context "when depth file exists" do
       it "fetch and returns correct s3 file" do
-        expect(workflow_run).to receive(:output).with(ConsensusGenomeCoverageService::OUTPUT_DEPTHS) { depths_file_content }
+        expect(workflow_run).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_DEPTHS) { depths_file_content }
 
         expect(subject.send(:fetch_depths_data)).to eq(depths)
       end
@@ -24,7 +24,7 @@ RSpec.describe ConsensusGenomeCoverageService, type: :service do
 
     context "when depth file does not exist" do
       it "returns original exception" do
-        expect(workflow_run).to receive(:output).with(ConsensusGenomeCoverageService::OUTPUT_DEPTHS) { nil }
+        expect(workflow_run).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_DEPTHS) { nil }
 
         expect { subject.send(:fetch_depths_data) }.to raise_error(ConsensusGenomeCoverageService::NoDepthDataError, /No depth data available for workflow_run #{workflow_run.id}/)
       end
@@ -33,7 +33,7 @@ RSpec.describe ConsensusGenomeCoverageService, type: :service do
 
   describe "#call" do
     before do
-      expect(workflow_run).to receive(:output).with(ConsensusGenomeCoverageService::OUTPUT_DEPTHS) { depths_file_content }
+      expect(workflow_run).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_DEPTHS) { depths_file_content }
     end
 
     it "computes base statistics correctly" do

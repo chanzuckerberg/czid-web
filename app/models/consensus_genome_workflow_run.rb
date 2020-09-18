@@ -1,4 +1,9 @@
 class ConsensusGenomeWorkflowRun < WorkflowRun
+  OUTPUT_DEPTHS = "consensus_genome.compute_stats_out_sam_depths".freeze
+  OUTPUT_QUAST = "consensus_genome.quast_out_quast_tsv".freeze
+  OUTPUT_STATS = "consensus_genome.compute_stats_out_output_stats".freeze
+  OUTPUT_ZIP = "consensus_genome.zip_outputs_out_output_zip".freeze
+
   def results
     {
       coverage_viz: coverage_viz,
