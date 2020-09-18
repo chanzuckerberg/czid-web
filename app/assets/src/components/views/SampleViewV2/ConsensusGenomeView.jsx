@@ -11,8 +11,9 @@ import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
 import Histogram from "~/components/visualizations/Histogram";
-import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import { Table } from "~/components/visualizations/table";
+import { numberWithCommas } from "~/helpers/strings";
+import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import ExternalLink from "~ui/controls/ExternalLink";
 import { IconAlert, LoadingIcon, IconArrowRight } from "~ui/icons";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
@@ -79,12 +80,17 @@ class ConsensusGenomeView extends React.Component {
   }
 
   componentDidMount = async () => {
-    const data = await getWorkflowRunResults(this.workflow.id);
-    this.setState({ data });
+    const { workflow } = this;
+
+    if (workflow.status === "SUCCEEDED") {
+      const data = await getWorkflowRunResults(this.workflow.id);
+      this.setState({ data });
+    }
   };
 
   componentDidUpdate = (prevProps, prevState) => {
     const { data } = this.state;
+
     if (data && data.coverage_viz && data !== prevState.data) {
       this.renderHistogram();
     }
@@ -173,14 +179,6 @@ class ConsensusGenomeView extends React.Component {
     });
   };
 
-  formatYAxisLabel = value => {
-    const superscript = "²³⁴⁵⁶⁷⁸⁹";
-    if (value > 10) {
-      return `10${superscript[value.toString().length - 3]}`;
-    }
-    return value;
-  };
-
   renderHistogram = () => {
     const { data } = this.state;
 
@@ -200,7 +198,7 @@ class ConsensusGenomeView extends React.Component {
         labelsLarge: true,
         labelX: "Reference Genome",
         labelY: "Coverage",
-        labelYHorizontalOffset: 15,
+        labelYHorizontalOffset: 30,
         labelYLarge: true,
         margins: {
           left: 100,
@@ -215,7 +213,7 @@ class ConsensusGenomeView extends React.Component {
         showStatistics: false,
         skipBins: true,
         yScaleLog: true,
-        yTickFormat: this.formatYAxisLabel,
+        yTickFormat: numberWithCommas,
         onHistogramBarHover: this.handleHistogramBarHover,
         onHistogramBarEnter: this.handleHistogramBarEnter,
         onHistogramBarExit: this.handleHistogramBarExit,
