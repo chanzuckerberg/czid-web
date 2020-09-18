@@ -95,7 +95,7 @@ class ProjectsController < ApplicationController
           }
         else
           limited_projects = limited_projects
-                             .includes(samples: [:host_genome, :user, { metadata: [:metadata_field, :location] }])
+                             .includes(:creator, samples: [:host_genome, :user, { metadata: [:metadata_field, :location] }])
                              .group(:id)
                              .references(:samples)
           # get aggregated lists of association values in string by using MySQL's GROUP_CONCAT (should update to JSON_ARRAYAGG when possible)
@@ -104,12 +104,11 @@ class ProjectsController < ApplicationController
           group_concat_location = Arel.sql("GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'collection_location' THEN IFNULL(locations.name, metadata.string_validated_value) ELSE NULL END SEPARATOR '::') AS locations")
           group_concat_users = Arel.sql("GROUP_CONCAT(DISTINCT CONCAT(users.name,'|',users.email) ORDER BY users.name SEPARATOR '::') AS users")
           editable = Arel.sql("BIT_OR(IF(users.id=#{current_user.id}, 1, 0)) AS editable")
-          uploaders = Arel.sql("GROUP_CONCAT(DISTINCT users_samples.name ORDER BY samples.id SEPARATOR '::') AS uploaders")
-          creator = Arel.sql("GROUP_CONCAT(IF(users.id=creator_id, users.name, NULL)) AS creator")
+          creator = Arel.sql("creators_projects.name AS creator")
 
           attrs = [
             'id', 'name', 'description', 'created_at', 'public_access', Arel.sql('COUNT(DISTINCT samples.id) AS number_of_samples'),
-            group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, uploaders, creator,
+            group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, creator,
           ]
           names = attrs.map { |attr| attr.split(' AS ').last }
           render json: {
@@ -117,9 +116,8 @@ class ProjectsController < ApplicationController
             projects: (limited_projects.pluck(*attrs).map do |p|
               project_hash = names.zip(p).to_h
               project_hash["users"] = (project_hash["users"] || '').split('::').map { |u| ["name", "email"].zip(u.split('|')).to_h }
-              project_hash["owner"] = project_hash["creator"] || (project_hash["uploaders"] || '').split('::')[0]
+              project_hash["owner"] = project_hash["creator"]
               project_hash["editable"] = current_user.admin? || project_hash["editable"] == 1
-              project_hash.delete("uploaders")
               ["locations", "hosts", "sample_types"].each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
               # Return as "tissue" for legacy compatibility. It's too hard to
               # rename all JS instances of "tissue".

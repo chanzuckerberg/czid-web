@@ -400,6 +400,7 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects << create(
               :public_project,
               users: extra_users + [@user],
+              creator: @user,
               samples_data: [
                 {
                   host_genome_name: "Human",
@@ -430,7 +431,7 @@ RSpec.describe ProjectsController, type: :controller do
                                                      hosts: ["Human", "Mosquito"],
                                                      tissues: ["Serum", "Water"],
                                                      locations: ["San Francisco, USA"],
-                                                     owner: extra_users[0].name,
+                                                     owner: @user.name,
                                                      editable: true,
                                                      users: expected_users)
           end

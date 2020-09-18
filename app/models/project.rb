@@ -16,6 +16,7 @@ class Project < ApplicationRecord
   has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :restrict_with_exception
   has_one :background
   has_and_belongs_to_many :metadata_fields
+  belongs_to :creator, optional: true, class_name: 'User', foreign_key: :creator_id
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   # NOTE: not sure why these columns were not created as booleans
