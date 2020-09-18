@@ -68,7 +68,9 @@ class ReadsStatsService
       stats_hash[:sampleId] = pr.sample_id
 
       wdl_version = pr.wdl_version.to_s
+      stats_hash[:wdlVersion] = wdl_version
       pipeline_version = pr.pipeline_version.to_s
+      stats_hash[:pipelineVersion] = pipeline_version
       step_order = step_orders[wdl_version][pipeline_version]
       stats_hash[:steps] = step_order.map do |step|
         step_stats = stats_hash[:steps].find { |step_hash| step_hash[:name] == step }

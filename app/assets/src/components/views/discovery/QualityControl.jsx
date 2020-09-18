@@ -169,6 +169,16 @@ class QualityControl extends React.Component {
   stackReadsLostData(samplesReadsStats) {
     const sampleIds = Object.keys(samplesReadsStats);
 
+    // Filter out Cdhitdup step from samples run on pipeline versions >= 4.0
+    sampleIds.forEach(sampleId => {
+      const sampleData = samplesReadsStats[sampleId];
+      if (parseFloat(sampleData.pipelineVersion) >= 4) {
+        sampleData.steps = sampleData.steps.filter(step => {
+          return step.name !== "Cdhitdup";
+        });
+      }
+    });
+
     // Collect all step names and humanize them
     const categories = sampleIds.reduce((accum, sampleId) => {
       samplesReadsStats[sampleId].steps.forEach((step, index) => {
@@ -201,11 +211,6 @@ class QualityControl extends React.Component {
       let total = 0;
       samplesReadsStats[sampleId].steps.forEach(step => {
         let readsAfter = step.readsAfter || readsRemaining;
-        // The readsAfter column for CD Hit Dup returns the number of unique reads,
-        // not the reads remaining. (FUN)
-        if (step.name === "Identify duplicates") {
-          readsAfter = readsRemaining;
-        }
         const readsLost = readsRemaining - readsAfter;
         dataRow[step.name] = readsLost;
         total += readsLost;
