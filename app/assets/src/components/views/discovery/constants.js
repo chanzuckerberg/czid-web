@@ -5,8 +5,6 @@ export const READS_LOST_STACK_COLORS = [
   "#AABDFC",
   "#DF87B0",
   "#88D0CA",
-  "#DC267F",
-  "#FFD700",
   "#2C8CB5",
   "#E58740",
   "#D43A81",
