@@ -183,12 +183,8 @@ export default class HorizontalStackedBarChart extends React.Component {
       })
     );
 
-    x.domain([
-      0,
-      max(data, d => {
-        return d.total;
-      }),
-    ]).nice();
+    const xDomainMax = max(data, d => d.total);
+    x.domain([0, xDomainMax + 0.1 * xDomainMax]).nice();
 
     z.domain(dataKeys);
 

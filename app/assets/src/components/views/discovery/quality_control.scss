@@ -7,7 +7,6 @@
   // window height minus the header and toolbars
   max-height: calc(100vh - #{$header-total-height} - 172px);
   overflow: scroll;
-  padding-right: $space-l;
   padding-left: $space-l;
 
   .notification {
@@ -25,7 +24,7 @@
 
   .statsRow {
     @include font-body-xxs;
-    color: $black;
+    color: $gray-dark;
   }
 
   .chartsContainer {
@@ -46,6 +45,8 @@
       width: 100%;
       padding-right: $space-xl;
       padding-bottom: $space-xl;
+      display: flex;
+      flex-direction: column;
 
       .stackedBarChart {
         margin: 0px;
@@ -57,6 +58,10 @@
       border: $border-gray-light;
       border-radius: $border-radius-m;
       height: 100%;
+      box-shadow: 0 2px 4px 0 $gray-light;
+      max-height: 66vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .title {
@@ -140,10 +145,12 @@
 .hoverTooltip {
   position: fixed;
   z-index: 1;
+  transform: translateY(-100%);
 }
 
 .summaryTooltip {
   transform: translateY(-100%);
+  z-index: 100;
 }
 
 .inlineLegend {

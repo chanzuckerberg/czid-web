@@ -8,6 +8,10 @@
 .chart {
   width: 100%;
   line-height: 0px;
+  margin: 0px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .xAxisTitle {
@@ -35,7 +39,9 @@
   @include scrollable;
   overflow-y: scroll;
   overflow-x: hidden;
-  display: inline-block;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
   margin: 0px;
   padding: 0px;
 
@@ -83,4 +89,5 @@
   display: inline-block;
   visibility: hidden;
   line-height: normal;
+  width: max-content;
 }
