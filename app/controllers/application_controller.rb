@@ -7,6 +7,7 @@ class ApplicationController < ActionController::Base
   before_action :check_browser
   before_action :set_current_context_for_logging!
   before_action :set_application_view_variables
+  before_action :set_raven_context
 
   include Consul::Controller
   include AppConfigHelper
@@ -126,6 +127,10 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def set_raven_context
+    Raven.extra_context(params: params.to_unsafe_h, url: request.url)
+  end
 
   def check_browser
     browser = UserAgent.parse(request.user_agent).browser
