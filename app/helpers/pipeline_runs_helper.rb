@@ -234,7 +234,7 @@ module PipelineRunsHelper
     "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
     "cd idseq-dag; " \
     "git checkout #{Shellwords.escape(commit_or_branch)}; " \
-    "pip3 install -e . --upgrade"
+    "pip3 install -e ."
   end
 
   def upload_version(s3_file)
