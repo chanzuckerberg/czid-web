@@ -10,11 +10,11 @@ default: &default
 
 development:
   <<: *default
-  host: db
+  host: <%= ENV['DB_HOST'] || "db" %>
 
 test:
   <<: *default
-  host: db
+  host: <%= ENV['DB_HOST'] || "db" %>
 
 deployed: &deployed
   <<: *default

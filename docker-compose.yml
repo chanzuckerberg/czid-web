@@ -79,12 +79,14 @@ services:
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
       - MYSQL_DATABASE=idseq_development
+    ports:
+      - 3306:3306
     command: ['--character-set-server=utf8', '--collation-server=utf8_unicode_ci', '--group_concat_max_len=1073741824']
   redis:
     image: redis:5.0.3
     container_name: redis
     ports:
-      - '6379:6379'
+      - 6379:6379
     volumes:
       - ./redis-data:/var/lib/redis/data
   web:
@@ -105,7 +107,7 @@ services:
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
     ports:
-      - "3000:3000"
+      - 3000:3000
     depends_on:
       - db
       - redis

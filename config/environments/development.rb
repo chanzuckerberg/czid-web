@@ -15,7 +15,7 @@ Rails.application.configure do
   # Enable/disable caching. By default caching is disabled.
   if Rails.root.join('tmp', 'caching-dev.txt').exist?
     config.action_controller.perform_caching = true
-    config.cache_store = :redis_store, 'redis://redis:6379/0/cache',
+    config.cache_store = :redis_store, "#{ENV['REDISCLOUD_URL'] || 'redis://redis:6379'}/0/cache",
                          {
                            # Needed for redis to evict keys in volatile-lru mode
                            expires_in: 30.days,
