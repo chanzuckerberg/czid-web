@@ -58,6 +58,7 @@ BackgroundModelFilter.propTypes = {
   rounded: PropTypes.bool,
   placeholder: PropTypes.string,
   label: PropTypes.string,
+  selectedInvalidBackground: PropTypes.bool,
 };
 
 export default BackgroundModelFilter;

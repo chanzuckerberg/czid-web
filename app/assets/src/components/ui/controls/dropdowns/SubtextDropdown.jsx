@@ -15,8 +15,6 @@ class SubtextDropdown extends React.Component {
         onClick={e => {
           if (option.disabled) {
             e.stopPropagation();
-          } else {
-            this.props.onChange(option.value);
           }
         }}
         className={cx(cs.option, option.disabled && cs.disabledOption)}

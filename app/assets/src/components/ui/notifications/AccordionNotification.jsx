@@ -13,6 +13,7 @@ export default class AccordionNotification extends React.Component {
       className,
       header,
       content,
+      toggleable,
       type,
       open,
       displayStyle,
@@ -23,10 +24,11 @@ export default class AccordionNotification extends React.Component {
         bottomContentPadding
         header={header}
         open={open}
+        toggleable={toggleable}
         className={cx(cs.listContainer, cs[type])}
         toggleArrowAlignment="topRight"
       >
-        <div className={cs.messageContainer}>{content}</div>
+        {content && <div className={cs.messageContainer}>{content}</div>}
       </Accordion>
     );
 
@@ -55,6 +57,7 @@ AccordionNotification.propTypes = {
   header: PropTypes.node,
   content: PropTypes.node,
   open: PropTypes.bool,
+  toggleable: PropTypes.bool,
   type: PropTypes.oneOf(["success", "info", "warning", "error"]),
   displayStyle: PropTypes.oneOf(["flat", "elevated"]),
   onClose: PropTypes.func,

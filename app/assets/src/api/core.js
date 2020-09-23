@@ -25,7 +25,7 @@ const instrument = func => {
       return result;
     } catch (errorResp) {
       postToFrontendMetrics(url, errorResp, performance.now() - startTime);
-      return Promise.reject(errorResp.data);
+      return Promise.reject(errorResp);
     }
   };
   return wrapper;

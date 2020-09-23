@@ -42,6 +42,9 @@ import {
 } from "~/components/utils/sample";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
 import { IconAlert, LoadingIcon } from "~ui/icons";
+import { showToast } from "~/components/utils/toast";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+import AccordionNotification from "~ui/notifications/AccordionNotification";
 import StatusLabel from "~ui/labels/StatusLabel";
 import AMRView from "~/components/AMRView";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
@@ -96,6 +99,10 @@ const TABS = {
   AMR: "Antimicrobial Resistance",
 };
 
+const NOTIFICATON_TYPES = {
+  invalidBackground: "invalid background",
+};
+
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
@@ -120,9 +127,11 @@ export default class SampleViewV2 extends React.Component {
         coverageVizVisible: false,
         currentTab: TABS.SHORT_READ_MNGS,
         filteredReportData: [],
+        selectedInvalidBackground: false,
         loadingReport: false,
         pipelineRun: null,
         pipelineVersion: null,
+        previousSelectedOptions: null,
         project: null,
         projectSamples: [],
         reportData: [],
@@ -234,6 +243,7 @@ export default class SampleViewV2 extends React.Component {
         pipelineRun: pipelineRun,
         project: sample.project,
         enableMassNormalizedBackgrounds: enableMassNormalizedBackgrounds,
+        previousSelectedOptions: selectedOptions,
         selectedOptions: newSelectedOptions,
       },
       () => {
@@ -260,17 +270,8 @@ export default class SampleViewV2 extends React.Component {
     }
   };
 
-  fetchSampleReportData = async () => {
-    const { snapshotShareId, sampleId } = this.props;
-    const { pipelineVersion, selectedOptions } = this.state;
-
-    this.setState({ loadingReport: true });
-    const rawReportData = await getSampleReportData({
-      snapshotShareId,
-      sampleId,
-      background: selectedOptions.background,
-      pipelineVersion,
-    });
+  processRawSampleReportData = rawReportData => {
+    const { selectedOptions } = this.state;
 
     const reportData = [];
     const highlightedTaxIds = new Set(rawReportData.highlightedTaxIds);
@@ -318,13 +319,71 @@ export default class SampleViewV2 extends React.Component {
     this.setState({
       filteredReportData,
       lineageData: rawReportData.lineage,
-      loadingReport: false,
       reportData,
       reportMetadata: rawReportData.metadata,
+      prevousSelectedOptions: selectedOptions,
       selectedOptions: Object.assign({}, selectedOptions, {
         background: rawReportData.metadata.backgroundId,
       }),
     });
+  };
+
+  handleInvalidBackgroundSelection = () => {
+    const {
+      backgrounds,
+      selectedOptions,
+      previousSelectedOptions,
+    } = this.state;
+    // If Internal Server Error caused by invalid background selection:
+    //   1. Render invalidBackgroundError modal
+    //   2. Revert selectedOptions to previous selectedOptions
+    //   3. Pass prop erred={true} to BackgroundModalFilter
+
+    const invalidBackground = backgrounds.find(
+      background => selectedOptions.background === background.id
+    );
+
+    this.setState(
+      {
+        selectedOptions: previousSelectedOptions,
+        selectedInvalidBackground: true,
+      },
+      () => this.updateHistoryAndPersistOptions()
+    );
+
+    this.showNotification(
+      NOTIFICATON_TYPES.invalidBackground,
+      invalidBackground.name
+    );
+  };
+
+  fetchSampleReportData = async () => {
+    const { snapshotShareId, sampleId } = this.props;
+    const {
+      pipelineVersion,
+      selectedOptions,
+      previousSelectedOptions,
+    } = this.state;
+
+    this.setState({ loadingReport: true });
+    await getSampleReportData({
+      snapshotShareId,
+      sampleId,
+      background: selectedOptions.background,
+      pipelineVersion,
+    })
+      .then(rawReportData => {
+        if (rawReportData) this.processRawSampleReportData(rawReportData);
+      })
+      .catch(err => {
+        if (
+          err.status === 500 &&
+          selectedOptions.background !== previousSelectedOptions.background
+        )
+          this.handleInvalidBackgroundSelection();
+      });
+
+    this.setState({ loadingReport: false });
   };
 
   fetchAmrData = async () => {
@@ -707,7 +766,7 @@ export default class SampleViewV2 extends React.Component {
   };
 
   refreshDataFromOptionsChange = ({ key, newSelectedOptions }) => {
-    const { reportData } = this.state;
+    const { reportData, selectedOptions } = this.state;
 
     // different behavior given type of option
     switch (key) {
@@ -747,6 +806,7 @@ export default class SampleViewV2 extends React.Component {
     // save options in state and persist in local storage
     this.setState(
       {
+        previousSelectedOptions: selectedOptions,
         selectedOptions: newSelectedOptions,
       },
       () => {
@@ -929,6 +989,7 @@ export default class SampleViewV2 extends React.Component {
 
     this.setState(
       {
+        previousSelectedOptions: selectedOptions,
         selectedOptions: newSelectedOptions,
         filteredReportData: this.filterReportData({
           reportData,
@@ -1062,11 +1123,73 @@ export default class SampleViewV2 extends React.Component {
     });
   };
 
+  showNotification = (notification, params) => {
+    switch (notification) {
+      case NOTIFICATON_TYPES.invalidBackground: {
+        showToast(
+          ({ closeToast }) =>
+            this.renderInvalidBackgroundError(closeToast, params),
+          {
+            autoClose: 12000,
+            onClose: () =>
+              this.setState({
+                selectedInvalidBackground: false,
+              }),
+          }
+        );
+      }
+    }
+  };
+
+  renderInvalidBackgroundError = (closeToast, background) => {
+    const handleOnClose = () => {
+      this.setState({
+        selectedInvalidBackground: false,
+      });
+      closeToast();
+    };
+
+    const email = "help@idseq.net";
+    const header = (
+      <div>
+        <span className={cs.highlight}>
+          It was not possible to load the report with background "{background}".
+        </span>
+
+        <span className={cs.notificationBody}>
+          {" "}
+          The report has reverted to the previous background model. For more
+          information,{" "}
+          <ExternalLink
+            href={`mailto:${email}?Subject=Background%20"${background}"%20failed%20to%20load`}
+            analyticsEventName={
+              "InvalidBackgroundError_accordion-notification_link_clicked"
+            }
+            className={cs.externalLink}
+          >
+            contact our help team.
+          </ExternalLink>
+        </span>
+      </div>
+    );
+
+    return (
+      <AccordionNotification
+        header={header}
+        toggleable={false}
+        type={"error"}
+        displayStyle={"elevated"}
+        onClose={handleOnClose}
+      />
+    );
+  };
+
   renderReport = () => {
     const {
       backgrounds,
       enableMassNormalizedBackgrounds,
       filteredReportData,
+      selectedInvalidBackground,
       lineageData,
       pipelineRun,
       project,
@@ -1085,6 +1208,7 @@ export default class SampleViewV2 extends React.Component {
           <div className={cs.reportFilters}>
             <ReportFilters
               backgrounds={backgrounds}
+              selectedInvalidBackground={selectedInvalidBackground}
               onFilterChanged={this.handleOptionChanged}
               onFilterRemoved={this.handleFilterRemoved}
               sampleId={sample && sample.id}
