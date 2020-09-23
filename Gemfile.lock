@@ -848,7 +848,7 @@ GEM
       guard (~> 2.1)
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
-    hashdiff (0.4.0)
+    hashdiff (1.0.1)
     hashie (3.6.0)
     health_check (3.0.0)
       railties (>= 5.0)
