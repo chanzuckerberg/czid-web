@@ -20,7 +20,8 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   },
   totalReads: {
     tooltip:
-      "The total number of single-end reads uploaded. Each of the paired-end reads count as one read.",
+      "The total number of single-end reads uploaded. Each end of the paired-end reads count as one read.",
+    link: DOC_BASE_LINK + "360053758913-Sample-QC#Total-Reads",
   },
   nonHostReads: {
     tooltip: `The percentage of reads that came out of step (8) of the host filtration
@@ -30,13 +31,15 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   qcPercent: {
     tooltip: `The percentage of reads that came out of PriceSeq, step (3) of the host
     filtration and QC steps, compared to what went in to Trimmomatic, step (2).`,
-    link: DOC_BASE_LINK + "360034790554-Pipeline-Details#passed-qc",
+    link: DOC_BASE_LINK + "360053758913-Sample-QC#Passed-QC",
   },
   duplicateCompressionRatio: {
     tooltip: `Duplicate Compression Ratio is the ratio of the total number of
     sequences present prior to running cd-hit-dup (duplicate identification) vs
     the number of unique sequences.`,
-    link: DOC_BASE_LINK + "360035296613-Project-Page#metrics-meanings",
+    link:
+      DOC_BASE_LINK +
+      "360053758913-Sample-QC#DCR-(duplicate-compression-ratio)",
   },
   erccReads: {
     tooltip: `The total number of reads aligning to ERCC (External RNA Controls
@@ -46,7 +49,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   meanInsertSize: {
     tooltip:
       "The average length of the nucleotide sequence that is inserted between the adapters.",
-    link: DOC_BASE_LINK + "360034790554#mean-insert-size",
+    link: DOC_BASE_LINK + "360053758913-Sample-QC#Mean-Insert-Size",
   },
   notes: {
     tooltip: "User-supplied notes.",
@@ -61,9 +64,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   readsLost: {
     tooltip:
       "Reads filtered during each step of the pipeline. The full length of the bar represents the Total Reads. Passed Filters represent the reads that passed quality control and filtering steps.",
-    link:
-      DOC_BASE_LINK +
-      "360034790554-Pipeline-Details#host-filtering-and-quality-control",
+    link: DOC_BASE_LINK + "360053758913-Sample-QC#Reads-Lost",
   },
   sampleType: {
     tooltip: "User-supplied metadata field indicating the sample type.",

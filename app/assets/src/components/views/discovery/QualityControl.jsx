@@ -28,6 +28,7 @@ import CategoricalLegend from "~/components/visualizations/legends/CategoricalLe
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 
+import { WORKFLOWS } from "~/components/utils/workflows";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
 import {
   BAR_FILL_COLOR,
@@ -157,6 +158,7 @@ class QualityControl extends React.Component {
       validSamples: data.validSamples,
       runningSamples: data.runningSamples,
       failedSamples: data.failedSamples,
+      consensusGenomeSamples: data.consensusGenomeSamples,
       samplesDict: data.samplesDict,
       readsLostData: readsLostData,
       readsLostLegendColors: legendColors,
@@ -236,11 +238,11 @@ class QualityControl extends React.Component {
     const validSamples = [];
     const runningSamples = [];
     const failedSamples = [];
+    const consensusGenomeSamples = [];
     const samplesDict = {};
 
     samples.forEach(sample => {
       const runInfo = sample.details.run_info;
-
       if (
         runInfo.result_status_description === "FAILED" ||
         runInfo.result_status_description === "COMPLETE - ISSUE" ||
@@ -253,6 +255,11 @@ class QualityControl extends React.Component {
       ) {
         validSamples.push(sample);
         samplesDict[sample.id] = sample;
+      } else if (
+        sample.details.db_sample.temp_pipeline_workflow !==
+        WORKFLOWS.SHORT_READ_MNGS.value
+      ) {
+        consensusGenomeSamples.push(sample);
       } else {
         runningSamples.push(sample);
       }
@@ -262,6 +269,7 @@ class QualityControl extends React.Component {
       validSamples,
       runningSamples,
       failedSamples,
+      consensusGenomeSamples,
       samplesDict,
     };
   }
@@ -737,6 +745,7 @@ class QualityControl extends React.Component {
                   }
                   title="Total Reads"
                   content={SAMPLE_TABLE_COLUMNS_V2.totalReads.tooltip}
+                  link={SAMPLE_TABLE_COLUMNS_V2.totalReads.link}
                 />
               </div>
               <div
@@ -780,7 +789,7 @@ class QualityControl extends React.Component {
           </div>
           <div className={cs.halfPageChart}>
             <div className={cs.title}>
-              Do my samples have enough sequence diversity?
+              Are there too many duplicate reads in my library?
             </div>
             <div className={cs.histogramContainer}>
               <div className={cs.subtitle}>
@@ -915,7 +924,7 @@ class QualityControl extends React.Component {
       <div className={cs.chartsContainer}>
         <div className={cs.fullPageChart}>
           <div className={cs.title}>
-            How did my samples go through the pipeline?
+            How were my samples processed through the pipeline?
           </div>
           <div className={cs.histogramContainer}>
             <div className={cs.subtitle}>
@@ -980,6 +989,7 @@ class QualityControl extends React.Component {
       validSamples,
       runningSamples,
       failedSamples,
+      consensusGenomeSamples,
       showProcessingSamplesMessage,
       totalSampleCount,
     } = this.state;
@@ -1001,6 +1011,13 @@ class QualityControl extends React.Component {
             {failedSamples.length}{" "}
             {failedSamples.length === 1 ? "sample" : "samples"} failed to
             process. Failed samples are not displayed in the charts below.
+          </li>
+          <li className={cs.statusListItem}>
+            {consensusGenomeSamples.length}{" "}
+            {consensusGenomeSamples.length === 1
+              ? "sample is a Consensus Genome"
+              : "samples are Consensus Genomes"}{" "}
+            and will not be displayed in the charts below.
           </li>
         </ul>
       </React.Fragment>
