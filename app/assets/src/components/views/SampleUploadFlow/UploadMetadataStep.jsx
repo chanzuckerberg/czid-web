@@ -88,41 +88,47 @@ class UploadMetadataStep extends React.Component {
   };
 
   render() {
+    const { samples, project, visible, onDirty, workflows } = this.props;
+    const {
+      showInstructions,
+      wasManual,
+      metadata,
+      continueDisabled,
+      issues,
+    } = this.state;
     return (
       <div className={cs.uploadMetadataStep}>
         <div
-          className={cx(
-            cs.uploadInstructions,
-            !this.state.showInstructions && cs.hide
-          )}
+          className={cx(cs.uploadInstructions, !showInstructions && cs.hide)}
         >
           <Instructions onClose={() => this.setShowInstructions(false)} />
         </div>
         <div
           className={cx(
             cs.uploadFlowStep,
-            this.state.showInstructions && cs.hide,
-            this.props.visible && cs.visible
+            showInstructions && cs.hide,
+            visible && cs.visible
           )}
         >
           <div className={cs.flexContent}>
             <MetadataUpload
               onShowCSVInstructions={() => this.setShowInstructions(true)}
-              samples={this.props.samples}
-              project={this.props.project}
+              samples={samples}
+              project={project}
               onMetadataChange={this.handleMetadataChange}
               samplesAreNew
-              issues={this.state.wasManual ? this.state.issues : null}
-              visible={this.props.visible}
-              onDirty={this.props.onDirty}
-              metadata={this.state.metadata}
+              issues={wasManual ? issues : null}
+              visible={visible}
+              onDirty={onDirty}
+              metadata={metadata}
+              workflows={workflows}
             />
           </div>
           <div className={cs.controls}>
             <PrimaryButton
               text="Continue"
               onClick={this.handleContinue}
-              disabled={this.state.continueDisabled}
+              disabled={continueDisabled}
               rounded={false}
               className={cs.continueButton}
             />
@@ -134,8 +140,8 @@ class UploadMetadataStep extends React.Component {
                   logAnalyticsEvent(
                     "UploadMetadataStep_cancel-button_clicked",
                     {
-                      projectId: this.props.project.id,
-                      projectName: this.props.project.name,
+                      projectId: project.id,
+                      projectName: project.name,
                     }
                   )
                 }

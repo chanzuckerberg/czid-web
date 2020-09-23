@@ -166,6 +166,7 @@ class SampleUploadFlow extends React.Component {
             project={this.state.project}
             visible={this.state.currentStep === "uploadMetadata"}
             onDirty={this.metadataChanged}
+            workflows={workflows}
           />
         )}
         {this.state.samples && this.state.metadata && (

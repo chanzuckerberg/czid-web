@@ -14,6 +14,7 @@ import { getProjectMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { getURLParamString } from "~/helpers/url";
+import { WORKFLOWS } from "~/components/utils/workflows";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
@@ -227,33 +228,51 @@ class MetadataUpload extends React.Component {
   };
 
   renderTab = () => {
-    if (this.state.currentTab === "Manual Input") {
-      if (!this.props.samples || !this.state.projectMetadataFields) {
+    const {
+      onDirty,
+      onShowCSVInstructions,
+      project,
+      samples,
+      samplesAreNew,
+      visible,
+      withinModal,
+      workflow,
+    } = this.props;
+    const {
+      currentTab,
+      hostGenomes,
+      projectMetadataFields,
+      sampleTypes,
+    } = this.state;
+
+    if (currentTab === "Manual Input") {
+      if (!samples || !projectMetadataFields) {
         return <div className={cs.loadingMsg}>Loading...</div>;
       } else {
         return (
           <MetadataManualInput
-            project={this.props.project}
-            samples={this.props.samples}
-            samplesAreNew={this.props.samplesAreNew}
+            project={project}
+            samples={samples}
+            samplesAreNew={samplesAreNew}
             onMetadataChange={this.onMetadataChangeManual}
-            withinModal={this.props.withinModal}
-            projectMetadataFields={this.state.projectMetadataFields}
-            hostGenomes={this.state.hostGenomes}
-            sampleTypes={this.state.sampleTypes}
+            withinModal={withinModal}
+            projectMetadataFields={projectMetadataFields}
+            hostGenomes={hostGenomes}
+            sampleTypes={sampleTypes}
+            workflow={workflow}
           />
         );
       }
     }
 
-    if (this.state.currentTab === "CSV Upload") {
+    if (currentTab === "CSV Upload") {
       return (
         <React.Fragment>
           <div>
             <span
               className={cs.link}
               onClick={withAnalytics(
-                this.props.onShowCSVInstructions,
+                onShowCSVInstructions,
                 "MetadataUpload_instruction-link_clicked"
               )}
             >
@@ -262,12 +281,12 @@ class MetadataUpload extends React.Component {
           </div>
           <MetadataCSVUpload
             className={cs.metadataCSVUpload}
-            samples={this.props.samples}
+            samples={samples}
             onMetadataChange={this.onMetadataChangeCSV}
-            project={this.props.project}
-            samplesAreNew={this.props.samplesAreNew}
-            visible={this.props.visible}
-            onDirty={this.props.onDirty}
+            project={project}
+            samplesAreNew={samplesAreNew}
+            visible={visible}
+            onDirty={onDirty}
           />
           <a
             className={cs.link}
@@ -278,8 +297,8 @@ class MetadataUpload extends React.Component {
               logAnalyticsEvent(
                 "MetadataUpload_download-csv-template_clicked",
                 {
-                  projectId: this.props.project.id,
-                  projectName: this.props.project.name,
+                  projectId: project.id,
+                  projectName: project.name,
                 }
               )
             }
@@ -389,7 +408,7 @@ class MetadataUpload extends React.Component {
 
   render() {
     const { hostGenomes, projectMetadataFields, currentTab } = this.state;
-    const { samplesAreNew } = this.props;
+    const { samplesAreNew, workflows } = this.props;
     const requiredFields = concat(
       "Host Organism",
       map("name", filter(["is_required", 1], projectMetadataFields))
@@ -423,14 +442,16 @@ class MetadataUpload extends React.Component {
               .
             </div>
             <div className={cs.details}>
-              <span
-                className={cs.label}
-              >{`Available organisms for host subtraction: `}</span>
-              {hostGenomes &&
-                hostGenomes
-                  .filter(h => !h.ercc_only)
-                  .map(h => h.name)
-                  .join(", ")}
+              <span className={cs.label}>
+                {"Available organisms for host subtraction: "}
+              </span>
+              {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value)
+                ? "Human only"
+                : hostGenomes &&
+                  hostGenomes
+                    .filter(h => !h.ercc_only)
+                    .map(h => h.name)
+                    .join(", ")}
               .
             </div>
           </div>
