@@ -477,7 +477,10 @@ class ConsensusGenomeView extends React.Component {
 
     if (workflow.status === "SUCCEEDED") {
       return data ? this.renderResults() : this.renderLoader();
-    } else if (workflow.status === "RUNNING" || !workflow.status) {
+    } else if (
+      !sample.upload_error &&
+      (workflow.status === "RUNNING" || !workflow.status)
+    ) {
       return (
         <SampleMessage
           icon={<LoadingIcon className={csSampleMessage.icon} />}
