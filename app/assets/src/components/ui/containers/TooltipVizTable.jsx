@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { get } from "lodash/fp";
 import cx from "classnames";
 
 import cs from "./tooltip_viz_table.scss";
@@ -28,7 +29,8 @@ class TooltipVizTable extends React.Component {
         {data.map((keyValuePair, index) => {
           return (
             <div className={cs.value} key={`value-${keyValuePair}-${index}`}>
-              {keyValuePair[1]}
+              {/* // Use .name if value is an object (e.g. location object) */}
+              {get("name", keyValuePair[1]) || keyValuePair[1]}
             </div>
           );
         })}
