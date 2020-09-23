@@ -396,6 +396,7 @@ class DiscoveryView extends React.Component {
         this.refreshFilteredStats();
         if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
           this.refreshFilteredLocations();
+          this.refreshSelectedPLQCSamples();
         }
       },
     });
@@ -548,6 +549,15 @@ class DiscoveryView extends React.Component {
         this.refreshMapPreviewedData();
         this.handleMapLevelChange(mapLevel);
       }
+    );
+  };
+
+  refreshSelectedPLQCSamples = () => {
+    this.setState(
+      {
+        plqcPreviewedSamples: [],
+      },
+      this.refreshPLQCPreviewedSamples
     );
   };
 
@@ -974,9 +984,9 @@ class DiscoveryView extends React.Component {
   refreshPLQCPreviewedSamples = async () => {
     const { plqcPreviewedSamples } = this.state;
     const { domain } = this.props;
+    const conditions = this.getConditions();
 
     if (plqcPreviewedSamples && plqcPreviewedSamples.length > 0) {
-      const conditions = this.getConditions();
       conditions.sampleIds = plqcPreviewedSamples;
       this.mapPreviewSamples = this.dataLayer.samples.createView({
         conditions,
@@ -984,25 +994,25 @@ class DiscoveryView extends React.Component {
         displayName: "MapPreviewSamplesView",
       });
       this.mapPreviewSamples.loadPage(0);
-
-      const { sampleStats } = await getDiscoveryStats({
-        domain,
-        ...conditions,
-      });
-      this.setState({
-        mapSidebarTab: "samples",
-        mapSidebarSampleStats: sampleStats,
-        mapSidebarSampleCount: plqcPreviewedSamples.length,
-      });
     } else {
       // if no sample ids, then display all samples
       this.mapPreviewSamples = this.samples;
-      this.setState({
-        mapSidebarTab: "samples",
-        mapSidebarSampleStats: {},
-        mapSidebarSampleCount: null,
-      });
     }
+
+    const mapSidebarSampleCount =
+      plqcPreviewedSamples && plqcPreviewedSamples.length > 0
+        ? plqcPreviewedSamples.length
+        : this.mapPreviewSamples.length;
+    const [{ sampleStats }, { sampleDimensions }] = await Promise.all([
+      getDiscoveryStats({ domain, ...conditions }),
+      getDiscoveryDimensions({ domain, ...conditions }),
+    ]);
+    this.setState({
+      mapSidebarTab: "samples",
+      mapSidebarSampleStats: sampleStats,
+      mapSidebarSampleCount: mapSidebarSampleCount,
+      mapSidebarSampleDimensions: sampleDimensions,
+    });
     this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
   };
 
@@ -1541,7 +1551,7 @@ class DiscoveryView extends React.Component {
                 (this.mapPreviewSidebar = mapPreviewSidebar)
               }
               sampleDimensions={
-                !mapPreviewedLocationId
+                !mapPreviewedLocationId && !plqcPreviewedSamples
                   ? computedSampleDimensions
                   : mapSidebarSampleDimensions
               }

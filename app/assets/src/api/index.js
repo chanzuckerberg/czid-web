@@ -172,6 +172,7 @@ const getSampleDimensions = ({
   projectId,
   snapshotShareId,
   search,
+  sampleIds,
 }) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
@@ -182,6 +183,7 @@ const getSampleDimensions = ({
         projectId,
         snapshotShareId,
         search,
+        sampleIds,
         ...filters,
       },
     }

@@ -28,6 +28,7 @@ const getDiscoveryDimensions = async ({
   projectId,
   snapshotShareId,
   search,
+  sampleIds,
 }) => {
   try {
     const actions = [
@@ -37,6 +38,7 @@ const getDiscoveryDimensions = async ({
         projectId,
         snapshotShareId,
         search,
+        sampleIds,
       }),
     ];
     if (!snapshotShareId)

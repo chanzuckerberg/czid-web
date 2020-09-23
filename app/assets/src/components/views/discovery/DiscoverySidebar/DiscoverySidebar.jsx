@@ -48,7 +48,9 @@ export default class DiscoverySidebar extends React.Component {
     return {
       stats: {
         numSamples: DiscoverySidebar.formatNumber((sampleStats || {}).count),
-        numProjects: DiscoverySidebar.formatNumber((projectStats || {}).count),
+        numProjects: DiscoverySidebar.formatNumber(
+          projectStats.count || sampleStats.projectCount || 0
+        ),
         avgTotalReads: DiscoverySidebar.formatNumber(
           (sampleStats || {}).avgTotalReads
         ),
