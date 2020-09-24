@@ -19,6 +19,10 @@ export const SAMPLE_ADDITIONAL_INFO = [
 
 export const PIPELINE_INFO_FIELDS = [
   {
+    name: "Analysis Type",
+    key: "workflow",
+  },
+  {
     name: "Pipeline Version",
     key: "pipelineVersion",
   },

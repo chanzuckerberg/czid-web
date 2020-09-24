@@ -181,15 +181,13 @@ class PipelineTab extends React.Component {
   render() {
     const { pipelineInfo, pipelineRun, sampleId, snapshotShareId } = this.props;
 
-    let fields = PIPELINE_INFO_FIELDS;
-    if (
-      get(["workflow", "text"], pipelineInfo) !==
-      WORKFLOWS.SHORT_READ_MNGS.label
-    ) {
-      fields = WORKFLOW_INFO_FIELDS.concat(fields);
-    }
-    const pipelineInfoFields = fields.map(this.getPipelineInfoField);
+    const workflow = get(["workflow", "text"], pipelineInfo);
+    const fields =
+      workflow === WORKFLOWS.CONSENSUS_GENOME.label
+        ? WORKFLOW_INFO_FIELDS
+        : PIPELINE_INFO_FIELDS;
 
+    const pipelineInfoFields = fields.map(this.getPipelineInfoField);
     const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
 
     return (
@@ -205,7 +203,7 @@ class PipelineTab extends React.Component {
             className={cs.pipelineInfoFields}
           />
         </MetadataSection>
-        {!snapshotShareId && (
+        {!snapshotShareId && workflow === WORKFLOWS.SHORT_READ_MNGS.label && (
           <React.Fragment>
             <MetadataSection
               toggleable

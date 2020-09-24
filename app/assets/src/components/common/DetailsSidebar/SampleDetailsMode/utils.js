@@ -2,11 +2,7 @@ import moment from "moment";
 import { find, get } from "lodash/fp";
 
 import { WORKFLOWS } from "~/components/utils/workflows";
-import {
-  humanize,
-  numberWithCommas,
-  numberWithPlusOrMinus,
-} from "~/helpers/strings";
+import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
 
 // Compute display values for Pipeline Info from server response.
 export const processPipelineInfo = additionalInfo => {
@@ -96,7 +92,7 @@ export const processPipelineInfo = additionalInfo => {
   }
 
   if (wetlabProtocol)
-    pipelineInfo.wetlabProtocol = { text: humanize(wetlabProtocol) };
+    pipelineInfo.wetlabProtocol = { text: wetlabProtocol.toUpperCase() };
 
   return pipelineInfo;
 };
