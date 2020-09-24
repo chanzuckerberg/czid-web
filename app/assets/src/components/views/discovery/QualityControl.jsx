@@ -170,9 +170,12 @@ class QualityControl extends React.Component {
 
   stackReadsLostData(samplesReadsStats) {
     const sampleIds = Object.keys(samplesReadsStats);
+    const samplesWithInitialReads = sampleIds.filter(sampleId =>
+      Number.isInteger(samplesReadsStats[sampleId].initialReads)
+    );
 
     // Filter out Cdhitdup step from samples run on pipeline versions >= 4.0
-    sampleIds.forEach(sampleId => {
+    samplesWithInitialReads.forEach(sampleId => {
       const sampleData = samplesReadsStats[sampleId];
       if (parseFloat(sampleData.pipelineVersion) >= 4) {
         sampleData.steps = sampleData.steps.filter(step => {
@@ -182,7 +185,7 @@ class QualityControl extends React.Component {
     });
 
     // Collect all step names and humanize them
-    const categories = sampleIds.reduce((accum, sampleId) => {
+    const categories = samplesWithInitialReads.reduce((accum, sampleId) => {
       samplesReadsStats[sampleId].steps.forEach((step, index) => {
         step.name = HUMAN_READABLE_STEP_NAMES[step.name] || step.name;
         if (!accum.includes(step.name)) {
@@ -207,7 +210,7 @@ class QualityControl extends React.Component {
       };
     });
 
-    const readsLostData = sampleIds.map(sampleId => {
+    const readsLostData = samplesWithInitialReads.map(sampleId => {
       const dataRow = {};
       let readsRemaining = samplesReadsStats[sampleId].initialReads;
       let total = 0;

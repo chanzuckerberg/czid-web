@@ -3,6 +3,7 @@ class ReadsStatsService
   include Callable
 
   INITIAL_READS_STAT = "fastqs".freeze
+  NON_HOST_FILTER_STATS = ["run_generate_unidentified_fasta", "unidentified_fasta"].freeze
 
   def initialize(samples)
     if samples.nil?
@@ -71,12 +72,19 @@ class ReadsStatsService
       stats_hash[:wdlVersion] = wdl_version
       pipeline_version = pr.pipeline_version.to_s
       stats_hash[:pipelineVersion] = pipeline_version
+
       step_order = step_orders[wdl_version][pipeline_version]
-      stats_hash[:steps] = step_order.map do |step|
-        step_stats = stats_hash[:steps].find { |step_hash| step_hash[:name] == step }
-        # Frontend can handle a nil case if step is not found
-        reads_after = step_stats.nil? ? nil : step_stats[:reads_after]
-        { name: StringUtil.humanize_step_name(step), readsAfter: reads_after }
+      if step_order.count.zero?
+        descending_step_stats = stats_hash[:steps].sort { |a, b| b[:reads_after] <=> a[:reads_after] }
+        host_filtering_stats = descending_step_stats.select { |step_hash| step_hash[:name] != INITIAL_READS_STAT && !NON_HOST_FILTER_STATS.include?(step_hash[:name]) }
+        stats_hash[:steps] = host_filtering_stats.map { |stat| { name: StringUtil.humanize_step_name(stat[:name]), readsAfter: stat[:reads_after] } }
+      else
+        stats_hash[:steps] = step_order.map do |step|
+          step_stats = stats_hash[:steps].find { |step_hash| step_hash[:name] == step }
+          # Frontend can handle a nil case if step is not found
+          reads_after = step_stats.nil? ? nil : step_stats[:reads_after]
+          { name: StringUtil.humanize_step_name(step), readsAfter: reads_after }
+        end
       end
       results[pr.sample_id] = stats_hash
     end
