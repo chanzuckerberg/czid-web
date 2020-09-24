@@ -78,8 +78,10 @@ class WorkflowRun < ApplicationRecord
         remote_status = STATUS[:succeeded_with_issue]
       else
         Rails.logger.error("SampleFailedEvent: Sample #{sample.id} by " \
-          "#{sample.user.role_name} failed WorkflowRun #{id} (#{workflow}). See: #{sample.status_url}")
+        "#{sample.user.role_name} failed WorkflowRun #{id} (#{workflow}). See: #{sample.status_url}")
       end
+    elsif remote_status == STATUS[:succeeded]
+      load_cached_results
     end
 
     if remote_status != status
@@ -122,5 +124,29 @@ class WorkflowRun < ApplicationRecord
 
   def sfn_execution
     @sfn_execution ||= SfnExecution.new(sfn_execution_arn, sample.sample_output_s3_path)
+  end
+
+  def workflow_by_class
+    becomes(WORKFLOW_CLASS[workflow])
+  end
+
+  # TODO: Consider refactoring with a different OOP approach or asynchronous results loading.
+  # Use cached_results for simple outputs that need to be accessed quickly (e.g. in multi-WorkflowRun displays).
+  # Don't use it for large or complex responses.
+  def load_cached_results
+    raise NotImplementedError unless workflow_by_class.respond_to?(:results)
+    begin
+      results = workflow_by_class.results(cacheable_only: true)
+      update(cached_results: results.to_json)
+    rescue ArgumentError
+      raise NotImplementedError("Check that results support cacheable_only")
+    rescue => exception
+      LogUtil.log_error(
+        "Error loading cached results",
+        exception: exception,
+        workflow_run_id: id
+      )
+      return nil
+    end
   end
 end

@@ -11,7 +11,7 @@ RSpec.describe ConsensusGenomeCoverageService, type: :service do
 
   let(:max_num_bins) { 4 }
 
-  subject { ConsensusGenomeCoverageService.new(workflow_run, max_num_bins: max_num_bins) }
+  subject { ConsensusGenomeCoverageService.new(workflow_run: workflow_run, max_num_bins: max_num_bins) }
 
   describe "#fetch_depths_data" do
     context "when depth file exists" do
@@ -116,6 +116,21 @@ RSpec.describe ConsensusGenomeCoverageService, type: :service do
           coverage_depth: expected_coverage_depth,
           coverage_breadth: expected_coverage_breadth
         )
+      end
+    end
+
+    context "when only metrics are requested" do
+      subject { ConsensusGenomeCoverageService.new(workflow_run: workflow_run, cacheable_only: true) }
+
+      it "computes and only returns metrics correctly" do
+        metrics = subject.call
+        expect(metrics).to include(
+          coverage_breadth: 0.75,
+          coverage_depth: 89.0,
+          max_aligned_length: 12,
+          total_length: 12
+        )
+        expect(metrics).not_to include(:coverage)
       end
     end
   end

@@ -11,11 +11,16 @@ class ConsensusGenomeCoverageService
   end
 
   def initialize(
-    workflow_run,
-    max_num_bins: MAX_NUM_BINS
+    workflow_run:,
+    max_num_bins: MAX_NUM_BINS,
+    cacheable_only: false
   )
     @workflow_run = workflow_run
     @max_num_bins = max_num_bins
+    # cacheable_only will return cache-friendly data (e.g. basic stats)
+    # Included: coverage_breadth, coverage_depth, max_aligned_length, total_length
+    # Excluded: coverage, coverage_bin_size
+    @cacheable_only = cacheable_only
   end
 
   def call
@@ -38,6 +43,20 @@ class ConsensusGenomeCoverageService
   end
 
   def convert_to_coverage_data(depths)
+    coverage_breadth = depths.select { |d| d > 0 }.size.to_f / depths.size
+    coverage_depth = depths.select { |d| d > 0 }.sum(0.0) / depths.size
+    max_aligned_length = depths.size
+    total_length = depths.size
+
+    if @cacheable_only
+      return {
+        coverage_breadth: coverage_breadth,
+        coverage_depth: coverage_depth,
+        max_aligned_length: max_aligned_length,
+        total_length: total_length,
+      }
+    end
+
     # takes the histogram from depths file and converts to coverage viz data format
     if depths.size <= @max_num_bins
       num_bins = depths.size
@@ -78,13 +97,13 @@ class ConsensusGenomeCoverageService
     end
 
     return {
-      total_length: depths.size,
+      total_length: total_length,
       coverage: coverage,
       coverage_bin_size: bin_size,
       # TODO: fix to match longer alignment
-      max_aligned_length: depths.size,
-      coverage_depth: depths.select { |d| d > 0 }.sum(0.0) / depths.size,
-      coverage_breadth: depths.select { |d| d > 0 }.size.to_f / depths.size,
+      max_aligned_length: max_aligned_length,
+      coverage_depth: coverage_depth,
+      coverage_breadth: coverage_breadth,
     }
   end
 end

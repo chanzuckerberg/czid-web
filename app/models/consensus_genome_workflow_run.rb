@@ -4,9 +4,11 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   OUTPUT_STATS = "consensus_genome.compute_stats_out_output_stats".freeze
   OUTPUT_ZIP = "consensus_genome.zip_outputs_out_output_zip".freeze
 
-  def results
+  # cacheable_only results will be stored in the db.
+  # Full results will fetch from S3 (a superset of cached results).
+  def results(cacheable_only: false)
     {
-      coverage_viz: coverage_viz,
+      coverage_viz: coverage_viz(cacheable_only: cacheable_only),
       quality_metrics: quality_metrics,
       taxon_info: taxon_info,
     }
@@ -14,8 +16,8 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
 
   private
 
-  def coverage_viz
-    ConsensusGenomeCoverageService.call(self)
+  def coverage_viz(cacheable_only: false)
+    ConsensusGenomeCoverageService.call(workflow_run: self, cacheable_only: cacheable_only)
   rescue => exception
     LogUtil.log_error(
       "Error loading coverage viz",

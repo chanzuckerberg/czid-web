@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_200_917_231_733) do
+ActiveRecord::Schema.define(version: 20_200_921_191_817) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -665,6 +665,7 @@ ActiveRecord::Schema.define(version: 20_200_917_231_733) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "rerun_from"
+    t.text "cached_results", comment: "JSON-string of cached results for generic loading. Use for simple outputs."
     t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
   end
 

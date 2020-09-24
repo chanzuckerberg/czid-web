@@ -11,7 +11,7 @@ describe WorkflowRun, type: :model do
       # AWS SDK rounds to second
       start_date: Time.zone.now.round,
       state_machine_arn: fake_sfn_arn,
-      status: "SUCCESS",
+      status: "SUCCEEDED",
     }
   end
   let(:fake_failed_sfn_execution_description) do
@@ -111,6 +111,14 @@ describe WorkflowRun, type: :model do
 
       @workflow_running.update_status
       expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded_with_issue])
+    end
+
+    it "triggers output metrics loading on success" do
+      @mock_aws_clients[:states].stub_responses(:describe_execution, fake_sfn_execution_description)
+      expect(@workflow_running).to receive(:load_cached_results)
+
+      @workflow_running.update_status
+      expect(@workflow_running.status).to eq(WorkflowRun::STATUS[:succeeded])
     end
   end
 
@@ -219,6 +227,52 @@ describe WorkflowRun, type: :model do
       it "creates and returns new workflow run that references previous workflow" do
         expect(subject.rerun_from).to eq(workflow_run.id)
       end
+    end
+  end
+
+  describe "#workflow_by_class" do
+    let(:project) { create(:project) }
+    let(:sample) { create(:sample, project: project) }
+    let(:workflow_run) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome]) }
+
+    subject { workflow_run.send(:workflow_by_class) }
+
+    it "returns an instance of the workflow-specific class" do
+      expect(subject).to be_instance_of(ConsensusGenomeWorkflowRun)
+      expect(subject).not_to be_instance_of(WorkflowRun)
+    end
+  end
+
+  describe "#load_cached_results" do
+    let(:project) { create(:project) }
+    let(:sample) { create(:sample, project: project) }
+    let(:workflow_run) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome]) }
+    @mock_result = { coverage_depth: 900, coverage_breadth: 0.9, total_reads: 200_000, ref_snps: 10, n_actg: 30_000, n_missing: 10, n_ambiguous: 0, percent_identity: 100.0, gc_percent: 40 }
+
+    subject { workflow_run.send(:load_cached_results) }
+
+    it "retrieves output metrics and updates the record column" do
+      expect_any_instance_of(ConsensusGenomeWorkflowRun).to receive(:results).with(cacheable_only: true).and_return(@mock_result)
+
+      expect(subject).to eq(true)
+      expect(workflow_run.cached_results).to eq(@mock_result.to_json)
+    end
+
+    it "throws an error if the subclass does not implement the method" do
+      expect(workflow_run).to receive(:workflow_by_class).and_return(WorkflowRun)
+
+      expect { subject }.to raise_error(NotImplementedError)
+    end
+
+    it "reports errors in loading the metrics" do
+      expect_any_instance_of(ConsensusGenomeWorkflowRun).to receive(:results).with(cacheable_only: true).and_raise(RuntimeError)
+      expect(LogUtil).to receive(:log_error).with(
+        "Error loading cached results",
+        exception: RuntimeError,
+        workflow_run_id: workflow_run.id
+      )
+
+      expect(subject).to eq(nil)
     end
   end
 end
