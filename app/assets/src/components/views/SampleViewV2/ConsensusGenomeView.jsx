@@ -427,7 +427,8 @@ class ConsensusGenomeView extends React.Component {
       {
         cellRenderer: renderRowCell,
         columnData: {
-          tooltip: "The number of nucleotides that are A,T,C, or G.",
+          tooltip:
+            "The number of nucleotides that are A,T,C, or G. Nucleotides are only called if 10 or more reads aligned.",
         },
         dataKey: "n_actg",
         flexGrow: 1,
