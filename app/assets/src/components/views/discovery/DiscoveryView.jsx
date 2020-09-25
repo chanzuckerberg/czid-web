@@ -245,6 +245,7 @@ class DiscoveryView extends React.Component {
     const sessionFields = concat(localFields, [
       "currentDisplay",
       "mapSidebarTab",
+      "workflow",
     ]);
     const urlFields = concat(sessionFields, [
       "currentTab",
@@ -780,7 +781,6 @@ class DiscoveryView extends React.Component {
         currentTab: "samples",
         mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
         projectId: project.id,
-        workflow: WORKFLOWS.SHORT_READ_MNGS.value,
         search: null,
       },
       () => {
@@ -1330,7 +1330,10 @@ class DiscoveryView extends React.Component {
         selectableSampleIds: view.getIds(),
         currentDisplay,
       },
-      () => this.samplesView && this.samplesView.reset()
+      () => {
+        this.updateBrowsingHistory("replace");
+        this.samplesView && this.samplesView.reset();
+      }
     );
     logAnalyticsEvent(`DiscoveryView_${workflow}-tab_clicked`);
   };
