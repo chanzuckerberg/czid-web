@@ -155,3 +155,28 @@
     }
   }
 }
+
+.links {
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+
+  margin-top: 1.1rem;
+
+  .headerLink {
+    color: $gray-medium !important;
+    margin-right: 2.6rem;
+  }
+}
+
+.footer {
+  width: 30rem;
+  margin: 7rem auto 2rem auto;
+  text-align: center;
+
+  .footerLink {
+    margin: 2rem;
+    font-size: 0.8rem;
+    color: $gray-dark !important;
+  }
+}

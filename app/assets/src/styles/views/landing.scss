@@ -6,19 +6,6 @@
   margin-right: 0.75rem;
 }
 
-.hiring-ad {
-  @media screen and (max-width: 768px) {
-    display: none;
-  }
-  margin-top: 1.1rem;
-  margin-right: 0.9rem;
-  color: white;
-  font-weight: 600;
-  a {
-    color: $primary !important;
-  }
-}
-
 .alert-browser-support {
   color: $gray-dark;
   margin-right: 0.75rem;
@@ -176,20 +163,6 @@
       width: 11rem;
       margin-top: 0.3rem;
       margin-left: 0.7rem;
-    }
-  }
-}
-
-.footer {
-  width: 30rem;
-  margin: 7rem auto 2rem auto;
-  text-align: center;
-
-  .footer-links {
-    a {
-      margin: 2rem;
-      font-size: 0.8rem;
-      color: $gray-dark !important;
     }
   }
 }

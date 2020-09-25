@@ -15,10 +15,10 @@ import BasicPopup from "~/components/BasicPopup";
 import { IconAlert, LogoReversed } from "~ui/icons";
 import Container from "../ui/containers/Container";
 import ExternalLink from "~ui/controls/ExternalLink";
+import Link from "~ui/controls/Link";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
 import StringHelper from "../../helpers/StringHelper";
-import logAnalyticsEvent from "~/api/analytics";
 import ImgBacteriaPrimary from "~ui/illustrations/ImgBacteriaPrimary";
 import ImgDetectPrimary from "~ui/illustrations/ImgDetectPrimary";
 import ImgDecipherPrimary from "~ui/illustrations/ImgDecipherPrimary";
@@ -94,23 +94,35 @@ class Landing extends React.Component {
             </a>
           </div>
           <div className="fill" />
-          <div className="hiring-ad">
-            {"Join our team! We're hiring "}
+          <div className={cs.links}>
             <ExternalLink
-              href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2215049"
-              analyticsEventName="Landing_engineer-job-link_clicked"
+              className={cs.headerLink}
+              href="help.idseq.net"
+              analyticsEventName="Landing_help-center-link_clicked"
             >
-              engineers
+              Help Center
             </ExternalLink>
-            {/* Uncomment when hiring */}
-            {/* {` and `}
             <ExternalLink
-              href="<link to job description>"
-              analyticsEventName="Landing_scientist-job-link_clicked"
+              className={cs.headerLink}
+              href="https://www.discoveridseq.com/vr"
+              analyticsEventName="Landing_video-tour-link_clicked"
             >
-              scientists
-            </ExternalLink> */}
-            !
+              Video Tour
+            </ExternalLink>
+            <ExternalLink
+              className={cs.headerLink}
+              href="https://chanzuckerberg.com/join-us/openings/?initiative=science"
+              analyticsEventName="Landing_hiring-link_clicked"
+            >
+              Hiring
+            </ExternalLink>
+            <ExternalLink
+              className={cs.headerLink}
+              href="https://github.com/chanzuckerberg/idseq-workflows"
+              analyticsEventName="Landing_github-link_clicked"
+            >
+              GitHub
+            </ExternalLink>
           </div>
           {this.props.browserInfo.supported ? (
             <div className="sign-in">
@@ -372,24 +384,26 @@ class Landing extends React.Component {
 
     const mailto = "mailto:" + this.props.contactEmail;
     const footer = (
-      <div className="footer">
-        <div className="footer-links">
-          <a href={mailto}>Contact</a>
-          <a
-            href="https://idseq.net/terms"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Terms
-          </a>
-          <a
-            href="https://idseq.net/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Privacy
-          </a>
-        </div>
+      <div className={cs.footer}>
+        <Link className={cs.footerLink} href={mailto}>
+          Contact
+        </Link>
+        <ExternalLink className={cs.footerLink} href="https://idseq.net/terms">
+          Terms
+        </ExternalLink>
+        <ExternalLink
+          className={cs.footerLink}
+          href="https://idseq.net/privacy"
+        >
+          Privacy
+        </ExternalLink>
+        <ExternalLink
+          className={cs.footerLink}
+          href="https://github.com/chanzuckerberg/idseq-workflows"
+          analyticsEventName="Landing_github-footer-link_clicked"
+        >
+          GitHub
+        </ExternalLink>
       </div>
     );
 
