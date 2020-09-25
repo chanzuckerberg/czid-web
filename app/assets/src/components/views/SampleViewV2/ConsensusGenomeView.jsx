@@ -388,7 +388,7 @@ class ConsensusGenomeView extends React.Component {
         cellRenderer: renderRowCell,
         columnData: {
           tooltip:
-            "Number of reads aligning to the taxon in the NCBI NT/NR database.",
+            "The total number of single-end reads uploaded. Each end of the paired-end reads count as one read.",
         },
         dataKey: "total_reads",
         flexGrow: 1,
