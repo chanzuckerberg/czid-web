@@ -556,7 +556,7 @@ class DiscoveryView extends React.Component {
   refreshSelectedPLQCSamples = () => {
     this.setState(
       {
-        plqcPreviewedSamples: [],
+        plqcPreviewedSamples: null,
       },
       this.refreshPLQCPreviewedSamples
     );
