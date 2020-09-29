@@ -314,4 +314,44 @@ RSpec.describe SamplesHelper, type: :helper do
       expect(results).to eq([])
     end
   end
+
+  describe "#top_workflow_runs_multiget" do
+    before do
+      @project = create(:project)
+      @sample = create(:sample, project: @project)
+      @workflow_run1 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: Time.now.utc, deprecated: true)
+      @workflow_run2 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:short_read_mngs], executed_at: 1.day.ago)
+      @workflow_run3 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: 2.days.ago)
+      @workflow_run4 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: 3.days.ago)
+    end
+
+    it "returns the latest non-deprecated workflow run per workflow" do
+      results = helper.send(:top_workflow_runs_multiget, [@sample.id], WorkflowRun::WORKFLOW[:consensus_genome])
+      expect(results[@sample.id]).to eq(@workflow_run3)
+    end
+  end
+
+  describe "#format_samples" do
+    # TODO: Backfill more tests.
+
+    before do
+      @project = create(:project)
+      @sample = create(:sample, project: @project)
+      @sample_without_runs = create(:sample, project: @project)
+      @mock_cached_results = { "mock_metric" => 10 }
+      @workflow_run1 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: Time.now.utc, cached_results: @mock_cached_results.to_json)
+    end
+
+    it "includes information for consensus genome cached_results" do
+      samples = Sample.where(id: @sample.id)
+      results = helper.send(:format_samples, samples)
+      expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: @mock_cached_results })
+    end
+
+    it "returns nil if no cached_results" do
+      samples = Sample.where(id: @sample_without_runs.id)
+      results = helper.send(:format_samples, samples)
+      expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: nil })
+    end
+  end
 end

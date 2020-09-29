@@ -23,6 +23,7 @@ import { sampleErrorInfo } from "~utils/sample";
 import cs from "./consensus_genome_view.scss";
 import csSampleMessage from "./sample_message.scss";
 
+// TODO: Deduplicate with tooltip.js#FIELDS_METADATA.
 const CONSENSUS_GENOME_VIEW_METRIC_COLUMNS = [
   [
     {
@@ -375,6 +376,7 @@ class ConsensusGenomeView extends React.Component {
         {options && options.percent ? "%" : null}
       </div>
     );
+    // TODO: Deduplicate with tooltip.js#FIELDS_METADATA.
     return [
       {
         cellRenderer: renderRowCell,

@@ -26,3 +26,58 @@ export const getTooltipStyle = (location, params = {}) => {
     };
   }
 };
+
+// General unordered lookup for any dataKey, label, tooltip combination.
+// - Don't add fields unless they are consistent everywhere (e.g. same label and tooltip in all places, but not same className).
+// - Use camelCase key names.
+export const FIELDS_METADATA = {
+  totalReadsCG: {
+    label: "Total Reads",
+    tooltip:
+      "The total number of single-end reads uploaded. Each end of the paired-end reads count as one read.",
+  },
+  gcPercent: {
+    label: "GC Content",
+    tooltip:
+      "The percentage of bases that are either guanine (G) or cytosine (C).",
+  },
+  refSnps: {
+    label: "SNPs",
+    tooltip:
+      "The number of single nucleotide polymorphisms (SNPs) - locations where the nucleotide of the consensus genome does not match the base of the reference genome",
+  },
+  percentIdentity: {
+    label: "%id",
+    tooltip:
+      "The percentage of nucleotides of the consensus genome that are identical to those in the reference genome.",
+  },
+  nActg: {
+    label: "Informative Nucleotides",
+    tooltip:
+      "The number of nucleotides that are A,T,C, or G. Nucleotides are only called if 10 or more reads aligned.",
+  },
+  nMissing: {
+    label: "Missing Bases",
+    tooltip:
+      "The number of bases that are N's because they could not be called.",
+  },
+  nAmbiguous: {
+    label: "Ambiguous Bases",
+    tooltip:
+      "The number of bases that could not be specified due to multiple observed alleles of single-base polymorphisms.",
+  },
+  wetlabProtocol: {
+    label: "Wetlab Protocol",
+    tooltip: "The method used to enrich for SARS-CoV-2.",
+  },
+  coverageDepth: {
+    label: "Coverage Depth",
+    tooltip:
+      "The average read depth of aligned contigs and reads over the length of the accession.",
+  },
+  coverageBreadth: {
+    label: "Coverage Breadth",
+    tooltip:
+      "The percentage of the accession that is covered by at least one read or contig.",
+  },
+};

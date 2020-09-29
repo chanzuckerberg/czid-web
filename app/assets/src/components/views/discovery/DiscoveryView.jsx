@@ -36,6 +36,10 @@ import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
+import {
+  computeColumnsByWorkflow,
+  DEFAULTS_BY_WORKFLOW,
+} from "~/components/views/samples/SamplesView/ColumnConfiguration";
 import Tabs from "~ui/controls/Tabs";
 import BannerProjects from "~ui/icons/BannerProjects";
 import BannerSamples from "~ui/icons/BannerSamples";
@@ -47,7 +51,7 @@ import { openUrl } from "~utils/links";
 import DiscoveryHeader from "./DiscoveryHeader";
 import ModalFirstTimeUser from "./ModalFirstTimeUser";
 import ProjectsView from "../projects/ProjectsView";
-import SamplesView from "../samples/SamplesView";
+import SamplesView from "../samples/SamplesView/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
 import DiscoveryFilters from "./DiscoveryFilters";
@@ -93,7 +97,6 @@ class DiscoveryView extends React.Component {
     const { projectId, domain } = this.props;
 
     this.urlParser = new UrlQueryParser({
-      sampleActiveColumns: "object",
       filters: "object",
       projectId: "number",
       showFilters: "boolean",
@@ -136,7 +139,7 @@ class DiscoveryView extends React.Component {
         projectDimensions: [],
         projectId: projectId,
         rawMapLocationData: {},
-        sampleActiveColumns: undefined,
+        sampleActiveColumnsByWorkflow: undefined,
         sampleDimensions: [],
         search: null,
         selectableSampleIds: [],
@@ -156,6 +159,9 @@ class DiscoveryView extends React.Component {
     // since the PLQC display only exists when viewing a single project.
     if (this.state.currentDisplay === "plqc" && !projectId) {
       this.state.currentDisplay = "table";
+    }
+    if (!this.state.sampleActiveColumnsByWorkflow) {
+      this.state.sampleActiveColumnsByWorkflow = DEFAULTS_BY_WORKFLOW;
     }
 
     this.dataLayer = new DiscoveryDataLayer(domain);
@@ -240,7 +246,11 @@ class DiscoveryView extends React.Component {
   updateBrowsingHistory = (action = "push") => {
     const { domain, snapshotShareId } = this.props;
 
-    const localFields = ["sampleActiveColumns", "showFilters", "showStats"];
+    const localFields = [
+      "sampleActiveColumnsByWorkflow",
+      "showFilters",
+      "showStats",
+    ];
 
     const sessionFields = concat(localFields, [
       "currentDisplay",
@@ -252,7 +262,8 @@ class DiscoveryView extends React.Component {
       "filters",
       "projectId",
       "search",
-    ]);
+      // Omit sampleActiveColumnsByWorkflow from URL b/c it's too large
+    ]).filter(key => key !== "sampleActiveColumnsByWorkflow");
     const stateFields = concat(urlFields, ["project"]);
 
     const localState = pick(localFields, this.state);
@@ -643,7 +654,10 @@ class DiscoveryView extends React.Component {
   };
 
   handleSampleActiveColumnsChange = activeColumns => {
-    this.setState({ sampleActiveColumns: activeColumns }, () => {
+    const { workflow, sampleActiveColumnsByWorkflow } = this.state;
+
+    sampleActiveColumnsByWorkflow[workflow] = activeColumns;
+    this.setState({ sampleActiveColumnsByWorkflow }, () => {
       this.updateBrowsingHistory("replace");
     });
   };
@@ -1324,11 +1338,12 @@ class DiscoveryView extends React.Component {
       currentDisplay === "plqc" && workflow === WORKFLOWS.CONSENSUS_GENOME.value
         ? "table"
         : currentDisplay;
+
     this.setState(
       {
-        workflow,
-        selectableSampleIds: view.getIds(),
         currentDisplay,
+        selectableSampleIds: view.getIds(),
+        workflow,
       },
       () => {
         this.updateBrowsingHistory("replace");
@@ -1368,7 +1383,7 @@ class DiscoveryView extends React.Component {
       mapLocationData,
       mapPreviewedLocationId,
       projectId,
-      sampleActiveColumns,
+      sampleActiveColumnsByWorkflow,
       selectableSampleIds,
       selectedSampleIds,
       showFilters,
@@ -1382,7 +1397,6 @@ class DiscoveryView extends React.Component {
 
     const samples = this.samplesByWorkflow[workflow];
     const tableHasLoaded = !samples.isLoading() && currentDisplay === "table";
-
     return (
       <React.Fragment>
         {currentTab === "projects" && (
@@ -1426,7 +1440,7 @@ class DiscoveryView extends React.Component {
                 this.renderNoDataWorkflowBanner(workflow)
               ) : (
                 <SamplesView
-                  activeColumns={sampleActiveColumns}
+                  activeColumns={sampleActiveColumnsByWorkflow[workflow]}
                   admin={admin}
                   allowedFeatures={allowedFeatures}
                   currentDisplay={currentDisplay}

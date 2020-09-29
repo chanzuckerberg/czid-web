@@ -1,4 +1,4 @@
-import { get, map } from "lodash/fp";
+import { get, map, upperCase } from "lodash/fp";
 import { numberWithPlusOrMinus } from "~/helpers/strings";
 import {
   getProjectDimensions,
@@ -9,6 +9,7 @@ import {
   getSamplesLocations,
   getVisualizations,
 } from "~/api";
+import { WORKFLOWS } from "~/components/utils/workflows";
 
 const DISCOVERY_DOMAIN_MY_DATA = "my_data";
 const DISCOVERY_DOMAIN_ALL_DATA = "all_data";
@@ -94,6 +95,28 @@ const processRawSample = sample => {
     insertSizeStandardDeviation
   );
 
+  const getConsensusGenomeField = path =>
+    get(
+      [WORKFLOWS.CONSENSUS_GENOME.value, "cached_results", ...path],
+      sample.details
+    );
+  const consensusGenomeFields = {
+    coverageDepth: getConsensusGenomeField(["coverage_viz", "coverage_depth"]),
+    totalReadsCG: getConsensusGenomeField(["quality_metrics", "total_reads"]),
+    gcPercent: getConsensusGenomeField(["quality_metrics", "gc_percent"]),
+    refSnps: getConsensusGenomeField(["quality_metrics", "ref_snps"]),
+    percentIdentity: getConsensusGenomeField([
+      "quality_metrics",
+      "percent_identity",
+    ]),
+    nActg: getConsensusGenomeField(["quality_metrics", "n_actg"]),
+    nMissing: getConsensusGenomeField(["quality_metrics", "n_missing"]),
+    nAmbiguous: getConsensusGenomeField(["quality_metrics", "n_ambiguous"]),
+    wetlabProtocol: upperCase(
+      get("db_sample.temp_wetlab_protocol", sample.details)
+    ),
+  };
+
   const row = {
     sample: {
       name: sample.name,
@@ -158,6 +181,7 @@ const processRawSample = sample => {
     ),
     totalRuntime: get("run_info.total_runtime", sample.details),
     waterControl: get("metadata.water_control", sample.details),
+    ...consensusGenomeFields,
   };
   return row;
 };

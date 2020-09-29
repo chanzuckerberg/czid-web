@@ -397,6 +397,11 @@ module SamplesHelper
     records_by_parent_id
   end
 
+  def top_workflow_runs_multiget(sample_ids, workflow)
+    # executed_at ascending because index_by takes last in group.
+    WorkflowRun.where(sample_id: sample_ids, deprecated: false, workflow: workflow).order(executed_at: :asc).index_by(&:sample_id)
+  end
+
   def format_samples_basic(samples)
     metadata_by_sample_id = Metadatum.by_sample_ids(samples.map(&:id), use_raw_date_strings: true)
     return samples.map do |sample|
@@ -424,6 +429,7 @@ module SamplesHelper
     end
     output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
     metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids, use_raw_date_strings: true, use_csv_compatible_values: use_csv_compatible_values)
+    top_cg_workflow_run_by_sample_id = top_workflow_runs_multiget(sample_ids, WorkflowRun::WORKFLOW[:consensus_genome])
 
     # Massage data into the right format
     samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user).each_with_index do |sample|
@@ -457,6 +463,12 @@ module SamplesHelper
                                                 pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
                             end
       job_info[:uploader] = sample_uploader(sample)
+
+      # Frontend caches by sample_id so responses must include the same info.
+      cg_cached_results = top_cg_workflow_run_by_sample_id.try(:[], sample.id).try(:cached_results)
+      cg_cached_results = cg_cached_results ? JSON.parse(cg_cached_results) : nil
+      job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = { cached_results: cg_cached_results }
+
       if is_snapshot
         [:project, :input_files, :db_sample].each { |param| job_info.delete(param) }
         job_info[:derived_sample_output].delete(:pipeline_run)

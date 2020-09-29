@@ -273,6 +273,12 @@ class BaseTable extends React.Component {
               )}
               {columnOrder.map(dataKey => {
                 const columnProps = find({ dataKey: dataKey }, columns);
+                if (!columnProps) {
+                  console.error(
+                    `${dataKey} was expected but not found in column config. Skipping.`
+                  );
+                  return null;
+                }
                 const { cellRenderer, className, ...extraProps } = columnProps;
                 return (
                   <Column

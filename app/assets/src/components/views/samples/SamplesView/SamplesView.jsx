@@ -2,35 +2,37 @@ import cx from "classnames";
 import { difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import PropTypes from "~/components/utils/propTypes";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
-import CollectionModal from "~/components/views/samples/CollectionModal";
+import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
+import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
+import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import QualityControl from "~/components/views/discovery/QualityControl";
+import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import CollectionModal from "~/components/views/samples/CollectionModal";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
+import { getURLParamString } from "~/helpers/url";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import {
   HeatmapIcon,
   IconBackgroundModel,
   IconDownload,
   PhyloTreeIcon,
 } from "~ui/icons";
-import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
-import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
-import NarrowContainer from "~/components/layout/NarrowContainer";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
-import PropTypes from "~/components/utils/propTypes";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { getURLParamString } from "~/helpers/url";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
-import { UserContext } from "~/components/common/UserContext";
+import { WORKFLOWS } from "~utils/workflows";
 
-import ToolbarIcon from "./ToolbarIcon";
-import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
+import {
+  computeColumnsByWorkflow,
+  DEFAULTS_BY_WORKFLOW,
+} from "./ColumnConfiguration";
 import cs from "./samples_view.scss";
-import csTableRenderer from "../discovery/table_renderers.scss";
-import { WORKFLOWS } from "../../utils/workflows";
+import ToolbarIcon from "./ToolbarIcon";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -45,128 +47,9 @@ class SamplesView extends React.Component {
 
     const { snapshotShareId } = this.props;
 
-    this.columns = [
-      {
-        dataKey: "sample",
-        flexGrow: 1,
-        width: 350,
-        cellRenderer: (cellData, basicIcon = !!snapshotShareId) =>
-          TableRenderers.renderSample(cellData, true, basicIcon),
-        headerClassName: cs.sampleHeader,
-      },
-      {
-        dataKey: "createdAt",
-        label: "Uploaded On",
-        width: 120,
-        className: cs.basicCell,
-        cellRenderer: TableRenderers.renderDateWithElapsed,
-      },
-      {
-        dataKey: "host",
-        flexGrow: 1,
-        className: cs.basicCell,
-      },
-      {
-        dataKey: "collectionLocationV2",
-        label: "Location",
-        flexGrow: 1,
-        className: cs.basicCell,
-      },
-      {
-        dataKey: "totalReads",
-        label: "Total Reads",
-        flexGrow: 1,
-        className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
-      },
-      {
-        dataKey: "nonHostReads",
-        label: "Passed Filters",
-        flexGrow: 1,
-        className: cs.basicCell,
-        cellRenderer: TableRenderers.renderNumberAndPercentage,
-      },
-      {
-        dataKey: "qcPercent",
-        label: "Passed QC",
-        flexGrow: 1,
-        className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey]),
-      },
-      {
-        dataKey: "duplicateCompressionRatio",
-        label: "DCR",
-        flexGrow: 1,
-        className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumber(rowData[dataKey]),
-      },
-      {
-        dataKey: "erccReads",
-        label: "ERCC Reads",
-        flexGrow: 1,
-        className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
-      },
-      {
-        dataKey: "notes",
-        flexGrow: 1,
-        className: cs.basicCell,
-      },
-      {
-        dataKey: "nucleotideType",
-        label: "Nucleotide Type",
-        flexGrow: 1,
-        className: cs.basicCell,
-      },
-      {
-        dataKey: "pipelineVersion",
-        label: "Pipeline Version",
-        flexGrow: 1,
-        className: cs.basicCell,
-      },
-      {
-        dataKey: "sampleType",
-        label: "Sample Type",
-        flexGrow: 1,
-        className: cs.basicCell,
-      },
-      {
-        dataKey: "subsampledFraction",
-        label: "SubSampled Fraction",
-        flexGrow: 1,
-        className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumber(rowData[dataKey]),
-      },
-      {
-        dataKey: "totalRuntime",
-        label: "Total Runtime",
-        flexGrow: 1,
-        className: cs.basicCell,
-        cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatDuration(rowData[dataKey]),
-      },
-      {
-        dataKey: "waterControl",
-        label: "Water Control",
-        flexGrow: 1,
-        className: cs.basicCell,
-      },
-      {
-        dataKey: "meanInsertSize",
-        label: "Mean Insert Size",
-        flexGrow: 1,
-        className: cs.basicCell,
-      },
-    ];
-
-    for (let column of this.columns) {
-      column["columnData"] = SAMPLE_TABLE_COLUMNS_V2[column["dataKey"]];
-    }
+    this.columnsByWorkflow = computeColumnsByWorkflow({
+      basicIcon: !!snapshotShareId,
+    });
   }
 
   componentDidUpdate(prevProps) {
@@ -385,6 +268,7 @@ class SamplesView extends React.Component {
       onLoadRows,
       protectedColumns,
       selectedSampleIds,
+      workflow,
     } = this.props;
 
     // TODO(tiago): replace by automated cell height computing
@@ -394,7 +278,7 @@ class SamplesView extends React.Component {
       <div className={cs.table}>
         <InfiniteTable
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
-          columns={this.columns}
+          columns={this.columnsByWorkflow[workflow]}
           defaultRowHeight={rowHeight}
           initialActiveColumns={activeColumns}
           loadingClassName={csTableRenderer.loading}
@@ -586,16 +470,10 @@ class SamplesView extends React.Component {
 }
 
 SamplesView.defaultProps = {
-  activeColumns: [
-    "sample",
-    "createdAt",
-    "host",
-    "collectionLocationV2",
-    "nonHostReads",
-    "qcPercent",
-  ],
+  activeColumns: DEFAULTS_BY_WORKFLOW[WORKFLOWS.SHORT_READ_MNGS.value],
   protectedColumns: ["sample"],
   currentDisplay: "table",
+  workflow: WORKFLOWS.SHORT_READ_MNGS.value,
 };
 
 SamplesView.propTypes = {
