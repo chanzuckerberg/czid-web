@@ -97,7 +97,7 @@ class Landing extends React.Component {
           <div className={cs.links}>
             <ExternalLink
               className={cs.headerLink}
-              href="help.idseq.net"
+              href="https://help.idseq.net"
               analyticsEventName="Landing_help-center-link_clicked"
             >
               Help Center
