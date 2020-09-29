@@ -58,24 +58,24 @@ class QualityControl extends React.Component {
       },
       histogramTooltipData: null,
       readsLostTooltipData: null,
+      redrawNeeded: true,
     };
   }
 
   componentDidMount() {
     this.fetchProjectData();
+    window.addEventListener("resize", this.handleWindowResize);
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { loading, validSamples } = this.state;
-
+    const { loading, validSamples, redrawNeeded } = this.state;
     const { filtersSidebarOpen, sampleStatsSidebarOpen, filters } = this.props;
     if (!isEqual(filters, prevProps.filters)) {
       this.fetchProjectData();
     } else if (
       // Do not render histograms if loading or there are no samples to display
-      (!loading &&
-        validSamples.length > 0 &&
-        validSamples !== prevState.validSamples) ||
+      (!loading && validSamples.length > 0 && redrawNeeded) ||
+      validSamples !== prevState.validSamples ||
       // Rerender the histograms if the sidepanels are toggled to scale their sizes appropriately
       !(
         filtersSidebarOpen === prevProps.filtersSidebarOpen &&
@@ -96,6 +96,7 @@ class QualityControl extends React.Component {
           return d3.format(".2s")(d);
         }
       };
+
       this.totalReadsHistogram = this.renderHistogram({
         container: this.totalReadsHistogramContainer,
         data: totalReadsBins,
@@ -128,7 +129,12 @@ class QualityControl extends React.Component {
           labelY: "Number of Samples",
         });
       }
+      this.setState({ redrawNeeded: false });
     }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleWindowResize);
   }
 
   fetchProjectData = async () => {
@@ -407,6 +413,12 @@ class QualityControl extends React.Component {
     return [dataBins, sampleBins];
   };
 
+  /** callback functions **/
+
+  handleWindowResize = () => {
+    this.setState({ redrawNeeded: true });
+  };
+
   handleHistogramBarClick = (data, binIndex) => {
     const {
       totalReadsBins,
@@ -672,7 +684,7 @@ class QualityControl extends React.Component {
       labelY: labelY,
       labelsLarge: true,
       labelYHorizontalOffset: 4,
-      labelYVerticalOffset: 122,
+      labelYVerticalOffset: 22,
       labelXVerticalOffset: 4,
       yTickFilter: isInteger,
       yTickFormat: d3.format(""),
@@ -723,7 +735,7 @@ class QualityControl extends React.Component {
       numSamplesWithInsertSize < validSamples.length;
 
     return (
-      <div>
+      <div className={cs.histogramSection}>
         {this.renderSampleStatsInfo()}
         <div className={cs.chartsContainer}>
           <div className={cs.halfPageChart}>
@@ -752,6 +764,7 @@ class QualityControl extends React.Component {
                 />
               </div>
               <div
+                className={cs.d3Container}
                 ref={histogramContainer => {
                   this.totalReadsHistogramContainer = histogramContainer;
                 }}
@@ -784,6 +797,7 @@ class QualityControl extends React.Component {
                 />
               </div>
               <div
+                className={cs.d3Container}
                 ref={histogramContainer => {
                   this.qualityReadsHistogramContainer = histogramContainer;
                 }}
@@ -818,6 +832,7 @@ class QualityControl extends React.Component {
                 />
               </div>
               <div
+                className={cs.d3Container}
                 ref={histogramContainer => {
                   this.dcrHistogramContainer = histogramContainer;
                 }}
@@ -882,6 +897,7 @@ class QualityControl extends React.Component {
                 )}
               </div>
               <div
+                className={cs.d3Container}
                 ref={histogramContainer => {
                   this.meanInsertSizeHistogramContainer = histogramContainer;
                 }}
@@ -924,62 +940,64 @@ class QualityControl extends React.Component {
     };
 
     return (
-      <div className={cs.chartsContainer}>
-        <div className={cs.fullPageChart}>
-          <div className={cs.title}>
-            How were my samples processed through the pipeline?
-          </div>
-          <div className={cs.histogramContainer}>
-            <div className={cs.subtitle}>
-              Reads Lost
-              <ColumnHeaderTooltip
-                trigger={
-                  <span>
-                    <InfoIconSmall
-                      className={cs.infoIcon}
-                      onMouseOver={() => {
-                        logAnalyticsEvent(
-                          "QualityControl_stacked-bar-chart-info-icon_hovered"
-                        );
-                      }}
-                    />
-                  </span>
-                }
-                title="Reads Lost"
-                content={SAMPLE_TABLE_COLUMNS_V2.readsLost.tooltip}
-                link={SAMPLE_TABLE_COLUMNS_V2.readsLost.link}
-              />
+      <div className={cs.readsLostSection}>
+        <div className={cs.chartsContainer}>
+          <div className={cs.fullPageChart}>
+            <div className={cs.title}>
+              How were my samples processed through the pipeline?
             </div>
-            {readsLostCategories.length > 0 ? (
-              <React.Fragment>
-                <CategoricalLegend
-                  className={cs.legend}
-                  data={readsLostLegendColors}
-                />
-                <HorizontalStackedBarChart
-                  data={readsLostData}
-                  keys={readsLostCategories}
-                  options={options}
-                  events={events}
-                  yAxisKey={"name"}
-                  className={cs.stackedBarChart}
-                />
-              </React.Fragment>
-            ) : (
-              <div className={cs.noDataBannerFlexContainer}>
-                <InfoBanner
-                  className={cs.noDataBannerContainer}
-                  icon={<ImgVizSecondary />}
-                  link={{
-                    href: SAMPLE_TABLE_COLUMNS_V2.readsLost.link,
-                    text: "Learn about sample QC",
-                  }}
-                  message="No reads lost data could be found for your samples."
-                  title="Reads Lost Visualization"
-                  type="no_reads_lost_step_data"
+            <div className={cs.histogramContainer}>
+              <div className={cs.subtitle}>
+                Reads Lost
+                <ColumnHeaderTooltip
+                  trigger={
+                    <span>
+                      <InfoIconSmall
+                        className={cs.infoIcon}
+                        onMouseOver={() => {
+                          logAnalyticsEvent(
+                            "QualityControl_stacked-bar-chart-info-icon_hovered"
+                          );
+                        }}
+                      />
+                    </span>
+                  }
+                  title="Reads Lost"
+                  content={SAMPLE_TABLE_COLUMNS_V2.readsLost.tooltip}
+                  link={SAMPLE_TABLE_COLUMNS_V2.readsLost.link}
                 />
               </div>
-            )}
+              {readsLostCategories.length > 0 ? (
+                <React.Fragment>
+                  <CategoricalLegend
+                    className={cs.legend}
+                    data={readsLostLegendColors}
+                  />
+                  <HorizontalStackedBarChart
+                    data={readsLostData}
+                    keys={readsLostCategories}
+                    options={options}
+                    events={events}
+                    yAxisKey={"name"}
+                    className={cs.stackedBarChart}
+                  />
+                </React.Fragment>
+              ) : (
+                <div className={cs.noDataBannerFlexContainer}>
+                  <InfoBanner
+                    className={cs.noDataBannerContainer}
+                    icon={<ImgVizSecondary />}
+                    link={{
+                      href: SAMPLE_TABLE_COLUMNS_V2.readsLost.link,
+                      text: "Learn about sample QC",
+                    }}
+                    message="No reads lost data could be found for your samples."
+                    title="Reads Lost Visualization"
+                    type="no_reads_lost_step_data"
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
