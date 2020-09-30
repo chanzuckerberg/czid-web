@@ -138,9 +138,10 @@ export default class SamplesHeatmapControls extends React.Component {
     return (
       <BackgroundModelFilter
         allBackgrounds={options.backgrounds}
-        value={selectedOptions.background}
-        onChange={this.onBackgroundChange}
+        disabled={this.props.loading || !this.props.data}
         enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+        onChange={this.onBackgroundChange}
+        value={selectedOptions.background}
       />
     );
   }
@@ -290,11 +291,12 @@ export default class SamplesHeatmapControls extends React.Component {
   renderTaxonsPerSampleSlider() {
     return (
       <Slider
+        disabled={this.props.loading || !this.props.data}
         label="Taxa per Sample: "
-        min={this.props.options.taxonsPerSample.min}
         max={this.props.options.taxonsPerSample.max}
-        value={this.props.selectedOptions.taxonsPerSample}
+        min={this.props.options.taxonsPerSample.min}
         onAfterChange={this.onTaxonsPerSampleEnd}
+        value={this.props.selectedOptions.taxonsPerSample}
       />
     );
   }

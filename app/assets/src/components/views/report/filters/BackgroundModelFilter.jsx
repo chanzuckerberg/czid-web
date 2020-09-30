@@ -8,10 +8,10 @@ class BackgroundModelFilter extends React.Component {
     const {
       allBackgrounds,
       enableMassNormalizedBackgrounds,
-      value,
       onChange,
+      value,
     } = this.props;
-    let disabled = false;
+    let disabled = !!this.props.disabled || false;
     let backgroundOptions = allBackgrounds.map(background => {
       const disabledOption =
         !enableMassNormalizedBackgrounds && background.mass_normalized;
@@ -52,13 +52,14 @@ BackgroundModelFilter.defaultProps = {
 
 BackgroundModelFilter.propTypes = {
   allBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
-  value: PropTypes.number,
-  onChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool,
   enableMassNormalizedBackgrounds: PropTypes.bool,
-  rounded: PropTypes.bool,
-  placeholder: PropTypes.string,
   label: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
+  rounded: PropTypes.bool,
   selectedInvalidBackground: PropTypes.bool,
+  value: PropTypes.number,
 };
 
 export default BackgroundModelFilter;
