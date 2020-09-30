@@ -26,10 +26,17 @@ class TaxonCount < ApplicationRecord
 
   COUNT_TYPE_NT = 'NT'.freeze
   COUNT_TYPE_NR = 'NR'.freeze
+  COUNT_TYPE_MERGED = 'merged_nt_nr'.freeze
   validates :count_type, presence: true, inclusion: { in: [
     COUNT_TYPE_NT,
     COUNT_TYPE_NR,
+    COUNT_TYPE_MERGED,
   ], }, if: :mass_validation_enabled?
+
+  validates :source_count_type, allow_nil: true, inclusion: { in: [
+    COUNT_TYPE_NT,
+    COUNT_TYPE_NR,
+  ], }
 
   # NOTE: some existing rspec tests assume a value of zero
   validates :count, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
