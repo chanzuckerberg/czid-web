@@ -44,9 +44,6 @@ const getSampleReportData = ({
       `/samples/${sampleId}/report_v2.json?background=${background}&pipeline_version=${pipelineVersion}`
   );
 
-const getSampleReportInfo = (id, params) =>
-  get(`/samples/${id}/report_info${params}`);
-
 const getSummaryContigCounts = (id, minContigReads) =>
   get(
     `/samples/${id}/summary_contig_counts?min_contig_reads=${minContigReads}`
@@ -466,7 +463,6 @@ export {
   getSampleDimensions,
   getMassNormalizedBackgroundAvailability,
   getSampleReportData,
-  getSampleReportInfo,
   getSamples,
   getSamplesLocations,
   getSampleStats,

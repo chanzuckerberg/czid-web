@@ -20,7 +20,7 @@ class SamplesController < ApplicationController
   ##########################################
 
   # Read action meant for single samples with set_sample before_action
-  READ_ACTIONS = [:show, :report_v2, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+  READ_ACTIONS = [:show, :report_v2, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary,
@@ -875,52 +875,6 @@ class SamplesController < ApplicationController
       end
     end
     render json: amr_counts || []
-  end
-
-  # The json response here should be precached in PipelineRun.
-  def report_info
-    skip_cache = params[:skip_cache] || false
-    MetricUtil.put_metric_now("samples.cache.requested", 1) unless skip_cache
-
-    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    if pipeline_run.nil?
-      message = "Pipeline run not found for sample #{@sample.id}"
-      raise ActiveRecord::RecordNotFound, message
-    end
-    report_info_params = pipeline_run.report_info_params
-
-    # Set background_id to a viewable background
-    params[:background_id] = get_background_id(@sample)
-
-    cache_key = ReportHelper.report_info_cache_key(
-      request.path,
-      params
-      .permit(report_info_params.keys)
-      .merge(pipeline_run_id: pipeline_run.id)
-    )
-
-    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    json =
-      if skip_cache
-        ReportHelper.report_info_json(pipeline_run, params[:background_id])
-      else
-        # This allows 304 Not Modified to be returned so that the client can use its
-        # local cache and avoid the large download.
-        httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
-        response.headers["Last-Modified"] = httpdate
-        # This is a custom header for testing and debugging
-        response.headers["X-IDseq-Cache"] = 'requested'
-        response.headers["X-IDseq-Cache-Key"] = cache_key
-        Rails.logger.info("Requesting report_info #{cache_key}")
-
-        Rails.cache.fetch(cache_key, expires_in: 30.days) do
-          MetricUtil.put_metric_now("samples.cache.miss", 1)
-          response.headers["X-IDseq-Cache"] = 'missed'
-          ReportHelper.report_info_json(pipeline_run, params[:background_id])
-        end
-      end
-
-    render json: json
   end
 
   def save_metadata
