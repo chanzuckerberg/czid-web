@@ -5,6 +5,7 @@
   border: $border-primary;
   background-color: $primary;
   color: $white;
+  fill: $white;
   margin-right: 0;
 
   .icon-label {
@@ -19,6 +20,7 @@
     border: $border-primary-dark;
     background: $primary-dark;
     color: $white;
+    fill: $white;
   }
 
   &:active,
@@ -26,6 +28,7 @@
     border: $border-primary-darkest;
     background-color: $primary-darkest;
     color: $white;
+    fill: $white;
   }
 
   &:focus,
@@ -33,6 +36,7 @@
     border: $border-primary-darkest;
     background-color: $primary-darkest;
     color: $white;
+    fill: $white;
   }
 
   &:disabled,
@@ -40,6 +44,7 @@
     border: 0;
     background-color: $gray-light;
     color: $gray-dark;
+    fill: $gray-dark;
 
     .icon-label {
       svg {

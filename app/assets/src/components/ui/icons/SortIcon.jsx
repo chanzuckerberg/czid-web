@@ -1,23 +1,20 @@
 import React from "react";
-import cx from "classnames";
 import PropTypes from "prop-types";
 
-export default class SortIcon extends React.Component {
-  render() {
-    const { sortDirection, className } = this.props;
-    return sortDirection === "ascending" ? (
-      <i className={cx("fa fa-angle-up", className)} />
-    ) : (
-      <i className={cx("fa fa-angle-down", className)} />
-    );
-  }
-}
+import IconArrowDownSmall from "./IconArrowDownSmall";
+import IconArrowUpSmall from "./IconArrowUpSmall";
 
-SortIcon.defaultProps = {
-  sortDirection: "ascending",
+const SortIcon = ({ className, sortDirection }) => {
+  return sortDirection === "ascending" ? (
+    <IconArrowDownSmall className={className} />
+  ) : (
+    <IconArrowUpSmall className={className} />
+  );
 };
 
 SortIcon.propTypes = {
-  sortDirection: PropTypes.oneOf(["ascending", "descending"]),
   className: PropTypes.string,
+  sortDirection: PropTypes.oneOf(["ascending", "descending"]),
 };
+
+export default SortIcon;

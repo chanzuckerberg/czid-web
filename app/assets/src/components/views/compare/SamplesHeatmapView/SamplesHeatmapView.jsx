@@ -25,7 +25,7 @@ import { getSampleTaxons, saveVisualization, getTaxaDetails } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
-import SortIcon from "~ui/icons/SortIcon";
+import { SortIcon } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { CONSENSUS_GENOME_FEATURE } from "~/components/utils/features";

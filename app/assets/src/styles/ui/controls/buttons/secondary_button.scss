@@ -5,6 +5,7 @@
   border: $border-primary;
   background-color: $white;
   color: $primary;
+  fill: $primary;
 
   .icon-label {
     svg {
@@ -16,6 +17,7 @@
   &.hover {
     background: $primary;
     color: $white;
+    fill: $white;
   }
 
   &:active,
@@ -23,6 +25,7 @@
     border: $border-primary-dark;
     background-color: $primary-dark;
     color: $white;
+    fill: $white;
   }
 
   &:focus,
@@ -30,6 +33,7 @@
     border: $border-primary-dark;
     background-color: $primary-dark;
     color: $white;
+    fill: $white;
   }
 
   &:disabled,
@@ -37,6 +41,7 @@
     border: $border-gray-light;
     background-color: $gray-off-white;
     color: $gray-light;
+    fill: $gray-light;
 
     .icon-label {
       svg {

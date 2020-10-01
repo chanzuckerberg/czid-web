@@ -3,6 +3,7 @@ import React from "react";
 
 import DownloadButton from "~ui/controls/buttons/DownloadButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import ButtonDropdown from "~ui/controls/dropdowns/ButtonDropdown";
 import BetaLabel from "~ui/labels/BetaLabel";
 import DownloadButtonDropdown from "~ui/controls/dropdowns/DownloadButtonDropdown";
@@ -178,6 +179,7 @@ class PlaygroundControls extends React.Component {
           </ComponentCard>
           <ComponentCard title="Dropdown" width={4}>
             <Dropdown
+              arrowInsideTrigger={false}
               key={0}
               fluid
               rounded
@@ -229,6 +231,16 @@ class PlaygroundControls extends React.Component {
               onChange={(a, b) => {
                 this.setState({ event: "MultipleDropdown:Change" });
               }}
+            />
+          </ComponentCard>
+          <ComponentCard title="Bare Dropdown" width={4}>
+            <BareDropdown
+              key={0}
+              trigger={<div>click me</div>}
+              items={this.dropdownOptions.map((option, i) => (
+                <BareDropdown.Item key={`option_${i}`} text={`option ${i}`} />
+              ))}
+              direction="left"
             />
           </ComponentCard>
           <ComponentCard title="Slider" width={4}>

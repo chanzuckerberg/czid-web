@@ -16,7 +16,9 @@ import HeatmapPublic from "./HeatmapPublic";
 import IconAlert from "./IconAlert";
 import IconAlertSmall from "./IconAlertSmall";
 import IconAlignmentSmall from "./IconAlignmentSmall";
+import IconArrowDownSmall from "./IconArrowDownSmall";
 import IconArrowRight from "./IconArrowRight";
+import IconArrowUpSmall from "./IconArrowUpSmall";
 import IconBackgroundModel from "./IconBackgroundModel";
 import IconBrowserSmall from "./IconBrowserSmall";
 import IconChartSmall from "./IconChartSmall";
@@ -72,6 +74,9 @@ export const ICONS_TAXONOMY = {
     IconAlert,
     IconAlertSmall,
     IconAlignmentSmall,
+    IconArrowDownSmall,
+    IconArrowRight,
+    IconArrowUpSmall,
     IconBackgroundModel,
     IconBrowserSmall,
     IconChartSmall,
@@ -79,6 +84,7 @@ export const ICONS_TAXONOMY = {
     IconCoverage,
     IconDownload,
     IconDownloadSmall,
+    InfoIconSmall,
     IconPhyloTreeSmall,
     InfoCircleIcon,
     InfoIcon,
@@ -98,7 +104,7 @@ export const ICONS_TAXONOMY = {
     SamplePrivateIcon,
     SamplePublicIcon,
     SaveIcon,
-    InfoIconSmall,
+    SortIcon,
     UserIcon,
   },
   FONT_AWESOME: {
@@ -107,7 +113,6 @@ export const ICONS_TAXONOMY = {
     GlobeLinedIcon,
     InsightIcon,
     LoadingIcon,
-    SortIcon,
     IconArrowRight,
   },
   LOGO: {

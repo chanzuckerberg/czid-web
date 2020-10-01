@@ -60,8 +60,9 @@
 
     .sortIcon {
       // Make the sort icon slightly bigger than the text.
-      font-size: 1.2em;
       margin-left: 4px;
+      fill: currentColor;
+      width: 12px;
 
       &.active {
         display: flex;

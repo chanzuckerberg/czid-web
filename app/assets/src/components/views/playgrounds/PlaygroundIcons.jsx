@@ -5,7 +5,6 @@ import { ICONS_TAXONOMY } from "~ui/icons";
 import Illustrations from "~ui/illustrations";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import cs from "./playground_icons.scss";
-import { IconAlert, IconAlertSmall } from "../../ui/icons";
 
 class PlaygroundIcons extends React.Component {
   render() {

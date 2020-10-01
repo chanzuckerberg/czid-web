@@ -4,6 +4,8 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import React from "react";
 
+import { IconArrowDownSmall } from "~ui/icons";
+
 const Button = ({
   icon,
   label,
@@ -35,7 +37,9 @@ const Button = ({
       )}
     >
       {content}
-      {hasDropdownArrow && <i className="icon-dropdown-arrow" />}
+      {hasDropdownArrow && (
+        <IconArrowDownSmall className="icon-dropdown-arrow" />
+      )}
     </BaseButton>
   );
 };

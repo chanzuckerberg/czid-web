@@ -22,18 +22,21 @@
   }
 }
 
-.toggleIcon {
+.toggleContainer {
   padding: 0 $space-default;
-  font-size: 22px;
-  color: $gray-dark;
 
-  &.topRight {
-    margin: -$space-xxs 0 0 $space-default;
-    padding: 0;
-  }
+  .toggleIcon {
+    font-size: 22px;
+    fill: $gray-dark;
 
-  &:hover {
-    color: $black;
+    &.topRight {
+      margin: -$space-xxs 0 0 $space-default;
+      padding: 0;
+    }
+
+    &:hover {
+      fill: $black;
+    }
   }
 }
 

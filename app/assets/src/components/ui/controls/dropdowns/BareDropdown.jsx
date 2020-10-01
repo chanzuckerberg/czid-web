@@ -18,6 +18,7 @@ import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import Input from "~ui/controls/Input";
 import PropTypes from "prop-types";
 import PortalDropdown from "./PortalDropdown.jsx";
+import { IconArrowDownSmall } from "~ui/icons";
 import cs from "./bare_dropdown.scss";
 
 class BareDropdown extends React.Component {
@@ -33,29 +34,28 @@ class BareDropdown extends React.Component {
 
   // If the user provides us options instead of items, we will render them like this.
   renderItemsDefault = options => {
-    return options.map(
-      option =>
-        option.customNode ? (
-          <div
-            key={option.value}
-            onClick={() => this.props.onChange(option.value)}
-            className={cx(
-              cs.item,
-              this.props.value === option.value && cs.active
-            )}
-          >
-            {option.customNode}
-          </div>
-        ) : (
-          <BaseDropdown.Item
-            key={option.value}
-            onClick={() => this.props.onChange(option.value)}
-            active={this.props.value === option.value}
-            className={cs.item}
-          >
-            {option.text}
-          </BaseDropdown.Item>
-        )
+    return options.map(option =>
+      option.customNode ? (
+        <div
+          key={option.value}
+          onClick={() => this.props.onChange(option.value)}
+          className={cx(
+            cs.item,
+            this.props.value === option.value && cs.active
+          )}
+        >
+          {option.customNode}
+        </div>
+      ) : (
+        <BaseDropdown.Item
+          key={option.value}
+          onClick={() => this.props.onChange(option.value)}
+          active={this.props.value === option.value}
+          className={cs.item}
+        >
+          {option.text}
+        </BaseDropdown.Item>
+      )
     );
   };
 
@@ -155,7 +155,6 @@ class BareDropdown extends React.Component {
       !hideArrow &&
         (arrowInsideTrigger ? cs.arrowInsideTrigger : cs.arrowOutsideTrigger),
       className,
-      hideArrow && cs.hideArrow,
       smallArrow && cs.smallArrow
     );
 
@@ -196,6 +195,9 @@ class BareDropdown extends React.Component {
           trigger={wrappedTrigger}
           className={dropdownClassName}
           onBlur={e => e.stopPropagation()}
+          icon={
+            hideArrow || <IconArrowDownSmall className={cs.dropdownArrow} />
+          }
         >
           <BaseDropdown.Menu onClick={this.handleMenuClick}>
             {children}
@@ -292,6 +294,7 @@ class BareDropdown extends React.Component {
         onBlur={e => e.stopPropagation()}
         search={search ? identity : undefined}
         ref={this.baseDropdownRef}
+        icon={hideArrow || <IconArrowDownSmall className={cs.dropdownArrow} />}
       >
         {menu}
       </BaseDropdown>

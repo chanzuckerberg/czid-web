@@ -1,6 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
+
+import { IconArrowDownSmall, IconArrowUpSmall } from "~ui/icons";
+
 import cs from "./accordion.scss";
 
 class Accordion extends React.Component {
@@ -40,15 +43,23 @@ class Accordion extends React.Component {
           <div className={cs.fill} />
           {toggleable && (
             <div className={cs.toggleContainer}>
-              <i
-                className={cx(
-                  "fa",
-                  open ? "fa-angle-up" : "fa-angle-down",
-                  cs.toggleIcon,
-                  iconClassName,
-                  cs[toggleArrowAlignment]
-                )}
-              />
+              {open ? (
+                <IconArrowUpSmall
+                  className={cx(
+                    cs.toggleIcon,
+                    iconClassName,
+                    cs[toggleArrowAlignment]
+                  )}
+                />
+              ) : (
+                <IconArrowDownSmall
+                  className={cx(
+                    cs.toggleIcon,
+                    iconClassName,
+                    cs[toggleArrowAlignment]
+                  )}
+                />
+              )}
             </div>
           )}
         </div>

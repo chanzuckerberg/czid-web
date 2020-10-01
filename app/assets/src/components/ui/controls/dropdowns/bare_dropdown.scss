@@ -4,16 +4,21 @@
 
 :global(.ui):global(.dropdown).bareDropdown,
 .portalDropdown {
+  .dropdownArrow {
+    fill: currentColor;
+    width: 12px;
+  }
+
   // Places the arrow within the trigger.
   &.arrowInsideTrigger {
     position: relative;
 
-    i:global(.dropdown) {
+    .dropdownArrow {
       margin: 0;
       padding: 0;
       position: absolute;
       right: 10px;
-      top: 5px;
+      top: 10px;
       line-height: 24px;
       pointer-events: none;
       font-size: 20px;
@@ -25,20 +30,20 @@
     display: flex;
     align-items: center;
 
-    i:global(.dropdown) {
+    .dropdownArrow {
       margin-left: 0;
       font-size: 20px;
     }
   }
 
   &.hideArrow {
-    i:global(.dropdown) {
+    .dropdownArrow {
       display: none;
     }
   }
 
   &.smallArrow {
-    i:global(.dropdown) {
+    .dropdownArrow {
       font-size: 16px;
     }
   }
