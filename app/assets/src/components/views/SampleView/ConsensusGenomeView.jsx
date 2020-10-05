@@ -1,4 +1,4 @@
-import { filter, head, isEmpty } from "lodash/fp";
+import { camelCase, filter, head, isEmpty } from "lodash/fp";
 import React from "react";
 import memoize from "memoize-one";
 import cx from "classnames";
@@ -19,43 +19,22 @@ import { IconAlert, LoadingIcon, IconArrowRight } from "~ui/icons";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import PropTypes from "~utils/propTypes";
 import { sampleErrorInfo } from "~utils/sample";
+import { FIELDS_METADATA } from "~utils/tooltip";
 
 import cs from "./consensus_genome_view.scss";
 import csSampleMessage from "./sample_message.scss";
 
-// TODO: Deduplicate with tooltip.js#FIELDS_METADATA.
 const CONSENSUS_GENOME_VIEW_METRIC_COLUMNS = [
-  [
-    {
-      key: "referenceNCBIEntry",
-      name: "Reference NCBI Entry",
-      tooltip: "The NCBI Genbank entry for the reference accession.",
-    },
-  ],
-  [
-    {
-      key: "referenceLength",
-      name: "Reference Length",
-      tooltip: "Length in base pairs of the reference accession.",
-    },
-  ],
-  [
-    {
-      key: "coverageDepth",
-      name: "Coverage Depth",
-      tooltip:
-        "The average read depth of aligned contigs and reads over the length of the accession.",
-    },
-  ],
-  [
-    {
-      key: "coverageBreadth",
-      name: "Coverage Breadth",
-      tooltip:
-        "The percentage of the accession that is covered by at least one read or contig.",
-    },
-  ],
-];
+  "referenceNCBIEntry",
+  "referenceLength",
+  "coverageDepth",
+  "coverageBreadth",
+].map(key => [
+  {
+    key,
+    ...FIELDS_METADATA[key],
+  },
+]);
 
 // TODO: use classnames and css
 const FILL_COLOR = "#A9BDFC";
@@ -293,7 +272,7 @@ class ConsensusGenomeView extends React.Component {
                   <div className={cs.metric} key={metric.key}>
                     <div className={cs.label}>
                       <BasicPopup
-                        trigger={<div>{metric.name}</div>}
+                        trigger={<div>{metric.label}</div>}
                         inverted
                         content={metric.tooltip}
                       />
@@ -326,7 +305,6 @@ class ConsensusGenomeView extends React.Component {
       taxon_name: data.taxon_info.taxon_name,
       ...data.quality_metrics,
     };
-
     const helpText = (
       <React.Fragment>
         These metrics help determine the quality of the reference genome.{" "}
@@ -376,90 +354,57 @@ class ConsensusGenomeView extends React.Component {
         {options && options.percent ? "%" : null}
       </div>
     );
-    // TODO: Deduplicate with tooltip.js#FIELDS_METADATA.
-    return [
+    const columns = [
       {
-        cellRenderer: renderRowCell,
         dataKey: "taxon_name",
-        flexGrow: 1,
         headerClassName: cs.primaryHeader,
         label: "Taxon",
         width: 315,
       },
       {
-        cellRenderer: renderRowCell,
-        columnData: {
-          tooltip:
-            "The total number of single-end reads uploaded. Each end of the paired-end reads count as one read.",
-        },
+        columnData: FIELDS_METADATA["totalReadsCG"],
         dataKey: "total_reads",
-        flexGrow: 1,
         label: "Reads",
       },
       {
         cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
-        columnData: {
-          tooltip:
-            "The percentage of bases that are either guanine (G) or cytosine (C).",
-        },
         dataKey: "gc_percent",
-        flexGrow: 1,
-        label: "GC Content",
       },
       {
-        cellRenderer: renderRowCell,
-        columnData: {
-          tooltip:
-            "The number of single nucleotide polymorphisms (SNPs) - locations where the nucleotide of the consensus genome does not match the base of the reference genome",
-        },
         dataKey: "ref_snps",
-        flexGrow: 1,
-        label: "SNPs",
       },
       {
         cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
-        columnData: {
-          tooltip:
-            "The percentage of nucleotides of the consensus genome that are identical to those in the reference genome.",
-        },
         dataKey: "percent_identity",
-        flexGrow: 1,
-        label: "%id",
       },
       {
-        cellRenderer: renderRowCell,
-        columnData: {
-          tooltip:
-            "The number of nucleotides that are A,T,C, or G. Nucleotides are only called if 10 or more reads aligned.",
-        },
         dataKey: "n_actg",
-        flexGrow: 1,
-        label: "Informative Nucleotides",
         width: 150,
       },
       {
-        cellRenderer: renderRowCell,
-        columnData: {
-          tooltip:
-            "The number of bases that are N's because they could not be called.",
-        },
         dataKey: "n_missing",
-        flexGrow: 1,
-        label: "Missing Bases",
         width: 100,
       },
       {
-        cellRenderer: renderRowCell,
-        columnData: {
-          tooltip:
-            "The number of bases that could not be specified due to multiple observed alleles of single-base polymorphisms.",
-        },
         dataKey: "n_ambiguous",
-        flexGrow: 1,
-        label: "Ambiguous Bases",
         width: 100,
       },
     ];
+
+    for (const col of columns) {
+      if (!col["cellRenderer"]) {
+        col["cellRenderer"] = renderRowCell;
+      }
+      col["flexGrow"] = 1;
+
+      // TODO: Convert to send in camelCase from the backend.
+      const key = camelCase(col["dataKey"]);
+      if (FIELDS_METADATA.hasOwnProperty(key)) {
+        col["columnData"] = FIELDS_METADATA[key];
+        col["label"] = FIELDS_METADATA[key].label;
+      }
+    }
+    return columns;
   };
 
   renderLoader = () => {
