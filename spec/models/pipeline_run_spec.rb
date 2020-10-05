@@ -389,23 +389,41 @@ describe PipelineRun, type: :model do
       }.to_json
     end
 
-    let(:user) { build_stubbed(:admin) }
-    let(:sample) { build_stubbed(:sample, user: user, id: 123) }
-    let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage, dag_json: dag_json("test_host")) }
-    let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample, pipeline_run_stages: [pipeline_run_stage]) }
+    let(:host_genome_name) { "none" }
 
-    it "should show the host that was subtracted" do
-      expect(pipeline_run.host_subtracted).to eq("test_host")
-      pipeline_run_stage.dag_json = dag_json("ercc")
-      expect(pipeline_run.host_subtracted).to eq("ercc")
+    before do
+      star_index_path = "s3://idseq-public-references/host_filter/test_host/2020-09-22/test_host_STAR_genome.tar"
+      bowtie2_index_path = "s3://idseq-public-references/host_filter/test_host/2020-09-22/test_host_bowtie2_genome.tar"
+      @test_host = create(:host_genome, name: "test_host", s3_star_index_path: star_index_path, s3_bowtie2_index_path: bowtie2_index_path)
+
+      user = create(:admin)
+      project = create(:project)
+      @sample_one = create(:sample, project: project, user: user, host_genome_name: host_genome_name)
+      @sample_two = create(:sample, project: project, user: user, host_genome_name: host_genome_name)
+      create(:pipeline_run, sample: @sample_one, pipeline_execution_strategy: PipelineRun.pipeline_execution_strategies[:directed_acyclic_graph])
+      create(:pipeline_run, sample: @sample_two, sfn_execution_arn: fake_sfn_execution_arn)
     end
-    it "should return nil when no host filtering stage" do
-      pipeline_run_stage.step_number = 0
-      expect(pipeline_run.host_subtracted).to eq(nil)
+
+    context "host filter genome available" do
+      let(:host_genome_name) { @test_host.name }
+
+      it "should show the host that was subtracted for dag runs" do
+        expect(@sample_one.first_pipeline_run.host_subtracted).to eq("test_host")
+      end
+      it "should show the host that was subtracted for sfn runs" do
+        expect(@sample_two.first_pipeline_run.host_subtracted).to eq("test_host")
+      end
     end
-    it "should return nil when no valid star_genome" do
-      pipeline_run_stage.dag_json = dag_json('no match spaces')
-      expect(pipeline_run.host_subtracted).to eq(nil)
+
+    context "ercc only" do
+      let(:host_genome_name) { "ercc" }
+
+      it "should show ercc only subtracted for dag runs" do
+        expect(@sample_one.first_pipeline_run.host_subtracted).to eq("ERCC Only")
+      end
+      it "should show ercc only subtracted for sfn runs" do
+        expect(@sample_two.first_pipeline_run.host_subtracted).to eq("ERCC Only")
+      end
     end
   end
 

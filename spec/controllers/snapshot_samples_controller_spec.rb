@@ -9,10 +9,12 @@ RSpec.describe SnapshotSamplesController, type: :controller do
 
     user = create(:user)
     project = create(:project, users: [user], metadata_fields: [nucleotide_type])
+    fake_sfn_execution_arn = "fake:sfn:execution:arn".freeze
+
     @sample_one = create(:sample,
                          project: project,
                          metadata_fields: { "nucleotide_type" => nil },
-                         pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+                         pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, sfn_execution_arn: fake_sfn_execution_arn }])
     @sample_two = create(:sample,
                          project: project,
                          pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
@@ -283,7 +285,7 @@ RSpec.describe SnapshotSamplesController, type: :controller do
                                          "wetlab_protocol", "workflow",]
         expected_pipeline_run_keys = ["adjusted_remaining_reads", "alert_sent", "alignment_config_id", "assembled", "created_at",
                                       "dag_vars", "error_message", "finalized", "fraction_subsampled", "id", "job_status",
-                                      "known_user_error", "max_input_fragments", "pipeline_branch", "pipeline_commit",
+                                      "known_user_error", "host_subtracted", "max_input_fragments", "pipeline_branch", "pipeline_commit",
                                       "pipeline_execution_strategy", "pipeline_version", "results_finalized", "sample_id",
                                       "sfn_execution_arn", "subsample", "total_ercc_reads", "total_reads", "truncated",
                                       "unmapped_reads", "updated_at", "use_taxon_whitelist", "version", "wdl_version",]
