@@ -21,8 +21,8 @@ import PropTypes from "~/components/utils/propTypes";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 
-import { REPORT_TABLE_COLUMNS } from "../report/ReportTable/constants";
-import HoverActions from "../report/ReportTable/HoverActions";
+import { REPORT_TABLE_COLUMNS } from "./constants";
+import HoverActions from "./HoverActions";
 import cs from "./report_table.scss";
 
 // Values for null values when sorting ascending and descending

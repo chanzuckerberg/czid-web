@@ -5,7 +5,6 @@ import { get, filter, head, map } from "lodash/fp";
 import BasicPopup from "~/components/BasicPopup";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import SampleViewControls from "../SampleView/SampleViewControls";
 import ViewHeader from "~/components/layout/ViewHeader";
 import { UserContext } from "~/components/common/UserContext";
 import { DownloadButton, SaveButton, ShareButton } from "~ui/controls/buttons";
@@ -15,7 +14,8 @@ import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import { saveVisualization } from "~/api";
 import { getConsensusGenomeZipLink } from "~/components/views/report/utils/download";
 
-import PipelineVersionSelect from "../SampleView/PipelineVersionSelect";
+import SampleViewControls from "./SampleViewControls";
+import PipelineVersionSelect from "./PipelineVersionSelect";
 import cs from "./sample_view_header.scss";
 
 export default function SampleViewHeader({

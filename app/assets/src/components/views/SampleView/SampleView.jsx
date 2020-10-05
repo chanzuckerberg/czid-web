@@ -55,15 +55,15 @@ import SampleViewHeader from "./SampleViewHeader";
 import Tabs from "~/components/ui/controls/Tabs";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import ConsensusGenomeView from "~/components/views/SampleViewV2/ConsensusGenomeView";
-import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
+import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
+import SampleMessage from "~/components/views/SampleView/SampleMessage";
 
 import { TREE_METRICS, MASS_NORMALIZED_PIPELINE_VERSION } from "./constants";
 import ReportViewSelector from "./ReportViewSelector";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
 import TaxonTreeVis from "./TaxonTreeVis";
-import cs from "./sample_view_v2.scss";
+import cs from "./sample_view.scss";
 import csSampleMessage from "./sample_message.scss";
 
 const mapValuesWithKey = mapValues.convert({ cap: false });
@@ -103,7 +103,7 @@ const NOTIFICATON_TYPES = {
   invalidBackground: "invalid background",
 };
 
-export default class SampleViewV2 extends React.Component {
+export default class SampleView extends React.Component {
   constructor(props) {
     super(props);
 
@@ -1379,9 +1379,9 @@ export default class SampleViewV2 extends React.Component {
   };
 }
 
-SampleViewV2.contextType = UserContext;
+SampleView.contextType = UserContext;
 
-SampleViewV2.propTypes = {
+SampleView.propTypes = {
   sampleId: PropTypes.number,
   snapshotShareId: PropTypes.string,
 };

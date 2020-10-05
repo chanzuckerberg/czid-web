@@ -9,7 +9,7 @@ import BasicPopup from "~/components/BasicPopup";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
-import SampleMessage from "~/components/views/SampleViewV2/SampleMessage";
+import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import Histogram from "~/components/visualizations/Histogram";
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";

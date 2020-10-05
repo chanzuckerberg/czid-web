@@ -3,7 +3,8 @@ import moment from "moment";
 import BasicPopup from "~/components/BasicPopup";
 import BareDropdown from "~/components/ui/controls/dropdowns/BareDropdown";
 import PropTypes from "~/components/utils/propTypes";
-import cs from "./sample_view.scss";
+
+import cs from "./pipeline_version_select.scss";
 
 class PipelineVersionSelect extends React.Component {
   getLastProcessedString = () => {
@@ -33,7 +34,6 @@ class PipelineVersionSelect extends React.Component {
     return (
       <BareDropdown
         trigger={trigger}
-        className={cs.pipelineVersionDropdown}
         options={options}
         onChange={this.props.onPipelineVersionSelect}
         smallArrow

@@ -1,69 +1,90 @@
 @import "~styles/themes/colors";
-@import "~styles/themes/typography";
-@import "~styles/typography";
 @import "~styles/themes/elements";
+@import "~styles/themes/typography";
 
-/* Subheader */
-.viewHeader {
-  margin-bottom: 5px;
+.sampleViewContainer {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - #{$header-total-height});
+}
 
-  .pipelineInfo {
-    @include font-body-xxxs;
-    color: $gray-dark;
-    margin-top: 14px;
-    margin-bottom: 18px;
+.sampleViewHeader {
+  flex: 0 0 auto;
+}
 
-    .warning {
-      text-align: left;
-      margin-bottom: 20px;
+.tabsContainer {
+  flex: 0 0 auto;
+  height: 60px;
+}
 
-      &:last-child {
-        margin-bottom: 0;
+.reportViewContainer {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  margin-top: $space-xl;
+
+  .reportFilters {
+    flex: 0 0 auto;
+  }
+
+  .reportTable {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+  }
+
+  .reportHeader {
+    display: flex;
+
+    .statsRow {
+      @include font-body-xxs;
+
+      color: $gray-dark;
+      flex: 1 0 auto;
+
+      .reportInfoMsg {
+        &:not(:first-child) {
+          margin-left: $space-xxs;
+        }
+      }
+
+      .clearAllFilters {
+        margin-left: $space-xxs;
+        font-weight: $font-weight-semibold;
+        white-space: nowrap;
+        cursor: pointer;
       }
     }
-  }
 
-  .linkToPipelineViz {
-    cursor: pointer;
-
-    &:hover {
-      color: $primary;
+    .reportViewSelector {
+      flex: 0 0 auto;
     }
-  }
-
-  .sampleDetailsLinkContainer {
-    margin-top: 5px;
-  }
-
-  .sampleDetailsLink {
-    color: $primary;
-    font-weight: $font-weight-semibold;
-    cursor: pointer;
-
-    &:hover {
-      opacity: 0.5;
-    }
-  }
-
-  .warningIcon {
-    margin-left: 2px;
-    transform: translateY(1px);
   }
 }
 
-.reportsDivider {
-  background-color: $gray-off-white;
-  height: 8px !important;
-  border-top: 1px solid $white !important;
+.highlight {
+  @include font-header-xs;
 }
 
-.dividerContainer {
-  height: 2px;
-  padding: 30px 0;
+.notificationBody {
+  @include font-body-xs;
+
+  .externalLink {
+    color: inherit !important;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+  }
 }
 
 .tabs {
   margin: 25px 0;
+
+  .statusLabel {
+    margin-left: $space-xs;
+    // To center without offsetting "indicator" line
+    margin-top: $space-xxxs;
+    vertical-align: text-top;
+  }
 }
 
 .divider {
@@ -74,35 +95,7 @@
   right: 0;
 }
 
-.pipelineVersionSelectContainer {
-  display: inline-block;
-  padding-left: 2px;
-
-  .pipelineVersionSelect {
-    display: flex;
-  }
-
-  .dropdownTrigger {
-    margin-right: 5px;
-    margin-left: 3px;
-  }
-}
-
-.waitingContainer {
-  margin-top: 100px;
-  text-align: center;
-
-  .spinner {
-    margin-top: 20px;
-  }
-}
-
-.failedContainer {
-  margin-top: 20px;
-  text-align: center;
-
-  .failed {
-    color: $error-medium !important;
-    font-weight: bold;
-  }
+.dividerContainer {
+  height: 2px;
+  padding: 30px 0;
 }

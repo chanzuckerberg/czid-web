@@ -1,0 +1,13 @@
+.pipelineVersionSelectContainer {
+  display: inline-block;
+  padding-left: 2px;
+
+  .pipelineVersionSelect {
+    display: flex;
+  }
+
+  .dropdownTrigger {
+    margin-right: 5px;
+    margin-left: 3px;
+  }
+}
