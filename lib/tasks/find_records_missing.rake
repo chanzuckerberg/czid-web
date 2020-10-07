@@ -1,4 +1,3 @@
-
 desc 'Finds database records that are missing child records'
 
 task 'find_records_missing_children', [:max_per_model] => :environment do |_t, args|
@@ -156,7 +155,7 @@ end
 
 def all_models
   Rails.application.eager_load!
-  ApplicationRecord.descendants.map { |m| [m.name, m] }.to_h
+  ApplicationRecord.descendants.index_by(&:name)
 end
 
 def get_total_message(max_per_model, model)

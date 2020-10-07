@@ -29,6 +29,7 @@ task :export_dags, [:sample_id, :print, :step] => :environment do |_, args|
         if args.step && step_number != args.step.to_i
           next
         end
+
         puts "Exporting DAG #{step_number} for pipeline run #{pipeline_run.id} (sample #{pipeline_run.sample.id})"
         exporter = DAGExporter.new(
           step_number: step_number,

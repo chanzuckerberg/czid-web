@@ -42,8 +42,8 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
 
   Logging.logger.root.level = :info
 
-  testrun = args.run_mode == "testrun" ? true : false
-  noverify = args.run_mode == "noverify" ? true : false
+  testrun = args.run_mode == "testrun"
+  noverify = args.run_mode == "noverify"
   puts "\n\nTEST RUN - LOCAL DATA" if testrun
 
   ncbi_date = ENV['NCBI_DATE']
@@ -128,11 +128,11 @@ class LineageDatabaseImporter
   end
 
   def host
-    Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
+    Rails.env.development? ? 'db' : '$RDS_ADDRESS'
   end
 
   def lp
-    Rails.env == 'development' ? '' : '--user=$DB_USERNAME --password=$DB_PASSWORD'
+    Rails.env.development? ? '' : '--user=$DB_USERNAME --password=$DB_PASSWORD'
   end
 
   def import!(testrun = false, noverify = false)
@@ -267,6 +267,7 @@ class LineageDatabaseImporter
     if affected != expected
       raise "Wrong number of rows affected: #{affected} and #{expected}"
     end
+
     affected
   end
 

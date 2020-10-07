@@ -2,6 +2,7 @@ task genus_aggregation: :environment do
   Sample.all.each do |s|
     pr = s.first_pipeline_run
     next unless pr
+
     ActiveRecord::Base.transaction do
       TaxonCount.connection.execute(
         "DELETE FROM taxon_counts

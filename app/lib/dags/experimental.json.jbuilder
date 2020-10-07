@@ -50,12 +50,13 @@ json.targets do
       json.nonhost_fastq_out ["nonhost_R1.fastq"]
     end
   else
-    # rubocop:disable IfInsideElse
+    # rubocop:disable Style/IfInsideElse
     if attr[:fastq2]
       json.nonhost_fastq_out ["nonhost_R1.fasta", "nonhost_R2.fasta"]
     else
       json.nonhost_fastq_out ["nonhost_R1.fasta"]
     end
+    # rubocop:enable Style/IfInsideElse
   end
 
   json.cdhitdup_clusters [

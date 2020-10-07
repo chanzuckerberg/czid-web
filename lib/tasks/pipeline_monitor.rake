@@ -39,12 +39,14 @@ class CheckPipelineRuns
     Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr, #{num_pt} pt, and #{num_wr} wr. shard #{shard_id} out of #{num_shards}")
     pr_ids.each do |prid|
       next unless prid % num_shards == shard_id
+
       pr = PipelineRun.find(prid)
       begin
         break if @shutdown_requested
+
         Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
         pr.update_job_status
-      rescue => exception
+      rescue StandardError => exception
         LogUtil.log_err("Updating pipeline run #{pr.id} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
@@ -52,12 +54,14 @@ class CheckPipelineRuns
 
     pt_ids.each do |ptid|
       next unless ptid % num_shards == shard_id
+
       pt = PhyloTree.find(ptid)
       begin
         break if @shutdown_requested
+
         Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
         pt.monitor_job
-      rescue => exception
+      rescue StandardError => exception
         LogUtil.log_err("Monitor job for phylo_tree #{pt.id} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
@@ -65,12 +69,14 @@ class CheckPipelineRuns
 
     wr_ids.each do |wrid|
       next unless wrid % num_shards == shard_id
+
       wr = WorkflowRun.find(wrid)
       begin
         break if @shutdown_requested
+
         Rails.logger.info("  Checking WorkflowRun #{wrid} for sample #{wr.sample_id}")
         wr.update_status
-      rescue => exception
+      rescue StandardError => exception
         LogUtil.log_err("Updating Workflow #{wrid} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
@@ -87,8 +93,10 @@ class CheckPipelineRuns
     items = s3_path.split("/")
     result = items[-2] + "-" + items[-1] + "|"
     return result if timestamp_str.blank?
+
     result = result + timestamp_str + "|"
     return result if metadata_prefix.blank?
+
     result + metadata_prefix.gsub("__", "|") # vertical bars are prettier
   end
 
@@ -142,6 +150,7 @@ class CheckPipelineRuns
     metadata.each do |k, v|
       next if k == "COMMENT"
       next if k == "ORIGIN"
+
       new_metadata[k] = v
     end
     bm_sample_params = {
@@ -162,11 +171,13 @@ class CheckPipelineRuns
     unless @bm_sample.save
       raise "Error creating benchmark sample with #{JSON.pretty_generate(bm_sample_params)}."
     end
+
     Rails.logger.info("Benchmark sample #{@bm_sample.id} created successfully.")
   end
 
   def self.prop_get(dict, property, defaults)
     return dict[property] if dict.key?(property)
+
     defaults[property]
   end
 
@@ -234,7 +245,7 @@ class CheckPipelineRuns
       bm_comment = prop_get(bm_props, 'comment', defaults)
       begin
         create_sample_for_benchmark(s3_bucket, s3_key, pipeline_commit, web_commit, bm_pipeline_branch, bm_user, bm_proj, bm_host, bm_comment, t_now)
-      rescue => exception
+      rescue StandardError => exception
         LogUtil.log_err("Creating sample for benchmark #{s3_path} failed with exception: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
@@ -246,7 +257,7 @@ class CheckPipelineRuns
       benchmark_state = { t_last: t_now }
       begin
         benchmark_update(t_now)
-      rescue => exception
+      rescue StandardError => exception
         LogUtil.log_err("Updating benchmarks failed with error: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
@@ -308,6 +319,7 @@ class CheckPipelineRuns
         t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
       end
       break unless t_iter_end + max_work_duration < t_end
+
       while t_now < t_iter_end && !@shutdown_requested
         # Ensure no iteration is shorter than min_refresh_interval.
         sleep [t_iter_end - t_now, @sleep_quantum].min

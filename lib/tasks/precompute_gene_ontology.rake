@@ -205,6 +205,7 @@ def get_publication_name(pmid)
   unless response.is_a?(Net::HTTPSuccess)
     return pmid
   end
+
   publication_page = Nokogiri::HTML(response.body)
   abstract_node = publication_page.at_xpath(".//div[@class='rprt abstract']")
   authors = abstract_node.at_xpath("./div[@class='auths']").content

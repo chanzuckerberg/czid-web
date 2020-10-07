@@ -33,7 +33,7 @@ task create_customer_support_download: :environment do
   begin
     bulk_download.verify_and_mark_success
     puts "Success! You can now notify the user that the file is available on their Downloads page."
-  rescue
+  rescue StandardError
     bulk_download.destroy
     puts "There was an issue with finding your file and finalizing the BulkDownload."
     puts "Please make sure you correctly uploaded the file to S3 and start over."

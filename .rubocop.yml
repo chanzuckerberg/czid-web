@@ -1,3 +1,7 @@
+require:
+  - rubocop-rails
+  - rubocop-performance
+
 AllCops:
   Include:
     - '**/*.builder'
@@ -50,9 +54,9 @@ AllCops:
     - vendor/**/*
     - bin/*
     - node_modules/**/*
-  TargetRubyVersion: 2.4
+  TargetRubyVersion: 2.5
 
-ClassLength:
+Metrics/ClassLength:
   Enabled: false
 
 Metrics/AbcSize:
@@ -68,7 +72,7 @@ Metrics/PerceivedComplexity:
 Metrics/BlockLength:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 Metrics/MethodLength:
@@ -78,7 +82,7 @@ Metrics/ParameterLists:
   Max: 10
   CountKeywordArgs: false
 
-ModuleLength:
+Metrics/ModuleLength:
   Enabled: false
 
 Rails/HasAndBelongsToMany:
@@ -145,5 +149,24 @@ Rails/FindEach:
   Enabled: false
 
 # Consistent with JS linting
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+Naming/RescuedExceptionsVariableName:
+  Enabled: false
+
+####################
+# TODO: Consider enabling the rules below after fixing
+####################
+
+Style/AccessModifierDeclarations:
+  Enabled: false
+
+Naming/MethodParameterName:
+  Enabled: false
+
+Performance/CollectionLiteralInLoop:
+  Enabled: false

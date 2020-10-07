@@ -6,6 +6,7 @@ task :load_scoring_models, [:models_json] => :environment do |_t, args|
 
   models.each do |model|
     next unless model["name"] && model["model"]
+
     scoring_model = TaxonScoringModel.find_by(name: model["name"]) || TaxonScoringModel.new(name: model["name"])
     scoring_model.model = model["model"]
     scoring_model.model_type = model["model_type"]

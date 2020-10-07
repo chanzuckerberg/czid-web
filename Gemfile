@@ -115,7 +115,9 @@ group :development, :test do
   gem 'guard', '~> 2.15'
   gem 'guard-rspec', '~> 4.7'
   gem 'rspec-rails', '>= 3.7.2'
-  gem 'rubocop', '=0.49.1'
+  gem 'rubocop', '>=0.92'
+  gem 'rubocop-performance'
+  gem 'rubocop-rails'
   gem 'selenium-webdriver'
   gem 'simplecov', require: false
 end

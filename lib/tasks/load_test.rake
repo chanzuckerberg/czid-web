@@ -60,7 +60,7 @@ namespace "load_test" do
 
     begin
       total_samples = Integer(args.total_samples)
-    rescue
+    rescue StandardError
       Rails.logger.error("Total samples is not an integer: #{args.total_samples}.")
       abort("Load test failed")
     end
@@ -139,14 +139,12 @@ namespace "load_test" do
       abort
     end
 
-    unless project
-      project = Project.create(
-        name: args.project_name,
-        description: "Project used for load testing the pipeline",
-        days_to_keep_sample_private: 1000 * 365,
-        users: [user]
-      )
-    end
+    project ||= Project.create(
+      name: args.project_name,
+      description: "Project used for load testing the pipeline",
+      days_to_keep_sample_private: 1000 * 365,
+      users: [user]
+    )
 
     samples_to_create = []
     (0...total_samples).each do |i|
@@ -193,7 +191,7 @@ namespace "load_test" do
       Rails.logger.info("Creating sample '#{sample_to_create.name}'")
       begin
         sample_to_create.save!
-      rescue
+      rescue StandardError
         Rails.logger.error("Failed to save sample: #{sample_to_create.name}")
         if cnt
           abort("Load test failed. [ATTENTION] Some samples might have gone through.")

@@ -176,7 +176,7 @@ class ExportUsersAuth0
       'name' => user.name,
       'user_id' => "legacy_idseq|#{user.email}",
       'user_metadata' => {},
-      'password' =>  user.encrypted_password,
+      'password' => user.encrypted_password,
       'verify_email' => false,
     }.freeze
   end

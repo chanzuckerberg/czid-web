@@ -16,27 +16,25 @@ class MonitorPipelineResults
     Instrument.snippet(name: "Update Jobs", cloudwatch_namespace: instrumentation_namespace, extra_dimensions: [{ name: "Monitor Type", value: "Result Monitor" }]) do
       Instrument.snippet(name: "Pipeline Run Loop", cloudwatch_namespace: instrumentation_namespace) do
         PipelineRun.results_in_progress.each do |pr|
-          begin
-            break if @shutdown_requested
-            Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
-            pr.monitor_results
-          rescue => exception
-            LogUtil.log_err("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
-            LogUtil.log_backtrace(exception)
-          end
+          break if @shutdown_requested
+
+          Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
+          pr.monitor_results
+        rescue StandardError => exception
+          LogUtil.log_err("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
+          LogUtil.log_backtrace(exception)
         end
       end
 
       Instrument.snippet(name: "PhyloTree Loop", cloudwatch_namespace: instrumentation_namespace) do
         PhyloTree.in_progress.each do |pt|
-          begin
-            break if @shutdown_requested
-            Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
-            pt.monitor_results
-          rescue => exception
-            LogUtil.log_err("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
-            LogUtil.log_backtrace(exception)
-          end
+          break if @shutdown_requested
+
+          Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
+          pt.monitor_results
+        rescue StandardError => exception
+          LogUtil.log_err("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
+          LogUtil.log_backtrace(exception)
         end
       end
 
@@ -45,14 +43,14 @@ class MonitorPipelineResults
         # anywhere else.
         begin
           MonitorPipelineResults.alert_stalled_uploads!
-        rescue => exception
+        rescue StandardError => exception
           LogUtil.log_err("Failed to alert on stalled uploads: #{exception.message}")
           LogUtil.log_backtrace(exception)
         end
 
         begin
           MonitorPipelineResults.fail_stalled_uploads!
-        rescue => exception
+        rescue StandardError => exception
           LogUtil.log_err("Failed to fail stalled uploads: #{exception.message}")
           LogUtil.log_backtrace(exception)
         end
@@ -110,6 +108,7 @@ class MonitorPipelineResults
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
       break unless t_iter_end + max_work_duration < t_end
+
       while t_now < t_iter_end && !@shutdown_requested
         # Ensure no iteration is shorter than min_refresh_interval.
         sleep [t_iter_end - t_now, @sleep_quantum].min

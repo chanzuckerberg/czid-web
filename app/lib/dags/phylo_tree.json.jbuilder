@@ -5,6 +5,7 @@ targets = {}
 attr[:taxon_byteranges].keys.each do |pipeline_run_id|
   # Only allow valid numbers in interpolated keys
   raise AssertionError unless pipeline_run_id.is_a?(Numeric)
+
   targets["prepare_taxon_fasta_#{pipeline_run_id}_out"] = ["#{pipeline_run_id}.fasta"]
 end
 targets["phylo_tree_out"] = [attr[:newick_basename], attr[:ncbi_metadata_basename]]
@@ -51,5 +52,6 @@ json.steps do
 end
 
 # Explicit parens for empty hash (instead of empty block)
-# rubocop:disable ParenthesesAsGroupedExpression
+# rubocop:disable Lint/ParenthesesAsGroupedExpression
 json.given_targets ({})
+# rubocop:enable Lint/ParenthesesAsGroupedExpression

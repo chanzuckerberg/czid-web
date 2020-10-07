@@ -1,4 +1,3 @@
-
 desc 'Finds database columns that have NULL values'
 
 task 'find_cols_that_have_nulls', [:max_per_model, :only_presence_true] => :environment do |_t, args|
@@ -44,7 +43,7 @@ def cols_that_have_nulls(model, max_per_model, only_presence_true)
     total, count, date = ActiveRecord::Base.connection.execute(sql).to_a[0]
     begin
       last = date.to_date
-    rescue
+    rescue StandardError
       last = nil
     end
     ["#{col.name}, #{last}", (count.to_f / total).round(2)]

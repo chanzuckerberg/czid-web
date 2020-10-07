@@ -109,7 +109,7 @@ jobs:
       #  This one: https://github.com/gimenete/rubocop-action
       #   offers literally no customization and we want to pin our
       #   rubocop version.
-      run: bundle exec rubocop -R
+      run: bundle exec rubocop
     - name: Brakeman
       run: bundle exec brakeman --no-pager -w3
       # TODO (https://app.clubhouse.io/idseq/story/17337/clean-up-brakeman-warnings-and-enable-annotations)
