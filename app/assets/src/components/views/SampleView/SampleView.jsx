@@ -29,7 +29,10 @@ import {
 } from "~/api";
 import { getAmrData } from "~/api/amr";
 import { UserContext } from "~/components/common/UserContext";
-import { AMR_TABLE_FEATURE } from "~/components/utils/features";
+import {
+  AMR_TABLE_FEATURE,
+  MERGED_NT_NR_FEATURE,
+} from "~/components/utils/features";
 import {
   logAnalyticsEvent,
   withAnalytics,
@@ -97,6 +100,7 @@ const TABS = {
   CONSENSUS_GENOME: WORKFLOWS.CONSENSUS_GENOME.label,
   SHORT_READ_MNGS: WORKFLOWS.SHORT_READ_MNGS.label,
   AMR: "Antimicrobial Resistance",
+  MERGED_NT_NR: "Metagenomics - Simplified",
 };
 
 const NOTIFICATON_TYPES = {
@@ -1035,11 +1039,30 @@ export default class SampleView extends React.Component {
         </React.Fragment>
       ),
     };
+
+    const mergedNtNrTab = {
+      value: TABS.MERGED_NT_NR,
+      label: (
+        <React.Fragment>
+          {TABS.MERGED_NT_NR}
+          <StatusLabel
+            className={cs.statusLabel}
+            inline
+            status="Prototype"
+            type="beta"
+          />
+        </React.Fragment>
+      ),
+    };
+
+    const sampleWorkflow = get("temp_pipeline_workflow", sample);
     return compact([
-      get("temp_pipeline_workflow", sample) ===
-        WORKFLOWS.SHORT_READ_MNGS.value && TABS.SHORT_READ_MNGS,
-      get("temp_pipeline_workflow", sample) ===
-        WORKFLOWS.CONSENSUS_GENOME.value && consensusGenomeTab,
+      sampleWorkflow === WORKFLOWS.SHORT_READ_MNGS.value &&
+        TABS.SHORT_READ_MNGS,
+      sampleWorkflow === WORKFLOWS.SHORT_READ_MNGS.value &&
+        allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
+        mergedNtNrTab,
+      sampleWorkflow === WORKFLOWS.CONSENSUS_GENOME.value && consensusGenomeTab,
       allowedFeatures.includes(AMR_TABLE_FEATURE) &&
         reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
         TABS.AMR,
