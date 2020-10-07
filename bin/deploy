@@ -102,6 +102,10 @@ begin
     system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 1")
     system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 1")
   end
+  puts "load release tag into param store"
+  unless env == "sandbox"
+    `aws ssm put-parameter --name /idseq-#{env}-web/GIT_RELEASE_SHA --value #{image.match(/^sha-([0-9a-f]{7,})$/)[1]} --type String --overwrite`
+  end
   notify_slack(env, image, "end")
 rescue Exception  # Even on abort/SystemExit
   notify_slack(env, image, "failure")

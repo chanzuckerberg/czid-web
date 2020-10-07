@@ -14,6 +14,7 @@ import "./styles/core.scss";
 Sentry.init({
   dsn: window.SENTRY_DSN_FRONTEND,
   environment: window.ENVIRONMENT,
+  release: window.GIT_RELEASE_SHA,
 });
 
 if (!function f() {}.name) {

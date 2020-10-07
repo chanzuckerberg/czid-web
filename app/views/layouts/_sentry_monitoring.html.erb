@@ -3,5 +3,6 @@
   <script>
     window.SENTRY_DSN_FRONTEND = "<%= ENV["SENTRY_DSN_FRONTEND"] %>";
     window.ENVIRONMENT = "<%= Rails.env %>";
+    window.GIT_RELEASE_SHA = "<%= ENV["GIT_RELEASE_SHA"] %>";
   </script>
 <% end %>
