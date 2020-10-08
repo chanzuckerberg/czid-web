@@ -46,12 +46,6 @@ x-env-variables: &env-variables
   ? ENVIRONMENT
   ? OFFLINE
 
-x-honeycomb-variables: &honeycomb-variables
-  ? IDSEQ_HONEYCOMB_DB_DATA_SET
-  ? IDSEQ_HONEYCOMB_DATA_SET
-  ? IDSEQ_HONEYCOMB_WRITE_KEY
-
-
 version: '3.4'
 services:
   elasticsearch:
@@ -114,7 +108,6 @@ services:
     environment:
       <<: *web-variables
       <<: *aws-variables
-      <<: *honeycomb-variables
       <<: *auth0-variables
       <<: *env-variables
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"

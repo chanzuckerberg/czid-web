@@ -852,9 +852,6 @@ GEM
     hashie (3.6.0)
     health_check (3.0.0)
       railties (>= 5.0)
-    honeycomb-rails (0.8.1)
-      libhoney (>= 1.9)
-      rails (>= 3.0.0)
     http-2 (0.10.1)
     http (4.1.1)
       addressable (~> 2.3)
@@ -875,9 +872,6 @@ GEM
     jmespath (1.4.0)
     json (2.3.0)
     jwt (2.2.1)
-    libhoney (1.12.1)
-      addressable (~> 2.0)
-      http (>= 2.0, < 5.0)
     listen (3.1.5)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
@@ -1196,7 +1190,6 @@ DEPENDENCIES
   guard (~> 2.15)
   guard-rspec (~> 4.7)
   health_check (>= 2.7.0)
-  honeycomb-rails (>= 0.8.1)
   http
   http-2
   immigrant
