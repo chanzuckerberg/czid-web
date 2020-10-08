@@ -57,11 +57,12 @@ describe WorkflowRun, type: :model do
 
   before do
     project = create(:project)
-    @sample = create(:sample, project: project, temp_pipeline_workflow: WorkflowRun::WORKFLOW[:consensus_genome], temp_wetlab_protocol: Sample::TEMP_WETLAB_PROTOCOL[:artic])
-    @workflow_running = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:running], sample: @sample, sfn_execution_arn: fake_sfn_execution_arn)
+    @sample = create(:sample, project: project, temp_pipeline_workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+    inputs_json = { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json
+    @workflow_running = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:running], sample: @sample, sfn_execution_arn: fake_sfn_execution_arn, inputs_json: inputs_json)
 
     @second_sample = create(:sample, project: project)
-    @second_workflow_running = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:running], sample: @second_sample, sfn_execution_arn: fake_sfn_execution_arn)
+    @second_workflow_running = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:running], sample: @second_sample, sfn_execution_arn: fake_sfn_execution_arn, inputs_json: inputs_json)
 
     @workflow_failed = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:failed], sample: @sample, sfn_execution_arn: fake_sfn_execution_arn)
 
@@ -211,7 +212,8 @@ describe WorkflowRun, type: :model do
                                                  {
                                                    sfn_input_json: {},
                                                    sfn_execution_arn: "fake_sfn_execution_arn",
-                                                 } }
+                                                 }
+                                               }
       end
 
       it "updates current workflow run to deprecated" do
@@ -273,6 +275,85 @@ describe WorkflowRun, type: :model do
       )
 
       expect(subject).to eq(nil)
+    end
+  end
+
+  describe "#inputs" do
+    let(:parsed_input) { { "wetlab_protocol" => ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] } }
+    let(:inputs_json) { parsed_input.to_json }
+    let(:project) { create(:project) }
+    let(:sample) { create(:sample, project: project) }
+    let(:workflow_run) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], inputs_json: inputs_json) }
+    let(:workflow_run_no_input) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome]) }
+
+    subject { workflow_run.send(:inputs) }
+
+    it "calls JSON parse on the inputs_json column" do
+      expect(JSON).to receive(:parse).with(inputs_json).and_call_original
+
+      expect(subject).to eq(parsed_input)
+    end
+
+    it "returns null if missing input" do
+      expect(workflow_run_no_input.inputs).to be_nil
+    end
+  end
+
+  describe "#handle_sample_upload_failure" do
+    before do
+      @project = create(:project)
+      @sample = create(:sample, project: @project)
+      @workflow_run = create(:workflow_run, sample: @sample, status: WorkflowRun::STATUS[:created])
+      @sample2 = create(:sample, project: @project)
+      @workflow_run2 = create(:workflow_run, sample: @sample2, status: WorkflowRun::STATUS[:created])
+      @sample_no_runs = create(:sample, project: @project)
+    end
+
+    it "marks the runs for one sample as failed" do
+      subject = WorkflowRun.handle_sample_upload_failure(@sample)
+      @workflow_run.reload
+
+      expect(subject).to eq(1)
+      expect(@workflow_run.status).to eq(WorkflowRun::STATUS[:failed])
+    end
+
+    it "marks the runs for multiple samples as failed" do
+      subject = WorkflowRun.handle_sample_upload_failure([@sample, @sample2])
+      @workflow_run.reload
+      @workflow_run2.reload
+
+      expect(subject).to eq(2)
+      expect(@workflow_run.status).to eq(WorkflowRun::STATUS[:failed])
+      expect(@workflow_run2.status).to eq(WorkflowRun::STATUS[:failed])
+    end
+
+    it "doesn't do anything if there are no matching runs" do
+      subject = WorkflowRun.handle_sample_upload_failure(@sample_no_runs)
+
+      expect(subject).to eq(0)
+    end
+  end
+
+  describe "#handle_sample_upload_restart" do
+    before do
+      @project = create(:project)
+      @sample = create(:sample, project: @project)
+      @workflow_run = create(:workflow_run, sample: @sample, status: WorkflowRun::STATUS[:failed])
+      @sample_no_runs = create(:sample, project: @project)
+    end
+
+    it "marks the failed workflow run as created again" do
+      subject = WorkflowRun.handle_sample_upload_restart(@sample)
+      @workflow_run.reload
+
+      expect(subject).to be true
+      expect(@workflow_run.status).to eq(WorkflowRun::STATUS[:created])
+    end
+
+    it "doesn't do anything if there are no matching runs" do
+      subject = WorkflowRun.handle_sample_upload_restart(@sample_no_runs)
+
+      expect(subject).to be_nil
     end
   end
 end

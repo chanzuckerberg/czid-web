@@ -47,7 +47,8 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
     create(:workflow_run,
            workflow: test_workflow_name,
            status: WorkflowRun::STATUS[:created],
-           sample: sample)
+           sample: sample,
+           inputs_json: { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:msspe] }.to_json)
   end
 
   describe "#call" do
@@ -140,12 +141,13 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         end
       end
 
-      context "when artic wetlab protoocol is chosen" do
-        let(:sample) do
-          create(:sample,
-                 project: project,
-                 temp_pipeline_workflow: test_workflow_name,
-                 temp_wetlab_protocol: Sample::TEMP_WETLAB_PROTOCOL[:artic])
+      context "when artic wetlab protocol is chosen" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
         end
         it "returns sfn input with artic primer" do
           expect(subject).to include_json(

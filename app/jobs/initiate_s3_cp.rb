@@ -8,5 +8,7 @@ class InitiateS3Cp
     Rails.logger.info("Start copying sample #{sample.id}")
     output = sample.initiate_s3_cp(unlimited_size)
     Rails.logger.info(output)
+
+    WorkflowRun.handle_sample_upload_restart(sample)
   end
 end

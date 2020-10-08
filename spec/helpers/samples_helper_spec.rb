@@ -339,19 +339,20 @@ RSpec.describe SamplesHelper, type: :helper do
       @sample = create(:sample, project: @project)
       @sample_without_runs = create(:sample, project: @project)
       @mock_cached_results = { "mock_metric" => 10 }
-      @workflow_run1 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: Time.now.utc, cached_results: @mock_cached_results.to_json)
+      @mock_inputs_json = { "wetlab_protocol" => ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }
+      @workflow_run1 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: Time.now.utc, cached_results: @mock_cached_results.to_json, inputs_json: @mock_inputs_json.to_json)
     end
 
     it "includes information for consensus genome cached_results" do
       samples = Sample.where(id: @sample.id)
       results = helper.send(:format_samples, samples)
-      expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: @mock_cached_results })
+      expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: @mock_cached_results, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] })
     end
 
     it "returns nil if no cached_results" do
       samples = Sample.where(id: @sample_without_runs.id)
       results = helper.send(:format_samples, samples)
-      expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: nil })
+      expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: nil, wetlab_protocol: nil })
     end
   end
 end

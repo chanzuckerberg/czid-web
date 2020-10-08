@@ -68,6 +68,7 @@ class MonitorPipelineResults
         status: Sample::STATUS_CHECKED,
         upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED
       )
+      WorkflowRun.handle_sample_upload_failure(samples)
     end
   end
 

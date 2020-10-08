@@ -106,8 +106,14 @@ class WorkflowRun < ApplicationRecord
 
   def rerun
     raise RerunDeprecatedWorkflowError if deprecated?
+
     update!(deprecated: true)
     sample.create_and_dispatch_workflow_run(workflow, rerun_from: id)
+  end
+
+  # Generic misc inputs from inputs_json database field
+  def inputs
+    @inputs ||= JSON.parse(inputs_json || "null")
   end
 
   def self.in_progress(workflow_name = nil)
@@ -118,6 +124,16 @@ class WorkflowRun < ApplicationRecord
 
   def self.viewable(user)
     where(sample: Sample.viewable(user))
+  end
+
+  def self.handle_sample_upload_failure(samples)
+    # If the Sample Upload fails, assume that all runs in CREATED should be failed.
+    WorkflowRun.where(sample: samples, status: WorkflowRun::STATUS[:created]).update_all(status: WorkflowRun::STATUS[:failed]) # rubocop:disable Rails/SkipsModelValidations
+  end
+
+  def self.handle_sample_upload_restart(sample)
+    # Assumes that the latest failed run should be reset.
+    WorkflowRun.where(sample: sample, status: WorkflowRun::STATUS[:failed]).order(created_at: :desc).first&.update(status: WorkflowRun::STATUS[:created])
   end
 
   private
@@ -135,12 +151,13 @@ class WorkflowRun < ApplicationRecord
   # Don't use it for large or complex responses.
   def load_cached_results
     raise NotImplementedError unless workflow_by_class.respond_to?(:results)
+
     begin
       results = workflow_by_class.results(cacheable_only: true)
       update(cached_results: results.to_json)
     rescue ArgumentError
       raise NotImplementedError("Check that results support cacheable_only")
-    rescue => exception
+    rescue StandardError => exception
       LogUtil.log_error(
         "Error loading cached results",
         exception: exception,

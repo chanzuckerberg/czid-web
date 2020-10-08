@@ -274,7 +274,8 @@ RSpec.describe "Sample request", type: :request do
 
         it "should properly set the selected wetlab protocol" do
           sample_params = @sample_params.dup
-          sample_params[:wetlab_protocol] = Sample::TEMP_WETLAB_PROTOCOL[:artic]
+          sample_params[:wetlab_protocol] = ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic]
+          sample_params[:workflows] = [WorkflowRun::WORKFLOW[:consensus_genome]]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
           expect(response.content_type).to eq("application/json")
@@ -283,19 +284,8 @@ RSpec.describe "Sample request", type: :request do
           sample_id = json_response["sample_ids"][0]
 
           test_sample = Sample.find(sample_id)
-          expect(test_sample.temp_wetlab_protocol).to eq(Sample::TEMP_WETLAB_PROTOCOL[:artic])
-        end
-
-        it "should fail with a bogus wetlab protocol" do
-          sample_params = @sample_params.dup
-          sample_params[:wetlab_protocol] = "bananas"
-          post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
-
-          expect(response.content_type).to eq("application/json")
-          expect(response).to have_http_status(:ok)
-          json_response = JSON.parse(response.body)
-          expect(json_response["sample_ids"]).to be_empty
-          expect(json_response["errors"]).to eq([{ "temp_wetlab_protocol" => ["is not included in the list"] }])
+          inputs_json = JSON.parse(test_sample&.workflow_runs&.last&.inputs_json || "{}")
+          expect(inputs_json).to include("wetlab_protocol" => ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic])
         end
 
         it "should succeed without a wetlab protocol for mNGS runs" do

@@ -70,10 +70,10 @@ class SfnCGPipelineDispatchService
   end
 
   def primer_file
-    case @sample.temp_wetlab_protocol
-    when Sample::TEMP_WETLAB_PROTOCOL[:msspe]
+    case @workflow_run.inputs&.[]("wetlab_protocol")
+    when ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:msspe]
       "msspe_primers.bed"
-    when Sample::TEMP_WETLAB_PROTOCOL[:artic]
+    when ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic]
       "artic_v3_primers.bed"
     else
       "msspe_primers.bed"

@@ -465,9 +465,11 @@ module SamplesHelper
       job_info[:uploader] = sample_uploader(sample)
 
       # Frontend caches by sample_id so responses must include the same info.
-      cg_cached_results = top_cg_workflow_run_by_sample_id.try(:[], sample.id).try(:cached_results)
-      cg_cached_results = cg_cached_results ? JSON.parse(cg_cached_results) : nil
-      job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = { cached_results: cg_cached_results }
+      top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
+      job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
+        cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
+        wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
+      }
 
       if is_snapshot
         [:project, :input_files, :db_sample].each { |param| job_info.delete(param) }
@@ -577,6 +579,8 @@ module SamplesHelper
   def upload_samples_with_metadata(samples_to_upload, metadata, user)
     samples = []
     errors = []
+    workflow_runs = []
+
     samples_to_upload.each do |sample_attributes|
       # A sample won't have input files if and only if it is being uploaded from basespace.
       if sample_attributes[:input_files_attributes]
@@ -610,7 +614,7 @@ module SamplesHelper
       end
 
       if sample_attributes.key?(:wetlab_protocol)
-        sample_attributes[:temp_wetlab_protocol] = sample_attributes.delete(:wetlab_protocol)
+        wetlab_protocol = sample_attributes.delete(:wetlab_protocol)
       end
 
       sample = Sample.new(sample_attributes)
@@ -629,8 +633,17 @@ module SamplesHelper
       sample.bulk_mode = sample.input_files.map(&:source_type).include?("s3")
       sample.status = Sample::STATUS_CREATED
       sample.user = user
+
       if sample.save
         samples << sample
+
+        # Instantiate the WorkflowRun but don't save
+        workflow = sample_attributes[:temp_pipeline_workflow]
+        if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
+          inputs_json = { wetlab_protocol: wetlab_protocol }.to_json
+          wr = WorkflowRun.new(sample: sample, workflow: workflow, inputs_json: inputs_json)
+          workflow_runs << wr
+        end
       else
         errors << sample.errors
         # Remove the metadata for the invalid sample.
@@ -639,8 +652,12 @@ module SamplesHelper
     end
 
     metadata_errors = upload_metadata_for_samples(samples, metadata)
-
     errors.concat(metadata_errors)
+
+    workflow_run_import = WorkflowRun.bulk_import(workflow_runs)
+    workflow_run_import.failed_instances.each do |wr|
+      errors.push("Could not save WorkflowRun: Sample #{wr.sample_id}, #{wr.workflow}, #{wr.inputs_json}")
+    end
 
     {
       "errors" => errors,

@@ -712,6 +712,8 @@ class SamplesController < ApplicationController
       end
     end
 
+    # TODO: Generalize when splitting into multiple workflows per sample.
+    workflow_run = @sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
     render json: {
       # Pass down base_type for the frontend
       metadata: @sample.metadata_with_base_type,
@@ -727,9 +729,8 @@ class SamplesController < ApplicationController
         ercc_comparison: ercc_comparison,
         pipeline_run: pr_display,
         summary_stats: summary_stats,
-        # TODO: IDSEQ-3285: Move these when splitting into per-workflow fields.
-        workflow: @sample.temp_pipeline_workflow,
-        wetlab_protocol: @sample.temp_wetlab_protocol,
+        workflow: workflow_run&.workflow,
+        wetlab_protocol: workflow_run&.inputs&.[]("wetlab_protocol"),
       },
     }
   end

@@ -41,11 +41,6 @@ class Sample < ApplicationRecord
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
 
-  TEMP_WETLAB_PROTOCOL = {
-    artic: "artic",
-    msspe: "msspe",
-  }.freeze
-
   validates :status, presence: true, inclusion: { in: [
     STATUS_CREATED,
     STATUS_UPLOADED,
@@ -53,8 +48,6 @@ class Sample < ApplicationRecord
     STATUS_RETRY_PR,
     STATUS_CHECKED,
   ], }
-
-  validates :temp_wetlab_protocol, allow_blank: true, inclusion: { in: TEMP_WETLAB_PROTOCOL.values }
 
   validate :input_files_checks
   validates :name, presence: true, uniqueness: { scope: :project_id, case_sensitive: false }
@@ -397,6 +390,7 @@ class Sample < ApplicationRecord
     if upload_error.blank?
       self.upload_error = Sample::UPLOAD_ERROR_S3_UPLOAD_FAILED
     end
+    WorkflowRun.handle_sample_upload_failure(self)
     save!
   end
 
@@ -455,6 +449,7 @@ class Sample < ApplicationRecord
 
     self.status = STATUS_CHECKED
     self.upload_error = Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED
+    WorkflowRun.handle_sample_upload_failure(self)
 
     # It's possible the error is caused by failed validation on the input files.
     # Clear the input files before trying to save again.
@@ -577,7 +572,7 @@ class Sample < ApplicationRecord
     elsif [WorkflowRun::WORKFLOW[:main], WorkflowRun::WORKFLOW[:short_read_mngs]].include?(temp_pipeline_workflow)
       kickoff_pipeline
     else
-      create_and_dispatch_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
+      workflow_runs.where(status: WorkflowRun::STATUS[:created]).all.map(&:dispatch)
     end
   end
 

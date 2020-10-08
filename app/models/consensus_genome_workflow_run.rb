@@ -4,6 +4,11 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   OUTPUT_STATS = "consensus_genome.compute_stats_out_output_stats".freeze
   OUTPUT_ZIP = "consensus_genome.zip_outputs_out_output_zip".freeze
 
+  WETLAB_PROTOCOL = {
+    artic: "artic",
+    msspe: "msspe",
+  }.freeze
+
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).
   def results(cacheable_only: false)
