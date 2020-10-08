@@ -107,7 +107,7 @@ describe Sample, type: :model do
                                                                                                {
                                                                                                  name: file_two_name,
                                                                                                  download_path: file_two_href_content,
-                                                                                                 source_path: file_one_href # This is the same as the previous
+                                                                                                 source_path: file_one_href, # This is the same as the previous
                                                                                                },
                                                                                              ])
 

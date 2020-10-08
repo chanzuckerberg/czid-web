@@ -16,6 +16,7 @@ AllCops:
     - '**/*.podspec'
     - '**/*.rabl'
     - '**/*.rake'
+    - '**/*.rb'
     - '**/*.rbuild'
     - '**/*.rbw'
     - '**/*.rbx'
@@ -158,15 +159,70 @@ Style/TrailingCommaInHashLiteral:
 Naming/RescuedExceptionsVariableName:
   Enabled: false
 
-####################
-# TODO: Consider enabling the rules below after fixing
-####################
-
+# TODO: Add back after manual fixes
 Style/AccessModifierDeclarations:
   Enabled: false
 
+# TODO: Add back after manual fixes
 Naming/MethodParameterName:
   Enabled: false
 
+# TODO: Add back after manual fixes
 Performance/CollectionLiteralInLoop:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Rails/HelperInstanceVariable:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Rails/LexicallyScopedActionFilter:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Naming/MemoizedInstanceVariableName:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Style/MultipleComparison:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Style/FormatStringToken:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Lint/UriEscapeUnescape:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Lint/DuplicateMethods:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Rails/ActiveRecordOverride:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Rails/UnknownEnv:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Rails/InverseOf:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Rails/HasManyOrHasOneDependent:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Rails/FilePath:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Lint/ShadowedArgument:
+  Enabled: false
+
+# TODO: Add back after manual fixes
+Style/MixinUsage:
   Enabled: false

@@ -38,7 +38,7 @@ class MetadataController < ApplicationController
     samples = samples_data.map do |sample|
       Sample.new(
         name: sample["name"],
-        project: projects.select { |project| project.id == sample["project_id"] }.first
+        project: projects.find { |project| project.id == sample["project_id"] }
       )
     end
 
@@ -60,7 +60,7 @@ class MetadataController < ApplicationController
       issues: issues,
       newHostGenomes: new_host_genomes,
     }
-  rescue => err
+  rescue StandardError => err
     render json: {
       status: "error",
       # Wrapped for consistency with success response

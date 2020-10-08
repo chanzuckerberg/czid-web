@@ -542,13 +542,13 @@ RSpec.describe BulkDownloadsController, type: :controller do
                                         finalized: 1,
                                         job_status: PipelineRun::STATUS_CHECKED,
                                         sfn_execution_arn: fake_sfn_execution_arn,
-                                      },])
+                                      }])
         @sample_two = create(:sample, project: @project,
                                       pipeline_runs_data: [{
                                         finalized: 1,
                                         job_status: PipelineRun::STATUS_CHECKED,
                                         sfn_execution_arn: fake_sfn_execution_arn,
-                                      },])
+                                      }])
 
         # This runs "aegea ecs run", which won't succeed on Travis CI, so we must mock it out.
         allow(Open3).to receive(:capture3)

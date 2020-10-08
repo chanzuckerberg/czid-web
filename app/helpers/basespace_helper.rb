@@ -57,7 +57,7 @@ module BasespaceHelper
         end
         return nil
       end
-    rescue
+    rescue StandardError
       LogUtil.log_err("Failed to fetch Basespace projects")
       return nil
     end
@@ -83,7 +83,7 @@ module BasespaceHelper
         end
         return nil
       end
-    rescue
+    rescue StandardError
       LogUtil.log_err("Failed to fetch samples for Basespace project")
       return nil
     end
@@ -117,7 +117,7 @@ module BasespaceHelper
         end
         return nil
       end
-    rescue
+    rescue StandardError
       LogUtil.log_err("Failed to fetch files for basespace dataset")
       return nil
     end

@@ -50,7 +50,7 @@ module LocationHelper
       # The first field in the address response may have a useful place name like 'university'
       parts = [address.first[1]]
       fields = [:city_name, :subdivision_name, :state_name, :country_name]
-      parts += fields.map { |f| loc[f] if loc[f].present? }.compact
+      parts += fields.map { |f| loc[f].presence }.compact
       loc[:name] = parts.uniq.join(", ")
     end
 

@@ -11,7 +11,7 @@ RSpec.describe MetricUtil do
       begin
         Rails.env = "asdf"
         expect(MetricUtil.send(:a_test?)).to eq(false)
-      rescue => err
+      rescue StandardError => err
         raise err
       ensure
         Rails.env = temp

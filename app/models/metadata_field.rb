@@ -116,7 +116,7 @@ class MetadataField < ApplicationRecord
     DATE_TYPE,
     LOCATION_TYPE,
     # see also boolean? method
-  ], }
+  ] }
 
   # NOTE: not sure why these columns were not created as booleans
   validates :force_options, inclusion: { in: [0, 1] }
@@ -203,6 +203,7 @@ class MetadataField < ApplicationRecord
     elsif type == LOCATION_TYPE
       return "location"
     end
+
     ""
   end
 

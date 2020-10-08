@@ -613,7 +613,7 @@ class MetadataValidateNewSamplesTest < ActionDispatch::IntegrationTest
 
     assert @response.parsed_body['issues']['errors'][1]['isGroup']
     assert @response.parsed_body['issues']['errors'][1]['caption'].starts_with?("2 invalid values for \"Collection Date\" (column 5)")
-    assert !@response.parsed_body['issues']['errors'][1]['caption'].ends_with?("(for human samples)")
+    assert_not @response.parsed_body['issues']['errors'][1]['caption'].ends_with?("(for human samples)")
     assert_equal [
       [11, "Test Sample Mosquito 5", "2018-01abc"],
       [12, "Test Sample Mosquito 6", "abc01/2018"],

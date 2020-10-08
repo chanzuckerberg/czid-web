@@ -86,7 +86,7 @@ class HomeController < ApplicationController
 
     begin
       UserMailer.account_request_reply(home_params[:email]).deliver_now
-    rescue => err
+    rescue StandardError => err
       LogUtil.log_err("account_request_reply(#{home_params[:email]} failed")
       LogUtil.log_backtrace(err)
     end
@@ -106,7 +106,7 @@ class HomeController < ApplicationController
     render json: {
       status: :ok,
     }
-  rescue => e
+  rescue StandardError => e
     Rails.logger.warn("Sign up error: #{e}")
     render json: {
       status: :internal_server_error,

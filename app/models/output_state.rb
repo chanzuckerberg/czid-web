@@ -41,5 +41,5 @@ class OutputState < ApplicationRecord
     PipelineRun::STATUS_LOADING_ERROR,
     PipelineRun::STATUS_LOADING_QUEUED,
     PipelineRun::STATUS_UNKNOWN,
-  ], }, if: :mass_validation_enabled?
+  ] }, if: :mass_validation_enabled?
 end

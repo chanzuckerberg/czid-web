@@ -64,7 +64,7 @@ class RetrievePipelineVizGraphDataService
       all_redefined_statuses = []
       steps = dag_json["steps"].map do |step|
         status_info = stage_step_statuses[step["out"]] || {}
-        description = status_info["description"].blank? ? stage_step_descriptions[step["out"]] : status_info["description"]
+        description = status_info["description"].presence || stage_step_descriptions[step["out"]]
         status = redefine_job_status(status_info["status"], @stage_job_statuses[stage_index])
         all_redefined_statuses << status
         {
@@ -124,6 +124,7 @@ class RetrievePipelineVizGraphDataService
     if existing_stages_status == "finished" && @all_dag_jsons.length != (@see_experimental ? 4 : 3)
       return "inProgress"
     end
+
     return existing_stages_status
   end
 

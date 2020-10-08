@@ -3,7 +3,7 @@ require 'json'
 
 module ApplicationHelper
   def rds_host
-    Rails.env == 'development' ? 'db' : '$RDS_ADDRESS'
+    Rails.env.development? ? 'db' : '$RDS_ADDRESS'
   end
 
   def warden

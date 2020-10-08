@@ -111,7 +111,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     assert_equal 0, MetadataField.where(name: "Custom Field 2").length
 
     # Prior to upload, the core field shouldn't be associated with the project.
-    assert !@metadata_validation_project.metadata_fields.include?(@core_field)
+    assert_not @metadata_validation_project.metadata_fields.include?(@core_field)
 
     post upload_metadata_project_url(@metadata_validation_project), params: {
       metadata: {

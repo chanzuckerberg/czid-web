@@ -6,7 +6,7 @@ class PrecacheReportInfo
   def self.perform(pipeline_run_id)
     pr = PipelineRun.find(pipeline_run_id)
     pr.precache_report_info!
-  rescue => err
+  rescue StandardError => err
     LogUtil.log_err(
       "PipelineRun #{pipeline_run_id} failed to precache report"
     )

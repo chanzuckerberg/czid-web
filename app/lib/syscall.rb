@@ -13,8 +13,9 @@ class Syscall
     elsif stderr
       Rails.logger.error("Syscall.run failed with command: #{cmd.join(' ')}. Error: #{stderr}")
     end
+
     return nil
-  rescue => e
+  rescue StandardError => e
     Rails.logger.error("Syscall.run failed with command: #{cmd.join(' ')}")
     Rails.logger.error(e)
 
@@ -34,8 +35,9 @@ class Syscall
     elsif stderr
       Rails.logger.error("Syscall.run_in_dir failed with command: #{cmd.join(' ')}. Error: #{stderr}")
     end
+
     return nil
-  rescue => e
+  rescue StandardError => e
     Rails.logger.error("Syscall.run_in_dir failed with command: #{cmd.join(' ')}")
     Rails.logger.error(e)
 
@@ -52,7 +54,7 @@ class Syscall
     output = ""
     Open3.pipeline_r(*cmd) { |line, _ts| output += line.read }
     output
-  rescue => e
+  rescue StandardError => e
     Rails.logger.error("Syscall.pipe_with_output failed with command: #{cmd.join(' ')}")
     Rails.logger.error(e)
 

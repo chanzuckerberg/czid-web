@@ -187,7 +187,7 @@ class PipelineRun < ApplicationRecord
     FINALIZED_SUCCESS,
     FINALIZED_FAIL,
     # See also pre_result_monitor?
-  ], }, if: :mass_validation_enabled?
+  ] }, if: :mass_validation_enabled?
 
   validates :finalized, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
   validates :total_ercc_reads, numericality: { greater_than_or_equal_to: 0, integer_only: true }, allow_nil: true, if: :mass_validation_enabled?
@@ -335,6 +335,7 @@ class PipelineRun < ApplicationRecord
 
   def retry
     return unless failed? # only retry from a failed job
+
     prs = active_stage
     prs.job_status = nil
     prs.job_command = nil
@@ -377,6 +378,7 @@ class PipelineRun < ApplicationRecord
     ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
     return unless status.exitstatus.zero?
+
     ercc_lines = Syscall.pipe_with_output(["aws", "s3", "cp", ercc_s3_path, "-"], ["grep", "ERCC"], ["cut", "-f1,2"])
     ercc_counts_array = []
     ercc_lines.split(/\r?\n/).each do |line|
@@ -402,11 +404,13 @@ class PipelineRun < ApplicationRecord
 
   private def extract_int_metric(metrics, metric_name)
     return nil unless metrics[metric_name]
+
     return metrics[metric_name].to_i
   end
 
   private def extract_float_metric(metrics, metric_name)
     return nil unless metrics[metric_name]
+
     return metrics[metric_name].to_f
   end
 
@@ -414,6 +418,7 @@ class PipelineRun < ApplicationRecord
     insert_size_metrics_s3_path = "#{host_filter_output_s3_path}/#{INSERT_SIZE_METRICS_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", insert_size_metrics_s3_path)
     return unless status.exitstatus.zero?
+
     insert_size_metrics_raw = Syscall.pipe_with_output(["aws", "s3", "cp", insert_size_metrics_s3_path, "-"])
     tsv_lines = []
     tsv_header_line = -1
@@ -503,6 +508,7 @@ class PipelineRun < ApplicationRecord
   def unidentified_fasta_s3_path
     return "#{assembly_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if supports_assembly?
     return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
+
     "#{alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
@@ -551,6 +557,7 @@ class PipelineRun < ApplicationRecord
     if contigs.empty?
       return
     end
+
     nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
     nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
     header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
@@ -710,7 +717,7 @@ class PipelineRun < ApplicationRecord
   def invalid_family_call?(tcnt)
     # TODO:  Better family support.
     tcnt['family_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
-  rescue
+  rescue StandardError
     false
   end
 
@@ -772,6 +779,7 @@ class PipelineRun < ApplicationRecord
                                                                   local_json_path, 3)
     LogUtil.log_err("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
     return unless downloaded_json_path
+
     load_taxons(downloaded_json_path, false)
   end
 
@@ -868,6 +876,7 @@ class PipelineRun < ApplicationRecord
 
   def status_display(output_states_by_pipeline_run_id)
     return "COMPLETE - ISSUE" if known_user_error
+
     status_display_helper(output_state_hash(output_states_by_pipeline_run_id), results_finalized)
   end
 
@@ -887,6 +896,7 @@ class PipelineRun < ApplicationRecord
     output = output_state.output
     state = output_state.state
     return unless [STATUS_UNKNOWN, STATUS_LOADING_ERROR].include?(state)
+
     Rails.logger.info("[PR: #{id}] Checking output - finalized: #{finalized?}, last update: #{pipeline_run_stages.order(:step_number).last.updated_at}")
     if output_ready?(output)
       Rails.logger.info("[PR: #{id}] Enqueue for resque: #{output}")
@@ -933,6 +943,7 @@ class PipelineRun < ApplicationRecord
     # Except, if the pipeline run is finalized, we have to (this is a failure case).
     update_pipeline_version(self, :pipeline_version, pipeline_version_file) if pipeline_version.blank?
     return if pipeline_version.blank? && !finalized
+
     # Load any new outputs that have become available:
     output_states.each do |o|
       check_and_enqueue(o)
@@ -946,7 +957,7 @@ class PipelineRun < ApplicationRecord
       # See https://jira.czi.team/browse/IDSEQ-1924.
       compile_stats_file!
       load_stats_file
-    rescue => e
+    rescue StandardError => e
       LogUtil.log_err("Failure compiling stats: #{e}")
       LogUtil.log_backtrace(e)
       compiling_stats_failed = true
@@ -987,14 +998,16 @@ class PipelineRun < ApplicationRecord
     # If there is no file, return false
     stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     return false unless status.exitstatus.zero?
+
     # If there is a file and there are no existing job_stats yet, return true
     existing_jobstats = job_stats.first
     return true unless existing_jobstats
+
     # If there is a file and there are job_stats, check if the file supersedes the job_stats:
     begin
       s3_file_time = DateTime.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
       return (s3_file_time && existing_jobstats.created_at && s3_file_time > existing_jobstats.created_at)
-    rescue
+    rescue StandardError
       return nil
     end
   end
@@ -1002,6 +1015,7 @@ class PipelineRun < ApplicationRecord
   def load_job_stats(stats_json_s3_path)
     downloaded_stats_path = PipelineRun.download_file(stats_json_s3_path, local_json_path)
     return unless downloaded_stats_path
+
     stats_array = JSON.parse(File.read(downloaded_stats_path))
     stats_array = stats_array.select { |entry| entry.key?("task") }
     job_stats.destroy_all
@@ -1018,7 +1032,7 @@ class PipelineRun < ApplicationRecord
         pipeline_version: sfn_service_result[:pipeline_version]
       )
       Rails.logger.info("PipelineRun: id=#{id} sfn_execution_arn=#{sfn_service_result[:sfn_execution_arn]}")
-    rescue => e
+    rescue StandardError => e
       LogUtil.log_err("Error starting SFN pipeline: #{e}")
       LogUtil.log_backtrace(e)
       # we will not retry in this case, since we do not know what error occurred
@@ -1129,6 +1143,7 @@ class PipelineRun < ApplicationRecord
 
   def job_status_display
     return "Pipeline Initializing" unless job_status
+
     stage = job_status.to_s.split("-")[0].split(".")[1]
     stage ? "Running #{stage}" : job_status
   end
@@ -1278,7 +1293,7 @@ class PipelineRun < ApplicationRecord
           Rails.logger.info("Fetching file: #{s3_path}")
           refined_annotated_out = Syscall.s3_read_json(s3_path)
           unmapped_reads = refined_annotated_out["unidentified_fasta"]
-        rescue
+        rescue StandardError
           Rails.logger.warn("Could not read file: #{s3_path}")
         end
       end
@@ -1303,6 +1318,7 @@ class PipelineRun < ApplicationRecord
     while round < max_tries
       downloaded = PipelineRun.download_file(s3_path, destination, dest_is_dir)
       return downloaded if downloaded
+
       round += 1
       sleep(15)
     end
@@ -1466,7 +1482,7 @@ class PipelineRun < ApplicationRecord
 
   def subsample_fraction
     # fraction of non-host ("remaining") reads that actually went through non-host alignment
-    if fraction_subsampled
+    if fraction_subsampled # rubocop:disable Style/RedundantCondition
       fraction_subsampled
     else # These should actually be the same value
       @cached_subsample_fraction ||= adjusted_remaining_reads > 0 ? ((1.0 * subsampled_reads) / adjusted_remaining_reads) : 1.0
@@ -1478,6 +1494,7 @@ class PipelineRun < ApplicationRecord
       # New dag pipeline. no subsample folder
       return nil
     end
+
     all_suffix = pipeline_version ? "subsample_all" : ""
     subsample? ? "subsample_#{subsample}" : all_suffix
   end
@@ -1576,10 +1593,12 @@ class PipelineRun < ApplicationRecord
     # Return "true" when v0 >= v1
     return true unless v1
     return false unless v0
+
     v0_major, v0_minor = major_minor(v0)
     v1_major, v1_minor = major_minor(v1)
     return true if v0_major > v1_major
     return false if v0_major < v1_major
+
     v0_minor >= v1_minor
   end
 
@@ -1677,7 +1696,8 @@ class PipelineRun < ApplicationRecord
 
   def compare_ercc_counts
     return nil if ercc_counts.empty?
-    ercc_counts_by_name = Hash[ercc_counts.map { |a| [a.name, a] }]
+
+    ercc_counts_by_name = ercc_counts.index_by(&:name)
 
     ret = []
     ErccCount::BASELINE.each do |baseline|
@@ -1702,6 +1722,7 @@ class PipelineRun < ApplicationRecord
     elsif directed_acyclic_graph?
       return dag_outputs_by_step(can_see_stage1_results)
     end
+
     return {}
   end
 
@@ -1776,6 +1797,7 @@ class PipelineRun < ApplicationRecord
     result = {}
     pipeline_run_stages.each_with_index do |prs, stage_idx|
       next unless prs.dag_json && STEP_DESCRIPTIONS[prs.name]
+
       result[prs.name] = {
         "stageDescription" => STEP_DESCRIPTIONS[prs.name]["stage"],
         "stageDagJson" => prs.redacted_dag_json,
@@ -1791,7 +1813,7 @@ class PipelineRun < ApplicationRecord
       step_statuses = prs.step_statuses
 
       targets.each_with_index do |(target_name, output_list), step_idx|
-        next if given_targets.keys.include?(target_name)
+        next if given_targets.key?(target_name)
 
         file_paths = []
         output_list.each do |output|
@@ -1806,6 +1828,7 @@ class PipelineRun < ApplicationRecord
         file_paths.each do |path|
           file_info_for_output = filename_to_info[path]
           next unless file_info_for_output
+
           if !can_see_stage1_results && stage_idx.zero? && step_idx < num_steps - 1
             # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
             file_info_for_output["url"] = nil

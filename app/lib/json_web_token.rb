@@ -33,6 +33,7 @@ class JsonWebToken
   # if the key id is not present on the cache
   def self.cached_jwks(kid)
     return @jwks_hash_cache[kid] if @jwks_hash_cache.key?(kid)
+
     @jwks_hash_cache = jwks_hash
     @jwks_hash_cache[kid]
   end

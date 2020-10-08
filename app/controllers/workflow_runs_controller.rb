@@ -24,7 +24,7 @@ class WorkflowRunsController < ApplicationController
   def rerun
     @workflow_run.rerun
     render json: { status: "success" }, status: :ok
-  rescue => e
+  rescue StandardError => e
     LogUtil.log_error("Rerun trigger failed", exception: e, workflow_id: @workflow_run.id)
     render json: {
       status: "error",

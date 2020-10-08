@@ -36,6 +36,7 @@ class SfnExecution
     map = workflow_result_mapping
     path = map[output_key]
     raise OutputNotFoundError.new(output_key, map.keys) unless path
+
     return path
   end
 
@@ -68,6 +69,7 @@ class SfnExecution
 
   def workflow_result_mapping
     raise SfnDescriptionNotFoundError, @s3_path unless description && description[:output]
+
     output_result = JSON.parse(description[:output])
     return output_result["Result"]
   end

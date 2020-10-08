@@ -392,7 +392,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     assert_equal 0, MetadataField.where(name: "Custom Field 2").length
 
     # Prior to upload, the core field shouldn't be associated with the project.
-    assert !@metadata_validation_project.metadata_fields.include?(@core_field)
+    assert_not @metadata_validation_project.metadata_fields.include?(@core_field)
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: @client_version,

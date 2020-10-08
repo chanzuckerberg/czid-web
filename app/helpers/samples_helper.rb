@@ -18,7 +18,7 @@ module SamplesHelper
 
   # Sample files stored in S3 have paths like s3://idseq-samples-prod/samples/{project_id}/{sample_id}/{path_to_file}
   # This regex extracts the sample_id from sample S3 paths.
-  SAMPLE_PATH_ID_MATCHER = %r{\A.*samples\/\d*\/(\d*)\/.*\z}
+  SAMPLE_PATH_ID_MATCHER = %r{\A.*samples\/\d*\/(\d*)\/.*\z}.freeze
 
   # Maps SFN execution statuses to classic frontend statuses
   SFN_STATUS_MAPPING = {
@@ -432,7 +432,7 @@ module SamplesHelper
     top_cg_workflow_run_by_sample_id = top_workflow_runs_multiget(sample_ids, WorkflowRun::WORKFLOW[:consensus_genome])
 
     # Massage data into the right format
-    samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user).each_with_index do |sample|
+    samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user).each do |sample|
       job_info = {}
       job_info[:db_sample] = sample
       job_info[:metadata] = metadata_by_sample_id[sample.id]
@@ -503,7 +503,7 @@ module SamplesHelper
     pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
 
-    samples.each_with_index do |sample|
+    samples.each do |sample|
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
 
       if top_pipeline_run && report_ready_pipeline_run_ids.include?(top_pipeline_run.id)
@@ -599,7 +599,7 @@ module SamplesHelper
           if hg.nil?
             hg = HostGenome.create!(name: name, user: user)
           end
-        rescue => e
+        rescue StandardError => e
           errors << e.message
           metadata.delete(sample_attributes[:name])
           next
@@ -827,6 +827,7 @@ module SamplesHelper
 
   def filter_by_host(samples, query)
     return samples.where("false") if query == ["none"]
+
     samples.where(host_genome_id: query)
   end
 

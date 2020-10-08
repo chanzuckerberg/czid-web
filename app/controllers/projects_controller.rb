@@ -332,6 +332,7 @@ class ProjectsController < ApplicationController
   def project_reports_csv_status
     stdout = Syscall.pipe_with_output(["aws", "s3", "ls", @project.report_tar_s3(current_user.id)], ["wc", "-l"])
     return if stdout.blank?
+
     final_complete = stdout.to_i == 1
     if final_complete
       render json: { status_display: "complete" }
@@ -358,6 +359,7 @@ class ProjectsController < ApplicationController
   def host_gene_counts_status
     stdout = Syscall.pipe_with_output(["aws", "s3", "ls", @project.host_gene_counts_tar_s3(current_user.id)], ["wc", "-l"])
     return if stdout.blank?
+
     final_complete = stdout.to_i == 1
     if final_complete
       render json: { status_display: "complete" }
@@ -568,7 +570,7 @@ class ProjectsController < ApplicationController
                                             @project.id,
                                             reset_url).deliver_now
     end
-  rescue => exception
+  rescue StandardError => exception
     LogUtil.log_err("Failed to send 'new user on project' password instructions to #{email}. #{exception.message}")
     LogUtil.log_backtrace(exception)
   end

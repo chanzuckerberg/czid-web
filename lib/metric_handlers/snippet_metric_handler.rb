@@ -39,9 +39,9 @@ module MetricHandlers
         metric_data.map { |metric| metric[:dimensions] = dimensions }
       end
 
-      namespace = @event.payload[:cloudwatch_namespace].blank? ? "#{Rails.env}-snippets" : @event.payload[:cloudwatch_namespace]
+      namespace = @event.payload[:cloudwatch_namespace].presence || "#{Rails.env}-snippets"
       CloudWatchUtil.put_metric_data(namespace, metric_data)
-    rescue => err
+    rescue StandardError => err
       Rails.logger.error(err.message)
     end
   end

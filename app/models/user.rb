@@ -44,7 +44,7 @@ class User < ApplicationRecord
   validates :role, presence: true, inclusion: { in: [
     ROLE_REGULAR_USER,
     ROLE_ADMIN,
-  ], }, allow_nil: true, if: :mass_validation_enabled?
+  ] }, allow_nil: true, if: :mass_validation_enabled?
 
   validates :authentication_token, presence: true, allow_nil: true, if: :mass_validation_enabled?
 

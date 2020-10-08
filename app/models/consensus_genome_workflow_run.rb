@@ -23,7 +23,7 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
 
   def coverage_viz(cacheable_only: false)
     ConsensusGenomeCoverageService.call(workflow_run: self, cacheable_only: cacheable_only)
-  rescue => exception
+  rescue StandardError => exception
     LogUtil.log_error(
       "Error loading coverage viz",
       exception: exception,
@@ -34,7 +34,7 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
 
   def quality_metrics
     ConsensusGenomeMetricsService.call(self)
-  rescue => exception
+  rescue StandardError => exception
     LogUtil.log_error(
       "Error loading quality metrics",
       exception: exception,

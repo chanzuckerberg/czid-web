@@ -8,7 +8,7 @@ if defined? Rack::Cors
         # SERVER_DOMAIN should be set to the current env root web address
         # such as https://staging.idseq.net/
         ENV["SERVER_DOMAIN"],
-        *Rails.application.config.allowed_cors_origins
+        *Rails.application.config.allowed_cors_origins,
         # All other domains should be added in env config files such as prod.rb.
       ].compact
       resource '/assets/*'

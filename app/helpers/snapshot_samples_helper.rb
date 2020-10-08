@@ -25,7 +25,7 @@ module SnapshotSamplesHelper
     if snapshot.present?
       pipeline_run_ids = snapshot_pipeline_run_ids(snapshot)
       pipeline_runs = PipelineRun.where("id in (?) and sample_id in (?)", pipeline_run_ids, sample_ids)
-      pipeline_runs_by_sample_id = pipeline_runs.map { |pr| [pr.sample_id, pr] }.to_h
+      pipeline_runs_by_sample_id = pipeline_runs.index_by(&:sample_id)
       pipeline_runs_by_sample_id
     end
   end

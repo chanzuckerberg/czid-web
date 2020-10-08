@@ -16,9 +16,7 @@ OQXB_GENBANK_ACCESSION = "EU370913".freeze
 OQXB_ONTOLOGY = {
   "accession" => OQXB_ACCESSION,
   "label" => OQXB_LABEL,
-  "synonyms" => [
-
-  ],
+  "synonyms" => [],
   "description" => OQXB_DESCRIPTION,
   "geneFamily" => [
     {
@@ -53,23 +51,23 @@ RSpec.describe AmrHeatmapController, type: :controller do
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
                                 gene: "IamA_Gene",
-                              },],
+                              }],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED,
-                              },],
-                            },])
+                              }],
+                            }])
         sample_two = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
                                 gene: "AnoT_Her",
-                              },],
+                              }],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED,
-                              },],
-                            },])
+                              }],
+                            }])
 
         get :index, params: { sampleIds: [sample_one["id"], sample_two["id"]] }
         expect(assigns(:sample_ids)).to eq([sample_one["id"].to_i, sample_two["id"].to_i])
@@ -80,23 +78,23 @@ RSpec.describe AmrHeatmapController, type: :controller do
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
                                 gene: "IamA_Gene",
-                              },],
+                              }],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED,
-                              },],
-                            },])
+                              }],
+                            }])
         sample_two = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
                                 gene: "AnoT_Her",
-                              },],
+                              }],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED,
-                              },],
-                            },])
+                              }],
+                            }])
 
         get :index, params: { sampleIds: [sample_one["id"], sample_two["id"]] }
         expect(response).to render_template("index")
@@ -115,24 +113,24 @@ RSpec.describe AmrHeatmapController, type: :controller do
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
                                 gene: "IamA_Gene",
-                              },],
+                              }],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED,
-                              },],
-                            },],
+                              }],
+                            }],
                                      metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" })
         sample_two = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
                                 gene: "AnoT_Her",
-                              },],
+                              }],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED,
-                              },],
-                            },],
+                              }],
+                            }],
                                      metadata_fields: { collection_location: "Los Angeles, USA", sample_type: "Serum" })
 
         amr_counts_one = sample_one.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
@@ -167,7 +165,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    depth: amr_counts_one["depth"],
                                                    pipeline_run_id: amr_counts_one["pipeline_run_id"],
                                                    drug_family: amr_counts_one["drug_family"],
-                                                 },])
+                                                 }])
         expect(json_response[1]).to include_json(sampleId: sample_two["id"],
                                                  sampleName: sample_two["name"],
                                                  metadata: [{
@@ -189,7 +187,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    depth: amr_counts_two["depth"],
                                                    pipeline_run_id: amr_counts_two["pipeline_run_id"],
                                                    drug_family: amr_counts_two["drug_family"],
-                                                 },])
+                                                 }])
       end
 
       it "works even if a sample doesn't exist" do
@@ -198,13 +196,13 @@ RSpec.describe AmrHeatmapController, type: :controller do
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
                                 gene: "IamA_Gene",
-                              },],
+                              }],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED,
-                              },],
-                            },],
+                              }],
+                            }],
                                      metadata_fields: { collection_location: "Santa Barbara, USA", sample_type: "Blood" })
 
         amr_counts_one = sample_one.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
@@ -238,7 +236,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    depth: amr_counts_one["depth"],
                                                    pipeline_run_id: amr_counts_one["pipeline_run_id"],
                                                    drug_family: amr_counts_one["drug_family"],
-                                                 },],
+                                                 }],
                                                  error: "")
         expect(json_response[1]).to include_json(sampleId: 99_999,
                                                  sampleName: "",
@@ -253,25 +251,25 @@ RSpec.describe AmrHeatmapController, type: :controller do
         sample_joe = create(:sample, project: project_joe, pipeline_runs_data: [{
                               amr_counts_data: [{
                                 gene: "IamA_Gene",
-                              },],
+                              }],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED,
-                              },],
-                            },],
+                              }],
+                            }],
                                      metadata_fields: { collection_location: "Santa Barbara, USA", sample_type: "Blood" })
 
         sample_admin = create(:sample, project: project_admin, pipeline_runs_data: [{
                                 amr_counts_data: [{
                                   gene: "AnoT_Her",
-                                },],
+                                }],
                                 job_status: PipelineRun::STATUS_CHECKED,
                                 output_states_data: [{
                                   output: "amr_counts",
                                   state: PipelineRun::STATUS_LOADED,
-                                },],
-                              },],
+                                }],
+                              }],
                                        metadata_fields: { collection_location: "Los Angeles, USA", sample_type: "Serum" })
 
         amr_counts_joe = sample_joe.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
@@ -305,7 +303,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    depth: amr_counts_joe["depth"],
                                                    pipeline_run_id: amr_counts_joe["pipeline_run_id"],
                                                    drug_family: amr_counts_joe["drug_family"],
-                                                 },],
+                                                 }],
                                                  error: "")
         expect(json_response[1]).to include_json(sampleId: sample_admin["id"],
                                                  sampleName: "",
@@ -318,7 +316,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
         project = create(:project, users: [@admin, @joe])
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
                               job_status: PipelineRun::STATUS_CHECKED,
-                            },])
+                            }])
 
         get :amr_counts, params: { sampleIds: [sample_one["id"]] }
         expect(response.content_type).to eq("application/json")
@@ -374,9 +372,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
             label: OQXB_LABEL,
             accession: OQXB_ACCESSION,
             description: OQXB_DESCRIPTION,
-            synonyms: [
-
-            ],
+            synonyms: [],
             publications: [
               OQXB_PUBLICATION,
             ],

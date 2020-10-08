@@ -34,7 +34,7 @@ class UserTest < ActiveSupport::TestCase
     user = new_user
 
     user.name = "1234 abcd"
-    assert !user.valid?
+    assert_not user.valid?
   end
 
   test "CZI user detected" do
@@ -45,10 +45,10 @@ class UserTest < ActiveSupport::TestCase
     assert user.czi_user?
 
     user = new_user "test@test.com"
-    assert !user.czi_user?
+    assert_not user.czi_user?
 
     user = new_user "test@fakechanzuckerberg.com"
-    assert !user.czi_user?
+    assert_not user.czi_user?
   end
 
   private

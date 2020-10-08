@@ -28,7 +28,7 @@ class LocationsController < ApplicationController
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]
     MetricUtil.log_analytics_event(event, current_user, { query: query }, request)
     render json: results
-  rescue => err
+  rescue StandardError => err
     render json: {
       status: "failed",
       message: GEOSEARCH_ERR_MSG,
@@ -50,7 +50,7 @@ class LocationsController < ApplicationController
       format.html { render :map_playground }
       format.json { render json: @results }
     end
-  rescue => err
+  rescue StandardError => err
     render json: {
       status: "failed",
       message: LOCATION_LOAD_ERR_MSG,
@@ -102,7 +102,7 @@ class LocationsController < ApplicationController
         render json: location_data
       end
     end
-  rescue => err
+  rescue StandardError => err
     render json: {
       status: "failed",
       message: LOCATION_LOAD_ERR_MSG,

@@ -38,7 +38,7 @@ module BenchmarksHelper
   rescue JSON::ParserError
     LogUtil.log_err("Invalid config file - '#{IDSEQ_BENCH_KEY}'")
     return nil
-  rescue => e
+  rescue StandardError => e
     LogUtil.log_err("Unknown error - '#{e.message}'")
     return nil
   end

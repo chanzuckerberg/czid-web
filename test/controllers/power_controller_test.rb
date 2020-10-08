@@ -193,7 +193,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     get "/search_suggestions"
     res = JSON.parse(@response.body)
     samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
-    assert !samples_shown.include?(samples(:one).id)
+    assert_not samples_shown.include?(samples(:one).id)
   end
 
   test 'joe sees public_project in search suggestions' do
@@ -209,7 +209,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     get "/search_suggestions"
     res = JSON.parse(@response.body)
     projects_shown = res["Project"]["results"].map { |h| h["id"] }
-    assert !projects_shown.include?(projects(:one).id)
+    assert_not projects_shown.include?(projects(:one).id)
   end
 
   test 'joe sees only my data samples in search suggestions in my data domain' do
@@ -218,7 +218,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     res = JSON.parse(@response.body)
     samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
     assert samples_shown.include?(samples(:joe_sample).id)
-    assert !samples_shown.include?(samples(:public_sample).id)
+    assert_not samples_shown.include?(samples(:public_sample).id)
   end
 
   test 'joe sees only public samples in search suggestions in public domain' do
@@ -227,7 +227,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     res = JSON.parse(@response.body)
     samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
     assert samples_shown.include?(samples(:public_sample).id)
-    assert !samples_shown.include?(samples(:joe_sample).id)
+    assert_not samples_shown.include?(samples(:joe_sample).id)
   end
 
   test 'joe sees my data and public samples in search suggestions in default domain' do
@@ -237,7 +237,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
     assert samples_shown.include?(samples(:public_sample).id)
     assert samples_shown.include?(samples(:joe_sample).id)
-    assert !samples_shown.include?(samples(:project_one_sampleA).id)
+    assert_not samples_shown.include?(samples(:project_one_sampleA).id)
   end
 
   # public projects
@@ -393,7 +393,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     get "/phylo_trees/index.json"
     pt = phylo_trees(:joe_phylo_tree)
-    is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count == 1
+    is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].count { |tree| tree['id'] == pt.id } == 1
     assert_equal is_tree_in_response, true
   end
 
@@ -401,7 +401,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     get "/phylo_trees/index.json"
     pt = phylo_trees(:public_phylo_tree)
-    is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count == 1
+    is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].count { |tree| tree['id'] == pt.id } == 1
     assert_equal is_tree_in_response, true
   end
 
@@ -412,7 +412,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
       get "/phylo_trees/#{pt.id}/show"
     end
     get "/phylo_trees/index.json"
-    is_tree_absent_from_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count.zero?
+    is_tree_absent_from_response = JSON.parse(@response.body)['phyloTrees'].count { |tree| tree['id'] == pt.id }.zero?
     assert_equal is_tree_absent_from_response, true
   end
 

@@ -7,6 +7,7 @@ module ElasticsearchCallbacksHelper
 
   def self.included(base)
     return unless base.ancestors.include?(::ActiveRecord::Base)
+
     base.class_eval do
       after_commit -> { async_elasticsearch_index }, on: :create
       after_commit -> { async_elasticsearch_index }, on: :update

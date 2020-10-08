@@ -8,10 +8,12 @@ class RestartPipelineForSample
     if s.nil?
       raise "Sample #{sample_id} not found"
     end
+
     Rails.logger.info("RestartPipelineForSample #{sample_id} is being triggered")
     raise "not restarted" unless s.kickoff_pipeline
+
     Rails.logger.info("RestartPipelineForSample #{sample_id} has started. ")
-  rescue => err
+  rescue StandardError => err
     LogUtil.log_err(
       "RestartPipelineForSample #{sample_id} failed to run. Reason: #{err}"
     )

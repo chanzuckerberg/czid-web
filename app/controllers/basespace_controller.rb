@@ -23,7 +23,7 @@ class BasespaceController < ApplicationController
           "grant_type" => "authorization_code"
         )
         @access_token = response["access_token"]
-      rescue
+      rescue StandardError
         Rails.logger.warn("Failed to get basespace access token")
       end
     end

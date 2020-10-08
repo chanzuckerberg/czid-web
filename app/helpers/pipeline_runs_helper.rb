@@ -124,8 +124,7 @@ module PipelineRunsHelper
   def parse_sfn_execution_history_hash(sfn_execution_history_hash)
     failed_state =
       sfn_execution_history_hash["events"]
-      .select { |evt| %w[ExecutionAborted ExecutionFailed ExecutionTimedOut].include?(evt["type"]) }
-      .first
+      .find { |evt| %w[ExecutionAborted ExecutionFailed ExecutionTimedOut].include?(evt["type"]) }
 
     step_numbers = {
       "HostFilter" => 1,
@@ -187,10 +186,11 @@ module PipelineRunsHelper
   def file_generated_since_run(record, s3_path)
     stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", s3_path.to_s)
     return false unless status.exitstatus.zero?
+
     begin
       s3_file_time = Time.strptime(stdout[0..18], "%Y-%m-%d %H:%M:%S")
       return (s3_file_time && record.created_at && s3_file_time > record.created_at)
-    rescue
+    rescue StandardError
       return nil
     end
   end
@@ -205,6 +205,7 @@ module PipelineRunsHelper
   def fetch_pipeline_version(s3_file = pipeline_version_file)
     stdout = Syscall.run("aws", "s3", "cp", s3_file, "-")
     return nil if stdout.blank?
+
     whole_version = stdout.strip
     whole_version =~ /(^\d+\.\d+).*/
     Regexp.last_match(1)
@@ -310,6 +311,7 @@ module PipelineRunsHelper
 
     # TODO: (gdingle): rename to stage_number. See https://jira.czi.team/browse/IDSEQ-1912.
     return [nil, nil] unless [1, 2].include? failed_stage.step_number
+
     # We need to set the pipeline version in the failed pipeline run so that the host_filter_output_s3_path includes it,
     # i.e. "/results/3.7" instead of "/results"
     # The pipeline version is usually set in the result monitor, but that is not guaranteed to have run by this point.

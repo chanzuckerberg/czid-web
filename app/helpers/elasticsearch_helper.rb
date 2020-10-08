@@ -9,7 +9,7 @@ module ElasticsearchHelper
   def prefix_match(model, field, prefix, condition)
     prefix = sanitize(prefix)
     search_params = { query: { query_string: { query: "#{prefix}*", analyze_wildcard: true, fields: [field] } } }
-    results = if Rails.env == "test"
+    results = if Rails.env.test?
                 # Return all records. Tests can't use elasticsearch.
                 # They focus on whether access control is enforced.
                 model.all
@@ -23,7 +23,8 @@ module ElasticsearchHelper
   end
 
   def taxon_search(query, tax_levels = TaxonCount::NAME_2_LEVEL.keys, filters = {})
-    return {} if Rails.env == "test"
+    return {} if Rails.env.test?
+
     query = sanitize(query)
 
     # sanitize tax_levels

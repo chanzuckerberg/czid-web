@@ -31,9 +31,7 @@ FactoryBot.define do
     before(:create) do |sample, options|
       options.metadata_fields.each_key do |metadata_field_name|
         metadata_field = MetadataField.find_by(name: metadata_field_name)
-        unless metadata_field
-          metadata_field = create(:metadata_field, name: metadata_field_name)
-        end
+        metadata_field ||= create(:metadata_field, name: metadata_field_name)
         host_genome = sample.host_genome
         host_genome.metadata_fields << metadata_field unless host_genome.metadata_fields.include?(metadata_field)
       end

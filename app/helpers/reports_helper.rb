@@ -39,7 +39,7 @@ module ReportsHelper
             tax_info[:name] = "all artificial constructs"
             Rails.logger.info("Blacklisted genus id appeared in report for pipeline run #{pipeline_run_id}.")
 
-          elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
+          elsif !TaxonLineage::MISSING_LINEAGE_ID.value?(tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
             tax_info[:name] += " #{tax_id}"
             Rails.logger.info("Pipeline run #{pipeline_run_id} missing lineage for #{tax_id}.")
           end

@@ -132,6 +132,7 @@ class PipelineReportService
     if @background.mass_normalized? && @pipeline_run.total_reads.zero?
       raise MassNormalizedBackgroundError.new(@background.id, @pipeline_run.id)
     end
+
     adjusted_total_reads = (@pipeline_run.total_reads - @pipeline_run.total_ercc_reads.to_i) * @pipeline_run.subsample_fraction
     @timer.split("initialize_and_adjust_reads")
 
@@ -144,14 +145,12 @@ class PipelineReportService
       results = nil
       ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
         results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
-          begin
-            ActiveRecord::Base.connection_pool.with_connection do
-              lambda.call()
-            end
-          rescue => e
-            LogUtil.log_err("Parallel fetch failed")
-            raise e
+          ActiveRecord::Base.connection_pool.with_connection do
+            lambda.call()
           end
+        rescue StandardError => e
+          LogUtil.log_err("Parallel fetch failed")
+          raise e
         end
       end
       @timer.split("parallel_fetch_report_data")
@@ -436,9 +435,7 @@ class PipelineReportService
       contigs_per_db_type.each do |db_type, contigs_per_read_count|
         norm_count_type = db_type.downcase.to_sym
         counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_SPECIES, tax_id, norm_count_type)
-        unless counts_per_db_type
-          counts_per_db_type = counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_GENUS, tax_id, norm_count_type)
-        end
+        counts_per_db_type ||= counts_by_tax_level.dig(TaxonCount::TAX_LEVEL_GENUS, tax_id, norm_count_type)
 
         if counts_per_db_type
           contigs = 0
@@ -474,6 +471,7 @@ class PipelineReportService
     absent_z_score = Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND
   )
     return absent_z_score unless stdev_mass_normalized && (total_ercc_reads > 0)
+
     r_mass_normalized = r / total_ercc_reads.to_f
     value = (r_mass_normalized - mean_mass_normalized) / stdev_mass_normalized
     value.clamp(min_z_score, max_z_score)
@@ -488,6 +486,7 @@ class PipelineReportService
     absent_z_score = Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND
   )
     return absent_z_score unless stdev
+
     value = (rpm - mean) / stdev
     value.clamp(min_z_score, max_z_score)
   end

@@ -83,6 +83,7 @@ class Location < ApplicationRecord
 
   def self.geo_search_request_base(action, query, limit = nil)
     raise ArgumentError, "No query for #{action}" if query.blank?
+
     base_query = if action == :autocomplete
                    AUTOCOMPLETE_BASE_QUERY
                  else
@@ -109,7 +110,7 @@ class Location < ApplicationRecord
     # Light name sanitization
     location_params.map { |_, v| v.is_a?(String) ? LocationHelper.sanitize_name(v) : v }
     Location.new(location_params)
-  rescue => err
+  rescue StandardError => err
     raise "Couldn't make new Location: #{err.message} #{location_params}"
   end
 
@@ -137,12 +138,7 @@ class Location < ApplicationRecord
       # that are different from loc_info above (where loc_info is passed in from the front-end).
       # So we need to check for existing AGAIN to avoid creating a duplicate entry in the database.
       existing = Location.find_with_fields(location_fields)
-      if existing
-        existing
-      else
-        # 'New' without saving so make sure caller saves.
-        new_from_params(location_fields)
-      end
+      existing || new_from_params(location_fields)
     else
       # If osm_id and osm_type are missing, just use the original params.
       # 'New' without saving so make sure caller saves.

@@ -20,5 +20,5 @@ class SampleType < ApplicationRecord
     'Organs',
     'Insect Body Parts',
     'Other',
-  ], }
+  ] }
 end

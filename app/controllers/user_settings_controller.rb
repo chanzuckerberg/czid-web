@@ -28,7 +28,7 @@ class UserSettingsController < ApplicationController
     end
 
     render json: user_setting_metadata
-  rescue => e
+  rescue StandardError => e
     LogUtil.log_backtrace(e)
     LogUtil.log_err("UserSettingsMetadataFetchError: Unexpected issue fetching user setting metadata: #{e}")
     render json: {
@@ -46,7 +46,7 @@ class UserSettingsController < ApplicationController
       key: params[:key],
       value: current_user.get_user_setting(params[:key]),
     }
-  rescue => e
+  rescue StandardError => e
     LogUtil.log_backtrace(e)
     LogUtil.log_err("UserSettingsUpdateError: Unexpected issue updating user settings: #{e}")
     render json: {

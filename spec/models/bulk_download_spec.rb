@@ -89,7 +89,7 @@ describe BulkDownload, type: :model do
                                       pipeline_version: fake_dag_version,
                                       wdl_version: fake_wdl_version,
                                       sfn_execution_arn: fake_sfn_execution_arn,
-                                    },])
+                                    }])
       @sample_two = create(:sample, project: @project, name: "Test Sample Two",
                                     pipeline_runs_data: [{
                                       finalized: 1,
@@ -97,7 +97,7 @@ describe BulkDownload, type: :model do
                                       pipeline_version: fake_dag_version,
                                       wdl_version: fake_wdl_version,
                                       sfn_execution_arn: fake_sfn_execution_arn,
-                                    },])
+                                    }])
 
       stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net",
                                           "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
@@ -537,7 +537,7 @@ describe BulkDownload, type: :model do
     end
 
     it "outputs correct command in development" do
-      allow(Rails).to receive(:env).and_return("development")
+      allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new("development"))
       stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-development"))
 
       task_command = [

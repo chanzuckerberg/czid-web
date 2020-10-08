@@ -35,7 +35,7 @@ class BulkDownloadsController < ApplicationController
     # Convert sample ids to pipeline run ids.
     begin
       pipeline_run_ids = validate_bulk_download_create_params(create_params, current_user)
-    rescue => e
+    rescue StandardError => e
       # Throw an error if any sample doesn't have a valid pipeline run.
       # The user should never see this error, because the validation step should catch any issues.
       LogUtil.log_backtrace(e)
@@ -59,7 +59,7 @@ class BulkDownloadsController < ApplicationController
       begin
         bulk_download.kickoff
         render json: bulk_download
-      rescue => e
+      rescue StandardError => e
         # If the kickoff failed, set to error.
         bulk_download.update(status: BulkDownload::STATUS_ERROR)
         LogUtil.log_backtrace(e)

@@ -83,6 +83,7 @@ module ReportHelper
     pipeline_run = select_pipeline_run(sample, params[:pipeline_version])
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
+
     tax_details = ReportHelper.taxonomy_details(pipeline_run_id, background_id, scoring_model, sort_by)
     ReportHelper.generate_report_csv(tax_details)
   end
@@ -127,6 +128,7 @@ module ReportHelper
   def self.generate_report_csv(tax_details)
     rows = tax_details[2]
     return if rows.blank?
+
     flat_keys = HashUtil.flat_hash(rows[0]).keys
     flat_keys_symbols = flat_keys.map { |array_key| array_key.map(&:to_sym) }
     attributes_as_symbols = flat_keys_symbols - IGNORE_IN_DOWNLOAD
@@ -161,18 +163,23 @@ module ReportHelper
 
   def self.decode_sort_by(sort_by)
     return nil unless sort_by
+
     parts = sort_by.split "_"
     return nil unless parts.length == 3
+
     direction = parts[0]
     return nil unless SORT_DIRECTIONS.include? direction
+
     count_type = parts[1].upcase
     return nil unless COUNT_TYPES.include? count_type
+
     metric = parts[2]
     return nil unless METRICS.include? metric
+
     {
-      direction:    direction,
-      count_type:   count_type,
-      metric:       metric,
+      direction: direction,
+      count_type: count_type,
+      metric: metric,
     }
   end
 
@@ -190,6 +197,7 @@ module ReportHelper
   def self.valid_arg_value(name, value, all_cats)
     # return appropriately validated value (based on name), or nil
     return nil unless value
+
     if name == :sort_by
       value = nil unless decode_sort_by(value)
     elsif name == :excluded_categories
@@ -407,7 +415,7 @@ module ReportHelper
           tax_info['name'] = "non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
         elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
           tax_info['name'] = "all artificial constructs"
-        elsif !(TaxonLineage::MISSING_LINEAGE_ID.values.include? tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
+        elsif !TaxonLineage::MISSING_LINEAGE_ID.value?(tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
           tax_info['name'] += " #{tax_id}"
         end
       elsif !tax_info['name']
@@ -452,6 +460,7 @@ module ReportHelper
     end
     taxon_counts_2d.each do |_tax_id, tax_info|
       next unless tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+
       genus_info = taxon_counts_2d[tax_info['genus_taxid']]
       genus_info['species_count'] += 1
     end
@@ -561,6 +570,7 @@ module ReportHelper
   def self.compute_genera_aggregate_scores!(rows, tax_2d)
     rows.each do |species_info|
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
       species_score = species_info['NT']['aggregatescore']
@@ -580,6 +590,7 @@ module ReportHelper
       species_info['NT']['maxzscore'] = [species_info['NT']['zscore'], species_info['NR']['zscore']].max
       species_info['NR']['maxzscore'] = species_info['NT']['maxzscore']
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+
       genus_id = species_info['genus_taxid']
       genus_info = tax_2d[genus_id]
       taxon_info = { "genus" => genus_info, "species" => species_info }

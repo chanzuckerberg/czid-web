@@ -23,7 +23,7 @@ class SampleAccessValidationService
 
     begin
       viewable_samples = validate_sample_access(@query_ids, @user)
-    rescue => e
+    rescue StandardError => e
       # just in case
       LogUtil.log_backtrace(e)
       LogUtil.log_err("SampleAccessValidationFailedEvent: Unexpected issue validating sample access: #{e}")

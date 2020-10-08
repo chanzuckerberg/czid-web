@@ -53,7 +53,7 @@ class SfnCGPipelineDispatchService
       sfn_input_json: sfn_input_json,
       sfn_execution_arn: sfn_execution_arn,
     }
-  rescue => err
+  rescue StandardError => err
     # Set to failed and re-raise
     @workflow_run.update(status: WorkflowRun::STATUS[:failed])
     LogUtil.log_err("Error starting CG SFN pipeline for WorkflowRun #{@workflow_run.id}: #{err}")

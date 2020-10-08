@@ -12,7 +12,7 @@ class ResultMonitorLoader
       output_state.update(state: PipelineRun::STATUS_LOADING)
       pr.send(PipelineRun::LOADERS_BY_OUTPUT[output])
       output_state.update(state: PipelineRun::STATUS_LOADED)
-    rescue
+    rescue StandardError
       # wait for up to 30 seconds. mark as error and restart
       # TODO: revisit this
       sleep(Time.now.to_i % 30)

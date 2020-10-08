@@ -163,7 +163,7 @@ class SfnPipelineDataService
         # or in the status.json files on S3.
         dag_name = SFN_STEP_TO_DAG_STEP_NAME[stage_name][step]
         status_info = step_statuses[dag_name] || {}
-        description = status_info["description"].blank? ? step_descriptions[dag_name] : status_info["description"]
+        description = status_info["description"].presence || step_descriptions[dag_name]
         status = redefine_job_status(status_info["status"], @stage_job_statuses[stage_index])
         all_redefined_statuses << status
 
@@ -290,6 +290,7 @@ class SfnPipelineDataService
     if split_var.nil?
       return var_name
     end
+
     # gather every piece but the first
     return split_var.drop(1).join
   end
@@ -344,6 +345,7 @@ class SfnPipelineDataService
     if existing_stages_status == "finished" && @stages_wdl_info.length != (@see_experimental ? 4 : 3)
       return "inProgress"
     end
+
     return existing_stages_status
   end
 
@@ -502,6 +504,7 @@ class SfnPipelineDataService
     unless status.success?
       raise ParseWdlError, stderr
     end
+
     parsed = JSON.parse(stdout)
     return parsed
   end

@@ -1,4 +1,3 @@
-
 class UrlUtil
   # Uses action_mailer config values on the assumption that we always want our
   # absolute URLs to be the same in emails and in other places.

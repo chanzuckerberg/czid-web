@@ -425,8 +425,8 @@ class SamplesController < ApplicationController
           countByWorkflow: samples.group(:temp_pipeline_workflow).count,
           count: sample_ids.count,
           projectCount: project_ids.count,
-          avgTotalReads: avg_total_reads.present? ? avg_total_reads : 0,
-          avgAdjustedRemainingReads: avg_remaining_reads.present? ? avg_remaining_reads : 0,
+          avgTotalReads: avg_total_reads.presence || 0,
+          avgAdjustedRemainingReads: avg_remaining_reads.presence || 0,
         }
       end
     end
@@ -888,13 +888,13 @@ class SamplesController < ApplicationController
         status: "ignored",
       }
     else
-      @sample.update_attributes!(metadata)
+      @sample.update!(metadata)
       render json: {
         status: "success",
         message: "Saved successfully",
       }
     end
-  rescue
+  rescue StandardError
     error_messages = @sample ? @sample.errors.full_messages : []
     render json: {
       status: 'failed',
@@ -911,6 +911,7 @@ class SamplesController < ApplicationController
   def taxid_contigs
     taxid = params[:taxid]
     return if HUMAN_TAX_IDS.include? taxid.to_i
+
     pr = select_pipeline_run(@sample, params[:pipeline_version])
     contigs = pr.get_contigs_for_taxid(taxid.to_i)
     output_fasta = ''
@@ -927,6 +928,7 @@ class SamplesController < ApplicationController
 
   def show_taxid_fasta
     return if HUMAN_TAX_IDS.include? params[:taxid].to_i
+
     pr = select_pipeline_run(@sample, params[:pipeline_version])
     if params[:hit_type] == "NT_or_NR"
       @taxid_fasta = get_taxon_fasta_from_pipeline_run_combined_nt_nr(pr, params[:taxid], params[:tax_level].to_i)
@@ -975,7 +977,7 @@ class SamplesController < ApplicationController
               error: "alignment file too big",
             }
           end
-        rescue
+        rescue StandardError
           render json: {
             error: "unexpected error occurred",
           }
@@ -1132,7 +1134,7 @@ class SamplesController < ApplicationController
     end
 
     render json: results
-  rescue => error
+  rescue StandardError => error
     LogUtil.log_error("Error while calling samples/reads_stats.json", exception: error)
     render json: { status: "Internal server error" }, status: :internal_server_error
   end
@@ -1161,8 +1163,8 @@ class SamplesController < ApplicationController
 
   # GET /samples/1/edit
   def edit
-    @project_info = @sample.project ? @sample.project : nil
-    @host_genomes = host_genomes_list ? host_genomes_list : nil
+    @project_info = @sample.project || nil
+    @host_genomes = host_genomes_list || nil
     @projects = current_power.updatable_projects
     @input_files = @sample.input_files
   end
@@ -1267,7 +1269,7 @@ class SamplesController < ApplicationController
       }
     end
     # For safety.
-  rescue
+  rescue StandardError
     render json: {
       error: "There was an error fetching the coverage viz summary file.",
     }
@@ -1286,7 +1288,7 @@ class SamplesController < ApplicationController
       }
     end
     # For safety.
-  rescue
+  rescue StandardError
     render json: {
       error: "There was an error fetching the coverage viz data file.",
     }
@@ -1385,7 +1387,7 @@ class SamplesController < ApplicationController
     else
       raise "Output file not found on S3"
     end
-  rescue => err
+  rescue StandardError => err
     LogUtil.log_err("Error loading #{output_name} for sample #{@sample.id}: #{err}")
     render json: {
       error: "#{output_name} does not exist for this sample",
@@ -1398,8 +1400,10 @@ class SamplesController < ApplicationController
 
   def clean_taxid_name(pipeline_run, taxid)
     return 'all' if taxid == 'all'
+
     taxid_name = pipeline_run.taxon_counts.find_by(tax_id: taxid).name
     return "taxon-#{taxid}" unless taxid_name
+
     taxid_name.downcase.gsub(/\W/, "-")
   end
 
@@ -1462,6 +1466,7 @@ class SamplesController < ApplicationController
     if samples.length < 100
       return
     end
+
     # assume that all samples are in the same project and from the same user
     project = samples.first.project
     uploader = samples.first.user

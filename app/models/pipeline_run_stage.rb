@@ -139,6 +139,7 @@ class PipelineRunStage < ApplicationRecord
   def run_job
     # Check output for the run and decide if we should run this stage
     return if started? && !failed? # job has been started successfully
+
     if pipeline_run.step_function?
       if pipeline_run.sfn_execution_arn
         # We do not need to start stage anymore for SFNs, because now we only start
@@ -186,6 +187,7 @@ class PipelineRunStage < ApplicationRecord
 
   def count_failed_tries
     return 0 if failed_jobs.blank?
+
     1 + failed_jobs.count(",")
   end
 
@@ -222,6 +224,7 @@ class PipelineRunStage < ApplicationRecord
     end
     # The job appears to be in progress.  Check to make sure it hasn't been killed in AWS.   But not too frequently.
     return unless due_for_aegea_check?
+
     self.job_status, self.job_log_id, self.job_description = job_info(job_id, id)
     save
   end
@@ -232,6 +235,7 @@ class PipelineRunStage < ApplicationRecord
 
   def log_url
     return nil unless job_log_id
+
     AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
   end
 
@@ -324,7 +328,7 @@ class PipelineRunStage < ApplicationRecord
   def alignment_command
     sample = pipeline_run.sample
     dag_json = generate_alignment_dag_json
-    key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
+    key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env.prod? ? 'prod' : 'staging')) # TODO: This is hacky
     dag_commands = prepare_dag(dag_json, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Run it

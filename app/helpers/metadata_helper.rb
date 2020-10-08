@@ -325,7 +325,7 @@ module MetadataHelper
       end
 
       if extract_host_genome_from_metadata
-        host_genome = host_genomes.select { |cur_hg| cur_hg && cur_hg.name.casecmp?(row[host_genome_index]) }.first
+        host_genome = host_genomes.find { |cur_hg| cur_hg && cur_hg.name.casecmp?(row[host_genome_index]) }
 
         if host_genome.nil?
           error_aggregator.add_error(:row_invalid_host_genome, [index + 1, sample.name, row[host_genome_index]])
@@ -350,6 +350,7 @@ module MetadataHelper
 
         # Ignore invalid columns.
         next if MetadataField::RESERVED_NAMES.include?(field)
+
         val_errors, val_field = sample.metadatum_validate(field, value).values_at(
           :errors, :metadata_field
         )
@@ -412,9 +413,7 @@ module MetadataHelper
     host_genomes = if allow_new_host_genomes
                      host_genome_names.map do |name|
                        hg = HostGenome.find_by(name: name) # case insensitive
-                       unless hg
-                         hg = HostGenome.new(name: name, user: current_user)
-                       end
+                       hg ||= HostGenome.new(name: name, user: current_user)
                        # Return all found or created host genomes until this is resolved:
                        # https://jira.czi.team/browse/IDSEQ-2193.
                        new_host_genomes << hg

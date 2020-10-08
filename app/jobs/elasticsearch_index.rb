@@ -22,7 +22,7 @@ class ElasticsearchIndex
   rescue Elasticsearch::Transport::Transport::Errors::NotFound
     Rails.logger.debug("Elasticsearch: Attempted to delete document: #{record_id} from #{index_name} but it was not found")
     raise # Raise error in order to fire on_failure resque hook in InstrumentedJob
-  rescue => err
+  rescue StandardError => err
     Rails.logger.error(err)
     LogUtil.log_backtrace(err)
     LogUtil.log_err("Elasticsearch failed to #{operation} record: #{record_id} source table: #{index_name}, with error: #{err.message}")

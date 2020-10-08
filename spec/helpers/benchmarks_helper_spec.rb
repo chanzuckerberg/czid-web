@@ -13,7 +13,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
       s3 = Aws::S3::Client.new(stub_responses: true)
       s3.stub_responses(:get_object, lambda { |context|
         obj = buckets.dig(context.params[:bucket], context.params[:key])
-        return obj ? obj : "NoSuchKey"
+        return obj || "NoSuchKey"
       })
       stub_const("S3_CLIENT", s3)
 

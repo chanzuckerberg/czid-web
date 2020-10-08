@@ -73,7 +73,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
 
         # check for expected snapshot content
         expected_content = { "samples" =>
-          [{ @sample_one.id.to_s => { "pipeline_run_id" => @sample_one.first_pipeline_run.id } }], }
+          [{ @sample_one.id.to_s => { "pipeline_run_id" => @sample_one.first_pipeline_run.id } }] }
         content = JSON.parse(new_snapshot["content"])
         expect(content).to eq(expected_content)
 
@@ -110,7 +110,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
         expected_content = { "samples" => [
           { @sample_one.id.to_s => { "pipeline_run_id" => @sample_one.first_pipeline_run.id } },
           { sample_two.id.to_s => { "pipeline_run_id" => sample_two.first_pipeline_run.id } },
-        ], }
+        ] }
         content = JSON.parse(new_snapshot["content"])
         expect(content).to eq(expected_content)
 
@@ -214,7 +214,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
                                         content: { samples: [
                                           { @sample_one.id => { pipeline_run_id: @sample_one.first_pipeline_run.id } },
                                           { @sample_two.id => { pipeline_run_id: @sample_two.first_pipeline_run.id } },
-                                        ], }.to_json)
+                                        ] }.to_json)
       end
 
       it "should return the correct json_response for empty snapshot, if snapshot sharing is enabled" do

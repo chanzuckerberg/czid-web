@@ -122,18 +122,21 @@ class BulkDownload < ApplicationRecord
   # The Rails success url that the s3_tar_writer task can ping once it succeeds.
   def success_url
     return nil if server_host.blank?
+
     "#{server_host}#{bulk_downloads_success_path(access_token: access_token, id: id)}"
   end
 
   # The Rails error url that the s3_tar_writer task can ping if it fails.
   def error_url
     return nil if server_host.blank?
+
     "#{server_host}#{bulk_downloads_error_path(access_token: access_token, id: id)}"
   end
 
   # The Rails progress url that the s3_tar_writer task can ping to update progress.
   def progress_url
     return nil if server_host.blank?
+
     "#{server_host}#{bulk_downloads_progress_path(access_token: access_token, id: id)}"
   end
 
@@ -153,7 +156,7 @@ class BulkDownload < ApplicationRecord
     end
 
     # Use the staging ecs cluster and executable s3 bucket for development.
-    if Rails.env == "development"
+    if Rails.env.development?
       ecs_cluster = "idseq-fargate-tasks-staging"
       executable_s3_bucket = "aegea-ecs-execute-staging"
     end
@@ -213,7 +216,7 @@ class BulkDownload < ApplicationRecord
   def fetch_output_file_size
     s3_response = S3_CLIENT.head_object(bucket: ENV["SAMPLES_BUCKET_NAME"], key: download_output_key)
     return s3_response.content_length
-  rescue => e
+  rescue StandardError => e
     LogUtil.log_backtrace(e)
     LogUtil.log_err("BulkDownloadsFileSizeError: Failed to get file size for bulk download id #{id}: #{e}")
   end
@@ -259,7 +262,7 @@ class BulkDownload < ApplicationRecord
 
   def get_param_field(key, field)
     params.dig(key, field)
-  rescue
+  rescue StandardError
     # If params is nil or malformed, will return nil
     nil
   end
@@ -502,7 +505,7 @@ class BulkDownload < ApplicationRecord
             contigs_nonhost_for_taxid_fasta
           )
         end
-      rescue => e
+      rescue StandardError => e
         Rails.logger.error(e)
         failed_sample_ids << pipeline_run.sample.id
       end
@@ -534,7 +537,7 @@ class BulkDownload < ApplicationRecord
     if download_type == SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
       Rails.logger.info("Generating sample overviews for #{pipeline_runs.length} samples...")
       samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
-      pipeline_runs_by_sample_id = pipeline_runs.map { |pr| [pr.sample_id, pr] }.to_h
+      pipeline_runs_by_sample_id = pipeline_runs.index_by(&:sample_id)
       sample_overviews_csv = generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, include_all_metadata: get_param_value("include_metadata"))
 
       s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
@@ -576,7 +579,7 @@ class BulkDownload < ApplicationRecord
     Rails.logger.info("Success!")
     Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", ActiveSupport::NumberHelper.number_to_human_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
     verify_and_mark_success
-  rescue
+  rescue StandardError
     update(status: STATUS_ERROR)
     raise
   end

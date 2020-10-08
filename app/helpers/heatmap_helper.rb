@@ -51,11 +51,9 @@ module HeatmapHelper
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
     min_reads = params[:minReads] ? params[:minReads].to_i : MINIMUM_READ_THRESHOLD
     removed_taxon_ids = (params[:removedTaxonIds] || []).map do |x|
-      begin
-        Integer(x)
-      rescue ArgumentError
-        nil
-      end
+      Integer(x)
+    rescue ArgumentError
+      nil
     end
     removed_taxon_ids = removed_taxon_ids.compact
     categories = params[:categories]
@@ -181,16 +179,13 @@ module HeatmapHelper
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
       count = 1
       rows.each do |row|
-        taxon = if candidate_taxons[row["tax_id"]]
-                  candidate_taxons[row["tax_id"]]
-                else
-                  { "tax_id" => row["tax_id"], "samples" => {}, "genus_taxid" => row["genus_taxid"] }
-                end
+        taxon = candidate_taxons[row["tax_id"]] || { "tax_id" => row["tax_id"], "samples" => {}, "genus_taxid" => row["genus_taxid"] }
         taxon["max_aggregate_score"] = row[sort[:count_type]][sort[:metric]] if
           taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
         taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
         candidate_taxons[row["tax_id"]] = taxon
         break if count >= num_results && !client_filtering_enabled
+
         count += 1
       end
     end
@@ -330,7 +325,7 @@ module HeatmapHelper
 
     pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
     pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
-    pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
+    pipeline_runs_by_id = pipeline_runs.index_by(&:id)
 
     sql_results.each do |row|
       pipeline_run_id = row["pipeline_run_id"]
@@ -368,7 +363,7 @@ module HeatmapHelper
 
     # Get sample results for the taxon ids
     unless taxon_ids.empty?
-      samples_by_id = Hash[samples.map { |s| [s.id, s] }]
+      samples_by_id = samples.index_by(&:id)
       results_by_pr.each do |_pr_id, res|
         pr = res["pr"]
         taxon_counts = res["taxon_counts"]
@@ -436,7 +431,7 @@ module HeatmapHelper
 
     pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
     pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
-    pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
+    pipeline_runs_by_id = pipeline_runs.index_by(&:id)
 
     sql_results.each do |row|
       pipeline_run_id = row["pipeline_run_id"]
@@ -555,7 +550,7 @@ module HeatmapHelper
       count_type, metric = filter["metric"].split("_")
       begin
         value = Float(filter["value"])
-      rescue
+      rescue StandardError
         Rails.logger.warn "Bad threshold filter value."
       else
         parsed << {

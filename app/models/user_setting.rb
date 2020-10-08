@@ -57,7 +57,7 @@ class UserSetting < ApplicationRecord
 
   def user_setting_checks
     # Verify that the key is listed above.
-    unless METADATA.keys.include?(key)
+    unless METADATA.key?(key)
       errors.add(:key, "invalid (#{key})")
       return
     end
@@ -85,6 +85,7 @@ class UserSetting < ApplicationRecord
     if METADATA[key] && METADATA[key][:data_type] == DATA_TYPE_BOOLEAN
       return serialized_value == "true"
     end
+
     return serialized_value
   end
 end

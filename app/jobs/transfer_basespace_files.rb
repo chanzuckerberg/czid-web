@@ -32,7 +32,7 @@ class TransferBasespaceFiles
       # This verification call will work even if called multiple times.
       BasespaceHelper.verify_access_token_revoked(basespace_access_token, sample_id)
     end
-  rescue => err
+  rescue StandardError => err
     LogUtil.log_err("Error transferring basespace files for sample #{sample_id}. Reason: #{err}")
     raise err
   end

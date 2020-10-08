@@ -230,7 +230,7 @@ RSpec.describe PipelineVizController, type: :controller do
           pipeline_runs_data: [{
             pipeline_run_stages_data: pipeline_run_stages_data,
             sfn_execution_arn: FAKE_SFN_EXECUTION_ARN,
-          },]
+          }]
         )
 
         get :show, params: { format: "json", sample_id: sample.id }
@@ -249,7 +249,7 @@ RSpec.describe PipelineVizController, type: :controller do
           pipeline_runs_data: [{
             pipeline_run_stages_data: pipeline_run_stages_data,
             sfn_execution_arn: FAKE_SFN_EXECUTION_ARN,
-          },]
+          }]
         )
 
         get :show, params: { format: "json", sample_id: sample.id }
@@ -291,7 +291,7 @@ RSpec.describe PipelineVizController, type: :controller do
                    pipeline_runs_data: [{
                      pipeline_run_stages_data: pipeline_run_stages_data,
                      sfn_execution_arn: FAKE_SFN_EXECUTION_ARN,
-                   },]
+                   }]
         )
 
         get :show, params: { format: "json", sample_id: sample.id }

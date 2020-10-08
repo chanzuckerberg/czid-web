@@ -7,6 +7,7 @@ module InstrumentedJob
   # extra_dimensions param1: "Example Dimension 1", param2: "Example Dimension 2"
   def extra_dimensions(hash)
     raise ArgumentError, "Argument is not a Hash" unless hash.is_a? Hash
+
     @extra_dimensions = hash
   end
 

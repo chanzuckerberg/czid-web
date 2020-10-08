@@ -35,7 +35,7 @@ shared_examples "pipeline viz" do
             name: "Four",
             inputEdges: [2],
             outputEdges: [3],
-          },],
+          }],
         },
       ],
       edges: [

@@ -14,6 +14,7 @@ end
 
 Warden::Manager.serialize_from_session do |warden_session_obj|
   return nil unless warden_session_obj.instance_of?(Hash)
+
   id, role, authentication_token_hash = warden_session_obj.values_at("id", "role", "authentication_token_hash")
   user = User.find_by(id: id, role: role)
   if user && authentication_token_hash == Digest::SHA1.hexdigest(user.authentication_token || "")

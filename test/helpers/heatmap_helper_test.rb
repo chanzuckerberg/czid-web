@@ -80,9 +80,9 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert_equal "sample1", response[0][:name]
     assert_equal "sample2", response[1][:name]
     assert_equal "RR004_water_2_S23-20180208", response[2][:name]
-    assert !response[0].key?(:taxons)
-    assert !response[1].key?(:taxons)
-    assert !response[2].key?(:taxons)
+    assert_not response[0].key?(:taxons)
+    assert_not response[1].key?(:taxons)
+    assert_not response[2].key?(:taxons)
   end
 
   test "top_taxons_details defaults" do

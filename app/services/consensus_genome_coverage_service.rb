@@ -43,7 +43,7 @@ class ConsensusGenomeCoverageService
   end
 
   def convert_to_coverage_data(depths)
-    coverage_breadth = depths.select { |d| d > 0 }.size.to_f / depths.size
+    coverage_breadth = depths.count { |d| d > 0 }.to_f / depths.size
     coverage_depth = depths.select { |d| d > 0 }.sum(0.0) / depths.size
     max_aligned_length = depths.size
     total_length = depths.size

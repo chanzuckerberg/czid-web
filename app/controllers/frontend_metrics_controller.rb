@@ -39,11 +39,12 @@ class FrontendMetricsController < ApplicationController
     # If conversion to float fails, append to invalid_params
     begin
       Float(metric_params[:response_time])
-    rescue
+    rescue StandardError
       invalid_params << metric_params[:response_time]
     end
 
     raise InvalidParametersError, invalid_params unless invalid_params.empty?
+
     return true
   end
 

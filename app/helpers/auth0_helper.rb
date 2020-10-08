@@ -31,6 +31,7 @@ module Auth0Helper
       return AUTH_TOKEN_EXPIRED if expired
       return AUTH_INVALID_USER if wrong_email || wrong_role
     end
+
     AUTH_VALID
   end
 
@@ -76,7 +77,7 @@ module Auth0Helper
       warden.logout(:auth0_user)
       # logout users from previous Devise scope
       warden.logout(:user)
-    rescue => e
+    rescue StandardError => e
       Rails.logger.error("Warden failed to logout session: #{e}")
       # if warden middleware is not present for any reason
       # we want to ensure we removed everything from current session

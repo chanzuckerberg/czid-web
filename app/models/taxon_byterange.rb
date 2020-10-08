@@ -6,7 +6,7 @@ class TaxonByterange < ApplicationRecord
   validates :hit_type, presence: true, inclusion: { in: [
     TaxonCount::COUNT_TYPE_NT,
     TaxonCount::COUNT_TYPE_NR,
-  ], }, if: :mass_validation_enabled?
+  ] }, if: :mass_validation_enabled?
 
   validates :first_byte, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
   validates :last_byte, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?

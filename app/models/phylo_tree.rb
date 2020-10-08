@@ -16,7 +16,7 @@ class PhyloTree < ApplicationRecord
   validates :tax_level, presence: true, inclusion: { in: [
     TaxonCount::TAX_LEVEL_SPECIES,
     TaxonCount::TAX_LEVEL_GENUS,
-  ], }, if: :mass_validation_enabled?
+  ] }, if: :mass_validation_enabled?
 
   STATUS_INITIALIZED = 0
   STATUS_READY = 1
@@ -27,7 +27,7 @@ class PhyloTree < ApplicationRecord
     STATUS_READY,
     STATUS_FAILED,
     STATUS_IN_PROGRESS,
-  ], }, if: :mass_validation_enabled?
+  ] }, if: :mass_validation_enabled?
 
   after_create :create_visualization
 
@@ -135,6 +135,7 @@ class PhyloTree < ApplicationRecord
 
   def log_url
     return nil unless job_log_id
+
     AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
   end
 
@@ -142,6 +143,7 @@ class PhyloTree < ApplicationRecord
     # Detect if batch job has failed so we can stop polling for results.
     # Also, populate job_log_id.
     return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
+
     job_status, job_log_id_response, self.job_description = job_info(job_id, id)
     self.job_log_id = job_log_id_response unless job_log_id # don't overwrite once it's been set (job_log_id_response could be nil after job has terminated)
     required_outputs = select_outputs("required")
@@ -156,6 +158,7 @@ class PhyloTree < ApplicationRecord
 
   def kickoff
     return unless [STATUS_INITIALIZED, STATUS_FAILED].include?(status)
+
     self.command_stdout, self.command_stderr, command_status = Open3.capture3(job_command)
     if command_status.exitstatus.zero?
       output = JSON.parse(command_stdout)

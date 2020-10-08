@@ -16,7 +16,7 @@ class Project < ApplicationRecord
   has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :restrict_with_exception
   has_one :background
   has_and_belongs_to_many :metadata_fields
-  belongs_to :creator, optional: true, class_name: 'User', foreign_key: :creator_id
+  belongs_to :creator, optional: true, class_name: 'User'
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   # NOTE: not sure why these columns were not created as booleans
@@ -89,6 +89,7 @@ class Project < ApplicationRecord
       sample_name = "#{sample.name.gsub(/\W/, '-')}_#{sample.id}"
       _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab")
       next unless status.exitstatus.zero?
+
       Syscall.run("aws", "s3", "cp", "#{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab", "#{work_dir}/#{sample_name}")
     end
     Syscall.run_in_dir(work_dir, "tar", "cvzf", output_file, ".")

@@ -127,6 +127,7 @@ class TaxonScoringModel < ApplicationRecord
     op = score_func["op"] # return 0.0 might not be the best solution but could avoid fatal error TODO(yf): revisit
     raise "operator is not set for scoring function" if op.nil? && validation_mode
     return 0.0 unless op
+
     case op
     when "+"
       result = 0.0
@@ -153,6 +154,7 @@ class TaxonScoringModel < ApplicationRecord
       else
         err_message = "Unknonw operator for taxonscoring: #{op}"
         raise err_message if validation_mode
+
         LogUtil.log_err(err_message)
         return result
       end

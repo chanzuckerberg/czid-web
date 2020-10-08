@@ -38,7 +38,7 @@ module S3Util
     begin
       resp = AwsClient[:s3].get_object(bucket: bucket, key: key)
       return resp.body.read
-    rescue
+    rescue StandardError
       return nil
     end
   end

@@ -47,7 +47,7 @@ class Sample < ApplicationRecord
     STATUS_RERUN,
     STATUS_RETRY_PR,
     STATUS_CHECKED,
-  ], }
+  ] }
 
   validate :input_files_checks
   validates :name, presence: true, uniqueness: { scope: :project_id, case_sensitive: false }
@@ -86,10 +86,10 @@ class Sample < ApplicationRecord
   DEFAULT_MEMORY_IN_MB = 120_000 # sorry, hacky
   HIMEM_IN_MB = 240_000
 
-  DEFAULT_QUEUE = (Rails.env == 'prod' ? 'idseq-prod-lomem' : 'idseq-staging-lomem').freeze
+  DEFAULT_QUEUE = (Rails.env.prod? ? 'idseq-prod-lomem' : 'idseq-staging-lomem').freeze
   DEFAULT_VCPUS = 16
 
-  DEFAULT_QUEUE_HIMEM = (Rails.env == 'prod' ? 'idseq-prod-himem' : 'idseq-staging-himem').freeze
+  DEFAULT_QUEUE_HIMEM = (Rails.env.prod? ? 'idseq-prod-himem' : 'idseq-staging-himem').freeze
   DEFAULT_VCPUS_HIMEM = 32
 
   METADATA_FIELDS = [:sample_notes].freeze
@@ -287,6 +287,7 @@ class Sample < ApplicationRecord
   def results_folder_files(pipeline_version = nil)
     pr = pipeline_version ? pipeline_run_by_version(pipeline_version) : first_pipeline_run
     return list_outputs(sample_output_s3_path) unless pr
+
     file_list = []
     if pipeline_version_at_least_2(pr.pipeline_version)
       if pr.step_function?
@@ -326,6 +327,7 @@ class Sample < ApplicationRecord
 
   def initiate_s3_cp(unlimited_size = false)
     return unless status == STATUS_CREATED
+
     self.upload_error = nil
     stderr_array = []
     total_reads_json_path = nil
@@ -384,7 +386,7 @@ class Sample < ApplicationRecord
 
     self.status = STATUS_UPLOADED
     save! # this triggers pipeline command
-  rescue => e
+  rescue StandardError => e
     LogUtil.log_err("SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}")
     self.status = STATUS_CHECKED
     if upload_error.blank?
@@ -443,7 +445,7 @@ class Sample < ApplicationRecord
 
     self.status = STATUS_UPLOADED
     save!
-  rescue => e
+  rescue StandardError => e
     Rails.logger.info(e)
     LogUtil.log_err("SampleUploadFailedEvent: #{e}")
 
@@ -480,14 +482,14 @@ class Sample < ApplicationRecord
   def sample_alignment_output_s3_path
     pr = first_pipeline_run
     return pr.alignment_output_s3_path
-  rescue
+  rescue StandardError
     return sample_output_s3_path
   end
 
   def sample_host_filter_output_s3_path
     pr = first_pipeline_run
     return pr.host_filter_output_s3_path
-  rescue
+  rescue StandardError
     return sample_output_s3_path
   end
 
@@ -533,11 +535,14 @@ class Sample < ApplicationRecord
 
   def concatenate_input_parts
     return unless status == STATUS_UPLOADED
+
     begin
       input_files.each do |f|
         next unless f.source_type == InputFile::SOURCE_TYPE_LOCAL
+
         parts = f.parts.split(", ")
         next unless parts.length > 1
+
         source_parts = []
         local_path = "#{LOCAL_INPUT_PART_PATH}/#{id}/#{f.id}"
         parts.each_with_index do |part, index|
@@ -552,13 +557,14 @@ class Sample < ApplicationRecord
           Syscall.run("aws", "s3", "rm", source_part)
         end
       end
-    rescue
+    rescue StandardError
       LogUtil.log_err("Failed to concatenate input parts for sample #{id}")
     end
   end
 
   def check_status
     return unless [STATUS_UPLOADED, STATUS_RERUN, STATUS_RETRY_PR].include?(status)
+
     pr = first_pipeline_run
     transient_status = status
     self.status = STATUS_CHECKED
@@ -701,9 +707,11 @@ class Sample < ApplicationRecord
     old_pipeline_runs.each do |pr|
       next unless pr.succeeded?
       next unless pr.taxon_counts.empty?
+
       pr_s3_file_name = "#{pr.archive_s3_path}/pipeline_run_#{pr.id}.json"
       pr_local_file_name = PipelineRun.download_file(pr_s3_file_name, pr.local_json_path)
       next unless pr_local_file_name
+
       json_dict = JSON.parse(File.read(pr_local_file_name))
       json_dict = json_dict["pipeline_output"] if json_dict["pipeline_output"]
       taxon_counts = (json_dict["taxon_counts"] || {}).map do |txn|
@@ -722,6 +730,7 @@ class Sample < ApplicationRecord
   def self.pipeline_commit(branch)
     o = Syscall.pipe_with_output(["git", "ls-remote", "https://github.com/chanzuckerberg/idseq-dag.git"], ["grep", "refs/heads/#{branch}"])
     return false if o.blank?
+
     o.split[0]
   end
 
@@ -738,7 +747,7 @@ class Sample < ApplicationRecord
     pr.sample = self
     pr.subsample = subsample || PipelineRun::DEFAULT_SUBSAMPLING
     pr.max_input_fragments = max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS
-    pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
+    pr.pipeline_branch = pipeline_branch.presence || "master"
     pr.pipeline_execution_strategy = PipelineRun.pipeline_execution_strategies[:step_function]
     pr.dag_vars = dag_vars if dag_vars
     pr.use_taxon_whitelist = use_taxon_whitelist
@@ -755,7 +764,7 @@ class Sample < ApplicationRecord
     # See app/assets/src/components/utils/sample.js
     # HACK ALERT! Use low-level update_columns to avoid callbacks, because
     # kickoff_pipeline may be running in a callback already.
-    update_columns(upload_error: Sample::UPLOAD_ERROR_PIPELINE_KICKOFF) # rubocop:disable SkipsModelValidations
+    update_columns(upload_error: Sample::UPLOAD_ERROR_PIPELINE_KICKOFF) # rubocop:disable Rails/SkipsModelValidations
   end
 
   def get_existing_metadatum(key)
@@ -811,6 +820,7 @@ class Sample < ApplicationRecord
       m.metadata_field = get_available_matching_field(self, key.to_s)
 
       raise RecordNotFound("No matching field for #{key}") unless m.metadata_field
+
       m.key = m.metadata_field.name
     end
     if val.present? && m.raw_value != val
@@ -909,7 +919,7 @@ class Sample < ApplicationRecord
   end
 
   def initiate_s3_prod_sync_to_staging
-    return unless Rails.env == 'staging'
+    return unless Rails.env.staging?
 
     from_path = "s3://idseq-samples-prod/#{sample_path}"
     to_path = "s3://idseq-samples-staging/#{sample_path}"

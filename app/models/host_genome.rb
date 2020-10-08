@@ -7,7 +7,7 @@ class HostGenome < ApplicationRecord
   # in light of the data. See showAsOption below.
   # See https://jira.czi.team/browse/IDSEQ-2193.
   belongs_to :user, optional: true
-  belongs_to :default_background, optional: true, class_name: "Background", foreign_key: :default_background_id
+  belongs_to :default_background, optional: true, class_name: "Background"
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }, format: {
     with: /\A\w[\w|\s|\.|\-]+\z/,

@@ -42,7 +42,7 @@ RSpec.describe BackgroundsController, type: :controller do
 
         expect(json_response).to include_json(backgrounds: [{
                                                 name: "Background Joe",
-                                              },])
+                                              }])
       end
     end
   end

@@ -6,7 +6,7 @@ class UserMailer < ApplicationMailer
     @shared_project_name = Project.find(email_arguments[:shared_project_id]).name
     @shared_project_id = email_arguments[:shared_project_id]
     mail(to: @new_user_email, subject: email_arguments[:email_subject])
-  rescue
+  rescue StandardError
     LogUtil.log_err("added_to_projects_email(#{email_arguments}) failed")
   end
 

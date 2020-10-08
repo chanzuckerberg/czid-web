@@ -158,7 +158,7 @@ class ApplicationController < ActionController::Base
   def set_current_context_for_logging!
     ApplicationRecord._current_user = current_user if current_user
     ApplicationRecord._current_request = request if request
-  rescue => e
+  rescue StandardError => e
     Rails.logger.error(e)
   end
 

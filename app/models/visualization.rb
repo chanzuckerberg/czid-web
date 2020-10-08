@@ -14,7 +14,7 @@ class Visualization < ApplicationRecord
     PHYLO_TREE_TYPE,
     TREE_TYPE,
     TABLE_TYPE,
-  ], }, if: :mass_validation_enabled?
+  ] }, if: :mass_validation_enabled?
   validates :data, presence: true, if: :mass_validation_enabled?
 
   serialize :data, JSON

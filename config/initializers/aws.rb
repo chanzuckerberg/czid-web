@@ -18,7 +18,7 @@ module AwsClient
   def self.[](key)
     @clients[key] ||= CLIENT_INITIALIZERS[key].call
     @clients[key]
-  rescue
+  rescue StandardError
     raise UnknownClientError, key
   end
 end

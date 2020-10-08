@@ -8,6 +8,7 @@ module ParameterSanitization
     if [:desc, :asc].include?(sanitized_order_dir)
       return sanitized_order_dir
     end
+
     return default
   end
 

@@ -9,6 +9,7 @@ module BackgroundsHelper
     elsif array1.blank? && array2.blank?
       return true
     end
+
     false
   end
 

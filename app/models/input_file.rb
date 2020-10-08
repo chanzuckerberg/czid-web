@@ -3,7 +3,7 @@ require 'open3'
 class InputFile < ApplicationRecord
   belongs_to :sample
 
-  FILE_REGEX = /\A[A-Za-z0-9_][-.A-Za-z0-9_]{0,119}\.(fastq|fq|fastq.gz|fq.gz|fasta|fa|fasta.gz|fa.gz)\z/
+  FILE_REGEX = /\A[A-Za-z0-9_][-.A-Za-z0-9_]{0,119}\.(fastq|fq|fastq.gz|fq.gz|fasta|fa|fasta.gz|fa.gz)\z/.freeze
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
 
   SOURCE_TYPE_LOCAL = 'local'.freeze
@@ -13,13 +13,13 @@ class InputFile < ApplicationRecord
     SOURCE_TYPE_LOCAL,
     SOURCE_TYPE_S3,
     SOURCE_TYPE_BASESPACE,
-  ], }
+  ] }
 
   validates :source, presence: true, if: :mass_validation_enabled?
   validate :s3_source_check, on: :create
 
-  BULK_FILE_PAIRED_REGEX = /\A([A-Za-z0-9_][-.A-Za-z0-9_]{1,119})_R(\d)(_001)?\.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/
-  BULK_FILE_SINGLE_REGEX = /\A([A-Za-z0-9_][-.A-Za-z0-9_]{1,119})\.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/
+  BULK_FILE_PAIRED_REGEX = /\A([A-Za-z0-9_][-.A-Za-z0-9_]{1,119})_R(\d)(_001)?\.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/.freeze
+  BULK_FILE_SINGLE_REGEX = /\A([A-Za-z0-9_][-.A-Za-z0-9_]{1,119})\.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/.freeze
   S3_CP_PIPE_ERROR = '[Errno 32] Broken pipe'.freeze
 
   def s3_source_check

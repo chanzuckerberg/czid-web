@@ -14,6 +14,7 @@ module StringUtil
   #      canonicalize_url(url, :post) => "/samples/X/save_metadata_v2"
   def self.canonicalize_url(url, method)
     raise ActionController::RoutingError, "The url provided is an empty string" if url.blank?
+
     # returns the route's parameter shell
     param_shell = Rails.application.routes.recognize_path(url, method: method).reject { |key, _| key == :format }
     uncanonicalized_keys = Set[:action, :controller]

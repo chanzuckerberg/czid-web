@@ -26,7 +26,7 @@ module BulkDownloadsHelper
   def get_valid_pipeline_run_ids_for_samples(samples)
     begin
       pipeline_runs = get_succeeded_pipeline_runs_for_samples(samples, true)
-    rescue => e
+    rescue StandardError => e
       # Convert the error to a human-readable error.
       if e.message == PipelineRunsHelper::PIPELINE_RUN_STILL_RUNNING_ERROR
         raise SAMPLE_STILL_RUNNING_ERROR

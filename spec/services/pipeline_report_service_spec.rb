@@ -473,7 +473,7 @@ RSpec.describe PipelineReportService, type: :service do
           "z_score" => 4.209967170274651, # previously rounded to 4.2099668
           "e_value" => 9.3,
         },
-        "agg_score" => 12_583.634591815486 # previously rounded to 12_583.63
+        "agg_score" => 12_583.634591815486, # previously rounded to 12_583.63
       }
 
       expect(JSON.parse(@report)["counts"]["1"]["1313"]).to include_json(species_result)
@@ -514,7 +514,7 @@ RSpec.describe PipelineReportService, type: :service do
           "z_score" => 1.6768346926439197, # previously rounded to 1.6768345
           "e_value" => 9.3,
         },
-        "agg_score" => 73_603.80226971892 # previously rounded to 73_603.777
+        "agg_score" => 73_603.80226971892, # previously rounded to 73_603.777
       }
 
       expect(JSON.parse(@report)["counts"]["2"]["1301"]).to include_json(genus_result)

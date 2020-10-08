@@ -197,7 +197,7 @@ class Metadatum < ApplicationRecord
     self.raw_value = location_params[:raw_value]
     self.string_validated_value = location_params[:string_validated_value]
     self.location_id = location_params[:location_id]
-  rescue => err
+  rescue StandardError => err
     LogUtil.log_err("Failed to save location metadatum: #{err.message}")
     LogUtil.log_backtrace(err)
     errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
@@ -220,12 +220,10 @@ class Metadatum < ApplicationRecord
     to_create = []
     errors = []
     csv_data.each_with_index do |row, index|
-      begin
-        to_create += load_csv_single_sample_row(row, index)
-      rescue => err
-        # Catch ArgumentError for proj and sample, other errors
-        errors << err.message
-      end
+      to_create += load_csv_single_sample_row(row, index)
+    rescue StandardError => err
+      # Catch ArgumentError for proj and sample, other errors
+      errors << err.message
     end
     [to_create, errors]
   end
@@ -248,9 +246,10 @@ class Metadatum < ApplicationRecord
       end
       to_create.each do |metadatum|
         next if missing_ids.member?(metadatum.id)
+
         metadatum.async_elasticsearch_index
       end
-    rescue => err
+    rescue StandardError => err
       # Record other errors
       errors << err.message
     end
@@ -265,8 +264,10 @@ class Metadatum < ApplicationRecord
       missing_ids.add(model.id)
     end
     return results unless ELASTICSEARCH_ON
+
     to_create.each do |metadatum|
       next if missing_ids.member?(metadatum.id)
+
       metadatum.async_elasticsearch_index
     end
     results
@@ -288,7 +289,7 @@ class Metadatum < ApplicationRecord
     begin
       resp = Client.get_object(bucket: bucket, key: key)
       csv_data = resp.body.read
-    rescue => err
+    rescue StandardError => err
       raise "Error in loading S3 file. #{err.message}"
     end
 
@@ -311,9 +312,11 @@ class Metadatum < ApplicationRecord
     done_keys = [:study_id, :project_name, :sample_name]
     row.each do |key, value|
       next unless key && value
+
       # Strip whitespace and ensure symbol
       key = key.to_s.strip.to_sym
       next if done_keys.include?(key)
+
       to_create << new_without_save(sample, key, value)
     end
 
@@ -326,10 +329,12 @@ class Metadatum < ApplicationRecord
     unless proj_name
       raise ArgumentError, "No project name found in row #{index + 2}"
     end
+
     proj = Project.find_by(name: proj_name)
     unless proj
       raise ArgumentError, "No project found named #{proj_name}"
     end
+
     proj
   end
 
@@ -339,10 +344,12 @@ class Metadatum < ApplicationRecord
     unless sample_name
       raise ArgumentError, "No sample name found in row #{index + 2}"
     end
+
     sample = Sample.find_by(project: proj, name: sample_name)
     unless sample
       raise ArgumentError, "No sample found named #{sample_name} in #{proj.name}"
     end
+
     sample
   end
 
@@ -366,7 +373,7 @@ class Metadatum < ApplicationRecord
       base = MetadataField.convert_type_to_string(metadata_field.base_type)
       self["#{base}_validated_value"]
     end
-  rescue
+  rescue StandardError
     ""
   end
 

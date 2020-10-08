@@ -18,18 +18,16 @@ class PopulateContigSpeciesTaxids
     # Process the contigs in batches so we don't need to load everything into RAM at once.
     contigs_to_update.find_in_batches(batch_size: BATCH_SIZE) do |contigs|
       contigs.each do |contig|
-        begin
-          if contig.lineage_json.present?
-            lineage_json = JSON.parse(contig.lineage_json)
-            contig.species_taxid_nt = lineage_json.dig("NT", 0) || nil
-            contig.species_taxid_nr = lineage_json.dig("NR", 0) || nil
-            contig.genus_taxid_nt = lineage_json.dig("NT", 1) || nil
-            contig.genus_taxid_nr = lineage_json.dig("NR", 1) || nil
-          end
-        rescue => e
-          Rails.logger.error(e)
-          failed_ids << contig.id
+        if contig.lineage_json.present?
+          lineage_json = JSON.parse(contig.lineage_json)
+          contig.species_taxid_nt = lineage_json.dig("NT", 0) || nil
+          contig.species_taxid_nr = lineage_json.dig("NR", 0) || nil
+          contig.genus_taxid_nt = lineage_json.dig("NT", 1) || nil
+          contig.genus_taxid_nr = lineage_json.dig("NR", 1) || nil
         end
+      rescue StandardError => e
+        Rails.logger.error(e)
+        failed_ids << contig.id
       end
 
       # Use active-import to update multiple contigs in one query.
@@ -52,7 +50,7 @@ class PopulateContigSpeciesTaxids
       Rails.logger.info("#{failed_ids.length} failed ids: #{failed_ids}")
     end
     Rails.logger.info(format("Updated %d rows in %3.1f seconds", total_updated, (Time.now.to_f - start_time)))
-  rescue => e
+  rescue StandardError => e
     # Eventually, this data migration may no longer be compatible with the database.
     Rails.logger.error(e)
     Rails.logger.error("populate_contig_species_taxids failed. This data migration may be out of date with the db schema. Consider deleting.")

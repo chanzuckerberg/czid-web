@@ -67,7 +67,7 @@ class MetricUtil
         context: request ? context_for_segment(request) : {}
       )
     end
-  rescue => err
+  rescue StandardError => err
     LogUtil.log_err("Failed to log to Segment '#{event}': #{err}")
   end
 
@@ -130,7 +130,7 @@ class MetricUtil
                          "points" => points,
                          "type" => type,
                          "tags" => tags,
-                       },])
+                       }])
       post_to_datadog(data)
     end
 

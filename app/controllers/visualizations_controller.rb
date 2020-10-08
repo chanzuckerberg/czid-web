@@ -86,8 +86,7 @@ class VisualizationsController < ApplicationController
                        # filter out legacy data
                        .where.not(visualization_type: [nil, 'undefined'], name: nil)
                        .order(created_at: :desc)
-                       .select { |v| v.sample_ids.to_set == sample_ids.to_set }
-                       .first
+                       .find { |v| v.sample_ids.to_set == sample_ids.to_set }
 
     if vis.present?
       vis.data = @data
@@ -113,7 +112,7 @@ class VisualizationsController < ApplicationController
       name: vis.name,
       sample_ids: vis.sample_ids,
     }
-  rescue => err
+  rescue StandardError => err
     render json: {
       status: "failed",
       message: "Unable to save",
@@ -128,7 +127,7 @@ class VisualizationsController < ApplicationController
       message: "Url shortened successfully",
       unique_key: short_url.unique_key,
     }
-  rescue => err
+  rescue StandardError => err
     render json: {
       status: "failed",
       message: "Unable to shorten",

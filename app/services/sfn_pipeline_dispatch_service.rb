@@ -82,7 +82,7 @@ class SfnPipelineDispatchService
           accession2taxid_db: @pipeline_run.alignment_config.s3_accession2taxid_path,
           taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
           index_dir_suffix: @pipeline_run.alignment_config.index_dir_suffix,
-          use_deuterostome_filter: @sample.skip_deutero_filter_flag == 1 ? false : true,
+          use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
           deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
           use_taxon_whitelist: @pipeline_run.use_taxon_whitelist,
         }, Postprocess: {
@@ -92,7 +92,7 @@ class SfnPipelineDispatchService
           nr_loc_db: @pipeline_run.alignment_config.s3_nr_loc_db_path,
           lineage_db: @pipeline_run.alignment_config.s3_lineage_path,
           taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
-          use_deuterostome_filter: @sample.skip_deutero_filter_flag == 1 ? false : true,
+          use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
           deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
           use_taxon_whitelist: @pipeline_run.use_taxon_whitelist,
         }, Experimental: {

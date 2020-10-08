@@ -9,7 +9,7 @@ module CloudWatchUtil
       timestamp: Time.current,
       value: value,
       unit: unit,
-      storage_resolution: 60 # 1 minute resolution
+      storage_resolution: 60, # 1 minute resolution
     }
   end
 
