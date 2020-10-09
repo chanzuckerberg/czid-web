@@ -140,7 +140,6 @@ task "result_monitor", [:duration] => :environment do |_t, args|
 
   # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb
   Rails.logger.level = [1, Rails.logger.level].max
-  HoneycombRails.config.sample_rate = 120
 
   if args[:duration] == "single_iteration"
     MonitorPipelineResults.run(0, 60.0 / checks_per_minute)
