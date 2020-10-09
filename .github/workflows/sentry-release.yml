@@ -1,10 +1,10 @@
-name: sentry-release
+name: idseq-web sentry release
 
 on:
   push:
     branches:
-      staging
-      prod
+      - staging
+      - prod
 
 jobs:
   sentry-release:
