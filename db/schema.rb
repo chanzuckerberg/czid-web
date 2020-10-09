@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_201_002_223_907) do
+ActiveRecord::Schema.define(version: 20_201_009_000_008) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -432,7 +432,6 @@ ActiveRecord::Schema.define(version: 20_201_002_223_907) do
     t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
     t.string "temp_pipeline_workflow", default: "short-read-mngs", null: false, comment: "A soft enum (string) describing which pipeline workflow should run. Main is the classic mNGS pipeline. To be moved to a pipeline run model."
-    t.string "temp_wetlab_protocol", comment: "A soft enum (string) for the wetlab protocol. Required for temp_pipeline_workflow=consensus_genome."
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["temp_pipeline_workflow"], name: "index_samples_on_temp_pipeline_workflow"
