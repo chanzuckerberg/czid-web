@@ -729,7 +729,7 @@ class SamplesController < ApplicationController
         ercc_comparison: ercc_comparison,
         pipeline_run: pr_display,
         summary_stats: summary_stats,
-        workflow: workflow_run&.workflow,
+        workflow: workflow_run&.workflow || WorkflowRun::WORKFLOW[:short_read_mngs],
         wetlab_protocol: workflow_run&.inputs&.[]("wetlab_protocol"),
       },
     }
