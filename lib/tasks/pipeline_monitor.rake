@@ -348,7 +348,7 @@ task "pipeline_monitor", [:duration] => :environment do |_t, args|
   wait_before_respawn = cloud_env ? 5 : 30
   additional_wait_after_failure = 25
 
-  # don't show all the SQL debug info in the logs, and throttle data sent to Honeycomb
+  # don't show all the SQL debug info in the logs
   Rails.logger.level = [1, Rails.logger.level].max
 
   if args[:duration] == "single_iteration"

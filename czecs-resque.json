@@ -40,14 +40,6 @@
         {
           "name": "SAMPLES_BUCKET_NAME",
           "value": "idseq-samples-{{.Values.env }}"
-        },
-        {
-          "name": "IDSEQ_HONEYCOMB_DATA_SET",
-          "value": "idseq-web-{{ .Values.env }}"
-        },
-        {
-          "name": "IDSEQ_HONEYCOMB_DB_DATA_SET",
-          "value": "idseq-database-{{ .Values.env }}"
         }
       ],
       "logConfiguration": {
