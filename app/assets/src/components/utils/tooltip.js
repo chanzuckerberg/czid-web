@@ -88,4 +88,9 @@ export const FIELDS_METADATA = {
     label: "Reference Length",
     tooltip: "Length in base pairs of the reference accession.",
   },
+  mappedReads: {
+    label: "Mapped Reads",
+    tooltip:
+      "Number of reads aligning to the taxon in the NCBI NT/NR database.",
+  },
 };

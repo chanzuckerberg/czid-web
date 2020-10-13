@@ -24,7 +24,7 @@ class ConsensusGenomeMetricsService
     quast_data = CSVSafe.parse(quast_data, col_sep: "\t").to_h
     metrics = JSON.parse(stats_data).symbolize_keys
 
-    allowed_keys = [:total_reads, :ref_snps, :n_actg, :n_missing, :n_ambiguous]
+    allowed_keys = [:total_reads, :mapped_reads, :ref_snps, :n_actg, :n_missing, :n_ambiguous]
     metrics = metrics.slice(*allowed_keys)
 
     metrics[:percent_identity] = ((metrics[:n_actg] - metrics[:ref_snps]) / metrics[:n_actg].to_f * 100).round(1)

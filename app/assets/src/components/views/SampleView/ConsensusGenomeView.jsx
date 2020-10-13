@@ -359,12 +359,11 @@ class ConsensusGenomeView extends React.Component {
         dataKey: "taxon_name",
         headerClassName: cs.primaryHeader,
         label: "Taxon",
-        width: 315,
+        width: 320,
       },
       {
-        columnData: FIELDS_METADATA["totalReadsCG"],
-        dataKey: "total_reads",
-        label: "Reads",
+        dataKey: "mapped_reads",
+        width: 80,
       },
       {
         cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
@@ -379,11 +378,11 @@ class ConsensusGenomeView extends React.Component {
       },
       {
         dataKey: "n_actg",
-        width: 150,
+        width: 140,
       },
       {
         dataKey: "n_missing",
-        width: 100,
+        width: 80,
       },
       {
         dataKey: "n_ambiguous",
