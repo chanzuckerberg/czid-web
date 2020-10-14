@@ -220,6 +220,13 @@ export const computeColumnsByWorkflow = ({ basicIcon = false } = {}) => {
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
     },
     {
+      dataKey: "percentGenomeCalled",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellDataGetter: ({ dataKey, rowData }) =>
+        TableRenderers.formatPercentage(rowData[dataKey]),
+    },
+    {
       dataKey: "nMissing",
       flexGrow: 1,
       className: cs.basicCell,
@@ -268,7 +275,7 @@ export const DEFAULTS_BY_WORKFLOW = {
     "host",
     "collectionLocationV2",
     "totalReadsCG",
-    "coverageDepth",
+    "percentGenomeCalled",
     "wetlabProtocol",
   ],
 };

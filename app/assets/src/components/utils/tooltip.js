@@ -93,4 +93,9 @@ export const FIELDS_METADATA = {
     tooltip:
       "Number of reads aligning to the taxon in the NCBI NT/NR database.",
   },
+  percentGenomeCalled: {
+    label: "% Genome Called",
+    tooltip:
+      "The percentage of the genome meeting thresholds for calling consensus bases.",
+  },
 };

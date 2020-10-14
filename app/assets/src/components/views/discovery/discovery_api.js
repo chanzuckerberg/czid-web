@@ -110,6 +110,10 @@ const processRawSample = sample => {
       "percent_identity",
     ]),
     nActg: getConsensusGenomeField(["quality_metrics", "n_actg"]),
+    percentGenomeCalled: getConsensusGenomeField([
+      "quality_metrics",
+      "percent_genome_called",
+    ]),
     nMissing: getConsensusGenomeField(["quality_metrics", "n_missing"]),
     nAmbiguous: getConsensusGenomeField(["quality_metrics", "n_ambiguous"]),
     wetlabProtocol: upperCase(

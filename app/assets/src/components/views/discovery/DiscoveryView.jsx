@@ -36,10 +36,7 @@ import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
-import {
-  computeColumnsByWorkflow,
-  DEFAULTS_BY_WORKFLOW,
-} from "~/components/views/samples/SamplesView/ColumnConfiguration";
+import { DEFAULTS_BY_WORKFLOW } from "~/components/views/samples/SamplesView/ColumnConfiguration";
 import Tabs from "~ui/controls/Tabs";
 import BannerProjects from "~ui/icons/BannerProjects";
 import BannerSamples from "~ui/icons/BannerSamples";

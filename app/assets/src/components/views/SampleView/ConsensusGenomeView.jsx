@@ -368,21 +368,29 @@ class ConsensusGenomeView extends React.Component {
       {
         cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
         dataKey: "gc_percent",
+        width: 60,
       },
       {
         dataKey: "ref_snps",
+        width: 20,
       },
       {
         cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
         dataKey: "percent_identity",
+        width: 30,
       },
       {
         dataKey: "n_actg",
-        width: 140,
+        width: 135,
+      },
+      {
+        cellRenderer: cellData => renderRowCell(cellData, { percent: true }),
+        dataKey: "percent_genome_called",
+        width: 100,
       },
       {
         dataKey: "n_missing",
-        width: 80,
+        width: 75,
       },
       {
         dataKey: "n_ambiguous",

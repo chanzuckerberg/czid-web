@@ -5,7 +5,7 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
   let(:sample) { create(:sample, project: project) }
   let(:workflow_run) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome]) }
 
-  let(:quast_data) { "GC (%)\t38.00\nFake Row\t-1" }
+  let(:quast_data) { "GC (%)\t38.00\nReference length\t15000\nFake Row\t-1" }
   let(:stats_data) do
     {
       fake_extra: -1,
@@ -18,11 +18,12 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
   end
   let(:consolidated_data) do
     {
+      gc_percent: 38.0,
       n_actg: 12_345,
       n_ambiguous: 0,
       n_missing: 20,
+      percent_genome_called: 82.3,
       percent_identity: 91.9,
-      gc_percent: 38.0,
       ref_snps: 1000,
       total_reads: 654_321,
     }
