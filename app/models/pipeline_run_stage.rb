@@ -49,25 +49,21 @@ class PipelineRunStage < ApplicationRecord
       name: HOST_FILTERING_STAGE_NAME,
       dag_name: DAG_NAME_BY_STAGE_NAME[HOST_FILTERING_STAGE_NAME],
       job_command_func: 'host_filtering_command'.freeze,
-      json_generation_func: 'generate_host_filtering_dag_json'.freeze,
     },
     2 => {
       name: ALIGNMENT_STAGE_NAME,
       dag_name: DAG_NAME_BY_STAGE_NAME[ALIGNMENT_STAGE_NAME],
       job_command_func: 'alignment_command'.freeze,
-      json_generation_func: 'generate_alignment_dag_json'.freeze,
     },
     3 => {
       name: POSTPROCESS_STAGE_NAME,
       dag_name: DAG_NAME_BY_STAGE_NAME[POSTPROCESS_STAGE_NAME],
       job_command_func: 'postprocess_command'.freeze,
-      json_generation_func: 'generate_postprocess_dag_json'.freeze,
     },
     4 => {
       name: EXPT_STAGE_NAME,
       dag_name: DAG_NAME_BY_STAGE_NAME[EXPT_STAGE_NAME],
       job_command_func: 'experimental_command'.freeze,
-      json_generation_func: 'generate_experimental_dag_json'.freeze,
     },
   }.freeze
 
@@ -140,28 +136,16 @@ class PipelineRunStage < ApplicationRecord
     # Check output for the run and decide if we should run this stage
     return if started? && !failed? # job has been started successfully
 
-    if pipeline_run.step_function?
-      if pipeline_run.sfn_execution_arn
-        # We do not need to start stage anymore for SFNs, because now we only start
-        # the step function which handles all stages (started in PipelineRun::update_job_status)
-        # Filling job_command with placeholder string because current pipeline
-        # depends on it (e.g. see started? method)
-        self.job_command = pipeline_run.sfn_execution_arn
-        self.job_status = STATUS_STARTED
-      else
-        self.job_status = STATUS_FAILED
-      end
+    # Only SFN runs supported
+    if pipeline_run.sfn_execution_arn
+      # We do not need to start stage anymore for SFNs, because now we only start
+      # the step function which handles all stages (started in PipelineRun::update_job_status)
+      # Filling job_command with placeholder string because current pipeline
+      # depends on it (e.g. see started? method)
+      self.job_command = pipeline_run.sfn_execution_arn
+      self.job_status = STATUS_STARTED
     else
-      # Fallback to DAG run
-      self.job_command = send(job_command_func)
-      self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
-      if status.exitstatus.zero?
-        output = JSON.parse(command_stdout)
-        self.job_id = output['jobId']
-        self.job_status = STATUS_STARTED
-      else
-        self.job_status = STATUS_FAILED
-      end
+      self.job_status = STATUS_FAILED
     end
     self.created_at = Time.now.utc
     save
@@ -237,169 +221,6 @@ class PipelineRunStage < ApplicationRecord
     return nil unless job_log_id
 
     AwsUtil.get_cloudwatch_url("/aws/batch/job", job_log_id)
-  end
-
-  def prepare_dag(dag_json, key_s3_params = nil)
-    self.dag_json = dag_json
-    sample = pipeline_run.sample
-    copy_done_file = "echo done | aws s3 cp - #{Shellwords.escape(sample.sample_output_s3_path)}/\"$AWS_BATCH_JOB_ID\".#{JOB_SUCCEEDED_FILE_SUFFIX}"
-    dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
-    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
-  end
-
-  def generate_json(attribute_dict)
-    sample = pipeline_run.sample
-    attribute_dict[:dag_name] = dag_name
-    attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-
-    # See our dag templates in app/lib/dags.
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.jbuilder",
-                           sample.project_id,
-                           sample.id,
-                           sample.host_genome_name.downcase,
-                           attribute_dict,
-                           pipeline_run.parse_dag_vars)
-    return dag.render
-  end
-
-  def generate_host_filtering_dag_json
-    # Upload DAG to S3
-    sample = pipeline_run.sample
-    file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
-    nucleotide_type_metadatum = sample.metadata.find_by(key: "nucleotide_type")
-    nucleotide_type = nucleotide_type_metadatum ? nucleotide_type_metadatum.string_validated_value : ''
-
-    attribute_dict = {
-      fastq1: sample.input_files[0].name,
-      file_ext: file_ext,
-      star_genome: sample.host_genome.s3_star_index_path,
-      bowtie2_genome: sample.host_genome.s3_bowtie2_index_path,
-      max_fragments: pipeline_run.max_input_fragments,
-      max_subsample_frag: pipeline_run.subsample,
-      nucleotide_type: nucleotide_type,
-    }
-    human_host_genome = HostGenome.find_by(name: "Human")
-    attribute_dict[:human_star_genome] = human_host_genome.s3_star_index_path
-    attribute_dict[:human_bowtie2_genome] = human_host_genome.s3_bowtie2_index_path
-    attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
-    attribute_dict[:adapter_fasta] = if sample.input_files[1]
-                                       PipelineRun::ADAPTER_SEQUENCES["paired-end"]
-                                     else
-                                       PipelineRun::ADAPTER_SEQUENCES["single-end"]
-                                     end
-    return generate_json(attribute_dict)
-  end
-
-  def host_filtering_command
-    # Upload DAG to S3
-    sample = pipeline_run.sample
-    dag_json = generate_host_filtering_dag_json
-    dag_commands = prepare_dag(dag_json)
-    batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
-
-    # Dispatch job. Use the himem settings for host filtering.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: DAG_NAME_HOST_FILTER, sample_id: sample.id)
-  end
-
-  def generate_alignment_dag_json
-    # Upload DAG to S3
-    sample = pipeline_run.sample
-    alignment_config = pipeline_run.alignment_config
-    attribute_dict = {
-      input_file_count: sample.input_files.count,
-      skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
-      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
-      index_dir_suffix: alignment_config.index_dir_suffix,
-      lineage_db: alignment_config.s3_lineage_path,
-      taxon_blacklist: alignment_config.s3_taxon_blacklist_path,
-      accession2taxid_db: alignment_config.s3_accession2taxid_path,
-      deuterostome_db: alignment_config.s3_deuterostome_db_path,
-      nt_db: alignment_config.s3_nt_db_path,
-      nt_loc_db: alignment_config.s3_nt_loc_db_path,
-      nr_db: alignment_config.s3_nr_db_path,
-      nr_loc_db: alignment_config.s3_nr_loc_db_path,
-      gsnap_m8: PipelineRun::GSNAP_M8,
-      rapsearch2_m8: PipelineRun::RAPSEARCH2_M8,
-      use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
-    }
-    return generate_json(attribute_dict)
-  end
-
-  def alignment_command
-    sample = pipeline_run.sample
-    dag_json = generate_alignment_dag_json
-    key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env.prod? ? 'prod' : 'staging')) # TODO: This is hacky
-    dag_commands = prepare_dag(dag_json, key_s3_params)
-    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
-    # Run it
-    aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_ALIGNMENT, sample_id: sample.id)
-  end
-
-  def generate_postprocess_dag_json
-    # Upload DAG to S3
-    sample = pipeline_run.sample
-    alignment_config = pipeline_run.alignment_config
-    attribute_dict = {
-      input_file_count: sample.input_files.count,
-      skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
-      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
-      index_dir_suffix: alignment_config.index_dir_suffix,
-      lineage_db: alignment_config.s3_lineage_path,
-      taxon_blacklist: alignment_config.s3_taxon_blacklist_path,
-      accession2taxid_db: alignment_config.s3_accession2taxid_path,
-      deuterostome_db: alignment_config.s3_deuterostome_db_path,
-      nt_db: alignment_config.s3_nt_db_path,
-      nt_loc_db: alignment_config.s3_nt_loc_db_path,
-      nr_db: alignment_config.s3_nr_db_path,
-      nr_loc_db: alignment_config.s3_nr_loc_db_path,
-      use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
-    }
-    return generate_json(attribute_dict)
-  end
-
-  def postprocess_command
-    # Upload DAG to S3
-    sample = pipeline_run.sample
-    dag_json = generate_postprocess_dag_json
-    dag_commands = prepare_dag(dag_json)
-    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
-    # Dispatch job with himem number of vCPUs and to the himem queue.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB, stage_name: DAG_NAME_POSTPROCESS, sample_id: sample.id)
-  end
-
-  def generate_experimental_dag_json
-    # Upload DAG to S3
-    sample = pipeline_run.sample
-    file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
-    alignment_config = pipeline_run.alignment_config
-    attribute_dict = {
-      fastq1: sample.input_files[0].name,
-      file_ext: file_ext,
-      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
-      lineage_db: alignment_config.s3_lineage_path,
-      accession2taxid_db: alignment_config.s3_accession2taxid_path,
-      deuterostome_db: alignment_config.s3_deuterostome_db_path,
-      nt_db: alignment_config.s3_nt_db_path,
-      nt_loc_db: alignment_config.s3_nt_loc_db_path,
-      nr_db: alignment_config.s3_nr_db_path,
-      nr_loc_db: alignment_config.s3_nr_loc_db_path,
-      nt_info_db: alignment_config.s3_nt_info_db_path || DEFAULT_S3_NT_INFO_DB_PATH,
-      # This was added for the betacoronavirus fastq download feature
-      use_taxon_whitelist: pipeline_run.use_taxon_whitelist,
-    }
-    attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
-    return generate_json(attribute_dict)
-  end
-
-  def experimental_command
-    # Upload DAG to S3
-    sample = pipeline_run.sample
-    dag_json = generate_experimental_dag_json
-    dag_commands = prepare_dag(dag_json)
-    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
-
-    # Dispatch job
-    aegea_batch_submit_command(batch_command, stage_name: DAG_NAME_EXPERIMENTAL, sample_id: sample.id)
   end
 
   # Gets the URL to the AWS console page of the batch job for display on
