@@ -26,7 +26,7 @@ class TaxonCount < ApplicationRecord
 
   COUNT_TYPE_NT = 'NT'.freeze
   COUNT_TYPE_NR = 'NR'.freeze
-  COUNT_TYPE_MERGED = 'merged_nt_nr'.freeze
+  COUNT_TYPE_MERGED = 'MERGED_NT_NR'.freeze
   validates :count_type, presence: true, inclusion: { in: [
     COUNT_TYPE_NT,
     COUNT_TYPE_NR,

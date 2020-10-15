@@ -34,14 +34,23 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
 const getSampleReportData = ({
-  snapshotShareId,
+  snapshotShareId = null,
   sampleId,
   background,
-  pipelineVersion,
+  pipelineVersion = null,
+  mergeNtNr = false,
 }) =>
   get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
-      `/samples/${sampleId}/report_v2.json?background=${background}&pipeline_version=${pipelineVersion}`
+      `/samples/${sampleId}/report_v2.json?`,
+    {
+      params: {
+        id: sampleId,
+        pipeline_version: pipelineVersion,
+        background: background,
+        merge_nt_nr: mergeNtNr,
+      },
+    }
   );
 
 const getSummaryContigCounts = (id, minContigReads) =>

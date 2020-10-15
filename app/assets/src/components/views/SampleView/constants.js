@@ -86,4 +86,11 @@ export const REPORT_TABLE_COLUMNS = {
       "Average log10 transformed expect value (e-value) of alignments to NCBI NT/NR.",
     link: DOC_BASE_LINK + "#inverse-of-e-value",
   },
+  sourceCountType: {
+    tooltip: "The DB that the single merged NT/NR value was derived from",
+  },
+  unavailable: {
+    tooltip:
+      "Unavailable for prototype. Value would be available when released",
+  },
 };

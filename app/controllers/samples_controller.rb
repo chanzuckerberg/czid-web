@@ -829,22 +829,23 @@ class SamplesController < ApplicationController
   end
 
   def report_v2
-    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    background_id = get_background_id(@sample, params[:background])
+    permitted_params = params.permit(:id, :pipeline_version, :background, :skip_cache, :share_id, :merge_nt_nr)
+    pipeline_run = select_pipeline_run(@sample, permitted_params[:pipeline_version])
+    background_id = get_background_id(@sample, permitted_params[:background])
 
     if pipeline_run
       # Don't cache the response until all results for the pipeline run are available
       # so the displayed pipeline run status and report hover actions will be updated correctly.
       skip_cache = !pipeline_run.ready_for_cache? ||
-                   params[:skip_cache] ||
+                   permitted_params[:skip_cache] ||
                    AppConfigHelper.get_app_config(AppConfig::DISABLE_REPORT_CACHING) ||
                    false
 
       report_info_params = pipeline_run.report_info_params
       # If the pipeline_version wasn't passed in from the client-side,
       # then set it to version for the selected default pipeline run.
-      if params[:pipeline_version].nil?
-        params[:pipeline_version] = pipeline_run.pipeline_version
+      if permitted_params[:pipeline_version].nil?
+        permitted_params[:pipeline_version] = pipeline_run.pipeline_version
       end
       cache_key = PipelineReportService.report_info_cache_key(
         request.path,
@@ -856,10 +857,10 @@ class SamplesController < ApplicationController
 
       json =
         fetch_from_or_store_in_cache(skip_cache, cache_key, httpdate, "samples.report") do
-          PipelineReportService.call(pipeline_run, background_id)
+          PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr])
         end
     else
-      json = PipelineReportService.call(pipeline_run, background_id)
+      json = PipelineReportService.call(pipeline_run, background_id, merge_nt_nr: permitted_params[:merge_nt_nr])
     end
     render json: json
   rescue PipelineReportService::MassNormalizedBackgroundError => e

@@ -1,5 +1,5 @@
 import React from "react";
-import { compact, getOr, get, map, orderBy } from "lodash/fp";
+import { compact, getOr, get, map, orderBy, reduce } from "lodash/fp";
 import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
@@ -39,7 +39,7 @@ class ReportTable extends React.Component {
   constructor(props) {
     super(props);
 
-    const { pipelineVersion } = props;
+    const { displayMergedNtNrValue, pipelineVersion } = props;
 
     this.state = {
       expandAllOpened: false,
@@ -47,6 +47,7 @@ class ReportTable extends React.Component {
       dbType: this.props.initialDbType,
     };
 
+    const countTypes = displayMergedNtNrValue ? ["merged_nt_nr"] : ["nt", "nr"];
     const assemblyEnabled = pipelineVersionHasAssembly(pipelineVersion);
     this.columns = compact([
       {
@@ -76,8 +77,12 @@ class ReportTable extends React.Component {
           }),
       },
       {
-        cellRenderer: this.renderAggregateScore,
-        columnData: REPORT_TABLE_COLUMNS["NT_aggregatescore"],
+        cellRenderer: displayMergedNtNrValue
+          ? () => "-"
+          : this.renderAggregateScore,
+        columnData: displayMergedNtNrValue
+          ? REPORT_TABLE_COLUMNS["unavailable"]
+          : REPORT_TABLE_COLUMNS["NT_aggregatescore"],
         dataKey: "agg_score",
         label: "Score",
         width: 130,
@@ -92,10 +97,22 @@ class ReportTable extends React.Component {
       },
       {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "z_score", 0),
-        cellRenderer: ({ cellData }) =>
-          this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
-        columnData: REPORT_TABLE_COLUMNS["zscore"],
+          displayMergedNtNrValue
+            ? null
+            : this.getCountTypeValuesFromDataRow({
+                rowData,
+                field: "z_score",
+                defaultValue: 0,
+                countTypes: countTypes,
+              }),
+        cellRenderer: ({ cellData }) => {
+          return cellData
+            ? this.renderCellValue({ cellData, decimalPlaces: 1 })
+            : "-";
+        },
+        columnData: displayMergedNtNrValue
+          ? REPORT_TABLE_COLUMNS["unavailable"]
+          : REPORT_TABLE_COLUMNS["zscore"],
         dataKey: "z_score",
         sortFunction: ({ data, sortDirection }) =>
           this.nestedNtNrSortFunction({
@@ -109,9 +126,14 @@ class ReportTable extends React.Component {
       },
       {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "rpm", 0),
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "rpm",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
         cellRenderer: ({ cellData }) =>
-          this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
+          this.renderCellValue({ cellData, decimalPlaces: 1 }),
         columnData: REPORT_TABLE_COLUMNS["rpm"],
         dataKey: "rpm",
         label: "rPM",
@@ -127,8 +149,13 @@ class ReportTable extends React.Component {
       },
       {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "count", 0),
-        cellRenderer: this.renderNtNrDecimalValues,
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "count",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
+        cellRenderer: this.renderCellValue,
         columnData: REPORT_TABLE_COLUMNS["r"],
         dataKey: "r",
         label: "r",
@@ -144,9 +171,18 @@ class ReportTable extends React.Component {
       },
       assemblyEnabled && {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "contigs", 0),
-        cellRenderer: this.renderNtNrDecimalValues,
-        columnData: REPORT_TABLE_COLUMNS["contigs"],
+          displayMergedNtNrValue
+            ? null
+            : this.getCountTypeValuesFromDataRow({
+                rowData,
+                field: "contigs",
+                defaultValue: 0,
+                countTypes: countTypes,
+              }),
+        cellRenderer: displayMergedNtNrValue ? () => "-" : this.renderCellValue,
+        columnData: displayMergedNtNrValue
+          ? REPORT_TABLE_COLUMNS["unavailable"]
+          : REPORT_TABLE_COLUMNS["contigs"],
         dataKey: "contigs",
         label: "contig",
         sortFunction: ({ data, sortDirection }) =>
@@ -161,9 +197,18 @@ class ReportTable extends React.Component {
       },
       assemblyEnabled && {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "contig_r", 0),
-        cellRenderer: this.renderNtNrDecimalValues,
-        columnData: REPORT_TABLE_COLUMNS["contigreads"],
+          displayMergedNtNrValue
+            ? null
+            : this.getCountTypeValuesFromDataRow({
+                rowData,
+                field: "contig_r",
+                defaultValue: 0,
+                countTypes: countTypes,
+              }),
+        cellRenderer: displayMergedNtNrValue ? () => "-" : this.renderCellValue,
+        columnData: displayMergedNtNrValue
+          ? REPORT_TABLE_COLUMNS["unavailable"]
+          : REPORT_TABLE_COLUMNS["contigreads"],
         dataKey: "contig_r",
         label: "contig r",
         sortFunction: ({ data, sortDirection }) =>
@@ -178,9 +223,14 @@ class ReportTable extends React.Component {
       },
       {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "percent_identity", 0),
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "percent_identity",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
         cellRenderer: ({ cellData }) =>
-          this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
+          this.renderCellValue({ cellData, decimalPlaces: 1 }),
         columnData: REPORT_TABLE_COLUMNS["percentidentity"],
         dataKey: "percent_identity",
         label: "%id",
@@ -196,9 +246,14 @@ class ReportTable extends React.Component {
       },
       {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "alignment_length", 0),
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "alignment_length",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
         cellRenderer: ({ cellData }) =>
-          this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
+          this.renderCellValue({ cellData, decimalPlaces: 1 }),
         columnData: REPORT_TABLE_COLUMNS["alignmentlength"],
         dataKey: "alignment_length",
         label: "L",
@@ -214,9 +269,14 @@ class ReportTable extends React.Component {
       },
       {
         cellDataGetter: ({ rowData }) =>
-          this.getNtNrFromDataRow(rowData, "e_value", 0),
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "e_value",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
         cellRenderer: ({ cellData }) =>
-          this.renderNtNrDecimalValues({ cellData, decimalPlaces: 1 }),
+          this.renderCellValue({ cellData, decimalPlaces: 1 }),
         columnData: REPORT_TABLE_COLUMNS["neglogevalue"],
         dataKey: "e_value",
         label: "log(1/E)",
@@ -228,15 +288,31 @@ class ReportTable extends React.Component {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 65,
+        width: 70,
       },
-      {
-        dataKey: "ntnrSelector",
-        disableSort: true,
-        headerClassName: cs.ntnrSelectorHeader,
-        headerRenderer: this.renderNtNrSelector,
-        width: 40,
-      },
+      displayMergedNtNrValue
+        ? {
+            cellDataGetter: ({ rowData }) =>
+              this.getCountTypeValuesFromDataRow({
+                rowData,
+                field: "source_count_type",
+                defaultValue: "-",
+                countTypes: countTypes,
+              }),
+            dataKey: "source_count_type",
+            columnData: REPORT_TABLE_COLUMNS["sourceCountType"],
+            // TODO(omar): Do users want to sort by SourceDB if prototype is successful?
+            disableSort: true,
+            label: "Source DB",
+            width: 70,
+          }
+        : {
+            dataKey: "ntnrSelector",
+            disableSort: true,
+            headerClassName: cs.ntnrSelectorHeader,
+            headerRenderer: this.renderNtNrSelector,
+            width: 40,
+          },
     ]);
   }
 
@@ -331,14 +407,27 @@ class ReportTable extends React.Component {
     );
   };
 
-  renderNtNrDecimalValues = ({ cellData, decimalPlaces }) => {
-    return this.renderNtNrStack({
-      cellData: cellData.map(val =>
-        TableRenderers.formatNumberWithCommas(
-          Number(val).toFixed(decimalPlaces || 0)
-        )
-      ),
-    });
+  renderCellValue = ({ cellData, decimalPlaces }) => {
+    if (!cellData.length) return "-";
+
+    const hasMergedNtNrValue = cellData.length === 1;
+    const mergedNtNrValue = (
+      <div>
+        {TableRenderers.formatNumberWithCommas(
+          Number(cellData[0]).toFixed(decimalPlaces || 0)
+        )}
+      </div>
+    );
+
+    return hasMergedNtNrValue
+      ? mergedNtNrValue
+      : this.renderNtNrStack({
+          cellData: cellData.map(val =>
+            TableRenderers.formatNumberWithCommas(
+              Number(val).toFixed(decimalPlaces || 0)
+            )
+          ),
+        });
   };
 
   renderNtNrSelector = () => {
@@ -550,11 +639,20 @@ class ReportTable extends React.Component {
     return defaultTableRowRenderer(rowProps);
   };
 
-  getNtNrFromDataRow(rowData, field, defaultValue) {
-    return [
-      getOr(defaultValue, ["nt", field], rowData),
-      getOr(defaultValue, ["nr", field], rowData),
-    ];
+  getCountTypeValuesFromDataRow({
+    rowData,
+    field,
+    defaultValue,
+    countTypes = ["nt", "nr"],
+  }) {
+    return reduce(
+      (result, countType) => {
+        result.push(getOr(defaultValue, [countType, field], rowData));
+        return result;
+      },
+      [],
+      countTypes
+    );
   }
 
   nestedSortFunction = ({ data, path, sortDirection, nullValue, limits }) => {
@@ -708,7 +806,7 @@ ReportTable.defaultProps = {
 
 ReportTable.propTypes = {
   data: PropTypes.array,
-  initialDbType: PropTypes.oneOf(["nt", "nr"]),
+  initialDbType: PropTypes.oneOf(["nt", "nr", "merged_nt_nr"]),
   onTaxonNameClick: PropTypes.func,
   rowHeight: PropTypes.number,
 

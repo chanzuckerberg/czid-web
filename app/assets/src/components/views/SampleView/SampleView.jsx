@@ -363,18 +363,24 @@ export default class SampleView extends React.Component {
 
   fetchSampleReportData = async () => {
     const { snapshotShareId, sampleId } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
     const {
+      currentTab,
       pipelineVersion,
       selectedOptions,
       previousSelectedOptions,
     } = this.state;
 
+    const mergeNtNr =
+      allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
+      (currentTab === TABS.MERGED_NT_NR || currentTab === TABS.SHORT_READ_MNGS);
     this.setState({ loadingReport: true });
     await getSampleReportData({
       snapshotShareId,
       sampleId,
       background: selectedOptions.background,
       pipelineVersion,
+      mergeNtNr,
     })
       .then(rawReportData => {
         if (rawReportData) this.processRawSampleReportData(rawReportData);
@@ -488,7 +494,7 @@ export default class SampleView extends React.Component {
         species[key] = parseFloat(
           metricValue.toFixed(METRIC_DECIMAL_PLACES[key])
         );
-      } else if (key === "nt" || key === "nr") {
+      } else if (["nt", "nr", "merged_nt_nr"].includes(key)) {
         Object.entries(species[key]).forEach(([metricKey, metricValue]) => {
           if (metricKey in METRIC_DECIMAL_PLACES) {
             species[key][metricKey] = parseFloat(
@@ -1207,7 +1213,7 @@ export default class SampleView extends React.Component {
     );
   };
 
-  renderReport = () => {
+  renderReport = ({ displayMergedNtNrValue = false } = {}) => {
     const {
       backgrounds,
       enableMassNormalizedBackgrounds,
@@ -1223,6 +1229,7 @@ export default class SampleView extends React.Component {
     } = this.state;
     const { snapshotShareId } = this.props;
 
+    // TODO(omar): Do users want to filter by SourceDB if MergedNTNR is successful?
     // reportReady is true if the pipeline run hasn't failed and is report-ready
     // (might still be running Experimental, but at least taxon_counts has been loaded).
     if (reportMetadata.reportReady) {
@@ -1275,6 +1282,8 @@ export default class SampleView extends React.Component {
                 fastaDownloadEnabled={
                   !!(reportMetadata && reportMetadata.hasByteRanges)
                 }
+                displayMergedNtNrValue={displayMergedNtNrValue}
+                initialDbType={displayMergedNtNrValue ? "merged_nt_nr" : "nt"}
                 phyloTreeAllowed={sample ? sample.editable : false}
                 pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
                 projectId={project && project.id}
@@ -1360,6 +1369,8 @@ export default class SampleView extends React.Component {
             )}
           </div>
           {currentTab === TABS.SHORT_READ_MNGS && this.renderReport()}
+          {currentTab === TABS.MERGED_NT_NR &&
+            this.renderReport({ displayMergedNtNrValue: true })}
           {currentTab === TABS.AMR && amrData && <AMRView amr={amrData} />}
           {currentTab === TABS.CONSENSUS_GENOME && (
             <ConsensusGenomeView sample={sample} />

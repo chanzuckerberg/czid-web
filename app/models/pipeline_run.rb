@@ -1663,8 +1663,8 @@ class PipelineRun < ApplicationRecord
       end
     end
     contig_taxids = contigs.where("read_count >= ?", min_contig_reads)
-                           .where("lineage_json IS NOT NULL")
-                           .pluck("read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr")
+                           .where.not(lineage_json: [nil, ""])
+                           .pluck(:read_count, :species_taxid_nt, :species_taxid_nr, :genus_taxid_nt, :genus_taxid_nr)
     contig_taxids.each do |c|
       read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr = c
 
