@@ -29,10 +29,20 @@
 
 
       <% if ENV["SEGMENT_JS_ID"] %>
-        <!-- Associate user ID with Segment -->
+        <!-- See https://segment.com/docs/connections/sources/catalog/libraries/website/javascript/ for more information on analytics.identify() -->
+        <!-- analytics.identify([userId], [traits], [options], [callback]) -->
         analytics.identify(
           <%= current_user.id %>,
-          <%= raw escape_json(current_user.traits_for_segment) %>);
+          <%= raw escape_json(current_user.traits_for_segment(include_pii: true)) %>,
+          { integrations: { "Appcues": false }},
+        );
+
+        <!-- Appcues integration setup for Segment only (excludes PII)-->
+        analytics.identify(
+          <%= current_user.id %>,
+          <%= raw escape_json(current_user.traits_for_segment(include_pii: false)) %>,
+          { integrations: { "All": false, "Appcues": true }},
+        );
       <% end %>
     <% end %>
   <% end %>
