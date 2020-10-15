@@ -1020,8 +1020,8 @@ class QualityControl extends React.Component {
         <ul className={cs.statusList}>
           <li className={cs.statusListItem}>
             {samples.length}{" "}
-            {samples.length === 1 ? "sample has" : "samples have"} been
-            uploaded.
+            {samples.length === 1 ? "sample has" : "samples have"} been uploaded
+            and selected by filters.
           </li>
           <li className={cs.statusListItem}>
             {runningSamples.length}{" "}
