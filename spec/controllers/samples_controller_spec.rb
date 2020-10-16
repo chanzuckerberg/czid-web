@@ -562,55 +562,6 @@ RSpec.describe SamplesController, type: :controller do
         expect(response).to have_http_status :success
       end
     end
-
-    describe "GET #consensus_genome_zip_link" do
-      let(:fake_sfn_description) do
-        { output: { "Result": { ConsensusGenomeWorkflowRun::OUTPUT_ZIP => "fake_s3_uri" } }.to_json }
-      end
-
-      before do
-        project = create(:project, users: [@joe])
-        @sample = create(:sample, project: project)
-        @sample_without_workflow_run = create(:sample, project: project)
-        @workflow_run = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], sfn_execution_arn: "arn:fake_sfn_name:fake_execution")
-      end
-
-      it "redirects to serve the output file" do
-        allow_any_instance_of(WorkflowRun).to receive(:sfn_description).and_return(fake_sfn_description)
-        allow_any_instance_of(PipelineOutputsHelper).to receive(:get_presigned_s3_url).and_return("fake_aws_link")
-
-        get :consensus_genome_zip_link, params: { id: @sample.id }
-        expect(response).to have_http_status :redirect
-        expect(response.headers['Location']).to include("fake_aws_link")
-      end
-
-      it "properly denies access to non-collaborators" do
-        project = create(:project, users: [])
-        sample = create(:sample, project: project)
-        get :consensus_genome_zip_link, params: { id: sample.id }
-
-        expect(response).to have_http_status(404)
-      end
-
-      it "returns an error message if the file was not found" do
-        allow_any_instance_of(PipelineOutputsHelper).to receive(:get_presigned_s3_url).and_return(nil)
-        expect(LogUtil).to receive(:log_err)
-        get :consensus_genome_zip_link, params: { id: @sample.id }
-
-        expect(response).to have_http_status(404)
-        message = JSON.parse(response.body)
-        expect(message["error"]).to include("does not exist for this sample")
-      end
-
-      it "returns an error message if a WorkflowRun was not found" do
-        expect(LogUtil).to receive(:log_err).with(/No valid WorkflowRun found/)
-        get :consensus_genome_zip_link, params: { id: @sample_without_workflow_run.id }
-
-        expect(response).to have_http_status(404)
-        message = JSON.parse(response.body)
-        expect(message["error"]).to include("does not exist for this sample")
-      end
-    end
   end
 
   context "Admin user" do

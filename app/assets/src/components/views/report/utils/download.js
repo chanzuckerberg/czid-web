@@ -77,6 +77,6 @@ export const getDownloadLinks = (sampleId, pipelineRun) => {
   }));
 };
 
-export const getConsensusGenomeZipLink = sampleId => {
-  return `/samples/${sampleId}/consensus_genome_zip_link`;
+export const getWorkflowRunZipLink = workflowRunId => {
+  return `/workflow_runs/${workflowRunId}/zip_link`;
 };

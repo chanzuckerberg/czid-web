@@ -123,35 +123,6 @@ describe WorkflowRun, type: :model do
     end
   end
 
-  context "#sfn_description" do
-    context "when arn exists" do
-      it "returns description" do
-        @mock_aws_clients[:states].stub_responses(:describe_execution, lambda { |context|
-          context.params[:execution_arn] == fake_sfn_execution_arn ? fake_sfn_execution_description : 'ExecutionDoesNotExist'
-        })
-
-        expect(@workflow_running.sfn_description).to have_attributes(fake_sfn_execution_description)
-      end
-    end
-
-    context "when arn does not exist" do
-      it "returns description from s3" do
-        @mock_aws_clients[:states].stub_responses(:describe_execution, 'ExecutionDoesNotExist')
-        fake_s3_path = File.join(@workflow_running.sample.sample_output_s3_path.split("/", 4)[-1], "sfn-desc", fake_sfn_execution_arn)
-        fake_bucket = { fake_s3_path => { body: JSON.dump(fake_sfn_execution_description) } }
-        @mock_aws_clients[:s3].stub_responses(:get_object, lambda { |context|
-          fake_bucket[context.params[:key]] || 'NoSuchKey'
-        })
-
-        # ATTENTION: if loading a JSON from S3 json time fields will come as strings
-        expected_description = fake_sfn_execution_description.merge(
-          start_date: fake_sfn_execution_description[:start_date].to_s
-        )
-        expect(@workflow_running.sfn_description).to eq(expected_description)
-      end
-    end
-  end
-
   describe "#output" do
     let(:fake_output_wdl_key) { "fake_output_wdl_key" }
     let(:fake_output_s3_key) { "fake_output_key" }

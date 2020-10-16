@@ -149,6 +149,10 @@ Performance/RegexpMatch:
 Rails/FindEach:
   Enabled: false
 
+# Hard to trace in the code
+Rails/Delegate:
+  Enabled: false
+
 # Consistent with JS linting
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: consistent_comma

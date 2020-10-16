@@ -24,7 +24,7 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary,
-                  :coverage_viz_data, :consensus_genome_zip_link,].freeze
+                  :coverage_viz_data,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat,].freeze
 
@@ -1361,39 +1361,6 @@ class SamplesController < ApplicationController
     render json: {
       uploaded_by_current_user: sample_ids.length == samples.length,
     }
-  end
-
-  # GET /samples/:id/consensus_genome_zip_link
-  # Zipped download of select Consensus Genome run result files.
-  def consensus_genome_zip_link
-    # TODO: remove direct access to SFN description in `workflow_run` once we refactor this
-    output_name = ConsensusGenomeWorkflowRun::OUTPUT_ZIP
-
-    workflow_run = @sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
-    raise "No valid WorkflowRun found" unless workflow_run
-
-    description = workflow_run.sfn_description
-    if description && description[:output]
-      result_mapping = JSON.parse(description[:output])
-      result_mapping = result_mapping["Result"]
-    else
-      raise "No SFN description or output"
-    end
-
-    s3_path = result_mapping[output_name]
-    raise "Output not found in results" unless s3_path
-
-    download_url = get_presigned_s3_url(s3_path, "#{@sample.name}_outputs.zip")
-    if download_url
-      redirect_to download_url
-    else
-      raise "Output file not found on S3"
-    end
-  rescue StandardError => err
-    LogUtil.log_err("Error loading #{output_name} for sample #{@sample.id}: #{err}")
-    render json: {
-      error: "#{output_name} does not exist for this sample",
-    }, status: :not_found
   end
 
   # Use callbacks to share common setup or constraints between actions.

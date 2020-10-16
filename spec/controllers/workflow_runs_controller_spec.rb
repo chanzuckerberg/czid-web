@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.shared_examples "private action" do |action, options = {}|
   # options:
@@ -123,6 +123,32 @@ RSpec.describe WorkflowRunsController, type: :controller do
           expect(response).to have_http_status :not_found
           expect(JSON.parse(response.body, symbolize_names: true)[:status]).to eq("Workflow Run action not supported")
         end
+      end
+    end
+
+    describe "GET /zip_link" do
+      before do
+        project = create(:project, users: [@joe])
+        @sample = create(:sample, project: project)
+        @sample_without_workflow_run = create(:sample, project: project)
+        @workflow_run = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+      end
+
+      it "redirects to the path generated" do
+        fake_aws_link = "fake_aws_link"
+        expect_any_instance_of(ConsensusGenomeWorkflowRun).to receive(:zip_link).and_return(fake_aws_link)
+
+        get :zip_link, params: { id: @workflow_run.id }
+
+        expect(response).to have_http_status :redirect
+        expect(response.headers["Location"]).to include(fake_aws_link)
+      end
+
+      it "returns an error if no path generated" do
+        get :zip_link, params: { id: @workflow_run.id }
+
+        expect(response).to have_http_status :not_found
+        expect(JSON.parse(response.body, symbolize_names: true)[:status]).to eq("Output not available")
       end
     end
   end

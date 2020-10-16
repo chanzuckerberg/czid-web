@@ -101,4 +101,24 @@ RSpec.describe ConsensusGenomeWorkflowRun, type: :model do
       end
     end
   end
+
+  describe "#zip_link" do
+    it "calls zip service and returns result" do
+      fake_link = "fake_link"
+      expect(ConsensusGenomeZipService).to receive(:call).with(consensus_genome_workflow_run) { fake_link }
+      expect(subject.send(:zip_link)).to eq(fake_link)
+    end
+
+    context "when consensus genome metrics service fails with exception" do
+      it "logs exception and returns nil" do
+        expect(ConsensusGenomeZipService).to receive(:call).with(consensus_genome_workflow_run).and_raise(RuntimeError)
+        expect(LogUtil).to receive(:log_error).with(
+          "Error loading zip link",
+          exception: RuntimeError,
+          workflow_run_id: consensus_genome_workflow_run.id
+        )
+        expect(subject.send(:zip_link)).to eq(nil)
+      end
+    end
+  end
 end

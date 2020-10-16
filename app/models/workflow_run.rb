@@ -59,12 +59,6 @@ class WorkflowRun < ApplicationRecord
     return "#{workflow}-v#{wdl_version}"
   end
 
-  def sfn_description
-    # Added for `consensus_genome_zip_link` in samples_controller.
-    # TODO: Consider removing it when reactored
-    sfn_execution.description
-  end
-
   def update_status
     remote_status = sfn_execution.description[:status]
     # Collapse failed status into our local unique failure status. Status retrieved from [2020/08/12]:
@@ -99,8 +93,12 @@ class WorkflowRun < ApplicationRecord
     end
   end
 
+  def output_path(output_key)
+    sfn_execution.output_path(output_key)
+  end
+
   def output(output_key)
-    path = sfn_execution.output_path(output_key)
+    path = output_path(output_key)
     return S3Util.get_s3_file(path)
   end
 

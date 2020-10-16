@@ -12,7 +12,7 @@ import { openUrl } from "~utils/links";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import { saveVisualization } from "~/api";
-import { getConsensusGenomeZipLink } from "~/components/views/report/utils/download";
+import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 
 import SampleViewControls from "./SampleViewControls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
@@ -49,23 +49,14 @@ export default function SampleViewHeader({
     if (
       get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
     ) {
-      const status = get(
-        "status",
-        head(
-          filter(
-            { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
-            sample.workflow_runs
-          )
-        )
-      );
       return (
         <ViewHeader.Controls>
-          {status === "SUCCEEDED" && (
+          {get("status", currentRun) === "SUCCEEDED" && (
             <DownloadButton
               text="Download All"
               primary={true}
               onClick={() => {
-                openUrl(getConsensusGenomeZipLink(sample.id));
+                openUrl(getWorkflowRunZipLink(currentRun.id));
                 logAnalyticsEvent(
                   "SampleViewHeader_consensus-genome-download-all-button_clicked",
                   {

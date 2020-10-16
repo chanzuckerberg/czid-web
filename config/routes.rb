@@ -58,7 +58,6 @@ Rails.application.routes.draw do
     post :taxa_with_reads_suggestions, on: :collection
     post :taxa_with_contigs_suggestions, on: :collection
     post :uploaded_by_current_user, on: :collection
-    get :consensus_genome_zip_link, on: :member
     get :reads_stats, on: :collection
   end
 
@@ -193,6 +192,7 @@ Rails.application.routes.draw do
 
   resources :workflow_runs, only: [:show] do
     get :results, on: :member
+    get :zip_link, on: :member
     put :rerun, on: :member
   end
 

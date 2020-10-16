@@ -1,5 +1,5 @@
 class WorkflowRunsController < ApplicationController
-  before_action :set_workflow_run, only: [:show, :results, :rerun]
+  before_action :set_workflow_run, only: [:show, :results, :rerun, :zip_link]
   before_action :admin_required, only: [:rerun]
 
   def show
@@ -30,6 +30,19 @@ class WorkflowRunsController < ApplicationController
       status: "error",
       message: e.message,
     }, status: :ok
+  end
+
+  # Top-level zipped pipeline results
+  def zip_link
+    path = @workflow_run.zip_link
+    if path
+      redirect_to path
+    else
+      render(
+        json: { status: "Output not available" },
+        status: :not_found
+      )
+    end
   end
 
   private
