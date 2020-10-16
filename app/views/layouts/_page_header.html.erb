@@ -39,7 +39,7 @@
 
         <!-- Appcues integration setup for Segment only (excludes PII)-->
         analytics.identify(
-          <%= current_user.id %>,
+          '<%= "Appcues-#{current_user.id}" %>',
           <%= raw escape_json(current_user.traits_for_segment(include_pii: false)) %>,
           { integrations: { "All": false, "Appcues": true }},
         );
