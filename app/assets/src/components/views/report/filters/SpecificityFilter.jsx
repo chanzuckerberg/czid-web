@@ -8,7 +8,7 @@ const SPECIFICITY_OPTIONS = [
   { text: "Specific Only", value: 1 },
 ];
 
-const SpecificityFilter = ({ value, onChange }) => {
+const SpecificityFilter = ({ value, onChange, disabled = false }) => {
   return (
     <Dropdown
       options={SPECIFICITY_OPTIONS}
@@ -16,13 +16,15 @@ const SpecificityFilter = ({ value, onChange }) => {
       label="Read Specificity"
       onChange={onChange}
       rounded
+      disabled={disabled}
     />
   );
 };
 
 SpecificityFilter.propTypes = {
-  value: PropTypes.number.isRequired,
+  disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
+  value: PropTypes.number.isRequired,
 };
 
 export default SpecificityFilter;

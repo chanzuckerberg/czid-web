@@ -5,9 +5,10 @@ import MultipleNestedDropdown from "../../../ui/controls/dropdowns/MultipleNeste
 
 const CategoryFilter = ({
   allCategories,
-  hideBadgeIfInsufficientSpace,
   categoryParentChild,
   categoryChildParent,
+  disabled = false,
+  hideBadgeIfInsufficientSpace,
   selectedCategories,
   selectedSubcategories,
   onChange,
@@ -47,6 +48,7 @@ const CategoryFilter = ({
       label="Categories"
       onChange={onChange}
       hideBadgeIfInsufficientSpace={hideBadgeIfInsufficientSpace}
+      disabled={disabled}
     />
   );
 };
@@ -60,10 +62,11 @@ CategoryFilter.propTypes = {
   categoryParentChild: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string))
     .isRequired,
   categoryChildParent: PropTypes.objectOf(PropTypes.string).isRequired,
+  disabled: PropTypes.bool,
+  hideBadgeIfInsufficientSpace: PropTypes.bool.isRequired,
+  onChange: PropTypes.func.isRequired,
   selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
   selectedSubcategories: PropTypes.arrayOf(PropTypes.string).isRequired,
-  onChange: PropTypes.func.isRequired,
-  hideBadgeIfInsufficientSpace: PropTypes.bool.isRequired,
 };
 
 export default CategoryFilter;

@@ -8,7 +8,7 @@ const NAME_TYPE_OPTIONS = [
   { text: "Common", value: "Common name" },
 ];
 
-const NameTypeFilter = ({ value, onChange }) => {
+const NameTypeFilter = ({ value, onChange, disabled = false }) => {
   return (
     <Dropdown
       options={NAME_TYPE_OPTIONS}
@@ -16,13 +16,15 @@ const NameTypeFilter = ({ value, onChange }) => {
       label="Name Type"
       onChange={onChange}
       rounded
+      disabled={disabled}
     />
   );
 };
 
 NameTypeFilter.propTypes = {
-  value: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
+  value: PropTypes.string.isRequired,
 };
 
 export default NameTypeFilter;

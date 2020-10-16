@@ -165,6 +165,8 @@ class ThresholdFilterDropdown extends React.Component {
   }
 
   render() {
+    const { disabled } = this.props;
+
     return (
       <BareDropdown
         trigger={this.renderLabel()}
@@ -179,6 +181,7 @@ class ThresholdFilterDropdown extends React.Component {
         }}
         open={this.state.popupIsOpen}
         closeOnClick={false}
+        disabled={disabled}
       >
         <div className={cs.container}>
           <Grid verticalAlign="middle" columns="equal">

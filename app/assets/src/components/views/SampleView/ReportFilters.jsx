@@ -108,13 +108,17 @@ class ReportFilters extends React.Component {
   render = () => {
     const {
       backgrounds,
-      selectedInvalidBackground,
+      enableMassNormalizedBackgrounds,
       sampleId,
       selected,
-      view,
-      enableMassNormalizedBackgrounds,
+      selectedInvalidBackground,
+      shouldDisableFilters,
       snapshotShareId,
+      view,
     } = this.props;
+
+    const sharedFilterProps = { disabled: shouldDisableFilters };
+
     return (
       <React.Fragment>
         <div className={cs.filterList}>
@@ -154,6 +158,7 @@ class ReportFilters extends React.Component {
                   value,
                 })
               }
+              {...sharedFilterProps}
             />
           </div>
           {/* from server */}
@@ -169,6 +174,7 @@ class ReportFilters extends React.Component {
                 })
               }
               enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+              {...sharedFilterProps}
             />
           </div>
           {/* from server */}
@@ -204,6 +210,7 @@ class ReportFilters extends React.Component {
                   },
                 })
               }
+              {...sharedFilterProps}
             />
           </div>
           <div className={cs.filterListElement}>
@@ -220,6 +227,7 @@ class ReportFilters extends React.Component {
                   value,
                 })
               }
+              {...sharedFilterProps}
             />
           </div>
           <div className={cs.filterListElement}>
@@ -231,6 +239,7 @@ class ReportFilters extends React.Component {
                   value,
                 })
               }
+              {...sharedFilterProps}
             />
           </div>
           {view === "tree" && (

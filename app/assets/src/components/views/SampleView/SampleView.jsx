@@ -1283,6 +1283,7 @@ export default class SampleView extends React.Component {
           <div className={cs.reportFilters}>
             <ReportFilters
               backgrounds={backgrounds}
+              shouldDisableFilters={displayMergedNtNrValue}
               selectedInvalidBackground={selectedInvalidBackground}
               onFilterChanged={this.handleOptionChanged}
               onFilterRemoved={this.handleFilterRemoved}
