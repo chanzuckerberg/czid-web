@@ -5,6 +5,7 @@ import {
   find,
   flatten,
   get,
+  head,
   isEmpty,
   keys,
   map,
@@ -102,6 +103,8 @@ const TABS = {
   AMR: "Antimicrobial Resistance",
   MERGED_NT_NR: "Metagenomics - Simplified",
 };
+
+const PIPELINE_RUN_TABS = [TABS.SHORT_READ_MNGS, TABS.AMR, TABS.MERGED_NT_NR];
 
 const NOTIFICATON_TYPES = {
   invalidBackground: "invalid background",
@@ -589,14 +592,20 @@ export default class SampleView extends React.Component {
   };
 
   handlePipelineVersionSelect = newPipelineVersion => {
-    const { pipelineRun, sample } = this.state;
-    if (newPipelineVersion !== pipelineRun.version) {
+    const { currentTab, pipelineVersion, sample } = this.state;
+
+    if (newPipelineVersion === pipelineVersion) {
+      return;
+    }
+
+    if (currentTab === TABS.SHORT_READ_MNGS) {
+      const newRun = find(
+        { pipeline_version: newPipelineVersion },
+        sample.pipeline_runs
+      );
       this.setState(
         {
-          pipelineRun: find(
-            { pipeline_version: newPipelineVersion },
-            sample.pipeline_runs
-          ),
+          pipelineRun: newRun,
           pipelineVersion: newPipelineVersion,
           filteredReportData: [],
           reportData: [],
@@ -606,6 +615,13 @@ export default class SampleView extends React.Component {
           this.fetchSampleReportData();
           this.fetchCoverageVizData();
         }
+      );
+    } else if (currentTab === TABS.CONSENSUS_GENOME) {
+      this.setState(
+        {
+          pipelineVersion: newPipelineVersion,
+        },
+        () => this.updateHistoryAndPersistOptions()
       );
     }
   };
@@ -1027,6 +1043,35 @@ export default class SampleView extends React.Component {
     return numFilters;
   };
 
+  getCurrentRun = () => {
+    const { currentTab, pipelineRun, pipelineVersion, sample } = this.state;
+
+    if (PIPELINE_RUN_TABS.includes(currentTab)) {
+      return pipelineRun;
+    }
+
+    if (sample.workflow_runs.length > 0) {
+      const workflowType = Object.values(WORKFLOWS).find(
+        workflow => workflow.label === currentTab
+      ).value;
+
+      if (pipelineVersion) {
+        const currentRun = sample.workflow_runs.find(run => {
+          if (run.workflow === workflowType && !!run.wdl_version) {
+            return run.wdl_version === pipelineVersion;
+          } else {
+            return false;
+          }
+        });
+        return currentRun;
+      } else {
+        return head(
+          sample.workflow_runs.filter(run => run.workflow === workflowType)
+        );
+      }
+    }
+  };
+
   computeWorkflowTabs = () => {
     const { reportMetadata, sample } = this.state;
     const { allowedFeatures = [] } = this.context || {};
@@ -1320,6 +1365,7 @@ export default class SampleView extends React.Component {
       coverageVizVisible,
       currentTab,
       pipelineRun,
+      pipelineVersion,
       project,
       projectSamples,
       reportMetadata,
@@ -1330,6 +1376,8 @@ export default class SampleView extends React.Component {
       view,
     } = this.state;
     const { snapshotShareId } = this.props;
+
+    const currentRun = this.getCurrentRun();
 
     return (
       <React.Fragment>
@@ -1345,7 +1393,7 @@ export default class SampleView extends React.Component {
               editable={sample ? sample.editable : false}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
-              pipelineRun={pipelineRun}
+              currentRun={currentRun}
               project={project}
               projectSamples={projectSamples}
               reportPresent={!!reportMetadata.reportReady}
@@ -1373,7 +1421,7 @@ export default class SampleView extends React.Component {
             this.renderReport({ displayMergedNtNrValue: true })}
           {currentTab === TABS.AMR && amrData && <AMRView amr={amrData} />}
           {currentTab === TABS.CONSENSUS_GENOME && (
-            <ConsensusGenomeView sample={sample} />
+            <ConsensusGenomeView sample={sample} workflow={currentRun} />
           )}
         </NarrowContainer>
         {sample && (

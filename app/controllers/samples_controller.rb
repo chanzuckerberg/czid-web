@@ -76,6 +76,7 @@ class SamplesController < ApplicationController
     :id,
     :status,
     :workflow,
+    :wdl_version,
     :executed_at,
     :deprecated,
   ].freeze

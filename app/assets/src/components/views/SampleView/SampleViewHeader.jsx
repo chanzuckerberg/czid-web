@@ -16,6 +16,7 @@ import { getConsensusGenomeZipLink } from "~/components/views/report/utils/downl
 
 import SampleViewControls from "./SampleViewControls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
+import WorkflowVersionHeader from "./WorkflowVersionHeader";
 import cs from "./sample_view_header.scss";
 
 export default function SampleViewHeader({
@@ -24,7 +25,7 @@ export default function SampleViewHeader({
   editable,
   onDetailsClick,
   onPipelineVersionChange,
-  pipelineRun,
+  currentRun,
   project,
   projectSamples,
   reportPresent,
@@ -33,21 +34,8 @@ export default function SampleViewHeader({
   view,
 }) {
   const userContext = useContext(UserContext);
-
-  const renderVersion = () => {
-    if (!pipelineRun) {
-      return "";
-    }
-
-    const pipelineRunVersionString = pipelineRun.pipeline_version
-      ? `v${pipelineRun.pipeline_version}`
-      : "N/A";
-    const alignmentConfigName = get("alignment_config_name", pipelineRun);
-    const alignmentConfigNameString = alignmentConfigName
-      ? `, NT/NR: ${alignmentConfigName}`
-      : "";
-    return `${pipelineRunVersionString}${alignmentConfigNameString}`;
-  };
+  const mngsWorkflow =
+    get("temp_pipeline_workflow", sample) === WORKFLOWS.SHORT_READ_MNGS.value;
 
   const onSaveClick = async () => {
     if (view) {
@@ -125,7 +113,7 @@ export default function SampleViewHeader({
           reportPresent={reportPresent}
           sample={sample}
           project={project}
-          pipelineRun={pipelineRun}
+          pipelineRun={currentRun}
           editable={editable}
           view={view}
         />
@@ -143,46 +131,21 @@ export default function SampleViewHeader({
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>
-        <div
-          className={cx(
-            cs.pipelineInfo,
-            !snapshotShareId &&
-              get("pipeline_version", pipelineRun) &&
-              cs.linkToPipelineViz
-          )}
-          onClick={() =>
-            !snapshotShareId &&
-            get("pipeline_version", pipelineRun) &&
-            openUrl(
-              `/samples/${sample.id}/pipeline_viz/${get(
-                "pipeline_version",
-                pipelineRun
-              )}`,
-              event
-            )
+        <WorkflowVersionHeader
+          sampleId={get("id", sample)}
+          currentRun={currentRun}
+          allRuns={
+            mngsWorkflow
+              ? get("pipeline_runs", sample)
+              : get("workflow_runs", sample)
           }
-        >
-          <span className={cs.pipelineRunVersion}>
-            {[WORKFLOWS.SHORT_READ_MNGS.value].includes(
-              get("temp_pipeline_workflow", sample)
-            ) && `Pipeline ${renderVersion()}`}
-          </span>
-          <PipelineVersionSelect
-            pipelineRun={pipelineRun}
-            pipelineVersions={map(
-              "pipeline_version",
-              get("pipeline_runs", sample)
-            )}
-            lastProcessedAt={get("created_at", pipelineRun)}
-            onPipelineVersionSelect={version => {
-              logAnalyticsEvent("SampleView_pipeline-select_clicked", {
-                sampleId: sample.id,
-                pipelineVersion: version,
-              });
-              onPipelineVersionChange(version);
-            }}
-          />
-        </div>
+          workflowType={get("temp_pipeline_workflow", sample)}
+          mngsWorkflow={mngsWorkflow}
+          versionKey={mngsWorkflow ? "pipeline_version" : "wdl_version"}
+          timeKey={mngsWorkflow ? "created_at" : "executed_at"}
+          onVersionChange={onPipelineVersionChange}
+          snapshotShareId={snapshotShareId}
+        />
         <ViewHeader.Pretitle breadcrumbLink={getBreadcrumbLink()}>
           {project ? project.name : ""}
         </ViewHeader.Pretitle>

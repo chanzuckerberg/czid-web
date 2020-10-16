@@ -16,8 +16,14 @@ class PipelineVersionSelect extends React.Component {
   };
 
   renderPipelineVersionDropdown = () => {
-    const otherVersions = this.props.pipelineVersions.filter(
-      v => v !== this.props.pipelineRun.pipeline_version
+    const {
+      pipelineVersions,
+      pipelineRun,
+      versionKey,
+      onPipelineVersionSelect,
+    } = this.props;
+    const otherVersions = pipelineVersions.filter(
+      v => v !== pipelineRun[versionKey]
     );
 
     const trigger = (
@@ -35,14 +41,19 @@ class PipelineVersionSelect extends React.Component {
       <BareDropdown
         trigger={trigger}
         options={options}
-        onChange={this.props.onPipelineVersionSelect}
+        onChange={onPipelineVersionSelect}
         smallArrow
       />
     );
   };
 
   render() {
-    const { pipelineVersions, lastProcessedAt, pipelineRun } = this.props;
+    const {
+      pipelineVersions,
+      lastProcessedAt,
+      pipelineRun,
+      versionKey,
+    } = this.props;
 
     if (!lastProcessedAt) return null;
 
@@ -51,7 +62,7 @@ class PipelineVersionSelect extends React.Component {
     if (
       pipelineVersions.length === 0 ||
       (pipelineVersions.length === 1 &&
-        pipelineVersions[0] === pipelineRun.pipeline_version)
+        pipelineVersions[0] === pipelineRun[versionKey])
     ) {
       return (
         <span className={cs.pipelineVersionSelectContainer}>
@@ -77,6 +88,7 @@ class PipelineVersionSelect extends React.Component {
 PipelineVersionSelect.propTypes = {
   pipelineRun: PropTypes.PipelineRun,
   pipelineVersions: PropTypes.arrayOf(PropTypes.string),
+  versionKey: PropTypes.string,
   lastProcessedAt: PropTypes.string, // Actually a datestring.
   onPipelineVersionSelect: PropTypes.func.isRequired,
 };

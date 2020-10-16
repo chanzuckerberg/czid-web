@@ -43,15 +43,6 @@ const HOVER_FILL_COLOR = "#3867FA";
 class ConsensusGenomeView extends React.Component {
   constructor(props) {
     super(props);
-
-    this.workflow =
-      head(
-        filter(
-          { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
-          this.props.sample.workflow_runs
-        )
-      ) || {};
-
     this.state = {
       data: null,
       histogramTooltipData: null,
@@ -60,19 +51,28 @@ class ConsensusGenomeView extends React.Component {
   }
 
   componentDidMount = async () => {
-    const { workflow } = this;
-
-    if (workflow.status === "SUCCEEDED") {
-      const data = await getWorkflowRunResults(this.workflow.id);
+    const { workflow } = this.props;
+    if (workflow && workflow.status === "SUCCEEDED") {
+      const data = await getWorkflowRunResults(workflow.id);
       this.setState({ data });
     }
   };
 
-  componentDidUpdate = (prevProps, prevState) => {
+  componentDidUpdate = async (prevProps, prevState) => {
+    const { workflow } = this.props;
     const { data } = this.state;
 
     if (data && data.coverage_viz && data !== prevState.data) {
       this.renderHistogram();
+    }
+
+    if (
+      workflow &&
+      workflow !== prevProps.workflow &&
+      workflow.status === "SUCCEEDED"
+    ) {
+      const data = await getWorkflowRunResults(workflow.id);
+      this.setState({ data });
     }
   };
 
@@ -427,8 +427,11 @@ class ConsensusGenomeView extends React.Component {
 
   render() {
     const { data } = this.state;
-    const { sample } = this.props;
-    const { workflow } = this;
+    const { sample, workflow } = this.props;
+
+    if (!workflow) {
+      return this.renderLoader();
+    }
 
     if (workflow.status === "SUCCEEDED") {
       return data ? this.renderResults() : this.renderLoader();
