@@ -9,6 +9,7 @@ import {
   concat,
   escapeRegExp,
   find,
+  getOr,
   isEmpty,
   keyBy,
   map,
@@ -581,13 +582,34 @@ class DiscoveryView extends React.Component {
       domain: domain,
       projectId,
     });
-    this.setState({
-      userDataCounts: {
-        sampleCountByWorkflow: stats.sampleStats.countByWorkflow,
-        sampleCount: stats.sampleStats.count,
-        projectCount: stats.sampleStats.projectCount,
+
+    const numOfCgSamples = getOr(
+      0,
+      WORKFLOWS.CONSENSUS_GENOME.value,
+      stats.sampleStats.countByWorkflow
+    );
+    const numOfMngsSamples = getOr(
+      0,
+      WORKFLOWS.SHORT_READ_MNGS.value,
+      stats.sampleStats.countByWorkflow
+    );
+
+    this.setState(
+      {
+        workflow:
+          numOfMngsSamples === 0 && numOfCgSamples > 0
+            ? WORKFLOWS.CONSENSUS_GENOME.value
+            : WORKFLOWS.SHORT_READ_MNGS.value,
+        userDataCounts: {
+          sampleCountByWorkflow: stats.sampleStats.countByWorkflow,
+          sampleCount: stats.sampleStats.count,
+          projectCount: stats.sampleStats.projectCount,
+        },
       },
-    });
+      () => {
+        this.updateBrowsingHistory("replace");
+      }
+    );
   };
 
   computeTabs = () => {
