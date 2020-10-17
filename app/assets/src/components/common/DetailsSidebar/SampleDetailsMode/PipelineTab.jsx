@@ -13,7 +13,7 @@ import FieldList from "~/components/common/DetailsSidebar/FieldList";
 import {
   RESULTS_FOLDER_STAGE_KEYS,
   RESULTS_FOLDER_STEP_KEYS,
-  CDHITDUP_KEYS,
+  READ_DEDUP_KEYS,
   RESULTS_FOLDER_ROOT_KEY,
 } from "~/components/utils/resultsFolder";
 
@@ -137,11 +137,11 @@ class PipelineTab extends React.Component {
       return;
     }
 
-    // Special case cdhitdup. All steps after cdhitdup transform their counts by
+    // Special case idseq-dedup. All steps after idseq-dedup transform their counts by
     // in the pipeline by the compression ratio to return nonunique reads.
     let uniqueReads = null;
-    const cdhitdupKeys = CDHITDUP_KEYS;
-    if (cdhitdupKeys.includes(stepKey) && pipelineRun.pipeline_version > "4") {
+    const readDedupKeys = READ_DEDUP_KEYS;
+    if (readDedupKeys.includes(stepKey) && pipelineRun.pipeline_version > "4") {
       // Property order is predictable in JavaScript objects since ES2015
       const stepKeys = Object.keys(pipelineStepDict[stepsKey]);
       const previousStepKey =

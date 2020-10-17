@@ -56,8 +56,8 @@ module SamplesControllerConstants
           ],
           readsAfter: 440,
         },
-        runCdHitDup: {
-          name: "Run Cd Hit Dup",
+        runIdSeqDedup: {
+          name: "Run Id Seq Dedup",
           stepDescription: "Test step description",
           fileList: [
             {
@@ -155,7 +155,7 @@ module SamplesControllerConstants
           readsAfter: 1_533_632,
         },
         {
-          name: "Cdhitdup",
+          name: "Idseq Dedup",
           readsAfter: 37_936,
         },
         {

@@ -12,6 +12,12 @@ export const RESULTS_FOLDER_STEP_KEYS = {
   readsAfterKey: "readsAfter",
 };
 
-export const CDHITDUP_KEYS = ["runCdHitDup", "cdhitdup_out"];
+// "runCdHitDup" and "cdhitdup_out" are required here for backwards compatibility
+export const READ_DEDUP_KEYS = [
+  "runCdHitDup",
+  "cdhitdup_out",
+  "runIdSeqDedup",
+  "idseq_dedup_out",
+];
 
 export const RESULTS_FOLDER_ROOT_KEY = "displayedData";

@@ -180,12 +180,13 @@ class QualityControl extends React.Component {
       Number.isInteger(samplesReadsStats[sampleId].initialReads)
     );
 
-    // Filter out Cdhitdup step from samples run on pipeline versions >= 4.0
+    // Filter out Idseq Dedup step from samples run on pipeline versions >= 4.0
     samplesWithInitialReads.forEach(sampleId => {
       const sampleData = samplesReadsStats[sampleId];
       if (parseFloat(sampleData.pipelineVersion) >= 4) {
         sampleData.steps = sampleData.steps.filter(step => {
-          return step.name !== "Cdhitdup";
+          // Cdhitdup required for backwards compatibility
+          return step.name !== "Idseq Dedup" && step.name !== "Cdhitdup";
         });
       }
     });

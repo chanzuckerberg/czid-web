@@ -32,6 +32,7 @@ import json
 
 # function names we can parse for Apply expressions
 SELECT_ALL = "select_all"
+DEFINED = "defined"
 GLOB = "glob"
 
 
@@ -161,6 +162,8 @@ def parse_apply_expression(apply_exp):
         for item in array.children:
             items.extend(parse_input_item(item))
         return items
+    elif function_name == DEFINED:
+        return []
 
 
 def get_file_basenames(task_inputs):

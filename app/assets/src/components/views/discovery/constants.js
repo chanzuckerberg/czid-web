@@ -18,7 +18,9 @@ export const HUMAN_READABLE_STEP_NAMES = {
   Star: "Filter host (STAR)",
   Trimmomatic: "Trim adapters",
   Priceseq: "Filter low quality",
+  // Cdhitdup required here for backwards compatibility
   Cdhitdup: "Filter duplicates",
+  "Idseq Dedup": "Filter duplicates",
   Lzw: "Filter low complexity",
   Bowtie2: "Filter host (Bowtie2)",
   Subsampled: "Subsampling",

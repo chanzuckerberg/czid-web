@@ -17,7 +17,7 @@ FactoryBot.define do
           star_out: ["unmapped1.fq"],
           trimmomatic_out: ["trimmomatic1.fq"],
           priceseq_out: ["priceseq1.fa"],
-          cdhitdup_out: ["dedup1.fa"],
+          idseq_dedup_out: ["dedup1.fa"],
           lzw_out: ["lzw1.fa"],
           bowtie2_out: ["bowtie2_1.fa"],
           subsampled_out: ["subsampled_1.fa"],

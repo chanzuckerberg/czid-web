@@ -33,7 +33,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   },
   duplicateCompressionRatio: {
     tooltip: `Duplicate Compression Ratio is the ratio of the total number of
-    sequences present prior to running cd-hit-dup (duplicate identification) vs
+    sequences present prior to running idseq-dedup (duplicate identification) vs
     the number of unique sequences.`,
     link:
       DOC_BASE_LINK +

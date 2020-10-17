@@ -49,7 +49,9 @@ class PipelineRun < ApplicationRecord
   DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
   UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
   MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
-  HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
+  # CDHITDUP_HIT_FASTA_BASENAME is required for backwards compatibility
+  CDHITDUP_HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
+  HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.idseq_dedup.priceseqfilter.unmapped.star.fasta'.freeze
 
   GSNAP_M8 = "gsnap.m8".freeze
   RAPSEARCH2_M8 = "rapsearch2.m8".freeze
@@ -483,7 +485,12 @@ class PipelineRun < ApplicationRecord
     return "#{assembly_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if supports_assembly?
     return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
-    multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
+    hit_fasta_basename = if pipeline_version_at_least(pipeline_version, "6.0.0")
+                           HIT_FASTA_BASENAME
+                         else
+                           CDHITDUP_HIT_FASTA_BASENAME
+                         end
+    multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{hit_fasta_basename}"
   end
 
   def host_gene_count_s3_path

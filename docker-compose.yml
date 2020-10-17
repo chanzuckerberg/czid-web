@@ -37,10 +37,8 @@ x-auth0-variables: &auth0-variables
   ? AUTH0_MANAGEMENT_DOMAIN
 
 x-aws-variables: &aws-variables
-  ? AWS_ACCESS_KEY_ID
-  ? AWS_SECRET_ACCESS_KEY
-  ? AWS_SESSION_TOKEN
   ? AWS_REGION
+  ? AWS_DEFAULT_REGION
 
 x-env-variables: &env-variables
   ? ENVIRONMENT

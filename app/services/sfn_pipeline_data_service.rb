@@ -47,7 +47,9 @@ class SfnPipelineDataService
       "RunStar" => "star_out",
       "RunTrimmomatic" => "trimmomatic_out",
       "RunPriceSeq" => "priceseq_out",
+      # "RunCDHitDup" required for backwards compatibility
       "RunCDHitDup" => "cdhitdup_out",
+      "RunIDSeqDedup" => "idseq_dedup_out",
       "RunLZW" => "lzw_out",
       "RunBowtie2" => "bowtie2_out",
       "RunSubsample" => "subsampled_out",
