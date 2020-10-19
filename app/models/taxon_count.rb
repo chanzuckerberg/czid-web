@@ -26,7 +26,10 @@ class TaxonCount < ApplicationRecord
 
   COUNT_TYPE_NT = 'NT'.freeze
   COUNT_TYPE_NR = 'NR'.freeze
-  COUNT_TYPE_MERGED = 'MERGED_NT_NR'.freeze
+  # Single classifier that can either get results from NT, NR or both
+  COUNT_TYPE_MERGED = 'merged_NT_NR'.freeze
+  # Used to specify that source_count_type (for merged type) is both NT and NR
+  COUNT_TYPE_NT_NR = 'NT-NR'.freeze
   validates :count_type, presence: true, inclusion: { in: [
     COUNT_TYPE_NT,
     COUNT_TYPE_NR,
@@ -36,6 +39,7 @@ class TaxonCount < ApplicationRecord
   validates :source_count_type, allow_nil: true, inclusion: { in: [
     COUNT_TYPE_NT,
     COUNT_TYPE_NR,
+    COUNT_TYPE_NT_NR,
   ] }
 
   # NOTE: some existing rspec tests assume a value of zero

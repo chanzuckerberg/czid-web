@@ -149,10 +149,10 @@ class PipelineReportService
     if @parallel
       parallel_steps = [
         -> { @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads) },
-        -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: ["NT", "NR"], background_id: @background.id) },
+        -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background.id) },
         -> { fetch_taxons_absent_from_sample(@pipeline_run.id, @background.id) },
       ]
-      parallel_steps << -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: ["MERGED_NT_NR"]) } if @merge_nt_nr
+      parallel_steps << -> { fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_MERGED]) } if @merge_nt_nr
       results = nil
       ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
         results = Parallel.map(parallel_steps, in_threads: parallel_steps.size) do |lambda|
@@ -170,14 +170,14 @@ class PipelineReportService
       contigs = @pipeline_run.get_summary_contig_counts_v2(@min_contig_reads)
       @timer.split("get_contig_summary")
 
-      taxon_counts_and_summaries = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: ["NT", "NR"], background_id: @background.id)
+      taxon_counts_and_summaries = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_NT, TaxonCount::COUNT_TYPE_NR], background_id: @background.id)
       @timer.split("fetch_taxon_counts_and_summaries")
 
       taxons_absent_from_sample = fetch_taxons_absent_from_sample(@pipeline_run.id, @background.id)
       @timer.split("fetch_taxons_absent_from_sample")
 
       if @merge_nt_nr
-        merged_taxon_counts = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: ["MERGED_NT_NR"])
+        merged_taxon_counts = fetch_taxon_counts(pipeline_run_id: @pipeline_run.id, count_types: [TaxonCount::COUNT_TYPE_MERGED])
         @timer.split("fetch_merged_taxon_counts")
       end
     end

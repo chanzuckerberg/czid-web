@@ -941,11 +941,17 @@ export default class SampleView extends React.Component {
   };
 
   countReportRows = () => {
-    const { filteredReportData, reportData } = this.state;
+    const { currentTab, reportData } = this.state;
 
-    let total = reportData.length;
-    let filtered = filteredReportData.length;
+    let total = 0;
+    let filtered = 0;
     reportData.forEach(genusRow => {
+      if (currentTab !== TABS.MERGED_NT_NR || genusRow["merged_nt_nr"]) {
+        total += 1;
+        if (genusRow.filteredSpecies) {
+          filtered += 1;
+        }
+      }
       total += genusRow.species.length;
       filtered += genusRow.filteredSpecies.length;
     });

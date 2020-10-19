@@ -760,6 +760,8 @@ class PipelineRun < ApplicationRecord
     taxon_counts_attributes_filtered.each do |tcnt|
       tcnt["count_type"] += "+" if refined
       tcnt.merge!(tcnt_attrs_to_merge)
+      # Format source count type as NT, NR or NT-NR (is currently an unordered array with possible unique value of ["NT", "NR"])
+      tcnt["source_count_type"] = tcnt["source_count_type"] ? tcnt["source_count_type"].sort.reverse.join("-") : nil
     end
     TaxonCount.import!(taxon_counts_attributes_filtered)
 

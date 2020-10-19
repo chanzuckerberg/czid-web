@@ -742,13 +742,18 @@ class ReportTable extends React.Component {
   };
 
   getTableRows = () => {
-    const { data } = this.props;
+    const { data, displayMergedNtNrValue } = this.props;
     const { expandedGenusIds } = this.state;
 
     // flatten data for consumption of react virtualized table
     // removes collapsed rows
     const tableRows = [];
     data.forEach(genusData => {
+      if (displayMergedNtNrValue && !genusData["merged_nt_nr"]) {
+        // skip lines wihtout merged counts
+        return;
+      }
+
       tableRows.push(genusData);
 
       if (expandedGenusIds.has(genusData.taxId)) {
@@ -806,6 +811,7 @@ ReportTable.defaultProps = {
 
 ReportTable.propTypes = {
   data: PropTypes.array,
+  displayMergedNtNrValue: PropTypes.bool,
   initialDbType: PropTypes.oneOf(["nt", "nr", "merged_nt_nr"]),
   onTaxonNameClick: PropTypes.func,
   rowHeight: PropTypes.number,

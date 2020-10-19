@@ -852,6 +852,7 @@ class SamplesController < ApplicationController
         request.path,
         report_info_params
         .merge(background_id: background_id)
+        .merge(merge_nt_nr: permitted_params[:merge_nt_nr])
         .symbolize_keys
       )
       httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
