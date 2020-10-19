@@ -941,26 +941,46 @@ export default class SampleView extends React.Component {
   };
 
   countReportRows = () => {
-    const { currentTab, reportData } = this.state;
+    const { currentTab, filteredReportData, reportData } = this.state;
 
     let total = 0;
     let filtered = 0;
-    reportData.forEach(genusRow => {
-      if (currentTab !== TABS.MERGED_NT_NR || genusRow["merged_nt_nr"]) {
-        total += 1;
-        if (genusRow.filteredSpecies) {
-          filtered += 1;
+    if (currentTab === TABS.MERGED_NT_NR) {
+      reportData.forEach(genusRow => {
+        if (genusRow["merged_nt_nr"]) {
+          total += 1;
+          genusRow.species.forEach(speciesRow => {
+            if (speciesRow["merged_nt_nr"]) {
+              total += 1;
+            }
+          });
         }
-      }
-      total += genusRow.species.length;
-      filtered += genusRow.filteredSpecies.length;
-    });
+      });
+      filteredReportData.forEach(genusRow => {
+        if (genusRow["merged_nt_nr"]) {
+          filtered += 1;
+          genusRow.filteredSpecies.forEach(speciesRow => {
+            if (speciesRow["merged_nt_nr"]) {
+              filtered += 1;
+            }
+          });
+        }
+      });
+    } else {
+      total = reportData.length;
+      filtered = filteredReportData.length;
+      reportData.forEach(genusRow => {
+        total += genusRow.species.length;
+        filtered += genusRow.filteredSpecies.length;
+      });
+    }
 
     return { total, filtered };
   };
 
   filteredMessage = () => {
     const { total, filtered } = this.countReportRows();
+
     return filtered !== total
       ? `${filtered} rows passing the above filters, out of ${total} total rows.`
       : `${total} total rows.`;
