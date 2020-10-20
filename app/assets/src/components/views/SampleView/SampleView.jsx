@@ -1102,21 +1102,6 @@ export default class SampleView extends React.Component {
     const { reportMetadata, sample } = this.state;
     const { allowedFeatures = [] } = this.context || {};
 
-    const consensusGenomeTab = {
-      value: TABS.CONSENSUS_GENOME,
-      label: (
-        <React.Fragment>
-          {TABS.CONSENSUS_GENOME}
-          <StatusLabel
-            className={cs.statusLabel}
-            inline
-            status="Beta"
-            type="beta"
-          />
-        </React.Fragment>
-      ),
-    };
-
     const mergedNtNrTab = {
       value: TABS.MERGED_NT_NR,
       label: (
@@ -1131,7 +1116,6 @@ export default class SampleView extends React.Component {
         </React.Fragment>
       ),
     };
-
     const sampleWorkflow = get("temp_pipeline_workflow", sample);
     return compact([
       sampleWorkflow === WORKFLOWS.SHORT_READ_MNGS.value &&
@@ -1139,7 +1123,8 @@ export default class SampleView extends React.Component {
       sampleWorkflow === WORKFLOWS.SHORT_READ_MNGS.value &&
         allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
         mergedNtNrTab,
-      sampleWorkflow === WORKFLOWS.CONSENSUS_GENOME.value && consensusGenomeTab,
+      sampleWorkflow === WORKFLOWS.CONSENSUS_GENOME.value &&
+        TABS.CONSENSUS_GENOME,
       allowedFeatures.includes(AMR_TABLE_FEATURE) &&
         reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
         TABS.AMR,

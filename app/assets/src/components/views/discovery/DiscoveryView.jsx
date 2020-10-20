@@ -42,7 +42,6 @@ import Tabs from "~ui/controls/Tabs";
 import BannerProjects from "~ui/icons/BannerProjects";
 import BannerSamples from "~ui/icons/BannerSamples";
 import BannerVisualizations from "~ui/icons/BannerVisualizations";
-import StatusLabel from "~ui/labels/StatusLabel";
 import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 
@@ -1386,14 +1385,6 @@ class DiscoveryView extends React.Component {
           <span className={cs.tabCounter}>
             {this.samplesByWorkflow[WORKFLOWS[name].value].length || "0"}
           </span>
-          {WORKFLOWS[name].beta ? (
-            <StatusLabel
-              className={cs.statusLabel}
-              inline
-              status="Beta"
-              type="beta"
-            />
-          ) : null}
         </React.Fragment>
       ),
       value: WORKFLOWS[name].value,
