@@ -347,7 +347,7 @@ class SamplesHeatmapVis extends React.Component {
     if (subtitle) {
       subtitle = (
         <div className={cs.warning}>
-          <IconAlertSmall type="warning" />
+          <IconAlertSmall className={cs.warningIcon} type="warning" />
           <div className={cs.warningText}>{subtitle}</div>
         </div>
       );
