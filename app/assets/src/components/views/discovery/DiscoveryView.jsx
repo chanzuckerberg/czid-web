@@ -300,6 +300,12 @@ class DiscoveryView extends React.Component {
 
     // We want to persist some options when user returns to the page on a different session
     localStorage.setItem("DiscoveryViewOptions", JSON.stringify(localState));
+
+    // Track changes to the page that did not cause a page load but the URL was updated
+    // Used specifically to notify Appcues
+    if (window.analytics) {
+      window.analytics.page();
+    }
   };
 
   isFirstTimeUser = () => {
