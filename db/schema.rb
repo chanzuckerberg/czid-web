@@ -120,10 +120,14 @@ ActiveRecord::Schema.define(version: 20_201_009_000_008) do
     t.integer "species_taxid_nr"
     t.integer "genus_taxid_nt"
     t.integer "genus_taxid_nr"
+    t.integer "species_taxid_merged_nt_nr"
+    t.integer "genus_taxid_merged_nt_nr"
+    t.index ["pipeline_run_id", "genus_taxid_merged_nt_nr"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_merged_nt_nr"
     t.index ["pipeline_run_id", "genus_taxid_nr"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_nr"
     t.index ["pipeline_run_id", "genus_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_genus_taxid_nt"
     t.index ["pipeline_run_id", "name"], name: "index_contigs_on_pipeline_run_id_and_name", unique: true
     t.index ["pipeline_run_id", "read_count"], name: "index_contigs_on_pipeline_run_id_and_read_count"
+    t.index ["pipeline_run_id", "species_taxid_merged_nt_nr"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_merged_nt_nr"
     t.index ["pipeline_run_id", "species_taxid_nr"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_nr"
     t.index ["pipeline_run_id", "species_taxid_nt"], name: "index_contigs_on_pipeline_run_id_and_species_taxid_nt"
   end
