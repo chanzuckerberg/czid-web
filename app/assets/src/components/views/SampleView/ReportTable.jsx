@@ -1,5 +1,5 @@
 import React from "react";
-import { compact, getOr, get, map, orderBy, reduce } from "lodash/fp";
+import { compact, filter, getOr, get, map, orderBy, reduce } from "lodash/fp";
 import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
@@ -330,7 +330,12 @@ class ReportTable extends React.Component {
   };
 
   renderName = ({ cellData, rowData }) => {
-    const { onTaxonNameClick } = this.props;
+    const { displayMergedNtNrValue, onTaxonNameClick } = this.props;
+
+    const childrenCount = displayMergedNtNrValue
+      ? filter(species => species["merged_nt_nr"], rowData.filteredSpecies)
+          .length
+      : rowData.filteredSpecies.length;
     return (
       rowData && (
         <div className={cs.taxonContainer}>
@@ -342,12 +347,14 @@ class ReportTable extends React.Component {
           </span>
           {rowData.taxLevel === "genus" &&
             (rowData.category ? (
-              <span className={cs.countInfo}>{`(${
-                rowData.filteredSpecies.length
-              } ${getCategoryAdjective(rowData.category)} species)`}</span>
+              <span
+                className={cs.countInfo}
+              >{`(${childrenCount} ${getCategoryAdjective(
+                rowData.category
+              )} species)`}</span>
             ) : (
               <span className={cs.countInfo}>
-                {`(${rowData.filteredSpecies.length} species)`}
+                {`(${childrenCount} species)`}
               </span>
             ))}
           <span>
@@ -750,7 +757,7 @@ class ReportTable extends React.Component {
     const tableRows = [];
     data.forEach(genusData => {
       if (displayMergedNtNrValue && !genusData["merged_nt_nr"]) {
-        // skip lines wihtout merged counts
+        // skip lines without merged counts
         return;
       }
 
@@ -758,6 +765,11 @@ class ReportTable extends React.Component {
 
       if (expandedGenusIds.has(genusData.taxId)) {
         genusData.filteredSpecies.forEach(speciesData => {
+          if (displayMergedNtNrValue && !speciesData["merged_nt_nr"]) {
+            // skip lines without merged counts
+            return;
+          }
+
           // Add a pointer to the genus data for sorting purposes
           speciesData.genus = genusData;
           tableRows.push(speciesData);
