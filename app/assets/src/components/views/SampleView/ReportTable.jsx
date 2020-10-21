@@ -1,9 +1,9 @@
 import React from "react";
 import { compact, filter, getOr, get, map, orderBy, reduce } from "lodash/fp";
+import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
 import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
-import { defaultTableRowRenderer } from "react-virtualized";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { getCsrfToken } from "~/api/utils";
@@ -772,7 +772,12 @@ class ReportTable extends React.Component {
   };
 
   render = () => {
-    const { projectId, projectName, rowHeight } = this.props;
+    const {
+      displayMergedNtNrValue,
+      projectId,
+      projectName,
+      rowHeight,
+    } = this.props;
     const { phyloTreeModalParams } = this.state;
     return (
       <React.Fragment>
@@ -785,6 +790,8 @@ class ReportTable extends React.Component {
           rowClassName={cs.row}
           rowRenderer={this.rowRenderer}
           sortable={true}
+          defaultSortBy={displayMergedNtNrValue ? "rpm" : "agg_score"}
+          defaultSortDirection={SortDirection.DESC}
           sortedHeaderClassName={cs.sortedHeader}
         />
         {phyloTreeModalParams && (

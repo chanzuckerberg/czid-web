@@ -107,8 +107,6 @@ Table.propTypes = {
   selectableKey: PropTypes.string,
   selected: PropTypes.instanceOf(Set),
   sortable: PropTypes.bool,
-  sortBy: PropTypes.string,
-  sortDirection: PropTypes.string,
   // Allows you to set a sort on table initialization, but still allows user to change the sort.
   defaultSortBy: PropTypes.string,
   defaultSortDirection: PropTypes.string,
