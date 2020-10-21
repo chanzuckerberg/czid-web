@@ -171,18 +171,14 @@ class ReportTable extends React.Component {
       },
       assemblyEnabled && {
         cellDataGetter: ({ rowData }) =>
-          displayMergedNtNrValue
-            ? null
-            : this.getCountTypeValuesFromDataRow({
-                rowData,
-                field: "contigs",
-                defaultValue: 0,
-                countTypes: countTypes,
-              }),
-        cellRenderer: displayMergedNtNrValue ? () => "-" : this.renderCellValue,
-        columnData: displayMergedNtNrValue
-          ? REPORT_TABLE_COLUMNS["unavailable"]
-          : REPORT_TABLE_COLUMNS["contigs"],
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "contigs",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
+        cellRenderer: this.renderCellValue,
+        columnData: REPORT_TABLE_COLUMNS["contigs"],
         dataKey: "contigs",
         label: "contig",
         sortFunction: ({ data, sortDirection }) =>
@@ -197,18 +193,14 @@ class ReportTable extends React.Component {
       },
       assemblyEnabled && {
         cellDataGetter: ({ rowData }) =>
-          displayMergedNtNrValue
-            ? null
-            : this.getCountTypeValuesFromDataRow({
-                rowData,
-                field: "contig_r",
-                defaultValue: 0,
-                countTypes: countTypes,
-              }),
-        cellRenderer: displayMergedNtNrValue ? () => "-" : this.renderCellValue,
-        columnData: displayMergedNtNrValue
-          ? REPORT_TABLE_COLUMNS["unavailable"]
-          : REPORT_TABLE_COLUMNS["contigreads"],
+          this.getCountTypeValuesFromDataRow({
+            rowData,
+            field: "contig_r",
+            defaultValue: 0,
+            countTypes: countTypes,
+          }),
+        cellRenderer: this.renderCellValue,
+        columnData: REPORT_TABLE_COLUMNS["contigreads"],
         dataKey: "contig_r",
         label: "contig r",
         sortFunction: ({ data, sortDirection }) =>
@@ -265,7 +257,7 @@ class ReportTable extends React.Component {
             nullValue: 0,
             limits: NUMBER_NULL_VALUES,
           }),
-        width: 60,
+        width: 70,
       },
       {
         cellDataGetter: ({ rowData }) =>

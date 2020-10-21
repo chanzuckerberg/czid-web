@@ -565,6 +565,7 @@ class PipelineRun < ApplicationRecord
       return
     end
 
+    # TODO(omar): Get mapping for merged_NT_NR?
     nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
     nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
     header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
@@ -646,15 +647,18 @@ class PipelineRun < ApplicationRecord
     get_contig_hash = lambda do |header, sequence|
       read_count = contig_stats_json[header] || 0
       lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
-      species_taxid_nt = lineage_json.dig("NT", 0) || nil
-      species_taxid_nr = lineage_json.dig("NR", 0) || nil
-      genus_taxid_nt = lineage_json.dig("NT", 1) || nil
-      genus_taxid_nr = lineage_json.dig("NR", 1) || nil
+
+      species_taxid_nt = lineage_json.dig(TaxonCount::COUNT_TYPE_NT, 0) || nil
+      species_taxid_nr = lineage_json.dig(TaxonCount::COUNT_TYPE_NR, 0) || nil
+      species_taxid_merged_nt_nr = lineage_json.dig(TaxonCount::COUNT_TYPE_MERGED, 0) || nil
+      genus_taxid_nt = lineage_json.dig(TaxonCount::COUNT_TYPE_NT, 1) || nil
+      genus_taxid_nr = lineage_json.dig(TaxonCount::COUNT_TYPE_NR, 1) || nil
+      genus_taxid_merged_nt_nr = lineage_json.dig(TaxonCount::COUNT_TYPE_MERGED, 1) || nil
 
       {
         name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json,
-        species_taxid_nt: species_taxid_nt, species_taxid_nr: species_taxid_nr,
-        genus_taxid_nt: genus_taxid_nt, genus_taxid_nr: genus_taxid_nr,
+        species_taxid_nt: species_taxid_nt, species_taxid_nr: species_taxid_nr, species_taxid_merged_nt_nr: species_taxid_merged_nt_nr,
+        genus_taxid_nt: genus_taxid_nt, genus_taxid_nr: genus_taxid_nr, genus_taxid_merged_nt_nr: genus_taxid_merged_nt_nr,
       }
     end
 
@@ -1662,7 +1666,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_summary_contig_counts_v2(min_contig_reads)
-    # Stores the number of contigs that match a given taxid, count_type (nt or nr), and read_count (number of reads aligned to that contig).
+    # Stores the number of contigs that match a given taxid, count_type (nt, nr, or merged_nt_nr), and read_count (number of reads aligned to that contig).
     # Create and store default values for the hash if the key doesn't exist yet
     summary_dict = Hash.new do |summary, taxid|
       summary[taxid] = Hash.new do |taxid_hash, count_type| # rubocop forces different variable names
@@ -1673,14 +1677,17 @@ class PipelineRun < ApplicationRecord
     end
     contig_taxids = contigs.where("read_count >= ?", min_contig_reads)
                            .where.not(lineage_json: [nil, ""])
-                           .pluck(:read_count, :species_taxid_nt, :species_taxid_nr, :genus_taxid_nt, :genus_taxid_nr)
+                           .pluck(:read_count, :species_taxid_nt, :species_taxid_nr, :species_taxid_merged_nt_nr, :genus_taxid_nt, :genus_taxid_nr, :genus_taxid_merged_nt_nr)
     contig_taxids.each do |c|
-      read_count, species_taxid_nt, species_taxid_nr, genus_taxid_nt, genus_taxid_nr = c
+      read_count, species_taxid_nt, species_taxid_nr, species_taxid_merged_nt_nr, genus_taxid_nt, genus_taxid_nr, genus_taxid_merged_nt_nr = c
 
       summary_dict[species_taxid_nt]["nt"][read_count] += 1 if species_taxid_nt
       summary_dict[species_taxid_nr]["nr"][read_count] += 1 if species_taxid_nr
+      summary_dict[species_taxid_merged_nt_nr]["merged_nt_nr"][read_count] += 1 if species_taxid_merged_nt_nr
+
       summary_dict[genus_taxid_nt]["nt"][read_count] += 1 if genus_taxid_nt
       summary_dict[genus_taxid_nr]["nr"][read_count] += 1 if genus_taxid_nr
+      summary_dict[genus_taxid_merged_nt_nr]["merged_nt_nr"][read_count] += 1 if genus_taxid_merged_nt_nr
     end
     return summary_dict
   end

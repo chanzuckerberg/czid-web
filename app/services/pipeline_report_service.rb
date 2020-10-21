@@ -217,7 +217,6 @@ class PipelineReportService
       @timer.split("generate_downloadable_csv")
       return csv_output
     else
-      merge_taxon_count_structures(merged_taxon_counts_by_tax_level, counts_by_tax_level) if merged_taxon_counts_by_tax_level.present?
       metadata = metadata.merge(backgroundId: @background.id,
                                 truncatedReadsCount: @pipeline_run.truncated,
                                 adjustedRemainingReadsCount: @pipeline_run.adjusted_remaining_reads,
@@ -252,9 +251,6 @@ class PipelineReportService
       counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
     )
     @timer.split("cleanup_missing_genus_counts")
-
-    merge_contigs(contigs, counts_by_tax_level)
-    @timer.split("merge_contigs")
 
     counts_by_tax_level.each_value do |tax_level_taxa|
       compute_rpm(count_types: [:nt, :nr], taxa_counts: tax_level_taxa, total_reads: total_reads)
@@ -331,6 +327,12 @@ class PipelineReportService
       genus
     end
     @timer.split("sort_species_within_each_genus")
+
+    merge_taxon_count_structures(merged_count_types_by_tax_level, counts_by_tax_level) if merged_count_types_by_tax_level.present?
+    @timer.split("merge_taxon_count_structures")
+
+    merge_contigs(contigs, counts_by_tax_level)
+    @timer.split("merge_contigs")
 
     highlighted_tax_ids = find_species_to_highlight(sorted_genus_tax_ids, counts_by_tax_level)
     @timer.split("find_species_to_highlight")
