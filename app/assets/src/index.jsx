@@ -56,6 +56,9 @@ const react_component = (componentName, props, target, userContext) => {
       </Sentry.ErrorBoundary>,
       document.getElementById(target)
     );
+    if (userContext && userContext.userId) {
+      Sentry.setUser({ id: userContext.userId });
+    }
   } else {
     // eslint-disable-next-line no-console
     console.error(
