@@ -53,8 +53,8 @@ async def read_stdin(uri, _path, _importer):
 
 
 def insert_declarations(task_inputs, decls):
-    """ Replace the reference to a variable declared in the workflow (e.g. gsnap_filter_input)
-    with all the possible inputs. """
+    """Replace the reference to a variable declared in the workflow (e.g. gsnap_filter_input)
+    with all the possible inputs."""
     for decl, inputs in decls.items():
         for task in task_inputs.keys():
             if f"WorkflowInput.{decl}" in task_inputs[task]:
@@ -146,6 +146,10 @@ def parse_input_item(reference):
         return parse_get_expression(reference)
     elif isinstance(reference, WDL.Expr.Apply):
         return parse_apply_expression(reference)
+    elif isinstance(reference, WDL.Expr.Array):
+        return parse_array_expression(reference)
+
+    raise Exception(f"Unsupported reference: {reference}")
 
 
 def parse_get_expression(get_exp):
@@ -157,13 +161,16 @@ def parse_get_expression(get_exp):
 def parse_apply_expression(apply_exp):
     function_name = str(apply_exp.function_name)
     if function_name == SELECT_ALL:
-        items = []
-        array = apply_exp.arguments[0]
-        for item in array.children:
-            items.extend(parse_input_item(item))
-        return items
+        return parse_array_expression(apply_exp.arguments[0])
     elif function_name == DEFINED:
         return []
+
+
+def parse_array_expression(array_exp):
+    items = []
+    for item in array_exp.children:
+        items.extend(parse_input_item(item))
+    return items
 
 
 def get_file_basenames(task_inputs):
