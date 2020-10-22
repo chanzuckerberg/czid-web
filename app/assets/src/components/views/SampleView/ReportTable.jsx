@@ -324,10 +324,13 @@ class ReportTable extends React.Component {
   renderName = ({ cellData, rowData }) => {
     const { displayMergedNtNrValue, onTaxonNameClick } = this.props;
 
-    const childrenCount = displayMergedNtNrValue
-      ? filter(species => species["merged_nt_nr"], rowData.filteredSpecies)
-          .length
-      : rowData.filteredSpecies.length;
+    let childrenCount = 0;
+    if (rowData.taxLevel === "genus") {
+      childrenCount = displayMergedNtNrValue
+        ? filter(species => species["merged_nt_nr"], rowData.filteredSpecies)
+            .length
+        : rowData.filteredSpecies.length;
+    }
     return (
       rowData && (
         <div className={cs.taxonContainer}>
