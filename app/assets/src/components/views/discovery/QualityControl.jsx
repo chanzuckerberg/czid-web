@@ -74,13 +74,15 @@ class QualityControl extends React.Component {
       this.fetchProjectData();
     } else if (
       // Do not render histograms if loading or there are no samples to display
-      (!loading && validSamples.length > 0 && redrawNeeded) ||
-      validSamples !== prevState.validSamples ||
-      // Rerender the histograms if the sidepanels are toggled to scale their sizes appropriately
-      !(
-        filtersSidebarOpen === prevProps.filtersSidebarOpen &&
-        sampleStatsSidebarOpen === prevProps.sampleStatsSidebarOpen
-      )
+      !loading &&
+      validSamples.length > 0 &&
+      (validSamples !== prevState.validSamples ||
+        redrawNeeded ||
+        // Rerender the histograms if the sidepanels are toggled to scale their sizes appropriately
+        !(
+          filtersSidebarOpen === prevProps.filtersSidebarOpen &&
+          sampleStatsSidebarOpen === prevProps.sampleStatsSidebarOpen
+        ))
     ) {
       const {
         totalReadsBins,
@@ -1020,9 +1022,9 @@ class QualityControl extends React.Component {
       <React.Fragment>
         <ul className={cs.statusList}>
           <li className={cs.statusListItem}>
-            {samples.length}{" "}
-            {samples.length === 1 ? "sample has" : "samples have"} been uploaded
-            and selected by filters.
+            {validSamples.length}{" "}
+            {validSamples.length === 1 ? "sample has" : "samples have"} been
+            uploaded and selected by filters.
           </li>
           <li className={cs.statusListItem}>
             {runningSamples.length}{" "}
