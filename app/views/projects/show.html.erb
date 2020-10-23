@@ -33,8 +33,8 @@
         <th>Uploader</th>
         <th>Project</th>
         <th>Sample Status</th>
-        <th>Pipeline Run status</th>
-        <th>Job Submitted At</th>
+        <th>Pipeline/Workflow Run status</th>
+        <th>Job Submitted/Executed At</th>
         <th>&nbsp;</th>
       </tr>
     </thead>
@@ -53,9 +53,7 @@
           </td>
           <td>
             <% pipeline_run = sample.first_pipeline_run %>
-            <% pipeline_run_submitted = 'N/A' %>
             <% if pipeline_run %>
-              <% pipeline_run_submitted = pipeline_run.created_at %>
               <%= pipeline_run.job_status %>
               &nbsp;
               <% if pipeline_run.completed? %>
@@ -63,8 +61,19 @@
                 <%= button_to "rerun failed stage", retry_pipeline_sample_path(sample), method: :put, form: {target: '_blank'} %>
               <% end %>
             <% end %>
+
+            <%# TODO: Refactor to support multiple workflows %>
+            <% workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome]) %>
+            <% if workflow_run %>
+              <%= workflow_run.status %>
+              &nbsp;
+              <% completed_statuses = [WorkflowRun::STATUS[:succeeded], WorkflowRun::STATUS[:succeeded_with_issue], WorkflowRun::STATUS[:failed]] %>
+              <% if completed_statuses.include?(workflow_run.status) %>
+                <%= button_to 'rerun', rerun_workflow_run_path(workflow_run), method: :put, form: {target: '_blank'} %>
+              <% end %>
+            <% end %>
           </td>
-          <td class="small"><%= pipeline_run_submitted %></td>
+          <td class="small"><%= pipeline_run&.created_at || workflow_run&.executed_at || "N/A" %></td>
           <td><u><%= link_to 'Runs', pipeline_runs_sample_path(sample) %></u> &nbsp;
               <u><%= link_to 'Edit', edit_sample_path(sample) %></u></td>
         </tr>

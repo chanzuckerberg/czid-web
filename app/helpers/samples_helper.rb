@@ -164,6 +164,12 @@ module SamplesHelper
     if sample.status == Sample::STATUS_CREATED
       'uploading'
     elsif sample.status == Sample::STATUS_CHECKED
+      if sample.temp_pipeline_workflow != WorkflowRun::WORKFLOW[:short_read_mngs]
+        # TODO: Refactor to support multiple workflows
+        workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
+        return workflow_run&.status&.downcase
+      end
+
       pipeline_run = sample.first_pipeline_run
       return '' unless pipeline_run
       if pipeline_run.job_status == PipelineRun::STATUS_CHECKED

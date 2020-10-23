@@ -386,7 +386,10 @@
     }
   }
 }
-.complete {
+
+.complete,
+.succeeded,
+.succeeded_with_issue {
   color: $success-medium !important;
 }
 .failed {
