@@ -62,7 +62,11 @@ import { WORKFLOWS } from "~/components/utils/workflows";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 
-import { TREE_METRICS, MASS_NORMALIZED_PIPELINE_VERSION } from "./constants";
+import {
+  TABS,
+  TREE_METRICS,
+  MASS_NORMALIZED_PIPELINE_VERSION,
+} from "./constants";
 import ReportViewSelector from "./ReportViewSelector";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
@@ -95,13 +99,6 @@ const METRIC_DECIMAL_PLACES = {
   percent_identity: 1,
   alignment_length: 1,
   e_value: 1,
-};
-
-const TABS = {
-  CONSENSUS_GENOME: WORKFLOWS.CONSENSUS_GENOME.label,
-  SHORT_READ_MNGS: WORKFLOWS.SHORT_READ_MNGS.label,
-  AMR: "Antimicrobial Resistance",
-  MERGED_NT_NR: "Metagenomics - Simplified",
 };
 
 const PIPELINE_RUN_TABS = [TABS.SHORT_READ_MNGS, TABS.AMR, TABS.MERGED_NT_NR];
@@ -1401,6 +1398,7 @@ export default class SampleView extends React.Component {
                   ? null
                   : selectedOptions.background
               }
+              currentTab={currentTab}
               deletable={sample ? sample.deletable : false}
               editable={sample ? sample.editable : false}
               onDetailsClick={this.toggleSampleDetailsSidebar}

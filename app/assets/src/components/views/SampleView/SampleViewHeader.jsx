@@ -21,6 +21,7 @@ import cs from "./sample_view_header.scss";
 
 export default function SampleViewHeader({
   backgroundId,
+  currentTab,
   deletable,
   editable,
   onDetailsClick,
@@ -100,6 +101,7 @@ export default function SampleViewHeader({
         )}{" "}
         <SampleViewControls
           backgroundId={backgroundId}
+          currentTab={currentTab}
           deletable={deletable}
           reportPresent={reportPresent}
           sample={sample}
@@ -182,6 +184,7 @@ SampleViewHeader.defaultProps = {
 
 SampleViewHeader.propTypes = {
   backgroundId: PropTypes.number,
+  currentTab: PropTypes.string,
   deletable: PropTypes.bool,
   editable: PropTypes.bool.isRequired,
   onDetailsClick: PropTypes.func.isRequired,

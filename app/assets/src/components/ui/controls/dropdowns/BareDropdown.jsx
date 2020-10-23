@@ -52,6 +52,7 @@ class BareDropdown extends React.Component {
           onClick={() => this.props.onChange(option.value)}
           active={this.props.value === option.value}
           className={cs.item}
+          disabled={option.disabled || false}
         >
           {option.text}
         </BaseDropdown.Item>
@@ -331,6 +332,7 @@ BareDropdown.propTypes = forbidExtraProps({
     PropTypes.shape({
       value: PropTypes.any,
       text: PropTypes.node,
+      disabled: PropTypes.bool,
       // Custom node to render for the option.
       customNode: PropTypes.node,
     })

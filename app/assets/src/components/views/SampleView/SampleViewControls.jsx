@@ -3,8 +3,9 @@ import SvgSaver from "svgsaver";
 import Nanobar from "nanobar";
 import querystring from "querystring";
 
-import { deleteSample } from "~/api";
+import { deleteSample as deleteSampleAPI } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
+import { TABS } from "./constants";
 import PropTypes from "~/components/utils/propTypes";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -13,10 +14,19 @@ import {
   getLinkInfoForDownloadOption,
 } from "~/components/views/report/utils/download";
 
-class SampleViewControls extends React.Component {
-  downloadCSV = () => {
-    const { backgroundId, pipelineRun, sample, minContigReads } = this.props;
-
+const SampleViewControls = ({
+  backgroundId,
+  currentTab,
+  deletable,
+  editable,
+  minContigReads,
+  pipelineRun,
+  project,
+  reportPresent,
+  sample,
+  view,
+}) => {
+  const downloadCSV = () => {
     const resParams = {
       ...(backgroundId && { background_id: backgroundId }),
       ...(pipelineRun &&
@@ -30,14 +40,13 @@ class SampleViewControls extends React.Component {
     )}`;
   };
 
-  deleteSample = async () => {
-    const { sample, project } = this.props;
+  const deleteSample = async () => {
     let nanobar = new Nanobar({
       id: "prog-bar",
       class: "prog-bar",
     });
     nanobar.go(30);
-    await deleteSample(sample.id);
+    await deleteSampleAPI(sample.id);
     nanobar.go(100);
     location.href = `/home?project_id=${project.id}`;
     logAnalyticsEvent("SampleViewControls_delete-sample-button_clicked", {
@@ -46,7 +55,7 @@ class SampleViewControls extends React.Component {
     });
   };
 
-  handleDownload = option => {
+  const handleDownload = option => {
     const log = () =>
       logAnalyticsEvent(
         // make names like:
@@ -57,30 +66,30 @@ class SampleViewControls extends React.Component {
           .replace("-_", "_")
           .toLowerCase()}_clicked`,
         {
-          sampleId: this.props.sample.id,
-          sampleName: this.props.sample.name,
+          sampleId: sample.id,
+          sampleName: sample.name,
         }
       );
 
     if (option === "download_csv") {
-      this.downloadCSV();
+      downloadCSV();
       log();
       return;
     } else if (option === "taxon_svg") {
       // TODO (gdingle): filename per tree?
-      new SvgSaver().asSvg(this.getTaxonTreeNode(), "taxon_tree.svg");
+      new SvgSaver().asSvg(getTaxonTreeNode(), "taxon_tree.svg");
       log();
       return;
     } else if (option === "taxon_png") {
       // TODO (gdingle): filename per tree?
-      new SvgSaver().asPng(this.getTaxonTreeNode(), "taxon_tree.png");
+      new SvgSaver().asPng(getTaxonTreeNode(), "taxon_tree.png");
       log();
       return;
     }
     const linkInfo = getLinkInfoForDownloadOption(
       option,
-      this.props.sample.id,
-      this.props.pipelineRun
+      sample.id,
+      pipelineRun
     );
     if (linkInfo) {
       window.open(linkInfo.path, linkInfo.newPage ? "_blank" : "_self");
@@ -89,47 +98,48 @@ class SampleViewControls extends React.Component {
   };
 
   // TODO (gdingle): should we pass in a reference with React somehow?
-  getTaxonTreeNode() {
+  const getTaxonTreeNode = () => {
     return document.getElementsByClassName("taxon-tree-vis")[0];
-  }
+  };
 
-  getImageDownloadOptions() {
-    if (this.props.view === "tree") {
+  const getImageDownloadOptions = () => {
+    if (view === "tree") {
       return [
         { text: "Download Taxon Tree as SVG", value: "taxon_svg" },
         { text: "Download Taxon Tree as PNG", value: "taxon_png" },
       ];
     }
     return [];
+  };
+
+  const renderDownloadButtonDropdown = () => {
+    const downloadOptions = [
+      {
+        text: "Download Report Table (.csv)",
+        value: "download_csv",
+        disabled: currentTab === TABS.MERGED_NT_NR,
+      },
+      ...getDownloadDropdownOptions(pipelineRun),
+      ...getImageDownloadOptions(),
+    ];
+
+    return (
+      <DownloadButtonDropdown
+        options={downloadOptions}
+        onClick={handleDownload}
+        direction="left"
+      />
+    );
+  };
+
+  if (reportPresent && pipelineRun) {
+    return renderDownloadButtonDropdown();
+  } else if (editable && deletable) {
+    return <PrimaryButton onClick={deleteSample} text="Delete Sample" />;
+  } else {
+    return <div />;
   }
-
-  render() {
-    const { deletable, editable, pipelineRun, reportPresent } = this.props;
-
-    if (reportPresent && pipelineRun) {
-      const downloadOptions = [
-        {
-          text: "Download Report Table (.csv)",
-          value: "download_csv",
-        },
-        ...getDownloadDropdownOptions(pipelineRun),
-        ...this.getImageDownloadOptions(),
-      ];
-
-      return (
-        <DownloadButtonDropdown
-          options={downloadOptions}
-          onClick={this.handleDownload}
-          direction="left"
-        />
-      );
-    } else if (editable && deletable) {
-      return <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />;
-    } else {
-      return <div />;
-    }
-  }
-}
+};
 
 SampleViewControls.defaultProps = {
   deletable: false,
@@ -137,6 +147,7 @@ SampleViewControls.defaultProps = {
 
 SampleViewControls.propTypes = {
   backgroundId: PropTypes.number,
+  currentTab: PropTypes.string,
   deletable: PropTypes.bool,
   editable: PropTypes.bool,
   minContigReads: PropTypes.number,

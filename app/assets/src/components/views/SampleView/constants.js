@@ -1,3 +1,12 @@
+import { WORKFLOWS } from "~/components/utils/workflows";
+
+export const TABS = {
+  CONSENSUS_GENOME: WORKFLOWS.CONSENSUS_GENOME.label,
+  SHORT_READ_MNGS: WORKFLOWS.SHORT_READ_MNGS.label,
+  AMR: "Antimicrobial Resistance",
+  MERGED_NT_NR: "Metagenomics - Simplified",
+};
+
 export const THRESHOLDS = [
   { text: "Score", value: "agg_score" },
   { text: "NT Z Score", value: "nt:z_score" },
