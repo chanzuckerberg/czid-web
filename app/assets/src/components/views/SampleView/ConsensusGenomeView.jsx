@@ -462,7 +462,7 @@ class ConsensusGenomeView extends React.Component {
       });
       return (
         <SampleMessage
-          icon={<IconAlert type={type} />}
+          icon={<IconAlert className={cs.iconAlert} type={type} />}
           link={link}
           linkText={linkText}
           message={message}

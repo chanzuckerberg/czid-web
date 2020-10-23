@@ -47,6 +47,12 @@ $img-s: 80px;
 $img-m: 150px;
 $img-l: 200px;
 
+// Icons
+$icon-xs: 10px;
+$icon-s: 14px;
+$icon-l: 22px;
+$icon-xl: 32px;
+
 // Customized scroll bar
 @mixin scrollable {
   &::-webkit-scrollbar {
