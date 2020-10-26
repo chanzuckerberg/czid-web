@@ -55,7 +55,7 @@ class DataTable extends React.Component {
   }
 
   filterRow(row, filter) {
-    row.forEach(column => {
+    return Object.keys(row).some(column => {
       if (!column.startsWith("__")) {
         let value =
           row[column] !== undefined &&
@@ -66,7 +66,6 @@ class DataTable extends React.Component {
         }
       }
     });
-    return false;
   }
 
   static indexData(originalData) {
@@ -194,6 +193,7 @@ DataTable.propTypes = {
   className: PropTypes.string,
   columns: PropTypes.array,
   data: PropTypes.array,
+  filter: PropTypes.string,
   headers: PropTypes.object,
   onSelectedRowsChanged: PropTypes.func,
   selectedRows: PropTypes.oneOfType([

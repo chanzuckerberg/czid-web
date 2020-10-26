@@ -347,7 +347,7 @@ const getContigsSequencesByByteranges = (
 const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 
 const validatePhyloTreeName = name =>
-  get(`/phylo_trees/validate_name?name=${name}`);
+  get(`/phylo_trees/validate_name`, { params: { name } });
 
 const getSamplesLocations = ({
   domain,
