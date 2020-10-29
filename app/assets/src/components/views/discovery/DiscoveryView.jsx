@@ -579,6 +579,7 @@ class DiscoveryView extends React.Component {
   loadUserDataStats = async () => {
     const { domain } = this.props;
     const { projectId } = this.state;
+    let { workflow } = this.state;
 
     this.setState({
       userDataCounts: null,
@@ -598,13 +599,15 @@ class DiscoveryView extends React.Component {
       WORKFLOWS.SHORT_READ_MNGS.value,
       stats.sampleStats.countByWorkflow
     );
+    if (numOfMngsSamples === 0 && numOfCgSamples > 0) {
+      workflow = WORKFLOWS.CONSENSUS_GENOME.value;
+    } else if (numOfCgSamples === 0 && numOfMngsSamples > 0) {
+      workflow = WORKFLOWS.SHORT_READ_MNGS.value;
+    }
 
     this.setState(
       {
-        workflow:
-          numOfMngsSamples === 0 && numOfCgSamples > 0
-            ? WORKFLOWS.CONSENSUS_GENOME.value
-            : WORKFLOWS.SHORT_READ_MNGS.value,
+        workflow,
         userDataCounts: {
           sampleCountByWorkflow: stats.sampleStats.countByWorkflow,
           sampleCount: stats.sampleStats.count,
