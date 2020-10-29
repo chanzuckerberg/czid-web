@@ -200,6 +200,10 @@ describe WorkflowRun, type: :model do
       it "creates and returns new workflow run that references previous workflow" do
         expect(subject.rerun_from).to eq(workflow_run.id)
       end
+
+      it "creates and returns new workflow run with the same inputs JSON" do
+        expect(subject.inputs_json).to eq(workflow_run.inputs_json)
+      end
     end
   end
 

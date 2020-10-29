@@ -582,8 +582,8 @@ class Sample < ApplicationRecord
     end
   end
 
-  def create_and_dispatch_workflow_run(workflow, rerun_from: nil)
-    workflow_run = WorkflowRun.create(sample: self, workflow: workflow, rerun_from: rerun_from)
+  def create_and_dispatch_workflow_run(workflow, rerun_from: nil, inputs_json: nil)
+    workflow_run = WorkflowRun.create(sample: self, workflow: workflow, rerun_from: rerun_from, inputs_json: inputs_json)
     workflow_run.dispatch
     workflow_run
   end

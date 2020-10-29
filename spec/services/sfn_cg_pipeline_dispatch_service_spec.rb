@@ -161,6 +161,18 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
           )
         end
       end
+
+      context "when no wetlab protocol is supplied" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample)
+        end
+        it "throws an error" do
+          expect { subject }.to raise_error(SfnCGPipelineDispatchService::WetlabProtocolMissingError)
+        end
+      end
     end
   end
 end

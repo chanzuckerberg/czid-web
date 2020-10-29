@@ -106,7 +106,7 @@ class WorkflowRun < ApplicationRecord
     raise RerunDeprecatedWorkflowError if deprecated?
 
     update!(deprecated: true)
-    sample.create_and_dispatch_workflow_run(workflow, rerun_from: id)
+    sample.create_and_dispatch_workflow_run(workflow, rerun_from: id, inputs_json: inputs_json)
   end
 
   # Generic misc inputs from inputs_json database field

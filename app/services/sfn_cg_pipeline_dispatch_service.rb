@@ -17,6 +17,12 @@ class SfnCGPipelineDispatchService
     end
   end
 
+  class WetlabProtocolMissingError < StandardError
+    def initialize
+      super("Wetlab Protocol not found in inputs_json.")
+    end
+  end
+
   def initialize(workflow_run)
     @workflow_run = workflow_run
     @sample = workflow_run.sample
@@ -76,7 +82,7 @@ class SfnCGPipelineDispatchService
     when ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic]
       "artic_v3_primers.bed"
     else
-      "msspe_primers.bed"
+      raise WetlabProtocolMissingError
     end
   end
 
