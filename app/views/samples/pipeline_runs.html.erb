@@ -23,6 +23,12 @@
     <strong class="failed"><%= @sample.upload_error %></strong>
   </p>
 <% end %>
+<% if @sample.input_files.present? %>
+  <p>
+    <strong>Upload source:</strong>
+    <%= @sample.input_files&.[](0)&.source_type %>
+  </p>
+<% end %>
 
 <% pipeline_run = @sample.first_pipeline_run %>
 <% if pipeline_run && pipeline_run.completed? %>
@@ -64,7 +70,7 @@
               </td>
               <% if pipeline_run %>
                 <% if pipeline_run && pipeline_run.step_function? %>
-                  <td><u><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(pipeline_run.sfn_execution_arn), target: :_blank  %></u></td>
+                  <td><u><%= link_to pipeline_run.sfn_execution_arn, AwsUtil.get_sfn_execution_url(pipeline_run.sfn_execution_arn), target: :_blank  %></u></td>
                 <% else %>
                   <td><u><%= run_stage.job_id ? (link_to run_stage.job_id, run_stage.batch_job_status_url, target: :_blank) : nil %></u></td>
                   <td><u><%= link_to 'Logs', run_stage.log_url, target: :_blank  %></u></td>
@@ -121,11 +127,11 @@
     <tbody>
       <% @sample.workflow_runs.each do |workflow_run| %>
         <tr>
-          <td><%= workflow_run.id %></td>
+          <td><u><%= link_to workflow_run.id, workflow_run_path(workflow_run.id) %></u></td>
           <td><%= workflow_run.workflow %></td>
           <td><%= workflow_run.status %></td>
           <% if workflow_run.sfn_execution_arn %>
-            <td><%= link_to 'SFN Execution', AwsUtil.get_sfn_execution_url(workflow_run.sfn_execution_arn), target: :_blank  %></td>
+            <td><u><%= link_to workflow_run.sfn_execution_arn, AwsUtil.get_sfn_execution_url(workflow_run.sfn_execution_arn), target: :_blank  %></u></td>
           <% else %>
             <td>Missing SFN Execution ARN</td>
           <% end %>

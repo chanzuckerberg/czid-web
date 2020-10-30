@@ -164,7 +164,9 @@ Rails.application.routes.draw do
   resources :frontend_metrics, only: :create
 
   resources :host_genomes
+
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
+  get 'users/:id', to: 'users#edit'
 
   resources :benchmarks, only: [:index]
 
