@@ -8,6 +8,8 @@ FactoryBot.define do
       # Array of pipeline_runs entries to create.
       # The hash elements will be passed on to pipeline_run factory as keyword arguments.
       pipeline_runs_data { [] }
+      # Same, as above, but for workflow runs.
+      workflow_runs_data { [] }
     end
 
     sequence(:name) { |n| "Sample #{n}" }
@@ -53,6 +55,10 @@ FactoryBot.define do
 
       options.pipeline_runs_data.each do |pipeline_run_data|
         create(:pipeline_run, sample: sample, **pipeline_run_data)
+      end
+
+      options.workflow_runs_data.each do |workflow_runs_data|
+        create(:workflow_run, sample: sample, **workflow_runs_data)
       end
     end
   end

@@ -85,7 +85,7 @@ module BulkDownloadsHelper
   end
 
   # Will raise errors if any validation fails.
-  # Returns pipeline_run_ids for the samples in the bulk download.
+  # Returns viewable samples in the bulk download.
   def validate_bulk_download_create_params(create_params, user)
     sample_ids = create_params[:sample_ids]
 
@@ -119,7 +119,7 @@ module BulkDownloadsHelper
       end
     end
 
-    get_valid_pipeline_run_ids_for_samples(viewable_samples)
+    return viewable_samples
   end
 
   # Generate the metric values matrix.

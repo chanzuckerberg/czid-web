@@ -63,6 +63,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
           download_type: "unmapped_reads",
           sample_ids: [@sample_one, @sample_two],
           params: mock_field_params,
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -96,6 +97,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
           download_type: "unmapped_reads",
           sample_ids: [@sample_one, @sample_two],
           params: mock_field_params,
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -118,6 +120,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "sample_overview",
           sample_ids: [@sample_one],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -134,6 +137,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "sample_overview",
           sample_ids: [@sample_one],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -153,6 +157,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "sample_overview",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -174,6 +179,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "sample_overview",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -196,6 +202,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "sample_overview",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -214,6 +221,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "original_input_file",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -236,6 +244,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "sample_overview",
           sample_ids: [@sample_one],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -258,6 +267,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
           # This download type is admin-only.
           download_type: "host_gene_counts",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -277,6 +287,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
           # This download type is uploader-only.
           download_type: "original_input_file",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -295,6 +306,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "mock_download_type",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -317,6 +329,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
             # Intentionally pass a string, instead of a hash of the form { displayName: "FOO", value: "BAR" }
             taxa_with_reads: "abc",
           },
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -324,6 +337,25 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         json_response = JSON.parse(response.body)
         expect(json_response["error"]).to eq(BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE)
+      end
+
+      it "should be able to create a bulk download with workflow runs" do
+        @sample_one = create(:sample, project: @project, name: "Test Sample One",
+                                      workflow_runs_data: [{ status: WorkflowRun::STATUS[:succeeded] }])
+        @sample_two = create(:sample, project: @project, name: "Test Sample Two",
+                                      workflow_runs_data: [{ status: WorkflowRun::STATUS[:succeeded] }])
+
+        bulk_download_params = {
+          download_type: "consensus_genome",
+          sample_ids: [@sample_one, @sample_two],
+          params: mock_field_params,
+          workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+        }
+
+        post :create, params: bulk_download_params
+
+        expect(response).to have_http_status(422)
+        expect(JSON.parse(response.body)["error"]).to eq(BulkDownloadsHelper::UNKNOWN_DOWNLOAD_TYPE)
       end
     end
 
@@ -530,6 +562,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         bulk_download_params = {
           download_type: "sample_overview",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -560,6 +593,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
           # This download type is admin-only.
           download_type: "host_gene_counts",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params
@@ -582,6 +616,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
           # This download type is uploader-only.
           download_type: "original_input_file",
           sample_ids: [@sample_one, @sample_two],
+          workflow: WorkflowRun::WORKFLOW[:short_read_mngs],
         }
 
         post :create, params: bulk_download_params

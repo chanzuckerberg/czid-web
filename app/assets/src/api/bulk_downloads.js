@@ -6,6 +6,7 @@ export const createBulkDownload = bulkDownload =>
   postWithCSRF("/bulk_downloads", {
     download_type: bulkDownload.downloadType,
     sample_ids: bulkDownload.sampleIds,
+    workflow: bulkDownload.workflow,
     params: bulkDownload.fields,
   });
 

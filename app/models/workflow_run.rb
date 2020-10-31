@@ -124,6 +124,10 @@ class WorkflowRun < ApplicationRecord
     where(sample: Sample.viewable(user))
   end
 
+  def self.active
+    where(status: WorkflowRun::STATUS[:succeeded], deprecated: false)
+  end
+
   def self.handle_sample_upload_failure(samples)
     # If the Sample Upload fails, assume that all runs in CREATED should be failed.
     WorkflowRun.where(sample: samples, status: WorkflowRun::STATUS[:created]).update_all(status: WorkflowRun::STATUS[:failed]) # rubocop:disable Rails/SkipsModelValidations

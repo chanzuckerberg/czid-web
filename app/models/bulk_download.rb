@@ -7,6 +7,7 @@ class BulkDownload < ApplicationRecord
   include BulkDownloadTypesHelper
   include Rails.application.routes.url_helpers
   has_and_belongs_to_many :pipeline_runs
+  has_and_belongs_to_many :workflow_runs
   belongs_to :user
   has_secure_token :access_token
 

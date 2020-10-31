@@ -433,7 +433,12 @@ class SamplesView extends React.Component {
   };
 
   render() {
-    const { currentDisplay, selectedSampleIds, snapshotShareId } = this.props;
+    const {
+      currentDisplay,
+      selectedSampleIds,
+      snapshotShareId,
+      workflow,
+    } = this.props;
     const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
     return (
       <div className={cs.container}>
@@ -461,6 +466,7 @@ class SamplesView extends React.Component {
               "SamplesView_bulk-download-modal_closed"
             )}
             selectedSampleIds={selectedSampleIds}
+            workflow={workflow}
             onGenerate={this.handleBulkDownloadGenerate}
           />
         )}

@@ -26,7 +26,8 @@ const assembleSelectedDownload = memoize(
     selectedDownloadTypeName,
     allSelectedFields,
     allSelectedFieldsDisplay,
-    sampleIds
+    sampleIds,
+    workflow
   ) => {
     const fieldValues = get(selectedDownloadTypeName, allSelectedFields);
     const fieldDisplayNames = get(
@@ -49,6 +50,7 @@ const assembleSelectedDownload = memoize(
       downloadType: selectedDownloadTypeName,
       fields,
       sampleIds: Array.from(sampleIds),
+      workflow,
     };
   }
 );
@@ -215,6 +217,7 @@ class BulkDownloadModal extends React.Component {
   // *** Callbacks ***
 
   handleDownloadRequest = () => {
+    const { workflow } = this.props;
     const {
       selectedDownloadTypeName,
       selectedFields,
@@ -226,7 +229,8 @@ class BulkDownloadModal extends React.Component {
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
-      validSampleIds
+      validSampleIds,
+      workflow
     );
 
     this.createBulkDownload(selectedDownload);
@@ -379,6 +383,7 @@ BulkDownloadModal.propTypes = {
   selectedSampleIds: PropTypes.instanceOf(Set),
   // called when a bulk download has successfully been kicked off
   onGenerate: PropTypes.func.isRequired,
+  workflow: PropTypes.string.isRequired,
 };
 
 export default BulkDownloadModal;

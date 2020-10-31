@@ -32,14 +32,26 @@ class BulkDownloadsController < ApplicationController
   def create
     create_params = bulk_download_create_params
 
-    # Convert sample ids to pipeline run ids.
+    unless create_params.key?(:workflow)
+      create_params[:workflow] = WorkflowRun::WORKFLOW[:short_read_mngs]
+    end
+    pipeline_run_ids = []
+    workflow_run_ids = []
+
+    # Convert sample ids to pipeline run ids or workflow run ids.
     begin
-      pipeline_run_ids = validate_bulk_download_create_params(create_params, current_user)
+      viewable_samples = validate_bulk_download_create_params(create_params, current_user)
+      if create_params[:workflow] == WorkflowRun::WORKFLOW[:short_read_mngs]
+        pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(viewable_samples)
+      else
+        relevant_workflow_runs = WorkflowRun.where(sample_id: viewable_samples.pluck(:id), workflow: workflow).active
+        # get the most recent workflow run for each samples
+        workflow_run_ids = relevant_workflow_runs.pluck(:id)
+      end
     rescue StandardError => e
-      # Throw an error if any sample doesn't have a valid pipeline run.
+      # Throw an error if any sample doesn't have a valid pipeline or workflow run.
       # The user should never see this error, because the validation step should catch any issues.
-      LogUtil.log_backtrace(e)
-      LogUtil.log_err("BulkDownloadsFailedEvent: Unexpected issue creating bulk download: #{e}")
+      LogUtil.log_error("BulkDownloadsFailedEvent: Unexpected issue creating bulk download: #{e}", exception: e)
       render json: { error: e }, status: :unprocessable_entity
       return
     end
@@ -51,6 +63,7 @@ class BulkDownloadsController < ApplicationController
     # Create and save the bulk download.
     bulk_download = BulkDownload.new(download_type: create_params[:download_type],
                                      pipeline_run_ids: pipeline_run_ids,
+                                     workflow_run_ids: workflow_run_ids,
                                      params: params,
                                      status: BulkDownload::STATUS_WAITING,
                                      user_id: current_user.id)
@@ -62,8 +75,7 @@ class BulkDownloadsController < ApplicationController
       rescue StandardError => e
         # If the kickoff failed, set to error.
         bulk_download.update(status: BulkDownload::STATUS_ERROR)
-        LogUtil.log_backtrace(e)
-        LogUtil.log_err("BulkDownloadsKickoffError: Unexpected issue kicking off bulk download: #{e}")
+        LogUtil.log_error("BulkDownloadsKickoffError: Unexpected issue kicking off bulk download: #{e}", exception: e)
         render json: {
           error: BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE,
           bulk_download: bulk_download,
@@ -175,6 +187,6 @@ class BulkDownloadsController < ApplicationController
   end
 
   def bulk_download_create_params
-    params.permit(:download_type, sample_ids: [], params: {})
+    params.permit(:download_type, :workflow, sample_ids: [], params: {})
   end
 end
