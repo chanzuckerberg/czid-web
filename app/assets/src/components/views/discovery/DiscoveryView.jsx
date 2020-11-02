@@ -32,7 +32,10 @@ import { get } from "~/api/core";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import { CONSENSUS_GENOME_FEATURE } from "~/components/utils/features";
+import {
+  CONSENSUS_GENOME_FEATURE,
+  CG_BULK_DOWNLOADS_FEATURE,
+} from "~/components/utils/features";
 import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
@@ -140,7 +143,10 @@ class DiscoveryView extends React.Component {
         sampleDimensions: [],
         search: null,
         selectableSampleIds: [],
-        selectedSampleIds: new Set(),
+        selectedSampleIds: {
+          [WORKFLOWS.SHORT_READ_MNGS.value]: new Set(),
+          [WORKFLOWS.CONSENSUS_GENOME.value]: new Set(),
+        },
         showFilters: true,
         showStats: true,
         userDataCounts: null,
@@ -1116,7 +1122,13 @@ class DiscoveryView extends React.Component {
   };
 
   handleSelectedSamplesUpdate = selectedSampleIds => {
-    this.setState({ selectedSampleIds });
+    const { workflow } = this.state;
+    this.setState(prevState => ({
+      selectedSampleIds: {
+        ...prevState.selectedSampleIds,
+        [workflow]: selectedSampleIds,
+      },
+    }));
   };
 
   handleMapSidebarTabChange = mapSidebarTab => {
@@ -1485,14 +1497,15 @@ class DiscoveryView extends React.Component {
                   ref={samplesView => (this.samplesView = samplesView)}
                   samples={samples}
                   selectableIds={selectableSampleIds}
-                  selectedSampleIds={selectedSampleIds}
+                  selectedSampleIds={selectedSampleIds[workflow]}
                   filtersSidebarOpen={showFilters}
                   sampleStatsSidebarOpen={showStats}
                   hideTriggers={
                     !!snapshotShareId ||
                     (workflow &&
                       this.samplesByWorkflow[workflow].displayName ===
-                        WORKFLOWS.CONSENSUS_GENOME.value)
+                        WORKFLOWS.CONSENSUS_GENOME.value &&
+                      !allowedFeatures.includes(CG_BULK_DOWNLOADS_FEATURE))
                   }
                   workflow={workflow}
                 />
@@ -1547,6 +1560,7 @@ class DiscoveryView extends React.Component {
       search,
       showStats,
       userDataCounts,
+      workflow,
     } = this.state;
     const { snapshotShareId, snapshotProjectDescription } = this.props;
     const filterCount = this.getFilterCount();
@@ -1603,7 +1617,7 @@ class DiscoveryView extends React.Component {
                       count: mapSidebarSampleCount,
                     }
               }
-              selectedSampleIds={selectedSampleIds}
+              selectedSampleIds={selectedSampleIds[workflow]}
             />
           ) : (
             <DiscoverySidebar

@@ -34,6 +34,23 @@ import {
 import cs from "./samples_view.scss";
 import ToolbarIcon from "./ToolbarIcon";
 
+const TRIGGERS = {
+  backgroundModel: "backgroundModel",
+  heatmap: "heatmap",
+  phylogeneticTree: "phylogeneticTree",
+  download: "download",
+};
+
+const WORKFLOW_TRIGGERS = {
+  [WORKFLOWS.CONSENSUS_GENOME.value]: [TRIGGERS.download],
+  [WORKFLOWS.SHORT_READ_MNGS.value]: [
+    TRIGGERS.backgroundModel,
+    TRIGGERS.heatmap,
+    TRIGGERS.phylogeneticTree,
+    TRIGGERS.download,
+  ],
+};
+
 class SamplesView extends React.Component {
   constructor(props) {
     super(props);
@@ -223,7 +240,19 @@ class SamplesView extends React.Component {
   };
 
   renderTriggers = () => {
-    const { selectedSampleIds } = this.props;
+    const { selectedSampleIds, workflow } = this.props;
+
+    const triggers = {
+      [TRIGGERS.backgroundModel]: this.renderCollectionTrigger,
+      [TRIGGERS.heatmap]: this.renderHeatmapTrigger,
+      [TRIGGERS.phylogeneticTree]: this.renderPhyloTreeTrigger,
+      [TRIGGERS.download]: this.renderBulkDownloadTrigger,
+    };
+
+    const triggersToRender = WORKFLOW_TRIGGERS[workflow].map(trigger => (
+      <React.Fragment>{triggers[trigger]()}</React.Fragment>
+    ));
+
     return (
       <React.Fragment>
         <div className={cs.counterContainer}>
@@ -239,12 +268,7 @@ class SamplesView extends React.Component {
           <span className={cs.label}>Selected</span>
         </div>
         <div className={cs.separator} />
-        <div className={cs.actions}>
-          {this.renderCollectionTrigger()}
-          {this.renderHeatmapTrigger()}
-          {this.renderPhyloTreeTrigger()}
-          {this.renderBulkDownloadTrigger()}
-        </div>
+        <div className={cs.actions}>{triggersToRender}</div>
       </React.Fragment>
     );
   };
