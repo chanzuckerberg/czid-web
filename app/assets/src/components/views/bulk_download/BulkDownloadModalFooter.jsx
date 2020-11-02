@@ -7,7 +7,6 @@ import { UserContext } from "~/components/common/UserContext";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { CONSENSUS_GENOME_FEATURE } from "~/components/utils/features";
 import { withAnalytics } from "~/api/analytics";
 
 import { CONDITIONAL_FIELDS } from "./constants.js";
@@ -88,7 +87,6 @@ export default class BulkDownloadModalFooter extends React.Component {
   };
 
   renderInvalidSamplesWarning() {
-    const { allowedFeatures = {} } = this.context || {};
     const { invalidSampleNames } = this.props;
 
     const header = (
@@ -98,11 +96,7 @@ export default class BulkDownloadModalFooter extends React.Component {
           {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
           bulk download
         </span>
-        , because they{" "}
-        {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE)
-          ? "are either failed, still processing, or not available for Consensus Genomes"
-          : "either failed or are still processing"}
-        :
+        , because they either failed or are still processing:
       </div>
     );
 

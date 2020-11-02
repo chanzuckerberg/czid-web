@@ -31,7 +31,6 @@ class BulkDownloadsController < ApplicationController
   # POST /bulk_downloads
   def create
     create_params = bulk_download_create_params
-
     unless create_params.key?(:workflow)
       create_params[:workflow] = WorkflowRun::WORKFLOW[:short_read_mngs]
     end
@@ -44,7 +43,7 @@ class BulkDownloadsController < ApplicationController
       if create_params[:workflow] == WorkflowRun::WORKFLOW[:short_read_mngs]
         pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(viewable_samples)
       else
-        relevant_workflow_runs = WorkflowRun.where(sample_id: viewable_samples.pluck(:id), workflow: workflow).active
+        relevant_workflow_runs = WorkflowRun.where(sample_id: viewable_samples.pluck(:id), workflow: create_params[:workflow]).active
         # get the most recent workflow run for each samples
         workflow_run_ids = relevant_workflow_runs.pluck(:id)
       end

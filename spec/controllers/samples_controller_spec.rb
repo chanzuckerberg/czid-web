@@ -480,6 +480,18 @@ RSpec.describe SamplesController, type: :controller do
         create(:sample, project: @admin_project, name: "Admin Sample", pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
       end
 
+      let(:good_workflow_sample) do
+        create(:sample, project: @project, name: "Workflow Sample One", workflow_runs_data: [{ status: WorkflowRun::STATUS[:succeeded] }])
+      end
+
+      let(:in_progress_workflow_sample) do
+        create(:sample, project: @project, name: "In Progress Workflow Sample", workflow_runs_data: [{ status: WorkflowRun::STATUS[:running] }])
+      end
+
+      let(:failed_workflow_sample) do
+        create(:sample, project: @project, name: "In Progress Workflow Sample", workflow_runs_data: [{ status: WorkflowRun::STATUS[:failed] }])
+      end
+
       it "should validate successful samples owned by user" do
         validate_params = {
           sampleIds: [good_sample_one, good_sample_two],
@@ -493,6 +505,23 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response).not_to eq(nil)
         expect(json_response["validSampleIds"]).to include(good_sample_one.id)
         expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["invalidSampleNames"]).to be_empty
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should also validate successful samples that use workflow runs and are owned by user" do
+        validate_params = {
+          sampleIds: [good_workflow_sample],
+          workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_workflow_sample.id)
         expect(json_response["invalidSampleNames"]).to be_empty
         expect(json_response["error"]).to be_nil
       end
@@ -514,6 +543,23 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response["error"]).to be_nil
       end
 
+      it "should also filter out workflow-based samples in progress" do
+        validate_params = {
+          sampleIds: [good_workflow_sample, in_progress_workflow_sample],
+          workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_workflow_sample.id)
+        expect(json_response["invalidSampleNames"]).to include(in_progress_workflow_sample.name)
+        expect(json_response["error"]).to be_nil
+      end
+
       it "should filter out failed samples" do
         validate_params = {
           sampleIds: [good_sample_one, good_sample_two, failed_sample],
@@ -528,6 +574,23 @@ RSpec.describe SamplesController, type: :controller do
         expect(json_response["validSampleIds"]).to include(good_sample_one.id)
         expect(json_response["validSampleIds"]).to include(good_sample_two.id)
         expect(json_response["invalidSampleNames"]).to include(failed_sample.name)
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should filter out failed workflow-based samples" do
+        validate_params = {
+          sampleIds: [good_workflow_sample, failed_workflow_sample],
+          workflow: WorkflowRun::WORKFLOW[:consensus_genome],
+        }
+
+        post :validate_sample_ids, params: validate_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response).not_to eq(nil)
+        expect(json_response["validSampleIds"]).to include(good_workflow_sample.id)
+        expect(json_response["invalidSampleNames"]).to include(failed_workflow_sample.name)
         expect(json_response["error"]).to be_nil
       end
     end

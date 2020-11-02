@@ -224,7 +224,7 @@ class SamplesController < ApplicationController
   #
   # Validate access to sample ids, and that the samples
   # have completed and succeeded processing.
-  # Filters out samples with a pipeline run still in progress,
+  # Filters out samples with a pipeline or workflow run still in progress,
   # with a failed latest run, and those the user does not have read
   # access to.
   #
@@ -236,13 +236,21 @@ class SamplesController < ApplicationController
   # trouble with projects with a large number of samples.
   def validate_sample_ids
     queried_sample_ids = params[:sampleIds]
+    workflow = WorkflowRun::WORKFLOW[:short_read_mngs]
+    if params.key?(:workflow)
+      workflow = params[:workflow]
+    end
 
     # We want to return valid sample ids, but for invalid samples we need their names to display
     # to the user. No information is returned on samples they don't have access to.
     validated_sample_info = SampleAccessValidationService.call(queried_sample_ids, current_user)
     viewable_samples = validated_sample_info[:viewable_samples]
     if validated_sample_info[:error].nil?
-      valid_sample_ids = get_succeeded_pipeline_runs_for_samples(viewable_samples, false, [:sample_id]).map(&:sample_id)
+      valid_sample_ids = if workflow == WorkflowRun::WORKFLOW[:short_read_mngs]
+                           get_succeeded_pipeline_runs_for_samples(viewable_samples, false, [:sample_id]).pluck(:sample_id)
+                         else
+                           WorkflowRun.where(sample_id: viewable_samples.pluck(:id), workflow: workflow).active.pluck(:sample_id)
+                         end
 
       invalid_samples = viewable_samples.reject { |sample| valid_sample_ids.include?(sample.id) }
       invalid_sample_names = invalid_samples.map(&:name)

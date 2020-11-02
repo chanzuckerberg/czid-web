@@ -96,11 +96,12 @@ class BulkDownloadModal extends React.Component {
   // *** Async requests ***
 
   async fetchSampleOptionsAndValidateSelectedSamples() {
-    const { selectedSampleIds } = this.props;
+    const { selectedSampleIds, workflow } = this.props;
 
     const bulkDownloadTypesRequest = this.fetchDownloadTypes();
     const sampleValidationInfoRequest = this.fetchValidationInfo(
-      Array.from(selectedSampleIds)
+      Array.from(selectedSampleIds),
+      workflow
     );
     const backgroundOptionsRequest = this.fetchBackgrounds();
     const metricsOptionsRequest = this.fetchHeatmapMetrics();
@@ -167,8 +168,11 @@ class BulkDownloadModal extends React.Component {
     return bulkDownloadTypes;
   }
 
-  async fetchValidationInfo(selectedSampleIds) {
-    const sampleValidationInfo = await validateSampleIds(selectedSampleIds);
+  async fetchValidationInfo(selectedSampleIds, workflow) {
+    const sampleValidationInfo = await validateSampleIds(
+      selectedSampleIds,
+      workflow
+    );
 
     return sampleValidationInfo;
   }
