@@ -103,3 +103,31 @@ export const REPORT_TABLE_COLUMNS = {
       "Unavailable for prototype. Value would be available when released",
   },
 };
+
+export const TAXON_GENERAL_FIELDS = [
+  "taxId",
+  "taxLevel",
+  "genus_tax_id",
+  "name",
+  "common_name",
+  "category",
+  "is_phage",
+  "species_tax_ids",
+  "agg_score",
+  "max_z_score",
+];
+
+export const TAXON_COUNT_TYPE_METRICS = [
+  "z_score",
+  "rpm",
+  "count",
+  "contigs",
+  "contig_r",
+  "percent_identity",
+  "alignment_length",
+  "e_value",
+  "bg_mean",
+  "bg_stdev",
+  "bg_mean_mass_normalized",
+  "bg_stdev_mass_normalized",
+];

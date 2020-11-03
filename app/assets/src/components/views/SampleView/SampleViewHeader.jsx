@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
-import cx from "classnames";
-import { get, filter, head, map } from "lodash/fp";
+import { get } from "lodash/fp";
 
 import BasicPopup from "~/components/BasicPopup";
 import PropTypes from "~/components/utils/propTypes";
@@ -15,7 +14,6 @@ import { saveVisualization } from "~/api";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 
 import SampleViewControls from "./SampleViewControls";
-import PipelineVersionSelect from "./PipelineVersionSelect";
 import WorkflowVersionHeader from "./WorkflowVersionHeader";
 import cs from "./sample_view_header.scss";
 
@@ -24,6 +22,8 @@ export default function SampleViewHeader({
   currentTab,
   deletable,
   editable,
+  getDownloadReportTableWithAppliedFiltersLink,
+  hasAppliedFilters,
   onDetailsClick,
   onPipelineVersionChange,
   currentRun,
@@ -103,11 +103,15 @@ export default function SampleViewHeader({
           backgroundId={backgroundId}
           currentTab={currentTab}
           deletable={deletable}
+          editable={editable}
+          getDownloadReportTableWithAppliedFiltersLink={
+            getDownloadReportTableWithAppliedFiltersLink
+          }
+          hasAppliedFilters={hasAppliedFilters}
+          pipelineRun={currentRun}
+          project={project}
           reportPresent={reportPresent}
           sample={sample}
-          project={project}
-          pipelineRun={currentRun}
-          editable={editable}
           view={view}
         />
       </ViewHeader.Controls>
@@ -187,6 +191,8 @@ SampleViewHeader.propTypes = {
   currentTab: PropTypes.string,
   deletable: PropTypes.bool,
   editable: PropTypes.bool.isRequired,
+  getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
+  hasAppliedFilters: PropTypes.bool.isRequired,
   onDetailsClick: PropTypes.func.isRequired,
   onPipelineVersionChange: PropTypes.func.isRequired,
   pipelineRun: PropTypes.PipelineRun,

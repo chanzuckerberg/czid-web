@@ -6,6 +6,7 @@ import querystring from "querystring";
 import { deleteSample as deleteSampleAPI } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { TABS } from "./constants";
+import { logError } from "~/components/utils/logUtil";
 import PropTypes from "~/components/utils/propTypes";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -19,6 +20,8 @@ const SampleViewControls = ({
   currentTab,
   deletable,
   editable,
+  getDownloadReportTableWithAppliedFiltersLink,
+  hasAppliedFilters,
   minContigReads,
   pipelineRun,
   project,
@@ -71,21 +74,30 @@ const SampleViewControls = ({
         }
       );
 
-    if (option === "download_csv") {
-      downloadCSV();
-      log();
-      return;
-    } else if (option === "taxon_svg") {
-      // TODO (gdingle): filename per tree?
-      new SvgSaver().asSvg(getTaxonTreeNode(), "taxon_tree.svg");
-      log();
-      return;
-    } else if (option === "taxon_png") {
-      // TODO (gdingle): filename per tree?
-      new SvgSaver().asPng(getTaxonTreeNode(), "taxon_tree.png");
-      log();
-      return;
+    switch (option) {
+      case "download_csv":
+        downloadCSV();
+        break;
+      case "download_csv_with_filters":
+        // getDownloadReportTableWithAppliedFiltersLink() generates an anchor tag that returns a link to download the CSV.
+        // Instead of programmatically clicking the anchor tag when it is clicked, it is passed directly into the DownloadButtonDropdown and downloaded upon click.
+        // See: renderDownloadButtonDropdown()
+        break;
+      case "taxon_svg":
+        new SvgSaver().asSvg(getTaxonTreeNode(), "taxon_tree.svg");
+        break;
+      case "taxon_png":
+        new SvgSaver().asPng(getTaxonTreeNode(), "taxon_tree.png");
+        break;
+      default:
+        logError({
+          message:
+            "SampleViewControls: Invalid option passed to handleDownload",
+          details: { option },
+        });
     }
+
+    log();
     const linkInfo = getLinkInfoForDownloadOption(
       option,
       sample.id,
@@ -119,6 +131,11 @@ const SampleViewControls = ({
         value: "download_csv",
         disabled: currentTab === TABS.MERGED_NT_NR,
       },
+      {
+        text: getDownloadReportTableWithAppliedFiltersLink(),
+        value: "download_csv_with_filters",
+        disabled: !hasAppliedFilters,
+      },
       ...getDownloadDropdownOptions(pipelineRun),
       ...getImageDownloadOptions(),
     ];
@@ -150,6 +167,8 @@ SampleViewControls.propTypes = {
   currentTab: PropTypes.string,
   deletable: PropTypes.bool,
   editable: PropTypes.bool,
+  getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
+  hasAppliedFilters: PropTypes.bool,
   minContigReads: PropTypes.number,
   reportPresent: PropTypes.bool,
   sample: PropTypes.Sample,

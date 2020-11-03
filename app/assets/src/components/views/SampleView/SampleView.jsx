@@ -5,6 +5,8 @@ import {
   find,
   flatten,
   get,
+  getOr,
+  has,
   head,
   isEmpty,
   keys,
@@ -47,6 +49,9 @@ import {
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
 import { IconAlert, LoadingIcon } from "~ui/icons";
 import { showToast } from "~/components/utils/toast";
+import { sanitizeCSVRow, createCSVObjectURL } from "~/components/utils/csv";
+import { diff } from "~/components/utils/objectUtil";
+import { logError } from "~/components/utils/logUtil";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import StatusLabel from "~ui/labels/StatusLabel";
@@ -63,6 +68,8 @@ import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeVi
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 
 import {
+  TAXON_COUNT_TYPE_METRICS,
+  TAXON_GENERAL_FIELDS,
   TABS,
   TREE_METRICS,
   MASS_NORMALIZED_PIPELINE_VERSION,
@@ -131,7 +138,6 @@ export default class SampleView extends React.Component {
         coverageVizVisible: false,
         currentTab: TABS.SHORT_READ_MNGS,
         filteredReportData: [],
-        selectedInvalidBackground: false,
         loadingReport: false,
         pipelineRun: null,
         pipelineVersion: null,
@@ -141,15 +147,16 @@ export default class SampleView extends React.Component {
         reportData: [],
         reportMetadata: {},
         sample: null,
-        sidebarMode: null,
-        sidebarVisible: false,
-        sidebarTaxonData: null,
-        view: "table",
+        selectedInvalidBackground: false,
         selectedOptions: Object.assign(
           this.defaultSelectedOptions(),
           selectedOptionsFromLocal,
           selectedOptionsFromUrl
         ),
+        sidebarMode: null,
+        sidebarVisible: false,
+        sidebarTaxonData: null,
+        view: "table",
       },
       nonNestedLocalState,
       nonNestedUrlState
@@ -191,7 +198,7 @@ export default class SampleView extends React.Component {
   defaultSelectedOptions = () => {
     return {
       background: {},
-      categories: {},
+      categories: { categories: [], subcategories: { Viruses: [] } },
       metric: TREE_METRICS[0].value,
       nameType: "Scientific name",
       readSpecificity: 0,
@@ -203,7 +210,7 @@ export default class SampleView extends React.Component {
     this.setState({ loadingReport: true });
 
     const { snapshotShareId, sampleId } = this.props;
-    const { pipelineVersion, backgrounds, selectedOptions } = this.state;
+    const { backgrounds, pipelineVersion, selectedOptions } = this.state;
     let { currentTab } = this.state;
     const sample = await getSample({ snapshotShareId, sampleId });
 
@@ -1266,17 +1273,197 @@ export default class SampleView extends React.Component {
     );
   };
 
+  hasAppliedFilters = () => {
+    const { selectedOptions } = this.state;
+    const [categories, subcategories] = Object.values(
+      get("categories", selectedOptions)
+    );
+
+    const hasSelectedCategoryFilters =
+      !!categories &&
+      !!subcategories &&
+      (!isEmpty(categories) || !isEmpty(flatten(Object.values(subcategories))));
+    const hasSelectedThresholdFilters = !isEmpty(
+      get("thresholds", selectedOptions)
+    );
+    const hasSelectedReadSpecificityFilter =
+      get("readSpecificity", selectedOptions) === 1;
+
+    return (
+      hasSelectedThresholdFilters ||
+      hasSelectedReadSpecificityFilter ||
+      hasSelectedCategoryFilters
+    );
+  };
+
+  createCSVRowForSelectedOptions = () => {
+    const { backgrounds, selectedOptions } = this.state;
+
+    const filterRow = [];
+    let numberOfFilters = 0;
+
+    const diffOptions = omit(
+      ["nameType", "metric"],
+      diff(selectedOptions, this.defaultSelectedOptions())
+    );
+
+    for (const [optionName, optionVal] of Object.entries(diffOptions)) {
+      if (!optionVal) continue;
+      switch (optionName) {
+        case "background": {
+          const background = backgrounds.find(
+            background => optionVal === background.id
+          ).name;
+          filterRow.push(`Background:, "${background}"`);
+          break;
+        }
+        case "categories": {
+          const categoryFilters = [];
+
+          if (has("categories", optionVal)) {
+            const categories = get("categories", optionVal);
+            categoryFilters.push(categories);
+            numberOfFilters += categories.length;
+          }
+
+          if (has("subcategories", optionVal)) {
+            const subcategories = [];
+            for (const [subcategoryName, subcategoryVal] of Object.entries(
+              get("subcategories", optionVal)
+            )) {
+              if (!isEmpty(subcategoryVal)) {
+                subcategories.push(
+                  `${subcategoryName} - ${subcategoryVal.join()}`
+                );
+              }
+            }
+            categoryFilters.push(subcategories);
+            numberOfFilters += subcategories.length;
+          }
+
+          const flattenedCategoryFilters = flatten(categoryFilters).join();
+          if (!isEmpty(flattenedCategoryFilters)) {
+            // Explicitly add commas to create blank cells for formatting purposes
+            filterRow.push(`Categories:, ${flattenedCategoryFilters}`);
+          }
+
+          break;
+        }
+        case "taxon": {
+          filterRow.push(`Taxon Name:, ${get("name", optionVal)}`);
+          numberOfFilters += 1;
+          break;
+        }
+        case "thresholds": {
+          const thresholdFilters = optionVal.reduce((result, threshold) => {
+            result.push(
+              `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`
+            );
+            return result;
+          }, []);
+
+          if (!isEmpty(thresholdFilters)) {
+            filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
+            numberOfFilters += thresholdFilters.length;
+          }
+          break;
+        }
+        case "readSpecificity": {
+          const readSpecificityOptions = {
+            0: "All",
+            1: "Specific Only",
+          };
+
+          filterRow.push(
+            `Read Specificity:, "${readSpecificityOptions[optionVal]}"`
+          );
+          numberOfFilters += 1;
+          break;
+        }
+        default:
+          logError({
+            msg:
+              "SampleView: Invalid filter passed to createCSVRowForSelectedOptions()",
+            details: { optionName, optionVal },
+          });
+      }
+    }
+
+    filterRow.unshift(`\n${numberOfFilters} Filters Applied:`);
+    return [sanitizeCSVRow(filterRow).join()];
+  };
+
+  computeReportTableValuesForCSV = () => {
+    const { filteredReportData } = this.state;
+
+    const csvRows = [];
+    const csvHeaders = [
+      ...TAXON_GENERAL_FIELDS,
+      ...Array.from(TAXON_COUNT_TYPE_METRICS, metric => "nt." + metric),
+      ...Array.from(TAXON_COUNT_TYPE_METRICS, metric => "nr." + metric),
+    ];
+
+    filteredReportData.forEach(datum => {
+      const genusRow = [];
+      csvHeaders.forEach(column => {
+        let val = JSON.stringify(getOr("-", column, datum));
+        val = val === "null" ? '"-"' : val;
+
+        // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
+        genusRow.push(val.includes(",") ? `"${val}"` : val);
+      });
+      csvRows.push([sanitizeCSVRow(genusRow).join()]);
+
+      if (has("species_tax_ids", datum) && has("species", datum)) {
+        datum["species"].forEach(speciesTaxon => {
+          const speciesRow = [];
+          csvHeaders.forEach(column => {
+            let val = JSON.stringify(getOr("-", column, speciesTaxon));
+            val = val === "null" ? '"-"' : val;
+
+            // If value contains a comma, add double quoutes around it to preserve the comma and prevent the creation of a new column.
+            speciesRow.push(val.includes(",") ? `"${val}"` : val);
+          });
+          csvRows.push([sanitizeCSVRow(speciesRow).join()]);
+        });
+      }
+    });
+
+    if (this.hasAppliedFilters()) {
+      csvRows.push(this.createCSVRowForSelectedOptions());
+    }
+
+    return [[csvHeaders.join()], csvRows];
+  };
+
+  getDownloadReportTableWithAppliedFiltersLink = () => {
+    const { sample } = this.state;
+    const [csvHeaders, csvRows] = this.computeReportTableValuesForCSV();
+
+    return (
+      <a
+        href={createCSVObjectURL(csvHeaders, csvRows)}
+        download={`${sample.name}_report_with_applied_filters.csv`}
+        target="_blank"
+        rel="noopener noreferrer"
+        key={"Download_CSV_With_Applied_Filters_link"}
+      >
+        Download Report Table with Applied Filters (.csv)
+      </a>
+    );
+  };
+
   renderReport = ({ displayMergedNtNrValue = false } = {}) => {
     const {
       backgrounds,
       enableMassNormalizedBackgrounds,
       filteredReportData,
-      selectedInvalidBackground,
       lineageData,
       pipelineRun,
       project,
       reportMetadata,
       sample,
+      selectedInvalidBackground,
       selectedOptions,
       view,
     } = this.state;
@@ -1374,7 +1561,6 @@ export default class SampleView extends React.Component {
       coverageVizVisible,
       currentTab,
       pipelineRun,
-      pipelineVersion,
       project,
       projectSamples,
       reportMetadata,
@@ -1401,6 +1587,10 @@ export default class SampleView extends React.Component {
               currentTab={currentTab}
               deletable={sample ? sample.deletable : false}
               editable={sample ? sample.editable : false}
+              getDownloadReportTableWithAppliedFiltersLink={
+                this.getDownloadReportTableWithAppliedFiltersLink
+              }
+              hasAppliedFilters={this.hasAppliedFilters()}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
               currentRun={currentRun}
