@@ -212,11 +212,7 @@ class Landing extends React.Component {
       </Container>
     );
 
-    const usageLabel = (
-      <label>
-        How would you use IDseq? <span className="optional">Optional</span>
-      </label>
-    );
+    const usageLabel = <label>How would you use IDseq?</label>;
 
     let submitMessageBanner;
     if (this.state.submitMessage) {

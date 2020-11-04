@@ -78,7 +78,7 @@ class HomeController < ApplicationController
 
   def sign_up
     # Send sign up email with filled out information
-    required = [:firstName, :lastName, :email, :institution]
+    required = [:firstName, :lastName, :email, :institution, :usage]
     unless required.all? { |r| home_params.key?(r.to_s) && home_params[r].present? }
       render json: {}, status: :not_acceptable
       return
