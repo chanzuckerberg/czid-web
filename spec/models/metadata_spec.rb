@@ -196,5 +196,18 @@ RSpec.describe Metadatum, type: :model do
         location_metadata.save!
       end.to raise_error(ActiveRecord::RecordInvalid)
     end
+
+    it "should throw error if the location raw value is missing info" do
+      insufficient_raw_value = { locationiq_id: 123 }
+      location_metadata = Metadatum.new(
+        raw_value: JSON.dump(insufficient_raw_value),
+        sample: @sample,
+        metadata_field: @location_metadata_field,
+        key: "mock_collection_location"
+      )
+
+      expect { location_metadata.save! }.to raise_error(ActiveRecord::RecordInvalid)
+      expect(location_metadata.errors.full_messages[0]).to include(ErrorHelper::MetadataValidationErrors::INVALID_LOCATION)
+    end
   end
 end

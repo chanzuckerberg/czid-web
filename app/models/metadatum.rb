@@ -153,11 +153,7 @@ class Metadatum < ApplicationRecord
     # If the location is too specific, reject it as invalid.
     # In theory, the user should never trigger this error, if the front-end is auto-correcting properly.
     unless Location.specificity_valid?(loc, sample.host_genome_name)
-      LogUtil.log_err(
-        "Location specificity invalid for host genome #{sample.host_genome_name} #{JSON.dump(loc)}"
-      )
-      LogUtil.log_backtrace(err)
-      raise "Location specificity is invalid for host genome #{sample.host_genome_name}"
+      raise "Location specificity invalid for host genome #{sample.host_genome_name} #{JSON.dump(loc)}"
     end
 
     unless location.id
