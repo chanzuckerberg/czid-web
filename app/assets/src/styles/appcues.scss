@@ -1,0 +1,10 @@
+@import "~styles/themes/colors";
+
+.hotspot > div > .apc-spotlight {
+  background: $white !important;
+  opacity: 0.9;
+}
+
+div > .apc-spotlight {
+  box-shadow: none !important;
+}

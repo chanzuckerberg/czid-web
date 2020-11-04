@@ -9,6 +9,7 @@ import "font-awesome/scss/font-awesome.scss";
 import "semantic-ui-css/semantic.min.css";
 import "./loader.scss";
 import "./styles/core.scss";
+import "./styles/appcues.scss";
 
 // Sentry Basic Configuration Options: https://docs.sentry.io/platforms/javascript/guides/react/config/basics/
 Sentry.init({
