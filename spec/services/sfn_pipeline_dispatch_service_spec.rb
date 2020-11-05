@@ -1,6 +1,8 @@
 require 'rails_helper'
 require 'json'
 
+require "support/common_constants"
+
 FAKE_SAMPLES_BUCKET = "fake-samples-bucket".freeze
 S3_SAMPLES_KEY_PREFIX = "samples/%<project_id>s/%<sample_id>s".freeze
 S3_SAMPLES_PATH = "s3://#{FAKE_SAMPLES_BUCKET}/#{S3_SAMPLES_KEY_PREFIX}".freeze
@@ -12,14 +14,13 @@ SFN_NAME = "idseq-test-%<project_id>s-%<sample_id>s-%<pipeline_run_id>s-%<time>s
 FAKE_DOCKER_IMAGE_ID = "123456789012.dkr.ecr.us-west-2.amazonaws.com/idseq-workflows".freeze
 FAKE_REGION = "fake-region".freeze
 FAKE_SFN_ARN = "fake:sfn:arn".freeze
-FAKE_SFN_EXECUTION_ARN = "fake:sfn:execution:arn".freeze
 TEST_WORKFLOW_NAME = WorkflowRun::WORKFLOW[:short_read_mngs]
 PIPELINE_RUN_STAGE_NAMES = PipelineRunStage::STAGE_INFO.values.pluck(:dag_name)
 FAKE_WDL_VERSION = "4.9.0".freeze
 FAKE_STATES_CLIENT = Aws::States::Client.new(
   stub_responses: {
     start_execution: {
-      execution_arn: FAKE_SFN_EXECUTION_ARN,
+      execution_arn: CommonConstants::FAKE_SFN_EXECUTION_ARN,
       start_date: Time.zone.now,
     },
     list_tags_for_resource: {
@@ -81,7 +82,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       let(:idd2wdl_stdout) { "" }
       let(:idd2wdl_stderr) { "" }
       let(:idd2wdl_exitstatus) { 0 }
-      let(:aws_cli_stdout) { JSON.dump(execution_arn: FAKE_SFN_EXECUTION_ARN) }
+      let(:aws_cli_stdout) { JSON.dump(execution_arn: CommonConstants::FAKE_SFN_EXECUTION_ARN) }
       let(:aws_cli_stderr) { "" }
       let(:aws_cli_exitstatus) { 0 }
       let(:sfn_name) do
@@ -89,7 +90,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       end
       let(:sfn_input) { anything }
       let(:sfn_arn) { FAKE_SFN_ARN }
-      let(:sfn_execution_arn) { FAKE_SFN_EXECUTION_ARN }
+      let(:sfn_execution_arn) { CommonConstants::FAKE_SFN_EXECUTION_ARN }
       let(:dag_json_name) { "" }
       let(:PIPELINE_RUN_STAGE_NAMES) { pipeline_run.pipeline_run_stages.pluck(:name).map { |n| [n, {}] }.to_h }
 

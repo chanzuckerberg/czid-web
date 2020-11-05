@@ -1,7 +1,5 @@
 require 'rails_helper'
 
-SHARE_ID_LENGTH = 10
-
 RSpec.describe SnapshotLinksController, type: :controller do
   before do
     @user = create(:user)
@@ -38,7 +36,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
         expect(existing_share_ids.exclude?(share_id)).to be(true)
         expect(share_id.count("^a-zA-Z0-9")).to eq(0)
         expect(share_id.count("ilI1oO0B8S5Z2G6")).to eq(0)
-        expect(share_id.length).to eq(SHARE_ID_LENGTH)
+        expect(share_id.length).to eq(SnapshotLink::SHARE_ID_LENGTH)
 
         # check for expected snapshot content
         expected_content = { "samples" => [] }
@@ -69,7 +67,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
         expect(existing_share_ids.exclude?(share_id)).to be(true)
         expect(share_id.count("^a-zA-Z0-9")).to eq(0)
         expect(share_id.count("ilI1oO0B8S5Z2G6")).to eq(0)
-        expect(share_id.length).to eq(SHARE_ID_LENGTH)
+        expect(share_id.length).to eq(SnapshotLink::SHARE_ID_LENGTH)
 
         # check for expected snapshot content
         expected_content = { "samples" =>
@@ -104,7 +102,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
         expect(existing_share_ids.exclude?(share_id)).to be(true)
         expect(share_id.count("^a-zA-Z0-9")).to eq(0)
         expect(share_id.count("ilI1oO0B8S5Z2G6")).to eq(0)
-        expect(share_id.length).to eq(SHARE_ID_LENGTH)
+        expect(share_id.length).to eq(SnapshotLink::SHARE_ID_LENGTH)
 
         # check for expected snapshot content
         expected_content = { "samples" => [

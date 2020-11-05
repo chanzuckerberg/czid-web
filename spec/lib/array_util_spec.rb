@@ -103,7 +103,7 @@ RSpec.describe ArrayUtil do
     it "merging with arguments of type array does not raise an ArgumentError" do
       a = [1, 2, 3]
       b = [2, 3, 1]
-      expect { ArrayUtil.merge_arrays_uniq(a, b) }.to_not raise_error(ArgumentError)
+      expect { ArrayUtil.merge_arrays_uniq(a, b) }.to_not raise_error
     end
 
     it "merging with an argument not of type array raises an ArgumentError" do

@@ -500,8 +500,7 @@ describe BulkDownload, type: :model do
     let(:mock_executable_file_path) { "/tmp/mock_path" }
 
     it "returns the correct aegea ecs submit command" do
-      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-test",
-                                          "S3_AEGEA_ECS_EXECUTE_BUCKET" => "aegea-ecs-execute-test"))
+      stub_const("S3_AEGEA_ECS_EXECUTE_BUCKET", "aegea-ecs-execute-test")
 
       task_command = [
         "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",
@@ -519,8 +518,7 @@ describe BulkDownload, type: :model do
 
     it "allows override of ecr image via AppConfig" do
       AppConfigHelper.set_app_config(AppConfig::S3_TAR_WRITER_SERVICE_ECR_IMAGE, "idseq-s3-tar-writer:v1.0")
-      stub_const('ENV', ENV.to_hash.merge("SAMPLES_BUCKET_NAME" => "idseq-samples-test",
-                                          "S3_AEGEA_ECS_EXECUTE_BUCKET" => "aegea-ecs-execute-test"))
+      stub_const("S3_AEGEA_ECS_EXECUTE_BUCKET", "aegea-ecs-execute-test")
 
       task_command = [
         "aegea", "ecs", "run", "--execute=#{mock_executable_file_path}",

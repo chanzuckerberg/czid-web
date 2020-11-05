@@ -210,7 +210,7 @@ RSpec.describe PipelineRunsHelper, type: :helper do
         it "returns error with description" do
           allow(@pipeline_run).to receive(:sfn_error).and_return("InvalidInputFileError")
           # At this moment, sfn_error is an costly call (can call AWS api twice)
-          @pipeline_run.should_receive(:sfn_error).once
+          expect(@pipeline_run).to receive(:sfn_error).once
           is_expected.to eq(["InvalidInputFileError", "There was an error parsing one of the input files."])
         end
       end

@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'json'
 
-FAKE_SFN_EXECUTION_ARN = "fake:sfn:execution:arn".freeze
+require "support/common_constants"
 
 RSpec.describe PipelineVizController, type: :controller do
   pipeline_run_stages_data = [{
@@ -166,6 +166,8 @@ RSpec.describe PipelineVizController, type: :controller do
 
   let(:expected_json) { JSON.parse(JSON.generate(expected_stage_results)) }
 
+  let(:fake_sfn_execution_arn) { CommonConstants::FAKE_SFN_EXECUTION_ARN }
+
   before do
     allow(SfnPipelineDataService).to receive(:call).with(instance_of(Integer), true, false).and_return(expected_stage_results)
     allow(SfnPipelineDataService).to receive(:call).with(instance_of(Integer), true, true).and_return(results_no_host_filter_urls)
@@ -190,7 +192,7 @@ RSpec.describe PipelineVizController, type: :controller do
           pipeline_runs_data: [
             {
               pipeline_run_stages_data: pipeline_run_stages_data,
-              sfn_execution_arn: FAKE_SFN_EXECUTION_ARN,
+              sfn_execution_arn: fake_sfn_execution_arn,
             },
           ]
         )
@@ -229,7 +231,7 @@ RSpec.describe PipelineVizController, type: :controller do
           project: project,
           pipeline_runs_data: [{
             pipeline_run_stages_data: pipeline_run_stages_data,
-            sfn_execution_arn: FAKE_SFN_EXECUTION_ARN,
+            sfn_execution_arn: fake_sfn_execution_arn,
           }]
         )
 
@@ -248,7 +250,7 @@ RSpec.describe PipelineVizController, type: :controller do
           project: project,
           pipeline_runs_data: [{
             pipeline_run_stages_data: pipeline_run_stages_data,
-            sfn_execution_arn: FAKE_SFN_EXECUTION_ARN,
+            sfn_execution_arn: fake_sfn_execution_arn,
           }]
         )
 
@@ -290,7 +292,7 @@ RSpec.describe PipelineVizController, type: :controller do
           :sample, project: project,
                    pipeline_runs_data: [{
                      pipeline_run_stages_data: pipeline_run_stages_data,
-                     sfn_execution_arn: FAKE_SFN_EXECUTION_ARN,
+                     sfn_execution_arn: fake_sfn_execution_arn,
                    }]
         )
 

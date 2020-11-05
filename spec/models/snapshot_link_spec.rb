@@ -1,7 +1,5 @@
 require 'rails_helper'
 
-SHARE_ID_LENGTH = 10
-
 describe SnapshotLink, type: :model do
   context "#generate_random_share_id" do
     it "should return a valid share_id (unique, alphanumeric, excludes ambiguous chars)" do
@@ -11,7 +9,7 @@ describe SnapshotLink, type: :model do
       expect(existing_share_ids.exclude?(share_id)).to be(true)
       expect(share_id.count("^a-zA-Z0-9")).to eq(0)
       expect(share_id.count("ilI1oO0B8S5Z2G6")).to eq(0)
-      expect(share_id.length).to eq(SHARE_ID_LENGTH)
+      expect(share_id.length).to eq(SnapshotLink::SHARE_ID_LENGTH)
     end
   end
 end
