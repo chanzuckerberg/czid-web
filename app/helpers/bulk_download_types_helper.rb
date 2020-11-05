@@ -1,7 +1,13 @@
 module BulkDownloadTypesHelper
+  # Manual types
   CUSTOMER_SUPPORT_BULK_DOWNLOAD_TYPE = "customer_support_request".freeze
-  SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE = "sample_overview".freeze
+
+  # Common to all workflows
   SAMPLE_METADATA_BULK_DOWNLOAD_TYPE = "sample_metadata".freeze
+  ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE = "original_input_file".freeze
+
+  # Specific to short read mNGS workflows
+  SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE = "sample_overview".freeze
   SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE = "sample_taxon_report".freeze
   COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE = "combined_sample_taxon_results".freeze
   CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE = "contig_summary_report".freeze
@@ -9,8 +15,10 @@ module BulkDownloadTypesHelper
   READS_NON_HOST_BULK_DOWNLOAD_TYPE = "reads_non_host".freeze
   CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE = "contigs_non_host".freeze
   UNMAPPED_READS_BULK_DOWNLOAD_TYPE = "unmapped_reads".freeze
-  ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE = "original_input_file".freeze
   BETACORONOVIRUS_BULK_DOWNLOAD_TYPE = "betacoronavirus".freeze
+
+  # Specific to consensus genome workflows
+  CONSENSUS_GENOME_DOWNLOAD_TYPE = "consensus_genome".freeze
 
   RESQUE_EXECUTION_TYPE = "resque".freeze
   VARIABLE_EXECUTION_TYPE = "variable".freeze
@@ -20,22 +28,50 @@ module BulkDownloadTypesHelper
   # See lib/tasks/create_customer_support_download.rake.
   MANUAL_UPLOAD_TYPE = "manual".freeze
 
+  # To help the controller return the appropriate types, we add the valid workflows for each type.
+  # For types that belong to all workflows, use this constant.
+  ALL_WORKFLOWS = WorkflowRun::WORKFLOW.values.freeze
+
   # The "type" value of the bulk download fields is really the field key.
   # There isn't currently anything that specifies what data type the field is.
   # The front-end is hard-coded to display a select dropdown or a checkbox depending on the field type.
   # For more documentation, see https://czi.quip.com/TJEaAeFaAewG/Making-a-Bulk-Download-Things-to-Know
   BULK_DOWNLOAD_TYPES = [
+
+    # Manual types
     {
       type: CUSTOMER_SUPPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Customer Support Request",
       execution_type: MANUAL_UPLOAD_TYPE,
       hide_in_creation_modal: true,
     },
+
+    # Common to all workflows
+    {
+      type: SAMPLE_METADATA_BULK_DOWNLOAD_TYPE,
+      display_name: "Sample Metadata",
+      description: "User-uploaded metadata, including sample collection location, collection date, sample type",
+      category: "reports", # to be revisited for CG downloads v1
+      execution_type: RESQUE_EXECUTION_TYPE,
+      file_type_display: "sample_metadata.csv",
+      workflows: ALL_WORKFLOWS,
+    },
+    {
+      type: ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE,
+      display_name: "Original Input Files",
+      description: "Original files you submitted to IDseq",
+      category: "raw_data",
+      execution_type: ECS_EXECUTION_TYPE,
+      uploader_only: true,
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]], # for CG downloads v0
+    },
+
+    # Specific to short read mNGS workflows
     {
       type: SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE,
       display_name: "Samples Overview",
       description: "Sample QC metrics (e.g. percent reads passing QC) and other summary statistics",
-      category: "report",
+      category: "reports",
       execution_type: RESQUE_EXECUTION_TYPE,
       # This will be displayed in the bulk-download creation modal.
       file_type_display: ".csv",
@@ -49,20 +85,13 @@ module BulkDownloadTypesHelper
           },
         },
       ],
-    },
-    {
-      type: SAMPLE_METADATA_BULK_DOWNLOAD_TYPE,
-      display_name: "Sample Metadata",
-      description: "User-uploaded metadata, including sample collection location, collection date, sample type",
-      category: "report",
-      execution_type: RESQUE_EXECUTION_TYPE,
-      file_type_display: ".csv",
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
       type: SAMPLE_TAXON_REPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Sample Taxon Reports",
       description: "Computed metrics (e.g. total reads, rPM) and metadata for each taxon identified in the sample",
-      category: "report",
+      category: "reports",
       execution_type: RESQUE_EXECUTION_TYPE,
       fields: [
         {
@@ -71,12 +100,13 @@ module BulkDownloadTypesHelper
         },
       ],
       file_type_display: ".csv",
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
       type: COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE,
       display_name: "Combined Sample Taxon Results",
       description: "The value of a particular metric (e.g. total reads, rPM) for all taxa in all selected samples, combined into a single file",
-      category: "report",
+      category: "reports",
       fields: [
         {
           display_name: "Metric",
@@ -89,29 +119,32 @@ module BulkDownloadTypesHelper
       ],
       execution_type: RESQUE_EXECUTION_TYPE,
       file_type_display: ".csv",
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
       type: CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE,
       display_name: "Contig Summary Reports",
       description: "Contig QC metrics (e.g. read coverage, percent identity) and other summary statistics",
-      category: "report",
+      category: "reports",
       execution_type: RESQUE_EXECUTION_TYPE,
       file_type_display: ".csv",
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
       type: HOST_GENE_COUNTS_BULK_DOWNLOAD_TYPE,
       display_name: "Host Gene Counts",
       description: "Host gene count outputs from STAR",
-      category: "report",
+      category: "reports",
       execution_type: ECS_EXECUTION_TYPE,
       admin_only: true,
       file_type_display: ".star.tab",
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
       type: READS_NON_HOST_BULK_DOWNLOAD_TYPE,
       display_name: "Reads (Non-host)",
       description: "Reads with host data subtracted",
-      category: "raw",
+      category: "raw_data",
       fields: [
         {
           display_name: "Taxon",
@@ -124,21 +157,23 @@ module BulkDownloadTypesHelper
         },
       ],
       execution_type: VARIABLE_EXECUTION_TYPE,
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
       type: BETACORONOVIRUS_BULK_DOWNLOAD_TYPE,
       required_allowed_feature: "betacoronavirus_fastqs", # see allowed_features
       display_name: "Betacoronavirus Reads (Paired, Non-Deduplicated)",
       description: "Paired, non-deduplicated, FASTQs of betacoronavirus reads",
-      category: "raw",
+      category: "raw_data",
       execution_type: ECS_EXECUTION_TYPE,
       file_type_display: ".fastq",
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
       type: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,
       display_name: "Contigs (Non-host)",
       description: "Contigs with host data subtracted",
-      category: "raw",
+      category: "raw_data",
       fields: [
         {
           display_name: "Taxon",
@@ -146,21 +181,26 @@ module BulkDownloadTypesHelper
         },
       ],
       execution_type: VARIABLE_EXECUTION_TYPE,
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
       type: UNMAPPED_READS_BULK_DOWNLOAD_TYPE,
       display_name: "Unmapped Reads",
       description: "Reads that didn’t map to any taxa",
-      category: "raw",
+      category: "raw_data",
       execution_type: ECS_EXECUTION_TYPE,
+      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
+
+    # Consensus genome workflows
     {
-      type: ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE,
-      display_name: "Original Input Files",
-      description: "Original files you submitted to IDseq",
-      category: "raw",
+      type: CONSENSUS_GENOME_DOWNLOAD_TYPE,
+      display_name: "Consensus Genome",
+      description: "The consensus genome",
+      category: "results",
       execution_type: ECS_EXECUTION_TYPE,
-      uploader_only: true,
+      file_type_display: "consensus.fa",
+      workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
     },
   ].freeze
 

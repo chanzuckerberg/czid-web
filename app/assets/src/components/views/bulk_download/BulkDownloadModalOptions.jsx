@@ -12,6 +12,8 @@ import RadioButton from "~ui/controls/RadioButton";
 import Checkbox from "~ui/controls/Checkbox";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
+import { humanize } from "~/helpers/strings";
+import { WORKFLOWS } from "~/components/utils/workflows";
 
 import TaxonHitSelect from "./TaxonHitSelect";
 import { CONDITIONAL_FIELDS } from "./constants.js";
@@ -313,21 +315,52 @@ class BulkDownloadModalOptions extends React.Component {
       return <LoadingMessage message="Loading download types..." />;
     }
 
-    const reportTypes = filter(["category", "report"], downloadTypes);
-    const rawTypes = filter(["category", "raw"], downloadTypes);
-
-    return (
-      <React.Fragment>
-        <div className={cs.category}>
-          <div className={cs.title}>Reports</div>
-          {reportTypes.map(this.renderDownloadType)}
-        </div>
-        <div className={cs.category}>
-          <div className={cs.title}>Raw Data</div>
-          {rawTypes.map(this.renderDownloadType)}
-        </div>
-      </React.Fragment>
+    const visibleTypes = downloadTypes.filter(
+      type =>
+        Object.prototype.hasOwnProperty.call(type, "category") &&
+        !type.hide_in_creation_modal
     );
+
+    const designatedOrder = ["results", "reports", "raw_data"];
+
+    // for CG bulk downloads v0, just don't display any categories
+    if (
+      visibleTypes.some(
+        type => type.display_name === WORKFLOWS.CONSENSUS_GENOME.label
+      )
+    ) {
+      visibleTypes.sort(
+        (typeA, typeB) =>
+          designatedOrder.indexOf(typeA.category) -
+          designatedOrder.indexOf(typeB.category)
+      );
+      return (
+        <div className={cs.category}>
+          {visibleTypes.map(this.renderDownloadType)}
+        </div>
+      );
+    }
+
+    const backendCategories = [
+      ...new Set(visibleTypes.map(type => type.category)),
+    ];
+    const additionalCategories = backendCategories.filter(
+      category => !designatedOrder.includes(category)
+    );
+    const categories = designatedOrder.concat(additionalCategories);
+
+    const computedDownloadTypes = categories.map(category => {
+      const categoryTypes = filter(["category", category], visibleTypes);
+
+      return (
+        <div className={cs.category} key={category}>
+          <div className={cs.title}>{humanize(category)}</div>
+          {categoryTypes.map(this.renderDownloadType)}
+        </div>
+      );
+    });
+
+    return <React.Fragment>{computedDownloadTypes}</React.Fragment>;
   };
 
   render() {

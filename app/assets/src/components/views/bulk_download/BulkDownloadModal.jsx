@@ -98,7 +98,7 @@ class BulkDownloadModal extends React.Component {
   async fetchSampleOptionsAndValidateSelectedSamples() {
     const { selectedSampleIds, workflow } = this.props;
 
-    const bulkDownloadTypesRequest = this.fetchDownloadTypes();
+    const bulkDownloadTypesRequest = this.fetchDownloadTypes(workflow);
     const sampleValidationInfoRequest = this.fetchValidationInfo(
       Array.from(selectedSampleIds),
       workflow
@@ -162,8 +162,8 @@ class BulkDownloadModal extends React.Component {
     });
   }
 
-  async fetchDownloadTypes() {
-    const bulkDownloadTypes = await getBulkDownloadTypes();
+  async fetchDownloadTypes(workflow) {
+    const bulkDownloadTypes = await getBulkDownloadTypes(workflow);
 
     return bulkDownloadTypes;
   }

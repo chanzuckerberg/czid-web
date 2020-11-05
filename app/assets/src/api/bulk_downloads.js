@@ -1,6 +1,7 @@
 import { get, postWithCSRF } from "./core";
 
-export const getBulkDownloadTypes = () => get("/bulk_downloads/types");
+export const getBulkDownloadTypes = workflow =>
+  get(`/bulk_downloads/types?workflow=${workflow}`);
 
 export const createBulkDownload = bulkDownload =>
   postWithCSRF("/bulk_downloads", {

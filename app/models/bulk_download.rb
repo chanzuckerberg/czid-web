@@ -296,8 +296,13 @@ class BulkDownload < ApplicationRecord
     # Order both pipeline runs and samples by ascending sample id.
     # This ensures that the download src-urls and tar-names have the same order which is critical to
     # mapping the file content to the correct file name.
-    pipeline_runs_ordered = pipeline_runs.order(:sample_id)
-    samples_ordered = Sample.where(id: pipeline_runs.map(&:sample_id)).order(:id)
+    if pipeline_runs.present?
+      pipeline_runs_ordered = pipeline_runs.order(:sample_id)
+      samples_ordered = Sample.where(id: pipeline_runs_ordered.map(&:sample_id)).order(:id)
+    else
+      workflow_runs_ordered = workflow_runs.order(:sample_id)
+      samples_ordered = Sample.where(id: workflow_runs_ordered.map(&:sample_id)).order(:id)
+    end
     projects = Project.where(id: samples_ordered.pluck(:project_id))
 
     # Compute cleaned project name once instead of once per sample.
@@ -393,6 +398,15 @@ class BulkDownload < ApplicationRecord
       download_tar_names = samples_ordered.map do |sample|
         "#{get_output_file_prefix(sample, cleaned_project_names)}" \
           "reads_per_gene.star.tab"
+      end
+    end
+
+    if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE
+      download_src_urls = workflow_runs_ordered.map { |run| run.output_path(ConsensusGenomeWorkflowRun::OUTPUT_CONSENSUS) }
+
+      download_tar_names = samples_ordered.map do |sample|
+        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+          "consensus.fa"
       end
     end
 

@@ -12,6 +12,8 @@ class BulkDownloadsController < ApplicationController
 
   # GET /bulk_downloads/types
   def types
+    workflow = params[:workflow]
+
     download_types = BulkDownloadTypesHelper.bulk_download_types
 
     # Filter out all types that are admin-only or require feature flags.
@@ -24,6 +26,13 @@ class BulkDownloadsController < ApplicationController
 
     # Filter out types that are explicitly marked as needing to be hidden
     download_types = download_types.reject { |type| type[:hide_in_creation_modal] }
+
+    # Only return types valid for this workflow
+    # default to mngs if no workflow parameter in query
+    if workflow.blank?
+      workflow = WorkflowRun::WORKFLOW[:short_read_mngs]
+    end
+    download_types = download_types.select { |type| type[:workflows].include?(workflow) }
 
     render json: download_types
   end

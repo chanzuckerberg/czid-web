@@ -6,6 +6,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
     {
       execution_arn: "FAKE_SFN_ARN",
       input: JSON.dump(OutputPrefix: "FAKE_OUTPUT_PREFIX"),
+      output: JSON.dump({ "consensus_genome.make_consensus_out_consensus_fa" => "FAKE_OUTPUT_PREFIX/consensus.fa" }),
       start_date: Time.zone.now,
       state_machine_arn: fake_sfn_execution_arn,
       status: "FAKE_EXECUTION_STATUS",
@@ -345,8 +346,16 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_two = create(:sample, project: @project, name: "Test Sample Two",
                                       workflow_runs_data: [{ status: WorkflowRun::STATUS[:succeeded] }])
 
+        expect(Open3).to receive(:capture3)
+          .with("aegea", "ecs", "run", a_string_starting_with("--execute"), any_args)
+          .exactly(1).times.and_return(
+            [JSON.generate("taskArn": "ABC"), "", instance_double(Process::Status, exitstatus: 0)]
+          )
+
+        allow_any_instance_of(SfnExecution).to receive(:output_path) { |output_key| "#{@s3_path}/#{output_key}" }
+
         bulk_download_params = {
-          download_type: "consensus_genome",
+          download_type: BulkDownloadTypesHelper::CONSENSUS_GENOME_DOWNLOAD_TYPE,
           sample_ids: [@sample_one, @sample_two],
           params: mock_field_params,
           workflow: WorkflowRun::WORKFLOW[:consensus_genome],
@@ -354,8 +363,19 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         post :create, params: bulk_download_params
 
-        expect(response).to have_http_status(422)
-        expect(JSON.parse(response.body)["error"]).to eq(BulkDownloadsHelper::UNKNOWN_DOWNLOAD_TYPE)
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+        bulk_download = BulkDownload.find(json_response["id"])
+
+        # Verify that bulk download was created correctly.
+        expect(bulk_download).not_to eq(nil)
+        expect(bulk_download.download_type).to eq(BulkDownloadTypesHelper::CONSENSUS_GENOME_DOWNLOAD_TYPE)
+        expect(bulk_download.workflow_run_ids).to include(@sample_one.workflow_runs.first.id)
+        expect(bulk_download.workflow_run_ids).to include(@sample_two.workflow_runs.first.id)
+        expect(bulk_download.user_id).to eq(@joe.id)
+        expect(bulk_download.status).to eq(BulkDownload::STATUS_RUNNING)
+        expect(bulk_download.ecs_task_arn).to eq("ABC")
+        expect(bulk_download.params_json).to eq(mock_field_params.to_json)
       end
     end
 

@@ -3,6 +3,7 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   OUTPUT_QUAST = "consensus_genome.quast_out_quast_tsv".freeze
   OUTPUT_STATS = "consensus_genome.compute_stats_out_output_stats".freeze
   OUTPUT_ZIP = "consensus_genome.zip_outputs_out_output_zip".freeze
+  OUTPUT_CONSENSUS = "consensus_genome.make_consensus_out_consensus_fa".freeze
 
   WETLAB_PROTOCOL = {
     artic: "artic",

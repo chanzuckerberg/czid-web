@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_201_009_000_008) do
+ActiveRecord::Schema.define(version: 20_201_029_055_803) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -106,6 +106,13 @@ ActiveRecord::Schema.define(version: 20_201_009_000_008) do
     t.bigint "bulk_download_id", null: false
     t.index ["bulk_download_id"], name: "index_bulk_downloads_pipeline_runs_on_bulk_download_id"
     t.index ["pipeline_run_id"], name: "index_bulk_downloads_pipeline_runs_on_pipeline_run_id"
+  end
+
+  create_table "bulk_downloads_workflow_runs", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "bulk_download_id", null: false
+    t.bigint "workflow_run_id", null: false
+    t.index ["bulk_download_id"], name: "index_bulk_downloads_workflow_runs_on_bulk_download_id"
+    t.index ["workflow_run_id"], name: "index_bulk_downloads_workflow_runs_on_workflow_run_id"
   end
 
   create_table "contigs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
@@ -682,6 +689,8 @@ ActiveRecord::Schema.define(version: 20_201_009_000_008) do
   add_foreign_key "bulk_downloads", "users"
   add_foreign_key "bulk_downloads_pipeline_runs", "bulk_downloads", name: "bulk_downloads_pipeline_runs_bulk_download_id_fk"
   add_foreign_key "bulk_downloads_pipeline_runs", "pipeline_runs", name: "bulk_downloads_pipeline_runs_pipeline_run_id_fk"
+  add_foreign_key "bulk_downloads_workflow_runs", "bulk_downloads", name: "bulk_downloads_workflow_runs_bulk_download_id_fk"
+  add_foreign_key "bulk_downloads_workflow_runs", "workflow_runs", name: "bulk_downloads_workflow_runs_workflow_run_id_fk"
   add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
   add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
   add_foreign_key "host_genomes", "users"
