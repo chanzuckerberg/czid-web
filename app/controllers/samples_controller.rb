@@ -809,6 +809,9 @@ class SamplesController < ApplicationController
           )
       end
     end
+
+    # Duplicates PipelineSampleReport_sample_viewed to compare frontend vs. backend tracks
+    MetricUtil.log_analytics_event("SamplesController_sample_viewed", current_user, { sample_id: @sample&.id }, request)
   end
 
   # TODO: (gdingle): remove this if we are not going to allow saving reports as visualizations
