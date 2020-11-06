@@ -98,4 +98,8 @@ AsyncMultipleDropdown.propTypes = {
   onFilterChange: PropTypes.func,
 };
 
+AsyncMultipleDropdown.defaultProps = {
+  selectedOptions: [],
+};
+
 export default AsyncMultipleDropdown;
