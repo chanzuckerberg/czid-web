@@ -100,7 +100,7 @@ class UsersController < ApplicationController
   end
 
   def new_user(attrs = {})
-    @user ||= User.new(attrs)
+    @user ||= User.new(**attrs, created_by_user_id: current_user.id)
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.

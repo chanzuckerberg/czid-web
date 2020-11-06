@@ -32,6 +32,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
           ))
     put add_user_project_url(@joe_project), params: { user_email_to_add: "help@idseq.net", user_name_to_add: "User invited from Power Controller test" }
     assert_response :success
+    assert_equal User.last.created_by_user_id, users(:joe).id
   end
 
   test 'joe can change project visibility to joe_project ' do

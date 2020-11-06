@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_201_029_055_803) do
+ActiveRecord::Schema.define(version: 20_201_102_114_100) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -650,6 +650,7 @@ ActiveRecord::Schema.define(version: 20_201_029_055_803) do
     t.integer "favorites_count", default: 0, null: false
     t.integer "visualizations_count", default: 0, null: false
     t.integer "phylo_trees_count", default: 0, null: false
+    t.bigint "created_by_user_id", comment: "The user_id that created/invited this user."
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
   end
