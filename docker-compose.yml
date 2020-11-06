@@ -26,6 +26,8 @@ x-web-variables: &web-variables
   ? SENTRY_DSN_BACKEND
   ? SENTRY_DSN_FRONTEND
   ? SERVER_DOMAIN
+  ? SMTP_PASSWORD
+  ? SMTP_USER
 
 x-auth0-variables: &auth0-variables
   ? AUTH0_CLIENT_ID

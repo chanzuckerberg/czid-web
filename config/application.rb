@@ -14,5 +14,18 @@ module Idseq
     config.active_record.default_timezone = :local
     config.middleware.use Rack::Deflater
     config.encoding = "utf-8"
+
+    # ActionMailer settings
+    config.action_mailer.raise_delivery_errors = true
+    config.action_mailer.perform_caching = false
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      address: "email-smtp.us-west-2.amazonaws.com",
+      authentication: :login,
+      enable_starttls_auto: true,
+      password: ENV["SMTP_PASSWORD"],
+      port: 587,
+      user_name: ENV["SMTP_USER"],
+    }
   end
 end
