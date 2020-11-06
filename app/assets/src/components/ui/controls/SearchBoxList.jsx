@@ -10,13 +10,25 @@ class SearchBoxList extends React.Component {
     super(props);
 
     let selected = new Set(this.props.selected);
-    this.sortedOptions = this.sortOptions(this.props.options, selected);
-
     this.state = {
-      filteredOptions: this.sortedOptions,
+      // Filtered options can be controlled by the client by setting an onFilterChange
+      filteredOptions: this.sortOptions(this.props.options, selected),
+      // Selected is controlled internally
       selected,
     };
   }
+
+  componentDidUpdate = (prevProps, prevState) => {
+    // object comparison only
+    if (prevProps.options !== this.props.options) {
+      this.setState({
+        filteredOptions: this.sortOptions(
+          this.props.options,
+          prevState.selected
+        ),
+      });
+    }
+  };
 
   handleOptionClick = optionValue => {
     let selected = new Set(this.state.selected);
