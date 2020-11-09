@@ -34,7 +34,6 @@
         analytics.identify(
           <%= current_user.id %>,
           <%= raw escape_json(current_user.traits_for_segment(include_pii: true)) %>,
-          { integrations: { "Appcues": false }},
         );
       <% end %>
     <% end %>
