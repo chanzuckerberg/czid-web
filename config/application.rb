@@ -29,3 +29,8 @@ module Idseq
     }
   end
 end
+
+HealthCheck.setup do |config|
+  # Exclude SMTP server test from standard check (can still use /health_check/email.json explicitly)
+  config.standard_checks -= ["emailconf"]
+end
