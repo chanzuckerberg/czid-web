@@ -40,7 +40,7 @@ task precompute_gene_ontology: :environment do
   begin
     resp = s3.get_object(bucket: S3_DATABASE_BUCKET, key: S3_ARGANNOT_FASTA)
     arg_annot_fasta = resp.body.read
-  rescue Aws::S3::Errors => err
+  rescue Aws::S3::Errors::ServiceError => err
     Rails.logger.error("Unable to fetch ARG ANNOT fasta file from S3")
     Rails.logger.error(err.message)
     return
@@ -102,7 +102,7 @@ task precompute_gene_ontology: :environment do
       bucket: S3_DATABASE_BUCKET,
       key: S3_JSON_KEY
     )
-  rescue Aws::S3::Errors => err
+  rescue Aws::S3::Errors::ServiceError => err
     Rails.logger.error("Failed to upload JSON ontology to S3")
     Rails.logger.error(err.message)
     return

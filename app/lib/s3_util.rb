@@ -25,7 +25,7 @@ module S3Util
           entry.push(event.payload.read)
         end
       end
-    rescue Aws::S3::Errors => e
+    rescue Aws::S3::Errors::ServiceError => e
       Rails.logger.error("Error retrieving entry #{expression} from #{bucket}/#{key} from s3")
       Rails.logger.error(e.message)
       return ""
