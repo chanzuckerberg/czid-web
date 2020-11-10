@@ -206,7 +206,7 @@ class SamplesView extends React.Component {
   };
 
   renderCollectionTrigger = () => {
-    const { samples, selectedSampleIds } = this.props;
+    const { samples, selectedSampleIds, workflow } = this.props;
 
     const targetSamples = samples.loaded;
 
@@ -235,6 +235,7 @@ class SamplesView extends React.Component {
         fetchedSamples={targetSamples.filter(sample =>
           selectedSampleIds.has(sample.id)
         )}
+        workflow={workflow}
       />
     );
   };

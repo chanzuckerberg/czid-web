@@ -1,26 +1,27 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
 import {
-  getMassNormalizedBackgroundAvailability,
   createBackground,
+  getMassNormalizedBackgroundAvailability,
 } from "~/api";
+import { validateSampleIds } from "~/api/access_control";
 import { withAnalytics } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import Modal from "~ui/containers/Modal";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
+import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
 import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
-import Modal from "~ui/containers/Modal";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
-import Notification from "~ui/notifications/Notification";
-import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import InfoIconSmall from "~ui/icons/InfoIconSmall";
-import { UserContext } from "~/components/common/UserContext";
-
-import { BACKGROUND_CORRECTION_METHODS } from "./constants";
+import AccordionNotification from "~ui/notifications/AccordionNotification";
+import Notification from "~ui/notifications/Notification";
 
 import cs from "./collection_modal.scss";
+import { BACKGROUND_CORRECTION_METHODS } from "./constants";
 
 /**
  * NOTE: "Collections" were an unrealized generalization of the background concept.
@@ -30,22 +31,25 @@ class CollectionModal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      appliedMethod: "",
       backgroundCreationResponse: null,
       backgroundDescription: null,
       backgroundName: "",
-      appliedMethod: "",
+      invalidSampleNames: [],
       modalOpen: false,
     };
   }
 
   componentDidMount() {
     this.fetchBackgroundAvailability();
+    this.fetchSampleValidation();
   }
 
   componentDidUpdate(prevProps, prevState) {
     const prevSamples = prevProps.selectedSampleIds;
     if (prevSamples !== this.props.selectedSampleIds) {
       this.fetchBackgroundAvailability();
+      this.fetchSampleValidation();
     }
   }
 
@@ -68,12 +72,6 @@ class CollectionModal extends React.Component {
     return (
       <div className={cs.sampleList}>
         <div className={cs.label}>Selected samples:</div>
-        <div className={cs.warning}>
-          <Notification className={cs.notification} type="warning">
-            A large number of samples may increase the processing time before
-            your background can be used in reports.
-          </Notification>
-        </div>
         <ul className={cs.selectedSamples}>
           {samplesToDisplay.map(sample => (
             <li key={sample.id}>
@@ -92,6 +90,38 @@ class CollectionModal extends React.Component {
       </div>
     );
   };
+
+  renderInvalidSamplesWarning() {
+    const { invalidSampleNames } = this.state;
+
+    const header = (
+      <div>
+        <span className={cs.highlight}>
+          {invalidSampleNames.length} sample
+          {invalidSampleNames.length > 1 ? "s" : ""} won't be included in the
+          background model
+        </span>
+        , because they either failed or are still processing:
+      </div>
+    );
+
+    const content = invalidSampleNames.map(name => (
+      <div key={name} className={cs.messageLine}>
+        {name}
+      </div>
+    ));
+
+    return (
+      <AccordionNotification
+        className={cs.notificationContainer}
+        content={content}
+        displayStyle="flat"
+        header={header}
+        open={false}
+        type="warning"
+      />
+    );
+  }
 
   handleNameChange = backgroundName => {
     this.setState({ backgroundName });
@@ -138,10 +168,23 @@ class CollectionModal extends React.Component {
     });
   };
 
+  fetchSampleValidation = async () => {
+    const { selectedSampleIds, workflow } = this.props;
+    const { invalidSampleNames } = await validateSampleIds(
+      Array.from(selectedSampleIds),
+      workflow
+    );
+    this.setState({ invalidSampleNames });
+  };
+
   renderForm = () => {
     const { numDescriptionRows } = this.props;
 
-    const { enableMassNormalizedBackgrounds, appliedMethod } = this.state;
+    const {
+      appliedMethod,
+      enableMassNormalizedBackgrounds,
+      invalidSampleNames,
+    } = this.state;
 
     const dropdownOptions = BACKGROUND_CORRECTION_METHODS;
     if (enableMassNormalizedBackgrounds) {
@@ -194,6 +237,7 @@ class CollectionModal extends React.Component {
           />
         </div>
         {this.renderSampleList()}
+        {invalidSampleNames.length > 0 && this.renderInvalidSamplesWarning()}
         <div className={cs.buttons}>
           <PrimaryButton
             text="Create"
@@ -212,6 +256,9 @@ class CollectionModal extends React.Component {
               "CollectionModal_cancel-button_clicked"
             )}
           />
+        </div>
+        <div className={cs.details}>
+          A large number of samples may increase the processing time.
         </div>
       </div>
     );
