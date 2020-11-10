@@ -22,6 +22,7 @@ module Idseq
     config.action_mailer.smtp_settings = {
       address: "email-smtp.us-west-2.amazonaws.com",
       authentication: :login,
+      domain: "idseq.net",
       enable_starttls_auto: true,
       password: ENV["SMTP_PASSWORD"],
       port: 587,
