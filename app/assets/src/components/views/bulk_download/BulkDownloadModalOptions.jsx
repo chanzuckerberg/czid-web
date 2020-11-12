@@ -351,7 +351,9 @@ class BulkDownloadModalOptions extends React.Component {
 
     const computedDownloadTypes = categories.map(category => {
       const categoryTypes = filter(["category", category], visibleTypes);
-
+      if (categoryTypes.length < 1) {
+        return;
+      }
       return (
         <div className={cs.category} key={category}>
           <div className={cs.title}>{humanize(category)}</div>
