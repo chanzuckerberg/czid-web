@@ -12,11 +12,14 @@ FactoryBot.define do
 
     initialize_with do
       if taxon_name
-        taxon_lineage = TaxonLineage.find_by(tax_name: taxon_name)
-        taxon_lineage ||= create(:species, tax_name: taxon_name, taxid: tax_id)
+        # If taxon name is passed, the taxa must exist
+        taxon_lineage = TaxonLineage.find_by!(tax_name: taxon_name)
         # Unable to edit the original hash for some reason
         new(**attributes.dup.merge(tax_id: taxon_lineage.taxid,
-                                   name: taxon_lineage.name))
+                                   name: taxon_lineage.tax_name,
+                                   genus_taxid: taxon_lineage.genus_taxid,
+                                   superkingdom_taxid: taxon_lineage.superkingdom_taxid))
+
       else
         new(attributes)
       end

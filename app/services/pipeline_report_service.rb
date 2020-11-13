@@ -64,15 +64,6 @@ class PipelineReportService
 
   DEFAULT_SORT_PARAM = :agg_score
 
-  CATEGORIES = {
-    2 => "bacteria",
-    2_157 => "archaea",
-    2_759 => "eukaryota",
-    10_239 => "viruses",
-    12_884 => "viroids",
-    nil => "uncategorized",
-  }.freeze
-
   CSV_COLUMNS = [
     "tax_id",
     "tax_level",
@@ -470,7 +461,7 @@ class PipelineReportService
         genus_tax_id: counts[field_index[:genus_taxid]],
         name: counts[field_index[:name]],
         common_name: counts[field_index[:common_name]],
-        category: CATEGORIES[counts[field_index[:superkingdom_taxid]]],
+        category: TaxonLineage::CATEGORIES[counts[field_index[:superkingdom_taxid]]],
       }
       if counts[field_index[:is_phage]] == 1
         counts_hash[tax_id][:subcategories] = ["phage"]

@@ -4,7 +4,10 @@ import { Popup } from "semantic-ui-react";
 import { getAlignmentData } from "~/api";
 import { getSampleMetadata } from "~/api/metadata";
 import AccessionViz from "../AccessionViz";
-import { pipelineVersionHasAssembly } from "../utils/sample";
+import {
+  isPipelineFeatureAvailable,
+  ASSEMBLY_FEATURE,
+} from "~/components/utils/pipeline_versions";
 import cs from "./alignment_viz.scss";
 
 class AlignmentViz extends React.Component {
@@ -57,7 +60,10 @@ class AlignmentViz extends React.Component {
             {this.taxName ? this.taxName + " (" + this.taxLevel + ")" : ""}
             Alignment ({alignmentData.length} unique accessions)
             {pipelineRun &&
-              pipelineVersionHasAssembly(pipelineRun.pipeline_version) && (
+              isPipelineFeatureAvailable(
+                ASSEMBLY_FEATURE,
+                pipelineRun.pipeline_version
+              ) && (
                 <Popup
                   trigger={
                     <i

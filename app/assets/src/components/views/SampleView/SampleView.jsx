@@ -42,10 +42,11 @@ import {
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import {
-  pipelineVersionAtLeast,
-  pipelineVersionHasCoverageViz,
-  sampleErrorInfo,
-} from "~/components/utils/sample";
+  MASS_NORMALIZED_FEATURE,
+  COVERAGE_VIZ_FEATURE,
+  isPipelineFeatureAvailable,
+} from "~/components/utils/pipeline_versions";
+import { sampleErrorInfo } from "~/components/utils/sample";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
 import { IconAlert, LoadingIcon } from "~ui/icons";
 import { showToast } from "~/components/utils/toast";
@@ -72,7 +73,6 @@ import {
   TAXON_GENERAL_FIELDS,
   TABS,
   TREE_METRICS,
-  MASS_NORMALIZED_PIPELINE_VERSION,
 } from "./constants";
 import ReportViewSelector from "./ReportViewSelector";
 import ReportFilters from "./ReportFilters";
@@ -230,9 +230,9 @@ export default class SampleView extends React.Component {
     const enableMassNormalizedBackgrounds =
       pipelineRun &&
       pipelineRun.total_ercc_reads > 0 &&
-      pipelineVersionAtLeast(
-        pipelineRun.pipeline_version,
-        MASS_NORMALIZED_PIPELINE_VERSION
+      isPipelineFeatureAvailable(
+        MASS_NORMALIZED_FEATURE,
+        pipelineRun.pipeline_version
       );
     // If the currently selected background is mass normalized and the sample is incompatible,
     // then load the report with the default background instead.
@@ -724,11 +724,6 @@ export default class SampleView extends React.Component {
     this.setState({
       coverageVizVisible: false,
     });
-  };
-
-  coverageVizEnabled = () => {
-    const { pipelineRun } = this.state;
-    return pipelineVersionHasCoverageViz(get("pipeline_version", pipelineRun));
   };
 
   // Aggregate the accessions from multiple species into a single data object.
@@ -1561,6 +1556,7 @@ export default class SampleView extends React.Component {
       coverageVizVisible,
       currentTab,
       pipelineRun,
+      pipelineVersion,
       project,
       projectSamples,
       reportMetadata,
@@ -1639,7 +1635,7 @@ export default class SampleView extends React.Component {
             params={this.getSidebarParams()}
           />
         )}
-        {this.coverageVizEnabled() && (
+        {isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) && (
           <CoverageVizBottomSidebar
             visible={coverageVizVisible}
             onClose={withAnalytics(

@@ -107,8 +107,11 @@ export default class PlaygroundViz extends React.Component {
     };
 
     const events = {
+      // eslint-disable-next-line no-console
       onYAxisLabelClick: console.log,
+      // eslint-disable-next-line no-console
       onBarStackHover: console.log,
+      // eslint-disable-next-line no-console
       onBarEmptySpaceHover: console.log,
     };
 

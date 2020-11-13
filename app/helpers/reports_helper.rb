@@ -10,49 +10,66 @@ module ReportsHelper
     missing_names = Set.new
     missing_parents = {}
 
-    genus_str = TaxonLineage.level_name(TaxonCount::TAX_LEVEL_GENUS)
-    family_str = TaxonLineage.level_name(TaxonCount::TAX_LEVEL_FAMILY)
     # Iterate through both species and genus.
     counts.each do |tax_level, tax_counts|
       tax_counts.each do |tax_id, tax_info|
-        level_str = TaxonLineage.level_name(tax_level)
+        validated_tax_name, missing_report = ReportsHelper.validate_name(
+          tax_id: tax_id,
+          tax_level: tax_level,
+          tax_name: tax_info[:name],
+          parent_name: fetch_parent_name(tax_level, tax_id, tax_info, lineage_by_tax_id)
+        )
+        tax_info[:name] = validated_tax_name if validated_tax_name
 
-        if tax_id < 0
-          # Usually -1 means accession number did not resolve to species.
-          # TODO: Can we keep the accession numbers to show in these cases?
-          # NOTE: important to be lowercase for sorting below uppercase valid genuses
-          tax_info[:name] = "all taxa with neither family nor genus classification"
-
-          if tax_id < TaxonLineage::INVALID_CALL_BASE_ID
-            parent_level = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? genus_str : family_str
-            parent_tax_id = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? tax_info[:genus_tax_id] : convert_neg_taxid(tax_id)
-            parent_name = fetch_parent_name(tax_level, tax_id, tax_info, lineage_by_tax_id)
-            # If no parent (genus/family) name was found, then use the parent id as the name.
-            unless parent_name
-              missing_parents[parent_tax_id] = tax_id
-              parent_name = "taxon #{parent_tax_id}"
-            end
-            tax_info[:name] = "non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
-            Rails.logger.info("Pipeline run #{pipeline_run_id} contains non-#{level_str}-specific reads in #{parent_level} #{parent_name}")
-
-          elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
-            tax_info[:name] = "all artificial constructs"
-            Rails.logger.info("Blacklisted genus id appeared in report for pipeline run #{pipeline_run_id}.")
-
-          elsif !TaxonLineage::MISSING_LINEAGE_ID.value?(tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
-            tax_info[:name] += " #{tax_id}"
-            Rails.logger.info("Pipeline run #{pipeline_run_id} missing lineage for #{tax_id}.")
-          end
-
-        elsif !tax_info[:name]
-          missing_names.add(tax_id)
-          tax_info[:name] = "unnamed #{level_str} taxon #{tax_id}"
+        if missing_report.present?
+          missing_parents[missing_report[:parent]] = tax_id if missing_report[:parent]
+          missing_names.add(tax_id) if missing_report[:name]
         end
       end
     end
 
     Rails.logger.warn "Pipeline run #{pipeline_run_id} missing names for taxon ids #{missing_names.to_a}" unless missing_names.empty?
     Rails.logger.warn "Pipeline run #{pipeline_run_id} missing parent for child:  #{missing_parents}" unless missing_parents.empty?
+  end
+
+  def self.validate_name(tax_id:, tax_level:, tax_name:, parent_name:)
+    genus_str = TaxonLineage.level_name(TaxonCount::TAX_LEVEL_GENUS)
+    family_str = TaxonLineage.level_name(TaxonCount::TAX_LEVEL_FAMILY)
+
+    level_str = TaxonLineage.level_name(tax_level)
+    missing = {}
+    if tax_id < 0
+      # Usually -1 means accession number did not resolve to species.
+      # TODO: Can we keep the accession numbers to show in these cases?
+      # NOTE: important to be lowercase for sorting below uppercase valid genuses
+      validated_tax_name = "all taxa with neither family nor genus classification"
+
+      if tax_id < TaxonLineage::INVALID_CALL_BASE_ID
+        parent_level = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? genus_str : family_str
+        parent_tax_id = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? tax_info[:genus_tax_id] : convert_neg_taxid(tax_id)
+        # If no parent (genus/family) name was found, then use the parent id as the name.
+        unless parent_name
+          missing[:parent] = parent_tax_id
+          parent_name = "taxon #{parent_tax_id}"
+        end
+        validated_tax_name = "non-#{level_str}-specific reads in #{parent_level} #{parent_name}"
+        Rails.logger.info("Pipeline run #{pipeline_run_id} contains non-#{level_str}-specific reads in #{parent_level} #{parent_name}")
+
+      elsif tax_id == TaxonLineage::BLACKLIST_GENUS_ID
+        validated_tax_name = "all artificial constructs"
+        Rails.logger.info("Blacklisted genus id appeared in report for pipeline run #{pipeline_run_id}.")
+
+      elsif !TaxonLineage::MISSING_LINEAGE_ID.value?(tax_id) && tax_id != TaxonLineage::MISSING_SPECIES_ID_ALT
+        validated_tax_name += " #{tax_id}"
+        Rails.logger.info("Pipeline run #{pipeline_run_id} missing lineage for #{tax_id}.")
+      end
+
+    elsif !tax_name
+      missing[:name] = tax_id
+      validated_tax_name = "unnamed #{level_str} taxon #{tax_id}"
+    end
+
+    return validated_tax_name, missing
   end
 
   def self.convert_neg_taxid(tax_id)

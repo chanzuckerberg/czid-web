@@ -104,6 +104,7 @@ end
 require 'rspec/json_expectations'
 require 'simplecov'
 require 'webmock/rspec'
+require "support/common_stub_constants"
 
 SimpleCov.command_name "RSpec"
 

@@ -573,11 +573,14 @@ RSpec.describe ProjectsController, type: :controller do
 
           it "sees correct projects when filtering by taxon" do
             expected_projects = []
+            create(:taxon_lineage, tax_name: "Klebsormidium", taxid: 1)
+            create(:taxon_lineage, tax_name: "Klebsiella", taxid: KLEBSIELLA_TAX_ID)
+
             create(:project, users: [@user])
             create(:project, :with_sample, users: [@user])
-            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsormidium", nt: 10, tax_id: 1 }], job_status: "CHECKED" }] }])
-            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 0, tax_id: KLEBSIELLA_TAX_ID }], job_status: "CHECKED" }] }])
-            expected_projects << create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 10, tax_id: KLEBSIELLA_TAX_ID }], job_status: "CHECKED" }] }])
+            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "Klebsormidium", nt: 10 }], job_status: "CHECKED" }] }])
+            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "Klebsiella", nt: 0 }], job_status: "CHECKED" }] }])
+            expected_projects << create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "Klebsiella", nt: 10 }], job_status: "CHECKED" }] }])
 
             get :index, params: { format: "json", domain: domain, taxon: KLEBSIELLA_TAX_ID }
 

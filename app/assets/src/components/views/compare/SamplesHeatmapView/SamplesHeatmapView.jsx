@@ -3,16 +3,18 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
 import {
-  compact,
-  map,
-  difference,
-  intersection,
-  keys,
   assign,
-  get,
-  set,
-  isEmpty,
+  compact,
+  difference,
   find,
+  get,
+  intersection,
+  isEmpty,
+  keys,
+  map,
+  property,
+  set,
+  values,
 } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 
@@ -24,6 +26,10 @@ import { processMetadata } from "~utils/metadata";
 import { getSampleTaxons, saveVisualization, getTaxaDetails } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  isPipelineFeatureAvailable,
+  MASS_NORMALIZED_FEATURE,
+} from "~/components/utils/pipeline_versions";
 import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import { SortIcon } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
@@ -85,8 +91,6 @@ const NOTIFICATION_TYPES = {
   taxaFilteredOut: "taxa filtered out",
   multiplePipelineVersions: "diverse_pipelines",
 };
-const MASS_NORMALIZED_PIPELINE_VERSION = 4.0;
-
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
   return isNaN(parsed) ? defaultVal : parsed;
@@ -370,7 +374,7 @@ class SamplesHeatmapView extends React.Component {
   fetchHeatmapData() {
     // If using client-side filtering, the server should still return info
     // related to removed taxa in case the user decides to add the taxon back.
-    const { allowedFeatures } = this.context || {};
+    const { allowedFeatures = [] } = this.context || {};
     const removedTaxonIds = allowedFeatures.includes("heatmap_filter_fe")
       ? []
       : Array.from(this.removedTaxonIds);
@@ -403,6 +407,8 @@ class SamplesHeatmapView extends React.Component {
   }
 
   async fetchViewData() {
+    const { allowedFeatures = [] } = this.context || {};
+
     this.setState({ loading: true });
 
     const sampleValidationInfo = await validateSampleIds(
@@ -426,21 +432,33 @@ class SamplesHeatmapView extends React.Component {
       this.fetchMetadataFieldsBySampleIds(),
     ]);
 
+    let pipelineVersions = [];
+    if (allowedFeatures.includes("heatmap_service")) {
+      pipelineVersions = compact(
+        map(
+          property("pipeline_run.pipeline_version"),
+          values(heatmapData.samples)
+        )
+      );
+    } else {
+      pipelineVersions = compact(property("pipeline_version"), heatmapData);
+    }
     const pipelineMajorVersionsSet = new Set(
-      compact(
-        map(data => {
-          if (!data.pipeline_version) return null;
-          return `${data.pipeline_version.split(".")[0]}.x`;
-        }, heatmapData)
+      map(
+        pipelineVersion => `${pipelineVersion.split(".")[0]}.x`,
+        pipelineVersions
       )
     );
+
     if (pipelineMajorVersionsSet.size > 1) {
       this.showNotification(NOTIFICATION_TYPES.multiplePipelineVersions, [
         ...pipelineMajorVersionsSet,
       ]);
     }
 
-    let newState = this.extractData(heatmapData);
+    const newState = allowedFeatures.includes("heatmap_service")
+      ? this.extractDataFromService(heatmapData)
+      : this.extractData(heatmapData);
 
     // Only calculate the metadataTypes once.
     if (metadataFields !== null) {
@@ -450,6 +468,126 @@ class SamplesHeatmapView extends React.Component {
     this.updateHistoryState();
     // this.state.loading will be set to false at the end of updateFilters
     this.setState(newState, this.updateFilters);
+  }
+
+  extractDataFromService(rawData) {
+    const { metrics } = this.props;
+
+    let sampleIds = [];
+    let sampleNamesCounts = new Map();
+    let sampleDetails = {};
+    let allTaxonIds = [];
+    let allSpeciesIds = [];
+    let allGeneraIds = [];
+    let allTaxonDetails = {};
+    let allData = {};
+    let taxonFilterState = {};
+    // Check if all samples have ERCC counts > 0 to enable backgrounds generated
+    // using normalized input mass.
+    let enableMassNormalizedBackgrounds = true;
+
+    for (let i = 0; i < rawData.samples.length; i++) {
+      let sample = rawData.samples[i];
+
+      sampleIds.push(sample.id);
+      const pipelineRun = sample.pipeline_run;
+      enableMassNormalizedBackgrounds =
+        pipelineRun.ercc_count > 0 &&
+        isPipelineFeatureAvailable(
+          MASS_NORMALIZED_FEATURE,
+          pipelineRun.pipeline_version
+        ) &&
+        enableMassNormalizedBackgrounds;
+
+      // Keep track of samples with the same name, which may occur if
+      // a user selects samples from multiple projects.
+      if (sampleNamesCounts.has(sample.name)) {
+        // Append a number to a sample's name to differentiate between samples with the same name.
+        let count = sampleNamesCounts.get(sample.name);
+        let originalName = sample.name;
+        sample.name = `${sample.name} (${count})`;
+        sampleNamesCounts.set(originalName, count + 1);
+      } else {
+        sampleNamesCounts.set(sample.name, 1);
+      }
+
+      sampleDetails[sample.id] = {
+        id: sample.id,
+        name: sample.name,
+        index: i,
+        host_genome_name: sample.host_genome_name,
+        metadata: processMetadata(sample.metadata, true),
+        taxa: [],
+        duplicate: false,
+      };
+    }
+
+    for (let i = 0; i < rawData.taxa.length; i++) {
+      const taxonIndex = allTaxonIds.length;
+      const taxon = rawData.taxa[i];
+      allTaxonIds.push(taxon.tax_id);
+
+      if (taxon.tax_level === TAXON_LEVEL_OPTIONS["species"]) {
+        allSpeciesIds.push(taxon.tax_id);
+      } else {
+        allGeneraIds.push(taxon.tax_id);
+      }
+
+      allTaxonDetails[taxon.tax_id] = {
+        id: taxon.tax_id,
+        index: taxonIndex,
+        name: taxon.name,
+        category: taxon.category_name,
+        parentId: taxon.genus_taxid,
+        phage: !!taxon.is_phage,
+        genusName: taxon.genus_name,
+        taxLevel: taxon.tax_level,
+        sampleCount: 0,
+      };
+      allTaxonDetails[taxon.name] = allTaxonDetails[taxon.tax_id];
+    }
+
+    const metricIndex = rawData.result_keys.reduce(
+      (acc, current, idx) => ({ ...acc, [current]: idx }),
+      {}
+    );
+    for (const [sampleId, countsPerTaxa] of Object.entries(rawData.results)) {
+      for (const [taxId, countsPerType] of Object.entries(countsPerTaxa)) {
+        allTaxonDetails[taxId].sampleCount += 1;
+        sampleDetails[sampleId].taxa.push(parseInt(taxId));
+
+        const taxonIndex = allTaxonDetails[taxId].index;
+        const sampleIndex = sampleDetails[sampleId].index;
+
+        metrics.forEach(metric => {
+          let [metricType, metricName] = metric.value.split(".");
+          allData[metric.value] = allData[metric.value] || [];
+          allData[metric.value][taxonIndex] =
+            allData[metric.value][taxonIndex] || [];
+          if (countsPerType[metricType]) {
+            const metricDatum =
+              countsPerType[metricType][metricIndex[metricName]];
+            allData[metric.value][taxonIndex][sampleIndex] = metricDatum;
+          } else {
+            allData[metric.value][taxonIndex][sampleIndex] = 0;
+          }
+        });
+      }
+    }
+
+    return {
+      // The server should always pass back the same set of sampleIds, but possibly in a different order.
+      // We overwrite both this.state.sampleDetails and this.state.sampleIds to make sure the two are in sync.
+      sampleIds,
+      sampleDetails,
+      allTaxonIds,
+      allSpeciesIds,
+      allGeneraIds,
+      allTaxonDetails,
+      allData,
+      taxonFilterState,
+      enableMassNormalizedBackgrounds,
+    };
   }
 
   extractData(rawData) {
@@ -472,8 +610,10 @@ class SamplesHeatmapView extends React.Component {
 
       enableMassNormalizedBackgrounds =
         sample.ercc_count > 0 &&
-        parseFloat(sample.pipeline_version) >=
-          MASS_NORMALIZED_PIPELINE_VERSION &&
+        isPipelineFeatureAvailable(
+          MASS_NORMALIZED_FEATURE,
+          sample.pipeline_version
+        ) &&
         enableMassNormalizedBackgrounds;
 
       // Keep track of samples with the same name, which may occur if
@@ -572,12 +712,46 @@ class SamplesHeatmapView extends React.Component {
   }
 
   async fetchBackground() {
+    const { allowedFeatures = [] } = this.context || {};
+
     this.setState({ loading: true });
     let backgroundData = await this.fetchBackgroundData();
-    let newState = this.extractBackgroundMetrics(backgroundData);
+    let newState = allowedFeatures.includes("heatmap_service")
+      ? this.extractBackgroundMetricsFromService(backgroundData)
+      : this.extractBackgroundMetrics(backgroundData);
 
     this.updateHistoryState();
     this.setState(newState, this.updateFilters);
+  }
+
+  extractBackgroundMetricsFromService(rawData, updateBackground) {
+    let { sampleDetails, allTaxonDetails, allData } = this.state;
+    const { metrics } = this.props;
+
+    const metricIndex = rawData.result_keys.reduce(
+      (acc, current, idx) => ({ ...acc, [current]: idx }),
+      {}
+    );
+    for (const [sampleId, countsPerTaxa] of Object.entries(rawData.results)) {
+      for (const [taxId, countsPerType] of Object.entries(countsPerTaxa)) {
+        const taxonIndex = allTaxonDetails[taxId].index;
+        const sampleIndex = sampleDetails[sampleId].index;
+
+        metrics.forEach(metric => {
+          let [metricType, metricName] = metric.value.split(".");
+          if (countsPerType[metricType]) {
+            const metricDatum =
+              countsPerType[metricType][metricIndex[metricName]];
+            allData[metric.value] = allData[metric.value] || [];
+            allData[metric.value][taxonIndex] =
+              allData[metric.value][taxonIndex] || [];
+            allData[metric.value][taxonIndex][sampleIndex] = metricDatum;
+          }
+        });
+      }
+    }
+
+    return { allData };
   }
 
   extractBackgroundMetrics(rawData) {
@@ -626,6 +800,7 @@ class SamplesHeatmapView extends React.Component {
     let taxonIds = new Set();
     let filteredData = {};
     let addedTaxonIdsPassingFilters = new Set();
+
     if (allowedFeatures.includes("heatmap_filter_fe")) {
       allTaxonIds.forEach(taxonId => {
         let taxon = allTaxonDetails[taxonId];
@@ -664,8 +839,8 @@ class SamplesHeatmapView extends React.Component {
     this.updateHistoryState();
 
     this.setState({
-      taxonFilterState: taxonFilterState,
-      taxonIds: taxonIds,
+      taxonFilterState,
+      taxonIds,
       loading: false,
       data: filteredData,
       notifiedFilteredOutTaxonIds,
@@ -733,7 +908,7 @@ class SamplesHeatmapView extends React.Component {
       subcategories,
       species,
     } = this.state.selectedOptions;
-    let phage_selected =
+    let phageSelected =
       subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
 
     if (species && taxonDetails["taxLevel"] !== 1) {
@@ -745,16 +920,16 @@ class SamplesHeatmapView extends React.Component {
       return false;
     }
     if (categories.length) {
-      if (!phage_selected && taxonDetails["phage"]) {
+      if (!phageSelected && taxonDetails["phage"]) {
         return false;
       }
       if (
         !categories.includes(taxonDetails["category"]) &&
-        !(phage_selected && taxonDetails["phage"])
+        !(phageSelected && taxonDetails["phage"])
       ) {
         return false;
       }
-    } else if (phage_selected && !taxonDetails["phage"]) {
+    } else if (phageSelected && !taxonDetails["phage"]) {
       // Exclude non-phages if only the phage subcategory is selected.
       return false;
     }
@@ -777,9 +952,9 @@ class SamplesHeatmapView extends React.Component {
     let topTaxonDetails = {};
     let filteredData = {};
     Object.values(sampleDetails).forEach(sample => {
-      let filteredTaxaInSample = sample.taxa.filter(taxonId =>
-        filteredTaxonIds.has(taxonId)
-      );
+      let filteredTaxaInSample = sample.taxa.filter(taxonId => {
+        return filteredTaxonIds.has(taxonId);
+      });
 
       filteredTaxaInSample.sort(
         (taxId1, taxId2) =>
@@ -857,13 +1032,16 @@ class SamplesHeatmapView extends React.Component {
   }
 
   async updateTaxa(taxaMissingInfo) {
+    const { allowedFeatures = [] } = (this.context = {});
     // Given a list of taxa for which details are currently missing,
     // fetch the information for those taxa from the server and
     // update the appropriate data structures to include the new taxa.
     this.setState({ loading: true });
 
     const newTaxaInfo = await this.fetchNewTaxa(taxaMissingInfo);
-    const extractedData = this.extractData(newTaxaInfo);
+    const extractedData = allowedFeatures.includes("heatmap_service")
+      ? this.extractDataFromService(newTaxaInfo)
+      : this.extractData(newTaxaInfo);
 
     let {
       allData,
@@ -977,7 +1155,7 @@ class SamplesHeatmapView extends React.Component {
   };
 
   handleRemoveTaxon = taxonName => {
-    const { allowedFeatures } = this.context || {};
+    const { allowedFeatures = [] } = this.context || {};
     let { addedTaxonIds } = this.state;
     let taxonId = this.state.allTaxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
@@ -1131,7 +1309,7 @@ class SamplesHeatmapView extends React.Component {
   });
 
   handleSelectedOptionsChange = newOptions => {
-    const { allowedFeatures } = this.context || {};
+    const { allowedFeatures = [] } = this.context || {};
 
     if (allowedFeatures.includes("heatmap_filter_fe")) {
       const frontendFilters = [
@@ -1218,7 +1396,7 @@ class SamplesHeatmapView extends React.Component {
       return <div className={cs.noDataMsg}>No data to render</div>;
     }
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
-    const { allowedFeatures } = this.context || {};
+    const { allowedFeatures = [] } = this.context || {};
     return (
       <ErrorBoundary>
         <SamplesHeatmapVis
@@ -1378,19 +1556,34 @@ class SamplesHeatmapView extends React.Component {
   }
 
   render() {
-    const { allowedFeatures } = this.context || {};
-    let shownTaxa = new Set(this.state.taxonIds, this.state.addedTaxonIds);
+    const { allowedFeatures = [] } = this.context || {};
+    const {
+      addedTaxonIds,
+      allGeneraIds,
+      allSpeciesIds,
+      data,
+      hideFilters,
+      loading,
+      sampleIds,
+      selectedOptions,
+      selectedSampleId,
+      sidebarMode,
+      taxonIds,
+    } = this.state;
+
+    let shownTaxa = new Set(taxonIds, addedTaxonIds);
     shownTaxa = new Set(
       [...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId))
     );
+
     return (
       <div className={cs.heatmap}>
         {!this.state.hideFilters && (
           <div>
             <NarrowContainer>
               <SamplesHeatmapHeader
-                sampleIds={this.state.sampleIds}
-                data={this.state.data}
+                sampleIds={sampleIds}
+                data={data}
                 onDownloadSvg={this.handleDownloadSvg}
                 onDownloadPng={this.handleDownloadPng}
                 onDownloadCsv={this.handleDownloadCsv}
@@ -1401,15 +1594,15 @@ class SamplesHeatmapView extends React.Component {
             <NarrowContainer>
               <SamplesHeatmapControls
                 options={this.getControlOptions()}
-                selectedOptions={this.state.selectedOptions}
+                selectedOptions={selectedOptions}
                 onSelectedOptionsChange={this.handleSelectedOptionsChange}
-                loading={this.state.loading}
-                data={this.state.data}
+                loading={loading}
+                data={data}
                 filteredTaxaCount={shownTaxa.size}
                 totalTaxaCount={
                   this.state.selectedOptions.species
-                    ? this.state.allSpeciesIds.length
-                    : this.state.allGeneraIds.length
+                    ? allSpeciesIds.length
+                    : allGeneraIds.length
                 }
                 prefilterConstants={this.props.prefilterConstants}
                 displayFilterStats={allowedFeatures.includes(
@@ -1423,7 +1616,7 @@ class SamplesHeatmapView extends React.Component {
           </div>
         )}
         <div className={cs.filterToggleContainer}>
-          {this.state.hideFilters && <div className={cs.filterLine} />}
+          {hideFilters && <div className={cs.filterLine} />}
           <div
             className={cs.arrowIcon}
             onClick={withAnalytics(
@@ -1446,8 +1639,8 @@ class SamplesHeatmapView extends React.Component {
             this.closeSidebar,
             "SamplesHeatmapView_details-sidebar_closed",
             {
-              sampleId: this.state.selectedSampleId,
-              sidebarMode: this.state.sidebarMode,
+              sampleId: selectedSampleId,
+              sidebarMode: sidebarMode,
             }
           )}
           params={this.getSidebarParams()}

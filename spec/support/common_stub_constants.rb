@@ -3,6 +3,6 @@
 # constants declared in multiple locations and helps keep
 # code duplication down.
 
-module CommonConstants
+module CommonStubConstants
   FAKE_SFN_EXECUTION_ARN = "fake:sfn:execution:arn".freeze
 end

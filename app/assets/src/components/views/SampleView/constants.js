@@ -44,8 +44,6 @@ export const CATEGORIES = [
   { name: "Uncategorized" },
 ];
 
-export const MASS_NORMALIZED_PIPELINE_VERSION = "4.0";
-
 const DOC_BASE_LINK =
   "https://help.idseq.net/hc/en-us/articles/360034790574-Single-Sample-Report-Table";
 

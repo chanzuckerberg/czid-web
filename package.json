@@ -6,7 +6,7 @@
     "preinstall": "npx npm-force-resolutions",
     "start": "npm install --no-optional && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
-    "lint": "./node_modules/.bin/eslint . ./**/*.js",
+    "lint": "./node_modules/.bin/eslint app/assets/src --ext .js,.jsx",
     "precommit": "lint-staged",
     "test": "jest",
     "snyk-protect": "snyk protect",

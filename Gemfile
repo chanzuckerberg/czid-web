@@ -104,6 +104,8 @@ gem 'ougai'
 # For loading all files in a directory
 gem 'require_all'
 
+gem 'pluck_to_hash'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]

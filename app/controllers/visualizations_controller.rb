@@ -8,8 +8,10 @@ class VisualizationsController < ApplicationController
     expires_in: 30.days,
     cache_path: proc do |c|
       sorted_params = c.request.params.to_h.sort.to_h
-      if current_user.allowed_feature?("heatmap_filter_fe")
-        sorted_params[:heatmap_filter_fe] = true
+      ["heatmap_filter_fe", "heatmap_service"].each do |feature|
+        if current_user.allowed_feature?(feature)
+          sorted_params[feature.to_sym] = true
+        end
       end
       sorted_params.to_query
     end
@@ -189,13 +191,22 @@ class VisualizationsController < ApplicationController
   end
 
   def samples_taxons
-    @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
-      params,
-      samples_for_heatmap,
-      background_for_heatmap,
-      client_filtering_enabled: current_user.allowed_feature?("heatmap_filter_fe")
-    )
-    render json: @sample_taxons_dict
+    if current_user.allowed_feature?("heatmap_service")
+      pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
+      heatmap_dict = TaxonCountsHeatmapService.call(
+        pipeline_run_ids: pr_id_to_sample_id.keys,
+        background_id: background_for_heatmap
+      )
+      render json: heatmap_dict
+    else
+      @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
+        params,
+        samples_for_heatmap,
+        background_for_heatmap,
+        client_filtering_enabled: current_user.allowed_feature?("heatmap_filter_fe")
+      )
+      render json: @sample_taxons_dict
+    end
   end
 
   # Given a list of taxon ids, samples, and a background, returns the
@@ -203,15 +214,27 @@ class VisualizationsController < ApplicationController
   # If update_background_only is true, then returned object will only include
   # metrics affected by the background (e.g. z-score).
   def taxa_details
-    update_background_only = params[:updateBackgroundOnly]
-    @sample_taxons_dict = HeatmapHelper.taxa_details(
-      params,
-      samples_for_heatmap,
-      background_for_heatmap,
-      update_background_only,
-      client_filtering_enabled: current_user.allowed_feature?("heatmap_filter_fe")
-    )
-    render json: @sample_taxons_dict
+    if current_user.allowed_feature?("heatmap_service")
+      pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
+      taxon_ids = params[:taxonIds] || []
+
+      sample_taxons_dict = TaxonCountsHeatmapService.call(
+        pipeline_run_ids: pr_id_to_sample_id.keys,
+        taxon_ids: taxon_ids.compact,
+        background_id: background_for_heatmap
+      )
+    else
+      update_background_only = params[:updateBackgroundOnly]
+      sample_taxons_dict = HeatmapHelper.taxa_details(
+        params,
+        samples_for_heatmap,
+        background_for_heatmap,
+        update_background_only,
+        client_filtering_enabled: current_user.allowed_feature?("heatmap_filter_fe")
+      )
+    end
+
+    render json: sample_taxons_dict
   end
 
   private

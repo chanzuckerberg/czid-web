@@ -243,7 +243,9 @@ class ViewOnlyLinkForm extends React.Component {
                   className={cs.dropdown}
                   placeholder="NID Human CSF v3"
                   options={this.dropdownOptions}
-                  onChange={() => console.log("background model")}
+                  onChange={() =>
+                    console.warn("background model onChange not configured")
+                  }
                 />
               </div>
               <div className={cs.settingsFormField}>

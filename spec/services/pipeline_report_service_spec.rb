@@ -38,6 +38,9 @@ RSpec.describe PipelineReportService, type: :service do
     before do
       ResqueSpec.reset!
 
+      create(:taxon_lineage, tax_name: "Klebsiella pneumoniae", taxid: 573, genus_taxid: 570, superkingdom_taxid: 2)
+      create(:taxon_lineage, tax_name: "Klebsiella", taxid: 570, genus_taxid: 570, superkingdom_taxid: 2)
+
       # This sample has reads in NT and NR for species taxid 573,
       # which belongs to genus 570. It's compared to a background
       # that also has reads in NT and NR for species taxid 573.
@@ -53,45 +56,33 @@ RSpec.describe PipelineReportService, type: :service do
                              adjusted_remaining_reads: 316,
                              subsample: 1_000_000,
                              taxon_counts_data: [{
-                               tax_id: 573,
                                tax_level: 1,
                                taxon_name: "Klebsiella pneumoniae",
                                nt: 209,
                                percent_identity: 99.6995,
                                alignment_length: 149.402,
                                e_value: -89.5641,
-                               genus_taxid: 570,
-                               superkingdom_taxid: 2,
                              }, {
-                               tax_id: 573,
                                tax_level: 1,
                                taxon_name: "Klebsiella pneumoniae",
                                nr: 69,
                                percent_identity: 97.8565,
                                alignment_length: 46.3623,
                                e_value: -16.9101,
-                               genus_taxid: 570,
-                               superkingdom_taxid: 2,
                              }, {
-                               tax_id: 570,
                                tax_level: 2,
                                nt: 217,
                                taxon_name: "Klebsiella",
                                percent_identity: 99.7014,
                                alignment_length: 149.424,
                                e_value: -89.5822,
-                               genus_taxid: 570,
-                               superkingdom_taxid: 2,
                              }, {
-                               tax_id: 570,
                                tax_level: 2,
                                nr: 87,
                                taxon_name: "Klebsiella",
                                percent_identity: 97.9598,
                                alignment_length: 46.4253,
                                e_value: -16.9874,
-                               genus_taxid: 570,
-                               superkingdom_taxid: 2,
                              },],
                              contigs_data: [{
                                species_taxid_nt: 573,
@@ -205,6 +196,9 @@ RSpec.describe PipelineReportService, type: :service do
     before do
       ResqueSpec.reset!
 
+      create(:taxon_lineage, tax_name: "Klebsiella pneumoniae", taxid: 573, genus_taxid: 570, superkingdom_taxid: 2)
+      create(:taxon_lineage, tax_name: "Klebsiella", taxid: 570, genus_taxid: 570, superkingdom_taxid: 2)
+
       # This sample has reads in NT and NR for species taxid 573,
       # which belongs to genus 570. It's compared to a background
       # that also has reads in NT and NR for species taxid 573.
@@ -221,45 +215,33 @@ RSpec.describe PipelineReportService, type: :service do
                              adjusted_remaining_reads: 316,
                              subsample: 1_000_000,
                              taxon_counts_data: [{
-                               tax_id: 573,
                                tax_level: 1,
                                taxon_name: "Klebsiella pneumoniae",
                                nt: 209,
                                percent_identity: 99.6995,
                                alignment_length: 149.402,
                                e_value: -89.5641,
-                               genus_taxid: 570,
-                               superkingdom_taxid: 2,
                              }, {
-                               tax_id: 573,
                                tax_level: 1,
                                taxon_name: "Klebsiella pneumoniae",
                                nr: 69,
                                percent_identity: 97.8565,
                                alignment_length: 46.3623,
                                e_value: -16.9101,
-                               genus_taxid: 570,
-                               superkingdom_taxid: 2,
                              }, {
-                               tax_id: 570,
                                tax_level: 2,
                                nt: 217,
                                taxon_name: "Klebsiella",
                                percent_identity: 99.7014,
                                alignment_length: 149.424,
                                e_value: -89.5822,
-                               genus_taxid: 570,
-                               superkingdom_taxid: 2,
                              }, {
-                               tax_id: 570,
                                tax_level: 2,
                                nr: 87,
                                taxon_name: "Klebsiella",
                                percent_identity: 97.9598,
                                alignment_length: 46.4253,
                                e_value: -16.9874,
-                               genus_taxid: 570,
-                               superkingdom_taxid: 2,
                              },],
                              contigs_data: [{
                                species_taxid_nt: 573,
@@ -349,6 +331,10 @@ RSpec.describe PipelineReportService, type: :service do
     before do
       ResqueSpec.reset!
 
+      create(:taxon_lineage, tax_name: "Streptococcus pneumoniae", taxid: 1313, genus_taxid: 1301, superkingdom_taxid: 2)
+      create(:taxon_lineage, tax_name: "Streptococcus", taxid: 1301, genus_taxid: 1301, superkingdom_taxid: 2)
+      create(:taxon_lineage, tax_name: "Streptococcus mitis", taxid: 28_037, genus_taxid: 1301, superkingdom_taxid: 2)
+
       # This sample only has NR reads for species taxid 1313, and
       # only NT reads for species taxid 28037, both of which belong to
       # genus 1301. It's compared to a background with both NT and NR reads
@@ -366,35 +352,26 @@ RSpec.describe PipelineReportService, type: :service do
                              adjusted_remaining_reads: 316,
                              subsample: 1_000_000,
                              taxon_counts_data: [{
-                               tax_id: 1313,
                                tax_level: 1,
                                taxon_name: "Streptococcus pneumoniae",
                                nr: 2,
                                percent_identity: 96.9,
                                alignment_length: 32.0,
                                e_value: -9.3,
-                               genus_taxid: 1301,
-                               superkingdom_taxid: 2,
                              }, {
-                               tax_id: 1301,
                                tax_level: 2,
                                nr: 2,
                                taxon_name: "Streptococcus",
                                percent_identity: 96.9,
                                alignment_length: 32.0,
                                e_value: -9.3,
-                               genus_taxid: 1301,
-                               superkingdom_taxid: 2,
                              }, {
-                               tax_id: 1301,
                                tax_level: 2,
                                nt: 4,
                                taxon_name: "Streptococcus",
                                percent_identity: 95.65,
                                alignment_length: 149.75,
                                e_value: -81.478,
-                               genus_taxid: 1301,
-                               superkingdom_taxid: 2,
                              }, {
                                tax_id: 28_037,
                                tax_level: 1,
@@ -403,8 +380,6 @@ RSpec.describe PipelineReportService, type: :service do
                                percent_identity: 95.65,
                                alignment_length: 149.75,
                                e_value: -81.478,
-                               genus_taxid: 1301,
-                               superkingdom_taxid: 2,
                              },])
 
       @background = create(:background,
@@ -525,6 +500,9 @@ RSpec.describe PipelineReportService, type: :service do
     before do
       ResqueSpec.reset!
 
+      create(:taxon_lineage, tax_name: "species", taxid: 1, genus_taxid: 2)
+      create(:taxon_lineage, tax_name: "genus", taxid: 2, genus_taxid: 2)
+
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
                              sfn_execution_arn: fake_sfn_execution_arn,
@@ -534,19 +512,15 @@ RSpec.describe PipelineReportService, type: :service do
                              adjusted_remaining_reads: 315,
                              subsample: 1_000_000,
                              taxon_counts_data: [{
-                               tax_id: 1,
                                tax_level: 1,
                                taxon_name: "species",
                                nt: 200,
                                e_value: -90,
-                               genus_taxid: 2,
                              }, {
-                               tax_id: 2,
                                tax_level: 2,
                                taxon_name: "genus",
                                nt: 220,
                                e_value: -90,
-                               genus_taxid: 2,
                              },])
 
       @background = create(:background,
@@ -579,6 +553,12 @@ RSpec.describe PipelineReportService, type: :service do
     before do
       ResqueSpec.reset!
 
+      create(:taxon_lineage, tax_name: "Escherichia", taxid: 1, genus_taxid: 1, genus_name: "Escherichia")
+      create(:taxon_lineage, tax_name: "Escherichia albertii", taxid: 2, genus_taxid: 1, genus_name: "Escherichia")
+      create(:taxon_lineage, tax_name: "Escherichia coli", taxid: 3, genus_taxid: 1, genus_name: "Escherichia")
+      create(:taxon_lineage, tax_name: "Salmonella", taxid: 4, genus_taxid: 4, genus_name: "Salmonella")
+      create(:taxon_lineage, tax_name: "Salmonella enterica", taxid: 5, genus_taxid: 4, genus_name: "Salmonella")
+
       @pipeline_run = create(:pipeline_run,
                              sample: create(:sample, project: create(:project)),
                              sfn_execution_arn: fake_sfn_execution_arn,
@@ -586,35 +566,25 @@ RSpec.describe PipelineReportService, type: :service do
                              total_reads: 100,
                              adjusted_remaining_reads: 100,
                              taxon_counts_data: [{
-                               tax_id: 1,
                                tax_level: 2,
                                taxon_name: "Escherichia", # nonpathogenic genus
                                e_value: 0,
-                               genus_taxid: 1,
                              }, {
-                               tax_id: 2,
                                tax_level: 1,
                                taxon_name: "Escherichia albertii", # nonpathogenic species
                                e_value: 0,
-                               genus_taxid: 1,
                              }, {
-                               tax_id: 3,
                                tax_level: 1,
                                taxon_name: "Escherichia coli", # pathogenic species
                                e_value: 0,
-                               genus_taxid: 1,
                              }, {
-                               tax_id: 4,
                                tax_level: 2,
                                taxon_name: "Salmonella", # pathogenic genus
                                e_value: 0,
-                               genus_taxid: 4,
                              }, {
-                               tax_id: 5,
                                tax_level: 1,
                                taxon_name: "Salmonella enterica", # species belonging to pathogenic genus
                                e_value: 0,
-                               genus_taxid: 4,
                              },])
 
       @background = create(:background,

@@ -1,8 +1,6 @@
 require 'rails_helper'
 require 'json'
 
-require "support/common_constants"
-
 RSpec.describe PipelineVizController, type: :controller do
   pipeline_run_stages_data = [{
     name: "Host Filtering",
@@ -166,7 +164,7 @@ RSpec.describe PipelineVizController, type: :controller do
 
   let(:expected_json) { JSON.parse(JSON.generate(expected_stage_results)) }
 
-  let(:fake_sfn_execution_arn) { CommonConstants::FAKE_SFN_EXECUTION_ARN }
+  let(:fake_sfn_execution_arn) { CommonStubConstants::FAKE_SFN_EXECUTION_ARN }
 
   before do
     allow(SfnPipelineDataService).to receive(:call).with(instance_of(Integer), true, false).and_return(expected_stage_results)

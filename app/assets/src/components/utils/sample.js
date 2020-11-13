@@ -1,38 +1,5 @@
 import { isEmpty, last } from "lodash/fp";
 
-export const pipelineVersionAtLeast = (pipelineVersion, testVersion) => {
-  if (!pipelineVersion) return false;
-
-  // turn undefined to 0.
-  const toInt = versionNumber => +versionNumber || 0;
-
-  const pipelineNums = pipelineVersion.split(".");
-  const testNums = testVersion.split(".");
-
-  if (toInt(pipelineNums[0]) > toInt(testNums[0])) {
-    return true;
-  } else if (toInt(pipelineNums[0]) === toInt(testNums[0])) {
-    if (toInt(pipelineNums[1]) > toInt(testNums[1])) {
-      return true;
-    } else if (toInt(pipelineNums[1]) === toInt(testNums[1])) {
-      if (toInt(pipelineNums[2]) >= toInt(testNums[2])) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-};
-
-const ASSEMBLY_PIPELINE_VERSION = "3.1";
-const COVERAGE_VIZ_PIPELINE_VERSION = "3.6";
-
-export const pipelineVersionHasAssembly = pipelineVersion =>
-  pipelineVersionAtLeast(pipelineVersion, ASSEMBLY_PIPELINE_VERSION);
-
-export const pipelineVersionHasCoverageViz = pipelineVersion =>
-  pipelineVersionAtLeast(pipelineVersion, COVERAGE_VIZ_PIPELINE_VERSION);
-
 // Get the basename from a file path
 export const baseName = str => {
   let base = cleanFilePath(str);

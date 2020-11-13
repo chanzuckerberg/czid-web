@@ -82,6 +82,15 @@ class TaxonLineage < ApplicationRecord
     ],
   }.freeze
 
+  CATEGORIES = {
+    2 => "bacteria",
+    2_157 => "archaea",
+    2_759 => "eukaryota",
+    10_239 => "viruses",
+    12_884 => "viroids",
+    nil => "uncategorized",
+  }.freeze
+
   def tax_level
     TaxonCount::LEVEL_2_NAME.keys.sort.each do |level_int|
       level_str = TaxonCount::LEVEL_2_NAME[level_int]

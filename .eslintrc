@@ -30,6 +30,7 @@
       "avoidEscape": true,
       "allowTemplateLiterals": true
     }],
+    "no-console": ["error", { "allow": ["warn", "error"] }],
     "no-prototype-builtins": "warn",
     "no-unreachable": "warn",
     "no-unused-vars": "warn",

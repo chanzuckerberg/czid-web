@@ -8,9 +8,10 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { getCsrfToken } from "~/api/utils";
 import {
-  pipelineVersionHasAssembly,
-  pipelineVersionHasCoverageViz,
-} from "~/components/utils/sample";
+  isPipelineFeatureAvailable,
+  ASSEMBLY_FEATURE,
+  COVERAGE_VIZ_FEATURE,
+} from "~/components/utils/pipeline_versions";
 import { UserContext } from "~/components/common/UserContext";
 import BasicPopup from "~/components/BasicPopup";
 import ReportInsightIcon from "../report/ReportInsightIcon";
@@ -48,7 +49,10 @@ class ReportTable extends React.Component {
     };
 
     const countTypes = displayMergedNtNrValue ? ["merged_nt_nr"] : ["nt", "nr"];
-    const assemblyEnabled = pipelineVersionHasAssembly(pipelineVersion);
+    const assemblyEnabled = isPipelineFeatureAvailable(
+      ASSEMBLY_FEATURE,
+      pipelineVersion
+    );
     this.columns = compact([
       {
         cellRenderer: this.renderExpandIcon,
@@ -526,7 +530,7 @@ class ReportTable extends React.Component {
     const { onCoverageVizClick, pipelineVersion, sampleId } = this.props;
     const alignmentVizUrl = `/samples/${sampleId}/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
-    if (pipelineVersionHasCoverageViz(pipelineVersion)) {
+    if (isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion)) {
       onCoverageVizClick({
         taxId,
         taxName,

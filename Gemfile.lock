@@ -946,6 +946,9 @@ GEM
     parallel (1.14.0)
     parser (2.7.2.0)
       ast (~> 2.4.1)
+    pluck_to_hash (1.0.2)
+      activerecord (>= 4.0.2)
+      activesupport (>= 4.0.2)
     pry (0.12.2)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
@@ -1205,6 +1208,7 @@ DEPENDENCIES
   omniauth-rails_csrf_protection (~> 0.1.2)
   ougai
   parallel (= 1.14.0)
+  pluck_to_hash
   puma (~> 3.12)
   rack-cors
   rack-host-redirect

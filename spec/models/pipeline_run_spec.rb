@@ -382,7 +382,7 @@ describe PipelineRun, type: :model do
           {
             "class": "PipelineStepRunStar",
             "additional_files": {
-              "star_genome": "s3://idseq-database/host_filter/#{host}/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar",
+              "star_genome": "s3://fake-references/host_filter/#{host}/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar",
             },
           },
         ],
@@ -392,8 +392,8 @@ describe PipelineRun, type: :model do
     let(:host_genome_name) { "none" }
 
     before do
-      star_index_path = "s3://idseq-public-references/host_filter/test_host/2020-09-22/test_host_STAR_genome.tar"
-      bowtie2_index_path = "s3://idseq-public-references/host_filter/test_host/2020-09-22/test_host_bowtie2_genome.tar"
+      star_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/test_host/2020-09-22/test_host_STAR_genome.tar"
+      bowtie2_index_path = "s3://#{S3_DATABASE_BUCKET}/host_filter/test_host/2020-09-22/test_host_bowtie2_genome.tar"
       @test_host = create(:host_genome, name: "test_host", s3_star_index_path: star_index_path, s3_bowtie2_index_path: bowtie2_index_path)
 
       user = create(:admin)

@@ -309,6 +309,10 @@ module HeatmapHelper
                                  end
 
     # TODO: (gdingle): how do we protect against SQL injection?
+    # The first query of a session does not work - the session variable @rank do not work, if we do not declare the variables before.
+    # Although I could not find support on MySQL documentation, the first query seems to use always the undefined value instead of updating the variable.
+    # Also guarantees that they are re-initialized to a value that avoids potential corner case issues from the last value from a previous query.
+    ActiveRecord::Base.connection.execute("SET @rank := 0, @current_id := 0;")
     sql_results = TaxonCount.connection.select_all(
       top_n_query(
         query,

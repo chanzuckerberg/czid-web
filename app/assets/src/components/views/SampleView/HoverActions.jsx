@@ -13,7 +13,10 @@ import {
   IconPhyloTreeSmall,
 } from "~ui/icons";
 import PropTypes from "~/components/utils/propTypes";
-import { pipelineVersionHasCoverageViz } from "~/components/utils/sample";
+import {
+  isPipelineFeatureAvailable,
+  COVERAGE_VIZ_FEATURE,
+} from "~/components/utils/pipeline_versions";
 
 import cs from "./hover_actions.scss";
 
@@ -31,7 +34,10 @@ class HoverActions extends React.Component {
   // Metadata for each of the hover actions.
   getHoverActions = () => {
     const { pipelineVersion, snapshotShareId } = this.props;
-    const hasCoverageViz = pipelineVersionHasCoverageViz(pipelineVersion);
+    const hasCoverageViz = isPipelineFeatureAvailable(
+      COVERAGE_VIZ_FEATURE,
+      pipelineVersion
+    );
 
     const params = {
       pipelineVersion,
