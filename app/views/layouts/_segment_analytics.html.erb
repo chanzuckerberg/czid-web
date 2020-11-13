@@ -8,10 +8,11 @@
         // Destination middleware - filter PII from events going to Appcues destination
         // See https://segment.com/docs/connections/sources/catalog/libraries/website/javascript/middleware/ for more information on middleware
         const DMW = ({ payload, integration, next }) => {
-          if (<%= current_user.present? %> && payload.obj.traits){
-            payload.obj.traits = <%= raw escape_json(current_user.traits_for_segment(include_pii: false)) %>;
-          }
-
+          <% if current_user.present? %>
+            if (payload.obj.traits){
+              payload.obj.traits = <%= raw escape_json(current_user.traits_for_segment(include_pii: false)) %>;
+            }
+          <% end %>
           next(payload);
         };
 
