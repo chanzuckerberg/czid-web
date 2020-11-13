@@ -16,7 +16,6 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'consul', '>= 0.13.1'
 gem 'health_check', '>= 2.7.0'
-gem 'mailgun_rails', '>= 0.9.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # Logger

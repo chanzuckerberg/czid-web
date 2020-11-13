@@ -17,7 +17,6 @@ x-web-variables: &web-variables
   ? GIT_RELEASE_SHA
   ? ID_SEQ_ENVS_THAT_CAN_SCALE
   ? LOCATION_IQ_API_KEY
-  ? MAIL_GUN_API_KEY
   ? MAPTILER_API_KEY
   ? RACK_ENV
   ? RAILS_ENV
