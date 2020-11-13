@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
-import LoadingIcon from "~ui/icons/LoadingIcon";
+import { IconLoading } from "~ui/icons";
 
 import cs from "./loading_message.scss";
 
@@ -11,7 +11,7 @@ class LoadingMessage extends React.Component {
     const { className, message } = this.props;
     return (
       <div className={cx(cs.loadingMessage, className)}>
-        <LoadingIcon className={cs.loadingIcon} />
+        <IconLoading className={cs.loadingIcon} />
         <div className={cs.text}>{message}</div>
       </div>
     );

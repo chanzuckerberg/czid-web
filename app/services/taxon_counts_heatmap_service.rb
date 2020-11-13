@@ -167,7 +167,8 @@ class TaxonCountsHeatmapService
             tax_id: tax_id,
             tax_level: taxon_count[:tax_level],
             tax_name: taxon_count[:name],
-            parent_name: TaxonCount::TAX_LEVEL_SPECIES ? taxon_count[:genus_name] : taxon_count[:family_name]
+            parent_name: TaxonCount::TAX_LEVEL_SPECIES ? taxon_count[:genus_name] : taxon_count[:family_name],
+            pipeline_run_id: pipeline_run_id
           )[0] || taxon_count[:name]
           h[:common_name] = taxon_count[:common_name]
           h[:tax_level] = taxon_count[:tax_level]

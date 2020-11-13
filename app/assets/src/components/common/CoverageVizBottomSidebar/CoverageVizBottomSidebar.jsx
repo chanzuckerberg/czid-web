@@ -12,7 +12,7 @@ import PropTypes from "~/components/utils/propTypes";
 import Histogram from "~/components/visualizations/Histogram";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import LoadingIcon from "~ui/icons/LoadingIcon";
+import { IconLoading } from "~ui/icons";
 import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
@@ -455,7 +455,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       return (
         <div className={cs.loadingContainer}>
           <div className={cs.loadingMessage}>
-            <LoadingIcon className={cs.loadingIcon} />
+            <IconLoading className={cs.loadingIcon} />
             Loading Visualization...
           </div>
         </div>

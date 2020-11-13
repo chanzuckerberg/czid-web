@@ -1,4 +1,4 @@
-import LoadingIcon from "../icons/LoadingIcon";
+import { IconLoading } from "../icons";
 import PropTypes from "prop-types";
 import React from "react";
 import { Label } from "semantic-ui-react";
@@ -6,7 +6,7 @@ import { Label } from "semantic-ui-react";
 const LoadingLabel = ({ text }) => {
   return (
     <Label className="idseq-ui loading">
-      <LoadingIcon /> {text || "Loading data..."}
+      <IconLoading /> {text || "Loading data..."}
     </Label>
   );
 };

@@ -1,4 +1,4 @@
-import { camelCase, filter, head, isEmpty } from "lodash/fp";
+import { camelCase, isEmpty } from "lodash/fp";
 import React from "react";
 import memoize from "memoize-one";
 import cx from "classnames";
@@ -6,7 +6,6 @@ import cx from "classnames";
 import { getWorkflowRunResults } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import { WORKFLOWS } from "~/components/utils/workflows";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
@@ -15,7 +14,7 @@ import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
 import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import ExternalLink from "~ui/controls/ExternalLink";
-import { IconAlert, LoadingIcon, IconArrowRight } from "~ui/icons";
+import { IconAlert, IconArrowRight, IconLoading } from "~ui/icons";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import PropTypes from "~utils/propTypes";
 import { sampleErrorInfo } from "~utils/sample";
@@ -417,7 +416,7 @@ class ConsensusGenomeView extends React.Component {
   renderLoader = () => {
     return (
       <SampleMessage
-        icon={<LoadingIcon className={csSampleMessage.icon} />}
+        icon={<IconLoading className={csSampleMessage.icon} />}
         message={"Loading report data."}
         status={"Loading"}
         type={"inProgress"}
@@ -441,7 +440,7 @@ class ConsensusGenomeView extends React.Component {
     ) {
       return (
         <SampleMessage
-          icon={<LoadingIcon className={csSampleMessage.icon} />}
+          icon={<IconLoading className={csSampleMessage.icon} />}
           link={CONSENSUS_GENOME_DOC_LINK}
           linkText={"Learn about Consensus Genomes"}
           message={"Your Consensus Genome is being generated!"}

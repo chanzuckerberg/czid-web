@@ -48,7 +48,7 @@ import {
 } from "~/components/utils/pipeline_versions";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
-import { IconAlert, LoadingIcon } from "~ui/icons";
+import { IconAlert, IconLoading } from "~ui/icons";
 import { showToast } from "~/components/utils/toast";
 import { sanitizeCSVRow, createCSVObjectURL } from "~/components/utils/csv";
 import { diff } from "~/components/utils/objectUtil";
@@ -424,8 +424,14 @@ export default class SampleView extends React.Component {
   };
 
   fetchCoverageVizData = async () => {
-    const { sample } = this.state;
-    if (this.coverageVizEnabled()) {
+    const { sample, pipelineRun } = this.state;
+
+    if (
+      isPipelineFeatureAvailable(
+        COVERAGE_VIZ_FEATURE,
+        get("pipeline_version", pipelineRun)
+      )
+    ) {
       const coverageVizSummary = await getCoverageVizSummary(sample.id);
 
       this.setState({
@@ -1151,7 +1157,7 @@ export default class SampleView extends React.Component {
     if (loadingReport) {
       status = "Loading";
       message = "Loading report data.";
-      icon = <LoadingIcon className={csSampleMessage.icon} />;
+      icon = <IconLoading className={csSampleMessage.icon} />;
       type = "inProgress";
     } else if (
       pipelineRunStatus === "WAITING" &&
@@ -1160,7 +1166,7 @@ export default class SampleView extends React.Component {
     ) {
       status = "IN PROGRESS";
       message = jobStatus;
-      icon = <LoadingIcon className={csSampleMessage.icon} />;
+      icon = <IconLoading className={csSampleMessage.icon} />;
       type = "inProgress";
       if (pipelineRun && pipelineRun.pipeline_version) {
         linkText = "View Pipeline Visualization";
@@ -1556,7 +1562,6 @@ export default class SampleView extends React.Component {
       coverageVizVisible,
       currentTab,
       pipelineRun,
-      pipelineVersion,
       project,
       projectSamples,
       reportMetadata,
@@ -1635,7 +1640,10 @@ export default class SampleView extends React.Component {
             params={this.getSidebarParams()}
           />
         )}
-        {isPipelineFeatureAvailable(COVERAGE_VIZ_FEATURE, pipelineVersion) && (
+        {isPipelineFeatureAvailable(
+          COVERAGE_VIZ_FEATURE,
+          get("pipeline_version", pipelineRun)
+        ) && (
           <CoverageVizBottomSidebar
             visible={coverageVizVisible}
             onClose={withAnalytics(

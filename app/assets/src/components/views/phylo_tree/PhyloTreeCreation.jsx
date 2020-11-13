@@ -7,7 +7,7 @@ import DataTable from "../../visualizations/table/DataTable";
 import Moment from "react-moment";
 import PhyloTreeChecks from "./PhyloTreeChecks";
 import SearchBox from "../../ui/controls/SearchBox";
-import LoadingIcon from "../../ui/icons/LoadingIcon";
+import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 import { validatePhyloTreeName } from "~/api";
 
@@ -502,7 +502,7 @@ class PhyloTreeCreation extends React.Component {
                   placeholder="Existing project name"
                 />
               ) : (
-                <LoadingIcon />
+                <IconLoading />
               )}
             </div>
           </div>
@@ -577,7 +577,7 @@ class PhyloTreeCreation extends React.Component {
               this.state.projectSamples.length === 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
-              <LoadingIcon />
+              <IconLoading />
             )}
           </div>
           <div className="wizard__page-3__notifications">
@@ -619,7 +619,7 @@ class PhyloTreeCreation extends React.Component {
               this.state.otherSamples.length === 0 ? (
               <div>No samples containing {this.state.taxonName} available</div>
             ) : (
-              <LoadingIcon />
+              <IconLoading />
             )}
           </div>
           <div className="wizard__page-4__notifications">
@@ -662,7 +662,7 @@ class PhyloTreeCreation extends React.Component {
         </Wizard>
       );
     } else {
-      return <LoadingIcon />;
+      return <IconLoading />;
     }
   }
 }

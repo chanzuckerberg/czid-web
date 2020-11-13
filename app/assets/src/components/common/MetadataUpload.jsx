@@ -7,12 +7,11 @@ import MetadataCSVLocationsMenu, {
   geosearchCSVLocations,
 } from "~/components/common/MetadataCSVLocationsMenu";
 import PropTypes from "~/components/utils/propTypes";
-import { IconAlert } from "~ui/icons";
+import { IconAlert, IconLoading } from "~ui/icons";
 import Tabs from "~/components/ui/controls/Tabs";
 import { getAllHostGenomes, getAllSampleTypes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import LoadingIcon from "~ui/icons/LoadingIcon";
 import { getURLParamString } from "~/helpers/url";
 import { WORKFLOWS } from "~/components/utils/workflows";
 
@@ -307,13 +306,13 @@ class MetadataUpload extends React.Component {
           </a>
           {this.state.validatingCSV && (
             <div className={cs.validationMessage}>
-              <LoadingIcon className={cs.loadingIcon} />
+              <IconLoading className={cs.loadingIcon} />
               Validating metadata...
             </div>
           )}
           {this.state.fetchingCSVLocationMatches && (
             <div className={cs.validationMessage}>
-              <LoadingIcon className={cs.loadingIcon} />
+              <IconLoading className={cs.loadingIcon} />
               Verifying collection locations...
             </div>
           )}

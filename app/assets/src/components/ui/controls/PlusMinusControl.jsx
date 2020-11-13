@@ -2,8 +2,7 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
 
-import PlusControlIcon from "~/components/ui/icons/PlusControlIcon.jsx";
-import MinusControlIcon from "~/components/ui/icons/MinusControlIcon.jsx";
+import { IconMinusSmall, IconPlusSmall } from "~/components/ui/icons";
 import cs from "./plus_minus_control.scss";
 
 const PlusMinusControl = ({
@@ -16,10 +15,10 @@ const PlusMinusControl = ({
   return (
     <div className={cx(className, cs.plusMinusContainer)}>
       <button disabled={plusDisabled} onClick={onPlusClick}>
-        <PlusControlIcon className={cs.icon} />
+        <IconPlusSmall className={cs.icon} />
       </button>
       <button disabled={minusDisabled} onClick={onMinusClick}>
-        <MinusControlIcon className={cs.icon} />
+        <IconMinusSmall className={cs.icon} />
       </button>
     </div>
   );

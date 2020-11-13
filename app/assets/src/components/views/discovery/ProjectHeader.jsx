@@ -4,7 +4,7 @@ import moment from "moment";
 import { assign, find, min } from "lodash/fp";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
-import UserIcon from "~ui/icons/UserIcon";
+import { IconMemberSmall } from "~ui/icons";
 import IconViewSmall from "~ui/icons/IconViewSmall";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
@@ -71,7 +71,7 @@ const ProjectHeader = ({
             position="bottom center"
           />
           <div className={cs.item}>
-            <UserIcon className={cx(cs.smallIcon, cs.userIcon)} />{" "}
+            <IconMemberSmall className={cx(cs.smallIcon, cs.userIcon)} />{" "}
             {project.users.length
               ? `${project.users.length} member${
                   project.users.length > 1 ? "s" : ""

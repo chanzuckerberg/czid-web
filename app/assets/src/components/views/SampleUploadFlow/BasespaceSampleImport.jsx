@@ -4,7 +4,7 @@ import { set, isEmpty, map, get, head, find, isArray } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import LoadingIcon from "~ui/icons/LoadingIcon";
+import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 import {
   getBasespaceProjects,
@@ -223,7 +223,7 @@ export default class BasespaceSampleImport extends React.Component {
         </div>
         {loadingSamples && (
           <div className={cs.loadingMessage}>
-            <LoadingIcon className={cs.loadingIcon} />
+            <IconLoading className={cs.loadingIcon} />
             <span>Loading samples...</span>
           </div>
         )}

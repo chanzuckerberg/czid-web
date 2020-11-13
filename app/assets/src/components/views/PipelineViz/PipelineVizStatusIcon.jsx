@@ -4,14 +4,14 @@ import cx from "classnames";
 
 import CircleCheckmarkIcon from "~/components/ui/icons/CircleCheckmarkIcon";
 import InfoCircleIcon from "~/components/ui/icons/InfoCircleIcon";
-import LoadingIcon from "~/components/ui/icons/LoadingIcon";
+import { IconLoading } from "~ui/icons";
 
 import cs from "./pipeline_viz.scss";
 
 const PipelineVizStatusIcon = ({ type, className }) => {
   switch (type) {
     case "inProgress":
-      return <LoadingIcon className={cx(className, cs.inProgressIcon)} />;
+      return <IconLoading className={cx(className, cs.inProgressIcon)} />;
     case "finished":
       return <CircleCheckmarkIcon className={cx(className, cs.finishedIcon)} />;
     case "pipelineErrored":

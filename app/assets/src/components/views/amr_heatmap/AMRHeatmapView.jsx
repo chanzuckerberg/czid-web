@@ -12,7 +12,7 @@ import {
   processMetadata,
   processMetadataTypes,
 } from "~/components/utils/metadata";
-import LoadingIcon from "~ui/icons/LoadingIcon";
+import { IconLoading } from "~ui/icons";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
@@ -430,7 +430,7 @@ export default class AMRHeatmapView extends React.Component {
     if (loading) {
       return (
         <p className={cs.loadingIndicator}>
-          <LoadingIcon className={cs.loadingIndicator} />
+          <IconLoading className={cs.loadingIndicator} />
           Loading...
         </p>
       );

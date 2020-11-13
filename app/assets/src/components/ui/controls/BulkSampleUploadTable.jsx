@@ -4,7 +4,7 @@ import cx from "classnames";
 import { isEmpty, concat, size, sortBy } from "lodash/fp";
 
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
-import LoadingIcon from "~/components/ui/icons/LoadingIcon";
+import { IconLoading } from "~ui/icons";
 import CheckmarkIcon from "~/components/ui/icons/CheckmarkIcon";
 import BasicPopup from "~/components/BasicPopup";
 import DataTable from "../../visualizations/table/DataTable";
@@ -54,7 +54,7 @@ class BulkSampleUploadTable extends React.Component {
               trigger={
                 <span>
                   {/* Popup wouldn't work on just the svg for some reason */}
-                  <LoadingIcon />
+                  <IconLoading />
                 </span>
               }
               content={`${avg}%`}
@@ -69,7 +69,9 @@ class BulkSampleUploadTable extends React.Component {
 
       const filesList = (
         <div>
-          {sortedFiles.map(f => <div key={f.source}>{f.name || f.source}</div>)}
+          {sortedFiles.map(f => (
+            <div key={f.source}>{f.name || f.source}</div>
+          ))}
         </div>
       );
 

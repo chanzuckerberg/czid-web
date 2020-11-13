@@ -2,7 +2,6 @@ import BacteriaCultureIcon from "./BacteriaCultureIcon";
 import BannerProjects from "./BannerProjects";
 import BannerSamples from "./BannerSamples";
 import BannerVisualizations from "./BannerVisualizations";
-import BulletListIcon from "./BulletListIcon";
 import CheckmarkIcon from "./CheckmarkIcon";
 import CircleCheckmarkIcon from "./CircleCheckmarkIcon";
 import CompareIcon from "./CompareIcon";
@@ -26,14 +25,18 @@ import IconContigSmall from "./IconContigSmall";
 import IconCoverage from "./IconCoverage";
 import IconDownload from "./IconDownload";
 import IconDownloadSmall from "./IconDownloadSmall";
+import IconLoading from "./IconLoading";
+import IconMember from "./IconMember";
+import IconMemberSmall from "./IconMemberSmall";
+import IconMinusSmall from "./IconMinusSmall";
 import IconPhyloTreeSmall from "./IconPhyloTreeSmall";
+import IconPlusSmall from "./IconPlusSmall";
 import InfoCircleIcon from "./InfoCircleIcon";
 import InfoIcon from "./InfoIcon";
 import InfoIconSmall from "./InfoIconSmall";
 import InfoPanelIcon from "./InfoPanelIcon";
 import InsightIcon from "./InsightIcon";
 import LargeDownloadIcon from "./LargeDownloadIcon";
-import LoadingIcon from "./LoadingIcon";
 import LockIcon from "./LockIcon";
 import LogoColor from "./LogoColor";
 import LogoLockupColor from "./LogoLockupColor";
@@ -41,12 +44,10 @@ import LogoLockupReversed from "./LogoLockupReversed";
 import LogoMarkColor from "./LogoMarkColor";
 import LogoMarkReversed from "./LogoMarkReversed";
 import LogoReversed from "./LogoReversed";
-import MinusControlIcon from "./MinusControlIcon";
 import PhyloTreeIcon from "./PhyloTreeIcon";
 import PhyloTreePrivate from "./PhyloTreePrivate";
 import PhyloTreePublic from "./PhyloTreePublic";
 import PipelineStageArrowheadIcon from "./PipelineStageArrowheadIcon";
-import PlusControlIcon from "./PlusControlIcon";
 import PlusIcon from "./PlusIcon";
 import PrivateProjectIcon from "./PrivateProjectIcon";
 import PublicProjectIcon from "./PublicProjectIcon";
@@ -55,7 +56,6 @@ import SamplePrivateIcon from "./SamplePrivateIcon";
 import SamplePublicIcon from "./SamplePublicIcon";
 import SaveIcon from "./SaveIcon";
 import SortIcon from "./SortIcon";
-import UserIcon from "./UserIcon";
 
 export const ICONS_TAXONOMY = {
   CUSTOM: {
@@ -80,23 +80,25 @@ export const ICONS_TAXONOMY = {
     IconBackgroundModel,
     IconBrowserSmall,
     IconChartSmall,
+    InfoCircleIcon,
     IconContigSmall,
     IconCoverage,
     IconDownload,
     IconDownloadSmall,
     InfoIconSmall,
-    IconPhyloTreeSmall,
-    InfoCircleIcon,
     InfoIcon,
+    IconMember,
+    IconMemberSmall,
+    IconMinusSmall,
     InfoPanelIcon,
+    IconPlusSmall,
+    IconPhyloTreeSmall,
     LargeDownloadIcon,
     LockIcon,
-    MinusControlIcon,
     PhyloTreeIcon,
     PhyloTreePrivate,
     PhyloTreePublic,
     PipelineStageArrowheadIcon,
-    PlusControlIcon,
     PlusIcon,
     PublicProjectIcon,
     PrivateProjectIcon,
@@ -105,14 +107,12 @@ export const ICONS_TAXONOMY = {
     SamplePublicIcon,
     SaveIcon,
     SortIcon,
-    UserIcon,
   },
   FONT_AWESOME: {
-    BulletListIcon,
     CheckmarkIcon,
     GlobeLinedIcon,
     InsightIcon,
-    LoadingIcon,
+    IconLoading,
     IconArrowRight,
   },
   LOGO: {
