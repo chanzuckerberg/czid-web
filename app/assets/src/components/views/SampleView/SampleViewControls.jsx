@@ -1,19 +1,21 @@
-import React from "react";
-import SvgSaver from "svgsaver";
+import { compact } from "lodash/fp";
 import Nanobar from "nanobar";
 import querystring from "querystring";
+import React, { useContext } from "react";
+import SvgSaver from "svgsaver";
 
 import { deleteSample as deleteSampleAPI } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { TABS } from "./constants";
+import { UserContext } from "~/components/common/UserContext";
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { logError } from "~/components/utils/logUtil";
 import PropTypes from "~/components/utils/propTypes";
-import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
 } from "~/components/views/report/utils/download";
+import { TABS } from "./constants";
 
 const SampleViewControls = ({
   backgroundId,
@@ -125,20 +127,22 @@ const SampleViewControls = ({
   };
 
   const renderDownloadButtonDropdown = () => {
-    const downloadOptions = [
+    const { allowedFeatures = [] } = useContext(UserContext) || {};
+
+    const downloadOptions = compact([
       {
         text: "Download Report Table (.csv)",
         value: "download_csv",
         disabled: currentTab === TABS.MERGED_NT_NR,
       },
-      {
+      allowedFeatures.includes("filtered_report_csv") && {
         text: getDownloadReportTableWithAppliedFiltersLink(),
         value: "download_csv_with_filters",
         disabled: !hasAppliedFilters,
       },
       ...getDownloadDropdownOptions(pipelineRun),
       ...getImageDownloadOptions(),
-    ];
+    ]);
 
     return (
       <DownloadButtonDropdown
