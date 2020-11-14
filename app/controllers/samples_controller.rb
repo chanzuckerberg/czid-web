@@ -515,8 +515,19 @@ class SamplesController < ApplicationController
       unless samples.empty?
         results["Sample"] = {
           "name" => "Sample",
-          "results" => samples.group_by(&:name).map do |val, records|
-            { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id), "project_id" => records.count == 1 ? records.first.project_id : nil }
+          # group_by so that samples with same name show up adjacent
+          "results" => samples.group_by(&:name).flat_map do |_, records|
+            records.map do |record|
+              {
+                "category" => "Sample",
+                "description" => "Project: #{record.project.name}",
+                "id" => record.name,
+                "key" => "sample-#{record.id}",
+                "project_id" => record.project_id,
+                "sample_id" => record.id,
+                "title" => record.name,
+              }
+            end
           end,
         }
       end

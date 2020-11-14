@@ -33,7 +33,7 @@ class DiscoveryHeader extends React.Component {
         break;
       }
       case "sample": {
-        value = result.sample_ids[0];
+        value = result.sample_id;
         break;
       }
       default: {

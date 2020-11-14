@@ -69,6 +69,8 @@ class LiveSearchBox extends React.Component {
     const { onSearchTriggered } = this.props;
     const { value } = this.state;
 
+    if (!value) return;
+
     this.setState({ isLoading: true, selectedResult: null });
 
     const timerId = this.lastestTimerId;

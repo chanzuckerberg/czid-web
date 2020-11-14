@@ -185,7 +185,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     get "/search_suggestions"
     res = JSON.parse(@response.body)
-    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_id"] }.flatten
     assert samples_shown.include?(samples(:public_sample).id)
   end
 
@@ -193,7 +193,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     get "/search_suggestions"
     res = JSON.parse(@response.body)
-    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_id"] }.flatten
     assert_not samples_shown.include?(samples(:one).id)
   end
 
@@ -217,7 +217,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     get "/search_suggestions?domain=my_data"
     res = JSON.parse(@response.body)
-    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_id"] }.flatten
     assert samples_shown.include?(samples(:joe_sample).id)
     assert_not samples_shown.include?(samples(:public_sample).id)
   end
@@ -226,7 +226,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     get "/search_suggestions?domain=public"
     res = JSON.parse(@response.body)
-    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_id"] }.flatten
     assert samples_shown.include?(samples(:public_sample).id)
     assert_not samples_shown.include?(samples(:joe_sample).id)
   end
@@ -235,7 +235,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     get "/search_suggestions"
     res = JSON.parse(@response.body)
-    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_id"] }.flatten
     assert samples_shown.include?(samples(:public_sample).id)
     assert samples_shown.include?(samples(:joe_sample).id)
     assert_not samples_shown.include?(samples(:project_one_sampleA).id)

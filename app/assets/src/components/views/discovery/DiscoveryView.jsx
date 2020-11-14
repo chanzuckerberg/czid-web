@@ -777,7 +777,7 @@ class DiscoveryView extends React.Component {
   handleStringSearch = search => {
     const { search: currentSearch } = this.state;
 
-    let parsedSearch = search.trim() || null;
+    let parsedSearch = (search && search.trim()) || null;
     if (currentSearch !== parsedSearch) {
       this.setState({ search: parsedSearch }, () => {
         this.updateBrowsingHistory("replace");
