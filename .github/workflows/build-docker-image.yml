@@ -1,7 +1,11 @@
 name: idseq-web build Docker image
 
 on:
-  push
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
 
 env:
   AWS_DEFAULT_OUTPUT: json
