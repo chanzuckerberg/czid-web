@@ -1,0 +1,266 @@
+#!/bin/zsh
+SCRIPT_DIR=$0:a:h
+SCRIPT_NAME=$0
+
+set -euo pipefail -o errexit -o nounset
+
+show_help_and_exit() {
+>&2 cat << HERE_DOC
+usage:
+  # List your running instances
+  ec2ia ls [ls-options]
+    ls-options:
+        --json          Display results in json format
+
+  # Launch a new instance
+  ec2ia launch --iam-role <role-name> [launch-options] [-- ...]
+    launch-options:
+        --iam-role <role-name>
+            Mandatory. IAM Role that will be used by your remote instance.
+            Valid options: 'idseq-on-call' or 'idseq-comp-bio'
+        --ami <ami>
+            AMI to be used. Defaults to <role-name>. For more info about this
+            parameter, see "aegea launch --help"
+        --instance-type <value>
+            EC2 instance type. Defaults to t3.small
+        --dry-run
+            Prints the command that would be used to launch the new instance.
+    -- ...
+        Append anything after double dashes will be appended to aegea command.
+
+  # Connect to existing instance.
+  ec2ia ssh [connect-options] [-- ...]
+    connect-options:
+        --instance-id <instance-id|instance-name>
+            Instance to connect. If you have multiple instances running and
+            omit this option, it will connect to your oldest running instance.
+        --ssh-user <ssh-user>
+            SSH user on the remote instance. Defaults to "ubuntu"
+
+    -- ...
+        Append anything after double dashes will be appended to aegea command.
+
+
+  # Terminate instances
+  ec2ia terminate [terminate-options]
+    terminate-options:
+        --instance-id <instance-id|instance-name>
+            Instance to terminate. If you have multiple instances running and
+            omit this option, it will terminate your oldest running instance.
+        --dry-run
+            Prints the command that would be used to terminate the instance.
+
+
+HERE_DOC
+exit 1
+}
+
+main() {
+    >&2 echo '* EC2 Individual Attribution instance manager *'
+    local command="${1:-}"
+    if [[ ! "$command" =~ $ACCEPTED_COMMANDS_RE ]]; then
+        >&2 echo "ERROR: Invalid command [$command]"
+        show_help_and_exit
+    else
+        INPUT_VALUES=(${@:2}) ${command}_command
+    fi
+}
+
+ACCEPTED_COMMANDS_RE='^(ls|launch|ssh|terminate|help)$'
+
+help_command() {
+    show_help_and_exit
+}
+
+ls_command() {
+    INPUT_VALUES=(${INPUT_VALUES[@]}) \
+    OPTIONS_ACCEPTED=(--json) \
+        parse_options
+
+    local running_instances; running_instances=$(get_my_running_instances_json)
+
+    if [[ "${PARSED_OPTIONS[json]:-}" == 1 ]]; then
+        jq . <<<"$running_instances"
+    else
+        tabulate <<<"$running_instances"
+    fi
+}
+
+launch_command() {
+    INPUT_VALUES=(${INPUT_VALUES[@]}) \
+    OPTIONS_ACCEPTED=(--instance-type= --instance-name= --iam-role= --ami= --dry-run) \
+        parse_options
+
+    if [[ ! -v PARSED_OPTIONS[iam-role] ]]; then
+        >&2 echo "ERROR. Parameter iam-role is mandatory for this command"
+        exit 1
+    fi
+
+    >&2 echo "Preparing to launch instance"
+
+    local account_alias; env=$(get_account_alias)
+    local env; env=$(translate_account_alias_to_env "$account_alias")
+    local email; email=$(get_current_user_email)
+    local username; username=$(sed -E 's/@.*$//g; s/[^0-9a-zA-Z]+/\-/g' <<<"$email")
+    local instance_name; instance_name=$(printf "ia-%s-%s" "$username" $(date +%s))
+    local subnet_id; subnet_id=$(get_subnet_id_for_env "$env")
+    local security_groups; security_groups=$(get_security_groups_with_name "idseq-${env}-ecs")
+    
+    local -a aegea_opts=(
+        launch
+        --iam-role "${PARSED_OPTIONS[iam-role]}"
+        --ami "${PARSED_OPTIONS[ami]:-${PARSED_OPTIONS[iam-role]}}"
+        --instance-type "${PARSED_OPTIONS[instance-type]:-t3.small}"
+        --tags LaunchedBy="$email"
+        --subnet "$subnet_id"
+        --security-groups "$security_groups"
+        --no-dns
+        "$instance_name"
+    )
+
+    run_aegea ${PARSED_OPTIONS[dry-run]:-0} ${aegea_opts[@]} ${PARSED_OPTIONS_RAW[@]}
+}
+
+ssh_command() {
+    INPUT_VALUES=(${INPUT_VALUES[@]}) \
+    OPTIONS_ACCEPTED=(--instance-id= --dry-run) \
+        parse_options
+
+    local instance_id
+    instance_id="${PARSED_OPTIONS[instance-id]:-$(get_first_running_instance_id)}"
+    ssh_user="${PARSED_OPTIONS[ssh-user]:-ubuntu}"
+
+    local -a aegea_opts=(
+        ssh
+        -X
+        "${ssh_user}@${instance_id}"
+    )
+
+    run_aegea ${PARSED_OPTIONS[dry-run]:-0} ${aegea_opts[@]} ${PARSED_OPTIONS_RAW[@]}
+}
+
+terminate_command() {
+    INPUT_VALUES=(${INPUT_VALUES[@]}) \
+    OPTIONS_ACCEPTED=(--instance-id= --dry-run) \
+        parse_options
+
+    local instance_id
+    instance_id="${PARSED_OPTIONS[instance-id]:-$(get_first_running_instance_id)}"
+
+    >&2 echo "Terminating instance ${instance_id} with command:"
+
+    local -a aegea_opts=(
+        terminate
+        "${instance_id}"
+    )
+
+    run_aegea ${PARSED_OPTIONS[dry-run]:-0} ${aegea_opts[@]} ${PARSED_OPTIONS_RAW[@]}
+}
+
+run_aegea() {
+    local dry_run="$1"
+    local aegea_opts=( ${@:2} )
+
+    if [[ "$dry_run" == "0" ]]; then
+        >&2 printf "\nRunning command:\n";
+        >&2 { printf "aegea "; printf "%q " ${aegea_opts[@]}; printf "\n\n" }
+        aegea ${aegea_opts[@]}
+    else
+        >&2 printf "\nCommand (dry-run):\n\n"
+        printf "aegea "; printf "%q " ${aegea_opts}; echo
+    fi
+}
+
+containsElement () {
+    for e in "${@:2}"; do [[ "$e" = "$1" ]] && return 0; done; return 1;
+}
+
+parse_options() {
+    declare -g -A PARSED_OPTIONS
+    declare -g PARSED_OPTIONS_RAW
+
+    while [[ ${#INPUT_VALUES[@]} != 0 ]]; do
+        local option_name="${INPUT_VALUES[1]}"
+        if [[ "${option_name}" = "--" ]]; then
+            PARSED_OPTIONS_RAW=(${INPUT_VALUES[@]:1})
+            break
+        fi
+        if containsElement "$option_name=" $OPTIONS_ACCEPTED; then
+            local option_value="${INPUT_VALUES[2]}"
+            INPUT_VALUES=(${INPUT_VALUES[@]:2})
+        elif containsElement "$option_name" $OPTIONS_ACCEPTED; then
+            local option_value=1
+            INPUT_VALUES=(${INPUT_VALUES[@]:1})
+        else
+            >&2 printf "PARSE OPTIONS ERROR: You passed an invalid option '%s' to %s\n\n" "$option_name" "$SCRIPT_NAME"
+            exit 1
+        fi
+        PARSED_OPTIONS[${option_name:2}]=$option_value
+    done
+}
+
+function get_current_user_email() {
+    >&2 echo ". Detecting user email"
+    local result; result=$(aws sts get-caller-identity --output json)
+    jq -r '.UserId | split(":")[1]' <<<"$result"
+}
+
+function get_account_alias() {
+    >&2 echo ". Detecting account alias"
+    aws iam list-account-aliases --output text --query 'AccountAliases[0]'
+}
+
+function translate_account_alias_to_env() {
+    local account_alias="$1"
+
+    [[ "$account_alias" == "idseq-prod" ]] && printf "prod" || printf "staging"
+}
+
+function get_subnet_id_for_env() {
+    local env="$1"
+
+    >&2 echo ". Finding private subnet ID for env $env"
+    aegea subnets -t "Name=idseq-${env}-private-*" --json | jq -r '.[0].id'
+}
+
+function get_security_groups_with_name() {
+    local security_group_tag_value="$1";
+
+    >&2 echo ". Finding security groups with tag Name=$security_group_tag_value"
+    local security_group_json; security_group_json=$(aws ec2 describe-security-groups --filters "Name=tag:Name,Values=${security_group_tag_value}" --query 'SecurityGroups[0]' --output json)
+    local security_group_id; security_group_id=$(jq -r .GroupId <<<"$security_group_json")
+    jq -r .GroupName <<<"$security_group_json"
+}
+
+function get_my_running_instances_json() {
+    local user_email=$(get_current_user_email)
+    >&2 echo ". Searching for running instances"
+    local my_instances_json=$(aegea ls --json -t LaunchedBy="${user_email}" -c id name launch_time instance_type state --sort-by launch_time)
+    if ! jq -e 'any' <<<"$my_instances_json" > /dev/null; then
+        >&2 echo "- NO RUNNING INSTANCES DETECTED -"
+    fi
+    jq 'map(select(.state != "terminated")) | to_entries | map(.value | {id, launch_time, instance_type, name, state})' <<<"$my_instances_json"
+}
+
+function get_first_running_instance_id() {
+    local my_running_instances; my_running_instances=$(get_my_running_instances_json)
+    local instance_id; instance_id=$(jq -r '.[0].id | select(.)' <<<"$my_running_instances")
+    if [[ -z "$instance_id" ]]; then
+        exit 2
+    fi
+    printf "%s" "$instance_id"
+}
+
+function tabulate() {
+    jq -r 'if (length == 0) then "" else [.[]| with_entries( .key |= ascii_downcase ) ] | (.[0] | keys_unsorted | map(ascii_upcase) | @tsv) , (.[]|.|map(.) |@tsv) end' \
+        | column -t -s $'\t'
+}
+
+trap 'catch $? $LINENO' ERR
+
+function catch() {
+    if [ "$1" != "0" ]; then
+        printf "\nERROR %s occurred on line %s. Command failed.\n\n" "$1" "$2"
+    fi
+}
+main ${@}
