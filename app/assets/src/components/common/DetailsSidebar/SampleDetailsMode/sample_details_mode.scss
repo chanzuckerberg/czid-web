@@ -1,6 +1,7 @@
 @import "~styles/typography";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .content {
   padding: 30px 20px;
@@ -24,6 +25,20 @@
 .noData {
   color: $gray-light;
   margin-left: 10px;
+}
+
+.loading {
+  @include font-body-s;
+  padding: 0 0 0 $space-default;
+  color: $gray-dark;
+  display: inline-block;
+
+  .loadingIcon {
+    fill: $gray-dark;
+    width: $icon-s;
+    height: $icon-s;
+    vertical-align: -0.1em;
+  }
 }
 
 .pipelineInfoFields,

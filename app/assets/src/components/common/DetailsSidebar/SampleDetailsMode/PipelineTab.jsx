@@ -10,6 +10,7 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import { getSamplePipelineResults } from "~/api";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
+import { IconLoading } from "~/components/ui/icons";
 import {
   RESULTS_FOLDER_STAGE_KEYS,
   RESULTS_FOLDER_STEP_KEYS,
@@ -25,16 +26,20 @@ import {
 import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
+const READ_COUNTS_TABLE = "readsRemaining";
+const ERCC_PLOT = "erccScatterplot";
+
 class PipelineTab extends React.Component {
   state = {
     sectionOpen: {
       pipelineInfo: true,
-      readsRemaining: false,
-      erccScatterplot: false,
+      [READ_COUNTS_TABLE]: false,
+      [ERCC_PLOT]: false,
       downloads: false,
     },
     sectionEditing: {},
     graphWidth: 0,
+    loading: [READ_COUNTS_TABLE],
     pipelineStepDict: {},
   };
 
@@ -111,10 +116,13 @@ class PipelineTab extends React.Component {
       const hostFilteringStageKey = Object.keys(
         pipelineResults[RESULTS_FOLDER_ROOT_KEY]
       )[0];
-      this.setState({
+      this.setState(prevState => ({
         pipelineStepDict:
           pipelineResults[RESULTS_FOLDER_ROOT_KEY][hostFilteringStageKey],
-      });
+        loading: prevState.loading.filter(
+          section => section !== READ_COUNTS_TABLE
+        ),
+      }));
     }
   };
 
@@ -178,8 +186,114 @@ class PipelineTab extends React.Component {
     );
   };
 
+  readsPresent = () => {
+    const { pipelineStepDict } = this.state;
+
+    const stepDictPresent = Boolean(pipelineStepDict);
+
+    const stepInformationPresent = Object.prototype.hasOwnProperty.call(
+      pipelineStepDict,
+      "steps"
+    );
+    if (!stepInformationPresent) {
+      return;
+    }
+
+    const readsPresent = Object.values(pipelineStepDict["steps"]).reduce(
+      (accum, step) => {
+        if (step.readsAfter) {
+          accum = true;
+        }
+        return accum;
+      },
+      false
+    );
+
+    return stepDictPresent && stepInformationPresent && readsPresent;
+  };
+
+  renderReadsRemainingSection = () => {
+    const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
+    const { pipelineRun } = this.props;
+    const { loading, pipelineStepDict } = this.state;
+
+    if (loading.includes(READ_COUNTS_TABLE)) {
+      return (
+        <div className={cs.loading}>
+          <IconLoading className={cs.loadingIcon} />
+          {" Loading"}
+        </div>
+      );
+    }
+
+    if (!pipelineRun || !pipelineRun.total_reads || !this.readsPresent()) {
+      return <div className={cs.noData}>No data</div>;
+    }
+
+    return (
+      <div>
+        <div className={cs.readsRemainingRow}>
+          <div className={cs.label}>
+            <ColumnHeaderTooltip
+              position="top left"
+              trigger={
+                <div className={cx(cs.labelText, cs.header)}>
+                  Host Filtering Step
+                </div>
+              }
+              content={pipelineStepDict[stageDescriptionKey]}
+              title="Host Filtering"
+              link={HOST_FILTERING_WIKI}
+            />
+          </div>
+          <div className={cs.narrowMetadataValueContainer}>
+            <div className={cs.labelText}>Reads Remaining</div>
+          </div>
+          <div className={cs.narrowMetadataValueContainer}>
+            <div className={cs.labelText}>% Reads Remaining</div>
+          </div>
+        </div>
+        {Object.keys(pipelineStepDict[stepsKey]).map(
+          this.renderReadCountsTable
+        )}
+      </div>
+    );
+  };
+
+  renderErccComparison = () => {
+    const { pipelineRun, erccComparison } = this.props;
+    const { graphWidth } = this.state;
+
+    if (!pipelineRun) {
+      return (
+        <div className={cs.loading}>
+          <IconLoading className={cs.loadingIcon} />
+          {" Loading"}
+        </div>
+      );
+    }
+
+    if (!erccComparison) {
+      return <div className={cs.noData}>No data</div>;
+    }
+
+    return (
+      <ERCCScatterPlot
+        ercc_comparison={erccComparison}
+        width={graphWidth}
+        height={0.7 * graphWidth}
+      />
+    );
+  };
+
   render() {
-    const { pipelineInfo, pipelineRun, sampleId, snapshotShareId } = this.props;
+    const {
+      pipelineInfo,
+      pipelineRun,
+      sampleId,
+      snapshotShareId,
+      erccComparison,
+    } = this.props;
 
     const workflow = get(["workflow", "text"], pipelineInfo);
     const fields =
@@ -188,7 +302,6 @@ class PipelineTab extends React.Component {
         : PIPELINE_INFO_FIELDS;
 
     const pipelineInfoFields = fields.map(this.getPipelineInfoField);
-    const { stageDescriptionKey, stepsKey } = RESULTS_FOLDER_STAGE_KEYS;
 
     return (
       <div>
@@ -207,45 +320,11 @@ class PipelineTab extends React.Component {
           <React.Fragment>
             <MetadataSection
               toggleable
-              onToggle={() => this.toggleSection("readsRemaining")}
-              open={this.state.sectionOpen.readsRemaining}
+              onToggle={() => this.toggleSection(READ_COUNTS_TABLE)}
+              open={this.state.sectionOpen[READ_COUNTS_TABLE]}
               title="Reads Remaining"
             >
-              {!pipelineRun ||
-              !pipelineRun.total_reads ||
-              isEmpty(this.state.pipelineStepDict) ||
-              isEmpty(this.state.pipelineStepDict["steps"]) ? (
-                <div className={cs.noData}>No data</div>
-              ) : (
-                <div>
-                  <div className={cs.readsRemainingRow}>
-                    <div className={cs.label}>
-                      <ColumnHeaderTooltip
-                        position="top left"
-                        trigger={
-                          <div className={cx(cs.labelText, cs.header)}>
-                            Host Filtering Step
-                          </div>
-                        }
-                        content={
-                          this.state.pipelineStepDict[stageDescriptionKey]
-                        }
-                        title="Host Filtering"
-                        link={HOST_FILTERING_WIKI}
-                      />
-                    </div>
-                    <div className={cs.narrowMetadataValueContainer}>
-                      <div className={cs.labelText}>Reads Remaining</div>
-                    </div>
-                    <div className={cs.narrowMetadataValueContainer}>
-                      <div className={cs.labelText}>% Reads Remaining</div>
-                    </div>
-                  </div>
-                  {Object.keys(this.state.pipelineStepDict[stepsKey]).map(
-                    this.renderReadCountsTable
-                  )}
-                </div>
-              )}
+              {this.renderReadsRemainingSection()}
             </MetadataSection>
             <MetadataSection
               toggleable
@@ -258,11 +337,7 @@ class PipelineTab extends React.Component {
                 ref={c => (this._graphContainer = c)}
                 className={cs.graphContainer}
               >
-                <ERCCScatterPlot
-                  ercc_comparison={this.props.erccComparison}
-                  width={this.state.graphWidth}
-                  height={0.7 * this.state.graphWidth}
-                />
+                {this.renderErccComparison()}
               </div>
             </MetadataSection>
             <MetadataSection
