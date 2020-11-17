@@ -258,11 +258,6 @@ module SamplesHelper
     requested_sample_ids = params[:sampleIds]
     workflow = params[:workflow]
 
-    # Remove this check once consensus genomes is released.
-    if current_user && !current_user.allowed_feature?("consensus_genome")
-      workflow = ["main", "short-read-mngs"]
-    end
-
     samples = samples.where(project_id: project_id) if project_id.present?
     samples = filter_by_taxid(samples, taxon) if taxon.present?
     samples = filter_by_host(samples, host) if host.present?

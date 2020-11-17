@@ -32,10 +32,7 @@ import { get } from "~/api/core";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import {
-  CONSENSUS_GENOME_FEATURE,
-  CG_BULK_DOWNLOADS_FEATURE,
-} from "~/components/utils/features";
+import { CG_BULK_DOWNLOADS_FEATURE } from "~/components/utils/features";
 import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
@@ -1462,11 +1459,8 @@ class DiscoveryView extends React.Component {
         {currentTab === "samples" && (
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
-              {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) &&
-                currentDisplay !== "map" &&
-                this.renderWorkflowTabs()}
-              {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) &&
-              userDataCounts &&
+              {currentDisplay !== "map" && this.renderWorkflowTabs()}
+              {userDataCounts &&
               !userDataCounts.sampleCountByWorkflow[workflow] ? (
                 this.renderNoDataWorkflowBanner(workflow)
               ) : (

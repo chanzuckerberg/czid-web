@@ -29,7 +29,6 @@ import {
   intersection,
 } from "lodash/fp";
 
-import { CONSENSUS_GENOME_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import ProjectSelect from "~/components/common/ProjectSelect";
@@ -741,7 +740,6 @@ class UploadSampleStep extends React.Component {
   };
 
   render() {
-    const { allowedFeatures = {} } = this.context || {};
     const {
       currentTab,
       selectedWorkflows,
@@ -797,14 +795,12 @@ class UploadSampleStep extends React.Component {
               </div>
             )}
           </div>
-          {allowedFeatures.includes(CONSENSUS_GENOME_FEATURE) && (
-            <WorkflowSelector
-              onWetlabProtocolChange={this.handleWetlabProtocolChange}
-              onWorkflowToggle={this.handleWorkflowToggle}
-              selectedWorkflows={selectedWorkflows}
-              selectedWetlabProtocol={selectedWetlabProtocol}
-            />
-          )}
+          <WorkflowSelector
+            onWetlabProtocolChange={this.handleWetlabProtocolChange}
+            onWorkflowToggle={this.handleWorkflowToggle}
+            selectedWorkflows={selectedWorkflows}
+            selectedWetlabProtocol={selectedWetlabProtocol}
+          />
           <div className={cs.fileUpload}>
             <div className={cs.title}>Upload Files</div>
             <Tabs
