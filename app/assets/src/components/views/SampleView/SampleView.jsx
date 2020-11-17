@@ -141,7 +141,7 @@ export default class SampleView extends React.Component {
         loadingReport: false,
         pipelineRun: null,
         pipelineVersion: null,
-        previousSelectedOptions: null,
+        previousSelectedOptions: this.defaultSelectedOptions(),
         project: null,
         projectSamples: [],
         reportData: [],
@@ -197,7 +197,7 @@ export default class SampleView extends React.Component {
 
   defaultSelectedOptions = () => {
     return {
-      background: {},
+      background: null,
       categories: { categories: [], subcategories: { Viruses: [] } },
       metric: TREE_METRICS[0].value,
       nameType: "Scientific name",
@@ -254,7 +254,6 @@ export default class SampleView extends React.Component {
         pipelineRun: pipelineRun,
         project: sample.project,
         enableMassNormalizedBackgrounds: enableMassNormalizedBackgrounds,
-        previousSelectedOptions: selectedOptions,
         selectedOptions: newSelectedOptions,
       },
       () => {
@@ -343,6 +342,7 @@ export default class SampleView extends React.Component {
     const {
       backgrounds,
       selectedOptions,
+      sample,
       previousSelectedOptions,
     } = this.state;
     // If Internal Server Error caused by invalid background selection:
@@ -354,18 +354,34 @@ export default class SampleView extends React.Component {
       background => selectedOptions.background === background.id
     );
 
+    // if there was no previously selected background and the current is the default, we do not load the report,
+    // and show a normal report error message
+    if (
+      !previousSelectedOptions.background &&
+      invalidBackground.id === sample.default_background_id
+    ) {
+      this.setState({ loadingReport: false });
+      return;
+    }
+
     this.setState(
       {
         selectedOptions: previousSelectedOptions,
         selectedInvalidBackground: true,
       },
-      () => this.updateHistoryAndPersistOptions()
+      () => {
+        this.updateHistoryAndPersistOptions();
+        this.refreshDataFromOptionsChange({
+          key: "background",
+          newSelectedOptions: previousSelectedOptions,
+        });
+      }
     );
 
-    this.showNotification(
-      NOTIFICATON_TYPES.invalidBackground,
-      invalidBackground.name
-    );
+    this.showNotification(NOTIFICATON_TYPES.invalidBackground, {
+      background: invalidBackground.name,
+      useDefault: !!selectedOptions.background,
+    });
   };
 
   fetchSampleReportData = async () => {
@@ -374,8 +390,8 @@ export default class SampleView extends React.Component {
     const {
       currentTab,
       pipelineVersion,
-      selectedOptions,
       previousSelectedOptions,
+      selectedOptions,
     } = this.state;
 
     const mergeNtNr =
@@ -391,16 +407,20 @@ export default class SampleView extends React.Component {
     })
       .then(rawReportData => {
         if (rawReportData) this.processRawSampleReportData(rawReportData);
+        this.setState({ loadingReport: false });
       })
       .catch(err => {
         if (
           err.status === 500 &&
           selectedOptions.background !== previousSelectedOptions.background
-        )
+        ) {
+          // This function must update loadingReport if and only if it does not request
+          // a new report with fallback settings
           this.handleInvalidBackgroundSelection();
+        } else {
+          this.setState({ loadingReport: false });
+        }
       });
-
-    this.setState({ loadingReport: false });
   };
 
   fetchAmrData = async () => {
@@ -1231,7 +1251,7 @@ export default class SampleView extends React.Component {
     }
   };
 
-  renderInvalidBackgroundError = (closeToast, background) => {
+  renderInvalidBackgroundError = (closeToast, { background, useDefault }) => {
     const handleOnClose = () => {
       this.setState({
         selectedInvalidBackground: false,
@@ -1248,8 +1268,10 @@ export default class SampleView extends React.Component {
 
         <span className={cs.notificationBody}>
           {" "}
-          The report has reverted to the previous background model. For more
-          information,{" "}
+          The report has reverted to the {useDefault
+            ? "default"
+            : "previous"}{" "}
+          background model. For more information,{" "}
           <ExternalLink
             href={`mailto:${email}?Subject=Background%20"${background}"%20failed%20to%20load`}
             analyticsEventName={
