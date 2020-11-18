@@ -21,10 +21,9 @@ import _fp, {
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
-import PlusIcon from "~ui/icons/PlusIcon";
+import { IconPlusCircleSmall } from "~ui/icons/IconPlusCircleSmall";
 import { UserContext } from "~/components/common/UserContext";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -341,7 +340,7 @@ class MetadataManualInput extends React.Component {
         menuLabel="Select Columns"
         onChange={this.handleColumnChange}
         options={options}
-        trigger={<PlusIcon className={cs.plusIcon} />}
+        trigger={<IconPlusCircleSmall className={cs.plusIcon} />}
         value={this.state.selectedFieldNames}
         className={cs.columnPicker}
       />

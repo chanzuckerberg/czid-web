@@ -13,7 +13,7 @@ import BasicPopup from "~/components/BasicPopup";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
-import PlusIcon from "~ui/icons/PlusIcon";
+import { IconPlusCircleSmall } from "~ui/icons";
 import SortIcon from "~ui/icons/SortIcon";
 import { humanize } from "~/helpers/strings";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -169,7 +169,7 @@ class BaseTable extends React.Component {
             menuLabel="Select Columns"
             onChange={this.handleColumnChange}
             options={options}
-            trigger={<PlusIcon className={cs.plusIcon} />}
+            trigger={<IconPlusCircleSmall className={cs.plusIcon} />}
             value={value}
           />
         }

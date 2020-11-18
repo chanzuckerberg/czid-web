@@ -22,7 +22,7 @@ import {
   HeatmapIcon,
   IconBackgroundModel,
   IconDownload,
-  PhyloTreeIcon,
+  IconPhyloTree,
 } from "~ui/icons";
 import Label from "~ui/labels/Label";
 import { WORKFLOWS } from "~utils/workflows";
@@ -171,7 +171,7 @@ class SamplesView extends React.Component {
 
   renderPhyloTreeTrigger = () => {
     const phyloTreeIcon = (
-      <PhyloTreeIcon className={cx(cs.icon, cs.phyloTree)} />
+      <IconPhyloTree className={cx(cs.icon, cs.phyloTree)} />
     );
     return (
       <ToolbarIcon

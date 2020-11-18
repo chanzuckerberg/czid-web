@@ -29,12 +29,16 @@ import IconLoading from "./IconLoading";
 import IconMember from "./IconMember";
 import IconMemberSmall from "./IconMemberSmall";
 import IconMinusSmall from "./IconMinusSmall";
+import IconPhyloTree from "./IconPhyloTree";
+import IconPhyloTreePrivate from "./IconPhyloTreePrivate";
+import IconPhyloTreePublic from "./IconPhyloTreePublic";
 import IconPhyloTreeSmall from "./IconPhyloTreeSmall";
 import IconPlusSmall from "./IconPlusSmall";
 import InfoCircleIcon from "./InfoCircleIcon";
 import InfoIcon from "./InfoIcon";
 import InfoIconSmall from "./InfoIconSmall";
 import InfoPanelIcon from "./InfoPanelIcon";
+import IconPlusCircleSmall from "./IconPlusCircleSmall";
 import InsightIcon from "./InsightIcon";
 import LargeDownloadIcon from "./LargeDownloadIcon";
 import LockIcon from "./LockIcon";
@@ -44,11 +48,7 @@ import LogoLockupReversed from "./LogoLockupReversed";
 import LogoMarkColor from "./LogoMarkColor";
 import LogoMarkReversed from "./LogoMarkReversed";
 import LogoReversed from "./LogoReversed";
-import PhyloTreeIcon from "./PhyloTreeIcon";
-import PhyloTreePrivate from "./PhyloTreePrivate";
-import PhyloTreePublic from "./PhyloTreePublic";
 import PipelineStageArrowheadIcon from "./PipelineStageArrowheadIcon";
-import PlusIcon from "./PlusIcon";
 import PrivateProjectIcon from "./PrivateProjectIcon";
 import PublicProjectIcon from "./PublicProjectIcon";
 import RemoveIcon from "./RemoveIcon";
@@ -92,14 +92,14 @@ export const ICONS_TAXONOMY = {
     IconMinusSmall,
     InfoPanelIcon,
     IconPlusSmall,
+    IconPhyloTree,
+    IconPhyloTreePrivate,
+    IconPhyloTreePublic,
     IconPhyloTreeSmall,
+    IconPlusCircleSmall,
     LargeDownloadIcon,
     LockIcon,
-    PhyloTreeIcon,
-    PhyloTreePrivate,
-    PhyloTreePublic,
     PipelineStageArrowheadIcon,
-    PlusIcon,
     PublicProjectIcon,
     PrivateProjectIcon,
     RemoveIcon,

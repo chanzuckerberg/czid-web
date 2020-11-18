@@ -7,8 +7,7 @@ import { humanize } from "~/helpers/strings";
 import { openUrl } from "~utils/links";
 import HeatmapPublic from "~ui/icons/HeatmapPublic";
 import HeatmapPrivate from "~ui/icons/HeatmapPrivate";
-import PhyloTreePublic from "~ui/icons/PhyloTreePublic";
-import PhyloTreePrivate from "~ui/icons/PhyloTreePrivate";
+import { IconPhyloTreePrivate, IconPhyloTreePublic } from "~ui/icons";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
@@ -82,9 +81,9 @@ class VisualizationsView extends React.Component {
       );
     } else if (visualizationType === "phylo_tree") {
       return publicAccess ? (
-        <PhyloTreePublic className={cs.icon} />
+        <IconPhyloTreePublic className={cs.icon} />
       ) : (
-        <PhyloTreePrivate className={cs.icon} />
+        <IconPhyloTreePrivate className={cs.icon} />
       );
     } else {
       // eslint-disable-next-line no-console
@@ -97,9 +96,7 @@ class VisualizationsView extends React.Component {
   }
 
   handleRowClick = ({ rowData }) => {
-    const url = `/visualizations/${rowData.visualization.visualization_type}/${
-      rowData.id
-    }`;
+    const url = `/visualizations/${rowData.visualization.visualization_type}/${rowData.id}`;
     openUrl(url, event);
     logAnalyticsEvent("VisualizationsView_row_clicked", {
       visualizationType: rowData.visualization.visualization_type,
