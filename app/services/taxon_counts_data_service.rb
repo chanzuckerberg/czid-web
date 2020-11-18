@@ -3,7 +3,7 @@ class TaxonCountsDataService
 
   Z_SCORE_MIN = -99
   Z_SCORE_MAX = 99
-  Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND = -100
+  Z_SCORE_WHEN_ABSENT_FROM_BACKGROUND = 100
 
   SELECT_CLAUSE_RPM = "count / ((total_reads - COALESCE(total_ercc_reads, 0)) * COALESCE(fraction_subsampled, 1.0)) * 1000 * 1000".freeze
   SELECT_CLAUSE_Z_SCORE = "COALESCE(
