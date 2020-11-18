@@ -76,7 +76,7 @@ class TaxonCountsHeatmapService
     # The first query of a session does not work - the session variable @pipeline_run_id_rank and @pipeline_run_id_rank_with_ties do not work, if we do not declare the variables before.
     # Although I could not find support on MySQL documentation, the first query seems to use always the undefined value instead of updating the variable.
     # Also guarantees that they are re-initialized to a value that avoids potential corner case issues from the last value from a previous query.
-    ActiveRecord::Base.connection.execute("SET @current_pipeline_run_id := 0, @pipeline_run_id_rank := 0, @pipeline_run_id_rank_with_ties := 0, @current_counts := 0")
+    ActiveRecord::Base.connection.execute("SET @current_pipeline_run_id := 0, @pipeline_run_id_rank := 0, @pipeline_run_id_rank_with_ties := 0, @current_count := 0")
     ranked_query = TaxonCount
                    .select(
                      :name,
