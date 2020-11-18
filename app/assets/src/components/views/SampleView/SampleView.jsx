@@ -69,10 +69,17 @@ import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeVi
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 
 import {
+  GENUS_LEVEL_INDEX,
+  LOCAL_STORAGE_FIELDS,
+  METRIC_DECIMAL_PLACES,
+  NOTIFICATON_TYPES,
+  PIPELINE_RUN_TABS,
+  SPECIES_LEVEL_INDEX,
   TAXON_COUNT_TYPE_METRICS,
   TAXON_GENERAL_FIELDS,
   TABS,
   TREE_METRICS,
+  URL_FIELDS,
 } from "./constants";
 import ReportViewSelector from "./ReportViewSelector";
 import ReportFilters from "./ReportFilters";
@@ -82,37 +89,6 @@ import cs from "./sample_view.scss";
 import csSampleMessage from "./sample_message.scss";
 
 const mapValuesWithKey = mapValues.convert({ cap: false });
-
-const SPECIES_LEVEL_INDEX = 1;
-const GENUS_LEVEL_INDEX = 2;
-
-const URL_FIELDS = {
-  pipelineVersion: "string",
-  selectedOptions: "object",
-  view: "string",
-};
-
-const LOCAL_STORAGE_FIELDS = {
-  selectedOptions: { excludePaths: ["taxon"] },
-};
-
-const METRIC_DECIMAL_PLACES = {
-  agg_score: 0,
-  z_score: 1,
-  rpm: 1,
-  count: 0,
-  contigs: 0,
-  contig_r: 0,
-  percent_identity: 1,
-  alignment_length: 1,
-  e_value: 1,
-};
-
-const PIPELINE_RUN_TABS = [TABS.SHORT_READ_MNGS, TABS.AMR, TABS.MERGED_NT_NR];
-
-const NOTIFICATON_TYPES = {
-  invalidBackground: "invalid background",
-};
 
 export default class SampleView extends React.Component {
   constructor(props) {
@@ -1409,6 +1385,7 @@ export default class SampleView extends React.Component {
               "SampleView: Invalid filter passed to createCSVRowForSelectedOptions()",
             details: { optionName, optionVal },
           });
+          break;
       }
     }
 
@@ -1460,20 +1437,9 @@ export default class SampleView extends React.Component {
   };
 
   getDownloadReportTableWithAppliedFiltersLink = () => {
-    const { sample } = this.state;
     const [csvHeaders, csvRows] = this.computeReportTableValuesForCSV();
 
-    return (
-      <a
-        href={createCSVObjectURL(csvHeaders, csvRows)}
-        download={`${sample.name}_report_with_applied_filters.csv`}
-        target="_blank"
-        rel="noopener noreferrer"
-        key={"Download_CSV_With_Applied_Filters_link"}
-      >
-        Download Report Table with Applied Filters (.csv)
-      </a>
-    );
+    return createCSVObjectURL(csvHeaders, csvRows);
   };
 
   renderReport = ({ displayMergedNtNrValue = false } = {}) => {

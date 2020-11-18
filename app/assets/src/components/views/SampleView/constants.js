@@ -1,10 +1,45 @@
 import { WORKFLOWS } from "~/components/utils/workflows";
 
+export const SPECIES_LEVEL_INDEX = 1;
+export const GENUS_LEVEL_INDEX = 2;
+
+export const URL_FIELDS = {
+  pipelineVersion: "string",
+  selectedOptions: "object",
+  view: "string",
+};
+
+export const LOCAL_STORAGE_FIELDS = {
+  selectedOptions: { excludePaths: ["taxon"] },
+};
+
+export const METRIC_DECIMAL_PLACES = {
+  agg_score: 0,
+  z_score: 1,
+  rpm: 1,
+  count: 0,
+  contigs: 0,
+  contig_r: 0,
+  percent_identity: 1,
+  alignment_length: 1,
+  e_value: 1,
+};
+
 export const TABS = {
   CONSENSUS_GENOME: WORKFLOWS.CONSENSUS_GENOME.label,
   SHORT_READ_MNGS: WORKFLOWS.SHORT_READ_MNGS.label,
   AMR: "Antimicrobial Resistance",
   MERGED_NT_NR: "Metagenomics - Simplified",
+};
+
+export const PIPELINE_RUN_TABS = [
+  TABS.SHORT_READ_MNGS,
+  TABS.AMR,
+  TABS.MERGED_NT_NR,
+];
+
+export const NOTIFICATON_TYPES = {
+  invalidBackground: "invalid background",
 };
 
 export const THRESHOLDS = [

@@ -1,98 +1,126 @@
-import React from "react";
+import React, { useContext } from "react";
 import PropTypes from "prop-types";
 
 import BasicPopup from "~/components/BasicPopup";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
-import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
-import { UserContext } from "~/components/common/UserContext";
+import { withAnalytics } from "~/api/analytics";
+import { logError } from "~/components/utils/logUtil";
 import { ViewHeader } from "~/components/layout";
+import { triggerCSVDownload } from "~/components/utils/csv";
+import { logDownloadOption } from "~/components/views/report/utils/download";
+import { UserContext } from "~/components/common/UserContext";
+import { compact } from "lodash/fp";
 
 import cs from "./samples_heatmap_view.scss";
 
-const DOWNLOAD_OPTIONS = [
-  { text: "Download CSV", value: "csv" },
-  { text: "Download SVG", value: "svg" },
-  { text: "Download PNG", value: "png" },
-];
+const SamplesHeatmapHeader = ({
+  sampleIds,
+  data,
+  onDownloadAllHeatmapMetricsCsv,
+  onDownloadCurrentHeatmapViewCsv,
+  onDownloadSvg,
+  onDownloadPng,
+  onShareClick,
+  onSaveClick,
+}) => {
+  const { allowedFeatures = [] } = useContext(UserContext) || {};
 
-export default class SamplesHeatmapHeader extends React.Component {
-  handleDownloadClick = fileType => {
-    switch (fileType) {
+  const DOWNLOAD_OPTIONS = compact([
+    { text: "Download All Heatmap Metrics (.csv)", value: "csv_metrics" },
+    allowedFeatures.includes("current_heatmap_view") && {
+      text: "Download Current Heatmap View (.csv)",
+      value: "current_heatmap_view_csv",
+    },
+    { text: "Download SVG", value: "svg" },
+    { text: "Download PNG", value: "png" },
+  ]);
+
+  const handleDownloadClick = option => {
+    switch (option) {
       case "svg":
-        // TODO (gdingle): pass in filename per sample?
-        this.props.onDownloadSvg();
+        onDownloadSvg();
         break;
       case "png":
-        // TODO (gdingle): pass in filename per sample?
-        this.props.onDownloadPng();
+        onDownloadPng();
         break;
-      case "csv":
-        this.props.onDownloadCsv();
+      case "csv_metrics":
+        onDownloadAllHeatmapMetricsCsv();
+        break;
+      case "current_heatmap_view_csv":
+        triggerCSVDownload({
+          csvDownloadUrl: onDownloadCurrentHeatmapViewCsv(),
+          fileName: "current_heatmap_view",
+        });
         break;
       default:
+        logError({
+          message:
+            "SamplesHeatmapHeader: Invalid option passed to handleDownloadClick",
+          details: { option },
+        });
         break;
     }
-    logAnalyticsEvent("SamplesHeatmapHeader_download-button_clicked", {
-      sampleIds: this.props.sampleIds.length,
-      fileType,
+
+    logDownloadOption({
+      component: "SamplesHeatmapHeader",
+      option,
+      details: {
+        sampleIds: sampleIds.length,
+        option,
+      },
     });
   };
 
-  render() {
-    const { sampleIds } = this.props;
-    const { allowedFeatures } = this.context || {};
-
-    return (
-      <ViewHeader className={cs.viewHeader}>
-        <ViewHeader.Content>
-          <ViewHeader.Pretitle>
-            <React.Fragment>Heatmap</React.Fragment>
-          </ViewHeader.Pretitle>
-          <ViewHeader.Title
-            label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
-          />
-        </ViewHeader.Content>
-        <ViewHeader.Controls className={cs.controls}>
-          <BasicPopup
-            trigger={
-              <ShareButton
-                onClick={withAnalytics(
-                  this.props.onShareClick,
-                  "SamplesHeatmapHeader_share-button_clicked",
-                  {
-                    sampleIds: sampleIds.length,
-                  }
-                )}
-                className={cs.controlElement}
-              />
+  return (
+    <ViewHeader className={cs.viewHeader}>
+      <ViewHeader.Content>
+        <ViewHeader.Pretitle>
+          <React.Fragment>Heatmap</React.Fragment>
+        </ViewHeader.Pretitle>
+        <ViewHeader.Title
+          label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
+        />
+      </ViewHeader.Content>
+      <ViewHeader.Controls className={cs.controls}>
+        <BasicPopup
+          trigger={
+            <ShareButton
+              onClick={withAnalytics(
+                onShareClick,
+                "SamplesHeatmapHeader_share-button_clicked",
+                {
+                  sampleIds: sampleIds.length,
+                }
+              )}
+              className={cs.controlElement}
+            />
+          }
+          content="A shareable URL was copied to your clipboard!"
+          on="click"
+          hideOnScroll
+        />
+        <SaveButton
+          onClick={withAnalytics(
+            onSaveClick,
+            "SamplesHeatmapHeader_save-button_clicked",
+            {
+              sampleIds: sampleIds.length,
+              path: window.location.pathname,
             }
-            content="A shareable URL was copied to your clipboard!"
-            on="click"
-            hideOnScroll
-          />
-          <SaveButton
-            onClick={withAnalytics(
-              this.props.onSaveClick,
-              "SamplesHeatmapHeader_save-button_clicked",
-              {
-                sampleIds: sampleIds.length,
-                path: window.location.pathname,
-              }
-            )}
-            className={cs.controlElement}
-          />
-          <DownloadButtonDropdown
-            className={cs.controlElement}
-            options={DOWNLOAD_OPTIONS}
-            onClick={this.handleDownloadClick}
-            disabled={!this.props.data}
-          />
-        </ViewHeader.Controls>
-      </ViewHeader>
-    );
-  }
-}
+          )}
+          className={cs.controlElement}
+        />
+        <DownloadButtonDropdown
+          className={cs.controlElement}
+          options={DOWNLOAD_OPTIONS}
+          onClick={handleDownloadClick}
+          disabled={!data}
+        />
+      </ViewHeader.Controls>
+    </ViewHeader>
+  );
+};
 
 SamplesHeatmapHeader.propTypes = {
   sampleIds: PropTypes.arrayOf(PropTypes.number),
@@ -106,4 +134,4 @@ SamplesHeatmapHeader.propTypes = {
   onSaveClick: PropTypes.func.isRequired,
 };
 
-SamplesHeatmapHeader.contextType = UserContext;
+export default SamplesHeatmapHeader;

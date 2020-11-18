@@ -1,13 +1,14 @@
 import d3 from "d3";
 import textWidth from "text-width";
 import Cluster from "clusterfck";
-import { clamp, mean } from "lodash/fp";
+import { clamp, find, mean, sortBy } from "lodash/fp";
 import { orderBy, some } from "lodash";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
 import SvgSaver from "svgsaver";
 import cx from "classnames";
 
+import { sanitizeCSVRow } from "~/components/utils/csv";
 import symlog from "../../utils/d3/scales/symlog.js";
 import cs from "./heatmap.scss";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.js";
@@ -921,6 +922,32 @@ export default class Heatmap {
     this.svgSaver.asPng(this.svg.node(), filename || "heatmap.png");
     this.svg.classed(cs.printMode, false);
     this.hidePrintCaption();
+  }
+
+  computeCurrentHeatmapViewValuesForCSV({ headers = [] }) {
+    const csvHeaders = [...headers];
+    let csvRows = [];
+
+    const sortedRows = sortBy(["pos"], this.rowLabels);
+    const sortedColumns = sortBy(["pos"], this.columnLabels);
+
+    sortedRows.forEach(row => csvRows.push([row.label]));
+
+    sortedColumns.forEach(column => {
+      csvHeaders.push(column.label);
+
+      sortedRows.forEach(row => {
+        const cellValue = find(
+          { columnIndex: column.columnIndex, rowIndex: row.rowIndex },
+          this.filteredCells
+        ).value;
+        // Explicitly check for undefined since the cellValue can be 0
+        csvRows[row.pos].push(cellValue === undefined ? 0 : cellValue);
+      });
+    });
+
+    csvRows = csvRows.map(row => [sanitizeCSVRow(row).join()]);
+    return [[sanitizeCSVRow(csvHeaders).join()], csvRows];
   }
 
   showPrintCaption = () => {

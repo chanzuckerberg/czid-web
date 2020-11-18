@@ -10,10 +10,12 @@ import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { logError } from "~/components/utils/logUtil";
+import { triggerCSVDownload } from "~/components/utils/csv";
 import PropTypes from "~/components/utils/propTypes";
 import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
+  logDownloadOption,
 } from "~/components/views/report/utils/download";
 import { TABS } from "./constants";
 
@@ -61,29 +63,15 @@ const SampleViewControls = ({
   };
 
   const handleDownload = option => {
-    const log = () =>
-      logAnalyticsEvent(
-        // make names like:
-        // SampleViewControls_download-download-non-host-contigs-summary-csv_clicked
-        `SampleViewControls-download-${option
-          .replace(/\W+/g, "-")
-          .replace(/_/g, "-")
-          .replace("-_", "_")
-          .toLowerCase()}_clicked`,
-        {
-          sampleId: sample.id,
-          sampleName: sample.name,
-        }
-      );
-
     switch (option) {
       case "download_csv":
         downloadCSV();
         break;
       case "download_csv_with_filters":
-        // getDownloadReportTableWithAppliedFiltersLink() generates an anchor tag that returns a link to download the CSV.
-        // Instead of programmatically clicking the anchor tag when it is clicked, it is passed directly into the DownloadButtonDropdown and downloaded upon click.
-        // See: renderDownloadButtonDropdown()
+        triggerCSVDownload({
+          csvDownloadUrl: getDownloadReportTableWithAppliedFiltersLink(),
+          fileName: `${sample.name}_report_with_applied_filters`,
+        });
         break;
       case "taxon_svg":
         new SvgSaver().asSvg(getTaxonTreeNode(), "taxon_tree.svg");
@@ -91,24 +79,34 @@ const SampleViewControls = ({
       case "taxon_png":
         new SvgSaver().asPng(getTaxonTreeNode(), "taxon_tree.png");
         break;
-      default:
-        logError({
-          message:
-            "SampleViewControls: Invalid option passed to handleDownload",
-          details: { option },
-        });
+      default: {
+        const linkInfo = getLinkInfoForDownloadOption(
+          option,
+          sample.id,
+          pipelineRun
+        );
+
+        if (linkInfo) {
+          window.open(linkInfo.path, linkInfo.newPage ? "_blank" : "_self");
+        } else {
+          logError({
+            message:
+              "SampleViewControls: Invalid option passed to handleDownload",
+            details: { option },
+          });
+        }
+        break;
+      }
     }
 
-    log();
-    const linkInfo = getLinkInfoForDownloadOption(
+    logDownloadOption({
+      component: "SampleViewControls",
       option,
-      sample.id,
-      pipelineRun
-    );
-    if (linkInfo) {
-      window.open(linkInfo.path, linkInfo.newPage ? "_blank" : "_self");
-      log();
-    }
+      details: {
+        sampleId: sample.id,
+        sampleName: sample.name,
+      },
+    });
   };
 
   // TODO (gdingle): should we pass in a reference with React somehow?
@@ -136,7 +134,7 @@ const SampleViewControls = ({
         disabled: currentTab === TABS.MERGED_NT_NR,
       },
       allowedFeatures.includes("filtered_report_csv") && {
-        text: getDownloadReportTableWithAppliedFiltersLink(),
+        text: "Download Report Table with Applied Filters (.csv)",
         value: "download_csv_with_filters",
         disabled: !hasAppliedFilters,
       },

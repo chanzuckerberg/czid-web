@@ -12,6 +12,7 @@ import {
   isEmpty,
   keys,
   map,
+  omit,
   property,
   set,
   values,
@@ -23,6 +24,9 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { NarrowContainer } from "~/components/layout";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { processMetadata } from "~utils/metadata";
+import { diff } from "~/components/utils/objectUtil";
+import { logError } from "~/components/utils/logUtil";
+import { sanitizeCSVRow, createCSVObjectURL } from "~/components/utils/csv";
 import { getSampleTaxons, saveVisualization, getTaxaDetails } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -38,58 +42,22 @@ import { showToast } from "~/components/utils/toast";
 import { validateSampleIds } from "~/api/access_control";
 import { UserContext } from "~/components/common/UserContext";
 import { WORKFLOWS } from "~/components/utils/workflows";
-
+import {
+  SCALE_OPTIONS,
+  SORT_SAMPLES_OPTIONS,
+  TAXON_LEVEL_OPTIONS,
+  TAXON_LEVEL_SELECTED,
+  SORT_TAXA_OPTIONS,
+  TAXONS_PER_SAMPLE_RANGE,
+  SPECIFICITY_OPTIONS,
+  METRIC_OPTIONS,
+  BACKGROUND_METRICS,
+  NOTIFICATION_TYPES,
+} from "./constants";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 
-const SCALE_OPTIONS = [
-  ["Log", "symlog"],
-  ["Lin", "linear"],
-];
-const SORT_SAMPLES_OPTIONS = [
-  { text: "Alphabetical", value: "alpha" },
-  { text: "Cluster", value: "cluster" },
-];
-const TAXON_LEVEL_OPTIONS = {
-  species: 1,
-  genus: 2,
-};
-// this.state.selectedOptions.species is 1 if species is selected,
-// 0 otherwise.
-const TAXON_LEVEL_SELECTED = {
-  0: "genus",
-  1: "species",
-};
-const SORT_TAXA_OPTIONS = [
-  { text: "Genus", value: "genus" },
-  { text: "Cluster", value: "cluster" },
-];
-const TAXONS_PER_SAMPLE_RANGE = {
-  min: 1,
-  max: 100,
-};
-const SPECIFICITY_OPTIONS = [
-  { text: "All", value: 0 },
-  { text: "Specific Only", value: 1 },
-];
-const METRIC_OPTIONS = [
-  "NT.zscore",
-  "NT.rpm",
-  "NT.r",
-  "NR.zscore",
-  "NR.rpm",
-  "NR.r",
-];
-const BACKGROUND_METRICS = [
-  { text: "NT Z Score", value: "NT.zscore" },
-  { text: "NR Z Score", value: "NR.zscore" },
-];
-const NOTIFICATION_TYPES = {
-  invalidSamples: "invalid samples",
-  taxaFilteredOut: "taxa filtered out",
-  multiplePipelineVersions: "diverse_pipelines",
-};
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
   return isNaN(parsed) ? defaultVal : parsed;
@@ -184,6 +152,24 @@ class SamplesHeatmapView extends React.Component {
 
     this.lastRequestToken = null;
   }
+
+  getDefaultSelectedOptions = () => {
+    const { backgrounds } = this.props;
+
+    return {
+      metric: "NT.rpm",
+      categories: [],
+      subcategories: {},
+      background: backgrounds[0].value,
+      species: 1,
+      sampleSortType: "cluster",
+      taxaSortType: "cluster",
+      thresholdFilters: [],
+      dataScaleIdx: 0,
+      taxonsPerSample: 10,
+      readSpecificity: 1,
+    };
+  };
 
   // For converting legacy URLs
   getSelectedMetric() {
@@ -326,6 +312,121 @@ class SamplesHeatmapView extends React.Component {
   getUrlForCurrentParams = () => {
     let url = new URL(location.pathname, window.origin);
     return `${url.toString()}?${this.prepareParams()}`;
+  };
+
+  getAppliedFilters = () => {
+    const { selectedOptions } = this.state;
+
+    // Only Category, Subcategories, Read Specifity, and Threshold Filters are considered "Applied Filters"
+    return omit(
+      [
+        "sampleSortType",
+        "taxaSortType",
+        "dataScaleIdx",
+        "taxonsPerSample",
+        "species",
+        "background",
+        "metric",
+      ],
+      diff(selectedOptions, this.getDefaultSelectedOptions())
+    );
+  };
+
+  createCSVRowForSelectedOptions = () => {
+    const { backgrounds } = this.props;
+    const { selectedOptions } = this.state;
+    const { metric, background } = selectedOptions;
+
+    const selectedBackgroundName = find({ value: background }, backgrounds)
+      .name;
+    // We want to show the metric and background selected, but do not consider them as filters.
+    const filterRow = [
+      `\nMetric:, ${metric}`,
+      `Background:, "${selectedBackgroundName}"`,
+    ];
+    let numberOfFilters = 0;
+
+    for (const [name, val] of Object.entries(this.getAppliedFilters())) {
+      if (val === undefined) continue;
+      switch (name) {
+        case "thresholdFilters": {
+          const thresholdFilters = val.reduce((result, threshold) => {
+            result.push(
+              `${threshold["metricDisplay"]} ${threshold["operator"]} ${threshold["value"]}`
+            );
+            return result;
+          }, []);
+
+          if (!isEmpty(thresholdFilters)) {
+            filterRow.push(`Thresholds:, ${thresholdFilters.join()}`);
+            ++numberOfFilters;
+          }
+          break;
+        }
+        case "categories": {
+          filterRow.push(`Categories:, ${val}`);
+          numberOfFilters += val.length;
+          break;
+        }
+        case "subcategories": {
+          let subcategories = [];
+          for (const [subcategoryName, subcategoryVal] of Object.entries(val)) {
+            if (!isEmpty(subcategoryVal)) {
+              subcategories.push(
+                `${subcategoryName} - ${subcategoryVal.join()}`
+              );
+            }
+          }
+
+          filterRow.push(`Subcategories:, ${subcategories}`);
+          numberOfFilters += subcategories.length;
+          break;
+        }
+        case "readSpecificity": {
+          filterRow.push(
+            `Read Specificity:, "${
+              find({ value: val }, SPECIFICITY_OPTIONS).text
+            }"`
+          );
+          ++numberOfFilters;
+          break;
+        }
+        default: {
+          logError({
+            msg:
+              "SamplesHeatmapView: Invalid filter passed to createCSVRowForSelectedOptions()",
+            details: { name, val },
+          });
+          break;
+        }
+      }
+    }
+
+    const filterStatement =
+      numberOfFilters === 0
+        ? "No Filters Applied."
+        : `${numberOfFilters} Filter${numberOfFilters > 1 ? "s" : ""} Applied:`;
+    // Insert filterStatement after Metric and Background
+    filterRow.splice(2, 0, filterStatement);
+    return [sanitizeCSVRow(filterRow).join()];
+  };
+
+  getDownloadCurrentViewHeatmapCSVLink = () => {
+    let csvHeaders = [];
+    let csvRows = [];
+
+    if (!this.heatmapVis) {
+      csvHeaders = ['"Current heatmap view did not render any data"'];
+      csvRows = [['"Please try adjusting the filters or samples selected"']];
+    } else {
+      [
+        csvHeaders,
+        csvRows,
+      ] = this.heatmapVis.computeCurrentHeatmapViewValuesForCSV();
+    }
+
+    csvRows.push(this.createCSVRowForSelectedOptions());
+    return createCSVObjectURL(csvHeaders, csvRows);
   };
 
   handleDownloadCsv = () => {
@@ -1424,6 +1525,7 @@ class SamplesHeatmapView extends React.Component {
           sampleDetails={this.state.sampleDetails}
           scale={SCALE_OPTIONS[scaleIndex][1]}
           selectedTaxa={this.state.addedTaxonIds}
+          // this.state.selectedOptions.species is 1 if species is selected, 0 otherwise.
           taxLevel={TAXON_LEVEL_SELECTED[this.state.selectedOptions.species]}
           allTaxonIds={
             this.state.selectedOptions.species
@@ -1556,12 +1658,14 @@ class SamplesHeatmapView extends React.Component {
       allGeneraIds,
       allSpeciesIds,
       data,
+      enableMassNormalizedBackgrounds,
       hideFilters,
       loading,
       sampleIds,
       selectedOptions,
       selectedSampleId,
       sidebarMode,
+      sidebarVisible,
       taxonIds,
     } = this.state;
 
@@ -1572,7 +1676,7 @@ class SamplesHeatmapView extends React.Component {
 
     return (
       <div className={cs.heatmap}>
-        {!this.state.hideFilters && (
+        {!hideFilters && (
           <div>
             <NarrowContainer>
               <SamplesHeatmapHeader
@@ -1580,7 +1684,10 @@ class SamplesHeatmapView extends React.Component {
                 data={data}
                 onDownloadSvg={this.handleDownloadSvg}
                 onDownloadPng={this.handleDownloadPng}
-                onDownloadCsv={this.handleDownloadCsv}
+                onDownloadCurrentHeatmapViewCsv={
+                  this.getDownloadCurrentViewHeatmapCSVLink
+                }
+                onDownloadAllHeatmapMetricsCsv={this.handleDownloadCsv}
                 onShareClick={this.handleShareClick}
                 onSaveClick={this.handleSaveClick}
               />
@@ -1594,7 +1701,7 @@ class SamplesHeatmapView extends React.Component {
                 data={data}
                 filteredTaxaCount={shownTaxa.size}
                 totalTaxaCount={
-                  this.state.selectedOptions.species
+                  selectedOptions.species
                     ? allSpeciesIds.length
                     : allGeneraIds.length
                 }
@@ -1603,7 +1710,7 @@ class SamplesHeatmapView extends React.Component {
                   "heatmap_filter_fe"
                 )}
                 enableMassNormalizedBackgrounds={
-                  this.state.enableMassNormalizedBackgrounds
+                  enableMassNormalizedBackgrounds
                 }
               />
             </NarrowContainer>
@@ -1619,16 +1726,14 @@ class SamplesHeatmapView extends React.Component {
             )}
           >
             <SortIcon
-              sortDirection={
-                this.state.hideFilters ? "descending" : "ascending"
-              }
+              sortDirection={hideFilters ? "descending" : "ascending"}
             />
           </div>
         </div>
         {this.renderVisualization()}
         <DetailsSidebar
-          visible={this.state.sidebarVisible}
-          mode={this.state.sidebarMode}
+          visible={sidebarVisible}
+          mode={sidebarMode}
           onClose={withAnalytics(
             this.closeSidebar,
             "SamplesHeatmapView_details-sidebar_closed",
