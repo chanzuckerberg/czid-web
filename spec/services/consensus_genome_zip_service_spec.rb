@@ -19,7 +19,7 @@ RSpec.describe ConsensusGenomeZipService, type: :service do
   describe "#generate" do
     it "presigns an S3 link for the target output zip" do
       expect(workflow_run).to receive(:output_path).and_return("fake_output_path")
-      expect(subject).to receive(:get_presigned_s3_url).with("fake_output_path", "#{sample.name}_outputs.zip").and_return(fake_presigned_link)
+      expect(subject).to receive(:get_presigned_s3_url).with(s3_path: "fake_output_path", filename: "#{sample.name}_outputs.zip").and_return(fake_presigned_link)
 
       expect(subject.send(:generate)).to eq(fake_presigned_link)
     end

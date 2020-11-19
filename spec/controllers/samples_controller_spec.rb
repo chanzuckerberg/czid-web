@@ -625,6 +625,70 @@ RSpec.describe SamplesController, type: :controller do
         expect(response).to have_http_status :success
       end
     end
+
+    describe "GET #consensus_genome_clade_export" do
+      before do
+        @project = create(:project, users: [@joe])
+        @sample1 = create(:sample, project: @project)
+        @sample2 = create(:sample, project: @project)
+        @sample_without_run = create(:sample, project: @project)
+
+        @project_without_joe = create(:project)
+        @sample_without_joe = create(:sample, project: @project_without_joe)
+
+        @workflow_run1 = create(:workflow_run, sample: @sample1, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+        @workflow_run2 = create(:workflow_run, sample: @sample2, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+
+        @fasta = ">sample1_A\nATTAAAGGTTTATACCTTCCCAGGTAACAAACCAACCAACTTTCGATCTCTTGTAGATCT\n>sample_1_B\nGTTCTCTAAACGAACTTTAAAATCTGTGTGGCTGTCACTCGGCTGCATGCTTAGTGCACT\n"
+      end
+
+      context "when all the consensus genomes are available" do
+        it "creates a properly formatted external link with presigned inputs" do
+          expect(ConsensusGenomeConcatService).to receive(:call).and_return(@fasta)
+          expect(S3Util).to receive(:upload_to_s3).and_call_original
+          expect(controller).to receive(:get_presigned_s3_url).and_call_original
+
+          get :consensus_genome_clade_export, params: { sampleIds: [@sample1.id, @sample2.id] }
+          body = JSON.parse(response.body)
+
+          expect(response).to have_http_status(:success)
+          expect(body).to include("external_url")
+          expect(body["external_url"]).to include("https://clades.nextstrain.org")
+          expect(body["external_url"]).to include("input-fasta", "X-Amz-Credential")
+        end
+      end
+
+      context "when no workflow runs are valid" do
+        it "returns a bad request error" do
+          get :consensus_genome_clade_export, params: { sampleIds: [@sample_without_run.id] }
+
+          expect(response).to have_http_status(:bad_request)
+          expect(JSON.parse(response.body)["status"]).to eq("No valid WorkflowRuns")
+        end
+      end
+
+      context "when an unexpected error occurs" do
+        it "logs the error and returns a message" do
+          problem = RuntimeError.new("Problem")
+          allow(ConsensusGenomeConcatService).to receive(:call).and_raise(problem)
+          expect(LogUtil).to receive(:log_error).with("Unexpected error in clade export generation", exception: problem, workflow_run_ids: [@workflow_run1.id, @workflow_run2.id])
+
+          get :consensus_genome_clade_export, params: { sampleIds: [@sample1.id, @sample2.id] }
+          body = JSON.parse(response.body)
+
+          expect(response).to have_http_status(:internal_server_error)
+          expect(body["status"]).to eq("Unexpected error in clade export generation")
+        end
+      end
+
+      context "when only disallowed samples are requested" do
+        it "returns a bad request error" do
+          get :consensus_genome_clade_export, params: { sampleIds: [@sample_without_joe.id] }
+
+          expect(response).to have_http_status(:bad_request)
+        end
+      end
+    end
   end
 
   context "Admin user" do

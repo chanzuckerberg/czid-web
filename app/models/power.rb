@@ -74,6 +74,10 @@ class Power
     WorkflowRun.viewable(@user)
   end
 
+  power :samples_workflow_runs do |samples|
+    WorkflowRun.viewable(@user).where(sample: samples)
+  end
+
   power :viewable_bulk_downloads do
     BulkDownload.viewable(@user)
   end

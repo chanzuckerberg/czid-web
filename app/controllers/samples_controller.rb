@@ -31,7 +31,7 @@ class SamplesController < ApplicationController
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
-                   :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats,].freeze
+                   :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
   TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata].freeze
 
@@ -80,6 +80,9 @@ class SamplesController < ApplicationController
     :executed_at,
     :deprecated,
   ].freeze
+
+  CLADE_FASTA_S3_KEY = "clade_exports/fastas/temp-%{path}".freeze
+  CLADE_EXTERNAL_SITE = "clades.nextstrain.org".freeze
 
   # GET /samples
   # GET /samples.json
@@ -1018,7 +1021,7 @@ class SamplesController < ApplicationController
 
     if contigs_fasta_s3_path
       filename = @sample.name + '_contigs.fasta'
-      @contigs_fasta_url = get_presigned_s3_url(contigs_fasta_s3_path, filename)
+      @contigs_fasta_url = get_presigned_s3_url(s3_path: contigs_fasta_s3_path, filename: filename)
       if @contigs_fasta_url
         redirect_to @contigs_fasta_url
       else
@@ -1088,7 +1091,7 @@ class SamplesController < ApplicationController
   def nonhost_fasta
     pr = select_pipeline_run(@sample, params[:pipeline_version])
     filename = @sample.name + '_nonhost.fasta'
-    @nonhost_fasta_url = get_presigned_s3_url(pr.annotated_fasta_s3_path, filename)
+    @nonhost_fasta_url = get_presigned_s3_url(s3_path: pr.annotated_fasta_s3_path, filename: filename)
     if @nonhost_fasta_url
       redirect_to @nonhost_fasta_url
     else
@@ -1102,7 +1105,7 @@ class SamplesController < ApplicationController
   def unidentified_fasta
     pr = select_pipeline_run(@sample, params[:pipeline_version])
     filename = @sample.name + '_unidentified.fasta'
-    @unidentified_fasta_url = get_presigned_s3_url(pr.unidentified_fasta_s3_path, filename)
+    @unidentified_fasta_url = get_presigned_s3_url(s3_path: pr.unidentified_fasta_s3_path, filename: filename)
     if @unidentified_fasta_url
       redirect_to @unidentified_fasta_url
     else
@@ -1386,6 +1389,44 @@ class SamplesController < ApplicationController
     }
   end
 
+  # TODO: Move to another controller if expanding CG export features.
+  def consensus_genome_clade_export
+    # Get the WorkflowRuns.
+    sample_ids = collection_params[:sampleIds]
+    samples = samples_scope.where(id: sample_ids)
+    workflow_runs = current_power.samples_workflow_runs(samples).consensus_genomes.active
+    workflow_run_ids = workflow_runs.pluck(:id)
+
+    if workflow_run_ids.empty?
+      render(
+        json: { status: "No valid WorkflowRuns" },
+        status: :bad_request
+      ) and return
+    end
+
+    # Concatenate the fastas, upload to S3, and generate a presigned link.
+    content = ConsensusGenomeConcatService.call(workflow_run_ids)
+    key = format(CLADE_FASTA_S3_KEY, path: SecureRandom.alphanumeric(5))
+    S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, key, content)
+    fasta_url = get_presigned_s3_url(bucket_name: SAMPLES_BUCKET_NAME, key: key, duration: 30)
+
+    # Generate the external URL.
+    options = { "input-fasta": fasta_url }
+    external_url = URI::HTTPS.build(host: CLADE_EXTERNAL_SITE, query: options.to_query)
+
+    render(
+      json: { external_url: external_url },
+      status: :ok
+    )
+  rescue StandardError => e
+    message = "Unexpected error in clade export generation"
+    LogUtil.log_error(message, exception: e, workflow_run_ids: workflow_run_ids)
+    render(
+      json: { status: message },
+      status: :internal_server_error
+    )
+  end
+
   # Use callbacks to share common setup or constraints between actions.
 
   private
@@ -1429,6 +1470,12 @@ class SamplesController < ApplicationController
                         workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)
+  end
+
+  # Doesn't require :sample or :samples
+  def collection_params
+    permitted_params = [sampleIds: []]
+    params.permit(*permitted_params)
   end
 
   def sort_by(samples, dir = nil)

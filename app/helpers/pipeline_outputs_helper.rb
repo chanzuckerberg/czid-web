@@ -178,16 +178,19 @@ module PipelineOutputsHelper
     resp.body.read
   end
 
-  def get_presigned_s3_url(s3_path, filename)
+  # Either s3_path or bucket_name+key is required.
+  def get_presigned_s3_url(s3_path: nil, filename: nil, duration: nil, bucket_name: nil, key: nil)
     s3 = Aws::S3::Resource.new(client: Client)
-    bucket_name, key = S3Util.parse_s3_path(s3_path)
+    if s3_path
+      bucket_name, key = S3Util.parse_s3_path(s3_path)
+    end
     begin
       bucket_exists = Client.head_bucket(bucket: bucket_name)
       if bucket_exists
         bucket = s3.bucket(bucket_name)
         if bucket.object(key).exists?
           object = bucket.object(key)
-          url = object.presigned_url(:get, response_content_disposition: "attachment; filename=#{filename}")
+          url = object.presigned_url(:get, response_content_disposition: "attachment; filename=#{filename}", expires_in: duration)
           return url
         end
       end
