@@ -23,7 +23,7 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
-import { IconPlusCircleSmall } from "~ui/icons/IconPlusCircleSmall";
+import { IconPlusCircleSmall } from "~ui/icons";
 import { UserContext } from "~/components/common/UserContext";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
