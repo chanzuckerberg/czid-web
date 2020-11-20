@@ -5,8 +5,9 @@ const IconMinusSmall = props => {
   return (
     <svg
       className={props.className}
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 20 20"
+      viewBox="0 0 14 14"
+      width="14px"
+      height="14px"
     >
       <rect id="Rectangle" x="1" y="6.13" width="12" height="1.75" />
     </svg>

@@ -25,6 +25,7 @@ const PlusMinusControl = ({
 };
 
 PlusMinusControl.propTypes = {
+  className: PropTypes.string,
   onPlusClick: PropTypes.func,
   onMinusClick: PropTypes.func,
   plusDisabled: PropTypes.bool,
