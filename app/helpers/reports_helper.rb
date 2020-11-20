@@ -17,6 +17,7 @@ module ReportsHelper
           tax_id: tax_id,
           tax_level: tax_level,
           tax_name: tax_info[:name],
+          genus_tax_id: tax_info[:genus_tax_id],
           parent_name: fetch_parent_name(tax_level, tax_id, tax_info, lineage_by_tax_id),
           pipeline_run_id: pipeline_run_id
         )
@@ -33,7 +34,7 @@ module ReportsHelper
     Rails.logger.warn "Pipeline run #{pipeline_run_id} missing parent for child:  #{missing_parents}" unless missing_parents.empty?
   end
 
-  def self.validate_name(tax_id:, tax_level:, tax_name:, parent_name:, pipeline_run_id:)
+  def self.validate_name(tax_id:, tax_level:, tax_name:, genus_tax_id:, parent_name:, pipeline_run_id:)
     genus_str = TaxonLineage.level_name(TaxonCount::TAX_LEVEL_GENUS)
     family_str = TaxonLineage.level_name(TaxonCount::TAX_LEVEL_FAMILY)
 
@@ -47,7 +48,7 @@ module ReportsHelper
 
       if tax_id < TaxonLineage::INVALID_CALL_BASE_ID
         parent_level = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? genus_str : family_str
-        parent_tax_id = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? tax_info[:genus_tax_id] : convert_neg_taxid(tax_id)
+        parent_tax_id = tax_level == TaxonCount::TAX_LEVEL_SPECIES ? genus_tax_id : convert_neg_taxid(tax_id)
         # If no parent (genus/family) name was found, then use the parent id as the name.
         unless parent_name
           missing[:parent] = parent_tax_id
