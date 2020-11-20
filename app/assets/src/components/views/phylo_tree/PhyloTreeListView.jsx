@@ -23,17 +23,18 @@ class PhyloTreeListView extends React.Component {
     const urlParams = parseUrlParams();
 
     this.state = {
+      currentTree: null,
+      phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree])),
+      selectedPipelineRunId: null,
+      selectedSampleId: null,
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(
         urlParams,
         props.phyloTrees
       ),
-      currentTree: null,
-      phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree])),
+      sidebarConfig: null,
       sidebarMode: null,
       sidebarVisible: false,
-      sidebarConfig: null,
-      selectedSampleId: null,
-      selectedPipelineRunId: null,
+      treeContainer: null,
     };
     this.selectedMetadata = urlParams.selectedMetadata;
   }
@@ -218,6 +219,8 @@ class PhyloTreeListView extends React.Component {
   };
 
   render() {
+    const { treeContainer } = this.state;
+
     if (!this.state.selectedPhyloTreeId) {
       return (
         <div className={cs.noTreeBanner}>
@@ -292,8 +295,9 @@ class PhyloTreeListView extends React.Component {
                 className={cs.controlElement}
               />
               <PhyloTreeDownloadButton
-                tree={currentTree}
                 className={cs.controlElement}
+                tree={currentTree}
+                treeContainer={treeContainer}
               />
             </ViewHeader.Controls>
           </ViewHeader>
@@ -315,13 +319,14 @@ class PhyloTreeListView extends React.Component {
         <NarrowContainer>
           {currentTree.newick ? (
             <PhyloTreeVis
-              newick={currentTree.newick}
-              nodeData={currentTree.sampleDetailsByNodeName}
-              phyloTreeId={this.state.selectedPhyloTreeId}
-              onMetadataUpdate={this.handleMetadataUpdate}
-              onSampleNodeClick={this.handleSampleNodeClick}
               afterSelectedMetadataChange={this.afterSelectedMetadataChange}
               defaultMetadata={this.selectedMetadata}
+              newick={currentTree.newick}
+              nodeData={currentTree.sampleDetailsByNodeName}
+              onMetadataUpdate={this.handleMetadataUpdate}
+              onNewTreeContainer={t => this.setState({ treeContainer: t })}
+              onSampleNodeClick={this.handleSampleNodeClick}
+              phyloTreeId={this.state.selectedPhyloTreeId}
             />
           ) : (
             <p className={cs.noTreeBanner}>

@@ -48,6 +48,8 @@ class PhyloTreeVis extends React.Component {
   }
 
   componentDidMount() {
+    const { onNewTreeContainer } = this.props;
+
     let tree = Tree.fromNewickString(this.props.newick, this.props.nodeData);
     this.treeVis = new Dendogram(this.treeContainer, tree, {
       defaultColor: "#cccccc",
@@ -63,6 +65,8 @@ class PhyloTreeVis extends React.Component {
       scaleLabel: "Relative distance",
     });
     this.treeVis.update();
+
+    onNewTreeContainer(this.treeContainer);
 
     this.fetchMetadataTypes();
     this.handleMetadataTypeChange(this.state.selectedMetadataType, "");
@@ -234,12 +238,13 @@ class PhyloTreeVis extends React.Component {
 }
 
 PhyloTreeVis.propTypes = {
+  defaultMetadata: PropTypes.string,
   newick: PropTypes.string,
   nodeData: PropTypes.object,
   onMetadataUpdate: PropTypes.func,
-  phyloTreeId: PropTypes.number,
+  onNewTreeContainer: PropTypes.func,
   onSampleNodeClick: PropTypes.func,
-  defaultMetadata: PropTypes.string,
+  phyloTreeId: PropTypes.number,
 };
 
 export default PhyloTreeVis;

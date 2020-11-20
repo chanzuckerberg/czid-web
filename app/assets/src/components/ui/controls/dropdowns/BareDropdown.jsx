@@ -295,7 +295,7 @@ class BareDropdown extends React.Component {
         onBlur={e => e.stopPropagation()}
         search={search ? identity : undefined}
         ref={this.baseDropdownRef}
-        icon={hideArrow || <IconArrowDownSmall className={cs.dropdownArrow} />}
+        icon={!hideArrow && <IconArrowDownSmall className={cs.dropdownArrow} />}
       >
         {menu}
       </BaseDropdown>
