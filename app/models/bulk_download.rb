@@ -574,7 +574,7 @@ class BulkDownload < ApplicationRecord
       end
     elsif download_type == SAMPLE_METADATA_BULK_DOWNLOAD_TYPE
       Rails.logger.info("Generating sample metadata for #{pipeline_runs.length} samples...")
-      samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+      samples = Sample.where(id: pipeline_runs.pluck(:sample_id)).or(Sample.where(id: workflow_runs.pluck(:sample_id)))
 
       sample_metadata_csv = BulkDownloadsHelper.generate_metadata_csv(samples)
 
