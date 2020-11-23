@@ -641,7 +641,7 @@ ActiveRecord::Schema.define(version: 20_201_102_114_100) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip", collation: "utf8_general_ci"
     t.string "last_sign_in_ip", collation: "utf8_general_ci"
-    t.string "authentication_token", limit: 30, collation: "utf8_general_ci"
+    t.binary "authentication_token_encrypted", limit: 48
     t.integer "role"
     t.text "allowed_features"
     t.string "institution", limit: 100
@@ -651,7 +651,7 @@ ActiveRecord::Schema.define(version: 20_201_102_114_100) do
     t.integer "visualizations_count", default: 0, null: false
     t.integer "phylo_trees_count", default: 0, null: false
     t.bigint "created_by_user_id", comment: "The user_id that created/invited this user."
-    t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
+    t.index ["authentication_token_encrypted"], name: "index_users_on_authentication_token_encrypted", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

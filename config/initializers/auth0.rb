@@ -8,7 +8,7 @@ Warden::Manager.serialize_into_session do |user|
   # convert to warden_session_obj
   serialized = user.slice("id", "role")
   # extra field to improve security
-  serialized["authentication_token_hash"] = Digest::SHA1.hexdigest(user["authentication_token"] || "")
+  serialized["authentication_token_hash"] = Digest::SHA1.hexdigest(user.authentication_token || "")
   serialized
 end
 

@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     container: ruby:2.5
     env:
+      # This is a dummy secret, do not use it for anything
+      AUTH_TOKEN_SECRET: 'GYbvZ9/uHy75wWWK4BO3jZGJ0noacv7GbTJI96wZgWQ='
       DB_USERNAME: test_user
       DB_PASSWORD: test_password
       RAILS_ENV: test

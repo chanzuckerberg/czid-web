@@ -1,5 +1,6 @@
 require 'elasticsearch/model'
 require 'auth0'
+require 'active_support/core_ext/securerandom'
 
 class User < ApplicationRecord
   if ELASTICSEARCH_ON
@@ -11,8 +12,21 @@ class User < ApplicationRecord
     include ElasticsearchCallbacksHelper
   end
 
-  # https://api.rubyonrails.org/classes/ActiveRecord/SecureToken/ClassMethods.html#method-i-has_secure_token
-  has_secure_token :authentication_token
+  def self.encrypt_token(data)
+    cipher = OpenSSL::Cipher::AES256.new(:CBC).encrypt
+    cipher.key = Base64.decode64(ENV["AUTH_TOKEN_SECRET"])
+    iv = cipher.random_iv
+    cipher.update(data) + cipher.final + iv
+  end
+
+  def self.decrypt_token(data)
+    decipher = OpenSSL::Cipher::AES256.new(:CBC).decrypt
+    decipher.key = Base64.decode64(ENV["AUTH_TOKEN_SECRET"])
+    decipher.iv = data[-decipher.iv_len..-1]
+    decipher.update(data[0..-(decipher.iv_len + 1)]) + decipher.final
+  end
+
+  before_create { send("authentication_token_encrypted=", User.encrypt_token(SecureRandom.base58(24))) unless send("authentication_token_encrypted?") }
 
   # NOTE: counter_cache is not supported for has_and_belongs_to_many.
   has_and_belongs_to_many :projects
@@ -46,13 +60,17 @@ class User < ApplicationRecord
     ROLE_ADMIN,
   ] }, allow_nil: true, if: :mass_validation_enabled?
 
-  validates :authentication_token, presence: true, allow_nil: true, if: :mass_validation_enabled?
+  validates :authentication_token_encrypted, presence: true, allow_nil: true, if: :mass_validation_enabled?
 
   IDSEQ_BUCKET_PREFIXES = ['idseq-'].freeze
   CZBIOHUB_BUCKET_PREFIXES = ['czb-', 'czbiohub-'].freeze
 
   def as_json(options = {})
-    super({ except: [:authentication_token], methods: [:admin] }.merge(options))
+    super({ except: [:authentication_token_encrypted], methods: [:admin] }.merge(options))
+  end
+
+  def authentication_token
+    authentication_token_encrypted && User.decrypt_token(authentication_token_encrypted)
   end
 
   def admin
