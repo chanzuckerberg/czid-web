@@ -7,49 +7,15 @@ set -euo pipefail -o errexit -o nounset
 show_help_and_exit() {
 >&2 cat << HERE_DOC
 usage:
-  # List your running instances
-  ec2ia ls [ls-options]
-    ls-options:
-        --json          Display results in json format
+    ec2ia [command] [command-options]|[--help]
 
-  # Launch a new instance
-  ec2ia launch --iam-role <role-name> [launch-options] [-- ...]
-    launch-options:
-        --iam-role <role-name>
-            Mandatory. IAM Role that will be used by your remote instance.
-            Valid options: 'idseq-on-call' or 'idseq-comp-bio'
-        --ami <ami>
-            AMI to be used. Defaults to <role-name>. For more info about this
-            parameter, see "aegea launch --help"
-        --instance-type <value>
-            EC2 instance type. Defaults to t3.small
-        --dry-run
-            Prints the command that would be used to launch the new instance.
-    -- ...
-        Append anything after double dashes will be appended to aegea command.
-
-  # Connect to existing instance.
-  ec2ia ssh [connect-options] [-- ...]
-    connect-options:
-        --instance-id <instance-id|instance-name>
-            Instance to connect. If you have multiple instances running and
-            omit this option, it will connect to your oldest running instance.
-        --ssh-user <ssh-user>
-            SSH user on the remote instance. Defaults to "ubuntu"
-
-    -- ...
-        Append anything after double dashes will be appended to aegea command.
-
-
-  # Terminate instances
-  ec2ia terminate [terminate-options]
-    terminate-options:
-        --instance-id <instance-id|instance-name>
-            Instance to terminate. If you have multiple instances running and
-            omit this option, it will terminate your oldest running instance.
-        --dry-run
-            Prints the command that would be used to terminate the instance.
-
+    Command:
+        ls          List your running instances
+        launch      Launch a new instance
+        ssh         Connect to an existing instance
+        terminate   Terminate instance
+        help        This help message. Use "ec2ia [command] --help" to see
+                    help to other commands
 
 HERE_DOC
 exit 1
@@ -57,12 +23,18 @@ exit 1
 
 main() {
     >&2 echo '* EC2 Individual Attribution instance manager *'
+    >&2 echo
     local command="${1:-}"
     if [[ ! "$command" =~ $ACCEPTED_COMMANDS_RE ]]; then
         >&2 echo "ERROR: Invalid command [$command]"
         show_help_and_exit
     else
-        INPUT_VALUES=(${@:2}) ${command}_command
+        if check_command_help_option "${@:2}"; then
+            ${command}_help
+            >&2 echo
+        else
+            INPUT_VALUES=(${@:2}) ${command}_command
+        fi
     fi
 }
 
@@ -70,6 +42,17 @@ ACCEPTED_COMMANDS_RE='^(ls|launch|ssh|terminate|help)$'
 
 help_command() {
     show_help_and_exit
+}
+
+ls_help() {
+>&2 cat << HERE_DOC
+  # List your running instances
+
+  ec2ia ls [ls-options]
+
+    ls-options:
+        --json          Display results in json format
+HERE_DOC
 }
 
 ls_command() {
@@ -86,19 +69,42 @@ ls_command() {
     fi
 }
 
+launch_help() {
+>&2 cat << HERE_DOC
+  # Launch a new instance
+
+  ec2ia launch --iam-role <role-name> [launch-options] [-- ...]
+
+    launch-options:
+        --iam-role <role-name>
+            Mandatory. IAM Role that will be used by your remote instance.
+            Valid options: 'idseq-on-call' or 'idseq-comp-bio'
+        --ami <ami>
+            AMI to be used. Defaults to <role-name>. For more info about this
+            parameter, see "aegea launch --help"
+        --instance-type <value>
+            EC2 instance type. Defaults to t3.small
+        --dry-run
+            Prints the command that would be used to launch the new instance.
+    -- ...
+        Anything after double dashes will be added to aegea launch command,
+        right before the hostname. For more info: aegea launch --help
+HERE_DOC
+}
+
 launch_command() {
     INPUT_VALUES=(${INPUT_VALUES[@]}) \
     OPTIONS_ACCEPTED=(--instance-type= --instance-name= --iam-role= --ami= --dry-run) \
         parse_options
 
     if [[ ! -v PARSED_OPTIONS[iam-role] ]]; then
-        >&2 echo "ERROR. Parameter iam-role is mandatory for this command"
+        >&2 echo "ERROR. Parameter --iam-role is mandatory for this command"
         exit 1
     fi
 
     >&2 echo "Preparing to launch instance"
 
-    local account_alias; env=$(get_account_alias)
+    local account_alias; account_alias=$(get_account_alias)
     local env; env=$(translate_account_alias_to_env "$account_alias")
     local email; email=$(get_current_user_email)
     local username; username=$(sed -E 's/@.*$//g; s/[^0-9a-zA-Z]+/\-/g' <<<"$email")
@@ -115,10 +121,28 @@ launch_command() {
         --subnet "$subnet_id"
         --security-groups "$security_groups"
         --no-dns
-        "$instance_name"
     )
 
-    run_aegea ${PARSED_OPTIONS[dry-run]:-0} ${aegea_opts[@]} ${PARSED_OPTIONS_RAW[@]}
+    run_aegea ${PARSED_OPTIONS[dry-run]:-0} ${aegea_opts[@]} ${PARSED_OPTIONS_RAW[@]} "$instance_name"
+}
+
+ssh_help() {
+>&2 cat << HERE_DOC
+
+  # Connect to existing instance.
+
+  ec2ia ssh [connect-options] [-- ...]
+
+    connect-options:
+        --instance-id <instance-id|instance-name>
+            Instance to connect. If you have multiple instances running and
+            omit this option, it will connect to your oldest running instance.
+        --ssh-user <ssh-user>
+            SSH user on the remote instance. Defaults to "ubuntu"
+
+    -- ...
+        Anything after double dashes will be appended to aegea command.
+HERE_DOC
 }
 
 ssh_command() {
@@ -132,11 +156,26 @@ ssh_command() {
 
     local -a aegea_opts=(
         ssh
-        -X
         "${ssh_user}@${instance_id}"
     )
 
     run_aegea ${PARSED_OPTIONS[dry-run]:-0} ${aegea_opts[@]} ${PARSED_OPTIONS_RAW[@]}
+}
+
+terminate_help() {
+>&2 cat << HERE_DOC
+
+  # Terminate instances
+
+  ec2ia terminate [terminate-options]
+
+    terminate-options:
+        --instance-id <instance-id|instance-name>
+            Instance to terminate. If you have multiple instances running and
+            omit this option, it will terminate your oldest running instance.
+        --dry-run
+            Prints the command that would be used to terminate the instance.
+HERE_DOC
 }
 
 terminate_command() {
@@ -175,21 +214,38 @@ containsElement () {
     for e in "${@:2}"; do [[ "$e" = "$1" ]] && return 0; done; return 1;
 }
 
+check_command_help_option() {
+    for e in "${@}"; do
+        [[ "$e" = "--help" ]] && return 0;
+        [[ "$e" = "--" ]] && return 1;
+    done;
+    return 1;
+}
+
 parse_options() {
     declare -g -A PARSED_OPTIONS
     declare -g PARSED_OPTIONS_RAW
+    local option_value option_name
 
     while [[ ${#INPUT_VALUES[@]} != 0 ]]; do
-        local option_name="${INPUT_VALUES[1]}"
+        option_name="${INPUT_VALUES[1]}"
         if [[ "${option_name}" = "--" ]]; then
             PARSED_OPTIONS_RAW=(${INPUT_VALUES[@]:1})
             break
         fi
         if containsElement "$option_name=" $OPTIONS_ACCEPTED; then
-            local option_value="${INPUT_VALUES[2]}"
+            if [[ ${#INPUT_VALUES} -lt 2 ]]; then
+                option_value="--"
+            else;
+                option_value="${INPUT_VALUES[2]:-}"
+            fi
+            if [[ "${option_value:0:2}" == "--" ]]; then
+                >&2 printf "PARSE OPTIONS ERROR: Missing value for option '%s'\n\n" "$option_name"
+                exit 1
+            fi
             INPUT_VALUES=(${INPUT_VALUES[@]:2})
         elif containsElement "$option_name" $OPTIONS_ACCEPTED; then
-            local option_value=1
+            option_value=1
             INPUT_VALUES=(${INPUT_VALUES[@]:1})
         else
             >&2 printf "PARSE OPTIONS ERROR: You passed an invalid option '%s' to %s\n\n" "$option_name" "$SCRIPT_NAME"
@@ -213,6 +269,7 @@ function get_account_alias() {
 function translate_account_alias_to_env() {
     local account_alias="$1"
 
+    >&2 echo ". Translating account alias $account_alias to env"
     [[ "$account_alias" == "idseq-prod" ]] && printf "prod" || printf "staging"
 }
 
