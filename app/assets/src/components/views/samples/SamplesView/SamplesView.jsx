@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { difference, isEmpty, union } from "lodash/fp";
+import { compact, difference, isEmpty, union, xor } from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -8,6 +8,7 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
+import NextcladeModal from "~/components/views/nextclade/NextcladeModal";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
@@ -23,9 +24,11 @@ import {
   IconBackgroundModel,
   IconDownload,
   IconPhyloTree,
+  IconNextcladeLarge,
 } from "~ui/icons";
 import Label from "~ui/labels/Label";
 import { WORKFLOWS } from "~utils/workflows";
+import { TRIGGERS, WORKFLOW_TRIGGERS } from "./constants";
 
 import {
   computeColumnsByWorkflow,
@@ -34,23 +37,6 @@ import {
 import cs from "./samples_view.scss";
 import ToolbarIcon from "./ToolbarIcon";
 
-const TRIGGERS = {
-  backgroundModel: "backgroundModel",
-  heatmap: "heatmap",
-  phylogeneticTree: "phylogeneticTree",
-  download: "download",
-};
-
-const WORKFLOW_TRIGGERS = {
-  [WORKFLOWS.CONSENSUS_GENOME.value]: [TRIGGERS.download],
-  [WORKFLOWS.SHORT_READ_MNGS.value]: [
-    TRIGGERS.backgroundModel,
-    TRIGGERS.heatmap,
-    TRIGGERS.phylogeneticTree,
-    TRIGGERS.download,
-  ],
-};
-
 class SamplesView extends React.Component {
   constructor(props) {
     super(props);
@@ -58,6 +44,7 @@ class SamplesView extends React.Component {
     this.state = {
       phyloTreeCreationModalOpen: false,
       bulkDownloadModalOpen: false,
+      nextcladeModalOpen: false,
       // This tooltip is reset whenever the selectedSampleIds changes.
       bulkDownloadButtonTempTooltip: null,
     };
@@ -196,6 +183,9 @@ class SamplesView extends React.Component {
         icon={downloadIcon}
         popperDependencies={[bulkDownloadButtonTempTooltip]}
         popupText={bulkDownloadButtonTempTooltip || "Download"}
+        popupSubtitle={
+          selectedSampleIds.size === 0 ? "Select at least 1 sample" : ""
+        }
         disabled={selectedSampleIds.size === 0}
         onClick={withAnalytics(
           this.handleBulkDownloadModalOpen,
@@ -219,7 +209,7 @@ class SamplesView extends React.Component {
         className={cs.action}
         disabled
         icon={backgroundIcon}
-        popupText={"Background Model"}
+        popupText="Background Model"
         popupSubtitle="Select at least 2 samples"
       />
     ) : (
@@ -228,7 +218,7 @@ class SamplesView extends React.Component {
           <ToolbarIcon
             className={cs.action}
             icon={backgroundIcon}
-            popupText={"Background Model"}
+            popupText="Background Model"
           />
         }
         selectedSampleIds={selectedSampleIds}
@@ -240,18 +230,50 @@ class SamplesView extends React.Component {
     );
   };
 
+  renderNextcladeTrigger = () => {
+    const { selectedSampleIds } = this.props;
+    const downloadIcon = (
+      <IconNextcladeLarge className={cx(cs.icon, cs.nextclade)} />
+    );
+
+    return (
+      <ToolbarIcon
+        className={cs.action}
+        icon={downloadIcon}
+        popupText="Nextclade"
+        popupSubtitle={
+          selectedSampleIds.size === 0 ? "Select at least 1 sample" : ""
+        }
+        disabled={selectedSampleIds.size === 0}
+        onClick={withAnalytics(
+          this.handleNextcladeModalOpen,
+          "SamplesView_nextclade-modal-open_clicked"
+        )}
+      />
+    );
+  };
+
   renderTriggers = () => {
-    const { selectedSampleIds, workflow } = this.props;
+    const { allowedFeatures, selectedSampleIds, workflow } = this.props;
+    const triggersToHide = compact([
+      !allowedFeatures.includes("nextclade") && TRIGGERS.nextclade,
+    ]);
 
     const triggers = {
       [TRIGGERS.backgroundModel]: this.renderCollectionTrigger,
       [TRIGGERS.heatmap]: this.renderHeatmapTrigger,
       [TRIGGERS.phylogeneticTree]: this.renderPhyloTreeTrigger,
       [TRIGGERS.download]: this.renderBulkDownloadTrigger,
+      [TRIGGERS.nextclade]: this.renderNextcladeTrigger,
     };
 
-    const triggersToRender = WORKFLOW_TRIGGERS[workflow].map(trigger => (
-      <React.Fragment>{triggers[trigger]()}</React.Fragment>
+    const triggersToRender = xor(
+      triggersToHide,
+      WORKFLOW_TRIGGERS[workflow]
+    ).map(trigger => (
+      <React.Fragment key={`${workflow}-${trigger}`}>
+        {triggers[trigger]()}
+      </React.Fragment>
     ));
 
     return (
@@ -275,12 +297,12 @@ class SamplesView extends React.Component {
   };
 
   renderToolbar = () => {
-    const { hideTriggers } = this.props;
+    const { hideAllTriggers } = this.props;
     return (
       <div className={cs.samplesToolbar}>
         {this.renderDisplaySwitcher()}
         <div className={cs.fluidBlank} />
-        {!hideTriggers && this.renderTriggers()}
+        {!hideAllTriggers && this.renderTriggers()}
       </div>
     );
   };
@@ -288,7 +310,7 @@ class SamplesView extends React.Component {
   renderTable = () => {
     const {
       activeColumns,
-      hideTriggers,
+      hideAllTriggers,
       onActiveColumnsChange,
       onLoadRows,
       protectedColumns,
@@ -317,7 +339,7 @@ class SamplesView extends React.Component {
           onRowClick={this.handleRowClick}
           protectedColumns={protectedColumns}
           rowClassName={cs.tableDataRow}
-          selectableKey={hideTriggers ? null : "id"}
+          selectableKey={hideAllTriggers ? null : "id"}
           selected={selectedSampleIds}
           selectAllChecked={selectAllChecked}
           selectableCellClassName={cs.selectableCell}
@@ -447,6 +469,14 @@ class SamplesView extends React.Component {
     showBulkDownloadNotification();
   };
 
+  handleNextcladeModalOpen = () => {
+    this.setState({ nextcladeModalOpen: true });
+  };
+
+  handleNextcladeModalClose = () => {
+    this.setState({ nextcladeModalOpen: false });
+  };
+
   handleRowClick = ({ event, rowData }) => {
     const { onSampleSelected, samples } = this.props;
     const sample = samples.get(rowData.id);
@@ -464,7 +494,11 @@ class SamplesView extends React.Component {
       snapshotShareId,
       workflow,
     } = this.props;
-    const { phyloTreeCreationModalOpen, bulkDownloadModalOpen } = this.state;
+    const {
+      phyloTreeCreationModalOpen,
+      bulkDownloadModalOpen,
+      nextcladeModalOpen,
+    } = this.state;
     return (
       <div className={cs.container}>
         {currentDisplay === "table" || currentDisplay === "plqc" ? (
@@ -495,6 +529,16 @@ class SamplesView extends React.Component {
             onGenerate={this.handleBulkDownloadGenerate}
           />
         )}
+        {nextcladeModalOpen && (
+          <NextcladeModal
+            open
+            onClose={withAnalytics(
+              this.handleNextcladeModalClose,
+              "SamplesView_nextclade-modal_closed"
+            )}
+            selectedSampleIds={selectedSampleIds}
+          />
+        )}
       </div>
     );
   }
@@ -513,7 +557,7 @@ SamplesView.propTypes = {
   currentDisplay: PropTypes.string.isRequired,
   currentTab: PropTypes.string.isRequired,
   filtersSidebarOpen: PropTypes.bool,
-  hideTriggers: PropTypes.bool,
+  hideAllTriggers: PropTypes.bool,
   mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,

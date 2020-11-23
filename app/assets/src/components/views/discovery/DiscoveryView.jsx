@@ -1495,7 +1495,7 @@ class DiscoveryView extends React.Component {
                   selectedSampleIds={selectedSampleIds[workflow]}
                   filtersSidebarOpen={showFilters}
                   sampleStatsSidebarOpen={showStats}
-                  hideTriggers={
+                  hideAllTriggers={
                     !!snapshotShareId ||
                     (workflow &&
                       this.samplesByWorkflow[workflow].displayName ===

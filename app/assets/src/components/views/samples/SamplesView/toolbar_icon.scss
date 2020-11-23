@@ -12,6 +12,7 @@
   // The child icon will contain an <svg>.
   // The 'fill' rule only works when applied on the svg itself, not the parent.
   svg {
+    color: $gray-light;
     fill: $gray-light;
   }
 
@@ -23,6 +24,7 @@
     }
 
     svg {
+      color: $primary;
       fill: $primary;
     }
   }

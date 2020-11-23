@@ -12,6 +12,11 @@ const IconPlusCircleSmall = ({ className }) => {
 
 IconPlusCircleSmall.propTypes = forbidExtraProps({
   className: PropTypes.string,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  onBlur: PropTypes.func,
+  onClick: PropTypes.func,
+  onFocus: PropTypes.func,
 });
 
 export default IconPlusCircleSmall;

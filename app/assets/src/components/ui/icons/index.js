@@ -28,6 +28,7 @@ import IconDownloadSmall from "./IconDownloadSmall";
 import IconLoading from "./IconLoading";
 import IconMember from "./IconMember";
 import IconMemberSmall from "./IconMemberSmall";
+import IconNextcladeLarge from "./IconNextcladeLarge";
 import IconMinusSmall from "./IconMinusSmall";
 import IconPhyloTree from "./IconPhyloTree";
 import IconPhyloTreePrivate from "./IconPhyloTreePrivate";
@@ -90,6 +91,7 @@ export const ICONS_TAXONOMY = {
     IconMember,
     IconMemberSmall,
     IconMinusSmall,
+    IconNextcladeLarge,
     InfoPanelIcon,
     IconPlusSmall,
     IconPhyloTree,

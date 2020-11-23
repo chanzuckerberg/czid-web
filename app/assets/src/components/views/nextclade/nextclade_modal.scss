@@ -1,0 +1,81 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.modal {
+  max-height: calc(85vh - 80px);
+  display: flex;
+  flex-direction: column;
+
+  .infoIcon {
+    fill: $gray-dark;
+    height: $icon-s;
+    width: $icon-s;
+    margin-left: $space-xxs;
+    margin-top: $space-xxxs;
+
+    &:hover {
+      fill: $primary;
+    }
+
+    &.lower {
+      vertical-align: -$space-xxxs;
+    }
+  }
+
+  .nextcladeHeader {
+    .title {
+      @include font-header-xl;
+      color: $black;
+      vertical-align: -$space-s;
+    }
+
+    .tagline {
+      @include font-body-s;
+      color: $gray-dark;
+    }
+  }
+
+  .nextcladeDescription {
+    margin-top: $space-xl;
+
+    .title {
+      @include font-header-m;
+      color: $black;
+    }
+
+    ul {
+      margin-top: $space-xxs;
+      list-style-position: inside;
+
+      li {
+        @include font-body-s;
+        list-style-type: disc !important;
+        color: $gray-dark;
+        padding-left: $space-xxs;
+
+        span {
+          position: relative;
+          left: -$space-xs;
+        }
+      }
+    }
+  }
+
+  .referenceTree {
+    margin-top: $space-xl;
+
+    .title {
+      @include font-header-s;
+      color: $black;
+    }
+
+    .options {
+      overflow: auto;
+    }
+  }
+
+  .footer {
+    margin-top: $space-l;
+  }
+}
