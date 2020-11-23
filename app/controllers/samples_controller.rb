@@ -1414,6 +1414,11 @@ class SamplesController < ApplicationController
     options = { "input-fasta": fasta_url }
     external_url = URI::HTTPS.build(host: CLADE_EXTERNAL_SITE, query: options.to_query)
 
+    # Ensure data export is logged and attributed.
+    event_name = "SamplesController_clade_exported"
+    MetricUtil.log_analytics_event(event_name, current_user, { sample_ids: samples.pluck(:id), workflow_run_ids: workflow_run_ids }, request)
+    Rails.logger.info("#{event_name} by user #{current_user.id} for samples (#{samples.pluck(:id)}) and workflow runs (#{workflow_run_ids})")
+
     render(
       json: { external_url: external_url },
       status: :ok
