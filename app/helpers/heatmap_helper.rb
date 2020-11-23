@@ -38,10 +38,10 @@ module HeatmapHelper
     { text: "NR r (total reads)", value: "NR.r" },
     { text: "NT %id", value: "NT.percentidentity" },
     { text: "NT L (alignment length in bp)", value: "NT.alignmentlength" },
-    { text: "NT log(1/e)", value: "NT.neglogevalue" },
+    { text: "NT E Value", value: "NT.logevalue" },
     { text: "NR %id", value: "NR.percentidentity" },
     { text: "NR L (alignment length in bp)", value: "NR.alignmentlength" },
-    { text: "R log(1/e)", value: "NR.neglogevalue" },
+    { text: "NR E Value", value: "NR.logevalue" },
   ].freeze
 
   # Samples and background are assumed here to be vieweable.
@@ -274,7 +274,7 @@ module HeatmapHelper
       mean_mass_normalized,
       percent_identity    AS  percentidentity,
       alignment_length    AS  alignmentlength,
-      COALESCE(0.0 - e_value, #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}) AS neglogevalue,
+      COALESCE(e_value, #{ReportHelper::DEFAULT_SAMPLE_LOGEVALUE}) AS logevalue,
       -- First pass of ranking in SQL. Second pass in Ruby.
       #{rpm_sql} AS rpm,
       #{zscore_sql} AS zscore
@@ -486,9 +486,9 @@ module HeatmapHelper
         taxon_counts.alignment_length         AS  alignmentlength,
         IF(
           taxon_counts.e_value IS NOT NULL,
-          (0.0 - taxon_counts.e_value),
-          #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                     AS  neglogevalue
+          taxon_counts.e_value,
+          #{ReportHelper::DEFAULT_SAMPLE_LOGEVALUE}
+        )                                     AS  logevalue
       FROM taxon_counts
       JOIN taxon_lineages ON taxon_counts.tax_id = taxon_lineages.taxid
       LEFT OUTER JOIN taxon_summaries ON

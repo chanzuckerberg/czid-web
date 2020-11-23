@@ -151,7 +151,7 @@ class TaxonCountsHeatmapService
       z_score: :zscore,
       percent_identity: :percentidentity,
       alignment_length: :alignmentlength,
-      e_value: :neglogevalue,
+      e_value: :logevalue,
       aggregate_score: :aggregatescore,
     }
     taxon_counts.each do |taxon_count|

@@ -271,11 +271,10 @@ class ReportTable extends React.Component {
             defaultValue: 0,
             countTypes: countTypes,
           }),
-        cellRenderer: ({ cellData }) =>
-          this.renderCellValue({ cellData, decimalPlaces: 1 }),
-        columnData: REPORT_TABLE_COLUMNS["neglogevalue"],
+        cellRenderer: ({ cellData }) => this.render10BaseExponent(cellData),
+        columnData: REPORT_TABLE_COLUMNS["evalue"],
         dataKey: "e_value",
-        label: "log(1/E)",
+        label: "E value",
         sortFunction: ({ data, sortDirection }) =>
           this.nestedNtNrSortFunction({
             data,
@@ -432,6 +431,23 @@ class ReportTable extends React.Component {
             TableRenderers.formatNumberWithCommas(
               Number(val).toFixed(decimalPlaces || 0)
             )
+          ),
+        });
+  };
+
+  render10BaseExponent = cellData => {
+    if (!cellData.length) return "-";
+
+    const hasMergedNtNrValue = cellData.length === 1;
+    const mergedNtNrValue = (
+      <div>{TableRenderers.format10BaseExponent(cellData[0])}</div>
+    );
+
+    return hasMergedNtNrValue
+      ? mergedNtNrValue
+      : this.renderNtNrStack({
+          cellData: cellData.map(val =>
+            TableRenderers.format10BaseExponent(val)
           ),
         });
   };

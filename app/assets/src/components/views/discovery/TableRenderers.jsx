@@ -180,6 +180,16 @@ class TableRenderers extends React.Component {
     const mDisplay = m > 0 ? m + (m === 1 ? " minute" : " minutes") : "";
     return hDisplay + mDisplay;
   };
+
+  static format10BaseExponent = logValue => {
+    if (!logValue) return logValue;
+    const roundedInteger = Math.round(logValue);
+    return (
+      <div className={cs.exponent}>
+        10<sup>{roundedInteger}</sup>
+      </div>
+    );
+  };
 }
 
 export default TableRenderers;

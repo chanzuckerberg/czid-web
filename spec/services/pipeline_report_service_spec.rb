@@ -2,8 +2,8 @@ require 'rails_helper'
 require 'json'
 
 RSpec.describe PipelineReportService, type: :service do
-  let(:csv_output_standard_background) { "tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nt_bg_mean_mass_normalized,nt_bg_stdev_mass_normalized,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,nr_bg_mean_mass_normalized,nr_bg_stdev_mass_normalized,species_tax_ids\n570,2,570,Klebsiella,,bacteria,false,2428411764.7058825,99,99,193404.63458110517,217,6,594,99.7014,149.424,89.5822,18.3311,64.2056,,,99,77540.10695187165,87,6,594,97.9598,46.4253,16.9874,35.0207,238.639,,,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,false,2428411764.7058825,99,99,186274.50980392157,209,2,198,99.6995,149.402,89.5641,9.35068,26.4471,,,99,61497.326203208555,69,2,198,97.8565,46.3623,16.9101,29.9171,236.332,,,\n".freeze }
-  let(:csv_output_mass_normalized_background) { "tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nt_bg_mean_mass_normalized,nt_bg_stdev_mass_normalized,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,nr_bg_mean_mass_normalized,nr_bg_stdev_mass_normalized,species_tax_ids\n570,2,570,Klebsiella,,bacteria,false,124107.09808698049,0.7071078152481705,0.707106649930723,193750.0,217,6,594,99.7014,149.424,89.5822,96875.0,137002.0,54.25,76.7211,0.7071078152481705,77678.57142857143,87,6,594,97.9598,46.4253,16.9874,38839.3,54927.0,21.75,30.7591,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,false,124107.09808698049,0.7071063853398237,0.7071063853398237,186607.14285714287,209,2,198,99.6995,149.402,89.5641,93303.6,131951.0,52.25,73.8927,0.7071063159965896,61607.142857142855,69,2,198,97.8565,46.3623,16.9101,30803.6,43562.8,17.25,24.3952,\n".freeze }
+  let(:csv_output_standard_background) { "tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nt_bg_mean_mass_normalized,nt_bg_stdev_mass_normalized,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,nr_bg_mean_mass_normalized,nr_bg_stdev_mass_normalized,species_tax_ids\n570,2,570,Klebsiella,,bacteria,false,2428411764.7058825,99,99,193404.63458110517,217,6,594,99.7014,149.424,10^-89.5822,18.3311,64.2056,,,99,77540.10695187165,87,6,594,97.9598,46.4253,10^-16.9874,35.0207,238.639,,,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,false,2428411764.7058825,99,99,186274.50980392157,209,2,198,99.6995,149.402,10^-89.5641,9.35068,26.4471,,,99,61497.326203208555,69,2,198,97.8565,46.3623,10^-16.9101,29.9171,236.332,,,\n".freeze }
+  let(:csv_output_mass_normalized_background) { "tax_id,tax_level,genus_tax_id,name,common_name,category,is_phage,agg_score,max_z_score,nt_z_score,nt_rpm,nt_count,nt_contigs,nt_contig_r,nt_percent_identity,nt_alignment_length,nt_e_value,nt_bg_mean,nt_bg_stdev,nt_bg_mean_mass_normalized,nt_bg_stdev_mass_normalized,nr_z_score,nr_rpm,nr_count,nr_contigs,nr_contig_r,nr_percent_identity,nr_alignment_length,nr_e_value,nr_bg_mean,nr_bg_stdev,nr_bg_mean_mass_normalized,nr_bg_stdev_mass_normalized,species_tax_ids\n570,2,570,Klebsiella,,bacteria,false,124107.09808698049,0.7071078152481705,0.707106649930723,193750.0,217,6,594,99.7014,149.424,10^-89.5822,96875.0,137002.0,54.25,76.7211,0.7071078152481705,77678.57142857143,87,6,594,97.9598,46.4253,10^-16.9874,38839.3,54927.0,21.75,30.7591,[573]\n573,1,570,Klebsiella pneumoniae,,bacteria,false,124107.09808698049,0.7071063853398237,0.7071063853398237,186607.14285714287,209,2,198,99.6995,149.402,10^-89.5641,93303.6,131951.0,52.25,73.8927,0.7071063159965896,61607.142857142855,69,2,198,97.8565,46.3623,10^-16.9101,30803.6,43562.8,17.25,24.3952,\n".freeze }
   let(:fake_output_prefix) { "s3://fake-output-prefix" }
   let(:fake_sfn_name) { "fake_sfn_name" }
   let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
@@ -172,13 +172,13 @@ RSpec.describe PipelineReportService, type: :service do
           "count" => 217.0,
           "rpm" => 193_404.63458110517, # previously rounded to 193_404.634
           "z_score" => 99.0,
-          "e_value" => 89.5822,
+          "e_value" => -89.5822,
         },
         "nr" => {
           "count" => 87.0,
           "rpm" => 77_540.10695187165, # previously rounded to 77_540.106
           "z_score" => 99.0,
-          "e_value" => 16.9874,
+          "e_value" => -16.9874,
         },
         "agg_score" => 2_428_411_764.7058825, # previously rounded to  2_428_411_754.8
       }
@@ -307,13 +307,13 @@ RSpec.describe PipelineReportService, type: :service do
           "count" => 217.0,
           "rpm" => 193_750.0,
           "z_score" => 0.707106649930723,
-          "e_value" => 89.5822,
+          "e_value" => -89.5822,
         },
         "nr" => {
           "count" => 87.0,
           "rpm" => 77_678.57142857143,
           "z_score" => 0.7071078152481705,
-          "e_value" => 16.9874,
+          "e_value" => -16.9874,
         },
         "agg_score" => 124_107.09808698049,
       }
@@ -446,7 +446,7 @@ RSpec.describe PipelineReportService, type: :service do
           "count" => 2.0,
           "rpm" => 1782.5311942959001, # previously rounded to 1782.531
           "z_score" => 4.209967170274651, # previously rounded to 4.2099668
-          "e_value" => 9.3,
+          "e_value" => -9.3,
         },
         "agg_score" => 12_583.634591815486, # previously rounded to 12_583.63
       }
@@ -481,13 +481,13 @@ RSpec.describe PipelineReportService, type: :service do
           "count" => 4.0,
           "rpm" => 3565.0623885918003, # previously rounded to 3565.062
           "z_score" => 2.208123824886411, # previously rounded to 2.2081236
-          "e_value" => 81.478,
+          "e_value" => -81.478,
         },
         "nr" => {
           "count" => 2.0,
           "rpm" => 1782.5311942959001, # previously rounded to 1782.531
           "z_score" => 1.6768346926439197, # previously rounded to 1.6768345
-          "e_value" => 9.3,
+          "e_value" => -9.3,
         },
         "agg_score" => 73_603.80226971892, # previously rounded to 73_603.777
       }

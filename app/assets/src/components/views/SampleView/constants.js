@@ -51,7 +51,7 @@ export const THRESHOLDS = [
   { text: "NT contig reads", value: "nt:contig_r" },
   { text: "NT %id", value: "nt:percent_identity" },
   { text: "NT L (alignment length in bp)", value: "nt:alignment_length" },
-  { text: "NT log(1/e)", value: "nt:e_value" },
+  { text: "NT E value (as a power of 10)", value: "nt:e_value" },
   { text: "NR Z Score", value: "nr:z_score" },
   { text: "NR rPM", value: "nr:rpm" },
   { text: "NR r (total reads)", value: "nr:count" },
@@ -59,7 +59,7 @@ export const THRESHOLDS = [
   { text: "NR contig reads", value: "nr:contig_r" },
   { text: "NR %id", value: "nr:percent_identity" },
   { text: "NR L (alignment length in bp)", value: "nr:alignment_length" },
-  { text: "NR log(1/e)", value: "nr:e_value" },
+  { text: "NR E value (as a power of 10)", value: "nr:e_value" },
 ];
 
 export const TREE_METRICS = [
@@ -123,10 +123,9 @@ export const REPORT_TABLE_COLUMNS = {
       "Average length of the local alignment for all contigs and reads assigned to this taxon.",
     link: DOC_BASE_LINK + "#average-length",
   },
-  neglogevalue: {
-    tooltip:
-      "Average log10 transformed expect value (e-value) of alignments to NCBI NT/NR.",
-    link: DOC_BASE_LINK + "#inverse-of-e-value",
+  evalue: {
+    tooltip: "Average expect value (e-value) of alignments to NCBI NT/NR.",
+    link: DOC_BASE_LINK + "#e-value",
   },
   sourceCountType: {
     tooltip: "The DB that the single merged NT/NR value was derived from",

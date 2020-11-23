@@ -475,7 +475,7 @@ class PipelineReportService
         count: counts[field_index[:count]],
         percent_identity: counts[field_index[:percent_identity]],
         alignment_length: counts[field_index[:alignment_length]],
-        e_value: counts[field_index[:e_value]].abs,
+        e_value: counts[field_index[:e_value]],
         source_count_type: counts[field_index[:source_count_type]],
       }
 
@@ -727,6 +727,10 @@ class PipelineReportService
       csv << CSV_COLUMNS
       rows.each do |row|
         tax_info = row.map { |k, v| [k.map(&:to_s).join("_"), v] }.to_h
+        # e_value is stored as the base 10 log of the actual value, but for a
+        # csv report we want to give the full direct value
+        tax_info["nt_e_value"] = tax_info["nt_e_value"].nil? ? nil : "10^#{tax_info['nt_e_value']}"
+        tax_info["nr_e_value"] = tax_info["nr_e_value"].nil? ? nil : "10^#{tax_info['nr_e_value']}"
         csv << tax_info.values_at(*CSV_COLUMNS)
       end
     end
