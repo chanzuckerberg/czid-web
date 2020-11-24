@@ -178,6 +178,7 @@ export default class SampleView extends React.Component {
       metric: TREE_METRICS[0].value,
       nameType: "Scientific name",
       readSpecificity: 0,
+      taxon: null,
       thresholds: [],
     };
   };
@@ -1274,48 +1275,46 @@ export default class SampleView extends React.Component {
 
   hasAppliedFilters = () => {
     const { selectedOptions } = this.state;
-    const [categories, subcategories] = Object.values(
-      get("categories", selectedOptions)
-    );
+    const { categories, readSpecificity, taxon, thresholds } = selectedOptions;
 
-    const hasSelectedCategoryFilters =
-      !!categories &&
-      !!subcategories &&
-      (!isEmpty(categories) || !isEmpty(flatten(Object.values(subcategories))));
-    const hasSelectedThresholdFilters = !isEmpty(
-      get("thresholds", selectedOptions)
-    );
-    const hasSelectedReadSpecificityFilter =
-      get("readSpecificity", selectedOptions) === 1;
+    const hasCategoryFilters =
+      categories.categories.length > 0 ||
+      (categories.subcategories.Viruses?.length > 0 ?? false);
+    const hasReadSpecificityFilters = readSpecificity !== 0;
+    const hasTaxonFilter = taxon ?? false;
+    const hasThresholdFilters = thresholds.length > 0;
 
     return (
-      hasSelectedThresholdFilters ||
-      hasSelectedReadSpecificityFilter ||
-      hasSelectedCategoryFilters
+      hasCategoryFilters ||
+      hasReadSpecificityFilters ||
+      hasTaxonFilter ||
+      hasThresholdFilters
     );
   };
 
-  createCSVRowForSelectedOptions = () => {
-    const { backgrounds, selectedOptions } = this.state;
+  getAppliedFilters = () => {
+    const { selectedOptions } = this.state;
 
-    const filterRow = [];
-    let numberOfFilters = 0;
-
-    const diffOptions = omit(
-      ["nameType", "metric"],
+    // Only Taxon, Category, Subcategories, Read Specifity, and Threshold Filters are considered "Applied Filters"
+    return omit(
+      ["nameType", "metric", "background"],
       diff(selectedOptions, this.defaultSelectedOptions())
     );
+  };
 
-    for (const [optionName, optionVal] of Object.entries(diffOptions)) {
+  createCSVRowForAppliedFilters = appliedFilters => {
+    const { backgrounds, selectedOptions } = this.state;
+
+    const selectedBackgroundName = find(
+      { id: selectedOptions.background },
+      backgrounds
+    ).name;
+    const filterRow = [`\nBackground:, "${selectedBackgroundName}"`];
+
+    let numberOfFilters = 0;
+    for (const [optionName, optionVal] of Object.entries(appliedFilters)) {
       if (!optionVal) continue;
       switch (optionName) {
-        case "background": {
-          const background = backgrounds.find(
-            background => optionVal === background.id
-          ).name;
-          filterRow.push(`Background:, "${background}"`);
-          break;
-        }
         case "categories": {
           const categoryFilters = [];
 
@@ -1389,7 +1388,12 @@ export default class SampleView extends React.Component {
       }
     }
 
-    filterRow.unshift(`\n${numberOfFilters} Filters Applied:`);
+    // Insert filter statement after Background
+    filterRow.splice(
+      1,
+      0,
+      `${numberOfFilters} Filter${numberOfFilters > 1 ? "s" : ""} Applied:`
+    );
     return [sanitizeCSVRow(filterRow).join()];
   };
 
@@ -1414,8 +1418,8 @@ export default class SampleView extends React.Component {
       });
       csvRows.push([sanitizeCSVRow(genusRow).join()]);
 
-      if (has("species_tax_ids", datum) && has("species", datum)) {
-        datum["species"].forEach(speciesTaxon => {
+      if (has("filteredSpecies", datum)) {
+        datum["filteredSpecies"].forEach(speciesTaxon => {
           const speciesRow = [];
           csvHeaders.forEach(column => {
             let val = JSON.stringify(getOr("-", column, speciesTaxon));
@@ -1430,7 +1434,9 @@ export default class SampleView extends React.Component {
     });
 
     if (this.hasAppliedFilters()) {
-      csvRows.push(this.createCSVRowForSelectedOptions());
+      csvRows.push(
+        this.createCSVRowForAppliedFilters(this.getAppliedFilters())
+      );
     }
 
     return [[csvHeaders.join()], csvRows];
