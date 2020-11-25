@@ -1408,7 +1408,7 @@ class SamplesController < ApplicationController
     content = ConsensusGenomeConcatService.call(workflow_run_ids)
     key = format(CLADE_FASTA_S3_KEY, path: SecureRandom.alphanumeric(5))
     S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, key, content)
-    fasta_url = get_presigned_s3_url(bucket_name: SAMPLES_BUCKET_NAME, key: key, duration: 30)
+    fasta_url = get_presigned_s3_url(bucket_name: SAMPLES_BUCKET_NAME, key: key, duration: 300)
 
     # Generate the external URL.
     options = { "input-fasta": fasta_url }
