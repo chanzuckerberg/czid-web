@@ -4,6 +4,15 @@ import { markSampleUploaded, uploadFileToUrlWithRetries } from "~/api";
 
 import { putWithCSRF, postWithCSRF } from "./core";
 
+export const MAX_MARK_SAMPLE_RETRIES = 10;
+
+export const exponentialDelayWithJitter = tryCount => {
+  // ~13 sec, ~46 sec, ~158 sec, ... -> ~115 minutes.
+  // Derived via eyeballing. Adjust based on user feedback.
+  const delay = ((tryCount + Math.random()) * 10) ** 3.5 + 10000;
+  return new Promise(resolve => setTimeout(resolve, delay));
+};
+
 export const bulkUploadBasespace = ({ samples, metadata }) =>
   bulkUploadWithMetadata(samples, metadata);
 
@@ -59,14 +68,24 @@ export const bulkUploadLocalWithMetadata = async ({
       every(file => fileNamesToProgress[file.name] === 1, sampleFiles)
     ) {
       markedUploaded[sample.name] = true;
-      try {
-        await markSampleUploaded(sampleId);
 
-        callbacks.onSampleUploadSuccess &&
-          callbacks.onSampleUploadSuccess(sample);
-      } catch (_) {
-        callbacks.onMarkSampleUploadedError &&
-          callbacks.onMarkSampleUploadedError(sample.name);
+      let tryCount = 0;
+      while (true) {
+        try {
+          await markSampleUploaded(sampleId);
+
+          callbacks.onSampleUploadSuccess &&
+            callbacks.onSampleUploadSuccess(sample);
+          break;
+        } catch (_) {
+          tryCount++;
+          if (tryCount === MAX_MARK_SAMPLE_RETRIES) {
+            callbacks.onMarkSampleUploadedError &&
+              callbacks.onMarkSampleUploadedError(sample);
+            break;
+          }
+          await exponentialDelayWithJitter(tryCount);
+        }
       }
     }
   };
