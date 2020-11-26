@@ -1,0 +1,102 @@
+import React from "react";
+import PropTypes from "~/components/utils/propTypes";
+
+import { head } from "lodash/fp";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+import FilePicker from "~ui/controls/FilePicker";
+import RadioButton from "~ui/controls/RadioButton";
+import {
+  NEXTCLADE_GLOBAL_TREE_LINK,
+  NEXTCLADE_TREE_FORMAT_LINK,
+  NEXTCLADE_TREE_ROOT_LINK,
+} from "~/components/utils/documentationLinks";
+
+import cx from "classnames";
+import cs from "./nextclade_modal_tree_options.scss";
+
+class NextcladeReferenceTreeOptions extends React.Component {
+  onDrop = acceptedFile => {
+    this.props.onChange(head(acceptedFile));
+  };
+
+  onRejected = () => {
+    const msg =
+      "Invalid file. Files must be in JSON format and file size must be under 5GB.";
+    window.alert(msg);
+  };
+
+  getFilePickerTitle = () => {
+    const { referenceTree } = this.props;
+
+    return referenceTree ? `${referenceTree} Selected For Upload` : null;
+  };
+
+  render() {
+    const filePickerTitle = this.getFilePickerTitle();
+    const { onSelect, selectedType } = this.props;
+    const uploadSelected = selectedType === "upload";
+
+    return (
+      <div className={cs.treeTypeContainer}>
+        <div
+          className={cx(cs.treeType, !uploadSelected && cs.selected)}
+          onClick={() => onSelect("global")}
+        >
+          <RadioButton className={cs.radioButton} selected={!uploadSelected} />
+          <div className={cs.content}>
+            <div className={cs.name}>Nextstrain Global Tree</div>
+            <div className={cs.description}>
+              This tree includes worldwide data from Nextstrain,{" "}
+              <ExternalLink href={NEXTCLADE_GLOBAL_TREE_LINK}>
+                view the tree.
+              </ExternalLink>
+            </div>
+          </div>
+        </div>
+        <div
+          className={cx(cs.treeType, uploadSelected && cs.selected)}
+          onClick={() => onSelect("upload")}
+        >
+          <RadioButton className={cs.radioButton} selected={uploadSelected} />
+          <div className={cs.content}>
+            <div className={cs.name}>Upload a Tree</div>
+            <div className={cs.description}>
+              You can upload your own info in{" "}
+              <ExternalLink href={NEXTCLADE_TREE_FORMAT_LINK}>
+                Auspice JSON
+              </ExternalLink>{" "}
+              format. For compatibility, make sure your tree's root is{" "}
+              <ExternalLink href={NEXTCLADE_TREE_ROOT_LINK}>
+                Wuhan/Hu-1/2019.
+              </ExternalLink>
+            </div>
+            {uploadSelected && (
+              <div className={cs.fields}>
+                <FilePicker
+                  className={cx(
+                    cs.localFilePicker,
+                    !filePickerTitle && cs.short
+                  )}
+                  title={filePickerTitle}
+                  accept=".json"
+                  onChange={this.onDrop}
+                  onRejected={this.onRejected}
+                  multiFile={false}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+NextcladeReferenceTreeOptions.propTypes = {
+  referenceTree: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  selectedType: PropTypes.string,
+};
+
+export default NextcladeReferenceTreeOptions;

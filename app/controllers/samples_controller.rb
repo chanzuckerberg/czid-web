@@ -82,6 +82,7 @@ class SamplesController < ApplicationController
   ].freeze
 
   CLADE_FASTA_S3_KEY = "clade_exports/fastas/temp-%{path}".freeze
+  CLADE_REFERENCE_TREE_S3_KEY = "clade_exports/trees/temp-%{path}".freeze
   CLADE_EXTERNAL_SITE = "clades.nextstrain.org".freeze
 
   # GET /samples
@@ -1412,6 +1413,14 @@ class SamplesController < ApplicationController
 
     # Generate the external URL.
     options = { "input-fasta": fasta_url }
+    # If a reference tree file was provided, upload to s3 and generate a presigned link.
+    if collection_params[:referenceTree].present?
+      tree_key = format(CLADE_REFERENCE_TREE_S3_KEY, path: SecureRandom.alphanumeric(5))
+      tree_contents = collection_params[:referenceTree].to_json
+      S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, tree_key, tree_contents)
+      tree_url = get_presigned_s3_url(bucket_name: SAMPLES_BUCKET_NAME, key: tree_key, duration: 300)
+      options["input-tree"] = tree_url
+    end
     external_url = URI::HTTPS.build(host: CLADE_EXTERNAL_SITE, query: options.to_query)
 
     # Ensure data export is logged and attributed.
@@ -1479,7 +1488,7 @@ class SamplesController < ApplicationController
 
   # Doesn't require :sample or :samples
   def collection_params
-    permitted_params = [sampleIds: []]
+    permitted_params = [sampleIds: [], referenceTree: {}]
     params.permit(*permitted_params)
   end
 

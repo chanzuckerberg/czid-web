@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~styles/themes/typography";
 
 .filePicker {
   width: 100%;
@@ -24,8 +25,7 @@
     margin: 0 28px;
 
     .title {
-      font-weight: 600;
-      font-size: 16px;
+      @include font-header-s;
       margin-bottom: 5px;
     }
 
@@ -46,6 +46,7 @@
     }
 
     .instructions {
+      color: $gray-darkest;
       font-size: 13px;
     }
 

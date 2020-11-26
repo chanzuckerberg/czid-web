@@ -3,7 +3,6 @@
 @import "~styles/themes/colors";
 
 .modal {
-  max-height: calc(85vh - 80px);
   display: flex;
   flex-direction: column;
 
@@ -46,6 +45,7 @@
 
     ul {
       margin-top: $space-xxs;
+      margin-bottom: 0;
       list-style-position: inside;
 
       li {

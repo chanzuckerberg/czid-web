@@ -3,8 +3,6 @@
 @import "~styles/themes/elements";
 
 .footer {
-  padding-top: $space-l;
-
   .downloadDisclaimer {
     @include font-body-xxs;
     color: $gray-dark;
@@ -36,7 +34,6 @@
 }
 
 .notifications {
-  margin-top: $space-xxl;
   margin-bottom: $space-xl;
 }
 

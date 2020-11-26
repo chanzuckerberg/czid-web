@@ -28,6 +28,7 @@ class FilePicker extends React.Component {
 
   render() {
     const {
+      accept,
       onChange,
       message,
       onRejected,
@@ -62,6 +63,7 @@ class FilePicker extends React.Component {
     return (
       <Dropzone
         acceptClassName={cs.accepted}
+        accept={accept}
         maxSize={5e9}
         minSize={1}
         onDrop={onChange || this.onChange}
@@ -79,6 +81,7 @@ class FilePicker extends React.Component {
 
 FilePicker.propTypes = {
   className: PropTypes.string,
+  accept: PropTypes.string,
   file: PropTypes.instanceOf(File),
   onChange: PropTypes.func.isRequired,
   message: PropTypes.string,

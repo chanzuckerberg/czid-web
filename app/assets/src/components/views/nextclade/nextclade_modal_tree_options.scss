@@ -1,0 +1,57 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.treeTypeContainer {
+  margin-top: $space-s;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.treeType {
+  padding: $space-s $space-m;
+  margin-bottom: $space-xxs;
+  border-radius: $border-radius-m;
+  display: flex;
+  cursor: pointer;
+
+  &:hover,
+  &.selected {
+    background-color: $gray-off-white;
+  }
+
+  .radioButton {
+    margin-right: $space-m;
+    margin-top: $space-xxs;
+  }
+
+  .content {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .name {
+    @include font-header-xs;
+  }
+
+  .description {
+    @include font-body-xxs;
+    color: $gray-dark;
+  }
+}
+
+.fields {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: $space-s;
+  margin-right: $space-xl;
+
+  .localFilePicker {
+    margin: $space-xs 0;
+    height: 120px;
+
+    &.short {
+      height: 90px;
+    }
+  }
+}

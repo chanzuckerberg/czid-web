@@ -452,6 +452,12 @@ const getMassNormalizedBackgroundAvailability = sampleIds =>
     sampleIds,
   });
 
+const createConsensusGenomeCladeExport = ({ sampleIds, referenceTree }) =>
+  postWithCSRF("/samples/consensus_genome_clade_export", {
+    sampleIds,
+    referenceTree,
+  });
+
 export {
   bulkImportRemoteSamples,
   createBackground,
@@ -460,6 +466,7 @@ export {
   getAlignmentData,
   getAllHostGenomes,
   getAllSampleTypes,
+  createConsensusGenomeCladeExport,
   getContigsSequencesByByteranges,
   getCoverageVizData,
   getCoverageVizSummary,

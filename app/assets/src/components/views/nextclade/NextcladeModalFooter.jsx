@@ -11,6 +11,7 @@ import cs from "~/components/views/nextclade/nextclade_modal_footer.scss";
 const NextcladeModalFooter = ({
   invalidSampleNames,
   loading,
+  onClick,
   validationError,
   validSampleIds,
 }) => {
@@ -72,7 +73,7 @@ const NextcladeModalFooter = ({
       <PrimaryButton
         disabled={loading || validSampleIds.size === 0}
         text="View QC in Nextclade"
-        // TODO: Implemement next part of Flow onClick={} in CH-32881
+        onClick={onClick}
       />
     );
   };
@@ -109,6 +110,7 @@ const NextcladeModalFooter = ({
 };
 
 NextcladeModalFooter.propTypes = {
+  onClick: PropTypes.func,
   validSampleIds: PropTypes.instanceOf(Set).isRequired,
   invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
   validationError: PropTypes.string,

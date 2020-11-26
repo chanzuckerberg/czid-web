@@ -2,15 +2,21 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
+import { createConsensusGenomeCladeExport } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
 import { WORKFLOWS } from "~utils/workflows";
-import { NEXTCLADE_TOOL_DOC_LINK } from "~/components/utils/documentationLinks";
+import {
+  NEXTCLADE_TOOL_DOC_LINK,
+  NEXTCLADE_REFERENCE_TREE_LINK,
+} from "~/components/utils/documentationLinks";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import InfoIconSmall from "~ui/icons/InfoIconSmall";
 import Modal from "~ui/containers/Modal";
+import { openUrlInNewTab } from "~utils/links";
+import NextcladeModalFooter from "./NextcladeModalFooter";
+import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
 
 import cs from "./nextclade_modal.scss";
-import NextcladeModalFooter from "./NextcladeModalFooter";
 
 export default class NextcladeModal extends React.Component {
   constructor(props) {
@@ -19,6 +25,8 @@ export default class NextcladeModal extends React.Component {
     this.state = {
       invalidSampleNames: [],
       loading: true,
+      referenceTree: null,
+      selectedTreeType: "global",
       validationError: null,
       validSampleIds: new Set(),
     };
@@ -48,6 +56,50 @@ export default class NextcladeModal extends React.Component {
     });
   };
 
+  openExportLink = async () => {
+    const {
+      validSampleIds,
+      referenceTreeContents,
+      selectedTreeType,
+    } = this.state;
+    const link = await createConsensusGenomeCladeExport({
+      sampleIds: Array.from(validSampleIds),
+      referenceTree:
+        selectedTreeType === "upload" ? referenceTreeContents : null,
+    });
+    openUrlInNewTab(link.external_url);
+  };
+
+  handleFileUpload = async file => {
+    const fileContents = await this.readUploadedFile(file);
+    this.setState({
+      referenceTree: file,
+      referenceTreeContents: fileContents,
+    });
+  };
+
+  readUploadedFile = inputFile => {
+    const reader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+      reader.onerror = () => {
+        reader.abort();
+        reject(reader.error);
+      };
+
+      reader.onload = () => {
+        resolve(JSON.parse(reader.result));
+      };
+      reader.readAsText(inputFile);
+    });
+  };
+
+  handleSelectTreeType = selectedTreeType => {
+    this.setState({
+      selectedTreeType,
+    });
+  };
+
   renderTooltip = ({ content, link, iconStyle = null }) => {
     return (
       <ColumnHeaderTooltip
@@ -65,8 +117,10 @@ export default class NextcladeModal extends React.Component {
     const {
       invalidSampleNames,
       loading,
+      referenceTree,
       validationError,
       validSampleIds,
+      selectedTreeType,
     } = this.state;
 
     return (
@@ -115,13 +169,22 @@ export default class NextcladeModal extends React.Component {
               {this.renderTooltip({
                 content:
                   "Nextclade will graft your sequences onto the reference tree to provide more context.",
-                link: "https://chanzuckerberg.zendesk.com/hc/en-us", // TODO: Awaiting correct Zendesk help page link (in progress)
+                link: NEXTCLADE_REFERENCE_TREE_LINK,
                 iconStyle: cs.lower,
               })}
+            </div>
+            <div className={cs.options}>
+              <NextcladeReferenceTreeOptions
+                referenceTree={referenceTree && referenceTree.name}
+                onChange={this.handleFileUpload}
+                onSelect={this.handleSelectTreeType}
+                selectedType={selectedTreeType}
+              />
             </div>
           </div>
           <div className={cs.footer}>
             <NextcladeModalFooter
+              onClick={this.openExportLink}
               invalidSampleNames={invalidSampleNames}
               loading={loading}
               validationError={validationError}
