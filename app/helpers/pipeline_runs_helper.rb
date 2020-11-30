@@ -124,9 +124,10 @@ module PipelineRunsHelper
   end
 
   def parse_sfn_execution_history_hash(sfn_execution_history_hash)
+    failed_types = %w[ExecutionAborted ExecutionFailed ExecutionTimedOut]
     failed_state =
       sfn_execution_history_hash["events"]
-      .find { |evt| %w[ExecutionAborted ExecutionFailed ExecutionTimedOut].include?(evt["type"]) }
+      .find { |evt| failed_types.include?(evt["type"]) }
 
     step_numbers = {
       "HostFilter" => 1,

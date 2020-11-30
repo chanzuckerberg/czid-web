@@ -1,3 +1,5 @@
+require "addressable"
+
 class Location < ApplicationRecord
   include LocationHelper
   belongs_to :country, class_name: "Location", optional: true
@@ -52,9 +54,9 @@ class Location < ApplicationRecord
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
 
     query_url = "#{LOCATION_IQ_BASE_URL}/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
-    uri = URI.parse(URI.escape(query_url))
+    uri = Addressable::URI.parse(query_url)
     request = Net::HTTP::Get.new(uri)
-    resp = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+    resp = Net::HTTP.start(uri.host, 443, use_ssl: true) do |http|
       http.request(request)
     end
     # Search with 0 results will return HTTPNotFound. Consider it a successful request for our handling.

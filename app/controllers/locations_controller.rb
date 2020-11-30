@@ -83,8 +83,8 @@ class LocationsController < ApplicationController
                     .group_by { |h| h[:id] }
                     .map do |k, v|
                       [k, v[0].except(:sample_id, :project_id)
-                              .merge(sample_ids: v.map { |h| h[:sample_id] })
-                              .merge(project_ids: v.map { |h| h[:project_id] }.uniq),]
+                              .merge(sample_ids: v.pluck(:sample_id))
+                              .merge(project_ids: v.pluck(:project_id).uniq),]
                     end.to_h
 
     # Supply extra Country and State entries for bubble clustering

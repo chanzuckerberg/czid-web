@@ -440,6 +440,7 @@ module SamplesHelper
     top_cg_workflow_run_by_sample_id = top_workflow_runs_multiget(sample_ids, WorkflowRun::WORKFLOW[:consensus_genome])
 
     # Massage data into the right format
+    snapshot_omissions = [:project, :input_files, :db_sample]
     samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user).each do |sample|
       job_info = {}
       job_info[:db_sample] = sample
@@ -480,7 +481,7 @@ module SamplesHelper
       }
 
       if is_snapshot
-        [:project, :input_files, :db_sample].each { |param| job_info.delete(param) }
+        snapshot_omissions.each { |param| job_info.delete(param) }
         job_info[:derived_sample_output].delete(:pipeline_run)
       end
       formatted_samples.push(job_info)

@@ -106,12 +106,6 @@ class Sample < ApplicationRecord
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id
 
-  # getter
-  attr_reader :bulk_mode
-
-  # setter
-  attr_writer :bulk_mode
-
   def sample_path
     File.join('samples', project_id.to_s, id.to_s)
   end

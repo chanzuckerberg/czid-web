@@ -296,9 +296,10 @@ class PhyloTreesController < ApplicationController
 
     metadata_by_sample_id = Metadatum.by_sample_ids(samples_projects.pluck("sample_id"), use_raw_date_strings: true)
 
+    nt_nr = %w[NT NR]
     samples_projects.each do |sp|
       sp["taxid_reads"] ||= {}
-      %w[NT NR].each do |count_type|
+      nt_nr.each do |count_type|
         key = "#{sp['pipeline_run_id']},#{count_type}"
         sp["taxid_reads"][count_type] = (taxon_counts[key] || []).count # count is a column of taxon_counts indicating number of reads
       end

@@ -92,12 +92,13 @@ Rails.application.configure do
   config.lograge.enabled = true
   config.lograge.formatter = Lograge::Formatters::Json.new
   config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
+  param_filtered = %w[controller action]
   config.lograge.custom_options = lambda do |event|
     { time: event.time,
       ddsource: ["ruby"],
       remote_ip: event.payload[:remote_ip],
       user_id: event.payload[:user_id],
-      params: event.payload[:params].reject { |k| %w[controller action].include? k }, }
+      params: event.payload[:params].reject { |k| param_filtered.include? k }, }
   end
   config.colorize_logging = false
   config.lograge.ignore_actions = ["HealthCheck::HealthCheckController#index"]

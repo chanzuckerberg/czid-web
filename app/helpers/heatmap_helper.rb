@@ -71,7 +71,7 @@ module HeatmapHelper
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
     sort_by = params[:sortBy] &&
-              HeatmapHelper::ALL_METRICS.map { |m| m[:value] }.include?(params[:sortBy]) ||
+              HeatmapHelper::ALL_METRICS.pluck(:value).include?(params[:sortBy]) ||
               HeatmapHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] ? params[:species].to_i == 1 : false # Otherwise genus selected
 

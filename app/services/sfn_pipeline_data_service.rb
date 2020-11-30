@@ -343,7 +343,7 @@ class SfnPipelineDataService
   end
 
   def pipeline_job_status(stages)
-    existing_stages_status = stage_job_status(stages.map { |stage| stage[:jobStatus] })
+    existing_stages_status = stage_job_status(stages.pluck(:jobStatus))
     if existing_stages_status == "finished" && @stages_wdl_info.length != (@see_experimental ? 4 : 3)
       return "inProgress"
     end

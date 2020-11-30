@@ -14,7 +14,8 @@ class Project < ApplicationRecord
   has_many :favorite_projects, dependent: :destroy
   has_many :favorited_by, through: :favorite_projects, source: :user
   has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :restrict_with_exception
-  has_one :background
+  # TODO: Pick dependent behavior for background
+  has_one :background # rubocop:disable Rails/HasManyOrHasOneDependent
   has_and_belongs_to_many :metadata_fields
   belongs_to :creator, optional: true, class_name: 'User'
 

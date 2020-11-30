@@ -10,7 +10,7 @@ task create_elasticsearch_indices: :environment do
     models = [User, Project, Sample, Metadatum]
     models.each do |m|
       puts "Indexing #{m}..."
-      [1, 2].each do |_|
+      [1, 2].each do |_| # rubocop:disable Performance/CollectionLiteralInLoop
         # Do it twice in case it doesn't yet exist the first time
         m.__elasticsearch__.create_index!(force: true)
       end

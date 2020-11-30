@@ -153,6 +153,9 @@ Rails/FindEach:
 Rails/Delegate:
   Enabled: false
 
+Rails/Pluck:
+  Enabled: true
+
 # Consistent with JS linting
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: consistent_comma
@@ -163,6 +166,13 @@ Style/TrailingCommaInHashLiteral:
 Naming/RescuedExceptionsVariableName:
   Enabled: false
 
+Rails/UnknownEnv:
+  Environments:
+    - development
+    - prod
+    - staging
+    - test
+
 # TODO: Add back after manual fixes
 Style/AccessModifierDeclarations:
   Enabled: false
@@ -172,15 +182,7 @@ Naming/MethodParameterName:
   Enabled: false
 
 # TODO: Add back after manual fixes
-Performance/CollectionLiteralInLoop:
-  Enabled: false
-
-# TODO: Add back after manual fixes
 Rails/HelperInstanceVariable:
-  Enabled: false
-
-# TODO: Add back after manual fixes
-Rails/LexicallyScopedActionFilter:
   Enabled: false
 
 # TODO: Add back after manual fixes
@@ -196,19 +198,7 @@ Style/FormatStringToken:
   Enabled: false
 
 # TODO: Add back after manual fixes
-Lint/UriEscapeUnescape:
-  Enabled: false
-
-# TODO: Add back after manual fixes
-Lint/DuplicateMethods:
-  Enabled: false
-
-# TODO: Add back after manual fixes
 Rails/ActiveRecordOverride:
-  Enabled: false
-
-# TODO: Add back after manual fixes
-Rails/UnknownEnv:
   Enabled: false
 
 # TODO: Add back after manual fixes
@@ -216,17 +206,5 @@ Rails/InverseOf:
   Enabled: false
 
 # TODO: Add back after manual fixes
-Rails/HasManyOrHasOneDependent:
-  Enabled: false
-
-# TODO: Add back after manual fixes
 Rails/FilePath:
-  Enabled: false
-
-# TODO: Add back after manual fixes
-Lint/ShadowedArgument:
-  Enabled: false
-
-# TODO: Add back after manual fixes
-Style/MixinUsage:
   Enabled: false

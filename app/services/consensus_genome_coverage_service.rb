@@ -77,7 +77,7 @@ class ConsensusGenomeCoverageService
       # compute average depth accounting for partial start and end fraction
       depth_arr = depths[idx_start..idx_end]
 
-      weights = [1.0] * depth_arr.size
+      weights = Array.new(depth_arr.size, 1.0)
       weights[0] = start_fraction
       # set end fraction only if we loaded the last cell
       weights[weights.size - 1] = end_fraction if end_fraction > 0

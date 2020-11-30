@@ -162,16 +162,17 @@ namespace "load_test" do
       sample.pipeline_execution_strategy = PipelineRun.pipeline_execution_strategies[:step_function]
 
       # add metadata
+      metadata_keys = [
+        # used as index
+        "Sample Name",
+        # process separately
+        "Host Organism",
+        # Skip due to issues with processing it as a correct location (not relevant for admin load tests)
+        "Collection Location",
+      ]
       valid_samples[rr_idx][:metadata].each do |key, value|
         # skip
-        if [
-          # used as index
-          "Sample Name",
-          # process separately
-          "Host Organism",
-          # Skip due to issues with processing it as a correct location (not relevant for admin load tests)
-          "Collection Location",
-        ].include?(key)
+        if metadata_keys.include?(key)
           next
         end
 

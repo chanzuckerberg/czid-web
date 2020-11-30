@@ -111,14 +111,17 @@ class ProjectsController < ApplicationController
             group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, creator,
           ]
           names = attrs.map { |attr| attr.split(' AS ').last }
+          name_email = ["name", "email"]
+          metadata = ["locations", "hosts", "sample_types"]
+
           render json: {
             # Parentheses are very important. With do..end map returns nil before it is run (same does not happen with curly braces {} )
             projects: (limited_projects.pluck(*attrs).map do |p|
               project_hash = names.zip(p).to_h
-              project_hash["users"] = (project_hash["users"] || '').split('::').map { |u| ["name", "email"].zip(u.split('|')).to_h }
+              project_hash["users"] = (project_hash["users"] || '').split('::').map { |u| name_email.zip(u.split('|')).to_h }
               project_hash["owner"] = project_hash["creator"]
               project_hash["editable"] = current_user.admin? || project_hash["editable"] == 1
-              ["locations", "hosts", "sample_types"].each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
+              metadata.each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
               # Return as "tissue" for legacy compatibility. It's too hard to
               # rename all JS instances of "tissue".
               project_hash["tissues"] = project_hash["sample_types"]

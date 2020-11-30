@@ -2,7 +2,6 @@
 
 require "rails_helper"
 require_relative "../../test/test_helpers/location_test_helper.rb"
-include LocationTestHelper
 
 RSpec.describe LocationHelper, type: :helper do
   describe "#sanitize_name" do
@@ -149,10 +148,10 @@ RSpec.describe LocationHelper, type: :helper do
     context "more autocomplete results than search results" do
       before do
         autocomplete_results =
-          API_GEOSEARCH_CALIFORNIA_RESPONSE +
-          API_GEOSEARCH_SF_COUNTY_RESPONSE +
-          API_GEOSEARCH_DHAKA_RESPONSE
-        search_results = API_GEOSEARCH_USA_RESPONSE + API_GEOSEARCH_UGANDA_RESPONSE
+          LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE +
+          LocationTestHelper::API_GEOSEARCH_SF_COUNTY_RESPONSE +
+          LocationTestHelper::API_GEOSEARCH_DHAKA_RESPONSE
+        search_results = LocationTestHelper::API_GEOSEARCH_USA_RESPONSE + LocationTestHelper::API_GEOSEARCH_UGANDA_RESPONSE
         @raw_results = {
           Location::GEOSEARCH_ACTIONS[0] => autocomplete_results,
           Location::GEOSEARCH_ACTIONS[1] => search_results,
@@ -162,35 +161,35 @@ RSpec.describe LocationHelper, type: :helper do
       it "zips/interpolates autocomplete and geosearch results" do
         actual = LocationHelper.handle_external_search_results(@raw_results)
         expected = [
-          FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE,
-          FORMATTED_GEOSEARCH_USA_RESPONSE,
-          FORMATTED_GEOSEARCH_SF_COUNTY_RESPONSE,
-          FORMATTED_GEOSEARCH_UGANDA_RESPONSE,
-          FORMATTED_GEOSEARCH_DHAKA_RESPONSE,
+          LocationTestHelper::FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE,
+          LocationTestHelper::FORMATTED_GEOSEARCH_USA_RESPONSE,
+          LocationTestHelper::FORMATTED_GEOSEARCH_SF_COUNTY_RESPONSE,
+          LocationTestHelper::FORMATTED_GEOSEARCH_UGANDA_RESPONSE,
+          LocationTestHelper::FORMATTED_GEOSEARCH_DHAKA_RESPONSE,
         ].flatten
 
         expected_names = expected.map { |r| r.symbolize_keys[:name] }
-        actual_names = actual.map { |r| r[:name] }
+        actual_names = actual.pluck(:name)
         expect(actual_names).to eq(expected_names)
       end
 
       it "filters by OSM search type" do
         raw_results = {
-          Location::GEOSEARCH_ACTIONS[0] => API_GEOSEARCH_NODE_RESPONSE +
-                                            API_GEOSEARCH_CALIFORNIA_RESPONSE,
+          Location::GEOSEARCH_ACTIONS[0] => LocationTestHelper::API_GEOSEARCH_NODE_RESPONSE +
+                                            LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE,
         }
         actual = LocationHelper.handle_external_search_results(raw_results)
-        expected = [FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE[0].symbolize_keys]
+        expected = [LocationTestHelper::FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE[0].symbolize_keys]
         expect(actual).to eq(expected)
       end
 
       it "de-duplicates by name/geo_level, and osm_id" do
         raw_results = {
-          Location::GEOSEARCH_ACTIONS[0] => API_GEOSEARCH_CALIFORNIA_RESPONSE + API_GEOSEARCH_USA_RESPONSE,
-          Location::GEOSEARCH_ACTIONS[1] => API_GEOSEARCH_CALIFORNIA_RESPONSE + API_GEOSEARCH_USA_ALTERNATIVE_RESPONSE,
+          Location::GEOSEARCH_ACTIONS[0] => LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE + LocationTestHelper::API_GEOSEARCH_USA_RESPONSE,
+          Location::GEOSEARCH_ACTIONS[1] => LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE + LocationTestHelper::API_GEOSEARCH_USA_ALTERNATIVE_RESPONSE,
         }
         actual = LocationHelper.handle_external_search_results(raw_results)
-        expected = [FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE, FORMATTED_GEOSEARCH_USA_RESPONSE].flatten.map(&:symbolize_keys)
+        expected = [LocationTestHelper::FORMATTED_GEOSEARCH_CALIFORNIA_RESPONSE, LocationTestHelper::FORMATTED_GEOSEARCH_USA_RESPONSE].flatten.map(&:symbolize_keys)
         expect(actual).to eq(expected)
       end
     end

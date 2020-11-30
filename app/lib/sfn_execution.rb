@@ -1,6 +1,4 @@
 class SfnExecution
-  attr_reader :description, :history
-
   class OutputNotFoundError < StandardError
     def initialize(output_key, available_keys)
       super("Output not available: #{output_key}. Available outputs: #{available_keys.join(', ')}")

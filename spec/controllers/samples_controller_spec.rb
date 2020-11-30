@@ -70,7 +70,7 @@ RSpec.describe SamplesController, type: :controller do
         json_response = JSON.parse(response.body)
         host_filter_data = json_response["displayedData"]["hostFiltering"]
         host_filter_data["steps"].each do |_step, step_data|
-          urls = step_data["fileList"].map { |f| f[:url] }
+          urls = step_data["fileList"].pluck(:url)
           urls.each { |url| expect(url).to be(nil) }
         end
       end

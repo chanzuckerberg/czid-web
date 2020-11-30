@@ -146,7 +146,8 @@ class ExportUsersAuth0
   private def auth0_api_update_user(legacy_user_record)
     user_id = "auth0|#{legacy_user_record['user_id']}"
 
-    update_record = legacy_user_record.reject { |k| ['user_id', 'email_verified', 'verify_email', 'email'].include?(k) }
+    reject_keys = ['user_id', 'email_verified', 'verify_email', 'email']
+    update_record = legacy_user_record.reject { |k| reject_keys.include?(k) }
 
     json_response = HTTP.auth("Bearer #{@auth0_api_bearer_token}")
                         .patch(

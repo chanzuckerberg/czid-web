@@ -307,7 +307,7 @@ class PipelineReportService
     tag_pathogens(counts_by_tax_level, lineage_by_tax_id)
     @timer.split("tag_pathogens")
 
-    structured_lineage = encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
+    structured_lineage = encode_taxon_lineage(lineage_by_tax_id)
     @timer.split("encode_taxon_lineage")
 
     sorted_genus_tax_ids = sort_genus_tax_ids(counts_by_tax_level, DEFAULT_SORT_PARAM)
@@ -600,7 +600,7 @@ class PipelineReportService
     end
   end
 
-  def encode_taxon_lineage(lineage_by_tax_id, structured_lineage)
+  def encode_taxon_lineage(lineage_by_tax_id)
     structured_lineage = {}
     ranks = ["superkingdom", "kingdom", "phylum", "class", "order", "family", "genus", "species"]
     lineage_by_tax_id.each do |base_tax_id, lineage|
@@ -635,7 +635,7 @@ class PipelineReportService
            .values
            .reject { |genus| genus[:genus_tax_id].nil? }
            .sort_by { |genus| genus[field] }
-           .map { |genus| genus[:genus_tax_id] }
+           .pluck(:genus_tax_id)
            .reverse!
   end
 
