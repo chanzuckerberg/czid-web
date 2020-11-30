@@ -43,7 +43,7 @@ module BulkDownloadsHelper
 
   def format_bulk_download(bulk_download, detailed: false, admin: false)
     formatted_bulk_download = bulk_download.as_json(except: [:access_token])
-    formatted_bulk_download[:num_samples] = bulk_download.pipeline_runs.empty? ? nil : bulk_download.pipeline_runs.length
+    formatted_bulk_download[:num_samples] = bulk_download.pipeline_runs.length + bulk_download.workflow_runs.length
     formatted_bulk_download[:download_name] = bulk_download.download_display_name
     formatted_bulk_download[:file_size] = ActiveSupport::NumberHelper.number_to_human_size(bulk_download.output_file_size)
     if admin
@@ -58,11 +58,14 @@ module BulkDownloadsHelper
     end
 
     if detailed
-      formatted_bulk_download[:pipeline_runs] = bulk_download.pipeline_runs.map do |pipeline_run|
-        {
-          "id": pipeline_run.id,
-          "sample_name": pipeline_run.sample.name,
-        }
+      detail_sources = [[:pipeline_runs, bulk_download.pipeline_runs], [:workflow_runs, bulk_download.workflow_runs]]
+      detail_sources.map do |symbol, data_source|
+        formatted_bulk_download[symbol] = data_source.map do |run|
+          {
+            "id": run.id,
+            "sample_name": run.sample.name,
+          }
+        end
       end
 
       formatted_bulk_download[:presigned_output_url] = bulk_download.output_file_presigned_url

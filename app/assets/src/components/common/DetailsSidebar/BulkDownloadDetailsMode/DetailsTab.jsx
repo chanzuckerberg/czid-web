@@ -13,6 +13,10 @@ export default class DetailsTab extends React.Component {
 
     const fields = [];
 
+    const allRuns = bulkDownload.pipeline_runs.concat(
+      bulkDownload.workflow_runs
+    );
+
     if (bulkDownload.num_samples) {
       fields.push({
         label: "Samples",
@@ -55,16 +59,19 @@ export default class DetailsTab extends React.Component {
           )}
           <FieldList fields={fields} />
         </Accordion>
-        {bulkDownload.pipeline_runs.length > 0 && (
+        {allRuns.length > 0 && (
           <Accordion
             className={cs.accordion}
             header={<div className={cs.header}>Samples in this Download</div>}
             bottomContentPadding
           >
             <div className={cs.samplesList}>
-              {bulkDownload.pipeline_runs.map(pipelineRun => (
-                <div key={pipelineRun.id} className={cs.sampleName}>
-                  {pipelineRun.sample_name}
+              {allRuns.map(run => (
+                <div
+                  key={`${run.id}+${run.sample_name}`}
+                  className={cs.sampleName}
+                >
+                  {run.sample_name}
                 </div>
               ))}
             </div>

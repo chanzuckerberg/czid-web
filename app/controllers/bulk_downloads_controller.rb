@@ -105,7 +105,7 @@ class BulkDownloadsController < ApplicationController
       format.html
       format.json do
         render json: current_power.viewable_bulk_downloads
-                                  .includes(:pipeline_runs, :user)
+                                  .includes(:pipeline_runs, :workflow_runs, :user)
                                   .map { |bulk_download| format_bulk_download(bulk_download, admin: current_user.admin?) }
       end
     end
