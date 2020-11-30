@@ -241,6 +241,7 @@ class BulkDownloadModal extends React.Component {
   };
 
   handleSelectDownloadType = newSelectedDownloadTypeName => {
+    const { workflow } = this.props;
     const { selectedDownloadTypeName } = this.state;
     if (newSelectedDownloadTypeName === selectedDownloadTypeName) {
       return;
@@ -248,7 +249,7 @@ class BulkDownloadModal extends React.Component {
 
     logAnalyticsEvent(
       "BulkDownloadModal_radio-button-for-download-type_selected",
-      { downloadType: newSelectedDownloadTypeName }
+      { downloadType: newSelectedDownloadTypeName, workflow }
     );
     this.setState({
       selectedDownloadTypeName: newSelectedDownloadTypeName,
@@ -256,6 +257,7 @@ class BulkDownloadModal extends React.Component {
   };
 
   handleFieldSelect = (downloadType, fieldType, value, displayName) => {
+    const { workflow } = this.props;
     this.setState(prevState => {
       logAnalyticsEvent(
         "BulkDownloadModal_dropdown-field-for-download-type_selected",
@@ -264,6 +266,7 @@ class BulkDownloadModal extends React.Component {
           fieldType,
           fieldValue: value,
           displayName,
+          workflow,
         }
       );
       // If the value is undefined, delete it from selectedFields.

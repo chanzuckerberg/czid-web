@@ -174,7 +174,7 @@ class SamplesView extends React.Component {
   };
 
   renderBulkDownloadTrigger = () => {
-    const { selectedSampleIds } = this.props;
+    const { selectedSampleIds, workflow } = this.props;
     const { bulkDownloadButtonTempTooltip } = this.state;
     const downloadIcon = <IconDownload className={cx(cs.icon, cs.download)} />;
     return (
@@ -189,7 +189,8 @@ class SamplesView extends React.Component {
         disabled={selectedSampleIds.size === 0}
         onClick={withAnalytics(
           this.handleBulkDownloadModalOpen,
-          "SamplesView_bulk-download-modal-open_clicked"
+          "SamplesView_bulk-download-modal-open_clicked",
+          { workflow }
         )}
       />
     );
