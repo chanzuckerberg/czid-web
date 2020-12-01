@@ -35,6 +35,7 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import { CG_BULK_DOWNLOADS_FEATURE } from "~/components/utils/features";
 import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
+import { logError } from "~/components/utils/logUtil";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
 import { DEFAULTS_BY_WORKFLOW } from "~/components/views/samples/SamplesView/ColumnConfiguration";
@@ -45,6 +46,7 @@ import BannerVisualizations from "~ui/icons/BannerVisualizations";
 import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 
+import NoSearchResultsBanner from "./NoSearchResultsBanner";
 import DiscoveryHeader from "./DiscoveryHeader";
 import ModalFirstTimeUser from "./ModalFirstTimeUser";
 import ProjectsView from "../projects/ProjectsView";
@@ -56,8 +58,9 @@ import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
 import ProjectHeader from "./ProjectHeader";
 import {
   getDiscoveryDimensions,
-  getDiscoveryStats,
   getDiscoveryLocations,
+  getDiscoveryStats,
+  getDiscoveryVisualizations,
   DISCOVERY_DOMAINS,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
@@ -587,20 +590,21 @@ class DiscoveryView extends React.Component {
     this.setState({
       userDataCounts: null,
     });
-    const stats = await getDiscoveryStats({
-      domain: domain,
-      projectId,
-    });
+
+    const [{ sampleStats }, { visualizations }] = await Promise.all([
+      getDiscoveryStats({ domain, projectId }),
+      getDiscoveryVisualizations({ domain }),
+    ]);
 
     const numOfCgSamples = getOr(
       0,
       WORKFLOWS.CONSENSUS_GENOME.value,
-      stats.sampleStats.countByWorkflow
+      sampleStats.countByWorkflow
     );
     const numOfMngsSamples = getOr(
       0,
       WORKFLOWS.SHORT_READ_MNGS.value,
-      stats.sampleStats.countByWorkflow
+      sampleStats.countByWorkflow
     );
     if (numOfMngsSamples === 0 && numOfCgSamples > 0) {
       workflow = WORKFLOWS.CONSENSUS_GENOME.value;
@@ -612,9 +616,10 @@ class DiscoveryView extends React.Component {
       {
         workflow,
         userDataCounts: {
-          sampleCountByWorkflow: stats.sampleStats.countByWorkflow,
-          sampleCount: stats.sampleStats.count,
-          projectCount: stats.sampleStats.projectCount,
+          sampleCountByWorkflow: sampleStats.countByWorkflow,
+          sampleCount: sampleStats.count,
+          projectCount: sampleStats.projectCount,
+          visualizationCount: visualizations?.length ?? 0,
         },
       },
       () => {
@@ -1236,11 +1241,9 @@ class DiscoveryView extends React.Component {
     const {
       currentTab,
       emptyStateModalOpen,
-      filteredProjectCount,
       userDataCounts,
       projectId,
     } = this.state;
-    const { visualizations } = this;
 
     if (!userDataCounts) return null;
 
@@ -1253,7 +1256,7 @@ class DiscoveryView extends React.Component {
 
     switch (currentTab) {
       case "projects":
-        if (filteredProjectCount === 0) {
+        if (userDataCounts.projectCount === 0) {
           return (
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
@@ -1295,10 +1298,7 @@ class DiscoveryView extends React.Component {
         }
         break;
       case "visualizations":
-        // visualizations are not filtered by conditions (not supported at this time)
-        // thus we use the object collection view from DataDiscoveryDataLayer directly
-        // and we never show the no search results banner.
-        if (!visualizations.isLoading() && visualizations.length === 0) {
+        if (userDataCounts.visualizationCount === 0) {
           return (
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
@@ -1341,16 +1341,81 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  getNoSearchResultsBannerData = type => {
+    let bannerData = {
+      searchType: "",
+      icon: null,
+      listenerLink: {
+        text: "",
+        tabToSwitchTo: "",
+      },
+    };
+
+    switch (type) {
+      case "projects":
+        bannerData = {
+          searchType: "Project",
+          icon: <BannerProjects />,
+          listenerLink: {
+            text: "Or view Sample results",
+            tabToSwitchTo: "samples",
+          },
+        };
+        break;
+      case "samples":
+        bannerData = {
+          searchType: "Sample",
+          icon: <BannerSamples />,
+          listenerLink: {
+            text: "Or view Project results",
+            tabToSwitchTo: "projects",
+          },
+        };
+        break;
+      case "visualizations":
+        bannerData = {
+          searchType: "Visualization",
+          icon: <BannerVisualizations />,
+          listenerLink: {
+            text: "Or view Sample results",
+            tabToSwitchTo: "samples",
+          },
+        };
+        break;
+      default:
+        logError({
+          message:
+            "DiscoveryView: Invalid type passed into getNoSearchResultsBannerData(). ",
+          details: { type },
+        });
+        break;
+    }
+
+    const { searchType, icon, listenerLink } = bannerData;
+    return {
+      searchType,
+      icon,
+      listenerLink: {
+        text: listenerLink.text,
+        onClick: () => this.handleTabChange(listenerLink.tabToSwitchTo),
+      },
+    };
+  };
+
   renderNoSearchResultsBanner = type => {
+    const {
+      searchType,
+      icon,
+      listenerLink,
+    } = this.getNoSearchResultsBannerData(type);
+
     return (
-      <div className={cs.noDataBannerFlexContainer}>
-        <InfoBanner
-          className={cs.noResultsContainer}
-          message="Sorry, no results match your search."
-          suggestion="Try another search"
-          type={type}
-        />
-      </div>
+      <NoSearchResultsBanner
+        searchType={searchType}
+        icon={icon}
+        listenerLink={listenerLink}
+        className={cs.noResultsContainer}
+      />
     );
   };
 
@@ -1408,6 +1473,7 @@ class DiscoveryView extends React.Component {
     const {
       currentDisplay,
       currentTab,
+      filteredProjectCount,
       mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
@@ -1451,9 +1517,9 @@ class DiscoveryView extends React.Component {
                 ref={projectsView => (this.projectsView = projectsView)}
               />
             </div>
-            {!projects.length &&
-              !projects.isLoading() &&
+            {!projects?.isLoading() &&
               currentDisplay === "table" &&
+              filteredProjectCount === 0 &&
               this.renderNoSearchResultsBanner("projects")}
           </div>
         )}
@@ -1461,8 +1527,7 @@ class DiscoveryView extends React.Component {
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               {currentDisplay !== "map" && this.renderWorkflowTabs()}
-              {userDataCounts &&
-              !userDataCounts.sampleCountByWorkflow[workflow] ? (
+              {!userDataCounts?.sampleCountByWorkflow[workflow] ? (
                 this.renderNoDataWorkflowBanner(workflow)
               ) : (
                 <SamplesView
@@ -1518,7 +1583,7 @@ class DiscoveryView extends React.Component {
             <div className={cs.dataContainer}>
               <VisualizationsView visualizations={visualizations} />
             </div>
-            {!visualizations.length &&
+            {!visualizations?.length &&
               !visualizations.isLoading() &&
               currentDisplay === "table" &&
               this.renderNoSearchResultsBanner("visualizations")}

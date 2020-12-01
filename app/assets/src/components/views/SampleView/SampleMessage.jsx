@@ -3,6 +3,7 @@ import React from "react";
 
 import PropTypes from "~/components/utils/propTypes";
 import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
+import { IconArrowRight } from "~ui/icons";
 
 import cs from "./sample_message.scss";
 
@@ -19,9 +20,7 @@ class SampleMessage extends React.Component {
           <div className={cs.message}>{message}</div>
           <a className={cs.actionLink} href={link} onClick={onClick}>
             {linkText}
-            {linkText && (
-              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-            )}
+            {linkText && <IconArrowRight />}
           </a>
         </div>
         <ImgMicrobeSecondary className={cs.imgMicrobe} />

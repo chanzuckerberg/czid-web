@@ -43,6 +43,10 @@
         font-size: 0.75em;
         margin-left: $space-xs;
       }
+
+      &:hover {
+        cursor: pointer;
+      }
     }
   }
   .icon {

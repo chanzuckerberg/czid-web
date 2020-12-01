@@ -12,7 +12,7 @@ import PropTypes from "~/components/utils/propTypes";
 import Histogram from "~/components/visualizations/Histogram";
 import GenomeViz from "~/components/visualizations/GenomeViz";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { IconLoading } from "~ui/icons";
+import { IconLoading, IconArrowRight } from "~ui/icons";
 import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
@@ -439,7 +439,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
               }
             >
               View read-level visualization
-              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+              <IconArrowRight />
             </a>
           </div>
         </div>
@@ -486,7 +486,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 }
               >
                 Contact us for help
-                <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+                <IconArrowRight />
               </a>
             </div>
             <ImgMicrobePrimary className={cs.icon} />
@@ -646,7 +646,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 }
               >
                 View read-level visualization
-                <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+                <IconArrowRight />
               </a>
             </div>
             <ImgMicrobePrimary className={cs.icon} />

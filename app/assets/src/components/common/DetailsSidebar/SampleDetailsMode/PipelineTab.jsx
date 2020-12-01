@@ -10,7 +10,7 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import { getSamplePipelineResults } from "~/api";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
-import { IconLoading } from "~/components/ui/icons";
+import { IconLoading, IconArrowRight } from "~/components/ui/icons";
 import {
   RESULTS_FOLDER_STAGE_KEYS,
   RESULTS_FOLDER_STEP_KEYS,
@@ -87,7 +87,7 @@ class PipelineTab extends React.Component {
         rel="noopener noreferrer"
       >
         {linkLabel}
-        <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+        <IconArrowRight />
       </a>
     );
 
