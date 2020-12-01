@@ -63,14 +63,14 @@ class PublicProjectConfirmationModal extends React.Component {
               <div className={cs.item}>
                 <PrimaryButton
                   text="Make Project Public"
-                  rounded={false}
+                  rounded={true}
                   onClick={this.handleConfirm}
                 />
               </div>
               <div className={cs.item}>
                 <SecondaryButton
                   text="Cancel"
-                  rounded={false}
+                  rounded={true}
                   onClick={this.closeModal}
                 />
               </div>
