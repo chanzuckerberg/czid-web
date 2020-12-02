@@ -268,14 +268,13 @@ class SamplesView extends React.Component {
       [TRIGGERS.nextclade]: this.renderNextcladeTrigger,
     };
 
-    const triggersToRender = xor(
-      triggersToHide,
-      WORKFLOW_TRIGGERS[workflow]
-    ).map(trigger => (
-      <React.Fragment key={`${workflow}-${trigger}`}>
-        {triggers[trigger]()}
-      </React.Fragment>
-    ));
+    const triggersToRender = WORKFLOW_TRIGGERS[workflow]
+      .filter(trigger => !triggersToHide.includes(trigger))
+      .map(trigger => (
+        <React.Fragment key={`${workflow}-${trigger}`}>
+          {triggers[trigger]()}
+        </React.Fragment>
+      ));
 
     return (
       <React.Fragment>
