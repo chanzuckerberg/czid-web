@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "~utils/propTypes";
 
+import { withAnalytics } from "~/api/analytics";
 import IconLoading from "~/components/ui/icons/IconLoading";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
@@ -73,7 +74,10 @@ const NextcladeModalFooter = ({
       <PrimaryButton
         disabled={loading || validSampleIds.size === 0}
         text="View QC in Nextclade"
-        onClick={onClick}
+        onClick={withAnalytics(
+          onClick,
+          "NextcladeModalFooter_view-qc-in-nextclade-button_clicked"
+        )}
       />
     );
   };

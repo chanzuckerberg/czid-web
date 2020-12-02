@@ -491,6 +491,7 @@ class SamplesView extends React.Component {
   render() {
     const {
       currentDisplay,
+      samples,
       selectedSampleIds,
       snapshotShareId,
       workflow,
@@ -500,6 +501,7 @@ class SamplesView extends React.Component {
       bulkDownloadModalOpen,
       nextcladeModalOpen,
     } = this.state;
+
     return (
       <div className={cs.container}>
         {currentDisplay === "table" || currentDisplay === "plqc" ? (
@@ -537,6 +539,7 @@ class SamplesView extends React.Component {
               this.handleNextcladeModalClose,
               "SamplesView_nextclade-modal_closed"
             )}
+            samples={samples.entries}
             selectedSampleIds={selectedSampleIds}
           />
         )}

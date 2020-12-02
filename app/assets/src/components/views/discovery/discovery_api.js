@@ -170,6 +170,7 @@ const processRawSample = sample => {
       sample.details
     ),
     privateUntil: sample.private_until,
+    projectId: sample.project_id,
     qcPercent: get(
       "derived_sample_output.summary_stats.qc_percent",
       sample.details

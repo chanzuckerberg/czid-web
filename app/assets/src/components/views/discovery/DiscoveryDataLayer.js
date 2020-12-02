@@ -76,6 +76,10 @@ class ObjectCollectionView {
     return this._displayName;
   }
 
+  get entries() {
+    return this._collection.entries;
+  }
+
   get = id => this._collection.entries[id];
 
   getIds = () => this._orderedIds || [];

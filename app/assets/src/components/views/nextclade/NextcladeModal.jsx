@@ -1,10 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
+import { get } from "lodash/fp";
 
 import { createConsensusGenomeCladeExport } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
 import { WORKFLOWS } from "~utils/workflows";
+import { logAnalyticsEvent } from "~/api/analytics";
 import {
   NEXTCLADE_TOOL_DOC_LINK,
   NEXTCLADE_REFERENCE_TREE_LINK,
@@ -123,10 +125,29 @@ export default class NextcladeModal extends React.Component {
   };
 
   handleConfirmationModalConfirm = () => {
-    const { onClose } = this.props;
+    const { onClose, samples } = this.props;
+    const { validSampleIds, selectedTreeType } = this.state;
+
+    const sampleIds = Array.from(validSampleIds);
+    const projectIds = Array.from(
+      sampleIds.reduce((result, id) => {
+        result.push(get(`${id}.projectId`, samples));
+        return result;
+      }, [])
+    );
+
     this.openExportLink();
-    this.setState({ confirmationModalOpen: false });
-    onClose();
+    this.setState({ confirmationModalOpen: false }, () => {
+      onClose();
+      logAnalyticsEvent(
+        "NextcladeModal_confirmation-modal-confirm-button_clicked",
+        {
+          sampleIds,
+          selectedTreeType,
+          projectIds,
+        }
+      );
+    });
   };
 
   render() {
@@ -225,5 +246,6 @@ export default class NextcladeModal extends React.Component {
 NextcladeModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
+  samples: PropTypes.object.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set).isRequired,
 };
