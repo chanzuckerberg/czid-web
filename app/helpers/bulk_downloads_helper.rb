@@ -177,10 +177,6 @@ module BulkDownloadsHelper
     taxon_counts_by_pr = HeatmapHelper.fetch_top_taxons(
       samples,
       background_id,
-      nil,
-      read_specificity: HeatmapHelper::READ_SPECIFICITY,
-      include_phage: HeatmapHelper::INCLUDE_PHAGE,
-      num_results: HeatmapHelper::DEFAULT_NUM_RESULTS,
       min_reads: 0 # minimum read threshold
     )
 

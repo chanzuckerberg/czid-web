@@ -8,7 +8,7 @@ class VisualizationsController < ApplicationController
     expires_in: 30.days,
     cache_path: proc do |c|
       sorted_params = c.request.params.to_h.sort.to_h
-      ["heatmap_filter_fe", "heatmap_service"].each do |feature|
+      ["heatmap_service"].each do |feature|
         if current_user.allowed_feature?(feature)
           sorted_params[feature.to_sym] = true
         end
@@ -202,8 +202,7 @@ class VisualizationsController < ApplicationController
       @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
         params,
         samples_for_heatmap,
-        background_for_heatmap,
-        client_filtering_enabled: current_user.allowed_feature?("heatmap_filter_fe")
+        background_for_heatmap
       )
       render json: @sample_taxons_dict
     end
@@ -229,8 +228,7 @@ class VisualizationsController < ApplicationController
         params,
         samples_for_heatmap,
         background_for_heatmap,
-        update_background_only,
-        client_filtering_enabled: current_user.allowed_feature?("heatmap_filter_fe")
+        update_background_only
       )
     end
 

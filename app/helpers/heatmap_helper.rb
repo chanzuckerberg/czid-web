@@ -45,10 +45,9 @@ module HeatmapHelper
   ].freeze
 
   # Samples and background are assumed here to be vieweable.
-  def self.sample_taxons_dict(params, samples, background_id, client_filtering_enabled: false)
+  def self.sample_taxons_dict(params, samples, background_id)
     return {} if samples.empty?
 
-    num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
     min_reads = params[:minReads] ? params[:minReads].to_i : MINIMUM_READ_THRESHOLD
     removed_taxon_ids = (params[:removedTaxonIds] || []).map do |x|
       Integer(x)
@@ -56,19 +55,11 @@ module HeatmapHelper
       nil
     end
     removed_taxon_ids = removed_taxon_ids.compact
-    categories = params[:categories]
     threshold_filters = if params[:thresholdFilters].is_a?(Array)
                           (params[:thresholdFilters] || []).map { |filter| JSON.parse(filter || "{}") }
                         else
                           JSON.parse(params[:thresholdFilters] || "[]")
                         end
-    subcategories = if params[:subcategories] && params[:subcategories].respond_to?(:to_h)
-                      params[:subcategories].to_h
-                    else
-                      JSON.parse(params[:subcategories] || "{}")
-                    end
-    include_phage = subcategories.fetch("Viruses", []).include?("Phage")
-    read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
     sort_by = params[:sortBy] &&
               HeatmapHelper::ALL_METRICS.pluck(:value).include?(params[:sortBy]) ||
@@ -80,26 +71,11 @@ module HeatmapHelper
     results_by_pr = fetch_top_taxons(
       samples,
       background_id,
-      categories,
-      read_specificity: read_specificity,
-      include_phage: include_phage,
-      num_results: num_results,
       min_reads: min_reads,
-      sort_by: sort_by,
-      threshold_filters: threshold_filters,
-      species_selected: species_selected,
-      client_filtering_enabled: client_filtering_enabled
+      threshold_filters: threshold_filters
     )
 
-    details = top_taxons_details(
-      results_by_pr,
-      num_results,
-      sort_by,
-      species_selected,
-      threshold_filters,
-      client_filtering_enabled: client_filtering_enabled
-    )
-
+    details = top_taxons_details(results_by_pr, sort_by)
     taxon_ids = details.pluck('tax_id')
     taxon_ids -= removed_taxon_ids
 
@@ -113,13 +89,11 @@ module HeatmapHelper
       results_by_pr,
       samples,
       taxon_ids,
-      species_selected,
-      threshold_filters,
-      client_filtering_enabled: client_filtering_enabled
+      threshold_filters
     )
   end
 
-  def self.taxa_details(params, samples, background_id, update_background_only, client_filtering_enabled: false)
+  def self.taxa_details(params, samples, background_id, update_background_only)
     taxon_ids = params[:taxonIds] || []
     taxon_ids = taxon_ids.compact
 
@@ -133,20 +107,11 @@ module HeatmapHelper
       results_by_pr,
       samples,
       taxon_ids,
-      1,
-      [],
-      client_filtering_enabled: client_filtering_enabled
+      []
     )
   end
 
-  def self.top_taxons_details(
-    results_by_pr,
-    num_results,
-    sort_by,
-    species_selected,
-    threshold_filters,
-    client_filtering_enabled: false
-  )
+  def self.top_taxons_details(results_by_pr, sort_by)
     sort = ReportHelper.decode_sort_by(sort_by)
     count_type = sort[:count_type]
     metric = sort[:metric]
@@ -157,7 +122,6 @@ module HeatmapHelper
       sample_id = pr.sample_id
 
       tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-      HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected) unless client_filtering_enabled
       rows = []
       tax_2d.each do |_tax_id, tax_info|
         rows << tax_info
@@ -166,13 +130,6 @@ module HeatmapHelper
       # NOTE: This block of code can probably be all removed because the same
       # filtering now happens earlier in SQL.
       HeatmapHelper.compute_aggregate_scores_v2!(rows)
-      unless client_filtering_enabled
-        rows = rows.select do |row|
-          # Note: these are applied *after* SQL filters, so results may not be
-          # 100% as expected .
-          HeatmapHelper.apply_custom_filters(row, threshold_filters)
-        end
-      end
 
       # Get the top N for each sample. This re-sorts on the same metric as in
       # fetch_top_taxons SQL. We sort there first for performance.
@@ -184,8 +141,6 @@ module HeatmapHelper
           taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
         taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
         candidate_taxons[row["tax_id"]] = taxon
-        break if count >= num_results && !client_filtering_enabled
-
         count += 1
       end
     end
@@ -196,47 +151,14 @@ module HeatmapHelper
   def self.fetch_top_taxons(
     samples,
     background_id,
-    categories,
-    read_specificity: READ_SPECIFICITY,
-    include_phage: INCLUDE_PHAGE,
-    num_results: DEFAULT_NUM_RESULTS,
     min_reads: MINIMUM_READ_THRESHOLD,
-    sort_by: DEFAULT_TAXON_SORT_PARAM,
-    threshold_filters: [],
-    species_selected: true,
-    client_filtering_enabled: false
+    threshold_filters: []
   )
-    categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
     read_specificity_clause = ""
     phage_clause = ""
 
-    # If client-side filtering is enabled on the heatmap, then skip the filters in the query.
-    # This enables consistent behavior for users viewing saved heatmaps with the client-side filtering flag enabled,
-    # so that they will not only be filtering on an already-filtered subset of the data.
-    # The filters are skipped in the query rather than modifying the client's request paramaters since
-    # saved visualizations are tied to visualization ids, and saved parameters are then pulled from the
-    # Visualizations table on the server-side.
-    unless client_filtering_enabled
-      if categories.present?
-        categories_clause = " AND superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
-      elsif include_phage
-        categories_clause = " AND superkingdom_taxid = #{categories_map['Viruses']}"
-      end
-
-      if read_specificity
-        read_specificity_clause = " AND taxon_counts.tax_id > 0"
-      end
-
-      if !include_phage && categories.present?
-        phage_clause = " AND is_phage != 1"
-      elsif include_phage && categories.blank?
-        phage_clause = " AND is_phage = 1"
-      end
-    end
-
-    tax_level = species_selected ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS
-    tax_level_clause = client_filtering_enabled ? " AND taxon_counts.tax_level IN ('#{TaxonCount::TAX_LEVEL_SPECIES}', '#{TaxonCount::TAX_LEVEL_GENUS}')" : " AND taxon_counts.tax_level = #{tax_level}"
+    tax_level_clause = " AND taxon_counts.tax_level IN ('#{TaxonCount::TAX_LEVEL_SPECIES}', '#{TaxonCount::TAX_LEVEL_GENUS}')"
 
     # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
     # fraction_subsampled = 1.0.
@@ -296,17 +218,7 @@ module HeatmapHelper
       #{read_specificity_clause}
       #{phage_clause}"
 
-    sort = if client_filtering_enabled
-             CLIENT_FILTERING_SORT_VALUES
-           else
-             ReportHelper.decode_sort_by(sort_by)
-           end
-
-    num_results_with_overfetch = if client_filtering_enabled
-                                   CLIENT_FILTERING_TAXA_PER_SAMPLE
-                                 else
-                                   num_results * SERVER_FILTERING_OVERFETCH_FACTOR
-                                 end
+    sort = CLIENT_FILTERING_SORT_VALUES
 
     # TODO: (gdingle): how do we protect against SQL injection?
     # The first query of a session does not work - the session variable @rank do not work, if we do not declare the variables before.
@@ -316,7 +228,7 @@ module HeatmapHelper
     sql_results = TaxonCount.connection.select_all(
       top_n_query(
         query,
-        num_results_with_overfetch,
+        CLIENT_FILTERING_TAXA_PER_SAMPLE,
         sort[:metric],
         sort[:direction],
         threshold_filters: threshold_filters,
@@ -359,9 +271,7 @@ module HeatmapHelper
     results_by_pr,
     samples,
     taxon_ids,
-    species_selected,
-    threshold_filters,
-    client_filtering_enabled: false
+    threshold_filters
   )
     results = {}
 
@@ -373,7 +283,6 @@ module HeatmapHelper
         taxon_counts = res["taxon_counts"]
         sample_id = pr.sample_id
         tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-        HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected) unless client_filtering_enabled
 
         rows = []
         tax_2d.each { |_tax_id, tax_info| rows << tax_info }
@@ -529,15 +438,6 @@ module HeatmapHelper
         AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
         AND taxon_counts.count_type IN ('NT', 'NR')
         AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_hash
-  end
-
-  def self.only_species_or_genus_counts!(tax_2d, species_selected)
-    if species_selected # Species selected
-      only_species_level_counts!(tax_2d)
-    else # Genus selected
-      only_genus_level_counts!(tax_2d)
-    end
-    tax_2d
   end
 
   def self.compute_aggregate_scores_v2!(rows)

@@ -461,7 +461,7 @@ export default class SamplesHeatmapControls extends React.Component {
   };
 
   render() {
-    const { selectedOptions, loading, displayFilterStats } = this.props;
+    const { selectedOptions, loading } = this.props;
     const { thresholdFilters, categories, subcategories } = selectedOptions;
     // Only display the filter tag row if relevant filters are selected,
     // otherwise an empty row will be rendered.
@@ -493,7 +493,7 @@ export default class SamplesHeatmapControls extends React.Component {
             <div className="col">{this.renderFilterTags()}</div>
           </div>
         )}
-        {!loading && displayFilterStats && (
+        {!loading && (
           <div className={cx(cs.filterRow, "row")}>
             <div className={cx(cs.statsRow, "col")}>
               {this.renderFilterStatsInfo()}
@@ -591,6 +591,5 @@ SamplesHeatmapControls.propTypes = {
   filteredTaxaCount: PropTypes.number,
   totalTaxaCount: PropTypes.number,
   prefilterConstants: PropTypes.object,
-  displayFilterStats: PropTypes.bool,
   enableMassNormalizedBackgrounds: PropTypes.bool,
 };
