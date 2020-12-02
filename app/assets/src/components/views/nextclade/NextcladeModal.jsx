@@ -13,6 +13,7 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import InfoIconSmall from "~ui/icons/InfoIconSmall";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
+import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
 
@@ -23,6 +24,7 @@ export default class NextcladeModal extends React.Component {
     super(props);
 
     this.state = {
+      confirmationModalOpen: false,
       invalidSampleNames: [],
       loading: true,
       referenceTree: null,
@@ -112,9 +114,25 @@ export default class NextcladeModal extends React.Component {
     );
   };
 
+  handleConfirmationModalOpen = () => {
+    this.setState({ confirmationModalOpen: true });
+  };
+
+  handleConfirmationModalClose = () => {
+    this.setState({ confirmationModalOpen: false });
+  };
+
+  handleConfirmationModalConfirm = () => {
+    const { onClose } = this.props;
+    this.openExportLink();
+    this.setState({ confirmationModalOpen: false });
+    onClose();
+  };
+
   render() {
     const { open, onClose, selectedSampleIds } = this.props;
     const {
+      confirmationModalOpen,
       invalidSampleNames,
       loading,
       referenceTree,
@@ -184,7 +202,7 @@ export default class NextcladeModal extends React.Component {
           </div>
           <div className={cs.footer}>
             <NextcladeModalFooter
-              onClick={this.openExportLink}
+              onClick={this.handleConfirmationModalOpen}
               invalidSampleNames={invalidSampleNames}
               loading={loading}
               validationError={validationError}
@@ -192,6 +210,13 @@ export default class NextcladeModal extends React.Component {
             />
           </div>
         </div>
+        {confirmationModalOpen && (
+          <NextcladeConfirmationModal
+            open
+            onCancel={this.handleConfirmationModalClose}
+            onConfirm={this.handleConfirmationModalConfirm}
+          />
+        )}
       </Modal>
     );
   }
