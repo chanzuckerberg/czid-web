@@ -15,8 +15,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     expect(@auth0_management_client_double)
       .to(receive(:create_user)
           .with(
-            "User invited from Power Controller test",
-            connection: "Username-Password-Authentication",
+            "Username-Password-Authentication",
             email: "help@idseq.net",
             name: "User invited from Power Controller test",
             password: instance_of(String),

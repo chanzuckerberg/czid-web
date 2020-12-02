@@ -27,8 +27,7 @@ RSpec.describe UsersController, type: :controller do
         expect(@auth0_management_client_double)
           .to(receive(:create_user)
             .with(
-              fake_user_data.dig(:user, :name),
-              connection: "Username-Password-Authentication",
+              "Username-Password-Authentication",
               email: fake_user_data.dig(:user, :email),
               name: fake_user_data.dig(:user, :name),
               password: instance_of(String),

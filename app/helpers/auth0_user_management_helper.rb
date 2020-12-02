@@ -5,7 +5,6 @@ module Auth0UserManagementHelper
   # This method creates the user only in the main user database (Username-Password-Authentication)
   def self.create_auth0_user(email:, name:, role: User::ROLE_REGULAR_USER)
     options = {
-      connection: AUTH0_CONNECTION_NAME,
       email: email,
       name: name,
       password: UsersHelper.generate_random_password,
@@ -14,7 +13,7 @@ module Auth0UserManagementHelper
     # See:
     # - https://auth0.com/docs/api/management/v2#!/Users/post_users
     # - https://github.com/auth0/ruby-auth0/blob/master/lib/auth0/api/v2/users.rb
-    create_response = auth0_management_client.create_user(name, options)
+    create_response = auth0_management_client.create_user(AUTH0_CONNECTION_NAME, options)
     if role == User::ROLE_ADMIN
       # We only need to add a role to this user if it is an admin
       change_auth0_user_role(auth0_user_id: create_response["user_id"], role: role)
