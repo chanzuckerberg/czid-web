@@ -8,7 +8,7 @@ import { validateSampleIds } from "~/api/access_control";
 import { WORKFLOWS } from "~utils/workflows";
 import { logAnalyticsEvent } from "~/api/analytics";
 import {
-  NEXTCLADE_TOOL_DOC_LINK,
+  NEXTCLADE_APP_LINK,
   NEXTCLADE_REFERENCE_TREE_LINK,
 } from "~/components/utils/documentationLinks";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -169,8 +169,9 @@ export default class NextcladeModal extends React.Component {
             <div className={cs.title}>
               View Samples in Nextclade
               {this.renderTooltip({
-                content: "Nextclade is a third-party tool.",
-                link: NEXTCLADE_TOOL_DOC_LINK,
+                content:
+                  "Nextclade is a third-party tool and has its own policies.",
+                link: NEXTCLADE_APP_LINK,
               })}
             </div>
             <div className={cs.tagline}>
