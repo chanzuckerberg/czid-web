@@ -44,7 +44,7 @@ class NextcladeReferenceTreeOptions extends React.Component {
         >
           <RadioButton className={cs.radioButton} selected={!uploadSelected} />
           <div className={cs.content}>
-            <div className={cs.name}>Nextstrain Global Tree</div>
+            <div className={cs.name}>Nextclade Default Tree</div>
             <div className={cs.description}>
               This tree includes worldwide data from Nextstrain,{" "}
               <ExternalLink href={NEXTCLADE_GLOBAL_TREE_LINK}>
