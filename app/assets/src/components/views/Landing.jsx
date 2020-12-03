@@ -300,7 +300,7 @@ class Landing extends React.Component {
               <div className={cs.paperCardLogoContainer}>
                 <Image
                   className={cs.paperCardLogo}
-                  src="/assets/logo-biorxiv.png"
+                  src="/assets/logo-gigascience.png"
                 />
               </div>
             </div>
@@ -315,7 +315,7 @@ class Landing extends React.Component {
               </div>
               <div>
                 <ExternalLink
-                  href="https://www.biorxiv.org/content/10.1101/2020.04.07.030551v1"
+                  href="https://academic.oup.com/gigascience/article/doi/10.1093/gigascience/giaa111/5918865"
                   analyticsEventName="Landing_paper-link_clicked"
                 >
                   <PrimaryButton text="Read the Paper" />
