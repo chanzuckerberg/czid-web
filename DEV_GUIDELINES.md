@@ -61,9 +61,8 @@ import { merge, pick } from "lodash";
 import moment from "moment";
 import cx from "classnames";
 
+import { IconPrivateSmall, IconPublicSmall } from "~ui/icons";
 import { Table } from "~/components/visualizations/table";
-import GlobeIcon from "~ui/icons/GlobeIcon";
-import LockIcon from "~ui/icons/LockIcon";
 
 import cs from "./visualizations_view.scss";
 ```

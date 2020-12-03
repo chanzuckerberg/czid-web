@@ -12,6 +12,9 @@ const IconPlusCircleSmall = ({ className }) => {
 
 IconPlusCircleSmall.propTypes = forbidExtraProps({
   className: PropTypes.string,
+  // TODO: these properties should be removed from the icon since we should define these on all icons.
+  // Possible alternative: always wrap icons on components that handle these events or create a Icon base component that does
+  // the props control.
   onMouseEnter: PropTypes.func,
   onMouseLeave: PropTypes.func,
   onBlur: PropTypes.func,

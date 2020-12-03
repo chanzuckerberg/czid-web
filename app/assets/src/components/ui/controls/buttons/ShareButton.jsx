@@ -1,13 +1,9 @@
 import React from "react";
-import Icon from "~ui/icons/Icon";
+import { IconShare } from "~ui/icons";
 import PrimaryButton from "./PrimaryButton";
 
 const ShareButton = props => (
-  <PrimaryButton
-    text="Share"
-    {...props}
-    icon={<Icon size="large" className={"share alternate"} />}
-  />
+  <PrimaryButton text="Share" {...props} icon={<IconShare />} />
 );
 
 export default ShareButton;

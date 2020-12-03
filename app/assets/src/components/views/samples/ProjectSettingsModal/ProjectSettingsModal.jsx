@@ -7,8 +7,7 @@ import { withAnalytics } from "~/api/analytics";
 import Modal from "~ui/containers/Modal";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import ShareButton from "~ui/controls/buttons/ShareButton";
-import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
-import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 import { UserContext } from "~/components/common/UserContext";
 import Divider from "~/components/layout/Divider";
 
@@ -86,7 +85,7 @@ class ProjectSettingsModal extends React.Component {
               <div className={cx(cs.background, cs.projectVisibility)}>
                 {project.public_access ? (
                   <div className={cs.visibility}>
-                    <PublicProjectIcon className={cs.icon} />
+                    <IconProjectPublic className={cs.icon} />
                     <div className={cs.text}>
                       <div className={cs.label}>Public Project</div>
                       <div className={cs.note}>
@@ -98,7 +97,7 @@ class ProjectSettingsModal extends React.Component {
                   </div>
                 ) : (
                   <div className={cs.visibility}>
-                    <PrivateProjectIcon className={cs.icon} />
+                    <IconProjectPrivate className={cs.icon} />
                     <div className={cs.text}>
                       <div className={cs.header}>
                         <div className={cs.label}>Private Project</div>

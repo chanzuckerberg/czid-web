@@ -2,9 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import moment from "moment";
 import { assign, find, min } from "lodash/fp";
-import GlobeIcon from "~ui/icons/GlobeIcon";
-import LockIcon from "~ui/icons/LockIcon";
-import { IconMemberSmall } from "~ui/icons";
+import { IconMemberSmall, IconPrivateSmall, IconPublicSmall } from "~ui/icons";
 import IconViewSmall from "~ui/icons/IconViewSmall";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
@@ -57,11 +55,11 @@ const ProjectHeader = ({
         </div>
       ) : project.public_access ? (
         <div className={cs.item}>
-          <GlobeIcon className={cs.smallIcon} /> Public project
+          <IconPublicSmall className={cs.smallIcon} /> Public project
         </div>
       ) : (
         <div className={cs.item}>
-          <LockIcon className={cs.smallIcon} /> Private project
+          <IconPrivateSmall className={cs.smallIcon} /> Private project
         </div>
       )}
       {project.editable && (

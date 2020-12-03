@@ -18,7 +18,7 @@ import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { formatFileSize } from "~/components/utils/format";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
-import { CircleCheckmarkIcon, IconAlert } from "~ui/icons";
+import { IconAlert, IconSuccess } from "~ui/icons";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import LoadingBar from "~/components/ui/controls/LoadingBar";
 import {
@@ -325,7 +325,7 @@ export default class UploadProgressModal extends React.Component {
     if (sampleUploadStatuses[sample.name] === "success") {
       return (
         <React.Fragment>
-          <CircleCheckmarkIcon className={cs.checkmarkIcon} />
+          <IconSuccess className={cs.checkmarkIcon} />
           Uploaded and sent to pipeline
         </React.Fragment>
       );
@@ -382,7 +382,7 @@ export default class UploadProgressModal extends React.Component {
           return (
             <React.Fragment>
               <div className={cs.titleWithIcon}>
-                <CircleCheckmarkIcon className={cs.checkmarkIcon} />
+                <IconSuccess className={cs.checkmarkIcon} />
                 {samples.length} samples successfully created
               </div>
               <div className={cs.instructions}>
@@ -430,7 +430,7 @@ export default class UploadProgressModal extends React.Component {
     // If all local samples succeeded.
     return (
       <div className={cs.titleWithIcon}>
-        <CircleCheckmarkIcon className={cs.checkmarkIcon} />
+        <IconSuccess className={cs.checkmarkIcon} />
         All samples uploaded successfully
       </div>
     );

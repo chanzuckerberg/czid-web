@@ -18,7 +18,7 @@ import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import Input from "~ui/controls/Input";
 import PropTypes from "prop-types";
 import PortalDropdown from "./PortalDropdown.jsx";
-import { IconArrowDownSmall } from "~ui/icons";
+import { IconArrowDownSmall, IconSearch } from "~ui/icons";
 import cs from "./bare_dropdown.scss";
 
 class BareDropdown extends React.Component {
@@ -239,7 +239,7 @@ class BareDropdown extends React.Component {
             <Input
               fluid
               className={cs.searchInput}
-              icon="search"
+              icon={<IconSearch className={cs.searchInputIcon} />}
               placeholder="Search"
               value={filterString}
               onChange={this.handleFilterChange}

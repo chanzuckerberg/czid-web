@@ -5,12 +5,10 @@ import { get } from "lodash/fp";
 import moment from "moment";
 
 import BasicPopup from "~/components/BasicPopup";
-import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
-import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
+import { IconSamplePrivate, IconSamplePublic } from "~ui/icons";
 import IconSample from "~ui/icons/IconSample";
 import StatusLabel from "~ui/labels/StatusLabel";
 import { numberWithCommas } from "~/helpers/strings";
-import { WORKFLOWS } from "~/components/utils/workflows";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./table_renderers.scss";
@@ -108,9 +106,9 @@ class TableRenderers extends React.Component {
               (basicIcon ? (
                 <IconSample className={cx(cs.iconSample)} />
               ) : sample.publicAccess ? (
-                <SamplePublicIcon className={cx(cs.icon)} />
+                <IconSamplePublic className={cx(cs.icon)} />
               ) : (
-                <SamplePrivateIcon className={cx(cs.icon)} />
+                <IconSamplePrivate className={cx(cs.icon)} />
               ))}
           </div>
         )}

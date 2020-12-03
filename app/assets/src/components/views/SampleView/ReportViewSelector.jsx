@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Menu, Icon, Popup } from "semantic-ui-react";
+import { Menu, Popup } from "semantic-ui-react";
+import { IconTableSmall, IconTreeSmall } from "~ui/icons";
 
 const ReportViewSelector = ({ view, onViewClick }) => {
   return (
@@ -12,7 +13,7 @@ const ReportViewSelector = ({ view, onViewClick }) => {
             active={view === "table"}
             onClick={() => onViewClick({ view: "table" })}
           >
-            <Icon name="table" />
+            <IconTableSmall />
           </Menu.Item>
         }
         content="Table View"
@@ -26,7 +27,7 @@ const ReportViewSelector = ({ view, onViewClick }) => {
             active={view === "tree"}
             onClick={() => onViewClick({ view: "tree" })}
           >
-            <Icon name="fork" />
+            <IconTreeSmall />
           </Menu.Item>
         }
         content={<div>Taxonomic Tree View</div>}

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Search } from "semantic-ui-react";
 import cx from "classnames";
 import cs from "./live_search_box.scss";
+import { IconSearch } from "~ui/icons";
 
 class LiveSearchBox extends React.Component {
   constructor(props) {
@@ -119,6 +120,7 @@ class LiveSearchBox extends React.Component {
           rectangular && cs.rectangular,
           className
         )}
+        icon={<IconSearch className={cs.searchIcon} />}
         loading={isLoading}
         onBlur={this.handleOnBlur}
         onKeyDown={this.handleKeyDown}

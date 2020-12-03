@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-// DEPRECATED! As of 2020-01-21, use InfoIcon, which is more consistent in style
+// DEPRECATED! As of 2020-01-21, use InfoIconSmall, which is more consistent in style
 // to the other notification icons.
 const InfoCircleIcon = props => {
   return (

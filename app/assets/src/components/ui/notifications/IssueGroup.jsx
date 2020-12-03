@@ -5,7 +5,7 @@ import { zipObject } from "lodash/fp";
 
 import Accordion from "~/components/layout/Accordion";
 import DataTable from "~/components/visualizations/table/DataTable";
-import { CircleCheckmarkIcon, IconAlert } from "~ui/icons";
+import { IconAlert, IconSuccess } from "~ui/icons";
 
 import cs from "./issue_group.scss";
 
@@ -27,7 +27,7 @@ const IssueGroup = ({
       header={
         <div className={cs.header}>
           {type === "info" ? (
-            <CircleCheckmarkIcon className={cx(cs.icon, cs[type])} />
+            <IconSuccess className={cx(cs.icon, cs[type])} />
           ) : (
             <IconAlert className={cx(cs.icon, cs[type])} />
           )}

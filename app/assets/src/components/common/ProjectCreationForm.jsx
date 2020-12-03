@@ -8,8 +8,7 @@ import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
 import RadioButton from "~ui/controls/RadioButton";
 import { createProject } from "~/api";
-import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
-import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
 import { logAnalyticsEvent } from "~/api/analytics";
 
@@ -150,7 +149,7 @@ class ProjectCreationForm extends React.Component {
                 selected={accessLevel === ACCESS_LEVEL.publicAccess}
                 className={cs.radioButton}
               />
-              <PublicProjectIcon className={cs.projectIcon} />
+              <IconProjectPublic className={cs.projectIcon} />
             </div>
             <div className={cs.optionText}>
               <div className={cs.title}>Public Project</div>
@@ -176,7 +175,7 @@ class ProjectCreationForm extends React.Component {
                 selected={accessLevel === ACCESS_LEVEL.privateAccess}
                 className={cs.radioButton}
               />
-              <PrivateProjectIcon className={cs.projectIcon} />
+              <IconProjectPrivate className={cs.projectIcon} />
             </div>
             <div className={cs.optionText}>
               <div className={cs.title}>Private Project</div>

@@ -22,8 +22,7 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import Checkbox from "~ui/controls/Checkbox";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
-import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 
 import cs from "./sample_upload_flow.scss";
 import UploadProgressModal from "./UploadProgressModal";
@@ -301,9 +300,9 @@ class ReviewStep extends React.Component {
             </div>
             <div className={cs.project}>
               {project.public_access === 1 ? (
-                <PublicProjectIcon className={cs.projectIcon} />
+                <IconProjectPublic className={cs.projectIcon} />
               ) : (
-                <PrivateProjectIcon className={cs.projectIcon} />
+                <IconProjectPrivate className={cs.projectIcon} />
               )}
               <div className={cs.text}>
                 <div className={cs.header}>

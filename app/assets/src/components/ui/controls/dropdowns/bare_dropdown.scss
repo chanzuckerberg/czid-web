@@ -17,6 +17,9 @@
       margin: 0;
       padding: 0;
       position: absolute;
+      // TODO: These are centering the icon in the input. So, they depend heavily on the dimensions of the component.
+      // For that reason, i think they should not depend on space variables.
+      // They should, however, be relative to dimensions of the parent component.
       right: 10px;
       top: 10px;
       line-height: 24px;
@@ -167,4 +170,16 @@
       color: $primary;
     }
   }
+}
+
+.searchInputIcon {
+  fill: $gray-medium;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  // TODO: These are centering the icon in the input. So, they depend heavily on the dimensions of the component.
+  // For that reason, i think they should not depend on space variables.
+  // They should, however, be relative to dimensions of the parent component.
+  right: 10px;
+  top: 10px;
 }

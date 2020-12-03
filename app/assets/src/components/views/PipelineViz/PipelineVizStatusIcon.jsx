@@ -2,9 +2,8 @@ import PropTypes from "prop-types";
 import React from "react";
 import cx from "classnames";
 
-import CircleCheckmarkIcon from "~/components/ui/icons/CircleCheckmarkIcon";
 import InfoCircleIcon from "~/components/ui/icons/InfoCircleIcon";
-import { IconLoading } from "~ui/icons";
+import { IconLoading, IconSuccessSmall } from "~ui/icons";
 
 import cs from "./pipeline_viz.scss";
 
@@ -13,7 +12,7 @@ const PipelineVizStatusIcon = ({ type, className }) => {
     case "inProgress":
       return <IconLoading className={cx(className, cs.inProgressIcon)} />;
     case "finished":
-      return <CircleCheckmarkIcon className={cx(className, cs.finishedIcon)} />;
+      return <IconSuccessSmall className={cx(className, cs.finishedIcon)} />;
     case "pipelineErrored":
       return (
         <InfoCircleIcon className={cx(className, cs.pipelineErroredIcon)} />

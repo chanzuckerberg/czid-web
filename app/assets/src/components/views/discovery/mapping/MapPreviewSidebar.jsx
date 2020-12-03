@@ -9,8 +9,7 @@ import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
-import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
+import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 import { ObjectCollectionView } from "../DiscoveryDataLayer";
 
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
@@ -146,9 +145,9 @@ export default class MapPreviewSidebar extends React.Component {
                 visibilityIconRenderer: p =>
                   p ? (
                     p.public_access ? (
-                      <PublicProjectIcon />
+                      <IconProjectPublic />
                     ) : (
-                      <PrivateProjectIcon />
+                      <IconProjectPrivate />
                     )
                   ) : (
                     ""

@@ -5,6 +5,8 @@ import Input from "~ui/controls/Input";
 import cs from "./search_box_list.scss";
 import cx from "classnames";
 
+import { IconSearch } from "~ui/icons";
+
 class SearchBoxList extends React.Component {
   constructor(props) {
     super(props);
@@ -86,7 +88,7 @@ class SearchBoxList extends React.Component {
           <Input
             fluid
             className={cs.searchBox}
-            icon="search"
+            icon={<IconSearch className={cs.searchBoxIcon} />}
             placeholder="Search"
             onChange={onFilterChange || this.handleFilterChange}
           />

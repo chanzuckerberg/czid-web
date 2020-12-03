@@ -7,6 +7,7 @@ import { escapeRegExp, debounce } from "lodash";
 import cs from "./search_box.scss";
 import { get } from "~/api/core";
 import { getURLParamString } from "~/helpers/url";
+import { IconSearch } from "~ui/icons";
 
 class SearchBox extends React.Component {
   constructor(props) {
@@ -101,6 +102,7 @@ class SearchBox extends React.Component {
           cs.searchBox,
           this.props.rounded && cs.rounded
         )}
+        icon={<IconSearch className={cs.searchIcon} />}
         loading={isLoading}
         category={this.props.category}
         onSearchChange={debounce(

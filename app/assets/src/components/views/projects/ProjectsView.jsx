@@ -5,9 +5,8 @@ import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 import PropTypes from "~/components/utils/propTypes";
-import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
 import {
@@ -90,9 +89,9 @@ class ProjectsView extends React.Component {
       return <div className={cs.icon} />;
     }
     return project.public_access ? (
-      <PublicProjectIcon />
+      <IconProjectPublic />
     ) : (
-      <PrivateProjectIcon />
+      <IconProjectPrivate />
     );
   }
 

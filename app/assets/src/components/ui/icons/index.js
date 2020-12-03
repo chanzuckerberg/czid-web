@@ -3,11 +3,9 @@ import BannerProjects from "./BannerProjects";
 import BannerSamples from "./BannerSamples";
 import BannerVisualizations from "./BannerVisualizations";
 import CheckmarkIcon from "./CheckmarkIcon";
-import CircleCheckmarkIcon from "./CircleCheckmarkIcon";
 import CompareIcon from "./CompareIcon";
 import CopyIcon from "./CopyIcon";
 import FiltersIcon from "./FiltersIcon";
-import GlobeIcon from "./GlobeIcon";
 import GlobeLinedIcon from "./GlobeLinedIcon";
 import HeatmapIcon from "./HeatmapIcon";
 import HeatmapPrivate from "./HeatmapPrivate";
@@ -35,14 +33,27 @@ import IconPhyloTreePrivate from "./IconPhyloTreePrivate";
 import IconPhyloTreePublic from "./IconPhyloTreePublic";
 import IconPhyloTreeSmall from "./IconPhyloTreeSmall";
 import IconPlusSmall from "./IconPlusSmall";
+import IconPrivateSmall from "./IconPrivateSmall";
+import IconProjectPrivate from "./IconProjectPrivate";
+import IconProjectPublic from "./IconProjectPublic";
+import IconPublicSmall from "./IconPublicSmall";
+import IconInfo from "./IconInfo";
+import IconPlusCircleSmall from "./IconPlusCircleSmall";
+import IconRefresh from "./IconRefresh";
+import IconSamplePrivate from "./IconSamplePrivate";
+import IconSamplePublic from "./IconSamplePublic";
+import IconSave from "./IconSave";
+import IconSearch from "./IconSearch";
+import IconShare from "./IconShare";
+import IconSuccess from "./IconSuccess";
+import IconSuccessSmall from "./IconSuccessSmall";
+import IconTableSmall from "./IconTableSmall";
+import IconTreeSmall from "./IconTreeSmall";
 import InfoCircleIcon from "./InfoCircleIcon";
-import InfoIcon from "./InfoIcon";
 import InfoIconSmall from "./InfoIconSmall";
 import InfoPanelIcon from "./InfoPanelIcon";
-import IconPlusCircleSmall from "./IconPlusCircleSmall";
 import InsightIcon from "./InsightIcon";
 import LargeDownloadIcon from "./LargeDownloadIcon";
-import LockIcon from "./LockIcon";
 import LogoColor from "./LogoColor";
 import LogoLockupColor from "./LogoLockupColor";
 import LogoLockupReversed from "./LogoLockupReversed";
@@ -50,12 +61,7 @@ import LogoMarkColor from "./LogoMarkColor";
 import LogoMarkReversed from "./LogoMarkReversed";
 import LogoReversed from "./LogoReversed";
 import PipelineStageArrowheadIcon from "./PipelineStageArrowheadIcon";
-import PrivateProjectIcon from "./PrivateProjectIcon";
-import PublicProjectIcon from "./PublicProjectIcon";
 import RemoveIcon from "./RemoveIcon";
-import SamplePrivateIcon from "./SamplePrivateIcon";
-import SamplePublicIcon from "./SamplePublicIcon";
-import SaveIcon from "./SaveIcon";
 import SortIcon from "./SortIcon";
 
 export const ICONS_TAXONOMY = {
@@ -64,11 +70,9 @@ export const ICONS_TAXONOMY = {
     BannerProjects,
     BannerSamples,
     BannerVisualizations,
-    CircleCheckmarkIcon,
     CompareIcon,
     CopyIcon,
     FiltersIcon,
-    GlobeIcon,
     HeatmapIcon,
     HeatmapPrivate,
     HeatmapPublic,
@@ -81,33 +85,41 @@ export const ICONS_TAXONOMY = {
     IconBackgroundModel,
     IconBrowserSmall,
     IconChartSmall,
-    InfoCircleIcon,
     IconContigSmall,
     IconCoverage,
     IconDownload,
     IconDownloadSmall,
-    InfoIconSmall,
-    InfoIcon,
+    IconInfo,
     IconMember,
     IconMemberSmall,
     IconMinusSmall,
     IconNextcladeLarge,
-    InfoPanelIcon,
     IconPlusSmall,
     IconPhyloTree,
     IconPhyloTreePrivate,
     IconPhyloTreePublic,
     IconPhyloTreeSmall,
     IconPlusCircleSmall,
+    IconPrivateSmall,
+    IconProjectPrivate,
+    IconProjectPublic,
+    IconPublicSmall,
+    IconRefresh,
+    IconSamplePrivate,
+    IconSamplePublic,
+    IconSave,
+    IconSearch,
+    IconShare,
+    IconSuccess,
+    IconSuccessSmall,
+    IconTableSmall,
+    IconTreeSmall,
+    InfoCircleIcon,
+    InfoIconSmall,
+    InfoPanelIcon,
     LargeDownloadIcon,
-    LockIcon,
     PipelineStageArrowheadIcon,
-    PublicProjectIcon,
-    PrivateProjectIcon,
     RemoveIcon,
-    SamplePrivateIcon,
-    SamplePublicIcon,
-    SaveIcon,
     SortIcon,
   },
   FONT_AWESOME: {

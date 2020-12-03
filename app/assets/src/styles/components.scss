@@ -43,6 +43,9 @@
   .dropdown.icon {
     pointer-events: none;
     position: absolute !important;
+    // TODO: These are centering the icon in the input. So, they depend heavily on the dimensions of the component.
+    // For that reason, i think they should not depend on space variables.
+    // They should, however, be relative to dimensions of the parent component.
     top: 8px;
     right: 10px;
     &:before {
