@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { compact, difference, isEmpty, union, xor } from "lodash/fp";
+import { compact, difference, isEmpty, union, pickBy } from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -546,8 +546,7 @@ class SamplesView extends React.Component {
               this.handleNextcladeModalClose,
               "SamplesView_nextclade-modal_closed"
             )}
-            samples={samples.entries}
-            selectedSampleIds={selectedSampleIds}
+            samples={pickBy(s => selectedSampleIds.has(s.id), samples.entries)}
           />
         )}
       </div>

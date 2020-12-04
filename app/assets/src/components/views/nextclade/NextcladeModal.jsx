@@ -1,10 +1,20 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import { get } from "lodash/fp";
+import {
+  compact,
+  difference,
+  filter,
+  keys,
+  map,
+  size,
+  uniq,
+  values,
+} from "lodash/fp";
 
 import { createConsensusGenomeCladeExport } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
+import { UserContext } from "~/components/common/UserContext";
 import { WORKFLOWS } from "~utils/workflows";
 import { logAnalyticsEvent } from "~/api/analytics";
 import {
@@ -40,9 +50,12 @@ export default class NextcladeModal extends React.Component {
   }
 
   componentDidMount() {
-    const { selectedSampleIds } = this.props;
+    const { samples } = this.props;
+    const { admin } = this.context || {};
 
-    this.fetchSampleValidationInfo(selectedSampleIds);
+    this.fetchSampleValidationInfo(keys(samples).map(Number));
+
+    if (admin) this.checkAdminSelections();
   }
 
   fetchSampleValidationInfo = async selectedSampleIds => {
@@ -53,14 +66,14 @@ export default class NextcladeModal extends React.Component {
       invalidSampleNames,
       error,
     } = await validateSampleIds(
-      Array.from(selectedSampleIds),
+      selectedSampleIds,
       WORKFLOWS.CONSENSUS_GENOME.value
     );
 
-    const projectIds = validSampleIds.reduce((result, id) => {
-      result.push(get(`${id}.projectId`, samples));
-      return result;
-    }, []);
+    const projectIds = map(
+      "projectId",
+      filter(s => validSampleIds.includes(s.id), values(samples))
+    );
 
     this.setState({
       validSampleIds: new Set(validSampleIds),
@@ -69,6 +82,20 @@ export default class NextcladeModal extends React.Component {
       validationError: error,
       projectIds: projectIds,
     });
+  };
+
+  checkAdminSelections = async () => {
+    const { userId } = this.context || {};
+    const { samples } = this.props;
+
+    const selectedOwnerIds = compact(
+      uniq(map("sample.userId", values(samples)))
+    );
+    if (difference(selectedOwnerIds, [userId]).length) {
+      window.alert(
+        "Admin warning: You have selected samples that belong to other users. Double-check that you have permission to send to Nextclade for production samples."
+      );
+    }
   };
 
   openExportLink = async () => {
@@ -208,7 +235,7 @@ export default class NextcladeModal extends React.Component {
   };
 
   render() {
-    const { open, onClose, selectedSampleIds } = this.props;
+    const { open, onClose, samples } = this.props;
     const {
       confirmationModalOpen,
       errorModalOpen,
@@ -233,8 +260,8 @@ export default class NextcladeModal extends React.Component {
               })}
             </div>
             <div className={cs.tagline}>
-              {selectedSampleIds.size} Sample
-              {selectedSampleIds.size !== 1 ? "s" : ""} selected
+              {size(samples)} Sample
+              {size(samples) !== 1 ? "s" : ""} selected
             </div>
           </div>
           <div className={cs.nextcladeDescription}>
@@ -313,5 +340,6 @@ NextcladeModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
   samples: PropTypes.object.isRequired,
-  selectedSampleIds: PropTypes.instanceOf(Set).isRequired,
 };
+
+NextcladeModal.contextType = UserContext;

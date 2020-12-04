@@ -127,6 +127,7 @@ const processRawSample = sample => {
       project: get("derived_sample_output.project_name", sample.details),
       publicAccess: !!sample.public,
       user: get("uploader.name", sample.details),
+      userId: get("uploader.id", sample.details),
       status: get(
         "run_info.result_status_description",
         sample.details

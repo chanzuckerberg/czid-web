@@ -344,6 +344,7 @@ module SamplesHelper
   def sample_uploader(sample)
     user = {}
     user[:name] = (sample.user.name if sample.user)
+    user[:id] = sample&.user&.id
     user
   end
 
