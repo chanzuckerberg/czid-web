@@ -6,7 +6,7 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 import FilePicker from "~ui/controls/FilePicker";
 import RadioButton from "~ui/controls/RadioButton";
 import {
-  NEXTCLADE_GLOBAL_TREE_LINK,
+  NEXTCLADE_DEFAULT_TREE_LINK,
   NEXTCLADE_TREE_FORMAT_LINK,
   NEXTCLADE_TREE_ROOT_LINK,
 } from "~/components/utils/documentationLinks";
@@ -47,7 +47,7 @@ class NextcladeReferenceTreeOptions extends React.Component {
             <div className={cs.name}>Nextclade Default Tree</div>
             <div className={cs.description}>
               This tree includes worldwide data from Nextstrain,{" "}
-              <ExternalLink href={NEXTCLADE_GLOBAL_TREE_LINK}>
+              <ExternalLink href={NEXTCLADE_DEFAULT_TREE_LINK}>
                 view the tree.
               </ExternalLink>
             </div>
