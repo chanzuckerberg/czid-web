@@ -1241,8 +1241,10 @@ class DiscoveryView extends React.Component {
     const {
       currentTab,
       emptyStateModalOpen,
+      filteredProjectCount,
       userDataCounts,
       projectId,
+      search,
     } = this.state;
 
     if (!userDataCounts) return null;
@@ -1256,7 +1258,7 @@ class DiscoveryView extends React.Component {
 
     switch (currentTab) {
       case "projects":
-        if (userDataCounts.projectCount === 0) {
+        if (!search && filteredProjectCount === 0) {
           return (
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
