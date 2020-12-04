@@ -5,6 +5,10 @@ import React from "react";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import {
+  CG_BULK_DOWNLOADS_FEATURE,
+  NEXTCLADE_FEATURE,
+} from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
@@ -256,8 +260,12 @@ class SamplesView extends React.Component {
 
   renderTriggers = () => {
     const { allowedFeatures, selectedSampleIds, workflow } = this.props;
+
     const triggersToHide = compact([
-      !allowedFeatures.includes("nextclade") && TRIGGERS.nextclade,
+      !allowedFeatures.includes(NEXTCLADE_FEATURE) && TRIGGERS.nextclade,
+      workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
+        !allowedFeatures.includes(CG_BULK_DOWNLOADS_FEATURE) &&
+        TRIGGERS.download,
     ]);
 
     const triggers = {
