@@ -16,6 +16,7 @@ import InfoIconSmall from "~ui/icons/InfoIconSmall";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
+import NextcladeErrorModal from "./NextcladeErrorModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
 
@@ -27,8 +28,10 @@ export default class NextcladeModal extends React.Component {
 
     this.state = {
       confirmationModalOpen: false,
+      errorModalOpen: false,
       invalidSampleNames: [],
       loading: true,
+      projectIds: [],
       referenceTree: null,
       selectedTreeType: "global",
       validationError: null,
@@ -43,6 +46,8 @@ export default class NextcladeModal extends React.Component {
   }
 
   fetchSampleValidationInfo = async selectedSampleIds => {
+    const { samples } = this.props;
+
     const {
       validSampleIds,
       invalidSampleNames,
@@ -52,11 +57,17 @@ export default class NextcladeModal extends React.Component {
       WORKFLOWS.CONSENSUS_GENOME.value
     );
 
+    const projectIds = validSampleIds.reduce((result, id) => {
+      result.push(get(`${id}.projectId`, samples));
+      return result;
+    }, []);
+
     this.setState({
       validSampleIds: new Set(validSampleIds),
       invalidSampleNames,
       loading: false,
       validationError: error,
+      projectIds: projectIds,
     });
   };
 
@@ -125,35 +136,82 @@ export default class NextcladeModal extends React.Component {
   };
 
   handleConfirmationModalConfirm = () => {
-    const { onClose, samples } = this.props;
-    const { validSampleIds, selectedTreeType } = this.state;
+    const { onClose } = this.props;
+    const { projectIds, validSampleIds, selectedTreeType } = this.state;
 
     const sampleIds = Array.from(validSampleIds);
-    const projectIds = Array.from(
-      sampleIds.reduce((result, id) => {
-        result.push(get(`${id}.projectId`, samples));
-        return result;
-      }, [])
-    );
 
-    this.openExportLink();
-    this.setState({ confirmationModalOpen: false }, () => {
-      onClose();
-      logAnalyticsEvent(
-        "NextcladeModal_confirmation-modal-confirm-button_clicked",
+    try {
+      this.openExportLink();
+      this.setState({ confirmationModalOpen: false }, () => {
+        onClose();
+        logAnalyticsEvent(
+          "NextcladeModal_confirmation-modal-confirm-button_clicked",
+          {
+            sampleIds,
+            selectedTreeType,
+            projectIds,
+          }
+        );
+      });
+    } catch (error) {
+      this.setState(
         {
-          sampleIds,
-          selectedTreeType,
-          projectIds,
+          confirmationModalOpen: false,
+          errorModalOpen: true,
+        },
+        () => {
+          console.error(error);
+          logAnalyticsEvent("NextcladeModal_upload_failed", {
+            error,
+            sampleIds,
+            selectedTreeType,
+            projectIds,
+          });
         }
       );
-    });
+    }
+  };
+
+  handleErrorModalRetry = () => {
+    const { onClose } = this.props;
+    const { projectIds, validSampleIds, selectedTreeType } = this.state;
+
+    const sampleIds = Array.from(validSampleIds);
+
+    try {
+      this.openExportLink();
+      this.setState({ errorModalOpen: false }, () => {
+        onClose();
+        logAnalyticsEvent(
+          "NextcladeModal_confirmation-modal-retry-button_clicked",
+          {
+            sampleIds,
+            selectedTreeType,
+            projectIds,
+          }
+        );
+      });
+    } catch (error) {
+      console.error(error);
+      logAnalyticsEvent("NextcladeModal_retry-upload_failed", {
+        error,
+        sampleIds,
+        selectedTreeType,
+        projectIds,
+      });
+    }
+  };
+
+  handleErrorModalClose = () => {
+    this.setState({ errorModalOpen: false });
   };
 
   render() {
     const { open, onClose, selectedSampleIds } = this.props;
     const {
       confirmationModalOpen,
+      errorModalOpen,
       invalidSampleNames,
       loading,
       referenceTree,
@@ -237,6 +295,13 @@ export default class NextcladeModal extends React.Component {
             open
             onCancel={this.handleConfirmationModalClose}
             onConfirm={this.handleConfirmationModalConfirm}
+          />
+        )}
+        {errorModalOpen && (
+          <NextcladeErrorModal
+            open
+            onCancel={this.handleErrorModalClose}
+            onConfirm={this.handleErrorModalRetry}
           />
         )}
       </Modal>

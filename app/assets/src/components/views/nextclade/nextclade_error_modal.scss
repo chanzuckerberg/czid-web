@@ -1,0 +1,71 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.nextcladeError {
+  .errorMessage {
+    display: flex;
+
+    .textContainer {
+      width: 315px;
+      margin-bottom: $space-l;
+
+      .error {
+        display: inline-flex;
+        background-color: $error-lightest;
+        border-radius: $border-radius-l;
+        padding: $space-xxs $space-s;
+        background-color: $error-off-white;
+        color: $error-medium;
+        margin-bottom: $space-l;
+        margin-left: -$space-xxs;
+
+        .icon {
+          width: $icon-l;
+          fill: $error-medium;
+        }
+
+        .text {
+          @include font-label-s;
+          margin-left: $space-s;
+          margin-top: $space-xxxs;
+        }
+      }
+
+      .title {
+        @include font-header-l;
+      }
+
+      .message {
+        @include font-body-s;
+        margin-top: $space-s;
+        color: $gray-darkest;
+
+        .actionLink {
+          color: $primary !important;
+        }
+      }
+    }
+
+    .imgMicrobe {
+      fill: $gray-lightest;
+      width: $img-l;
+      margin: -$space-l;
+    }
+  }
+
+  .actions {
+    margin-top: $space-m;
+    display: flex;
+
+    .item {
+      &:not(:first-child) {
+        margin-left: $space-xs;
+      }
+
+      &:not(:last-child) {
+        margin-right: $space-xs;
+      }
+    }
+  }
+}
