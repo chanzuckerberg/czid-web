@@ -53,6 +53,7 @@
         list-style-type: disc !important;
         color: $gray-dark;
         padding-left: $space-xxs;
+        width: max-content;
 
         span {
           position: relative;

@@ -142,7 +142,13 @@ export default class NextcladeModal extends React.Component {
     });
   };
 
-  renderTooltip = ({ content, link, iconStyle = null }) => {
+  renderTooltip = ({
+    content,
+    link,
+    iconStyle = null,
+    offset = 0,
+    position = "top center",
+  }) => {
     return (
       <ColumnHeaderTooltip
         trigger={
@@ -150,6 +156,8 @@ export default class NextcladeModal extends React.Component {
         }
         content={content}
         link={link}
+        offset={offset}
+        position={position}
       />
     );
   };
@@ -284,6 +292,13 @@ export default class NextcladeModal extends React.Component {
                 <span>
                   View sample placement in the context of a Nextstrain
                   phylogenetic tree
+                  {this.renderTooltip({
+                    content:
+                      "Exercise caution when interpreting this tree. Nextclade’s algorithms are meant for quick assessments and not a replacement for full analysis with the Nextstrain pipeline.",
+                    iconStyle: cs.lower,
+                    position: "top right",
+                    offset: 11,
+                  })}
                 </span>
               </li>
             </ul>
