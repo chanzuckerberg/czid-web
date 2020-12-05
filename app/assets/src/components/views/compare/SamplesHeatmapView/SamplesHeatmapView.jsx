@@ -412,6 +412,7 @@ class SamplesHeatmapView extends React.Component {
   };
 
   getDownloadCurrentViewHeatmapCSVLink = () => {
+    const { selectedOptions } = this.state;
     let csvHeaders = [];
     let csvRows = [];
 
@@ -422,7 +423,9 @@ class SamplesHeatmapView extends React.Component {
       [
         csvHeaders,
         csvRows,
-      ] = this.heatmapVis.computeCurrentHeatmapViewValuesForCSV();
+      ] = this.heatmapVis.computeCurrentHeatmapViewValuesForCSV({
+        headers: compact(["Taxon", selectedOptions.species !== 0 && "Genus"]),
+      });
     }
 
     csvRows.push(this.createCSVRowForSelectedOptions());

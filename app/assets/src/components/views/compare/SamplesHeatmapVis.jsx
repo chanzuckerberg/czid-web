@@ -308,10 +308,10 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap.downloadAsPng();
   }
 
-  computeCurrentHeatmapViewValuesForCSV() {
+  computeCurrentHeatmapViewValuesForCSV({ headers }) {
     // Need to specify the Taxon header. The other headers (sample names in the heatmap) will be computed in this.heatmap
     return this.heatmap.computeCurrentHeatmapViewValuesForCSV({
-      headers: ["Taxon"],
+      headers,
     });
   }
 

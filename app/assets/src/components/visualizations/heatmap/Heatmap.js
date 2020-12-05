@@ -931,18 +931,22 @@ export default class Heatmap {
     const sortedRows = sortBy(["pos"], this.rowLabels);
     const sortedColumns = sortBy(["pos"], this.columnLabels);
 
-    sortedRows.forEach(row => csvRows.push([row.label]));
+    sortedRows.forEach(row =>
+      csvRows.push([
+        row.label,
+        ...(headers.includes("Genus") ? [row.genusName] : []),
+      ])
+    );
 
     sortedColumns.forEach(column => {
       csvHeaders.push(column.label);
 
       sortedRows.forEach(row => {
-        const cellValue = find(
+        const cell = find(
           { columnIndex: column.columnIndex, rowIndex: row.rowIndex },
           this.filteredCells
-        ).value;
-        // Explicitly check for undefined since the cellValue can be 0
-        csvRows[row.pos].push(cellValue === undefined ? 0 : cellValue);
+        );
+        csvRows[row.pos].push(cell.value ?? 0);
       });
     });
 

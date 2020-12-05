@@ -129,7 +129,8 @@ SamplesHeatmapHeader.propTypes = {
   ),
   onDownloadSvg: PropTypes.func.isRequired,
   onDownloadPng: PropTypes.func.isRequired,
-  onDownloadCsv: PropTypes.func.isRequired,
+  onDownloadAllHeatmapMetricsCsv: PropTypes.func.isRequired,
+  onDownloadCurrentHeatmapViewCsv: PropTypes.func.isRequired,
   onShareClick: PropTypes.func.isRequired,
   onSaveClick: PropTypes.func.isRequired,
 };
