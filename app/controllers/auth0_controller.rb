@@ -87,6 +87,14 @@ class Auth0Controller < ApplicationController
 
     authenticated = auth0_authenticate_with_bearer_token(bearer_token)
     if authenticated
+      if current_user.nil?
+        LogUtil.log_error("User logged in on Auth0 but entry is missing from database.")
+        render(
+          json: "Your account does not exist on this server. Please contact help@idseq.net for assistance.",
+          status: :bad_request
+        ) and return
+      end
+
       # https://github.com/omniauth/omniauth-oauth2/issues/31#issuecomment-23806447
       mode = filter_value(request.env['omniauth.params']['mode'], SUPPORTED_MODES)
 
