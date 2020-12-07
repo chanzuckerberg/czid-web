@@ -1,12 +1,10 @@
-import { compact } from "lodash/fp";
 import Nanobar from "nanobar";
 import querystring from "querystring";
-import React, { useContext } from "react";
+import React from "react";
 import SvgSaver from "svgsaver";
 
 import { deleteSample as deleteSampleAPI } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { UserContext } from "~/components/common/UserContext";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { logError } from "~/components/utils/logUtil";
@@ -125,22 +123,20 @@ const SampleViewControls = ({
   };
 
   const renderDownloadButtonDropdown = () => {
-    const { allowedFeatures = [] } = useContext(UserContext) || {};
-
-    const downloadOptions = compact([
+    const downloadOptions = [
       {
         text: "Download Report Table (.csv)",
         value: "download_csv",
         disabled: currentTab === TABS.MERGED_NT_NR,
       },
-      allowedFeatures.includes("filtered_report_csv") && {
+      {
         text: "Download Report Table with Applied Filters (.csv)",
         value: "download_csv_with_filters",
         disabled: !hasAppliedFilters,
       },
       ...getDownloadDropdownOptions(pipelineRun),
       ...getImageDownloadOptions(),
-    ]);
+    ];
 
     return (
       <DownloadButtonDropdown

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 
 import BasicPopup from "~/components/BasicPopup";
@@ -9,8 +9,6 @@ import { logError } from "~/components/utils/logUtil";
 import { ViewHeader } from "~/components/layout";
 import { triggerCSVDownload } from "~/components/utils/csv";
 import { logDownloadOption } from "~/components/views/report/utils/download";
-import { UserContext } from "~/components/common/UserContext";
-import { compact } from "lodash/fp";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -24,17 +22,15 @@ const SamplesHeatmapHeader = ({
   onShareClick,
   onSaveClick,
 }) => {
-  const { allowedFeatures = [] } = useContext(UserContext) || {};
-
-  const DOWNLOAD_OPTIONS = compact([
+  const DOWNLOAD_OPTIONS = [
     { text: "Download All Heatmap Metrics (.csv)", value: "csv_metrics" },
-    allowedFeatures.includes("current_heatmap_view") && {
+    {
       text: "Download Current Heatmap View (.csv)",
       value: "current_heatmap_view_csv",
     },
     { text: "Download SVG", value: "svg" },
     { text: "Download PNG", value: "png" },
-  ]);
+  ];
 
   const handleDownloadClick = option => {
     switch (option) {
