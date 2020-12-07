@@ -81,6 +81,8 @@ class SfnCGPipelineDispatchService
       "msspe_primers.bed"
     when ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic]
       "artic_v3_primers.bed"
+    when ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap]
+      "snap_primers.bed"
     else
       raise WetlabProtocolMissingError
     end

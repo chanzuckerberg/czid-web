@@ -21,6 +21,10 @@ const WETLAB_OPTIONS = [
     text: "MSSPE",
     value: "msspe",
   },
+  {
+    text: "SNAP",
+    value: "snap",
+  },
 ];
 
 class WorkflowSelector extends React.Component {

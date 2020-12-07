@@ -6,8 +6,12 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   OUTPUT_CONSENSUS = "consensus_genome.make_consensus_out_consensus_fa".freeze
 
   WETLAB_PROTOCOL = {
+    # See: https://artic.network/resources/ncov/ncov-amplicon-v3.pdf
     artic: "artic",
+    # See: https://www.nature.com/articles/s41564-019-0637-9
     msspe: "msspe",
+    # See: https://swiftbiosci.com/swift-normalase-amplicon-panels
+    snap: "snap",
   }.freeze
 
   # cacheable_only results will be stored in the db.

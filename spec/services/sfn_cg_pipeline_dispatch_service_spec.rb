@@ -162,6 +162,27 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         end
       end
 
+      context "when SNAP wetlab protocol is chosen" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
+        end
+        it "returns sfn input with SNAP primer" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/snap_primers.bed",
+                },
+              },
+            }
+          )
+        end
+      end
+
       context "when no wetlab protocol is supplied" do
         let(:workflow_run) do
           create(:workflow_run,
