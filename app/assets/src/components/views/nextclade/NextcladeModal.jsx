@@ -170,14 +170,14 @@ export default class NextcladeModal extends React.Component {
     this.setState({ confirmationModalOpen: false });
   };
 
-  handleConfirmationModalConfirm = () => {
+  handleConfirmationModalConfirm = async () => {
     const { onClose } = this.props;
     const { projectIds, validSampleIds, selectedTreeType } = this.state;
 
     const sampleIds = Array.from(validSampleIds);
 
     try {
-      this.openExportLink();
+      await this.openExportLink();
       this.setState({ confirmationModalOpen: false }, () => {
         onClose();
         logAnalyticsEvent(
@@ -208,14 +208,14 @@ export default class NextcladeModal extends React.Component {
     }
   };
 
-  handleErrorModalRetry = () => {
+  handleErrorModalRetry = async () => {
     const { onClose } = this.props;
     const { projectIds, validSampleIds, selectedTreeType } = this.state;
 
     const sampleIds = Array.from(validSampleIds);
 
     try {
-      this.openExportLink();
+      await this.openExportLink();
       this.setState({ errorModalOpen: false }, () => {
         onClose();
         logAnalyticsEvent(
