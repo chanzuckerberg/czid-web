@@ -179,7 +179,7 @@ const AnnouncementBanner = ({ onClose }) => {
     <div className={cs.announcementBanner}>
       <BasicPopup
         content={
-          "Low-Support Mode: We will only be responding to highly urgent issues from 12/21–12/29. For now, check out our Help Center. Happy Holidays!"
+          "Low-Support Mode: We will only be responding to highly urgent issues from 12/24–1/3. For now, check out our Help Center. Happy Holidays!"
         }
         position="bottom center"
         wide="very"
@@ -187,7 +187,7 @@ const AnnouncementBanner = ({ onClose }) => {
           <span className={cs.content}>
             <IconAlert className={cs.icon} />
             <span className={cs.title}>Low-Support Mode:</span>
-            We will only be responding to highly urgent issues from 12/21–12/29.
+            We will only be responding to highly urgent issues from 12/24–1/3.
             For now, check out our
             <ExternalLink
               className={cs.link}
