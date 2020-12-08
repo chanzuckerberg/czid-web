@@ -3,7 +3,9 @@ class ReadsStatsService
   include Callable
 
   INITIAL_READS_STAT = "fastqs".freeze
-  NON_HOST_FILTER_STATS = ["run_generate_unidentified_fasta", "unidentified_fasta"].freeze
+  # the unidentified_fasta stats are not part of host filtering
+  # the "subsampled" stat is actually a bool indicating whether or not subsampling happened
+  BLOCKLIST = ["run_generate_unidentified_fasta", "unidentified_fasta", "subsampled"].freeze
 
   def initialize(samples)
     if samples.nil?
@@ -37,7 +39,7 @@ class ReadsStatsService
       end
       if stat.task == INITIAL_READS_STAT
         reads_stats[stat.pipeline_run_id][:initialReads] = stat.reads_after
-      else
+      elsif !BLOCKLIST.include?(stat.task)
         reads_stats[stat.pipeline_run_id][:steps].push(name: stat.task, reads_after: stat.reads_after)
       end
     end
@@ -47,12 +49,14 @@ class ReadsStatsService
   # get all possible step orders
   def get_step_orders(pipeline_runs)
     step_orders = {}
-    unique_versions = pipeline_runs.group(:wdl_version, :pipeline_version)
+    unique_versions = Set.new(pipeline_runs.map { |pr| [pr.wdl_version, pr.pipeline_version] })
     unique_versions.each do |uniq|
-      ordered_tasks = uniq.host_filtering_stage.step_statuses.keys
+      representative_run = pipeline_runs.find { |pr| uniq == [pr.wdl_version, pr.pipeline_version] }
+      ordered_tasks = representative_run.host_filtering_stage.step_statuses.keys
       # save in step_orders hash according to [wdl_version][pipeline_version]
-      wdl_version = uniq.wdl_version.to_s
-      pipeline_version = uniq.pipeline_version.to_s
+      # uses 'to_s' because some values may be nil
+      wdl_version = representative_run.wdl_version.to_s
+      pipeline_version = representative_run.pipeline_version.to_s
       unless step_orders.key?(wdl_version)
         step_orders[wdl_version] = {}
       end
@@ -75,8 +79,7 @@ class ReadsStatsService
 
       step_order = step_orders[wdl_version][pipeline_version]
       if step_order.count.zero?
-        descending_step_stats = stats_hash[:steps].sort { |a, b| b[:reads_after] <=> a[:reads_after] }
-        host_filtering_stats = descending_step_stats.select { |step_hash| step_hash[:name] != INITIAL_READS_STAT && !NON_HOST_FILTER_STATS.include?(step_hash[:name]) }
+        host_filtering_stats = stats_hash[:steps].sort { |a, b| b[:reads_after] <=> a[:reads_after] }
         stats_hash[:steps] = host_filtering_stats.map { |stat| { name: StringUtil.humanize_step_name(stat[:name]), readsAfter: stat[:reads_after] } }
       else
         stats_hash[:steps] = step_order.map do |step|
