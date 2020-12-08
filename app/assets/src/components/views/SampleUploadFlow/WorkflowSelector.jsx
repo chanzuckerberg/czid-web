@@ -102,8 +102,8 @@ class WorkflowSelector extends React.Component {
             </div>
             <div className={cs.description}>
               Run your samples through our new pipeline to get consensus genomes
-              for SARS-CoV-2. Our assembly supports wet lab protocols ARTIC v3
-              and MSSPE.
+              for SARS-CoV-2. Our assembly supports wet lab protocols ARTIC v3,
+              MSSPE, and SNAP.
             </div>
             {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
               this.renderWetlabSelector()}
