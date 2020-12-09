@@ -3,7 +3,9 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 
 import { getTaxonDescriptions, getTaxonDistributionForBackground } from "~/api";
-import Histogram from "~/components/visualizations/Histogram";
+import Histogram, {
+  HISTOGRAM_SCALE,
+} from "~/components/visualizations/Histogram";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import InfoCircleIcon from "~/components/ui/icons/InfoCircleIcon";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -200,7 +202,7 @@ export default class TaxonDetailsMode extends React.Component {
           },
         ],
         showStatistics: false,
-        xScaleLog: true,
+        xScaleType: HISTOGRAM_SCALE.SYM_LOG,
       }
     );
     this.histogram.update();

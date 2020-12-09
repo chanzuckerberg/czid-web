@@ -9,7 +9,9 @@ import BasicPopup from "~/components/BasicPopup";
 import { formatPercent } from "~/components/utils/format";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
-import Histogram from "~/components/visualizations/Histogram";
+import Histogram, {
+  HISTOGRAM_SCALE,
+} from "~/components/visualizations/Histogram";
 import { Table } from "~/components/visualizations/table";
 import { numberWithCommas } from "~/helpers/strings";
 import { HelpIcon, TooltipVizTable } from "~ui/containers";
@@ -176,14 +178,15 @@ class ConsensusGenomeView extends React.Component {
         hoverColors: [HOVER_FILL_COLOR],
         labelsLarge: true,
         labelX: "Reference Genome",
-        labelY: "Coverage",
+        labelY: "Coverage (SymLog)",
         labelYHorizontalOffset: 30,
+        labelYVerticalOffset: 54,
         labelYLarge: true,
         margins: {
           left: 100,
           right: 50,
-          top: 40,
-          bottom: 70,
+          top: 22,
+          bottom: 54,
         },
         numBins: Math.round(
           data.coverage_viz.total_length / data.coverage_viz.coverage_bin_size
@@ -191,7 +194,7 @@ class ConsensusGenomeView extends React.Component {
         numTicksY: 2,
         showStatistics: false,
         skipBins: true,
-        yScaleLog: true,
+        yScaleType: HISTOGRAM_SCALE.SYM_LOG,
         yTickFormat: numberWithCommas,
         onHistogramBarHover: this.handleHistogramBarHover,
         onHistogramBarEnter: this.handleHistogramBarEnter,
@@ -480,6 +483,7 @@ class ConsensusGenomeView extends React.Component {
 
 ConsensusGenomeView.propTypes = {
   sample: PropTypes.object,
+  workflow: PropTypes.object,
 };
 
 export default ConsensusGenomeView;
