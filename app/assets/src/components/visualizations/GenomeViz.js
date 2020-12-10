@@ -151,6 +151,7 @@ export default class GenomeViz {
       if (closestDataIndex !== null) {
         const barBBox = this.svg
           .select(".bar-container")
+          .selectAll("rect")
           .filter((_d, i) => i === closestDataIndex)
           .node()
           .getBoundingClientRect();
