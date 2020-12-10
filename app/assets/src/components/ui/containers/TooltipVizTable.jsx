@@ -6,34 +6,15 @@ import cx from "classnames";
 import cs from "./tooltip_viz_table.scss";
 
 class TooltipVizTable extends React.Component {
-  renderLabels(data, compact) {
-    return (
-      <div className={cs.labelColumn}>
-        {data.map((keyValuePair, index) => {
-          return (
-            <div
-              className={cx(cs.label, compact && cs.compact)}
-              key={`label-${keyValuePair}-${index}`}
-            >
-              {keyValuePair[0]}
-            </div>
-          );
-        })}
-      </div>
-    );
+  renderLabel(label, compact) {
+    return <div className={cx(cs.label, compact && cs.compact)}>{label}</div>;
   }
 
-  renderValues(data) {
+  renderValue(value) {
     return (
-      <div className={cs.valueColumn}>
-        {data.map((keyValuePair, index) => {
-          return (
-            <div className={cs.value} key={`value-${keyValuePair}-${index}`}>
-              {/* // Use .name if value is an object (e.g. location object) */}
-              {get("name", keyValuePair[1]) || keyValuePair[1]}
-            </div>
-          );
-        })}
+      <div className={cs.value}>
+        {/* // Use .name if value is an object (e.g. location object) */}
+        {get("name", value) || value}
       </div>
     );
   }
@@ -46,8 +27,15 @@ class TooltipVizTable extends React.Component {
       >
         <div className={cx(cs.name, disabled && cs.disabled)}>{name}</div>
         <div className={cs.data}>
-          {this.renderLabels(data, compact)}
-          {this.renderValues(data)}
+          {data.map((datum, index) => {
+            const [label, value] = datum;
+            return (
+              <div className={cs.dataRow} key={`section-${name}-row-${index}`}>
+                {this.renderLabel(datum[0], compact)}
+                {this.renderValue(datum[1])}
+              </div>
+            );
+          })}
         </div>
       </div>
     );

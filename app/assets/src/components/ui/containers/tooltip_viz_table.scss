@@ -48,28 +48,29 @@
 
     .data {
       display: flex;
+      flex-direction: column;
 
-      .labelColumn {
+      .dataRow {
         display: flex;
-        flex-direction: column;
-        margin-right: $space-l;
+        flex-direction: row;
+        align-items: stretch;
+        width: 100%;
 
         .label {
           @include font-header-xs;
           width: auto;
+          margin-right: $space-l;
+          flex-grow: 1;
         }
 
         .compact {
           width: auto;
         }
-      }
-
-      .valueColumn {
-        display: flex;
-        flex-direction: column;
 
         .value {
           @include font-body-xs;
+          text-align: right;
+          flex-grow: 1;
         }
       }
     }
