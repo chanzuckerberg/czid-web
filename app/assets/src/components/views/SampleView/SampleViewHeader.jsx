@@ -1,19 +1,24 @@
 import React, { useContext } from "react";
-import { get } from "lodash/fp";
+import { get, isEmpty } from "lodash/fp";
 
+import { deleteSample, saveVisualization } from "~/api";
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
+import { UserContext } from "~/components/common/UserContext";
+import ViewHeader from "~/components/layout/ViewHeader";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import ViewHeader from "~/components/layout/ViewHeader";
-import { UserContext } from "~/components/common/UserContext";
-import { DownloadButton, SaveButton, ShareButton } from "~ui/controls/buttons";
-import { openUrl } from "~utils/links";
-import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
-import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
-import { saveVisualization } from "~/api";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
+import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
+import {
+  DownloadButton,
+  PrimaryButton,
+  SaveButton,
+  ShareButton,
+} from "~ui/controls/buttons";
+import { openUrl } from "~utils/links";
 
-import SampleViewControls from "./SampleViewControls";
+import PipelineRunSampleViewControls from "./PipelineRunSampleViewControls";
 import WorkflowVersionHeader from "./WorkflowVersionHeader";
 import cs from "./sample_view_header.scss";
 
@@ -46,33 +51,9 @@ export default function SampleViewHeader({
     }
   };
 
-  const renderViewHeaderControls = () => {
-    if (
-      get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
-    ) {
-      return (
-        <ViewHeader.Controls>
-          {get("status", currentRun) === "SUCCEEDED" && (
-            <DownloadButton
-              text="Download All"
-              primary={true}
-              onClick={() => {
-                openUrl(getWorkflowRunZipLink(currentRun.id));
-                logAnalyticsEvent(
-                  "SampleViewHeader_consensus-genome-download-all-button_clicked",
-                  {
-                    sampleId: sample.id,
-                  }
-                );
-              }}
-            />
-          )}
-        </ViewHeader.Controls>
-      );
-    }
-
+  const renderShareButton = () => {
     return (
-      <ViewHeader.Controls>
+      <>
         <BasicPopup
           trigger={
             <ShareButton
@@ -88,34 +69,83 @@ export default function SampleViewHeader({
           on="click"
           hideOnScroll
         />{" "}
-        {userContext.admin && (
-          <SaveButton
-            onClick={withAnalytics(
-              onSaveClick,
-              "SampleView_save-button_clicked",
-              {
-                sampleId: sample && sample.id,
-              }
-            )}
-          />
-        )}{" "}
-        <SampleViewControls
-          backgroundId={backgroundId}
-          currentTab={currentTab}
-          deletable={deletable}
-          editable={editable}
-          getDownloadReportTableWithAppliedFiltersLink={
-            getDownloadReportTableWithAppliedFiltersLink
-          }
-          hasAppliedFilters={hasAppliedFilters}
-          pipelineRun={currentRun}
-          project={project}
-          reportMetadata={reportMetadata}
-          sample={sample}
-          view={view}
-        />
-      </ViewHeader.Controls>
+      </>
     );
+  };
+
+  const handleDeleteSample = async () => {
+    await deleteSample(sample.id);
+    location.href = `/home?project_id=${project.id}`;
+    logAnalyticsEvent("SampleViewHeader_delete-sample-button_clicked", {
+      sampleId: sample.id,
+      sampleName: sample.name,
+    });
+  };
+
+  const renderViewHeaderControls = () => {
+    if (
+      get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
+    ) {
+      const succeeded = get("status", currentRun) === "SUCCEEDED";
+      return (
+        <ViewHeader.Controls>
+          {succeeded && (
+            <>
+              {renderShareButton()}
+              <DownloadButton
+                text="Download All"
+                onClick={() => {
+                  openUrl(getWorkflowRunZipLink(currentRun.id));
+                  logAnalyticsEvent(
+                    "SampleViewHeader_consensus-genome-download-all-button_clicked",
+                    {
+                      sampleId: sample.id,
+                    }
+                  );
+                }}
+              />
+            </>
+          )}
+          {!succeeded && editable && deletable && (
+            <PrimaryButton onClick={handleDeleteSample} text="Delete Sample" />
+          )}
+        </ViewHeader.Controls>
+      );
+    } else {
+      // This block is for short-read-mngs PipelineRun reports.
+      return (
+        <ViewHeader.Controls>
+          {!isEmpty(reportMetadata) && renderShareButton()}
+          {userContext.admin && (
+            <SaveButton
+              onClick={withAnalytics(
+                onSaveClick,
+                "SampleView_save-button_clicked",
+                {
+                  sampleId: sample && sample.id,
+                }
+              )}
+            />
+          )}{" "}
+          <PipelineRunSampleViewControls
+            backgroundId={backgroundId}
+            currentTab={currentTab}
+            deletable={deletable}
+            editable={editable}
+            getDownloadReportTableWithAppliedFiltersLink={
+              getDownloadReportTableWithAppliedFiltersLink
+            }
+            onDeleteSample={handleDeleteSample}
+            hasAppliedFilters={hasAppliedFilters}
+            pipelineRun={currentRun}
+            project={project}
+            reportMetadata={reportMetadata}
+            sample={sample}
+            view={view}
+          />
+        </ViewHeader.Controls>
+      );
+    }
   };
 
   const getBreadcrumbLink = () => {

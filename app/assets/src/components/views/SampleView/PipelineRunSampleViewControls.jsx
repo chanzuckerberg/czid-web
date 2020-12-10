@@ -1,11 +1,8 @@
 import { isEmpty } from "lodash/fp";
-import Nanobar from "nanobar";
 import querystring from "querystring";
 import React from "react";
 import SvgSaver from "svgsaver";
 
-import { deleteSample as deleteSampleAPI } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { logError } from "~/components/utils/logUtil";
@@ -18,7 +15,7 @@ import {
 } from "~/components/views/report/utils/download";
 import { TABS } from "./constants";
 
-const SampleViewControls = ({
+const PipelineRunSampleViewControls = ({
   backgroundId,
   currentTab,
   deletable,
@@ -26,8 +23,8 @@ const SampleViewControls = ({
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
   minContigReads,
+  onDeleteSample,
   pipelineRun,
-  project,
   reportMetadata,
   sample,
   view,
@@ -44,21 +41,6 @@ const SampleViewControls = ({
     location.href = `/samples/${sample.id}/report_csv?${querystring.stringify(
       resParams
     )}`;
-  };
-
-  const deleteSample = async () => {
-    let nanobar = new Nanobar({
-      id: "prog-bar",
-      class: "prog-bar",
-    });
-    nanobar.go(30);
-    await deleteSampleAPI(sample.id);
-    nanobar.go(100);
-    location.href = `/home?project_id=${project.id}`;
-    logAnalyticsEvent("SampleViewControls_delete-sample-button_clicked", {
-      sampleId: sample.id,
-      sampleName: sample.name,
-    });
   };
 
   const handleDownload = option => {
@@ -90,7 +72,7 @@ const SampleViewControls = ({
         } else {
           logError({
             message:
-              "SampleViewControls: Invalid option passed to handleDownload",
+              "PipelineRunSampleViewControls: Invalid option passed to handleDownload",
             details: { option },
           });
         }
@@ -99,7 +81,7 @@ const SampleViewControls = ({
     }
 
     logDownloadOption({
-      component: "SampleViewControls",
+      component: "PipelineRunSampleViewControls",
       option,
       details: {
         sampleId: sample.id,
@@ -151,17 +133,17 @@ const SampleViewControls = ({
   if (!!reportMetadata.reportReady && pipelineRun) {
     return renderDownloadButtonDropdown();
   } else if (!isEmpty(reportMetadata) && editable && deletable) {
-    return <PrimaryButton onClick={deleteSample} text="Delete Sample" />;
+    return <PrimaryButton onClick={onDeleteSample} text="Delete Sample" />;
   } else {
     return <div />;
   }
 };
 
-SampleViewControls.defaultProps = {
+PipelineRunSampleViewControls.defaultProps = {
   deletable: false,
 };
 
-SampleViewControls.propTypes = {
+PipelineRunSampleViewControls.propTypes = {
   backgroundId: PropTypes.number,
   currentTab: PropTypes.string,
   deletable: PropTypes.bool,
@@ -169,11 +151,11 @@ SampleViewControls.propTypes = {
   getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
   hasAppliedFilters: PropTypes.bool,
   minContigReads: PropTypes.number,
+  onDeleteSample: PropTypes.func,
+  pipelineRun: PropTypes.PipelineRun,
   reportMetadata: PropTypes.ReportMetadata,
   sample: PropTypes.Sample,
-  pipelineRun: PropTypes.PipelineRun,
-  project: PropTypes.Project,
   view: PropTypes.string,
 };
 
-export default SampleViewControls;
+export default PipelineRunSampleViewControls;
