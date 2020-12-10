@@ -146,6 +146,19 @@ const SampleTypeProps = PropTypes.shape({
   human_only: PropTypes.bool,
 });
 
+const ReportMetadata = PropTypes.shape({
+  adjustedRemainingReadsCount: PropTypes.number,
+  alignVizAvailable: PropTypes.bool,
+  backgroundId: PropTypes.number,
+  hasByteRanges: PropTypes.bool,
+  hasErrors: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  jobStatus: PropTypes.string,
+  pipelineRunStatus: PropTypes.string,
+  reportReady: PropTypes.bool,
+  subsampledReadsCount: PropTypes.number,
+  taxonWhitelisted: PropTypes.bool,
+});
+
 export default {
   ReportDetails,
   Taxon,
@@ -163,5 +176,6 @@ export default {
   DownloadTypeParam,
   SampleTypeProps,
   BulkDownload,
+  ReportMetadata,
   ...PropTypes,
 };

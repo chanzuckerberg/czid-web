@@ -1591,7 +1591,7 @@ export default class SampleView extends React.Component {
               currentRun={currentRun}
               project={project}
               projectSamples={projectSamples}
-              reportPresent={!!reportMetadata.reportReady}
+              reportMetadata={reportMetadata}
               sample={sample}
               snapshotShareId={snapshotShareId}
               view={view}

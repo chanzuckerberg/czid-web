@@ -29,7 +29,7 @@ export default function SampleViewHeader({
   currentRun,
   project,
   projectSamples,
-  reportPresent,
+  reportMetadata,
   sample,
   snapshotShareId,
   view,
@@ -110,7 +110,7 @@ export default function SampleViewHeader({
           hasAppliedFilters={hasAppliedFilters}
           pipelineRun={currentRun}
           project={project}
-          reportPresent={reportPresent}
+          reportMetadata={reportMetadata}
           sample={sample}
           view={view}
         />
@@ -183,7 +183,7 @@ export default function SampleViewHeader({
 SampleViewHeader.defaultProps = {
   deletable: false,
   projectSample: [],
-  reportPresent: false,
+  reportMetadata: {},
 };
 
 SampleViewHeader.propTypes = {
@@ -199,7 +199,7 @@ SampleViewHeader.propTypes = {
   pipelineVersions: PropTypes.arrayOf(PropTypes.string),
   project: PropTypes.Project,
   projectSamples: PropTypes.arrayOf(PropTypes.Sample),
-  reportPresent: PropTypes.bool,
+  reportMetadata: PropTypes.ReportMetadata,
   sample: PropTypes.Sample,
   snapshotShareId: PropTypes.string,
   view: PropTypes.string.isRequired,

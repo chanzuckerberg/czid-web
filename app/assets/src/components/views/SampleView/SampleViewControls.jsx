@@ -1,3 +1,4 @@
+import { isEmpty } from "lodash/fp";
 import Nanobar from "nanobar";
 import querystring from "querystring";
 import React from "react";
@@ -27,7 +28,7 @@ const SampleViewControls = ({
   minContigReads,
   pipelineRun,
   project,
-  reportPresent,
+  reportMetadata,
   sample,
   view,
 }) => {
@@ -147,9 +148,9 @@ const SampleViewControls = ({
     );
   };
 
-  if (reportPresent && pipelineRun) {
+  if (!!reportMetadata.reportReady && pipelineRun) {
     return renderDownloadButtonDropdown();
-  } else if (editable && deletable) {
+  } else if (!isEmpty(reportMetadata) && editable && deletable) {
     return <PrimaryButton onClick={deleteSample} text="Delete Sample" />;
   } else {
     return <div />;
@@ -168,7 +169,7 @@ SampleViewControls.propTypes = {
   getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
   hasAppliedFilters: PropTypes.bool,
   minContigReads: PropTypes.number,
-  reportPresent: PropTypes.bool,
+  reportMetadata: PropTypes.ReportMetadata,
   sample: PropTypes.Sample,
   pipelineRun: PropTypes.PipelineRun,
   project: PropTypes.Project,
