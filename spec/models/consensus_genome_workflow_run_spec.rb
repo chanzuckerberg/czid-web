@@ -47,8 +47,8 @@ RSpec.describe ConsensusGenomeWorkflowRun, type: :model do
       it "includes taxon info" do
         expect(subject.results).to include(
           taxon_info: {
-            accession_id: "MN985325.1",
-            accession_name: "Severe acute respiratory syndrome coronavirus 2 isolate SARS-CoV-2/human/USA/WA-CDC-WA1/2020, complete genome",
+            accession_id: "MN908947.3",
+            accession_name: "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome",
             taxon_id: 2_697_049,
             taxon_name: "Severe acute respiratory syndrome coronavirus 2",
           }
@@ -61,8 +61,8 @@ RSpec.describe ConsensusGenomeWorkflowRun, type: :model do
         @coverage_mock_result = { coverage_breadth: 0.99 }
         @quality_mock_result = { total_reads: 10 }
         @taxon_mock_result = {
-          accession_id: "MN985325.1",
-          accession_name: "Severe acute respiratory syndrome coronavirus 2 isolate SARS-CoV-2/human/USA/WA-CDC-WA1/2020, complete genome",
+          accession_id: "MN908947.3",
+          accession_name: "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome",
           taxon_id: 2_697_049,
           taxon_name: "Severe acute respiratory syndrome coronavirus 2",
         }

@@ -62,8 +62,8 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   def taxon_info
     # TODO: Hardcoded as the only consensus genome for now
     return {
-      accession_id: "MN985325.1",
-      accession_name: "Severe acute respiratory syndrome coronavirus 2 isolate SARS-CoV-2/human/USA/WA-CDC-WA1/2020, complete genome",
+      accession_id: "MN908947.3",
+      accession_name: "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome",
       taxon_id: 2_697_049,
       taxon_name: "Severe acute respiratory syndrome coronavirus 2",
     }
