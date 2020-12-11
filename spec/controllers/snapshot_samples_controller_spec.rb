@@ -110,7 +110,7 @@ RSpec.describe SnapshotSamplesController, type: :controller do
         json_response = JSON.parse(response.body)
         expect(json_response["name"]).to include(@sample_one.name)
         expect(json_response["default_pipeline_run_id"]).to eq(@sample_one.first_pipeline_run.id)
-        expect(json_response["default_background_id"]).to eq(@public_background.id)
+        expect(json_response["default_background_id"]).to eq(@sample_one.default_background_id)
       end
     end
 
@@ -125,8 +125,8 @@ RSpec.describe SnapshotSamplesController, type: :controller do
         expect(response).to redirect_to(root_path)
       end
 
-      it "should return the correct report_v2 for valid share_id and sample" do
-        get :report_v2, params: { id: @sample_one.id, share_id: @snapshot_link.share_id }
+      it "should return the correct report_v2 for valid share_id, sample, and background" do
+        get :report_v2, params: { id: @sample_one.id, background: @public_background.id, share_id: @snapshot_link.share_id }
         expect(response).to have_http_status(:success)
 
         json_response = JSON.parse(response.body)

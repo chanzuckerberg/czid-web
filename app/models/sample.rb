@@ -508,7 +508,8 @@ class Sample < ApplicationRecord
   end
 
   def default_background_id
-    host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(public_access: 1).id
+    # If the background of the host genome is not present, use Human HostGenome default background
+    host_genome&.default_background_id.present? ? host_genome.default_background_id : HostGenome.find_by(name: "Human").default_background_id
   end
 
   def as_json(options = {})
