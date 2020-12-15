@@ -1,12 +1,12 @@
 // This modal contains a wizard that allows users to upload metadata to a project.
 import React from "react";
-import { keyBy, flow, mapValues, omit } from "lodash/fp";
+import { flow, get, keyBy, mapValues, omit } from "lodash/fp";
 import PropTypes from "prop-types";
 
 import Wizard from "~ui/containers/Wizard";
 import Modal from "~ui/containers/Modal";
 import Notification from "~ui/notifications/Notification";
-import { getSamplesV1 } from "~/api";
+import { getSamples } from "~/api";
 import { uploadMetadataForProject } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { showToast } from "~/components/utils/toast";
@@ -24,9 +24,16 @@ class MetadataUploadModal extends React.Component {
   };
 
   async componentDidMount() {
-    const projectSamples = await getSamplesV1({
-      project_id: this.props.project.id,
-      basic: true,
+    const { project } = this.props;
+
+    const { samples: projectSamples } = await getSamples({
+      projectId: project.id,
+    });
+
+    projectSamples.forEach(sample => {
+      // This maintains compatibility with downstream MetadataManualInput,
+      // which expects sample.metadata instead of sample.details.metadata.
+      sample.metadata = get("metadata", sample.details);
     });
 
     this.setState({

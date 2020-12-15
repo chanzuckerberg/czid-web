@@ -273,47 +273,6 @@ module SamplesHelper
     return samples
   end
 
-  def filter_by_status(samples, query)
-    top_pipeline_run_clause = "pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)"
-    if query == 'In Progress'
-      samples.joins(:pipeline_runs).where("#{top_pipeline_run_clause} or pipeline_runs.id is NULL").where("samples.status = ? or pipeline_runs.job_status is NULL or (pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1)", Sample::STATUS_CREATED, [PipelineRun::STATUS_CHECKED, PipelineRun::STATUS_FAILED])
-    else
-      samples_pipeline_runs = samples.joins(:pipeline_runs).where(status: Sample::STATUS_CHECKED).where(top_pipeline_run_clause)
-      if query == 'Failed'
-        samples_pipeline_runs.where("pipeline_runs.job_status like '%FAILED'")
-      elsif query == 'Complete'
-        samples_pipeline_runs.where("(pipeline_runs.job_status = ? or pipeline_runs.job_status like '%READY') and pipeline_runs.finalized = 1", PipelineRun::STATUS_CHECKED)
-      else # query == 'All' or something unexpected
-        samples
-      end
-    end
-  end
-
-  def filter_by_metadatum(samples, key, query)
-    # !DEPRECATED
-    # TODO(tiago): This filter will be replaced by filter_by_metadata_key
-    return samples.where("false") if query == ["none"]
-
-    # Use a set to speed up query.
-    query_set = query.to_set
-
-    include_not_set = query.include?('Not set')
-
-    sample_type_metadatum = Metadatum
-                            .where(sample_id: samples.pluck(:id), key: key)
-
-    matching_sample_ids = sample_type_metadatum
-                          .select { |m| query_set.include?(m.validated_value) }
-                          .pluck(:sample_id)
-
-    if include_not_set
-      not_set_ids = samples.pluck(:id) - sample_type_metadatum.pluck(:sample_id)
-      matching_sample_ids.concat(not_set_ids)
-    end
-
-    samples.where(id: matching_sample_ids)
-  end
-
   def get_total_runtime(pipeline_run, run_stages)
     if pipeline_run.finalized?
       # total processing time (without time spent waiting), for performance evaluation
@@ -411,18 +370,6 @@ module SamplesHelper
     WorkflowRun.where(sample_id: sample_ids, deprecated: false, workflow: workflow).order(executed_at: :asc).index_by(&:sample_id)
   end
 
-  def format_samples_basic(samples)
-    metadata_by_sample_id = Metadatum.by_sample_ids(samples.map(&:id), use_raw_date_strings: true)
-    return samples.map do |sample|
-      {
-        name: sample.name,
-        id: sample.id,
-        host_genome_id: sample.host_genome_id,
-        metadata: metadata_by_sample_id[sample.id],
-      }
-    end
-  end
-
   def format_samples(samples, selected_pipeline_runs_by_sample_id: nil, use_csv_compatible_values: false, is_snapshot: false)
     formatted_samples = []
     return formatted_samples if samples.empty?
@@ -500,36 +447,6 @@ module SamplesHelper
            .joins(:project)
            .select("samples.*", "IF(projects.public_access = 1 OR DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < '#{Time.current.strftime('%y-%m-%d')}', true, false) AS public")
            .map(&:public)
-  end
-
-  # From the list of samples, return the ids of all samples whose top pipeline run is report ready.
-  def get_ready_sample_ids(samples)
-    ready_sample_ids = []
-    return ready_sample_ids if samples.empty?
-
-    # Do major SQL queries
-    sample_ids = samples.map(&:id)
-    top_pipeline_run_by_sample_id = top_pipeline_runs_multiget(sample_ids)
-    pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
-    report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
-
-    samples.each do |sample|
-      top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
-
-      if top_pipeline_run && report_ready_pipeline_run_ids.include?(top_pipeline_run.id)
-        ready_sample_ids.push(sample.id)
-      end
-    end
-
-    ready_sample_ids
-  end
-
-  def get_distinct_sample_types(samples)
-    Metadatum
-      .where(key: "sample_type")
-      .where(sample_id: samples.pluck(:id))
-      .pluck(:string_validated_value)
-      .uniq
   end
 
   # Takes an array of samples and uploads metadata for those samples.

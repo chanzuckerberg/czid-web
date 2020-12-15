@@ -233,8 +233,6 @@ const getProjectDimensions = ({ domain, filters, projectId, search }) =>
     },
   });
 
-const getSamplesV1 = params => get("/samples.json", { params });
-
 const getProject = ({ projectId }) => get(`/projects/${projectId}.json`);
 
 const getProjects = ({
@@ -482,7 +480,6 @@ export {
   getSamples,
   getSamplesLocations,
   getSampleStats,
-  getSamplesV1,
   getSampleTaxons,
   getSamplePipelineResults,
   getSearchSuggestions,

@@ -417,40 +417,47 @@ RSpec.describe SamplesController, type: :controller do
       end
     end
 
-    describe "#index" do
+    describe "#index_v2" do
       it "returns basic samples with correctly formatted date" do
         project = create(:project, users: [@joe])
         create(:sample, name: "Mosquito Sample", project: project, user: @joe, host_genome_name: "Mosquito", metadata_fields: { collection_date: "2019-01-01" })
 
-        get :index, params: { project_id: project.id, basic: true }
+        get :index_v2, params: { projectId: project.id }, format: :json
         json_response = JSON.parse(response.body)
         expect(json_response.length).to eq(1)
-        expect(json_response).to include_json([
-                                                {
-                                                  "name" => "Mosquito Sample",
-                                                  "metadata" => {
-                                                    "collection_date" => "2019-01-01",
+        expect(json_response).to include_json({
+                                                "samples" => [
+                                                  {
+                                                    "name" => "Mosquito Sample",
+                                                    "details" => {
+                                                      "metadata" => {
+                                                        "collection_date" => "2019-01-01",
+                                                      },
+                                                    },
                                                   },
-                                                },
-
-                                              ])
+                                                ],
+                                              })
       end
 
       it "for human samples, truncates date metadata to month" do
         project = create(:project, users: [@joe])
         create(:sample, name: "Human Sample", project: project, user: @joe, host_genome_name: "Human", metadata_fields: { collection_date: "2019-01" })
 
-        get :index, params: { project_id: project.id, basic: true }
+        get :index_v2, params: { projectId: project.id }, format: :json
         json_response = JSON.parse(response.body)
         expect(json_response.length).to eq(1)
-        expect(json_response).to include_json([
-                                                {
-                                                  "name" => "Human Sample",
-                                                  "metadata" => {
-                                                    "collection_date" => "2019-01",
+        expect(json_response).to include_json({
+                                                "samples": [
+                                                  {
+                                                    "name" => "Human Sample",
+                                                    "details" => {
+                                                      "metadata" => {
+                                                        "collection_date" => "2019-01",
+                                                      },
+                                                    },
                                                   },
-                                                },
-                                              ])
+                                                ],
+                                              })
       end
     end
 

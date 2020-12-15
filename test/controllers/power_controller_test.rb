@@ -59,40 +59,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert @joe_sample.metadata.find_by(key: "sample_notes").string_validated_value == 'Test note 2'
   end
 
-  # ===== START: /samples/index
-  test 'joe can see samples in joe_project' do
-    sign_in(:joe)
-    @joe_project = projects(:joe_project)
-    get "/samples.json?project_id=#{@joe_project.id}"
-    assert_response :success
-    assert JSON.parse(@response.body)["count"] == 5
-  end
-
-  test 'joe cannot see samples in project one' do
-    sign_in(:joe)
-    @project = projects(:one)
-    get "/samples.json?project_id=#{@project.id}"
-    assert_response :success
-    assert JSON.parse(@response.body)["count"].zero?
-  end
-
-  test 'joe can see expired samples in project two' do
-    sign_in(:joe)
-    @project = projects(:two)
-    get "/samples.json?project_id=#{@project.id}"
-    assert_response :success
-    assert JSON.parse(@response.body)["count"] == 2
-  end
-
-  test 'joe can see samples in public_project' do
-    sign_in(:joe)
-    @public_project = projects(:public_project)
-    get "/samples.json?project_id=#{@public_project.id}"
-    assert_response :success
-    assert JSON.parse(@response.body)["count"] == 5
-  end
-  # ===== END: /samples/index
-
   # ===== START: /samples/index_v2
   test 'joe can see samples in joe_project with index_v2' do
     sign_in(:joe)

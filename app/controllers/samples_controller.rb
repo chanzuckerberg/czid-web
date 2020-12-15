@@ -55,7 +55,6 @@ class SamplesController < ApplicationController
 
   around_action :instrument_with_timer
 
-  PAGE_SIZE = 30
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
   MIN_CLI_VERSION = '0.8.10'.freeze
@@ -84,94 +83,6 @@ class SamplesController < ApplicationController
   CLADE_FASTA_S3_KEY = "clade_exports/fastas/temp-%{path}".freeze
   CLADE_REFERENCE_TREE_S3_KEY = "clade_exports/trees/temp-%{path}".freeze
   CLADE_EXTERNAL_SITE = "clades.nextstrain.org".freeze
-
-  # GET /samples
-  # GET /samples.json
-  def index
-    # this endpoint will be replaced in the future by index_v2
-    @all_project = current_power.projects
-    @page_size = PAGE_SIZE
-    project_id = params[:project_id]
-    name_search_query = params[:search]
-    filter_query = params[:filter]
-    page = params[:page]
-    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
-    # instances to "sample_type".
-    sample_type_query = params[:tissue].split(',') if params[:tissue].present?
-    host_query = params[:host].split(',') if params[:host].present?
-    samples_query = params[:ids].split(',') if params[:ids].present?
-    sort = params[:sort_by]
-    # Return only some basic props for samples.
-    # TODO(mark): Make "basic" the default. This involves refactoring all the callers of this endpoint.
-    basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
-
-    results = current_power.samples
-
-    results = results.where(id: samples_query) if samples_query.present?
-    results = results.where(project_id: project_id) if project_id.present?
-    results = results.where(user_id: params[:uploader].split(",")) if params[:uploader].present?
-    results = filter_by_taxid(results, params[:taxid].split(",")) if params[:taxid].present?
-
-    @count_project = results.size
-
-    # Get sample types and host genomes that are present in the sample list
-    # TODO(yf) : the following sample_types, host_genomes have performance
-    # impact that it should be moved to different dedicated functions. Not
-    # parsing the whole results.
-    @sample_types = get_distinct_sample_types(results)
-
-    host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
-    @host_genomes = HostGenome.find(host_genome_ids)
-
-    # Query by name for a Sample attribute or pathogen name in the Sample.
-    if name_search_query.present?
-      # Pass in a scope of pipeline runs using current_power
-      pipeline_run_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
-      results = results.search(name_search_query, pipeline_run_ids)
-    end
-
-    results = filter_by_status(results, filter_query) if filter_query.present?
-    results = filter_by_metadatum(results, "sample_type", sample_type_query) if sample_type_query.present?
-    results = filter_by_metadatum(results, "collection_location", params[:location].split(',')) if params[:location].present?
-    results = filter_by_host(results, host_query) if host_query.present?
-
-    page_size = params[:per_page] || PAGE_SIZE
-
-    # If just returning basic fields, return all samples.
-    if basic
-      page_size = results.length
-    end
-
-    @samples = sort_by(results, sort).paginate(page: page, per_page: page_size).includes([:user, :host_genome, :pipeline_runs, :input_files])
-    @samples_count = results.size
-    @samples_formatted = basic ? format_samples_basic(@samples) : format_samples(@samples)
-
-    @ready_sample_ids = get_ready_sample_ids(results)
-
-    if basic
-      render json: @samples_formatted
-    # Send more information with the first page.
-    elsif !page || page == '1'
-      render json: {
-        # Samples in this page.
-        samples: @samples_formatted,
-        # Number of samples in the current query.
-        count: @samples_count,
-        # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
-        # instances to "sample_type"
-        tissues: @sample_types,
-        host_genomes: @host_genomes,
-        # Total number of samples in the project
-        count_project: @count_project,
-        # Ids for all ready samples in the current query, not just the current page.
-        ready_sample_ids: @ready_sample_ids,
-      }
-    else
-      render json: {
-        samples: @samples_formatted,
-      }
-    end
-  end
 
   def index_v2
     # this method is going to replace 'index' once we fully migrate to the
