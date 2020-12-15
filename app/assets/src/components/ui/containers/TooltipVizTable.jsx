@@ -1,25 +1,27 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { get } from "lodash/fp";
+import { getOr } from "lodash/fp";
 import cx from "classnames";
 
 import cs from "./tooltip_viz_table.scss";
 
-class TooltipVizTable extends React.Component {
-  renderLabel(label, compact) {
-    return <div className={cx(cs.label, compact && cs.compact)}>{label}</div>;
-  }
+const TooltipVizTable = ({ data, subtitle, title }) => {
+  const shouldCompactLabel = data.length === 1;
 
-  renderValue(value) {
+  const renderLabel = label => {
     return (
-      <div className={cs.value}>
-        {/* // Use .name if value is an object (e.g. location object) */}
-        {get("name", value) || value}
+      <div className={cx(cs.label, shouldCompactLabel && cs.compact)}>
+        {label}
       </div>
     );
-  }
+  };
 
-  renderSection(name, data, disabled, compact) {
+  const renderValue = value => {
+    return <div className={cs.value}>{getOr(value, "name", value)}</div>;
+  };
+
+  const renderSection = section => {
+    const { name, data, disabled } = section;
     return (
       <div
         className={cx(cs.section, disabled && cs.disabled)}
@@ -31,35 +33,28 @@ class TooltipVizTable extends React.Component {
             const [label, value] = datum;
             return (
               <div className={cs.dataRow} key={`section-${name}-row-${index}`}>
-                {this.renderLabel(datum[0], compact)}
-                {this.renderValue(datum[1])}
+                {renderLabel(label)}
+                {renderValue(value)}
               </div>
             );
           })}
         </div>
       </div>
     );
-  }
+  };
 
-  renderSections(data) {
-    const compact = data.length === 1;
-    return data.map(section =>
-      this.renderSection(section.name, section.data, section.disabled, compact)
-    );
-  }
+  const renderSections = () => {
+    return data.map(section => renderSection(section));
+  };
 
-  render() {
-    const { title, subtitle, data } = this.props;
-
-    return (
-      <div className={cs.table}>
-        {title && <div className={cs.title}>{title}</div>}
-        {subtitle && <div className={cs.subtitle}>{subtitle}</div>}
-        {this.renderSections(data)}
-      </div>
-    );
-  }
-}
+  return (
+    <div className={cs.table}>
+      {title && <div className={cs.title}>{title}</div>}
+      {subtitle && <div className={cs.subtitle}>{subtitle}</div>}
+      {renderSections()}
+    </div>
+  );
+};
 
 TooltipVizTable.propTypes = {
   data: PropTypes.arrayOf(
@@ -70,6 +65,8 @@ TooltipVizTable.propTypes = {
       disabled: PropTypes.bool,
     })
   ),
+  subtitle: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
 };
 
 export default TooltipVizTable;
