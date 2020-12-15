@@ -35,7 +35,14 @@ class UsersController < ApplicationController
 
           # Send them an invitation and account activation email.
           email = new_user_params[:email]
-          UserMailer.account_activation(email, reset_url).deliver_now
+          begin
+            UserMailer.account_activation(email, reset_url).deliver_now
+          rescue Net::SMTPAuthenticationError
+            render(
+              json: ["User was successfully created but SMTP email is not configured. Try manual password reset at #{request.base_url}#{users_password_new_path}"],
+              status: :internal_server_error
+            ) and return
+          end
         end
 
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
