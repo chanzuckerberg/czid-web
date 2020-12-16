@@ -52,4 +52,10 @@ export default class ArrayUtils {
 
     return [sortedArray[low], sortedArray[high]];
   }
+
+  static caseInsensitiveIncludes = (strArray, filterStr) => {
+    return strArray
+      .map(element => element.toLowerCase())
+      .includes((filterStr || "").toLowerCase());
+  };
 }

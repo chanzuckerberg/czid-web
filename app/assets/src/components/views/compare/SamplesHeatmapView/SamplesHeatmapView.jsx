@@ -57,6 +57,7 @@ import {
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
+import ArrayUtils from "~/components/utils/ArrayUtils";
 
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
@@ -1016,7 +1017,12 @@ class SamplesHeatmapView extends React.Component {
         return false;
       }
       if (
-        !categories.includes(taxonDetails["category"]) &&
+        // Consider using the regular array includes function,
+        // once we guarantee that all data is lower case
+        !ArrayUtils.caseInsensitiveIncludes(
+          categories,
+          taxonDetails["category"]
+        ) &&
         !(phageSelected && taxonDetails["phage"])
       ) {
         return false;
