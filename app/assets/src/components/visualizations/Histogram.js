@@ -400,6 +400,7 @@ export default class Histogram {
     const logScale = scaleLog()
       .domain([1, scale.domain()[1]])
       .nice();
+
     scale.ticks = function(count) {
       const logTicks = logScale.ticks(count);
       // The log scale ticks function also does not seem to respect the count variable for lower scales.
@@ -407,13 +408,27 @@ export default class Histogram {
       // Since we do not adjust the domain to this values, the axis would be larger than the chart partially overlapping the container.
       // Thus, we must trim the logTicks to values within the domain.
       // This still does not respect `count`, but at least, shows the axis with the proper size.
+
+      // Log ticks might return:
+      // * ticks all shorter than domain (returns -1), in which case we want to use all ticks
+      // * more ticks than necessary (for domains <= 10), in which case we want to remove unnecessary ticks
+      const firstIndexHigherThanMax = logTicks.findIndex(
+        v => v >= this.domain()[1]
+      );
       const trimmedLogTicks = logTicks.slice(
         0,
-        // +1 to get the first value greater than or equal to the max
-        logTicks.findIndex(v => v >= this.domain()[1]) + 1
+        firstIndexHigherThanMax === -1
+          ? logTicks.length
+          : firstIndexHigherThanMax + 1
       );
-      // reset the domain to include the min/max axis
-      this.domain([0, trimmedLogTicks[[trimmedLogTicks.length - 1]]]).nice();
+      // reset the domain to include the min/max axis - including the case where max tick is lower than max of
+      this.domain([
+        0,
+        Math.max(
+          trimmedLogTicks[trimmedLogTicks.length - 1],
+          scale.domain()[1]
+        ),
+      ]).nice();
 
       return [0].concat(trimmedLogTicks);
     };
