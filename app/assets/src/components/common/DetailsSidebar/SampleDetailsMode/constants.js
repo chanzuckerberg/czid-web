@@ -76,4 +76,4 @@ export const WORKFLOW_INFO_FIELDS = [
 ];
 
 export const HOST_FILTERING_WIKI =
-  "https://github.com/chanzuckerberg/idseq-dag/wiki/IDseq-Pipeline-Stage-%231:-Host-Filtering-and-QC";
+  "https://github.com/chanzuckerberg/idseq-workflows/wiki/IDseq-Pipeline-Stage-%231:-Host-Filtering-and-QC";

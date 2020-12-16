@@ -235,8 +235,8 @@ module PipelineRunsHelper
   def install_pipeline(commit_or_branch)
     "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
     "cd /mnt; rm -rf idseq-dag idseq/results; df -h; " \
-    "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
-    "cd idseq-dag; " \
+    "git clone https://github.com/chanzuckerberg/idseq-workflows.git; " \
+    "cd short-read-mngs/idseq-dag; " \
     "git checkout #{Shellwords.escape(commit_or_branch)}; " \
     "pip3 install -e ."
   end
@@ -328,13 +328,13 @@ module PipelineRunsHelper
     if file_generated_since_run(failed_stage, user_input_validation_file)
       # Case where validation of user input format fails.
       # The code that produces user_input_validation_file lives here:
-      # https://github.com/chanzuckerberg/idseq-dag/blob/3feaa36d85bd1c4626b363f393699c8d4c4c274c/idseq_dag/steps/run_validate_input.py#L59
+      # https://github.com/chanzuckerberg/idseq-workflows/blob/a922fa8986715d30a06e20beaa3c92033c799f32/short-read-mngs/idseq-dag/idseq_dag/steps/run_validate_input.py#L117
       validation_error = get_key_from_s3_json(user_input_validation_file, "Validation error")
       return ["FAULTY_INPUT", validation_error] if validation_error
     end
     if file_generated_since_run(failed_stage, invalid_step_input_file)
       # Case where an intermediate output does not meet the requirements for the next step's inputs.
-      # Possible error codes defined here: https://github.com/chanzuckerberg/idseq-dag/blob/861e4d9f1382315ae16971c6985b31f08feca501/idseq_dag/engine/pipeline_step.py#L21
+      # Possible error codes defined here: https://github.com/chanzuckerberg/idseq-workflows/blob/a922fa8986715d30a06e20beaa3c92033c799f32/short-read-mngs/idseq-dag/idseq_dag/exceptions.py
       error_code = get_key_from_s3_json(invalid_step_input_file, "error")
       return [error_code, nil]
     end
