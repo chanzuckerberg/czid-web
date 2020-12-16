@@ -130,7 +130,8 @@ export default class NextcladeModal extends React.Component {
       };
 
       reader.onload = () => {
-        resolve(JSON.parse(reader.result));
+        // stringify-parse to remove excess whitespace
+        resolve(JSON.stringify(JSON.parse(reader.result)));
       };
       reader.readAsText(inputFile);
     });

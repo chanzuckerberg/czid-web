@@ -1327,7 +1327,7 @@ class SamplesController < ApplicationController
     # If a reference tree file was provided, upload to s3 and generate a presigned link.
     if collection_params[:referenceTree].present?
       tree_key = format(CLADE_REFERENCE_TREE_S3_KEY, path: SecureRandom.alphanumeric(5))
-      tree_contents = collection_params[:referenceTree].to_json
+      tree_contents = collection_params[:referenceTree]
       S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, tree_key, tree_contents)
       tree_url = get_presigned_s3_url(bucket_name: SAMPLES_BUCKET_NAME, key: tree_key, duration: 300)
       options["input-tree"] = tree_url
@@ -1399,7 +1399,7 @@ class SamplesController < ApplicationController
 
   # Doesn't require :sample or :samples
   def collection_params
-    permitted_params = [sampleIds: [], referenceTree: {}]
+    permitted_params = [:referenceTree, sampleIds: []]
     params.permit(*permitted_params)
   end
 
