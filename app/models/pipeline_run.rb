@@ -435,7 +435,10 @@ class PipelineRun < ApplicationRecord
     end
     if tsv_lines.length != 2
       error_message = "Pipeline run ##{id} has an insert size metrics file but metrics could not be found"
-      LogUtil.log_err(error_message)
+      LogUtil.log_error(
+        error_message,
+        pipeline_run_id: id
+      )
       raise error_message
     end
     insert_size_metrics = {}
@@ -790,7 +793,7 @@ class PipelineRun < ApplicationRecord
     output_json_s3_path = s3_file_for("taxon_counts")
     downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
                                                                   local_json_path, 3)
-    LogUtil.log_err("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
+    LogUtil.log_error("PipelineRun #{id} failed taxon_counts download", pipeline_run_id: id) unless downloaded_json_path
     return unless downloaded_json_path
 
     load_taxons(downloaded_json_path, false)
@@ -804,7 +807,7 @@ class PipelineRun < ApplicationRecord
 
     Syscall.run_in_dir(local_json_path, "sed", "-e", "s/$/,#{id}/", "-i", "taxon_byteranges")
     success = Syscall.run_in_dir(local_json_path, "mysqlimport --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --fields-terminated-by=',' --replace --local --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id idseq_#{Rails.env} taxon_byteranges")
-    LogUtil.log_err("PipelineRun #{id} failed db_load_byteranges import") unless success
+    LogUtil.log_error("PipelineRun #{id} failed db_load_byteranges import", pipeline_run_id: id) unless success
     Syscall.run("rm", "-f", downloaded_byteranges_path)
   end
 
@@ -853,7 +856,7 @@ class PipelineRun < ApplicationRecord
     # taxon_counts/taxon_byteranges/contigs/contig_counts.
     unless pipeline_version.present? || finalized
       # No need to warn if finalized (likely failed)
-      LogUtil.log_err("s3_file_for was called without a pipeline_version for PR #{id}")
+      LogUtil.log_error("s3_file_for was called without a pipeline_version for PR #{id}", pipeline_run_id: id)
     end
 
     case output
@@ -971,8 +974,7 @@ class PipelineRun < ApplicationRecord
       compile_stats_file!
       load_stats_file
     rescue StandardError => e
-      LogUtil.log_err("Failure compiling stats: #{e}")
-      LogUtil.log_backtrace(e)
+      LogUtil.log_error("Failure compiling stats: #{e}", exception: e)
       compiling_stats_failed = true
     end
 
@@ -1046,8 +1048,7 @@ class PipelineRun < ApplicationRecord
       )
       Rails.logger.info("PipelineRun: id=#{id} sfn_execution_arn=#{sfn_service_result[:sfn_execution_arn]}")
     rescue StandardError => e
-      LogUtil.log_err("Error starting SFN pipeline: #{e}")
-      LogUtil.log_backtrace(e)
+      LogUtil.log_error("Error starting SFN pipeline: #{e}", exception: e)
       # we will not retry in this case, since we do not know what error occurred
     end
 

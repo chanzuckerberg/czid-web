@@ -133,7 +133,12 @@ class LocationsController < ApplicationController
       # Monitor if users run up against geosearch API rate limits / record any other errs.
       msg = GEOSEARCH_RATE_LIMIT_ERR
       msg += ": #{resp}" if resp
-      LogUtil.log_err(msg)
+      LogUtil.log_error(
+        msg,
+        action: action,
+        query: query,
+        limit: limit
+      )
       raise msg
     end
   end

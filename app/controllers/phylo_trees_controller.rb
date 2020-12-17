@@ -211,7 +211,7 @@ class PhyloTreesController < ApplicationController
       send_file local_file.path, filename: "#{@phylo_tree.name.downcase.gsub(/\W/, '-')}__#{File.basename(s3_file)}"
     else
       local_file.close
-      LogUtil.log_err("downloading #{s3_file} failed")
+      LogUtil.log_error("downloading #{s3_file} failed", s3_file: s3_file)
       head :not_found
     end
   end

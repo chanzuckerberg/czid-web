@@ -23,7 +23,11 @@ module BasespaceHelper
     fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token, {}, true)
 
     # If we reach this step, the access token must not have been revoked.
-    LogUtil.log_err("BasespaceAccessTokenError: Failed to revoke access token for sample id #{sample_id}")
+    LogUtil.log_error(
+      "BasespaceAccessTokenError: Failed to revoke access token for sample id #{sample_id}",
+      access_token: access_token,
+      sample_id: sample_id
+    )
   rescue HttpHelper::HttpError => e
     # We expect the API endpoint to return a 401.
     if e.status_code == 401
@@ -51,14 +55,18 @@ module BasespaceHelper
 
       if response.dig("Response", "Items").nil?
         if response.dig("ResponseStatus", "Message").present?
-          LogUtil.log_err("Fetch Basespace projects failed with error: #{response['ResponseStatus']['Message']}")
+          LogUtil.log_error(
+            "Fetch Basespace projects failed with error: #{response['ResponseStatus']['Message']}",
+            access_token: access_token,
+            response: response
+          )
         else
-          LogUtil.log_err("Failed to fetch Basespace projects")
+          LogUtil.log_error("Failed to fetch Basespace projects", access_token: access_token, response: response)
         end
         return nil
       end
     rescue StandardError
-      LogUtil.log_err("Failed to fetch Basespace projects")
+      LogUtil.log_error("Failed to fetch Basespace projects", access_token: access_token)
       return nil
     end
 
@@ -77,14 +85,28 @@ module BasespaceHelper
 
       if response["Items"].nil?
         if response["ErrorMessage"].present?
-          LogUtil.log_err("Fetch samples for Basespace project failed with error: #{response['ErrorMessage']}")
+          LogUtil.log_error(
+            "Fetch samples for Basespace project failed with error: #{response['ErrorMessage']}",
+            project_id: project_id,
+            access_token: access_token,
+            response: response
+          )
         else
-          LogUtil.log_err("Failed to fetch samples for Basespace project")
+          LogUtil.log_error(
+            "Failed to fetch samples for Basespace project",
+            project_id: project_id,
+            access_token: access_token,
+            response: response
+          )
         end
         return nil
       end
     rescue StandardError
-      LogUtil.log_err("Failed to fetch samples for Basespace project")
+      LogUtil.log_error(
+        "Failed to fetch samples for Basespace project",
+        project_id: project_id,
+        access_token: access_token
+      )
       return nil
     end
 
@@ -111,14 +133,28 @@ module BasespaceHelper
 
       if response["Items"].nil?
         if response["ErrorMessage"].present?
-          LogUtil.log_err("Fetch files for Basespace dataset failed with error: #{response['ErrorMessage']}")
+          LogUtil.log_error(
+            "Fetch files for Basespace dataset failed with error: #{response['ErrorMessage']}",
+            dataset_id: dataset_id,
+            access_token: access_token,
+            response: response
+          )
         else
-          LogUtil.log_err("Failed to fetch files for basespace dataset")
+          LogUtil.log_error(
+            "Failed to fetch files for basespace dataset",
+            dataset_id: dataset_id,
+            access_token: access_token,
+            response: response
+          )
         end
         return nil
       end
     rescue StandardError
-      LogUtil.log_err("Failed to fetch files for basespace dataset")
+      LogUtil.log_error(
+        "Failed to fetch files for basespace dataset",
+        dataset_id: dataset_id,
+        access_token: access_token
+      )
       return nil
     end
 
@@ -143,7 +179,14 @@ module BasespaceHelper
       ["aws", "s3", "cp", "-", "#{s3_path}/#{file_name}"]
     )
 
-    LogUtil.log_err("Failed to transfer file from basespace to #{s3_path} for #{file_name}: #{stderr}") unless success
+    unless success
+      LogUtil.log_error(
+        "Failed to transfer file from basespace to #{s3_path} for #{file_name}: #{stderr}",
+        basespace_path: basespace_path,
+        s3_path: s3_path,
+        file_name: file_name
+      )
+    end
 
     return success
   end

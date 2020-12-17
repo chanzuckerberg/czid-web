@@ -152,10 +152,14 @@ class TaxonScoringModel < ApplicationRecord
       elsif MATH_FUNCTIONS.include?(op)
         return send(op, result)
       else
-        err_message = "Unknonw operator for taxonscoring: #{op}"
+        err_message = "Unknown operator for taxonscoring: #{op}"
         raise err_message if validation_mode
 
-        LogUtil.log_err(err_message)
+        LogUtil.log_error(
+          err_message,
+          taxon: taxon,
+          operator: op
+        )
         return result
       end
     end

@@ -14,10 +14,11 @@ class RestartPipelineForSample
 
     Rails.logger.info("RestartPipelineForSample #{sample_id} has started. ")
   rescue StandardError => err
-    LogUtil.log_err(
-      "RestartPipelineForSample #{sample_id} failed to run. Reason: #{err}"
+    LogUtil.log_error(
+      "RestartPipelineForSample #{sample_id} failed to run. Reason: #{err}",
+      exception: err,
+      sample_id: sample_id
     )
-    LogUtil.log_backtrace(err)
     raise err # Raise e in order to fire on_failure resque hook in InstrumentedJob
   end
 end

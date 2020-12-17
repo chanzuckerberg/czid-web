@@ -25,7 +25,7 @@ module Auth0Helper
       # this field is a custom claim set in "Add roles custom claims to JWT" rule in auth0
       wrong_role = current_user.admin? && !(auth_token.dig(:auth_payload, ROLES_CUSTOM_CLAIM) || []).include?('admin')
       if wrong_role && !expired && !wrong_email
-        LogUtil.log_err("Wrong auth0 role for admin user #{current_user.email}")
+        LogUtil.log_error("Wrong auth0 role for admin user #{current_user.email}", user_email: current_user.email)
       end
 
       return AUTH_TOKEN_EXPIRED if expired

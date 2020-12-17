@@ -17,7 +17,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
       })
       stub_const("S3_CLIENT", s3)
 
-      allow(LogUtil).to receive(:log_err)
+      allow(LogUtil).to receive(:log_error)
     end
 
     context "when config is available" do
@@ -49,7 +49,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
 
       it "logs a not found exception" do
         subject
-        expect(LogUtil).to have_received(:log_err).with(match(/Config file not found/))
+        expect(LogUtil).to have_received(:log_error).with(match(/Config file not found/))
       end
     end
 
@@ -70,7 +70,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
 
       it "logs a invalid JSON exception" do
         subject
-        expect(LogUtil).to have_received(:log_err).with(match(/Invalid config file/))
+        expect(LogUtil).to have_received(:log_error).with(match(/Invalid config file/))
       end
     end
   end

@@ -194,8 +194,7 @@ class Metadatum < ApplicationRecord
     self.string_validated_value = location_params[:string_validated_value]
     self.location_id = location_params[:location_id]
   rescue StandardError => err
-    LogUtil.log_err("Failed to save location metadatum: #{err.message}")
-    LogUtil.log_backtrace(err)
+    LogUtil.log_error("Failed to save location metadatum: #{err.message}", exception: err)
     errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
   end
 

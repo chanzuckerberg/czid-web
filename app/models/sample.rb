@@ -241,7 +241,7 @@ class Sample < ApplicationRecord
                                           expires_in: SAMPLE_DOWNLOAD_EXPIRATION).to_s
       end
     rescue StandardError => e
-      LogUtil.log_err("AWS presign error: #{e.inspect}")
+      LogUtil.log_error("AWS presign error: #{e.inspect}", exception: e, s3key: s3key)
     end
     nil
   end
@@ -381,7 +381,12 @@ class Sample < ApplicationRecord
     self.status = STATUS_UPLOADED
     save! # this triggers pipeline command
   rescue StandardError => e
-    LogUtil.log_err("SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}")
+    LogUtil.log_error(
+      "SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}",
+      exception: e,
+      sample_name: name,
+      sample_id: id
+    )
     self.status = STATUS_CHECKED
     if upload_error.blank?
       self.upload_error = Sample::UPLOAD_ERROR_S3_UPLOAD_FAILED
@@ -441,7 +446,12 @@ class Sample < ApplicationRecord
     save!
   rescue StandardError => e
     Rails.logger.info(e)
-    LogUtil.log_err("SampleUploadFailedEvent: #{e}")
+    LogUtil.log_error(
+      "SampleUploadFailedEvent: #{e}",
+      exception: e,
+      basespace_dataset_id: basespace_dataset_id,
+      basespace_access_token: basespace_access_token
+    )
 
     self.status = STATUS_CHECKED
     self.upload_error = Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED
@@ -553,7 +563,7 @@ class Sample < ApplicationRecord
         end
       end
     rescue StandardError
-      LogUtil.log_err("Failed to concatenate input parts for sample #{id}")
+      LogUtil.log_error("Failed to concatenate input parts for sample #{id}", sample_id: id)
     end
   end
 
@@ -752,8 +762,7 @@ class Sample < ApplicationRecord
     pr.alignment_config ||= AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
     pr.save!
   rescue StandardError => err
-    LogUtil.log_err("Error saving pipeline run: #{err.inspect}")
-    LogUtil.log_backtrace(err)
+    LogUtil.log_error("Error saving pipeline run: #{err.inspect}", exception: err)
     # This may cause a message to be shown to the user on the sample page.
     # This may cause a message to be shown to the user on the sample page.
     # See app/assets/src/components/utils/sample.js

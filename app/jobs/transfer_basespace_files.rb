@@ -33,7 +33,13 @@ class TransferBasespaceFiles
       BasespaceHelper.verify_access_token_revoked(basespace_access_token, sample_id)
     end
   rescue StandardError => err
-    LogUtil.log_err("Error transferring basespace files for sample #{sample_id}. Reason: #{err}")
+    LogUtil.log_error(
+      "Error transferring basespace files for sample #{sample_id}. Reason: #{err}",
+      exception: err,
+      sample_id: sample_id,
+      basespace_dataset_id: basespace_dataset_id,
+      basespace_access_token: basespace_access_token
+    )
     raise err
   end
 end

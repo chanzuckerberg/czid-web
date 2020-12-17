@@ -22,8 +22,12 @@ module StringUtil
     param_shell[:only_path] = true
     return Rails.application.routes.url_for(param_shell)
   rescue ActionController::RoutingError, ActionController::UnknownHttpMethod => err
-    Rails.logger.error(ErrorHelper::FrontendMetricErrors.invalid_route(url, method))
-    LogUtil.log_backtrace(err)
+    LogUtil.log_error(
+      ErrorHelper::FrontendMetricErrors.invalid_route(url, method),
+      exception: err,
+      url: url,
+      method: method
+    )
     raise err
   end
 end

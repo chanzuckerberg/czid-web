@@ -184,7 +184,12 @@ class PipelineRunStage < ApplicationRecord
       # this logic will be replaced soon by step functions async notifications (IDSEQ-2310)
 
       if !id || !pipeline_run.sfn_execution_arn
-        LogUtil.log_err("Invalid precondition for PipelineRunStage.update_job_status step_function #{id} #{pipeline_run.sfn_execution_arn} #{job_status}.")
+        LogUtil.log_error(
+          "Invalid precondition for PipelineRunStage.update_job_status step_function #{id} #{pipeline_run.sfn_execution_arn} #{job_status}.",
+          step_function_id: id,
+          sfn_execution_arn: pipeline_run.sfn_execution_arn,
+          job_status: job_status
+        )
         return
       end
       self.job_status, self.job_log_id = sfn_info(pipeline_run.sfn_execution_arn, id, step_number)
@@ -193,7 +198,12 @@ class PipelineRunStage < ApplicationRecord
     end
 
     if !id || !started?
-      LogUtil.log_err("Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.")
+      LogUtil.log_error(
+        "Invalid precondition for PipelineRunStage.update_job_status #{id} #{job_id} #{job_status}.",
+        step_function_id: id,
+        job_id: job_id,
+        job_status: job_status
+      )
       return
     end
     check_status_file_and_update(JOB_SUCCEEDED_FILE_SUFFIX, STATUS_SUCCEEDED)

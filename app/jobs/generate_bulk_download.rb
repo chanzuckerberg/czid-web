@@ -6,8 +6,7 @@ class GenerateBulkDownload
   def self.perform(bulk_download_id)
     BulkDownload.find(bulk_download_id).generate_download_file
   rescue StandardError => err
-    LogUtil.log_backtrace(err)
-    LogUtil.log_err("Bulk download generation failed for id #{bulk_download_id}: #{err}")
+    LogUtil.log_error("Bulk download generation failed for id #{bulk_download_id}: #{err}", exception: err, bulk_download_id: bulk_download_id)
     raise err # Raise error in order to fire on_failure resque hook in InstrumentedJob
   end
 end

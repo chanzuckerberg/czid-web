@@ -21,8 +21,11 @@ class MonitorPipelineResults
           Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
           pr.monitor_results
         rescue StandardError => exception
-          LogUtil.log_err("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
-          LogUtil.log_backtrace(exception)
+          LogUtil.log_error(
+            "Failed monitor results for pipeline run #{pr.id}: #{exception.message}",
+            exception: exception,
+            pipeline_run_id: pr.id
+          )
         end
       end
 
@@ -33,8 +36,11 @@ class MonitorPipelineResults
           Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
           pt.monitor_results
         rescue StandardError => exception
-          LogUtil.log_err("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
-          LogUtil.log_backtrace(exception)
+          LogUtil.log_error(
+            "Failed monitor results for phylo_tree #{pt.id}: #{exception.message}",
+            exception: exception,
+            phylo_tree_id: pt.id
+          )
         end
       end
 
@@ -44,15 +50,13 @@ class MonitorPipelineResults
         begin
           MonitorPipelineResults.alert_stalled_uploads!
         rescue StandardError => exception
-          LogUtil.log_err("Failed to alert on stalled uploads: #{exception.message}")
-          LogUtil.log_backtrace(exception)
+          LogUtil.log_error("Failed to alert on stalled uploads: #{exception.message}", exception: exception)
         end
 
         begin
           MonitorPipelineResults.fail_stalled_uploads!
         rescue StandardError => exception
-          LogUtil.log_err("Failed to fail stalled uploads: #{exception.message}")
-          LogUtil.log_backtrace(exception)
+          LogUtil.log_error("Failed to fail stalled uploads: #{exception.message}", exception: exception)
         end
       end
     end

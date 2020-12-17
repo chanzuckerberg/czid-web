@@ -67,8 +67,11 @@ class SnapshotLinksController < ApplicationController
     snapshot_link.save!
     render json: {}, status: :ok
   rescue StandardError => e
-    LogUtil.log_backtrace(e)
-    LogUtil.log_err("Unexpected issue creating snapshot: #{e}")
+    LogUtil.log_error(
+      "Unexpected issue creating snapshot: #{e}",
+      exception: e,
+      project_id: project_id
+    )
     render json: { error: e }, status: :internal_server_error
   end
 
@@ -85,8 +88,11 @@ class SnapshotLinksController < ApplicationController
     @snapshot.destroy!
     render json: { head: :no_content }
   rescue StandardError => e
-    LogUtil.log_backtrace(e)
-    LogUtil.log_err("Unexpected issue deleting snapshot: #{e}")
+    LogUtil.log_error(
+      "Unexpected issue deleting snapshot: #{e}",
+      exception: e,
+      project_id: project_id
+    )
     render json: { error: e }, status: :internal_server_error
   end
 

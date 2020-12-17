@@ -8,7 +8,7 @@ class KickoffPhyloTree
   rescue StandardError
     failure_message = "Batch job submission failed for phylo_tree #{phylo_tree_id}"
     Rails.logger.error(failure_message)
-    LogUtil.log_err(failure_message)
+    LogUtil.log_error(failure_message, phylo_tree_id: phylo_tree_id)
     PhyloTree.find(phylo_tree_id).update(status: PhyloTree::STATUS_FAILED)
     raise # Raise error in order to fire on_failure resque hook in InstrumentedJob
   end

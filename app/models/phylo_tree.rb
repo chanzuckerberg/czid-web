@@ -151,7 +151,12 @@ class PhyloTree < ApplicationRecord
     if job_status == PipelineRunStage::STATUS_FAILED ||
        (job_status == "SUCCEEDED" && !required_outputs.all? { |ro| exists_in_s3?(s3_outputs[ro]["s3_path"]) })
       self.status = STATUS_FAILED
-      LogUtil.log_error("Phylo tree creation failed for #{name} (#{id}). See #{log_url}.")
+      LogUtil.log_error(
+        "Phylo tree creation failed for #{name} (#{id}). See #{log_url}.",
+        phylo_tree_name: name,
+        phylo_tree_id: id,
+        log_url: log_url
+      )
     end
     save
   end
@@ -166,7 +171,11 @@ class PhyloTree < ApplicationRecord
       self.status = STATUS_IN_PROGRESS
     else
       self.status = STATUS_FAILED
-      LogUtil.log_error("Phylo tree failed to kick off for #{name} (#{id}).")
+      LogUtil.log_error(
+        "Phylo tree failed to kick off for #{name} (#{id}).",
+        phylo_tree_name: name,
+        phylo_tree_id: id
+      )
     end
     save
   end

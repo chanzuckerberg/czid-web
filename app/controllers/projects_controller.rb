@@ -574,8 +574,11 @@ class ProjectsController < ApplicationController
                                             reset_url).deliver_now
     end
   rescue StandardError => exception
-    LogUtil.log_err("Failed to send 'new user on project' password instructions to #{email}. #{exception.message}")
-    LogUtil.log_backtrace(exception)
+    LogUtil.log_error(
+      "Failed to send 'new user on project' password instructions to #{email}. #{exception.message}",
+      exception: exception,
+      user_params: user_params
+    )
   end
 
   def shared_project_email_arguments

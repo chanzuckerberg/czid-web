@@ -151,7 +151,11 @@ class PipelineReportService
             lambda.call()
           end
         rescue StandardError => e
-          LogUtil.log_err("Parallel fetch failed")
+          LogUtil.log_error(
+            "Parallel fetch failed",
+            exception: e,
+            pipeline_run_id: @pipeline_run.id
+          )
           raise e
         end
       end

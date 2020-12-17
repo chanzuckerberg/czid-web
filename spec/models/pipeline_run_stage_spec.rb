@@ -18,7 +18,10 @@ RSpec.describe PipelineRunStage, type: :model do
         let(:sfn_execution_arn) {}
 
         it "logs Invalid precondition error" do
-          expect(LogUtil).to receive(:log_err).with(match(/Invalid precondition/))
+          expect(LogUtil).to receive(:log_error).with(
+            match(/Invalid precondition/),
+            anything
+          )
           subject.update_job_status
         end
       end
