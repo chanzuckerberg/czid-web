@@ -1176,8 +1176,8 @@ class PipelineRun < ApplicationRecord
     MetricUtil.put_metric_now("samples.running.run_time", run_time, tags, "gauge")
 
     if alert_sent.zero?
-      # NOTE (2019-08-02): Based on the last 3000 successful samples, only 0.17% took longer than 12 hours.
-      threshold = 12.hours
+      # NOTE (2020-12-16): Based on the last 3000 pipeline runs, only 1 took longer than 18 hours.
+      threshold = 18.hours
       if run_time > threshold
         msg = "LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
           "See: #{status_url}"
