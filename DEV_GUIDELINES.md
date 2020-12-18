@@ -1,4 +1,4 @@
-# IDSeq Frontend Development Guidelines (WIP)
+# IDseq Frontend Development Guidelines (Perpetual WIP)
 
 The goal of this document is to present a set of guidelines, conventions and best practices to develop frontend code for IDseq. It is an ongoing effort as opposed to a thorough document.
 These guidelines should be enforced for any new PRs.
@@ -47,6 +47,10 @@ See [Higher-Order Functions in Lodash](https://blog.pragmatists.com/higher-order
 `lodash/fp` has many useful functions, and you should use them whenever possible to simplify your code.
 
 A good rule of thumb: if you ever find yourself wanting to use a for loop, `lodash/fp` can help.
+
+### New language features
+
+To balance browser compatibility with ease of development, avoid using language features with less than 2 years of major browser support. When in doubt, check a site like https://caniuse.com/ in the "Date relative" view for Chrome/Safari/Firefox/Edge.
 
 ## Imports
 
@@ -335,3 +339,19 @@ class NoDepthDataError < StandardError
   end
 end
 ```
+
+## Feature flags
+
+- `idseq-web` uses a lightweight custom feature flag system. Feature flags are stored in a string-array on the `allowed_features` column of `Users`.
+- Not every change needs a feature flag, but it is encouraged if you are less sure about a new refactor or need to decouple feature release from code deployment for testing.
+- We use feature flags instead of long lived feature branches to promote smaller diffs, continuous code integration, continuous QA testing, and dynamic changes without re-deploys.
+
+### General lifecycle
+
+1. Add a code path checking for the presence of the feature, e.g. `allowedFeatures.includes("feature_name")`.
+1. Add the flag to your account in development with `user.add_allowed_feature("feature_name")` where `user` is the ActiveRecord object for your user.
+1. When it's ready for QA testing, add the feature flag to the QA tester accounts in `staging` and let them know how to test it.
+1. When it's ready for dogfooding, add the feature flag to all admin accounts (`.where(role: 1)`) in `staging` and `prod`.
+1. When it's ready for beta testing or UXR testing, add the feature flag to beta users in `prod`.
+1. When it's ready for launch, run `rake features:launch[<feature_name>]` in `prod`. It will then be available for all users.
+1. A month or more after the launch, delete the feature flag from the code to remove the obsolete code path.
