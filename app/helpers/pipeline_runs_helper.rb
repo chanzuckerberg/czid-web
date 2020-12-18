@@ -245,7 +245,7 @@ module PipelineRunsHelper
     "pip install --upgrade git+git://github.com/chanzuckerberg/s3mi.git; " \
     "cd /mnt; rm -rf idseq-dag idseq/results; df -h; " \
     "git clone https://github.com/chanzuckerberg/idseq-workflows.git; " \
-    "cd short-read-mngs/idseq-dag; " \
+    "cd idseq-workflows/short-read-mngs/idseq-dag; " \
     "git checkout #{Shellwords.escape(commit_or_branch)}; " \
     "pip3 install -e ."
   end
