@@ -229,7 +229,7 @@ class PhyloTreesController < ApplicationController
     name = sanitize_title_name(params[:name])
     tax_name = params[:taxName]
     dag_branch = if current_user.admin?
-                   params[:dagBranch] || "master"
+                   params[:dagBranch] || "main"
                  else
                    "master"
                  end
