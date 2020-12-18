@@ -231,7 +231,7 @@ class PhyloTreesController < ApplicationController
     dag_branch = if current_user.admin?
                    params[:dagBranch] || "main"
                  else
-                   "master"
+                   "main"
                  end
     dag_vars = params[:dagVars] if current_user.admin?
 
