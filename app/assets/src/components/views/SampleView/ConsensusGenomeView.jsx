@@ -1,4 +1,4 @@
-import { camelCase, isEmpty } from "lodash/fp";
+import { camelCase, getOr, isEmpty } from "lodash/fp";
 import React from "react";
 import memoize from "memoize-one";
 import cx from "classnames";
@@ -225,7 +225,7 @@ class ConsensusGenomeView extends React.Component {
             </ExternalLink>
           </div>
         }
-        inverted
+        inverted={false}
         content={data.taxon_info.taxon_name}
       />
     );
@@ -239,17 +239,13 @@ class ConsensusGenomeView extends React.Component {
   };
 
   renderCoverageView = () => {
-    const helpText = (
-      <React.Fragment>
-        These metrics and chart help determine the coverage of the reference
-        genome.{" "}
-        <ExternalLink
-          href={CONSENSUS_GENOME_DOC_LINK}
-          analyticsEventName={"ConsensusGenomeView_help-link_clicked"}
-        >
-          Learn more.
-        </ExternalLink>
-      </React.Fragment>
+    const helpLink = (
+      <ExternalLink
+        href={CONSENSUS_GENOME_DOC_LINK}
+        analyticsEventName={"ConsensusGenomeView_help-link_clicked"}
+      >
+        Learn more.
+      </ExternalLink>
     );
 
     const metrics = this.getAccessionMetrics();
@@ -258,13 +254,16 @@ class ConsensusGenomeView extends React.Component {
       <div className={cs.section}>
         <div className={cs.title}>
           How good is the coverage?
-          <HelpIcon
-            text={helpText}
-            className={cs.helpIcon}
-            analyticsEventName={
-              "ConsensusGenomeView_coverage-viz-help-icon_hovered"
-            }
-          />
+          {this.renderHelpIcon({
+            text:
+              "These metrics and chart help determine the coverage of the reference genome.",
+            link: helpLink,
+            analytics: {
+              analyticsEventName:
+                "ConsensusGenomeView_quality-metrics-help-icon_hovered",
+            },
+            iconStyle: cs.lower,
+          })}
         </div>
         <div className={cx(cs.coverageContainer, cs.raisedContainer)}>
           <div className={cs.metrics}>
@@ -275,7 +274,7 @@ class ConsensusGenomeView extends React.Component {
                     <div className={cs.label}>
                       <BasicPopup
                         trigger={<div>{metric.label}</div>}
-                        inverted
+                        inverted={false}
                         content={metric.tooltip}
                       />
                     </div>
@@ -301,36 +300,56 @@ class ConsensusGenomeView extends React.Component {
     );
   };
 
+  renderHelpIcon = ({
+    text,
+    link = null,
+    analytics = null,
+    iconStyle = null,
+  }) => {
+    return (
+      <HelpIcon
+        text={
+          <>
+            {text} {link}
+          </>
+        }
+        className={cx(cs.helpIcon, iconStyle && iconStyle)}
+        analyticsEventName={getOr(undefined, "analyticsEventName", analytics)}
+        analyticsEventData={getOr(undefined, "analyticsEventData", analytics)}
+      />
+    );
+  };
+
   renderMetricsTable = () => {
     const { data } = this.state;
     const metricsData = {
       taxon_name: data.taxon_info.taxon_name,
       ...data.quality_metrics,
     };
-    const helpText = (
-      <React.Fragment>
-        These metrics help determine the quality of the reference genome.{" "}
-        <ExternalLink
-          href={CONSENSUS_GENOME_DOC_LINK}
-          analyticsEventName={
-            "ConsensusGenomeView_quality-metrics-help-link_clicked"
-          }
-        >
-          Learn more.
-        </ExternalLink>
-      </React.Fragment>
+    const helpLink = (
+      <ExternalLink
+        href={CONSENSUS_GENOME_DOC_LINK}
+        analyticsEventName={
+          "ConsensusGenomeView_quality-metrics-help-link_clicked"
+        }
+      >
+        Learn more.
+      </ExternalLink>
     );
     return (
       <div className={cs.section}>
         <div className={cs.title}>
           Is my consensus genome complete?
-          <HelpIcon
-            text={helpText}
-            className={cs.helpIcon}
-            analyticsEventName={
-              "ConsensusGenomeView_quality-metrics-help-icon_hovered"
-            }
-          />
+          {this.renderHelpIcon({
+            text:
+              "These metrics help determine the quality of the reference genome.",
+            link: helpLink,
+            analytics: {
+              analyticsEventName:
+                "ConsensusGenomeView_quality-metrics-help-icon_hovered",
+            },
+            iconStyle: cs.lower,
+          })}
         </div>
         <div className={cx(cs.metricsTable, cs.raisedContainer)}>
           <Table

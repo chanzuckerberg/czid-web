@@ -1278,11 +1278,11 @@ export default class SampleView extends React.Component {
     const { categories, readSpecificity, taxon, thresholds } = selectedOptions;
 
     const hasCategoryFilters =
-      (categories.categories?.length > 0 ?? false) ||
-      (categories.subcategories?.Viruses?.length > 0 ?? false);
+      !isEmpty(getOr([], "categories", categories)) ||
+      !isEmpty(getOr([], "subcategories.Viruses", categories));
     const hasReadSpecificityFilters = readSpecificity !== 0;
-    const hasTaxonFilter = taxon ?? false;
-    const hasThresholdFilters = thresholds.length > 0;
+    const hasTaxonFilter = !isEmpty(taxon);
+    const hasThresholdFilters = !isEmpty(thresholds);
 
     return (
       hasCategoryFilters ||

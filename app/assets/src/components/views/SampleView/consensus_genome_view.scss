@@ -16,6 +16,10 @@
         display: inline;
         margin-left: $space-xxs;
 
+        &.lower {
+          vertical-align: -$space-xxxxs;
+        }
+
         svg:hover {
           fill: $primary;
         }
@@ -126,6 +130,7 @@
         .value {
           flex: 1 1 0;
           min-width: 0;
+          cursor: default;
         }
 
         .label {

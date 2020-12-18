@@ -622,7 +622,7 @@ class DiscoveryView extends React.Component {
           sampleCountByWorkflow: sampleStats.countByWorkflow,
           sampleCount: sampleStats.count,
           projectCount: sampleStats.projectCount,
-          visualizationCount: visualizations?.length ?? 0,
+          visualizationCount: visualizations.length || 0,
         },
       },
       () => {
@@ -1535,7 +1535,8 @@ class DiscoveryView extends React.Component {
                 ref={projectsView => (this.projectsView = projectsView)}
               />
             </div>
-            {!projects?.isLoading() &&
+            {projects &&
+              !projects.isLoading() &&
               currentDisplay === "table" &&
               filteredProjectCount === 0 &&
               this.renderNoSearchResultsBanner("projects")}
@@ -1545,7 +1546,8 @@ class DiscoveryView extends React.Component {
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               {currentDisplay !== "map" && this.renderWorkflowTabs()}
-              {!userDataCounts?.sampleCountByWorkflow[workflow] ? (
+              {userDataCounts &&
+              !userDataCounts.sampleCountByWorkflow[workflow] ? (
                 this.renderNoDataWorkflowBanner(workflow)
               ) : (
                 <SamplesView
@@ -1595,7 +1597,8 @@ class DiscoveryView extends React.Component {
             <div className={cs.dataContainer}>
               <VisualizationsView visualizations={visualizations} />
             </div>
-            {!visualizations?.length &&
+            {visualizations &&
+              !visualizations.length &&
               !visualizations.isLoading() &&
               currentDisplay === "table" &&
               this.renderNoSearchResultsBanner("visualizations")}

@@ -946,7 +946,7 @@ export default class Heatmap {
           { columnIndex: column.columnIndex, rowIndex: row.rowIndex },
           this.filteredCells
         );
-        csvRows[row.pos].push(cell.value ?? 0);
+        csvRows[row.pos].push(cell.value || 0);
       });
     });
 
