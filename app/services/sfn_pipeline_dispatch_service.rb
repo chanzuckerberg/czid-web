@@ -52,10 +52,6 @@ class SfnPipelineDispatchService
 
   private
 
-  def stage_deployment_name
-    return ENV_TO_DEPLOYMENT_STAGE_NAMES[Rails.env] || Rails.env
-  end
-
   def generate_wdl_input
     sfn_pipeline_input_json = {
       dag_branch: @pipeline_run.pipeline_branch != "master" ? @pipeline_run.pipeline_branch : nil,

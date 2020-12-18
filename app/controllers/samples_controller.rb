@@ -740,19 +740,6 @@ class SamplesController < ApplicationController
     MetricUtil.log_analytics_event("SamplesController_sample_viewed", current_user, { sample_id: @sample&.id }, request)
   end
 
-  # TODO: (gdingle): remove this if we are not going to allow saving reports as visualizations
-  def last_saved_visualization
-    valid_viz_types = ['tree', 'table'] # See PipelineSampleReport.jsx
-    Sample
-      .includes(:visualizations)
-      .find(@sample.id)
-      .visualizations
-      .where(user: current_user)
-      .where('visualizations.visualization_type IN (?)', valid_viz_types)
-      .order('visualizations.updated_at desc')
-      .limit(1)[0]
-  end
-
   def samples_going_public
     ahead = (params[:ahead] || 10).to_i
     behind = params[:behind].to_i

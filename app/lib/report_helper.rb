@@ -145,23 +145,6 @@ module ReportHelper
     end
   end
 
-  def self.threshold_param?(param_key)
-    parts = param_key.to_s.split "_"
-    (parts.length == 3 && parts[0] == 'threshold' && COUNT_TYPES.include?(parts[1].upcase) && METRICS.include?(parts[2]))
-  end
-
-  def self.decode_thresholds(params)
-    thresholds = {}
-    COUNT_TYPES.each do |count_type|
-      thresholds[count_type] = {}
-      METRICS.each do |metric|
-        param_key = "threshold_#{count_type.downcase}_#{metric}".to_sym
-        thresholds[count_type][metric] = params[param_key]
-      end
-    end
-    thresholds
-  end
-
   def self.decode_sort_by(sort_by)
     return nil unless sort_by
 
@@ -184,48 +167,10 @@ module ReportHelper
     }
   end
 
-  def self.number_or_nil(string)
-    Float(string || '')
-  rescue ArgumentError
-    nil
-  end
-
   ZERO_ONE = {
     '0' => 0,
     '1' => 1,
   }.freeze
-
-  def self.valid_arg_value(name, value, all_cats)
-    # return appropriately validated value (based on name), or nil
-    return nil unless value
-
-    if name == :sort_by
-      value = nil unless decode_sort_by(value)
-    elsif name == :excluded_categories
-      value = validated_excluded_categories_or_nil(value, all_cats)
-    elsif name == :selected_genus
-      # This gets validated later in taxonomy_details()
-      value = value
-    elsif name == :disable_filters
-      value = ZERO_ONE[value]
-    else
-      value = nil unless threshold_param?(name)
-      value = number_or_nil(value)
-    end
-    value
-  end
-
-  def self.decode_excluded_categories(param_str)
-    Set.new(param_str.split(",").map { |x| x.strip.capitalize })
-  end
-
-  def self.validated_excluded_categories_or_nil(str, all_cats)
-    all_categories = Set.new(all_cats.map { |x| x['name'] })
-    all_categories.add('None')
-    excluded_categories = all_categories & decode_excluded_categories(str)
-    validated_str = Array(excluded_categories).map(&:capitalize).join(',')
-    !validated_str.empty? ? validated_str : nil
-  end
 
   def self.fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
@@ -520,40 +465,6 @@ module ReportHelper
       sort_key_3d = [sort_key_genus, sort_key_genus_om, sort_key_genus_alt, sort_key_genus_om_alt, genus_id, genus_priority, 0, 0, 0, 0]
     end
     sort_by[:direction] == 'lowest' ? sort_key_3d : negative(sort_key_3d)
-  end
-
-  def self.filter_rows!(rows, thresholds, excluded_categories)
-    # filter out rows that are below the thresholds
-    # but make sure not to delete any genus row for which some species
-    # passes the filters
-    to_delete = Set.new
-    to_keep = Set.new
-    rows.each do |tax_info|
-      should_delete = false
-      # if any metric is below threshold in the specified type, delete
-      METRICS.any? do |metric|
-        COUNT_TYPES.any? do |count_type|
-          should_delete = !(tax_info[count_type][metric]) || (thresholds[count_type][metric] && tax_info[count_type][metric] < thresholds[count_type][metric])
-          # aggregatescore is null for genera, and thus not considered in filtering genera
-        end
-      end
-      if tax_info['tax_id'] != TaxonLineage::MISSING_GENUS_ID && tax_info['tax_id'] != TaxonLineage::BLACKLIST_GENUS_ID
-        if excluded_categories.include? tax_info['category_name']
-          # The only way a species and its genus can have different category
-          # names:  If genus_id == MISSING_GENUS_ID or BLACKLIST_GENUS_ID.
-          should_delete = true
-        end
-      end
-      if should_delete
-        to_delete.add(tax_info['tax_id'])
-      else
-        # if we are not deleting it, make sure to keep around its genus
-        to_keep.add(tax_info['genus_taxid'])
-      end
-    end
-    to_delete.subtract(to_keep)
-    rows.keep_if { |tax_info| !to_delete.include? tax_info['tax_id'] }
-    rows
   end
 
   def self.aggregate_score(genus_info, species_info)

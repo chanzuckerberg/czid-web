@@ -76,19 +76,6 @@ class MetricUtil
     )
   end
 
-  # Log analytics from a batch of new samples from an upload session
-  def self.log_upload_batch_analytics(samples, user, client, request = nil)
-    # Send off an event for each project and host genome combo
-    samples.group_by { |s| [s.project_id, s.host_genome_id] }.each do |(project_id, host_genome_id), entries|
-      log_analytics_event(
-        ANALYTICS_EVENT_NAMES[:sample_upload_batch_created],
-        user,
-        { count: entries.count, project_id: project_id, host_genome_id: host_genome_id, client: client },
-        request
-      )
-    end
-  end
-
   def self.post_to_airtable(table_name, data)
     # Reference: https://airtable.com/api
     if ENV["AIRTABLE_BASE_ID"] && ENV["AIRTABLE_API_KEY"]

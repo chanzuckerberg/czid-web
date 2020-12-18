@@ -123,10 +123,6 @@ class PipelineRunStage < ApplicationRecord
     failed? || succeeded?
   end
 
-  def checked?
-    job_status == STATUS_CHECKED
-  end
-
   def redacted_dag_json
     # redact any s3 paths
     dag_json.gsub(%r{(\"s3://).*(\")}, '"s3://..."')
@@ -161,18 +157,6 @@ class PipelineRunStage < ApplicationRecord
     elsif started?
       Time.current - created_at
     end
-  end
-
-  def add_failed_job
-    existing_failed_jobs = failed_jobs ? "#{failed_jobs}, " : ""
-    new_failed_job = "[#{job_id}, #{job_log_id}]"
-    self.failed_jobs = existing_failed_jobs + new_failed_job
-  end
-
-  def count_failed_tries
-    return 0 if failed_jobs.blank?
-
-    1 + failed_jobs.count(",")
   end
 
   def due_for_aegea_check?
@@ -221,10 +205,6 @@ class PipelineRunStage < ApplicationRecord
 
     self.job_status, self.job_log_id, self.job_description = job_info(job_id, id)
     save
-  end
-
-  def terminate_job
-    _stdout, _stderr, _status = Open3.capture3("aegea", "batch", "terminate", job_id.to_s)
   end
 
   def log_url

@@ -104,57 +104,6 @@ class TaxonLineage < ApplicationRecord
     self["#{level_str}_name"]
   end
 
-  def self.get_genus_info(genus_tax_id)
-    r = find_by(genus_taxid: genus_tax_id)
-    return { query: r.genus_name, tax_id: genus_tax_id } if r
-  end
-
-  def self.fill_lineage_details(tax_map, pipeline_run_id)
-    t2 = Time.now.to_f
-
-    # Set lineage info from the first positive tax_id of the species, genus, or family levels.
-    # Preserve names of the negative 'non-specific' nodes.
-    # Used for the tree view and sets appropriate lineage info at each node.
-    lineage_by_taxid = fetch_lineage_by_taxid(tax_map, pipeline_run_id)
-
-    # Make a new hash with 'species_taxid', 'genus_taxid', etc.
-    missing_vals = Hash[MISSING_LINEAGE_ID.map { |k, v| [k.to_s + "_taxid", v] }]
-
-    name_columns = column_names.select { |cn| cn.include?("_name") }
-    tax_map.each do |tax|
-      # Grab the appropriate lineage info by the first positive tax level
-      lineage_id = most_specific_positive_id(tax)
-      tax['lineage'] = if lineage_id
-                         lineage_by_taxid[lineage_id] || missing_vals.dup
-                       else
-                         missing_vals.dup
-                       end
-      tax['lineage']['taxid'] = tax['tax_id']
-      tax['lineage']['species_taxid'] = tax['species_taxid']
-      tax['lineage']['genus_taxid'] = tax['genus_taxid']
-      tax['lineage']['family_taxid'] = tax['family_taxid']
-
-      # Set the name
-      name = level_name(tax['tax_level']) + "_name"
-      tax['lineage'][name] = tax['name']
-
-      # Tag pathogens
-      pathogen_tags = []
-      PRIORITY_PATHOGENS.each do |category, pathogen_list|
-        name_columns.each do |col|
-          pathogen_tags |= [category] if pathogen_list.include?(tax['lineage'][col])
-        end
-      end
-      best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
-      tax['pathogenTag'] = best_tag
-    end
-
-    t3 = Time.now.to_f
-    Rails.logger.info "tax_map took #{(t3 - t2).round(2)}s"
-
-    tax_map
-  end
-
   def to_a
     TaxonLineage.names_a.map { |col| self[col] }
   end
@@ -166,14 +115,6 @@ class TaxonLineage < ApplicationRecord
 
   def self.null_array
     TaxonLineage.column_defaults.values_at(*TaxonLineage.names_a)
-  end
-
-  def self.most_specific_positive_id(tax)
-    targets = [tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
-    targets.each do |tentative_id|
-      return tentative_id if tentative_id && tentative_id > 0
-    end
-    nil
   end
 
   def self.level_name(tax_level)

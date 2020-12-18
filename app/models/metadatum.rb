@@ -372,21 +372,6 @@ class Metadatum < ApplicationRecord
     ""
   end
 
-  def self.validated_value_multiget(metadata)
-    metadata_fields = MetadataField.where(id: metadata.pluck(:metadata_field_id)).index_by(&:id)
-    validated_values = {}
-    metadata.each do |md|
-      mdf = metadata_fields[md.metadata_field_id]
-      if mdf
-        base = MetadataField.convert_type_to_string(mdf.base_type)
-        validated_values[md.id] = md["#{base}_validated_value"]
-      else
-        validated_values[md.id] = ""
-      end
-    end
-    validated_values
-  end
-
   # CSV-friendly string value
   def csv_compatible_value
     # Special case for Location objects

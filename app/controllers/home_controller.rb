@@ -130,10 +130,6 @@ class HomeController < ApplicationController
     params.require(:signUp).permit(:firstName, :lastName, :email, :institution, :usage)
   end
 
-  def landing_params
-    params.permit(:show_bulletin)
-  end
-
   def send_sign_up_to_airtable(params)
     table_name = "Landing Page Form"
     data = {

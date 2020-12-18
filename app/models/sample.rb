@@ -301,10 +301,6 @@ class Sample < ApplicationRecord
     file_list
   end
 
-  def fastqs_folder_files
-    list_outputs(sample_input_s3_path)
-  end
-
   def initiate_input_file_upload
     # The reason why we don't check input_files.first.source_type == InputFile::SOURCE_TYPE_BASESPACE here is:
     # We don't yet have the input files at this point.
@@ -471,23 +467,12 @@ class Sample < ApplicationRecord
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/fastqs"
   end
 
-  def filter_host_flag
-    host_genome && host_genome.name == HostGenome::NO_HOST_NAME ? 0 : 1
-  end
-
   def skip_deutero_filter_flag
     !host_genome || host_genome.skip_deutero_filter == 1 ? 1 : 0
   end
 
   def sample_output_s3_path
     "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample_path}/results"
-  end
-
-  def sample_alignment_output_s3_path
-    pr = first_pipeline_run
-    return pr.alignment_output_s3_path
-  rescue StandardError
-    return sample_output_s3_path
   end
 
   def sample_host_filter_output_s3_path

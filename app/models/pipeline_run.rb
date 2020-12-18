@@ -724,10 +724,6 @@ class PipelineRun < ApplicationRecord
     update(amr_counts_attributes: amr_counts_array)
   end
 
-  def taxon_counts_json_name
-    OUTPUT_JSON_NAME
-  end
-
   def invalid_family_call?(tcnt)
     # TODO:  Better family support.
     tcnt['family_taxid'].to_i < TaxonLineage::INVALID_CALL_BASE_ID
@@ -1321,10 +1317,6 @@ class PipelineRun < ApplicationRecord
 
   def local_amr_full_results_path
     "#{LOCAL_AMR_FULL_RESULTS_PATH}/#{id}"
-  end
-
-  def local_amr_drug_summary_path
-    "#{LOCAL_AMR_DRUG_SUMMARY_PATH}/#{id}"
   end
 
   def self.download_file_with_retries(s3_path, destination, max_tries, dest_is_dir = true)

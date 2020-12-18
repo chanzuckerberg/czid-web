@@ -486,10 +486,6 @@ module HeatmapHelper
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES }
   end
 
-  def self.only_genus_level_counts!(taxon_counts_2d)
-    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS }
-  end
-
   # This query:
   # 1) assigns a rank to each row within a pipeline run
   # 2) returns rows ranking <= num_results
