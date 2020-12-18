@@ -220,7 +220,11 @@ module PipelineRunsHelper
 
     whole_version = stdout.strip
     whole_version =~ /(^\d+\.\d+).*/
-    Regexp.last_match(1)
+    # since we are externally managing the pipeline version for the phylo tree it's
+    #   version is `EXTERNALLY_MANAGED` this doesn't match the regex but we still
+    #   want to use it for results paths. This function will fall back to the full
+    #   string for the version if the pattern doesn't match to handle this case.
+    Regexp.last_match(1) || whole_version
   end
 
   def upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
