@@ -7,7 +7,7 @@ jobs:
   ruby_test:
     name: Ruby Test
     runs-on: ubuntu-latest
-    container: ruby:2.5
+    container: ruby:2.7
     env:
       # This is a dummy secret, do not use it for anything
       AUTH_TOKEN_SECRET: 'GYbvZ9/uHy75wWWK4BO3jZGJ0noacv7GbTJI96wZgWQ='

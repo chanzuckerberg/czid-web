@@ -15,6 +15,7 @@
     <strong>Sample owner:</strong>
     <%= @sample.user.name %>
     (<%= @sample.user.email %>)
+    (ID: <%= @sample.user.id %>)
   </p>
 <% end %>
 <% if @sample.upload_error %>
