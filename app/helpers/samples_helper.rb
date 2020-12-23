@@ -37,7 +37,7 @@ module SamplesHelper
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
                     quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup reads_after_idseq_dedup
-                    host_genome notes
+                    host_organism notes
                     insert_size_median insert_size_mode insert_size_median_absolute_deviation insert_size_min insert_size_max insert_size_mean insert_size_standard_deviation insert_size_read_pairs]
 
     if include_all_metadata
@@ -77,7 +77,7 @@ module SamplesHelper
                         # reads_after_cdhitdup required for backwards compatibility
                         reads_after_cdhitdup: (derived_output[:summary_stats] || {})[:reads_after_cdhitdup] || '',
                         reads_after_idseq_dedup: (derived_output[:summary_stats] || {})[:reads_after_idseq_dedup] || '',
-                        host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
+                        host_organism: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
                         notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '',
                         insert_size_median: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.median ? pipeline_run.insert_size_metric_set.median : '',
                         insert_size_mode: pipeline_run && pipeline_run.insert_size_metric_set && pipeline_run.insert_size_metric_set.mode ? pipeline_run.insert_size_metric_set.mode : '',
