@@ -169,6 +169,8 @@
   .icon {
     flex: 0 0 auto;
     margin-right: $space-xs;
+    height: $icon-l;
+    vertical-align: middle;
   }
 
   .data {

@@ -11,7 +11,7 @@ import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 import PropTypes from "~/components/utils/propTypes";
-import RemoveIcon from "~/components/ui/icons/RemoveIcon";
+import { IconCloseSmall } from "~ui/icons";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./pipeline_viz.scss";
@@ -330,9 +330,7 @@ class PipelineViz extends React.Component {
       } else {
         if (edgeInfo.from) {
           const prevGraph = this.graphs[edgeInfo.from.stageIndex];
-          const prevEdgeId = `${
-            edgeInfo.from.stepIndex
-          }-${END_NODE_ID}-colored`;
+          const prevEdgeId = `${edgeInfo.from.stepIndex}-${END_NODE_ID}-colored`;
           prevGraph.updateEdges([prevEdgeId], inputColorOptions);
 
           for (
@@ -369,9 +367,7 @@ class PipelineViz extends React.Component {
             edgeIds.push(`${nodeId}-${edgeInfo.to.stepIndex}-colored`);
           } else {
             const nextGraph = this.graphs[edgeInfo.to.stageIndex];
-            const nextGraphEdgeId = `${START_NODE_ID}-${
-              edgeInfo.to.stepIndex
-            }-colored`;
+            const nextGraphEdgeId = `${START_NODE_ID}-${edgeInfo.to.stepIndex}-colored`;
             nextGraph.updateEdges([nextGraphEdgeId], outputColorOptions);
 
             for (
@@ -878,7 +874,7 @@ class PipelineViz extends React.Component {
       <div className={isOpened ? cs.openedStage : cs.hidden}>
         <div className={cs.graphLabel}>
           {stageNameAndIcon}
-          <RemoveIcon
+          <IconCloseSmall
             onClick={withAnalytics(
               () => this.toggleStage(i),
               "PipelineViz_stage-collapse-button_clicked",

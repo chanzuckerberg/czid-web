@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { CheckmarkIcon, IconAlert, IconInfo, RemoveIcon } from "~ui/icons";
+import { IconCheckSmall, IconAlert, IconInfo, IconCloseSmall } from "~ui/icons";
 import cs from "./notification.scss";
 import cx from "classnames";
 
@@ -13,7 +13,7 @@ class Notification extends React.Component {
       case "info":
         return <IconInfo />;
       case "success":
-        return <CheckmarkIcon className={cs.successIcon} />;
+        return <IconCheckSmall className={cs.successIcon} />;
       default:
         break;
     }
@@ -43,7 +43,7 @@ class Notification extends React.Component {
           )}
         </div>
         {onClose && !closeWithDismiss && (
-          <RemoveIcon className={cs.removeIcon} onClick={onClose} />
+          <IconCloseSmall className={cs.removeIcon} onClick={onClose} />
         )}
       </div>
     );

@@ -5,9 +5,12 @@ import { merge, pick } from "lodash/fp";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { humanize } from "~/helpers/strings";
 import { openUrl } from "~utils/links";
-import HeatmapPublic from "~ui/icons/HeatmapPublic";
-import HeatmapPrivate from "~ui/icons/HeatmapPrivate";
-import { IconPhyloTreePrivate, IconPhyloTreePublic } from "~ui/icons";
+import {
+  IconHeatmapPrivate,
+  IconHeatmapPublic,
+  IconPhyloTreePrivate,
+  IconPhyloTreePublic,
+} from "~ui/icons";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
@@ -75,9 +78,9 @@ class VisualizationsView extends React.Component {
     } = visualization;
     if (visualizationType === "heatmap") {
       return publicAccess ? (
-        <HeatmapPublic className={cs.icon} />
+        <IconHeatmapPublic className={cs.icon} />
       ) : (
-        <HeatmapPrivate className={cs.icon} />
+        <IconHeatmapPrivate className={cs.icon} />
       );
     } else if (visualizationType === "phylo_tree") {
       return publicAccess ? (

@@ -3,7 +3,7 @@ import React from "react";
 
 import { withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import InfoCircleIcon from "~ui/icons/InfoCircleIcon";
+import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./map_banner.scss";
 
@@ -44,7 +44,7 @@ class MapBanner extends React.Component {
               size="mini"
               trigger={
                 <span>
-                  <InfoCircleIcon className={cs.infoIcon} />
+                  <IconInfoSmall className={cs.infoIcon} />
                 </span>
               }
             />

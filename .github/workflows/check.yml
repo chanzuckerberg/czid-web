@@ -146,7 +146,7 @@ jobs:
     - name: Lint
       # setup-node automatically creates annotations from this output
       # Use eslint-disable or fix another warning to stay below the max.
-      run: ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --max-warnings 215
+      run: ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --max-warnings 200
 
   python:
     name: Python

@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const InfoPanelIcon = props => {
+const IconInfoPanel = props => {
   return (
     <svg
       className={props.className}
@@ -20,8 +20,8 @@ const InfoPanelIcon = props => {
   );
 };
 
-InfoPanelIcon.propTypes = {
+IconInfoPanel.propTypes = {
   className: PropTypes.string,
 };
 
-export default InfoPanelIcon;
+export default IconInfoPanel;

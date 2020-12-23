@@ -22,7 +22,7 @@ import {
   NEXTCLADE_REFERENCE_TREE_LINK,
 } from "~/components/utils/documentationLinks";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import InfoIconSmall from "~ui/icons/InfoIconSmall";
+import { IconInfoSmall } from "~/components/ui/icons";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
@@ -153,7 +153,7 @@ export default class NextcladeModal extends React.Component {
     return (
       <ColumnHeaderTooltip
         trigger={
-          <InfoIconSmall className={cx(cs.infoIcon, iconStyle && iconStyle)} />
+          <IconInfoSmall className={cx(cs.infoIcon, iconStyle && iconStyle)} />
         }
         content={content}
         link={link}

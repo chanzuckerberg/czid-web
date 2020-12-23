@@ -19,14 +19,6 @@
     &.boxed {
       border: $border-gray-medium;
       border-radius: $border-radius-s;
-
-      &.checked {
-        background-color: $primary;
-
-        .icon {
-          color: white;
-        }
-      }
     }
 
     &.checked {

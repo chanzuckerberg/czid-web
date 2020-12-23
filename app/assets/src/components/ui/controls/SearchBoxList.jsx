@@ -1,11 +1,11 @@
-import React from "react";
-import PropTypes from "prop-types";
-import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
-import Input from "~ui/controls/Input";
-import cs from "./search_box_list.scss";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
-import { IconSearch } from "~ui/icons";
+import Input from "~ui/controls/Input";
+import { IconCheckSmall, IconSearch } from "~ui/icons";
+
+import cs from "./search_box_list.scss";
 
 class SearchBoxList extends React.Component {
   constructor(props) {
@@ -117,9 +117,7 @@ class SearchBoxList extends React.Component {
               onClick={() => this.handleOptionClick(option.value)}
             >
               <div className={cs.listCheckmark}>
-                {this.state.selected.has(option.value) && (
-                  <CheckmarkIcon size="small" />
-                )}
+                {this.state.selected.has(option.value) && <IconCheckSmall />}
               </div>
               <div className={cs.listLabel}>{option.label}</div>
               {option.count && (

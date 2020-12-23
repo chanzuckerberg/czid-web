@@ -16,7 +16,7 @@ import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import Toggle from "~ui/controls/Toggle";
 import { Input } from "~ui/controls";
-import InfoIconSmall from "~ui/icons/InfoIconSmall";
+import { IconInfoSmall } from "~/components/ui/icons";
 import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./view_only_link_form.scss";
@@ -215,7 +215,7 @@ class ViewOnlyLinkForm extends React.Component {
             <ColumnHeaderTooltip
               trigger={
                 <span>
-                  <InfoIconSmall className={cs.helpIcon} />
+                  <IconInfoSmall className={cs.helpIcon} />
                 </span>
               }
               content={viewOnlyHelpText}

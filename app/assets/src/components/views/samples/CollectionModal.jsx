@@ -16,7 +16,7 @@ import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
 import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
-import InfoIconSmall from "~ui/icons/InfoIconSmall";
+import { IconInfoSmall } from "~/components/ui/icons";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 
@@ -218,7 +218,7 @@ class CollectionModal extends React.Component {
             <ColumnHeaderTooltip
               trigger={
                 <span>
-                  <InfoIconSmall className={cs.infoIcon} />
+                  <IconInfoSmall className={cs.infoIcon} />
                 </span>
               }
               content="Applied Correction Method is the method used when comparing a chosen set of samples against a background model."

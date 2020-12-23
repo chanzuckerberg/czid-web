@@ -18,7 +18,7 @@ import {
 } from "lodash/fp";
 import InfoBanner from "./InfoBanner";
 import Histogram from "~/components/visualizations/Histogram";
-import InfoIconSmall from "~/components/ui/icons/InfoIconSmall";
+import { IconInfoSmall } from "~/components/ui/icons";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { TooltipVizTable } from "~ui/containers";
@@ -751,7 +751,7 @@ class QualityControl extends React.Component {
                 <ColumnHeaderTooltip
                   trigger={
                     <span>
-                      <InfoIconSmall
+                      <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
@@ -784,7 +784,7 @@ class QualityControl extends React.Component {
                 <ColumnHeaderTooltip
                   trigger={
                     <span>
-                      <InfoIconSmall
+                      <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
@@ -817,7 +817,7 @@ class QualityControl extends React.Component {
                 <ColumnHeaderTooltip
                   trigger={
                     <span>
-                      <InfoIconSmall
+                      <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
@@ -857,7 +857,7 @@ class QualityControl extends React.Component {
                 <ColumnHeaderTooltip
                   trigger={
                     <span>
-                      <InfoIconSmall
+                      <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
@@ -878,7 +878,7 @@ class QualityControl extends React.Component {
                     <ColumnHeaderTooltip
                       trigger={
                         <span>
-                          <InfoIconSmall
+                          <IconInfoSmall
                             className={cs.infoIcon}
                             onMouseOver={() => {
                               logAnalyticsEvent(
@@ -955,7 +955,7 @@ class QualityControl extends React.Component {
                 <ColumnHeaderTooltip
                   trigger={
                     <span>
-                      <InfoIconSmall
+                      <IconInfoSmall
                         className={cs.infoIcon}
                         onMouseOver={() => {
                           logAnalyticsEvent(
@@ -1070,7 +1070,7 @@ class QualityControl extends React.Component {
           <ColumnHeaderTooltip
             trigger={
               <span>
-                <InfoIconSmall className={cs.infoIcon} />
+                <IconInfoSmall className={cs.infoIcon} />
               </span>
             }
             content={content}

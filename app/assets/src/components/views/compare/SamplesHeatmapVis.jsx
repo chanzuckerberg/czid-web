@@ -13,7 +13,7 @@ import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import TaxonSelector from "~/components/common/TaxonSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
-import { IconAlertSmall, RemoveIcon } from "~ui/icons";
+import { IconAlertSmall, IconCloseSmall } from "~ui/icons";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 
 import cs from "./samples_heatmap_vis.scss";
@@ -596,7 +596,7 @@ class SamplesHeatmapVis extends React.Component {
         >
           <div className={cs.bannerText}>
             Hold SHIFT to scroll horizontally and SPACE BAR to pan.
-            <RemoveIcon
+            <IconCloseSmall
               className={cs.removeIcon}
               onClick={this.hideControlsBanner}
             />

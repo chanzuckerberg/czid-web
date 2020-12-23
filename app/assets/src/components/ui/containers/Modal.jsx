@@ -3,7 +3,7 @@ import React from "react";
 import cx from "classnames";
 import { forbidExtraProps } from "airbnb-prop-types";
 import { Modal as SemanticModal } from "semantic-ui-react";
-import RemoveIcon from "../icons/RemoveIcon";
+import { IconCloseSmall } from "~ui/icons";
 import cs from "./modal.scss";
 
 class Modal extends React.Component {
@@ -37,7 +37,10 @@ class Modal extends React.Component {
           <SemanticModal.Header>{this.props.title}</SemanticModal.Header>
         )}
         {this.props.onClose && (
-          <RemoveIcon className={cs.closeIcon} onClick={this.props.onClose} />
+          <IconCloseSmall
+            className={cs.closeIcon}
+            onClick={this.props.onClose}
+          />
         )}
         <SemanticModal.Content>{this.props.children}</SemanticModal.Content>
       </SemanticModal>

@@ -4,7 +4,7 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import RadioButton from "~ui/controls/RadioButton";
 import IconSample from "~ui/icons/IconSample";
-import InfoIconSmall from "~ui/icons/InfoIconSmall";
+import { IconInfoSmall } from "~/components/ui/icons";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
 import PropTypes from "~utils/propTypes";
 import { WORKFLOWS } from "~utils/workflows";
@@ -88,7 +88,7 @@ class WorkflowSelector extends React.Component {
               <ColumnHeaderTooltip
                 trigger={
                   <span>
-                    <InfoIconSmall className={cs.infoIcon} />
+                    <IconInfoSmall className={cs.infoIcon} />
                   </span>
                 }
                 content="Consensus genome aligns short reads to a SARS-CoV-2 reference genome."

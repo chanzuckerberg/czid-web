@@ -14,7 +14,7 @@ import {
 } from "~/components/utils/pipeline_versions";
 import { UserContext } from "~/components/common/UserContext";
 import BasicPopup from "~/components/BasicPopup";
-import ReportInsightIcon from "../report/ReportInsightIcon";
+import { IconInsightSmall } from "~ui/icons";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import PathogenPreview from "~/components/views/report/PathogenPreview";
 import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
@@ -315,7 +315,9 @@ class ReportTable extends React.Component {
     return (
       <div className={cs.annotatedData}>
         <div className={cs.icon}>
-          {rowData.highlighted && <ReportInsightIcon />}
+          {rowData.highlighted && (
+            <IconInsightSmall tooltip="Highest-scoring organisms satisfying certain thresholds" />
+          )}
         </div>
         <div className={cs.data}>
           {TableRenderers.formatNumberWithCommas(Number(cellData).toFixed(0))}

@@ -6,12 +6,12 @@ import { get, find } from "lodash/fp";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import { IconCloseSmall } from "~ui/icons";
 import Input from "~/components/ui/controls/Input";
 import { logAnalyticsEvent } from "~/api/analytics";
 
 import PrimaryButton from "../buttons/PrimaryButton";
 import SecondaryButton from "../buttons/SecondaryButton";
-import RemoveIcon from "../../icons/RemoveIcon";
 import DropdownTrigger from "./common/DropdownTrigger";
 import DropdownLabel from "./common/DropdownLabel";
 import cs from "./threshold_filter_dropdown.scss";
@@ -299,7 +299,7 @@ const ThresholdFilter = ({
       </Grid.Column>
       <Grid.Column width={1}>
         <div onClick={onRemove} className={cs.removeIcon}>
-          <RemoveIcon />
+          <IconCloseSmall />
         </div>
       </Grid.Column>
     </Grid.Row>

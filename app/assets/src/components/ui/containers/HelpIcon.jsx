@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
-import InfoIconSmall from "~ui/icons/InfoIconSmall";
+import { IconInfoSmall } from "~ui/icons";
 import cs from "./help_icon.scss";
 
 class HelpIcon extends React.Component {
@@ -20,7 +20,7 @@ class HelpIcon extends React.Component {
       <BasicPopup
         trigger={
           <div className={className} onMouseEnter={this.handleTriggerEnter}>
-            <InfoIconSmall className={cs.helpIcon} />
+            <IconInfoSmall className={cs.helpIcon} />
           </div>
         }
         hoverable

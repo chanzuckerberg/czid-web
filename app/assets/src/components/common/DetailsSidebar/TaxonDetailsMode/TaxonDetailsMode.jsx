@@ -7,7 +7,7 @@ import Histogram, {
   HISTOGRAM_SCALE,
 } from "~/components/visualizations/Histogram";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import InfoCircleIcon from "~/components/ui/icons/InfoCircleIcon";
+import { IconInfoSmall } from "~ui/icons";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
 import cs from "./taxon_details_mode.scss";
@@ -329,7 +329,7 @@ export default class TaxonDetailsMode extends React.Component {
               <ColumnHeaderTooltip
                 trigger={
                   <span>
-                    <InfoCircleIcon className={cs.infoIcon} />
+                    <IconInfoSmall className={cs.infoIcon} />
                   </span>
                 }
                 content="This chart shows how abundant (rPM) this taxon is in your

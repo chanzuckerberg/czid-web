@@ -24,7 +24,7 @@ import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { getURLParamString } from "~/helpers/url";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import {
-  HeatmapIcon,
+  IconHeatmap,
   IconBackgroundModel,
   IconDownload,
   IconPhyloTree,
@@ -118,7 +118,7 @@ class SamplesView extends React.Component {
       { text: "AMR Heatmap", value: "/amr_heatmap" },
     ];
 
-    const heatmapIcon = <HeatmapIcon className={cs.icon} />;
+    const heatmapIcon = <IconHeatmap className={cs.icon} />;
 
     return selectedSampleIds.size < 2 ? (
       <ToolbarIcon

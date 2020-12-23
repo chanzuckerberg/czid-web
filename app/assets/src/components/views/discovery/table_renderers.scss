@@ -67,7 +67,9 @@
 
 .icon {
   fill: $primary;
-  width: 36px;
+  height: 100%;
+  justify-content: center;
+  width: $icon-xl;
 }
 
 .iconSample {

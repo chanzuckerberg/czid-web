@@ -10,7 +10,7 @@ import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { IconAlert, LogoReversed, RemoveIcon } from "~ui/icons";
+import { IconAlert, LogoReversed, IconCloseSmall } from "~ui/icons";
 import {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
@@ -200,7 +200,10 @@ const AnnouncementBanner = ({ onClose }) => {
           </span>
         }
       />
-      <RemoveIcon className={cs.close} onClick={() => onClose && onClose()} />
+      <IconCloseSmall
+        className={cs.close}
+        onClick={() => onClose && onClose()}
+      />
     </div>
   );
 };

@@ -4,7 +4,7 @@ import cx from "classnames";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
-import CopyIcon from "~ui/icons/CopyIcon";
+import { IconCopySmall } from "~ui/icons";
 import BasicPopup from "~/components/BasicPopup";
 import { withAnalytics } from "~/api/analytics";
 
@@ -90,7 +90,7 @@ export default class AdvancedDownloadTab extends React.Component {
         onMouseLeave={this.resetTooltip}
       >
         <div className={cs.command}>{this.getCLICommand()}</div>
-        <CopyIcon className={cs.icon} />
+        <IconCopySmall className={cs.icon} />
       </div>
     );
 

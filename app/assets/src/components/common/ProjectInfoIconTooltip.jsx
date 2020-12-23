@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import InfoIconSmall from "~ui/icons/InfoIconSmall";
+import { IconInfoSmall } from "~ui/icons";
 
 import cs from "./project_info_icon_tooltip.scss";
 
@@ -16,7 +16,7 @@ const ProjectInfoIconTooltip = props => {
       className={cs.projectInfoIconTooltip} // Manually sets width of tooltip to 300px
       trigger={
         <span className={cs.centerSpan}>
-          <InfoIconSmall className={cs.projectInfoIcon} />
+          <IconInfoSmall className={cs.projectInfoIcon} />
         </span>
       }
       content={description}

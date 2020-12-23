@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import BareDropdown from "../BareDropdown";
-import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
+import { IconCheckSmall } from "~ui/icons";
 import cs from "./checkbox_item.scss";
 import cx from "classnames";
 
@@ -20,7 +20,7 @@ const CheckboxItem = ({ value, label, checked, onOptionClick, boxed }) => (
           boxed && cs.boxed
         )}
       >
-        <CheckmarkIcon size="small" className={cs.icon} />
+        <IconCheckSmall className={cs.icon} />
       </div>
       <div className={cs.listLabel}>{label}</div>
     </div>

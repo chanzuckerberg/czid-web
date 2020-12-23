@@ -2,8 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import cx from "classnames";
 
-import InfoCircleIcon from "~/components/ui/icons/InfoCircleIcon";
-import { IconLoading, IconSuccessSmall } from "~ui/icons";
+import { IconLoading, IconSuccessSmall, IconInfoSmall } from "~ui/icons";
 
 import cs from "./pipeline_viz.scss";
 
@@ -15,10 +14,10 @@ const PipelineVizStatusIcon = ({ type, className }) => {
       return <IconSuccessSmall className={cx(className, cs.finishedIcon)} />;
     case "pipelineErrored":
       return (
-        <InfoCircleIcon className={cx(className, cs.pipelineErroredIcon)} />
+        <IconInfoSmall className={cx(className, cs.pipelineErroredIcon)} />
       );
     case "userErrored":
-      return <InfoCircleIcon className={cx(className, cs.userErroredIcon)} />;
+      return <IconInfoSmall className={cx(className, cs.userErroredIcon)} />;
     default:
       return null;
   }

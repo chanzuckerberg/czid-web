@@ -9,7 +9,7 @@ import { withAnalytics } from "~/api/analytics";
 import { TooltipVizTable } from "~ui/containers";
 import BasicPopup from "~/components/BasicPopup";
 import GenomeViz from "~/components/visualizations/GenomeViz";
-import { CopyIcon, IconDownload } from "~ui/icons";
+import { IconCopySmall, IconDownload } from "~ui/icons";
 import { getURLParamString } from "~/helpers/url";
 import { getContigsSequencesByByteranges } from "~/api";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -236,7 +236,7 @@ export default class HitGroupViz extends React.Component {
         <BasicPopup
           trigger={
             <div
-              className={cx(cs.icon, cs.copyIcon)}
+              className={cx(cs.icon)}
               onClick={withAnalytics(
                 this.handleContigCopy,
                 "HitGroupViz_contig-copy-button_clicked",
@@ -254,7 +254,7 @@ export default class HitGroupViz extends React.Component {
               )}
               onMouseEnter={this.restoreCopyIconMessage}
             >
-              <CopyIcon />
+              <IconCopySmall />
             </div>
           }
           inverted
