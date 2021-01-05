@@ -588,10 +588,15 @@ export default class Heatmap {
       this.options.marginTop,
       Math.max(deltaY + gCurrentTranslate[1], yScrollMax)
     );
-    this.g
-      .transition()
-      .duration(transition ? this.options.transitionDuration : 0)
-      .attr("transform", `translate(${[dx, dy]})`);
+
+    if (transition) {
+      this.g
+        .transition()
+        .duration(this.options.transitionDuration)
+        .attr("transform", `translate(${[dx, dy]})`);
+    } else {
+      this.g.attr("transform", `translate(${[dx, dy]})`);
+    }
 
     // Translating the row labels in the opposite x direction of the svg.
     let rowLabelsCurrent = d3.transform(this.gRowLabels.attr("transform"))
@@ -1451,7 +1456,7 @@ export default class Heatmap {
       .append("rect")
       .attr("class", cs.hoverTarget)
       .attr("x", -this.options.marginLeft)
-      .attr("y", 0)
+      .attr("y", -1)
       .attr("width", d => {
         const xOffset = this.getColumnMetadataLabelOffset(d);
         return this.rowLabelsWidth + this.options.marginLeft + xOffset;
