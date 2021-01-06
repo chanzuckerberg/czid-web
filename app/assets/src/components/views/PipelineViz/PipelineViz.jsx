@@ -8,10 +8,9 @@ import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import { getGraph } from "~/api/pipelineViz";
 import { getURLParamString, parseUrlParams } from "~/helpers/url";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
-import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 import PropTypes from "~/components/utils/propTypes";
-import { IconCloseSmall } from "~ui/icons";
+import { IconCloseSmall, IconArrowPipelineStage } from "~ui/icons";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./pipeline_viz.scss";
@@ -930,9 +929,7 @@ class PipelineViz extends React.Component {
     return (
       <div className={cs.stageArrow}>
         <div className={cx(cs.stageArrowBody, coloring)} />
-        <PipelineStageArrowheadIcon
-          className={cx(cs.stageArrowHead, coloring)}
-        />
+        <IconArrowPipelineStage className={cx(cs.stageArrowHead, coloring)} />
       </div>
     );
   }

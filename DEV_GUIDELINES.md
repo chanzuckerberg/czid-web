@@ -225,8 +225,10 @@ Icons should follow the Design System and be stored in `~/components/ui/icons/` 
 1. Copy the `<svg>` tag into a skeleton React functional component.
 1. Delete extraneous HTML artifacts: `<title>`, `id=`, `version`, `xmlns`, `xmlns:xlink`.
 1. Change attributes such as `stroke-width` -> `strokeWidth` or `fill-rule` -> `fillRule`.
+1. For `width`, `height`, and `viewBox` sizes, use one of the exported sizes in `_elements.scss` whenever possible. (Ex: ``viewBox={`0 0 ${cs.imgM} ${cs.imgM}`}``)
 1. If there is just one nested group, remove it and just copy the `fillRule` and `fill`, if defined, to the parent `<svg>`.
-1. If the icon needs to change color via a `className` prop, set a default `color` in the `<svg>` tag (e.g. `<svg className={className} color="#3867FA">`). Then set `fill="currentColor"` on any child `<g>` tags with color. This way a `color` coming from the `className` will override the icon default.
+1. If the icon needs to change color via a `className` prop, set a default `color` in the `<svg>` tag (e.g. `<svg className={className} color="#3867FA">`).
+    - Next, set `fill="currentColor"` on any child `<g>` tags with color. This way a `color` coming from the `className` will override the icon default.
 1. Add the icon to `~ui/icons/index.js`. It will automatically appear in your _localhost_`/playground/icons`.
 1. Icons should be imported in one statement, e.g. `import { IconAlert, IconLoading } from "~ui/icons"`.
 

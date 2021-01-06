@@ -4,7 +4,6 @@ import { SortDirection } from "react-virtualized";
 import { some } from "lodash/fp";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 
-import LargeDownloadIcon from "~ui/icons/LargeDownloadIcon";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
 import { ViewHeader, NarrowContainer, Divider } from "~/components/layout";
@@ -14,6 +13,7 @@ import { Table } from "~/components/visualizations/table";
 import { openUrl } from "~utils/links";
 import { UserContext } from "~/components/common/UserContext";
 import Notification from "~ui/notifications/Notification";
+import ImgDownloadPrimary from "~ui/illustrations/ImgDownloadPrimary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 
 import BulkDownloadTableRenderers from "./BulkDownloadTableRenderers";
@@ -219,7 +219,7 @@ class BulkDownloadList extends React.Component {
           <BlankScreenMessage
             message="You don't have any bulk downloads yet"
             tagline="You can select samples from your data and request a download."
-            icon={<LargeDownloadIcon className={cs.largeDownloadIcon} />}
+            icon={<ImgDownloadPrimary className={cs.largeDownloadIcon} />}
             textWidth={260}
           />
         </div>

@@ -2,12 +2,11 @@ import BacteriaCultureIcon from "./BacteriaCultureIcon";
 import BannerProjects from "./BannerProjects";
 import BannerSamples from "./BannerSamples";
 import BannerVisualizations from "./BannerVisualizations";
-import CompareIcon from "./CompareIcon";
-import GlobeLinedIcon from "./GlobeLinedIcon";
 import IconAlert from "./IconAlert";
 import IconAlertSmall from "./IconAlertSmall";
 import IconAlignmentSmall from "./IconAlignmentSmall";
 import IconArrowDownSmall from "./IconArrowDownSmall";
+import IconArrowPipelineStage from "./IconArrowPipelineStage";
 import IconArrowRight from "./IconArrowRight";
 import IconArrowUpSmall from "./IconArrowUpSmall";
 import IconBackgroundModel from "./IconBackgroundModel";
@@ -55,14 +54,12 @@ import IconSuccess from "./IconSuccess";
 import IconSuccessSmall from "./IconSuccessSmall";
 import IconTableSmall from "./IconTableSmall";
 import IconTreeSmall from "./IconTreeSmall";
-import LargeDownloadIcon from "./LargeDownloadIcon";
 import LogoColor from "./LogoColor";
 import LogoLockupColor from "./LogoLockupColor";
 import LogoLockupReversed from "./LogoLockupReversed";
 import LogoMarkColor from "./LogoMarkColor";
 import LogoMarkReversed from "./LogoMarkReversed";
 import LogoReversed from "./LogoReversed";
-import PipelineStageArrowheadIcon from "./PipelineStageArrowheadIcon";
 import SortIcon from "./SortIcon";
 
 export const ICONS_TAXONOMY = {
@@ -71,11 +68,11 @@ export const ICONS_TAXONOMY = {
     BannerProjects,
     BannerSamples,
     BannerVisualizations,
-    CompareIcon,
     IconAlert,
     IconAlertSmall,
     IconAlignmentSmall,
     IconArrowDownSmall,
+    IconArrowPipelineStage,
     IconArrowRight,
     IconArrowUpSmall,
     IconBackgroundModel,
@@ -123,12 +120,9 @@ export const ICONS_TAXONOMY = {
     IconSuccessSmall,
     IconTableSmall,
     IconTreeSmall,
-    LargeDownloadIcon,
-    PipelineStageArrowheadIcon,
     SortIcon,
   },
   FONT_AWESOME: {
-    GlobeLinedIcon,
     IconArrowRight,
   },
   LOGO: {

@@ -1,7 +1,7 @@
 import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
-import cs from "./remove_icon.scss";
+import cs from "./icon_close_small.scss";
 
 const IconCloseSmall = ({ className, onClick }) => {
   return (

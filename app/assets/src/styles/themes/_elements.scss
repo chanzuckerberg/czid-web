@@ -54,6 +54,27 @@ $icon-s: 14px;
 $icon-l: 22px;
 $icon-xl: 32px;
 
+// Remove the px unit for SVG viewBox
+// See: https://css-tricks.com/snippets/sass/strip-unit-function/
+@function strip-unit($number) {
+  @if type-of($number) == "number" and not unitless($number) {
+    @return $number / ($number * 0 + 1);
+  }
+  @return $number;
+}
+
+// Export variables for use in JSX icon and img sizes
+:export {
+  imgS: strip-unit($img-s);
+  imgM: strip-unit($img-m);
+  imgL: strip-unit($img-l);
+
+  iconXS: strip-unit($icon-xs);
+  iconS: strip-unit($icon-s);
+  iconL: strip-unit($icon-l);
+  iconXL: strip-unit($icon-xl);
+}
+
 // Customized scroll bar
 @mixin scrollable {
   &::-webkit-scrollbar {
