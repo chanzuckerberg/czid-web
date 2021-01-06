@@ -78,7 +78,7 @@
   },
   "dependencies": {
     "@sentry/react": "^5.22.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "axios-retry": "^3.1.2",
     "classnames": "^2.2.6",
     "clusterfck": "git+https://github.com/chanzuckerberg/clusterfck.git#master",
