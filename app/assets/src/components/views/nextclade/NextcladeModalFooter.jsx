@@ -114,6 +114,7 @@ const NextcladeModalFooter = ({
 };
 
 NextcladeModalFooter.propTypes = {
+  loading: PropTypes.bool,
   onClick: PropTypes.func,
   validSampleIds: PropTypes.instanceOf(Set).isRequired,
   invalidSampleNames: PropTypes.arrayOf(PropTypes.string),

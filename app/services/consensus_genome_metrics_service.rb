@@ -13,10 +13,15 @@ class ConsensusGenomeMetricsService
 
   def generate
     cache_key = "cg_metrics-#{@workflow_run.id}-#{@workflow_run.status}"
-    Rails.cache.fetch(cache_key, expires_in: 30.days) do
-      quast_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_QUAST)
-      stats_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_STATS)
-      format_metrics(quast_data, stats_data)
+    begin
+      Rails.cache.fetch(cache_key, expires_in: 30.days) do
+        quast_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_QUAST)
+        stats_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_STATS)
+        format_metrics(quast_data, stats_data)
+      end
+    rescue SfnExecution::SfnDescriptionNotFoundError => err
+      LogUtil.log_error("ConsensusGenomeMetricsService: Cannot generate Consensus Genome metrics when the SFN description is not found", exception: err)
+      return nil
     end
   end
 
@@ -24,7 +29,7 @@ class ConsensusGenomeMetricsService
     quast_data = CSVSafe.parse(quast_data, col_sep: "\t").to_h
     metrics = JSON.parse(stats_data).symbolize_keys
 
-    allowed_keys = [:total_reads, :mapped_reads, :ref_snps, :n_actg, :n_missing, :n_ambiguous]
+    allowed_keys = [:ercc_mapped_reads, :total_reads, :mapped_reads, :ref_snps, :n_actg, :n_missing, :n_ambiguous]
     metrics = metrics.slice(*allowed_keys)
 
     metrics[:gc_percent] = quast_data["GC (%)"].to_f.round(1)

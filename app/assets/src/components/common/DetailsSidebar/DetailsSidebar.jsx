@@ -13,9 +13,8 @@ import TaxonDetailsMode from "./TaxonDetailsMode";
 import PipelineStepDetailsMode from "./PipelineStepDetailsMode";
 import GeneDetailsMode from "./GeneDetailsMode";
 
-export default class DetailsSidebar extends React.Component {
-  renderContents() {
-    const { mode, params, visible } = this.props;
+const DetailsSidebar = ({ mode, onClose, params, visible }) => {
+  const renderContents = () => {
     if (!visible) {
       return null;
     }
@@ -34,18 +33,14 @@ export default class DetailsSidebar extends React.Component {
       default:
         return null;
     }
-  }
+  };
 
-  render() {
-    const { visible, onClose } = this.props;
-
-    return (
-      <Sidebar visible={visible} width="very wide" onClose={onClose}>
-        {this.renderContents()}
-      </Sidebar>
-    );
-  }
-}
+  return (
+    <Sidebar visible={visible} width="very wide" onClose={onClose}>
+      {renderContents()}
+    </Sidebar>
+  );
+};
 
 DetailsSidebar.propTypes = {
   mode: PropTypes.string,
@@ -53,3 +48,5 @@ DetailsSidebar.propTypes = {
   onClose: PropTypes.func.isRequired,
   params: PropTypes.any, // the params that are required depends on the mode. See subclasses like SampleDetailsMode for needed params.
 };
+
+export default DetailsSidebar;

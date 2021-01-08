@@ -73,6 +73,30 @@ export const WORKFLOW_INFO_FIELDS = [
     name: "Wetlab Protocol",
     key: "wetlabProtocol",
   },
+  {
+    name: "Pipeline Version",
+    key: "pipelineVersion",
+  },
+  {
+    name: "Host Subtracted",
+    key: "hostSubtracted",
+  },
+  {
+    name: "Total Reads",
+    key: "totalReads",
+  },
+  {
+    name: "ERCC Reads",
+    key: "erccMappedReads",
+  },
+  {
+    name: "Mapped Reads",
+    key: "mappedReads",
+  },
+  {
+    name: "Date Processed",
+    key: "lastProcessedAt",
+  },
 ];
 
 export const HOST_FILTERING_WIKI =

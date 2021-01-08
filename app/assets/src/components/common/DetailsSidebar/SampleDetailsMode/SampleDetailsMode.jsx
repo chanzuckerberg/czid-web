@@ -190,6 +190,7 @@ class SampleDetailsMode extends React.Component {
 
   renderTab = () => {
     const {
+      currentTab,
       metadata,
       metadataTypes,
       metadataSavePending,
@@ -199,11 +200,11 @@ class SampleDetailsMode extends React.Component {
       metadataErrors,
       sampleTypes,
     } = this.state;
-    const { snapshotShareId } = this.props;
+    const { sampleId, snapshotShareId } = this.props;
 
     const savePending = some(metadataSavePending);
 
-    if (this.state.currentTab === "Metadata") {
+    if (currentTab === "Metadata") {
       return (
         <MetadataTab
           metadata={metadata}
@@ -218,18 +219,18 @@ class SampleDetailsMode extends React.Component {
         />
       );
     }
-    if (this.state.currentTab === "Pipeline") {
+    if (currentTab === "Pipeline") {
       return (
         <PipelineTab
           pipelineInfo={pipelineInfo}
           erccComparison={additionalInfo.ercc_comparison}
           pipelineRun={pipelineRun}
-          sampleId={this.props.sampleId}
+          sampleId={sampleId}
           snapshotShareId={snapshotShareId}
         />
       );
     }
-    if (this.state.currentTab === "Notes") {
+    if (currentTab === "Notes") {
       return (
         <NotesTab
           notes={additionalInfo.notes}

@@ -287,13 +287,7 @@ class PipelineTab extends React.Component {
   };
 
   render() {
-    const {
-      pipelineInfo,
-      pipelineRun,
-      sampleId,
-      snapshotShareId,
-      erccComparison,
-    } = this.props;
+    const { pipelineInfo, pipelineRun, sampleId, snapshotShareId } = this.props;
 
     const workflow = get(["workflow", "text"], pipelineInfo);
     const fields =

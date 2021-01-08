@@ -1,5 +1,5 @@
 import moment from "moment";
-import { find, get } from "lodash/fp";
+import { find, get, isUndefined, mapValues } from "lodash/fp";
 
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
@@ -11,9 +11,10 @@ export const processPipelineInfo = additionalInfo => {
     summary_stats: summaryStats,
     wetlab_protocol: wetlabProtocol,
     workflow,
+    workflow_run: workflowRunInfo,
   } = additionalInfo;
 
-  const pipelineInfo = {};
+  let pipelineInfo = {};
 
   const BLANK_TEXT = "unknown";
 
@@ -89,12 +90,43 @@ export const processPipelineInfo = additionalInfo => {
     pipelineInfo.workflow = {
       text: get("label", find({ value: workflow }, Object.values(WORKFLOWS))),
     };
+
+    if (workflowRunInfo) {
+      if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+        const cgWorkflowRunInfo = processCGWorkflowRunInfo(workflowRunInfo);
+        pipelineInfo = {
+          ...pipelineInfo,
+          ...mapValues(v => ({ text: v }), cgWorkflowRunInfo),
+        };
+      }
+    }
   }
 
   if (wetlabProtocol)
     pipelineInfo.wetlabProtocol = { text: wetlabProtocol.toUpperCase() };
 
   return pipelineInfo;
+};
+
+const processCGWorkflowRunInfo = qualityMetrics => {
+  const {
+    ercc_mapped_reads: erccMappedReads,
+    executed_at: lastProcessedAt,
+    mapped_reads: mappedReads,
+    total_reads: totalReads,
+    wdl_version: pipelineVersion,
+  } = qualityMetrics;
+
+  return {
+    erccMappedReads: isUndefined(erccMappedReads)
+      ? ""
+      : numberWithCommas(erccMappedReads),
+    lastProcessedAt: moment(lastProcessedAt).format("YYYY-MM-DD"),
+    hostSubtracted: "Human",
+    mappedReads: isUndefined(mappedReads) ? "" : numberWithCommas(mappedReads),
+    totalReads: isUndefined(totalReads) ? "" : numberWithCommas(totalReads),
+    pipelineVersion,
+  };
 };
 
 // Format the upload date.

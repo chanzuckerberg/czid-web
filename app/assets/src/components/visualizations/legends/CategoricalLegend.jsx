@@ -44,5 +44,6 @@ export default class CategoricalLegend extends React.Component {
 }
 
 CategoricalLegend.propTypes = {
+  className: PropTypes.string,
   data: PropTypes.array,
 };
