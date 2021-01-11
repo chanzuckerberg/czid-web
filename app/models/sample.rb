@@ -52,9 +52,9 @@ class Sample < ApplicationRecord
   validate :input_files_checks
   validates :name, presence: true, uniqueness: { scope: :project_id, case_sensitive: false }
 
-  validates :web_commit, presence: true, allow_blank: true, if: :mass_validation_enabled?
-  validates :pipeline_commit, presence: true, allow_blank: true, if: :mass_validation_enabled?
-  validates :uploaded_from_basespace, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
+  validates :web_commit, presence: true, allow_blank: true
+  validates :pipeline_commit, presence: true, allow_blank: true
+  validates :uploaded_from_basespace, presence: true, inclusion: { in: [0, 1] }
   validates :temp_pipeline_workflow, inclusion: { in: WorkflowRun::WORKFLOW.values }
 
   after_create :initiate_input_file_upload

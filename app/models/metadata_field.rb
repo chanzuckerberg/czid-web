@@ -85,8 +85,8 @@ class MetadataField < ApplicationRecord
 
   # Obeying the same rules as in MetadataHelper validate_metadata_csv_for_samples
   # Metadata fields are shared globally and can be created by users.
-  validates :name, presence: true, uniqueness: true, if: :mass_validation_enabled?
-  validates :display_name, presence: true, uniqueness: true, if: :mass_validation_enabled?
+  validates :name, presence: true
+  validates :display_name, presence: true
 
   validate :metadata_field_validations
 
@@ -123,7 +123,6 @@ class MetadataField < ApplicationRecord
   validates :is_core, inclusion: { in: [0, 1] }
   validates :is_default, inclusion: { in: [0, 1] }
   validates :is_required, inclusion: { in: [0, 1] }
-  validates :default_for_new_host_genome, inclusion: { in: [0, 1] }, if: -> { respond_to?(:default_for_new_host_genome) && mass_validation_enabled? } # respond_to? for migrations
 
   # Note: default_for_host_genome is no longer only for "new" hosts
   def default_for_host_genome?

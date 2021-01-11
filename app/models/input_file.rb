@@ -15,7 +15,7 @@ class InputFile < ApplicationRecord
     SOURCE_TYPE_BASESPACE,
   ] }
 
-  validates :source, presence: true, if: :mass_validation_enabled?
+  validates :source, presence: true
   validate :s3_source_check, on: :create
 
   BULK_FILE_PAIRED_REGEX = /\A([A-Za-z0-9_][-.A-Za-z0-9_]{1,119})_R(\d)(_001)?\.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/.freeze

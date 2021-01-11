@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_201_102_114_100) do
+ActiveRecord::Schema.define(version: 20_210_109_012_552) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(version: 20_201_102_114_100) do
     t.integer "lineage_version", limit: 2
     t.text "s3_nt_info_db_path"
     t.string "s3_taxon_blacklist_path", default: "s3://idseq-database/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
+    t.index ["name"], name: "index_alignment_configs_on_name", unique: true
   end
 
   create_table "amr_counts", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
@@ -272,7 +273,9 @@ ActiveRecord::Schema.define(version: 20_201_102_114_100) do
     t.datetime "updated_at", null: false
     t.string "examples"
     t.integer "default_for_new_host_genome", limit: 1, default: 0
+    t.index ["display_name"], name: "index_metadata_fields_on_display_name", unique: true
     t.index ["group"], name: "index_metadata_fields_on_group"
+    t.index ["name"], name: "index_metadata_fields_on_name", unique: true
   end
 
   create_table "metadata_fields_projects", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|

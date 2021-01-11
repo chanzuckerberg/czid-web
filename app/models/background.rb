@@ -7,7 +7,7 @@ class Background < ApplicationRecord
   validate :validate_size
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   # Not sure why this is not a boolean
-  validates :ready, presence: true, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
+  validates :ready, presence: true, inclusion: { in: [0, 1] }
   validate :mass_normalized_has_ercc
 
   after_save :submit_store_summary_job

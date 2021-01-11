@@ -14,7 +14,7 @@ RSpec.describe Location, type: :model do
     end
 
     it "should return existing location if it exists" do
-      mock_location = create(:location, country_name: "USA")
+      mock_location = create(:location, country_name: "USA", osm_id: 123, locationiq_id: 89_640_023)
 
       loc_info = { country_name: "USA" }
       location = Location.find_or_new_by_fields(loc_info)
@@ -46,7 +46,7 @@ RSpec.describe Location, type: :model do
 
     it "should return existing location if it matches geosearch response" do
       # There is an existing location for USA, but not California.
-      mock_location = create(:location, country_name: "USA")
+      mock_location = create(:location, country_name: "USA", osm_id: 123, locationiq_id: 89_640_023)
       loc_info = { country_name: "USA", state_name: "California", osm_id: 123, osm_type: "Relation" }
 
       expect(Location).to receive(:geosearch_by_osm_id).with(123, "Relation").exactly(1).times

@@ -21,9 +21,9 @@ class Project < ApplicationRecord
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   # NOTE: not sure why these columns were not created as booleans
-  validates :public_access, inclusion: { in: [0, 1] }, if: :mass_validation_enabled?
+  validates :public_access, inclusion: { in: [0, 1] }
   # NOTE: all values of background_flag in prod db are currently zero.
-  validates :background_flag, inclusion: { in: [0, 1] }, allow_nil: true, if: :mass_validation_enabled?
+  validates :background_flag, inclusion: { in: [0, 1] }, allow_nil: true
   # Description requirement added 2020-03-11
   validates :description, presence: true, if: :description_changed?
 

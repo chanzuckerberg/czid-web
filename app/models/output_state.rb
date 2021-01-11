@@ -14,7 +14,7 @@ class OutputState < ApplicationRecord
   # | contigs              |
   # | input_validations    |
   # +----------------------+
-  validates :output, presence: true, if: :mass_validation_enabled?
+  validates :output, presence: true
 
   # Current database values of state including legacy are:
   # +----------------+
@@ -41,5 +41,5 @@ class OutputState < ApplicationRecord
     PipelineRun::STATUS_LOADING_ERROR,
     PipelineRun::STATUS_LOADING_QUEUED,
     PipelineRun::STATUS_UNKNOWN,
-  ] }, if: :mass_validation_enabled?
+  ] }
 end

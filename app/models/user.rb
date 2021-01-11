@@ -58,9 +58,9 @@ class User < ApplicationRecord
   validates :role, presence: true, inclusion: { in: [
     ROLE_REGULAR_USER,
     ROLE_ADMIN,
-  ] }, allow_nil: true, if: :mass_validation_enabled?
+  ] }, allow_nil: true
 
-  validates :authentication_token_encrypted, presence: true, allow_nil: true, if: :mass_validation_enabled?
+  validates :authentication_token_encrypted, presence: true, allow_nil: true
 
   IDSEQ_BUCKET_PREFIXES = ['idseq-'].freeze
   CZBIOHUB_BUCKET_PREFIXES = ['czb-', 'czbiohub-'].freeze

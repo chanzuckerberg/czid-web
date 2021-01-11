@@ -9,10 +9,10 @@ class Location < ApplicationRecord
 
   # Lat and lng may be null if the location provider is missing coordinates, as
   # opposed to placing a location at (0,0)
-  validates :lat, inclusion: -90..90, allow_nil: true, if: :mass_validation_enabled?
-  validates :lng, inclusion: -180..180, allow_nil: true, if: :mass_validation_enabled?
-  validates :osm_id, presence: true, if: :mass_validation_enabled?
-  validates :locationiq_id, presence: true, if: :mass_validation_enabled?
+  validates :lat, inclusion: -90..90, allow_nil: true
+  validates :lng, inclusion: -180..180, allow_nil: true
+  validates :osm_id, presence: true
+  validates :locationiq_id, presence: true
 
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
   GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze

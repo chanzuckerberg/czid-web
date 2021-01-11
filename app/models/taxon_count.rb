@@ -22,7 +22,7 @@ class TaxonCount < ApplicationRecord
     TAX_LEVEL_PHYLUM,
     TAX_LEVEL_KINGDOM,
     TAX_LEVEL_SUPERKINGDOM,
-  ] }, if: :mass_validation_enabled?
+  ] }
 
   COUNT_TYPE_NT = 'NT'.freeze
   COUNT_TYPE_NR = 'NR'.freeze
@@ -34,7 +34,7 @@ class TaxonCount < ApplicationRecord
     COUNT_TYPE_NT,
     COUNT_TYPE_NR,
     COUNT_TYPE_MERGED,
-  ] }, if: :mass_validation_enabled?
+  ] }
 
   validates :source_count_type, allow_nil: true, inclusion: { in: [
     COUNT_TYPE_NT,
@@ -43,11 +43,11 @@ class TaxonCount < ApplicationRecord
   ] }
 
   # NOTE: some existing rspec tests assume a value of zero
-  validates :count, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
-  validates :percent_identity, inclusion: 0..100, if: :mass_validation_enabled?
+  validates :count, numericality: { greater_than_or_equal_to: 0 }
+  validates :percent_identity, inclusion: 0..100
   # NOTE: some existing rspec tests assume a value of zero
-  validates :alignment_length, numericality: { greater_than_or_equal_to: 0 }, if: :mass_validation_enabled?
-  validates :e_value, presence: true, if: :mass_validation_enabled?
+  validates :alignment_length, numericality: { greater_than_or_equal_to: 0 }
+  validates :e_value, presence: true
 
   NAME_2_LEVEL = { 'species' => TAX_LEVEL_SPECIES,
                    'genus' => TAX_LEVEL_GENUS,
