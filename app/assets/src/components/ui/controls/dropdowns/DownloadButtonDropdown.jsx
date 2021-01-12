@@ -1,8 +1,12 @@
-import { Icon } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
-import ButtonDropdown from "./ButtonDropdown";
 import PropTypes from "prop-types";
 import React from "react";
+
+import { IconDownload } from "~ui/icons";
+
+import ButtonDropdown from "./ButtonDropdown";
+
+import cs from "./download_button_dropdown.scss";
 
 const DownloadButtonDropdown = props => {
   return (
@@ -11,7 +15,7 @@ const DownloadButtonDropdown = props => {
       secondary
       fluid
       text="Download"
-      icon={<Icon size="large" className={"cloud download alternate"} />}
+      icon={<IconDownload className={cs.iconDownload} />}
     />
   );
 };

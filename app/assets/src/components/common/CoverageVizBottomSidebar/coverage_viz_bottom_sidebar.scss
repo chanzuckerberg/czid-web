@@ -270,7 +270,8 @@ $genome-viz-spacing: $space-xs;
 
   .icon {
     cursor: pointer;
-    height: 20px;
+    height: $icon-l;
+    width: $icon-l;
 
     svg {
       width: 100%;
@@ -288,8 +289,6 @@ $genome-viz-spacing: $space-xs;
   }
 
   .downloadIcon {
-    width: 20px;
-    height: 20px;
     margin-right: 12px;
   }
 }

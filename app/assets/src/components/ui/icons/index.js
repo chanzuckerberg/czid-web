@@ -1,7 +1,4 @@
 import BacteriaCultureIcon from "./BacteriaCultureIcon";
-import BannerProjects from "./BannerProjects";
-import BannerSamples from "./BannerSamples";
-import BannerVisualizations from "./BannerVisualizations";
 import IconAlert from "./IconAlert";
 import IconAlertSmall from "./IconAlertSmall";
 import IconAlignmentSmall from "./IconAlignmentSmall";
@@ -65,9 +62,6 @@ import SortIcon from "./SortIcon";
 export const ICONS_TAXONOMY = {
   CUSTOM: {
     BacteriaCultureIcon,
-    BannerProjects,
-    BannerSamples,
-    BannerVisualizations,
     IconAlert,
     IconAlertSmall,
     IconAlignmentSmall,

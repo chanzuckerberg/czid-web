@@ -9,7 +9,7 @@ import { withAnalytics } from "~/api/analytics";
 import { TooltipVizTable } from "~ui/containers";
 import BasicPopup from "~/components/BasicPopup";
 import GenomeViz from "~/components/visualizations/GenomeViz";
-import { IconCopySmall, IconDownload } from "~ui/icons";
+import { IconCopySmall, IconDownloadSmall } from "~ui/icons";
 import { getURLParamString } from "~/helpers/url";
 import { getContigsSequencesByByteranges } from "~/api";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -226,7 +226,7 @@ export default class HitGroupViz extends React.Component {
                 }
               )}
             >
-              <IconDownload />
+              <IconDownloadSmall />
             </div>
           }
           inverted

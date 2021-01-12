@@ -1,8 +1,12 @@
 import PropTypes from "prop-types";
 import React from "react";
-import { Icon } from "semantic-ui-react";
+
+import { IconDownload } from "~ui/icons";
+
 import PrimaryButton from "./PrimaryButton";
 import SecondaryButton from "./SecondaryButton";
+
+import cs from "./download_button.scss";
 
 const DownloadButton = ({ disabled, onClick, text, primary, ...props }) => {
   if (primary) {
@@ -12,7 +16,7 @@ const DownloadButton = ({ disabled, onClick, text, primary, ...props }) => {
         text={text}
         disabled={disabled}
         onClick={onClick}
-        icon={<Icon size="large" className={"cloud download alternate"} />}
+        icon={<IconDownload className={cs.iconDownload} />}
       />
     );
   } else {
@@ -22,7 +26,7 @@ const DownloadButton = ({ disabled, onClick, text, primary, ...props }) => {
         text={text}
         disabled={disabled}
         onClick={onClick}
-        icon={<Icon size="large" className={"cloud download alternate"} />}
+        icon={<IconDownload className={cs.iconDownload} />}
       />
     );
   }

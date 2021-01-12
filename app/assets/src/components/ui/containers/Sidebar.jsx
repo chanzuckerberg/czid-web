@@ -2,7 +2,7 @@ import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
 import { forbidExtraProps } from "airbnb-prop-types";
-import { IconCloseSmall } from "~ui/icons";
+import { IconClose } from "~ui/icons";
 import { Sidebar as SemanticSidebar } from "semantic-ui-react";
 import cs from "./sidebar.scss";
 
@@ -16,7 +16,7 @@ class Sidebar extends React.Component {
         className={cx(cs.sidebar, className, cs[this.props.direction])}
       >
         {children}
-        <IconCloseSmall className={cs.closeIcon} onClick={this.props.onClose} />
+        <IconClose className={cs.closeIcon} onClick={this.props.onClose} />
       </SemanticSidebar>
     );
   }

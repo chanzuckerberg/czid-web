@@ -43,9 +43,11 @@ import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
 import { DEFAULTS_BY_WORKFLOW } from "~/components/views/samples/SamplesView/ColumnConfiguration";
 import Tabs from "~ui/controls/Tabs";
-import BannerProjects from "~ui/icons/BannerProjects";
-import BannerSamples from "~ui/icons/BannerSamples";
-import BannerVisualizations from "~ui/icons/BannerVisualizations";
+import {
+  ImgProjectsSecondary,
+  ImgSamplesSecondary,
+  ImgVizSecondary,
+} from "~ui/illustrations";
 import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
 
@@ -1266,7 +1268,7 @@ class DiscoveryView extends React.Component {
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
                 className={cs.noDataBannerContainer}
-                icon={<BannerProjects />}
+                icon={<ImgProjectsSecondary />}
                 link={{
                   href: "/samples/upload",
                   text: "Upload your data",
@@ -1285,7 +1287,7 @@ class DiscoveryView extends React.Component {
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
                 className={cs.noDataBannerContainer}
-                icon={<BannerSamples />}
+                icon={<ImgSamplesSecondary />}
                 link={{
                   href: "/samples/upload",
                   text: "Upload your data",
@@ -1308,7 +1310,7 @@ class DiscoveryView extends React.Component {
             <div className={cs.noDataBannerFlexContainer}>
               <InfoBanner
                 className={cs.noDataBannerContainer}
-                icon={<BannerVisualizations />}
+                icon={<ImgVizSecondary />}
                 link={{
                   href: VISUALIZATIONS_DOC_LINK,
                   text: "Learn about Heatmaps",
@@ -1334,7 +1336,7 @@ class DiscoveryView extends React.Component {
     return (
       <InfoBanner
         className={cs.noResultsContainer}
-        icon={<BannerSamples />}
+        icon={<ImgSamplesSecondary />}
         link={{
           href: "/samples/upload",
           text: `Run ${workflowLabel}s`,
@@ -1360,7 +1362,7 @@ class DiscoveryView extends React.Component {
       case "projects":
         bannerData = {
           searchType: "Project",
-          icon: <BannerProjects />,
+          icon: <ImgProjectsSecondary />,
           listenerLink: {
             text: "Or view Sample results",
             tabToSwitchTo: "samples",
@@ -1370,7 +1372,7 @@ class DiscoveryView extends React.Component {
       case "samples":
         bannerData = {
           searchType: "Sample",
-          icon: <BannerSamples />,
+          icon: <ImgSamplesSecondary />,
           listenerLink: {
             text: "Or view Project results",
             tabToSwitchTo: "projects",
@@ -1380,7 +1382,7 @@ class DiscoveryView extends React.Component {
       case "visualizations":
         bannerData = {
           searchType: "Visualization",
-          icon: <BannerVisualizations />,
+          icon: <ImgVizSecondary />,
           listenerLink: {
             text: "Or view Sample results",
             tabToSwitchTo: "samples",

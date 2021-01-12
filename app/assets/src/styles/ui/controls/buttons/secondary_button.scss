@@ -18,6 +18,12 @@
     background: $primary;
     color: $white;
     fill: $white;
+
+    .icon-label {
+      svg {
+        fill: $white;
+      }
+    }
   }
 
   &:active,
@@ -26,6 +32,12 @@
     background-color: $primary-dark;
     color: $white;
     fill: $white;
+
+    .icon-label {
+      svg {
+        fill: $white;
+      }
+    }
   }
 
   &:focus,
@@ -34,6 +46,12 @@
     background-color: $primary-dark;
     color: $white;
     fill: $white;
+
+    .icon-label {
+      svg {
+        fill: $white;
+      }
+    }
   }
 
   &:disabled,

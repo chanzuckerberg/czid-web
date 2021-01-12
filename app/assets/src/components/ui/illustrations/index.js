@@ -10,7 +10,7 @@ import ImgSearchSecondary from "./ImgSearchSecondary";
 import ImgUploadPrimary from "./ImgUploadPrimary";
 import ImgVizSecondary from "./ImgVizSecondary";
 
-export default {
+export const ILLUSTRATIONS = {
   ImgBacteriaPrimary,
   ImgDecipherPrimary,
   ImgDetectPrimary,
@@ -23,3 +23,5 @@ export default {
   ImgUploadPrimary,
   ImgVizSecondary,
 };
+
+module.exports = ILLUSTRATIONS;
