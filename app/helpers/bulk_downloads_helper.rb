@@ -47,7 +47,7 @@ module BulkDownloadsHelper
     formatted_bulk_download[:download_name] = bulk_download.download_display_name
     formatted_bulk_download[:file_size] = ActiveSupport::NumberHelper.number_to_human_size(bulk_download.output_file_size)
     if admin
-      formatted_bulk_download[:user_name] = bulk_download.user.name
+      formatted_bulk_download[:user_name] = bulk_download.user&.name
       formatted_bulk_download[:execution_type] = bulk_download.execution_type
       formatted_bulk_download[:log_url] = bulk_download.log_url
     end

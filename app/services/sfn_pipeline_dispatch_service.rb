@@ -80,7 +80,6 @@ class SfnPipelineDispatchService
           index_dir_suffix: @pipeline_run.alignment_config.index_dir_suffix,
           use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
           deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
-          use_taxon_whitelist: @pipeline_run.use_taxon_whitelist,
         }, Postprocess: {
           nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
           nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
@@ -90,13 +89,11 @@ class SfnPipelineDispatchService
           taxon_blacklist: @pipeline_run.alignment_config.s3_taxon_blacklist_path,
           use_deuterostome_filter: @sample.skip_deutero_filter_flag != 1,
           deuterostome_db: @pipeline_run.alignment_config.s3_deuterostome_db_path,
-          use_taxon_whitelist: @pipeline_run.use_taxon_whitelist,
         }, Experimental: {
           nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
           nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
           file_ext: @sample.fasta_input? ? 'fasta' : 'fastq',
           nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
-          use_taxon_whitelist: @pipeline_run.use_taxon_whitelist,
         },
       },
       OutputPrefix: @sample.sample_output_s3_path,

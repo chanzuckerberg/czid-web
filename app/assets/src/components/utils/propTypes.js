@@ -156,7 +156,6 @@ const ReportMetadata = PropTypes.shape({
   pipelineRunStatus: PropTypes.string,
   reportReady: PropTypes.bool,
   subsampledReadsCount: PropTypes.number,
-  taxonWhitelisted: PropTypes.bool,
 });
 
 export default {

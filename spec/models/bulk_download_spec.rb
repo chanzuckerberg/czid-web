@@ -249,48 +249,6 @@ describe BulkDownload, type: :model do
       expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
     end
 
-    it "returns the correct task command for betacoronavirus download type with fastq file format" do
-      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::BETACORONOVIRUS_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
-                                @sample_one.first_pipeline_run.id,
-                                @sample_two.first_pipeline_run.id,
-                              ], params: {
-                                "file_format": {
-                                  "value": ".fastq",
-                                  "displayName": ".fastq",
-                                },
-                                "taxa_with_reads": {
-                                  "value": "all",
-                                  "displayName": "All Taxa",
-                                },
-                              })
-
-      task_command = [
-        "python",
-        "s3_tar_writer.py",
-        "--src-urls",
-        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R1.fastq",
-        "#{@sample_one.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R2.fastq",
-        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R1.fastq",
-        "#{@sample_two.first_pipeline_run.sample_output_s3_path}/#{fake_sfn_name}/wdl-#{fake_wdl_version}/dag-#{fake_dag_version}/betacoronavirus__nonhost_R2.fastq",
-        "--tar-names",
-        get_expected_tar_name(@project, @sample_one, "betacoronavirus_reads_R1.fastq"),
-        get_expected_tar_name(@project, @sample_one, "betacoronavirus_reads_R2.fastq"),
-        get_expected_tar_name(@project, @sample_two, "betacoronavirus_reads_R1.fastq"),
-        get_expected_tar_name(@project, @sample_two, "betacoronavirus_reads_R2.fastq"),
-        "--dest-url",
-        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Betacoronavirus Reads (Paired, Non-Deduplicated).tar.gz",
-        "--progress-delay",
-        15,
-        "--success-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
-        "--error-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
-        "--progress-url",
-        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
-      ]
-      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
-    end
-
     it "returns the correct task command for contigs_non_host download type" do
       @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE, pipeline_run_ids: [
                                 @sample_one.first_pipeline_run.id,

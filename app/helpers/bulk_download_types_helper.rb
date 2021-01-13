@@ -160,14 +160,11 @@ module BulkDownloadTypesHelper
       workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
+      # DEPRECATED:
+      hide_in_creation_modal: true,
       type: BETACORONOVIRUS_BULK_DOWNLOAD_TYPE,
-      required_allowed_feature: "betacoronavirus_fastqs", # see allowed_features
       display_name: "Betacoronavirus Reads (Paired, Non-Deduplicated)",
-      description: "Paired, non-deduplicated, FASTQs of betacoronavirus reads",
-      category: "raw_data",
       execution_type: ECS_EXECUTION_TYPE,
-      file_type_display: ".fastq",
-      workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
     },
     {
       type: CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE,

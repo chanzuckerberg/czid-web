@@ -43,7 +43,6 @@ class ReviewStep extends React.Component {
     showUploadModal: false,
     skipSampleProcessing: false,
     useStepFunctionPipeline: true,
-    useTaxonWhitelist: false,
     adminOptions: {},
   };
 
@@ -197,13 +196,6 @@ class ReviewStep extends React.Component {
     });
   };
 
-  toggleUseTaxonWhitelist = () => {
-    const { useTaxonWhitelist } = this.state;
-    this.setState({
-      useTaxonWhitelist: !useTaxonWhitelist,
-    });
-  };
-
   // This is only for admins and QA testers.
   renderSkipSampleProcessingOption = () => {
     const { skipSampleProcessing } = this.state;
@@ -213,18 +205,6 @@ class ReviewStep extends React.Component {
         checked={skipSampleProcessing}
         onChange={this.toggleSkipSampleProcessing}
         label="Skip sample processing after upload is complete."
-      />
-    );
-  };
-
-  renderUseTaxonWhitelist = () => {
-    const { useTaxonWhitelist } = this.state;
-    return (
-      <Checkbox
-        className={cs.sampleProcessingOption}
-        checked={useTaxonWhitelist}
-        onChange={this.toggleUseTaxonWhitelist}
-        label="Use respiratory pathogen whitelist mode."
       />
     );
   };
@@ -254,7 +234,6 @@ class ReviewStep extends React.Component {
       showUploadModal,
       skipSampleProcessing,
       useStepFunctionPipeline,
-      useTaxonWhitelist,
     } = this.state;
 
     const {
@@ -403,8 +382,6 @@ class ReviewStep extends React.Component {
           )}
           {get("show_skip_processing_option", userSettings) &&
             this.renderSkipSampleProcessingOption()}
-          {allowedFeatures.includes("taxon_whitelist") &&
-            this.renderUseTaxonWhitelist()}
           <TermsAgreement
             checked={consentChecked}
             onChange={() =>
@@ -444,7 +421,6 @@ class ReviewStep extends React.Component {
               skipSampleProcessing={skipSampleProcessing}
               uploadType={uploadType}
               useStepFunctionPipeline={useStepFunctionPipeline}
-              useTaxonWhitelist={useTaxonWhitelist}
               wetlabProtocol={wetlabProtocol}
               workflows={workflows}
             />

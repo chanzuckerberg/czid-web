@@ -167,7 +167,6 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
                 nt_loc_db: %r{s3://.+},
                 nt_info_db: %r{s3://.+},
                 file_ext: "fastq",
-                use_taxon_whitelist: false,
               },
             },
             dag_branch: nil,
