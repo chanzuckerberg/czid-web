@@ -104,6 +104,7 @@ class SnapshotLinksController < ApplicationController
 
   def app_config_required
     unless get_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING) == "1"
+      Rails.logger.info("Snapshot sharing AppConfig is not enabled")
       block_action
     end
   end
@@ -116,8 +117,9 @@ class SnapshotLinksController < ApplicationController
   end
 
   def edit_access?(project_id)
+    # Only Project Creator can edit.
     editable_project = current_power.updatable_projects.find_by(id: project_id)
-    editable_project.present?
+    editable_project&.creator_id == current_user.id
   end
 
   def format_snapshot_content(project_id)

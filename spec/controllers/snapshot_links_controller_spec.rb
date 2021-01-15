@@ -4,15 +4,22 @@ RSpec.describe SnapshotLinksController, type: :controller do
   before do
     @user = create(:user)
     @unauthorized_user = create(:user)
+    @other_user = create(:user)
   end
 
   context "when the user is logged in" do
     before do
-      @empty_project = create(:project, users: [@user])
-      @project = create(:project, users: [@user])
+      @empty_project = create(:project, users: [@user], creator: @user)
+      @project = create(:project, users: [@user], creator: @user)
       @sample_one = create(:sample,
                            project: @project,
                            pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
+
+      @project_created_by_other = create(:project, users: [@user], creator: @other_user)
+      @snapshot_link_with_wrong_project_creator = create(:snapshot_link,
+                                                         project_id: @project_created_by_other.id,
+                                                         share_id: "wrong_creator",
+                                                         content: { samples: [] }.to_json)
     end
 
     describe "POST #create" do
@@ -133,6 +140,17 @@ RSpec.describe SnapshotLinksController, type: :controller do
         json_response = JSON.parse(response.body)
         expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")
       end
+
+      it "should return unauthorized if the user is not the project creator even if they can edit" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
+        @user.add_allowed_feature("edit_snapshot_links")
+        sign_in @user
+
+        post :create, params: { project_id: @project_created_by_other.id }
+        expect(response).to have_http_status(:unauthorized)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")
+      end
     end
 
     describe "DELETE #destroy" do
@@ -189,6 +207,17 @@ RSpec.describe SnapshotLinksController, type: :controller do
         json_response = JSON.parse(response.body)
         expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")
       end
+
+      it "should return unauthorized if the user is not the project creator even if they can edit" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
+        @user.add_allowed_feature("edit_snapshot_links")
+        sign_in @user
+
+        delete :destroy, params: { share_id: @snapshot_link_with_wrong_project_creator.share_id }
+        expect(response).to have_http_status(:unauthorized)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")
+      end
     end
 
     describe "GET #info" do
@@ -196,8 +225,8 @@ RSpec.describe SnapshotLinksController, type: :controller do
         @sample_two = create(:sample,
                              project: @project,
                              pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
-        @project_two = create(:project, users: [@user])
-        @project_three = create(:project, users: [@user])
+        @project_two = create(:project, users: [@user], creator: @user)
+        @project_three = create(:project, users: [@user], creator: @user)
         @empty_snapshot = create(:snapshot_link,
                                  project_id: @project.id,
                                  share_id: "empty_id",
@@ -261,7 +290,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
       it "should return not_found for non-existent snapshot, if snapshot sharing is enabled" do
         AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
         sign_in @user
-        no_snapshot_project = create(:project, users: [@user])
+        no_snapshot_project = create(:project, users: [@user], creator: @user)
 
         get :info, params: { project_id: no_snapshot_project.id }
         expect(response).to have_http_status(:not_found)
@@ -283,6 +312,16 @@ RSpec.describe SnapshotLinksController, type: :controller do
         sign_in @unauthorized_user
 
         get :info, params: { project_id: @multi_sample_snapshot.project_id }
+        expect(response).to have_http_status(:unauthorized)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")
+      end
+
+      it "should return unauthorized if the user is not the project creator even if they can edit" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
+        sign_in @user
+
+        get :info, params: { project_id: @snapshot_link_with_wrong_project_creator.project_id }
         expect(response).to have_http_status(:unauthorized)
         json_response = JSON.parse(response.body)
         expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")

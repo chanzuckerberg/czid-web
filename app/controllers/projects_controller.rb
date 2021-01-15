@@ -105,10 +105,11 @@ class ProjectsController < ApplicationController
           group_concat_users = Arel.sql("GROUP_CONCAT(DISTINCT CONCAT(users.name,'|',users.email) ORDER BY users.name SEPARATOR '::') AS users")
           editable = Arel.sql("BIT_OR(IF(users.id=#{current_user.id}, 1, 0)) AS editable")
           creator = Arel.sql("creators_projects.name AS creator")
+          creator_id = Arel.sql("creators_projects.id AS creator_id")
 
           attrs = [
             'id', 'name', 'description', 'created_at', 'public_access', Arel.sql('COUNT(DISTINCT samples.id) AS number_of_samples'),
-            group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, creator,
+            group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, creator, creator_id,
           ]
           names = attrs.map { |attr| attr.split(' AS ').last }
           name_email = ["name", "email"]

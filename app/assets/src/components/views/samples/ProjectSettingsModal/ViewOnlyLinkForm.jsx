@@ -51,13 +51,16 @@ class ViewOnlyLinkForm extends React.Component {
     const { project } = this.props;
     try {
       const snapshot = await getSnapshotInfo(project.id);
-      this.setState({
-        sharingEnabled: true,
-        snapshotShareId: snapshot.share_id,
-        snapshotNumSamples: snapshot.num_samples,
-        snapshotPipelineVersions: snapshot.pipeline_versions,
-        snapshotTimestamp: snapshot.timestamp,
-      });
+      // Check in case you received an HTML redirect response
+      if (snapshot && snapshot.share_id) {
+        this.setState({
+          sharingEnabled: true,
+          snapshotShareId: snapshot.share_id,
+          snapshotNumSamples: snapshot.num_samples,
+          snapshotPipelineVersions: snapshot.pipeline_versions,
+          snapshotTimestamp: snapshot.timestamp,
+        });
+      }
     } catch (_) {
       this.clearSnapshotInfo();
     }
@@ -134,6 +137,7 @@ class ViewOnlyLinkForm extends React.Component {
 
   renderPipelineVersions = () => {
     const { snapshotPipelineVersions } = this.state;
+
     const numPipelineVersions = snapshotPipelineVersions.length;
     if (numPipelineVersions === 0) return "No pipeline versions";
     if (numPipelineVersions === 1) {

@@ -49,7 +49,7 @@ class ProjectSettingsModal extends React.Component {
       project,
       users,
     } = this.props;
-    const { allowedFeatures = [] } = this.context || {};
+    const { allowedFeatures = [], userId } = this.context || {};
 
     return (
       <div>
@@ -145,14 +145,15 @@ class ProjectSettingsModal extends React.Component {
                   users={users}
                 />
               </div>
-              {allowedFeatures.includes("edit_snapshot_links") && (
-                <div>
-                  <Divider />
-                  <div className={cs.formContainer}>
-                    <ViewOnlyLinkForm project={project} />
+              {allowedFeatures.includes("edit_snapshot_links") &&
+                project.creator_id === userId && (
+                  <div>
+                    <Divider />
+                    <div className={cs.formContainer}>
+                      <ViewOnlyLinkForm project={project} />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </Modal>
         )}
