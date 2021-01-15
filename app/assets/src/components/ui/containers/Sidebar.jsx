@@ -16,7 +16,9 @@ class Sidebar extends React.Component {
         className={cx(cs.sidebar, className, cs[this.props.direction])}
       >
         {children}
-        <IconClose className={cs.closeIcon} onClick={this.props.onClose} />
+        <div onClick={this.props.onClose}>
+          <IconClose className={cs.closeIcon} />
+        </div>
       </SemanticSidebar>
     );
   }
