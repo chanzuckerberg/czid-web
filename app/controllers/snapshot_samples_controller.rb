@@ -16,6 +16,8 @@ class SnapshotSamplesController < SamplesController
 
   # GET /pub/:share_id/samples/:id
   def show
+    background_id = JSON.parse(@snapshot.content)["background_id"]
+
     respond_to do |format|
       format.html
       format.json do
@@ -30,7 +32,7 @@ class SnapshotSamplesController < SamplesController
             }
           ).merge(
             default_pipeline_run_id: @pipeline_run_id,
-            default_background_id: @sample.default_background_id,
+            background_id: background_id,
             pipeline_runs: @sample.pipeline_runs_info,
             deletable: false,
             editable: false
@@ -41,6 +43,9 @@ class SnapshotSamplesController < SamplesController
 
   # GET /pub/:share_id/samples/:id/report_v2
   def report_v2
+    if params[:background].nil?
+      params[:background] = JSON.parse(@snapshot.content)["background_id"]
+    end
     super
   end
 
@@ -82,9 +87,10 @@ class SnapshotSamplesController < SamplesController
     render json: results
   end
 
-  # GET /pub/backgrounds.json
+  # GET /pub/:share_id/backgrounds.json
   def backgrounds
-    @backgrounds = Background.where(public_access: 1)
+    @snapshot = SnapshotLink.find_by(share_id: snapshot_sample_params[:share_id])
+    @backgrounds = @snapshot.fetch_snapshot_backgrounds
     render json: { backgrounds: @backgrounds }
   end
 

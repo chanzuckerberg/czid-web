@@ -36,6 +36,14 @@ module SnapshotSamplesHelper
     pipeline_versions.to_set
   end
 
+  def snapshot_enable_mass_normalized_backgrounds(samples)
+    pipeline_runs = PipelineRun.latest_by_sample(samples)
+    samples_have_erccs = pipeline_runs.all? { |pr| ((pr.total_ercc_reads || 0) > 0) }
+    samples_have_correct_pr_versions = pipeline_runs.all? { |pr| pipeline_version_at_least(pr.pipeline_version, "4.0") }
+    mass_normalized_backgronds_available = samples_have_erccs && samples_have_correct_pr_versions
+    mass_normalized_backgronds_available
+  end
+
   def snapshot_pipeline_run_ids(snapshot)
     pipeline_run_ids = []
     content = JSON.parse(snapshot.content)

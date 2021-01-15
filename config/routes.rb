@@ -159,8 +159,9 @@ Rails.application.routes.draw do
   delete 'pub/:share_id/destroy', to: 'snapshot_links#destroy'
   post 'pub/projects/:project_id/create', to: 'snapshot_links#create'
   get 'pub/projects/:project_id/info.json', to: 'snapshot_links#info'
-  get 'pub/backgrounds', to: 'snapshot_samples#backgrounds'
+  get 'pub/:share_id/backgrounds', to: 'snapshot_samples#backgrounds'
   get 'pub/:share_id', to: 'snapshot_links#show'
+  put 'pub/:share_id/update_background', to: 'snapshot_links#update_background'
 
   resources :frontend_metrics, only: :create
 

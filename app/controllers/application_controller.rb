@@ -94,10 +94,15 @@ class ApplicationController < ActionController::Base
     raise "action doesn't check against access control" unless @access_checked
   end
 
-  def get_background_id(sample, background_id = nil)
+  def get_background_id(sample, background_id = nil, share_id = nil)
     background_id = (background_id || params[:background_id]).to_i
     if background_id > 0
-      viewable_background_ids = current_power.backgrounds.pluck(:id)
+      if share_id
+        snapshot = SnapshotLink.find_by(share_id: share_id)
+        viewable_background_ids = snapshot ? snapshot.fetch_snapshot_backgrounds.pluck(:id) : []
+      else
+        viewable_background_ids = current_power.backgrounds.pluck(:id)
+      end
       if viewable_background_ids.include?(background_id)
         return background_id
       end

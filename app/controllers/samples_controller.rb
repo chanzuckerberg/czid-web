@@ -762,7 +762,7 @@ class SamplesController < ApplicationController
   def report_v2
     permitted_params = params.permit(:id, :pipeline_version, :background, :skip_cache, :share_id, :merge_nt_nr)
     pipeline_run = select_pipeline_run(@sample, permitted_params[:pipeline_version])
-    background_id = get_background_id(@sample, permitted_params[:background])
+    background_id = get_background_id(@sample, permitted_params[:background], permitted_params[:share_id])
 
     if pipeline_run
       # Don't cache the response until all results for the pipeline run are available

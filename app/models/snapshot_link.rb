@@ -15,4 +15,8 @@ class SnapshotLink < ApplicationRecord
       break share_id unless SnapshotLink.find_by(share_id: share_id)
     end
   end
+
+  def fetch_snapshot_backgrounds
+    Background.where(user_id: creator_id).or(Background.where(public_access: 1))
+  end
 end

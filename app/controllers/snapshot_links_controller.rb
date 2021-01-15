@@ -32,12 +32,15 @@ class SnapshotLinksController < ApplicationController
     end
 
     snapshot = SnapshotLink.find_by(project_id: project_id)
+    samples = current_power.samples.where(project_id: project_id)
     if snapshot.present?
       # timestamp formatted as: "Aug 19, 2020, 1:14pm"
       render json: {
         share_id: snapshot.share_id,
         num_samples: JSON.parse(snapshot.content)["samples"].length,
         pipeline_versions: snapshot_pipeline_versions(snapshot),
+        background_id: JSON.parse(snapshot.content)["background_id"] || HostGenome.find_by(name: "Human").default_background_id,
+        mass_normalized_backgronds_available: snapshot_enable_mass_normalized_backgrounds(samples),
         timestamp: snapshot.created_at.strftime("%b %d, %Y, %-I:%M%P"),
       }
     else
@@ -48,6 +51,7 @@ class SnapshotLinksController < ApplicationController
   # POST /pub/projects/:project_id/create
   def create
     project_id = snapshot_links_params[:project_id]
+    background_id = snapshot_links_params[:background_id]
     unless edit_access?(project_id)
       render json: {
         error: NO_EDIT_ACCESS_ERROR,
@@ -56,7 +60,7 @@ class SnapshotLinksController < ApplicationController
     end
 
     share_id = SnapshotLink.generate_random_share_id
-    content = format_snapshot_content(project_id)
+    content = format_snapshot_content(project_id, background_id)
     snapshot_link = SnapshotLink.new(
       share_id: share_id,
       project_id: project_id,
@@ -96,6 +100,26 @@ class SnapshotLinksController < ApplicationController
     render json: { error: e }, status: :internal_server_error
   end
 
+  # PUT /pub/:share_id/update_background
+  def update_background
+    @snapshot = SnapshotLink.find_by(share_id: snapshot_links_params[:share_id])
+    project_id = @snapshot.project_id
+    if edit_access?(project_id)
+      background_id = snapshot_links_params[:background_id]
+      @snapshot.content = format_snapshot_content(project_id, background_id)
+      @snapshot.save
+      render json: {
+        message: "Snapshot background updated successfully",
+        status: :ok,
+      }
+    else
+      render json: {
+        error: NO_EDIT_ACCESS_ERROR,
+      }, status: :unauthorized
+      return
+    end
+  end
+
   private
 
   def block_action
@@ -122,11 +146,12 @@ class SnapshotLinksController < ApplicationController
     editable_project&.creator_id == current_user.id
   end
 
-  def format_snapshot_content(project_id)
+  def format_snapshot_content(project_id, background_id)
     # content stored as
     # {"samples":
     #   [{1: {"pipeline_run_id": 12345}},
-    #    {2: {"pipeline_run_id": 12345}}]
+    #    {2: {"pipeline_run_id": 12345}}],
+    #   "background_id": 1
     # }
     samples = []
     sample_ids = current_power.samples.where(project_id: project_id).pluck(:id)
@@ -136,11 +161,11 @@ class SnapshotLinksController < ApplicationController
         samples << { sample_id.to_s => { "pipeline_run_id" => pipeline_run.id } }
       end
     end
-    { "samples" => samples }.to_json
+    { "samples" => samples, "background_id" => background_id }.to_json
   end
 
   def snapshot_links_params
-    permitted_params = [:share_id, :project_id]
+    permitted_params = [:share_id, :project_id, :background_id]
     params.permit(*permitted_params)
   end
 end

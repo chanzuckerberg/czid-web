@@ -46,7 +46,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
         expect(share_id.length).to eq(SnapshotLink::SHARE_ID_LENGTH)
 
         # check for expected snapshot content
-        expected_content = { "samples" => [] }
+        expected_content = { "background_id" => nil, "samples" => [] }
         content = JSON.parse(new_snapshot["content"])
         expect(content).to eq(expected_content)
 
@@ -77,8 +77,8 @@ RSpec.describe SnapshotLinksController, type: :controller do
         expect(share_id.length).to eq(SnapshotLink::SHARE_ID_LENGTH)
 
         # check for expected snapshot content
-        expected_content = { "samples" =>
-          [{ @sample_one.id.to_s => { "pipeline_run_id" => @sample_one.first_pipeline_run.id } }] }
+        expected_content = { "background_id" => nil, "samples" =>
+          [{ @sample_one.id.to_s => { "pipeline_run_id" => @sample_one.first_pipeline_run.id } }], }
         content = JSON.parse(new_snapshot["content"])
         expect(content).to eq(expected_content)
 
@@ -112,10 +112,10 @@ RSpec.describe SnapshotLinksController, type: :controller do
         expect(share_id.length).to eq(SnapshotLink::SHARE_ID_LENGTH)
 
         # check for expected snapshot content
-        expected_content = { "samples" => [
+        expected_content = { "background_id" => nil, "samples" => [
           { @sample_one.id.to_s => { "pipeline_run_id" => @sample_one.first_pipeline_run.id } },
           { sample_two.id.to_s => { "pipeline_run_id" => sample_two.first_pipeline_run.id } },
-        ] }
+        ], }
         content = JSON.parse(new_snapshot["content"])
         expect(content).to eq(expected_content)
 
@@ -322,6 +322,37 @@ RSpec.describe SnapshotLinksController, type: :controller do
         sign_in @user
 
         get :info, params: { project_id: @snapshot_link_with_wrong_project_creator.project_id }
+        expect(response).to have_http_status(:unauthorized)
+        json_response = JSON.parse(response.body)
+        expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")
+      end
+    end
+
+    describe "PUT #update_background" do
+      before do
+        @snapshot_link = create(:snapshot_link,
+                                project_id: @project.id,
+                                share_id: "test_id",
+                                content: { background_id: nil, samples: [{ @sample_one.id => { pipeline_run_id: @sample_one.first_pipeline_run.id } }] }.to_json)
+      end
+
+      it "should update the default background for a snapshot link" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
+        @user.add_allowed_feature("edit_snapshot_links")
+        sign_in @user
+
+        put :update_background, params: { share_id: @snapshot_link.share_id, background_id: 1 }
+        expect(response).to have_http_status(:success)
+
+        @snapshot_link.reload
+        expect(JSON.parse(@snapshot_link.content)["background_id"]).to eq("1")
+      end
+
+      it "should return unauthorized if user doesn't have edit access to the project" do
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
+        sign_in @unauthorized_user
+
+        put :update_background, params: { share_id: @snapshot_link.share_id, background_id: 1 }
         expect(response).to have_http_status(:unauthorized)
         json_response = JSON.parse(response.body)
         expect(json_response["error"]).to eq("You are not authorized to edit view-only sharing settings.")

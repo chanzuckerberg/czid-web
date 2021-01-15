@@ -7,7 +7,7 @@ class BackgroundsController < ApplicationController
   # GET /backgrounds
   # GET /backgrounds.json
   def index
-    @backgrounds = current_power.backgrounds
+    @backgrounds = params[:ownedOrPublicBackgroundsOnly] ? current_power.owned_and_public_backgrounds : current_power.backgrounds
 
     respond_to do |format|
       format.html { render :index }
@@ -125,6 +125,6 @@ class BackgroundsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def background_params
-    params.require(:background).permit(:name, pipeline_run_ids: [], sample_ids: [])
+    params.require(:background).permit(:name, :ownedOrPublicBackgroundsOnly, pipeline_run_ids: [], sample_ids: [])
   end
 end

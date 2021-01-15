@@ -3,15 +3,15 @@ require "rails_helper"
 RSpec.describe SnapshotSamplesHelper, type: :helper do
   before do
     user = create(:user)
-    project = create(:project, users: [user])
+    @project = create(:project, users: [user])
     @sample_one = create(:sample,
-                         project: project,
+                         project: @project,
                          pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
     @sample_two = create(:sample,
-                         project: project,
+                         project: @project,
                          pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
     @sample_three = create(:sample,
-                           project: project,
+                           project: @project,
                            pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
     snapshot_content = {
       samples: [
@@ -20,11 +20,11 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
       ],
     }.to_json
     @empty_snapshot_link = create(:snapshot_link,
-                                  project_id: project.id,
+                                  project_id: @project.id,
                                   share_id: "empty_id",
                                   content: { samples: [] }.to_json)
     @snapshot_link = create(:snapshot_link,
-                            project_id: project.id,
+                            project_id: @project.id,
                             share_id: "test_id",
                             content: snapshot_content)
   end
@@ -106,6 +106,35 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
       response = helper.snapshot_pipeline_run_ids(@snapshot_link)
       pipeline_runs_ids = [@sample_one.first_pipeline_run.id, @sample_two.first_pipeline_run.id]
       expect(response).to eq(pipeline_runs_ids)
+    end
+  end
+
+  context "#snapshot_enable_mass_normalized_backgrounds" do
+    before do
+      @sample_four = create(:sample,
+                            project: @project,
+                            pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, total_ercc_reads: 2, pipeline_version: "4.0" }])
+      @sample_five = create(:sample,
+                            project: @project,
+                            pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, total_ercc_reads: 2, pipeline_version: "3.9" }])
+      @sample_six = create(:sample,
+                           project: @project,
+                           pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED, pipeline_version: "4.0" }])
+    end
+
+    it "should return true if all samples have ERCCs and have pipeline version 4.0+" do
+      response = helper.snapshot_enable_mass_normalized_backgrounds([@sample_four])
+      expect(response).to eq(true)
+    end
+
+    it "should return false if not all samples have pipeline version 4.0+" do
+      response = helper.snapshot_enable_mass_normalized_backgrounds([@sample_five])
+      expect(response).to eq(false)
+    end
+
+    it "should return false if not all samples have ERCCs" do
+      response = helper.snapshot_enable_mass_normalized_backgrounds([@sample_six])
+      expect(response).to eq(false)
     end
   end
 

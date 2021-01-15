@@ -409,7 +409,7 @@ export default class SampleView extends React.Component {
   fetchBackgrounds = async () => {
     const { snapshotShareId } = this.props;
     this.setState({ loadingReport: true });
-    const backgrounds = await getBackgrounds(snapshotShareId);
+    const backgrounds = await getBackgrounds({ snapshotShareId });
     this.setState(
       {
         backgrounds,

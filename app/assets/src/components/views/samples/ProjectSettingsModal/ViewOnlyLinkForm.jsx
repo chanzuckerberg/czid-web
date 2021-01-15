@@ -6,14 +6,16 @@ import {
   createSnapshot,
   getSnapshotInfo,
   deleteSnapshot,
+  updateSnapshotBackground,
 } from "~/api/snapshot_links";
+import { getBackgrounds } from "~/api";
 import { copyUrlToClipboard } from "~/helpers/url";
 import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import HelpIcon from "~ui/containers/HelpIcon";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import Toggle from "~ui/controls/Toggle";
 import { Input } from "~ui/controls";
 import { IconInfoSmall } from "~/components/ui/icons";
@@ -25,6 +27,7 @@ class ViewOnlyLinkForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      backgroundId: null,
       isLoading: false,
       sharingEnabled: false,
       automaticUpdateEnabled: false,
@@ -33,17 +36,12 @@ class ViewOnlyLinkForm extends React.Component {
       snapshotPipelineVersions: [],
       snapshotTimestamp: "",
     };
-    // TODO(ihan): fill dropdown options with real values
-    this.dropdownOptions = [
-      { text: "NID Human CSF v3", value: "0" },
-      { text: "Background Model 1", value: "1" },
-      { text: "Background Model 2", value: "2" },
-    ];
   }
 
   async componentDidMount() {
     this.setState({ isLoading: true });
     await this.fetchSnapshotInfo();
+    await this.fetchBackgrounds();
     this.setState({ isLoading: false });
   }
 
@@ -54,6 +52,10 @@ class ViewOnlyLinkForm extends React.Component {
       // Check in case you received an HTML redirect response
       if (snapshot && snapshot.share_id) {
         this.setState({
+          
+          backgroundId: snapshot.background_id,
+          enableMassNormalizedBackgrounds:
+            snapshot.mass_normalized_backgronds_available,
           sharingEnabled: true,
           snapshotShareId: snapshot.share_id,
           snapshotNumSamples: snapshot.num_samples,
@@ -64,6 +66,18 @@ class ViewOnlyLinkForm extends React.Component {
     } catch (_) {
       this.clearSnapshotInfo();
     }
+  };
+
+  fetchBackgrounds = async () => {
+    const backgrounds = await getBackgrounds({
+      ownedOrPublicBackgroundsOnly: true,
+    });
+    const backgroundOptions = backgrounds.map(background => ({
+      text: background.name,
+      value: background.id,
+      mass_normalized: background.mass_normalized,
+    }));
+    this.setState({ backgroundOptions });
   };
 
   clearSnapshotInfo = () => {
@@ -137,7 +151,6 @@ class ViewOnlyLinkForm extends React.Component {
 
   renderPipelineVersions = () => {
     const { snapshotPipelineVersions } = this.state;
-
     const numPipelineVersions = snapshotPipelineVersions.length;
     if (numPipelineVersions === 0) return "No pipeline versions";
     if (numPipelineVersions === 1) {
@@ -166,8 +179,31 @@ class ViewOnlyLinkForm extends React.Component {
     );
   };
 
+  handleBackgroundChange = async backgroundId => {
+    const { snapshotShareId } = this.state;
+    const { project } = this.props;
+    this.setState({ backgroundId });
+    try {
+      await updateSnapshotBackground(snapshotShareId, backgroundId);
+      logAnalyticsEvent("ViewOnlyLinkForm_background-select_changed", {
+        projectId: project.id,
+        backgroundId,
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      logAnalyticsEvent("ViewOnlyLinkForm_background-select_failed", {
+        projectId: project.id,
+        backgroundId,
+      });
+    }
+  };
+
   render() {
     const {
+      backgroundId,
+      backgroundOptions,
+      enableMassNormalizedBackgrounds,
       isLoading,
       sharingEnabled,
       automaticUpdateEnabled,
@@ -226,7 +262,7 @@ class ViewOnlyLinkForm extends React.Component {
             />
           </div>
         </div>
-        {sharingEnabled && (
+        {sharingEnabled && !isLoading && (
           <div className={cx(cs.viewOnlyLinkBody, cs.background)}>
             <div className={cs.label}>Details for View-Only</div>
             <div className={cs.note}>
@@ -242,14 +278,19 @@ class ViewOnlyLinkForm extends React.Component {
                     className={cs.helpIcon}
                   />
                 </div>
-                <Dropdown
-                  fluid
+                <BackgroundModelFilter
+                  allBackgrounds={backgroundOptions}
                   className={cs.dropdown}
-                  placeholder="NID Human CSF v3"
-                  options={this.dropdownOptions}
-                  onChange={() =>
-                    console.warn("background model onChange not configured")
+                  enableMassNormalizedBackgrounds={
+                    enableMassNormalizedBackgrounds
                   }
+                  fluid
+                  label={null}
+                  onChange={backgroundId =>
+                    this.handleBackgroundChange(backgroundId)
+                  }
+                  rounded={false}
+                  value={backgroundId}
                 />
               </div>
               <div className={cs.settingsFormField}>
