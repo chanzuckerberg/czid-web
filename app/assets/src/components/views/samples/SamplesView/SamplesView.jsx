@@ -5,10 +5,6 @@ import React from "react";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import {
-  CG_BULK_DOWNLOADS_FEATURE,
-  NEXTCLADE_FEATURE,
-} from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
@@ -259,14 +255,7 @@ class SamplesView extends React.Component {
   };
 
   renderTriggers = () => {
-    const { allowedFeatures, selectedSampleIds, workflow } = this.props;
-
-    const triggersToHide = compact([
-      !allowedFeatures.includes(NEXTCLADE_FEATURE) && TRIGGERS.nextclade,
-      workflow === WORKFLOWS.CONSENSUS_GENOME.value &&
-        !allowedFeatures.includes(CG_BULK_DOWNLOADS_FEATURE) &&
-        TRIGGERS.download,
-    ]);
+    const { selectedSampleIds, workflow } = this.props;
 
     const triggers = {
       [TRIGGERS.backgroundModel]: this.renderCollectionTrigger,
@@ -275,14 +264,11 @@ class SamplesView extends React.Component {
       [TRIGGERS.download]: this.renderBulkDownloadTrigger,
       [TRIGGERS.nextclade]: this.renderNextcladeTrigger,
     };
-
-    const triggersToRender = WORKFLOW_TRIGGERS[workflow]
-      .filter(trigger => !triggersToHide.includes(trigger))
-      .map(trigger => (
-        <React.Fragment key={`${workflow}-${trigger}`}>
-          {triggers[trigger]()}
-        </React.Fragment>
-      ));
+    const triggersToRender = WORKFLOW_TRIGGERS[workflow].map(trigger => (
+      <React.Fragment key={`${workflow}-${trigger}`}>
+        {triggers[trigger]()}
+      </React.Fragment>
+    ));
 
     return (
       <React.Fragment>

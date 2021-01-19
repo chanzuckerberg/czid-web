@@ -32,10 +32,6 @@ import { get } from "~/api/core";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import {
-  CG_BULK_DOWNLOADS_FEATURE,
-  NEXTCLADE_FEATURE,
-} from "~/components/utils/features";
 import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { logError } from "~/components/utils/logUtil";
@@ -1500,17 +1496,7 @@ class DiscoveryView extends React.Component {
     const samples = this.samplesByWorkflow[workflow];
     const tableHasLoaded = !samples.isLoading() && currentDisplay === "table";
 
-    const isConsensusGenome =
-      workflow &&
-      this.samplesByWorkflow[workflow].displayName ===
-        WORKFLOWS.CONSENSUS_GENOME.value;
-
-    const hideAllTriggers =
-      !!snapshotShareId ||
-      (isConsensusGenome &&
-        !allowedFeatures.some(f =>
-          [CG_BULK_DOWNLOADS_FEATURE, NEXTCLADE_FEATURE].includes(f)
-        ));
+    const hideAllTriggers = !!snapshotShareId;
 
     return (
       <React.Fragment>
