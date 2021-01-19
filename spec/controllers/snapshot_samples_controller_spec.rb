@@ -34,51 +34,51 @@ RSpec.describe SnapshotSamplesController, type: :controller do
     end
 
     describe "GET #show" do
-      it "should redirect to root_path" do
+      it "should redirect to page_not_found_path" do
         get :show, params: { id: @sample_one.id, share_id: @snapshot_link.share_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
     end
 
     describe "GET #report_v2" do
-      it "should redirect to root_path" do
+      it "should redirect to page_not_found_path" do
         get :report_v2, params: { id: @sample_one.id, share_id: @snapshot_link.share_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
     end
 
     describe "GET #index_v2" do
-      it "should redirect to root_path" do
+      it "should redirect to page_not_found_path" do
         get :index_v2, params: { share_id: @snapshot_link.share_id, project_id: @snapshot_link.project_id, listAllIds: true, basic: true }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
     end
 
     describe "GET #stats" do
-      it "should redirect to root_path" do
+      it "should redirect to page_not_found_path" do
         get :stats, params: { share_id: @snapshot_link.share_id, domain: "snapshot", project_id: @snapshot_link.project_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
     end
 
     describe "GET #dimensions" do
-      it "should redirect to root_path" do
+      it "should redirect to page_not_found_path" do
         get :dimensions, params: { share_id: @snapshot_link.share_id, domain: "snapshot", project_id: @snapshot_link.project_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
     end
 
     describe "GET #metadata" do
-      it "should redirect to root_path" do
+      it "should redirect to page_not_found_path" do
         get :metadata, params: { id: @sample_one.id, share_id: @snapshot_link.share_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
     end
 
     describe "GET #metadata_fields" do
-      it "should redirect to root_path" do
+      it "should redirect to page_not_found_path" do
         get :metadata_fields, params: { sampleIds: [@sample_one.id], share_id: @snapshot_link.share_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
     end
   end
@@ -93,14 +93,14 @@ RSpec.describe SnapshotSamplesController, type: :controller do
     end
 
     describe "GET #show" do
-      it "should redirect to root_path for invalid share_id" do
+      it "should redirect to page_not_found_path for invalid share_id" do
         get :show, params: { id: @sample_one.id, share_id: "invalid_id" }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
-      it "should redirect to root_path for non-snapshot sample" do
+      it "should redirect to page_not_found_path for non-snapshot sample" do
         get :show, params: { id: @sample_two.id, share_id: @snapshot_link.share_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
       it "should return the correct sample for valid share_id and sample" do
@@ -115,14 +115,14 @@ RSpec.describe SnapshotSamplesController, type: :controller do
     end
 
     describe "GET #report_v2" do
-      it "should redirect to root_path for invalid share_id" do
+      it "should redirect to page_not_found_path for invalid share_id" do
         get :report_v2, params: { id: @sample_one.id, share_id: "invalid_id" }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
-      it "should redirect to root_path for non-snapshot sample" do
+      it "should redirect to page_not_found_path for non-snapshot sample" do
         get :report_v2, params: { id: @sample_two.id, share_id: @snapshot_link.share_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
       it "should return the correct report_v2 for valid share_id, sample, and background" do
@@ -135,9 +135,9 @@ RSpec.describe SnapshotSamplesController, type: :controller do
     end
 
     describe "GET #index_v2" do
-      it "should redirect to root_path for invalid share_id" do
+      it "should redirect to page_not_found_path for invalid share_id" do
         get :index_v2, params: { share_id: "invalid_id", project_id: @snapshot_link.project_id, listAllIds: true, basic: true }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
       it "should return the correct json_response for valid share_id and empty project (basic)" do
@@ -184,9 +184,9 @@ RSpec.describe SnapshotSamplesController, type: :controller do
     end
 
     describe "GET #stats" do
-      it "should redirect to root_path for invalid share_id" do
+      it "should redirect to page_not_found_path for invalid share_id" do
         get :stats, params: { share_id: "invalid_id", domain: "snapshot", project_id: @snapshot_link.project_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
       it "should return the correct json_response for valid share_id and empty project" do
@@ -207,9 +207,9 @@ RSpec.describe SnapshotSamplesController, type: :controller do
     end
 
     describe "GET #dimensions" do
-      it "should redirect to root_path for invalid share_id" do
+      it "should redirect to page_not_found_path for invalid share_id" do
         get :dimensions, params: { share_id: "invalid_id", domain: "snapshot", project_id: @snapshot_link.project_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
       it "should return the correct json_response for valid share_id and empty project" do
@@ -264,14 +264,14 @@ RSpec.describe SnapshotSamplesController, type: :controller do
     end
 
     describe "GET #metadata" do
-      it "should redirect to root_path for invalid share_id" do
+      it "should redirect to page_not_found_path for invalid share_id" do
         get :metadata, params: { id: @sample_one.id, share_id: "invalid_id" }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
-      it "should redirect to root_path for non-snapshot sample" do
+      it "should redirect to page_not_found_path for non-snapshot sample" do
         get :metadata, params: { id: @sample_two.id, share_id: @snapshot_link.share_id }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
       it "should return the correct json_response for valid share_id" do
@@ -303,9 +303,9 @@ RSpec.describe SnapshotSamplesController, type: :controller do
     end
 
     describe "GET #metadata_fields" do
-      it "should redirect to root_path for invalid share_id" do
+      it "should redirect to page_not_found_path for invalid share_id" do
         get :metadata_fields, params: { sampleIds: [@sample_one.id], share_id: "invalid_id" }
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(page_not_found_path)
       end
 
       it "should exclude non-snapshot sample for valid share_id" do

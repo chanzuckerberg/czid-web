@@ -1,0 +1,14 @@
+<!--Show a "mobile-friendly" page -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div id="page_not_found">
+  <%= javascript_tag do %>
+    react_component(
+      'PageNotFound',
+      {
+        browserInfo: <%= @browser_info.to_json.html_safe %>,
+        showLandingHeader: <%= @show_landing_header %>
+      },
+      'page_not_found'
+      );
+  <% end %>
+</div>

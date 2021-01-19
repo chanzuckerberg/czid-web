@@ -123,11 +123,11 @@ RSpec.describe SnapshotLinksController, type: :controller do
         expect(response).to have_http_status(:ok)
       end
 
-      it "should redirect to root path, if the feature is disabled" do
+      it "should redirect to page not found path, if the feature is disabled" do
         AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "0")
         sign_in @user
         post :create, params: { project_id: @project.id }
-        expect(response).to redirect_to root_path
+        expect(response).to redirect_to page_not_found_path
       end
 
       it "should return unauthorized if user doesn't have edit access to the project" do
@@ -171,22 +171,22 @@ RSpec.describe SnapshotLinksController, type: :controller do
         end.to change(SnapshotLink, :count).by(-1)
       end
 
-      it "should redirect to root path, if the share_id is invalid" do
+      it "should redirect to page not found path, if the share_id is invalid" do
         AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "1")
         @user.add_allowed_feature("edit_snapshot_links")
         sign_in @user
 
         delete :destroy, params: { share_id: "invalid_id" }
-        expect(response).to redirect_to root_path
+        expect(response).to redirect_to page_not_found_path
       end
 
-      it "should redirect to root path, if the snapshot sharing is disabled" do
+      it "should redirect to page not found path, if the snapshot sharing is disabled" do
         AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "0")
         @user.add_allowed_feature("edit_snapshot_links")
         sign_in @user
 
         delete :destroy, params: { share_id: @snapshot_link.share_id }
-        expect(response).to redirect_to root_path
+        expect(response).to redirect_to page_not_found_path
       end
 
       it "should redirect to root path, if the feature is disabled" do
@@ -299,12 +299,12 @@ RSpec.describe SnapshotLinksController, type: :controller do
         expect(json_response).to eq({})
       end
 
-      it "should redirect to root path, if snapshot sharing is disabled" do
+      it "should redirect to page not found path, if snapshot sharing is disabled" do
         AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "0")
         sign_in @user
 
         get :info, params: { project_id: @multi_sample_snapshot.project_id }
-        expect(response).to redirect_to root_path
+        expect(response).to redirect_to page_not_found_path
       end
 
       it "should return unauthorized if user doesn't have edit access to the project" do
@@ -373,10 +373,10 @@ RSpec.describe SnapshotLinksController, type: :controller do
     end
 
     describe "GET #show" do
-      it "should redirect to root path, if snapshot sharing is disabled" do
+      it "should redirect to page_not_found_path path, if snapshot sharing is disabled" do
         AppConfigHelper.set_app_config(AppConfig::ENABLE_SNAPSHOT_SHARING, "0")
         get :show, params: { share_id: @snapshot_link.share_id }
-        expect(response).to redirect_to root_path
+        expect(response).to redirect_to page_not_found_path
       end
 
       it "should render the snapshot template, if snapshot sharing is enabled" do

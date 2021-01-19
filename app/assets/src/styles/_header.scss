@@ -35,59 +35,6 @@ a {
   display: none;
 }
 
-.header-row {
-  margin: 0;
-}
-.site-header {
-  height: 50px;
-  background-color: $black;
-  font-size: $font-size-base;
-  position: relative;
-  z-index: 1000;
-  display: flex;
-
-  .fill {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .user-name {
-    font-family: $font-family-default;
-    font-size: 14px;
-    margin-right: 5px;
-  }
-
-  .user-dropdown {
-    color: $gray-dark;
-    margin-right: 10px;
-    height: 36px;
-    margin-top: 7px;
-
-    &:hover {
-      color: $gray-light;
-    }
-
-    &.active {
-      color: $gray-light;
-
-      /* Override semantic-ui */
-      .icon.dropdown:before {
-        color: $gray-light !important;
-      }
-    }
-  }
-}
-
-.brand-details {
-  .logo-icon {
-    svg {
-      height: 2.5rem;
-      margin-top: 0.5rem;
-      margin-left: 0.3rem;
-    }
-  }
-}
-
 .profile-dropdown {
   cursor: pointer;
   i {

@@ -73,6 +73,7 @@ YAxis.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
   barHeight: PropTypes.number,
+  tickSize: PropTypes.number,
   ticksVisible: PropTypes.bool,
   pathVisible: PropTypes.bool,
   textClassName: PropTypes.string,

@@ -123,7 +123,7 @@ class SnapshotLinksController < ApplicationController
   private
 
   def block_action
-    redirect_to root_path
+    redirect_to page_not_found_path
   end
 
   def app_config_required

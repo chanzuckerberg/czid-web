@@ -12,7 +12,7 @@ import {
 } from "semantic-ui-react";
 
 import BasicPopup from "~/components/BasicPopup";
-import { IconAlert, LogoReversed } from "~ui/icons";
+import { IconAlert } from "~ui/icons";
 import Container from "../ui/containers/Container";
 import ExternalLink from "~ui/controls/ExternalLink";
 import Link from "~ui/controls/Link";
@@ -22,6 +22,7 @@ import StringHelper from "../../helpers/StringHelper";
 import ImgBacteriaPrimary from "~ui/illustrations/ImgBacteriaPrimary";
 import ImgDetectPrimary from "~ui/illustrations/ImgDetectPrimary";
 import ImgDecipherPrimary from "~ui/illustrations/ImgDecipherPrimary";
+import LandingHeader from "~/components/views/LandingHeader";
 
 import cs from "./landing.scss";
 
@@ -80,68 +81,6 @@ class Landing extends React.Component {
   }
 
   render() {
-    const signInLink = () => {
-      location.href = "/auth0/login";
-    };
-    const header = (
-      <div className="header-row row">
-        <div className="site-header col s12">
-          <div className="left brand-details">
-            <a href="/">
-              <span className="logo-icon">
-                <LogoReversed />
-              </span>
-            </a>
-          </div>
-          <div className="fill" />
-          <div className={cs.links}>
-            <ExternalLink
-              className={cs.headerLink}
-              href="https://help.idseq.net"
-              analyticsEventName="Landing_help-center-link_clicked"
-            >
-              Help Center
-            </ExternalLink>
-            <ExternalLink
-              className={cs.headerLink}
-              href="https://www.discoveridseq.com/vr"
-              analyticsEventName="Landing_video-tour-link_clicked"
-            >
-              Video Tour
-            </ExternalLink>
-            <ExternalLink
-              className={cs.headerLink}
-              href="https://chanzuckerberg.com/join-us/openings/?initiative=science"
-              analyticsEventName="Landing_hiring-link_clicked"
-            >
-              Hiring
-            </ExternalLink>
-            <ExternalLink
-              className={cs.headerLink}
-              href="https://github.com/chanzuckerberg/idseq-workflows"
-              analyticsEventName="Landing_github-link_clicked"
-            >
-              GitHub
-            </ExternalLink>
-          </div>
-          {this.props.browserInfo.supported ? (
-            <div className="sign-in">
-              <TransparentButton
-                text="Sign In"
-                onClick={signInLink}
-                disabled={!this.props.browserInfo.supported}
-              />
-            </div>
-          ) : (
-            <div className="alert-browser-support">
-              {this.props.browserInfo.browser} is not currently supported.
-              Please sign in from a different browser.
-            </div>
-          )}
-        </div>
-      </div>
-    );
-
     let publicSiteBanner;
     if (this.props.showPublicSite) {
       publicSiteBanner = (
@@ -405,7 +344,7 @@ class Landing extends React.Component {
 
     return (
       <div>
-        {header}
+        <LandingHeader browserInfo={this.props.browserInfo} />
         {publicSiteBanner}
         {firstBlock}
         {paperReference}

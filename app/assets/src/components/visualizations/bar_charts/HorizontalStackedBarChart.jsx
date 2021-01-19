@@ -163,7 +163,7 @@ export default class HorizontalStackedBarChart extends React.Component {
 
   updateChartDimensions() {
     const { yAxisKey } = this.props;
-    const { data, dataKeys, options } = this.state;
+    const { data, dataKeys } = this.state;
 
     // allow for autoselection of width
     // 98% container width to account for floating point math rounding
@@ -217,7 +217,7 @@ export default class HorizontalStackedBarChart extends React.Component {
   }
 
   measureWidths(width) {
-    const { options, measurements } = this.state;
+    const { measurements } = this.state;
 
     let truncatedLabels = [];
     const longestLabel = maxBy(measurements.yTextWidthPairs, pair => pair[1]);
@@ -233,8 +233,6 @@ export default class HorizontalStackedBarChart extends React.Component {
     );
 
     if (longestLabelLength > yAxisWidth) {
-      const truncatedLabelWidth = yAxisWidth - measurements.ellipsisTextWidth;
-
       measurements.yTextWidthPairs.forEach(pair => {
         const [label, labelWidth] = pair;
 
@@ -456,7 +454,6 @@ export default class HorizontalStackedBarChart extends React.Component {
     const {
       data,
       options,
-      dataKeys,
       stackedData,
       barCanvasWidth,
       barHeight,

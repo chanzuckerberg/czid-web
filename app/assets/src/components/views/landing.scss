@@ -169,6 +169,35 @@
   }
 }
 
+.header {
+  margin: 0;
+
+  .siteHeader {
+    height: 50px;
+    background-color: $black;
+    font-size: $font-size-h6;
+    position: relative;
+    z-index: 1000;
+    display: flex;
+    padding: 0 0.75rem;
+
+    .fill {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+}
+
+.brandDetails {
+  .logoIcon {
+    svg {
+      height: 2.5rem;
+      margin-top: 0.5rem;
+      margin-left: 0.3rem;
+    }
+  }
+}
+
 .footer {
   width: 30rem;
   margin: 7rem auto 2rem auto;

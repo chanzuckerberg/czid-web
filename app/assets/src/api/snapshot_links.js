@@ -9,9 +9,9 @@ const getSnapshotInfo = projectId =>
 const deleteSnapshot = snapshotShareId =>
   deleteWithCSRF(`/pub/${snapshotShareId}/destroy`);
 
-const updateSnapshotBackground = (snapshotShareId, background_id) =>
+const updateSnapshotBackground = (snapshotShareId, backgroundId) =>
   putWithCSRF(`/pub/${snapshotShareId}/update_background`, {
-    background_id,
+    background_id: backgroundId,
   });
 
 export {

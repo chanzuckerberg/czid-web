@@ -79,6 +79,7 @@ Rails.application.routes.draw do
   get 'terms', to: 'support#terms'
   get 'terms_changes', to: 'support#terms_changes'
   get 'faqs', to: 'support#faqs'
+  get 'page_not_found', to: 'home#page_not_found'
 
   get 'maintenance', to: 'home#maintenance'
 

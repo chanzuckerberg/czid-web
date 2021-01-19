@@ -2,11 +2,11 @@ require 'will_paginate/array'
 
 class HomeController < ApplicationController
   include SamplesHelper
-  before_action :login_required, except: [:landing, :sign_up, :maintenance]
+  before_action :login_required, except: [:landing, :sign_up, :maintenance, :page_not_found]
   before_action :admin_required, only: [:all_data] # rubocop:disable Rails/LexicallyScopedActionFilter
-  skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance]
+  skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance, :page_not_found]
   skip_before_action :check_for_maintenance, only: [:maintenance, :landing, :sign_up]
-  power :projects, except: [:landing, :sign_up, :maintenance]
+  power :projects, except: [:landing, :sign_up, :maintenance, :page_not_found]
 
   # Public unsecured landing page
   def landing
@@ -33,6 +33,15 @@ class HomeController < ApplicationController
 
       @show_landing_header = true
       render 'landing'
+    end
+  end
+
+  def page_not_found
+    if current_user
+      @show_landing_header = false
+    else
+      @show_landing_header = true
+      render 'page_not_found'
     end
   end
 
