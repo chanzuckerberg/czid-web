@@ -112,12 +112,12 @@ const uploadFileToUrlWithRetries = async (
     onUploadProgress,
   };
 
-  // Retry up to 5 times with a 30s delay. axiosRetry interceptor means that 'catch' won't be
+  // Retry up to 3 times with a 10s delay. axiosRetry interceptor means that 'catch' won't be
   // called until all tries fail.
   const client = axios.create();
   axiosRetry(client, {
-    retries: 5,
-    retryDelay: () => 30000,
+    retries: 3,
+    retryDelay: () => 10000,
     retryCondition: () => true,
   });
 

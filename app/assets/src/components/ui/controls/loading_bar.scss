@@ -3,28 +3,35 @@
 
 .loadingBarBackground {
   background-color: $gray-lightest;
-  height: 8px;
-  margin-top: 5px;
+  height: $space-s;
   border-radius: $border-radius-m;
   overflow: hidden;
 
   .loadingBar {
-    background-color: $primary-light;
-    height: 8px;
+    background-color: $primary;
+    height: $space-s;
     width: 0px;
     border-radius: $border-radius-m;
 
     &.showHint {
-      min-width: 4px;
+      min-width: $space-xxs;
+    }
+
+    &.error {
+      background-color: $error-medium;
     }
   }
 
   &.tiny {
-    height: 6px;
+    height: $space-xs;
 
     .loadingBar {
-      height: 6px;
+      height: $space-xs;
       border-radius: $border-radius-m;
     }
+  }
+
+  &.loading {
+    margin-top: $space-xxs;
   }
 }

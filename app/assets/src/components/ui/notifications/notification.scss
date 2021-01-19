@@ -8,6 +8,7 @@
   box-shadow: $box-shadow-s;
   color: $black;
   display: flex;
+  align-items: center;
   font-family: $font-family-default;
   font-size: $font-size;
   padding: 14px 14px 14px 9px;
@@ -20,6 +21,7 @@
 
   .icon {
     flex-grow: 0;
+    margin-left: $space-xxs;
     margin-right: $space-l;
     height: 20px;
 

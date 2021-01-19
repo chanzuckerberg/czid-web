@@ -1,7 +1,9 @@
 import React from "react";
+import PropTypes from "~/components/utils/propTypes";
+
 import {
+  isEmpty,
   filter,
-  some,
   map,
   sum,
   take,
@@ -9,24 +11,28 @@ import {
   times,
   constant,
   pick,
-  pickBy,
   size,
+  find,
 } from "lodash/fp";
 
 import Modal from "~ui/containers/Modal";
-import PropTypes from "~/components/utils/propTypes";
-import { logAnalyticsEvent } from "~/api/analytics";
+import UploadConfirmationModal from "./UploadConfirmationModal";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logError } from "~/components/utils/logUtil";
 import { formatFileSize } from "~/components/utils/format";
+import Notification from "~ui/notifications/Notification";
 import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
-import { IconAlert, IconSuccess } from "~ui/icons";
+import { IconAlert, IconCheckSmall, IconSuccess } from "~ui/icons";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import LoadingBar from "~/components/ui/controls/LoadingBar";
 import {
-  bulkUploadLocalWithMetadata,
+  initiateBulkUploadLocalWithMetadata,
   bulkUploadRemote,
   bulkUploadBasespace,
+  uploadSampleFilesToPresignedURL,
 } from "~/api/upload";
 
+import cx from "classnames";
 import cs from "./upload_progress_modal.scss";
 
 const BASESPACE_SAMPLE_FIELDS = [
@@ -46,6 +52,9 @@ const PIPELINE_EXECUTION_STRATEGIES = {
 
 export default class UploadProgressModal extends React.Component {
   state = {
+    confirmationModalOpen: false,
+    locallyCreatedSamples: [],
+    retryingSampleUpload: false,
     // For local uploads.
     sampleUploadPercentages: {},
     sampleUploadStatuses: {},
@@ -56,13 +65,18 @@ export default class UploadProgressModal extends React.Component {
 
   componentDidUpdate() {
     const { samples, onUploadComplete, uploadType } = this.props;
-    const { uploadComplete, sampleUploadStatuses } = this.state;
+    const {
+      uploadComplete,
+      sampleUploadStatuses,
+      retryingSampleUpload,
+    } = this.state;
 
     // For local uploads, check if all samples are completed whenever sampleUploadStatuses changes.
     if (
       uploadType === "local" &&
       !uploadComplete &&
-      !this.someLocalSamplesInProgress()
+      !retryingSampleUpload &&
+      isEmpty(this.getLocalSamplesInProgress())
     ) {
       onUploadComplete();
 
@@ -70,7 +84,7 @@ export default class UploadProgressModal extends React.Component {
         uploadComplete: true,
       });
 
-      if (this.someLocalSamplesFailed()) {
+      if (!isEmpty(this.getLocalSamplesFailed())) {
         const failedSamples = filter(
           sample => sampleUploadStatuses[sample.name] === "error",
           samples
@@ -142,12 +156,56 @@ export default class UploadProgressModal extends React.Component {
     }));
   };
 
+  checkIfRetriedSamplesCompleted = () => {
+    const { retryingSampleUpload } = this.state;
+
+    if (retryingSampleUpload && isEmpty(this.getLocalSamplesInProgress())) {
+      this.setState({ retryingSampleUpload: false, uploadComplete: true });
+    }
+  };
+
+  getUploadProgressCallbacks = () => {
+    return {
+      onSampleUploadProgress: (sample, percentage) => {
+        this.updateSampleUploadPercentage(sample.name, percentage);
+      },
+      onSampleUploadError: (sample, error) => {
+        logError({
+          message:
+            "UploadProgressModal: Local sample upload error to S3 occured",
+          details: {
+            sample,
+            error,
+          },
+        });
+        this.updateSampleUploadStatus(sample.name, "error");
+        this.checkIfRetriedSamplesCompleted();
+        this.logUploadStepError("sampleUpload", 1);
+      },
+      onSampleUploadSuccess: sample => {
+        this.updateSampleUploadStatus(sample.name, "success");
+        this.checkIfRetriedSamplesCompleted();
+      },
+      onMarkSampleUploadedError: sample => {
+        logError({
+          message:
+            "UploadProgressModal: An error occured when marking a sample as uploaded",
+          details: {
+            sample,
+          },
+        });
+        this.updateSampleUploadStatus(sample.name, "error");
+        this.checkIfRetriedSamplesCompleted();
+        this.logUploadStepError("markSampleUploaded", 1);
+      },
+    };
+  };
+
   initiateUploadLocal = () => {
-    const { samples, metadata } = this.props;
+    const { metadata, samples } = this.props;
 
     const samplesToUpload = this.addFlagsToSamples(samples);
-
-    bulkUploadLocalWithMetadata({
+    initiateBulkUploadLocalWithMetadata({
       samples: samplesToUpload,
       metadata,
       callbacks: {
@@ -170,28 +228,19 @@ export default class UploadProgressModal extends React.Component {
 
           this.logUploadStepError("createSamples", erroredSampleNames.length);
         },
-        onSampleUploadProgress: (sample, percentage) => {
-          this.updateSampleUploadPercentage(sample.name, percentage);
-        },
-        onSampleUploadError: (sample, error) => {
-          // TODO(mark): Send to Datadog once front-end Datadog integration is installed
-          // Particularly important for this callback since we upload directly to S3 without going through idseq-web.
-          // eslint-disable-next-line no-console
-          console.error("onSampleUploadError:", sample.name, error);
-          this.updateSampleUploadStatus(sample.name, "error");
-          this.logUploadStepError("sampleUpload", 1);
-        },
-        onSampleUploadSuccess: sample => {
-          this.updateSampleUploadStatus(sample.name, "success");
-        },
-        onMarkSampleUploadedError: sample => {
-          // eslint-disable-next-line no-console
-          console.error("onMarkSampleUploadedError:", sample.name);
-          this.updateSampleUploadStatus(sample.name, "error");
-          this.logUploadStepError("markSampleUploaded", 1);
-        },
       },
-    });
+    }).then(createdSamples =>
+      this.setState(
+        {
+          locallyCreatedSamples: createdSamples,
+        },
+        () =>
+          uploadSampleFilesToPresignedURL({
+            samples: createdSamples,
+            callbacks: this.getUploadProgressCallbacks(),
+          })
+      )
+    );
   };
 
   // Initiate upload for s3 and basespace samples.
@@ -282,50 +331,90 @@ export default class UploadProgressModal extends React.Component {
 
   getNumFailedSamples = () => {
     const { uploadType } = this.props;
-    const { sampleUploadStatuses, failedSampleNames } = this.state;
+    const { failedSampleNames } = this.state;
     if (uploadType === "local") {
-      return size(pickBy(status => status === "error", sampleUploadStatuses));
+      return size(this.getLocalSamplesFailed());
     } else {
       return failedSampleNames.length;
     }
   };
 
-  someLocalSamplesInProgress = () => {
+  getLocalSamplesInProgress = () => {
     const { samples } = this.props;
     const { sampleUploadStatuses } = this.state;
-    return some(
-      sample => sampleUploadStatuses[sample.name] === undefined,
+    return filter(
+      sample =>
+        sampleUploadStatuses[sample.name] === undefined ||
+        sampleUploadStatuses[sample.name] === "in progress",
       samples
     );
   };
 
-  someLocalSamplesFailed = () => {
+  getLocalSamplesFailed = () => {
     const { samples } = this.props;
     const { sampleUploadStatuses } = this.state;
-    return some(
+    return filter(
       sample => sampleUploadStatuses[sample.name] === "error",
       samples
     );
   };
 
-  renderSampleStatus = sample => {
-    const { sampleUploadStatuses } = this.state;
+  retryFailedSamplesUploadToS3 = failedSamples => {
+    const { locallyCreatedSamples } = this.state;
 
-    if (sampleUploadStatuses[sample.name] === "error") {
+    // We want to set { retryingSampleUpload: true } so the title gets updated right before the sample upload retry process
+    this.setState(
+      {
+        retryingSampleUpload: true,
+        uploadComplete: false,
+      },
+      () => {
+        // Finds the corresponding sample from locallyCreatedSamples and marks it as in progress with an upload percentage of 0
+        // This is necessary because the locallyCreatedSamples all have the presigned S3 URL whereas the samples passed in via props does not
+        const failedSamplesWithPresignedURLs = map(failedSample => {
+          this.updateSampleUploadStatus(failedSample.name, "in progress");
+          this.updateSampleUploadPercentage(failedSample.name, 0);
+
+          return find({ name: failedSample.name }, locallyCreatedSamples);
+        }, failedSamples);
+
+        uploadSampleFilesToPresignedURL({
+          samples: failedSamplesWithPresignedURLs,
+          callbacks: this.getUploadProgressCallbacks(),
+        });
+      }
+    );
+  };
+
+  renderSampleStatus = ({ sample, status }) => {
+    if (status === "error") {
       return (
         <React.Fragment>
           <IconAlert className={cs.alertIcon} type="error" />
           Upload failed
+          <div className={cs.verticalDivider}> | </div>{" "}
+          <div
+            onClick={withAnalytics(
+              () => this.retryFailedSamplesUploadToS3([sample]),
+              "UploadProgressModal_retry_clicked",
+              {
+                sampleName: sample.name,
+              }
+            )}
+            className={cs.sampleRetry}
+          >
+            Retry
+          </div>
         </React.Fragment>
       );
     }
 
-    if (sampleUploadStatuses[sample.name] === "success") {
+    if (status === "success") {
       return (
-        <React.Fragment>
-          <IconSuccess className={cs.checkmarkIcon} />
-          Uploaded and sent to pipeline
-        </React.Fragment>
+        <div className={cs.success}>
+          <IconCheckSmall className={cs.checkmarkIcon} />
+          Sent to pipeline
+        </div>
       );
     }
 
@@ -342,33 +431,43 @@ export default class UploadProgressModal extends React.Component {
   };
 
   renderFailedSamplesTitle = () => {
+    const { samples } = this.props;
+    const { sampleUploadStatuses } = this.state;
+
     const numFailedSamples = this.getNumFailedSamples();
+    const title =
+      Object.keys(sampleUploadStatuses).length === numFailedSamples
+        ? "All uploads failed"
+        : `Uploads completed with ${numFailedSamples} error`;
 
     return (
       <React.Fragment>
-        <div className={cs.titleWithIcon}>
-          <IconAlert className={cs.alertIcon} type="error" />
-          {numFailedSamples} sample{numFailedSamples === 1 ? "" : "s"} failed to
-          upload
-        </div>
-        <div className={cs.subtitle}>
-          <a
-            className={cs.helpLink}
-            href="mailto:help@idseq.net"
-            onClick={() =>
-              logAnalyticsEvent("UploadProgressModal_contact-us-link_clicked")
-            }
-          >
-            Contact us for help
-          </a>
-        </div>
+        <div className={cs.titleWithIcon}>{title}</div>
+        {numFailedSamples === size(samples) && (
+          <div className={cs.subtitle}>
+            <a
+              className={cs.helpLink}
+              href="mailto:help@idseq.net"
+              onClick={() =>
+                logAnalyticsEvent("UploadProgressModal_contact-us-link_clicked")
+              }
+            >
+              Contact us for help
+            </a>
+          </div>
+        )}
+        {this.renderRetryAllFailedNotification()}
       </React.Fragment>
     );
   };
 
   renderTitle = () => {
     const { samples, project, uploadType } = this.props;
-    const { uploadComplete, failedSampleNames } = this.state;
+    const {
+      uploadComplete,
+      failedSampleNames,
+      retryingSampleUpload,
+    } = this.state;
 
     if (uploadType === "remote" || uploadType === "basespace") {
       if (uploadComplete) {
@@ -400,93 +499,163 @@ export default class UploadProgressModal extends React.Component {
             Creating {samples.length} sample{samples.length !== 1 && "s"} in{" "}
             {project.name}
           </div>
-          <div className={cs.subtitle}>Please stay on this page</div>
+          <div className={cs.subtitle}>
+            Stay on this page until upload completes.
+          </div>
         </React.Fragment>
       );
     }
 
+    const numLocalSamplesInProgress = size(this.getLocalSamplesInProgress());
     // While local samples are being uploaded.
-    if (this.someLocalSamplesInProgress()) {
+    if (numLocalSamplesInProgress) {
       return (
         <React.Fragment>
           <div className={cs.title}>
-            Uploading {samples.length} sample{samples.length !== 1 && "s"} to{" "}
-            {project.name}
+            {retryingSampleUpload
+              ? `Restarting ${numLocalSamplesInProgress} sample upload${
+                  numLocalSamplesInProgress > 1 ? "s" : ""
+                }`
+              : `Uploading ${numLocalSamplesInProgress} sample${
+                  numLocalSamplesInProgress > 1 ? "s" : ""
+                } to ${project.name}`}
           </div>
           <div className={cs.subtitle}>
-            Please stay on this page until your upload completes
+            Please stay on this page until upload completes!
           </div>
         </React.Fragment>
       );
     }
 
     // If any local samples failed.
-    if (this.someLocalSamplesFailed()) {
+    if (!isEmpty(this.getLocalSamplesFailed())) {
       return this.renderFailedSamplesTitle();
     }
 
     // If all local samples succeeded.
+    return <div className={cs.titleWithIcon}>Uploads completed!</div>;
+  };
+
+  renderRetryAllFailedNotification = () => {
+    const localSamplesFailed = this.getLocalSamplesFailed();
+    const numberOfLocalSamplesFailed = size(localSamplesFailed);
+
     return (
-      <div className={cs.titleWithIcon}>
-        <IconSuccess className={cs.checkmarkIcon} />
-        All samples uploaded successfully
-      </div>
+      <Notification
+        className={cs.notificationContainer}
+        type="error"
+        displayStyle="flat"
+      >
+        <div className={cs.errorMessage}>
+          {numberOfLocalSamplesFailed} upload
+          {numberOfLocalSamplesFailed > 1 && "s"} ha
+          {numberOfLocalSamplesFailed > 1 ? "ve" : "s"} failed
+        </div>
+        <div className={cs.fill} />
+        <div
+          className={cx(cs.sampleRetry, cs.retryAll)}
+          onClick={withAnalytics(
+            () => this.retryFailedSamplesUploadToS3(localSamplesFailed),
+            "UploadProgressModal_retry-all-failed_clicked",
+            {
+              numberOfLocalSamplesFailed,
+            }
+          )}
+        >
+          Retry all failed
+        </div>
+      </Notification>
     );
   };
 
-  renderSampleLoadingBar = sample => {
+  renderSampleLoadingBar = ({ sample, status }) => {
     const uploadPercentage = this.getSampleUploadPercentage(sample);
+    return (
+      <LoadingBar percentage={uploadPercentage} error={status === "error"} />
+    );
+  };
 
-    return <LoadingBar percentage={uploadPercentage} />;
+  handleConfirmationModalOpen = () =>
+    this.setState({ confirmationModalOpen: true });
+
+  handleConfirmationModalClose = () =>
+    this.setState({ confirmationModalOpen: false });
+
+  redirectToProject = ({ useAnalytics = false } = {}) => {
+    const { samples, project } = this.props;
+
+    if (useAnalytics) {
+      logAnalyticsEvent("UploadConfirmationModal_to-project-button_clicked", {
+        numberOfTotalSamples: size(samples),
+        numberOfFailedSamples: size(this.getLocalSamplesFailed),
+      });
+    }
+    location.href = `/home?project_id=${project.id}`;
   };
 
   renderViewProjectButton = () => {
     const { project } = this.props;
-    const { uploadComplete } = this.state;
-    if (!uploadComplete) {
-      return null;
-    }
+
+    const buttonCallback = () => {
+      logAnalyticsEvent("UploadProgressModal_to-project-button_clicked", {
+        projectId: project.id,
+        projectName: project.name,
+      });
+
+      if (!isEmpty(this.getLocalSamplesFailed())) {
+        this.handleConfirmationModalOpen();
+      } else {
+        this.redirectToProject();
+      }
+    };
 
     return (
-      <a className={cs.link} href={`/home?project_id=${project.id}`}>
-        <PrimaryButton
-          text="Go to Project"
-          rounded={false}
-          onClick={() =>
-            logAnalyticsEvent("UploadProgressModal_to-project-button_clicked", {
-              projectId: project.id,
-              projectName: project.name,
-            })
-          }
-        />
-      </a>
+      <PrimaryButton text="Go to Project" onClick={() => buttonCallback()} />
     );
   };
 
   render() {
     const { samples, uploadType } = this.props;
-    const { failedSampleNames } = this.state;
+    const {
+      confirmationModalOpen,
+      failedSampleNames,
+      retryingSampleUpload,
+      uploadComplete,
+      sampleUploadStatuses,
+    } = this.state;
 
     return (
-      <Modal open tall narrow className={cs.uploadProgressModal}>
+      <Modal
+        open
+        tall
+        narrow
+        className={cx(
+          cs.uploadProgressModal,
+          uploadComplete && cs.uploadComplete
+        )}
+      >
         <div className={cs.header}>
           <ImgUploadPrimary className={cs.uploadImg} />
           {this.renderTitle()}
         </div>
         {uploadType === "local" && (
           <div className={cs.sampleList}>
-            {samples.map(sample => (
-              <div key={sample.name} className={cs.sample}>
-                <div className={cs.sampleHeader}>
-                  <div className={cs.sampleName}>{sample.name}</div>
-                  <div className={cs.fill} />
-                  <div className={cs.sampleStatus}>
-                    {this.renderSampleStatus(sample)}
+            {samples.map(sample => {
+              const status = sampleUploadStatuses[sample.name];
+
+              return (
+                <div key={sample.name} className={cs.sample}>
+                  <div className={cs.sampleHeader}>
+                    <div className={cs.sampleName}>{sample.name}</div>
+                    <div className={cs.fill} />
+                    <div className={cs.sampleStatus}>
+                      {this.renderSampleStatus({ sample, status })}
+                    </div>
                   </div>
+                  {this.renderSampleLoadingBar({ sample, status })}
                 </div>
-                {this.renderSampleLoadingBar(sample)}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         {failedSampleNames.length > 0 && (
@@ -501,7 +670,17 @@ export default class UploadProgressModal extends React.Component {
             )}
           </div>
         )}
-        <div className={cs.footer}>{this.renderViewProjectButton()}</div>
+        {!retryingSampleUpload && uploadComplete && (
+          <div className={cs.footer}>{this.renderViewProjectButton()}</div>
+        )}
+        {confirmationModalOpen && (
+          <UploadConfirmationModal
+            numberOfFailedSamples={this.getNumFailedSamples()}
+            onCancel={this.handleConfirmationModalClose}
+            onConfirm={() => this.redirectToProject({ useAnalytics: true })}
+            open
+          />
+        )}
       </Modal>
     );
   }

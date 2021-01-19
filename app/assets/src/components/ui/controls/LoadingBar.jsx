@@ -6,22 +6,30 @@ import { clamp } from "lodash/fp";
 
 import cs from "./loading_bar.scss";
 
-class LoadingBar extends React.Component {
-  render() {
-    const { percentage, showHint, tiny } = this.props;
-
-    return (
-      <div className={cx(cs.loadingBarBackground, tiny && cs.tiny)}>
-        <div
-          className={cx(cs.loadingBar, showHint && cs.showHint)}
-          style={{ width: `${clamp(0, 1, percentage) * 100}%` }}
-        />
-      </div>
-    );
-  }
-}
+const LoadingBar = ({ error = false, percentage, showHint, tiny }) => {
+  return (
+    <div
+      className={cx(
+        cs.loadingBarBackground,
+        tiny && cs.tiny,
+        error || cs.loading
+      )}
+    >
+      <div
+        className={cx(
+          cs.loadingBar,
+          showHint && cs.showHint,
+          error && cs.error
+        )}
+        style={{ width: `${clamp(0, 1, percentage) * 100}%` }}
+      />
+    </div>
+  );
+};
 
 LoadingBar.propTypes = {
+  // If true, set the loading bar's color to $error-medium.
+  error: PropTypes.bool,
   percentage: PropTypes.number,
   // If true, we show a tiny sliver of loading bar even at 0%, to help users understand.
   showHint: PropTypes.bool,

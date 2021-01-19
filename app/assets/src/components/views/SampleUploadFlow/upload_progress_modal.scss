@@ -3,29 +3,34 @@
 @import "~styles/themes/elements";
 
 .uploadProgressModal {
-  padding: 0;
+  padding: 0 0 $space-xxl + $space-xl 0;
+
+  &.uploadComplete {
+    padding-bottom: $space-xxl;
+  }
 
   .header {
-    margin-top: 40px;
+    margin-top: $space-xxl;
     text-align: center;
 
     .uploadImg {
       width: $img-m;
       height: $img-m;
-      margin-bottom: 15px;
     }
 
     .title {
-      @include font-header-l;
+      @include font-header-xl;
       color: black;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+      margin-bottom: $space-s;
       padding: 0 40px;
     }
 
     .titleWithIcon {
-      @include font-header-l;
+      @include font-header-xl;
+      margin-bottom: $space-s;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -33,13 +38,13 @@
       .alertIcon {
         width: 18px;
         height: 18px;
-        margin-right: 6px;
+        margin-right: $space-xs;
       }
 
       .checkmarkIcon {
         width: 25px;
         height: 25px;
-        margin-right: 6px;
+        margin-right: $space-xs;
         fill: $success-medium;
       }
     }
@@ -55,13 +60,20 @@
     .instructions {
       @include font-body-s;
       max-width: 500px;
-      margin: 8px auto 40px;
+      margin: $space-s auto $space-xxl;
+    }
+
+    .notificationContainer {
+      margin: $space-s $space-xxl 0;
+
+      .errorMessage {
+        @include font-header-s;
+      }
     }
   }
 
   .sampleList {
-    margin: 35px 10px 0 10px;
-    padding: 0 40px;
+    margin: $space-xxl $space-xxl 0;
     max-height: 200px;
     overflow: auto;
 
@@ -85,15 +97,11 @@
         white-space: nowrap;
       }
 
-      .fill {
-        flex: 1 1 0;
-      }
-
       .sampleStatus {
         @include font-body-xxs;
         display: flex;
         align-items: center;
-        margin-left: 10px;
+        margin-left: $space-m;
         white-space: nowrap;
 
         .alertIcon {
@@ -107,23 +115,16 @@
         .checkmarkIcon {
           width: 16px;
           height: 16px;
+          margin-bottom: -$space-xxs;
           margin-right: 5px;
           fill: $success-medium;
         }
       }
-    }
 
-    .loadingBarBackground {
-      background-color: $gray-lightest;
-      height: 8px;
-      margin-top: 5px;
-      border-radius: $border-radius-m;
-
-      .loadingBar {
-        background-color: $primary;
-        height: 8px;
-        width: 0px;
-        border-radius: $border-radius-m;
+      .verticalDivider {
+        @include font-body-l;
+        color: $gray-medium;
+        padding: 0 4px 4px;
       }
     }
   }
@@ -131,15 +132,14 @@
   .failedSamples {
     @include font-body-s;
     max-width: 500px;
-    margin: 8px auto 40px;
+    margin: $space-s auto 40px;
     text-align: center;
   }
 
   .footer {
     text-align: center;
     height: 34px;
-    margin-top: 45px;
-    margin-bottom: 35px;
+    margin-top: $space-xxl;
 
     .completeMessage {
       @include font-body-xxs;
@@ -147,4 +147,22 @@
       align-items: center;
     }
   }
+}
+
+.sampleRetry {
+  @include font-caps-xxxs;
+  color: $primary;
+  text-transform: uppercase;
+
+  &.retryAll {
+    color: $error-dark !important;
+  }
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.fill {
+  flex: 1 1 0;
 }

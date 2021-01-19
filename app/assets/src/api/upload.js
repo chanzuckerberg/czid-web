@@ -1,4 +1,14 @@
-import { map, keyBy, mapValues, every, pick, sum, difference } from "lodash/fp";
+import {
+  get,
+  find,
+  map,
+  keyBy,
+  mapValues,
+  every,
+  pick,
+  sum,
+  difference,
+} from "lodash/fp";
 
 import { markSampleUploaded, uploadFileToUrlWithRetries } from "~/api";
 
@@ -19,23 +29,13 @@ export const bulkUploadBasespace = ({ samples, metadata }) =>
 export const bulkUploadRemote = ({ samples, metadata }) =>
   bulkUploadWithMetadata(samples, metadata);
 
-export const bulkUploadLocalWithMetadata = async ({
+export const initiateBulkUploadLocalWithMetadata = async ({
   samples,
   metadata,
   callbacks = {
     onCreateSamplesError: null,
-    onSampleUploadProgress: null,
-    onSampleUploadError: null,
-    onSampleUploadSuccess: null,
-    onMarkSampleUploadedError: null,
   },
 }) => {
-  // Store the upload progress of file names, so we can track when
-  // everything is done.
-  const fileNamesToProgress = {};
-  const markedUploaded = {};
-  const sampleNamesToFiles = mapValues("files", keyBy("name", samples));
-
   // Only upload these fields from the sample.
   const processedSamples = map(
     pick([
@@ -57,6 +57,55 @@ export const bulkUploadLocalWithMetadata = async ({
     ]),
     samples
   );
+
+  let response;
+
+  try {
+    // Creates the Sample objects and assigns a presigned S3 URL so we can upload the sample files to S3 via the URL
+    response = await bulkUploadWithMetadata(processedSamples, metadata);
+  } catch (e) {
+    callbacks.onCreateSamplesError &&
+      callbacks.onCreateSamplesError([e], map("name", samples));
+    return;
+  }
+
+  // It's possible that a subset of samples errored out, but other ones can still be uploaded.
+  if (response.errors.length > 0) {
+    callbacks.onCreateSamplesError &&
+      callbacks.onCreateSamplesError(
+        response.errors,
+        response.errored_sample_names
+      );
+  }
+
+  // The samples created from the network response (response.samples) does not contain the files that need to be upload to S3.
+  // They contain information pertaining to the sample itself (metadata) as well as presigned S3 URL links
+  // The sample files that need to be uploaded to S3 are in the samples argument passed into initiateBulkUploadLocalWithMetadata
+  // So we need to fetch the files from samples argument and copy them over to response.samples where they're later uploaded to S3 via uploadSampleFilesToPresignedURL
+  response.samples.forEach(
+    createdSample =>
+      (createdSample["filesToUpload"] = get(
+        "files",
+        find({ name: createdSample.name }, samples)
+      ))
+  );
+  return response.samples;
+};
+
+export const uploadSampleFilesToPresignedURL = ({
+  samples,
+  callbacks = {
+    onSampleUploadProgress: null,
+    onSampleUploadError: null,
+    onSampleUploadSuccess: null,
+    onMarkSampleUploadedError: null,
+  },
+}) => {
+  // Store the upload progress of file names, so we can track when
+  // everything is done.
+  const fileNamesToProgress = {};
+  const markedUploaded = {};
+  const sampleNamesToFiles = mapValues("filesToUpload", keyBy("name", samples));
 
   // This function needs access to fileNamesToProgress.
   const onFileUploadSuccess = async (sample, sampleId) => {
@@ -117,27 +166,7 @@ export const bulkUploadLocalWithMetadata = async ({
     return uploadedSize / totalSize;
   };
 
-  let response;
-
-  try {
-    response = await bulkUploadWithMetadata(processedSamples, metadata);
-  } catch (e) {
-    callbacks.onCreateSamplesError &&
-      callbacks.onCreateSamplesError([e], map("name", samples));
-    return;
-  }
-
-  // It's possible that a subset of samples errored out, but other ones can still be uploaded.
-  if (response.errors.length > 0) {
-    callbacks.onCreateSamplesError &&
-      callbacks.onCreateSamplesError(
-        response.errors,
-        response.errored_sample_names
-      );
-  }
-
-  // After successful sample creation, upload each sample's input files to the presigned URLs
-  response.samples.forEach(sample => {
+  samples.forEach(sample => {
     const files = sampleNamesToFiles[sample.name];
 
     // Start pinging server to monitor uploads server-side
@@ -154,7 +183,6 @@ export const bulkUploadLocalWithMetadata = async ({
 
           if (callbacks.onSampleUploadProgress) {
             const uploadedPercentage = getSampleUploadPercentage(sample);
-
             callbacks.onSampleUploadProgress(sample, uploadedPercentage);
           }
         },
@@ -164,6 +192,7 @@ export const bulkUploadLocalWithMetadata = async ({
           clearInterval(interval);
         },
         onError: error => {
+          fileNamesToProgress[file.name] = 0;
           callbacks.onSampleUploadError &&
             callbacks.onSampleUploadError(sample, error);
           clearInterval(interval);

@@ -34,14 +34,14 @@ class Notification extends React.Component {
         className={cx(className, cs.notification, cs[type], cs[displayStyle])}
       >
         <div className={cs.icon}>{this.getIcon(type)}</div>
-        <div className={cs.content}>
-          <div>{children}</div>
+        <>
+          <>{children}</>
           {onClose && closeWithDismiss && (
             <div className={cs.actions} onClick={onClose}>
               Dismiss
             </div>
           )}
-        </div>
+        </>
         {onClose && !closeWithDismiss && (
           <IconCloseSmall className={cs.removeIcon} onClick={onClose} />
         )}
