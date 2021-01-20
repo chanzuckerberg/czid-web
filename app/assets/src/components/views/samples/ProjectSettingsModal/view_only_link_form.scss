@@ -28,6 +28,8 @@
     vertical-align: middle;
 
     &:hover {
+      fill: $primary;
+
       svg {
         fill: $primary;
       }
@@ -130,7 +132,7 @@
 
     .shareableLink {
       display: flex;
-      margin-top: $space-l;
+      margin-top: $space-xl;
 
       .shareableLinkField:first-child {
         flex: 1;
@@ -151,6 +153,15 @@
         min-width: 75px;
       }
     }
+
+    .staticWarning {
+      @include font-body-xxs;
+      color: $gray-dark;
+      margin-left: $space-xxxs;
+      margin-top: $space-s;
+      margin-right: 100px;
+      margin-bottom: $space-s;
+    }
   }
 }
 
@@ -160,10 +171,10 @@
 
 // Override materialize.css
 .conditionList {
+  @include font-body-xs;
   padding-left: 0;
   margin-top: $space-m;
-  margin-bottom: 0;
-  @include font-body-xs;
+  margin-bottom: $space-m;
 
   .conditionListItem {
     list-style: disc inside none;

@@ -52,7 +52,6 @@ class ViewOnlyLinkForm extends React.Component {
       // Check in case you received an HTML redirect response
       if (snapshot && snapshot.share_id) {
         this.setState({
-          
           backgroundId: snapshot.background_id,
           enableMassNormalizedBackgrounds:
             snapshot.mass_normalized_backgronds_available,
@@ -199,6 +198,34 @@ class ViewOnlyLinkForm extends React.Component {
     }
   };
 
+  renderAutomaticUpdateControl = () => {
+    const { automaticUpdateEnabled } = this.state;
+    return (
+      <div className={cs.settingsFormField}>
+        <div className={cx(cs.toggleContainer, cs.formFieldLabelContainer)}>
+          <div className={cs.formFieldLabel}>Automatically update</div>
+          <Toggle
+            className={cs.automaticUpdateToggle}
+            onLabel="On"
+            offLabel="Off"
+            initialChecked={automaticUpdateEnabled}
+            onChange={this.handleAutomaticUpdateChange}
+          />
+        </div>
+        <div className={cs.noteContainer}>
+          <div className={cs.note}>
+            View-only link
+            <span className={cs.highlight}>
+              {automaticUpdateEnabled ? " will " : " will not "}
+            </span>
+            update to include new pipeline runs or new samples added to this
+            project.
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   render() {
     const {
       backgroundId,
@@ -206,7 +233,6 @@ class ViewOnlyLinkForm extends React.Component {
       enableMassNormalizedBackgrounds,
       isLoading,
       sharingEnabled,
-      automaticUpdateEnabled,
       snapshotShareId,
       snapshotTimestamp,
     } = this.state;
@@ -224,6 +250,10 @@ class ViewOnlyLinkForm extends React.Component {
             Download non-host reads/ contigs or unmapped reads
           </li>
         </ul>
+        <span>
+          You can preview your View-only link in private browsing mode on your
+          web browser.
+        </span>
       </React.Fragment>
     );
     const backgroundModelHelpText =
@@ -293,30 +323,8 @@ class ViewOnlyLinkForm extends React.Component {
                   value={backgroundId}
                 />
               </div>
-              <div className={cs.settingsFormField}>
-                <div
-                  className={cx(cs.toggleContainer, cs.formFieldLabelContainer)}
-                >
-                  <div className={cs.formFieldLabel}>Automatically update</div>
-                  <Toggle
-                    className={cs.automaticUpdateToggle}
-                    onLabel="On"
-                    offLabel="Off"
-                    initialChecked={automaticUpdateEnabled}
-                    onChange={this.handleAutomaticUpdateChange}
-                  />
-                </div>
-                <div className={cs.noteContainer}>
-                  <div className={cs.note}>
-                    View-only link
-                    <span className={cs.highlight}>
-                      {automaticUpdateEnabled ? " will " : " will not "}
-                    </span>
-                    update to include new pipeline runs or new samples added to
-                    this project.
-                  </div>
-                </div>
-              </div>
+              {/* Uncomment the line below when automatic update controls are implemented. */}
+              {/* this.renderAutomaticUpdateControl() */}
             </div>
             <div className={cs.shareableLink}>
               <div className={cs.shareableLinkField}>
@@ -352,6 +360,10 @@ class ViewOnlyLinkForm extends React.Component {
                   hideOnScroll
                 />
               </div>
+            </div>
+            <div className={cs.staticWarning}>
+              This link will not update to include new pipeline runs or new
+              samples added to this project.
             </div>
           </div>
         )}
