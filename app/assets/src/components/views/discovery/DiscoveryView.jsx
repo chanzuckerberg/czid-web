@@ -266,6 +266,7 @@ class DiscoveryView extends React.Component {
       "filters",
       "projectId",
       "search",
+      "appcue",
       // Omit sampleActiveColumnsByWorkflow from URL b/c it's too large
     ]).filter(key => key !== "sampleActiveColumnsByWorkflow");
     const stateFields = concat(urlFields, ["project"]);
