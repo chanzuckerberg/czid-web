@@ -106,7 +106,9 @@ class SnapshotLinksController < ApplicationController
     project_id = @snapshot.project_id
     if edit_access?(project_id)
       background_id = snapshot_links_params[:background_id]
-      @snapshot.content = format_snapshot_content(project_id, background_id)
+      content = JSON.parse(@snapshot.content)
+      content["background_id"] = background_id
+      @snapshot.content = content.to_json
       @snapshot.save
       render json: {
         message: "Snapshot background updated successfully",

@@ -317,7 +317,7 @@ const createBackground = ({ description, name, sampleIds, massNormalized }) =>
 const getBackgrounds = async ({
   snapshotShareId,
   ownedOrPublicBackgroundsOnly,
-}) => {
+} = {}) => {
   const response = await get(
     (snapshotShareId ? `/pub/${snapshotShareId}` : "") + "/backgrounds.json",
     {
