@@ -13,6 +13,7 @@ const Button = ({
   hasDropdownArrow,
   className,
   rounded,
+  circular,
   ...props
 }) => {
   let content = text;
@@ -33,6 +34,7 @@ const Button = ({
         cname,
         className,
         !rounded && "rectangular",
+        circular && "circular",
         hasDropdownArrow && "has-dropdown-arrow"
       )}
     >
@@ -57,11 +59,13 @@ Button.propTypes = forbidExtraProps({
   primary: PropTypes.bool,
   secondary: PropTypes.bool,
   rounded: PropTypes.bool,
+  circular: PropTypes.bool,
   className: PropTypes.string,
   hasDropdownArrow: PropTypes.bool,
 });
 
 Button.defaultProps = {
+  circular: false,
   rounded: true,
 };
 

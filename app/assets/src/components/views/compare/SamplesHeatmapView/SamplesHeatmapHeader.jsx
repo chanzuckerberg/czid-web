@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import PropTypes from "prop-types";
 
 import BasicPopup from "~/components/BasicPopup";
-import { SaveButton, ShareButton } from "~ui/controls/buttons";
+import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { withAnalytics } from "~/api/analytics";
 import { logError } from "~/components/utils/logUtil";
 import { ViewHeader } from "~/components/layout";
 import { triggerCSVDownload } from "~/components/utils/csv";
 import { logDownloadOption } from "~/components/views/report/utils/download";
+import { UserContext } from "~/components/common/UserContext";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -68,6 +69,9 @@ const SamplesHeatmapHeader = ({
     });
   };
 
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
+
   return (
     <ViewHeader className={cs.viewHeader}>
       <ViewHeader.Content>
@@ -113,6 +117,13 @@ const SamplesHeatmapHeader = ({
           onClick={handleDownloadClick}
           disabled={!data}
         />
+        {allowedFeatures.includes("appcues") && (
+          <HelpButton
+            className={cs.controlElement}
+            // eslint-disable-next-line no-console
+            onClick={() => console.log("TODO: connect to AppCues")}
+          />
+        )}
       </ViewHeader.Controls>
     </ViewHeader>
   );

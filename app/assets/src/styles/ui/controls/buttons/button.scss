@@ -17,6 +17,11 @@
     border-radius: $border-radius-m;
   }
 
+  &.circular {
+    min-width: 34px;
+    padding: 4px 0;
+  }
+
   div.icon-label {
     height: 22px;
     line-height: 22px;

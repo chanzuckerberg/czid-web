@@ -22,6 +22,7 @@ import IconFilters from "./IconFilters";
 import IconHeatmap from "./IconHeatmap";
 import IconHeatmapPrivate from "./IconHeatmapPrivate";
 import IconHeatmapPublic from "./IconHeatmapPublic";
+import IconHelp from "./IconHelp";
 import IconInfo from "./IconInfo";
 import IconInfoPanel from "./IconInfoPanel";
 import IconInfoSmall from "./IconInfoSmall";
@@ -85,6 +86,7 @@ export const ICONS_TAXONOMY = {
     IconHeatmap,
     IconHeatmapPrivate,
     IconHeatmapPublic,
+    IconHelp,
     IconInfo,
     IconInfoPanel,
     IconInfoSmall,

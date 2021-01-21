@@ -12,6 +12,7 @@ import { getWorkflowRunZipLink } from "~/components/views/report/utils/download"
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import {
   DownloadButton,
+  HelpButton,
   PrimaryButton,
   SaveButton,
   ShareButton,
@@ -57,6 +58,7 @@ export default function SampleViewHeader({
         <BasicPopup
           trigger={
             <ShareButton
+              className={cs.controlElement}
               onClick={() => {
                 copyShortUrlToClipboard();
                 logAnalyticsEvent("SampleView_share-button_clicked", {
@@ -68,7 +70,7 @@ export default function SampleViewHeader({
           content="A shareable URL was copied to your clipboard!"
           on="click"
           hideOnScroll
-        />{" "}
+        />
       </>
     );
   };
@@ -83,6 +85,8 @@ export default function SampleViewHeader({
   };
 
   const renderViewHeaderControls = () => {
+    const { allowedFeatures } = userContext || {};
+
     if (
       get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
     ) {
@@ -118,6 +122,7 @@ export default function SampleViewHeader({
           {!isEmpty(reportMetadata) && renderShareButton()}
           {userContext.admin && (
             <SaveButton
+              className={cs.controlElement}
               onClick={withAnalytics(
                 onSaveClick,
                 "SampleView_save-button_clicked",
@@ -126,8 +131,9 @@ export default function SampleViewHeader({
                 }
               )}
             />
-          )}{" "}
+          )}
           <PipelineRunSampleViewControls
+            className={cs.controlElement}
             backgroundId={backgroundId}
             currentTab={currentTab}
             deletable={deletable}
@@ -143,6 +149,13 @@ export default function SampleViewHeader({
             sample={sample}
             view={view}
           />
+          {!isEmpty(reportMetadata) && allowedFeatures.includes("appcues") && (
+            <HelpButton
+              className={cs.controlElement}
+              // eslint-disable-next-line no-console
+              onClick={() => console.log("TODO: connect to AppCues")}
+            />
+          )}
         </ViewHeader.Controls>
       );
     }

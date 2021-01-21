@@ -17,6 +17,7 @@ import { TABS } from "./constants";
 
 const PipelineRunSampleViewControls = ({
   backgroundId,
+  className,
   currentTab,
   deletable,
   editable,
@@ -123,6 +124,7 @@ const PipelineRunSampleViewControls = ({
 
     return (
       <DownloadButtonDropdown
+        className={className}
         options={downloadOptions}
         onClick={handleDownload}
         direction="left"
@@ -145,6 +147,7 @@ PipelineRunSampleViewControls.defaultProps = {
 
 PipelineRunSampleViewControls.propTypes = {
   backgroundId: PropTypes.number,
+  className: PropTypes.string,
   currentTab: PropTypes.string,
   deletable: PropTypes.bool,
   editable: PropTypes.bool,

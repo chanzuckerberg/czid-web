@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 @import "~styles/typography";
+@import "~styles/themes/elements";
 
 .viewHeader {
   margin-bottom: 5px;
@@ -31,5 +32,13 @@
   .warningIcon {
     margin-left: 2px;
     transform: translateY(1px);
+  }
+
+  .controlElement {
+    margin-left: $space-m;
+
+    &:not(:last-child) {
+      margin-right: 0;
+    }
   }
 }
