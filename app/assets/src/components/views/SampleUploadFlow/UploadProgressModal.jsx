@@ -456,7 +456,6 @@ export default class UploadProgressModal extends React.Component {
             </a>
           </div>
         )}
-        {this.renderRetryAllFailedNotification()}
       </React.Fragment>
     );
   };
@@ -637,6 +636,8 @@ export default class UploadProgressModal extends React.Component {
         <div className={cs.header}>
           <ImgUploadPrimary className={cs.uploadImg} />
           {this.renderTitle()}
+          {!isEmpty(this.getLocalSamplesFailed()) &&
+            this.renderRetryAllFailedNotification()}
         </div>
         {uploadType === "local" && (
           <div className={cs.sampleList}>

@@ -20,6 +20,8 @@
     display: flex;
 
     .item {
+      cursor: pointer;
+
       &:not(:first-child) {
         margin-left: $space-xs;
       }

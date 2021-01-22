@@ -54,6 +54,10 @@
 
       .helpLink {
         color: $primary !important;
+
+        &:hover {
+          cursor: pointer;
+        }
       }
     }
 
@@ -64,7 +68,7 @@
     }
 
     .notificationContainer {
-      margin: $space-s $space-xxl 0;
+      margin: $space-l $space-xxl $space-s $space-xxl;
 
       .errorMessage {
         @include font-header-s;
@@ -99,6 +103,7 @@
 
       .sampleStatus {
         @include font-body-xxs;
+        color: $gray-darkest;
         display: flex;
         align-items: center;
         margin-left: $space-m;
@@ -123,7 +128,7 @@
 
       .verticalDivider {
         @include font-body-l;
-        color: $gray-medium;
+        color: $gray-light;
         padding: 0 4px 4px;
       }
     }
@@ -155,11 +160,16 @@
   text-transform: uppercase;
 
   &.retryAll {
-    color: $error-dark !important;
+    color: $error-medium;
+
+    &:hover {
+      color: $error-dark !important;
+    }
   }
 
   &:hover {
     cursor: pointer;
+    color: $primary-dark;
   }
 }
 
