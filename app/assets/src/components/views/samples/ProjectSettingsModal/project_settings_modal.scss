@@ -17,7 +17,8 @@
   flex-direction: column;
 
   .title {
-    @include font-body-xl;
+    @include font-header-xl;
+    font-weight: $font-weight-regular;
 
     .highlight {
       font-weight: $font-weight-semibold;

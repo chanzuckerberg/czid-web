@@ -1,4 +1,4 @@
-@import "~styles/typography";
+@import "~styles/themes/typography";
 @import "~styles/themes/colors";
 
 .instructionContainer {
@@ -59,8 +59,8 @@
 }
 
 .uploadQuestion {
+  @include font-body-xxs;
   color: $gray-darkest;
-  font-size: $font-size-small;
   margin-top: 20px;
   margin-bottom: 25px;
 

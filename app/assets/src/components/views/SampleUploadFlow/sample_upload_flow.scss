@@ -51,7 +51,7 @@
   margin-bottom: 5px;
 
   .infoLink {
-    @include font-label-s;
+    @include font-caps-xxxs;
     margin-left: 10px;
     color: $primary;
     cursor: pointer;
@@ -141,7 +141,7 @@
     }
 
     .createProjectButton {
-      @include font-label-s;
+      @include font-caps-xxxs;
       color: $primary;
       cursor: pointer;
       margin-top: 4px;
@@ -352,13 +352,12 @@
       }
 
       .showHide {
+        @include font-body-xxxs;
         text-transform: uppercase;
         display: inline-block;
         margin-top: 5px;
         margin-bottom: 10px;
         color: $primary;
-        font-size: $font-size-smallest;
-        letter-spacing: 0.5px;
         cursor: pointer;
       }
     }

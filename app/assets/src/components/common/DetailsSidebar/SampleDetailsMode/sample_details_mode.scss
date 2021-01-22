@@ -10,8 +10,7 @@
 
 .title,
 .loadingMsg {
-  font-size: $font-size-h4;
-  font-weight: $font-weight-semibold;
+  @include font-header-xl;
   margin: 0 10px;
   margin-right: 60px;
   word-break: break-all;

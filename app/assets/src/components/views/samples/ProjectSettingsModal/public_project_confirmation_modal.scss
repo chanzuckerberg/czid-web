@@ -4,7 +4,8 @@
 
 .publicProjectConfirmation {
   .title {
-    @include font-body-xl;
+    @include font-header-xl;
+    font-weight: $font-weight-regular;
     color: black;
   }
 

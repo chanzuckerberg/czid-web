@@ -75,7 +75,7 @@ $metadata-input-extra-width: 225;
   }
 
   .autoPopulateButton {
-    @include font-label-s;
+    @include font-caps-xxxs;
     color: $primary;
     cursor: pointer;
     margin-top: $space-xxs;

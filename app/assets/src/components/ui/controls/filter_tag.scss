@@ -2,7 +2,7 @@
 @import "~styles/themes/typography";
 
 :global(.ui):global(.label).filterTag {
-  @include font-tag-s;
+  @include font-body-xxxs;
   background: $primary !important;
   border-color: $primary !important;
   color: $white !important;

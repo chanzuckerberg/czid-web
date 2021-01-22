@@ -6,17 +6,17 @@
   border-bottom: 1px solid $gray-light;
 
   .title {
-    @include font-header-accordion;
-
+    @include font-caps-xxs;
+    line-height: 40px;
     color: $black;
     padding: 0 10px;
     height: 40px;
   }
 
   .editLink {
+    @include font-body-xxs;
     color: $gray-light;
     text-decoration: underline;
-    font-size: $font-size-small;
     display: none;
     cursor: pointer;
 
@@ -30,8 +30,8 @@
   }
 
   .status {
+    @include font-body-xxs;
     color: $gray-light;
-    font-size: $font-size-small;
     margin-top: 1px;
   }
 

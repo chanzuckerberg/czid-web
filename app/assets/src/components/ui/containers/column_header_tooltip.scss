@@ -3,8 +3,8 @@
 @import "~styles/themes/elements";
 
 .tooltip {
+  @include font-body-xs;
   text-align: left;
-  font-size: $font-size;
 
   .title {
     font-weight: bold;

@@ -41,7 +41,7 @@
   border-bottom: 1px solid $gray-light;
 
   .header {
-    @include font-header-accordion;
+    @include font-caps-xxs;
 
     color: $black;
     padding: 0 $space-m;

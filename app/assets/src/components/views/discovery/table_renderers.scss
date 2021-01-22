@@ -15,10 +15,8 @@
   }
 
   .itemName {
+    @include font-header-m;
     color: $black;
-    font-weight: $font-weight-semibold;
-    font-size: $font-size-h5;
-    line-height: 22px;
     margin-bottom: 2px;
   }
 

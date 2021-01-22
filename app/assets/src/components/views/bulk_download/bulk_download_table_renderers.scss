@@ -92,7 +92,7 @@
   }
 
   .link {
-    @include font-label-s;
+    @include font-caps-xxxs;
     /* overwrite header.scss */
     color: $primary !important;
     cursor: pointer;

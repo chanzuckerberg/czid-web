@@ -33,8 +33,8 @@
 
   // See SampleDetailsMode/metadata_section.scss
   .title {
-    @include font-header-accordion;
-
+    @include font-caps-xxs;
+    line-height: 40px;
     color: $black;
     padding: 0 10px;
     height: 40px;
@@ -148,12 +148,11 @@
   }
 
   .showHide {
+    @include font-body-xxxs;
     text-transform: uppercase;
     margin-top: 5px;
     margin-bottom: 10px;
     color: $primary;
-    font-size: $font-size-smallest;
-    letter-spacing: 0.5px;
     cursor: pointer;
   }
 

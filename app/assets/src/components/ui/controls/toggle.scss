@@ -23,10 +23,11 @@
 }
 
 .toggle.toggle.toggle label {
+  @include font-body-xxs;
+  line-height: 25px;
   padding-top: 6px; // vertical align text
   min-height: 34px;
   min-width: 58px; // enough space for text
-  font-size: $font-size-small;
 }
 
 // Place text to the left

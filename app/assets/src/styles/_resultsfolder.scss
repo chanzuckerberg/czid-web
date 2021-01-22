@@ -1,11 +1,11 @@
-@import "typography";
+@import "themes/typography";
 @import "themes/colors";
 
 .results-folder {
   .header {
     margin: 25px 75px;
     .title {
-      font-size: $font-size-h3;
+      @include font-header-xxl;
       color: $primary;
       .path {
         margin: 20px;

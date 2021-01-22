@@ -11,12 +11,6 @@
     margin-right: 20px;
   }
 
-  .info {
-    color: $gray-light;
-    font-size: $font-size-small;
-    margin-bottom: 10px;
-  }
-
   .fill {
     flex: 1 1 0;
     min-width: 0;
@@ -27,7 +21,7 @@
   }
 
   .sampleDropdown {
-    font-size: $font-size-h3;
+    @include font-header-xxl;
   }
 
   .sampleName {

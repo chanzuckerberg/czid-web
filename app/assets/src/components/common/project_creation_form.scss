@@ -8,7 +8,7 @@
     margin-bottom: 5px;
 
     .infoLink {
-      @include font-label-s;
+      @include font-caps-xxxs;
       margin-left: $space-xxs;
       color: $primary;
       cursor: pointer;
@@ -118,7 +118,7 @@
   }
 
   .createButton {
-    @include font-label-s;
+    @include font-caps-xxxs;
     color: $primary;
     margin: 0px 10px;
     cursor: pointer;
@@ -130,7 +130,7 @@
   }
 
   .cancelButton {
-    @include font-label-s;
+    @include font-caps-xxxs;
     color: $gray-dark;
     margin: 0px 10px;
     cursor: pointer;

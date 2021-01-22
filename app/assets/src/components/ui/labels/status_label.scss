@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 .statusLabel {
-  @include font-label-xxs;
+  @include font-caps-xxxxs;
   line-height: 9px;
   border-radius: $border-radius-l;
   margin-left: $space-xs;

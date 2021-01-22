@@ -86,20 +86,16 @@
   @include font-header-xxxs;
 }
 
-.font-header-accordion {
-  @include font-header-accordion;
+.font-caps-xxs {
+  @include font-caps-xxs;
 }
 
-.font-header-node-l {
-  @include font-header-node-l;
+.font-caps-xxxs {
+  @include font-caps-xxxs;
 }
 
-.font-header-node-s {
-  @include font-header-node-s;
-}
-
-.font-body-xl {
-  @include font-body-xl;
+.font-caps-xxxxs {
+  @include font-caps-xxxxs;
 }
 
 .font-body-l {
@@ -127,31 +123,31 @@
 }
 
 .font-label-s {
-  @include font-label-s;
+  @include font-caps-xxxs;
 }
 
 .font-label-xs {
-  @include font-label-xs;
+  @include font-caps-xxxxs;
 }
 
 .font-label-xxs {
-  @include font-label-xxs;
+  @include font-caps-xxxxs;
 }
 
 .font-tag-s {
-  @include font-tag-s;
+  @include font-body-xxxs;
 }
 
 .font-viz-label {
-  @include viz-label;
+  @include font-body-xxxs;
 }
 
 .font-search-result-title {
-  @include font-search-result-title;
+  @include font-header-xs;
 }
 
 .font-search-result-description {
-  @include font-search-result-description;
+  @include font-body-xxxs;
 }
 
 .font-code {

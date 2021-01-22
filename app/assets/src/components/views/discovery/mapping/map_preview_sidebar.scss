@@ -37,9 +37,8 @@
     }
 
     .tabCounter {
+      @include font-body-xs;
       color: $gray-dark;
-      font-size: $font-size;
-      font-weight: $font-weight-regular;
     }
   }
 

@@ -57,13 +57,13 @@
 }
 
 .tabLabel {
-  font-size: $font-size-h6;
+  @include font-header-s;
   margin-right: 10px;
 }
 
 .tabCounter {
+  @include font-body-xs;
   color: $gray-dark;
-  font-size: $font-size;
   font-weight: $font-weight-regular;
 }
 

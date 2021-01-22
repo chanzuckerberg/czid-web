@@ -2,7 +2,8 @@
 @import "~styles/themes/typography";
 
 .filterLabel {
-  @include font-label-s;
+  @include font-caps-xxxs;
+  line-height: 24px;
   color: $gray-dark;
   margin-right: 10px;
 }

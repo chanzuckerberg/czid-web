@@ -7,18 +7,6 @@ $font-family-monospace: "Andale Mono", Menlo, Monaco, Consolas, "Courier New",
   monospace !default;
 $font-family-default: $font-family-sans-serif !default;
 
-// Size
-// Avoid individual sizing: use mixins below whenever possible
-$font-size-smallest: 11px;
-$font-size-small: 12px;
-$font-size: 13px;
-$font-size-h1: 40px;
-$font-size-h2: 34px;
-$font-size-h3: 28px;
-$font-size-h4: 22px;
-$font-size-h5: 16px;
-$font-size-h6: 14px;
-
 // Weights
 // Avoid individual weighting: use mixins below whenever possible
 $font-weight-thin: 300;
@@ -58,7 +46,7 @@ $font-weight-heavy: 800;
 
 @mixin font-header-s {
   font-size: 14px;
-  line-height: 24px;
+  line-height: 20px;
   font-weight: $font-weight-semibold;
   letter-spacing: 0.3px;
 }
@@ -82,36 +70,6 @@ $font-weight-heavy: 800;
   line-height: 16px;
   font-weight: $font-weight-semibold;
   letter-spacing: 0.3px;
-}
-
-@mixin font-header-accordion {
-  font-size: 12px;
-  line-height: 40px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 1.3px;
-  text-transform: uppercase;
-}
-
-@mixin font-header-node-l {
-  font-size: 12px;
-  line-height: 13px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-@mixin font-header-node-s {
-  font-size: 11px;
-  line-height: 14px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-@mixin font-body-xl {
-  font-size: 22px;
-  line-height: 30px;
-  letter-spacing: 0.3px;
-  font-weight: $font-weight-regular;
 }
 
 @mixin font-body-l {
@@ -154,54 +112,6 @@ $font-weight-heavy: 800;
   line-height: 16px;
   letter-spacing: 0.3px;
   font-weight: $font-weight-regular;
-}
-
-@mixin font-label-s {
-  font-size: 11px;
-  line-height: 24px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-weight: $font-weight-semibold;
-}
-
-@mixin font-label-xs {
-  font-size: 10px;
-  line-height: 24px;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-}
-
-@mixin font-label-xxs {
-  font-size: 9px;
-  line-height: 24px;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-}
-
-@mixin font-tag-s {
-  font-size: 11px;
-  line-height: 11px;
-  letter-spacing: 0.8px;
-  font-weight: 400;
-}
-
-@mixin viz-label {
-  font-size: 9px;
-  line-height: 13px;
-  font-weight: $font-weight-semibold;
-}
-
-@mixin font-search-result-title {
-  font-size: 13px;
-  line-height: 24px;
-  letter-spacing: 1px;
-  font-weight: $font-weight-semibold;
-}
-
-@mixin font-search-result-description {
-  font-size: 10px;
-  line-height: 14px;
-  letter-spacing: 1px;
 }
 
 @mixin font-code {

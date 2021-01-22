@@ -173,9 +173,11 @@
   margin: 0;
 
   .siteHeader {
+    @include font-body-s;
+    line-height: unset;
+    letter-spacing: unset;
     height: 50px;
     background-color: $black;
-    font-size: $font-size-h6;
     position: relative;
     z-index: 1000;
     display: flex;

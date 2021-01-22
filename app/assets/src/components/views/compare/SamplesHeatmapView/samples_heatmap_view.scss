@@ -68,11 +68,12 @@
     }
 
     .arrowIcon {
+      @include font-header-xl;
+      line-height: unset;
       display: inline-block;
       cursor: pointer;
       color: $gray-dark;
       background-color: $white;
-      font-size: $font-size-h4;
       padding: 0 $space-l;
       border-radius: 0 0 $border-radius-m $border-radius-m;
       box-shadow: $box-shadow-s;

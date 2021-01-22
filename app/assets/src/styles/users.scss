@@ -1,7 +1,7 @@
 // Place all the styles related to the users controller here.
 // They will automatically be included in application.scss.
 // You can use Sass (SCSS) here: http://sass-lang.com/
-@import "typography";
+@import "themes/typography";
 @import "themes/colors";
 @import "themes/elements";
 
@@ -16,7 +16,7 @@ $break-large: 1460px;
   .title {
     padding: 25px 35px;
     p.signup {
-      font-size: $font-size-h3;
+      @include font-header-xxl;
       font-weight: $font-weight-bold;
       color: $gray-darkest;
       margin-top: 9px;
@@ -37,6 +37,7 @@ $break-large: 1460px;
   }
 
   .error-info {
+    @include font-body-xxs;
     width: 80%;
     background: $error-lightest;
     border-radius: $border-radius-m;
@@ -44,11 +45,11 @@ $break-large: 1460px;
     margin: 0 auto;
     padding: 10px 5px;
     border: $border-error;
-    font-size: $font-size-small;
     transition: 0.2s width ease-out;
     text-align: center;
   }
   .success-info {
+    @include font-body-xxs;
     width: 80%;
     background: $success-lightest;
     border-radius: $border-radius-m;
@@ -56,7 +57,6 @@ $break-large: 1460px;
     margin: 0 auto;
     padding: 10px 5px;
     border: $border-success;
-    font-size: $font-size-small;
     transition: 0.2s width ease-out;
     text-align: center;
   }

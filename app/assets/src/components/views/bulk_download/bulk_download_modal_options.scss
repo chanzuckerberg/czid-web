@@ -13,7 +13,7 @@
     }
 
     .title {
-      @include font-label-s;
+      @include font-caps-xxxs;
       color: $gray-dark;
     }
   }

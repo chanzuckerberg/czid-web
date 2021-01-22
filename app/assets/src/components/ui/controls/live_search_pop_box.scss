@@ -25,7 +25,7 @@
   }
 
   .category {
-    @include font-label-s;
+    @include font-caps-xxxs;
 
     background-color: transparent;
     color: $gray-light;
@@ -45,14 +45,14 @@
     padding: 5px 0;
 
     .title {
-      @include font-search-result-title;
+      @include font-header-xs;
 
       color: $black;
       font-weight: $font-weight-semibold;
     }
 
     .description {
-      @include font-search-result-description;
+      @include font-body-xxs;
 
       color: $gray-dark;
     }

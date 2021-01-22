@@ -85,7 +85,7 @@
 }
 
 .stageButton {
-  @include font-header-node-l;
+  @include font-caps-xxs;
   background-color: $white;
   border-radius: $border-radius-m;
   padding: 6px 8px;
@@ -211,7 +211,7 @@
 }
 
 .graphLabel {
-  @include font-header-node-l;
+  @include font-caps-xxs;
   padding: 14px 14px 0;
   display: flex;
   justify-content: space-between;
