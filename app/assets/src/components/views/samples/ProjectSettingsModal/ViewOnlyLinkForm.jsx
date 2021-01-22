@@ -10,6 +10,7 @@ import {
 } from "~/api/snapshot_links";
 import { getBackgrounds } from "~/api";
 import { copyUrlToClipboard } from "~/helpers/url";
+import DisableSharingConfirmationModal from "./DisableSharingConfirmationModal";
 import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import HelpIcon from "~ui/containers/HelpIcon";
@@ -28,6 +29,7 @@ class ViewOnlyLinkForm extends React.Component {
     super(props);
     this.state = {
       backgroundId: null,
+      disableSharingConfirmationModalOpen: false,
       isLoading: false,
       sharingEnabled: false,
       automaticUpdateEnabled: false,
@@ -95,10 +97,17 @@ class ViewOnlyLinkForm extends React.Component {
     this.setState({ automaticUpdateEnabled: !automaticUpdateEnabled });
   };
 
+  handleDisableSharingConfirmationModalOpen = () =>
+    this.setState({ disableSharingConfirmationModalOpen: true });
+
+  handleDisableSharingConfirmationModalClose = () =>
+    this.setState({ disableSharingConfirmationModalOpen: false });
+
   handleSharingToggle = () => {
     const { sharingEnabled } = this.state;
+
     if (sharingEnabled) {
-      this.handleDisableSharing();
+      this.handleDisableSharingConfirmationModalOpen();
     } else {
       this.handleEnableSharing();
     }
@@ -139,6 +148,8 @@ class ViewOnlyLinkForm extends React.Component {
         projectId: project.id,
       });
     }
+
+    this.setState({ disableSharingConfirmationModalOpen: false });
   };
 
   renderNumSamples = () => {
@@ -230,6 +241,7 @@ class ViewOnlyLinkForm extends React.Component {
     const {
       backgroundId,
       backgroundOptions,
+      disableSharingConfirmationModalOpen,
       enableMassNormalizedBackgrounds,
       isLoading,
       sharingEnabled,
@@ -272,6 +284,7 @@ class ViewOnlyLinkForm extends React.Component {
                 className={cs.linkToggle}
                 onLabel="On"
                 offLabel="Off"
+                isChecked={sharingEnabled}
                 initialChecked={sharingEnabled}
                 onChange={this.handleSharingToggle}
               />
@@ -366,6 +379,13 @@ class ViewOnlyLinkForm extends React.Component {
               samples added to this project.
             </div>
           </div>
+        )}
+        {disableSharingConfirmationModalOpen && (
+          <DisableSharingConfirmationModal
+            onCancel={this.handleDisableSharingConfirmationModalClose}
+            onConfirm={this.handleDisableSharing}
+            open
+          />
         )}
       </div>
     );

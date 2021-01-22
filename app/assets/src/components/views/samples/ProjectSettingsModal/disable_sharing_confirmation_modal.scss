@@ -1,0 +1,32 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.confirmationModal {
+  .title {
+    @include font-header-xl;
+    color: $black;
+  }
+
+  .body {
+    @include font-body-s;
+    margin-top: $space-s;
+    margin-bottom: $space-xl;
+    color: $gray-darkest;
+  }
+
+  .actions {
+    margin-top: $space-m;
+    display: flex;
+
+    .item {
+      &:not(:first-child) {
+        margin-left: $space-xs;
+      }
+
+      &:not(:last-child) {
+        margin-right: $space-xs;
+      }
+    }
+  }
+}
