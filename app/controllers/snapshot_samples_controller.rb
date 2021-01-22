@@ -2,14 +2,31 @@ class SnapshotSamplesController < SamplesController
   include SamplesHelper
   include SnapshotSamplesHelper
 
-  SNAPSHOT_ACTIONS = [:show, :report_v2, :index_v2, :backgrounds, :stats, :dimensions, :metadata, :metadata_fields].freeze
+  SNAPSHOT_ACTIONS = [
+    :backgrounds,
+    :coverage_viz_data,
+    :coverage_viz_summary,
+    :dimensions,
+    :index_v2,
+    :metadata_fields,
+    :metadata,
+    :report_v2,
+    :show,
+    :stats,
+  ].freeze
 
   # Snapshot endpoints are publicly accessible but access control is checked by set_snapshot_sample and share_id
   skip_before_action :authenticate_user!, :set_sample, :check_access, only: SNAPSHOT_ACTIONS
 
   before_action :app_config_required
   before_action :check_snapshot_exists, except: [:backgrounds]
-  before_action :set_snapshot_sample, only: [:show, :report_v2, :metadata]
+  before_action :set_snapshot_sample, only: [
+    :coverage_viz_data,
+    :coverage_viz_summary,
+    :metadata,
+    :report_v2,
+    :show,
+  ]
   before_action :block_action, except: SNAPSHOT_ACTIONS
 
   MAX_PAGE_SIZE_V2 = 100
@@ -96,16 +113,19 @@ class SnapshotSamplesController < SamplesController
 
   # GET /pub/:share_id/samples/stats.json
   def stats
+    # Access checked by samples_by_share_id
     super
   end
 
   # GET /pub/:share_id/samples/dimensions.json
   def dimensions
+    # Access checked by samples_by_share_id
     super
   end
 
   # GET /pub/:share_id/samples/:id/metadata
   def metadata
+    # Access checked by set_snapshot_sample
     super
   end
 
@@ -117,6 +137,18 @@ class SnapshotSamplesController < SamplesController
     sample = snapshot_samples.find_by(id: sample_ids[0])
     results = sample.present? ? sample.metadata_fields_info : []
     render json: results
+  end
+
+  # GET /pub/:share_id/samples/:id/coverage_viz_summary
+  def coverage_viz_summary
+    # Access checked by set_snapshot_sample
+    super
+  end
+
+  # GET /pub/:share_id/samples/:id/coverage_viz_data
+  def coverage_viz_data
+    # Access checked by set_snapshot_sample
+    super
   end
 
   private

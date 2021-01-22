@@ -132,14 +132,16 @@ export default class CoverageVizBottomSidebar extends React.Component {
   }
 
   getDataForAccession = async accessionId => {
-    const { sampleId } = this.props;
+    const { sampleId, snapshotShareId } = this.props;
 
     if (this._accessionDataCache[accessionId]) {
       return this._accessionDataCache[accessionId];
     } else {
-      // Replace with network fetch.
-      const data = await getCoverageVizData(sampleId, accessionId);
-
+      const data = await getCoverageVizData({
+        sampleId,
+        accessionId,
+        snapshotShareId,
+      });
       this._accessionDataCache[accessionId] = data;
       return data;
     }
@@ -366,7 +368,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
   };
 
   renderContentHeader = () => {
-    const { params, sampleId } = this.props;
+    const { params, sampleId, snapshotShareId } = this.props;
     const { currentAccessionSummary } = this.state;
 
     const numBestAccessions = params.accessionData.best_accessions.length;
@@ -420,36 +422,38 @@ export default class CoverageVizBottomSidebar extends React.Component {
           </div>
         </div>
         <div className={cs.fill} />
-        <div className={cs.headerControls}>
-          <div className={cs.vizLinkContainer}>
-            <a
-              className={cs.linkWithArrow}
-              href={params.alignmentVizUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() =>
-                logAnalyticsEvent(
-                  "CoverageVizBottomSidebar_alignment-viz-link_clicked",
-                  {
-                    accessionId: currentAccessionSummary.id,
-                    taxonId: params.taxonId,
-                    sampleId,
-                  }
-                )
-              }
-            >
-              View read-level visualization
-              <IconArrowRight />
-            </a>
+        {!snapshotShareId && (
+          <div className={cs.headerControls}>
+            <div className={cs.vizLinkContainer}>
+              <a
+                className={cs.linkWithArrow}
+                href={params.alignmentVizUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "CoverageVizBottomSidebar_alignment-viz-link_clicked",
+                    {
+                      accessionId: currentAccessionSummary.id,
+                      taxonId: params.taxonId,
+                      sampleId,
+                    }
+                  )
+                }
+              >
+                View read-level visualization
+                <IconArrowRight />
+              </a>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   };
 
   renderContentBody = () => {
     const { currentAccessionData, currentAccessionSummary } = this.state;
-    const { pipelineVersion, sampleId, params } = this.props;
+    const { pipelineVersion, sampleId, params, snapshotShareId } = this.props;
 
     if (!currentAccessionData) {
       return (
@@ -567,14 +571,15 @@ export default class CoverageVizBottomSidebar extends React.Component {
           />
         </div>
         <HitGroupViz
+          accessionData={currentAccessionData}
+          color={CONTIG_FILL_COLOR}
+          hitGroups={contigHitGroups}
           key="contigHitGroupViz"
           label={`Contigs (${totalContigs})`}
-          color={CONTIG_FILL_COLOR}
-          accessionData={currentAccessionData}
-          hitGroups={contigHitGroups}
-          taxonId={params.taxonId}
-          sampleId={sampleId}
           pipelineVersion={pipelineVersion}
+          sampleId={sampleId}
+          snapshotShareId={snapshotShareId}
+          taxonId={params.taxonId}
         />
         {!isEmpty(readHitGroups) && (
           <HitGroupViz
@@ -615,7 +620,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
   }
 
   renderNoDataContents() {
-    const { params, sampleId } = this.props;
+    const { params, sampleId, snapshotShareId } = this.props;
 
     return (
       <NarrowContainer className={cs.contents}>
@@ -630,24 +635,26 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 Sorry, the coverage visualization is only available for taxons
                 with at least one assembled contig in NT.
               </div>
-              <a
-                className={cs.linkWithArrow}
-                href={params.alignmentVizUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() =>
-                  logAnalyticsEvent(
-                    "CoverageVizBottomSidebar_no-data-alignment-viz-link_clicked",
-                    {
-                      taxonId: params.taxonId,
-                      sampleId,
-                    }
-                  )
-                }
-              >
-                View read-level visualization
-                <IconArrowRight />
-              </a>
+              {!snapshotShareId && (
+                <a
+                  className={cs.linkWithArrow}
+                  href={params.alignmentVizUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    logAnalyticsEvent(
+                      "CoverageVizBottomSidebar_no-data-alignment-viz-link_clicked",
+                      {
+                        taxonId: params.taxonId,
+                        sampleId,
+                      }
+                    )
+                  }
+                >
+                  View read-level visualization
+                  <IconArrowRight />
+                </a>
+              )}
             </div>
             <ImgMicrobePrimary className={cs.icon} />
           </div>
@@ -704,4 +711,5 @@ CoverageVizBottomSidebar.propTypes = {
   sampleId: PropTypes.number,
   pipelineVersion: PropTypes.string,
   nameType: PropTypes.string,
+  snapshotShareId: PropTypes.string,
 };

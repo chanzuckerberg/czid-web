@@ -421,6 +421,7 @@ export default class SampleView extends React.Component {
   };
 
   fetchCoverageVizData = async () => {
+    const { snapshotShareId } = this.props;
     const { sample, pipelineRun } = this.state;
 
     if (
@@ -429,7 +430,10 @@ export default class SampleView extends React.Component {
         get("pipeline_version", pipelineRun)
       )
     ) {
-      const coverageVizSummary = await getCoverageVizSummary(sample.id);
+      const coverageVizSummary = await getCoverageVizSummary({
+        sampleId: sample.id,
+        snapshotShareId,
+      });
 
       this.setState({
         coverageVizDataByTaxon: coverageVizSummary,
@@ -1639,7 +1643,7 @@ export default class SampleView extends React.Component {
           get("pipeline_version", pipelineRun)
         ) && (
           <CoverageVizBottomSidebar
-            visible={coverageVizVisible}
+            nameType={selectedOptions.nameType}
             onClose={withAnalytics(
               this.closeCoverageViz,
               "SampleView_coverage-viz-sidebar_closed",
@@ -1649,9 +1653,10 @@ export default class SampleView extends React.Component {
               }
             )}
             params={this.getCoverageVizParams()}
-            sampleId={sample.id}
             pipelineVersion={pipelineRun.pipeline_version}
-            nameType={selectedOptions.nameType}
+            sampleId={sample.id}
+            snapshotShareId={snapshotShareId}
+            visible={coverageVizVisible}
           />
         )}
       </React.Fragment>

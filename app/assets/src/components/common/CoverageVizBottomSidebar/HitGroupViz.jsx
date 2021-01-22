@@ -267,8 +267,7 @@ export default class HitGroupViz extends React.Component {
   };
 
   render() {
-    const { label } = this.props;
-
+    const { label, snapshotShareId } = this.props;
     const {
       genomeVizTooltipLocation,
       genomeVizTooltipData,
@@ -290,6 +289,7 @@ export default class HitGroupViz extends React.Component {
           this.renderGenomeVizTooltip()}
         {contigDownloaderLocation &&
           contigDownloaderData &&
+          !snapshotShareId &&
           this.renderContigDownloader()}
       </div>
     );
@@ -321,4 +321,5 @@ HitGroupViz.propTypes = {
   taxonId: PropTypes.number,
   pipelineVersion: PropTypes.string,
   color: PropTypes.string,
+  snapshotShareId: PropTypes.string,
 };

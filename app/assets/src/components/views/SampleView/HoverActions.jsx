@@ -1,6 +1,8 @@
 // These are the buttons that appear on a Report table row when hovered.
 import React from "react";
 import cx from "classnames";
+import { filter } from "lodash/fp";
+
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
@@ -48,7 +50,7 @@ class HoverActions extends React.Component {
       taxSpecies: this.props.taxSpecies,
     };
 
-    const basicHoverAction = [
+    const hoverActions = [
       {
         key: `taxonomy_browser_${params.taxId}`,
         message: "NCBI Taxonomy Browser",
@@ -57,10 +59,8 @@ class HoverActions extends React.Component {
         enabled: this.props.ncbiEnabled,
         disabledMessage: "NCBI Taxonomy Not Found",
         params,
+        snapshotEnabled: true,
       },
-    ];
-
-    const hoverActions = [
       {
         key: `fasta_download_${params.taxId}`,
         message: "FASTA Download",
@@ -89,6 +89,7 @@ class HoverActions extends React.Component {
             disabledMessage:
               "Coverage Visualization Not Available - requires reads in NT",
             params,
+            snapshotEnabled: true,
           }
         : {
             key: `alignment_viz_${params.taxId}`,
@@ -116,8 +117,8 @@ class HoverActions extends React.Component {
     ];
 
     return snapshotShareId
-      ? basicHoverAction
-      : [...basicHoverAction, ...hoverActions];
+      ? filter("snapshotEnabled", hoverActions)
+      : hoverActions;
   };
 
   // Render the hover action according to metadata.

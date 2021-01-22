@@ -163,6 +163,8 @@ Rails.application.routes.draw do
   get 'pub/:share_id/backgrounds', to: 'snapshot_samples#backgrounds'
   get 'pub/:share_id', to: 'snapshot_links#show'
   put 'pub/:share_id/update_background', to: 'snapshot_links#update_background'
+  get 'pub/:share_id/samples/:id/coverage_viz_summary', to: 'snapshot_samples#coverage_viz_summary'
+  get 'pub/:share_id/samples/:id/coverage_viz_data', to: 'snapshot_samples#coverage_viz_data'
 
   resources :frontend_metrics, only: :create
 

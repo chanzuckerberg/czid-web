@@ -329,5 +329,25 @@ RSpec.describe SnapshotSamplesController, type: :controller do
         expect(json_response.first["key"]).to eq("nucleotide_type")
       end
     end
+
+    describe "GET #coverage_viz_summary" do
+      it "should set the sample and call the parent method" do
+        expect_any_instance_of(SnapshotSamplesController).to receive(:set_snapshot_sample)
+        expect_any_instance_of(SamplesController).to receive(:coverage_viz_summary)
+
+        get :coverage_viz_summary, params: { id: @sample_one.id, share_id: @snapshot_link.share_id, format: "json" }
+        expect(response).to have_http_status(:success)
+      end
+    end
+
+    describe "GET #coverage_viz_data" do
+      it "should set the sample and call the parent method" do
+        expect_any_instance_of(SnapshotSamplesController).to receive(:set_snapshot_sample)
+        expect_any_instance_of(SamplesController).to receive(:coverage_viz_data)
+
+        get :coverage_viz_data, params: { id: @sample_one.id, share_id: @snapshot_link.share_id, format: "json" }
+        expect(response).to have_http_status(:success)
+      end
+    end
   end
 end

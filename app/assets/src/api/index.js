@@ -327,11 +327,17 @@ const getBackgrounds = async ({
   return response.backgrounds;
 };
 
-const getCoverageVizSummary = sampleId =>
-  get(`/samples/${sampleId}/coverage_viz_summary`);
+const getCoverageVizSummary = ({ sampleId, snapshotShareId } = {}) =>
+  get(
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+      `/samples/${sampleId}/coverage_viz_summary`
+  );
 
-const getCoverageVizData = (sampleId, accessionId) =>
-  get(`/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`);
+const getCoverageVizData = ({ sampleId, accessionId, snapshotShareId } = {}) =>
+  get(
+    (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+      `/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`
+  );
 
 const getWorkflowRunResults = workflowRunId =>
   get(`/workflow_runs/${workflowRunId}/results`);
