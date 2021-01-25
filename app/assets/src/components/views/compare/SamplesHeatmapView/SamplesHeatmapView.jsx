@@ -15,6 +15,7 @@ import {
   omit,
   property,
   set,
+  toLower,
   values,
 } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
@@ -41,6 +42,8 @@ import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { showToast } from "~/components/utils/toast";
 import { validateSampleIds } from "~/api/access_control";
 import { UserContext } from "~/components/common/UserContext";
+import { URL_FIELDS } from "~/components/views/SampleView/constants.js";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import {
   SCALE_OPTIONS,
@@ -68,6 +71,7 @@ class SamplesHeatmapView extends React.Component {
   constructor(props) {
     super(props);
 
+    this.urlParser = new UrlQueryParser(URL_FIELDS);
     this.urlParams = this.parseUrlParams();
     // URL params have precedence
     this.urlParams = {
@@ -1372,8 +1376,9 @@ class SamplesHeatmapView extends React.Component {
     }
     if (this.state.sidebarMode === "sampleDetails") {
       return {
-        sampleId: this.state.selectedSampleId,
+        getTempSelectedOptionsUrlQuery: this.getTempSelectedOptionsUrlQuery,
         onMetadataUpdate: this.handleMetadataUpdate,
+        sampleId: this.state.selectedSampleId,
         showReportLink: true,
       };
     }
@@ -1439,6 +1444,60 @@ class SamplesHeatmapView extends React.Component {
     this.filterTaxa();
   }
 
+  // Maps SamplesHeatmapView threshold metric names to SampleView threshold metric names
+  mapThresholdMetricName = metricName => {
+    switch (metricName) {
+      case "zscore":
+        return "z_score";
+      case "rpm":
+        return "rpm";
+      case "r":
+        return "count";
+      case "percentidentity":
+        return "percent_identity";
+      case "alignmentlength":
+        return "alignment_length";
+      case "logevalue":
+        return "e_value";
+    }
+  };
+
+  // TODO: In the future, it would be convenient to consolidate the selectedOptions (structure & threshold filter metric names)
+  getTempSelectedOptionsUrlQuery = () => {
+    const { selectedOptions } = this.state;
+
+    // Since the structure of the selectedOptions are different in the SampleView & SamplesHeatmapView components,
+    // we map SamplesHeatmapView's selectedOptions into SampleView's selectedOptions structure
+    // To checkout the differences between selectedOptions in both components, refer to their getDefaultSelectedOptions()
+    const tempSelectedOptions = {
+      background: selectedOptions.background,
+      categories: {
+        categories: selectedOptions.categories || [],
+        subcategories: selectedOptions.subcategories || {},
+      },
+      // SampleView thresholds expect the metric format: nt:z_score
+      // SamplesHeatmapView thresholds are in the format: NT_zscore so we convert them appropriately
+      thresholds: map(threshold => {
+        // i.e. r => count
+        const mappedSampleViewThresholdValue = this.mapThresholdMetricName(
+          threshold.metric.slice(3)
+        );
+        return {
+          ...threshold,
+          // Convert to lowercase and replace everything after the first _ with the mappedSampleViewThresholdValue
+          // i.e. NT_r => nt:count
+          metric: toLower(threshold.metric).replace(
+            /_.*/,
+            `:${mappedSampleViewThresholdValue}`
+          ),
+        };
+      }, selectedOptions.thresholdFilters),
+      readSpecificity: selectedOptions.readSpecificity,
+    };
+
+    return this.urlParser.stringify({ tempSelectedOptions });
+  };
+
   renderVisualization() {
     return (
       <div className="visualization-content">
@@ -1477,6 +1536,7 @@ class SamplesHeatmapView extends React.Component {
         <SamplesHeatmapVis
           data={this.state.data}
           defaultMetadata={this.state.selectedMetadata}
+          getTempSelectedOptionsUrlQuery={this.getTempSelectedOptionsUrlQuery}
           metadataTypes={this.state.metadataTypes}
           metadataSortField={this.metadataSortField}
           metadataSortAsc={this.metadataSortAsc}
@@ -1495,6 +1555,7 @@ class SamplesHeatmapView extends React.Component {
           sampleDetails={this.state.sampleDetails}
           scale={SCALE_OPTIONS[scaleIndex][1]}
           selectedTaxa={this.state.addedTaxonIds}
+          selectedOptions={this.state.selectedOptions}
           // this.state.selectedOptions.species is 1 if species is selected, 0 otherwise.
           taxLevel={TAXON_LEVEL_SELECTED[this.state.selectedOptions.species]}
           allTaxonIds={

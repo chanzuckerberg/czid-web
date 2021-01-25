@@ -98,6 +98,7 @@ export default class SampleView extends React.Component {
     // remove nested options to be merge separately
     const {
       selectedOptions: selectedOptionsFromUrl,
+      tempSelectedOptions,
       ...nonNestedUrlState
     } = this.urlParser.parse(location.search);
     const {
@@ -117,7 +118,7 @@ export default class SampleView extends React.Component {
         loadingReport: false,
         pipelineRun: null,
         pipelineVersion: null,
-        previousSelectedOptions: this.defaultSelectedOptions(),
+        previousSelectedOptions: this.getDefaultSelectedOptions(),
         project: null,
         projectSamples: [],
         reportData: [],
@@ -125,9 +126,10 @@ export default class SampleView extends React.Component {
         sample: null,
         selectedInvalidBackground: false,
         selectedOptions: Object.assign(
-          this.defaultSelectedOptions(),
-          selectedOptionsFromLocal,
-          selectedOptionsFromUrl
+          this.getDefaultSelectedOptions(),
+          !isEmpty(tempSelectedOptions)
+            ? tempSelectedOptions
+            : (selectedOptionsFromLocal, selectedOptionsFromUrl)
         ),
         sidebarMode: null,
         sidebarVisible: false,
@@ -155,6 +157,7 @@ export default class SampleView extends React.Component {
 
   componentDidUpdate() {
     const { amrData, currentTab } = this.state;
+
     if (currentTab === TABS.AMR && !amrData) {
       this.fetchAmrData();
     }
@@ -171,7 +174,7 @@ export default class SampleView extends React.Component {
     return {};
   };
 
-  defaultSelectedOptions = () => {
+  getDefaultSelectedOptions = () => {
     return {
       background: null,
       categories: { categories: [], subcategories: { Viruses: [] } },
@@ -1302,7 +1305,7 @@ export default class SampleView extends React.Component {
     // Only Taxon, Category, Subcategories, Read Specifity, and Threshold Filters are considered "Applied Filters"
     return omit(
       ["nameType", "metric", "background"],
-      diff(selectedOptions, this.defaultSelectedOptions())
+      diff(selectedOptions, this.getDefaultSelectedOptions())
     );
   };
 

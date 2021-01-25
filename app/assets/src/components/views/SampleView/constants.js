@@ -6,6 +6,7 @@ export const GENUS_LEVEL_INDEX = 2;
 export const URL_FIELDS = {
   pipelineVersion: "string",
   selectedOptions: "object",
+  tempSelectedOptions: "object",
   view: "string",
 };
 

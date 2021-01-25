@@ -1,6 +1,6 @@
 import React from "react";
 import { some } from "lodash";
-import { set } from "lodash/fp";
+import { isEmpty, set } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import Tabs from "~/components/ui/controls/Tabs";
@@ -245,11 +245,14 @@ class SampleDetailsMode extends React.Component {
   };
 
   render() {
-    const { showReportLink, sampleId } = this.props;
+    const {
+      getTempSelectedOptionsUrlQuery,
+      showReportLink,
+      sampleId,
+    } = this.props;
     const { metadata, metadataTypes, additionalInfo } = this.state;
 
     const loading = !metadata || !metadataTypes;
-
     return (
       <div className={cs.content}>
         {loading ? (
@@ -259,7 +262,24 @@ class SampleDetailsMode extends React.Component {
         )}
         {!loading && showReportLink && (
           <div className={cs.reportLink}>
-            <a href={`/samples/${sampleId}`}>See Report</a>
+            <a
+              href={`/samples/${sampleId}${
+                getTempSelectedOptionsUrlQuery
+                  ? `?${getTempSelectedOptionsUrlQuery()}`
+                  : ""
+              }`}
+              target="_blank"
+              rel="noreferrer noopener"
+              onClick={() =>
+                logAnalyticsEvent("SampleDetailsMode_see-report-link_clicked", {
+                  withTempSelectedOptions: !isEmpty(
+                    getTempSelectedOptionsUrlQuery
+                  ),
+                })
+              }
+            >
+              See Report
+            </a>
           </div>
         )}
         {!loading && (
@@ -277,6 +297,7 @@ class SampleDetailsMode extends React.Component {
 }
 
 SampleDetailsMode.propTypes = {
+  getTempSelectedOptionsUrlQuery: PropTypes.func,
   sampleId: PropTypes.number,
   pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,

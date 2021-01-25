@@ -401,10 +401,14 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleCellClick = (cell, currentEvent) => {
+    const { getTempSelectedOptionsUrlQuery } = this.props;
+
     // Disable cell click if spacebar is pressed to pan the heatmap.
     if (!this.state.spacePressed) {
       const sampleId = this.props.sampleIds[cell.columnIndex];
-      openUrlInNewTab(`/samples/${sampleId}`, currentEvent);
+      const url = `/samples/${sampleId}?${getTempSelectedOptionsUrlQuery()}`;
+
+      openUrlInNewTab(url, currentEvent);
       logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
         sampleId,
       });
@@ -615,6 +619,7 @@ SamplesHeatmapVis.propTypes = {
   data: PropTypes.object,
   taxonFilterState: PropTypes.objectOf(PropTypes.objectOf(PropTypes.bool)),
   defaultMetadata: PropTypes.array,
+  getTempSelectedOptionsUrlQuery: PropTypes.func,
   metadataTypes: PropTypes.array,
   metric: PropTypes.string,
   metadataSortField: PropTypes.string,
