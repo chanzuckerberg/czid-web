@@ -6,9 +6,9 @@ import IconArrowUpSmall from "./IconArrowUpSmall";
 
 const SortIcon = ({ className, sortDirection }) => {
   return sortDirection === "ascending" ? (
-    <IconArrowDownSmall className={className} />
-  ) : (
     <IconArrowUpSmall className={className} />
+  ) : (
+    <IconArrowDownSmall className={className} />
   );
 };
 
