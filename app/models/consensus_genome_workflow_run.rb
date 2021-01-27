@@ -6,8 +6,12 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   OUTPUT_CONSENSUS = "consensus_genome.make_consensus_out_consensus_fa".freeze
 
   WETLAB_PROTOCOL = {
+    # See: https://www.illumina.com/products/by-brand/ampliseq.html
+    ampliseq: "ampliseq",
     # See: https://artic.network/resources/ncov/ncov-amplicon-v3.pdf
     artic: "artic",
+    # MSSPE + ARTIC concatenated
+    combined_msspe_artic: "combined_msspe_artic",
     # See: https://www.nature.com/articles/s41564-019-0637-9
     msspe: "msspe",
     # See: https://swiftbiosci.com/swift-normalase-amplicon-panels

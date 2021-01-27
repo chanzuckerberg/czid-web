@@ -12,7 +12,7 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./workflow_selector.scss";
 
-const WETLAB_OPTIONS = [
+export const CG_WETLAB_OPTIONS = [
   {
     text: "ARTIC v3",
     value: "artic",
@@ -22,8 +22,16 @@ const WETLAB_OPTIONS = [
     value: "msspe",
   },
   {
+    text: "Combined MSSPE & ARTIC v3",
+    value: "combined_msspe_artic",
+  },
+  {
     text: "SNAP",
     value: "snap",
+  },
+  {
+    text: "AmpliSeq",
+    value: "ampliseq",
   },
 ];
 
@@ -44,7 +52,7 @@ class WorkflowSelector extends React.Component {
               }
             )
           }
-          options={WETLAB_OPTIONS}
+          options={CG_WETLAB_OPTIONS}
           placeholder="Select"
           value={selectedWetlabProtocol}
         ></Dropdown>
@@ -103,7 +111,7 @@ class WorkflowSelector extends React.Component {
             <div className={cs.description}>
               Run your samples through our new pipeline to get consensus genomes
               for SARS-CoV-2. Our assembly supports wet lab protocols ARTIC v3,
-              MSSPE, and SNAP.
+              MSSPE, combined MSSPE + ARTIC, SNAP, and AmpliSeq.
             </div>
             {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
               this.renderWetlabSelector()}

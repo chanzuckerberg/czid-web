@@ -80,12 +80,18 @@ class SfnCGPipelineDispatchService
   end
 
   def primer_file
+    protocols = ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL
+
     case @workflow_run.inputs&.[]("wetlab_protocol")
-    when ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:msspe]
-      "msspe_primers.bed"
-    when ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic]
+    when protocols[:ampliseq]
+      "ampliseq_primers.bed"
+    when protocols[:artic]
       "artic_v3_primers.bed"
-    when ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap]
+    when protocols[:combined_msspe_artic]
+      "combined_msspe_artic_primers.bed"
+    when protocols[:msspe]
+      "msspe_primers.bed"
+    when protocols[:snap]
       "snap_primers.bed"
     else
       raise WetlabProtocolMissingError

@@ -2,6 +2,7 @@ import moment from "moment";
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { CG_WETLAB_OPTIONS } from "~/components/views/SampleUploadFlow/WorkflowSelector";
 import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
 
 // Compute display values for Pipeline Info from server response.
@@ -102,8 +103,12 @@ export const processPipelineInfo = additionalInfo => {
     }
   }
 
-  if (wetlabProtocol)
-    pipelineInfo.wetlabProtocol = { text: wetlabProtocol.toUpperCase() };
+  if (wetlabProtocol) {
+    pipelineInfo.wetlabProtocol = {
+      // Get the friendly name
+      text: get("text", find({ value: wetlabProtocol }, CG_WETLAB_OPTIONS)),
+    };
+  }
 
   return pipelineInfo;
 };
