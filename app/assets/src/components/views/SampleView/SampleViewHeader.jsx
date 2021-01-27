@@ -97,6 +97,7 @@ export default function SampleViewHeader({
             <>
               {renderShareButton()}
               <DownloadButton
+                className={cs.controlElement}
                 text="Download All"
                 onClick={() => {
                   openUrl(getWorkflowRunZipLink(currentRun.id));
