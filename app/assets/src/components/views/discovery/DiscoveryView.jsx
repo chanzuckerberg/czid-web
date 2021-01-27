@@ -1460,7 +1460,11 @@ class DiscoveryView extends React.Component {
   };
 
   computeWorkflowTabs = () => {
-    return WORKFLOW_ORDER.map(name => ({
+    const { snapshotShareId } = this.props;
+    let workflows = WORKFLOW_ORDER;
+    if (snapshotShareId) workflows = [workflows[0]]; // Only mngs
+
+    return workflows.map(name => ({
       label: (
         <React.Fragment>
           <span className={cs.tabLabel}>{`${WORKFLOWS[name].label}s`}</span>
