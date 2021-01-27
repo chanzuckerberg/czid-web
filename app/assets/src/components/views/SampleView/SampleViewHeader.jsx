@@ -197,7 +197,10 @@ export default function SampleViewHeader({
             label: sample.name,
             id: sample.id,
             onClick: () => {
-              openUrl(`/samples/${sample.id}  `, event);
+              openUrl(
+                (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
+                  `/samples/${sample.id}`
+              );
               logAnalyticsEvent("SampleView_header-title_clicked", {
                 sampleId: sample.id,
               });
