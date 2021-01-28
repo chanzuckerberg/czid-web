@@ -1,10 +1,7 @@
 name: idseq-web sentry release
 
 on:
-  push:
-    branches:
-      - staging
-      - prod
+  deployment
 
 jobs:
   sentry-release:
@@ -13,6 +10,7 @@ jobs:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       SENTRY_ORG: czi-idseq
       SENTRY_URL: https://sentry.prod.si.czi.technology
+      SENTRY_ENV: ${{ github.event.deployment.environment }}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
@@ -31,8 +29,6 @@ jobs:
         npm install -g @sentry/cli
     - name: Build Webpack config for source maps
       run: npm run build-img
-    - name: Set environment
-      run: echo "ENV=${GITHUB_REF##*/}" >> $GITHUB_ENV
     - name: Notify Sentry about the latest release
       run: |
         start=$(date +%s)
@@ -40,4 +36,4 @@ jobs:
         sentry-cli releases --project idseq-frontend files "${GITHUB_SHA::8}" upload-sourcemaps app/assets/dist --no-rewrite
         sentry-cli releases finalize "${GITHUB_SHA::8}"
         now=$(date +%s)
-        sentry-cli releases deploys "${GITHUB_SHA::8}" new -e $ENV -t $((now-start))
+        sentry-cli releases deploys "${GITHUB_SHA::8}" new -e $SENTRY_ENV -t $((now-start))

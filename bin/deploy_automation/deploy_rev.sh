@@ -28,7 +28,13 @@ main() {
     _exit_with_err_msg "Commit ${sha} is in an invalid state. Aborting deployment. More details at $GITHUB_REPOSITORY_URL/commits/${env}"
   fi
 
+  _log "Creating deployment event on Github"
+  declare github_deploy_id=$(__start_github_deploy "${sha}" "$env")
+
   "$SCRIPT_DIR/../deploy" "$env" "sha-$sha"
+
+  _log "Marking successful deploy on Github"
+  __finish_github_deploy "$github_deploy_id"
 }
 
 __docker_tag_exists() {
@@ -52,6 +58,22 @@ __check_commit_state() {
     _trace "Status checks failed for commit ${sha} in branch ${branch}. More details at $GITHUB_REPOSITORY_URL/commits/${branch}"
     return 1
   fi
+}
+
+__start_github_deploy() {
+  declare sha="$1"
+  declare env="$2"
+
+  deployment_args=$(jq -n ".auto_merge=false | .ref=\"${sha}\" | .environment=\"${env}\" | .required_contexts=[]")
+  response_json=$(gh api repos/:owner/:repo/deployments --input - <<< "$deployment_args")
+  jq '.id' <<< "$response_json"
+}
+
+__finish_github_deploy() {
+  declare deploy_id="$1"
+
+  status_args=$(jq -n ".state=\"success\"")
+  gh api repos/:owner/:repo/deployments/$deploy_id/statuses --input - <<< "$status_args"
 }
 
 __retry() {
