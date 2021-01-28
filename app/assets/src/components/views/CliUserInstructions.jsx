@@ -27,12 +27,9 @@ class CliUserInstructions extends React.Component {
         </p>
         <div>
           For macOS users: We recommend trying the Homebrew package manager to
-          install <span className={cs.code}>awscli</span>. You can install by
-          running these commands:
-          <div className={cs.codeBullet}>
-            /usr/bin/ruby -e "$(curl -fsSL
-            https://raw.githubusercontent.com/Homebrew/install/master/install)"
-          </div>
+          install <span className={cs.code}>awscli</span>. Please install
+          Homebrew by following the commands listed on the
+          <a href="https://brew.sh/" target="_blank" rel="noopener noreferrer">Homebrew website</a>, then run:
           <div className={cs.codeBullet}>brew install awscli</div>
         </div>
         <p>
@@ -55,18 +52,15 @@ class CliUserInstructions extends React.Component {
         <p className={cs.instructionHeading}>(2) Install the IDseq CLI:</p>
         <div>
           <span className={cs.code}>
-            pip install git+https://github.com/chanzuckerberg/idseq-cli.git
-            --upgrade
+            pip3 install idseq --upgrade
           </span>
           <p className={cs.instructionMediumMarginTop}>
             - Tips: Make sure you have Python 3 installed already. Try running{" "}
-            <span className={cs.code}>pip --version</span> or{" "}
-            <span className={cs.code}>python --version</span>.
+            <span className={cs.code}>pip3 --version</span> or{" "}
+            <span className={cs.code}>python3 --version</span>.
           </p>
           <p>
-            - Try running with <span className={cs.code}>pip</span> or{" "}
-            <span className={cs.code}>pip3</span> depending on your
-            configuration. Try <span className={cs.code}>sudo pip</span> if you
+            - Try <span className={cs.code}>sudo pip3</span> if you
             run into permissions errors (anything like OSError: [Errno 13]
             Permission denied). You can use this same command in the future to
             update the CLI if needed.
