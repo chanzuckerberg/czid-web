@@ -69,7 +69,8 @@ _get_current_version_initial_tag() {
 
 _get_latest_tag() {
   declare env_name="${1:-staging}"
-  git tag -l --sort=-version:refname "v*_${env_name}_*" | head -n 1
+  declare output; output=$(git tag -l --sort=-version:refname "v*_${env_name}_*")
+  echo "$output" | head -n 1
 }
 
 _bump_version_string() {

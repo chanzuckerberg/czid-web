@@ -68,7 +68,7 @@ __check_release_state() {
   _trace "highest_version=$highest_version"
   _trace "latest_staging_tag=$latest_staging_tag ($latest_staging_tag_commit)"
   _trace "latest_staging_commit=$latest_staging_commit"
-  _trace "checklist_json=$(jq -c <<<"$checklist_json" | cut -c 1-40)"
+  _trace "checklist_json=$(jq -c . <<<"$checklist_json" | cut -c 1-40)"
 
   if [ "$checklist_json" == "null" ] \
      && [ ! -z "$current_staging_version" ] \
