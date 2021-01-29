@@ -119,9 +119,14 @@ class ProjectsController < ApplicationController
             # Parentheses are very important. With do..end map returns nil before it is run (same does not happen with curly braces {} )
             projects: (limited_projects.pluck(*attrs).map do |p|
               project_hash = names.zip(p).to_h
-              project_hash["users"] = (project_hash["users"] || '').split('::').map { |u| name_email.zip(u.split('|')).to_h }
+
+              # Don't show list of project members unless they can edit the project.
+              # :: and | are used as separators in the SQL queries above, so split on them here.
+              project_hash["users"] = project_hash["editable"] == 1 ? (project_hash["users"] || '').split('::').map { |u| name_email.zip(u.split('|')).to_h } : []
               project_hash["owner"] = project_hash["creator"]
+
               project_hash["editable"] = current_user.admin? || project_hash["editable"] == 1
+
               metadata.each { |k| project_hash[k] = (project_hash[k] || '').split('::') }
               # Return as "tissue" for legacy compatibility. It's too hard to
               # rename all JS instances of "tissue".
