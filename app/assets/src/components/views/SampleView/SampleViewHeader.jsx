@@ -158,7 +158,9 @@ export default function SampleViewHeader({
             <HelpButton
               className={cs.controlElement}
               // eslint-disable-next-line no-console
-              onClick={() => console.log("TODO: connect to AppCues")}
+              onClick={() =>
+                logAnalyticsEvent("SampleViewHeader_help-button_clicked")
+              }
             />
           )}
         </ViewHeader.Controls>

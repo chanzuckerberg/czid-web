@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import BasicPopup from "~/components/BasicPopup";
 import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
-import { withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { logError } from "~/components/utils/logUtil";
 import { ViewHeader } from "~/components/layout";
 import { triggerCSVDownload } from "~/components/utils/csv";
@@ -121,7 +121,9 @@ const SamplesHeatmapHeader = ({
           <HelpButton
             className={cs.controlElement}
             // eslint-disable-next-line no-console
-            onClick={() => console.log("TODO: connect to AppCues")}
+            onClick={() =>
+              logAnalyticsEvent("SamplesHeatmapHeader_help-button_clicked")
+            }
           />
         )}
       </ViewHeader.Controls>
