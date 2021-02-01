@@ -32,7 +32,8 @@ class HomeController < ApplicationController
       end
 
       @show_landing_header = true
-      render 'landing'
+      # :text is included to avoid errors with bot crawlers
+      render 'landing', formats: [:html, :text]
     end
   end
 
