@@ -112,7 +112,11 @@ export default function SampleViewHeader({
             </>
           )}
           {!succeeded && editable && deletable && (
-            <PrimaryButton onClick={handleDeleteSample} text="Delete Sample" />
+            <PrimaryButton
+              className={cs.controlElement}
+              onClick={handleDeleteSample}
+              text="Delete Sample"
+            />
           )}
         </ViewHeader.Controls>
       );

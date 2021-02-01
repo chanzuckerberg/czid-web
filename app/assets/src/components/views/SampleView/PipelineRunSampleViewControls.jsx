@@ -135,7 +135,13 @@ const PipelineRunSampleViewControls = ({
   if (!!reportMetadata.reportReady && pipelineRun) {
     return renderDownloadButtonDropdown();
   } else if (!isEmpty(reportMetadata) && editable && deletable) {
-    return <PrimaryButton onClick={onDeleteSample} text="Delete Sample" />;
+    return (
+      <PrimaryButton
+        className={className}
+        onClick={onDeleteSample}
+        text="Delete Sample"
+      />
+    );
   } else {
     return <div />;
   }

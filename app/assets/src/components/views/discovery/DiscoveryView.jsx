@@ -1697,7 +1697,11 @@ class DiscoveryView extends React.Component {
                 !userDataCounts.projectCount
               }
               loading={loading}
-              onFilterClick={this.handleMetadataFilterClick}
+              onFilterClick={
+                // Re-enable when LocationFilter is supported.
+                domain !== DISCOVERY_DOMAIN_SNAPSHOT &&
+                this.handleMetadataFilterClick
+              }
               projectDimensions={computedProjectDimensions}
               projectStats={
                 // if no filtered samples are present, setting the project count to null
