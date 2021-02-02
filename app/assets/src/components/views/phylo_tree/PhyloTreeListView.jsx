@@ -4,10 +4,12 @@ import PropTypes from "prop-types";
 
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import BasicPopup from "~/components/BasicPopup";
-import { getPhyloTree, saveVisualization } from "~/api";
+import { UserContext } from "~/components/common/UserContext";
+import { getPhyloTree, retryPhyloTree, saveVisualization } from "~/api";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 
 import Divider from "../../layout/Divider";
@@ -15,6 +17,11 @@ import ViewHeader from "../../layout/ViewHeader/ViewHeader";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import PhyloTreeVis from "./PhyloTreeVis";
 import cs from "./phylo_tree_list_view.scss";
+
+const STATUS_INITIALIZED = 0;
+const STATUS_READY = 1;
+const STATUS_FAILED = 2;
+const STATUS_IN_PROGRESS = 3;
 
 class PhyloTreeListView extends React.Component {
   constructor(props) {
@@ -122,11 +129,11 @@ class PhyloTreeListView extends React.Component {
   getTreeStatus(tree) {
     let statusMessage = "";
     switch (tree) {
-      case 0:
-      case 3:
+      case STATUS_INITIALIZED:
+      case STATUS_IN_PROGRESS:
         statusMessage = "Computation in progress. Please check back later!";
         break;
-      case 2:
+      case STATUS_FAILED:
         statusMessage = "Tree creation failed!";
         break;
       default:
@@ -218,8 +225,28 @@ class PhyloTreeListView extends React.Component {
     });
   };
 
+  renderAdminPanel = () => {
+    const { currentTree, phyloTreeMap } = this.state;
+    return (
+      <div className={cs.adminPanel}>
+        <div className={cs.header}>Admin panel:</div>
+        <PrimaryButton
+          text="Retry"
+          onClick={() => {
+            retryPhyloTree(currentTree.id);
+            location.reload();
+          }}
+        />
+        <div>
+          <pre>{JSON.stringify(phyloTreeMap[currentTree.id], null, 2)}</pre>
+        </div>
+      </div>
+    );
+  };
+
   render() {
     const { treeContainer } = this.state;
+    const { admin } = this.context || {};
 
     if (!this.state.selectedPhyloTreeId) {
       return (
@@ -329,11 +356,14 @@ class PhyloTreeListView extends React.Component {
               phyloTreeId={this.state.selectedPhyloTreeId}
             />
           ) : (
-            <p className={cs.noTreeBanner}>
+            <div className={cs.noTreeBanner}>
               {this.getTreeStatus(currentTree.status)}
-            </p>
+            </div>
           )}
         </NarrowContainer>
+        {admin &&
+          currentTree.status === STATUS_FAILED &&
+          this.renderAdminPanel()}
       </div>
     );
   }
@@ -343,5 +373,7 @@ PhyloTreeListView.propTypes = {
   phyloTrees: PropTypes.array,
   allowedFeatures: PropTypes.array,
 };
+
+PhyloTreeListView.contextType = UserContext;
 
 export default PhyloTreeListView;

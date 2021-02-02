@@ -1,5 +1,5 @@
 @import "~styles/themes/colors";
-@import "~styles/typography";
+@import "~styles/themes/typography";
 
 .phyloTreeListView {
   .viewHeader {
@@ -27,5 +27,13 @@
   &:hover {
     color: $primary;
     cursor: pointer;
+  }
+}
+
+.adminPanel {
+  text-align: left;
+
+  .header {
+    @include font-header-l;
   }
 }
