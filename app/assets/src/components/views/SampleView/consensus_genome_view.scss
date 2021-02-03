@@ -146,6 +146,8 @@
     .coverageVizHistogram {
       height: 270px;
       background-color: $gray-off-white;
+      overflow-x: auto;
+      overflow-y: hidden;
     }
   }
 
