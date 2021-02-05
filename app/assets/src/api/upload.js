@@ -239,6 +239,8 @@ export const startUploadHeartbeat = async sampleId => {
     );
   };
   sendHeartbeat(); // Send first heartbeat immediately so we know it is working
-  const interval = 60000; // 60 sec
+
+  // Range from 170-230 seconds each. Picked via eyeballing.
+  const interval = (17 + 6 * Math.random()) * 10000;
   return setInterval(sendHeartbeat, interval);
 };
