@@ -465,7 +465,6 @@ class MetadataManualInput extends React.Component {
                     this.updateMetadataField(key, value, sample);
                     logAnalyticsEvent("MetadataManualInput_input_changed", {
                       key,
-                      value,
                       sampleName: sample.name,
                     });
                   }}

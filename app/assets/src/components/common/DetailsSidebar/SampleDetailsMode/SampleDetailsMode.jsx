@@ -116,7 +116,6 @@ class SampleDetailsMode extends React.Component {
     logAnalyticsEvent("SampleDetailsMode_metadata_changed", {
       sampleId: this.props.sampleId,
       key,
-      value,
       shouldSave,
       metadataErrors: Object.keys(this.state.metadataErrors).length,
     });
@@ -141,7 +140,6 @@ class SampleDetailsMode extends React.Component {
       logAnalyticsEvent("SampleDetailsMode_metadata_saved", {
         sampleId: this.props.sampleId,
         key,
-        newValue,
       });
     }
   };

@@ -271,7 +271,6 @@ class SamplesHeatmapVis extends React.Component {
     });
     logAnalyticsEvent("SamplesHeatmapVis_column-metadata_hovered", {
       nodeValue: node.value,
-      columnMetadataLegend: legend,
     });
   };
 

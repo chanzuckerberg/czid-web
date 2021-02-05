@@ -122,7 +122,6 @@ class MetadataCSVLocationsMenu extends React.Component {
         this.setState({ applyToAllSample: sampleName });
         logAnalyticsEvent("MetadataCSVLocationsMenu_input_changed", {
           key,
-          value,
           sampleName,
         });
       };
