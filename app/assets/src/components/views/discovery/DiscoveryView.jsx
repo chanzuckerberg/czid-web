@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import moment from "moment";
@@ -26,6 +27,7 @@ import {
   xorBy,
 } from "lodash/fp";
 
+import { updateProjectId } from "~/redux/modules/discovery/slice";
 import { getSearchSuggestions } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { get } from "~/api/core";
@@ -95,9 +97,10 @@ class DiscoveryView extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    const { projectId, domain } = this.props;
+    const { domain, projectId, updateDiscoveryProjectId } = this.props;
 
     this.urlParser = new UrlQueryParser({
+      globalContext: "object",
       filters: "object",
       projectId: "number",
       showFilters: "boolean",
@@ -107,6 +110,10 @@ class DiscoveryView extends React.Component {
     const urlState = this.urlParser.parse(location.search);
     let sessionState = this.loadState(sessionStorage, "DiscoveryViewOptions");
     let localState = this.loadState(localStorage, "DiscoveryViewOptions");
+
+    const projectIdToUpdate = projectId || urlState.projectId;
+    // If the projectId was passed as props or is in the URL, update the projectId in the redux state via the updateProjectid action creator
+    updateDiscoveryProjectId(projectIdToUpdate || null);
 
     // values are copied from left to right to the first argument (last arguments override previous)
     this.state = Object.assign(
@@ -248,7 +255,7 @@ class DiscoveryView extends React.Component {
   };
 
   updateBrowsingHistory = (action = "push") => {
-    const { domain, snapshotShareId } = this.props;
+    const { domain, snapshotShareId, updateDiscoveryProjectId } = this.props;
 
     const localFields = [
       "sampleActiveColumnsByWorkflow",
@@ -275,6 +282,9 @@ class DiscoveryView extends React.Component {
     const sessionState = pick(sessionFields, this.state);
     const urlState = pick(urlFields, this.state);
     const historyState = pick(stateFields, this.state);
+
+    // If the url doesn't have the projectId in it, reset projectId to null in global redux state via redux action creator
+    !urlState.projectId && updateDiscoveryProjectId(urlState.projectId);
 
     // Saving on URL enables sharing current view with other users
     let urlQuery = this.urlParser.stringify(urlState);
@@ -825,6 +835,7 @@ class DiscoveryView extends React.Component {
 
   handleProjectSelected = ({ project }) => {
     const { mapSidebarTab } = this.state;
+    const { updateDiscoveryProjectId } = this.props;
 
     this.setState(
       {
@@ -835,6 +846,7 @@ class DiscoveryView extends React.Component {
         search: null,
       },
       () => {
+        updateDiscoveryProjectId(project.id);
         this.projects.reset({ conditions: this.getConditions() });
         this.projects.loadPage(0);
         this.clearMapPreview();
@@ -844,8 +856,23 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  getGlobalContextUrlQuery = () => {
+    const { projectId } = this.state;
+
+    if (projectId) {
+      return this.urlParser.stringify({
+        globalContext: {
+          projectId,
+        },
+      });
+    }
+  };
+
   handleSampleSelected = ({ sample, currentEvent }) => {
-    let url = this.getSnapshotPrefix() + `/samples/${sample.id}`;
+    const globalContextQuery = this.getGlobalContextUrlQuery();
+    const queryString = globalContextQuery ? `?${globalContextQuery}` : "";
+
+    let url = this.getSnapshotPrefix() + `/samples/${sample.id}${queryString}`;
     openUrl(url, currentEvent);
   };
 
@@ -1831,8 +1858,16 @@ DiscoveryView.propTypes = {
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   mapTilerKey: PropTypes.string,
   admin: PropTypes.bool,
+  updateDiscoveryProjectId: PropTypes.func,
 };
 
 DiscoveryView.contextType = UserContext;
 
-export default DiscoveryView;
+const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectId };
+
+// Don't need mapStateToProps yet so pass in null
+const connectedComponent = connect(null, mapDispatchToProps)(DiscoveryView);
+
+connectedComponent.name = "DiscoveryView";
+
+export default connectedComponent;

@@ -1,7 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { UserContext } from "~/components/common/UserContext";
+import { Provider } from "react-redux";
 import * as Sentry from "@sentry/react";
+import store from "~/redux/store";
 import "url-search-params-polyfill";
 import "materialize-css";
 import "materialize-css/dist/css/materialize.css";
@@ -52,7 +54,9 @@ const react_component = (componentName, props, target, userContext) => {
     ReactDOM.render(
       <Sentry.ErrorBoundary fallback={"An error has occured"}>
         <UserContext.Provider value={userContext || {}}>
-          {React.createElement(matchedComponent, props)}
+          <Provider store={store}>
+            {React.createElement(matchedComponent, props)}
+          </Provider>
         </UserContext.Provider>
       </Sentry.ErrorBoundary>,
       document.getElementById(target)

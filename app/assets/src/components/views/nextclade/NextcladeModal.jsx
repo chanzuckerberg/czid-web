@@ -168,6 +168,17 @@ export default class NextcladeModal extends React.Component {
   };
 
   handleConfirmationModalClose = () => {
+    const { projectIds, validSampleIds, selectedTreeType } = this.state;
+
+    logAnalyticsEvent(
+      "NextcladeModal_confirmation-modal-cancel-button_clicked",
+      {
+        sampleIds: Array.from(validSampleIds),
+        selectedTreeType,
+        projectIds,
+      }
+    );
+
     this.setState({ confirmationModalOpen: false });
   };
 

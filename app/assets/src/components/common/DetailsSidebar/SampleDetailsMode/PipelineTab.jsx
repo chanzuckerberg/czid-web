@@ -10,6 +10,7 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import { getSamplePipelineResults } from "~/api";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
+import Link from "~ui/controls/Link";
 import { IconLoading, IconArrowRight } from "~/components/ui/icons";
 import {
   RESULTS_FOLDER_STAGE_KEYS,
@@ -80,15 +81,10 @@ class PipelineTab extends React.Component {
     const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
     const metadataLink = !snapshotShareId && linkLabel && link && (
-      <a
-        className={cs.vizLink}
-        href={link}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <Link className={cs.vizLink} href={link}>
         {linkLabel}
         <IconArrowRight />
-      </a>
+      </Link>
     );
 
     return {
@@ -97,7 +93,14 @@ class PipelineTab extends React.Component {
         text === undefined || text === null || text === "" ? (
           <div className={cs.emptyValue}>--</div>
         ) : (
-          <div className={cs.metadataValue}>
+          <div
+            className={cs.metadataValue}
+            onClick={() =>
+              logAnalyticsEvent(
+                "PipelineTab_pipeline-visualization-link_clicked"
+              )
+            }
+          >
             {text}
             {metadataLink}
           </div>

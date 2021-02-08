@@ -445,7 +445,7 @@ class SamplesHeatmapView extends React.Component {
   };
 
   handleShareClick = async () => {
-    await copyShortUrlToClipboard(this.getUrlForCurrentParams());
+    await copyShortUrlToClipboard({ url: this.getUrlForCurrentParams() });
   };
 
   handleSaveClick = async () => {

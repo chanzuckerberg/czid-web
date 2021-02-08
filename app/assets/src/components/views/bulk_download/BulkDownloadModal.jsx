@@ -296,7 +296,7 @@ class BulkDownloadModal extends React.Component {
   // *** Create bulk download and close modal ***
 
   createBulkDownload = async selectedDownload => {
-    const { onGenerate } = this.props;
+    const { onGenerate, workflow } = this.props;
 
     this.setState({
       waitingForCreate: true,
@@ -309,11 +309,15 @@ class BulkDownloadModal extends React.Component {
         createStatus: "error",
         createError: e.error || DEFAULT_CREATION_ERROR,
       });
-      logAnalyticsEvent("BulkDownloadModal_bulk-download-creation_failed");
+      logAnalyticsEvent("BulkDownloadModal_bulk-download-creation_failed", {
+        workflow,
+      });
       return;
     }
 
-    logAnalyticsEvent("BulkDownloadModal_bulk-download-creation_successful");
+    logAnalyticsEvent("BulkDownloadModal_bulk-download-creation_successful", {
+      workflow,
+    });
 
     onGenerate();
   };
@@ -336,6 +340,7 @@ class BulkDownloadModal extends React.Component {
       createStatus,
       createError,
       enableMassNormalizedBackgrounds,
+      workflow,
     } = this.state;
 
     const numSamples = validSampleIds.size;
@@ -376,6 +381,7 @@ class BulkDownloadModal extends React.Component {
               selectedFields={selectedFields}
               selectedDownloadTypeName={selectedDownloadTypeName}
               onDownloadRequest={this.handleDownloadRequest}
+              workflow={workflow}
             />
           </div>
         </div>

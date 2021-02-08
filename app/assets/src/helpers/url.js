@@ -1,6 +1,9 @@
 import QueryString from "query-string";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
+import { URL_FIELDS } from "~/components/views/SampleView/constants";
 import {
   filter,
+  isEmpty,
   isObject,
   isArray,
   toPairs,
@@ -9,11 +12,14 @@ import {
   isUndefined,
   flow,
   map,
+  omit,
   flatten,
   join,
 } from "lodash/fp";
 import { shortenUrl } from "~/api";
 import copy from "copy-to-clipboard";
+
+const urlParser = new UrlQueryParser(URL_FIELDS);
 
 // See also parseUrlParams in SamplesHeatmapView
 export const parseUrlParams = () => {
@@ -60,8 +66,13 @@ export const getURLParamString = params => {
   )(filtered);
 };
 
-export const copyShortUrlToClipboard = async url => {
-  url = url || window.location.href;
+export const copyShortUrlToClipboard = async ({
+  url = "",
+  removeGlobalContext = false,
+} = {}) => {
+  url = url === "" ? window.location.href : url;
+  url = removeGlobalContext ? removeURLParameter(url, "globalContext") : url;
+
   const shortUrl = await shortenUrl(url);
   copy(window.location.origin + "/" + shortUrl.unique_key);
 };
@@ -69,4 +80,16 @@ export const copyShortUrlToClipboard = async url => {
 export const copyUrlToClipboard = async url => {
   url = url || window.location.href;
   copy(url);
+};
+
+const removeURLParameter = (url, parameter) => {
+  const urlParts = url.split("?");
+  const urlQueryParams = urlParser.parse(urlParts[1]);
+  const allowedParams = urlParser.stringify(omit(parameter, urlQueryParams));
+
+  // If allowedParams is empty, then there's no query string - so return everything before the query parameters.
+  // Else, return the new URL with the specified parameter omitted.
+  return isEmpty(allowedParams)
+    ? urlParts[0]
+    : urlParts[0] + "?" + allowedParams;
 };

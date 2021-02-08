@@ -1,3 +1,5 @@
+import store from "~/redux/store";
+import { getGlobalAnalyticsContext } from "~/redux/modules/discovery/selectors";
 import { isArray, isObject, camelCase, snakeCase, lowerFirst } from "lodash/fp";
 
 // Event name guidelines: Follow object_action convention with object being the
@@ -36,6 +38,14 @@ export const logAnalyticsEvent = async (eventName, eventData = {}) => {
         ...eventData,
       };
     }
+
+    // Get the global analytic context from the Redux global state tree using the getGlobalAnalyticsContext selector
+    const globalAnalyticsContext = getGlobalAnalyticsContext(store.getState());
+
+    if (globalAnalyticsContext) {
+      eventData["globalContext"] = globalAnalyticsContext;
+    }
+
     window.analytics.track(eventName, eventData);
   }
 };

@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Menu, Popup } from "semantic-ui-react";
 import { IconTableSmall, IconTreeSmall } from "~ui/icons";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 const ReportViewSelector = ({ view, onViewClick }) => {
   return (
@@ -11,7 +12,10 @@ const ReportViewSelector = ({ view, onViewClick }) => {
           <Menu.Item
             name="table"
             active={view === "table"}
-            onClick={() => onViewClick({ view: "table" })}
+            onClick={() => {
+              onViewClick({ view: "table" });
+              logAnalyticsEvent("ReportViewSelector_table-view_selected");
+            }}
           >
             <IconTableSmall />
           </Menu.Item>
@@ -25,7 +29,12 @@ const ReportViewSelector = ({ view, onViewClick }) => {
           <Menu.Item
             name="tree"
             active={view === "tree"}
-            onClick={() => onViewClick({ view: "tree" })}
+            onClick={() => {
+              onViewClick({ view: "tree" });
+              logAnalyticsEvent(
+                "ReportViewSelector_taxonomic-tree-view_selected"
+              );
+            }}
           >
             <IconTreeSmall />
           </Menu.Item>

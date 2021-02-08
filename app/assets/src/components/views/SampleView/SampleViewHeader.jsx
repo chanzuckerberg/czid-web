@@ -30,6 +30,7 @@ export default function SampleViewHeader({
   editable,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
+  hasGlobalContext,
   onDetailsClick,
   onPipelineVersionChange,
   currentRun,
@@ -60,7 +61,9 @@ export default function SampleViewHeader({
             <ShareButton
               className={cs.controlElement}
               onClick={() => {
-                copyShortUrlToClipboard();
+                copyShortUrlToClipboard({
+                  removeGlobalContext: hasGlobalContext,
+                });
                 logAnalyticsEvent("SampleView_share-button_clicked", {
                   sampleId: sample && sample.id,
                 });
@@ -246,6 +249,7 @@ SampleViewHeader.propTypes = {
   editable: PropTypes.bool.isRequired,
   getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
   hasAppliedFilters: PropTypes.bool.isRequired,
+  hasGlobalContext: PropTypes.bool.isRequired,
   onDetailsClick: PropTypes.func.isRequired,
   onPipelineVersionChange: PropTypes.func.isRequired,
   pipelineRun: PropTypes.PipelineRun,

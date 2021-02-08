@@ -75,6 +75,8 @@ class SamplesView extends React.Component {
     }
     onSelectedSamplesUpdate(newSelected);
     logAnalyticsEvent("SamplesView_row_selected", {
+      rowIsChecked: checked,
+      sampleId: value,
       selectedSampleIds: newSelected.size,
     });
   };

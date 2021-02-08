@@ -153,6 +153,7 @@ export default class BulkDownloadModalFooter extends React.Component {
       createStatus,
       createError,
       onDownloadRequest,
+      workflow,
     } = this.props;
 
     if (waitingForCreate) {
@@ -169,7 +170,10 @@ export default class BulkDownloadModalFooter extends React.Component {
         text="Start Generating Download"
         onClick={withAnalytics(
           onDownloadRequest,
-          "BulkDownloadModalFooter_start-generating-button_clicked"
+          "BulkDownloadModalFooter_start-generating-button_clicked",
+          {
+            workflow,
+          }
         )}
       />
     );
@@ -214,6 +218,7 @@ BulkDownloadModalFooter.propTypes = {
   createStatus: PropTypes.string,
   createError: PropTypes.string,
   onDownloadRequest: PropTypes.func.isRequired,
+  workflow: PropTypes.string.isRequired,
 };
 
 BulkDownloadModalFooter.contextType = UserContext;

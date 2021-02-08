@@ -1,4 +1,6 @@
 import React from "react";
+import { connect } from "react-redux";
+import { updateProjectId } from "~/redux/modules/discovery/slice";
 import {
   compact,
   every,
@@ -90,13 +92,14 @@ import csSampleMessage from "./sample_message.scss";
 
 const mapValuesWithKey = mapValues.convert({ cap: false });
 
-export default class SampleView extends React.Component {
+class SampleView extends React.Component {
   constructor(props) {
     super(props);
 
     this.urlParser = new UrlQueryParser(URL_FIELDS);
     // remove nested options to be merge separately
     const {
+      globalContext,
       selectedOptions: selectedOptionsFromUrl,
       tempSelectedOptions,
       ...nonNestedUrlState
@@ -106,10 +109,18 @@ export default class SampleView extends React.Component {
       ...nonNestedLocalState
     } = this.loadState(localStorage, "SampleViewOptions");
 
+    const { updateDiscoveryProjectId } = this.props;
+
+    // Updates the projectId in the Redux store to add global context in our analytic events
+    updateDiscoveryProjectId(
+      (globalContext && globalContext.projectId) || null
+    );
+
     this.state = Object.assign(
       {
         amrData: null,
         backgrounds: [],
+        globalContext: globalContext || null,
         coverageVizDataByTaxon: {},
         coverageVizParams: {},
         coverageVizVisible: false,
@@ -129,7 +140,7 @@ export default class SampleView extends React.Component {
           this.getDefaultSelectedOptions(),
           !isEmpty(tempSelectedOptions)
             ? tempSelectedOptions
-            : (selectedOptionsFromLocal, selectedOptionsFromUrl)
+            : Object.assign(selectedOptionsFromLocal, selectedOptionsFromUrl)
         ),
         sidebarMode: null,
         sidebarVisible: false,
@@ -1562,6 +1573,7 @@ export default class SampleView extends React.Component {
       amrData,
       coverageVizVisible,
       currentTab,
+      globalContext,
       pipelineRun,
       project,
       projectSamples,
@@ -1593,6 +1605,7 @@ export default class SampleView extends React.Component {
                 this.getDownloadReportTableWithAppliedFiltersLink
               }
               hasAppliedFilters={this.hasAppliedFilters()}
+              hasGlobalContext={globalContext !== null}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
               currentRun={currentRun}
@@ -1667,9 +1680,19 @@ export default class SampleView extends React.Component {
   };
 }
 
-SampleView.contextType = UserContext;
-
 SampleView.propTypes = {
   sampleId: PropTypes.number,
   snapshotShareId: PropTypes.string,
+  updateDiscoveryProjectId: PropTypes.func,
 };
+
+SampleView.contextType = UserContext;
+
+const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectId };
+
+// Don't need mapStateToProps yet so pass in null
+const connectedComponent = connect(null, mapDispatchToProps)(SampleView);
+
+connectedComponent.name = "SampleView";
+
+export default connectedComponent;
