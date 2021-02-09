@@ -703,9 +703,14 @@ class DiscoveryView extends React.Component {
   handleSampleActiveColumnsChange = activeColumns => {
     const { workflow, sampleActiveColumnsByWorkflow } = this.state;
 
+    const previousColumns = sampleActiveColumnsByWorkflow[workflow];
     sampleActiveColumnsByWorkflow[workflow] = activeColumns;
     this.setState({ sampleActiveColumnsByWorkflow }, () => {
       this.updateBrowsingHistory("replace");
+      logAnalyticsEvent(`DiscoveryView_columns_changed`, {
+        newColumns: sampleActiveColumnsByWorkflow[workflow],
+        previousColumns: previousColumns,
+      });
     });
   };
 

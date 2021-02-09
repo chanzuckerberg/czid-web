@@ -42,7 +42,7 @@ class PipelineVizController < ApplicationController
           return
         end
       rescue StandardError => e
-        LogUtil.log_error("Error retrieving pipeline viz data for Pipeline Run #{pipeline_run.id}: #{e}", exception: e, pipeline_run_id: pipline_run.id)
+        LogUtil.log_error("Error retrieving pipeline viz data for Pipeline Run #{pipeline_run.id}: #{e}", exception: e, pipeline_run_id: pipeline_run.id)
         if current_user.admin?
           render(json: {
                    status: STATUS_OTHER_ERROR,
