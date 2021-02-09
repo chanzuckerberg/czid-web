@@ -66,11 +66,7 @@
             <% workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome]) %>
             <% if workflow_run %>
               <%= workflow_run.status %>
-              &nbsp;
-              <% completed_statuses = [WorkflowRun::STATUS[:succeeded], WorkflowRun::STATUS[:succeeded_with_issue], WorkflowRun::STATUS[:failed]] %>
-              <% if completed_statuses.include?(workflow_run.status) %>
-                <%= button_to 'rerun', rerun_workflow_run_path(workflow_run), method: :put, form: {target: '_blank'} %>
-              <% end %>
+              <%= button_to 'rerun', rerun_workflow_run_path(workflow_run), method: :put, form: {target: '_blank'} %>
             <% end %>
           </td>
           <td class="small"><%= pipeline_run&.created_at || workflow_run&.executed_at || "N/A" %></td>
