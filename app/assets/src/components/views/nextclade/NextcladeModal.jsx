@@ -41,6 +41,7 @@ export default class NextcladeModal extends React.Component {
       errorModalOpen: false,
       invalidSampleNames: [],
       loading: true,
+      loadingResults: false,
       projectIds: [],
       referenceTree: null,
       selectedTreeType: "global",
@@ -189,9 +190,7 @@ export default class NextcladeModal extends React.Component {
     const sampleIds = Array.from(validSampleIds);
 
     try {
-      await this.openExportLink();
-      this.setState({ confirmationModalOpen: false }, () => {
-        onClose();
+      this.setState({ loadingResults: true }, () => {
         logAnalyticsEvent(
           "NextcladeModal_confirmation-modal-confirm-button_clicked",
           {
@@ -201,11 +200,17 @@ export default class NextcladeModal extends React.Component {
           }
         );
       });
+
+      await this.openExportLink();
+      this.setState({ confirmationModalOpen: false }, () => {
+        onClose();
+      });
     } catch (error) {
       this.setState(
         {
           confirmationModalOpen: false,
           errorModalOpen: true,
+          loadingResults: false,
         },
         () => {
           console.error(error);
@@ -261,6 +266,7 @@ export default class NextcladeModal extends React.Component {
       errorModalOpen,
       invalidSampleNames,
       loading,
+      loadingResults,
       referenceTree,
       validationError,
       validSampleIds,
@@ -349,6 +355,7 @@ export default class NextcladeModal extends React.Component {
             open
             onCancel={this.handleConfirmationModalClose}
             onConfirm={this.handleConfirmationModalConfirm}
+            loading={loadingResults}
           />
         )}
         {errorModalOpen && (

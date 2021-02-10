@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { compact, difference, isEmpty, union, pickBy } from "lodash/fp";
+import { difference, isEmpty, union, pickBy } from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -36,6 +36,8 @@ import {
 } from "./ColumnConfiguration";
 import cs from "./samples_view.scss";
 import ToolbarIcon from "./ToolbarIcon";
+
+const MAX_NEXTCLADE_SAMPLES = 200;
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -238,16 +240,25 @@ class SamplesView extends React.Component {
     const downloadIcon = (
       <IconNextcladeLarge className={cx(cs.icon, cs.nextclade)} />
     );
-
+    const getPopupSubtitle = () => {
+      if (selectedSampleIds.size > MAX_NEXTCLADE_SAMPLES) {
+        return `Select at most ${MAX_NEXTCLADE_SAMPLES} samples`;
+      } else if (selectedSampleIds.size === 0) {
+        return "Select at least 1 sample";
+      } else {
+        return "";
+      }
+    };
     return (
       <ToolbarIcon
         className={cs.action}
         icon={downloadIcon}
         popupText="Nextclade"
-        popupSubtitle={
-          selectedSampleIds.size === 0 ? "Select at least 1 sample" : ""
+        popupSubtitle={getPopupSubtitle()}
+        disabled={
+          selectedSampleIds.size === 0 ||
+          selectedSampleIds.size > MAX_NEXTCLADE_SAMPLES
         }
-        disabled={selectedSampleIds.size === 0}
         onClick={withAnalytics(
           this.handleNextcladeModalOpen,
           "SamplesView_nextclade-modal-open_clicked"

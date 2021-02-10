@@ -33,5 +33,19 @@
         margin-right: $space-xs;
       }
     }
+
+    .loadingIcon {
+      fill: $gray-dark;
+      width: $icon-l;
+      height: $icon-l;
+      vertical-align: middle;
+      margin-right: $space-xxs;
+    }
+
+    .loading {
+      @include font-body-s;
+      color: $gray-dark;
+      vertical-align: middle;
+    }
   }
 }

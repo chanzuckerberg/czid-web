@@ -5,10 +5,11 @@ import { Image } from "semantic-ui-react";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import IconLoading from "~/components/ui/icons/IconLoading";
 
 import cs from "./nextclade_confirmation_modal.scss";
 
-const NextcladeConfirmationModal = ({ onCancel, onConfirm, open }) => {
+const NextcladeConfirmationModal = ({ onCancel, onConfirm, open, loading }) => {
   return (
     <Modal className={cs.nextcladeConfirmation} narrowest open={open}>
       <Image className={cs.logo} src="/assets/LogoNextclade.png" />
@@ -31,12 +32,29 @@ const NextcladeConfirmationModal = ({ onCancel, onConfirm, open }) => {
         .
       </div>
       <div className={cs.actions}>
-        <div className={cs.item}>
-          <PrimaryButton text="Confirm" rounded={true} onClick={onConfirm} />
-        </div>
-        <div className={cs.item}>
-          <SecondaryButton text="Cancel" rounded={true} onClick={onCancel} />
-        </div>
+        {loading ? (
+          <React.Fragment>
+            <IconLoading className={cs.loadingIcon} />
+            <span className={cs.loading}>{"Loading..."}</span>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <div className={cs.item}>
+              <PrimaryButton
+                text="Confirm"
+                rounded={true}
+                onClick={onConfirm}
+              />
+            </div>
+            <div className={cs.item}>
+              <SecondaryButton
+                text="Cancel"
+                rounded={true}
+                onClick={onCancel}
+              />
+            </div>
+          </React.Fragment>
+        )}
       </div>
     </Modal>
   );
@@ -46,6 +64,7 @@ NextcladeConfirmationModal.propTypes = {
   onCancel: PropTypes.func.isRequired,
   onConfirm: PropTypes.func.isRequired,
   open: PropTypes.bool,
+  loading: PropTypes.bool,
 };
 
 export default NextcladeConfirmationModal;
