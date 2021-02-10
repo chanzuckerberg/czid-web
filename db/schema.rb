@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_109_012_552) do
+ActiveRecord::Schema.define(version: 20_210_209_192_430) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -438,7 +438,7 @@ ActiveRecord::Schema.define(version: 20_210_109_012_552) do
     t.string "pipeline_commit", default: ""
     t.text "dag_vars"
     t.integer "max_input_fragments"
-    t.datetime "client_updated_at"
+    t.datetime "client_updated_at", comment: "Deprecated as of 2021-02-09."
     t.integer "uploaded_from_basespace", limit: 1, default: 0
     t.string "upload_error"
     t.string "basespace_access_token"

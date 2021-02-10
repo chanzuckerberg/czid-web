@@ -78,7 +78,7 @@ class MonitorPipelineResults
 
   def self.alert_stalled_uploads!
     # Delay determined based on query of historical upload times, where 80%
-    # of successful uploads took less than 3 hours by client_updated_at.
+    # of successful uploads took less than 3 hours by updated time.
     samples = Sample.current_stalled_local_uploads(3.hours).where(upload_error: nil)
     if samples.empty?
       return
@@ -88,10 +88,8 @@ class MonitorPipelineResults
     role_names = samples.map { |sample| sample.user.role_name }.compact.uniq
     project_names = samples.map { |sample| sample.project.name }.compact.uniq
     duration_hrs = ((Time.now.utc - created_at) / 60 / 60).round(2)
-    client_updated_at = samples.map(&:client_updated_at).compact.max
     status_urls = samples.map(&:status_url)
-    msg = %(LongRunningUploadsEvent: #{samples.length} samples were created more than #{duration_hrs} hours ago by #{role_names} in projects #{project_names}.
-      #{client_updated_at ? "Last client ping was at #{client_updated_at}. " : ''} See: #{status_urls})
+    msg = %(LongRunningUploadsEvent: #{samples.length} samples were created more than #{duration_hrs} hours ago by #{role_names} in projects #{project_names}. See: #{status_urls})
     Rails.logger.info(msg)
 
     samples.update_all(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED) # rubocop:disable Rails/SkipsModelValidations

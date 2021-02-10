@@ -1,18 +1,21 @@
 import {
-  get,
-  find,
-  map,
-  keyBy,
-  mapValues,
+  difference,
   every,
+  find,
+  get,
+  isEqual,
+  keyBy,
+  keys,
+  map,
+  mapValues,
   pick,
   sum,
-  difference,
 } from "lodash/fp";
 
 import { markSampleUploaded, uploadFileToUrlWithRetries } from "~/api";
+import { logAnalyticsEvent } from "~/api/analytics";
 
-import { putWithCSRF, postWithCSRF } from "./core";
+import { postWithCSRF } from "./core";
 
 export const MAX_MARK_SAMPLE_RETRIES = 10;
 
@@ -166,11 +169,24 @@ export const uploadSampleFilesToPresignedURL = ({
     return uploadedSize / totalSize;
   };
 
+  const heartbeatInterval = startUploadHeartbeat(map("id", samples));
+
+  // Need to keep track of "finalized file names" to indicate when the batch is complete.
+  const finalizedFileNames = {};
+  const onFileNameFinalized = fileName => {
+    finalizedFileNames[fileName] = true;
+    if (
+      isEqual(keys(finalizedFileNames).sort(), keys(fileNamesToProgress).sort())
+    ) {
+      clearInterval(heartbeatInterval);
+      logAnalyticsEvent("Uploads_batch-heartbeat_completed", {
+        sampleIds: map("id", samples),
+      });
+    }
+  };
+
   samples.forEach(sample => {
     const files = sampleNamesToFiles[sample.name];
-
-    // Start pinging server to monitor uploads server-side
-    const interval = startUploadHeartbeat(sample.id);
 
     sample.input_files.map(inputFileAttributes => {
       const file = files[inputFileAttributes.name];
@@ -188,14 +204,16 @@ export const uploadSampleFilesToPresignedURL = ({
         },
         onSuccess: () => {
           fileNamesToProgress[file.name] = 1;
+          onFileNameFinalized(file.name);
+
           onFileUploadSuccess(sample, sample.id);
-          clearInterval(interval);
         },
         onError: error => {
           fileNamesToProgress[file.name] = 0;
+          onFileNameFinalized(file.name);
+
           callbacks.onSampleUploadError &&
             callbacks.onSampleUploadError(sample, error);
-          clearInterval(interval);
         },
       });
     });
@@ -230,17 +248,14 @@ const bulkUploadWithMetadata = async (samples, metadata) => {
 };
 
 // Local uploads go directly from the browser to S3, so we don't know if an upload was interrupted.
-// Ping the heartbeat endpoint periodically to say the browser is actively uploading this sample.
-export const startUploadHeartbeat = async sampleId => {
-  const sendHeartbeat = () => {
-    putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`).catch(() =>
-      // eslint-disable-next-line no-console
-      console.error("Can't connect to IDseq server.")
-    );
-  };
+// Ping a heartbeat periodically to say the browser is actively uploading the samples.
+export const startUploadHeartbeat = async sampleIds => {
+  const sendHeartbeat = () =>
+    logAnalyticsEvent("Uploads_batch-heartbeat_sent", { sampleIds });
+
   sendHeartbeat(); // Send first heartbeat immediately so we know it is working
 
-  // Range from 170-230 seconds each. Picked via eyeballing.
-  const interval = (17 + 6 * Math.random()) * 10000;
-  return setInterval(sendHeartbeat, interval);
+  const minutes = 10; // Picked arbitrarily, adjust as needed.
+  const milliseconds = minutes * 60 * 10000;
+  return setInterval(sendHeartbeat, milliseconds);
 };

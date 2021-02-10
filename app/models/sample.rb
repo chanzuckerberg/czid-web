@@ -579,7 +579,7 @@ class Sample < ApplicationRecord
   end
 
   # Delay determined based on query of historical upload times, where 80%
-  # of successful uploads took less than 3 hours by client_updated_at.
+  # of successful uploads took less than 3 hours by updated time.
   def self.current_stalled_local_uploads(delay = 3.hours)
     where(status: STATUS_CREATED)
       .where("samples.created_at < ?", Time.now.utc - delay)
