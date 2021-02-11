@@ -48,6 +48,7 @@ import {
 } from "~ui/illustrations";
 import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
+import { generateUrlToSampleView } from "~/components/utils/urls";
 
 import NoSearchResultsBanner from "./NoSearchResultsBanner";
 import DiscoveryHeader from "./DiscoveryHeader";
@@ -100,7 +101,6 @@ class DiscoveryView extends React.Component {
     const { domain, projectId, updateDiscoveryProjectId } = this.props;
 
     this.urlParser = new UrlQueryParser({
-      globalContext: "object",
       filters: "object",
       projectId: "number",
       showFilters: "boolean",
@@ -861,23 +861,14 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  getGlobalContextUrlQuery = () => {
-    const { projectId } = this.state;
-
-    if (projectId) {
-      return this.urlParser.stringify({
-        globalContext: {
-          projectId,
-        },
-      });
-    }
-  };
-
   handleSampleSelected = ({ sample, currentEvent }) => {
-    const globalContextQuery = this.getGlobalContextUrlQuery();
-    const queryString = globalContextQuery ? `?${globalContextQuery}` : "";
+    const { snapshotShareId } = this.props;
 
-    let url = this.getSnapshotPrefix() + `/samples/${sample.id}${queryString}`;
+    let url = generateUrlToSampleView({
+      sampleId: sample.id,
+      snapshotShareId,
+    });
+
     openUrl(url, currentEvent);
   };
 
@@ -1855,14 +1846,14 @@ class DiscoveryView extends React.Component {
 }
 
 DiscoveryView.propTypes = {
+  admin: PropTypes.bool,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   domain: PropTypes.oneOf(DISCOVERY_DOMAINS).isRequired,
+  mapTilerKey: PropTypes.string,
   projectId: PropTypes.number,
   snapshotProjectName: PropTypes.string,
   snapshotProjectDescription: PropTypes.string,
   snapshotShareId: PropTypes.string,
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
-  mapTilerKey: PropTypes.string,
-  admin: PropTypes.bool,
   updateDiscoveryProjectId: PropTypes.func,
 };
 

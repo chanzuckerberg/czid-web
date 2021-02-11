@@ -18,11 +18,11 @@ import {
   ShareButton,
 } from "~ui/controls/buttons";
 import { openUrl } from "~utils/links";
+import { generateUrlToSampleView } from "~/components/utils/urls";
 
 import PipelineRunSampleViewControls from "./PipelineRunSampleViewControls";
 import WorkflowVersionHeader from "./WorkflowVersionHeader";
 import cs from "./sample_view_header.scss";
-
 export default function SampleViewHeader({
   backgroundId,
   currentTab,
@@ -30,7 +30,6 @@ export default function SampleViewHeader({
   editable,
   getDownloadReportTableWithAppliedFiltersLink,
   hasAppliedFilters,
-  hasGlobalContext,
   onDetailsClick,
   onPipelineVersionChange,
   currentRun,
@@ -61,9 +60,7 @@ export default function SampleViewHeader({
             <ShareButton
               className={cs.controlElement}
               onClick={() => {
-                copyShortUrlToClipboard({
-                  removeGlobalContext: hasGlobalContext,
-                });
+                copyShortUrlToClipboard();
                 logAnalyticsEvent("SampleView_share-button_clicked", {
                   sampleId: sample && sample.id,
                 });
@@ -207,8 +204,10 @@ export default function SampleViewHeader({
             id: sample.id,
             onClick: () => {
               openUrl(
-                (snapshotShareId ? `/pub/${snapshotShareId}` : "") +
-                  `/samples/${sample.id}`
+                generateUrlToSampleView({
+                  sampleId: sample.id,
+                  snapshotShareId,
+                })
               );
               logAnalyticsEvent("SampleView_header-title_clicked", {
                 sampleId: sample.id,
@@ -249,7 +248,6 @@ SampleViewHeader.propTypes = {
   editable: PropTypes.bool.isRequired,
   getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,
   hasAppliedFilters: PropTypes.bool.isRequired,
-  hasGlobalContext: PropTypes.bool.isRequired,
   onDetailsClick: PropTypes.func.isRequired,
   onPipelineVersionChange: PropTypes.func.isRequired,
   pipelineRun: PropTypes.PipelineRun,

@@ -445,7 +445,7 @@ class SamplesHeatmapView extends React.Component {
   };
 
   handleShareClick = async () => {
-    await copyShortUrlToClipboard({ url: this.getUrlForCurrentParams() });
+    await copyShortUrlToClipboard(this.getUrlForCurrentParams());
   };
 
   handleSaveClick = async () => {
@@ -1376,7 +1376,7 @@ class SamplesHeatmapView extends React.Component {
     }
     if (this.state.sidebarMode === "sampleDetails") {
       return {
-        getTempSelectedOptionsUrlQuery: this.getTempSelectedOptionsUrlQuery,
+        tempSelectedOptions: this.getTempSelectedOptions(),
         onMetadataUpdate: this.handleMetadataUpdate,
         sampleId: this.state.selectedSampleId,
         showReportLink: true,
@@ -1463,13 +1463,13 @@ class SamplesHeatmapView extends React.Component {
   };
 
   // TODO: In the future, it would be convenient to consolidate the selectedOptions (structure & threshold filter metric names)
-  getTempSelectedOptionsUrlQuery = () => {
+  getTempSelectedOptions = () => {
     const { selectedOptions } = this.state;
 
     // Since the structure of the selectedOptions are different in the SampleView & SamplesHeatmapView components,
     // we map SamplesHeatmapView's selectedOptions into SampleView's selectedOptions structure
     // To checkout the differences between selectedOptions in both components, refer to their getDefaultSelectedOptions()
-    const tempSelectedOptions = {
+    return {
       background: selectedOptions.background,
       categories: {
         categories: selectedOptions.categories || [],
@@ -1494,8 +1494,6 @@ class SamplesHeatmapView extends React.Component {
       }, selectedOptions.thresholdFilters),
       readSpecificity: selectedOptions.readSpecificity,
     };
-
-    return this.urlParser.stringify({ tempSelectedOptions });
   };
 
   renderVisualization() {
@@ -1536,7 +1534,6 @@ class SamplesHeatmapView extends React.Component {
         <SamplesHeatmapVis
           data={this.state.data}
           defaultMetadata={this.state.selectedMetadata}
-          getTempSelectedOptionsUrlQuery={this.getTempSelectedOptionsUrlQuery}
           metadataTypes={this.state.metadataTypes}
           metadataSortField={this.metadataSortField}
           metadataSortAsc={this.metadataSortAsc}
@@ -1558,6 +1555,7 @@ class SamplesHeatmapView extends React.Component {
           selectedOptions={this.state.selectedOptions}
           // this.state.selectedOptions.species is 1 if species is selected, 0 otherwise.
           taxLevel={TAXON_LEVEL_SELECTED[this.state.selectedOptions.species]}
+          tempSelectedOptions={this.getTempSelectedOptions()}
           allTaxonIds={
             this.state.selectedOptions.species
               ? this.state.allSpeciesIds

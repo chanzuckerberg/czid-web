@@ -6,6 +6,7 @@ import { size, map, keyBy, isEmpty } from "lodash/fp";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { TooltipVizTable } from "~ui/containers";
 import { openUrlInNewTab } from "~utils/links";
+import { generateUrlToSampleView } from "~/components/utils/urls";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
@@ -400,12 +401,15 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleCellClick = (cell, currentEvent) => {
-    const { getTempSelectedOptionsUrlQuery } = this.props;
+    const { tempSelectedOptions } = this.props;
 
     // Disable cell click if spacebar is pressed to pan the heatmap.
     if (!this.state.spacePressed) {
       const sampleId = this.props.sampleIds[cell.columnIndex];
-      const url = `/samples/${sampleId}?${getTempSelectedOptionsUrlQuery()}`;
+      const url = generateUrlToSampleView({
+        sampleId,
+        tempSelectedOptions,
+      });
 
       openUrlInNewTab(url, currentEvent);
       logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
@@ -618,7 +622,6 @@ SamplesHeatmapVis.propTypes = {
   data: PropTypes.object,
   taxonFilterState: PropTypes.objectOf(PropTypes.objectOf(PropTypes.bool)),
   defaultMetadata: PropTypes.array,
-  getTempSelectedOptionsUrlQuery: PropTypes.func,
   metadataTypes: PropTypes.array,
   metric: PropTypes.string,
   metadataSortField: PropTypes.string,
@@ -636,6 +639,7 @@ SamplesHeatmapVis.propTypes = {
   taxLevel: PropTypes.string,
   taxonCategories: PropTypes.array,
   taxonDetails: PropTypes.object,
+  tempSelectedOptions: PropTypes.object,
   allTaxonIds: PropTypes.array,
   taxonIds: PropTypes.array,
   selectedTaxa: PropTypes.object,

@@ -66,30 +66,12 @@ export const getURLParamString = params => {
   )(filtered);
 };
 
-export const copyShortUrlToClipboard = async ({
-  url = "",
-  removeGlobalContext = false,
-} = {}) => {
-  url = url === "" ? window.location.href : url;
-  url = removeGlobalContext ? removeURLParameter(url, "globalContext") : url;
-
-  const shortUrl = await shortenUrl(url);
+export const copyShortUrlToClipboard = async url => {
+  const shortUrl = await shortenUrl(url || window.location.href);
   copy(window.location.origin + "/" + shortUrl.unique_key);
 };
 
 export const copyUrlToClipboard = async url => {
   url = url || window.location.href;
   copy(url);
-};
-
-const removeURLParameter = (url, parameter) => {
-  const urlParts = url.split("?");
-  const urlQueryParams = urlParser.parse(urlParts[1]);
-  const allowedParams = urlParser.stringify(omit(parameter, urlQueryParams));
-
-  // If allowedParams is empty, then there's no query string - so return everything before the query parameters.
-  // Else, return the new URL with the specified parameter omitted.
-  return isEmpty(allowedParams)
-    ? urlParts[0]
-    : urlParts[0] + "?" + allowedParams;
 };

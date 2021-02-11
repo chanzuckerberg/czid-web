@@ -58,9 +58,9 @@ const postToUrlWithCSRF = (url, params) => {
 };
 
 export {
+  downloadStringToFile,
   openUrl,
   openUrlInNewTab,
-  downloadStringToFile,
   openUrlInPopupWindow,
   postToUrlWithCSRF,
 };

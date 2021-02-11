@@ -12,7 +12,7 @@ import {
 } from "~/api/metadata";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { processMetadata, processMetadataTypes } from "~utils/metadata";
-
+import { generateUrlToSampleView } from "~/components/utils/urls";
 import MetadataTab from "./MetadataTab";
 import PipelineTab from "./PipelineTab";
 import NotesTab from "./NotesTab";
@@ -243,11 +243,7 @@ class SampleDetailsMode extends React.Component {
   };
 
   render() {
-    const {
-      getTempSelectedOptionsUrlQuery,
-      showReportLink,
-      sampleId,
-    } = this.props;
+    const { tempSelectedOptions, showReportLink, sampleId } = this.props;
     const { metadata, metadataTypes, additionalInfo } = this.state;
 
     const loading = !metadata || !metadataTypes;
@@ -261,18 +257,15 @@ class SampleDetailsMode extends React.Component {
         {!loading && showReportLink && (
           <div className={cs.reportLink}>
             <a
-              href={`/samples/${sampleId}${
-                getTempSelectedOptionsUrlQuery
-                  ? `?${getTempSelectedOptionsUrlQuery()}`
-                  : ""
-              }`}
+              href={generateUrlToSampleView({
+                sampleId,
+                tempSelectedOptions,
+              })}
               target="_blank"
               rel="noreferrer noopener"
               onClick={() =>
                 logAnalyticsEvent("SampleDetailsMode_see-report-link_clicked", {
-                  withTempSelectedOptions: !isEmpty(
-                    getTempSelectedOptionsUrlQuery
-                  ),
+                  withTempSelectedOptions: !isEmpty(tempSelectedOptions),
                 })
               }
             >
@@ -295,12 +288,12 @@ class SampleDetailsMode extends React.Component {
 }
 
 SampleDetailsMode.propTypes = {
-  getTempSelectedOptionsUrlQuery: PropTypes.func,
   sampleId: PropTypes.number,
   pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,
   showReportLink: PropTypes.bool,
   snapshotShareId: PropTypes.string,
+  tempSelectedOptions: PropTypes.object,
 };
 
 export default SampleDetailsMode;

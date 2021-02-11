@@ -99,7 +99,6 @@ class SampleView extends React.Component {
     this.urlParser = new UrlQueryParser(URL_FIELDS);
     // remove nested options to be merge separately
     const {
-      globalContext,
       selectedOptions: selectedOptionsFromUrl,
       tempSelectedOptions,
       ...nonNestedUrlState
@@ -109,18 +108,10 @@ class SampleView extends React.Component {
       ...nonNestedLocalState
     } = this.loadState(localStorage, "SampleViewOptions");
 
-    const { updateDiscoveryProjectId } = this.props;
-
-    // Updates the projectId in the Redux store to add global context in our analytic events
-    updateDiscoveryProjectId(
-      (globalContext && globalContext.projectId) || null
-    );
-
     this.state = Object.assign(
       {
         amrData: null,
         backgrounds: [],
-        globalContext: globalContext || null,
         coverageVizDataByTaxon: {},
         coverageVizParams: {},
         coverageVizVisible: false,
@@ -140,7 +131,11 @@ class SampleView extends React.Component {
           this.getDefaultSelectedOptions(),
           !isEmpty(tempSelectedOptions)
             ? tempSelectedOptions
-            : Object.assign(selectedOptionsFromLocal, selectedOptionsFromUrl)
+            : Object.assign(
+                {},
+                selectedOptionsFromLocal,
+                selectedOptionsFromUrl
+              )
         ),
         sidebarMode: null,
         sidebarVisible: false,
@@ -200,7 +195,7 @@ class SampleView extends React.Component {
   fetchSample = async () => {
     this.setState({ loadingReport: true });
 
-    const { snapshotShareId, sampleId } = this.props;
+    const { snapshotShareId, sampleId, updateDiscoveryProjectId } = this.props;
     const { backgrounds, pipelineVersion, selectedOptions } = this.state;
     let { currentTab } = this.state;
     const sample = await getSample({ snapshotShareId, sampleId });
@@ -248,6 +243,8 @@ class SampleView extends React.Component {
         selectedOptions: newSelectedOptions,
       },
       () => {
+        // Updates the projectId in the Redux store to add global context in our analytic events
+        updateDiscoveryProjectId(sample.project.id);
         this.fetchSampleReportData();
         this.fetchProjectSamples();
         this.fetchCoverageVizData();
@@ -1573,7 +1570,6 @@ class SampleView extends React.Component {
       amrData,
       coverageVizVisible,
       currentTab,
-      globalContext,
       pipelineRun,
       project,
       projectSamples,
@@ -1605,7 +1601,6 @@ class SampleView extends React.Component {
                 this.getDownloadReportTableWithAppliedFiltersLink
               }
               hasAppliedFilters={this.hasAppliedFilters()}
-              hasGlobalContext={globalContext !== null}
               onDetailsClick={this.toggleSampleDetailsSidebar}
               onPipelineVersionChange={this.handlePipelineVersionSelect}
               currentRun={currentRun}

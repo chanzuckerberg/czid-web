@@ -4,7 +4,6 @@ export const SPECIES_LEVEL_INDEX = 1;
 export const GENUS_LEVEL_INDEX = 2;
 
 export const URL_FIELDS = {
-  globalContext: "object",
   pipelineVersion: "string",
   selectedOptions: "object",
   tempSelectedOptions: "object",
