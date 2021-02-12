@@ -150,15 +150,6 @@ class SampleView extends React.Component {
   componentDidMount = () => {
     // fetchBackgrounds will subsequently call fetchSample and fetchSampleReportData.
     this.fetchBackgrounds();
-
-    logAnalyticsEvent("PipelineSampleReport_sample_viewed", {
-      sampleId: this.props.sampleId,
-    });
-    // DEPRECATED: kept temporarily for continuity
-    // TODO (written 12/2/19): remove after v2 of the report page has been active for 3 months.
-    logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleViewed, {
-      sampleId: this.props.sampleId,
-    });
   };
 
   componentDidUpdate() {
@@ -409,6 +400,10 @@ class SampleView extends React.Component {
           this.setState({ loadingReport: false });
         }
       });
+
+    logAnalyticsEvent("PipelineSampleReport_sample_viewed", {
+      sampleId,
+    });
   };
 
   fetchAmrData = async () => {
