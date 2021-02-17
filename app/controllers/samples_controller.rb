@@ -26,7 +26,7 @@ class SamplesController < ApplicationController
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary,
                   :coverage_viz_data,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline,
-                  :pipeline_runs, :save_metadata, :save_metadata_v2,].freeze
+                  :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow,].freeze
 
   OTHER_ACTIONS = [:bulk_upload_with_metadata, :bulk_import, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
@@ -1176,6 +1176,14 @@ class SamplesController < ApplicationController
   def pipeline_runs
   end
 
+  # POST /samples/:id/kickoff_workflow
+  def kickoff_workflow
+    workflow = collection_params[:workflow]
+    inputs_json = collection_params[:inputs_json].to_json
+    workflow_run = @sample.create_and_dispatch_workflow_run(workflow, inputs_json: inputs_json)
+    render json: workflow_run
+  end
+
   def cli_user_instructions
     render template: "samples/cli_user_instructions"
   end
@@ -1383,7 +1391,7 @@ class SamplesController < ApplicationController
 
   # Doesn't require :sample or :samples
   def collection_params
-    permitted_params = [:referenceTree, sampleIds: []]
+    permitted_params = [:referenceTree, :workflow, sampleIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name]]
     params.permit(*permitted_params)
   end
 

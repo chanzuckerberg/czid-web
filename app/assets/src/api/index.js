@@ -470,6 +470,24 @@ const createConsensusGenomeCladeExport = ({ sampleIds, referenceTree }) =>
     referenceTree,
   });
 
+const kickoffConsensusGenome = ({
+  sampleId,
+  workflow,
+  accessionId,
+  accessionName,
+  taxonId,
+  taxonName,
+}) =>
+  postWithCSRF(`/samples/${sampleId}/kickoff_workflow`, {
+    workflow,
+    inputs_json: {
+      accession_id: accessionId,
+      accession_name: accessionName,
+      taxon_id: taxonId,
+      taxon_name: taxonName,
+    },
+  });
+
 export {
   bulkImportRemoteSamples,
   createBackground,
@@ -508,6 +526,7 @@ export {
   getUserSettingMetadataByCategory,
   getVisualizations,
   getWorkflowRunResults,
+  kickoffConsensusGenome,
   markSampleUploaded,
   retryPhyloTree,
   saveProjectDescription,

@@ -94,26 +94,50 @@ class SfnCGPipelineDispatchService
     when protocols[:snap]
       "snap_primers.bed"
     else
-      raise WetlabProtocolMissingError
+      if @workflow_run.inputs&.[]("accession_id").nil?
+        raise WetlabProtocolMissingError
+      end
     end
   end
 
+  def alignment_config_paths
+    alignment_config = AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
+    paths = {
+      s3_nr_db_path: alignment_config.s3_nr_db_path,
+      s3_nr_loc_db_path: alignment_config.s3_nr_loc_db_path,
+    }
+    paths
+  end
+
   def generate_wdl_input
+    additional_inputs = if @workflow_run.inputs&.[]("accession_id")
+                          {
+                            accession_id: @workflow_run.inputs&.[]("accession_id"),
+                            s3_nr_db_path: alignment_config_paths[:s3_nr_db_path],
+                            s3_nr_loc_db_path: alignment_config_paths[:s3_nr_loc_db_path],
+                          }
+                        else
+                          {
+                            ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
+                          }
+                        end
+
+    run_inputs = {
+      docker_image_id: retrieve_docker_image_id,
+      fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
+      fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
+      sample: @sample.name,
+      ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
+      kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",
+      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{primer_file}",
+      ercc_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ercc_sequences.fasta",
+    }.merge(additional_inputs)
+
     sfn_pipeline_input_json = {
       # TODO(JIRA:IDSEQ-3163): do not use hardcoded version (outputs will still be here in the SFN version returned by the tag)
       RUN_WDL_URI: "s3://#{S3_WORKFLOWS_BUCKET}/#{@workflow_run.workflow_version_tag}/run.wdl",
       Input: {
-        Run: {
-          docker_image_id: retrieve_docker_image_id,
-          fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
-          fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
-          sample: @sample.name,
-          ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
-          ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
-          kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",
-          primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{primer_file}",
-          ercc_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ercc_sequences.fasta",
-        },
+        Run: run_inputs,
       },
       OutputPrefix: @sample.sample_output_s3_path,
     }

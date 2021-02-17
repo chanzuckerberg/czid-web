@@ -5,6 +5,9 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
   let(:fake_samples_bucket) { "fake-samples-bucket" }
   let(:s3_samples_key_prefix) { "samples/%<project_id>s/%<sample_id>s" }
   let(:s3_sample_input_files_path) { "s3://#{fake_samples_bucket}/#{s3_samples_key_prefix}/fastqs/%<input_file_name>s" }
+  let(:fake_alignment_config) { AlignmentConfig::DEFAULT_NAME }
+  let(:s3_nr_db_path) { "s3://idseq-public-references/ncbi-sources/#{fake_alignment_config}/nr" }
+  let(:s3_nr_loc_db_path) { "s3://idseq-public-references/alignment_data/#{fake_alignment_config}/nr_loc.db" }
   let(:sfn_name) { "idseq-test-%<project_id>s-%<sample_id>s-cg-%<time>s" }
   let(:fake_account_id) { "123456789012" }
   let(:fake_samples_bucket) { "fake-samples-bucket" }
@@ -38,10 +41,12 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
   end
 
   let(:project) { create(:project) }
+  let(:alignment_config) { create(:alignment_config, name: fake_alignment_config, s3_nr_db_path: s3_nr_db_path, s3_nr_loc_db_path: s3_nr_loc_db_path) }
   let(:sample) do
     create(:sample,
            project: project,
-           temp_pipeline_workflow: test_workflow_name)
+           temp_pipeline_workflow: test_workflow_name,
+           alignment_config_name: alignment_config.name)
   end
   let(:workflow_run) do
     create(:workflow_run,
@@ -234,6 +239,29 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         end
         it "throws an error" do
           expect { subject }.to raise_error(SfnCGPipelineDispatchService::WetlabProtocolMissingError)
+        end
+      end
+
+      context "when an accession id is provided" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { accession_id: 1 }.to_json)
+        end
+        it "returns sfn input containing correct sfn parameters" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  accession_id: 1,
+                  s3_nr_db_path: s3_nr_db_path,
+                  s3_nr_loc_db_path: s3_nr_loc_db_path,
+                },
+              },
+            }
+          )
         end
       end
     end
