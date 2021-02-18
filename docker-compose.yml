@@ -128,6 +128,22 @@ services:
       <<: *web-variables
       <<: *aws-variables
     command: bundle exec "COUNT=5 rake resque:workers"
+  resque_scheduler:
+    # See config/resque_schedule.yml for usages.
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
+    volumes:
+      - .:/app:ro
+      - ./log:/app/log
+      - ./tmp:/app/tmp
+      - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
+    depends_on:
+      - db
+      - redis
+    environment:
+      <<: *web-variables
+      <<: *aws-variables
+    command: bundle exec "rake resque:scheduler"
   resque_result_monitor:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
     volumes:

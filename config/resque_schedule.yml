@@ -1,0 +1,7 @@
+# See: https://github.com/resque/resque-scheduler#static-schedules
+
+SendSampleVisibilityEmail:
+  cron: "0 0 15 * *"
+  class: SendSampleVisibilityEmail
+  queue: send_sample_visiblity_email
+  description: "On the 15th of every month, run this job for sending upcoming sample visibility reminders."
