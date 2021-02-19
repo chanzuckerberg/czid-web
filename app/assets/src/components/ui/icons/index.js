@@ -12,6 +12,7 @@ import IconChartSmall from "./IconChartSmall";
 import IconCheckSmall from "./IconCheckSmall";
 import IconClose from "./IconClose";
 import IconCloseSmall from "./IconCloseSmall";
+import IconConsensusSmall from "./IconConsensusSmall";
 import IconContigSmall from "./IconContigSmall";
 import IconCopySmall from "./IconCopySmall";
 import IconCoverage from "./IconCoverage";
@@ -76,6 +77,7 @@ export const ICONS_TAXONOMY = {
     IconCheckSmall,
     IconClose,
     IconCloseSmall,
+    IconConsensusSmall,
     IconContigSmall,
     IconCopySmall,
     IconCoverage,

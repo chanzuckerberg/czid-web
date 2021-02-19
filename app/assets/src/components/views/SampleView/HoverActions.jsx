@@ -9,6 +9,7 @@ import BetaLabel from "~/components/ui/labels/BetaLabel";
 import {
   IconAlignmentSmall,
   IconBrowserSmall,
+  IconConsensusSmall,
   IconContigSmall,
   IconCoverage,
   IconDownloadSmall,
@@ -18,7 +19,10 @@ import PropTypes from "~/components/utils/propTypes";
 import {
   isPipelineFeatureAvailable,
   COVERAGE_VIZ_FEATURE,
+  CONSENSUS_GENOME_FEATURE,
+  MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
+import { UserContext } from "~/components/common/UserContext";
 
 import cs from "./hover_actions.scss";
 
@@ -35,7 +39,12 @@ class HoverActions extends React.Component {
 
   // Metadata for each of the hover actions.
   getHoverActions = () => {
-    const { pipelineVersion, snapshotShareId } = this.props;
+    const { allowedFeatures = [] } = this.context || {};
+    const {
+      onConsensusGenomeClick,
+      pipelineVersion,
+      snapshotShareId,
+    } = this.props;
     const hasCoverageViz = isPipelineFeatureAvailable(
       COVERAGE_VIZ_FEATURE,
       pipelineVersion
@@ -116,9 +125,40 @@ class HoverActions extends React.Component {
       },
     ];
 
+    if (allowedFeatures.includes("gen_viral_cg")) {
+      hoverActions.push({
+        key: `consensus_genome_${params.taxId}`,
+        message: "Consensus Genome",
+        iconComponentClass: IconConsensusSmall,
+        handleClick: onConsensusGenomeClick,
+        enabled: !this.getConsensusGenomeError(),
+        disabledMessage: this.getConsensusGenomeError(),
+      });
+    }
+
     return snapshotShareId
       ? filter("snapshotEnabled", hoverActions)
       : hoverActions;
+  };
+
+  getConsensusGenomeError = () => {
+    const {
+      ntContigsAvailable,
+      pipelineVersion,
+      taxCategory,
+      taxLevel,
+    } = this.props;
+    if (
+      !isPipelineFeatureAvailable(CONSENSUS_GENOME_FEATURE, pipelineVersion)
+    ) {
+      return `Consensus genome pipeline not available for mNGS pipeline versions < ${MINIMUM_VERSIONS[CONSENSUS_GENOME_FEATURE]}`;
+    } else if (taxCategory !== "viruses") {
+      return "Consensus genome pipeline is currently available for viruses only.";
+    } else if (taxLevel !== 1) {
+      return "Consensus genome pipeline only available at the species level.";
+    } else if (!ntContigsAvailable) {
+      return "Please select a virus with at least 1 contig that aligned to the NT database to run the consensus genome pipeline.";
+    }
   };
 
   // Render the hover action according to metadata.
@@ -171,6 +211,8 @@ HoverActions.propTypes = {
   coverageVizEnabled: PropTypes.bool,
   fastaEnabled: PropTypes.bool,
   ncbiEnabled: PropTypes.bool,
+  ntContigsAvailable: PropTypes.bool,
+  onConsensusGenomeClick: PropTypes.func.isRequired,
   onContigVizClick: PropTypes.func.isRequired,
   onCoverageVizClick: PropTypes.func.isRequired,
   onFastaActionClick: PropTypes.func.isRequired,
@@ -184,6 +226,9 @@ HoverActions.propTypes = {
   taxLevel: PropTypes.number,
   taxName: PropTypes.string,
   taxSpecies: PropTypes.array,
+  taxCategory: PropTypes.string,
 };
+
+HoverActions.contextType = UserContext;
 
 export default HoverActions;

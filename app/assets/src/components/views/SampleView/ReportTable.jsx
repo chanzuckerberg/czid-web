@@ -579,6 +579,7 @@ class ReportTable extends React.Component {
       alignVizAvailable,
       fastaDownloadEnabled,
       phyloTreeAllowed,
+      onConsensusGenomeClick,
       pipelineVersion,
       projectId,
       sampleId,
@@ -615,7 +616,9 @@ class ReportTable extends React.Component {
         taxName={rowData.name}
         taxCommonName={rowData.common_name}
         taxSpecies={rowData.species}
+        taxCategory={rowData.category}
         ncbiEnabled={validTaxId}
+        ntContigsAvailable={!!get("nt.contigs", rowData)}
         onNcbiActionClick={withAnalytics(
           this.linkToNCBI,
           "PipelineSampleReport_ncbi-link_clicked",
@@ -627,6 +630,7 @@ class ReportTable extends React.Component {
           "PipelineSampleReport_taxon-fasta-link_clicked",
           analyticsContext
         )}
+        onConsensusGenomeClick={onConsensusGenomeClick}
         coverageVizEnabled={coverageVizEnabled}
         onCoverageVizClick={withAnalytics(
           this.handleCoverageVizClick,
@@ -856,6 +860,7 @@ ReportTable.propTypes = {
   // Consider adding a callback to render the hover actions
   alignVizAvailable: PropTypes.bool.isRequired,
   fastaDownloadEnabled: PropTypes.bool.isRequired,
+  onConsensusGenomeClick: PropTypes.func.isRequired,
   onCoverageVizClick: PropTypes.func.isRequired,
   phyloTreeAllowed: PropTypes.bool.isRequired,
   pipelineVersion: PropTypes.string,

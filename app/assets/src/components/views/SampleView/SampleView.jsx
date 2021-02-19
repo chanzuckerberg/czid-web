@@ -910,6 +910,10 @@ class SampleView extends React.Component {
     });
   };
 
+  handleConsensusGenomeClick = () => {
+    // TODO: Currently a placeholder. Update to open the Viral CG parameters modal in CH-118820.
+  };
+
   handleMetadataUpdate = (key, value) => {
     const { sample } = this.state;
     if (key === "name") {
@@ -1520,6 +1524,7 @@ class SampleView extends React.Component {
                   !!(reportMetadata && reportMetadata.alignVizAvailable)
                 }
                 data={filteredReportData}
+                onConsensusGenomeClick={this.handleConsensusGenomeClick}
                 onCoverageVizClick={this.handleCoverageVizClick}
                 onTaxonNameClick={withAnalytics(
                   this.handleTaxonClick,
