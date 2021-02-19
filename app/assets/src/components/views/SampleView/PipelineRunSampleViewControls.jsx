@@ -143,7 +143,7 @@ const PipelineRunSampleViewControls = ({
       />
     );
   } else {
-    return <div />;
+    return null;
   }
 };
 
