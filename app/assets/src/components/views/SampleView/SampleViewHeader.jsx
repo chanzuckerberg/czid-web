@@ -17,6 +17,7 @@ import {
   SaveButton,
   ShareButton,
 } from "~ui/controls/buttons";
+import { SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR } from "~/constants";
 import { openUrl } from "~utils/links";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 
@@ -158,9 +159,12 @@ export default function SampleViewHeader({
             <HelpButton
               className={cs.controlElement}
               // eslint-disable-next-line no-console
-              onClick={() =>
-                logAnalyticsEvent("SampleViewHeader_help-button_clicked")
-              }
+              onClick={withAnalytics(
+                () =>
+                  window.Appcues &&
+                  window.Appcues.show(SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR),
+                "SampleViewHeader_help-button_clicked"
+              )}
             />
           )}
         </ViewHeader.Controls>
