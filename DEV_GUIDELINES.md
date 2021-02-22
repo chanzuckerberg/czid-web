@@ -357,6 +357,10 @@ class NoDepthDataError < StandardError
 end
 ```
 
+## RSpec Ruby testing
+
+When in doubt, follow the [Better Specs guide](https://betterspecs.org/).
+
 ## Feature flags
 
 - `idseq-web` uses a lightweight custom feature flag system. Feature flags are stored in a string-array on the `allowed_features` column of `Users`.
