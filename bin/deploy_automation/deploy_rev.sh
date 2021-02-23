@@ -8,6 +8,16 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 # This command will wait for the commit of this git rev
 # to be available in Docker hub and passed all checks in github before deploying it
 main() {
+  declare force;
+  while getopts "f" opt; do
+    # Ex: ./deploy_rev.sh -f ...
+    case ${opt} in
+      f )
+        force=true
+        shift $((OPTIND-1))
+        ;;
+    esac
+  done
   declare env="$1" # staging / prod
   declare git_rev="$2" # https://git-scm.com/docs/git-rev-parse#_specifying_revisions
 
@@ -23,9 +33,14 @@ main() {
     _exit_with_err_msg "Couldn't find image ${docker_image} in docker hub"
   fi
 
-  _log "Checking if Github commit ${sha} in a valid state"
-  if ! __retry 15 60 __check_commit_state "${sha}" "$env"; then
-    _exit_with_err_msg "Commit ${sha} is in an invalid state. Aborting deployment. More details at $GITHUB_REPOSITORY_URL/commits/${env}"
+  if [ "$force" == true ] ; then
+    _log "WARNING: Force deploy mode detected. Please use this sparingly"
+    _log "Skipping Github state check"
+  else
+    _log "Checking if Github commit ${sha} in a valid state"
+    if ! __retry 15 60 __check_commit_state "${sha}" "$env"; then
+      _exit_with_err_msg "Commit ${sha} is in an invalid state. Aborting deployment. More details at $GITHUB_REPOSITORY_URL/commits/${env}"
+    fi
   fi
 
   _log "Creating deployment event on Github"
