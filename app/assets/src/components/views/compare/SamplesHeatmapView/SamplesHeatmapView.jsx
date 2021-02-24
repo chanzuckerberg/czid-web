@@ -985,11 +985,11 @@ class SamplesHeatmapView extends React.Component {
           return false;
         }
         if (filter["operator"] === ">=") {
-          if (value < parseInt(filter["value"])) {
+          if (value < parseFloat(filter["value"])) {
             return false;
           }
         } else if (filter["operator"] === "<=") {
-          if (value > parseInt(filter["value"])) {
+          if (value > parseFloat(filter["value"])) {
             return false;
           }
         }
