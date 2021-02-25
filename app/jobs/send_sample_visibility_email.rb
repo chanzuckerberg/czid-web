@@ -4,8 +4,8 @@ class SendSampleVisibilityEmail
   extend InstrumentedJob
 
   NEXT_PERIOD = -> { Time.zone.today.next_month }
-  NO_ELLIGIBLE_SAMPLES = "No samples going public in the next period.".freeze
-  NO_ELLIGIBLE_USERS = "No elligible users have samples going public in the next period.".freeze
+  NO_ELIGIBLE_SAMPLES = "No samples going public in the next period.".freeze
+  NO_ELIGIBLE_USERS = "No eligible users have samples going public in the next period.".freeze
   SAMPLE_VISIBILITY_EMAIL_FEATURE = "sample_visibility_email".freeze
 
   @queue = :send_sample_visibility_email
@@ -13,18 +13,18 @@ class SendSampleVisibilityEmail
   def self.perform
     Rails.logger.info("Starting SendSampleVisibilityEmail job...")
 
-    samples = find_elligible_samples
+    samples = find_eligible_samples
     if samples.empty?
-      Rails.logger.info(NO_ELLIGIBLE_SAMPLES)
-      return NO_ELLIGIBLE_SAMPLES
+      Rails.logger.info(NO_ELIGIBLE_SAMPLES)
+      return NO_ELIGIBLE_SAMPLES
     end
     samples_by_user_id = samples.group_by(&:user_id)
 
-    users = find_elligible_users
+    users = find_eligible_users
     users = users.where(id: samples_by_user_id.keys)
     if users.empty?
-      Rails.logger.info(NO_ELLIGIBLE_USERS)
-      return NO_ELLIGIBLE_USERS
+      Rails.logger.info(NO_ELIGIBLE_USERS)
+      return NO_ELIGIBLE_USERS
     end
 
     users.each do |user|
@@ -35,13 +35,13 @@ class SendSampleVisibilityEmail
     Rails.logger.info("Finished SendSampleVisibilityEmail job.")
   end
 
-  def self.find_elligible_samples
+  def self.find_eligible_samples
     time = NEXT_PERIOD.call
     range = [time.at_beginning_of_month, time.at_end_of_month]
     return Sample.samples_going_public_in_period(range)
   end
 
-  def self.find_elligible_users
+  def self.find_eligible_users
     launched = AppConfigHelper.get_json_app_config(AppConfig::LAUNCHED_FEATURES, [])
     users = if launched.include?(SAMPLE_VISIBILITY_EMAIL_FEATURE)
               User.all

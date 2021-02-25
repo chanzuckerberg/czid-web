@@ -20,8 +20,8 @@ RSpec.describe SendSampleVisibilityEmail, type: :job do
   describe "#perform" do
     it "correctly dispatches emails to each user with samples going public" do
       _ = [sample_1, sample_2, sample_3, sample_4]
-      expect(subject).to receive(:find_elligible_samples).and_return(Sample.all)
-      expect(subject).to receive(:find_elligible_users).and_return(User.all)
+      expect(subject).to receive(:find_eligible_samples).and_return(Sample.all)
+      expect(subject).to receive(:find_eligible_users).and_return(User.all)
 
       expect(subject).to receive(:prepare_individual_emails).with(beta_user, beta_user.samples)
       expect(subject).to receive(:prepare_individual_emails).with(regular_user, regular_user.samples)
@@ -29,38 +29,38 @@ RSpec.describe SendSampleVisibilityEmail, type: :job do
     end
 
     it "exits properly when there are no matching samples" do
-      expect(subject).to receive(:find_elligible_samples).and_return(Sample.none)
+      expect(subject).to receive(:find_eligible_samples).and_return(Sample.none)
 
-      expect(subject.perform).to eq(subject::NO_ELLIGIBLE_SAMPLES)
+      expect(subject.perform).to eq(subject::NO_ELIGIBLE_SAMPLES)
     end
 
     it "exits properly when there are no users with the feature" do
-      expect(subject).to receive(:find_elligible_samples).and_return([sample_1])
-      expect(subject).to receive(:find_elligible_users).and_return(User.none)
+      expect(subject).to receive(:find_eligible_samples).and_return([sample_1])
+      expect(subject).to receive(:find_eligible_users).and_return(User.none)
 
-      expect(subject.perform).to eq(subject::NO_ELLIGIBLE_USERS)
+      expect(subject.perform).to eq(subject::NO_ELIGIBLE_USERS)
     end
 
     it "exits properly when there are no users with samples going public" do
-      expect(subject).to receive(:find_elligible_samples).and_return([sample_1])
-      expect(subject).to receive(:find_elligible_users).and_return(User.where(id: beta_user.id))
+      expect(subject).to receive(:find_eligible_samples).and_return([sample_1])
+      expect(subject).to receive(:find_eligible_users).and_return(User.where(id: beta_user.id))
 
-      expect(subject.perform).to eq(subject::NO_ELLIGIBLE_USERS)
+      expect(subject.perform).to eq(subject::NO_ELIGIBLE_USERS)
     end
   end
 
-  describe "#find_elligible_samples" do
+  describe "#find_eligible_samples" do
     it "requests samples going public in the correct time period" do
       next_month = Time.zone.today.next_month
       start = next_month.at_beginning_of_month
       finish = next_month.at_end_of_month
       expect(Sample).to receive(:samples_going_public_in_period).with([start, finish]).and_return([sample_1])
 
-      expect(subject.find_elligible_samples).to eq([sample_1])
+      expect(subject.find_eligible_samples).to eq([sample_1])
     end
   end
 
-  describe "#find_elligible_users" do
+  describe "#find_eligible_users" do
     context "when the feature is launched" do
       before do
         expect(AppConfigHelper).to receive(:get_json_app_config).and_return([feature_name])
@@ -69,7 +69,7 @@ RSpec.describe SendSampleVisibilityEmail, type: :job do
       it "returns all users" do
         expected = [admin_user, beta_user, regular_user]
 
-        expect(subject.find_elligible_users.pluck(:id)).to match_array(expected.pluck(:id))
+        expect(subject.find_eligible_users.pluck(:id)).to match_array(expected.pluck(:id))
       end
     end
 
@@ -77,7 +77,7 @@ RSpec.describe SendSampleVisibilityEmail, type: :job do
       it "returns only admins and beta users" do
         expected = [admin_user.id, beta_user.id]
 
-        expect(subject.find_elligible_users.pluck(:id)).to match_array(expected)
+        expect(subject.find_eligible_users.pluck(:id)).to match_array(expected)
       end
     end
   end
