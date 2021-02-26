@@ -49,7 +49,7 @@ class SfnExecution
 
     # Attention: Timestamp fields will be returned as strings
     description_json = S3Util.get_s3_file("#{@s3_path}/sfn-desc/#{@execution_arn}")
-    description_json && JSON.parse(description_json, symbolize_names: true)
+    description_json && format_json(description_json)
   end
 
   # SFN history for workflow runs
@@ -62,7 +62,13 @@ class SfnExecution
 
     # Attention: Timestamp fields will be returned as strings
     history_json = S3Util.get_s3_file("#{@s3_path}/sfn-hist/#{@execution_arn}")
-    history_json && JSON.parse(history_json, symbolize_names: true)
+    history_json && format_json(history_json)
+  end
+
+  def format_json(json)
+    # Underscore key transform for uniformity.
+    # Ex: JSON export may have saved 'executionFailedEventDetails' instead of 'execution_failed_event_details'. The AWS SDK structs return underscore keys.
+    JSON.parse(json).deep_transform_keys { |key| key.to_s.underscore.to_sym }
   end
 
   def workflow_result_mapping

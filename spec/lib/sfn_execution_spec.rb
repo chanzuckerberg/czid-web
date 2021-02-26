@@ -37,10 +37,24 @@ RSpec.describe SfnExecution do
     {
       events: [
         {
-          id: 1,
+          id: 2,
           execution_failed_event_details: { error: fake_error },
           timestamp: Time.zone.now,
           type: "dummy_type",
+          previous_event_id: 1,
+        },
+      ],
+    }
+  end
+  let(:fake_error_sfn_execution_history_from_s3) do
+    {
+      events: [
+        {
+          id: 2,
+          executionFailedEventDetails: { error: fake_error },
+          timestamp: Time.zone.now,
+          type: "dummy_type",
+          previousEventId: 1,
         },
       ],
     }
@@ -129,7 +143,7 @@ RSpec.describe SfnExecution do
 
       it "returns history from s3" do
         fake_s3_history_path = File.join(fake_s3_path.split("/", 4)[-1], "sfn-hist", fake_sfn_execution_arn)
-        fake_bucket = { fake_s3_history_path => { body: JSON.dump(fake_error_sfn_execution_history) } }
+        fake_bucket = { fake_s3_history_path => { body: JSON.dump(fake_error_sfn_execution_history_from_s3) } }
         @mock_aws_clients[:s3].stub_responses(:get_object, lambda { |context|
           fake_bucket[context.params[:key]] || 'NoSuchKey'
         })
@@ -219,6 +233,15 @@ RSpec.describe SfnExecution do
           expect(sfn_execution.output_path(test_key)).to eq(fake_outputs[test_key])
         end
       end
+    end
+  end
+
+  describe "#format_json" do
+    it "correctly parses the JSON and returns underscore format keys" do
+      actual = sfn_execution.send(:format_json, fake_error_sfn_execution_history_from_s3.to_json)[:events][0]
+
+      expect(actual).to include(execution_failed_event_details: { error: fake_error })
+      expect(actual).to include(previous_event_id: 1)
     end
   end
 end
