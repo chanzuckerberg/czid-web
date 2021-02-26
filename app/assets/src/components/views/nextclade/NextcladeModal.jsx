@@ -16,7 +16,7 @@ import { createConsensusGenomeCladeExport } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
 import { UserContext } from "~/components/common/UserContext";
 import { WORKFLOWS } from "~utils/workflows";
-import { logAnalyticsEvent } from "~/api/analytics";
+import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import {
   NEXTCLADE_APP_LINK,
   NEXTCLADE_REFERENCE_TREE_LINK,
@@ -172,7 +172,7 @@ export default class NextcladeModal extends React.Component {
     const { projectIds, validSampleIds, selectedTreeType } = this.state;
 
     logAnalyticsEvent(
-      "NextcladeModal_confirmation-modal-cancel-button_clicked",
+      ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED,
       {
         sampleIds: Array.from(validSampleIds),
         selectedTreeType,
@@ -192,7 +192,7 @@ export default class NextcladeModal extends React.Component {
     try {
       this.setState({ loadingResults: true }, () => {
         logAnalyticsEvent(
-          "NextcladeModal_confirmation-modal-confirm-button_clicked",
+          ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED,
           {
             sampleIds,
             selectedTreeType,
@@ -214,12 +214,15 @@ export default class NextcladeModal extends React.Component {
         },
         () => {
           console.error(error);
-          logAnalyticsEvent("NextcladeModal_upload_failed", {
-            error,
-            sampleIds,
-            selectedTreeType,
-            projectIds,
-          });
+          logAnalyticsEvent(
+            ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_UPLOAD_FAILED,
+            {
+              error,
+              sampleIds,
+              selectedTreeType,
+              projectIds,
+            }
+          );
         }
       );
     }
@@ -236,7 +239,7 @@ export default class NextcladeModal extends React.Component {
       this.setState({ errorModalOpen: false }, () => {
         onClose();
         logAnalyticsEvent(
-          "NextcladeModal_confirmation-modal-retry-button_clicked",
+          ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_RETRY_BUTTON_CLICKED,
           {
             sampleIds,
             selectedTreeType,
@@ -246,12 +249,15 @@ export default class NextcladeModal extends React.Component {
       });
     } catch (error) {
       console.error(error);
-      logAnalyticsEvent("NextcladeModal_retry-upload_failed", {
-        error,
-        sampleIds,
-        selectedTreeType,
-        projectIds,
-      });
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED,
+        {
+          error,
+          sampleIds,
+          selectedTreeType,
+          projectIds,
+        }
+      );
     }
   };
 

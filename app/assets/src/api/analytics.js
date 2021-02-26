@@ -1,20 +1,11 @@
-import store from "~/redux/store";
-import { getGlobalAnalyticsContext } from "~/redux/modules/discovery/selectors";
 import { isArray, isObject, camelCase, snakeCase, lowerFirst } from "lodash/fp";
 
-// Event name guidelines: Follow object_action convention with object being the
-// name of the core model if it makes sense, and a past tense action. Keep names
-// meaningful, descriptive, and non-redundant (e.g. prefer sample_viewed to
-// sample_view_viewed). ANALYTICS_EVENT_NAMES will have the camelCase key and
-// snake_case value. See
-// https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
-//
-// Dom events handled in React components should use withAnalytics instead of
-// ANALYTICS_EVENT_NAMES, which does not require registration here and uses a
-// more elaborate naming convention.
-export const ANALYTICS_EVENT_NAMES = {
-  sampleViewed: "sample_viewed",
-};
+import eventNames from "~/api/events";
+import store from "~/redux/store";
+import { getGlobalAnalyticsContext } from "~/redux/modules/discovery/selectors";
+
+// This is exported from here as well for importing convenience.
+export const ANALYTICS_EVENT_NAMES = eventNames;
 
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // See also documentation for withAnalytics below.
