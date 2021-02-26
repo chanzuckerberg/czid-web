@@ -446,6 +446,7 @@ ActiveRecord::Schema.define(version: 20_210_209_192_430) do
     t.string "pipeline_execution_strategy", comment: "A soft enum (string) describing which pipeline infrastructure to run the sample on."
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, sample processing will filter for a whitelist of taxons."
     t.string "temp_pipeline_workflow", default: "short-read-mngs", null: false, comment: "A soft enum (string) describing which pipeline workflow should run. Main is the classic mNGS pipeline. To be moved to a pipeline run model."
+    t.string "initial_workflow", default: "short-read-mngs", null: false, comment: "A soft enum (string) describing the initial workflow the sample was run on"
     t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["temp_pipeline_workflow"], name: "index_samples_on_temp_pipeline_workflow"

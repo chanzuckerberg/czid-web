@@ -538,6 +538,7 @@ module SamplesHelper
         workflows = sample_attributes.delete(:workflows)
         # Only one temp_pipeline_workflow supported at this time (2020-07-10)
         sample_attributes[:temp_pipeline_workflow] = workflows[0]
+        sample_attributes[:initial_workflow] = workflows[0]
       end
 
       if sample_attributes.key?(:wetlab_protocol)
