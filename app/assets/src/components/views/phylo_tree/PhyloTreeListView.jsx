@@ -19,7 +19,7 @@ import PhyloTreeVis from "./PhyloTreeVis";
 import cs from "./phylo_tree_list_view.scss";
 
 const STATUS_INITIALIZED = 0;
-const STATUS_READY = 1;
+// Unused: const STATUS_READY = 1;
 const STATUS_FAILED = 2;
 const STATUS_IN_PROGRESS = 3;
 

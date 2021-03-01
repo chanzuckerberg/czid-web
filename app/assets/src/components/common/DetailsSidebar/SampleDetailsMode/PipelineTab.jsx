@@ -1,5 +1,5 @@
 import React from "react";
-import { get, isEmpty, set } from "lodash/fp";
+import { get, set } from "lodash/fp";
 import cx from "classnames";
 
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";

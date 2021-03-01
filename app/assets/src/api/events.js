@@ -14,22 +14,22 @@
 function EventDictionary() {
   /** The user closed the confirmation modal before sending their samples to Nextclade. */
   this.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED =
-    "NextcladeModal_confirmation-modal-cancel-button_clicked";
+    "NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED";
 
   /** The user clicked Confirm on the confirmation modal to send their samples to Nextclade. */
   this.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED =
-    "NextcladeModal_confirmation-modal-confirm-button_clicked";
+    "NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED";
 
   /** The user clicked Retry after sending the samples to Nextclade failed. */
   this.NEXTCLADE_MODAL_CONFIRMATION_MODAL_RETRY_BUTTON_CLICKED =
-    "NextcladeModal_confirmation-modal-retry-button_clicked";
+    "NEXTCLADE_MODAL_CONFIRMATION_MODAL_RETRY_BUTTON_CLICKED";
 
   /** The operation to send samples to Nextclade failed. */
-  this.NEXTCLADE_MODAL_UPLOAD_FAILED = "NextcladeModal_upload_failed";
+  this.NEXTCLADE_MODAL_UPLOAD_FAILED = "NEXTCLADE_MODAL_UPLOAD_FAILED";
 
   /** There was a failure upon retrying the operation to send samples to Nextclade. */
   this.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED =
-    "NextcladeModal_retry-upload_failed";
+    "NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED";
 }
 
 const eventNames = new EventDictionary();

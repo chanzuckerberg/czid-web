@@ -148,7 +148,7 @@ export default class NextcladeModal extends React.Component {
     content,
     link,
     iconStyle = null,
-    offset = 0,
+    offset = [0, 0],
     position = "top center",
   }) => {
     return (
@@ -321,7 +321,7 @@ export default class NextcladeModal extends React.Component {
                       "Exercise caution when interpreting this tree. Nextclade’s algorithms are meant for quick assessments and not a replacement for full analysis with the Nextstrain pipeline.",
                     iconStyle: cs.lower,
                     position: "top right",
-                    offset: 11,
+                    offset: [11, 0],
                   })}
                 </span>
               </li>

@@ -222,12 +222,10 @@ class QualityControl extends React.Component {
     const readsLostData = samplesWithInitialReads.map(sampleId => {
       const dataRow = {};
       let readsRemaining = samplesReadsStats[sampleId].initialReads;
-      let total = 0;
       samplesReadsStats[sampleId].steps.forEach(step => {
         let readsAfter = step.readsAfter || readsRemaining;
         const readsLost = readsRemaining - readsAfter;
         dataRow[step.name] = readsLost;
-        total += readsLost;
         readsRemaining = readsAfter;
       });
       // account for every category
@@ -1009,7 +1007,6 @@ class QualityControl extends React.Component {
 
   renderSampleStatsInfo = () => {
     const {
-      samples,
       validSamples,
       runningSamples,
       failedSamples,

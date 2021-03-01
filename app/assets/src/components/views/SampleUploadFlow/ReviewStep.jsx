@@ -251,7 +251,7 @@ class ReviewStep extends React.Component {
     const shouldTruncateDescription =
       project.description && this.countNewLines(project.description) > 5;
 
-    const { userSettings, allowedFeatures, admin } = this.context || {};
+    const { userSettings, admin } = this.context || {};
 
     return (
       <div
@@ -295,7 +295,7 @@ class ReviewStep extends React.Component {
                     isPublic={project.public_access === 1}
                     // Offset required to align the carrot of the tooltip accurately on top of the IconInfoSmall.
                     // This issue is caused by nested div containers being passed to the prop "content" in the BasicPopup component
-                    offset="-7px, 0px"
+                    offset={[-7, 0]}
                     position="top left"
                   />
                 </div>

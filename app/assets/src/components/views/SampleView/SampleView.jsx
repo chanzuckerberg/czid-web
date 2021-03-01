@@ -38,11 +38,7 @@ import {
   AMR_TABLE_FEATURE,
   MERGED_NT_NR_FEATURE,
 } from "~/components/utils/features";
-import {
-  logAnalyticsEvent,
-  withAnalytics,
-  ANALYTICS_EVENT_NAMES,
-} from "~/api/analytics";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import {
   MASS_NORMALIZED_FEATURE,
   COVERAGE_VIZ_FEATURE,

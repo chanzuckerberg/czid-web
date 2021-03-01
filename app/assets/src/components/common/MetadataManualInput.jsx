@@ -406,8 +406,6 @@ class MetadataManualInput extends React.Component {
 
   // Create form fields for the table.
   getManualInputData = () => {
-    const { allowedFeatures } = this.context || {};
-
     if (!this.props.samples) {
       return null;
     }

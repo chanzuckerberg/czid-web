@@ -6,7 +6,7 @@ import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
 
 import cs from "./playground_viz.scss";
-import { STACKED_COLORS, STACKED_DATA_CSV } from "./constants";
+import { STACKED_DATA_CSV } from "./constants";
 
 const TABS = ["Heatmap", "HorizontalStackedBarChart"];
 
@@ -138,10 +138,8 @@ export default class PlaygroundViz extends React.Component {
     switch (currentTab) {
       case "Heatmap":
         return this.renderHeatmap();
-        break;
       case "HorizontalStackedBarChart":
         return this.renderHorizontalStackedBarChart();
-        break;
     }
   }
 

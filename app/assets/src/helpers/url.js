@@ -1,9 +1,6 @@
 import QueryString from "query-string";
-import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import { URL_FIELDS } from "~/components/views/SampleView/constants";
 import {
   filter,
-  isEmpty,
   isObject,
   isArray,
   toPairs,
@@ -12,14 +9,11 @@ import {
   isUndefined,
   flow,
   map,
-  omit,
   flatten,
   join,
 } from "lodash/fp";
 import { shortenUrl } from "~/api";
 import copy from "copy-to-clipboard";
-
-const urlParser = new UrlQueryParser(URL_FIELDS);
 
 // See also parseUrlParams in SamplesHeatmapView
 export const parseUrlParams = () => {
