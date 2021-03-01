@@ -991,10 +991,10 @@ class PipelineRun < ApplicationRecord
         tags = ["sample_id:#{sample.id}"]
         # DEPRECATED. Use log_analytics_event.
         MetricUtil.put_metric_now("samples.succeeded.run_time", run_time, tags, "gauge")
-        event = MetricUtil::ANALYTICS_EVENT_NAMES[:pipeline_run_succeeded]
+        event = EventDictionary::PIPELINE_RUN_SUCCEEDED
       else
         update(results_finalized: FINALIZED_FAIL)
-        event = MetricUtil::ANALYTICS_EVENT_NAMES[:pipeline_run_failed]
+        event = EventDictionary::PIPELINE_RUN_FAILED
       end
 
       MetricUtil.log_analytics_event(
@@ -1897,7 +1897,7 @@ class PipelineRun < ApplicationRecord
         PipelineReportService.call(self, background_id)
       end
 
-      MetricUtil.log_analytics_event("PipelineReport_precached", nil)
+      MetricUtil.log_analytics_event(EventDictionary::PIPELINE_REPORT_PRECACHED, nil)
     end
   end
 

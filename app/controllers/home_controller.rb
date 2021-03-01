@@ -111,7 +111,7 @@ class HomeController < ApplicationController
     Rails.logger.info("New sign up:\n#{body}")
     # DEPRECATED. Use log_analytics_event.
     MetricUtil.put_metric_now("users.sign_ups", 1)
-    MetricUtil.log_analytics_event("user_interest_form_submitted", nil, home_params.to_hash, request)
+    MetricUtil.log_analytics_event(EventDictionary::USER_INTEREST_FORM_SUBMITTED, nil, home_params.to_hash, request)
 
     UserMailer.landing_sign_up_email(body).deliver_now
     send_sign_up_to_airtable(home_params)

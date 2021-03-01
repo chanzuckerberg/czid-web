@@ -37,7 +37,7 @@ class ApplicationRecord < ActiveRecord::Base
     Thread.current[:_current_request]
   end
 
-  # See also ANALYTICS_EVENT_NAMES
+  # See also EventDictionary
   def log_analytics(record, action)
     # example: "visualization_updated"
     event = "#{record.class.name.underscore}_#{action}"

@@ -15,19 +15,6 @@ class MetricUtil
                         )
                       end
 
-  # Backend event name guidelines:
-  # Follow object_action convention with object being the name of the core model or component name
-  # if it makes sense, and a past tense action. Keep names meaningful, descriptive, and
-  # non-redundant (e.g. prefer sample_viewed to sample_view_viewed).
-  # See also auto named events in ApplicationRecord#log_analytics. Put new
-  # events here that are not covered by auto events.
-  ANALYTICS_EVENT_NAMES = {
-    pipeline_run_succeeded: "pipeline_run_succeeded",
-    pipeline_run_failed: "pipeline_run_failed",
-    sample_upload_batch_created: "sample_upload_batch_created",
-    location_geosearched: "location_geosearched",
-  }.freeze
-
   # Use for system monitoring (e.g. performance) metrics. Sends to DataDog.
   def self.put_metric_now(name, value, tags = [], type = "count")
     put_metric(name, value, Time.now.to_i, tags, type)
@@ -41,6 +28,7 @@ class MetricUtil
   # https://segment.com/docs/sources/server/http/#batch.
 
   # Use for usage metrics. Sends to GoogleAnalytics.
+  # See EventDictionary.
   def self.log_analytics_event(event, user, properties = {}, request = nil)
     if SEGMENT_ANALYTICS && !a_test?(request)
       # current_user should be passed from a controller

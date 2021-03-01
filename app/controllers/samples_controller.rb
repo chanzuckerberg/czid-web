@@ -743,7 +743,7 @@ class SamplesController < ApplicationController
     end
 
     # Duplicates PipelineSampleReport_sample_viewed to compare frontend vs. backend tracks
-    MetricUtil.log_analytics_event("SamplesController_sample_viewed", current_user, { sample_id: @sample&.id }, request)
+    MetricUtil.log_analytics_event(EventDictionary::SAMPLES_CONTROLLER_SAMPLE_VIEWED, current_user, { sample_id: @sample&.id }, request)
   end
 
   def samples_going_public
