@@ -39,7 +39,8 @@ const LandingHeader = ({ browserInfo }) => {
           </ExternalLink>
           <ExternalLink
             className={cs.headerLink}
-            href="https://chanzuckerberg.com/join-us/openings/?initiative=science"
+            // Don't remove until all headcount for this role ID is filled.
+            href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/2215049"
             analyticsEventName="Landing_hiring-link_clicked"
           >
             Hiring
