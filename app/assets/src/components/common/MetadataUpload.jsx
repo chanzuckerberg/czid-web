@@ -448,7 +448,7 @@ class MetadataUpload extends React.Component {
                 ? "Human only"
                 : hostGenomes &&
                   hostGenomes
-                    .filter(h => !h.ercc_only)
+                    .filter(h => !h.ercc_only && h.showAsOption === true)
                     .map(h => h.name)
                     .join(", ")}
               .

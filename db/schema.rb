@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_209_192_430) do
+ActiveRecord::Schema.define(version: 20_210_302_004_357) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -25,7 +25,7 @@ ActiveRecord::Schema.define(version: 20_210_209_192_430) do
     t.datetime "updated_at", null: false
     t.integer "lineage_version", limit: 2
     t.text "s3_nt_info_db_path"
-    t.string "s3_taxon_blacklist_path", default: "s3://idseq-database/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
+    t.string "s3_taxon_blacklist_path", default: "s3://idseq-public-references/taxonomy/2018-04-01-utc-1522569777-unixtime__2018-04-04-utc-1522862260-unixtime/taxon_blacklist.txt", null: false
     t.index ["name"], name: "index_alignment_configs_on_name", unique: true
   end
 
@@ -160,8 +160,8 @@ ActiveRecord::Schema.define(version: 20_210_209_192_430) do
 
   create_table "host_genomes", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name", null: false, comment: "Friendly name of host genome. May be common name or scientific name of species. Must be unique and start with a capital letter."
-    t.string "s3_star_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
-    t.string "s3_bowtie2_index_path", default: "s3://idseq-database/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
+    t.string "s3_star_index_path", default: "s3://idseq-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/STAR_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by star for host filtering."
+    t.string "s3_bowtie2_index_path", default: "s3://idseq-public-references/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/bowtie2_genome.tar", null: false, comment: "The path to the index file to be used in the pipeline by bowtie for host filtering."
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

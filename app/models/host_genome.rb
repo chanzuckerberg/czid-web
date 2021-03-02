@@ -34,7 +34,8 @@ class HostGenome < ApplicationRecord
   before_create :add_default_metadata_fields!
 
   # NOTE: Consider updating the star and bowtie defaults if we ever add new ERCC index files.
-  ERCC_PATH_PREFIX = "s3://#{S3_DATABASE_BUCKET}/host_filter/ercc/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/".freeze
+  ERCC_DIRECTORY_PATH = "host_filter/ercc".freeze
+  ERCC_PATH_PREFIX = "s3://#{S3_DATABASE_BUCKET}/#{ERCC_DIRECTORY_PATH}/2017-09-01-utc-1504224000-unixtime__2017-09-01-utc-1504224000-unixtime/".freeze
   S3_STAR_INDEX_FILE = "STAR_genome.tar".freeze
   S3_BOWTIE2_INDEX_FILE = "bowtie2_genome.tar".freeze
 
@@ -68,8 +69,8 @@ class HostGenome < ApplicationRecord
   # This should be true for all host genomes created without index files, and
   # the "ERCC only" genome.
   def ercc_only?
-    s3_star_index_path.starts_with?(HostGenome::ERCC_PATH_PREFIX) &&
-      s3_bowtie2_index_path.starts_with?(HostGenome::ERCC_PATH_PREFIX)
+    s3_star_index_path.include?(HostGenome::ERCC_DIRECTORY_PATH) &&
+      s3_bowtie2_index_path.include?(HostGenome::ERCC_DIRECTORY_PATH)
   end
 
   def show_as_option?
