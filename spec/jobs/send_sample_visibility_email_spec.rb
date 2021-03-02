@@ -92,5 +92,21 @@ RSpec.describe SendSampleVisibilityEmail, type: :job do
       expect(actual[project_1.id].pluck(:id)).to match_array([sample_1.id, sample_2.id])
       expect(actual[project_2.id].pluck(:id)).to match_array([sample_3.id])
     end
+
+    it "calls the user mailer with the correct params" do
+      _ = [sample_1, sample_2, sample_3]
+      user_samples = regular_user.samples
+
+      expect(UserMailer).to receive(:sample_visibility_reminder).with(
+        email: regular_user.email,
+        name: regular_user.name,
+        period_name: subject::NEXT_PERIOD.call.strftime("%B %Y"),
+        projects: Project.where(id: [project_1.id, project_2.id]),
+        samples_by_project_id: user_samples.group_by(&:project_id),
+        total_count: user_samples.size
+      ).and_call_original
+
+      subject.prepare_individual_emails(regular_user, user_samples)
+    end
   end
 end

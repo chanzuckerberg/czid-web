@@ -33,4 +33,9 @@ class EventDictionary
 
   # Machine-event: The pipeline report for a newly processed sample was precached with a default background model.
   PIPELINE_REPORT_PRECACHED = "PIPELINE_REPORT_PRECACHED".freeze
+
+  # Machine-event: The user was sent a scheduled email reminding them of Samples that are becoming public in the next time period.
+  #  @param sample_ids An array of sample ids that were included in the email notification.
+  #  @param project_ids An array of project ids that were included in the email notification.
+  SEND_SAMPLE_VISIBILITY_EMAIL_USER_EMAIL_SENT = "SEND_SAMPLE_VISIBILITY_EMAIL_USER_EMAIL_SENT".freeze
 end

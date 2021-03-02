@@ -1,0 +1,23 @@
+<p>Hi <%= @name %>,</p>
+
+<p>We’re reminding you that you have samples in IDseq that will become visible to other users in <b><%= @period_name %></b>:</p>
+
+<p>
+  <% @projects.each do |proj| %>
+    <% sample_count = @samples_by_project_id[proj.id].size %>
+    <% project_link = "#{root_url}my_data?projectId=#{proj.id}" %>
+    • <%= sample_count %> samples in project <a href="<%= project_link %>"><%= proj.name %></a><br />
+  <% end %>
+</p>
+
+<p>If you have any questions, please refer to our <a href="https://idseq.net/privacy">privacy policy</a> or contact us directly at <a href="mailto:help@idseq.net">help@idseq.net</a>.</p>
+
+---
+
+<p>Your samples become visible to other IDseq users, or “public”, 1 year after the original upload date. Public samples help enrich the experience for you and other researchers. For instance, it allows you to compare your samples with samples collected around the world using tools like the heatmap.</p>
+
+<p>Once a sample is public, it is viewable and searchable by any IDseq user. Importantly, other users will not be able to edit your data or download the original FASTQ files.</p>
+
+<p>
+  Thanks,<br /> The IDseq Team
+</p>

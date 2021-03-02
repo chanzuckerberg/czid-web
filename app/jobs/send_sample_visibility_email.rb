@@ -53,13 +53,31 @@ class SendSampleVisibilityEmail
   end
 
   def self.prepare_individual_emails(user, user_samples)
-    samples_by_project_id = user_samples.group_by(&:project_id)
-    samples_by_project_id.each do |project_id, project_samples|
-      # Example: "User 1 has samples [15225, 15226, 15227, 15216, 15218] going public in project 1 in March 2021.""
-      Rails.logger.info("User #{user.id} has samples #{project_samples.pluck(:id)} going public in project #{project_id} in #{NEXT_PERIOD.call.strftime('%B %Y')}.")
+    period_name = NEXT_PERIOD.call.strftime("%B %Y")
 
-      # TODO: Format and send the actual emails here.
+    samples_by_project_id = user_samples.group_by(&:project_id)
+    projects = Project.where(id: samples_by_project_id.keys)
+
+    UserMailer.sample_visibility_reminder(
+      email: user.email,
+      name: user.name,
+      period_name: period_name,
+      projects: projects,
+      samples_by_project_id: samples_by_project_id,
+      total_count: user_samples.size
+    ).deliver_now
+
+    samples_by_project_id.each do |project_id, project_samples|
+      # Example: "SendSampleVisibilityEmail: User 1 has samples [15225, 15226, 15227, 15216, 15218] going public in project 1 in March 2021."
+      Rails.logger.info("SendSampleVisibilityEmail: User #{user.id} has samples #{project_samples.pluck(:id)} going public in project #{project_id} in #{period_name}.")
     end
+
+    event = EventDictionary::SEND_SAMPLE_VISIBILITY_EMAIL_USER_EMAIL_SENT
+    MetricUtil.log_analytics_event(event, user, {
+                                     project_ids: samples_by_project_id.keys,
+                                     sample_ids: user_samples.pluck(:id),
+                                   })
+
     return samples_by_project_id
   end
 end
