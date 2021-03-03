@@ -541,6 +541,16 @@ module SamplesHelper
         sample_attributes[:initial_workflow] = workflows[0]
       end
 
+      if sample_attributes[:technology].present?
+        technology = sample_attributes.delete(:technology)
+      end
+
+      if technology == WorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+        # TODO: current default values; to be exposed as a user-facing option in a future version
+        medaka_model = ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL
+        vadr_options = ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS
+      end
+
       if sample_attributes.key?(:wetlab_protocol)
         wetlab_protocol = sample_attributes.delete(:wetlab_protocol)
       end
@@ -568,7 +578,11 @@ module SamplesHelper
         # Instantiate the WorkflowRun but don't save
         workflow = sample_attributes[:temp_pipeline_workflow]
         if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
-          inputs_json = { wetlab_protocol: wetlab_protocol }.to_json
+          inputs_json = if technology == WorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+                          { technology: technology, medaka_model: medaka_model, vadr_options: vadr_options }.to_json
+                        else
+                          { technology: technology, wetlab_protocol: wetlab_protocol }.to_json
+                        end
           wr = WorkflowRun.new(sample: sample, workflow: workflow, inputs_json: inputs_json)
           workflow_runs << wr
         end

@@ -23,6 +23,13 @@ class SfnCGPipelineDispatchService
     end
   end
 
+  class InvalidTechnologyError < StandardError
+    def initialize(technology)
+      # TODO: raise this error once technology is added as wdl input
+      super("Technology #{technology} not recognized.")
+    end
+  end
+
   def initialize(workflow_run)
     @workflow_run = workflow_run
     @sample = workflow_run.sample
@@ -79,6 +86,13 @@ class SfnCGPipelineDispatchService
     return "#{resp[:account]}.dkr.ecr.#{AwsUtil::AWS_REGION}.amazonaws.com/idseq-consensus-genome:v#{@workflow_run.wdl_version}"
   end
 
+  def technology
+    if WorkflowRun::TECHNOLOGY_INPUT.value?(@workflow_run.inputs&.[]("technology"))
+      return @workflow_run.inputs&.[]("technology")
+    end
+    # TODO: raise an error if technology is not provided or is not a valid option
+  end
+
   def primer_file
     protocols = ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL
 
@@ -94,9 +108,7 @@ class SfnCGPipelineDispatchService
     when protocols[:snap]
       "snap_primers.bed"
     else
-      if @workflow_run.inputs&.[]("accession_id").nil?
-        raise WetlabProtocolMissingError
-      end
+      raise WetlabProtocolMissingError
     end
   end
 
@@ -110,15 +122,25 @@ class SfnCGPipelineDispatchService
   end
 
   def generate_wdl_input
-    additional_inputs = if @workflow_run.inputs&.[]("accession_id")
+    additional_inputs = if technology == WorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+                          # ONT sars-cov-2 cg
+                          {
+                            technology: technology,
+                            medaka_model: @workflow_run.inputs&.[]("medaka_model"),
+                            vadr_options: @workflow_run.inputs&.[]("vadr_options"),
+                          }
+                        elsif @workflow_run.inputs&.[]("accession_id")
+                          # illumina gen viral cg
                           {
                             accession_id: @workflow_run.inputs&.[]("accession_id"),
                             s3_nr_db_path: alignment_config_paths[:s3_nr_db_path],
                             s3_nr_loc_db_path: alignment_config_paths[:s3_nr_loc_db_path],
                           }
                         else
+                          # illumina sars-cov-2 cg
                           {
                             ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
+                            primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{primer_file}",
                           }
                         end
 
@@ -129,7 +151,6 @@ class SfnCGPipelineDispatchService
       sample: @sample.name,
       ref_host: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/hg38.fa.gz",
       kraken2_db_tar_gz: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/kraken_coronavirus_db_only.tar.gz",
-      primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{primer_file}",
       ercc_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ercc_sequences.fasta",
     }.merge(additional_inputs)
 

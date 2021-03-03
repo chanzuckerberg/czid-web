@@ -15,6 +15,8 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
   let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn" }
   let(:test_workflow_name) { WorkflowRun::WORKFLOW[:consensus_genome] }
   let(:fake_wdl_version) { "10.0.0" }
+  let(:medaka_model) { ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL }
+  let(:vadr_options) { ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS }
   let(:fake_states_client) do
     Aws::States::Client.new(
       stub_responses: {
@@ -258,6 +260,29 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                   accession_id: 1,
                   s3_nr_db_path: s3_nr_db_path,
                   s3_nr_loc_db_path: s3_nr_loc_db_path,
+                },
+              },
+            }
+          )
+        end
+      end
+
+      context "when a nanopore run is selected" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { technology: WorkflowRun::TECHNOLOGY_INPUT[:nanopore], medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
+        end
+        it "returns sfn input containing correct sfn parameters" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  technology: WorkflowRun::TECHNOLOGY_INPUT[:nanopore],
+                  medaka_model: medaka_model,
+                  vadr_options: vadr_options,
                 },
               },
             }
