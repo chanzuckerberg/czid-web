@@ -182,7 +182,7 @@ module ReportHelper
 
     # NOTE:  If you add more columns to be fetched here, you really should add them to PROPERTIES_OF_TAXID above
     # otherwise they will not survive cleaning.
-    TaxonCount.connection.select_all("
+    ActiveRecord::Base.send(:sanitize_sql_array, ["
       SELECT
         taxon_counts.tax_id              AS  tax_id,
         SUBSTR(taxon_counts.count_type, 1, 2)          AS  count_type,
@@ -222,7 +222,7 @@ module ReportHelper
         pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count_type IN #{count_types}
-    ").to_hash
+    "]).to_hash
   end
 
   def self.zero_metrics(count_type)

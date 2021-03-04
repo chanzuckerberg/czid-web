@@ -766,7 +766,7 @@ GEM
       execjs (~> 2.0)
     bcrypt (3.1.13)
     bindex (0.5.0)
-    brakeman (4.7.2)
+    brakeman (5.0.0)
     builder (3.2.4)
     byebug (11.0.1)
     capybara (2.18.0)

@@ -115,7 +115,16 @@ jobs:
       #   rubocop version.
       run: bundle exec rubocop
     - name: Brakeman
-      run: bundle exec brakeman --no-pager -w3
+      run: |
+        # No High Confidence warnings.
+        bundle exec brakeman --no-pager -w3
+
+        # No new Medium Confidence warnings.
+        MAX_MEDIUM_WARNINGS=35
+        if [ $(bundle exec brakeman --no-pager -w2 -f json | jq '.scan_info.security_warnings') -gt $MAX_MEDIUM_WARNINGS ]
+        then
+          echo "No new Medium Confidence Brakeman warnings are allowed."
+        fi
       # TODO (https://app.clubhouse.io/idseq/story/17337/clean-up-brakeman-warnings-and-enable-annotations)
       #  This is a good action but we have > 50 brakeman warnings
       #  which maxes out the annotations API breaking the action.
