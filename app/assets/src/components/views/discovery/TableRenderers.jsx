@@ -92,12 +92,22 @@ class TableRenderers extends React.Component {
     );
   };
 
-  static renderSample = (
-    { cellData: sample },
+  static renderSample = ({
+    sample,
+    workflow = null,
     full = true,
-    basicIcon = false
-  ) => {
+    basicIcon = false,
+  }) => {
     const sampleName = get("name", sample);
+    let sampleStatus;
+
+    if (sample) {
+      if (sample.uploadError) sampleStatus = sample.uploadError;
+      else if (workflow) sampleStatus = get(workflow, sample.statusByWorkflow);
+      // no upload error occurred and no workflow was specified so default to the initialWorkflow
+      else sampleStatus = get(sample.initialWorkflow, sample.statusByWorkflow);
+    }
+
     return (
       <div className={cs.sample}>
         {full && (
@@ -121,8 +131,8 @@ class TableRenderers extends React.Component {
               />
               <StatusLabel
                 className={cs.sampleStatus}
-                status={sample.status}
-                type={STATUS_TYPE[sample.status]}
+                status={sampleStatus}
+                type={STATUS_TYPE[sampleStatus]}
               />
             </div>
           ) : (

@@ -24,7 +24,8 @@ export default class MapPreviewSidebar extends React.Component {
         dataKey: "sample",
         flexGrow: 1,
         width: 150,
-        cellRenderer: cellData => TableRenderers.renderSample(cellData, false),
+        cellRenderer: ({ cellData }) =>
+          TableRenderers.renderSample({ sample: cellData, full: false }),
         className: cs.sample,
         headerClassName: cs.sampleHeader,
       },

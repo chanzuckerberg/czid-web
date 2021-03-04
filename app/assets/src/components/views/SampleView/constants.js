@@ -39,7 +39,7 @@ export const PIPELINE_RUN_TABS = [
   TABS.MERGED_NT_NR,
 ];
 
-export const NOTIFICATON_TYPES = {
+export const NOTIFICATION_TYPES = {
   invalidBackground: "invalid background",
 };
 

@@ -12,8 +12,13 @@ export const computeColumnsByWorkflow = ({ basicIcon = false } = {}) => {
       dataKey: "sample",
       flexGrow: 1,
       width: 350,
-      cellRenderer: cellData =>
-        TableRenderers.renderSample(cellData, true, basicIcon),
+      cellRenderer: ({ cellData }) =>
+        TableRenderers.renderSample({
+          sample: cellData,
+          workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+          full: true,
+          basicIcon,
+        }),
       headerClassName: cs.sampleHeader,
     },
     {
@@ -134,8 +139,13 @@ export const computeColumnsByWorkflow = ({ basicIcon = false } = {}) => {
       dataKey: "sample",
       flexGrow: 1,
       width: 350,
-      cellRenderer: cellData =>
-        TableRenderers.renderSample(cellData, true, basicIcon),
+      cellRenderer: ({ cellData }) =>
+        TableRenderers.renderSample({
+          sample: cellData,
+          workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+          full: true,
+          basicIcon,
+        }),
       headerClassName: cs.sampleHeader,
     },
     {

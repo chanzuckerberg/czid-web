@@ -47,7 +47,6 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
   let(:sample) do
     create(:sample,
            project: project,
-           temp_pipeline_workflow: test_workflow_name,
            alignment_config_name: alignment_config.name)
   end
   let(:workflow_run) do

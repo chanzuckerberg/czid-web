@@ -57,7 +57,7 @@ describe WorkflowRun, type: :model do
 
   before do
     project = create(:project)
-    @sample = create(:sample, project: project, temp_pipeline_workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+    @sample = create(:sample, project: project)
     inputs_json = { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json
     @workflow_running = create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:running], sample: @sample, sfn_execution_arn: fake_sfn_execution_arn, inputs_json: inputs_json)
 

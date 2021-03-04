@@ -19,6 +19,7 @@ import {
   pick,
   pull,
   set,
+  size,
   some,
   sum,
   values,
@@ -70,7 +71,7 @@ import {
   GENUS_LEVEL_INDEX,
   LOCAL_STORAGE_FIELDS,
   METRIC_DECIMAL_PLACES,
-  NOTIFICATON_TYPES,
+  NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
   SPECIES_LEVEL_INDEX,
   TAXON_COUNT_TYPE_METRICS,
@@ -179,19 +180,32 @@ class SampleView extends React.Component {
     };
   };
 
+  getWorkflowCount = sample => {
+    return {
+      [WORKFLOWS.SHORT_READ_MNGS.value]: size(sample.pipeline_runs),
+      // TODO(omar): Generalize when new workflows are introduced
+      [WORKFLOWS.CONSENSUS_GENOME.value]: size(sample.workflow_runs),
+    };
+  };
+
+  determineInitialTab = ({
+    [WORKFLOWS.SHORT_READ_MNGS.value]: mngs,
+    [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
+  }) => {
+    if (mngs) {
+      return TABS.SHORT_READ_MNGS;
+    } else if (cg) {
+      return TABS.CONSENSUS_GENOME;
+    }
+  };
+
   fetchSample = async () => {
     this.setState({ loadingReport: true });
-
     const { snapshotShareId, sampleId, updateDiscoveryProjectId } = this.props;
     const { backgrounds, pipelineVersion, selectedOptions } = this.state;
-    let { currentTab } = this.state;
     const sample = await getSample({ snapshotShareId, sampleId });
 
     sample.id = sampleId;
-    if (
-      get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
-    )
-      currentTab = TABS.CONSENSUS_GENOME;
 
     const pipelineRun = find(
       pipelineVersion
@@ -219,14 +233,14 @@ class SampleView extends React.Component {
     ) {
       newSelectedOptions.background = sample.default_background_id;
     }
-
+    const workflowCount = this.getWorkflowCount(sample);
     this.setState(
       {
-        currentTab: currentTab,
-        sample: sample,
-        pipelineRun: pipelineRun,
+        currentTab: this.determineInitialTab(workflowCount),
+        sample,
+        pipelineRun,
         project: sample.project,
-        enableMassNormalizedBackgrounds: enableMassNormalizedBackgrounds,
+        enableMassNormalizedBackgrounds,
         selectedOptions: newSelectedOptions,
       },
       () => {
@@ -353,7 +367,7 @@ class SampleView extends React.Component {
       }
     );
 
-    this.showNotification(NOTIFICATON_TYPES.invalidBackground, {
+    this.showNotification(NOTIFICATION_TYPES.invalidBackground, {
       background: invalidBackground.name,
       useDefault: !!selectedOptions.background,
     });
@@ -1128,18 +1142,18 @@ class SampleView extends React.Component {
         </React.Fragment>
       ),
     };
-    const sampleWorkflow = get("temp_pipeline_workflow", sample);
+
+    const {
+      [WORKFLOWS.SHORT_READ_MNGS.value]: mngs,
+      [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
+    } = this.getWorkflowCount(sample);
     return compact([
-      sampleWorkflow === WORKFLOWS.SHORT_READ_MNGS.value &&
-        TABS.SHORT_READ_MNGS,
-      sampleWorkflow === WORKFLOWS.SHORT_READ_MNGS.value &&
-        allowedFeatures.includes(MERGED_NT_NR_FEATURE) &&
-        mergedNtNrTab,
-      sampleWorkflow === WORKFLOWS.CONSENSUS_GENOME.value &&
-        TABS.CONSENSUS_GENOME,
+      mngs && TABS.SHORT_READ_MNGS,
+      mngs && allowedFeatures.includes(MERGED_NT_NR_FEATURE) && mergedNtNrTab,
       allowedFeatures.includes(AMR_TABLE_FEATURE) &&
         reportMetadata.pipelineRunStatus === "SUCCEEDED" &&
         TABS.AMR,
+      cg && TABS.CONSENSUS_GENOME,
     ]);
   };
 
@@ -1222,7 +1236,7 @@ class SampleView extends React.Component {
 
   showNotification = (notification, params) => {
     switch (notification) {
-      case NOTIFICATON_TYPES.invalidBackground: {
+      case NOTIFICATION_TYPES.invalidBackground: {
         showToast(
           ({ closeToast }) =>
             this.renderInvalidBackgroundError(closeToast, params),
@@ -1609,7 +1623,7 @@ class SampleView extends React.Component {
             />
           </div>
           <div className={cs.tabsContainer}>
-            {this.computeWorkflowTabs().length ? (
+            {sample && this.computeWorkflowTabs().length ? (
               <Tabs
                 className={cs.tabs}
                 tabs={this.computeWorkflowTabs()}

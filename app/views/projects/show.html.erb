@@ -32,6 +32,7 @@
         <th>ID</th>
         <th>Uploader</th>
         <th>Project</th>
+        <th>Workflow</th>
         <th>Sample Status</th>
         <th>Pipeline/Workflow Run status</th>
         <th>Job Submitted/Executed At</th>
@@ -41,38 +42,38 @@
 
     <tbody>
       <% @samples.each do |sample| %>
-        <tr class=<%= sample_status_display_for_hidden_page(sample)%>>
-          <td><u><%= link_to sample.name, sample %></u></td>
-          <td><%= sample.id %></td>
-          <td class='small'><%= sample.user.email if sample.user %></td>
-          <td><u><%= link_to sample.project.name, sample.project %></u></td>
-          <td><%= sample.status %>
-            <% if sample.status.to_s == 'created' and sample.created_at < 30.minutes.ago %>
-                <%= button_to 'reupload', reupload_source_sample_path(sample), method: :put %>
-            <% end %>
-          </td>
-          <td>
-            <% pipeline_run = sample.first_pipeline_run %>
-            <% if pipeline_run %>
-              <%= pipeline_run.job_status %>
-              &nbsp;
-              <% if pipeline_run.completed? %>
-                <%= button_to 'rerun from top', kickoff_pipeline_sample_path(sample), method: :put, form: {target: '_blank'} %>
-                <%= button_to "rerun failed stage", retry_pipeline_sample_path(sample), method: :put, form: {target: '_blank'} %>
+        <% pipeline_run = sample.first_pipeline_run %>
+        <% first_workflow_runs = WorkflowRun::WORKFLOW.values.map { |workflow| sample.first_workflow_run(workflow) } %>
+        <% [pipeline_run, *first_workflow_runs].compact.each do |run| %>
+          <tr class=<%= sample_status_display_for_hidden_page(sample, run)%>>
+            <td><u><%= link_to sample.name, sample %></u></td>
+            <td><%= sample.id %></td>
+            <td class='small'><%= sample.user.email if sample.user %></td>
+            <td class='small'><u><%= link_to sample.project.name, sample.project %></u></td>
+            <td class='small'><%= run.class == PipelineRun ? WorkflowRun::WORKFLOW[:short_read_mngs] : run.workflow %></td>
+            <td><%= sample.status %>
+              <% if sample.status.to_s == 'created' and sample.created_at < 30.minutes.ago %>
+                  <%= button_to 'reupload', reupload_source_sample_path(sample), method: :put %>
               <% end %>
-            <% end %>
-
-            <%# TODO: Refactor to support multiple workflows %>
-            <% workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome]) %>
-            <% if workflow_run %>
-              <%= workflow_run.status %>
-              <%= button_to 'rerun', rerun_workflow_run_path(workflow_run), method: :put, form: {target: '_blank'} %>
-            <% end %>
-          </td>
-          <td class="small"><%= pipeline_run&.created_at || workflow_run&.executed_at || "N/A" %></td>
-          <td><u><%= link_to 'Runs', pipeline_runs_sample_path(sample) %></u> &nbsp;
-              <u><%= link_to 'Edit', edit_sample_path(sample) %></u></td>
-        </tr>
+            </td>
+            <td>
+              <% if run.class == PipelineRun %>
+                <%= run.job_status %>
+                &nbsp;
+                <% if run.completed? %>
+                  <%= button_to 'rerun from top', kickoff_pipeline_sample_path(sample), method: :put, form: {target: '_blank'} %>
+                  <%= button_to "rerun failed stage", retry_pipeline_sample_path(sample), method: :put, form: {target: '_blank'} %>
+                <% end %>
+              <% elsif run.class == WorkflowRun %>
+                <%= run.status %>
+                <%= button_to 'rerun', rerun_workflow_run_path(run), method: :put, form: {target: '_blank'} %>
+              <% end %>
+            </td>
+            <td class="small"><%= run&.created_at || run&.executed_at || "N/A" %></td>
+            <td><u><%= link_to 'Runs', pipeline_runs_sample_path(sample) %></u> &nbsp;
+                <u><%= link_to 'Edit', edit_sample_path(sample) %></u></td>
+          </tr>
+        <% end %>
       <% end %>
     </tbody>
   </table>

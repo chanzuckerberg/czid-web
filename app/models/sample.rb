@@ -55,11 +55,11 @@ class Sample < ApplicationRecord
   validates :web_commit, presence: true, allow_blank: true
   validates :pipeline_commit, presence: true, allow_blank: true
   validates :uploaded_from_basespace, presence: true, inclusion: { in: [0, 1] }
-  validates :temp_pipeline_workflow, inclusion: { in: WorkflowRun::WORKFLOW.values }
+  validates :initial_workflow, inclusion: { in: WorkflowRun::WORKFLOW.values }
 
-  after_create :initiate_input_file_upload
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
+  after_create :initiate_input_file_upload
 
   delegate :consensus_genomes, to: :workflow_runs
 
@@ -564,11 +564,10 @@ class Sample < ApplicationRecord
     # TODO: Support retry status on WorkflowRuns
     if transient_status == STATUS_RETRY_PR && pr
       pr.retry
-    # TODO: remove main
-    elsif [WorkflowRun::WORKFLOW[:main], WorkflowRun::WORKFLOW[:short_read_mngs]].include?(temp_pipeline_workflow)
-      kickoff_pipeline
+    elsif initial_workflow == WorkflowRun::WORKFLOW[:consensus_genome]
+      workflow_runs.where(status: WorkflowRun::STATUS[:created], workflow: WorkflowRun::WORKFLOW[:consensus_genome]).all.map(&:dispatch)
     else
-      workflow_runs.where(status: WorkflowRun::STATUS[:created]).all.map(&:dispatch)
+      kickoff_pipeline
     end
   end
 

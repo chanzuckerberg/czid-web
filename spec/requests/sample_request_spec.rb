@@ -243,10 +243,15 @@ RSpec.describe "Sample request", type: :request do
           sample_id = json_response["sample_ids"][0]
 
           test_sample = Sample.find(sample_id)
-          expect(test_sample.temp_pipeline_workflow).to eq("short-read-mngs")
+          # we have to call the method manually in testing,
+          # to bypass the file upload process
+          test_sample.kickoff_pipeline
+          created_pipeline_run = PipelineRun.find_by(sample_id: sample_id)
+
+          expect(test_sample.pipeline_runs).to include(created_pipeline_run)
         end
 
-        it "should properly set the consensus_genome pipeline workflow" do
+        it "should properly create the consensus genome workflow" do
           sample_params = @sample_params.dup
           sample_params[:workflows] = ["consensus-genome"]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
@@ -257,19 +262,21 @@ RSpec.describe "Sample request", type: :request do
           sample_id = json_response["sample_ids"][0]
 
           test_sample = Sample.find(sample_id)
-          expect(test_sample.temp_pipeline_workflow).to eq("consensus-genome")
+          created_workflow_run = WorkflowRun.find_by(sample_id: sample_id)
+
+          expect(test_sample.workflow_runs).to include(created_workflow_run)
         end
 
         it "should fail with a bogus pipeline workflow selection" do
           sample_params = @sample_params.dup
-          sample_params[:workflows] = ["foobar"]
+          bogus_pipeline_workflow = "foobar"
+          sample_params[:workflows] = [bogus_pipeline_workflow]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
           expect(response.content_type).to eq("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           expect(json_response["sample_ids"]).to be_empty
-          expect(json_response["errors"]).to eq([{ "temp_pipeline_workflow" => ["is not included in the list"] }])
         end
 
         it "should properly set the selected wetlab protocol" do

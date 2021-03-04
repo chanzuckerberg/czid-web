@@ -5,7 +5,7 @@ import BasicPopup from "~/components/BasicPopup";
 import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { withAnalytics } from "~/api/analytics";
-import { SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR } from "~/constants";
+import { SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR } from "~/components/utils/appcues";
 import { logError } from "~/components/utils/logUtil";
 import { ViewHeader } from "~/components/layout";
 import { triggerCSVDownload } from "~/components/utils/csv";

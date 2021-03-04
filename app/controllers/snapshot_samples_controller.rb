@@ -73,6 +73,8 @@ class SnapshotSamplesController < SamplesController
     order_dir = snapshot_sample_params[:orderDir] || :desc
     limit = snapshot_sample_params[:limit] ? snapshot_sample_params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = snapshot_sample_params[:offset].to_i
+    # Snapshot samples only suppoprt mNGS samples currently (as of 03-03-2021)
+    workflow = WorkflowRun::WORKFLOW[:short_read_mngs]
 
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(snapshot_sample_params[:listAllIds])
     samples = samples_by_share_id(share_id)
@@ -91,7 +93,7 @@ class SnapshotSamplesController < SamplesController
     unless basic
       sample_ids = (samples || []).map(&:id)
       pipeline_runs_by_sample_id = snapshot_pipeline_runs_multiget(sample_ids, share_id)
-      details_json = format_samples(limited_samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, is_snapshot: true).as_json(
+      details_json = format_samples(limited_samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, is_snapshot: true, workflow: workflow).as_json(
         except: [:sfn_results_path]
       )
       limited_samples_json.zip(details_json).map do |sample, details|

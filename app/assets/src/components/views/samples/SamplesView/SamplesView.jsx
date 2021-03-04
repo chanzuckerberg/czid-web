@@ -430,11 +430,14 @@ class SamplesView extends React.Component {
 
   renderDisplay = () => {
     const { currentDisplay } = this.props;
-    return currentDisplay === "table"
-      ? this.renderTable()
-      : currentDisplay === "map"
-      ? this.renderMap()
-      : this.renderQualityControl();
+    switch (currentDisplay) {
+      case "table":
+        return this.renderTable();
+      case "map":
+        return this.renderMap();
+      case "plqc":
+        return this.renderQualityControl();
+    }
   };
 
   handlePhyloModalOpen = () => {

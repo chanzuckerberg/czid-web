@@ -17,9 +17,10 @@ import {
   SaveButton,
   ShareButton,
 } from "~ui/controls/buttons";
-import { SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR } from "~/constants";
+import { SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR } from "~/components/utils/appcues";
 import { openUrl } from "~utils/links";
 import { generateUrlToSampleView } from "~/components/utils/urls";
+import { PIPELINE_RUN_TABS } from "./constants";
 
 import PipelineRunSampleViewControls from "./PipelineRunSampleViewControls";
 import WorkflowVersionHeader from "./WorkflowVersionHeader";
@@ -42,8 +43,12 @@ export default function SampleViewHeader({
   view,
 }) {
   const userContext = useContext(UserContext);
-  const mngsWorkflow =
-    get("temp_pipeline_workflow", sample) === WORKFLOWS.SHORT_READ_MNGS.value;
+  const workflow = PIPELINE_RUN_TABS.includes(currentTab)
+    ? WORKFLOWS.SHORT_READ_MNGS.value
+    : WORKFLOWS.CONSENSUS_GENOME.value;
+
+  // Leaving in for now, removing in CH-118827
+  const mngsWorkflow = workflow === WORKFLOWS.SHORT_READ_MNGS.value;
 
   const onSaveClick = async () => {
     if (view) {
@@ -88,9 +93,7 @@ export default function SampleViewHeader({
   const renderViewHeaderControls = () => {
     const { allowedFeatures } = userContext || {};
 
-    if (
-      get("temp_pipeline_workflow", sample) === WORKFLOWS.CONSENSUS_GENOME.value
-    ) {
+    if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
       const succeeded = get("status", currentRun) === "SUCCEEDED";
       return (
         <ViewHeader.Controls>
@@ -190,7 +193,7 @@ export default function SampleViewHeader({
               ? get("pipeline_runs", sample)
               : get("workflow_runs", sample)
           }
-          workflowType={get("temp_pipeline_workflow", sample)}
+          workflowType={workflow}
           mngsWorkflow={mngsWorkflow}
           versionKey={mngsWorkflow ? "pipeline_version" : "wdl_version"}
           timeKey={mngsWorkflow ? "created_at" : "executed_at"}

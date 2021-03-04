@@ -1,4 +1,4 @@
-import { get, map, upperCase } from "lodash/fp";
+import { get, map, mapValues, toLower, upperCase } from "lodash/fp";
 import { numberWithPlusOrMinus } from "~/helpers/strings";
 import {
   getProjectDimensions,
@@ -123,19 +123,19 @@ const processRawSample = sample => {
 
   const row = {
     sample: {
+      initialWorkflow: get("db_sample.initial_workflow", sample.details),
       name: sample.name,
       project: get("derived_sample_output.project_name", sample.details),
       publicAccess: !!sample.public,
+      statusByWorkflow: mapValues(
+        runInfo => toLower(runInfo.result_status_description),
+        get("run_info_by_workflow", sample.details)
+      ),
+      uploadError: toLower(
+        get("upload_error.result_status_description", sample.details)
+      ),
       user: get("uploader.name", sample.details),
       userId: get("uploader.id", sample.details),
-      status: get(
-        "run_info.result_status_description",
-        sample.details
-      ).toLowerCase(),
-      tempPipelineWorkflow: get(
-        "db_sample.temp_pipeline_workflow",
-        sample.details
-      ),
     },
     collectionLocation: get("metadata.collection_location", sample.details),
     collectionLocationV2: get(

@@ -10,6 +10,7 @@ import {
   ceil,
   compact,
   flatten,
+  get,
   isEqual,
   isInteger,
   last,
@@ -166,7 +167,6 @@ class QualityControl extends React.Component {
       validSamples: data.validSamples,
       runningSamples: data.runningSamples,
       failedSamples: data.failedSamples,
-      consensusGenomeSamples: data.consensusGenomeSamples,
       samplesDict: data.samplesDict,
       readsLostData: readsLostData,
       readsLostLegendColors: legendColors,
@@ -248,11 +248,16 @@ class QualityControl extends React.Component {
     const validSamples = [];
     const runningSamples = [];
     const failedSamples = [];
-    const consensusGenomeSamples = [];
     const samplesDict = {};
 
     samples.forEach(sample => {
-      const runInfo = sample.details.run_info;
+      // PLQC is only for samples with an mNGS pipeline run
+      const runInfo =
+        get("upload_error", sample.details) ||
+        get(
+          ["run_info_by_workflow", WORKFLOWS.SHORT_READ_MNGS.value],
+          sample.details
+        );
       if (
         runInfo.result_status_description === "FAILED" ||
         runInfo.result_status_description === "COMPLETE - ISSUE" ||
@@ -265,11 +270,6 @@ class QualityControl extends React.Component {
       ) {
         validSamples.push(sample);
         samplesDict[sample.id] = sample;
-      } else if (
-        sample.details.db_sample.temp_pipeline_workflow !==
-        WORKFLOWS.SHORT_READ_MNGS.value
-      ) {
-        consensusGenomeSamples.push(sample);
       } else {
         runningSamples.push(sample);
       }
@@ -279,7 +279,6 @@ class QualityControl extends React.Component {
       validSamples,
       runningSamples,
       failedSamples,
-      consensusGenomeSamples,
       samplesDict,
     };
   }
@@ -1010,7 +1009,6 @@ class QualityControl extends React.Component {
       validSamples,
       runningSamples,
       failedSamples,
-      consensusGenomeSamples,
       showProcessingSamplesMessage,
       totalSampleCount,
     } = this.state;
@@ -1034,11 +1032,8 @@ class QualityControl extends React.Component {
             process. Failed samples are not displayed in the charts below.
           </li>
           <li className={cs.statusListItem}>
-            {consensusGenomeSamples.length}{" "}
-            {consensusGenomeSamples.length === 1
-              ? "sample is a Consensus Genome"
-              : "samples are Consensus Genomes"}{" "}
-            and will not be displayed in the charts below.
+            Samples with only Consensus Genome runs will not be displayed in the
+            charts below
           </li>
         </ul>
       </React.Fragment>

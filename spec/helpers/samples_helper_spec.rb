@@ -284,28 +284,34 @@ RSpec.describe SamplesHelper, type: :helper do
     before do
       @joe = create(:joe)
       @project = create(:project, users: [@joe])
-      @sample_one = create(:sample, project: @project, name: "Test Sample One", temp_pipeline_workflow: "short-read-mngs")
-      @sample_two = create(:sample, project: @project, name: "Test Sample Two", temp_pipeline_workflow: "consensus-genome")
-      @sample_three = create(:sample, project: @project, name: "Test Sample Three", temp_pipeline_workflow: "short-read-mngs")
-      @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id])
+
+      @sample_one = create(:sample, project: @project, name: "Test Sample One", initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs])
+      @sample_two = create(:sample, project: @project, name: "Test Sample Two", initial_workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+      @sample_three = create(:sample, project: @project, name: "Test Sample Three", initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs])
+
+      # mngs sample with cg workflow_run
+      @sample_four = create(:sample, project: @project, name: "Test Sample Four", initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs])
+      create(:workflow_run, workflow: WorkflowRun::WORKFLOW[:consensus_genome], sample: @sample_four)
+
+      @samples_input = Sample.where(id: [@sample_one.id, @sample_two.id, @sample_three.id, @sample_four])
     end
 
-    it "properly returns only samples with the short-read-mngs workflow" do
-      query = ["short-read-mngs"]
+    it "properly returns only samples with a short-read-mngs workflow" do
+      query = [WorkflowRun::WORKFLOW[:short_read_mngs]]
       results = helper.send(:filter_by_workflow, @samples_input, query)
-      expect(results.pluck(:id)).to eq([@sample_one.id, @sample_three.id])
+      expect(results.pluck(:id)).to eq([@sample_one.id, @sample_three.id, @sample_four.id])
     end
 
-    it "properly returns only samples with the consensus-genome workflow" do
-      query = ["consensus-genome"]
+    it "properly returns only samples with a consensus-genome workflow" do
+      query = [WorkflowRun::WORKFLOW[:consensus_genome]]
       results = helper.send(:filter_by_workflow, @samples_input, query)
-      expect(results.pluck(:id)).to eq([@sample_two.id])
+      expect(results.pluck(:id)).to eq([@sample_two.id, @sample_four.id])
     end
 
     it "properly returns samples with the short-read-mngs and consensus-genome workflows" do
-      query = ["short-read-mngs", "consensus-genome"]
+      query = [WorkflowRun::WORKFLOW[:short_read_mngs], WorkflowRun::WORKFLOW[:consensus_genome]]
       results = helper.send(:filter_by_workflow, @samples_input, query)
-      expect(results.pluck(:id)).to include(@sample_one.id, @sample_two.id, @sample_three.id)
+      expect(results.pluck(:id)).to include(@sample_one.id, @sample_two.id, @sample_three.id, @sample_four.id)
     end
 
     it "returns an empty response if no sample workflows match the query" do
@@ -336,23 +342,122 @@ RSpec.describe SamplesHelper, type: :helper do
 
     before do
       @project = create(:project)
-      @sample = create(:sample, project: @project)
+      @sample1 = create(:sample, project: @project)
       @sample_without_runs = create(:sample, project: @project)
+      @sample2 = create(:sample, project: @project)
+
+      create(:pipeline_run, sample_id: @sample2.id, finalized: 1, job_status: PipelineRun::STATUS_CHECKED)
       @mock_cached_results = { "mock_metric" => 10 }
       @mock_inputs_json = { "wetlab_protocol" => ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }
-      @workflow_run1 = create(:workflow_run, sample: @sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: Time.now.utc, cached_results: @mock_cached_results.to_json, inputs_json: @mock_inputs_json.to_json)
+      @workflow_run1 = create(:workflow_run, sample: @sample1, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: Time.now.utc, cached_results: @mock_cached_results.to_json, inputs_json: @mock_inputs_json.to_json)
     end
 
     it "includes information for consensus genome cached_results" do
-      samples = Sample.where(id: @sample.id)
-      results = helper.send(:format_samples, samples)
+      samples = Sample.where(id: @sample1.id)
+      results = helper.send(:format_samples, samples, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
       expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: @mock_cached_results, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] })
     end
 
     it "returns nil if no cached_results" do
       samples = Sample.where(id: @sample_without_runs.id)
-      results = helper.send(:format_samples, samples)
+      results = helper.send(:format_samples, samples, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
       expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: nil, wetlab_protocol: nil })
+    end
+
+    it "returns results without consensus genome information if mNGS workflow specified" do
+      samples = Sample.where(id: @sample_without_runs.id)
+      results = helper.send(:format_samples, samples, workflow: WorkflowRun::WORKFLOW[:short_read_mngs])
+      expect(results[0]).not_to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym)
+    end
+  end
+
+  describe "#get_sample_run_info_by_workflow" do
+    before do
+      @project = create(:project)
+
+      @sample1 = create(:sample, project: @project)
+      @pipeline_run1 = create(:pipeline_run, sample_id: @sample1.id, finalized: 1, job_status: PipelineRun::STATUS_CHECKED)
+
+      @sample2 = create(:sample, project: @project)
+      create(:workflow_run, sample: @sample2, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+
+      @sample3 = create(:sample, project: @project)
+      create(:pipeline_run, sample_id: @sample3.id, finalized: 1, job_status: PipelineRun::STATUS_CHECKED)
+      create(:workflow_run, sample: @sample3, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+    end
+
+    it "returns the correct status for a sample that only has a consensus-genome workflow run" do
+      results = helper.send(:get_sample_run_info_by_workflow,
+                            sample: @sample2,
+                            is_snapshot: false,
+                            top_pipeline_run: nil,
+                            output_states_by_pipeline_run_id: nil,
+                            pipeline_run_stages_by_pipeline_run_id: nil,
+                            report_ready_pipeline_run_ids: nil)
+
+      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]].keys).to contain_exactly(:result_status_description)
+      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({ result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]] })
+    end
+
+    it "returns the correct status for a sample that only has a short-read-mngs pipeline run" do
+      expect(helper).to receive(:pipeline_run_info).and_return({
+                                                                 finalized: 1,
+                                                                 report_ready: true,
+                                                                 result_status_description: "COMPLETE",
+                                                                 total_runtime: 123,
+                                                                 with_assembly: 0,
+                                                               })
+
+      results = helper.send(:get_sample_run_info_by_workflow,
+                            sample: @sample1,
+                            is_snapshot: false,
+                            top_pipeline_run: @pipeline_run1,
+                            output_states_by_pipeline_run_id: nil,
+                            pipeline_run_stages_by_pipeline_run_id: nil,
+                            report_ready_pipeline_run_ids: [@pipeline_run1.id])
+
+      expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]].keys).to contain_exactly(:finalized, :report_ready, :result_status_description, :total_runtime, :with_assembly)
+      expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]][:result_status_description]).to eq("COMPLETE")
+    end
+
+    it "returns the correct statuses for a sample that has both a short-read-mngs pipeline run and consensus-genome workflow run" do
+      expect(helper).to receive(:pipeline_run_info).and_return({
+                                                                 finalized: 1,
+                                                                 report_ready: true,
+                                                                 result_status_description: "COMPLETE",
+                                                                 total_runtime: 123,
+                                                                 with_assembly: 0,
+                                                               })
+
+      results = helper.send(:get_sample_run_info_by_workflow,
+                            sample: @sample3,
+                            is_snapshot: false,
+                            top_pipeline_run: @pipeline_run1,
+                            output_states_by_pipeline_run_id: nil,
+                            pipeline_run_stages_by_pipeline_run_id: nil,
+                            report_ready_pipeline_run_ids: [@pipeline_run1.id])
+
+      expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]].keys).to contain_exactly(:finalized, :report_ready, :result_status_description, :total_runtime, :with_assembly)
+      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]].keys).to contain_exactly(:result_status_description)
+      expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]][:result_status_description]).to eq("COMPLETE")
+      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({ result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]] })
+    end
+
+    it "returns the correct status for a snapshot sample that has a short-read-mngs pipeline run" do
+      expect(helper).to receive(:snapshot_pipeline_run_info).and_return({
+                                                                          result_status_description: "COMPLETE",
+                                                                        })
+
+      results = helper.send(:get_sample_run_info_by_workflow,
+                            sample: @sample1,
+                            is_snapshot: true,
+                            top_pipeline_run: @pipeline_run1,
+                            output_states_by_pipeline_run_id: nil,
+                            pipeline_run_stages_by_pipeline_run_id: nil,
+                            report_ready_pipeline_run_ids: [@pipeline_run1.id])
+
+      expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]].keys).to contain_exactly(:result_status_description)
+      expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]][:result_status_description]).to eq("COMPLETE")
     end
   end
 end

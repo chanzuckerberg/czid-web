@@ -68,7 +68,6 @@ class SamplesController < ApplicationController
     :status,
     :host_genome_id,
     :upload_error,
-    :temp_pipeline_workflow,
   ].freeze
 
   WORKFLOW_RUN_DEFAULT_FIELDS = [
@@ -93,6 +92,7 @@ class SamplesController < ApplicationController
     order_dir = params[:orderDir] || :desc
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
+    workflow = params[:workflow] || WorkflowRun::WORKFLOW[:short_read_mngs]
 
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
@@ -114,7 +114,7 @@ class SamplesController < ApplicationController
       # format_samples loads a lot of information about samples
       # There are many ways we can refactor: multiple endpoints for client to ask for the information
       # they actually need or at least a configurable function to get only certain data
-      details_json = format_samples(limited_samples).as_json(
+      details_json = format_samples(limited_samples, workflow: workflow).as_json(
         except: [:sfn_results_path]
       )
       limited_samples_json.zip(details_json, samples_visibility).map do |sample, details, visibility|
@@ -331,9 +331,13 @@ class SamplesController < ApplicationController
     sample_data = samples.pluck(:id, :project_id)
     sample_ids = sample_data.map { |s| s[0] }
     project_ids = sample_data.map { |s| s[1] }.uniq
-
     avg_total_reads = nil
     avg_remaining_reads = nil
+    workflow_count = {
+      WorkflowRun::WORKFLOW[:short_read_mngs] => samples.where(initial_workflow: WorkflowRun::WORKFLOW[:short_read_mngs]).distinct.count,
+      WorkflowRun::WORKFLOW[:consensus_genome] => samples.joins(:workflow_runs).where(["workflow_runs.workflow = :workflow OR samples.initial_workflow = :workflow", { workflow: WorkflowRun::WORKFLOW[:consensus_genome] }]).distinct.count,
+    }
+
     if sample_ids.count > 0
       pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
       avg_total_reads, avg_remaining_reads = PipelineRun
@@ -346,7 +350,7 @@ class SamplesController < ApplicationController
     respond_to do |format|
       format.json do
         render json: {
-          countByWorkflow: samples.group(:temp_pipeline_workflow).count,
+          countByWorkflow: workflow_count,
           count: sample_ids.count,
           projectCount: project_ids.count,
           avgTotalReads: avg_total_reads.presence || 0,

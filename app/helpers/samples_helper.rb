@@ -31,7 +31,7 @@ module SamplesHelper
 
   # If selected_pipeline_runs_by_sample_id is provided, use those pipelines runs instead of the latest pipeline run for each sample.
   def generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: nil, include_all_metadata: false)
-    formatted_samples = format_samples(samples, selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
+    formatted_samples = format_samples(samples, workflow: WorkflowRun::WORKFLOW[:short_read_mngs], selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
 
     # reads_after_cdhitdup required for backwards compatibility
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
@@ -160,26 +160,25 @@ module SamplesHelper
     (100.0 * pr.adjusted_remaining_reads) / pr.total_reads unless pr.nil? || pr.adjusted_remaining_reads.nil? || pr.total_reads.nil?
   end
 
-  def sample_status_display_for_hidden_page(sample)
+  def sample_status_display_for_hidden_page(sample, run)
     if sample.status == Sample::STATUS_CREATED
       'uploading'
     elsif sample.status == Sample::STATUS_CHECKED
-      if sample.temp_pipeline_workflow != WorkflowRun::WORKFLOW[:short_read_mngs]
-        # TODO: Refactor to support multiple workflows
-        workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
-        return workflow_run&.status&.downcase
-      end
+      return '' unless run
 
-      pipeline_run = sample.first_pipeline_run
-      return '' unless pipeline_run
-      if pipeline_run.job_status == PipelineRun::STATUS_CHECKED
-        return 'complete'
-      elsif pipeline_run.job_status == PipelineRun::STATUS_FAILED
-        return 'failed'
-      elsif pipeline_run.job_status == PipelineRun::STATUS_RUNNING
-        return 'running'
-      else
-        return 'initializing'
+      if run.class == WorkflowRun
+        run&.status&.downcase
+      elsif run.class == PipelineRun
+        case run.job_status
+        when PipelineRun::STATUS_CHECKED
+          'complete'
+        when PipelineRun::STATUS_FAILED
+          'failed'
+        when PipelineRun::STATUS_RUNNING
+          'running'
+        else
+          'initializing'
+        end
       end
     end
   end
@@ -370,7 +369,7 @@ module SamplesHelper
     WorkflowRun.where(sample_id: sample_ids, deprecated: false, workflow: workflow).order(executed_at: :asc).index_by(&:sample_id)
   end
 
-  def format_samples(samples, selected_pipeline_runs_by_sample_id: nil, use_csv_compatible_values: false, is_snapshot: false)
+  def format_samples(samples, workflow:, selected_pipeline_runs_by_sample_id: nil, use_csv_compatible_values: false, is_snapshot: false)
     formatted_samples = []
     return formatted_samples if samples.empty?
 
@@ -396,37 +395,33 @@ module SamplesHelper
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, top_pipeline_run, job_stats_hash)
-      job_info[:run_info] = if sample.upload_error && sample.upload_error == Sample::DO_NOT_PROCESS
-                              {
-                                result_status_description: 'SKIPPED',
-                                finalized: 0,
-                                report_ready: 0,
-                              }
-                            elsif sample.upload_error && sample.upload_error != Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED
-                              {
-                                result_status_description: 'FAILED',
-                                finalized: 0,
-                                report_ready: 0,
-                              }
-                            elsif sample.temp_pipeline_workflow == WorkflowRun::WORKFLOW[:consensus_genome]
-                              workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
-                              {
-                                result_status_description: workflow_run ? SFN_STATUS_MAPPING[workflow_run.status] : "RUNNING",
-                              }
-                            elsif is_snapshot
-                              snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id)
-                            else
-                              pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
-                                                pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
-                            end
       job_info[:uploader] = sample_uploader(sample)
+      upload_error = if sample.upload_error && sample.upload_error == Sample::DO_NOT_PROCESS
+                       { result_status_description: 'SKIPPED' }
+                     elsif sample.upload_error && sample.upload_error != Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED
+                       { result_status_description: 'FAILED' }
+                     end
+      job_info[:upload_error] = upload_error if upload_error.present?
 
-      # Frontend caches by sample_id so responses must include the same info.
-      top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
-      job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
-        cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
-        wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
-      }
+      if upload_error.nil?
+        job_info[:run_info_by_workflow] = get_sample_run_info_by_workflow(
+          sample: sample,
+          is_snapshot: is_snapshot,
+          top_pipeline_run: top_pipeline_run,
+          output_states_by_pipeline_run_id: output_states_by_pipeline_run_id,
+          pipeline_run_stages_by_pipeline_run_id: pipeline_run_stages_by_pipeline_run_id,
+          report_ready_pipeline_run_ids: report_ready_pipeline_run_ids
+        )
+      end
+
+      if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
+        # Frontend caches by sample_id so responses must include the same info.
+        top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
+        job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
+          cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
+          wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
+        }
+      end
 
       if is_snapshot
         snapshot_omissions.each { |param| job_info.delete(param) }
@@ -435,6 +430,25 @@ module SamplesHelper
       formatted_samples.push(job_info)
     end
     formatted_samples
+  end
+
+  def get_sample_run_info_by_workflow(sample:, is_snapshot: false, top_pipeline_run:, output_states_by_pipeline_run_id:, pipeline_run_stages_by_pipeline_run_id:, report_ready_pipeline_run_ids:)
+    # Returns a hash where keys are workflows and values contain info regarding the workflow/pipeline run
+    mngs_run_info = if is_snapshot
+                      snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id)
+                    else
+                      pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
+                                        pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
+                    end
+
+    # TODO: Generalize when new workflows are introduced
+    cg_workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
+    cg_run_info = { result_status_description: cg_workflow_run ? SFN_STATUS_MAPPING[cg_workflow_run.status] : "RUNNING" }
+
+    return {
+      WorkflowRun::WORKFLOW[:short_read_mngs] => mngs_run_info,
+      WorkflowRun::WORKFLOW[:consensus_genome] => cg_run_info,
+    }
   end
 
   def get_visibility(samples)
@@ -534,12 +548,8 @@ module SamplesHelper
         sample_attributes[:host_genome_id] = hg.id
       end
 
-      if sample_attributes[:workflows].present?
-        workflows = sample_attributes.delete(:workflows)
-        # Only one temp_pipeline_workflow supported at this time (2020-07-10)
-        sample_attributes[:temp_pipeline_workflow] = workflows[0]
-        sample_attributes[:initial_workflow] = workflows[0]
-      end
+      # Frontend uploader only lets the user select one workflow at a time, so select the only workflow in the array.
+      workflow = sample_attributes[:initial_workflow] = sample_attributes.delete(:workflows)[0] if sample_attributes[:workflows].present?
 
       if sample_attributes[:technology].present?
         technology = sample_attributes.delete(:technology)
@@ -575,8 +585,8 @@ module SamplesHelper
       if sample.save
         samples << sample
 
-        # Instantiate the WorkflowRun but don't save
-        workflow = sample_attributes[:temp_pipeline_workflow]
+        # In case the user uploads a large amount of samples: instantiate the WorkflowRun, add to workflow_runs array, then WorkflowRun.bulk_import them at once.
+        # We do this to prevent a large amount of individual insertions. Instead they're done in a bulk_import.
         if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
           inputs_json = if technology == WorkflowRun::TECHNOLOGY_INPUT[:nanopore]
                           { technology: technology, medaka_model: medaka_model, vadr_options: vadr_options }.to_json
@@ -587,7 +597,7 @@ module SamplesHelper
           workflow_runs << wr
         end
       else
-        errors << sample.errors
+        errors << sample.errors unless sample.errors.empty?
         # Remove the metadata for the invalid sample.
         metadata.delete(sample_attributes[:name])
       end
@@ -795,6 +805,7 @@ module SamplesHelper
   end
 
   def filter_by_workflow(samples, query)
-    samples.where(temp_pipeline_workflow: query)
+    samples_with_workflow_run = samples.joins(:workflow_runs).where(workflow_runs: { workflow: query }).pluck(:id)
+    samples.where(initial_workflow: query).or(samples.where(id: samples_with_workflow_run))
   end
 end
