@@ -10,6 +10,7 @@ class Modal extends React.Component {
   render() {
     const {
       fixedHeight,
+      minimumHeight,
       narrow,
       narrowest,
       tall,
@@ -28,7 +29,8 @@ class Modal extends React.Component {
           narrowest && cs.narrowest,
           tall && cs.tall,
           wide && cs.wide,
-          fixedHeight && cs.fixedHeight
+          fixedHeight && cs.fixedHeight,
+          minimumHeight && cs.minimumHeight
         )}
         dimmer={"inverted"}
         trigger={<span />}
@@ -54,6 +56,7 @@ Modal.propTypes = forbidExtraProps({
   onClose: PropTypes.func,
   open: PropTypes.bool,
   fixedHeight: PropTypes.bool,
+  minimumHeight: PropTypes.bool, // Sets the Modal to a minimum height it cannot shrink past.
   narrow: PropTypes.bool, // Decrease the width of the Modal for smaller modals.
   narrowest: PropTypes.bool, // Decrease the width of the Modal for the smallest modals.
   wide: PropTypes.bool, // Increase the width of the Modal for the wider modals.

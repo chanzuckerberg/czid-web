@@ -4,7 +4,11 @@ import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
 import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  logAnalyticsEvent,
+  withAnalytics,
+  ANALYTICS_EVENT_NAMES,
+} from "~/api/analytics";
 import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { getCsrfToken } from "~/api/utils";
 import {
@@ -600,6 +604,7 @@ class ReportTable extends React.Component {
         getOr(0, "nt.count", rowData),
         getOr(0, "nr.count", rowData)
       );
+    const percentIdentity = get("nt.percent_identity", rowData);
 
     const analyticsContext = {
       projectId: projectId,
@@ -630,7 +635,11 @@ class ReportTable extends React.Component {
           "PipelineSampleReport_taxon-fasta-link_clicked",
           analyticsContext
         )}
-        onConsensusGenomeClick={onConsensusGenomeClick}
+        onConsensusGenomeClick={withAnalytics(
+          onConsensusGenomeClick,
+          ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_CONSENSUS_GENOME_LINK_CLICKED,
+          analyticsContext
+        )}
         coverageVizEnabled={coverageVizEnabled}
         onCoverageVizClick={withAnalytics(
           this.handleCoverageVizClick,
@@ -649,6 +658,7 @@ class ReportTable extends React.Component {
           "PipelineSampleReport_phylotree-link_clicked",
           analyticsContext
         )}
+        percentIdentity={percentIdentity}
         pipelineVersion={pipelineVersion}
         snapshotShareId={snapshotShareId}
       />

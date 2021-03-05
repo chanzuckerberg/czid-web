@@ -1,0 +1,49 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.modal {
+  overflow-y: visible; // allow dropdown menu to extend past the modal
+
+  .title {
+    @include font-header-xxl;
+    margin-bottom: $space-s;
+  }
+
+  .description {
+    @include font-body-s;
+    color: $gray-darkest;
+  }
+
+  .label {
+    @include font-header-xs;
+    margin-top: $space-xl;
+    .taxonName {
+      @include font-body-xs;
+    }
+
+    .infoIcon {
+      fill: $gray-dark;
+      height: $icon-s;
+      width: $icon-s;
+      margin-left: $space-xxs;
+      margin-top: $space-xxxs;
+      vertical-align: -$space-xxxs;
+
+      &:hover {
+        fill: $primary;
+      }
+    }
+  }
+
+  .dropdown {
+    margin-top: $space-s;
+  }
+
+  .button {
+    margin-top: $space-xl;
+    margin-bottom: $space-xxl;
+    position: absolute;
+    bottom: 0;
+  }
+}

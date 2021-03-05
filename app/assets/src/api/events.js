@@ -30,6 +30,25 @@ function EventDictionary() {
   /** There was a failure upon retrying the operation to send samples to Nextclade. */
   this.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED =
     "NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED";
+
+  /** The user changed their selected accession in the Consensus Genome Creation modal. */
+  this.CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED =
+    "CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED";
+
+  /** The user clicked Create Consensus Genome in the Consensus Genome Creation modal. */
+  this.CONSENSUS_GENOME_CREATION_MODAL_CREATE_BUTTON_CLICKED =
+    "CONSENSUS_GENOME_CREATION_MODAL_CREATE_BUTTON_CLICKED";
+
+  /** The user closed the Consensus Genome Creation modal. */
+  this.CONSENSUS_GENOME_CREATION_MODAL_CLOSED =
+    "CONSENSUS_GENOME_CREATION_MODAL_CLOSED";
+
+  /** The user clicked the Learn More link in the Consensus Genome Creation modal. */
+  this.CONSENSUS_GENOME_CREATION_MODAL_HELP_LINK_CLICKED =
+    "CONSENSUS_GENOME_CREATION_MODAL_HELP_LINK_CLICKED";
+
+  this.PIPELINE_SAMPLE_REPORT_CONSENSUS_GENOME_LINK_CLICKED =
+    "PIPELINE_SAMPLE_REPORT_CONSENSUS_GENOME_LINK_CLICKED";
 }
 
 const eventNames = new EventDictionary();

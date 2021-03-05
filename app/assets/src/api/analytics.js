@@ -1,5 +1,3 @@
-import { isArray, isObject, camelCase, snakeCase, lowerFirst } from "lodash/fp";
-
 import eventNames from "~/api/events";
 import store from "~/redux/store";
 import { getGlobalAnalyticsContext } from "~/redux/modules/discovery/selectors";
@@ -42,70 +40,21 @@ export const logAnalyticsEvent = async (eventName, eventData = {}) => {
 };
 
 /**
- * For wrapping event handlers in React. The first part of the name should be
- * the React component. The middle part should be user-friendly UI name. The
- * last part should be the action taken.
- *
- * <ReactComponent>_<friendly-name-of-ui-element>_<past_tense_action>
- *
- * In this way, we can easily discern the
- * context and meaning of an analytics event in a report and locate it in the
- * codebase.
- *
- * The eventData should be used for extra data that would be useful for an
- * analysis specific to the event. The keys in should be named the same as in
- * the calling context for easy interpretation. Only scalars should be passed to
- * keep things simple downstream. Arrays should be replaced by their lengths.
+ * For wrapping event handlers in React. Event should be taken from ANALYTICS_EVENT_NAMES.
  *
  * For example:
  *
  *    withAnalytics(
- *      this.renderMoreReads,
- *      "AccessionViz_more-reads-link_clicked",
- *      { projectId: this.state.projectId, reads: this.state.reads.length }
+ *      this.onClose,
+ *      ANALYTICS_EVENT_NAMES.MODAL_CLOSED,
+ *      { projectId: this.state.projectId, sampleId: this.state.sampleId }
  *    )
- *
- * React events should have have a single callsite, so there is no need to put
- * them in ANALYTICS_EVENT_NAMES.
  *
  **/
 export const withAnalytics = (handleEvent, eventName, eventData = {}) => {
   if (typeof handleEvent !== "function") {
     // eslint-disable-next-line no-console
     console.error(`Missing event handler function "${handleEvent}"`);
-  }
-
-  const [componentName, friendlyName, ...actionType] = eventName.split("_");
-
-  if (!(componentName && friendlyName && actionType.length)) {
-    // eslint-disable-next-line no-console
-    console.warn(`Missing one part of analytics event name in "${eventName}"`);
-  }
-  if (camelCase(componentName) !== lowerFirst(componentName)) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `Component name "${componentName}" should be CamelCase in "${eventName}"`
-    );
-  }
-  if (snakeCase(friendlyName).replace(/_/g, "-") !== friendlyName) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `Friendly name "${friendlyName}" should be dash-case in "${eventName}"`
-    );
-  }
-  if (actionType.length > 1) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `Action type "${actionType}" should be single word in "${eventName}"`
-    );
-  }
-
-  for (var k in eventData) {
-    const val = eventData[k];
-    if (isArray(val) || isObject(val)) {
-      // eslint-disable-next-line no-console
-      console.warn(`${val} should be a scalar in "${eventName}"`);
-    }
   }
 
   return (...args) => {

@@ -44,6 +44,10 @@
     }
   }
 
+  &.minimumHeight {
+    min-height: 400px;
+  }
+
   :global(.content) {
     /* Overwrite semantic ui */
     padding: 0 !important;

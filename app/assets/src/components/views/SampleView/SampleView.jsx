@@ -32,6 +32,7 @@ import {
   getSample,
   getSampleReportData,
   getSamples,
+  kickoffConsensusGenome,
 } from "~/api";
 import { getAmrData } from "~/api/amr";
 import { UserContext } from "~/components/common/UserContext";
@@ -66,6 +67,7 @@ import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
+import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/ConsensusGenomeCreationModal";
 
 import {
   GENUS_LEVEL_INDEX,
@@ -109,6 +111,8 @@ class SampleView extends React.Component {
       {
         amrData: null,
         backgrounds: [],
+        consensusGenomeParams: {},
+        consensusGenomeCreationModalVisible: false,
         coverageVizDataByTaxon: {},
         coverageVizParams: {},
         coverageVizVisible: false,
@@ -920,8 +924,43 @@ class SampleView extends React.Component {
     });
   };
 
-  handleConsensusGenomeClick = () => {
-    // TODO: Currently a placeholder. Update to open the Viral CG parameters modal in CH-118820.
+  handleConsensusGenomeClick = ({ percentIdentity, taxId, taxName }) => {
+    const { coverageVizDataByTaxon } = this.state;
+    const accessionData = get(taxId, coverageVizDataByTaxon);
+    this.setState({
+      consensusGenomeParams: {
+        accessionData,
+        percentIdentity,
+        taxId,
+        taxName,
+      },
+      consensusGenomeCreationModalVisible: true,
+    });
+  };
+
+  onConsensusGenomeCreation = ({
+    accessionId,
+    accessionName,
+    taxonId,
+    taxonName,
+  }) => {
+    const { sample } = this.state;
+    kickoffConsensusGenome({
+      sampleId: sample.id,
+      workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+      accessionId,
+      accessionName,
+      taxonId,
+      taxonName,
+    });
+
+    this.handleCloseConsensusGenomeCreationModal();
+  };
+
+  handleCloseConsensusGenomeCreationModal = () => {
+    this.setState({
+      consensusGenomeCreationModalVisible: false,
+    });
   };
 
   handleMetadataUpdate = (key, value) => {
@@ -1578,6 +1617,8 @@ class SampleView extends React.Component {
   render = () => {
     const {
       amrData,
+      consensusGenomeParams,
+      consensusGenomeCreationModalVisible,
       coverageVizVisible,
       currentTab,
       pipelineRun,
@@ -1678,6 +1719,15 @@ class SampleView extends React.Component {
             sampleId={sample.id}
             snapshotShareId={snapshotShareId}
             visible={coverageVizVisible}
+          />
+        )}
+        {consensusGenomeCreationModalVisible && (
+          <ConsensusGenomeCreationModal
+            consensusGenomeData={consensusGenomeParams}
+            onClose={this.handleCloseConsensusGenomeCreationModal}
+            onCreation={this.onConsensusGenomeCreation}
+            open={consensusGenomeCreationModalVisible}
+            sample={sample}
           />
         )}
       </React.Fragment>

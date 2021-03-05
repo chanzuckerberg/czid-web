@@ -37,14 +37,26 @@ class HoverActions extends React.Component {
       });
   };
 
+  handleConsensusGenomeClick = () => {
+    const {
+      percentIdentity,
+      taxId,
+      taxName,
+      onConsensusGenomeClick,
+    } = this.props;
+
+    onConsensusGenomeClick &&
+      onConsensusGenomeClick({
+        percentIdentity,
+        taxId,
+        taxName,
+      });
+  };
+
   // Metadata for each of the hover actions.
   getHoverActions = () => {
     const { allowedFeatures = [] } = this.context || {};
-    const {
-      onConsensusGenomeClick,
-      pipelineVersion,
-      snapshotShareId,
-    } = this.props;
+    const { pipelineVersion, snapshotShareId } = this.props;
     const hasCoverageViz = isPipelineFeatureAvailable(
       COVERAGE_VIZ_FEATURE,
       pipelineVersion
@@ -130,7 +142,7 @@ class HoverActions extends React.Component {
         key: `consensus_genome_${params.taxId}`,
         message: "Consensus Genome",
         iconComponentClass: IconConsensusSmall,
-        handleClick: onConsensusGenomeClick,
+        handleClick: this.handleConsensusGenomeClick,
         enabled: !this.getConsensusGenomeError(),
         disabledMessage: this.getConsensusGenomeError(),
       });
@@ -218,6 +230,7 @@ HoverActions.propTypes = {
   onFastaActionClick: PropTypes.func.isRequired,
   onNcbiActionClick: PropTypes.func.isRequired,
   onPhyloTreeModalOpened: PropTypes.func,
+  percentIdentity: PropTypes.number,
   phyloTreeEnabled: PropTypes.bool,
   pipelineVersion: PropTypes.string,
   snapshotShareId: PropTypes.string,
