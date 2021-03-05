@@ -31,7 +31,7 @@ module SamplesHelper
 
   # If selected_pipeline_runs_by_sample_id is provided, use those pipelines runs instead of the latest pipeline run for each sample.
   def generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: nil, include_all_metadata: false)
-    formatted_samples = format_samples(samples, workflow: WorkflowRun::WORKFLOW[:short_read_mngs], selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
+    formatted_samples = format_samples(samples, selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
 
     # reads_after_cdhitdup required for backwards compatibility
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
@@ -57,7 +57,7 @@ module SamplesHelper
         derived_output = sample_info[:derived_sample_output]
         pipeline_run = derived_output[:pipeline_run]
         db_sample = sample_info[:db_sample]
-        run_info = sample_info[:run_info]
+        run_info = sample_info[:run_info_by_workflow][WorkflowRun::WORKFLOW[:short_read_mngs]]
 
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
@@ -369,7 +369,7 @@ module SamplesHelper
     WorkflowRun.where(sample_id: sample_ids, deprecated: false, workflow: workflow).order(executed_at: :asc).index_by(&:sample_id)
   end
 
-  def format_samples(samples, workflow:, selected_pipeline_runs_by_sample_id: nil, use_csv_compatible_values: false, is_snapshot: false)
+  def format_samples(samples, selected_pipeline_runs_by_sample_id: nil, use_csv_compatible_values: false, is_snapshot: false)
     formatted_samples = []
     return formatted_samples if samples.empty?
 
@@ -414,14 +414,12 @@ module SamplesHelper
         )
       end
 
-      if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
-        # Frontend caches by sample_id so responses must include the same info.
-        top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
-        job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
-          cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
-          wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
-        }
-      end
+      # Frontend caches by sample_id so responses must include the same info.
+      top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
+      job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
+        cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
+        wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
+      }
 
       if is_snapshot
         snapshot_omissions.each { |param| job_info.delete(param) }

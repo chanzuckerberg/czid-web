@@ -185,7 +185,14 @@ const processRawSample = sample => {
       "derived_sample_output.pipeline_run.total_reads",
       sample.details
     ),
-    totalRuntime: get("run_info.total_runtime", sample.details),
+    totalRuntime: get(
+      [
+        "run_info_by_workflow",
+        WORKFLOWS.SHORT_READ_MNGS.value,
+        "total_runtime",
+      ],
+      sample.details
+    ),
     waterControl: get("metadata.water_control", sample.details),
     ...consensusGenomeFields,
   };

@@ -149,33 +149,33 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
     describe "for non-snapshot samples" do
       it "should return 0 formatted samples when samples is empty" do
         samples = Sample.where(id: [])
-        formatted_samples = helper.format_samples(samples, workflow: mngs_workflow)
+        formatted_samples = helper.format_samples(samples)
         expect(formatted_samples).to eq([])
       end
 
       it "should return correctly formatted sample that had an upload error" do
         samples = Sample.where(id: [@sample_five.id])
-        formatted_samples = helper.format_samples(samples, workflow: mngs_workflow)
+        formatted_samples = helper.format_samples(samples)
         first_sample = formatted_samples.first
 
-        expect(first_sample.keys).to contain_exactly(:db_sample, :metadata, :derived_sample_output, :upload_error, :uploader)
+        expect(first_sample.keys).to contain_exactly(:db_sample, :metadata, :derived_sample_output, :upload_error, :uploader, cg_workflow.to_sym)
         expect(first_sample[:upload_error].keys).to contain_exactly(:result_status_description)
       end
 
       it "should return correctly formatted short-read-mngs samples" do
         samples = Sample.where(id: [@sample_one.id])
-        formatted_samples = helper.format_samples(samples, workflow: mngs_workflow)
+        formatted_samples = helper.format_samples(samples)
         first_sample = formatted_samples.first
-        expect(first_sample.keys).to contain_exactly(:db_sample, :metadata, :derived_sample_output, :run_info_by_workflow, :uploader)
+        expect(first_sample.keys).to contain_exactly(:db_sample, :metadata, :derived_sample_output, :run_info_by_workflow, :uploader, cg_workflow.to_sym)
         expect(first_sample[:derived_sample_output].keys).to contain_exactly(:host_genome_name, :pipeline_run, :project_name, :summary_stats)
         expect(first_sample[:run_info_by_workflow][mngs_workflow].keys).to contain_exactly(:finalized, :report_ready, :result_status_description, :total_runtime, :with_assembly)
       end
 
       it "should return correctly formatted consensus-genome samples" do
         samples = Sample.where(id: [@sample_four.id])
-        formatted_samples = helper.format_samples(samples, workflow: cg_workflow)
+        formatted_samples = helper.format_samples(samples)
         first_sample = formatted_samples.first
-        expect(first_sample.keys).to contain_exactly(:db_sample, :metadata, :derived_sample_output, :run_info_by_workflow, :uploader, :"consensus-genome")
+        expect(first_sample.keys).to contain_exactly(:db_sample, :metadata, :derived_sample_output, :run_info_by_workflow, :uploader, cg_workflow.to_sym)
         expect(first_sample[:derived_sample_output].keys).to contain_exactly(:host_genome_name, :pipeline_run, :project_name, :summary_stats)
         expect(first_sample[:run_info_by_workflow][cg_workflow].keys).to contain_exactly(:result_status_description)
       end
@@ -184,16 +184,16 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
     describe "for snapshot samples" do
       it "should return 0 formatted samples when samples is empty" do
         samples = Sample.where(id: [])
-        formatted_samples = helper.format_samples(samples, workflow: mngs_workflow, selected_pipeline_runs_by_sample_id: {}, is_snapshot: true)
+        formatted_samples = helper.format_samples(samples, selected_pipeline_runs_by_sample_id: {}, is_snapshot: true)
         expect(formatted_samples).to eq([])
       end
 
       it "should return correctly formatted sample that had an upload error" do
         samples = Sample.where(id: [@sample_five.id])
-        formatted_samples = helper.format_samples(samples, workflow: mngs_workflow, is_snapshot: true)
+        formatted_samples = helper.format_samples(samples, is_snapshot: true)
         first_sample = formatted_samples.first
 
-        expect(first_sample.keys).to contain_exactly(:metadata, :derived_sample_output, :uploader, :upload_error)
+        expect(first_sample.keys).to contain_exactly(:metadata, :derived_sample_output, :uploader, :upload_error, cg_workflow.to_sym)
         expect(first_sample[:upload_error].keys).to contain_exactly(:result_status_description)
       end
 
@@ -201,18 +201,18 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
         samples = Sample.where(id: [@sample_one.id])
         sample_ids = (samples || []).map(&:id)
         pipeline_runs_by_sample_id = snapshot_pipeline_runs_multiget(sample_ids, @snapshot_link.share_id)
-        formatted_samples = helper.format_samples(samples, workflow: mngs_workflow, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, is_snapshot: true)
+        formatted_samples = helper.format_samples(samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, is_snapshot: true)
         first_sample = formatted_samples.first
-        expect(first_sample.keys).to contain_exactly(:metadata, :derived_sample_output, :run_info_by_workflow, :uploader)
+        expect(first_sample.keys).to contain_exactly(:metadata, :derived_sample_output, :run_info_by_workflow, :uploader, cg_workflow.to_sym)
         expect(first_sample[:derived_sample_output].keys).to contain_exactly(:host_genome_name, :project_name, :summary_stats)
         expect(first_sample[:run_info_by_workflow][mngs_workflow].keys).to contain_exactly(:result_status_description)
       end
 
       it "should return correctly formatted consensus-genome samples" do
         samples = Sample.where(id: [@sample_four.id])
-        formatted_samples = helper.format_samples(samples, workflow: cg_workflow, is_snapshot: true)
+        formatted_samples = helper.format_samples(samples, is_snapshot: true)
         first_sample = formatted_samples.first
-        expect(first_sample.keys).to contain_exactly(:metadata, :derived_sample_output, :run_info_by_workflow, :uploader, :"consensus-genome")
+        expect(first_sample.keys).to contain_exactly(:metadata, :derived_sample_output, :run_info_by_workflow, :uploader, cg_workflow.to_sym)
         expect(first_sample[:derived_sample_output].keys).to contain_exactly(:host_genome_name, :project_name, :summary_stats)
         expect(first_sample[:run_info_by_workflow][cg_workflow].keys).to contain_exactly(:result_status_description)
       end

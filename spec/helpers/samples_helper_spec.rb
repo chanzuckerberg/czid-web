@@ -354,20 +354,20 @@ RSpec.describe SamplesHelper, type: :helper do
 
     it "includes information for consensus genome cached_results" do
       samples = Sample.where(id: @sample1.id)
-      results = helper.send(:format_samples, samples, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+      results = helper.send(:format_samples, samples)
       expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: @mock_cached_results, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] })
     end
 
     it "returns nil if no cached_results" do
       samples = Sample.where(id: @sample_without_runs.id)
-      results = helper.send(:format_samples, samples, workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+      results = helper.send(:format_samples, samples)
       expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: nil, wetlab_protocol: nil })
     end
 
-    it "returns results without consensus genome information if mNGS workflow specified" do
+    it "returns results for when mNGS workflow specified" do
       samples = Sample.where(id: @sample_without_runs.id)
-      results = helper.send(:format_samples, samples, workflow: WorkflowRun::WORKFLOW[:short_read_mngs])
-      expect(results[0]).not_to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym)
+      results = helper.send(:format_samples, samples)
+      expect(results[0].keys).to eq([:db_sample, :metadata, :derived_sample_output, :uploader, :run_info_by_workflow, :"consensus-genome"])
     end
   end
 
