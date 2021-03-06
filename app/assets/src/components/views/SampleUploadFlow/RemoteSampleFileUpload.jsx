@@ -7,6 +7,7 @@ import PropTypes from "~/components/utils/propTypes";
 import { bulkImportRemoteSamples } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import Notification from "~ui/notifications/Notification";
+import List from "~/components/ui/List";
 
 import {
   NO_TARGET_PROJECT_ERROR,
@@ -115,34 +116,28 @@ class RemoteSampleFileUpload extends React.Component {
         {this.state.showInfo && (
           <div className={cs.info}>
             <div className={cs.title}>S3 Bucket Instructions</div>
-            <ul>
-              <li>
-                Please ensure that IDseq has permissions to read/list your S3
-                bucket. <span>Contact us</span> for help getting set up.
-              </li>
-              <li>
-                Also convert links like
-                &quot;https://s3-us-west-2.amazonaws.com/your_s3_bucket/rawdata/fastqs&quot;
-                to the format &quot;s3://your_s3_bucket/rawdata/fastqs&quot;
-              </li>
-            </ul>
+            <List
+              listItems={[
+                `Please ensure that IDseq has permissions to read/list your S3
+                bucket. Contact us for help getting set up.`,
+                `Also convert links like
+                "https://s3-us-west-2.amazonaws.com/your_s3_bucket/rawdata/fastqs"
+                to the format "s3://your_s3_bucket/rawdata/fastqs"`,
+              ]}
+            />
             <div className={cs.title}>File Instructions</div>
-            <ul>
-              <li>
-                Accepted file formats: fastq (.fq), fastq.gz (.fq.gz), fasta
-                (.fa), fasta.gz (.fa.gz).
-              </li>
-              <li>
-                Paired files must be labeled with &quot;_R1&quot; or
-                &quot;_R2&quot; at the end of the basename.
-              </li>
-              <li>
-                File names must be no longer than 120 characters and can only
+            <List
+              listItems={[
+                `Accepted file formats: fastq (.fq), fastq.gz (.fq.gz), fasta
+                (.fa), fasta.gz (.fa.gz).`,
+                `Paired files must be labeled with "_R1" or
+                "_R2" at the end of the basename.`,
+                `File names must be no longer than 120 characters and can only
                 contain letters from the English alphabet (A-Z, upper and lower
                 case), numbers (0-9), periods (.), hyphens (-) and underscores
-                (_). Spaces are not allowed.
-              </li>
-            </ul>
+                (_). Spaces are not allowed.`,
+              ]}
+            />
           </div>
         )}
         <div className={cs.controls}>

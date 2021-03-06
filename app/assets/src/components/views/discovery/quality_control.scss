@@ -129,13 +129,7 @@
 }
 
 .statusList {
-  padding-left: 0;
-  margin: 0;
-
-  .statusListItem {
-    list-style: disc inside none;
-    margin-bottom: $space-xxs;
-  }
+  margin: 0 0 0 $space-l; // override list margins and move bullets inside tooltip
 }
 
 // see discovery_view.scss

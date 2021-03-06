@@ -21,6 +21,7 @@ import Toggle from "~ui/controls/Toggle";
 import { Input } from "~ui/controls";
 import { IconInfoSmall } from "~/components/ui/icons";
 import { logAnalyticsEvent } from "~/api/analytics";
+import List from "~/components/ui/List";
 
 import cs from "./view_only_link_form.scss";
 
@@ -255,13 +256,14 @@ class ViewOnlyLinkForm extends React.Component {
         <span>
           Users viewing this link <span className={cs.highlight}>can not</span>:
         </span>
-        <ul className={cs.conditionList}>
-          <li className={cs.conditionListItem}>Upload samples</li>
-          <li className={cs.conditionListItem}>Edit metadata</li>
-          <li className={cs.conditionListItem}>
-            Download non-host reads/ contigs or unmapped reads
-          </li>
-        </ul>
+        <List
+          listClassName={cs.conditionList}
+          listItems={[
+            "Upload samples",
+            "Edit metadata",
+            "Download non-host reads/ contigs or unmapped reads",
+          ]}
+        />
         <span>
           You can preview your View-only link in private browsing mode on your
           web browser.

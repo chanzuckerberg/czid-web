@@ -1,5 +1,7 @@
 import React from "react";
 import { NarrowContainer } from "~/components/layout";
+import List from "~/components/ui/List";
+import { nanoid } from "nanoid";
 import cs from "./support.scss";
 
 export default class PrivacyPolicy extends React.Component {
@@ -14,19 +16,17 @@ export default class PrivacyPolicy extends React.Component {
           </h4>
         </div>
         <p className={cs.large}>
-          The Chan Zuckerberg Biohub Inc. (“<b>CZ Biohub</b>,” “<b>we</b>,” “<b>
-            us
-          </b>,” or “<b>our</b>”) provides the IDseq platform (“<b>Services</b>”
-          or “<b>IDseq</b>”) in partnership with the Chan Zuckerberg Initiative,
-          LLC (“CZI”). This Data Privacy Notice (“<b>Privacy Notice</b>”)
-          describes the types of information we collect or that is uploaded by
-          website visitors (“<b>Visitors</b>”) and registered users (“<b>
-            Users
-          </b>”), and how we use, share, and protect that information. See our{" "}
-          <a href="/faqs">FAQ</a>, which has useful information about IDseq, and
-          for more information about our data practices, the IDseq service and
-          the <a href="/terms">Terms of Use</a> (“<b>Terms</b>”) that applies to
-          your access and use of IDseq.
+          The Chan Zuckerberg Biohub Inc. (“<b>CZ Biohub</b>,” “<b>we</b>,” “
+          <b>us</b>,” or “<b>our</b>”) provides the IDseq platform (“
+          <b>Services</b>” or “<b>IDseq</b>”) in partnership with the Chan
+          Zuckerberg Initiative, LLC (“CZI”). This Data Privacy Notice (“
+          <b>Privacy Notice</b>”) describes the types of information we collect
+          or that is uploaded by website visitors (“<b>Visitors</b>”) and
+          registered users (“<b>Users</b>”), and how we use, share, and protect
+          that information. See our <a href="/faqs">FAQ</a>, which has useful
+          information about IDseq, and for more information about our data
+          practices, the IDseq service and the <a href="/terms">Terms of Use</a>{" "}
+          (“<b>Terms</b>”) that applies to your access and use of IDseq.
         </p>
         <h3>About IDseq</h3>
         <p className={cs.large}>
@@ -37,17 +37,15 @@ export default class PrivacyPolicy extends React.Component {
         </p>
         <p className={cs.large}>
           <b>Here’s how IDseq works</b>: Users submit Upload Data (as described
-          below). This data may contain human and non-human genetic sequences (“<b
-          >
-            Sample Data
-          </b>”; as further defined below), as well as information about those
-          sequences, such as the date the sample was collected and the species
-          it was collected from (“<b>Sample Metadata</b>” as further defined
-          below). For example, a researcher might upload genetic information
-          from mosquitoes, which are often a source of infectious disease, or
-          from humans, who can be infected by such diseases. IDseq then
-          processes this Upload Data in order to identify pathogens found within
-          the genetic sequence (e.g., the mosquito may be carrying the
+          below). This data may contain human and non-human genetic sequences (“
+          <b>Sample Data</b>”; as further defined below), as well as information
+          about those sequences, such as the date the sample was collected and
+          the species it was collected from (“<b>Sample Metadata</b>” as further
+          defined below). For example, a researcher might upload genetic
+          information from mosquitoes, which are often a source of infectious
+          disease, or from humans, who can be infected by such diseases. IDseq
+          then processes this Upload Data in order to identify pathogens found
+          within the genetic sequence (e.g., the mosquito may be carrying the
           chikungunya virus).
         </p>
         <p className={cs.large}>
@@ -83,45 +81,48 @@ export default class PrivacyPolicy extends React.Component {
         <p className={cs.large}>
           Upload Data includes Sample Data and Sample Metadata.
         </p>
-        <ul>
-          <li>
-            <span className={cs.listItemLabel}>Sample Data:</span>
-            “<b>Sample Data</b>” is full genetic sequence data uploaded by
-            Users. Genetic sequence data contains genetic information about
-            pathogens in the sample and of the host from which the sample was
-            taken. The host could be a human or non-human (e.g., mosquito). You
-            should not be able to find any human sequence data in IDseq other
-            than those embedded in samples you yourself have uploaded. This is
-            because we filter out and discard host sequence data in order to
-            generate Reports. If you are able to find human sequence data
-            elsewhere in IDseq, please let us know at{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and we will
-            address it.
-          </li>
-          <li>
-            <span className={cs.listItemLabel}>Sample Metadata:</span>
-            “<b>Sample Metadata</b>” includes information related to the Sample
-            Data, such as the host type (e.g., human or mosquito), upload date,
-            and tissue type and free-text research notes entered by Users. This
-            data <u>should not</u> include personally-identifying information
-            regarding the individual to whom the Sample Data relates.
-          </li>
-        </ul>
+        <List
+          listItems={[
+            <React.Fragment key={nanoid()}>
+              <span className={cs.listItemLabel}>Sample Data:</span>“
+              <b>Sample Data</b>” is full genetic sequence data uploaded by
+              Users. Genetic sequence data contains genetic information about
+              pathogens in the sample and of the host from which the sample was
+              taken. The host could be a human or non-human (e.g., mosquito).
+              You should not be able to find any human sequence data in IDseq
+              other than those embedded in samples you yourself have uploaded.
+              This is because we filter out and discard host sequence data in
+              order to generate Reports. If you are able to find human sequence
+              data elsewhere in IDseq, please let us know at{" "}
+              <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and we
+              will address it.
+            </React.Fragment>,
+            <React.Fragment key={nanoid()}>
+              <span className={cs.listItemLabel}>Sample Metadata:</span>“
+              <b>Sample Metadata</b>” includes information related to the Sample
+              Data, such as the host type (e.g., human or mosquito), upload
+              date, and tissue type and free-text research notes entered by
+              Users. This data <u>should not</u> include personally-identifying
+              information regarding the individual to whom the Sample Data
+              relates.
+            </React.Fragment>,
+          ]}
+        />
         <p className={cs.large}>
           <div className={cs.underlineHeader}>How We Use Upload Data</div>
         </p>
         <p className={cs.large}>
           Upload Data is used for the following purposes:
-          <ul>
-            <li>
-              To create Report Data (described below), including new reports for
-              Users when we update our Data Pipeline.
-            </li>
-            <li>
-              To improve the way IDseq creates Report Data, including improving
-              our Data Pipeline.
-            </li>
-          </ul>
+        </p>
+        <List
+          listItems={[
+            `To create Report Data (described below), including new reports for
+          Users when we update our Data Pipeline.`,
+            `To improve the way IDseq creates Report Data, including improving
+          our Data Pipeline.`,
+          ]}
+        />
+        <p className={cs.large}>
           <b>
             We never sell your data, including your personally identifiable
             information (“personal data”).
@@ -167,23 +168,21 @@ export default class PrivacyPolicy extends React.Component {
           Regulation (“GDPR”) applies, we rely on the following legal bases to
           use and share personal data within Upload Data:
         </p>
-        <ul>
-          <li>
-            The explicit consent of the individual whose data is being analyzed,
-            where such consent has been obtained by the User in accordance with
-            the GDPR; and
-          </li>
-          <li>
-            The public interest and our and our Users’ legitimate interest in
-            investigating and stopping the spread of infectious diseases and
-            promoting global health. The use and sharing of personal data within
-            Upload Data furthers the public interest in the area of public
-            health, particularly by helping to protect against serious
-            cross-border threats to health. The processing of personal data
-            within Upload Data is also necessary for scientific research
-            purposes.
-          </li>
-        </ul>
+        <List
+          listItems={[
+            `The explicit consent of the individual whose data is being analyzed,
+          where such consent has been obtained by the User in accordance with
+          the GDPR; and`,
+            `The public interest and our and our Users’ legitimate interest in
+          investigating and stopping the spread of infectious diseases and
+          promoting global health. The use and sharing of personal data within
+          Upload Data furthers the public interest in the area of public
+          health, particularly by helping to protect against serious
+          cross-border threats to health. The processing of personal data
+          within Upload Data is also necessary for scientific research
+          purposes.`,
+          ]}
+        />
         <h2>
           <span className={cs.number}>2.</span>Report Data.
         </h2>
@@ -229,47 +228,50 @@ export default class PrivacyPolicy extends React.Component {
         <p className={cs.large}>
           <div className={cs.underlineHeader}>What We Collect</div>
         </p>
-        <ul>
-          <li>
-            <span className={cs.listItemLabel}>Visitor Data.</span>
-            This is information collected from visitors to our website, whether
-            or not they are Users (“<b>Visitor Data</b>”).
-          </li>
-          <li>
-            <span className={cs.listItemLabel}>User Data.</span>
-            User Data is any information we collect from a User about that User
-            (“<b>User Data</b>”). It may include information necessary to create
-            or access your account such as your name, username, email address,
-            and login credentials.
-          </li>
-          <li>
-            When Visitors and Users visit or use our Service, we may
-            automatically collect Device Data or Analytics Information. “<b>
-              Device Data
-            </b>” includes information about your browser type and operating
-            system, IP address and/or device ID, including basic analytics from
-            your device or browser. “<b>Analytics Information</b>” relates to
-            any of your requests, queries, or use of the Services, such as the
-            amount of time spent viewing particular web pages. We use{" "}
-            <a href="/faqs">Google Analytics</a> for this service. Visitor Data
-            may also include information we collect about you when you visit our
-            website or use the Services, including through the use of cookies,
-            web beacons, and other technologies.
-          </li>
-          <li>
-            <span className={cs.listItemLabel}>
-              Cookies, Web Beacons, and other Technologies.
-            </span>
-            A cookie is a small file that may be stored on your computer or
-            other device. Web beacons and similar technologies are small bits of
-            code embedded in web pages, ads, and email that communicate with
-            third parties. We use these technologies to recognize your device
-            and browser and do things such as keep you logged in or to
-            understand usage patterns by Users and Visitors to our Services. We
-            do not use cookies to service third party ads. For more information
-            about our cookies use, please see our <a href="/faqs">FAQ</a>.
-          </li>
-        </ul>
+        <List
+          listItems={[
+            <React.Fragment key={nanoid()}>
+              <span className={cs.listItemLabel}>Visitor Data.</span>
+              This is information collected from visitors to our website,
+              whether or not they are Users (“<b>Visitor Data</b>”).
+            </React.Fragment>,
+            <React.Fragment key={nanoid()}>
+              <span className={cs.listItemLabel}>User Data.</span>
+              User Data is any information we collect from a User about that
+              User (“<b>User Data</b>”). It may include information necessary to
+              create or access your account such as your name, username, email
+              address, and login credentials.
+            </React.Fragment>,
+            <React.Fragment key={nanoid()}>
+              When Visitors and Users visit or use our Service, we may
+              automatically collect Device Data or Analytics Information. “
+              <b>Device Data</b>” includes information about your browser type
+              and operating system, IP address and/or device ID, including basic
+              analytics from your device or browser. “
+              <b>Analytics Information</b>” relates to any of your requests,
+              queries, or use of the Services, such as the amount of time spent
+              viewing particular web pages. We use{" "}
+              <a href="/faqs">Google Analytics</a> for this service. Visitor
+              Data may also include information we collect about you when you
+              visit our website or use the Services, including through the use
+              of cookies, web beacons, and other technologies.
+            </React.Fragment>,
+            <React.Fragment key={nanoid()}>
+              <span className={cs.listItemLabel}>
+                Cookies, Web Beacons, and other Technologies.
+              </span>
+              A cookie is a small file that may be stored on your computer or
+              other device. Web beacons and similar technologies are small bits
+              of code embedded in web pages, ads, and email that communicate
+              with third parties. We use these technologies to recognize your
+              device and browser and do things such as keep you logged in or to
+              understand usage patterns by Users and Visitors to our Services.
+              We do not use cookies to service third party ads. For more
+              information about our cookies use, please see our{" "}
+              <a href="/faqs">FAQ</a>.
+            </React.Fragment>,
+          ]}
+        />
         <p className={cs.large}>
           <div className={cs.underlineHeader}>How We Use That Data</div>
         </p>
@@ -277,22 +279,18 @@ export default class PrivacyPolicy extends React.Component {
           Visitor Data and User Data (including any Personal Data in the Visitor
           Data and User Data) will be used for the following purposes:
         </p>
-        <ul>
-          <li>
-            To identify you, create a profile for Users, and verify User’s
-            identity so you can log in to and use IDseq.
-          </li>
-          <li>
-            To provide you with notices about your account and updates about
-            IDseq.
-          </li>
-          <li>To respond to your inquiries and requests.</li>
-          <li>
-            To analyze how Users and Visitors are using IDseq so we can optimize
-            and improve it.
-          </li>
-          <li>To protect the security and integrity of IDseq.</li>
-        </ul>
+        <List
+          listItems={[
+            `To identify you, create a profile for Users, and verify User’s
+            identity so you can log in to and use IDseq.`,
+            `To provide you with notices about your account and updates about
+          IDseq.`,
+            `To respond to your inquiries and requests.`,
+            `To analyze how Users and Visitors are using IDseq so we can optimize
+          and improve it.`,
+            `To protect the security and integrity of IDseq.`,
+          ]}
+        />
         <p className={cs.large}>
           <div className={cs.underlineHeader}>
             What is our legal basis for using Personal Data in Visitor Data and
@@ -382,23 +380,26 @@ export default class PrivacyPolicy extends React.Component {
         <p className={cs.large}>
           We retain your personal data only as long as is reasonably necessary:
         </p>
-        <ul>
-          <li>
-            Sample Data and Sample Metadata is retained until Users delete it
-            from IDseq. Users may submit deletion requests by emailing{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and we will
-            delete the requested Sample Data and corresponding Sample Metadata
-            within 60 days.
-          </li>
-          <li>Report Data produced by IDseq will be retained on IDseq.</li>
-          <li>
-            User Data is retained until Users delete their IDseq account as such
-            data is required to manage the service. Users may submit account
-            deletion requests by emailing{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. We will
-            delete personal data within 60 days following close of your account.
-          </li>
-        </ul>
+        <List
+          listItems={[
+            <React.Fragment key={nanoid()}>
+              Sample Data and Sample Metadata is retained until Users delete it
+              from IDseq. Users may submit deletion requests by emailing{" "}
+              <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and we
+              will delete the requested Sample Data and corresponding Sample
+              Metadata within 60 days.
+            </React.Fragment>,
+            `Report Data produced by IDseq will be retained on IDseq.`,
+            <React.Fragment key={nanoid()}>
+              User Data is retained until Users delete their IDseq account as
+              such data is required to manage the service. Users may submit
+              account deletion requests by emailing{" "}
+              <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. We will
+              delete personal data within 60 days following close of your
+              account.
+            </React.Fragment>,
+          ]}
+        />
         <p className={cs.large}>
           Please note that we do not control, and so cannot delete, personal
           data that Users have copied outside of IDseq.
@@ -409,55 +410,51 @@ export default class PrivacyPolicy extends React.Component {
         <p className={cs.large}>
           If you are a User, you have the following choices:
         </p>
-        <ul>
-          <li>
-            Users are able to request the deletion of User Data that constitutes
-            their personal data or Sample Data that they submitted to IDseq.
-          </li>
-          <li>
-            Users are able to access and download Report Data relating to Upload
-            Data they submitted within IDseq.
-          </li>
-          <li>
-            Users may also object to the processing of User Data in certain
-            circumstances by emailing{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. In such
-            cases, we will stop processing that data unless we have legitimate
-            grounds to continue processing it -- for example, it is needed for
-            legal reasons.
-          </li>
-          <li>
-            Users can also contact us by emailing{" "}
-            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> should they
-            wish to access, restrict the processing of, or rectify their User
-            Data.
-          </li>
-        </ul>
+        <List
+          listItems={[
+            `Users are able to request the deletion of User Data that constitutes
+          their personal data or Sample Data that they submitted to IDseq.`,
+            `Users are able to access and download Report Data relating to Upload
+          Data they submitted within IDseq.`,
+            <React.Fragment key={nanoid()}>
+              Users may also object to the processing of User Data in certain
+              circumstances by emailing{" "}
+              <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. In such
+              cases, we will stop processing that data unless we have legitimate
+              grounds to continue processing it -- for example, it is needed for
+              legal reasons.
+            </React.Fragment>,
+            <React.Fragment key={nanoid()}>
+              Users can also contact us by emailing{" "}
+              <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> should
+              they wish to access, restrict the processing of, or rectify their
+              User Data.
+            </React.Fragment>,
+          ]}
+        />
         <p className={cs.large}>
           If a User has submitted Upload Data containing your personal data,
           please see below:
         </p>
-        <ul>
-          <li>
-            We require Users who submit Upload Data to ensure they have all
-            necessary consents, permissions, and authorizations to do so. We are
-            unable to relate Upload Data to identifiable individuals and so
-            cannot directly process requests from persons whose personal
-            sequencing data may be contained in Upload Data. As a result, IDseq
-            is able to receive access, restriction, rectification, objection, or
-            deletion requests only from Users.
-          </li>
-          <li>
-            If you believe your information has been uploaded to IDseq, you
-            should contact the researcher or User that uploaded this information
-            to (i) request access to the information, (ii) object to the
-            processing of the information, or (iii) seek deletion, restriction,
-            or rectification of the information. Similarly, if you previously
-            provided consent to a researcher or User, you may have the right to
-            withdraw that consent. You should contact the researcher or User to
-            make such a withdrawal or otherwise exercise your rights.
-          </li>
-        </ul>
+        <List
+          listItems={[
+            `We require Users who submit Upload Data to ensure they have all
+          necessary consents, permissions, and authorizations to do so. We are
+          unable to relate Upload Data to identifiable individuals and so
+          cannot directly process requests from persons whose personal
+          sequencing data may be contained in Upload Data. As a result, IDseq
+          is able to receive access, restriction, rectification, objection, or
+          deletion requests only from Users.`,
+            `If you believe your information has been uploaded to IDseq, you
+          should contact the researcher or User that uploaded this information
+          to (i) request access to the information, (ii) object to the
+          processing of the information, or (iii) seek deletion, restriction,
+          or rectification of the information. Similarly, if you previously
+          provided consent to a researcher or User, you may have the right to
+          withdraw that consent. You should contact the researcher or User to
+          make such a withdrawal or otherwise exercise your rights.`,
+          ]}
+        />
         <p className={cs.large}>
           Please contact us at{" "}
           <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> if you would
@@ -505,7 +502,8 @@ export default class PrivacyPolicy extends React.Component {
           email at{" "}
           <a href="mailto:privacy@chanzuckerberg.com">
             privacy@chanzuckerberg.com
-          </a>.
+          </a>
+          .
         </p>
         <h2>
           <span className={cs.number}>10.</span>Changes to This Privacy Notice.

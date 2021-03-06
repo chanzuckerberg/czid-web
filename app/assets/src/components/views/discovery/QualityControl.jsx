@@ -28,6 +28,7 @@ import Notification from "~ui/notifications/Notification";
 import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
+import List from "~/components/ui/List";
 
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
@@ -1015,27 +1016,22 @@ class QualityControl extends React.Component {
 
     const content = (
       <React.Fragment>
-        <ul className={cs.statusList}>
-          <li className={cs.statusListItem}>
-            {validSamples.length}{" "}
-            {validSamples.length === 1 ? "sample has" : "samples have"} been
-            uploaded and selected by filters.
-          </li>
-          <li className={cs.statusListItem}>
-            {runningSamples.length}{" "}
-            {runningSamples.length === 1 ? "sample is" : "samples are"} still
-            being processed.
-          </li>
-          <li className={cs.statusListItem}>
-            {failedSamples.length}{" "}
-            {failedSamples.length === 1 ? "sample" : "samples"} failed to
-            process. Failed samples are not displayed in the charts below.
-          </li>
-          <li className={cs.statusListItem}>
-            Samples with only Consensus Genome runs will not be displayed in the
-            charts below
-          </li>
-        </ul>
+        <List
+          listClassName={cs.statusList}
+          listItems={[
+            `${validSamples.length} 
+            ${validSamples.length === 1 ? "sample has" : "samples have"} been
+            uploaded and selected by filters.`,
+            `${runningSamples.length} 
+            ${runningSamples.length === 1 ? "sample is" : "samples are"} still
+            being processed.`,
+            `${failedSamples.length} 
+            ${failedSamples.length === 1 ? "sample" : "samples"} failed to
+            process. Failed samples are not displayed in the charts below.`,
+            `Samples with only Consensus Genome runs will not be displayed in the
+            charts below`,
+          ]}
+        />
       </React.Fragment>
     );
 

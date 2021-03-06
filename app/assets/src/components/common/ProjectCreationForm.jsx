@@ -11,6 +11,7 @@ import { createProject } from "~/api";
 import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
 import { logAnalyticsEvent } from "~/api/analytics";
+import List from "~/components/ui/List";
 
 import cs from "./project_creation_form.scss";
 
@@ -202,23 +203,17 @@ class ProjectCreationForm extends React.Component {
           {showInfo && (
             <div className={cs.info}>
               <div className={cs.title}>A project description may include:</div>
-              <ul>
-                <li>
-                  The project goal (benchmarking, identifying an unknown
-                  pathogen, microbiome, etc.)
-                </li>
-                <li>
-                  If this work is part of a larger study, the aim of that study
-                </li>
-                <li>
-                  A summary of where the samples came from (geographically and
-                  collection date) and preparation techniques, if relevant
-                </li>
-                <li>
-                  Any other context that might be helpful in interpreting the
-                  data
-                </li>
-              </ul>
+              <List
+                listItems={[
+                  `The project goal (benchmarking, identifying an unknown
+                  pathogen, microbiome, etc.)`,
+                  `If this work is part of a larger study, the aim of that study`,
+                  `A summary of where the samples came from (geographically and
+                collection date) and preparation techniques, if relevant`,
+                  `Any other context that might be helpful in interpreting the
+                data`,
+                ]}
+              />
               <p>
                 <span className={cs.title}>Example project description: </span>
                 Investigation of pathogen diversity in healthy vs. diseased dogs

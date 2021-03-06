@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import cs from "./metadata_upload_modal.scss";
 import cx from "classnames";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import List from "~/components/ui/List";
 
 class UploadInstructions extends React.Component {
   render() {
@@ -19,52 +20,55 @@ class UploadInstructions extends React.Component {
         </div>
         <div className={cs.content}>
           <div className={cs.sectionTitle}>Instructions</div>
-          <ol className={cs.section}>
-            <li>
-              Review the fields in our{" "}
-              <a
-                href="/metadata/dictionary"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cs.link}
-              >
-                metadata dictionary
-              </a>, where you will find definitions and format requirements.
-              Take special note of the <b>required</b> fields, which you must
-              provide when uploading a new sample.
-            </li>
-            <li>
-              You can use your own CSV or copy your metadata into our{" "}
-              <a
-                href="/metadata/metadata_template_csv"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cs.link}
-              >
-                CSV template.
-              </a>
-              <p>
-                {`If your entered Host Organism does not match a supported host
-              genome, we will only subtract out ERCCs and the Human genome. You can
-              read more about how to request a new genome to be added to IDseq `}
+          <List
+            listClassName={cs.section}
+            ordered={true}
+            listItems={[
+              <React.Fragment key={"metadata-dictionary"}>
+                Review the fields in our{" "}
                 <a
-                  href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790814-How-do-I-request-a-new-host-genome-be-added-to-IDseq-"
+                  href="/metadata/dictionary"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cs.link}
                 >
-                  here.
+                  metadata dictionary
                 </a>
-              </p>
-            </li>
-            <li>Make sure your column headers match our naming convention.</li>
-            <li>Make sure your metadata values are in the correct format.</li>
-            <li>Upload your CSV file.</li>
-            <li>
-              If there are errors, please make the necessary changes in your CSV
-              and upload it again.
-            </li>
-          </ol>
+                , where you will find definitions and format requirements. Take
+                special note of the <b>required</b> fields, which you must
+                provide when uploading a new sample.
+              </React.Fragment>,
+              <React.Fragment key={"metadata-template-csv"}>
+                You can use your own CSV or copy your metadata into our{" "}
+                <a
+                  href="/metadata/metadata_template_csv"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cs.link}
+                >
+                  CSV template.
+                </a>
+                <p>
+                  {`If your entered Host Organism does not match a supported host
+                genome, we will only subtract out ERCCs and the Human genome. You can
+                read more about how to request a new genome to be added to IDseq `}
+                  <a
+                    href="https://chanzuckerberg.zendesk.com/hc/en-us/articles/360034790814-How-do-I-request-a-new-host-genome-be-added-to-IDseq-"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cs.link}
+                  >
+                    here.
+                  </a>
+                </p>
+              </React.Fragment>,
+              `Make sure your column headers match our naming convention.`,
+              `Make sure your metadata values are in the correct format.`,
+              `Upload your CSV file.`,
+              `If there are errors, please make the necessary changes in your CSV
+              and upload it again.`,
+            ]}
+          />
         </div>
       </div>
     );

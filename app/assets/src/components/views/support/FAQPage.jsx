@@ -1,5 +1,7 @@
 import React from "react";
 import { Accordion, NarrowContainer } from "~/components/layout";
+import List from "~/components/ui/List";
+import { nanoid } from "nanoid";
 import cs from "./support.scss";
 
 export default class FAQPage extends React.Component {
@@ -31,9 +33,9 @@ export default class FAQPage extends React.Component {
             <h3>How does IDseq share the data I upload with other users?</h3>
           }
         >
-          <p>
-            <ul>
-              <li>
+          <List
+            listItems={[
+              <React.Fragment key={nanoid()}>
                 When you upload data to IDseq, you control who the data is
                 shared with. IDseq relies on three key categories of data, and
                 we want you to understand how each is treated.{" "}
@@ -46,22 +48,22 @@ export default class FAQPage extends React.Component {
                 fluid). <b>Report Data</b> includes the pathogen report IDseq
                 generates from the Upload Data, Sample Metadata, and other data
                 derived from the Upload, such as phylogenetic trees.
-              </li>
-              <li>
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
                 <b>Report Data</b> and <b>Sample Metadata</b> will be shared
                 with anyone you share your project with.
-              </li>
-              <li>
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
                 Unless you choose to remove it <b>one year</b> after you
                 uploaded your sample, Report Data and the Sample Metadata
-                uploaded alongside it will be shared with <b>all IDseq users</b>.
-                We will notify and remind you of this sharing of the Report Data
-                and Sample Metadata before the one year anniversary of your
+                uploaded alongside it will be shared with <b>all IDseq users</b>
+                . We will notify and remind you of this sharing of the Report
+                Data and Sample Metadata before the one year anniversary of your
                 upload by sending you a message to the contact information you
                 provided to us at registration.
-              </li>
-            </ul>
-          </p>
+              </React.Fragment>,
+            ]}
+          />
         </Accordion>
         <Accordion
           className={cs.question}
@@ -75,9 +77,9 @@ export default class FAQPage extends React.Component {
           className={cs.question}
           header={<h3>How is human genomic data handled and protected?</h3>}
         >
-          <p>
-            <ul>
-              <li>
+          <List
+            listItems={[
+              <React.Fragment key={nanoid()}>
                 You should not be able to find any human sequence data in IDseq
                 other than the original fastq files you yourself have uploaded.
                 This is because we have a multi-step process in place to filter
@@ -87,8 +89,8 @@ export default class FAQPage extends React.Component {
                 <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>, and we
                 will remove it. The fastq files you uploaded are only available
                 to you, the uploader.
-              </li>
-              <li>
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
                 For the fastq files you yourself have uploaded, we understand
                 this data is sensitive and we implement security measures
                 designed to safeguard it. We seek to implement security best
@@ -98,9 +100,9 @@ export default class FAQPage extends React.Component {
                 that only authorized staff have access to the data. If you need
                 more information about our security practices please contact us
                 at <a href="mailto:security@idseq.net">security@idseq.net</a>.
-              </li>
-            </ul>
-          </p>
+              </React.Fragment>,
+            ]}
+          />
         </Accordion>
         <Accordion
           className={cs.question}
@@ -133,39 +135,39 @@ export default class FAQPage extends React.Component {
             </h3>
           }
         >
-          <p>
-            <ul>
-              <li>
+          <List
+            listItems={[
+              <React.Fragment key={nanoid()}>
                 We require 4 metadata fields for uploaded samples. We believe
                 these data are necessary to fully analyze the data. The 4 fields
                 we require are:
-                <li className={cs.innerListItem}>
+                <div className={cs.innerListItem}>
                   1. Sample type (CSF, Stool, Serum, etc)
-                </li>
-                <li className={cs.innerListItem}>
+                </div>
+                <div className={cs.innerListItem}>
                   2. Nucleotide type (RNA or DNA)
-                </li>
-                <li className={cs.innerListItem}>
+                </div>
+                <div className={cs.innerListItem}>
                   3. Location (limited to state or country)
-                </li>
-                <li className={cs.innerListItem}>
+                </div>
+                <div className={cs.innerListItem}>
                   4. Collection Date (limited to month and year)
-                </li>
-              </li>
-              <li>
+                </div>
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
                 We limit the granularity of location and collection date to help
                 maintain the anonymity of the uploaded data.
-              </li>
-              <li>
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
                 Other metadata can be uploaded to IDseq but is not required and
                 may be deleted at any point. We have put together a metadata
                 ontology that you can find{" "}
                 <a href="/metadata/dictionary">here</a> that does not include
                 any fields where Protected Health Information (PHI) can be
                 derived.
-              </li>
-            </ul>
-          </p>
+              </React.Fragment>,
+            ]}
+          />
         </Accordion>
         <Accordion
           className={cs.question}
@@ -201,18 +203,14 @@ export default class FAQPage extends React.Component {
           className={cs.question}
           header={<h3>What is your address?</h3>}
         >
-          <p>
-            <ul>
-              <li>
-                Chan Zuckerberg Biohub, 499 Illinois Street, Fourth Floor San
-                Francisco, CA 94158
-              </li>
-              <li>
-                Chan Zuckerberg Initiative, LLC, 601 Marshall St., Redwood City,
-                CA 94063
-              </li>
-            </ul>
-          </p>
+          <List
+            listItems={[
+              `Chan Zuckerberg Biohub, 499 Illinois Street, Fourth Floor San
+              Francisco, CA 94158`,
+              `Chan Zuckerberg Initiative, LLC, 601 Marshall St., Redwood City,
+              CA 94063`,
+            ]}
+          />
         </Accordion>
         <Accordion
           className={cs.question}
@@ -231,37 +229,35 @@ export default class FAQPage extends React.Component {
             address you gave us) and other cookies are not. We use three
             different types of cookies:
           </p>
-          <ul>
-            <li>
-              <span className={cs.listItemLabel}>Session cookies</span> are
-              specific to a particular visit you make to IDseq and hold certain
-              information as you browse different pages so you don’t have to
-              re-enter information every time you change pages. Session cookies
-              expire and delete themselves automatically in a short period of
-              time like after you leave IDseq or when you close your web
-              browser.
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <span className={cs.listItemLabel}>Persistent cookies</span>{" "}
-              remember certain information about your preferences for viewing
-              IDseq and allow us to recognize you each time you return.
-              Persistent cookies are stored on your browser cache or mobile
-              device until you choose to delete them, and otherwise delete
-              themselves in a standard period of time.
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <span className={cs.listItemLabel}>Third party cookies</span> are
-              a type of persistent cookie and are placed by someone other than
-              us. These cookies may gather browsing activity across multiple
-              websites and across multiple sessions. They are stored until you
-              delete them or expire based on the time period set in each third
-              party cookie.
-            </li>
-          </ul>
+          <List
+            listItems={[
+              <React.Fragment key={nanoid()}>
+                <span className={cs.listItemLabel}>Session cookies</span> are
+                specific to a particular visit you make to IDseq and hold
+                certain information as you browse different pages so you don’t
+                have to re-enter information every time you change pages.
+                Session cookies expire and delete themselves automatically in a
+                short period of time like after you leave IDseq or when you
+                close your web browser.
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
+                <span className={cs.listItemLabel}>Persistent cookies</span>{" "}
+                remember certain information about your preferences for viewing
+                IDseq and allow us to recognize you each time you return.
+                Persistent cookies are stored on your browser cache or mobile
+                device until you choose to delete them, and otherwise delete
+                themselves in a standard period of time.
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
+                <span className={cs.listItemLabel}>Third party cookies</span>{" "}
+                are a type of persistent cookie and are placed by someone other
+                than us. These cookies may gather browsing activity across
+                multiple websites and across multiple sessions. They are stored
+                until you delete them or expire based on the time period set in
+                each third party cookie.
+              </React.Fragment>,
+            ]}
+          />
           <p>
             We partner with third-party analytics providers (such as Google and
             Segment), which set cookies when you visit our websites. These
@@ -281,36 +277,38 @@ export default class FAQPage extends React.Component {
             We use cookies to help operate and make our Services function
             securely:
           </p>
-          <ul>
-            <li>
-              <span className={cs.listItemLabel}>
-                Authentication and security.
-              </span>{" "}
-              Cookies and similar technologies help us verify your account and
-              device to maintain the security, safety, and integrity of our
-              Services. For example, we use cookies to help prevent the
-              fraudulent use of your login credentials.
-            </li>
-            <li>
-              <span className={cs.listItemLabel}>
-                Account and user preferences.
-              </span>{" "}
-              We use some technologies to remember your account and preferences
-              over time so that we can make it easier for you to access the
-              Services and provide you with the experiences and features you
-              desire. For example, we use cookies to persist some report
-              filtering settings.
-            </li>
-            <li>
-              <span className={cs.listItemLabel}>
-                Performance and analytics.
-              </span>{" "}
-              Cookies and similar technologies help us analyze how the Services
-              are being accessed and used, and enable us to track the
-              performance of the Services. This gives us the information we need
-              to improve your experience on our Services.
-            </li>
-          </ul>
+          <List
+            listItems={[
+              <React.Fragment key={nanoid()}>
+                <span className={cs.listItemLabel}>
+                  Authentication and security.
+                </span>{" "}
+                Cookies and similar technologies help us verify your account and
+                device to maintain the security, safety, and integrity of our
+                Services. For example, we use cookies to help prevent the
+                fraudulent use of your login credentials.
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
+                <span className={cs.listItemLabel}>
+                  Account and user preferences.
+                </span>{" "}
+                We use some technologies to remember your account and
+                preferences over time so that we can make it easier for you to
+                access the Services and provide you with the experiences and
+                features you desire. For example, we use cookies to persist some
+                report filtering settings.
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
+                <span className={cs.listItemLabel}>
+                  Performance and analytics.
+                </span>{" "}
+                Cookies and similar technologies help us analyze how the
+                Services are being accessed and used, and enable us to track the
+                performance of the Services. This gives us the information we
+                need to improve your experience on our Services.
+              </React.Fragment>,
+            ]}
+          />
         </Accordion>
         <Accordion
           className={cs.question}
@@ -320,35 +318,36 @@ export default class FAQPage extends React.Component {
             You have options to control or limit how we and our partners use
             cookies and similar technologies.
           </p>
-          <ul>
-            <li>
-              Although most browsers and devices accept cookies by default,
+          <List
+            listItems={[
+              `Although most browsers and devices accept cookies by default,
               their settings usually allow you to clear or decline cookies. Note
               that if you disable cookies, however, some of the features of our
-              Services may not function properly.
-            </li>
-            <li>
-              To learn more about how to opt out of Google’s use of cookies
-              either as part of AdWords or Analytics services, you may visit{" "}
-              <a href="https://adssettings.google.com/">
-                Google’s Ads Settings
-              </a>{" "}
-              and “<a href="https://policies.google.com/privacy/partners">
-                How Google Uses Information From Sites or Apps That Use Our
-                Services
-              </a>”. You will be able to prevent your data from being used by
-              Google Analytics by installing Google’s opt-out browser add-on
-              from the{" "}
-              <a href="https://tools.google.com/dlpage/gaoptout">
-                Google Analytics Opt-out Page
-              </a>.
-            </li>
-            <li>
-              To learn more about how to opt out of the use of cookies and
-              similar technologies, generally, visit the Network Advertising
-              Initiative and the Digital Advertising Alliance.
-            </li>
-          </ul>
+              Services may not function properly.`,
+              <React.Fragment key={nanoid()}>
+                To learn more about how to opt out of Google’s use of cookies
+                either as part of AdWords or Analytics services, you may visit{" "}
+                <a href="https://adssettings.google.com/">
+                  Google’s Ads Settings
+                </a>{" "}
+                and “
+                <a href="https://policies.google.com/privacy/partners">
+                  How Google Uses Information From Sites or Apps That Use Our
+                  Services
+                </a>
+                ”. You will be able to prevent your data from being used by
+                Google Analytics by installing Google’s opt-out browser add-on
+                from the{" "}
+                <a href="https://tools.google.com/dlpage/gaoptout">
+                  Google Analytics Opt-out Page
+                </a>
+                .
+              </React.Fragment>,
+              `To learn more about how to opt out of the use of cookies and
+            similar technologies, generally, visit the Network Advertising
+            Initiative and the Digital Advertising Alliance.`,
+            ]}
+          />
         </Accordion>
         <Accordion
           className={cs.question}
@@ -380,37 +379,39 @@ export default class FAQPage extends React.Component {
             residents of California the right to request information about the
             personal information that a business has collected in the past 12
             months, such as:
-            <ul>
-              <li>
+          </p>
+          <List
+            listItems={[
+              <React.Fragment key={nanoid()}>
                 <b>Information about Data Collection.</b>
-                <li className={cs.innerListItem}>
+                <div className={cs.innerListItem}>
                   (1) The categories of personal information that have been
                   collected.
-                </li>
-                <li className={cs.innerListItem}>
+                </div>
+                <div className={cs.innerListItem}>
                   (2) The specific pieces of personal information that have been
                   collected about you.
-                </li>
-                <li className={cs.innerListItem}>
+                </div>
+                <div className={cs.innerListItem}>
                   (3) The categories of sources that have collected it.
-                </li>
-                <li className={cs.innerListItem}>
+                </div>
+                <div className={cs.innerListItem}>
                   (4) The business purpose for collecting personal information.
-                </li>
-              </li>
-              <li>
+                </div>
+              </React.Fragment>,
+              <React.Fragment key={nanoid()}>
                 <b>Information about Data Disclosure.</b>
-                <li className={cs.innerListItem}>
+                <div className={cs.innerListItem}>
                   (1) The categories of third parties with whom personal
                   information has been shared.
-                </li>
-                <li className={cs.innerListItem}>
+                </div>
+                <div className={cs.innerListItem}>
                   (2) The categories of personal information that we have
                   disclosed for a business purpose.
-                </li>
-              </li>
-            </ul>
-          </p>
+                </div>
+              </React.Fragment>,
+            ]}
+          />
           <p>
             We have described in fuller detail in our{" "}
             <a href="/privacy">Privacy Policy</a> our collection and use of

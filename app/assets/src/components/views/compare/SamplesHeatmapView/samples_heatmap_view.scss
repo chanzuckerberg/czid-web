@@ -107,12 +107,5 @@
 }
 
 .conditionList {
-  padding-left: 0;
-  margin-top: $space-m;
-  margin-bottom: 0;
-
-  .conditionListItem {
-    list-style: disc inside none;
-    margin-bottom: $space-xxs;
-  }
+  margin-left: $space-xl;
 }

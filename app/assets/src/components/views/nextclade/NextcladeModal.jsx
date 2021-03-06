@@ -29,6 +29,7 @@ import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeErrorModal from "./NextcladeErrorModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
+import List from "~/components/ui/List";
 
 import cs from "./nextclade_modal.scss";
 
@@ -298,22 +299,12 @@ export default class NextcladeModal extends React.Component {
           </div>
           <div className={cs.nextcladeDescription}>
             <div className={cs.title}> Nextclade helps you: </div>
-            <ul>
-              <li>
-                <span>Assess sequence quality</span>
-              </li>
-              <li>
-                <span>
-                  See where your samples differ from the reference sequence
-                </span>
-              </li>
-              <li>
-                <span>
-                  Identify which clade or lineage your samples belong to
-                </span>
-              </li>
-              <li>
-                <span>
+            <List
+              listItems={[
+                `Assess sequence quality`,
+                `See where your samples differ from the reference sequence`,
+                `Identify which clade or lineage your samples belong to`,
+                <React.Fragment>
                   View sample placement in the context of a Nextstrain
                   phylogenetic tree
                   {this.renderTooltip({
@@ -323,9 +314,9 @@ export default class NextcladeModal extends React.Component {
                     position: "top right",
                     offset: [11, 0],
                   })}
-                </span>
-              </li>
-            </ul>
+                </React.Fragment>,
+              ]}
+            />
           </div>
           <div className={cs.referenceTree}>
             <div className={cs.title}>

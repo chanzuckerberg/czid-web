@@ -172,12 +172,5 @@
 // Override materialize.css
 .conditionList {
   @include font-body-xs;
-  padding-left: 0;
-  margin-top: $space-m;
-  margin-bottom: $space-m;
-
-  .conditionListItem {
-    list-style: disc inside none;
-    margin-bottom: $space-xxs;
-  }
+  margin-left: $space-xl;
 }

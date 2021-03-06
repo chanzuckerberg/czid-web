@@ -44,21 +44,14 @@
     }
 
     ul {
+      margin-left: $space-xl;
       margin-top: $space-xxs;
       margin-bottom: 0;
-      list-style-position: inside;
 
       li {
         @include font-body-s;
-        list-style-type: disc !important;
         color: $gray-dark;
-        padding-left: $space-xxs;
         width: max-content;
-
-        span {
-          position: relative;
-          left: -$space-xs;
-        }
       }
     }
   }

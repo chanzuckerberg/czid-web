@@ -16,6 +16,7 @@ import { sampleNameFromFileName } from "~utils/sample";
 import FilePicker from "~ui/controls/FilePicker";
 import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent } from "~/api/analytics";
+import List from "~/components/ui/List";
 
 import cs from "./sample_upload_flow.scss";
 
@@ -32,7 +33,12 @@ class LocalSampleFileUpload extends React.Component {
       groupBy(file => sampleNameFromFileName(file.name)),
       // Make sure R1 comes before R2 and there are at most 2 files.
       // Sort files by lower case file name, then take the first two.
-      mapValues(flow(sortBy(file => file.name.toLowerCase()), slice(0, 2)))
+      mapValues(
+        flow(
+          sortBy(file => file.name.toLowerCase()),
+          slice(0, 2)
+        )
+      )
     )(acceptedFiles);
 
     // Create local samples.
@@ -120,22 +126,18 @@ class LocalSampleFileUpload extends React.Component {
         {this.state.showInfo && (
           <div className={cs.info}>
             <div className={cs.title}>File Instructions</div>
-            <ul>
-              <li>
-                Accepted file formats: fastq (.fq), fastq.gz (.fq.gz), fasta
-                (.fa), fasta.gz (.fa.gz).
-              </li>
-              <li>
-                Paired files must be labeled with &quot;_R1&quot; or
-                &quot;_R2&quot; at the end of the basename.
-              </li>
-              <li>
-                File names must be no longer than 120 characters and can only
+            <List
+              listItems={[
+                `Accepted file formats: fastq (.fq), fastq.gz (.fq.gz), fasta
+                (.fa), fasta.gz (.fa.gz).`,
+                `Paired files must be labeled with "_R1" or
+                "_R2" at the end of the basename.`,
+                `File names must be no longer than 120 characters and can only
                 contain letters from the English alphabet (A-Z, upper and lower
                 case), numbers (0-9), periods (.), hyphens (-) and underscores
-                (_). Spaces are not allowed.
-              </li>
-            </ul>
+                (_). Spaces are not allowed.`,
+              ]}
+            />
           </div>
         )}
         <FilePicker

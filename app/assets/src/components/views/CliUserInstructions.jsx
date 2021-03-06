@@ -7,13 +7,9 @@ import { openUrlInNewTab } from "~utils/links";
 
 class CliUserInstructions extends React.Component {
   render() {
-    const singleUploadCmd = `idseq -e='${this.props.email}' -t='${
-      this.props.authToken
-    }' -p='Your Project Name' -s='Your Sample Name' --r1=your_sample_R1.fastq.gz --r2=your_sample_R2.fastq.gz`;
+    const singleUploadCmd = `idseq -e='${this.props.email}' -t='${this.props.authToken}' -p='Your Project Name' -s='Your Sample Name' --r1=your_sample_R1.fastq.gz --r2=your_sample_R2.fastq.gz`;
 
-    const bulkUploadCmd = `idseq -e='${this.props.email}' -t='${
-      this.props.authToken
-    }' -p='Your Project Name' --bulk=.`;
+    const bulkUploadCmd = `idseq -e='${this.props.email}' -t='${this.props.authToken}' -p='Your Project Name' --bulk=.`;
 
     const genomesList = `'${this.props.hostGenomes.join("', '")}'`;
 
@@ -29,7 +25,10 @@ class CliUserInstructions extends React.Component {
           For macOS users: We recommend trying the Homebrew package manager to
           install <span className={cs.code}>awscli</span>. Please install
           Homebrew by following the commands listed on the
-          <a href="https://brew.sh/" target="_blank" rel="noopener noreferrer">Homebrew website</a>, then run:
+          <a href="https://brew.sh/" target="_blank" rel="noopener noreferrer">
+            Homebrew website
+          </a>
+          , then run:
           <div className={cs.codeBullet}>brew install awscli</div>
         </div>
         <p>
@@ -45,44 +44,40 @@ class CliUserInstructions extends React.Component {
           {`. `}
         </p>
         <p>
-          - Verify it works by running <span className={cs.code}>aws help</span>,
-          which should display usage instructions. You do not need to set up AWS
-          credentials unless you're using the bulk upload mode.
+          - Verify it works by running <span className={cs.code}>aws help</span>
+          , which should display usage instructions. You do not need to set up
+          AWS credentials unless you&apos;re using the bulk upload mode.
         </p>
         <p className={cs.instructionHeading}>(2) Install the IDseq CLI:</p>
         <div>
-          <span className={cs.code}>
-            pip3 install idseq --upgrade
-          </span>
+          <span className={cs.code}>pip3 install idseq --upgrade</span>
           <p className={cs.instructionMediumMarginTop}>
             - Tips: Make sure you have Python 3 installed already. Try running{" "}
             <span className={cs.code}>pip3 --version</span> or{" "}
             <span className={cs.code}>python3 --version</span>.
           </p>
           <p>
-            - Try <span className={cs.code}>sudo pip3</span> if you
-            run into permissions errors (anything like OSError: [Errno 13]
-            Permission denied). You can use this same command in the future to
-            update the CLI if needed.
+            - Try <span className={cs.code}>sudo pip3</span> if you run into
+            permissions errors (anything like OSError: [Errno 13] Permission
+            denied). You can use this same command in the future to update the
+            CLI if needed.
           </p>
         </div>
         <p />
         <p className={cs.instructionHeading}>(3) Upload a single sample:</p>
         <div className={cx(cs.code, cs.center)}>
           <p>
-            idseq -e='<span className={cs.codePersonal}>
-              {this.props.email}
-            </span>' -t='<span className={cs.codePersonal}>
-              {this.props.authToken}
-            </span>' -p='<span className={cs.codeToEdit}>
-              Your Project Name
-            </span>' -s='<span className={cs.codeToEdit}>Your Sample Name</span>'
-            \
-            <br /> --r1=<span className={cs.codeToEdit}>
-              your_sample_R1
-            </span>.fastq.gz --r2=<span className={cs.codeToEdit}>
-              your_sample_R2
-            </span>.fastq.gz
+            idseq -e=&apos;
+            <span className={cs.codePersonal}>{this.props.email}</span>&apos;
+            -t=&apos;
+            <span className={cs.codePersonal}>{this.props.authToken}</span>
+            &apos; -p=&apos;
+            <span className={cs.codeToEdit}>Your Project Name</span>&apos;
+            -s=&apos;<span className={cs.codeToEdit}>Your Sample Name</span>
+            &apos; \
+            <br /> --r1=<span className={cs.codeToEdit}>your_sample_R1</span>
+            .fastq.gz --r2=<span className={cs.codeToEdit}>your_sample_R2</span>
+            .fastq.gz
           </p>
         </div>
         <div className={cs.instructionMediumMarginTop}>
@@ -155,7 +150,8 @@ class CliUserInstructions extends React.Component {
               className={cs.link}
             >
               here
-            </span>.
+            </span>
+            .
           </p>
         </p>
         <p>{`- Supported host genome values: ${genomesList}`}</p>
@@ -186,7 +182,8 @@ class CliUserInstructions extends React.Component {
             className="terms-link"
           >
             Guide here
-          </a>.
+          </a>
+          .
         </p>
         <p className={cs.instructionHeading}>
           (Optional) Run the program in interactive mode:
@@ -201,16 +198,14 @@ class CliUserInstructions extends React.Component {
         </p>
         <div className={cx(cs.code, cs.center)}>
           <p>
-            idseq -e='<span className={cs.codePersonal}>
-              {this.props.email}
-            </span>' -t='<span className={cs.codePersonal}>
-              {this.props.authToken}
-            </span>' -p='<span className={cs.codeToEdit}>
-              Your Project Name
-            </span>' \
-            <br /> --bulk=<span className={cs.codeToEdit}>
-              /path/to/your/folder
-            </span>
+            idseq -e=&apos;
+            <span className={cs.codePersonal}>{this.props.email}</span>&apos;
+            -t=&apos;
+            <span className={cs.codePersonal}>{this.props.authToken}</span>
+            &apos; -p=&apos;
+            <span className={cs.codeToEdit}>Your Project Name</span>&apos; \
+            <br /> --bulk=
+            <span className={cs.codeToEdit}>/path/to/your/folder</span>
           </p>
         </div>
         <div className={cs.instructionMediumMarginTop}>
@@ -237,7 +232,8 @@ class CliUserInstructions extends React.Component {
             className={cs.link}
           >
             GitHub repository
-          </a>.
+          </a>
+          .
         </p>
       </div>
     );

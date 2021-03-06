@@ -27,6 +27,7 @@ import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import FilterTag from "~ui/controls/FilterTag";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import { IconInfoSmall } from "~ui/icons";
+import List from "~/components/ui/List";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -432,14 +433,13 @@ export default class SamplesHeatmapControls extends React.Component {
       <React.Fragment>
         In order to load the heatmap faster, the data included in this heatmap
         was preselected based on the following conditions:
-        <ul className={cs.conditionList}>
-          <li
-            className={cs.conditionListItem}
-          >{`The top ${topN} unique taxa per sample, based on relative abundance (rPM)`}</li>
-          <li
-            className={cs.conditionListItem}
-          >{`Only taxa with at least ${minReads} reads`}</li>
-        </ul>
+        <List
+          listClassName={cs.conditionList}
+          listItems={[
+            `The top ${topN} unique taxa per sample, based on relative abundance (rPM)`,
+            `Only taxa with at least ${minReads} reads`,
+          ]}
+        />
         You can add taxa under 5 reads using the “Add taxa” button below.
       </React.Fragment>
     );
