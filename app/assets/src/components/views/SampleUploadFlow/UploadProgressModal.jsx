@@ -545,23 +545,25 @@ export default class UploadProgressModal extends React.Component {
         type="error"
         displayStyle="flat"
       >
-        <div className={cs.errorMessage}>
-          {numberOfLocalSamplesFailed} upload
-          {numberOfLocalSamplesFailed > 1 && "s"} ha
-          {numberOfLocalSamplesFailed > 1 ? "ve" : "s"} failed
-        </div>
-        <div className={cs.fill} />
-        <div
-          className={cx(cs.sampleRetry, cs.retryAll)}
-          onClick={withAnalytics(
-            () => this.retryFailedSamplesUploadToS3(localSamplesFailed),
-            "UploadProgressModal_retry-all-failed_clicked",
-            {
-              numberOfLocalSamplesFailed,
-            }
-          )}
-        >
-          Retry all failed
+        <div className={cs.content}>
+          <div className={cs.errorMessage}>
+            {numberOfLocalSamplesFailed} upload
+            {numberOfLocalSamplesFailed > 1 && "s"} ha
+            {numberOfLocalSamplesFailed > 1 ? "ve" : "s"} failed
+          </div>
+          <div className={cs.fill} />
+          <div
+            className={cx(cs.sampleRetry, cs.retryAll)}
+            onClick={withAnalytics(
+              () => this.retryFailedSamplesUploadToS3(localSamplesFailed),
+              "UploadProgressModal_retry-all-failed_clicked",
+              {
+                numberOfLocalSamplesFailed,
+              }
+            )}
+          >
+            Retry all failed
+          </div>
         </div>
       </Notification>
     );

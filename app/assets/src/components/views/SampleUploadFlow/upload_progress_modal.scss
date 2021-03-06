@@ -70,8 +70,12 @@
     .notificationContainer {
       margin: $space-l $space-xxl $space-s $space-xxl;
 
-      .errorMessage {
-        @include font-header-s;
+      .content {
+        display: flex;
+
+        .errorMessage {
+          @include font-header-s;
+        }
       }
     }
   }
@@ -158,6 +162,7 @@
   @include font-caps-xxxs;
   color: $primary;
   text-transform: uppercase;
+  align-self: center;
 
   &.retryAll {
     color: $error-medium;

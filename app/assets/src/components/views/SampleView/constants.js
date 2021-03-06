@@ -40,6 +40,7 @@ export const PIPELINE_RUN_TABS = [
 ];
 
 export const NOTIFICATION_TYPES = {
+  consensusGenomeCreated: "consensus genome created",
   invalidBackground: "invalid background",
 };
 

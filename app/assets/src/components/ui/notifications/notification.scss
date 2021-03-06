@@ -24,6 +24,7 @@
     margin-left: $space-xxs;
     margin-right: $space-l;
     height: 20px;
+    align-self: flex-start;
 
     svg {
       width: 20px;
@@ -38,6 +39,7 @@
   .content {
     // Helps to center single-line text vertically.
     margin-top: 1px;
+    flex: 1 1 0;
   }
 
   .removeIcon {

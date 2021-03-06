@@ -55,6 +55,7 @@ import { diff } from "~/components/utils/objectUtil";
 import { logError } from "~/components/utils/logUtil";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
+import Notification from "~ui/notifications/Notification";
 import StatusLabel from "~ui/labels/StatusLabel";
 import AMRView from "~/components/AMRView";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
@@ -954,6 +955,7 @@ class SampleView extends React.Component {
       taxonName,
     });
 
+    this.showNotification(NOTIFICATION_TYPES.consensusGenomeCreated);
     this.handleCloseConsensusGenomeCreationModal();
   };
 
@@ -1273,7 +1275,7 @@ class SampleView extends React.Component {
     });
   };
 
-  showNotification = (notification, params) => {
+  showNotification = (notification, params = {}) => {
     switch (notification) {
       case NOTIFICATION_TYPES.invalidBackground: {
         showToast(
@@ -1287,6 +1289,16 @@ class SampleView extends React.Component {
               }),
           }
         );
+        break;
+      }
+      case NOTIFICATION_TYPES.consensusGenomeCreated: {
+        showToast(
+          ({ closeToast }) => this.renderConsensusGenomeCreated(closeToast),
+          {
+            autoClose: 12000,
+          }
+        );
+        break;
       }
     }
   };
@@ -1303,7 +1315,8 @@ class SampleView extends React.Component {
     const header = (
       <div>
         <span className={cs.highlight}>
-          It was not possible to load the report with background "{background}".
+          It was not possible to load the report with background &quot;
+          {background}&quot;.
         </span>
 
         <span className={cs.notificationBody}>
@@ -1333,6 +1346,28 @@ class SampleView extends React.Component {
         displayStyle={"elevated"}
         onClose={handleOnClose}
       />
+    );
+  };
+
+  renderConsensusGenomeCreated = closeToast => {
+    return (
+      <Notification
+        className={cs.notificationBody}
+        closeWithDismiss={false}
+        type="info"
+      >
+        We&apos;re creating your requested consensus genome, you&apos;ll be able
+        to view it in the Consensus Genome tab.
+        <div
+          className={cs.consensusGenomeLink}
+          onClick={() => {
+            this.handleTabChange(TABS.CONSENSUS_GENOME);
+            closeToast();
+          }}
+        >
+          View Consensus Genomes
+        </div>
+      </Notification>
     );
   };
 

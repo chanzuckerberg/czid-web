@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { isNull } from "lodash/fp";
 import {
   logAnalyticsEvent,
   withAnalytics,
@@ -100,7 +101,8 @@ export default class ConsensusGenomeCreationModal extends React.Component {
   };
 
   render() {
-    const { open, onClose, consensusGenomeData } = this.props;
+    const { consensusGenomeData, onClose, open } = this.props;
+    const { selectedAccessionIndex } = this.state;
     return (
       <Modal
         className={cs.modal}
@@ -151,6 +153,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
           className={cs.button}
           text="Create Consensus Genome"
           onClick={this.handleConsensusGenomeCreate}
+          disabled={isNull(selectedAccessionIndex)}
         />
       </Modal>
     );

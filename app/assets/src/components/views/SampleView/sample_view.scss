@@ -68,11 +68,19 @@
 
 .notificationBody {
   @include font-body-xs;
+  cursor: default;
 
   .externalLink {
     color: inherit !important;
     text-decoration: underline;
     text-decoration-style: dashed;
+  }
+
+  .consensusGenomeLink {
+    @include font-caps-xxxs;
+    margin-top: $space-s;
+    color: $primary;
+    cursor: pointer;
   }
 }
 
