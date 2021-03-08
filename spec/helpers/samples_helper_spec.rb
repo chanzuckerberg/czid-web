@@ -348,26 +348,44 @@ RSpec.describe SamplesHelper, type: :helper do
 
       create(:pipeline_run, sample_id: @sample2.id, finalized: 1, job_status: PipelineRun::STATUS_CHECKED)
       @mock_cached_results = { "mock_metric" => 10 }
-      @mock_inputs_json = { "wetlab_protocol" => ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }
+      @mock_inputs_json = { "wetlab_protocol" => ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic], "technology" => ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore] }
       @workflow_run1 = create(:workflow_run, sample: @sample1, workflow: WorkflowRun::WORKFLOW[:consensus_genome], executed_at: Time.now.utc, cached_results: @mock_cached_results.to_json, inputs_json: @mock_inputs_json.to_json)
     end
 
     it "includes information for consensus genome cached_results" do
       samples = Sample.where(id: @sample1.id)
       results = helper.send(:format_samples, samples)
-      expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: @mock_cached_results, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] })
+      expect(results[0]).to include({ WorkflowRun::WORKFLOW[:consensus_genome].to_sym => hash_including({ cached_results: @mock_cached_results, wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }) })
     end
 
     it "returns nil if no cached_results" do
       samples = Sample.where(id: @sample_without_runs.id)
       results = helper.send(:format_samples, samples)
-      expect(results[0]).to include(WorkflowRun::WORKFLOW[:consensus_genome].to_sym => { cached_results: nil, wetlab_protocol: nil })
+      expect(results[0]).to include({ WorkflowRun::WORKFLOW[:consensus_genome].to_sym => hash_including({ cached_results: nil, wetlab_protocol: nil }) })
     end
 
     it "returns results for when mNGS workflow specified" do
       samples = Sample.where(id: @sample_without_runs.id)
       results = helper.send(:format_samples, samples)
       expect(results[0].keys).to eq([:db_sample, :metadata, :derived_sample_output, :uploader, :run_info_by_workflow, :"consensus-genome"])
+    end
+
+    context "when sequencing technology is present" do
+      it "correctly returns the sequencing technology" do
+        samples = Sample.where(id: @sample1.id)
+        results = helper.send(:format_samples, samples)
+
+        expect(results[0]).to include({ WorkflowRun::WORKFLOW[:consensus_genome].to_sym => hash_including({ technology: @mock_inputs_json["technology"] }) })
+      end
+    end
+
+    context "when sequencing technology is not present" do
+      it "returns an Illumina default" do
+        samples = Sample.where(id: @sample_without_runs.id)
+        results = helper.send(:format_samples, samples)
+
+        expect(results[0]).to include({ WorkflowRun::WORKFLOW[:consensus_genome].to_sym => hash_including({ technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina] }) })
+      end
     end
   end
 

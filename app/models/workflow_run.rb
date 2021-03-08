@@ -13,13 +13,6 @@ class WorkflowRun < ApplicationRecord
 
   belongs_to :sample
 
-  TECHNOLOGY_INPUT = {
-    illumina: "Illumina",
-    nanopore: "ONT",
-  }.freeze
-
-  TECHNOLOGY_NAME = TECHNOLOGY_INPUT.invert
-
   WORKFLOW = {
     # NOTE: 'main' is not yet supported in WorkflowRuns.
     main: "main",

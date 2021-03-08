@@ -418,6 +418,8 @@ module SamplesHelper
       top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
       job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
         cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
+        # TODO: Remove Illumina default once Technology is added to the upload flow (CH-124571) and backfilled.
+        technology: top_cg_workflow_run&.inputs&.[]("technology") || ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina],
         wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
       }
 
@@ -550,7 +552,7 @@ module SamplesHelper
       workflow = sample_attributes[:initial_workflow] = sample_attributes.delete(:workflows)[0] if sample_attributes[:workflows].present?
       technology = sample_attributes.delete(:technology) if sample_attributes[:technology].present?
 
-      if technology == WorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+      if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
         # TODO: current default values; to be exposed as a user-facing option in a future version
         medaka_model = ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL
         vadr_options = ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS
@@ -590,7 +592,7 @@ module SamplesHelper
             h[:taxon_name] = "Severe acute respiratory syndrome coronavirus 2"
             h[:technology] = technology
 
-            if technology == WorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+            if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
               h[:medaka_model] = medaka_model
               h[:vadr_options] = vadr_options
             else

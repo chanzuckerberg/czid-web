@@ -255,6 +255,11 @@ export const computeColumnsByWorkflow = ({ basicIcon = false } = {}) => {
       flexGrow: 1,
       className: cs.basicCell,
     },
+    {
+      dataKey: "technology",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
   ];
 
   for (const col of columnsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value]) {
@@ -287,5 +292,6 @@ export const DEFAULTS_BY_WORKFLOW = {
     "totalReadsCG",
     "percentGenomeCalled",
     "wetlabProtocol",
+    "technology",
   ],
 };

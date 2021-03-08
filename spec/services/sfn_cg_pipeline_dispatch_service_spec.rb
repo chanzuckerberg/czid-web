@@ -272,14 +272,14 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { technology: WorkflowRun::TECHNOLOGY_INPUT[:nanopore], medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
+                 inputs_json: { technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore], medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
         end
         it "returns sfn input containing correct sfn parameters" do
           expect(subject).to include_json(
             sfn_input_json: {
               Input: {
                 Run: {
-                  technology: WorkflowRun::TECHNOLOGY_INPUT[:nanopore],
+                  technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore],
                   medaka_model: medaka_model,
                   vadr_options: vadr_options,
                 },

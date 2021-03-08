@@ -22,6 +22,13 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   # Never interpolate user input into DEFAULT_VADR_OPTIONS to prevent command injection.
   DEFAULT_VADR_OPTIONS = "-s -r --nomisc --mkey NC_045512 --lowsim5term 2 --lowsim3term 2 --fstlowthr 0.0 --alt_fail lowscore,fsthicnf,fstlocnf".freeze
 
+  TECHNOLOGY_INPUT = {
+    illumina: "Illumina",
+    nanopore: "ONT",
+  }.freeze
+
+  TECHNOLOGY_NAME = TECHNOLOGY_INPUT.invert
+
   # cacheable_only results will be stored in the db.
   # Full results will fetch from S3 (a superset of cached results).
   def results(cacheable_only: false)

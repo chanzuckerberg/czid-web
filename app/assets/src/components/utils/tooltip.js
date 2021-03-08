@@ -98,4 +98,8 @@ export const FIELDS_METADATA = {
     tooltip:
       "The percentage of the genome meeting thresholds for calling consensus bases.",
   },
+  technology: {
+    label: "Sequencing Platform",
+    tooltip: "The sequencing technology used for read generation.",
+  },
 };

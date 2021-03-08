@@ -116,6 +116,10 @@ const processRawSample = sample => {
     ]),
     nMissing: getConsensusGenomeField(["quality_metrics", "n_missing"]),
     nAmbiguous: getConsensusGenomeField(["quality_metrics", "n_ambiguous"]),
+    technology: get(
+      [WORKFLOWS.CONSENSUS_GENOME.value, "technology"],
+      sample.details
+    ),
     wetlabProtocol: upperCase(
       get([WORKFLOWS.CONSENSUS_GENOME.value, "wetlab_protocol"], sample.details)
     ),

@@ -87,7 +87,7 @@ class SfnCGPipelineDispatchService
   end
 
   def technology
-    if WorkflowRun::TECHNOLOGY_INPUT.value?(@workflow_run.inputs&.[]("technology"))
+    if ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT.value?(@workflow_run.inputs&.[]("technology"))
       return @workflow_run.inputs&.[]("technology")
     end
     # TODO: raise an error if technology is not provided or is not a valid option
@@ -122,7 +122,7 @@ class SfnCGPipelineDispatchService
   end
 
   def generate_wdl_input
-    additional_inputs = if technology == WorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+    additional_inputs = if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
                           # ONT sars-cov-2 cg
                           {
                             technology: technology,
