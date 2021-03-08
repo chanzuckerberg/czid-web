@@ -31,7 +31,7 @@ export default class MapPreviewSidebar extends React.Component {
       },
       {
         dataKey: "createdAt",
-        label: "Uploaded On",
+        label: "Created On",
         className: cs.basicCell,
         cellRenderer: TableRenderers.renderDateWithElapsed,
       },

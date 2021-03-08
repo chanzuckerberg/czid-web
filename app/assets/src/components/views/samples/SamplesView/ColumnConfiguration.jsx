@@ -23,7 +23,7 @@ export const computeColumnsByWorkflow = ({ basicIcon = false } = {}) => {
     },
     {
       dataKey: "createdAt",
-      label: "Uploaded On",
+      label: "Created On",
       width: 120,
       className: cs.basicCell,
       cellRenderer: TableRenderers.renderDateWithElapsed,
@@ -150,7 +150,7 @@ export const computeColumnsByWorkflow = ({ basicIcon = false } = {}) => {
     },
     {
       dataKey: "createdAt",
-      label: "Uploaded On",
+      label: "Created On",
       width: 120,
       className: cs.basicCell,
       cellRenderer: TableRenderers.renderDateWithElapsed,
