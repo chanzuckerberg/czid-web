@@ -129,18 +129,18 @@ class SfnCGPipelineDispatchService
                             medaka_model: @workflow_run.inputs&.[]("medaka_model"),
                             vadr_options: @workflow_run.inputs&.[]("vadr_options"),
                           }
-                        elsif @workflow_run.inputs&.[]("accession_id")
+                        elsif @workflow_run.inputs&.[]("accession_id") == "MN908947.3"
+                          # illumina sars-cov-2 cg
+                          {
+                            ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
+                            primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{primer_file}",
+                          }
+                        else
                           # illumina gen viral cg
                           {
                             accession_id: @workflow_run.inputs&.[]("accession_id"),
                             s3_nr_db_path: alignment_config_paths[:s3_nr_db_path],
                             s3_nr_loc_db_path: alignment_config_paths[:s3_nr_loc_db_path],
-                          }
-                        else
-                          # illumina sars-cov-2 cg
-                          {
-                            ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
-                            primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{primer_file}",
                           }
                         end
 

@@ -54,7 +54,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
            workflow: test_workflow_name,
            status: WorkflowRun::STATUS[:created],
            sample: sample,
-           inputs_json: { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:msspe] }.to_json)
+           inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:msspe] }.to_json)
   end
 
   describe "#call" do
@@ -153,7 +153,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
         end
         it "returns sfn input with artic primer" do
           expect(subject).to include_json(
@@ -174,7 +174,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
+                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
         end
         it "returns sfn input with SNAP primer" do
           expect(subject).to include_json(
@@ -195,7 +195,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:combined_msspe_artic] }.to_json)
+                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:combined_msspe_artic] }.to_json)
         end
         it "returns sfn input with SNAP primer" do
           expect(subject).to include_json(
@@ -216,7 +216,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
+                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
         end
         it "returns sfn input with SNAP primer" do
           expect(subject).to include_json(
@@ -236,7 +236,8 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
           create(:workflow_run,
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
-                 sample: sample)
+                 sample: sample,
+                 inputs_json: { accession_id: "MN908947.3" }.to_json)
         end
         it "throws an error" do
           expect { subject }.to raise_error(SfnCGPipelineDispatchService::WetlabProtocolMissingError)
@@ -251,6 +252,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  sample: sample,
                  inputs_json: { accession_id: 1 }.to_json)
         end
+
         it "returns sfn input containing correct sfn parameters" do
           expect(subject).to include_json(
             sfn_input_json: {
@@ -259,6 +261,29 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                   accession_id: 1,
                   s3_nr_db_path: s3_nr_db_path,
                   s3_nr_loc_db_path: s3_nr_loc_db_path,
+                },
+              },
+            }
+          )
+        end
+      end
+
+      context "when sars-cov-2 accession id is provided" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+        end
+
+        it "returns sfn input containing correct sfn parameters for sars-cov-2" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v3_primers.bed",
                 },
               },
             }
