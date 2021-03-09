@@ -3,10 +3,11 @@
 class SendSampleVisibilityEmail
   extend InstrumentedJob
 
-  NEXT_PERIOD = -> { Time.zone.today.next_month }
-  NO_ELIGIBLE_SAMPLES = "No samples going public in the next period.".freeze
-  NO_ELIGIBLE_USERS = "No eligible users have samples going public in the next period.".freeze
-  SAMPLE_VISIBILITY_EMAIL_FEATURE = "sample_visibility_email".freeze
+  # Using ||= because app/jobs may be loaded at multiple points.
+  NEXT_PERIOD ||= -> { Time.zone.today.next_month }
+  NO_ELIGIBLE_SAMPLES ||= "No samples going public in the next period.".freeze
+  NO_ELIGIBLE_USERS ||= "No eligible users have samples going public in the next period.".freeze
+  SAMPLE_VISIBILITY_EMAIL_FEATURE ||= "sample_visibility_email".freeze
 
   @queue = :send_sample_visibility_email
 
