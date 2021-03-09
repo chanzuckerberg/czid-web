@@ -419,7 +419,7 @@ module SamplesHelper
       job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
         cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
         # TODO: Remove Illumina default once Technology is added to the upload flow (CH-124571) and backfilled.
-        technology: top_cg_workflow_run&.inputs&.[]("technology") || ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina],
+        technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_NAME[top_cg_workflow_run&.inputs&.[]("technology")]&.capitalize || ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina],
         wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
       }
 

@@ -375,7 +375,7 @@ RSpec.describe SamplesHelper, type: :helper do
         samples = Sample.where(id: @sample1.id)
         results = helper.send(:format_samples, samples)
 
-        expect(results[0]).to include({ WorkflowRun::WORKFLOW[:consensus_genome].to_sym => hash_including({ technology: @mock_inputs_json["technology"] }) })
+        expect(results[0]).to include({ WorkflowRun::WORKFLOW[:consensus_genome].to_sym => hash_including({ technology: :Nanopore }) })
       end
     end
 
