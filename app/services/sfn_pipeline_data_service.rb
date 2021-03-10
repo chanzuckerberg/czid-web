@@ -52,12 +52,17 @@ class SfnPipelineDataService
       "RunIDSeqDedup" => "idseq_dedup_out",
       "RunLZW" => "lzw_out",
       "RunBowtie2" => "bowtie2_out",
+      "RunBowtie2_bowtie2_out" => "bowtie2_out",
       "RunSubsample" => "subsampled_out",
+      "RunStarDownstream" => "star_human_out",
+      "RunBowtie2_bowtie2_human_out" => "bowtie2_human_out",
       "RunGsnapFilter" => "gsnap_filter_out",
     },
     PipelineRunStage::ALIGNMENT_STAGE_NAME => {
       "RunAlignmentRemotely_gsnap_out" => "gsnap_out",
       "RunAlignmentRemotely_rapsearch2_out" => "rapsearch2_out",
+      "RunAlignment_gsnap_out" => "gsnap_out",
+      "RunAlignment_rapsearch2_out" => "rapsearch2_out",
       "CombineTaxonCounts" => "taxon_count_out",
       "GenerateAnnotatedFasta" => "annotated_out",
     },
@@ -69,6 +74,7 @@ class SfnPipelineDataService
       "BlastContigs_refined_gsnap_out" => "refined_gsnap_out",
       "BlastContigs_refined_rapsearch2_out" => "refined_rapsearch2_out",
       "CombineTaxonCounts" => "refined_taxon_count_out",
+      "ComputeMergedTaxonCounts" => "compute_merged_taxon_counts_out",
       "CombineJson" => "contig_summary_out",
       "GenerateAnnotatedFasta" => "refined_annotated_out",
       "GenerateTaxidFasta" => "refined_taxid_fasta_out",
@@ -189,7 +195,8 @@ class SfnPipelineDataService
 
       {
         steps: steps,
-        jobStatus: stage_job_status(all_redefined_statuses),
+        # mark stage as finished if pipeline run stage has been mark as succeed, otherwise infer from steps
+        jobStatus: @stage_job_statuses[stage_index] == PipelineRunStage::STATUS_SUCCEEDED ? "finished" : stage_job_status(all_redefined_statuses),
       }
     end
     return stages
@@ -339,6 +346,8 @@ class SfnPipelineDataService
       return "notStarted"
     elsif statuses.include? "finished"
       return "finished"
+    else
+      return "inProgress"
     end
   end
 

@@ -12,9 +12,11 @@ RSpec.describe SfnPipelineDataService do
     [
       {
         name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
+        job_status: PipelineRunStage::STATUS_STARTED,
       },
       {
         name: PipelineRunStage::EXPT_STAGE_NAME,
+        job_status: PipelineRunStage::STATUS_STARTED,
       },
     ]
   end
