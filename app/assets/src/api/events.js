@@ -8,6 +8,7 @@
  * - We are consolidating all analytics event names here to prevent typos, facilitate code completion, and make a reference for product analysts.<br>
  * - Provide a plain-English description of what each event means.<br>
  * - Make sure the key matches its SQL-compatible converted form (e.g. NextcladeModal changes to NEXTCLADE_MODAL, dash changes to underscore).<br>
+ * - If you migrate a legacy-style event name, please flag it in the analytics channel in case there are dashboards relying directly on the EVENTS.TRACKS.NAME field.
  * - You MUST use the ** comment style if you want the comment to appear in JSDoc docs.<br>
  * - This is in a JS function mostly so that JSDoc can parse it.
  */
