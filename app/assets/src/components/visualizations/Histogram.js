@@ -43,10 +43,12 @@ export default class Histogram {
       {
         barOpacity: 0.8,
         colormap: "viridis",
+        labelsBold: false,
         labelsLarge: false,
         labelX: "",
         labelXVerticalOffset: 10,
         labelY: "",
+        labelXSubtext: "",
         labelYHorizontalOffset: 0,
         labelYVerticalOffset: 0,
         seriesNames: null,
@@ -119,8 +121,24 @@ export default class Histogram {
       .attr("fill", "#000")
       .attr("font-weight", 600)
       .attr("text-anchor", "end")
-      .attr("class", cx(cs.labelX, this.options.labelsLarge && cs.large))
+      .attr(
+        "class",
+        cx(
+          cs.labelX,
+          this.options.labelsLarge && cs.large,
+          this.options.labelsBold && cs.bold
+        )
+      )
       .text(this.options.labelX);
+
+    if (this.options.labelXSubtext) {
+      g.append("text")
+        .attr("x", this.size.width / 2)
+        .attr("y", 47 + this.options.labelXVerticalOffset)
+        .attr("text-anchor", "middle")
+        .attr("class", cs.labelXSubtext)
+        .text(this.options.labelXSubtext);
+    }
 
     g.select(".domain").attr("class", cs.xAxis);
 
@@ -164,7 +182,14 @@ export default class Histogram {
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "end")
       .attr("font-weight", 600)
-      .attr("class", cx(cs.labelY, this.options.labelsLarge && cs.large))
+      .attr(
+        "class",
+        cx(
+          cs.labelY,
+          this.options.labelsLarge && cs.large,
+          this.options.labelsBold && cs.bold
+        )
+      )
       .text(this.options.labelY);
   }
 

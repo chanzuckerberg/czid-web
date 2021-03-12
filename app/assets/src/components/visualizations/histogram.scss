@@ -26,6 +26,17 @@
     @include font-body-xxs;
     font-weight: $font-weight-regular;
   }
+
+  &.bold {
+    @include font-header-xxs;
+  }
+}
+
+.labelXSubtext {
+  @include font-body-xxs;
+
+  font-family: $font-family-sans-serif;
+  fill: $gray-darkest;
 }
 
 .hoverRect {

@@ -167,6 +167,7 @@ class ConsensusGenomeView extends React.Component {
       x0: valueArr[0] * data.coverage_viz.coverage_bin_size,
       length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
     }));
+    const subtext = `${data.taxon_info.accession_id} - ${data.taxon_info.accession_name}`;
 
     this.coverageViz = new Histogram(
       this.coverageVizContainer,
@@ -176,9 +177,11 @@ class ConsensusGenomeView extends React.Component {
         colors: [FILL_COLOR],
         domain: [0, data.coverage_viz.total_length],
         hoverColors: [HOVER_FILL_COLOR],
+        labelsBold: true,
         labelsLarge: true,
         labelX: "Reference Genome",
         labelY: "Coverage (SymLog)",
+        labelXSubtext: subtext,
         labelYHorizontalOffset: 30,
         labelYVerticalOffset: 54,
         labelYLarge: true,
@@ -186,7 +189,7 @@ class ConsensusGenomeView extends React.Component {
           left: 100,
           right: 50,
           top: 22,
-          bottom: 54,
+          bottom: 75,
         },
         numBins: Math.round(
           data.coverage_viz.total_length / data.coverage_viz.coverage_bin_size
