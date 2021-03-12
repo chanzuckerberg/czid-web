@@ -16,6 +16,14 @@ env:
   IMDS_URL: http://169.254.169.254/latest
   
 jobs:
+  cancel_outdated_builds:
+    runs-on: ubuntu-latest
+    # This will cancel the whole workflow for non-current pushes on your branch
+    steps:
+      - name: Cancel Outdated Builds
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
   build_dev_docker_image:
     runs-on: [self-hosted, idseq-dev]
     steps:
