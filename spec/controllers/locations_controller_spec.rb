@@ -1,5 +1,5 @@
 require 'rails_helper'
-require_relative "../../test/test_helpers/location_test_helper.rb"
+require_relative '../../test/test_helpers/location_test_helper'
 
 RSpec.describe LocationsController, type: :controller do
   create_users
@@ -20,6 +20,28 @@ RSpec.describe LocationsController, type: :controller do
       end
 
       it "gives user a geosearch without results" do
+        allow(Location).to receive(:geo_search_request_base).and_return([true, []])
+        get :external_search, params: { query: "ahsdlfkjasfk" }
+        expect(response).to have_http_status(:success)
+        expect(response.body).to eq("[]")
+
+        get :external_search, params: { query: "" }
+        expect(response).to have_http_status(:success)
+        expect(response.body).to eq("[]")
+
+        get :external_search
+        expect(response).to have_http_status(:success)
+        expect(response.body).to eq("[]")
+
+        allow(Location).to receive(:geo_search_request_base).and_return([true, LocationTestHelper::API_NO_GEOCODE_RESPONSE])
+        get :external_search, params: { query: "ahsdlfkjasfk" }
+        expect(response).to have_http_status(:success)
+        expect(response.body).to eq("[]")
+      end
+
+      it "gives user a geosearch without results when using ssrfs-up" do
+        # We should get the same thing if we use SSRFs Up
+        AppConfigHelper.set_app_config(AppConfig::ENABLE_SSRFS_UP, "1")
         allow(Location).to receive(:geo_search_request_base).and_return([true, []])
         get :external_search, params: { query: "ahsdlfkjasfk" }
         expect(response).to have_http_status(:success)

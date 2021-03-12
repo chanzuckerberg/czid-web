@@ -132,6 +132,12 @@ jobs:
       # use: devmasx/brakeman-linter-action@v1.0.0
       # env:
       #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Semgrep
+      id: semgrep
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: jacobrheath:rubyhttpreq # https://semgrep.dev/s/jacobrheath:rubyhttpreq
+        auditOn: push pull_request
 
   javascript:
     name: Javascript

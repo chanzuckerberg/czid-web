@@ -49,4 +49,7 @@ class AppConfig < ApplicationRecord
 
   # Templates versions
   WORKFLOW_VERSION_TEMPLATE = "%<workflow_name>s-version".freeze
+
+  # SSRF flag configures the app to use SSRFs-Up to send requests
+  ENABLE_SSRFS_UP = "enabled_ssrfs_up".freeze
 end

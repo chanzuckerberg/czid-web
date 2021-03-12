@@ -1,5 +1,4 @@
 require "addressable"
-
 class Location < ApplicationRecord
   include LocationHelper
   belongs_to :country, class_name: "Location", optional: true
@@ -54,6 +53,15 @@ class Location < ApplicationRecord
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
 
     query_url = "#{LOCATION_IQ_BASE_URL}/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
+
+    # only trigger this flow if the app is configured to use SSRFs UP
+    # until it's tested in staging a bit, it currently just invokes the lambda
+    # and calls the old behavior. We'll use lambda metrics to see how it is working.
+    if AppConfigHelper.get_app_config(AppConfig::ENABLE_SSRFS_UP) == "1"
+      SSRFsUp.get(query_url, { sensitive: ["key"] })
+      # return [resp.status_code != 200, JSON.parse(resp.body)]
+    end
+
     uri = Addressable::URI.parse(query_url)
     request = Net::HTTP::Get.new(uri)
     resp = Net::HTTP.start(uri.host, 443, use_ssl: true) do |http|
@@ -98,7 +106,7 @@ class Location < ApplicationRecord
 
   # Search request to Location IQ API by country, state, and subdivision (or left subset)
   def self.geosearch_by_levels(country_name, state_name = "", subdivision_name = "")
-    # Note: Don't use field="" because provider results differ vs. not including the param at all.
+    # NOTE: Don't use field="" because provider results differ vs. not including the param at all.
     endpoint_query = "#{GEOSEARCH_BASE_QUERY}&country=#{country_name}"
     endpoint_query += "&state=#{state_name}" if state_name.present?
     endpoint_query += "&county=#{subdivision_name}" if subdivision_name.present?
@@ -197,7 +205,7 @@ class Location < ApplicationRecord
     return Location.find_with_fields(result) || new_from_params(result)
   end
 
-  # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
+  # NOTE: We are clustering at Country+State for now so Subdivision+City ids may be nil.
   def self.check_and_fetch_parents(location)
     present_parent_level_ids, missing_parent_levels = present_and_missing_parents(location)
     location.save! unless location.id
