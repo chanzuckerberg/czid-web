@@ -475,6 +475,15 @@ class ConsensusGenomeView extends React.Component {
           }
         />
       );
+    } else if (!sample.upload_error && workflow.status === "CREATED") {
+      return (
+        <SampleMessage
+          icon={<IconLoading className={csSampleMessage.icon} />}
+          message={"Waiting to Start or Receive Files"}
+          status={"IN PROGRESS"}
+          type={"inProgress"}
+        />
+      );
     } else {
       // FAILED
       const { link, linkText, message, status, type } = sampleErrorInfo({

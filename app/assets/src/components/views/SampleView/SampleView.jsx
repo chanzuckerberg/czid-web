@@ -185,22 +185,27 @@ class SampleView extends React.Component {
     };
   };
 
-  getWorkflowCount = sample => {
-    return {
-      [WORKFLOWS.SHORT_READ_MNGS.value]: size(sample.pipeline_runs),
-      // TODO(omar): Generalize when new workflows are introduced
-      [WORKFLOWS.CONSENSUS_GENOME.value]: size(sample.workflow_runs),
-    };
-  };
+  // TODO(omar): Generalize when new workflows are introduced
+  getWorkflowCount = sample => ({
+    [WORKFLOWS.SHORT_READ_MNGS.value]: size(sample.pipeline_runs),
+    [WORKFLOWS.CONSENSUS_GENOME.value]: size(sample.workflow_runs),
+  });
 
   determineInitialTab = ({
-    [WORKFLOWS.SHORT_READ_MNGS.value]: mngs,
-    [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
+    initialWorkflow,
+    workflowCount: {
+      [WORKFLOWS.SHORT_READ_MNGS.value]: mngs,
+      [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
+    },
   }) => {
     if (mngs) {
       return TABS.SHORT_READ_MNGS;
     } else if (cg) {
       return TABS.CONSENSUS_GENOME;
+    } else {
+      return initialWorkflow === WORKFLOWS.SHORT_READ_MNGS.value
+        ? TABS.SHORT_READ_MNGS
+        : TABS.CONSENSUS_GENOME;
     }
   };
 
@@ -241,7 +246,10 @@ class SampleView extends React.Component {
     const workflowCount = this.getWorkflowCount(sample);
     this.setState(
       {
-        currentTab: this.determineInitialTab(workflowCount),
+        currentTab: this.determineInitialTab({
+          initialWorkflow: sample.initial_workflow,
+          workflowCount,
+        }),
         sample,
         pipelineRun,
         project: sample.project,
@@ -1188,7 +1196,7 @@ class SampleView extends React.Component {
       [WORKFLOWS.SHORT_READ_MNGS.value]: mngs,
       [WORKFLOWS.CONSENSUS_GENOME.value]: cg,
     } = this.getWorkflowCount(sample);
-    return compact([
+    const workflowTabs = compact([
       mngs && TABS.SHORT_READ_MNGS,
       mngs && allowedFeatures.includes(MERGED_NT_NR_FEATURE) && mergedNtNrTab,
       allowedFeatures.includes(AMR_TABLE_FEATURE) &&
@@ -1196,6 +1204,14 @@ class SampleView extends React.Component {
         TABS.AMR,
       cg && TABS.CONSENSUS_GENOME,
     ]);
+
+    if (isEmpty(workflowTabs)) {
+      return sample.initial_workflow === WORKFLOWS.SHORT_READ_MNGS.value
+        ? [TABS.SHORT_READ_MNGS]
+        : [TABS.CONSENSUS_GENOME];
+    } else {
+      return workflowTabs;
+    }
   };
 
   renderSampleMessage = () => {

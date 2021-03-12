@@ -68,6 +68,7 @@ class SamplesController < ApplicationController
     :status,
     :host_genome_id,
     :upload_error,
+    :initial_workflow,
   ].freeze
 
   WORKFLOW_RUN_DEFAULT_FIELDS = [
