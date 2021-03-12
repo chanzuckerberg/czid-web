@@ -197,7 +197,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  sample: sample,
                  inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:combined_msspe_artic] }.to_json)
         end
-        it "returns sfn input with SNAP primer" do
+        it "returns sfn input with MSSPE + ARTIC primer" do
           expect(subject).to include_json(
             sfn_input_json: {
               Input: {
@@ -218,12 +218,33 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  sample: sample,
                  inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
         end
-        it "returns sfn input with SNAP primer" do
+        it "returns sfn input with AmpliSeq primer" do
           expect(subject).to include_json(
             sfn_input_json: {
               Input: {
                 Run: {
                   primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/ampliseq_primers.bed",
+                },
+              },
+            }
+          )
+        end
+      end
+
+      context "when ARTIC short amplicons protocol is chosen" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic_short_amplicons] }.to_json)
+        end
+        it "returns sfn input with ARTIC short amplicons primer" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/artic_v3_short_275_primers.bed",
                 },
               },
             }

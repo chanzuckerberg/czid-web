@@ -10,6 +10,8 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     ampliseq: "ampliseq",
     # See: https://artic.network/resources/ncov/ncov-amplicon-v3.pdf
     artic: "artic",
+    # Artic v3 with short amplicons (275 bp) from Biohub
+    artic_short_amplicons: "artic_short_amplicons",
     # MSSPE + ARTIC concatenated
     combined_msspe_artic: "combined_msspe_artic",
     # See: https://www.nature.com/articles/s41564-019-0637-9

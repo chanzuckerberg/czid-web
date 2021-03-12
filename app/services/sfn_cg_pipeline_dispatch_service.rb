@@ -107,6 +107,8 @@ class SfnCGPipelineDispatchService
       "msspe_primers.bed"
     when protocols[:snap]
       "snap_primers.bed"
+    when protocols[:artic_short_amplicons]
+      "artic_v3_short_275_primers.bed"
     else
       raise WetlabProtocolMissingError
     end

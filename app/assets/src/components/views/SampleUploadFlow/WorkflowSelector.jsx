@@ -1,4 +1,5 @@
 import React from "react";
+import { map } from "lodash/fp";
 
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
@@ -16,6 +17,10 @@ export const CG_WETLAB_OPTIONS = [
   {
     text: "ARTIC v3",
     value: "artic",
+  },
+  {
+    text: "ARTIC v3 - Short Amplicons (275 bp)",
+    value: "artic_short_amplicons",
   },
   {
     text: "MSSPE",
@@ -110,8 +115,8 @@ class WorkflowSelector extends React.Component {
             </div>
             <div className={cs.description}>
               Run your samples through our new pipeline to get consensus genomes
-              for SARS-CoV-2. Our assembly supports wet lab protocols ARTIC v3,
-              MSSPE, combined MSSPE + ARTIC, SNAP, and AmpliSeq.
+              for SARS-CoV-2. Our assembly supports wet lab protocols:{" "}
+              {map("text", CG_WETLAB_OPTIONS).join(", ")}.
             </div>
             {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
               this.renderWetlabSelector()}
