@@ -1,5 +1,6 @@
 import React from "react";
 import { NarrowContainer } from "~/components/layout";
+import Notification from "~ui/notifications/Notification";
 import List from "~/components/ui/List";
 import { nanoid } from "nanoid";
 import cs from "./support.scss";
@@ -14,6 +15,11 @@ export default class PrivacyPolicy extends React.Component {
             Last Updated: May 13, 2019.{" "}
             <a href="/terms_changes">See Recent Changes</a>
           </h4>
+          <Notification type="info" displayStyle="flat">
+            We invite you to preview our updated Privacy Policy, which will go
+            into effect on April 1, 2021.{" "}
+            <a href="idseq.net/privacy">Learn more about these changes.</a>
+          </Notification>
         </div>
         <p className={cs.large}>
           The Chan Zuckerberg Biohub Inc. (“<b>CZ Biohub</b>,” “<b>we</b>,” “
