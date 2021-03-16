@@ -18,8 +18,7 @@ export default class TermsOfUse extends React.Component {
           <Notification type="info" displayStyle="flat">
             We invite you to preview our updated Terms of Use, which will go
             into effect on April 1, 2021.{" "}
-            <a href="idseq.net/terms_changes">Learn more about these changes</a>
-            .
+            <a href="/terms_changes">Learn more about these changes</a>.
           </Notification>
         </div>
         <p className={cs.large}>

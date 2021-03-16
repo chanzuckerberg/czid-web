@@ -361,10 +361,10 @@ const TermsChanges = () => {
       </div>
       <p className={cs.large}>
         We periodically update our <a href="/terms">Terms of Use</a> and{" "}
-        <a href="/privacy">Privacy Policy</a>
-        to help ensure that we are providing useful transparency regarding how
-        we collect, use and protect their data and so our Users understand their
-        responsibilities and rights when they use IDseq.
+        <a href="/privacy">Privacy Policy</a> to help ensure that we are
+        providing useful transparency regarding how we collect, use and protect
+        their data and so our Users understand their responsibilities and rights
+        when they use IDseq.
       </p>
       <p className={cs.large}>
         We are planning to update our Terms of Use and Privacy Policy for the
