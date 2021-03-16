@@ -13,6 +13,23 @@ RSpec.describe SamplesController, type: :controller do
       sign_in @joe
     end
 
+    describe "GET index_v2" do
+      it "loads list of samples with coorect visibility" do
+        project = create(:project, users: [@joe])
+        sample_private = create(:sample, project: project, user: @joe, created_at: 6.months.ago)
+        sample_public = create(:sample, project: project, user: @joe, created_at: 2.years.ago)
+        get :index_v2, format: :json, params: { project_id: project.id, domain: "my_data" }
+        expect(response).to have_http_status :success
+
+        json_response = JSON.parse(response.body)
+        expect(json_response["samples"].length).to eq(2)
+        expect(json_response).to include_json(samples: [
+                                                { id: sample_public.id, public: 1 },
+                                                { id: sample_private.id, public: 0 },
+                                              ])
+      end
+    end
+
     describe "GET raw_results_folder (nonadmin)" do
       it "can see raw results on the user's own samples" do
         project = create(:project, users: [@joe])

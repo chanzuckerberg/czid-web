@@ -451,16 +451,16 @@ module SamplesHelper
     }
   end
 
-  def get_visibility(samples)
+  def get_visibility_by_sample_id(samples)
     # When in conjunction with some filters, the query below was not returning the public property,
     # thus we need to get ids and redo the query independently
     sample_ids = samples.pluck(:id)
-    return current_power
+    return Hash[
+      current_power
            .samples
            .where(id: sample_ids)
            .joins(:project)
-           .select("samples.*", "IF(projects.public_access = 1 OR DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < '#{Time.current.strftime('%y-%m-%d')}', true, false) AS public")
-           .map(&:public)
+           .pluck("samples.id", Arel.sql("IF(projects.public_access = 1 OR DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < '#{Time.current.strftime('%y-%m-%d')}', true, false) AS public"))]
   end
 
   # Takes an array of samples and uploads metadata for those samples.

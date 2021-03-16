@@ -103,22 +103,23 @@ class SamplesController < ApplicationController
     limited_samples = samples.offset(offset).limit(limit)
 
     limited_samples_json = limited_samples.includes(:project).as_json(
-      only: [:id, :name, :host_genome_id, :project_id, :created_at, :public],
+      only: [:id, :name, :host_genome_id, :project_id, :created_at],
       methods: [:private_until]
     )
 
     basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
     # If basic requested, then don't include extra details (ex: metadata) for each sample.
     unless basic
-      samples_visibility = get_visibility(limited_samples)
+      samples_visibility = get_visibility_by_sample_id(limited_samples)
       # format_samples loads a lot of information about samples
       # There are many ways we can refactor: multiple endpoints for client to ask for the information
       # they actually need or at least a configurable function to get only certain data
+      # NOTE: `details_json` guarantees the order of samples, but it would be good to make it indexed on id too
       details_json = format_samples(limited_samples).as_json(
         except: [:sfn_results_path]
       )
-      limited_samples_json.zip(details_json, samples_visibility).map do |sample, details, visibility|
-        sample[:public] = visibility
+      limited_samples_json.zip(details_json).map do |sample, details|
+        sample[:public] = samples_visibility[sample["id"]]
         sample[:details] = details
       end
     end
