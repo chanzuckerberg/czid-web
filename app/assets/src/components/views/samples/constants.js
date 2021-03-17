@@ -5,7 +5,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
     tooltip: `The user-defined sample name.`,
   },
   createdAt: {
-    tooltip: "The date on which the sample was initially uploaded to IDseq.",
+    tooltip: "The date on which the pipeline was run.",
   },
   host: {
     tooltip: `User-selected organism from which this sample was collected; this
