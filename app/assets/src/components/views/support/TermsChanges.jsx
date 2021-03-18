@@ -375,38 +375,42 @@ const TermsChanges = () => {
       <List
         listItems={[
           <React.Fragment key={nanoid()}>
-            <i>Dispute resolution through binding arbitration.</i> We’ve updated
-            the default for resolving disputes under these terms to through
-            arbitration.
+            <i>
+              Disputes between IDseq and you will now be resolved through final
+              and binding arbitration.
+            </i>{" "}
+            This is a more efficient and cost effective (we will bear most
+            costs) way of resolving disputes related to IDseq. Our Terms of Use
+            describes in detail how this works, and how you can opt out.
           </React.Fragment>,
+          `To help make the document easier to understand, we’ve provided a summary
+           at the top of our Terms of Use of key things to know.`,
         ]}
       />
       <h2>IDseq Privacy Policy</h2>
       <List
         listItems={[
-          `We’ve updated the title of our Privacy Notice to a Privacy Policy.
-          This is a stylistic change to a more commonly used name for these types of documents.`,
+          `To help make the document easier to understand, we’ve created a Summary Table at
+          the top of our Privacy Policy that explains the key aspects of our data practices in a concise way.`,
           <React.Fragment key={nanoid()}>
-            <i>Chan Zuckerberg Initiative Foundation.</i> IDseq is now offered
-            by the Chan Zuckerberg Biohub in partnership with the Chan
-            Zuckerberg Initiative Foundation (CZIF), a 501(c)(3) non-profit.
-            CZIF and the Chan Zuckerberg Initiative, LLC (“CZI LLC”) are our
-            primary technical partners, meaning they help design, build, and
-            operate IDseq.
+            <i>Chan Zuckerberg Initiative Foundation.</i> ID IDseq, as of April
+            1, 2021, will be provided by the Chan Zuckerberg Biohub in close
+            collaboration with the Chan Zuckerberg Initiative Foundation. This
+            is part of the Chan Zuckerberg Initiative’s shifting of its Science
+            employees, projects, and activities to live within the existing CZI
+            Foundation, a 501(c)(3) nonprofit entity. We want to assure you that
+            this does not change our commitment to delivering a high-quality
+            experience for you within IDseq. This is a largely back-end
+            organizational change that will take effect on April 1, 2021, and
+            will have minimal impacts on CZI’s work with grantees and partners,
+            or on the CZI Science team day-to-day.
           </React.Fragment>,
           <React.Fragment key={nanoid()}>
             <i>Nextclade.</i> Users now can choose to share certain Report Data
             with third party tools, like Nextclade. This integration is purely
-            optional and you choose to use it or not.
-          </React.Fragment>,
-          <React.Fragment key={nanoid()}>
-            <i>User Rights.</i> California has passed data privacy laws that
-            give its residents certain rights to ask about what we do with their
-            personal information. We voluntarily support these rights for all
-            IDseq users and have provided more information about how you can
-            make these requests. Similarly, we’ve provided additional contact
-            information for people in Europe to exercise their rights under
-            GDPR.
+            optional and you choose to use it or not. As a reminder, we will
+            never share raw sample data you’ve uploaded -- only you can access
+            that data.
           </React.Fragment>,
         ]}
       />

@@ -2,6 +2,8 @@ import React from "react";
 import { NarrowContainer } from "~/components/layout";
 import Notification from "~ui/notifications/Notification";
 import List from "~/components/ui/List";
+import ExternalLink from "~ui/controls/ExternalLink";
+import { PREVIEW_TERMS_AND_PRIVACY_POLICY_CHANGES_DOC_LINK } from "~/components/utils/documentationLinks";
 import { nanoid } from "nanoid";
 import cs from "./support.scss";
 
@@ -16,9 +18,14 @@ export default class PrivacyPolicy extends React.Component {
             <a href="/terms_changes">See Recent Changes</a>
           </h4>
           <Notification type="info" displayStyle="flat">
-            We invite you to preview our updated Privacy Policy, which will go
-            into effect on April 1, 2021.{" "}
-            <a href="/terms_changes">Learn more about these changes.</a>
+            We invite you to{" "}
+            <ExternalLink
+              href={PREVIEW_TERMS_AND_PRIVACY_POLICY_CHANGES_DOC_LINK}
+            >
+              preview
+            </ExternalLink>{" "}
+            our updated Privacy Policy, which will go into effect on April 1,
+            2021. <a href="/terms_changes">Learn more about these changes.</a>
           </Notification>
         </div>
         <p className={cs.large}>

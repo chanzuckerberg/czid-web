@@ -13,3 +13,5 @@ export const NEXTCLADE_TREE_ROOT_LINK =
   "https://github.com/nextstrain/ncov/blob/master/defaults/reference_seq.gb";
 export const VISUALIZATIONS_DOC_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360043062453-Creating-a-Heatmap";
+export const PREVIEW_TERMS_AND_PRIVACY_POLICY_CHANGES_DOC_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360058195412";
