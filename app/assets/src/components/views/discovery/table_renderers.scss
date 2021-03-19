@@ -143,6 +143,42 @@
   }
 }
 
+.referenceGenome {
+  .title {
+    @include font-header-s;
+
+    min-width: 0;
+    text-align: left;
+    color: $black;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .details {
+    @include font-body-xxs;
+
+    font-weight: $font-weight-regular;
+    color: $gray-dark;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+
+.referenceGenomeTooltip {
+  .title {
+    @include font-header-xs;
+    color: $white;
+  }
+
+  .details {
+    @include font-header-xxs;
+    font-weight: $font-weight-regular;
+    color: $gray-medium;
+  }
+}
+
 .loading {
   .base {
     @include loadingAnimation;

@@ -260,6 +260,20 @@ export const computeColumnsByWorkflow = ({ basicIcon = false } = {}) => {
       flexGrow: 1,
       className: cs.basicCell,
     },
+    {
+      dataKey: "referenceGenome",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellRenderer: ({ cellData }) =>
+        TableRenderers.renderReferenceGenome(cellData),
+    },
+    {
+      dataKey: "referenceGenomeLength",
+      flexGrow: 1,
+      className: cs.basicCell,
+      cellDataGetter: ({ dataKey, rowData }) =>
+        TableRenderers.formatNumber(rowData[dataKey]),
+    },
   ];
 
   for (const col of columnsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value]) {

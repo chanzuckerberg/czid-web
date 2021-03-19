@@ -151,6 +151,37 @@ class TableRenderers extends React.Component {
     );
   };
 
+  static renderReferenceGenome = cellData => {
+    const accessionName = get("accessionName", cellData);
+    const referenceGenomeId = get("referenceGenomeId", cellData);
+    const taxonName = get("taxonName", cellData);
+
+    const content = (
+      <div>
+        <div className={cs.title}>
+          {referenceGenomeId} - {accessionName}
+        </div>
+        <div className={cs.details}>{taxonName}</div>
+      </div>
+    );
+
+    return (
+      <BasicPopup
+        basic={false}
+        trigger={
+          <div className={cs.referenceGenome}>
+            {referenceGenomeId && content}
+          </div>
+        }
+        content={
+          <div className={cs.referenceGenomeTooltip}>
+            {referenceGenomeId && content}
+          </div>
+        }
+      />
+    );
+  };
+
   static formatNumberWithCommas = value => {
     return numberWithCommas(value);
   };

@@ -12,17 +12,12 @@ class ConsensusGenomeMetricsService
   private
 
   def generate
-    cache_key = "cg_metrics-#{@workflow_run.id}-#{@workflow_run.status}"
-    begin
-      Rails.cache.fetch(cache_key, expires_in: 30.days) do
-        quast_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_QUAST)
-        stats_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_STATS)
-        format_metrics(quast_data, stats_data)
-      end
-    rescue SfnExecution::SfnDescriptionNotFoundError => err
-      LogUtil.log_error("ConsensusGenomeMetricsService: Cannot generate Consensus Genome metrics when the SFN description is not found", exception: err)
-      return nil
-    end
+    quast_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_QUAST)
+    stats_data = @workflow_run.output(ConsensusGenomeWorkflowRun::OUTPUT_STATS)
+    format_metrics(quast_data, stats_data)
+  rescue SfnExecution::SfnDescriptionNotFoundError => err
+    LogUtil.log_error("ConsensusGenomeMetricsService: Cannot generate Consensus Genome metrics when the SFN description is not found", exception: err)
+    return nil
   end
 
   def format_metrics(quast_data, stats_data)
@@ -37,6 +32,8 @@ class ConsensusGenomeMetricsService
 
     # Different from 'depth_frac_above_10x'. 'depth_frac_above_10x' means the base is covered by at least 10 sequences. 'n_actg' is used here b/c 'n_actg' is only called when >90% of the underlying sequences match that allele.
     metrics[:percent_genome_called] = (metrics[:n_actg] / quast_data["Reference length"].to_f * 100).round(1)
+
+    metrics[:reference_genome_length] = quast_data["Reference length"].to_i
     return metrics
   end
 end

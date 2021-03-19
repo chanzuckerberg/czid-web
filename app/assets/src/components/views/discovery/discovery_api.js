@@ -116,6 +116,18 @@ const processRawSample = sample => {
     ]),
     nMissing: getConsensusGenomeField(["quality_metrics", "n_missing"]),
     nAmbiguous: getConsensusGenomeField(["quality_metrics", "n_ambiguous"]),
+    referenceGenome: {
+      accessionName: getConsensusGenomeField(["taxon_info", "accession_name"]),
+      referenceGenomeId: getConsensusGenomeField([
+        "taxon_info",
+        "accession_id",
+      ]),
+      taxonName: getConsensusGenomeField(["taxon_info", "taxon_name"]),
+    },
+    referenceGenomeLength: getConsensusGenomeField([
+      "quality_metrics",
+      "reference_genome_length",
+    ]),
     technology: get(
       [WORKFLOWS.CONSENSUS_GENOME.value, "technology"],
       sample.details

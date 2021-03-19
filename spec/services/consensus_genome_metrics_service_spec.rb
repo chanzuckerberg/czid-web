@@ -25,6 +25,7 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
       percent_genome_called: 82.3,
       percent_identity: 91.9,
       ref_snps: 1000,
+      reference_genome_length: 15_000,
       total_reads: 654_321,
     }
   end
@@ -53,18 +54,11 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
   end
 
   describe "#generate" do
-    before do
-      allow(Rails).to receive(:cache).and_return(memory_store)
-      Rails.cache.clear
-    end
-
-    it "fetches and formats metrics using a cache" do
-      # Test that methods are only called ONCE to show the cache is working.
+    it "fetches and formats metrics" do
       allow(workflow_run).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_QUAST).exactly(1).times.and_return(quast_data)
       allow(workflow_run).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_STATS).exactly(1).times.and_return(stats_data)
-      expect(subject).to receive(:format_metrics).with(quast_data, stats_data).exactly(1).times
+      expect(subject).to receive(:format_metrics).with(quast_data, stats_data)
 
-      subject.send(:generate)
       subject.send(:generate)
     end
   end

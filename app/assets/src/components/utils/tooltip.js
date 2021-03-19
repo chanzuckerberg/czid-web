@@ -102,4 +102,12 @@ export const FIELDS_METADATA = {
     label: "Sequencing Platform",
     tooltip: "The sequencing technology used for read generation.",
   },
+  referenceGenome: {
+    label: "Reference Genome",
+    tooltip: "The reference to which the non-host reads were aligned.",
+  },
+  referenceGenomeLength: {
+    label: "Reference Genome Length",
+    tooltip: "Length of reference genome in basepairs.",
+  },
 };
