@@ -41,6 +41,13 @@ class JsonWebToken
   # Fetches the jwks hash from auth0
   def self.jwks_hash
     Rails.logger.info("Fetching jwks_hash at #{JWT_JWKS_KEYS_URL}")
+    # only trigger this flow if the app is configured to use SSRFs UP
+    # until it's tested in staging a bit, it currently just invokes the lambda
+    # and calls the old behavior. We'll use lambda metrics to see how it is working.
+    if AppConfigHelper.get_app_config(AppConfig::ENABLE_SSRFS_UP) == "1"
+      SSRFsUp.get(JWT_JWKS_KEYS_URL)
+      # return [resp.status_code != 200, JSON.parse(resp.body)]
+    end
     jwks_raw = Net::HTTP.get URI(JWT_JWKS_KEYS_URL)
     jwks_keys = Array(JSON.parse(jwks_raw)['keys'])
     Hash[
