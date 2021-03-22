@@ -963,6 +963,8 @@ class SampleView extends React.Component {
       taxonName,
     });
 
+    // Re-fetch the sample data to include the newly created CG workflow run and ensure the CG tab is displayed.
+    this.fetchSample();
     this.showNotification(NOTIFICATION_TYPES.consensusGenomeCreated);
     this.handleCloseConsensusGenomeCreationModal();
   };
