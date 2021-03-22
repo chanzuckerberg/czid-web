@@ -12,6 +12,7 @@
     <table>
       <thead>
         <tr>
+          <th>ID</th>
           <th>Email</th>
           <th>Name</th>
           <th>Institution</th>
@@ -27,6 +28,7 @@
       <tbody>
         <% @users.each do |user| %>
           <tr>
+            <td><%= user.id %></td>
             <td><%= user.email %></td>
             <td><%= link_to user.name, user if user.name %></td>
             <td><%= user.institution %></td>
