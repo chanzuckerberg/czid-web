@@ -101,6 +101,7 @@ For example, if you need a specially styled button, try to wrap `<Button>` from 
 
 ### Component Design
 
+- Prefer stateless functional components over class-based components for new components. Try `useEffect`, `useState`, and other [React Hooks](https://reactjs.org/docs/hooks-reference.html) if you need lifecycle methods, although we do not have in-app examples of this yet (as of 2021-03-22).
 - Avoid monolithic components. Break complex components up into smaller units.
   - No strict guidelines for how to do this, but it's similar to the process of breaking up a complex function into smaller parts. Find small self-contained units. For example, a component whose job is to receive data and render a particular piece of UI. Strive for each component to have a single, well-defined responsibility.
   - This makes code easier to reason about and encourages reusability.
