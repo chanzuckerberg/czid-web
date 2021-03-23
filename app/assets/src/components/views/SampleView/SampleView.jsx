@@ -1,13 +1,13 @@
-import React from "react";
-import { connect } from "react-redux";
-import { updateProjectId } from "~/redux/modules/discovery/slice";
+import deepEqual from "fast-deep-equal";
 import {
   compact,
   every,
+  filter,
   find,
   flatten,
   get,
   getOr,
+  groupBy,
   has,
   head,
   isEmpty,
@@ -24,7 +24,8 @@ import {
   sum,
   values,
 } from "lodash/fp";
-import deepEqual from "fast-deep-equal";
+import React from "react";
+import { connect } from "react-redux";
 
 import {
   getBackgrounds,
@@ -35,40 +36,41 @@ import {
   kickoffConsensusGenome,
 } from "~/api";
 import { getAmrData } from "~/api/amr";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import AMRView from "~/components/AMRView";
+import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+import Tabs from "~/components/ui/controls/Tabs";
+import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import {
   AMR_TABLE_FEATURE,
   MERGED_NT_NR_FEATURE,
 } from "~/components/utils/features";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logError } from "~/components/utils/logUtil";
+import { diff } from "~/components/utils/objectUtil";
 import {
-  MASS_NORMALIZED_FEATURE,
   COVERAGE_VIZ_FEATURE,
   isPipelineFeatureAvailable,
+  MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
-import { sampleErrorInfo } from "~/components/utils/sample";
-import { getGeneraPathogenCounts } from "~/helpers/taxon";
-import { IconAlert, IconLoading } from "~ui/icons";
-import { showToast } from "~/components/utils/toast";
-import { sanitizeCSVRow, createCSVObjectURL } from "~/components/utils/csv";
-import { diff } from "~/components/utils/objectUtil";
-import { logError } from "~/components/utils/logUtil";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
-import AccordionNotification from "~ui/notifications/AccordionNotification";
-import Notification from "~ui/notifications/Notification";
-import StatusLabel from "~ui/labels/StatusLabel";
-import AMRView from "~/components/AMRView";
-import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
-import DetailsSidebar from "~/components/common/DetailsSidebar";
-import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
-import SampleViewHeader from "./SampleViewHeader";
-import Tabs from "~/components/ui/controls/Tabs";
+import { sampleErrorInfo } from "~/components/utils/sample";
+import { showToast } from "~/components/utils/toast";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/ConsensusGenomeCreationModal";
+import ConsensusGenomePreviousModal from "~/components/views/consensus_genome/ConsensusGenomePreviousModal";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
-import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/ConsensusGenomeCreationModal";
+import { getGeneraPathogenCounts } from "~/helpers/taxon";
+import { updateProjectId } from "~/redux/modules/discovery/slice";
+import { IconAlert, IconLoading } from "~ui/icons";
+import StatusLabel from "~ui/labels/StatusLabel";
+import AccordionNotification from "~ui/notifications/AccordionNotification";
+import Notification from "~ui/notifications/Notification";
 
 import {
   GENUS_LEVEL_INDEX,
@@ -77,18 +79,19 @@ import {
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
   SPECIES_LEVEL_INDEX,
+  TABS,
   TAXON_COUNT_TYPE_METRICS,
   TAXON_GENERAL_FIELDS,
-  TABS,
   TREE_METRICS,
   URL_FIELDS,
 } from "./constants";
-import ReportViewSelector from "./ReportViewSelector";
 import ReportFilters from "./ReportFilters";
 import ReportTable from "./ReportTable";
-import TaxonTreeVis from "./TaxonTreeVis";
-import cs from "./sample_view.scss";
+import ReportViewSelector from "./ReportViewSelector";
+import SampleViewHeader from "./SampleViewHeader";
 import csSampleMessage from "./sample_message.scss";
+import cs from "./sample_view.scss";
+import TaxonTreeVis from "./TaxonTreeVis";
 
 const mapValuesWithKey = mapValues.convert({ cap: false });
 
@@ -113,7 +116,9 @@ class SampleView extends React.Component {
         amrData: null,
         backgrounds: [],
         consensusGenomeParams: {},
+        consensusGenomePreviousParams: {},
         consensusGenomeCreationModalVisible: false,
+        consensusGenomePreviousModalVisible: false,
         coverageVizDataByTaxon: {},
         coverageVizParams: {},
         coverageVizVisible: false,
@@ -947,6 +952,23 @@ class SampleView extends React.Component {
     });
   };
 
+  handlePreviousConsensusGenomeClick = ({
+    percentIdentity,
+    taxId,
+    taxName,
+  }) => {
+    const previousRuns = get(taxId, this.getConsensusGenomeData());
+    this.setState({
+      consensusGenomePreviousParams: {
+        percentIdentity,
+        previousRuns,
+        taxId,
+        taxName,
+      },
+      consensusGenomePreviousModalVisible: true,
+    });
+  };
+
   onConsensusGenomeCreation = ({
     accessionId,
     accessionName,
@@ -967,11 +989,18 @@ class SampleView extends React.Component {
     this.fetchSample();
     this.showNotification(NOTIFICATION_TYPES.consensusGenomeCreated);
     this.handleCloseConsensusGenomeCreationModal();
+    this.handleCloseConsensusGenomePreviousModal();
   };
 
   handleCloseConsensusGenomeCreationModal = () => {
     this.setState({
       consensusGenomeCreationModalVisible: false,
+    });
+  };
+
+  handleCloseConsensusGenomePreviousModal = () => {
+    this.setState({
+      consensusGenomePreviousModalVisible: false,
     });
   };
 
@@ -1564,6 +1593,18 @@ class SampleView extends React.Component {
     return createCSVObjectURL(csvHeaders, csvRows);
   };
 
+  getConsensusGenomeData = () => {
+    const { sample } = this.state;
+    // Mapping of taxids to WorkflowRuns
+    return groupBy(
+      "inputs.taxon_id",
+      filter(
+        { workflow: WORKFLOWS.CONSENSUS_GENOME.value },
+        get("workflow_runs", sample)
+      )
+    );
+  };
+
   renderReport = ({ displayMergedNtNrValue = false } = {}) => {
     const {
       backgrounds,
@@ -1625,8 +1666,12 @@ class SampleView extends React.Component {
                 alignVizAvailable={
                   !!(reportMetadata && reportMetadata.alignVizAvailable)
                 }
+                consensusGenomeData={this.getConsensusGenomeData()}
                 data={filteredReportData}
                 onConsensusGenomeClick={this.handleConsensusGenomeClick}
+                onPreviousConsensusGenomeClick={
+                  this.handlePreviousConsensusGenomeClick
+                }
                 onCoverageVizClick={this.handleCoverageVizClick}
                 onTaxonNameClick={withAnalytics(
                   this.handleTaxonClick,
@@ -1671,7 +1716,9 @@ class SampleView extends React.Component {
     const {
       amrData,
       consensusGenomeParams,
+      consensusGenomePreviousParams,
       consensusGenomeCreationModalVisible,
+      consensusGenomePreviousModalVisible,
       coverageVizVisible,
       currentTab,
       pipelineRun,
@@ -1780,6 +1827,15 @@ class SampleView extends React.Component {
             onClose={this.handleCloseConsensusGenomeCreationModal}
             onCreation={this.onConsensusGenomeCreation}
             open={consensusGenomeCreationModalVisible}
+            sample={sample}
+          />
+        )}
+        {consensusGenomePreviousModalVisible && (
+          <ConsensusGenomePreviousModal
+            consensusGenomeData={consensusGenomePreviousParams}
+            onClose={this.handleCloseConsensusGenomePreviousModal}
+            onNew={this.handleConsensusGenomeClick}
+            open={consensusGenomePreviousModalVisible}
             sample={sample}
           />
         )}

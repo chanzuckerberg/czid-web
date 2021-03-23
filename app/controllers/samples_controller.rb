@@ -72,12 +72,12 @@ class SamplesController < ApplicationController
   ].freeze
 
   WORKFLOW_RUN_DEFAULT_FIELDS = [
+    :deprecated,
+    :executed_at,
     :id,
     :status,
-    :workflow,
     :wdl_version,
-    :executed_at,
-    :deprecated,
+    :workflow,
   ].freeze
 
   CLADE_FASTA_S3_KEY = "clade_exports/fastas/temp-%{path}".freeze
@@ -739,9 +739,9 @@ class SamplesController < ApplicationController
             deletable: @sample.deletable?(current_user),
             editable: current_power.updatable_sample?(@sample),
             pipeline_runs: @sample.pipeline_runs_info,
-            workflow_runs: @sample.workflow_runs.reverse.as_json(
+            workflow_runs: @sample.workflow_runs.non_deprecated.reverse.as_json(
               only: WORKFLOW_RUN_DEFAULT_FIELDS,
-              methods: [:input_error]
+              methods: [:input_error, :inputs]
             )
           )
       end

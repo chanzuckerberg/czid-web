@@ -1,5 +1,5 @@
 import React from "react";
-import { compact, filter, getOr, get, map, orderBy, reduce } from "lodash/fp";
+import { compact, filter, get, getOr, map, orderBy, reduce } from "lodash/fp";
 import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
 import cx from "classnames";
 
@@ -581,9 +581,11 @@ class ReportTable extends React.Component {
   renderHoverActions = ({ rowData }) => {
     const {
       alignVizAvailable,
+      consensusGenomeData,
       fastaDownloadEnabled,
-      phyloTreeAllowed,
       onConsensusGenomeClick,
+      onPreviousConsensusGenomeClick,
+      phyloTreeAllowed,
       pipelineVersion,
       projectId,
       sampleId,
@@ -605,6 +607,7 @@ class ReportTable extends React.Component {
         getOr(0, "nr.count", rowData)
       );
     const percentIdentity = get("nt.percent_identity", rowData);
+    const previousConsensusGenomeRuns = get(rowData.taxId, consensusGenomeData);
 
     const analyticsContext = {
       projectId: projectId,
@@ -637,9 +640,15 @@ class ReportTable extends React.Component {
         )}
         onConsensusGenomeClick={withAnalytics(
           onConsensusGenomeClick,
-          ANALYTICS_EVENT_NAMES.PIPELINE_SAMPLE_REPORT_CONSENSUS_GENOME_LINK_CLICKED,
+          ANALYTICS_EVENT_NAMES.REPORT_TABLE_CONSENSUS_GENOME_HOVER_ACTION_CLICKED,
           analyticsContext
         )}
+        onPreviousConsensusGenomeClick={withAnalytics(
+          onPreviousConsensusGenomeClick,
+          ANALYTICS_EVENT_NAMES.REPORT_TABLE_PREVIOUS_CONSENSUS_GENOME_HOVER_ACTION_CLICKED,
+          analyticsContext
+        )}
+        previousConsensusGenomeRuns={previousConsensusGenomeRuns}
         coverageVizEnabled={coverageVizEnabled}
         onCoverageVizClick={withAnalytics(
           this.handleCoverageVizClick,

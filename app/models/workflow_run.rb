@@ -42,6 +42,7 @@ class WorkflowRun < ApplicationRecord
   validates :status, inclusion: { in: STATUS.values }
 
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
+  scope :non_deprecated, -> { where(deprecated: false) }
 
   class RerunDeprecatedWorkflowError < StandardError
     def initialize

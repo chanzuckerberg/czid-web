@@ -1,7 +1,7 @@
 // These are the buttons that appear on a Report table row when hovered.
 import React from "react";
 import cx from "classnames";
-import { filter } from "lodash/fp";
+import { filter, size } from "lodash/fp";
 
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
@@ -53,10 +53,30 @@ class HoverActions extends React.Component {
       });
   };
 
+  handlePreviousConsensusGenomeClick = () => {
+    const {
+      onPreviousConsensusGenomeClick,
+      taxId,
+      taxName,
+      percentIdentity,
+    } = this.props;
+
+    onPreviousConsensusGenomeClick &&
+      onPreviousConsensusGenomeClick({
+        percentIdentity,
+        taxId,
+        taxName,
+      });
+  };
+
   // Metadata for each of the hover actions.
   getHoverActions = () => {
     const { allowedFeatures = [] } = this.context || {};
-    const { pipelineVersion, snapshotShareId } = this.props;
+    const {
+      pipelineVersion,
+      snapshotShareId,
+      previousConsensusGenomeRuns,
+    } = this.props;
     const hasCoverageViz = isPipelineFeatureAvailable(
       COVERAGE_VIZ_FEATURE,
       pipelineVersion
@@ -138,14 +158,25 @@ class HoverActions extends React.Component {
     ];
 
     if (allowedFeatures.includes("gen_viral_cg")) {
-      hoverActions.push({
-        key: `consensus_genome_${params.taxId}`,
-        message: "Consensus Genome",
-        iconComponentClass: IconConsensusSmall,
-        handleClick: this.handleConsensusGenomeClick,
-        enabled: !this.getConsensusGenomeError(),
-        disabledMessage: this.getConsensusGenomeError(),
-      });
+      if (previousConsensusGenomeRuns) {
+        hoverActions.push({
+          key: `consensus_genome_${params.taxId}`,
+          message: `Consensus Genome`,
+          iconComponentClass: IconConsensusSmall,
+          count: size(previousConsensusGenomeRuns),
+          handleClick: this.handlePreviousConsensusGenomeClick,
+          enabled: true,
+        });
+      } else {
+        hoverActions.push({
+          key: `consensus_genome_${params.taxId}`,
+          message: "Consensus Genome",
+          iconComponentClass: IconConsensusSmall,
+          handleClick: this.handleConsensusGenomeClick,
+          enabled: !this.getConsensusGenomeError(),
+          disabledMessage: this.getConsensusGenomeError(),
+        });
+      }
     }
 
     return snapshotShareId
@@ -155,11 +186,13 @@ class HoverActions extends React.Component {
 
   getConsensusGenomeError = () => {
     const {
+      coverageVizEnabled,
       ntContigsAvailable,
       pipelineVersion,
       taxCategory,
       taxLevel,
     } = this.props;
+
     if (
       !isPipelineFeatureAvailable(CONSENSUS_GENOME_FEATURE, pipelineVersion)
     ) {
@@ -170,6 +203,8 @@ class HoverActions extends React.Component {
       return "Consensus genome pipeline only available at the species level.";
     } else if (!ntContigsAvailable) {
       return "Please select a virus with at least 1 contig that aligned to the NT database to run the consensus genome pipeline.";
+    } else if (!coverageVizEnabled) {
+      return "Consensus genome pipeline only available when coverage visualization is available.";
     }
   };
 
@@ -182,6 +217,7 @@ class HoverActions extends React.Component {
       trigger = (
         <div onClick={onClickFn} className={cs.actionDot}>
           <IconComponent className={cs.icon} />
+          {hoverAction.count || null}
         </div>
       );
       tooltipMessage = hoverAction.message;

@@ -165,7 +165,7 @@ jobs:
     - name: Lint
       # setup-node automatically creates annotations from this output
       # Use eslint-disable or fix another warning to stay below the max.
-      run: ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --max-warnings 175
+      run: ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --max-warnings 169
     - name: Check for Unused Packages
       # Uses Depcheck to flag unused dependencies in package.json
       run: exit $(./node_modules/.bin/depcheck --ignores="core-js" --json | jq '.dependencies | length')

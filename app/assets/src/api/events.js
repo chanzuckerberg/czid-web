@@ -8,9 +8,9 @@
  * - We are consolidating all analytics event names here to prevent typos, facilitate code completion, and make a reference for product analysts.<br>
  * - Provide a plain-English description of what each event means.<br>
  * - Make sure the key matches its SQL-compatible converted form (e.g. NextcladeModal changes to NEXTCLADE_MODAL, dash changes to underscore).<br>
- * - If you migrate a legacy-style event name, please flag it in the analytics channel in case there are dashboards relying directly on the EVENTS.TRACKS.NAME field.
+ * - If you migrate a legacy-style event name, please flag it in the analytics channel in case there are dashboards relying directly on the EVENTS.TRACKS.NAME field.<br>
  * - You MUST use the ** comment style if you want the comment to appear in JSDoc docs.<br>
- * - This is in a JS function mostly so that JSDoc can parse it.
+ * - This is in a JS function mostly so that JSDoc can parse it.<br>
  */
 function EventDictionary() {
   /** The user closed the confirmation modal before sending their samples to Nextclade. */
@@ -48,8 +48,9 @@ function EventDictionary() {
   this.CONSENSUS_GENOME_CREATION_MODAL_HELP_LINK_CLICKED =
     "CONSENSUS_GENOME_CREATION_MODAL_HELP_LINK_CLICKED";
 
-  this.PIPELINE_SAMPLE_REPORT_CONSENSUS_GENOME_LINK_CLICKED =
-    "PIPELINE_SAMPLE_REPORT_CONSENSUS_GENOME_LINK_CLICKED";
+  /** The user clicked the hover action to create a Consensus Genome from the mngs report page taxon row. */
+  this.REPORT_TABLE_CONSENSUS_GENOME_HOVER_ACTION_CLICKED =
+    "REPORT_TABLE_CONSENSUS_GENOME_HOVER_ACTION_CLICKED";
 
   /** The user clicked a Consensus Genome technology in the Sample Upload Flow. */
   this.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED =
@@ -62,6 +63,14 @@ function EventDictionary() {
   /** The user clicked the "here" link under the Consensus Genome Nanopore technology option in the Sample Upload Flow. */
   this.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED =
     "UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED";
+
+  /** The user closed the modal listing previously generated Consensus Genomes for the taxon. */
+  this.CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED =
+    "CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED";
+
+  /** The user clicked the hover action to open up previous Consensus Genome runs from the mngs report page taxon row. */
+  this.REPORT_TABLE_PREVIOUS_CONSENSUS_GENOME_HOVER_ACTION_CLICKED =
+    "REPORT_TABLE_PREVIOUS_CONSENSUS_GENOME_HOVER_ACTION_CLICKED";
 }
 
 const eventNames = new EventDictionary();

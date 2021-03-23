@@ -1,0 +1,22 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.modal {
+  .title {
+    @include font-header-xxl;
+    margin-bottom: $space-s;
+  }
+
+  .label {
+    @include font-header-xs;
+    margin-top: $space-xl;
+    .taxonName {
+      @include font-body-xs;
+    }
+  }
+
+  .table {
+    height: 200px;
+  }
+}
