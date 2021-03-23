@@ -568,6 +568,7 @@ SamplesView.propTypes = {
   admin: PropTypes.bool,
   currentDisplay: PropTypes.string.isRequired,
   currentTab: PropTypes.string.isRequired,
+  filters: PropTypes.object,
   filtersSidebarOpen: PropTypes.bool,
   hideAllTriggers: PropTypes.bool,
   mapLevel: PropTypes.string,
