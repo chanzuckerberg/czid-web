@@ -18,6 +18,7 @@
           <th>Institution</th>
           <th>Admin?</th>
           <th>Added by</th>
+          <th>Ever logged in?</th>
           <th>Projects</th>
           <th>Feature flags</th>
           <th>Date joined</th>
@@ -32,12 +33,13 @@
             <td><%= user.email %></td>
             <td><%= link_to user.name, user if user.name %></td>
             <td><%= user.institution %></td>
-            <td><%= user.role %></td>
+            <td><%= user.role == 1 ? "ADMIN" : "" %></td>
             <td>
               <u>
                 <%= link_to user.created_by_user_id, edit_user_path(user.created_by_user_id) if user.created_by_user_id %>
               </u>
             </td>
+            <td><%= user.sign_in_count > 0 ? "Yes" : "No" %></td>
             <td><% user.projects[0...-1].each do |p| %>
                   <%= link_to p.name, p if p %>,
                 <% end %>
