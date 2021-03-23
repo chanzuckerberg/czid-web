@@ -3,16 +3,16 @@ require "webmock/rspec"
 
 RSpec.describe SamplesHelper, type: :helper do
   describe "#upload_samples_with_metadata" do
+    before do
+      @project = create(:public_project)
+      @joe = create(:joe)
+      @host_genome = create(:host_genome, user: @joe)
+    end
+
     context "with basespace samples" do
       let(:fake_access_token) { "fake_access_token" }
       let(:fake_dataset_id) { "fake_dataset_id" }
       let(:fake_sample_name) { "fake_sample_name" }
-
-      before do
-        @project = create(:public_project)
-        @joe = create(:joe)
-        @host_genome = create(:host_genome, user: @joe)
-      end
 
       let(:basespace_sample_attributes) do
         [
@@ -91,6 +91,127 @@ RSpec.describe SamplesHelper, type: :helper do
         expect(response["errors"]).to eq([
                                            ErrorHelper::SampleUploadErrors.missing_input_files_or_basespace_params(fake_sample_name),
                                          ])
+      end
+
+      context "with local samples" do
+        let(:fake_sample_name) { "fake_local_sample_name" }
+        let(:fake_input_files_attributes) do
+          [
+            {
+              "source_type": "local",
+              "source": "fake_source_R1_001.fastq.gz",
+              "parts": "fake_source_R1_001.fastq.gz",
+            },
+            {
+              "source_type": "local",
+              "source": "fake_source_R2_001.fastq.gz",
+              "parts": "fake_source_R2_001.fastq.gz",
+            },
+          ]
+        end
+
+        let(:local_cg_sample_attributes) do
+          {
+            name: fake_sample_name,
+            project_id: @project.id,
+            host_genome_id: @host_genome.id,
+            input_files_attributes: fake_input_files_attributes,
+          }
+        end
+
+        let(:metadata_attributes) do
+          {
+            fake_sample_name.to_s => {
+              "Fake Metadata Field One" => "CSF",
+              "Fake Metadata Field Two" => "DNA",
+            },
+          }
+        end
+
+        it "saves successfully for short-read-mngs workflows" do
+          additional_attributes = {
+            workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
+          }
+          sample_attributes = [local_cg_sample_attributes.merge(additional_attributes)]
+
+          response = helper.upload_samples_with_metadata(
+            sample_attributes,
+            metadata_attributes,
+            @joe
+          )
+
+          expect(response["samples"].length).to eq(1)
+          expect(response["errors"].length).to eq(0)
+
+          created_sample = response["samples"][0]
+
+          expect(created_sample.pipeline_runs.length).to eq(0)
+          expect(created_sample.workflow_runs.length).to eq(0)
+
+          expect(created_sample.input_files.length).to eq(2)
+          expect(created_sample.input_files.first.presigned_url).not_to be_empty
+          expect(created_sample.input_files.second.presigned_url).not_to be_empty
+        end
+
+        it "saves successfully if technology is provided with consensus genome workflow runs" do
+          additional_attributes = {
+            technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore],
+            workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
+          }
+          sample_attributes = [local_cg_sample_attributes.merge(additional_attributes)]
+
+          response = helper.upload_samples_with_metadata(
+            sample_attributes,
+            metadata_attributes,
+            @joe
+          )
+
+          expect(response["samples"].length).to eq(1)
+          expect(response["errors"].length).to eq(0)
+
+          created_sample = response["samples"][0]
+          created_workflow_run = created_sample.workflow_runs.first
+
+          expect(created_sample.pipeline_runs.length).to eq(0)
+          expect(created_sample.workflow_runs.length).to eq(1)
+          expect(created_sample.name).to eq(fake_sample_name)
+          expect(created_sample.host_genome.id).to eq(@host_genome.id)
+          expect(created_sample.host_genome.user).to eq(@joe)
+          expect(created_sample.project.id).to eq(@project.id)
+          expect(created_sample.bulk_mode).to eq(nil)
+          expect(created_sample.uploaded_from_basespace).to eq(0)
+          expect(created_sample.user).to eq(@joe)
+
+          expect(created_workflow_run.inputs.keys).to eq([
+                                                           "accession_id",
+                                                           "accession_name",
+                                                           "taxon_id",
+                                                           "taxon_name",
+                                                           "technology",
+                                                           "medaka_model",
+                                                           "vadr_options",
+                                                         ])
+
+          expect(created_workflow_run.inputs&.[]("technology")).to eq(ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore])
+          expect(created_workflow_run.inputs&.[]("medaka_model")).to eq(ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL)
+          expect(created_workflow_run.inputs&.[]("vadr_options")).to eq(ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS)
+        end
+
+        it "fails if technology is not provided with consensus genome workflow runs" do
+          additional_attributes = { workflows: [WorkflowRun::WORKFLOW[:consensus_genome]] }
+          sample_attributes = [local_cg_sample_attributes.merge(additional_attributes)]
+
+          response = helper.upload_samples_with_metadata(
+            sample_attributes,
+            metadata_attributes,
+            @joe
+          )
+
+          expect(response["samples"].length).to eq(0)
+          expect(response["errors"]).to eq([
+                                             ErrorHelper::SampleUploadErrors.missing_required_technology_for_cg(fake_sample_name),
+                                           ])
+        end
       end
     end
 
@@ -380,11 +501,11 @@ RSpec.describe SamplesHelper, type: :helper do
     end
 
     context "when sequencing technology is not present" do
-      it "returns an Illumina default" do
+      it "returns nil" do
         samples = Sample.where(id: @sample_without_runs.id)
         results = helper.send(:format_samples, samples)
 
-        expect(results[0]).to include({ WorkflowRun::WORKFLOW[:consensus_genome].to_sym => hash_including({ technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina] }) })
+        expect(results[0]).to include({ WorkflowRun::WORKFLOW[:consensus_genome].to_sym => hash_including({ technology: nil }) })
       end
     end
   end

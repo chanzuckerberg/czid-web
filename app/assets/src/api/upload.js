@@ -55,6 +55,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
       "project_id",
       "s3_preload_result_path",
       "subsample",
+      "technology",
       "wetlab_protocol",
       "workflows",
     ]),

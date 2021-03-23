@@ -77,6 +77,8 @@ jobs:
       run: bundle exec rake db:create db:migrate db:seed
     - name: RSpec
       run: bundle exec rspec
+      env:
+        SAMPLES_BUCKET_NAME: idseq-samples-development
     - name: Rails Test
       run: bundle exec rails test
       env:

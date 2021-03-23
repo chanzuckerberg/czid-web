@@ -25,8 +25,13 @@ class SfnCGPipelineDispatchService
 
   class InvalidTechnologyError < StandardError
     def initialize(technology)
-      # TODO: raise this error once technology is added as wdl input
       super("Technology #{technology} not recognized.")
+    end
+  end
+
+  class TechnologyMissingError < StandardError
+    def initialize
+      super("Technology not found in inputs_json.")
     end
   end
 
@@ -87,10 +92,14 @@ class SfnCGPipelineDispatchService
   end
 
   def technology
-    if ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT.value?(@workflow_run.inputs&.[]("technology"))
-      return @workflow_run.inputs&.[]("technology")
+    wr_technology = @workflow_run.inputs&.[]("technology")
+    raise TechnologyMissingError if wr_technology.nil?
+
+    if ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT.value?(wr_technology)
+      wr_technology
+    else
+      raise InvalidTechnologyError(technology)
     end
-    # TODO: raise an error if technology is not provided or is not a valid option
   end
 
   def primer_file

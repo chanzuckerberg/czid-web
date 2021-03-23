@@ -33,6 +33,10 @@ module ErrorHelper
       "Could not save sample '#{sample['name']}'. Invalid project id."
     end
 
+    def self.missing_required_technology_for_cg(sample_name)
+      "Could not save sample '#{sample_name}'. Missing required technology parameter."
+    end
+
     def self.missing_required_metadata(sample, missing_metadata_fields)
       "Could not save sample '#{sample['name']}'. Missing required metadata: #{missing_metadata_fields.join(', ')}"
     end

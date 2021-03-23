@@ -30,6 +30,7 @@ class SampleUploadFlow extends React.Component {
     // Metadata upload information
     metadata: null, //
     metadataIssues: null,
+    technology: null,
     stepsEnabled: {
       uploadSamples: true,
       uploadMetadata: false,
@@ -51,14 +52,16 @@ class SampleUploadFlow extends React.Component {
   };
 
   handleUploadSamples = ({
-    samples,
+    technology,
     project,
-    uploadType,
     sampleNamesToFiles,
-    workflows,
+    samples,
+    uploadType,
     wetlabProtocol,
+    workflows,
   }) => {
     this.setState({
+      technology,
       currentStep: "uploadMetadata",
       project,
       sampleNamesToFiles,
@@ -171,6 +174,7 @@ class SampleUploadFlow extends React.Component {
         )}
         {this.state.samples && this.state.metadata && (
           <ReviewStep
+            technology={this.state.technology}
             hostGenomes={this.state.hostGenomes}
             metadata={this.state.metadata}
             onStepSelect={this.handleStepSelect}

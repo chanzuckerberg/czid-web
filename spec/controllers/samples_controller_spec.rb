@@ -14,7 +14,7 @@ RSpec.describe SamplesController, type: :controller do
     end
 
     describe "GET index_v2" do
-      it "loads list of samples with coorect visibility" do
+      it "loads list of samples with correct visibility" do
         project = create(:project, users: [@joe])
         sample_private = create(:sample, project: project, user: @joe, created_at: 6.months.ago)
         sample_public = create(:sample, project: project, user: @joe, created_at: 2.years.ago)

@@ -10,14 +10,26 @@
     margin-bottom: $space-default;
   }
 
-  .workflowOption {
+  .selectableOption {
     border-radius: $border-radius-m;
     cursor: pointer;
     display: flex;
-    padding: $space-l $space-xs;
+    padding: $space-l;
 
     &:hover {
       background-color: $gray-off-white;
+    }
+
+    .technologyOptions {
+      margin-top: $space-xxxs;
+
+      .technology {
+        padding: $space-m;
+
+        &:hover {
+          background-color: $gray-lightest;
+        }
+      }
     }
 
     .radioButton {
@@ -37,13 +49,16 @@
       .title {
         @include font-header-s;
 
+        &.technologyTitle {
+          padding-top: $space-l;
+        }
+
         .infoIcon {
           fill: $gray-dark;
-          height: 15px;
-          margin-left: $space-xxs;
-          margin-top: $space-xxxs;
-          vertical-align: text-top;
-          width: 15px;
+          height: $icon-s;
+          width: $icon-s;
+          margin-left: $space-xs;
+          vertical-align: -$space-xxxs;
 
           &:hover {
             fill: $primary;
@@ -55,8 +70,38 @@
         @include font-body-s;
       }
 
+      .technologyDescription {
+        @include font-body-xxs;
+        color: $gray-darkest;
+
+        .externalLink {
+          color: black !important;
+          text-decoration: underline;
+          text-decoration-style: dashed;
+
+          &:hover {
+            text-decoration-style: solid;
+          }
+        }
+      }
+
+      .nanoporeContent {
+        display: flex;
+        margin-top: $space-l;
+
+        .item {
+          width: 160px;
+          margin-right: $space-xl;
+
+          .subheader {
+            @include font-header-xs;
+            margin-bottom: $space-xs;
+          }
+        }
+      }
+
       .wetlabOption {
-        margin-top: $space-xl;
+        margin-top: $space-l;
 
         .title {
           @include font-header-xs;

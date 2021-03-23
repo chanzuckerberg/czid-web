@@ -1,62 +1,67 @@
-import React from "react";
-import { map } from "lodash/fp";
+import React, { useContext } from "react";
 
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import RadioButton from "~ui/controls/RadioButton";
-import IconSample from "~ui/icons/IconSample";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import { IconInfoSmall } from "~/components/ui/icons";
-import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
+import IconSample from "~ui/icons/IconSample";
 import PropTypes from "~utils/propTypes";
 import { WORKFLOWS } from "~utils/workflows";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
+import { NANOPORE_FEATURE } from "~/components/utils/features";
+import { CG_WETLAB_OPTIONS, CG_TECHNOLOGY_OPTIONS } from "./constants";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import {
+  ARTIC_PIPELINE_LINK,
+  CG_ILLUMINA_PIPELINE_GITHUB_LINK,
+} from "~/components/utils/documentationLinks";
 
+import cx from "classnames";
 import cs from "./workflow_selector.scss";
 
-export const CG_WETLAB_OPTIONS = [
-  {
-    text: "ARTIC v3",
-    value: "artic",
-  },
-  {
-    text: "ARTIC v3 - Short Amplicons (275 bp)",
-    value: "artic_short_amplicons",
-  },
-  {
-    text: "MSSPE",
-    value: "msspe",
-  },
-  {
-    text: "Combined MSSPE & ARTIC v3",
-    value: "combined_msspe_artic",
-  },
-  {
-    text: "SNAP",
-    value: "snap",
-  },
-  {
-    text: "AmpliSeq",
-    value: "ampliseq",
-  },
-];
+const WorkflowSelector = ({
+  onTechnologyToggle,
+  onWetlabProtocolChange,
+  onWorkflowToggle,
+  selectedTechnology,
+  selectedWetlabProtocol,
+  selectedWorkflows,
+}) => {
+  const userContext = useContext(UserContext);
+  const { allowedFeatures = [] } = userContext || {};
+  const nanoporeFeatureEnabled = allowedFeatures.includes(NANOPORE_FEATURE);
 
-class WorkflowSelector extends React.Component {
-  renderWetlabSelector = () => {
-    const { onWetlabProtocolChange, selectedWetlabProtocol } = this.props;
+  const createExternalLink = ({
+    additionalStyle = null,
+    analyticsEventName,
+    content,
+    link,
+  }) => (
+    <ExternalLink
+      href={link}
+      analyticsEventName={analyticsEventName}
+      className={cx(cs.externalLink, additionalStyle && additionalStyle)}
+    >
+      {content}
+    </ExternalLink>
+  );
+
+  const renderWetlabSelector = () => {
     return (
       <div className={cs.wetlabOption}>
         <div className={cs.title}>Wetlab protocol:</div>
         <Dropdown
           className={cs.dropdown}
-          onChange={value =>
-            withAnalytics(
-              onWetlabProtocolChange(value),
-              "WorkflowSelector_wetlab-protocol_selected",
-              {
-                wetlabOption: value,
-              }
-            )
-          }
+          onChange={value => {
+            onWetlabProtocolChange(value);
+            !nanoporeFeatureEnabled &&
+              onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA);
+
+            logAnalyticsEvent("WorkflowSelector_wetlab-protocol_selected", {
+              wetlabOption: value,
+            });
+          }}
           options={CG_WETLAB_OPTIONS}
           placeholder="Select"
           value={selectedWetlabProtocol}
@@ -65,71 +70,169 @@ class WorkflowSelector extends React.Component {
     );
   };
 
-  render() {
-    const { onWorkflowToggle, selectedWorkflows = new Set() } = this.props;
+  const renderMngsAnalysisType = () => {
     return (
-      <div className={cs.workflowSelector}>
-        <div className={cs.header}>Analysis Type</div>
-        <div
-          className={cs.workflowOption}
-          onClick={() => onWorkflowToggle(WORKFLOWS.SHORT_READ_MNGS.value)}
-        >
-          <RadioButton
-            selected={selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)}
-            className={cs.radioButton}
-          />
-          <IconSample className={cs.iconSample} />
-          <div className={cs.optionText}>
-            <div className={cs.title}>Metagenomics</div>
-            <div className={cs.description}>
-              Run your samples through our metagenomics pipeline.
-            </div>
-          </div>
-        </div>
-        <div
-          className={cs.workflowOption}
-          onClick={() => onWorkflowToggle(WORKFLOWS.CONSENSUS_GENOME.value)}
-        >
-          <RadioButton
-            selected={selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)}
-            className={cs.radioButton}
-          />
-          <IconSample className={cs.iconSample} />
-          <div className={cs.optionText}>
-            <div className={cs.title}>
-              SARS-CoV-2 Consensus Genome
-              <ColumnHeaderTooltip
-                trigger={
-                  <span>
-                    <IconInfoSmall className={cs.infoIcon} />
-                  </span>
-                }
-                content="Consensus genome aligns short reads to a SARS-CoV-2 reference genome."
-                link={CONSENSUS_GENOME_DOC_LINK}
-                onClick={() =>
-                  logAnalyticsEvent(
-                    "WorkflowSelector_consensus-genome-doc-link_clicked"
-                  )
-                }
-              />
-            </div>
-            <div className={cs.description}>
-              Run your samples through our new pipeline to get consensus genomes
-              for SARS-CoV-2. Our assembly supports wet lab protocols:{" "}
-              {map("text", CG_WETLAB_OPTIONS).join(", ")}.
-            </div>
-            {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
-              this.renderWetlabSelector()}
+      <div
+        className={cs.selectableOption}
+        onClick={() => onWorkflowToggle(WORKFLOWS.SHORT_READ_MNGS.value)}
+      >
+        <RadioButton
+          selected={selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)}
+          className={cs.radioButton}
+        />
+        <IconSample className={cs.iconSample} />
+        <div className={cs.optionText}>
+          <div className={cs.title}>Metagenomics</div>
+          <div className={cs.description}>
+            Run your samples through our metagenomics pipeline. Our pipeline
+            only supports Illumina.
           </div>
         </div>
       </div>
     );
-  }
-}
+  };
+
+  const renderCGAnalysisType = () => {
+    const cgWorkflowSelected = selectedWorkflows.has(
+      WORKFLOWS.CONSENSUS_GENOME.value
+    );
+    return (
+      <div
+        className={cs.selectableOption}
+        onClick={() => onWorkflowToggle(WORKFLOWS.CONSENSUS_GENOME.value)}
+      >
+        <RadioButton selected={cgWorkflowSelected} className={cs.radioButton} />
+        <IconSample className={cs.iconSample} />
+        <div className={cs.optionText}>
+          <div className={cs.title}>SARS-CoV-2 Consensus Genome</div>
+          <div className={cs.description}>
+            Run your samples through our Illumina or Nanopore supported
+            pipelines to get consensus genomes for SARS-CoV-2.
+          </div>
+          {cgWorkflowSelected &&
+            (nanoporeFeatureEnabled
+              ? renderTechnologyOptions()
+              : renderWetlabSelector())}
+        </div>
+      </div>
+    );
+  };
+
+  const renderTechnologyOptions = () => {
+    return (
+      <div className={cs.optionText}>
+        <div className={cx(cs.title, cs.technologyTitle)}>
+          Sequencing Platform:
+          <div className={cs.technologyOptions}>
+            {renderIlluminaOption()}
+            {renderNanoporeOption()}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderIlluminaOption = () => {
+    const illuminaTechnologyOptionSelected =
+      selectedTechnology === CG_TECHNOLOGY_OPTIONS.ILLUMINA;
+
+    return (
+      <div
+        className={cx(cs.selectableOption, cs.technology)}
+        onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA)}
+      >
+        <RadioButton
+          selected={illuminaTechnologyOptionSelected}
+          className={cs.radioButton}
+        />
+        <div className={cs.optionText}>
+          <div className={cs.title}>Illumina</div>
+          <div className={cs.technologyDescription}>
+            You can check out the Illumina pipeline on GitHub{" "}
+            {createExternalLink({
+              analyticsEventName:
+                ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_CG_ILLUMINA_PIPELINE_GITHUB_LINK_CLICKED,
+              content: "here",
+              link: CG_ILLUMINA_PIPELINE_GITHUB_LINK,
+            })}
+            .
+          </div>
+          {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+            illuminaTechnologyOptionSelected &&
+            renderWetlabSelector()}
+        </div>
+      </div>
+    );
+  };
+
+  const renderNanoporeContent = () => (
+    <div className={cs.nanoporeContent}>
+      <div className={cs.item}>
+        <div className={cs.subheader}>Wetlab Protocol&#58;</div>
+        <div className={cs.description}>ARTIC v3</div>
+      </div>
+
+      <div className={cs.item}>
+        <div className={cs.subheader}>
+          Medaka Model:
+          <ColumnHeaderTooltip
+            trigger={<IconInfoSmall className={cs.infoIcon} />}
+            content={
+              "Medaka is a tool to create consensus sequences and variant calls from Nanopore sequencing data."
+            }
+            position={"top center"}
+          />
+        </div>
+        <div className={cs.description}>r941_min_fast_g303</div>
+      </div>
+    </div>
+  );
+
+  const renderNanoporeOption = () => {
+    const nanoporeTechnologyOptionSelected =
+      selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
+    return (
+      <div
+        className={cx(cs.selectableOption, cs.technology)}
+        onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE)}
+      >
+        <RadioButton
+          selected={nanoporeTechnologyOptionSelected}
+          className={cs.radioButton}
+        />
+        <div className={cs.optionText}>
+          <div className={cs.title}>Nanopore</div>
+          <div className={cs.technologyDescription}>
+            We are using the ARTIC network’s nCoV-2019 novel coronavirus
+            bioinformatics pipeline for Nanopore sequencing, which can be found{" "}
+            {createExternalLink({
+              analyticsEventName:
+                ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED,
+              content: "here",
+              link: ARTIC_PIPELINE_LINK,
+            })}
+            .
+          </div>
+          {nanoporeTechnologyOptionSelected && renderNanoporeContent()}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className={cs.workflowSelector}>
+      <div className={cs.header}>Analysis Type</div>
+      {renderMngsAnalysisType()}
+      {renderCGAnalysisType()}
+    </div>
+  );
+};
 
 WorkflowSelector.propTypes = {
+  onTechnologyToggle: PropTypes.func,
   onWetlabProtocolChange: PropTypes.func,
   onWorkflowToggle: PropTypes.func,
+  selectedTechnology: PropTypes.string,
   selectedWetlabProtocol: PropTypes.string,
   selectedWorkflows: PropTypes.instanceOf(Set),
 };

@@ -50,6 +50,18 @@ function EventDictionary() {
 
   this.PIPELINE_SAMPLE_REPORT_CONSENSUS_GENOME_LINK_CLICKED =
     "PIPELINE_SAMPLE_REPORT_CONSENSUS_GENOME_LINK_CLICKED";
+
+  /** The user clicked a Consensus Genome technology in the Sample Upload Flow. */
+  this.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED =
+    "UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED";
+
+  /** The user clicked the "here" link under the Consensus Genome Illumina technology option in the Sample Upload Flow. */
+  this.UPLOAD_SAMPLE_CG_ILLUMINA_PIPELINE_GITHUB_LINK_CLICKED =
+    "UPLOAD_SAMPLE_CG_ILLUMINA_PIPELINE_GITHUB_LINK_CLICKED";
+
+  /** The user clicked the "here" link under the Consensus Genome Nanopore technology option in the Sample Upload Flow. */
+  this.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED =
+    "UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED";
 }
 
 const eventNames = new EventDictionary();

@@ -4,6 +4,8 @@ RSpec.describe "Sample request", type: :request do
   create_users
 
   context 'Joe' do
+    let(:illumina_technology) { ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina] }
+
     before do
       sign_in @joe
     end
@@ -253,6 +255,8 @@ RSpec.describe "Sample request", type: :request do
 
         it "should properly create the consensus genome workflow" do
           sample_params = @sample_params.dup
+          sample_params[:technology] = illumina_technology
+          sample_params[:wetlab_protocol] = ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic]
           sample_params[:workflows] = ["consensus-genome"]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
@@ -270,6 +274,7 @@ RSpec.describe "Sample request", type: :request do
         it "should fail with a bogus pipeline workflow selection" do
           sample_params = @sample_params.dup
           bogus_pipeline_workflow = "foobar"
+          sample_params[:technology] = illumina_technology
           sample_params[:workflows] = [bogus_pipeline_workflow]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
@@ -281,6 +286,7 @@ RSpec.describe "Sample request", type: :request do
 
         it "should properly set the selected wetlab protocol" do
           sample_params = @sample_params.dup
+          sample_params[:technology] = illumina_technology
           sample_params[:wetlab_protocol] = ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic]
           sample_params[:workflows] = [WorkflowRun::WORKFLOW[:consensus_genome]]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
@@ -297,6 +303,7 @@ RSpec.describe "Sample request", type: :request do
 
         it "should succeed without a wetlab protocol for mNGS runs" do
           sample_params = @sample_params.dup
+          sample_params[:technology] = illumina_technology
           sample_params[:workflows] = [WorkflowRun::WORKFLOW[:short_read_mngs]]
           sample_params[:wetlab_protocol] = nil
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }

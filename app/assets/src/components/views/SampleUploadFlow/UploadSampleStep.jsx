@@ -35,9 +35,14 @@ import ProjectSelect from "~/components/common/ProjectSelect";
 import Tabs from "~/components/ui/controls/Tabs";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  logAnalyticsEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
 import { UserContext } from "~/components/common/UserContext";
+import { NANOPORE_FEATURE } from "~/components/utils/features";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 
@@ -48,7 +53,11 @@ import WorkflowSelector from "./WorkflowSelector";
 import cs from "./sample_upload_flow.scss";
 import SampleUploadTable from "./SampleUploadTable";
 import { openBasespaceOAuthPopup } from "./utils";
-import { SELECT_ID_KEY } from "./constants";
+import {
+  CG_TECHNOLOGY_OPTIONS,
+  SELECT_ID_KEY,
+  TEMP_DEFAULT_NANOPORE_WETLAB_OPTION,
+} from "./constants";
 
 const LOCAL_UPLOAD = "local";
 const REMOTE_UPLOAD = "remote";
@@ -62,24 +71,25 @@ const UPLOADSAMPLESTEP_SAMPLE_CHANGED = "UploadSampleStep_sample_changed";
 
 class UploadSampleStep extends React.Component {
   state = {
-    selectedProject: null,
+    basespaceAccessToken: null,
+    basespaceSamples: [],
+    basespaceSelectedSampleIds: new Set(),
     createProjectOpen: false,
-    projects: [],
     currentTab: LOCAL_UPLOAD,
     localSamples: [],
-    remoteSamples: [],
-    basespaceSamples: [],
     // We generate a unique "selectId" for each sample, which we use to store which samples are selected.
     // This simplifies the logic, because sample names can change (they can get renamed when de-duped)
     localSelectedSampleIds: new Set(),
+    projects: [],
+    remoteSamples: [],
     remoteSelectedSampleIds: new Set(),
-    basespaceSelectedSampleIds: new Set(),
-    basespaceAccessToken: null,
     removedLocalFiles: [], // Invalid local files that were removed.
-    validatingSamples: false, // Disable the "Continue" button while validating samples.
-    showNoProjectError: false, // Whether we should show an error if no project is currently selected.
-    selectedWorkflows: new Set([WORKFLOWS.SHORT_READ_MNGS.value]),
+    selectedTechnology: null,
+    selectedProject: null,
     selectedWetlabProtocol: null,
+    selectedWorkflows: new Set(),
+    showNoProjectError: false, // Whether we should show an error if no project is currently selected.
+    validatingSamples: false, // Disable the "Continue" button while validating samples.
   };
 
   async componentDidMount() {
@@ -338,8 +348,24 @@ class UploadSampleStep extends React.Component {
       this.setState({
         selectedWorkflows: new Set([workflow]),
         selectedWetlabProtocol: null,
+        selectedTechnology: null,
       });
       logAnalyticsEvent(`UploadSampleStep_${workflow}-workflow_selected`);
+    }
+  };
+
+  handleTechnologyToggle = technology => {
+    const { selectedWorkflows } = this.state;
+
+    if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
+      this.setState({
+        selectedTechnology: technology,
+      });
+
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_TECHNOLOGY_CLICKED,
+        { technology }
+      );
     }
   };
 
@@ -639,30 +665,38 @@ class UploadSampleStep extends React.Component {
   // *** Miscellaneous functions ***
 
   handleContinue = () => {
+    const { onUploadSamples } = this.props;
     const {
       currentTab,
+      selectedTechnology,
       selectedProject,
       selectedWorkflows,
       selectedWetlabProtocol,
     } = this.state;
 
-    if (this.state.currentTab === BASESPACE_UPLOAD) {
+    if (currentTab === BASESPACE_UPLOAD) {
       this.requestBasespaceReadProjectPermissions();
     } else {
-      this.props.onUploadSamples({
+      onUploadSamples({
+        technology: selectedTechnology,
         project: selectedProject,
         samples: this.getSelectedSamples(currentTab),
         uploadType: currentTab,
-        wetlabProtocol: selectedWetlabProtocol,
+        // For now, if Nanopore was selected as the sequencing platform, default to ARTIC v3 Wetlab Protocol
+        wetlabProtocol:
+          selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE
+            ? TEMP_DEFAULT_NANOPORE_WETLAB_OPTION
+            : selectedWetlabProtocol,
         workflows: selectedWorkflows,
       });
     }
 
     logAnalyticsEvent("UploadSampleStep_continue-button_clicked", {
+      basespaceSamples: this.state.basespaceSamples.length,
+      technology: selectedTechnology,
+      currentTab: this.state.currentTab,
       localSamples: this.state.localSamples.length,
       remoteSamples: this.state.remoteSamples.length,
-      basespaceSamples: this.state.basespaceSamples.length,
-      currentTab: this.state.currentTab,
       wetlabProtocol: selectedWetlabProtocol,
       workflows: selectedWorkflows,
       ...this.getAnalyticsContext(),
@@ -671,19 +705,37 @@ class UploadSampleStep extends React.Component {
 
   // Whether the current user input is valid. Determines whether the Continue button is enabled.
   isValid = () => {
+    const { allowedFeatures = [] } = this.context || {};
     const {
       currentTab,
+      selectedTechnology,
       selectedProject,
       selectedWetlabProtocol,
       selectedWorkflows,
       validatingSamples,
     } = this.state;
 
-    const workflowsValid = selectedWorkflows.has(
-      WORKFLOWS.CONSENSUS_GENOME.value
-    )
-      ? !!selectedWetlabProtocol
-      : true;
+    let workflowsValid;
+    if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
+      if (allowedFeatures.includes(NANOPORE_FEATURE)) {
+        switch (selectedTechnology) {
+          case CG_TECHNOLOGY_OPTIONS.ILLUMINA:
+            workflowsValid = !!selectedWetlabProtocol;
+            break;
+          case CG_TECHNOLOGY_OPTIONS.NANOPORE:
+            workflowsValid = true;
+            break;
+          default:
+            workflowsValid = false;
+            break;
+        }
+      } else {
+        workflowsValid = !!selectedWetlabProtocol;
+      }
+    } else if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
+      workflowsValid = true;
+    }
+
     return (
       selectedProject !== null &&
       size(this.getSelectedSamples(currentTab)) > 0 &&
@@ -742,6 +794,7 @@ class UploadSampleStep extends React.Component {
   render() {
     const {
       currentTab,
+      selectedTechnology,
       selectedWorkflows,
       selectedWetlabProtocol,
     } = this.state;
@@ -797,7 +850,9 @@ class UploadSampleStep extends React.Component {
           </div>
           <WorkflowSelector
             onWetlabProtocolChange={this.handleWetlabProtocolChange}
+            onTechnologyToggle={this.handleTechnologyToggle}
             onWorkflowToggle={this.handleWorkflowToggle}
+            selectedTechnology={selectedTechnology}
             selectedWorkflows={selectedWorkflows}
             selectedWetlabProtocol={selectedWetlabProtocol}
           />

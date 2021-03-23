@@ -237,6 +237,7 @@ class ReviewStep extends React.Component {
     } = this.state;
 
     const {
+      technology,
       metadata,
       onUploadComplete,
       originalHostGenomes,
@@ -414,6 +415,7 @@ class ReviewStep extends React.Component {
           {showUploadModal && (
             <UploadProgressModal
               adminOptions={adminOptions}
+              technology={technology}
               metadata={processMetadataRows(metadata.rows)}
               onUploadComplete={onUploadComplete}
               project={project}

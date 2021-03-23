@@ -418,8 +418,7 @@ module SamplesHelper
       top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
       job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
         cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
-        # TODO: Remove Illumina default once Technology is added to the upload flow (CH-124571) and backfilled.
-        technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_NAME[top_cg_workflow_run&.inputs&.[]("technology")]&.capitalize || ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina],
+        technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_NAME[top_cg_workflow_run&.inputs&.[]("technology")]&.capitalize,
         wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
       }
 
@@ -523,6 +522,7 @@ module SamplesHelper
     workflow_runs = []
 
     samples_to_upload.each do |sample_attributes|
+      should_attempt_to_save_sample = true
       # A sample won't have input files if and only if it is being uploaded from basespace.
       if sample_attributes[:input_files_attributes]
         sample_attributes[:input_files_attributes].reject! { |f| f["source"] == '' }
@@ -550,7 +550,12 @@ module SamplesHelper
 
       # Frontend uploader only lets the user select one workflow at a time, so select the only workflow in the array.
       workflow = sample_attributes[:initial_workflow] = sample_attributes.delete(:workflows)[0] if sample_attributes[:workflows].present?
-      technology = sample_attributes.delete(:technology) if sample_attributes[:technology].present?
+      technology = sample_attributes.delete(:technology) if sample_attributes.key?(:technology)
+
+      if workflow == WorkflowRun::WORKFLOW[:consensus_genome] && technology.nil?
+        should_attempt_to_save_sample = false
+        errors << SampleUploadErrors.missing_required_technology_for_cg(sample_attributes[:name])
+      end
 
       if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
         # TODO: current default values; to be exposed as a user-facing option in a future version
@@ -579,7 +584,7 @@ module SamplesHelper
       sample.status = Sample::STATUS_CREATED
       sample.user = user
 
-      if sample.save
+      if should_attempt_to_save_sample && sample.save
         samples << sample
 
         if workflow == WorkflowRun::WORKFLOW[:consensus_genome]

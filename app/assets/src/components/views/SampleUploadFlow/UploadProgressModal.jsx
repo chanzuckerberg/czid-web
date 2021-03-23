@@ -136,6 +136,7 @@ export default class UploadProgressModal extends React.Component {
   addFlagsToSamples = samples => {
     const {
       adminOptions,
+      technology,
       skipSampleProcessing,
       useStepFunctionPipeline,
       wetlabProtocol,
@@ -150,6 +151,7 @@ export default class UploadProgressModal extends React.Component {
       ...sample,
       do_not_process: skipSampleProcessing,
       pipeline_execution_strategy,
+      technology,
       wetlab_protocol: wetlabProtocol,
       workflows: Array.from(workflows),
       ...adminOptions,
@@ -205,6 +207,7 @@ export default class UploadProgressModal extends React.Component {
     const { metadata, samples } = this.props;
 
     const samplesToUpload = this.addFlagsToSamples(samples);
+
     initiateBulkUploadLocalWithMetadata({
       samples: samplesToUpload,
       metadata,

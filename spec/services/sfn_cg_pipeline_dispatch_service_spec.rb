@@ -17,6 +17,8 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
   let(:fake_wdl_version) { "10.0.0" }
   let(:medaka_model) { ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL }
   let(:vadr_options) { ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS }
+  let(:illumina_technology) { ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:illumina] }
+  let(:nanopore_technology) { ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore] }
   let(:fake_states_client) do
     Aws::States::Client.new(
       stub_responses: {
@@ -54,7 +56,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
            workflow: test_workflow_name,
            status: WorkflowRun::STATUS[:created],
            sample: sample,
-           inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:msspe] }.to_json)
+           inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:msspe] }.to_json)
   end
 
   describe "#call" do
@@ -153,8 +155,9 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
         end
+
         it "returns sfn input with artic primer" do
           expect(subject).to include_json(
             sfn_input_json: {
@@ -174,8 +177,9 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:snap] }.to_json)
         end
+
         it "returns sfn input with SNAP primer" do
           expect(subject).to include_json(
             sfn_input_json: {
@@ -195,8 +199,9 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:combined_msspe_artic] }.to_json)
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:combined_msspe_artic] }.to_json)
         end
+
         it "returns sfn input with MSSPE + ARTIC primer" do
           expect(subject).to include_json(
             sfn_input_json: {
@@ -216,8 +221,9 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:ampliseq] }.to_json)
         end
+
         it "returns sfn input with AmpliSeq primer" do
           expect(subject).to include_json(
             sfn_input_json: {
@@ -237,8 +243,9 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic_short_amplicons] }.to_json)
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic_short_amplicons] }.to_json)
         end
+
         it "returns sfn input with ARTIC short amplicons primer" do
           expect(subject).to include_json(
             sfn_input_json: {
@@ -258,8 +265,9 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { accession_id: "MN908947.3" }.to_json)
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3" }.to_json)
         end
+
         it "throws an error" do
           expect { subject }.to raise_error(SfnCGPipelineDispatchService::WetlabProtocolMissingError)
         end
@@ -271,7 +279,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { accession_id: 1 }.to_json)
+                 inputs_json: { technology: illumina_technology, accession_id: 1 }.to_json)
         end
 
         it "returns sfn input containing correct sfn parameters" do
@@ -295,7 +303,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
+                 inputs_json: { technology: illumina_technology, accession_id: "MN908947.3", wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic] }.to_json)
         end
 
         it "returns sfn input containing correct sfn parameters for sars-cov-2" do
@@ -318,20 +326,35 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore], medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
+                 inputs_json: { technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
         end
+
         it "returns sfn input containing correct sfn parameters" do
           expect(subject).to include_json(
             sfn_input_json: {
               Input: {
                 Run: {
-                  technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore],
+                  technology: nanopore_technology,
                   medaka_model: medaka_model,
                   vadr_options: vadr_options,
                 },
               },
             }
           )
+        end
+      end
+
+      context "when a nanopore run is selected but the workflow_runs does not contain the technology input" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
+        end
+
+        it "fails with TechnologyMissingError" do
+          expect { subject }.to raise_error(SfnCGPipelineDispatchService::TechnologyMissingError)
         end
       end
     end
