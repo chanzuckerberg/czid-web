@@ -1185,8 +1185,11 @@ class SamplesController < ApplicationController
   def kickoff_workflow
     workflow = collection_params[:workflow]
     inputs_json = collection_params[:inputs_json].to_json
-    workflow_run = @sample.create_and_dispatch_workflow_run(workflow, inputs_json: inputs_json)
-    render json: workflow_run
+    @sample.create_and_dispatch_workflow_run(workflow, inputs_json: inputs_json)
+    render json: @sample.workflow_runs.non_deprecated.reverse.as_json(
+      only: WORKFLOW_RUN_DEFAULT_FIELDS,
+      methods: [:input_error, :inputs]
+    )
   end
 
   def cli_user_instructions
@@ -1396,7 +1399,7 @@ class SamplesController < ApplicationController
 
   # Doesn't require :sample or :samples
   def collection_params
-    permitted_params = [:referenceTree, :workflow, sampleIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name]]
+    permitted_params = [:referenceTree, :workflow, sampleIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name, :technology]]
     params.permit(*permitted_params)
   end
 

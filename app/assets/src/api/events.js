@@ -32,6 +32,10 @@ function EventDictionary() {
   this.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED =
     "NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED";
 
+  /** The user clicked the "contact us" link in the Nextclade error modal. */
+  this.NEXTCLADE_MODAL_ERROR_MODAL_HELP_LINK_CLICKED =
+    "NEXTCLADE_MODAL_ERROR_MODAL_HELP_LINK_CLICKED";
+
   /** The user changed their selected accession in the Consensus Genome Creation modal. */
   this.CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED =
     "CONSENSUS_GENOME_CREATION_MODAL_SELECTED_ACCESSION_CHANGED";
@@ -71,6 +75,22 @@ function EventDictionary() {
   /** The user clicked the hover action to open up previous Consensus Genome runs from the mngs report page taxon row. */
   this.REPORT_TABLE_PREVIOUS_CONSENSUS_GENOME_HOVER_ACTION_CLICKED =
     "REPORT_TABLE_PREVIOUS_CONSENSUS_GENOME_HOVER_ACTION_CLICKED";
+
+  /** The user clicked the "contact us" link in the Consensus Genome creation error modal. */
+  this.CONSENSUS_GENOME_ERROR_MODAL_HELP_LINK_CLICKED =
+    "CONSENSUS_GENOME_ERROR_MODAL_HELP_LINK_CLICKED";
+
+  /** The operation to kickoff a Consensus Genome run from an mNGS report failed. */
+  this.CONSENSUS_GENOME_CREATION_MODAL_KICKOFF_FAILED =
+    "CONSENSUS_GENOME_CREATION_MODAL_KICKOFF_FAILED";
+
+  /** The user clicked Retry after the Consensus Genome kickoff failed. */
+  this.CONSENSUS_GENOME_ERROR_MODAL_RETRY_BUTTON_CLICKED =
+    "CONSENSUS_GENOME_ERROR_MODAL_RETRY_BUTTON_CLICKED";
+
+  /** There was a failure upon retrying the kickoff of a Consensus Genome run from an mNGS report. */
+  this.CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED =
+    "CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED";
 }
 
 const eventNames = new EventDictionary();

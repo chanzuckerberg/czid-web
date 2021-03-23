@@ -477,6 +477,7 @@ const kickoffConsensusGenome = ({
   accessionName,
   taxonId,
   taxonName,
+  technology,
 }) =>
   postWithCSRF(`/samples/${sampleId}/kickoff_workflow`, {
     workflow,
@@ -485,6 +486,7 @@ const kickoffConsensusGenome = ({
       accession_name: accessionName,
       taxon_id: taxonId,
       taxon_name: taxonName,
+      technology,
     },
   });
 

@@ -36,12 +36,18 @@ import {
   kickoffConsensusGenome,
 } from "~/api";
 import { getAmrData } from "~/api/amr";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  logAnalyticsEvent,
+  withAnalytics,
+  ANALYTICS_EVENT_NAMES,
+} from "~/api/analytics";
 import AMRView from "~/components/AMRView";
+import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import ErrorModal from "~/components/ui/containers/ErrorModal";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
@@ -115,9 +121,11 @@ class SampleView extends React.Component {
       {
         amrData: null,
         backgrounds: [],
-        consensusGenomeParams: {},
+        consensusGenomeData: {},
+        consensusGenomeCreationParams: {},
         consensusGenomePreviousParams: {},
         consensusGenomeCreationModalVisible: false,
+        consensusGenomeErrorModalVisible: false,
         consensusGenomePreviousModalVisible: false,
         coverageVizDataByTaxon: {},
         coverageVizParams: {},
@@ -938,11 +946,40 @@ class SampleView extends React.Component {
     });
   };
 
+  handleConsensusGenomeKickoff = async ({
+    accessionId,
+    accessionName,
+    taxonId,
+    taxonName,
+  }) => {
+    const { sample } = this.state;
+    const workflowRuns = await kickoffConsensusGenome({
+      sampleId: sample.id,
+      workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+      accessionId,
+      accessionName,
+      taxonId,
+      taxonName,
+      technology: CG_TECHNOLOGY_OPTIONS.ILLUMINA,
+    });
+
+    this.setState({
+      consensusGenomeErrorModalVisible: false,
+      // Update the sample's workflow runs to include the newly created CG run and ensure the CG tab is displayed.
+      sample: {
+        ...sample,
+        workflow_runs: workflowRuns,
+      },
+    });
+    this.showNotification(NOTIFICATION_TYPES.consensusGenomeCreated);
+    this.handleCloseConsensusGenomeCreationModal();
+  };
+
   handleConsensusGenomeClick = ({ percentIdentity, taxId, taxName }) => {
     const { coverageVizDataByTaxon } = this.state;
     const accessionData = get(taxId, coverageVizDataByTaxon);
     this.setState({
-      consensusGenomeParams: {
+      consensusGenomeData: {
         accessionData,
         percentIdentity,
         taxId,
@@ -969,33 +1006,103 @@ class SampleView extends React.Component {
     });
   };
 
-  onConsensusGenomeCreation = ({
+  onConsensusGenomeCreation = async ({
     accessionId,
     accessionName,
     taxonId,
     taxonName,
   }) => {
     const { sample } = this.state;
-    kickoffConsensusGenome({
-      sampleId: sample.id,
-      workflow: WORKFLOWS.CONSENSUS_GENOME.value,
-      accessionId,
-      accessionName,
-      taxonId,
-      taxonName,
-    });
-
-    // Re-fetch the sample data to include the newly created CG workflow run and ensure the CG tab is displayed.
-    this.fetchSample();
-    this.showNotification(NOTIFICATION_TYPES.consensusGenomeCreated);
-    this.handleCloseConsensusGenomeCreationModal();
-    this.handleCloseConsensusGenomePreviousModal();
+    try {
+      // Save the creation parameters if kickoff fails and we need to retry.
+      this.setState({
+        consensusGenomeCreationParams: {
+          accessionId,
+          accessionName,
+          taxonId,
+          taxonName,
+        },
+      });
+      await this.handleConsensusGenomeKickoff({
+        accessionId,
+        accessionName,
+        taxonId,
+        taxonName,
+      });
+    } catch (error) {
+      this.setState(
+        {
+          consensusGenomeErrorModalVisible: true,
+        },
+        () => {
+          console.error(error);
+          logAnalyticsEvent(
+            ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_KICKOFF_FAILED,
+            {
+              error,
+              sampleId: sample.id,
+              accessionId,
+              accessionName,
+              taxonId,
+              taxonName,
+            }
+          );
+        }
+      );
+    }
   };
 
   handleCloseConsensusGenomeCreationModal = () => {
     this.setState({
       consensusGenomeCreationModalVisible: false,
     });
+  };
+
+  handleConsensusGenomeErrorModalRetry = async () => {
+    const { consensusGenomeCreationParams, sample } = this.state;
+    const {
+      accessionId,
+      accessionName,
+      taxonId,
+      taxonName,
+    } = consensusGenomeCreationParams;
+
+    try {
+      await this.handleConsensusGenomeKickoff({
+        accessionId,
+        accessionName,
+        taxonId,
+        taxonName,
+      });
+
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_ERROR_MODAL_RETRY_BUTTON_CLICKED,
+        {
+          accessionId,
+          accessionName,
+          taxonId,
+          taxonName,
+          sampleId: sample.id,
+        }
+      );
+    } catch (error) {
+      console.error(error);
+      logAnalyticsEvent(
+        ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED,
+        {
+          error,
+          sampleId: sample.id,
+          accessionId,
+          accessionName,
+          taxonId,
+          taxonName,
+        }
+      );
+    }
+  };
+
+  handleConsensusGenomeErrorModalClose = () => {
+    this.setState({ consensusGenomeErrorModalVisible: false });
   };
 
   handleCloseConsensusGenomePreviousModal = () => {
@@ -1715,9 +1822,10 @@ class SampleView extends React.Component {
   render = () => {
     const {
       amrData,
-      consensusGenomeParams,
+      consensusGenomeData,
       consensusGenomePreviousParams,
       consensusGenomeCreationModalVisible,
+      consensusGenomeErrorModalVisible,
       consensusGenomePreviousModalVisible,
       coverageVizVisible,
       currentTab,
@@ -1823,7 +1931,7 @@ class SampleView extends React.Component {
         )}
         {consensusGenomeCreationModalVisible && (
           <ConsensusGenomeCreationModal
-            consensusGenomeData={consensusGenomeParams}
+            consensusGenomeData={consensusGenomeData}
             onClose={this.handleCloseConsensusGenomeCreationModal}
             onCreation={this.onConsensusGenomeCreation}
             open={consensusGenomeCreationModalVisible}
@@ -1837,6 +1945,20 @@ class SampleView extends React.Component {
             onNew={this.handleConsensusGenomeClick}
             open={consensusGenomePreviousModalVisible}
             sample={sample}
+          />
+        )}
+        {consensusGenomeErrorModalVisible && (
+          <ErrorModal
+            helpLinkEvent={
+              ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_ERROR_MODAL_HELP_LINK_CLICKED
+            }
+            labelText="Failed"
+            open={consensusGenomeErrorModalVisible}
+            onCancel={this.handleConsensusGenomeErrorModalClose}
+            onConfirm={this.handleConsensusGenomeErrorModalRetry}
+            title={
+              "Sorry! There was an error starting your consensus genome run."
+            }
           />
         )}
       </React.Fragment>

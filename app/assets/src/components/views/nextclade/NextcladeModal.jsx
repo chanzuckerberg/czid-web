@@ -23,10 +23,10 @@ import {
 } from "~/components/utils/documentationLinks";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import { IconInfoSmall } from "~/components/ui/icons";
+import ErrorModal from "~/components/ui/containers/ErrorModal";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
-import NextcladeErrorModal from "./NextcladeErrorModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
 import List from "~/components/ui/List";
@@ -356,10 +356,17 @@ export default class NextcladeModal extends React.Component {
           />
         )}
         {errorModalOpen && (
-          <NextcladeErrorModal
+          <ErrorModal
+            helpLinkEvent={
+              ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_ERROR_MODAL_HELP_LINK_CLICKED
+            }
+            labelText="Failed to send"
             open
             onCancel={this.handleErrorModalClose}
             onConfirm={this.handleErrorModalRetry}
+            title={
+              "Sorry! There was an error sending your samples to Nextclade."
+            }
           />
         )}
       </Modal>
