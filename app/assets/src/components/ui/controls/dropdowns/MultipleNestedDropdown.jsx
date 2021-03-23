@@ -239,7 +239,6 @@ class MultipleNestedDropdown extends React.Component {
         label={labelText}
         value={label}
         rounded={this.props.rounded}
-        hideBadgeIfInsufficientSpace={this.props.hideBadgeIfInsufficientSpace}
       />
     );
   }
@@ -257,7 +256,6 @@ class MultipleNestedDropdown extends React.Component {
         // This component needs to implement the itemSearchStrings prop before search will work.
         // Manually disable the search prop for now.
         "search",
-        "hideBadgeIfInsufficientSpace",
       ],
       this.props
     );
@@ -290,7 +288,6 @@ MultipleNestedDropdown.propTypes = {
   selectedSuboptions: PropTypes.object,
   disabled: PropTypes.bool,
   rounded: PropTypes.bool,
-  hideBadgeIfInsufficientSpace: PropTypes.bool,
 };
 
 export default MultipleNestedDropdown;

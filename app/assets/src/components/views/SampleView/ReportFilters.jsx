@@ -181,7 +181,6 @@ class ReportFilters extends React.Component {
           <div className={cs.filterListElement}>
             <CategoryFilter
               allCategories={CATEGORIES}
-              hideBadgeIfInsufficientSpace={false}
               categoryParentChild={transform((result, category) => {
                 if (category.children) {
                   result[category.name] = category.children;
@@ -220,7 +219,6 @@ class ReportFilters extends React.Component {
                 operators: [">=", "<="],
               }}
               thresholds={selected.thresholds}
-              hideBadgeIfInsufficientSpace={false}
               onApply={value =>
                 this.handleFilterChange({
                   key: "thresholds",

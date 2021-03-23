@@ -88,7 +88,6 @@ export default class SamplesHeatmapControls extends React.Component {
         selectedSuboptions={this.props.selectedOptions.subcategories}
         label="Categories"
         disabled={this.props.loading || !this.props.data}
-        hideBadgeIfInsufficientSpace
       />
     );
   }
@@ -169,7 +168,6 @@ export default class SamplesHeatmapControls extends React.Component {
         thresholds={selectedOptions.thresholdFilters}
         onApply={this.onThresholdFilterApply}
         disabled={this.props.loading || !this.props.data}
-        hideBadgeIfInsufficientSpace
       />
     );
   }

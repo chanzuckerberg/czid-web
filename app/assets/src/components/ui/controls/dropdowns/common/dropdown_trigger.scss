@@ -12,6 +12,7 @@
   line-height: 24px;
   padding: 4px 26px 4px 14px;
   font-size: 13px;
+  overflow: hidden;
 
   &.rounded {
     border-radius: $border-radius-l;

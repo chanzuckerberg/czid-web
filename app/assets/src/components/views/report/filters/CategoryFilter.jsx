@@ -8,7 +8,6 @@ const CategoryFilter = ({
   categoryParentChild,
   categoryChildParent,
   disabled = false,
-  hideBadgeIfInsufficientSpace,
   selectedCategories,
   selectedSubcategories,
   onChange,
@@ -47,7 +46,6 @@ const CategoryFilter = ({
       rounded
       label="Categories"
       onChange={onChange}
-      hideBadgeIfInsufficientSpace={hideBadgeIfInsufficientSpace}
       disabled={disabled}
     />
   );
@@ -63,7 +61,6 @@ CategoryFilter.propTypes = {
     .isRequired,
   categoryChildParent: PropTypes.objectOf(PropTypes.string).isRequired,
   disabled: PropTypes.bool,
-  hideBadgeIfInsufficientSpace: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
   selectedSubcategories: PropTypes.arrayOf(PropTypes.string).isRequired,
