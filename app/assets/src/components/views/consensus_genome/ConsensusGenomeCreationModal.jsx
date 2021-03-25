@@ -27,20 +27,34 @@ export default class ConsensusGenomeCreationModal extends React.Component {
 
   getReferenceGenomes = () => {
     const { consensusGenomeData } = this.props;
-    const { accessionData, percentIdentity } = consensusGenomeData;
+    const {
+      accessionData,
+      percentIdentity,
+      usedAccessions,
+    } = consensusGenomeData;
 
     // If accessionData doesn't exist, just pass an empty list.
     if (!accessionData) {
       return [];
     }
 
-    return accessionData.best_accessions.map((data, index) => ({
-      value: index,
-      text: data.name,
-      subtext: `${percentIdentity} %id, ${this.getSequenceCompleteness(
+    return accessionData.best_accessions.map((data, index) => {
+      const disabled = usedAccessions.includes(data.id);
+      const subtext = `${percentIdentity} %id, ${this.getSequenceCompleteness(
         data.name
-      )}, ${data.coverage_depth}x coverage`,
-    }));
+      )}, ${data.coverage_depth}x coverage`;
+
+      return {
+        disabled,
+        subtext,
+        text: data.name,
+        value: index,
+        ...(disabled && {
+          tooltip:
+            "A consensus genome has already been generated for this accession",
+        }),
+      };
+    });
   };
 
   getSequenceCompleteness = accessionName => {
@@ -166,6 +180,7 @@ ConsensusGenomeCreationModal.propTypes = {
     percentIdentity: PropTypes.number,
     taxId: PropTypes.number,
     taxName: PropTypes.string,
+    usedAccessions: PropTypes.arrayOf(PropTypes.string),
   }),
   open: PropTypes.bool,
   onClose: PropTypes.func.isRequired,

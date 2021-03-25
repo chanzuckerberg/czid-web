@@ -22,6 +22,7 @@ import {
   size,
   some,
   sum,
+  uniq,
   values,
 } from "lodash/fp";
 import React from "react";
@@ -977,13 +978,18 @@ class SampleView extends React.Component {
 
   handleConsensusGenomeClick = ({ percentIdentity, taxId, taxName }) => {
     const { coverageVizDataByTaxon } = this.state;
+
     const accessionData = get(taxId, coverageVizDataByTaxon);
+    const usedAccessions = uniq(
+      map("inputs.accession_id", get(taxId, this.getConsensusGenomeData()))
+    );
     this.setState({
       consensusGenomeData: {
         accessionData,
         percentIdentity,
         taxId,
         taxName,
+        usedAccessions,
       },
       consensusGenomeCreationModalVisible: true,
     });
