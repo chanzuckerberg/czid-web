@@ -139,6 +139,8 @@ class SfnCGPipelineDispatchService
                             technology: technology,
                             medaka_model: @workflow_run.inputs&.[]("medaka_model"),
                             vadr_options: @workflow_run.inputs&.[]("vadr_options"),
+                            # Remove ref_fasta once it's changed to an optional wdl input for ONT runs.
+                            ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/MN908947.3.fa",
                           }
                         elsif @workflow_run.inputs&.[]("accession_id") == "MN908947.3"
                           # illumina sars-cov-2 cg

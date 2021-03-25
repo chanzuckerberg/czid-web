@@ -20,7 +20,7 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     snap: "snap",
   }.freeze
 
-  DEFAULT_MEDAKA_MODEL = "r941_grid_fast_g303".freeze
+  DEFAULT_MEDAKA_MODEL = "r941_min_high_g360".freeze
   # Never interpolate user input into DEFAULT_VADR_OPTIONS to prevent command injection.
   DEFAULT_VADR_OPTIONS = "-s -r --nomisc --mkey NC_045512 --lowsim5term 2 --lowsim3term 2 --fstlowthr 0.0 --alt_fail lowscore,fsthicnf,fstlocnf".freeze
 
