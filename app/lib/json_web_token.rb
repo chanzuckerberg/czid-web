@@ -7,25 +7,20 @@ class JsonWebToken
   AUTH0_DOMAIN = ENV["AUTH0_DOMAIN"]
   AUTH0_CLIENT_ID = ENV["AUTH0_CLIENT_ID"]
 
+  AUTH0_CLI_AUDIENCE = ENV["AUTH0_CLI_AUDIENCE"]
+  AUTH0_CLI_ISSUER = ENV["AUTH0_CLI_ISSUER"]
+
   JWT_JWKS_KEYS_URL = "https://#{AUTH0_DOMAIN}/.well-known/jwks.json"
   JWT_TOKEN_ISS = "https://#{AUTH0_DOMAIN}/"
 
   @jwks_hash_cache = {}
 
-  # Verify the signature of JWT token using jwks keys retrieved from Auth0
-  # https://auth0.com/docs/jwks
-  def self.verify(token)
-    JWT.decode(
-      token, nil,
-      true, # Verify the signature of this token
-      algorithm: 'RS256',
-      iss: JWT_TOKEN_ISS,
-      verify_iss: true,
-      aud: AUTH0_CLIENT_ID,
-      verify_aud: true
-    ) do |header|
-      cached_jwks(header['kid'])
-    end
+  def self.verify_application(token)
+    verify(token, AUTH0_CLIENT_ID, JWT_TOKEN_ISS)
+  end
+
+  def self.verify_cli(token)
+    verify(token, AUTH0_CLI_AUDIENCE, AUTH0_CLI_ISSUER)
   end
 
   # Retrieve jwks key for a specific key id
@@ -61,4 +56,22 @@ class JsonWebToken
       end
     ]
   end
+
+  # Verify the signature of JWT token using jwks keys retrieved from Auth0
+  # https://auth0.com/docs/jwks
+  def self.verify(token, audience, iss)
+    JWT.decode(
+      token, nil,
+      true, # Verify the signature of this token
+      algorithm: 'RS256',
+      iss: iss,
+      verify_iss: true,
+      aud: audience,
+      verify_aud: true
+    ) do |header|
+      cached_jwks(header['kid'])
+    end
+  end
+
+  private_class_method :verify
 end

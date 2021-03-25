@@ -111,11 +111,21 @@ class ApplicationController < ActionController::Base
   end
 
   # This method is only used to login users using tokens
+  # These tokens are issued via the CLI authentication flow
   # It is not intended to replace the authenticate_user! method, which
   # must be invoked regardless.
   # authenticate_user! is used for verifying if the user is already logged in
   # and redirecting to the homepage in case they are not.
   def token_based_login_support
+    if request.headers['Authorization'].present?
+      @auth0_cli_auth = true
+      bearer_token = request.headers['Authorization'].split(' ').last
+      authorized = auth0_authenticate_with_bearer_token({ "id_token" => bearer_token })
+      @token_based_login_request = authorized
+      return
+    end
+
+    # TODO: remove legacy token login support
     user_email = request.headers['X-User-Email'] || params[:user_email]
     user_token = request.headers['X-User-Token'] || params[:user_token]
 

@@ -110,6 +110,12 @@ module Auth0Helper
 
   def auth_token
     token = http_token
-    JsonWebToken.verify(token) if token
+    return unless token
+
+    if @auth0_cli_auth
+      JsonWebToken.verify_cli(token)
+    else
+      JsonWebToken.verify_application(token)
+    end
   end
 end

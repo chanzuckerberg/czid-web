@@ -1,6 +1,15 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 
+.deprecationBanner {
+  background-color: $error-light;
+  padding: 16px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
 .instructionContainer {
   .title {
     font-size: 25px;

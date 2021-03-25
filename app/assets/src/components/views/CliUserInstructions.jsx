@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import cs from "./cli_user_instructions.scss";
 import { openUrlInNewTab } from "~utils/links";
+import ExternalLink from "~ui/controls/ExternalLink";
 
 class CliUserInstructions extends React.Component {
   render() {
@@ -15,6 +16,15 @@ class CliUserInstructions extends React.Component {
 
     return (
       <div className={cs.instructionContainer}>
+        <div className={cs.deprecationBanner}>
+          These instructions are for version 1 of our CLI which is now
+          deprecated. Version 1 will be discontinued soon. Check out our new and
+          improved{" "}
+          <ExternalLink href="https://github.com/chanzuckerberg/idseq-cli-v2">
+            version 2
+          </ExternalLink>
+          .
+        </div>
         <div className={cs.title}>Command Line Interface Instructions</div>
         <p className={cs.instructionHeading}>
           {

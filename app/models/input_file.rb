@@ -40,6 +40,14 @@ class InputFile < ApplicationRecord
     File.join(sample.sample_path, 'fastqs', name)
   end
 
+  def s3_path
+    File.join(sample.sample_input_s3_path, name)
+  end
+
+  def multipart_upload_id
+    S3Util.latest_multipart_upload(ENV['SAMPLES_BUCKET_NAME'], file_path)
+  end
+
   def file_type
     FILE_REGEX.match(name)[1] if FILE_REGEX.match(name)
   end

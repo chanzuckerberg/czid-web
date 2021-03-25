@@ -18,7 +18,7 @@ module SamplesHelper
 
   # Sample files stored in S3 have paths like s3://idseq-samples-prod/samples/{project_id}/{sample_id}/{path_to_file}
   # This regex extracts the sample_id from sample S3 paths.
-  SAMPLE_PATH_ID_MATCHER = %r{\A.*samples\/\d*\/(\d*)\/.*\z}.freeze
+  SAMPLE_PATH_ID_MATCHER = %r{\A.*samples/\d*/(\d*)/.*\z}.freeze
 
   # Maps SFN execution statuses to classic frontend statuses
   SFN_STATUS_MAPPING = {
@@ -166,9 +166,9 @@ module SamplesHelper
     elsif sample.status == Sample::STATUS_CHECKED
       return '' unless run
 
-      if run.class == WorkflowRun
+      if run.instance_of?(WorkflowRun)
         run&.status&.downcase
-      elsif run.class == PipelineRun
+      elsif run.instance_of?(PipelineRun)
         case run.job_status
         when PipelineRun::STATUS_CHECKED
           'complete'
@@ -431,7 +431,7 @@ module SamplesHelper
     formatted_samples
   end
 
-  def get_sample_run_info_by_workflow(sample:, is_snapshot: false, top_pipeline_run:, output_states_by_pipeline_run_id:, pipeline_run_stages_by_pipeline_run_id:, report_ready_pipeline_run_ids:)
+  def get_sample_run_info_by_workflow(sample:, top_pipeline_run:, output_states_by_pipeline_run_id:, pipeline_run_stages_by_pipeline_run_id:, report_ready_pipeline_run_ids:, is_snapshot: false)
     # Returns a hash where keys are workflows and values contain info regarding the workflow/pipeline run
     mngs_run_info = if is_snapshot
                       snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id)
@@ -567,24 +567,37 @@ module SamplesHelper
         wetlab_protocol = sample_attributes.delete(:wetlab_protocol)
       end
 
-      sample = Sample.new(sample_attributes)
-      sample.input_files.each { |f| f.name ||= File.basename(f.source) }
+      sample = Sample.find_by(
+        name: sample_attributes[:name],
+        project_id: sample_attributes[:project_id],
+        user: user
+      )
 
-      # Add these as temporary attributes to this sample object.
-      if sample_attributes[:basespace_access_token]
-        sample.basespace_access_token = sample_attributes.delete(:basespace_access_token)
-        sample.uploaded_from_basespace = 1
+      # Check if there is no existing sample or if the sample is not an in-progress upload
+      unless sample &&
+             (sample.status == Sample::STATUS_CREATED) &&
+             !(sample_attributes[:basespace_access_token]) &&
+             !(sample_attributes[:basespace_dataset_id]) &&
+             sample_attributes[:input_files_attributes].all? { |i| i[:source_type] == "local" }
+        sample = Sample.new(sample_attributes)
+        sample.input_files.each { |f| f.name ||= File.basename(f.source) }
+
+        # Add these as temporary attributes to this sample object.
+        if sample_attributes[:basespace_access_token]
+          sample.basespace_access_token = sample_attributes.delete(:basespace_access_token)
+          sample.uploaded_from_basespace = 1
+        end
+        if sample_attributes[:basespace_dataset_id]
+          sample.basespace_dataset_id = sample_attributes.delete(:basespace_dataset_id)
+        end
+
+        # If s3 upload, set "bulk_mode" to true.
+        sample.bulk_mode = sample.input_files.map(&:source_type).include?("s3")
+        sample.status = Sample::STATUS_CREATED
+        sample.user = user
       end
-      if sample_attributes[:basespace_dataset_id]
-        sample.basespace_dataset_id = sample_attributes.delete(:basespace_dataset_id)
-      end
 
-      # If s3 upload, set "bulk_mode" to true.
-      sample.bulk_mode = sample.input_files.map(&:source_type).include?("s3")
-      sample.status = Sample::STATUS_CREATED
-      sample.user = user
-
-      if should_attempt_to_save_sample && sample.save
+      if should_attempt_to_save_sample && sample && sample.save
         samples << sample
 
         if workflow == WorkflowRun::WORKFLOW[:consensus_genome]
@@ -821,5 +834,37 @@ module SamplesHelper
   def filter_by_workflow(samples, query)
     samples_with_workflow_run = samples.joins(:workflow_runs).where(workflow_runs: { workflow: query }).pluck(:id)
     samples.where(initial_workflow: query).or(samples.where(id: samples_with_workflow_run))
+  end
+
+  def get_upload_credentials(samples)
+    action = [
+      "s3:PutObject",
+      "s3:CreateMultipartUpload",
+      "s3:AbortMultipartUpload",
+      "s3:ListMultipartUploadParts",
+    ]
+
+    object_arns = samples.flat_map do |sample|
+      sample.input_files.map do |input_file|
+        "arn:aws:s3:::#{ENV['SAMPLES_BUCKET_NAME']}/#{input_file.file_path}"
+      end
+    end
+
+    policy = {
+      Version: "2012-10-17",
+      Statement: {
+        Sid: "AllowSampleUploads",
+        Effect: "Allow",
+        Action: action,
+        Resource: object_arns,
+      },
+    }
+
+    session_name = "#{current_user.id}-CLI-session-#{Time.now.utc.to_i}"
+    AwsClient[:sts].assume_role({
+                                  policy: JSON.dump(policy),
+                                  role_arn: ENV['CLI_UPLOAD_ROLE_ARN'],
+                                  role_session_name: session_name,
+                                })
   end
 end

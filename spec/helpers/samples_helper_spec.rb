@@ -2,6 +2,35 @@ require "rails_helper"
 require "webmock/rspec"
 
 RSpec.describe SamplesHelper, type: :helper do
+  describe "#get_upload_credentials" do
+    let(:fake_role_arn) { "dsfsdfsdfs" }
+    let(:fake_access_key_id) { "123456789012" }
+    let(:current_user) { create(:user) }
+
+    it "returns an access key from assume_role" do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with('CLI_UPLOAD_ROLE_ARN').and_return(fake_role_arn)
+      allow(AwsClient).to receive(:[]) { |_client|
+        mock_client = Aws::STS::Client.new(stub_responses: true)
+        creds = mock_client.stub_data(
+          :assume_role,
+          credentials: {
+            access_key_id: fake_access_key_id,
+          }
+        )
+        mock_client.stub_responses(:assume_role, creds)
+        mock_client
+      }
+
+      sample = Sample.new
+      input_file = InputFile.new
+      input_file.name = "test.fasta"
+      sample.input_files = [input_file]
+      creds = get_upload_credentials([sample])
+
+      expect(creds[:credentials][:access_key_id]).to be fake_access_key_id
+    end
+  end
   describe "#upload_samples_with_metadata" do
     before do
       @project = create(:public_project)
@@ -151,6 +180,45 @@ RSpec.describe SamplesHelper, type: :helper do
           expect(created_sample.input_files.length).to eq(2)
           expect(created_sample.input_files.first.presigned_url).not_to be_empty
           expect(created_sample.input_files.second.presigned_url).not_to be_empty
+        end
+
+        it "returns the sample when re-called with the same sample name if it is not uploaded" do
+          additional_attributes = {
+            workflows: [WorkflowRun::WORKFLOW[:short_read_mngs]],
+          }
+          sample_attributes = [local_cg_sample_attributes.merge(additional_attributes)]
+
+          response = helper.upload_samples_with_metadata(
+            sample_attributes,
+            metadata_attributes,
+            @joe
+          )
+
+          expect(response["samples"].length).to eq(1)
+          expect(response["errors"].length).to eq(0)
+
+          created_sample = response["samples"][0]
+
+          expect(created_sample.pipeline_runs.length).to eq(0)
+          expect(created_sample.workflow_runs.length).to eq(0)
+
+          expect(created_sample.input_files.length).to eq(2)
+
+          response = helper.upload_samples_with_metadata(
+            sample_attributes,
+            metadata_attributes,
+            @joe
+          )
+
+          expect(response["samples"].length).to eq(1)
+          expect(response["errors"].length).to eq(0)
+
+          created_sample = response["samples"][0]
+
+          expect(created_sample.pipeline_runs.length).to eq(0)
+          expect(created_sample.workflow_runs.length).to eq(0)
+
+          expect(created_sample.input_files.length).to eq(2)
         end
 
         it "saves successfully if technology is provided with consensus genome workflow runs" do

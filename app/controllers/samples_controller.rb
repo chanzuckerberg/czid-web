@@ -283,7 +283,7 @@ class SamplesController < ApplicationController
         bins_map = samples.group(
           ActiveRecord::Base.send(
             :sanitize_sql_array,
-            ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `samples`.`created_at`)/:step)", min_date: min_date, step: step]
+            ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `samples`.`created_at`)/:step)", { min_date: min_date, step: step }]
           )
         ).count
         time_bins = (0...MAX_BINS).map do |bucket|
@@ -396,15 +396,13 @@ class SamplesController < ApplicationController
         }
       end
     end
-    if !categories || categories.include?("uploader")
-      unless users.empty?
-        results["Uploader"] = {
-          "name" => "Uploader",
-          "results" => users.group_by(&:name).map do |val, records|
-            { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
-          end,
-        }
-      end
+    if (!categories || categories.include?("uploader")) && !users.empty?
+      results["Uploader"] = {
+        "name" => "Uploader",
+        "results" => users.group_by(&:name).map do |val, records|
+          { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
+        end,
+      }
     end
 
     # Permission-dependent
@@ -528,11 +526,12 @@ class SamplesController < ApplicationController
     client = params[:client]
     errors = []
 
+    version_number = client.sub(/-.*$/, "")
     # Check if the client is up-to-date. "web" is always valid whereas the
     # CLI client should provide a version string to-be-checked against the
     # minimum version here. Bulk upload from CLI goes to this method.
     min_version = Gem::Version.new(MIN_CLI_VERSION)
-    unless client && (client == "web" || Gem::Version.new(client) >= min_version)
+    unless client && (client == "web" || Gem::Version.new(version_number) >= min_version)
       render json: {
         message: CLI_DEPRECATION_MSG,
         # idseq-cli v0.6.0 only checks the 'errors' field, so ensure users see this.
@@ -612,13 +611,42 @@ class SamplesController < ApplicationController
 
     warn_if_large_bulk_upload(samples)
 
-    respond_to do |format|
-      if samples.count > 0
-        tags = %W[client:web type:bulk user_id:#{current_user.id}]
-        # DEPRECATED. Use log_analytics_event.
-        MetricUtil.put_metric_now("samples.created", samples.count, tags)
+    resp = { samples: samples, sample_ids: samples.pluck(:id), errors: errors }
+    # TODO: remove this 2.0.0 requirement once we discontinue support for < 2.0.0 higher up
+    if client != "web" && Gem::Version.new(version_number) >= Gem::Version.new("2.0.0") && samples.any?
+      credentials = get_upload_credentials(samples)[:credentials]
+      v2_samples = samples.map do |sample|
+        input_files = sample.input_files.map do |input_file|
+          {
+            multipart_upload_id: input_file.multipart_upload_id,
+            s3_path: input_file.s3_path,
+          }
+        end
+        {
+          id: sample.id,
+          name: sample.name,
+          input_files: input_files,
+        }
       end
-      format.json { render json: { samples: samples, sample_ids: samples.pluck(:id), errors: errors } }
+      resp = { samples: v2_samples, credentials: credentials, errors: errors }
+    end
+
+    if samples.count > 0
+      client_tag = client == "web" ? client : "CLI"
+      log_analytics_params = {
+        version: client, # web if web version number if cli
+        client: client_tag, # here we map version number to CLI for easier queries
+        count: samples.count,
+      }
+      MetricUtil.log_analytics_event(
+        EventDictionary::SAMPLES_BULK_UPLOADED,
+        current_user,
+        log_analytics_params
+      )
+    end
+
+    respond_to do |format|
+      format.json { render json: resp }
     end
   end
 
@@ -1379,7 +1407,7 @@ class SamplesController < ApplicationController
                                :basespace_dataset_id, :basespace_access_token, :skip_cache,
                                :do_not_process, :pipeline_execution_strategy, :wetlab_protocol,
                                :share_id, :technology, :medaka_model, :vadr_options,
-                               workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
+                               { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts] },]
     permitted_sample_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?
 
     new_params = params.permit(samples: permitted_sample_params)
@@ -1392,14 +1420,14 @@ class SamplesController < ApplicationController
                         :search, :basespace_dataset_id, :basespace_access_token, :client,
                         :do_not_process, :pipeline_execution_strategy, :technology, :wetlab_protocol,
                         :share_id,
-                        workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
+                        { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts] },]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)
   end
 
   # Doesn't require :sample or :samples
   def collection_params
-    permitted_params = [:referenceTree, :workflow, sampleIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name, :technology]]
+    permitted_params = [:referenceTree, :workflow, { sampleIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name, :technology] }]
     params.permit(*permitted_params)
   end
 
@@ -1407,10 +1435,8 @@ class SamplesController < ApplicationController
     default_dir = 'id,desc'
     dir ||= default_dir
     column, direction = dir.split(',')
-    if column && direction
-      if Sample.column_names.include?(column) && ["desc", "asc"].include?(direction)
-        samples = samples.order("samples.#{column} #{direction}")
-      end
+    if column && direction && (Sample.column_names.include?(column) && ["desc", "asc"].include?(direction))
+      samples = samples.order("samples.#{column} #{direction}")
     end
     samples
   end

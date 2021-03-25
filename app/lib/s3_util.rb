@@ -66,4 +66,13 @@ module S3Util
       raise "Cannot get file size for #{s3_path}: unable to find file"
     end
   end
+
+  def self.latest_multipart_upload(bucket, key)
+    resp = AwsClient[:s3].list_multipart_uploads(
+      bucket: bucket,
+      prefix: key,
+      max_uploads: 1
+    )
+    resp.uploads.map(&:upload_id).first
+  end
 end
