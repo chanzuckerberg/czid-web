@@ -73,9 +73,10 @@ class HoverActions extends React.Component {
   getHoverActions = () => {
     const { allowedFeatures = [] } = this.context || {};
     const {
+      consensusGenomeEnabled,
       pipelineVersion,
-      snapshotShareId,
       previousConsensusGenomeRuns,
+      snapshotShareId,
     } = this.props;
     const hasCoverageViz = isPipelineFeatureAvailable(
       COVERAGE_VIZ_FEATURE,
@@ -157,7 +158,7 @@ class HoverActions extends React.Component {
       },
     ];
 
-    if (allowedFeatures.includes("gen_viral_cg")) {
+    if (allowedFeatures.includes("gen_viral_cg") && consensusGenomeEnabled) {
       if (previousConsensusGenomeRuns) {
         hoverActions.push({
           key: `consensus_genome_${params.taxId}`,
@@ -262,6 +263,7 @@ class HoverActions extends React.Component {
 
 HoverActions.propTypes = {
   className: PropTypes.string,
+  consensusGenomeEnabled: PropTypes.bool,
   contigVizEnabled: PropTypes.bool,
   coverageVizEnabled: PropTypes.bool,
   fastaEnabled: PropTypes.bool,
@@ -277,12 +279,12 @@ HoverActions.propTypes = {
   phyloTreeEnabled: PropTypes.bool,
   pipelineVersion: PropTypes.string,
   snapshotShareId: PropTypes.string,
+  taxCategory: PropTypes.string,
   taxCommonName: PropTypes.string,
   taxId: PropTypes.number,
   taxLevel: PropTypes.number,
   taxName: PropTypes.string,
   taxSpecies: PropTypes.array,
-  taxCategory: PropTypes.string,
 };
 
 HoverActions.contextType = UserContext;

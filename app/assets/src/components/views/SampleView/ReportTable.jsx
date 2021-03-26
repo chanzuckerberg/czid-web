@@ -582,6 +582,7 @@ class ReportTable extends React.Component {
     const {
       alignVizAvailable,
       consensusGenomeData,
+      consensusGenomeEnabled,
       fastaDownloadEnabled,
       onConsensusGenomeClick,
       onPreviousConsensusGenomeClick,
@@ -670,6 +671,7 @@ class ReportTable extends React.Component {
         percentIdentity={percentIdentity}
         pipelineVersion={pipelineVersion}
         snapshotShareId={snapshotShareId}
+        consensusGenomeEnabled={consensusGenomeEnabled}
       />
     );
   };
@@ -878,6 +880,7 @@ ReportTable.propTypes = {
   // Needed only for hover actions
   // Consider adding a callback to render the hover actions
   alignVizAvailable: PropTypes.bool.isRequired,
+  consensusGenomeEnabled: PropTypes.bool.isRequired,
   fastaDownloadEnabled: PropTypes.bool.isRequired,
   onConsensusGenomeClick: PropTypes.func.isRequired,
   onCoverageVizClick: PropTypes.func.isRequired,

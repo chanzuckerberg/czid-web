@@ -192,6 +192,7 @@ class ReportFilters extends React.Component {
                   category.children || []
                 );
               }, {})(CATEGORIES)}
+              disableMarginRight
               selectedCategories={getOr(
                 [],
                 ["categories", "categories"],

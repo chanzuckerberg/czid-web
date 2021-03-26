@@ -1812,21 +1812,22 @@ class SampleView extends React.Component {
                   !!(reportMetadata && reportMetadata.alignVizAvailable)
                 }
                 consensusGenomeData={this.getConsensusGenomeData()}
+                consensusGenomeEnabled={sample && sample.editable}
                 data={filteredReportData}
+                displayMergedNtNrValue={displayMergedNtNrValue}
+                fastaDownloadEnabled={
+                  !!(reportMetadata && reportMetadata.hasByteRanges)
+                }
+                initialDbType={displayMergedNtNrValue ? "merged_nt_nr" : "nt"}
                 onConsensusGenomeClick={this.handleConsensusGenomeClick}
+                onCoverageVizClick={this.handleCoverageVizClick}
                 onPreviousConsensusGenomeClick={
                   this.handlePreviousConsensusGenomeClick
                 }
-                onCoverageVizClick={this.handleCoverageVizClick}
                 onTaxonNameClick={withAnalytics(
                   this.handleTaxonClick,
                   "PipelineSampleReport_taxon-sidebar-link_clicked"
                 )}
-                fastaDownloadEnabled={
-                  !!(reportMetadata && reportMetadata.hasByteRanges)
-                }
-                displayMergedNtNrValue={displayMergedNtNrValue}
-                initialDbType={displayMergedNtNrValue ? "merged_nt_nr" : "nt"}
                 phyloTreeAllowed={sample ? sample.editable : false}
                 pipelineVersion={pipelineRun && pipelineRun.pipeline_version}
                 projectId={project && project.id}
