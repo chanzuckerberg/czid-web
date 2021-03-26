@@ -157,6 +157,7 @@ class SampleView extends React.Component {
         sidebarVisible: false,
         sidebarTaxonData: null,
         view: "table",
+        workflowRun: null,
       },
       nonNestedLocalState,
       nonNestedUrlState
@@ -671,8 +672,13 @@ class SampleView extends React.Component {
         }
       );
     } else if (currentTab === TABS.CONSENSUS_GENOME) {
+      const newRun = find(
+        { wdl_version: newPipelineVersion },
+        sample.workflow_runs
+      );
       this.setState(
         {
+          workflowRun: newRun,
           pipelineVersion: newPipelineVersion,
         },
         () => this.updateHistoryAndPersistOptions()
@@ -974,8 +980,12 @@ class SampleView extends React.Component {
     });
     this.showNotification(NOTIFICATION_TYPES.consensusGenomeCreated);
     this.handleCloseConsensusGenomeCreationModal();
+
+    // Close both modals in case they came via the previous runs modal
+    this.handleCloseConsensusGenomePreviousModal();
   };
 
+  // Clicking the HoverAction to open the CG creation modal
   handleConsensusGenomeClick = ({ percentIdentity, taxId, taxName }) => {
     const { coverageVizDataByTaxon } = this.state;
 
@@ -995,6 +1005,7 @@ class SampleView extends React.Component {
     });
   };
 
+  // Clicking the HoverAction to open the previous CG modal
   handlePreviousConsensusGenomeClick = ({
     percentIdentity,
     taxId,
@@ -1115,6 +1126,14 @@ class SampleView extends React.Component {
     this.setState({
       consensusGenomePreviousModalVisible: false,
     });
+  };
+
+  // Opening up a previous Consensus Genome run
+  handlePreviousConsensusGenomeReportClick = ({ rowData }) => {
+    this.setState({
+      workflowRun: rowData,
+      consensusGenomePreviousModalVisible: false,
+    }, () =>  this.handleTabChange(TABS.CONSENSUS_GENOME));
   };
 
   handleMetadataUpdate = (key, value) => {
@@ -1289,7 +1308,13 @@ class SampleView extends React.Component {
   };
 
   getCurrentRun = () => {
-    const { currentTab, pipelineRun, pipelineVersion, sample } = this.state;
+    const {
+      currentTab,
+      pipelineRun,
+      pipelineVersion,
+      sample,
+      workflowRun,
+    } = this.state;
 
     if (PIPELINE_RUN_TABS.includes(currentTab)) {
       return pipelineRun;
@@ -1299,6 +1324,10 @@ class SampleView extends React.Component {
       const workflowType = Object.values(WORKFLOWS).find(
         workflow => workflow.label === currentTab
       ).value;
+
+      if (workflowRun && workflowRun.workflow === workflowType) {
+        return workflowRun;
+      }
 
       if (pipelineVersion) {
         const currentRun = sample.workflow_runs.find(run => {
@@ -1949,6 +1978,7 @@ class SampleView extends React.Component {
             consensusGenomeData={consensusGenomePreviousParams}
             onClose={this.handleCloseConsensusGenomePreviousModal}
             onNew={this.handleConsensusGenomeClick}
+            onRowClick={this.handlePreviousConsensusGenomeReportClick}
             open={consensusGenomePreviousModalVisible}
             sample={sample}
           />

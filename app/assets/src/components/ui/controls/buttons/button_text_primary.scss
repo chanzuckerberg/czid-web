@@ -1,0 +1,17 @@
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.button {
+  background: none !important; // Override Semantic UI
+  color: $primary;
+  padding: 0 !important; // Override .idseq-ui.button
+}
+
+.label {
+  @include font-caps-xxxs;
+
+  align-items: center;
+  color: $primary;
+  display: flex;
+}

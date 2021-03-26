@@ -91,6 +91,14 @@ function EventDictionary() {
   /** There was a failure upon retrying the kickoff of a Consensus Genome run from an mNGS report. */
   this.CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED =
     "CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED";
+
+  /** The user clicked on one of the previously-generated consensus genomes for this taxon. */
+  this.CONSENSUS_GENOME_PREVIOUS_MODAL_ROW_CLICKED =
+    "CONSENSUS_GENOME_PREVIOUS_MODAL_ROW_CLICKED";
+
+  /** The user clicked the button to create another consensus genome for this taxon. */
+  this.CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED =
+    "CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED";
 }
 
 const eventNames = new EventDictionary();

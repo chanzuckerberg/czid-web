@@ -5,12 +5,13 @@
 .modal {
   .title {
     @include font-header-xxl;
-    margin-bottom: $space-s;
+    margin-bottom: $space-xxs;
   }
 
   .label {
     @include font-header-xs;
-    margin-top: $space-xl;
+    margin-bottom: $space-xl;
+
     .taxonName {
       @include font-body-xs;
     }
@@ -18,5 +19,29 @@
 
   .table {
     height: 200px;
+    margin-bottom: $space-m;
+
+    .headerLabel {
+      @include font-header-xs;
+
+      color: $gray-dark;
+    }
+
+    .primaryHeader {
+      text-align: left;
+    }
+
+    .row {
+      cursor: pointer;
+    }
+
+    .dateCell {
+      @include font-body-xs;
+    }
+  }
+
+  .icon {
+    height: 10px !important; // Override .idseq-ui.button
+    fill: $primary;
   }
 }

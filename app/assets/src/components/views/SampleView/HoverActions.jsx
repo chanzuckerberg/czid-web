@@ -212,14 +212,21 @@ class HoverActions extends React.Component {
   renderHoverAction = hoverAction => {
     let trigger, tooltipMessage;
     const IconComponent = hoverAction.iconComponentClass;
+
     if (hoverAction.enabled) {
       const onClickFn = () => hoverAction.handleClick(hoverAction.params || {});
+
+      const count = hoverAction.count ? (
+        <span className={cs.countCircle}>{hoverAction.count}</span>
+      ) : null;
+
       trigger = (
         <div onClick={onClickFn} className={cs.actionDot}>
           <IconComponent className={cs.icon} />
-          {hoverAction.count || null}
+          {count}
         </div>
       );
+
       tooltipMessage = hoverAction.message;
     } else {
       trigger = (

@@ -1,14 +1,31 @@
-@import "~styles/typography";
+@import "~styles/themes/typography";
 @import "~styles/themes/colors";
 
 .hoverActions {
   color: $primary;
-  font-size: $font-size-base;
+  font-size: 14px;
 
   .actionDot {
     margin-left: 7px;
     font-size: 15px;
     display: inline-block;
+
+    .countCircle {
+      @include font-body-xxs;
+
+      // This makes a circle with a number in it
+      background: $primary;
+      border-radius: 50%;
+      color: $white;
+      cursor: pointer;
+      float: right;
+      font-size: 9px;
+      font-weight: $font-weight-semibold;
+      height: 12px;
+      line-height: 14px;
+      text-align: center;
+      width: 12px;
+    }
   }
 
   .disabled {

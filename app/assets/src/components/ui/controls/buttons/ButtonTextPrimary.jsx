@@ -1,9 +1,24 @@
 import Button from "./Button";
 import React from "react";
+import cx from "classnames";
+import PropTypes from "prop-types";
 
-// TODO: Implement actual styling. Temporary placeholder.
+import cs from "./button_text_primary.scss";
+
 const ButtonTextPrimary = props => {
-  return <Button {...props} primary />;
+  const { className } = props;
+
+  return (
+    <Button
+      className={cx(cs.button, className)}
+      labelClassName={cs.label}
+      {...props}
+    />
+  );
+};
+
+ButtonTextPrimary.propTypes = {
+  className: PropTypes.string,
 };
 
 export default ButtonTextPrimary;

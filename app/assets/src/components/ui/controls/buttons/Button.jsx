@@ -7,19 +7,20 @@ import React from "react";
 import { IconArrowDownSmall } from "~ui/icons";
 
 const Button = ({
+  circular,
+  className,
+  hasDropdownArrow,
   icon,
   label,
-  text,
-  hasDropdownArrow,
-  className,
+  labelClassName,
   rounded,
-  circular,
+  text,
   ...props
 }) => {
   let content = text;
   if (icon || label) {
     content = (
-      <div className="icon-label">
+      <div className={cx(labelClassName, "icon-label")}>
         {icon}
         {text}
         {label}
@@ -47,21 +48,22 @@ const Button = ({
 };
 
 Button.propTypes = forbidExtraProps({
-  disabled: PropTypes.bool,
-  icon: PropTypes.element,
-  label: PropTypes.element,
-  onBlur: PropTypes.func,
-  onFocus: PropTypes.func,
-  onClick: PropTypes.func,
-  onMouseLeave: PropTypes.func,
-  onMouseEnter: PropTypes.func,
-  text: PropTypes.string,
-  primary: PropTypes.bool,
-  secondary: PropTypes.bool,
-  rounded: PropTypes.bool,
   circular: PropTypes.bool,
   className: PropTypes.string,
+  disabled: PropTypes.bool,
   hasDropdownArrow: PropTypes.bool,
+  icon: PropTypes.element,
+  label: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
+  labelClassName: PropTypes.string,
+  onBlur: PropTypes.func,
+  onClick: PropTypes.func,
+  onFocus: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  primary: PropTypes.bool,
+  rounded: PropTypes.bool,
+  secondary: PropTypes.bool,
+  text: PropTypes.string,
 });
 
 Button.defaultProps = {
