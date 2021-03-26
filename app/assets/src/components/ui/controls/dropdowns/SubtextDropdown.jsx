@@ -44,19 +44,28 @@ class SubtextDropdown extends React.Component {
       text: option.text,
       value: option.value,
       subtext: option.subtext,
-      customNode: this.renderMenuItem(option),
+      customNode: option.customNode
+        ? option.customNode
+        : this.renderMenuItem(option),
     }));
     return dropdownOptions;
   }
 
   render() {
     const renderedMenuItems = this.renderMenuItems();
-    const { className, initialSelectedValue, onChange, ...props } = this.props;
+    const {
+      className,
+      initialSelectedValue,
+      menuClassName,
+      onChange,
+      ...props
+    } = this.props;
 
     return (
       <Dropdown
         {...props}
         className={className}
+        menuClassName={menuClassName}
         options={renderedMenuItems}
         value={initialSelectedValue}
         onChange={onChange}
@@ -67,6 +76,7 @@ class SubtextDropdown extends React.Component {
 
 SubtextDropdown.propTypes = {
   className: PropTypes.string,
+  menuClassName: PropTypes.string,
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

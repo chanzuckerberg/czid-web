@@ -1130,10 +1130,13 @@ class SampleView extends React.Component {
 
   // Opening up a previous Consensus Genome run
   handlePreviousConsensusGenomeReportClick = ({ rowData }) => {
-    this.setState({
-      workflowRun: rowData,
-      consensusGenomePreviousModalVisible: false,
-    }, () =>  this.handleTabChange(TABS.CONSENSUS_GENOME));
+    this.setState(
+      {
+        workflowRun: rowData,
+        consensusGenomePreviousModalVisible: false,
+      },
+      () => this.handleTabChange(TABS.CONSENSUS_GENOME)
+    );
   };
 
   handleMetadataUpdate = (key, value) => {
@@ -1925,7 +1928,7 @@ class SampleView extends React.Component {
             this.renderReport({ displayMergedNtNrValue: true })}
           {currentTab === TABS.AMR && amrData && <AMRView amr={amrData} />}
           {currentTab === TABS.CONSENSUS_GENOME && (
-            <ConsensusGenomeView sample={sample} workflow={currentRun} />
+            <ConsensusGenomeView sample={sample} workflowRun={currentRun} />
           )}
         </NarrowContainer>
         {sample && (

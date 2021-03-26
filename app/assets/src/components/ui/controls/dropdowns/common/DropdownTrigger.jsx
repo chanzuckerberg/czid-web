@@ -17,16 +17,17 @@ class DropdownTrigger extends React.Component {
 
   render() {
     const {
-      label,
-      itemSubtext,
-      value,
-      rounded,
       active,
+      className,
       disabled,
       erred,
-      className,
+      disableMarginRight,
+      itemSubtext,
+      label,
       onClick,
       placeholder,
+      rounded,
+      value,
     } = this.props;
 
     return (
@@ -43,7 +44,14 @@ class DropdownTrigger extends React.Component {
       >
         <div className={cs.labelContainer}>
           {label && (
-            <span className={cx(cs.label, cs.disableMarginRight)}>{label}</span>
+            <span
+              className={cx(
+                cs.label,
+                disableMarginRight && cs.disableMarginRight
+              )}
+            >
+              {label}
+            </span>
           )}
           <span
             className={cx(
@@ -71,6 +79,7 @@ DropdownTrigger.propTypes = {
   disabled: PropTypes.bool,
   erred: PropTypes.bool,
   onClick: PropTypes.func,
+  disableMarginRight: PropTypes.bool,
 };
 
 export default DropdownTrigger;

@@ -1,8 +1,10 @@
-import { camelCase, getOr, isEmpty } from "lodash/fp";
+import { camelCase, getOr, find, isEmpty, size } from "lodash/fp";
 import React from "react";
+import PropTypes from "~utils/propTypes";
 import memoize from "memoize-one";
 import cx from "classnames";
 
+import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
 import { getWorkflowRunResults } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
@@ -18,80 +20,108 @@ import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import ExternalLink from "~ui/controls/ExternalLink";
 import { IconAlert, IconArrowRight, IconLoading } from "~ui/icons";
 import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
-import PropTypes from "~utils/propTypes";
 import { sampleErrorInfo } from "~utils/sample";
 import { FIELDS_METADATA } from "~utils/tooltip";
-
+import {
+  CG_VIEW_METRIC_COLUMNS,
+  CG_HISTOGRAM_FILL_COLOR,
+  CG_HISTOGRAM_HOVER_FILL_COLOR,
+} from "./constants";
 import cs from "./consensus_genome_view.scss";
 import csSampleMessage from "./sample_message.scss";
-
-const CONSENSUS_GENOME_VIEW_METRIC_COLUMNS = [
-  "referenceNCBIEntry",
-  "referenceLength",
-  "coverageDepth",
-  "coverageBreadth",
-].map(key => [
-  {
-    key,
-    ...FIELDS_METADATA[key],
-  },
-]);
-
-// TODO: use classnames and css
-const FILL_COLOR = "#A9BDFC";
-const HOVER_FILL_COLOR = "#3867FA";
 
 class ConsensusGenomeView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      workflowRun: this.props.workflowRun,
       data: null,
       histogramTooltipData: null,
       histogramTooltipLocation: null,
+      loading: false,
     };
   }
 
-  componentDidMount = async () => {
-    const { workflow } = this.props;
-    if (workflow && workflow.status === "SUCCEEDED") {
-      const data = await getWorkflowRunResults(workflow.id);
-      this.setState({ data });
+  componentDidMount = () => {
+    const { workflowRun } = this.state;
+
+    if (workflowRun && workflowRun.status === "SUCCEEDED") {
+      this.fetchWorkflowRunData(workflowRun.id);
     }
   };
 
-  componentDidUpdate = async (prevProps, prevState) => {
-    const { workflow } = this.props;
+  componentDidUpdate = (_, prevState) => {
     const { data } = this.state;
 
     if (data && data.coverage_viz && data !== prevState.data) {
       this.renderHistogram();
     }
+  };
 
-    if (
-      workflow &&
-      workflow !== prevProps.workflow &&
-      workflow.status === "SUCCEEDED"
-    ) {
-      const data = await getWorkflowRunResults(workflow.id);
-      this.setState({ data });
+  fetchWorkflowRunData = async workflowId => {
+    const { sample } = this.props;
+    const { data, workflowRun } = this.state;
+
+    // Ensures that we don't re-load the data if the user selects the same CG that they are currently on
+    if (data === null || workflowId !== workflowRun.id) {
+      this.setState({ loading: true });
+      const data = await getWorkflowRunResults(workflowId);
+
+      this.setState({
+        data,
+        loading: false,
+        workflowRun: find({ id: workflowId }, sample.workflow_runs),
+      });
     }
+  };
+
+  renderConsensusGenomeDropdown = () => {
+    const { sample } = this.props;
+    const { workflowRun } = this.state;
+
+    return (
+      <div className={cs.dropdownContainer}>
+        <ConsensusGenomeDropdown
+          workflowRuns={sample.workflow_runs}
+          initialSelectedValue={workflowRun.id}
+          onConsensusGenomeSelection={this.fetchWorkflowRunData}
+        />
+      </div>
+    );
+  };
+
+  renderHeaderInfoAndDropdown = () => {
+    const { sample } = this.props;
+
+    const shouldRenderCGDropdown = size(sample.workflow_runs) > 1;
+    return (
+      <div
+        className={cx(
+          cs.headerContainer,
+          !shouldRenderCGDropdown && cs.removeBottomMargin
+        )}
+      >
+        {shouldRenderCGDropdown && this.renderConsensusGenomeDropdown()}
+        <ExternalLink
+          className={cx(
+            cs.learnMoreLink,
+            !shouldRenderCGDropdown && cs.alignRight
+          )}
+          href={CONSENSUS_GENOME_DOC_LINK}
+          analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
+        >
+          Learn more about consensus genomes <IconArrowRight />
+        </ExternalLink>
+      </div>
+    );
   };
 
   renderResults() {
     const { data, histogramTooltipData, histogramTooltipLocation } = this.state;
 
     return (
-      <React.Fragment>
+      <>
         <div className={cs.resultsContainer}>
-          <div className={cs.learnMoreContainer}>
-            <ExternalLink
-              className={cs.learnMoreLink}
-              href={CONSENSUS_GENOME_DOC_LINK}
-              analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
-            >
-              Learn more about consensus genomes <IconArrowRight />
-            </ExternalLink>
-          </div>
           {data && !isEmpty(data.quality_metrics) && this.renderMetricsTable()}
           {data && !isEmpty(data.coverage_viz) && this.renderCoverageView()}
         </div>
@@ -103,7 +133,7 @@ class ConsensusGenomeView extends React.Component {
             <TooltipVizTable data={histogramTooltipData} />
           </div>
         )}
-      </React.Fragment>
+      </>
     );
   }
 
@@ -174,9 +204,9 @@ class ConsensusGenomeView extends React.Component {
       [coverageVizData],
       {
         barOpacity: 1,
-        colors: [FILL_COLOR],
+        colors: [CG_HISTOGRAM_FILL_COLOR],
         domain: [0, data.coverage_viz.total_length],
-        hoverColors: [HOVER_FILL_COLOR],
+        hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
         labelsBold: true,
         labelsLarge: true,
         labelX: "Reference Genome",
@@ -270,7 +300,7 @@ class ConsensusGenomeView extends React.Component {
         </div>
         <div className={cx(cs.coverageContainer, cs.raisedContainer)}>
           <div className={cs.metrics}>
-            {CONSENSUS_GENOME_VIEW_METRIC_COLUMNS.map((col, index) => (
+            {CG_VIEW_METRIC_COLUMNS.map((col, index) => (
               <div className={cs.column} key={index}>
                 {col.map(metric => (
                   <div className={cs.metric} key={metric.key}>
@@ -449,19 +479,15 @@ class ConsensusGenomeView extends React.Component {
     );
   };
 
-  render() {
-    const { data } = this.state;
-    const { sample, workflow } = this.props;
+  renderContent = () => {
+    const { sample } = this.props;
+    const { workflowRun } = this.state;
 
-    if (!workflow) {
-      return this.renderLoader();
-    }
-
-    if (workflow.status === "SUCCEEDED") {
-      return data ? this.renderResults() : this.renderLoader();
+    if (workflowRun.status === "SUCCEEDED") {
+      return this.renderResults();
     } else if (
       !sample.upload_error &&
-      (workflow.status === "RUNNING" || !workflow.status)
+      (workflowRun.status === "RUNNING" || !workflowRun.status)
     ) {
       return (
         <SampleMessage
@@ -478,7 +504,7 @@ class ConsensusGenomeView extends React.Component {
           }
         />
       );
-    } else if (!sample.upload_error && workflow.status === "CREATED") {
+    } else if (!sample.upload_error && workflowRun.status === "CREATED") {
       return (
         <SampleMessage
           icon={<IconLoading className={csSampleMessage.icon} />}
@@ -491,7 +517,7 @@ class ConsensusGenomeView extends React.Component {
       // FAILED
       const { link, linkText, message, status, type } = sampleErrorInfo({
         sample,
-        error: workflow.input_error || {},
+        error: workflowRun.input_error || {},
       });
       return (
         <SampleMessage
@@ -509,12 +535,23 @@ class ConsensusGenomeView extends React.Component {
         />
       );
     }
+  };
+
+  render() {
+    const { loading } = this.state;
+
+    return (
+      <>
+        {this.renderHeaderInfoAndDropdown()}
+        {loading ? this.renderLoader() : this.renderContent()}
+      </>
+    );
   }
 }
 
 ConsensusGenomeView.propTypes = {
-  sample: PropTypes.object,
-  workflow: PropTypes.object,
+  sample: PropTypes.object.isRequired,
+  workflowRun: PropTypes.object.isRequired,
 };
 
 export default ConsensusGenomeView;

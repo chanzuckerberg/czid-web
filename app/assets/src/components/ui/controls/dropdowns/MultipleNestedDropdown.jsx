@@ -239,6 +239,7 @@ class MultipleNestedDropdown extends React.Component {
         label={labelText}
         value={label}
         rounded={this.props.rounded}
+        disableMarginRight={this.props.disableMarginRight}
       />
     );
   }
@@ -256,6 +257,7 @@ class MultipleNestedDropdown extends React.Component {
         // This component needs to implement the itemSearchStrings prop before search will work.
         // Manually disable the search prop for now.
         "search",
+        "disableMarginRight",
       ],
       this.props
     );
@@ -275,6 +277,7 @@ class MultipleNestedDropdown extends React.Component {
 }
 
 MultipleNestedDropdown.defaultProps = {
+  disableMarginRight: false,
   selectedOptions: [],
   selectedSuboptions: {},
 };
@@ -288,6 +291,7 @@ MultipleNestedDropdown.propTypes = {
   selectedSuboptions: PropTypes.object,
   disabled: PropTypes.bool,
   rounded: PropTypes.bool,
+  disableMarginRight: PropTypes.bool,
 };
 
 export default MultipleNestedDropdown;

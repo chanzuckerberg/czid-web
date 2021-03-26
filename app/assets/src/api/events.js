@@ -92,6 +92,9 @@ function EventDictionary() {
   this.CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED =
     "CONSENSUS_GENOME_CREATION_MODAL_RETRY_KICKOFF_FAILED";
 
+  /* The user selected a Consensus Genome from the Consensus Genome Dropdown */
+  this.CONSENSUS_GENOME_DROPDOWN_CONSENSUS_GENOME_SELECTED =
+    "CONSENSUS_GENOME_DROPDOWN_CONSENSUS_GENOME_SELECTED";
   /** The user clicked on one of the previously-generated consensus genomes for this taxon. */
   this.CONSENSUS_GENOME_PREVIOUS_MODAL_ROW_CLICKED =
     "CONSENSUS_GENOME_PREVIOUS_MODAL_ROW_CLICKED";

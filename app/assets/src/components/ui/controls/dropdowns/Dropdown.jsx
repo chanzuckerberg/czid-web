@@ -99,6 +99,7 @@ class Dropdown extends React.Component {
         optionsHeader={this.props.optionsHeader}
         showNoResultsMessage={this.props.showNoResultsMessage}
         isLoadingSearchOptions={this.props.isLoadingSearchOptions}
+        menuClassName={this.props.menuClassName}
       />
     );
   }
@@ -106,6 +107,7 @@ class Dropdown extends React.Component {
 
 Dropdown.propTypes = {
   className: PropTypes.string,
+  menuClassName: PropTypes.string,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
   erred: PropTypes.bool,

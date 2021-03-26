@@ -8,6 +8,7 @@ const CategoryFilter = ({
   categoryParentChild,
   categoryChildParent,
   disabled = false,
+  disableMarginRight,
   selectedCategories,
   selectedSubcategories,
   onChange,
@@ -46,6 +47,7 @@ const CategoryFilter = ({
       rounded
       label="Categories"
       onChange={onChange}
+      disableMarginRight={disableMarginRight}
       disabled={disabled}
     />
   );
@@ -61,6 +63,7 @@ CategoryFilter.propTypes = {
     .isRequired,
   categoryChildParent: PropTypes.objectOf(PropTypes.string).isRequired,
   disabled: PropTypes.bool,
+  disableMarginRight: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
   selectedSubcategories: PropTypes.arrayOf(PropTypes.string).isRequired,

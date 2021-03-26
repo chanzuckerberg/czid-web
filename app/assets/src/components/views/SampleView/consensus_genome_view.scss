@@ -150,13 +150,27 @@
       overflow-y: hidden;
     }
   }
+}
 
-  .learnMoreContainer {
-    text-align: right;
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  margin: $space-xs 0 $space-xl 0;
 
-    .learnMoreLink {
-      @include font-header-xxs;
+  .dropdownContainer {
+    width: 260px;
+  }
+
+  .learnMoreLink {
+    @include font-header-xxs;
+
+    &.alignRight {
+      margin-left: auto;
     }
+  }
+
+  &.removeBottomMargin {
+    margin-bottom: 0 !important;
   }
 }
 

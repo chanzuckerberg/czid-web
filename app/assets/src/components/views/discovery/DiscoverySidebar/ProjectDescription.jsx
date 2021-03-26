@@ -153,6 +153,7 @@ class ProjectDescription extends React.Component {
 
 ProjectDescription.propTypes = {
   project: PropTypes.object.isRequired,
+  onProjectDescriptionSave: PropTypes.func,
 };
 
 export default ProjectDescription;

@@ -392,6 +392,7 @@ DiscoverySidebar.propTypes = {
   loading: PropTypes.bool,
   noDataAvailable: PropTypes.bool,
   onFilterClick: PropTypes.func,
+  onProjectDescriptionSave: PropTypes.func,
   projectDimensions: PropTypes.array,
   projectStats: PropTypes.object,
   sampleDimensions: PropTypes.array,

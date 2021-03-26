@@ -1,17 +1,17 @@
 import React from "react";
 
-import PropTypes from "../../../utils/propTypes";
+import PropTypes from "~utils/propTypes";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
 
-class BackgroundModelFilter extends React.Component {
-  render() {
-    const {
-      allBackgrounds,
-      enableMassNormalizedBackgrounds,
-      onChange,
-      value,
-    } = this.props;
-    let disabled = !!this.props.disabled || false;
+const BackgroundModelFilter = React.memo(
+  ({
+    allBackgrounds,
+    enableMassNormalizedBackgrounds,
+    onChange,
+    value,
+    ...props
+  }) => {
+    let disabled = props.disabled || false;
     let backgroundOptions = allBackgrounds.map(background => {
       const disabledOption =
         !enableMassNormalizedBackgrounds && background.mass_normalized;
@@ -35,7 +35,7 @@ class BackgroundModelFilter extends React.Component {
     }
     return (
       <SubtextDropdown
-        {...this.props}
+        {...props}
         options={backgroundOptions}
         initialSelectedValue={value}
         disabled={disabled}
@@ -43,7 +43,7 @@ class BackgroundModelFilter extends React.Component {
       />
     );
   }
-}
+);
 
 BackgroundModelFilter.defaultProps = {
   rounded: true,

@@ -139,13 +139,14 @@ class ThresholdFilterDropdown extends React.Component {
   };
 
   renderLabel() {
-    const { thresholds, disabled } = this.props;
+    const { thresholds, disabled, disableMarginRight } = this.props;
 
     const label = thresholds.length > 0 && (
       <DropdownLabel
         className={cs.dropdownLabel}
         disabled={disabled}
         text={String(thresholds.length)}
+        disableMarginRight={disableMarginRight}
       />
     );
 
@@ -239,6 +240,7 @@ ThresholdFilterDropdown.propTypes = forbidExtraProps({
   thresholds: PropTypes.array,
   onApply: PropTypes.func,
   options: PropTypes.object,
+  disableMarginRight: PropTypes.bool,
 });
 
 const ThresholdFilter = ({
