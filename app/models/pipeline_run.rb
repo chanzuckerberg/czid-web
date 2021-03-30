@@ -808,7 +808,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def sfn_error
-    SfnExecution.new(sfn_execution_arn, sample_output_s3_path).error
+    SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sample_output_s3_path).error
   end
 
   def workflow_version_tag

@@ -11,9 +11,10 @@ class SfnExecution
     end
   end
 
-  def initialize(execution_arn, s3_path)
+  def initialize(execution_arn:, s3_path:, finalized: nil)
     @execution_arn = execution_arn
     @s3_path = s3_path
+    @finalized = finalized
   end
 
   def description
@@ -26,7 +27,7 @@ class SfnExecution
 
   def error
     if description && description[:status] == "FAILED"
-      return history[:events].last["execution_failed_event_details"]["error"]
+      return history[:events].last[:execution_failed_event_details][:error]
     end
   end
 
@@ -43,26 +44,32 @@ class SfnExecution
   def description_from_aws
     return if @execution_arn.blank?
 
+    # Prefer S3 if finalized b/c describe_execution has a low rate limit
+    return sfn_archive_from_s3("sfn-desc") if @finalized
+
     AwsClient[:states].describe_execution(execution_arn: @execution_arn)
   rescue Aws::States::Errors::ExecutionDoesNotExist, ArgumentError
-    return if @s3_path.blank?
-
-    # Attention: Timestamp fields will be returned as strings
-    description_json = S3Util.get_s3_file("#{@s3_path}/sfn-desc/#{@execution_arn}")
-    description_json && format_json(description_json)
+    sfn_archive_from_s3("sfn-desc")
   end
 
   # SFN history for workflow runs
   def history_from_aws
     return if @execution_arn.blank?
 
+    # Prefer S3 if finalized b/c get_execution_history has a low rate limit
+    return sfn_archive_from_s3("sfn-hist") if @finalized
+
     AwsClient[:states].get_execution_history(execution_arn: @execution_arn)
   rescue Aws::States::Errors::ExecutionDoesNotExist, ArgumentError
+    sfn_archive_from_s3("sfn-hist")
+  end
+
+  def sfn_archive_from_s3(subpath)
     return if @s3_path.blank?
 
     # Attention: Timestamp fields will be returned as strings
-    history_json = S3Util.get_s3_file("#{@s3_path}/sfn-hist/#{@execution_arn}")
-    history_json && format_json(history_json)
+    archive_json = S3Util.get_s3_file("#{@s3_path}/#{subpath}/#{@execution_arn}")
+    archive_json && format_json(archive_json)
   end
 
   def format_json(json)

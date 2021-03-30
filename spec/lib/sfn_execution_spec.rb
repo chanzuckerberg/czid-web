@@ -59,6 +59,19 @@ RSpec.describe SfnExecution do
       ],
     }
   end
+  let(:fake_sfn_execution_history) do
+    {
+      events: [
+        {
+          id: 2,
+          execution_failed_event_details: {},
+          timestamp: Time.zone.now,
+          type: "dummy_type",
+          previous_event_id: 1,
+        },
+      ],
+    }
+  end
 
   before do
     @mock_aws_clients = {
@@ -70,7 +83,8 @@ RSpec.describe SfnExecution do
     }
   end
 
-  subject(:sfn_execution) { SfnExecution.new(fake_sfn_execution_arn, fake_s3_path) }
+  subject(:sfn_execution) { SfnExecution.new(execution_arn: fake_sfn_execution_arn, s3_path: fake_s3_path) }
+  subject(:finalized_sfn_execution) { SfnExecution.new(execution_arn: fake_sfn_execution_arn, s3_path: fake_s3_path, finalized: true) }
 
   describe "#description" do
     context "when arn exists" do
@@ -111,6 +125,14 @@ RSpec.describe SfnExecution do
     context "when arn is nil" do
       let(:fake_sfn_execution_arn) { nil }
       it { expect(sfn_execution.description).to be_nil }
+    end
+
+    context "when execution is finalized" do
+      it "returns description from s3" do
+        expect(finalized_sfn_execution).to receive(:sfn_archive_from_s3).and_return(fake_sfn_execution_description)
+
+        expect(finalized_sfn_execution.description).to eq(fake_sfn_execution_description)
+      end
     end
 
     it "should memoize result" do
@@ -163,6 +185,14 @@ RSpec.describe SfnExecution do
     context "when arn is nil" do
       let(:fake_sfn_execution_arn) { nil }
       it { expect(sfn_execution.history).to be_nil }
+    end
+
+    context "when execution is finalized" do
+      it "returns history from s3" do
+        expect(finalized_sfn_execution).to receive(:sfn_archive_from_s3).and_return(fake_sfn_execution_history)
+
+        expect(finalized_sfn_execution.history).to eq(fake_sfn_execution_history)
+      end
     end
 
     it "should memoize result" do
@@ -242,6 +272,15 @@ RSpec.describe SfnExecution do
 
       expect(actual).to include(execution_failed_event_details: { error: fake_error })
       expect(actual).to include(previous_event_id: 1)
+    end
+  end
+
+  describe "#sfn_archive_from_s3" do
+    it "correctly fetches from S3" do
+      expect(S3Util).to receive(:get_s3_file).with("#{fake_s3_path}/sfn-hist/#{fake_sfn_execution_arn}").and_return("{}")
+
+      actual = sfn_execution.send(:sfn_archive_from_s3, "sfn-hist")
+      expect(actual).to eq({})
     end
   end
 end
