@@ -30,6 +30,7 @@ import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
 import List from "~/components/ui/List";
+import { SARS_COV_2 } from "~/components/views/samples/SamplesView/constants";
 
 import cs from "./nextclade_modal.scss";
 
@@ -43,6 +44,7 @@ export default class NextcladeModal extends React.Component {
       invalidSampleNames: [],
       loading: true,
       loadingResults: false,
+      nonSarsCov2SampleNames: [],
       projectIds: [],
       referenceTree: null,
       selectedTreeType: "global",
@@ -72,15 +74,22 @@ export default class NextcladeModal extends React.Component {
       WORKFLOWS.CONSENSUS_GENOME.value
     );
 
-    const projectIds = map(
-      "projectId",
-      filter(s => validSampleIds.includes(s.id), values(samples))
+    const validSamples = filter(
+      s => validSampleIds.includes(s.id),
+      values(samples)
     );
+
+    const projectIds = map("projectId", validSamples);
+
+    const nonSarsCov2SampleNames = values(validSamples)
+      .filter(sample => sample.referenceGenome.taxonName !== SARS_COV_2)
+      .map(sample => sample.sample.name);
 
     this.setState({
       validSampleIds: new Set(validSampleIds),
       invalidSampleNames,
       loading: false,
+      nonSarsCov2SampleNames,
       validationError: error,
       projectIds: projectIds,
     });
@@ -274,6 +283,7 @@ export default class NextcladeModal extends React.Component {
       invalidSampleNames,
       loading,
       loadingResults,
+      nonSarsCov2SampleNames,
       referenceTree,
       validationError,
       validSampleIds,
@@ -342,6 +352,7 @@ export default class NextcladeModal extends React.Component {
               onClick={this.handleConfirmationModalOpen}
               invalidSampleNames={invalidSampleNames}
               loading={loading}
+              nonSarsCov2SampleNames={nonSarsCov2SampleNames}
               validationError={validationError}
               validSampleIds={validSampleIds}
             />

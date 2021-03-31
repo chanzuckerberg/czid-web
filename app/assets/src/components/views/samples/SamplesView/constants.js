@@ -17,3 +17,5 @@ export const WORKFLOW_TRIGGERS = {
     TRIGGERS.download,
   ],
 };
+
+export const SARS_COV_2 = "Severe acute respiratory syndrome coronavirus 2";

@@ -29,7 +29,7 @@ import {
 } from "~ui/icons";
 import Label from "~ui/labels/Label";
 import { WORKFLOWS } from "~utils/workflows";
-import { TRIGGERS, WORKFLOW_TRIGGERS } from "./constants";
+import { SARS_COV_2, TRIGGERS, WORKFLOW_TRIGGERS } from "./constants";
 
 import {
   computeColumnsByWorkflow,
@@ -50,6 +50,7 @@ class SamplesView extends React.Component {
       nextcladeModalOpen: false,
       // This tooltip is reset whenever the selectedSampleIds changes.
       bulkDownloadButtonTempTooltip: null,
+      sarsCov2Count: 0,
     };
 
     const { snapshotShareId } = this.props;
@@ -241,15 +242,25 @@ class SamplesView extends React.Component {
   };
 
   renderNextcladeTrigger = () => {
-    const { selectedSampleIds } = this.props;
+    const { samples, selectedSampleIds } = this.props;
+    const selectedSamples = samples.loaded.filter(sample =>
+      selectedSampleIds.has(sample.id)
+    );
+
+    const sarsCov2Count = selectedSamples
+      .map(sample => sample.referenceGenome.taxonName)
+      .reduce((n, taxonName) => {
+        return n + (taxonName === SARS_COV_2);
+      }, 0);
+
     const downloadIcon = (
       <IconNextcladeLarge className={cx(cs.icon, cs.nextclade)} />
     );
     const getPopupSubtitle = () => {
-      if (selectedSampleIds.size > MAX_NEXTCLADE_SAMPLES) {
-        return `Select at most ${MAX_NEXTCLADE_SAMPLES} samples`;
-      } else if (selectedSampleIds.size === 0) {
-        return "Select at least 1 sample";
+      if (sarsCov2Count > MAX_NEXTCLADE_SAMPLES) {
+        return `Select at most ${MAX_NEXTCLADE_SAMPLES} SARS-CoV-2 samples`;
+      } else if (sarsCov2Count === 0) {
+        return "Select at least 1 SARS-CoV-2 sample";
       } else {
         return "";
       }
@@ -260,10 +271,7 @@ class SamplesView extends React.Component {
         icon={downloadIcon}
         popupText="Nextclade"
         popupSubtitle={getPopupSubtitle()}
-        disabled={
-          selectedSampleIds.size === 0 ||
-          selectedSampleIds.size > MAX_NEXTCLADE_SAMPLES
-        }
+        disabled={sarsCov2Count === 0 || sarsCov2Count > MAX_NEXTCLADE_SAMPLES}
         onClick={withAnalytics(
           this.handleNextcladeModalOpen,
           "SamplesView_nextclade-modal-open_clicked"

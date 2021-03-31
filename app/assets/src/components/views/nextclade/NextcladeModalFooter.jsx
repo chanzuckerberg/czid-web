@@ -13,23 +13,26 @@ const NextcladeModalFooter = ({
   invalidSampleNames,
   loading,
   onClick,
+  nonSarsCov2SampleNames,
   validationError,
   validSampleIds,
 }) => {
-  const renderInvalidSamplesWarning = () => {
+  const renderAccordionNotification = ({
+    message,
+    description,
+    list,
+    type = "warning",
+  }) => {
     const header = (
       <div>
-        <span className={cs.highlight}>
-          {invalidSampleNames.length} sample
-          {invalidSampleNames.length > 1 ? "s" : ""} won't be sent to Nextclade
-        </span>
-        , because they either failed or are still processing:
+        <span className={cs.highlight}>{message}</span>
+        {description}
       </div>
     );
 
     const content = (
       <span>
-        {invalidSampleNames.map((name, index) => {
+        {list.map((name, index) => {
           return (
             <div key={`${name}-${index}`} className={cs.messageLine}>
               {name}
@@ -44,7 +47,7 @@ const NextcladeModalFooter = ({
         header={header}
         content={content}
         open={false}
-        type="warning"
+        type={type}
         displayStyle="flat"
       />
     );
@@ -58,6 +61,16 @@ const NextcladeModalFooter = ({
         </Notification>
       </div>
     );
+  };
+
+  const renderInvalidSamplesWarning = () => {
+    return renderAccordionNotification({
+      message: `${invalidSampleNames.length} sample${
+        invalidSampleNames.length > 1 ? "s" : ""
+      } won't be sent to Nextclade`,
+      description: ", because they either failed or are still processing:",
+      list: invalidSampleNames,
+    });
   };
 
   const renderValidationError = () => {
@@ -96,6 +109,19 @@ const NextcladeModalFooter = ({
     }
   };
 
+  const renderNonSARSCov2Warning = () => {
+    if (!loading && nonSarsCov2SampleNames.length > 0) {
+      return renderAccordionNotification({
+        message: `${nonSarsCov2SampleNames.length} sample${
+          nonSarsCov2SampleNames.length > 1 ? "s" : ""
+        } won't be sent to Nextclade`,
+        description:
+          ", because Nextclade only accepts SARS-CoV-2 genomes currently:",
+        list: nonSarsCov2SampleNames,
+      });
+    }
+  };
+
   return (
     <div className={cs.footer}>
       <div className={cs.notifications}>
@@ -107,6 +133,7 @@ const NextcladeModalFooter = ({
         )}
         {renderValidationError()}
         {renderInvalidSamplesNotifications()}
+        {renderNonSARSCov2Warning()}
       </div>
       {renderViewQCInNextcladeButton()}
     </div>
@@ -114,11 +141,16 @@ const NextcladeModalFooter = ({
 };
 
 NextcladeModalFooter.propTypes = {
-  loading: PropTypes.bool,
-  onClick: PropTypes.func,
-  validSampleIds: PropTypes.instanceOf(Set).isRequired,
+  description: PropTypes.string,
   invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
+  list: PropTypes.arrayOf(PropTypes.string),
+  loading: PropTypes.bool,
+  message: PropTypes.string,
+  onClick: PropTypes.func,
+  nonSarsCov2SampleNames: PropTypes.arrayOf(PropTypes.string),
+  type: PropTypes.string,
   validationError: PropTypes.string,
+  validSampleIds: PropTypes.instanceOf(Set).isRequired,
 };
 
 export default NextcladeModalFooter;
