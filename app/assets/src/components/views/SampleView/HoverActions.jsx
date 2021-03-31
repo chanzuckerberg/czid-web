@@ -23,7 +23,7 @@ import {
   MINIMUM_VERSIONS,
 } from "~/components/utils/pipeline_versions";
 import { UserContext } from "~/components/common/UserContext";
-
+import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
 import cs from "./hover_actions.scss";
 
 class HoverActions extends React.Component {
@@ -158,7 +158,10 @@ class HoverActions extends React.Component {
       },
     ];
 
-    if (allowedFeatures.includes("gen_viral_cg") && consensusGenomeEnabled) {
+    if (
+      allowedFeatures.includes(GEN_VIRAL_CG_FEATURE) &&
+      consensusGenomeEnabled
+    ) {
       if (previousConsensusGenomeRuns) {
         hoverActions.push({
           key: `consensus_genome_${params.taxId}`,

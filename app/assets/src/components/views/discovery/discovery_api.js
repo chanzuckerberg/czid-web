@@ -152,6 +152,14 @@ const processRawSample = sample => {
       ),
       user: get("uploader.name", sample.details),
       userId: get("uploader.id", sample.details),
+      topCgWorkflowRunAccessionId: get(
+        "workflow_runs_accession_ids.top_cg",
+        sample.details
+      ),
+      allWorkflowRunsAccessionIds: get(
+        "workflow_runs_accession_ids.all",
+        sample.details
+      ),
     },
     collectionLocation: get("metadata.collection_location", sample.details),
     collectionLocationV2: get(

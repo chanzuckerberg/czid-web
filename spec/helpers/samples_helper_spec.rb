@@ -556,7 +556,7 @@ RSpec.describe SamplesHelper, type: :helper do
     it "returns results for when mNGS workflow specified" do
       samples = Sample.where(id: @sample_without_runs.id)
       results = helper.send(:format_samples, samples)
-      expect(results[0].keys).to eq([:db_sample, :metadata, :derived_sample_output, :uploader, :run_info_by_workflow, :"consensus-genome"])
+      expect(results[0].keys).to eq([:db_sample, :metadata, :derived_sample_output, :uploader, :run_info_by_workflow, :workflow_runs_accession_ids, :"consensus-genome"])
     end
 
     context "when sequencing technology is present" do

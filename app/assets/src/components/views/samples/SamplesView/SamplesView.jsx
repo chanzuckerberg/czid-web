@@ -4,6 +4,7 @@ import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
+import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
@@ -40,7 +41,7 @@ import ToolbarIcon from "./ToolbarIcon";
 const MAX_NEXTCLADE_SAMPLES = 200;
 
 class SamplesView extends React.Component {
-  constructor(props) {
+  constructor(props, context) {
     super(props);
 
     this.state = {
@@ -53,8 +54,12 @@ class SamplesView extends React.Component {
 
     const { snapshotShareId } = this.props;
 
+    // TODO: Remove allowedFeatures argument once General Viral CG Flat List implementation (CH-127140)
+    // It is passed in as an argument since static methods (TableRenderers) can't access React Context directly
+    const { allowedFeatures = [] } = context || {};
     this.columnsByWorkflow = computeColumnsByWorkflow({
       basicIcon: !!snapshotShareId,
+      allowedFeatures,
     });
   }
 
@@ -315,6 +320,7 @@ class SamplesView extends React.Component {
   };
 
   renderTable = () => {
+    const { allowedFeatures = [] } = this.context || {};
     const {
       activeColumns,
       hideAllTriggers,
@@ -326,7 +332,12 @@ class SamplesView extends React.Component {
     } = this.props;
 
     // TODO(tiago): replace by automated cell height computing
-    const rowHeight = 66;
+    // TODO: Remove this ternary and set rowHeight to 66 after General Viral CG Flat List implementation
+    const rowHeight =
+      allowedFeatures.includes(GEN_VIRAL_CG_FEATURE) &&
+      workflow === WORKFLOWS.CONSENSUS_GENOME.value
+        ? 70
+        : 66;
     const selectAllChecked = this.isSelectAllChecked();
     return (
       <div className={cs.table}>

@@ -4,7 +4,10 @@ import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants";
 import { WORKFLOWS } from "~utils/workflows";
 import cs from "./samples_view.scss";
 
-export const computeColumnsByWorkflow = ({ basicIcon = false } = {}) => {
+export const computeColumnsByWorkflow = ({
+  basicIcon = false,
+  allowedFeatures = [],
+} = {}) => {
   const columnsByWorkflow = {};
 
   columnsByWorkflow[WORKFLOWS.SHORT_READ_MNGS.value] = [
@@ -145,6 +148,7 @@ export const computeColumnsByWorkflow = ({ basicIcon = false } = {}) => {
           workflow: WORKFLOWS.CONSENSUS_GENOME.value,
           full: true,
           basicIcon,
+          allowedFeatures,
         }),
       headerClassName: cs.sampleHeader,
     },

@@ -140,6 +140,37 @@
         margin-right: $space-xxs;
       }
     }
+
+    .consensusGenomeCount {
+      @include font-body-xxxs;
+      color: $primary;
+    }
+  }
+}
+
+.popup {
+  @include font-body-xs;
+
+  .header {
+    font-weight: $font-weight-semibold;
+  }
+
+  .list {
+    margin-top: 0px;
+    margin-left: 18px;
+
+    .unorderedListItem {
+      margin-bottom: 0px !important;
+    }
+  }
+
+  .topWr {
+    display: flex;
+  }
+
+  .accessionId {
+    text-decoration: underline;
+    margin-right: $space-xxs;
   }
 }
 

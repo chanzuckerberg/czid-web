@@ -414,8 +414,16 @@ module SamplesHelper
         )
       end
 
-      # Frontend caches by sample_id so responses must include the same info.
+      # TODO: Remove this in General Viral CG v1 when flat list implementation is complete
       top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
+      if is_snapshot == false
+        job_info[:workflow_runs_accession_ids] = {
+          all: sample.workflow_runs.map { |wr| wr.inputs&.[]("accession_id") },
+          top_cg: top_cg_workflow_run&.inputs&.[]("accession_id"),
+        }
+      end
+
+      # Frontend caches by sample_id so responses must include the same info.
       job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
         cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
         technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_NAME[top_cg_workflow_run&.inputs&.[]("technology")]&.capitalize,
