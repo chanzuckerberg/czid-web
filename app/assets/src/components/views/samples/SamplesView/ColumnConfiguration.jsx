@@ -276,7 +276,7 @@ export const computeColumnsByWorkflow = ({
       flexGrow: 1,
       className: cs.basicCell,
       cellDataGetter: ({ dataKey, rowData }) =>
-        TableRenderers.formatNumber(rowData[dataKey]),
+        TableRenderers.formatNumberWithCommas(rowData[dataKey]),
     },
   ];
 
