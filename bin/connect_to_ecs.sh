@@ -35,4 +35,4 @@ instance_id=$(aws ecs describe-container-instances --cluster $cluster --containe
 docker_container_id=$(aws ecs describe-tasks --cluster $cluster --tasks $task_arn | jq -r .tasks[0].containers[0].runtimeId)
 if [[ $cluster == "idseq-public-ecs" ]]; then cluster="public"; fi
 aws s3 cp "s3://idseq-secrets/idseq-${cluster}.pem" - | ssh-add -
-aegea ssh --no-ssm -t ec2-user@$instance_id docker exec -it $docker_container_id bin/entrypoint.sh "$@"
+aegea ssh --no-ssm -t idseq@$instance_id sudo docker exec -it $docker_container_id bin/entrypoint.sh "$@"
