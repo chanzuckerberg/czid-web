@@ -1,5 +1,6 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .privacyPolicy,
 .termsOfUse,
@@ -69,7 +70,7 @@
     li {
       @include font-body-s;
       list-style-type: disc;
-      margin-bottom: 10px;
+      margin-bottom: $space-m;
 
       .listItemLabel {
         font-weight: 600;
@@ -78,24 +79,67 @@
     }
   }
 
+  .nestedList {
+    margin: 20px 0 20px 30px;
+  }
+
   .underlineHeader {
-    @include font-body-m;
-    margin-top: 25px;
+    @include font-body-s;
+    margin-top: 30px;
     text-decoration: underline;
   }
 
   b {
     font-weight: $font-weight-semibold;
   }
+
+  .privacySummaryTable {
+    margin: 25px 0px;
+    border-style: solid;
+    border-width: $space-xxxxs;
+    width: 840px;
+    height: 2458px;
+
+    td {
+      padding: $space-m 15px;
+      border: $space-xxxxs solid $gray-light;
+      text-align: left;
+    }
+
+    .topRow {
+      @include font-header-s;
+      background-color: $gray-lightest;
+
+      td {
+        text-align: center;
+      }
+    }
+
+    .sectionRow {
+      @include font-header-s;
+      background-color: $gray-off-white;
+
+      td {
+        text-align: center;
+      }
+    }
+
+    .contentRow {
+      td {
+        @include font-body-s;
+        vertical-align: top;
+      }
+    }
+  }
 }
 
 .faqPage .question {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $space-xxxxs solid $gray-light;
 
   h3 {
     margin-top: 0;
     margin-bottom: 0;
-    padding: 0 10px;
+    padding: 0 $space-m;
     min-height: 50px;
     display: flex;
     align-items: center;
@@ -111,11 +155,11 @@
   }
 
   p {
-    margin: 0px 50px 10px 10px;
+    margin: 0px 50px $space-m $space-m;
   }
 
   .innerListItem {
-    margin-top: 10px;
+    margin-top: $space-m;
     margin-left: 20px;
   }
 }
