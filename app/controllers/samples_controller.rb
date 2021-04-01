@@ -1335,6 +1335,9 @@ class SamplesController < ApplicationController
     sample_ids = collection_params[:sampleIds]
     samples = samples_scope.where(id: sample_ids)
     workflow_runs = current_power.samples_workflow_runs(samples).consensus_genomes.active
+
+    # Remove the line below if generalizing beyond SARS-CoV-2
+    workflow_runs = workflow_runs.select { |wr| wr.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID }
     workflow_run_ids = workflow_runs.pluck(:id)
 
     if workflow_run_ids.empty?

@@ -5,6 +5,8 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   OUTPUT_ZIP = "consensus_genome.zip_outputs_out_output_zip".freeze
   OUTPUT_CONSENSUS = "consensus_genome.make_consensus_out_consensus_fa".freeze
 
+  SARS_COV_2_ACCESSION_ID = "MN908947.3".freeze
+
   WETLAB_PROTOCOL = {
     # See: https://www.illumina.com/products/by-brand/ampliseq.html
     ampliseq: "ampliseq",
