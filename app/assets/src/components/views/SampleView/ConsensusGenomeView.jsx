@@ -45,9 +45,7 @@ class ConsensusGenomeView extends React.Component {
   componentDidMount = () => {
     const { workflowRun } = this.state;
 
-    if (workflowRun && workflowRun.status === "SUCCEEDED") {
-      this.fetchWorkflowRunData(workflowRun.id);
-    }
+    if (workflowRun) this.fetchWorkflowRunData(workflowRun.id);
   };
 
   componentDidUpdate = (_, prevState) => {
@@ -61,16 +59,22 @@ class ConsensusGenomeView extends React.Component {
   fetchWorkflowRunData = async workflowId => {
     const { sample } = this.props;
     const { data, workflowRun } = this.state;
+    const newWorkflowRun = find({ id: workflowId }, sample.workflow_runs);
 
     // Ensures that we don't re-load the data if the user selects the same CG that they are currently on
     if (data === null || workflowId !== workflowRun.id) {
       this.setState({ loading: true });
-      const data = await getWorkflowRunResults(workflowId);
+
+      // getWorkflowRunResults raises error unless successful
+      const data =
+        newWorkflowRun.status === "SUCCEEDED"
+          ? await getWorkflowRunResults(workflowId)
+          : null;
 
       this.setState({
         data,
         loading: false,
-        workflowRun: find({ id: workflowId }, sample.workflow_runs),
+        workflowRun: newWorkflowRun,
       });
     }
   };
