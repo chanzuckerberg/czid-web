@@ -204,7 +204,7 @@ const WorkflowSelector = ({
           <div className={cs.title}>Nanopore</div>
           <div className={cs.technologyDescription}>
             We are using the ARTIC network’s nCoV-2019 novel coronavirus
-            bioinformatics pipeline for Nanopore sequencing, which can be found{" "}
+            bioinformatics protocol for nanopore sequencing, which can be found{" "}
             {createExternalLink({
               analyticsEventName:
                 ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED,
