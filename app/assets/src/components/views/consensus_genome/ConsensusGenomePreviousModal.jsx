@@ -24,6 +24,7 @@ export default function ConsensusGenomePreviousModal({
       flexGrow: 1,
       label: "Consensus Genomes",
       headerClassName: cs.primaryHeader,
+      className: cs.runData,
       cellRenderer: ({ cellData }) =>
         `${cellData.accession_id} - ${cellData.accession_name}`,
     },
