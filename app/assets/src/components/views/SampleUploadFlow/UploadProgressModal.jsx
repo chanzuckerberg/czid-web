@@ -441,7 +441,9 @@ export default class UploadProgressModal extends React.Component {
     const title =
       Object.keys(sampleUploadStatuses).length === numFailedSamples
         ? "All uploads failed"
-        : `Uploads completed with ${numFailedSamples} error`;
+        : `Uploads completed with ${numFailedSamples} error${
+            numFailedSamples > 1 ? "s" : ""
+          }`;
 
     return (
       <React.Fragment>

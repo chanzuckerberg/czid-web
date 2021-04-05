@@ -135,8 +135,9 @@ class UploadSampleStep extends React.Component {
   handleBasespaceOAuthMessageEvent = async event => {
     const {
       selectedProject,
-      selectedWorkflows,
+      selectedTechnology,
       selectedWetlabProtocol,
+      selectedWorkflows,
     } = this.state;
     const basespaceSamples = this.getSelectedSamples("basespace");
 
@@ -160,6 +161,7 @@ class UploadSampleStep extends React.Component {
       this.props.onUploadSamples({
         project: selectedProject,
         samples: samplesWithToken,
+        technology: selectedTechnology,
         uploadType: "basespace",
         wetlabProtocol: selectedWetlabProtocol,
         workflows: selectedWorkflows,
