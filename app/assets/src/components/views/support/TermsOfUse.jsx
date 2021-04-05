@@ -407,6 +407,7 @@ export default function TermsOfUse() {
           </p>,
         ]}
       />
+      <div style={{ height: "50px" }} />
     </>
   );
 
