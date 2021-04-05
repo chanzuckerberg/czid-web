@@ -30,6 +30,7 @@ RSpec.describe ProjectsController, type: :controller do
         json_response = JSON.parse(response.body)
         expect(json_response["projects"].count).to eq(expected_projects.count)
         expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+        expect(json_response["projects"].pluck("users").flatten.pluck("name")).to contain_exactly(*expected_projects.map(&:users).flatten.pluck(:name))
       end
     end
 
@@ -49,6 +50,7 @@ RSpec.describe ProjectsController, type: :controller do
         json_response = JSON.parse(response.body)
         expect(json_response["projects"].count).to eq(expected_projects.count)
         expect(json_response["projects"].pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+        expect(json_response["projects"].pluck("users").flatten.pluck("name")).to contain_exactly(*expected_projects.map(&:users).flatten.pluck(:name))
       end
     end
 

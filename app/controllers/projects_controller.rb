@@ -103,7 +103,7 @@ class ProjectsController < ApplicationController
           group_concat_sample_type = Arel.sql("GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'sample_type' THEN metadata.string_validated_value ELSE NULL END SEPARATOR '::') AS sample_types")
           group_concat_location = Arel.sql("GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'collection_location' THEN IFNULL(locations.name, metadata.string_validated_value) ELSE NULL END SEPARATOR '::') AS locations")
           group_concat_users = Arel.sql("GROUP_CONCAT(DISTINCT CONCAT(users.name,'|',users.email) ORDER BY users.name SEPARATOR '::') AS users")
-          editable = Arel.sql("BIT_OR(IF(users.id=#{current_user.id}, 1, 0)) AS editable")
+          editable = Arel.sql("BIT_OR(IF(users.id=#{current_user.id} OR #{current_user.admin?}, 1, 0)) AS editable")
           creator = Arel.sql("creators_projects.name AS creator")
           creator_id = Arel.sql("creators_projects.id AS creator_id")
 
