@@ -56,12 +56,20 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     skip("This endpoint is deprecated in favor of upload with metadata")
 
     sign_in @user
-    input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
-                     name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local", },
-                   { source: "RR004_water_2_S23_R2_001.fastq.gz",
-                     name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local", },]
+    input_files = [
+      {
+        source: "RR004_water_2_S23_R1_001.fastq.gz",
+        name: "RR004_water_2_S23_R1_001.fastq.gz",
+        source_type: "local",
+        upload_client: "web",
+      },
+      {
+        source: "RR004_water_2_S23_R2_001.fastq.gz",
+        name: "RR004_water_2_S23_R2_001.fastq.gz",
+        source_type: "local",
+        upload_client: "web",
+      },
+    ]
     assert_difference('Sample.count') do
       post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
     end

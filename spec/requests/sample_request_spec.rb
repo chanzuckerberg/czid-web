@@ -21,8 +21,18 @@ RSpec.describe "Sample request", type: :request do
           host_genome_id: hg.id,
           host_genome_name: hg.name,
           input_files_attributes: [
-            { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz" },
-            { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz" },
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              upload_client: "web",
+            },
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              upload_client: "web",
+            },
           ],
           length: 2,
           name: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17",
@@ -331,8 +341,18 @@ RSpec.describe "Sample request", type: :request do
           host_genome_id: hg.id,
           host_genome_name: hg.name,
           input_files_attributes: [
-            { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz" },
-            { source_type: "local", source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz", parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz" },
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R1.fastq.gz",
+              upload_client: "web",
+            },
+            {
+              source_type: "local",
+              source: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              parts: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__R2.fastq.gz",
+              upload_client: "web",
+            },
           ],
           length: 2,
           name: "norg_6__nacc_27__uniform_weight_per_organism__hiseq_reads__v6__17",

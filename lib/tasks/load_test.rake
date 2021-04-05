@@ -46,6 +46,7 @@ namespace "load_test" do
         name: filename,
         source: "s3://#{s3_bucket}/#{object.key}",
         source_type: InputFile::SOURCE_TYPE_S3,
+        upload_client: InputFile::UPLOAD_CLIENT_INTERNAL,
       }
     end
     return samples

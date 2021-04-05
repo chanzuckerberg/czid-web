@@ -189,6 +189,7 @@ ActiveRecord::Schema.define(version: 20_210_302_004_357) do
     t.string "source_type", null: false
     t.text "source"
     t.text "parts"
+    t.string "upload_client"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 

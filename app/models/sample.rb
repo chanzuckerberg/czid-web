@@ -432,7 +432,8 @@ class Sample < ApplicationRecord
       input_file = InputFile.new(
         name: file[:name],
         source_type: InputFile::SOURCE_TYPE_BASESPACE,
-        source: file[:source_path]
+        source: file[:source_path],
+        upload_client: InputFile::UPLOAD_CLIENT_WEB
       )
 
       input_files << input_file

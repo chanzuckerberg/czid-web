@@ -13,7 +13,7 @@ FactoryBot.define do
     end
 
     sequence(:name) { |n| "Sample #{n}" }
-    input_files { build_list(:local_input_file, 2) }
+    input_files { build_list(:local_web_input_file, 2) }
     host_genome do
       if host_genome_name
         hg = HostGenome.find_by(name: host_genome_name)

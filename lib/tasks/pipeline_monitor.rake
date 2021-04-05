@@ -134,7 +134,8 @@ class CheckPipelineRuns
       {
         name: fq,
         source: s3_path + "/" + fq,
-        source_type: "s3",
+        source_type: InputFile::SOURCE_TYPE_S3,
+        upload_client: InputFile::UPLOAD_CLIENT_INTERNAL,
       }
     end
 

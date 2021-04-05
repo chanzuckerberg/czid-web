@@ -446,6 +446,7 @@ ReviewStep.propTypes = {
         name: PropTypes.string,
         source: PropTypes.string,
         source_type: PropTypes.string,
+        upload_client: PropTypes.string,
       }),
       name: PropTypes.string,
       project_id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),

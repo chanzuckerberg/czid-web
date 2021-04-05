@@ -16,6 +16,15 @@ class InputFile < ApplicationRecord
   ] }
 
   validates :source, presence: true
+
+  UPLOAD_CLIENT_CLI = 'cli'.freeze
+  UPLOAD_CLIENT_INTERNAL = 'internal'.freeze
+  UPLOAD_CLIENT_WEB = 'web'.freeze
+  validates :upload_client, presence: true, inclusion: { in: [
+    UPLOAD_CLIENT_CLI,
+    UPLOAD_CLIENT_INTERNAL,
+    UPLOAD_CLIENT_WEB,
+  ] }
   validate :s3_source_check, on: :create
 
   BULK_FILE_PAIRED_REGEX = /\A([A-Za-z0-9_][-.A-Za-z0-9_]{1,119})_R(\d)(_001)?\.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/.freeze

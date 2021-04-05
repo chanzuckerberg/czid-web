@@ -130,11 +130,13 @@ RSpec.describe SamplesHelper, type: :helper do
               "source_type": "local",
               "source": "fake_source_R1_001.fastq.gz",
               "parts": "fake_source_R1_001.fastq.gz",
+              "upload_client": "web",
             },
             {
               "source_type": "local",
               "source": "fake_source_R2_001.fastq.gz",
               "parts": "fake_source_R2_001.fastq.gz",
+              "upload_client": "web",
             },
           ]
         end

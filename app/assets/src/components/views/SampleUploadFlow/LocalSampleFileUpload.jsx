@@ -52,6 +52,7 @@ class LocalSampleFileUpload extends React.Component {
           source_type: "local",
           source: file.name,
           parts: file.name,
+          upload_client: "web",
         })),
         // Store the files keyed by name for easy de-duping. These files are associated with the input_file_attributes.
         files: keyBy("name", files),
