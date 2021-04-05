@@ -419,7 +419,7 @@ module SamplesHelper
       top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
       if is_snapshot == false
         job_info[:workflow_runs_accession_ids] = {
-          all: sample.workflow_runs.map { |wr| wr.inputs&.[]("accession_id") },
+          all: sample.workflow_runs.non_deprecated.map { |wr| wr.inputs&.[]("accession_id") },
           top_cg: top_cg_workflow_run&.inputs&.[]("accession_id"),
         }
       end
