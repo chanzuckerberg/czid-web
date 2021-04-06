@@ -7,28 +7,54 @@ RSpec.describe SamplesHelper, type: :helper do
     let(:fake_access_key_id) { "123456789012" }
     let(:current_user) { create(:user) }
 
-    it "returns an access key from assume_role" do
+    it "returns an access key from assume_role and calls assume_role with the appropriate ARNs" do
+      @joe = create(:joe)
+      @project = create(:project, users: [@joe])
+      input_file = InputFile.new
+      input_file.name = "test.fasta"
+      input_file.source = "test.fasta"
+      input_file.parts = "test.fasta"
+      input_file.source_type = "local"
+      input_file.upload_client = "cli"
+      @sample_one = create(:sample, project: @project, name: "Test Sample", input_files: [input_file])
+
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with('CLI_UPLOAD_ROLE_ARN').and_return(fake_role_arn)
+      mock_client = Aws::STS::Client.new(stub_responses: true)
+      creds = mock_client.stub_data(
+        :assume_role,
+        credentials: {
+          access_key_id: fake_access_key_id,
+        }
+      )
+      mock_client.stub_responses(:assume_role, creds)
       allow(AwsClient).to receive(:[]) { |_client|
-        mock_client = Aws::STS::Client.new(stub_responses: true)
-        creds = mock_client.stub_data(
-          :assume_role,
-          credentials: {
-            access_key_id: fake_access_key_id,
-          }
-        )
-        mock_client.stub_responses(:assume_role, creds)
         mock_client
       }
 
-      sample = Sample.new
-      input_file = InputFile.new
-      input_file.name = "test.fasta"
-      sample.input_files = [input_file]
-      creds = get_upload_credentials([sample])
-
+      creds = get_upload_credentials([@sample_one])
       expect(creds[:credentials][:access_key_id]).to be fake_access_key_id
+      expect(mock_client.api_requests.length).to be 1
+      request = mock_client.api_requests.first
+
+      action = [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:CreateMultipartUpload",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts",
+      ]
+      object_arns = ["arn:aws:s3:::#{ENV['SAMPLES_BUCKET_NAME']}/samples/#{@project.id}/#{@sample_one.id}/fastqs/test.fasta"]
+      policy = {
+        Version: "2012-10-17",
+        Statement: {
+          Sid: "AllowSampleUploads",
+          Effect: "Allow",
+          Action: action,
+          Resource: object_arns,
+        },
+      }
+      expect(request[:params][:policy]).to eq(JSON.dump(policy))
     end
   end
   describe "#upload_samples_with_metadata" do

@@ -857,6 +857,7 @@ module SamplesHelper
 
   def get_upload_credentials(samples)
     action = [
+      "s3:GetObject",
       "s3:PutObject",
       "s3:CreateMultipartUpload",
       "s3:AbortMultipartUpload",
