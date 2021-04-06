@@ -526,6 +526,12 @@ class SamplesController < ApplicationController
     client = params[:client]
     errors = []
 
+    client_type = client == "web" ? client : "cli"
+    samples_to_upload.each_with_index do |sample, sample_idx|
+      sample[:input_files_attributes].each_with_index do |_, input_file_idx|
+        samples_to_upload[sample_idx][:input_files_attributes][input_file_idx][:upload_client] = client_type
+      end
+    end
     version_number = client.sub(/-.*$/, "")
     # Check if the client is up-to-date. "web" is always valid whereas the
     # CLI client should provide a version string to-be-checked against the
@@ -632,10 +638,9 @@ class SamplesController < ApplicationController
     end
 
     if samples.count > 0
-      client_tag = client == "web" ? client : "CLI"
       log_analytics_params = {
         version: client, # web if web version number if cli
-        client: client_tag, # here we map version number to CLI for easier queries
+        client: client_type, # here we map version number to CLI for easier queries
         count: samples.count,
       }
       MetricUtil.log_analytics_event(
