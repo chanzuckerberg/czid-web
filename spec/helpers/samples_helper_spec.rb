@@ -97,6 +97,8 @@ RSpec.describe SamplesHelper, type: :helper do
       end
 
       it "fails if basespace_access_token is not provided" do
+        expect(LogUtil).to receive(:log_error).and_call_original
+
         response = helper.upload_samples_with_metadata(
           basespace_sample_attributes.map { |sample| sample.reject { |key, _| key == :basespace_access_token } },
           metadata_attributes,
@@ -110,6 +112,8 @@ RSpec.describe SamplesHelper, type: :helper do
       end
 
       it "fails if basespace_dataset_id is not provided" do
+        expect(LogUtil).to receive(:log_error).and_call_original
+
         response = helper.upload_samples_with_metadata(
           basespace_sample_attributes.map { |sample| sample.reject { |key, _| key == :basespace_dataset_id } },
           metadata_attributes,
@@ -268,9 +272,10 @@ RSpec.describe SamplesHelper, type: :helper do
         end
 
         it "fails if technology is not provided with consensus genome workflow runs" do
+          expect(LogUtil).to receive(:log_error).and_call_original
+
           additional_attributes = { workflows: [WorkflowRun::WORKFLOW[:consensus_genome]] }
           sample_attributes = [local_cg_sample_attributes.merge(additional_attributes)]
-
           response = helper.upload_samples_with_metadata(
             sample_attributes,
             metadata_attributes,
@@ -279,7 +284,7 @@ RSpec.describe SamplesHelper, type: :helper do
 
           expect(response["samples"].length).to eq(0)
           expect(response["errors"]).to eq([
-                                             ErrorHelper::SampleUploadErrors.missing_required_technology_for_cg(fake_sample_name),
+                                             ErrorHelper::SampleUploadErrors.missing_required_technology_for_cg(sample_attributes[0][:project_id]),
                                            ])
         end
       end

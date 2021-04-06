@@ -29,6 +29,12 @@ module SamplesHelper
     WorkflowRun::STATUS[:failed] => "FAILED",
   }.freeze
 
+  class UploadCreationError < StandardError
+    def initialize(errors)
+      super("Upload creation encountered errors: #{errors}")
+    end
+  end
+
   # If selected_pipeline_runs_by_sample_id is provided, use those pipelines runs instead of the latest pipeline run for each sample.
   def generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: nil, include_all_metadata: false)
     formatted_samples = format_samples(samples, selected_pipeline_runs_by_sample_id: selected_pipeline_runs_by_sample_id, use_csv_compatible_values: true)
@@ -563,7 +569,7 @@ module SamplesHelper
 
       if workflow == WorkflowRun::WORKFLOW[:consensus_genome] && technology.nil?
         should_attempt_to_save_sample = false
-        errors << SampleUploadErrors.missing_required_technology_for_cg(sample_attributes[:name])
+        errors << SampleUploadErrors.missing_required_technology_for_cg(sample_attributes[:project_id])
       end
 
       if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
@@ -647,6 +653,10 @@ module SamplesHelper
       errors.push("Could not save WorkflowRun: Sample #{wr.sample_id}, #{wr.workflow}, #{wr.inputs_json}")
     end
 
+    # Report an error for ops awareness. Don't raise a blanket exception b/c you want a valid response if some samples succeeded.
+    if errors.present?
+      LogUtil.log_error("Some samples or workflows failed to save", exception: UploadCreationError.new(errors))
+    end
     {
       "errors" => errors,
       # Need to refetch samples so sample.metadata is fresh.
