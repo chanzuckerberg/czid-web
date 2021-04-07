@@ -173,6 +173,7 @@ class VisualizationsController < ApplicationController
         topN: HeatmapHelper::CLIENT_FILTERING_TAXA_PER_SAMPLE,
         minReads: HeatmapHelper::MINIMUM_READ_THRESHOLD,
       },
+      projectIds: samples_for_heatmap.map(&:project_id),
     }
   end
 

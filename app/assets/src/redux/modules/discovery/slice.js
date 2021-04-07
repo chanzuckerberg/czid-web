@@ -8,7 +8,7 @@ import { createSlice } from "@reduxjs/toolkit";
   increase the separation of concerns in our app
 */
 
-const initialState = { projectId: null };
+const initialState = { projectIds: null };
 
 // The discoverySlice is responsible for state in the discovery feature of our app
 // For this initial implementation, we just store the projectId
@@ -16,12 +16,12 @@ const discoverySlice = createSlice({
   name: "discovery",
   initialState,
   reducers: {
-    updateProjectId(state, action) {
-      state.projectId = action.payload;
+    updateProjectIds(state, action) {
+      state.projectIds = action.payload;
     },
   },
 });
 
-export const { updateProjectId } = discoverySlice.actions;
+export const { updateProjectIds } = discoverySlice.actions;
 
 export default discoverySlice.reducer;

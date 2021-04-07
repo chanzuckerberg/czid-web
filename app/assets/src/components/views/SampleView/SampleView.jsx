@@ -73,7 +73,7 @@ import ConsensusGenomePreviousModal from "~/components/views/consensus_genome/Co
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
-import { updateProjectId } from "~/redux/modules/discovery/slice";
+import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, IconLoading } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
@@ -2014,7 +2014,7 @@ SampleView.propTypes = {
 
 SampleView.contextType = UserContext;
 
-const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectId };
+const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectIds };
 
 // Don't need mapStateToProps yet so pass in null
 const connectedComponent = connect(null, mapDispatchToProps)(SampleView);

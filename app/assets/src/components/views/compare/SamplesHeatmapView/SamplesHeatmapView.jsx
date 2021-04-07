@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
+import { connect } from "react-redux";
 import {
   assign,
   compact,
@@ -16,6 +17,7 @@ import {
   property,
   set,
   toLower,
+  uniq,
   values,
 } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
@@ -30,6 +32,7 @@ import { logError } from "~/components/utils/logUtil";
 import { sanitizeCSVRow, createCSVObjectURL } from "~/components/utils/csv";
 import { getSampleTaxons, saveVisualization, getTaxaDetails } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
+import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import {
   isPipelineFeatureAvailable,
@@ -206,7 +209,10 @@ class SamplesHeatmapView extends React.Component {
   }
 
   componentDidMount() {
+    const { projectIds, updateDiscoveryProjectIds } = this.props;
+
     this.fetchViewData();
+    updateDiscoveryProjectIds(uniq(projectIds));
   }
 
   parseUrlParams = () => {
@@ -1779,6 +1785,7 @@ SamplesHeatmapView.propTypes = {
   categories: PropTypes.array,
   metrics: PropTypes.array,
   sampleIds: PropTypes.array,
+  sampleIdsToProjectIds: PropTypes.array,
   savedParamValues: PropTypes.object,
   subcategories: PropTypes.object,
   removedTaxonIds: PropTypes.array,
@@ -1790,4 +1797,14 @@ SamplesHeatmapView.propTypes = {
 
 SamplesHeatmapView.contextType = UserContext;
 
-export default SamplesHeatmapView;
+const mapDispatchToProps = { updateDiscoveryProjectIds: updateProjectIds };
+
+// Don't need mapStateToProps yet so pass in null
+const connectedComponent = connect(
+  null,
+  mapDispatchToProps
+)(SamplesHeatmapView);
+
+connectedComponent.name = "SamplesHeatmapView";
+
+export default connectedComponent;

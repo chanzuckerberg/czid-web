@@ -27,7 +27,7 @@ import {
   xorBy,
 } from "lodash/fp";
 
-import { updateProjectId } from "~/redux/modules/discovery/slice";
+import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { getSearchSuggestions } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { get } from "~/api/core";
@@ -112,7 +112,7 @@ class DiscoveryView extends React.Component {
     let localState = this.loadState(localStorage, "DiscoveryViewOptions");
 
     const projectIdToUpdate = projectId || urlState.projectId;
-    // If the projectId was passed as props or is in the URL, update the projectId in the redux state via the updateProjectid action creator
+    // If the projectId was passed as props or is in the URL, update the projectIds in the redux state via the updateProjectIds action creator
     updateDiscoveryProjectId(projectIdToUpdate || null);
 
     // values are copied from left to right to the first argument (last arguments override previous)
@@ -1859,7 +1859,7 @@ DiscoveryView.propTypes = {
 
 DiscoveryView.contextType = UserContext;
 
-const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectId };
+const mapDispatchToProps = { updateDiscoveryProjectId: updateProjectIds };
 
 // Don't need mapStateToProps yet so pass in null
 const connectedComponent = connect(null, mapDispatchToProps)(DiscoveryView);
