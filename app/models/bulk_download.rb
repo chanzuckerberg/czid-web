@@ -5,6 +5,7 @@ class BulkDownload < ApplicationRecord
   include SamplesHelper
   include PipelineOutputsHelper
   include BulkDownloadTypesHelper
+  include ParameterSanitization
   include Rails.application.routes.url_helpers
   has_and_belongs_to_many :pipeline_runs
   has_and_belongs_to_many :workflow_runs
@@ -291,6 +292,14 @@ class BulkDownload < ApplicationRecord
     "#{project_name_truncated}_#{sample.project_id}/#{sample_name_truncated}#{sample_id_str}"
   end
 
+  def get_accession_id_prefix(workflow_run)
+    accession_id = workflow_run.inputs&.[]("accession_id")
+    if accession_id
+      # Should not be necessary but sanitizing out of an abundance of caution
+      sanitize_accession_id(accession_id) + "_"
+    end
+  end
+
   def bulk_download_ecs_task_command
     # Order both pipeline runs and samples by ascending sample id.
     # This ensures that the download src-urls and tar-names have the same order which is critical to
@@ -387,8 +396,9 @@ class BulkDownload < ApplicationRecord
     if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE
       download_src_urls = workflow_runs_ordered.map { |run| run.output_path(ConsensusGenomeWorkflowRun::OUTPUT_CONSENSUS) }
 
-      download_tar_names = samples_ordered.map do |sample|
-        "#{get_output_file_prefix(sample, cleaned_project_names)}" \
+      download_tar_names = workflow_runs_ordered.map do |run|
+        "#{get_output_file_prefix(run.sample, cleaned_project_names)}" \
+        "#{get_accession_id_prefix(run)}" \
           "consensus.fa"
       end
     end

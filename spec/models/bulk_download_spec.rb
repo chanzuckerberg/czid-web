@@ -99,6 +99,11 @@ describe BulkDownload, type: :model do
                                       sfn_execution_arn: fake_sfn_execution_arn,
                                     }])
 
+      @sample_three = create(:sample, project: @project, name: "Test Sample Three")
+      @workflow_run_one = create(:workflow_run, sample: @sample_three, inputs_json: { accession_id: "ABC123456.1" }.to_json)
+      @workflow_run_two = create(:workflow_run, sample: @sample_three, inputs_json: { accession_id: "XYZ5432.1" }.to_json)
+      @workflow_run_three = create(:workflow_run, sample: @sample_one, inputs_json: { accession_id: "IJK5432.1" }.to_json)
+
       stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq.net",
                                           "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
     end
@@ -435,6 +440,42 @@ describe BulkDownload, type: :model do
         get_expected_tar_name(@project, @sample_two, "reads_nh_R2.fastq"),
         "--dest-url",
         "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Reads (Non-host).tar.gz",
+        "--progress-delay",
+        15,
+        "--success-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/success/#{@bulk_download.access_token}",
+        "--error-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/error/#{@bulk_download.access_token}",
+        "--progress-url",
+        "https://idseq.net/bulk_downloads/#{@bulk_download.id}/progress/#{@bulk_download.access_token}",
+      ]
+
+      expect(@bulk_download.bulk_download_ecs_task_command).to eq(task_command)
+    end
+
+    it "returns the correct task command for consensus genomes download type" do
+      fake_path = "s3://consensus.fa"
+      allow_any_instance_of(SfnExecution).to receive(:output_path).and_return(fake_path)
+
+      @bulk_download = create(:bulk_download, user: @joe, download_type: BulkDownloadTypesHelper::CONSENSUS_GENOME_DOWNLOAD_TYPE, workflow_run_ids: [
+                                @workflow_run_one.id,
+                                @workflow_run_two.id,
+                                @workflow_run_three.id,
+                              ])
+
+      task_command = [
+        "python",
+        "s3_tar_writer.py",
+        "--src-urls",
+        fake_path,
+        fake_path,
+        fake_path,
+        "--tar-names",
+        get_expected_tar_name(@project, @sample_one, "#{@workflow_run_three.inputs['accession_id']}_consensus.fa"),
+        get_expected_tar_name(@project, @sample_three, "#{@workflow_run_one.inputs['accession_id']}_consensus.fa"),
+        get_expected_tar_name(@project, @sample_three, "#{@workflow_run_two.inputs['accession_id']}_consensus.fa"),
+        "--dest-url",
+        "s3://idseq-samples-prod/downloads/#{@bulk_download.id}/Consensus Genome.tar.gz",
         "--progress-delay",
         15,
         "--success-url",
@@ -1140,6 +1181,37 @@ describe BulkDownload, type: :model do
       }
 
       expect(bulk_download).to_not be_valid
+    end
+  end
+
+  describe "#get_accession_id_prefix" do
+    let(:joe) { create(:joe) }
+    let(:project) { create(:project, users: [joe], name: "Test Project") }
+    let(:sample_one) { create(:sample, project: project, name: "Test Sample One") }
+    let(:bulk_download) do
+      create(
+        :bulk_download,
+        user: joe,
+        download_type: BulkDownloadTypesHelper::SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+      )
+    end
+    let(:inputs_json) do
+      {
+        accession_id: "ABC123456.1",
+        accession_name: "Fake accession",
+        taxon_id: 987_654,
+        taxon_name: "Fake taxon",
+      }.to_json
+    end
+    let(:workflow_run) { create(:workflow_run, sample: sample_one, inputs_json: inputs_json) }
+    let(:workflow_run_without_accession_id) { create(:workflow_run, sample: sample_one) }
+
+    it "gets the accession id if one is present and adds an underscore" do
+      expect(bulk_download.get_accession_id_prefix(workflow_run)).to eq("ABC123456.1_")
+    end
+
+    it "returns nothing if no accession id" do
+      expect(bulk_download.get_accession_id_prefix(workflow_run_without_accession_id)).to eq(nil)
     end
   end
 end

@@ -16,4 +16,9 @@ module ParameterSanitization
     # Allow letters, numbers, underscores, dashes, and spaces
     return title.gsub(/[^A-Za-z0-9_\- ]/, ' ').strip
   end
+
+  def sanitize_accession_id(accession_id)
+    # Allow capital letters, numbers, underscores, and periods
+    return accession_id.gsub(/[^A-Z0-9_\.]/, '')
+  end
 end
