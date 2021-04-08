@@ -2,6 +2,7 @@ import axios from "axios";
 
 const INSTRUMENTATION_ENDPOINT = "/frontend_metrics";
 const MAX_SAMPLES_FOR_GET_REQUEST = 256;
+const DEVELOPMENT_MODE = process.env.NODE_ENV === "development";
 
 const postToFrontendMetrics = async (url, resp, duration) =>
   axios
@@ -18,13 +19,15 @@ const instrument = func => {
     const startTime = performance.now();
     try {
       const result = await func.apply(this, [url, ...args]).then(async resp => {
-        postToFrontendMetrics(url, resp, performance.now() - startTime);
+        !DEVELOPMENT_MODE &&
+          postToFrontendMetrics(url, resp, performance.now() - startTime);
         return resp.data;
       });
 
       return result;
     } catch (errorResp) {
-      postToFrontendMetrics(url, errorResp, performance.now() - startTime);
+      !DEVELOPMENT_MODE &&
+        postToFrontendMetrics(url, errorResp, performance.now() - startTime);
       return Promise.reject(errorResp);
     }
   };
