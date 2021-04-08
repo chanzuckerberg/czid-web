@@ -74,6 +74,15 @@ $break-large: 1460px;
   p .error {
     margin: 0;
   }
+
+  .section {
+    margin-bottom: $space-m;
+    padding: 0;
+    .header {
+      @include font-header-s;
+      margin: $space-xxs 0;
+    }
+  }
 }
 
 // Forgot password error style
