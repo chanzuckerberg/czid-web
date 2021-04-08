@@ -1,3 +1,13 @@
+export const DOWNLOAD_OPTIONS = [
+  { text: "Download All Heatmap Metrics (.csv)", value: "csv_metrics" },
+  {
+    text: "Download Current Heatmap View (.csv)",
+    value: "current_heatmap_view_csv",
+  },
+  { text: "Download SVG", value: "svg" },
+  { text: "Download PNG", value: "png" },
+];
+
 export const SCALE_OPTIONS = [
   ["Log", "symlog"],
   ["Lin", "linear"],

@@ -1,8 +1,12 @@
 import React, { useContext } from "react";
-import { get, isEmpty } from "lodash/fp";
+import { get, isEmpty, size } from "lodash/fp";
 
 import { deleteSample, saveVisualization } from "~/api";
-import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  withAnalytics,
+  logAnalyticsEvent,
+} from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import ViewHeader from "~/components/layout/ViewHeader";
@@ -43,6 +47,8 @@ export default function SampleViewHeader({
   view,
 }) {
   const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
+
   const workflow = PIPELINE_RUN_TABS.includes(currentTab)
     ? WORKFLOWS.SHORT_READ_MNGS.value
     : WORKFLOWS.CONSENSUS_GENOME.value;
@@ -90,8 +96,32 @@ export default function SampleViewHeader({
     });
   };
 
+  const renderConsensusGenomeHelpButton = () => (
+    <HelpButton
+      className={cs.controlElement}
+      onClick={withAnalytics(
+        () =>
+          /*
+          TODO: Uncomment & insert CG appcue flow ID when it's ready (CH-118852)
+          window.Appcues &&
+          window.Appcues.show(INSERT_CG_HELP_BUTTON_APPCUE_FLOW_ID_HERE)
+        */
+          // eslint-disable-next-line no-console
+          console.log(
+            ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED
+          ),
+        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED
+      )}
+    />
+  );
+
   const renderViewHeaderControls = () => {
-    const { allowedFeatures } = userContext || {};
+    // Should hide CG appcues help button if a sample doesn't have the feature flag or (has 0 mNGS runs & 1 CG run)
+    const shouldHideConsensusGenomeHelpButton =
+      !allowedFeatures.includes("cg_appcues_help_button") ||
+      (sample &&
+        isEmpty(sample.pipeline_runs) &&
+        size(sample.workflow_runs) === 1);
 
     if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
       const succeeded = get("status", currentRun) === "SUCCEEDED";
@@ -122,6 +152,8 @@ export default function SampleViewHeader({
               text="Delete Sample"
             />
           )}
+          {shouldHideConsensusGenomeHelpButton ||
+            renderConsensusGenomeHelpButton()}
         </ViewHeader.Controls>
       );
     } else {
@@ -161,7 +193,6 @@ export default function SampleViewHeader({
           {!isEmpty(reportMetadata) && allowedFeatures.includes("appcues") && (
             <HelpButton
               className={cs.controlElement}
-              // eslint-disable-next-line no-console
               onClick={withAnalytics(
                 () =>
                   window.Appcues &&
@@ -182,61 +213,65 @@ export default function SampleViewHeader({
       : `/home?project_id=${project.id}`;
   };
 
+  const renderViewHeaderContent = () => (
+    <ViewHeader.Content>
+      <WorkflowVersionHeader
+        sampleId={get("id", sample)}
+        currentRun={currentRun}
+        allRuns={
+          mngsWorkflow
+            ? get("pipeline_runs", sample)
+            : get("workflow_runs", sample)
+        }
+        workflowType={workflow}
+        mngsWorkflow={mngsWorkflow}
+        versionKey={mngsWorkflow ? "pipeline_version" : "wdl_version"}
+        timeKey={mngsWorkflow ? "created_at" : "executed_at"}
+        onVersionChange={onPipelineVersionChange}
+        snapshotShareId={snapshotShareId}
+      />
+      <ViewHeader.Pretitle breadcrumbLink={getBreadcrumbLink()}>
+        {project ? project.name : ""}
+      </ViewHeader.Pretitle>
+      <ViewHeader.Title
+        label={get("name", sample)}
+        id={sample && sample.id}
+        options={projectSamples.map(sample => ({
+          label: sample.name,
+          id: sample.id,
+          onClick: () => {
+            openUrl(
+              generateUrlToSampleView({
+                sampleId: sample.id,
+                snapshotShareId,
+              })
+            );
+            logAnalyticsEvent("SampleView_header-title_clicked", {
+              sampleId: sample.id,
+            });
+          },
+        }))}
+      />
+      <div className={cs.sampleDetailsLinkContainer}>
+        <span
+          className={cs.sampleDetailsLink}
+          onClick={withAnalytics(
+            onDetailsClick,
+            "SampleView_sample-details-link_clicked",
+            {
+              sampleId: sample && sample.id,
+            }
+          )}
+        >
+          Sample Details
+        </span>
+      </div>
+    </ViewHeader.Content>
+  );
+
   return (
     <ViewHeader className={cs.viewHeader}>
-      <ViewHeader.Content>
-        <WorkflowVersionHeader
-          sampleId={get("id", sample)}
-          currentRun={currentRun}
-          allRuns={
-            mngsWorkflow
-              ? get("pipeline_runs", sample)
-              : get("workflow_runs", sample)
-          }
-          workflowType={workflow}
-          mngsWorkflow={mngsWorkflow}
-          versionKey={mngsWorkflow ? "pipeline_version" : "wdl_version"}
-          timeKey={mngsWorkflow ? "created_at" : "executed_at"}
-          onVersionChange={onPipelineVersionChange}
-          snapshotShareId={snapshotShareId}
-        />
-        <ViewHeader.Pretitle breadcrumbLink={getBreadcrumbLink()}>
-          {project ? project.name : ""}
-        </ViewHeader.Pretitle>
-        <ViewHeader.Title
-          label={get("name", sample)}
-          id={sample && sample.id}
-          options={projectSamples.map(sample => ({
-            label: sample.name,
-            id: sample.id,
-            onClick: () => {
-              openUrl(
-                generateUrlToSampleView({
-                  sampleId: sample.id,
-                  snapshotShareId,
-                })
-              );
-              logAnalyticsEvent("SampleView_header-title_clicked", {
-                sampleId: sample.id,
-              });
-            },
-          }))}
-        />
-        <div className={cs.sampleDetailsLinkContainer}>
-          <span
-            className={cs.sampleDetailsLink}
-            onClick={withAnalytics(
-              onDetailsClick,
-              "SampleView_sample-details-link_clicked",
-              {
-                sampleId: sample && sample.id,
-              }
-            )}
-          >
-            Sample Details
-          </span>
-        </div>
-      </ViewHeader.Content>
+      {renderViewHeaderContent()}
       {!snapshotShareId && renderViewHeaderControls()}
     </ViewHeader>
   );

@@ -11,6 +11,7 @@ import { ViewHeader } from "~/components/layout";
 import { triggerCSVDownload } from "~/components/utils/csv";
 import { logDownloadOption } from "~/components/views/report/utils/download";
 import { UserContext } from "~/components/common/UserContext";
+import { DOWNLOAD_OPTIONS } from "./constants";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -24,15 +25,8 @@ const SamplesHeatmapHeader = ({
   onShareClick,
   onSaveClick,
 }) => {
-  const DOWNLOAD_OPTIONS = [
-    { text: "Download All Heatmap Metrics (.csv)", value: "csv_metrics" },
-    {
-      text: "Download Current Heatmap View (.csv)",
-      value: "current_heatmap_view_csv",
-    },
-    { text: "Download SVG", value: "svg" },
-    { text: "Download PNG", value: "png" },
-  ];
+  const userContext = useContext(UserContext);
+  const { allowedFeatures } = userContext || {};
 
   const handleDownloadClick = option => {
     switch (option) {
@@ -69,9 +63,6 @@ const SamplesHeatmapHeader = ({
       },
     });
   };
-
-  const userContext = useContext(UserContext);
-  const { allowedFeatures } = userContext || {};
 
   return (
     <ViewHeader className={cs.viewHeader}>

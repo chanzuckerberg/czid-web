@@ -102,6 +102,10 @@ function EventDictionary() {
   /** The user clicked the button to create another consensus genome for this taxon. */
   this.CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED =
     "CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED";
+
+  /** The user clicked the consensus genome help button in a sample report */
+  this.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED =
+    "SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED";
 }
 
 const eventNames = new EventDictionary();
