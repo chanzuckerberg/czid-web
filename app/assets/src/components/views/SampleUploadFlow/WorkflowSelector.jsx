@@ -183,7 +183,7 @@ const WorkflowSelector = ({
             position={"top center"}
           />
         </div>
-        <div className={cs.description}>r941_min_fast_g303</div>
+        <div className={cs.description}>r941_min_high_g360</div>
       </div>
     </div>
   );
