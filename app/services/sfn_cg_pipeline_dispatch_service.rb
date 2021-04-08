@@ -142,6 +142,7 @@ class SfnCGPipelineDispatchService
                           # illumina gen viral cg
                           {
                             ref_accession_id: @workflow_run.inputs&.[]("accession_id"),
+                            filter_reads: false, # filters all except SARS-CoV-2 at the moment
                           }
                         end
 
