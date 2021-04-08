@@ -774,7 +774,7 @@ class SamplesController < ApplicationController
             pipeline_runs: @sample.pipeline_runs_info,
             workflow_runs: @sample.workflow_runs.non_deprecated.reverse.as_json(
               only: WORKFLOW_RUN_DEFAULT_FIELDS,
-              methods: [:input_error, :inputs]
+              methods: [:input_error, :inputs, :parsed_cached_results]
             )
           )
       end
@@ -1221,7 +1221,7 @@ class SamplesController < ApplicationController
     @sample.create_and_dispatch_workflow_run(workflow, inputs_json: inputs_json)
     render json: @sample.workflow_runs.non_deprecated.reverse.as_json(
       only: WORKFLOW_RUN_DEFAULT_FIELDS,
-      methods: [:input_error, :inputs]
+      methods: [:input_error, :inputs, :parsed_cached_results]
     )
   end
 

@@ -115,6 +115,10 @@ class WorkflowRun < ApplicationRecord
     @inputs ||= JSON.parse(inputs_json || "null")
   end
 
+  def parsed_cached_results
+    @parsed_cached_results ||= JSON.parse(cached_results || "null")
+  end
+
   def self.in_progress(workflow_name = nil)
     scope = where(status: STATUS[:running])
     scope = scope.where(workflow: workflow_name) if workflow_name.present?

@@ -331,4 +331,25 @@ describe WorkflowRun, type: :model do
       expect(subject).to be_nil
     end
   end
+
+  describe "#parsed_cached_results" do
+    let(:parsed_results) { { "accession_id" => "MN908947.3", "accession_name" => "Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome", "taxon_id" => 463_676, "taxon_name" => "Severe acute respiratory syndrome coronavirus 2", "technology" => "Illumina", "wetlab_protocol" => "artic" } }
+    let(:cached_results) { parsed_results.to_json }
+    let(:project) { create(:project) }
+    let(:sample) { create(:sample, project: project) }
+    let(:workflow_run) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome], cached_results: cached_results) }
+    let(:workflow_run_no_results) { create(:workflow_run, sample: sample, workflow: WorkflowRun::WORKFLOW[:consensus_genome]) }
+
+    subject { workflow_run.send(:parsed_cached_results) }
+
+    it "calls JSON parse on the cached_results column" do
+      expect(JSON).to receive(:parse).with(cached_results).and_call_original
+
+      expect(subject).to eq(parsed_results)
+    end
+
+    it "returns null if missing results" do
+      expect(workflow_run_no_results.parsed_cached_results).to be_nil
+    end
+  end
 end

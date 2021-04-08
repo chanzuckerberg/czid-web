@@ -1,12 +1,14 @@
 import { get } from "lodash/fp";
+import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
-import moment from "moment";
 
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import BasicPopup from "~/components/BasicPopup";
 import ButtonTextPrimary from "~/components/ui/controls/buttons/ButtonTextPrimary";
 import { IconPlusSmall } from "~/components/ui/icons";
 import { Table } from "~/components/visualizations/table";
+import { numberWithCommas } from "~/helpers/strings";
 import Modal from "~ui/containers/Modal";
 
 import cs from "./consensus_genome_previous_modal.scss";
@@ -18,15 +20,41 @@ export default function ConsensusGenomePreviousModal({
   onRowClick,
   open,
 }) {
+  const renderPrimaryCell = cellData => {
+    const { inputs, parsed_cached_results: results } = cellData;
+
+    const coverage = results
+      ? get("coverage_viz.coverage_depth", results).toFixed(2)
+      : null;
+    const percentId = get("quality_metrics.percent_identity", results);
+    const referenceLength = numberWithCommas(
+      get("quality_metrics.reference_genome_length", results)
+    );
+    const title = `${inputs.accession_id} - ${inputs.accession_name}`;
+    return (
+      <>
+        <BasicPopup
+          content={title}
+          position="top right"
+          trigger={<div className={cs.title}>{title}</div>}
+        />
+        <div className={cs.subtext}>
+          {results &&
+            `${percentId} %id, ${referenceLength} bp length, ${coverage}x coverage`}
+        </div>
+      </>
+    );
+  };
+
   const columns = [
     {
-      dataKey: "inputs",
+      dataKey: "", // Using multiple columns
       flexGrow: 1,
       label: "Consensus Genomes",
       headerClassName: cs.primaryHeader,
       className: cs.runData,
-      cellRenderer: ({ cellData }) =>
-        `${cellData.accession_id} - ${cellData.accession_name}`,
+      cellDataGetter: ({ rowData }) => rowData,
+      cellRenderer: ({ cellData }) => renderPrimaryCell(cellData),
     },
     {
       dataKey: "executed_at",

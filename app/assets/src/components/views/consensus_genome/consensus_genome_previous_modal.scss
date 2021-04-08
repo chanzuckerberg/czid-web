@@ -37,6 +37,19 @@
 
     .row {
       cursor: pointer;
+
+      .title {
+        @include font-header-xs;
+
+        text-overflow: ellipsis;
+        overflow: hidden;
+        margin-bottom: 0; // Override Popup
+      }
+
+      .subtext {
+        @include font-body-xs;
+        color: $gray-light;
+      }
     }
 
     .dateCell {
