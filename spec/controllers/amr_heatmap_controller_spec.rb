@@ -360,7 +360,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
           # Although in this instance we are only returning one entry,
           # S3 always adds the comma at the end.
           allow(S3Util).to receive(:s3_select_json).and_return(OQXB_ONTOLOGY.to_json + ",")
-          stub_const("S3_DATABASE_BUCKET", "idseq-database")
+          stub_const("S3_DATABASE_BUCKET", "idseq-public-references")
         end
 
         it "should return relevant information from the Ontology JSON stored on s3" do
@@ -394,7 +394,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
       context "when no matching gene is found" do
         before do
           allow(S3Util).to receive(:s3_select_json).and_return("")
-          stub_const("S3_DATABASE_BUCKET", "idseq-database")
+          stub_const("S3_DATABASE_BUCKET", "idseq-public-references")
         end
 
         it "should return an ontology object with an error message if no match is found" do
