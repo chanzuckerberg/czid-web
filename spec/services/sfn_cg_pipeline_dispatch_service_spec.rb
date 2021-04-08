@@ -273,7 +273,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         end
       end
 
-      context "when an accession id is provided" do
+      context "when an accession id is provided (General Viral CG)" do
         let(:workflow_run) do
           create(:workflow_run,
                  workflow: test_workflow_name,
@@ -287,9 +287,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
             sfn_input_json: {
               Input: {
                 Run: {
-                  accession_id: 1,
-                  s3_nr_db_path: s3_nr_db_path,
-                  s3_nr_loc_db_path: s3_nr_loc_db_path,
+                  ref_accession_id: 1,
                 },
               },
             }

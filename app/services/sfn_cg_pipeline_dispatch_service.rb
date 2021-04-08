@@ -123,15 +123,6 @@ class SfnCGPipelineDispatchService
     end
   end
 
-  def alignment_config_paths
-    alignment_config = AlignmentConfig.find_by(name: AlignmentConfig::DEFAULT_NAME)
-    paths = {
-      s3_nr_db_path: alignment_config.s3_nr_db_path,
-      s3_nr_loc_db_path: alignment_config.s3_nr_loc_db_path,
-    }
-    paths
-  end
-
   def generate_wdl_input
     additional_inputs = if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
                           # ONT sars-cov-2 cg
@@ -150,9 +141,7 @@ class SfnCGPipelineDispatchService
                         else
                           # illumina gen viral cg
                           {
-                            accession_id: @workflow_run.inputs&.[]("accession_id"),
-                            s3_nr_db_path: alignment_config_paths[:s3_nr_db_path],
-                            s3_nr_loc_db_path: alignment_config_paths[:s3_nr_loc_db_path],
+                            ref_accession_id: @workflow_run.inputs&.[]("accession_id"),
                           }
                         end
 
