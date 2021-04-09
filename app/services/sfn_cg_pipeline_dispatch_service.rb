@@ -5,6 +5,8 @@ class SfnCGPipelineDispatchService
 
   include Callable
 
+  NA_PRIMER_FILE = "na_primers.bed".freeze
+
   class SfnArnMissingError < StandardError
     def initialize
       super("SFN_CG_ARN not set on App Config.")
@@ -142,7 +144,12 @@ class SfnCGPipelineDispatchService
                           # illumina gen viral cg
                           {
                             ref_accession_id: @workflow_run.inputs&.[]("accession_id"),
-                            filter_reads: false, # filters all except SARS-CoV-2 at the moment
+                            # This option filters all except SARS-CoV-2 at the moment:
+                            filter_reads: false,
+                            # This is a special empty primer file b/c the user doesn't specify a
+                            # wetlab protocol from mngs samples but we still want some quality/
+                            # length filtering:
+                            primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{NA_PRIMER_FILE}",
                           }
                         end
 

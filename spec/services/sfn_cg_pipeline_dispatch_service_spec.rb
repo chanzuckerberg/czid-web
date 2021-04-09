@@ -288,6 +288,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
               Input: {
                 Run: {
                   ref_accession_id: 1,
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{SfnCGPipelineDispatchService::NA_PRIMER_FILE}",
                 },
               },
             }
