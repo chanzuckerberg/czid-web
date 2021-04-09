@@ -528,7 +528,7 @@ class SamplesController < ApplicationController
 
     client_type = client == "web" ? client : "cli"
     samples_to_upload.each_with_index do |sample, sample_idx|
-      sample[:input_files_attributes].each_with_index do |_, input_file_idx|
+      (sample[:input_files_attributes] || []).each_with_index do |_, input_file_idx|
         samples_to_upload[sample_idx][:input_files_attributes][input_file_idx][:upload_client] = client_type
       end
     end
