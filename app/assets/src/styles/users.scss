@@ -60,6 +60,9 @@ $break-large: 1460px;
     transition: 0.2s width ease-out;
     text-align: center;
   }
+  .checkbox {
+    justify-content: flex-start;
+  }
   .input-field {
     i {
       float: right;

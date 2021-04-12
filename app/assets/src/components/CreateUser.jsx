@@ -1,18 +1,17 @@
 import React from "react";
+import PropTypes from "prop-types";
 
+import { includes } from "lodash/fp";
 import { openUrl } from "~utils/links";
 import { withAnalytics } from "~/api/analytics";
 import UserForm from "~/components/views/UserForm";
 import { createUser, updateUser } from "~/api/user";
 
-const GROUP_OPTIONS = [
-  { text: "DPH", value: "DPH" },
-  { text: "GCE", value: "GCE" },
-  { text: "Africa CDC", value: "Africa CDC" },
-  { text: "Biohub", value: "Biohub" },
-  { text: "LMIC", value: "LMIC" },
-  { text: "N/A", value: "" },
-];
+const DPH = "DPH";
+const GCE = "GCE";
+const AFRICA_CDC = "Africa CDC";
+const BIOHUB = "Biohub";
+const LMIC = "LMIC";
 
 const MEDICAL_DETECTIVE = "Medical Detective";
 const LANDSCAPE_EXPLORER = "Landscape Explorer";
@@ -42,27 +41,30 @@ class CreateUser extends React.Component {
       serverErrors: [],
       email: this.selectedUser.email || "",
       name: this.selectedUser.name || "",
-      adminstatus: this.selectedUser.adminStatus,
       id: this.selectedUser.id,
       sendActivation: true,
       institution: this.selectedUser.institution || "",
-      isMedicalDetective: !!(
-        this.selectedUser.archetypes &&
-        this.selectedUser.archetypes.includes(MEDICAL_DETECTIVE)
+      isMedicalDetective: includes(
+        MEDICAL_DETECTIVE,
+        this.selectedUser.archetypes
       ),
-      isLandscapeExplorer: !!(
-        this.selectedUser.archetypes &&
-        this.selectedUser.archetypes.includes(LANDSCAPE_EXPLORER)
+      isLandscapeExplorer: includes(
+        LANDSCAPE_EXPLORER,
+        this.selectedUser.archetypes
       ),
-      isOutbreakSurveyor: !!(
-        this.selectedUser.archetypes &&
-        this.selectedUser.archetypes.includes(OUTBREAK_SURVEYOR)
+      isOutbreakSurveyor: includes(
+        OUTBREAK_SURVEYOR,
+        this.selectedUser.archetypes
       ),
-      isMicrobiomeInvestigator: !!(
-        this.selectedUser.archetypes &&
-        this.selectedUser.archetypes.includes(MICROBIOME_INVESTIGATOR)
+      isMicrobiomeInvestigator: includes(
+        MICROBIOME_INVESTIGATOR,
+        this.selectedUser.archetypes
       ),
-      group: this.selectedUser.group,
+      isAfricaCDC: includes(AFRICA_CDC, this.selectedUser.group),
+      isBiohub: includes(BIOHUB, this.selectedUser.group),
+      isDPH: includes(DPH, this.selectedUser.group),
+      isGCE: includes(GCE, this.selectedUser.group),
+      isLMIC: includes(LMIC, this.selectedUser.group),
     };
   }
 
@@ -86,13 +88,6 @@ class CreateUser extends React.Component {
 
   clearError = () => {
     this.setState({ showFailed: false });
-  };
-
-  toggleCheckBox = e => {
-    this.setState({
-      isAdmin: e.target.value !== "true",
-      adminstatus: e.target.value !== "true",
-    });
   };
 
   handleEmailChange = e => {
@@ -136,8 +131,25 @@ class CreateUser extends React.Component {
     return JSON.stringify(archetypes);
   };
 
-  onGroupChange = group => {
-    this.setState({ group });
+  getGroups = () => {
+    const { isAfricaCDC, isBiohub, isDPH, isGCE, isLMIC } = this.state;
+    let groups = [];
+    if (isAfricaCDC) {
+      groups.push(AFRICA_CDC);
+    }
+    if (isBiohub) {
+      groups.push(BIOHUB);
+    }
+    if (isDPH) {
+      groups.push(DPH);
+    }
+    if (isGCE) {
+      groups.push(GCE);
+    }
+    if (isLMIC) {
+      groups.push(LMIC);
+    }
+    return JSON.stringify(groups);
   };
 
   isCreateFormInvalid() {
@@ -161,15 +173,9 @@ class CreateUser extends React.Component {
   }
 
   createUser = async () => {
-    const {
-      name,
-      email,
-      institution,
-      isAdmin,
-      sendActivation,
-      group,
-    } = this.state;
+    const { name, email, institution, isAdmin, sendActivation } = this.state;
     const archetypes = this.getArchetypes();
+    const group = this.getGroups();
     try {
       await createUser({
         name,
@@ -200,8 +206,9 @@ class CreateUser extends React.Component {
   };
 
   async updateUser() {
-    const { name, email, institution, isAdmin, group, id } = this.state;
+    const { name, email, institution, isAdmin, id } = this.state;
     const archetypes = this.getArchetypes();
+    const group = this.getGroups();
     try {
       await updateUser({
         userId: id,
@@ -236,10 +243,14 @@ class CreateUser extends React.Component {
     const {
       email,
       errorMessage,
-      group,
       institution,
       isAdmin,
+      isAfricaCDC,
+      isBiohub,
+      isDPH,
+      isGCE,
       isLandscapeExplorer,
+      isLMIC,
       isMedicalDetective,
       isMicrobiomeInvestigator,
       isOutbreakSurveyor,
@@ -276,20 +287,27 @@ class CreateUser extends React.Component {
           email={email}
           errorMessage={errorMessage}
           funcName={funcName}
-          group={group}
-          groupOptions={GROUP_OPTIONS}
+          groups={{
+            isAfricaCDC,
+            isBiohub,
+            isDPH,
+            isGCE,
+            isLMIC,
+          }}
           institution={institution}
           isAdmin={isAdmin}
           name={name}
-          onAdminChange={withAnalytics(
-            this.toggleCheckBox,
-            "CreateUser_admin_changed"
-          )}
+          onAdminChange={withAnalytics(() => {
+            this.setState({ isAdmin: !isAdmin });
+          }, "CreateUser_admin_changed")}
+          onAfricaCDCChange={() => this.setState({ isAfricaCDC: !isAfricaCDC })}
+          onBiohubChange={() => this.setState({ isBiohub: !isBiohub })}
+          onDPHChange={() => this.setState({ isDPH: !isDPH })}
           onEmailChange={withAnalytics(
             this.handleEmailChange,
             "CreateUser_email_changed"
           )}
-          onGroupChange={this.onGroupChange}
+          onGCEChange={() => this.setState({ isGCE: !isGCE })}
           onInstitutionChange={withAnalytics(
             this.handleInstitutionChange,
             "CreateUser_institution_changed"
@@ -297,6 +315,7 @@ class CreateUser extends React.Component {
           onLandscapeExplorerChange={() =>
             this.setState({ isLandscapeExplorer: !isLandscapeExplorer })
           }
+          onLMICChange={() => this.setState({ isLMIC: !isLMIC })}
           onMedicalDetectiveChange={() =>
             this.setState({ isMedicalDetective: !isMedicalDetective })
           }
@@ -342,4 +361,17 @@ class CreateUser extends React.Component {
     );
   }
 }
+
+CreateUser.propTypes = {
+  selectedUser: PropTypes.shape({
+    admin: PropTypes.bool,
+    archetypes: PropTypes.string,
+    email: PropTypes.string,
+    name: PropTypes.string,
+    institution: PropTypes.string,
+    id: PropTypes.number,
+    group: PropTypes.string,
+  }),
+};
+
 export default CreateUser;

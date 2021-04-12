@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
+
 import { logAnalyticsEvent } from "~/api/analytics";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import Checkbox from "~ui/controls/Checkbox";
 
 const UserForm = ({
   archetypes,
@@ -9,16 +10,19 @@ const UserForm = ({
   email,
   errorMessage,
   funcName,
-  group,
-  groupOptions,
+  groups,
   institution,
   isAdmin,
   name,
   onAdminChange,
+  onAfricaCDCChange,
+  onBiohubChange,
+  onDPHChange,
   onEmailChange,
-  onGroupChange,
+  onGCEChange,
   onInstitutionChange,
   onLandscapeExplorerChange,
+  onLMICChange,
   onMedicalDetectiveChange,
   onMicrobiomeInvestigatorChange,
   onNameChange,
@@ -109,88 +113,102 @@ const UserForm = ({
             </div>
             <div className="section">
               <div className="header">Archetypes</div>
-              <p>
-                <input
-                  type="checkbox"
-                  id="medicalDetective"
-                  className="filled-in"
-                  checked={archetypes.isMedicalDetective ? "checked" : ""}
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={archetypes.isMedicalDetective}
                   onChange={onMedicalDetectiveChange}
-                  value={archetypes.isMedicalDetective}
+                  label="Medical Detective"
                 />
-                <label htmlFor="medicalDetective">Medical Detective</label>
-              </p>
-              <p>
-                <input
-                  type="checkbox"
-                  id="landscapeExplorer"
-                  className="filled-in"
-                  checked={archetypes.isLandscapeExplorer ? "checked" : ""}
+              </div>
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={archetypes.isLandscapeExplorer}
                   onChange={onLandscapeExplorerChange}
-                  value={archetypes.isLandscapeExplorer}
+                  label="Landscape Explorer"
                 />
-                <label htmlFor="landscapeExplorer">Landscape Explorer</label>
-              </p>
-              <p>
-                <input
-                  type="checkbox"
-                  id="outbreakSurveyor"
-                  className="filled-in"
-                  checked={archetypes.isOutbreakSurveyor ? "checked" : ""}
+              </div>
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={archetypes.isOutbreakSurveyor}
                   onChange={onOutbreakSurveyorChange}
-                  value={archetypes.isOutbreakSurveyor}
+                  label="Outbreak Surveyor"
                 />
-                <label htmlFor="outbreakSurveyor">Outbreak Surveyor</label>
-              </p>
-              <p>
-                <input
-                  type="checkbox"
-                  id="microbiomeInvestigator"
-                  className="filled-in"
-                  checked={archetypes.isMicrobiomeInvestigator ? "checked" : ""}
+              </div>
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={archetypes.isMicrobiomeInvestigator}
                   onChange={onMicrobiomeInvestigatorChange}
-                  value={archetypes.isMicrobiomeInvestigator}
+                  label="Microbiome Investigator"
                 />
-                <label htmlFor="microbiomeInvestigator">
-                  Microbiome Investigator
-                </label>
-              </p>
+              </div>
             </div>
             <div className="section">
               <div className="header">Group</div>
-              <Dropdown
-                arrowInsideTrigger={false}
-                key={0}
-                fluid
-                options={groupOptions}
-                label="Group"
-                onChange={onGroupChange}
-                value={group}
-              />
-            </div>
-            <p>
-              <input
-                type="checkbox"
-                id="admin"
-                className="filled-in"
-                checked={isAdmin ? "checked" : ""}
-                onChange={onAdminChange}
-                value={isAdmin}
-              />
-              <label htmlFor="admin">Admin</label>
-            </p>
-            {!selectedUser && (
-              <p>
-                <input
-                  type="checkbox"
-                  id="sendActivation"
-                  className="filled-in"
-                  checked={sendActivation ? "checked" : ""}
-                  onChange={onSendActivationChange}
-                  value={sendActivation}
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={groups.isDPH}
+                  onChange={onDPHChange}
+                  label="DPH"
                 />
-                <label htmlFor="sendActivation">Send activation email</label>
-              </p>
+              </div>
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={groups.isGCE}
+                  onChange={onGCEChange}
+                  label="GCE"
+                />
+              </div>
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={groups.isAfricaCDC}
+                  onChange={onAfricaCDCChange}
+                  label="Africa CDC"
+                />
+              </div>
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={groups.isBiohub}
+                  onChange={onBiohubChange}
+                  label="Biohub"
+                />
+              </div>
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={groups.isLMIC}
+                  onChange={onLMICChange}
+                  label="LMIC"
+                />
+              </div>
+            </div>
+            <div className="section">
+              <div className="header">Admin</div>
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={isAdmin}
+                  onChange={onAdminChange}
+                  label="Admin"
+                />
+              </div>
+            </div>
+            {!selectedUser && (
+              <div>
+                <Checkbox
+                  className="checkbox"
+                  checked={sendActivation}
+                  onChange={onSendActivationChange}
+                  label="Send activation email"
+                />
+              </div>
             )}
           </div>
           <input className="hidden" type="submit" />
@@ -221,21 +239,25 @@ UserForm.propTypes = {
   email: PropTypes.string,
   errorMessage: PropTypes.string,
   funcName: PropTypes.string,
-  group: PropTypes.string,
-  groupOptions: PropTypes.arrayOf(
-    PropTypes.shape({
-      text: PropTypes.string,
-      value: PropTypes.string,
-    })
-  ),
+  groups: PropTypes.shape({
+    isAfricaCDC: PropTypes.bool,
+    isBiohub: PropTypes.bool,
+    isDPH: PropTypes.bool,
+    isGCE: PropTypes.bool,
+    isLMIC: PropTypes.bool,
+  }),
   institution: PropTypes.string,
   isAdmin: PropTypes.bool,
   name: PropTypes.string,
   onAdminChange: PropTypes.func,
+  onAfricaCDCChange: PropTypes.func,
+  onBiohubChange: PropTypes.func,
+  onDPHChange: PropTypes.func,
   onEmailChange: PropTypes.func,
-  onGroupChange: PropTypes.func,
+  onGCEChange: PropTypes.func,
   onInstitutionChange: PropTypes.func,
   onLandscapeExplorerChange: PropTypes.func,
+  onLMICChange: PropTypes.func,
   onMedicalDetectiveChange: PropTypes.func,
   onMicrobiomeInvestigatorChange: PropTypes.func,
   onNameChange: PropTypes.func,
