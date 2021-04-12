@@ -63,6 +63,7 @@ class SfnCGPipelineDispatchService
     else
       @workflow_run.update(
         executed_at: Time.now.utc,
+        s3_output_prefix: output_prefix,
         sfn_execution_arn: sfn_execution_arn,
         status: WorkflowRun::STATUS[:running]
       )
@@ -125,6 +126,10 @@ class SfnCGPipelineDispatchService
     end
   end
 
+  def output_prefix
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{@sample.sample_path}/#{@workflow_run.id}"
+  end
+
   def generate_wdl_input
     additional_inputs = if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
                           # ONT sars-cov-2 cg
@@ -170,7 +175,7 @@ class SfnCGPipelineDispatchService
       Input: {
         Run: run_inputs,
       },
-      OutputPrefix: @sample.sample_output_s3_path,
+      OutputPrefix: output_prefix,
     }
     return sfn_pipeline_input_json
   end

@@ -15,6 +15,6 @@ class ConsensusGenomeZipService
   def generate
     s3_path = @workflow_run.output_path(ConsensusGenomeWorkflowRun::OUTPUT_ZIP)
     sample_name = @workflow_run.sample.name
-    return get_presigned_s3_url(s3_path: s3_path, filename: "#{sample_name}_outputs.zip")
+    return get_presigned_s3_url(s3_path: s3_path, filename: "#{sample_name}_#{@workflow_run.id}_outputs.zip")
   end
 end

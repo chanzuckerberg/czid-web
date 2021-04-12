@@ -62,7 +62,7 @@ class ConsensusGenomeView extends React.Component {
   };
 
   fetchWorkflowRunData = async workflowId => {
-    const { sample } = this.props;
+    const { sample, onWorkflowRunSelect } = this.props;
     const { data, workflowRun } = this.state;
     const newWorkflowRun = find({ id: workflowId }, sample.workflow_runs);
 
@@ -81,6 +81,8 @@ class ConsensusGenomeView extends React.Component {
         loading: false,
         workflowRun: newWorkflowRun,
       });
+
+      onWorkflowRunSelect && onWorkflowRunSelect(newWorkflowRun);
     }
   };
 
@@ -569,6 +571,7 @@ class ConsensusGenomeView extends React.Component {
 }
 
 ConsensusGenomeView.propTypes = {
+  onWorkflowRunSelect: PropTypes.func,
   sample: PropTypes.object.isRequired,
   workflowRun: PropTypes.object.isRequired,
 };

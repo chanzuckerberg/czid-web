@@ -146,9 +146,10 @@ class WorkflowRun < ApplicationRecord
   private
 
   def sfn_execution
+    s3_path = s3_output_prefix || sample.sample_output_s3_path
     finalized = [STATUS[:failed], STATUS[:succeeded], STATUS[:succeeded_with_issue]].include?(status)
 
-    @sfn_execution ||= SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: sample.sample_output_s3_path, finalized: finalized)
+    @sfn_execution ||= SfnExecution.new(execution_arn: sfn_execution_arn, s3_path: s3_path, finalized: finalized)
   end
 
   def workflow_by_class

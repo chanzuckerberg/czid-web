@@ -138,7 +138,11 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
 
       it "kicks off the CG run and updates the WorkflowRun as expected" do
         subject
-        expect(workflow_run).to have_attributes(sfn_execution_arn: fake_sfn_execution_arn, status: WorkflowRun::STATUS[:running])
+        expect(workflow_run).to have_attributes(
+          sfn_execution_arn: fake_sfn_execution_arn,
+          status: WorkflowRun::STATUS[:running],
+          s3_output_prefix: "s3://#{fake_samples_bucket}/#{format(s3_samples_key_prefix, project_id: project.id, sample_id: sample.id)}/#{workflow_run.id}"
+        )
       end
 
       context "when start-execution or dispatch fails" do

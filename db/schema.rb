@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_302_004_357) do
+ActiveRecord::Schema.define(version: 20_210_409_215_638) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -684,6 +684,7 @@ ActiveRecord::Schema.define(version: 20_210_302_004_357) do
     t.bigint "rerun_from"
     t.text "cached_results", comment: "JSON-string of cached results for generic loading. Use for simple outputs."
     t.text "inputs_json", comment: "Generic JSON-string field for recording execution inputs."
+    t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/samples/subpath/results' Never allow users to set this."
     t.index ["sample_id"], name: "index_workflow_runs_on_sample_id"
   end
 

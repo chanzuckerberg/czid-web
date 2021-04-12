@@ -686,6 +686,10 @@ class SampleView extends React.Component {
     }
   };
 
+  handleWorkflowRunSelect = workflowRun => {
+    this.setState({ workflowRun });
+  };
+
   handleTabChange = tab => {
     this.setState({ currentTab: tab });
     const name = tab.replace(/\W+/g, "-").toLowerCase();
@@ -1929,7 +1933,11 @@ class SampleView extends React.Component {
             this.renderReport({ displayMergedNtNrValue: true })}
           {currentTab === TABS.AMR && amrData && <AMRView amr={amrData} />}
           {currentTab === TABS.CONSENSUS_GENOME && (
-            <ConsensusGenomeView sample={sample} workflowRun={currentRun} />
+            <ConsensusGenomeView
+              onWorkflowRunSelect={this.handleWorkflowRunSelect}
+              sample={sample}
+              workflowRun={currentRun}
+            />
           )}
         </NarrowContainer>
         {sample && (
