@@ -120,6 +120,7 @@
       <tr>
         <th>WorkflowRun ID</th>
         <th>Workflow</th>
+        <th>Accession ID</th>
         <th>Version</th>
         <th>Status</th>
         <th>SFN Execution</th>
@@ -133,6 +134,7 @@
         <tr>
           <td><u><%= link_to workflow_run.id, workflow_run_path(workflow_run.id) %></u></td>
           <td><%= workflow_run.workflow %></td>
+          <td><%= workflow_run.inputs&.[]("accession_id") %></td>
           <td><%= workflow_run.wdl_version %></td>
           <td><%= workflow_run.status %></td>
           <% if workflow_run.sfn_execution_arn %>

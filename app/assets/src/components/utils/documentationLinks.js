@@ -1,5 +1,7 @@
-export const CONSENSUS_GENOME_DOC_LINK =
+export const SARS_COV_2_CONSENSUS_GENOME_DOC_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360049787632";
+export const VIRAL_CONSENSUS_GENOME_DOC_LINK =
+  "https://chanzuckerberg.zendesk.com/knowledge/articles/360059664191";
 export const NEXTCLADE_APP_LINK = "https://clades.nextstrain.org/";
 export const NEXTCLADE_DEFAULT_TREE_LINK =
   "https://github.com/nextstrain/nextclade/blob/master/packages/web/src/algorithms/defaults/sars-cov-2/ncov_small.json"; // Beware of brittleness

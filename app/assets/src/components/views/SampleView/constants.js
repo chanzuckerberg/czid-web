@@ -181,3 +181,5 @@ export const TAXON_COUNT_TYPE_METRICS = [
   "bg_mean_mass_normalized",
   "bg_stdev_mass_normalized",
 ];
+
+export const SARS_COV_2_ACCESSION_ID = "MN908947.3";

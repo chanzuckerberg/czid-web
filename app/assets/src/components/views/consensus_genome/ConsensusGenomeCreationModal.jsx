@@ -131,7 +131,8 @@ export default class ConsensusGenomeCreationModal extends React.Component {
         <div className={cs.title}>Generate Consensus Genome</div>
         <div className={cs.description}>
           Align non-host reads to the reference genome of choice to generate a
-          consensus genome for this taxon.{" "}
+          consensus genome for this taxon. This pipeline should not be used on
+          samples using enrichment protocols such as MSSPE.{" "}
           <ExternalLink
             href={"https://help.idseq.net"}
             analyticsEventName={

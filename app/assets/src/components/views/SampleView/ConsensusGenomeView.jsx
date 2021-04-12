@@ -1,4 +1,4 @@
-import { camelCase, getOr, find, isEmpty, size } from "lodash/fp";
+import { camelCase, getOr, find, isEmpty, size, get } from "lodash/fp";
 import React from "react";
 import PropTypes from "~utils/propTypes";
 import memoize from "memoize-one";
@@ -19,13 +19,18 @@ import { numberWithCommas } from "~/helpers/strings";
 import { HelpIcon, TooltipVizTable } from "~ui/containers";
 import ExternalLink from "~ui/controls/ExternalLink";
 import { IconAlert, IconArrowRight, IconLoading } from "~ui/icons";
-import { CONSENSUS_GENOME_DOC_LINK } from "~utils/documentationLinks";
+import {
+  SARS_COV_2_CONSENSUS_GENOME_DOC_LINK,
+  VIRAL_CONSENSUS_GENOME_DOC_LINK,
+} from "~utils/documentationLinks";
 import { sampleErrorInfo } from "~utils/sample";
 import { FIELDS_METADATA } from "~utils/tooltip";
+
 import {
   CG_VIEW_METRIC_COLUMNS,
   CG_HISTOGRAM_FILL_COLOR,
   CG_HISTOGRAM_HOVER_FILL_COLOR,
+  SARS_COV_2_ACCESSION_ID,
 } from "./constants";
 import cs from "./consensus_genome_view.scss";
 import csSampleMessage from "./sample_message.scss";
@@ -111,7 +116,7 @@ class ConsensusGenomeView extends React.Component {
             cs.learnMoreLink,
             !shouldRenderCGDropdown && cs.alignRight
           )}
-          href={CONSENSUS_GENOME_DOC_LINK}
+          href={this.computeHelpLink()}
           analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
         >
           Learn more about consensus genomes <IconArrowRight />
@@ -278,7 +283,7 @@ class ConsensusGenomeView extends React.Component {
   renderCoverageView = () => {
     const helpLink = (
       <ExternalLink
-        href={CONSENSUS_GENOME_DOC_LINK}
+        href={this.computeHelpLink()}
         analyticsEventName={"ConsensusGenomeView_help-link_clicked"}
       >
         Learn more.
@@ -365,7 +370,7 @@ class ConsensusGenomeView extends React.Component {
     };
     const helpLink = (
       <ExternalLink
-        href={CONSENSUS_GENOME_DOC_LINK}
+        href={this.computeHelpLink()}
         analyticsEventName={
           "ConsensusGenomeView_quality-metrics-help-link_clicked"
         }
@@ -414,6 +419,7 @@ class ConsensusGenomeView extends React.Component {
     );
     const columns = [
       {
+        className: cs.taxonName,
         dataKey: "taxon_name",
         headerClassName: cs.primaryHeader,
         label: "Taxon",
@@ -483,6 +489,15 @@ class ConsensusGenomeView extends React.Component {
     );
   };
 
+  computeHelpLink = () => {
+    const { workflowRun } = this.state;
+
+    if (get("inputs.accession_id", workflowRun) === SARS_COV_2_ACCESSION_ID) {
+      return SARS_COV_2_CONSENSUS_GENOME_DOC_LINK;
+    }
+    return VIRAL_CONSENSUS_GENOME_DOC_LINK;
+  };
+
   renderContent = () => {
     const { sample } = this.props;
     const { workflowRun } = this.state;
@@ -496,7 +511,7 @@ class ConsensusGenomeView extends React.Component {
       return (
         <SampleMessage
           icon={<IconLoading className={csSampleMessage.icon} />}
-          link={CONSENSUS_GENOME_DOC_LINK}
+          link={this.computeHelpLink()}
           linkText={"Learn about Consensus Genomes"}
           message={"Your Consensus Genome is being generated!"}
           status={"IN PROGRESS"}
