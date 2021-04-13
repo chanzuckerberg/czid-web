@@ -20,7 +20,7 @@ class InputFile < ApplicationRecord
   UPLOAD_CLIENT_CLI = 'cli'.freeze
   UPLOAD_CLIENT_INTERNAL = 'internal'.freeze
   UPLOAD_CLIENT_WEB = 'web'.freeze
-  validates :upload_client, presence: true, inclusion: { in: [
+  validates :upload_client, presence: true, on: :create, inclusion: { in: [
     UPLOAD_CLIENT_CLI,
     UPLOAD_CLIENT_INTERNAL,
     UPLOAD_CLIENT_WEB,
