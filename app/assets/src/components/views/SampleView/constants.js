@@ -9,6 +9,7 @@ export const URL_FIELDS = {
   selectedOptions: "object",
   tempSelectedOptions: "object",
   view: "string",
+  currentTab: "string",
 };
 
 export const CG_VIEW_METRIC_COLUMNS = [
@@ -183,3 +184,8 @@ export const TAXON_COUNT_TYPE_METRICS = [
 ];
 
 export const SARS_COV_2_ACCESSION_ID = "MN908947.3";
+
+// WorkflowRun state names
+export const CREATED_STATE = "CREATED";
+export const RUNNING_STATE = "RUNNING";
+export const SUCCEEDED_STATE = "SUCCEEDED";

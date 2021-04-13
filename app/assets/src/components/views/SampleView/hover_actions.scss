@@ -35,8 +35,11 @@
   .icon {
     height: 14px;
     width: 14px;
-
     fill: $primary;
+
+    &:hover {
+      fill: $primary-darkest;
+    }
 
     &.disabled {
       fill: $gray-light;

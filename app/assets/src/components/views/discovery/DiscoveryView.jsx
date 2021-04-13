@@ -863,8 +863,10 @@ class DiscoveryView extends React.Component {
 
   handleSampleSelected = ({ sample, currentEvent }) => {
     const { snapshotShareId } = this.props;
+    const { workflow } = this.state;
 
     let url = generateUrlToSampleView({
+      workflow,
       sampleId: sample.id,
       snapshotShareId,
     });

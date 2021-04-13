@@ -127,33 +127,35 @@ export default function SampleViewHeader({
       const succeeded = get("status", currentRun) === "SUCCEEDED";
       return (
         <ViewHeader.Controls>
-          {succeeded && (
-            <>
-              {renderShareButton()}
-              <DownloadButton
+          <>
+            {succeeded && (
+              <>
+                {renderShareButton()}
+                <DownloadButton
+                  className={cs.controlElement}
+                  text="Download All"
+                  onClick={() => {
+                    openUrl(getWorkflowRunZipLink(currentRun.id));
+                    logAnalyticsEvent(
+                      "SampleViewHeader_consensus-genome-download-all-button_clicked",
+                      {
+                        sampleId: sample.id,
+                      }
+                    );
+                  }}
+                />
+              </>
+            )}
+            {!succeeded && editable && deletable && (
+              <PrimaryButton
                 className={cs.controlElement}
-                text="Download All"
-                onClick={() => {
-                  openUrl(getWorkflowRunZipLink(currentRun.id));
-                  logAnalyticsEvent(
-                    "SampleViewHeader_consensus-genome-download-all-button_clicked",
-                    {
-                      sampleId: sample.id,
-                    }
-                  );
-                }}
+                onClick={handleDeleteSample}
+                text="Delete Sample"
               />
-            </>
-          )}
-          {!succeeded && editable && deletable && (
-            <PrimaryButton
-              className={cs.controlElement}
-              onClick={handleDeleteSample}
-              text="Delete Sample"
-            />
-          )}
-          {shouldHideConsensusGenomeHelpButton ||
-            renderConsensusGenomeHelpButton()}
+            )}
+            {shouldHideConsensusGenomeHelpButton ||
+              renderConsensusGenomeHelpButton()}
+          </>
         </ViewHeader.Controls>
       );
     } else {

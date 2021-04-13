@@ -57,6 +57,9 @@ export default class Histogram {
         // If true, the data is already binned, i.e. the data is an array of
         // { x0, length }
         skipBins: false,
+        // If true, don't round domain scales to nice numbers. Currently
+        // applied to x domain but can be expanded.
+        skipNiceDomains: false,
         // hoverBuffer is used to determine how far away the cursor can be
         // to activate a bar's hover behavior (e.g. coverage viz).
         // If 0, then hover behavior is activated only when the bar itself
@@ -469,7 +472,7 @@ export default class Histogram {
 
     // If there are explicit tick values, don't call .nice() since it may modify the domain
     // to differ from the given ticks.
-    if (this.options.tickValues) {
+    if (this.options.tickValues || this.options.skipNiceDomains) {
       x.domain(xDomain).range([
         this.margins.left,
         this.size.width - this.margins.right,

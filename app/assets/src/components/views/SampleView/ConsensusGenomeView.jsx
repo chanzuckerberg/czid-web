@@ -27,10 +27,13 @@ import { sampleErrorInfo } from "~utils/sample";
 import { FIELDS_METADATA } from "~utils/tooltip";
 
 import {
-  CG_VIEW_METRIC_COLUMNS,
   CG_HISTOGRAM_FILL_COLOR,
   CG_HISTOGRAM_HOVER_FILL_COLOR,
+  CG_VIEW_METRIC_COLUMNS,
+  CREATED_STATE,
+  RUNNING_STATE,
   SARS_COV_2_ACCESSION_ID,
+  SUCCEEDED_STATE,
 } from "./constants";
 import cs from "./consensus_genome_view.scss";
 import csSampleMessage from "./sample_message.scss";
@@ -72,7 +75,7 @@ class ConsensusGenomeView extends React.Component {
 
       // getWorkflowRunResults raises error unless successful
       const data =
-        newWorkflowRun.status === "SUCCEEDED"
+        newWorkflowRun.status === SUCCEEDED_STATE
           ? await getWorkflowRunResults(workflowId)
           : null;
 
@@ -103,6 +106,7 @@ class ConsensusGenomeView extends React.Component {
 
   renderHeaderInfoAndDropdown = () => {
     const { sample } = this.props;
+    const { workflowRun } = this.state;
 
     const shouldRenderCGDropdown = size(sample.workflow_runs) > 1;
     return (
@@ -113,16 +117,18 @@ class ConsensusGenomeView extends React.Component {
         )}
       >
         {shouldRenderCGDropdown && this.renderConsensusGenomeDropdown()}
-        <ExternalLink
-          className={cx(
-            cs.learnMoreLink,
-            !shouldRenderCGDropdown && cs.alignRight
-          )}
-          href={this.computeHelpLink()}
-          analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
-        >
-          Learn more about consensus genomes <IconArrowRight />
-        </ExternalLink>
+        {get("status", workflowRun) !== RUNNING_STATE && (
+          <ExternalLink
+            className={cx(
+              cs.learnMoreLink,
+              !shouldRenderCGDropdown && cs.alignRight
+            )}
+            href={this.computeHelpLink()}
+            analyticsEventName={"ConsensusGenomeView_learn-more-link_clicked"}
+          >
+            Learn more about consensus genomes <IconArrowRight />
+          </ExternalLink>
+        )}
       </div>
     );
   };
@@ -240,6 +246,7 @@ class ConsensusGenomeView extends React.Component {
         skipBins: true,
         yScaleType: HISTOGRAM_SCALE.SYM_LOG,
         yTickFormat: numberWithCommas,
+        skipNiceDomains: true,
         onHistogramBarHover: this.handleHistogramBarHover,
         onHistogramBarEnter: this.handleHistogramBarEnter,
         onHistogramBarExit: this.handleHistogramBarExit,
@@ -504,11 +511,13 @@ class ConsensusGenomeView extends React.Component {
     const { sample } = this.props;
     const { workflowRun } = this.state;
 
-    if (workflowRun.status === "SUCCEEDED") {
+    if (get("status", workflowRun) === SUCCEEDED_STATE) {
       return this.renderResults();
     } else if (
       !sample.upload_error &&
-      (workflowRun.status === "RUNNING" || !workflowRun.status)
+      (!workflowRun ||
+        !workflowRun.status ||
+        workflowRun.status === RUNNING_STATE)
     ) {
       return (
         <SampleMessage
@@ -525,7 +534,7 @@ class ConsensusGenomeView extends React.Component {
           }
         />
       );
-    } else if (!sample.upload_error && workflowRun.status === "CREATED") {
+    } else if (!sample.upload_error && workflowRun.status === CREATED_STATE) {
       return (
         <SampleMessage
           icon={<IconLoading className={csSampleMessage.icon} />}
@@ -573,7 +582,7 @@ class ConsensusGenomeView extends React.Component {
 ConsensusGenomeView.propTypes = {
   onWorkflowRunSelect: PropTypes.func,
   sample: PropTypes.object.isRequired,
-  workflowRun: PropTypes.object.isRequired,
+  workflowRun: PropTypes.object,
 };
 
 export default ConsensusGenomeView;

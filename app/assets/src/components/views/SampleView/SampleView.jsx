@@ -131,7 +131,7 @@ class SampleView extends React.Component {
         coverageVizDataByTaxon: {},
         coverageVizParams: {},
         coverageVizVisible: false,
-        currentTab: TABS.SHORT_READ_MNGS,
+        currentTab: null,
         filteredReportData: [],
         loadingReport: false,
         pipelineRun: null,
@@ -227,7 +227,12 @@ class SampleView extends React.Component {
   fetchSample = async () => {
     this.setState({ loadingReport: true });
     const { snapshotShareId, sampleId, updateDiscoveryProjectId } = this.props;
-    const { backgrounds, pipelineVersion, selectedOptions } = this.state;
+    const {
+      backgrounds,
+      currentTab,
+      pipelineVersion,
+      selectedOptions,
+    } = this.state;
     const sample = await getSample({ snapshotShareId, sampleId });
 
     sample.id = sampleId;
@@ -258,13 +263,18 @@ class SampleView extends React.Component {
     ) {
       newSelectedOptions.background = sample.default_background_id;
     }
+
     const workflowCount = this.getWorkflowCount(sample);
+    const newCurrentTab =
+      currentTab ||
+      this.determineInitialTab({
+        initialWorkflow: sample.initial_workflow,
+        workflowCount,
+      });
+
     this.setState(
       {
-        currentTab: this.determineInitialTab({
-          initialWorkflow: sample.initial_workflow,
-          workflowCount,
-        }),
+        currentTab: newCurrentTab,
         sample,
         pipelineRun,
         project: sample.project,
@@ -1327,7 +1337,7 @@ class SampleView extends React.Component {
       return pipelineRun;
     }
 
-    if (sample.workflow_runs.length > 0) {
+    if (sample && sample.workflow_runs.length > 0) {
       const workflowType = Object.values(WORKFLOWS).find(
         workflow => workflow.label === currentTab
       ).value;
@@ -1932,7 +1942,7 @@ class SampleView extends React.Component {
           {currentTab === TABS.MERGED_NT_NR &&
             this.renderReport({ displayMergedNtNrValue: true })}
           {currentTab === TABS.AMR && amrData && <AMRView amr={amrData} />}
-          {currentTab === TABS.CONSENSUS_GENOME && (
+          {currentTab === TABS.CONSENSUS_GENOME && sample && (
             <ConsensusGenomeView
               onWorkflowRunSelect={this.handleWorkflowRunSelect}
               sample={sample}

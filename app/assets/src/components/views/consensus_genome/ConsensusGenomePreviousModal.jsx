@@ -23,9 +23,7 @@ export default function ConsensusGenomePreviousModal({
   const renderPrimaryCell = cellData => {
     const { inputs, parsed_cached_results: results } = cellData;
 
-    const coverage = results
-      ? get("coverage_viz.coverage_depth", results).toFixed(2)
-      : null;
+    const coverage = get("coverage_viz.coverage_depth", results);
     const percentId = get("quality_metrics.percent_identity", results);
     const referenceLength = numberWithCommas(
       get("quality_metrics.reference_genome_length", results)
@@ -40,7 +38,9 @@ export default function ConsensusGenomePreviousModal({
         />
         <div className={cs.subtext}>
           {results &&
-            `${percentId} %id, ${referenceLength} bp length, ${coverage}x coverage`}
+            `${percentId} %id, ${referenceLength} bp length, ${
+              coverage ? coverage.toFixed(2) : ""
+            }x coverage`}
         </div>
       </>
     );
