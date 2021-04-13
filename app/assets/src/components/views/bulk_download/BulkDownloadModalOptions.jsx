@@ -149,6 +149,14 @@ class BulkDownloadModalOptions extends React.Component {
         dropdownOptions = metricsOptions || [];
         placeholder = metricsOptions ? "Select metric" : "Loading...";
         break;
+      case "download_format":
+        dropdownOptions = field.options.map(option => ({
+          text: option,
+          value: option,
+        }));
+
+        placeholder = "Select format";
+        break;
     }
 
     if (!dropdownOptions) {

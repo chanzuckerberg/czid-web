@@ -325,7 +325,7 @@ class BulkDownloadModal extends React.Component {
   // *** Render methods ***
 
   render() {
-    const { open, onClose } = this.props;
+    const { open, onClose, workflow } = this.props;
     const {
       bulkDownloadTypes,
       validSampleIds,
@@ -340,7 +340,6 @@ class BulkDownloadModal extends React.Component {
       createStatus,
       createError,
       enableMassNormalizedBackgrounds,
-      workflow,
     } = this.state;
 
     const numSamples = validSampleIds.size;

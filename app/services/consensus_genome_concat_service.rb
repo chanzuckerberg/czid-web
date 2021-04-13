@@ -13,8 +13,9 @@ class ConsensusGenomeConcatService
     end
   end
 
-  def initialize(workflow_run_ids)
+  def initialize(workflow_run_ids, headers: nil)
     @workflow_run_ids = workflow_run_ids
+    @headers = headers
   end
 
   def call
@@ -34,7 +35,13 @@ class ConsensusGenomeConcatService
       content = S3Util.get_s3_file(s3_path)
       raise EmptyS3FileError, s3_path unless content
 
-      fasta_body += content
+      if @headers
+        # If new headers are provided (ex: with the accession id added), replace the existing fasta header
+        header = @headers[wr.id]
+        fasta_body += (header + content.partition("\n").last)
+      else
+        fasta_body += content
+      end
     end
     return fasta_body
   end

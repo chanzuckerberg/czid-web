@@ -461,7 +461,13 @@ describe BulkDownload, type: :model do
                                 @workflow_run_one.id,
                                 @workflow_run_two.id,
                                 @workflow_run_three.id,
-                              ])
+                              ],
+                                              params: {
+                                                "download_format": {
+                                                  "value": BulkDownloadTypesHelper::SEPARATE_FILES_DOWNLOAD,
+                                                  "displayName": BulkDownloadTypesHelper::SEPARATE_FILES_DOWNLOAD,
+                                                },
+                                              })
 
       task_command = [
         "python",

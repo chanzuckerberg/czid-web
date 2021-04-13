@@ -354,10 +354,17 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
         allow_any_instance_of(SfnExecution).to receive(:output_path) { |output_key| "#{@s3_path}/#{output_key}" }
 
+        # pass in a valid download_format
+        fields = {
+          "download_format": {
+            "displayName": "Separate Files",
+            "value": "Separate Files",
+          },
+        }
         bulk_download_params = {
           download_type: BulkDownloadTypesHelper::CONSENSUS_GENOME_DOWNLOAD_TYPE,
           sample_ids: [@sample_one, @sample_two],
-          params: mock_field_params,
+          params: fields,
           workflow: WorkflowRun::WORKFLOW[:consensus_genome],
         }
 
@@ -375,7 +382,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(bulk_download.user_id).to eq(@joe.id)
         expect(bulk_download.status).to eq(BulkDownload::STATUS_RUNNING)
         expect(bulk_download.ecs_task_arn).to eq("ABC")
-        expect(bulk_download.params_json).to eq(mock_field_params.to_json)
+        expect(bulk_download.params_json).to eq(fields.to_json)
       end
     end
 

@@ -19,6 +19,8 @@ module BulkDownloadTypesHelper
 
   # Specific to consensus genome workflows
   CONSENSUS_GENOME_DOWNLOAD_TYPE = "consensus_genome".freeze
+  SEPARATE_FILES_DOWNLOAD = "Separate Files".freeze
+  SINGLE_FILE_CONCATENATED_DOWNLOAD = "Single File (Concatenated)".freeze
 
   RESQUE_EXECUTION_TYPE = "resque".freeze
   VARIABLE_EXECUTION_TYPE = "variable".freeze
@@ -193,9 +195,16 @@ module BulkDownloadTypesHelper
     {
       type: CONSENSUS_GENOME_DOWNLOAD_TYPE,
       display_name: "Consensus Genome",
-      description: "The consensus genome",
+      description: "Download multiple consensus genomes as separate or a single file.",
       category: "results",
-      execution_type: ECS_EXECUTION_TYPE,
+      fields: [
+        {
+          display_name: "Download Format",
+          type: "download_format",
+          options: [SEPARATE_FILES_DOWNLOAD, SINGLE_FILE_CONCATENATED_DOWNLOAD],
+        },
+      ],
+      execution_type: VARIABLE_EXECUTION_TYPE,
       file_type_display: "consensus.fa",
       workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
     },

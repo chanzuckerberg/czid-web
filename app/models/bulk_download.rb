@@ -72,6 +72,10 @@ class BulkDownload < ApplicationRecord
       taxa_with_contigs = get_param_value("taxa_with_contigs")
       errors.add(:params, "taxa_with_contigs must be all or an integer") unless taxa_with_contigs.is_a?(Integer) || taxa_with_contigs == "all"
     end
+
+    if download_type == BulkDownloadTypesHelper::CONSENSUS_GENOME_DOWNLOAD_TYPE
+      errors.add(:params, "download_format must be Separate Files or Single File (Concatenated)") unless [BulkDownloadTypesHelper::SEPARATE_FILES_DOWNLOAD, BulkDownloadTypesHelper::SINGLE_FILE_CONCATENATED_DOWNLOAD].include?(get_param_value("download_format"))
+    end
   end
 
   # Only bulk downloads created by the user
@@ -93,10 +97,17 @@ class BulkDownload < ApplicationRecord
     end
 
     begin
+      filename = BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)
+      filename += if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE && get_param_value("download_format") == BulkDownloadTypesHelper::SINGLE_FILE_CONCATENATED_DOWNLOAD
+                    ".fa"
+                  else
+                    ".tar.gz"
+                  end
       return S3_PRESIGNER.presigned_url(:get_object,
                                         bucket: ENV['SAMPLES_BUCKET_NAME'],
                                         key: download_output_key,
-                                        expires_in: OUTPUT_DOWNLOAD_EXPIRATION).to_s
+                                        expires_in: OUTPUT_DOWNLOAD_EXPIRATION,
+                                        response_content_disposition: "attachment; filename=\"#{filename}\"").to_s
     rescue StandardError => e
       LogUtil.log_error("BulkDownloadPresignError: #{e.inspect}", exception: e, access_token: access_token)
     end
@@ -212,7 +223,11 @@ class BulkDownload < ApplicationRecord
   end
 
   def download_output_key
-    "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}.tar.gz"
+    if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE && get_param_value("download_format") == BulkDownloadTypesHelper::SINGLE_FILE_CONCATENATED_DOWNLOAD
+      "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}.fa"
+    else
+      "downloads/#{id}/#{BulkDownloadTypesHelper.bulk_download_type_display_name(download_type)}.tar.gz"
+    end
   end
 
   def fetch_output_file_size
@@ -292,11 +307,18 @@ class BulkDownload < ApplicationRecord
     "#{project_name_truncated}_#{sample.project_id}/#{sample_name_truncated}#{sample_id_str}"
   end
 
-  def get_accession_id_prefix(workflow_run)
+  def get_accession_id(workflow_run)
     accession_id = workflow_run.inputs&.[]("accession_id")
     if accession_id
       # Should not be necessary but sanitizing out of an abundance of caution
-      sanitize_accession_id(accession_id) + "_"
+      sanitize_accession_id(accession_id)
+    end
+  end
+
+  def get_accession_id_prefix(workflow_run)
+    accession_id = get_accession_id(workflow_run)
+    if accession_id
+      accession_id + "_"
     end
   end
 
@@ -538,62 +560,82 @@ class BulkDownload < ApplicationRecord
   end
 
   def generate_download_file
-    start_time = Time.now.to_f
+    if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE
+      update(status: STATUS_RUNNING)
+      workflow_runs_ordered = workflow_runs.order(:sample_id)
+      workflow_run_ids = workflow_runs_ordered.pluck(:id)
 
-    update(status: STATUS_RUNNING)
-
-    s3_tar_writer = S3TarWriter.new(download_output_url)
-    Rails.logger.info("Starting tarfile streaming to #{download_output_url}...")
-    s3_tar_writer.start_streaming
-
-    if download_type == SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
-      Rails.logger.info("Generating sample overviews for #{pipeline_runs.length} samples...")
-      samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
-      pipeline_runs_by_sample_id = pipeline_runs.index_by(&:sample_id)
-      sample_overviews_csv = generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, include_all_metadata: get_param_value("include_metadata"))
-
-      s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
-    elsif download_type == COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
-      metric = get_param_value("metric")
-      Rails.logger.info("Generating combined sample taxon results for #{metric} for #{pipeline_runs.length} samples...")
-      samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
-      # If the metric is NT.zscore or NR.zscore, the background param is required.
-      # For other metrics, it doesn't affect the metric calculation, so we set it to a default.
-      # Note that we are using heatmap helper functions to calculate all the metrics at once, so the background id is required even if we don't need it.
-      background_id = get_param_value("background") || samples.first.default_background_id
-      result = BulkDownloadsHelper.generate_combined_sample_taxon_results_csv(samples, background_id, metric)
-
-      s3_tar_writer.add_file_with_data("combined_sample_taxon_results_#{metric}.csv", result[:csv_str])
-
-      unless result[:failed_sample_ids].empty?
-        LogUtil.log_error(
-          "BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{result[:failed_sample_ids]}",
-          bulk_download_id: id,
-          failed_sample_ids: result[:failed_sample_ids]
-        )
-        update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % result[:failed_sample_ids].length)
+      # Add the accession ids to the fasta headers
+      headers = {}
+      workflow_runs_ordered.map do |run|
+        headers[run.id] = ">#{run.sample.name} #{get_accession_id(run)}\n"
       end
-    elsif download_type == SAMPLE_METADATA_BULK_DOWNLOAD_TYPE
-      Rails.logger.info("Generating sample metadata for #{pipeline_runs.length} samples...")
-      samples = Sample.where(id: pipeline_runs.pluck(:sample_id)).or(Sample.where(id: workflow_runs.pluck(:sample_id)))
 
-      sample_metadata_csv = BulkDownloadsHelper.generate_metadata_csv(samples)
+      Rails.logger.info("Starting concatenation...")
+      content = ConsensusGenomeConcatService.call(workflow_run_ids, headers: headers)
 
-      s3_tar_writer.add_file_with_data("sample_metadata.csv", sample_metadata_csv)
+      Rails.logger.info("Uploading concatenated file to S3...")
+      S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, download_output_key, content)
+
+      Rails.logger.info("Success!")
     else
-      write_output_files_to_s3_tar_writer(s3_tar_writer)
+      start_time = Time.now.to_f
+
+      update(status: STATUS_RUNNING)
+
+      s3_tar_writer = S3TarWriter.new(download_output_url)
+      Rails.logger.info("Starting tarfile streaming to #{download_output_url}...")
+      s3_tar_writer.start_streaming
+
+      if download_type == SAMPLE_OVERVIEW_BULK_DOWNLOAD_TYPE
+        Rails.logger.info("Generating sample overviews for #{pipeline_runs.length} samples...")
+        samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+        pipeline_runs_by_sample_id = pipeline_runs.index_by(&:sample_id)
+        sample_overviews_csv = generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, include_all_metadata: get_param_value("include_metadata"))
+
+        s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
+      elsif download_type == COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
+        metric = get_param_value("metric")
+        Rails.logger.info("Generating combined sample taxon results for #{metric} for #{pipeline_runs.length} samples...")
+        samples = Sample.where(id: pipeline_runs.pluck(:sample_id))
+        # If the metric is NT.zscore or NR.zscore, the background param is required.
+        # For other metrics, it doesn't affect the metric calculation, so we set it to a default.
+        # Note that we are using heatmap helper functions to calculate all the metrics at once, so the background id is required even if we don't need it.
+        background_id = get_param_value("background") || samples.first.default_background_id
+        result = BulkDownloadsHelper.generate_combined_sample_taxon_results_csv(samples, background_id, metric)
+
+        s3_tar_writer.add_file_with_data("combined_sample_taxon_results_#{metric}.csv", result[:csv_str])
+
+        unless result[:failed_sample_ids].empty?
+          LogUtil.log_error(
+            "BulkDownloadFailedSamplesError(id #{id}): The following samples failed to process: #{result[:failed_sample_ids]}",
+            bulk_download_id: id,
+            failed_sample_ids: result[:failed_sample_ids]
+          )
+          update(error_message: BulkDownloadsHelper::FAILED_SAMPLES_ERROR_TEMPLATE % result[:failed_sample_ids].length)
+        end
+      elsif download_type == SAMPLE_METADATA_BULK_DOWNLOAD_TYPE
+        Rails.logger.info("Generating sample metadata for #{pipeline_runs.length} samples...")
+        samples = Sample.where(id: pipeline_runs.pluck(:sample_id)).or(Sample.where(id: workflow_runs.pluck(:sample_id)))
+
+        sample_metadata_csv = BulkDownloadsHelper.generate_metadata_csv(samples)
+
+        s3_tar_writer.add_file_with_data("sample_metadata.csv", sample_metadata_csv)
+      else
+        write_output_files_to_s3_tar_writer(s3_tar_writer)
+      end
+
+      Rails.logger.info("Closing s3 tar writer...")
+      s3_tar_writer.close
+
+      Rails.logger.info("Waiting for streaming to complete...")
+      unless s3_tar_writer.process_status.success?
+        raise BulkDownloadsHelper::BULK_DOWNLOAD_GENERATION_FAILED
+      end
+
+      Rails.logger.info("Success!")
+      Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", ActiveSupport::NumberHelper.number_to_human_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
     end
-
-    Rails.logger.info("Closing s3 tar writer...")
-    s3_tar_writer.close
-
-    Rails.logger.info("Waiting for streaming to complete...")
-    unless s3_tar_writer.process_status.success?
-      raise BulkDownloadsHelper::BULK_DOWNLOAD_GENERATION_FAILED
-    end
-
-    Rails.logger.info("Success!")
-    Rails.logger.info(format("Tarfile of size %s written successfully in %3.1f seconds", ActiveSupport::NumberHelper.number_to_human_size(s3_tar_writer.total_size_processed), Time.now.to_f - start_time))
     verify_and_mark_success
   rescue StandardError
     update(status: STATUS_ERROR)
@@ -638,6 +680,10 @@ class BulkDownload < ApplicationRecord
 
     if download_type == CONTIGS_NON_HOST_BULK_DOWNLOAD_TYPE
       return get_param_value("taxa_with_contigs") == "all" ? ECS_EXECUTION_TYPE : RESQUE_EXECUTION_TYPE
+    end
+
+    if download_type == CONSENSUS_GENOME_DOWNLOAD_TYPE
+      return get_param_value("download_format") == BulkDownloadTypesHelper::SEPARATE_FILES_DOWNLOAD ? ECS_EXECUTION_TYPE : RESQUE_EXECUTION_TYPE
     end
 
     # Should never happen
