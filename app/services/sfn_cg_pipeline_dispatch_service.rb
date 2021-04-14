@@ -105,6 +105,11 @@ class SfnCGPipelineDispatchService
     end
   end
 
+  def apply_length_filter
+    # apply_length_filter should be true by default, and false for ClearLabs samples
+    !@workflow_run.inputs&.[]("clearlabs")
+  end
+
   def primer_file
     protocols = ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL
 
@@ -134,6 +139,7 @@ class SfnCGPipelineDispatchService
     additional_inputs = if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
                           # ONT sars-cov-2 cg
                           {
+                            apply_length_filter: apply_length_filter,
                             medaka_model: @workflow_run.inputs&.[]("medaka_model"),
                             vadr_options: @workflow_run.inputs&.[]("vadr_options"),
                             # Remove ref_fasta once it's changed to an optional wdl input for ONT runs.

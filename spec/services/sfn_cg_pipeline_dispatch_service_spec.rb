@@ -337,6 +337,32 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
             sfn_input_json: {
               Input: {
                 Run: {
+                  apply_length_filter: true,
+                  technology: nanopore_technology,
+                  medaka_model: medaka_model,
+                  vadr_options: vadr_options,
+                },
+              },
+            }
+          )
+        end
+      end
+
+      context "when a nanopore run for a ClearLabs sample is selected" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { clearlabs: true, technology: nanopore_technology, medaka_model: medaka_model, vadr_options: vadr_options }.to_json)
+        end
+
+        it "returns sfn input containing correct sfn parameters" do
+          expect(subject).to include_json(
+            sfn_input_json: {
+              Input: {
+                Run: {
+                  apply_length_filter: false,
                   technology: nanopore_technology,
                   medaka_model: medaka_model,
                   vadr_options: vadr_options,

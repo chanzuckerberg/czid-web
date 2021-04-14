@@ -288,6 +288,7 @@ RSpec.describe SamplesHelper, type: :helper do
                                                            "taxon_id",
                                                            "taxon_name",
                                                            "technology",
+                                                           "clearlabs",
                                                            "medaka_model",
                                                            "vadr_options",
                                                          ])

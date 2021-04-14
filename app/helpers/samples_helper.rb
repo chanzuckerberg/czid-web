@@ -626,6 +626,8 @@ module SamplesHelper
             h[:technology] = technology
 
             if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+              # ClearLabs is an optional flag
+              h[:clearlabs] = user.allowed_feature?("clearlabs")
               h[:medaka_model] = medaka_model
               h[:vadr_options] = vadr_options
             else

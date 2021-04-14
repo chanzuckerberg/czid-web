@@ -357,8 +357,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
         # pass in a valid download_format
         fields = {
           "download_format": {
-            "displayName": "Separate Files",
-            "value": "Separate Files",
+            "displayName": BulkDownloadTypesHelper::SEPARATE_FILES_DOWNLOAD,
+            "value": BulkDownloadTypesHelper::SEPARATE_FILES_DOWNLOAD,
           },
         }
         bulk_download_params = {
