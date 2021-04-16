@@ -146,13 +146,16 @@ export default function SampleViewHeader({
                 />
               </>
             )}
-            {!succeeded && editable && deletable && (
-              <PrimaryButton
-                className={cs.controlElement}
-                onClick={handleDeleteSample}
-                text="Delete Sample"
-              />
-            )}
+            {!succeeded &&
+            editable &&
+            deletable &&
+            isEmpty(sample.pipeline_runs) && ( // wouldn't want to delete mngs report
+                <PrimaryButton
+                  className={cs.controlElement}
+                  onClick={handleDeleteSample}
+                  text="Delete Sample"
+                />
+              )}
             {shouldHideConsensusGenomeHelpButton ||
               renderConsensusGenomeHelpButton()}
           </>
