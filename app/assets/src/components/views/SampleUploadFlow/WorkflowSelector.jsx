@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
 import RadioButton from "~ui/controls/RadioButton";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
@@ -9,21 +10,31 @@ import IconSample from "~ui/icons/IconSample";
 import PropTypes from "~utils/propTypes";
 import { WORKFLOWS } from "~utils/workflows";
 import { UserContext } from "~/components/common/UserContext";
-import { NANOPORE_FEATURE } from "~/components/utils/features";
-import { CG_WETLAB_OPTIONS, CG_TECHNOLOGY_OPTIONS } from "./constants";
+import {
+  NANOPORE_FEATURE,
+  NANOPORE_V1_FEATURE,
+} from "~/components/utils/features";
+import {
+  CG_WETLAB_OPTIONS,
+  CG_TECHNOLOGY_OPTIONS,
+  MEDAKA_MODEL_OPTIONS,
+} from "./constants";
 import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
 import {
   ARTIC_PIPELINE_LINK,
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
+  UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
 } from "~/components/utils/documentationLinks";
 
 import cx from "classnames";
 import cs from "./workflow_selector.scss";
 
 const WorkflowSelector = ({
+  onMedakaModelChange,
   onTechnologyToggle,
   onWetlabProtocolChange,
   onWorkflowToggle,
+  selectedMedakaModel,
   selectedTechnology,
   selectedWetlabProtocol,
   selectedWorkflows,
@@ -31,6 +42,9 @@ const WorkflowSelector = ({
   const userContext = useContext(UserContext);
   const { allowedFeatures = [] } = userContext || {};
   const nanoporeFeatureEnabled = allowedFeatures.includes(NANOPORE_FEATURE);
+  const nanoporeV1FeatureEnabled = allowedFeatures.includes(
+    NANOPORE_V1_FEATURE
+  );
 
   const createExternalLink = ({
     additionalStyle = null,
@@ -71,13 +85,16 @@ const WorkflowSelector = ({
   };
 
   const renderMngsAnalysisType = () => {
+    const mngsWorkflowSelected = selectedWorkflows.has(
+      WORKFLOWS.SHORT_READ_MNGS.value
+    );
     return (
       <div
-        className={cs.selectableOption}
+        className={cx(cs.selectableOption, mngsWorkflowSelected && cs.selected)}
         onClick={() => onWorkflowToggle(WORKFLOWS.SHORT_READ_MNGS.value)}
       >
         <RadioButton
-          selected={selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)}
+          selected={mngsWorkflowSelected}
           className={cs.radioButton}
         />
         <IconSample className={cs.iconSample} />
@@ -98,7 +115,7 @@ const WorkflowSelector = ({
     );
     return (
       <div
-        className={cs.selectableOption}
+        className={cx(cs.selectableOption, cgWorkflowSelected && cs.selected)}
         onClick={() => onWorkflowToggle(WORKFLOWS.CONSENSUS_GENOME.value)}
       >
         <RadioButton selected={cgWorkflowSelected} className={cs.radioButton} />
@@ -143,7 +160,7 @@ const WorkflowSelector = ({
       >
         <RadioButton
           selected={illuminaTechnologyOptionSelected}
-          className={cs.radioButton}
+          className={cx(cs.radioButton, cs.alignTitle)}
         />
         <div className={cs.optionText}>
           <div className={cs.title}>Illumina</div>
@@ -172,19 +189,43 @@ const WorkflowSelector = ({
         <div className={cs.description}>ARTIC v3</div>
       </div>
 
-      <div className={cs.item}>
-        <div className={cs.subheader}>
-          Medaka Model:
-          <ColumnHeaderTooltip
-            trigger={<IconInfoSmall className={cs.infoIcon} />}
-            content={
-              "Medaka is a tool to create consensus sequences and variant calls from Nanopore sequencing data."
-            }
-            position={"top center"}
+      {nanoporeV1FeatureEnabled ? (
+        <div className={cs.item}>
+          <div className={cs.subheader}>
+            Medaka Model:
+            <ColumnHeaderTooltip
+              trigger={<IconInfoSmall className={cs.infoIcon} />}
+              content={
+                "For best results, specify the correct model. Where a version of Guppy has been used without a corresponding model, choose a model with the highest version equal to or less than the Guppy version."
+              }
+              position={"top center"}
+              link={UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK}
+            />
+          </div>
+          <SectionsDropdown
+            className={cs.dropdown}
+            menuClassName={cs.dropdownMenu}
+            fluid
+            categories={MEDAKA_MODEL_OPTIONS}
+            onChange={val => onMedakaModelChange(val)}
+            selectedValue={selectedMedakaModel}
           />
         </div>
-        <div className={cs.description}>r941_min_high_g360</div>
-      </div>
+      ) : (
+        <div className={cs.item}>
+          <div className={cs.subheader}>
+            Medaka Model:
+            <ColumnHeaderTooltip
+              trigger={<IconInfoSmall className={cs.infoIcon} />}
+              content={
+                "Medaka is a tool to create consensus sequences and variant calls from Nanopore sequencing data."
+              }
+              position={"top center"}
+            />
+          </div>
+          <div className={cs.description}>r941_min_high_g360</div>
+        </div>
+      )}
     </div>
   );
 
@@ -198,7 +239,7 @@ const WorkflowSelector = ({
       >
         <RadioButton
           selected={nanoporeTechnologyOptionSelected}
-          className={cs.radioButton}
+          className={cx(cs.radioButton, cs.alignTitle)}
         />
         <div className={cs.optionText}>
           <div className={cs.title}>Nanopore</div>
@@ -229,9 +270,11 @@ const WorkflowSelector = ({
 };
 
 WorkflowSelector.propTypes = {
+  onMedakaModelChange: PropTypes.func,
   onTechnologyToggle: PropTypes.func,
   onWetlabProtocolChange: PropTypes.func,
   onWorkflowToggle: PropTypes.func,
+  selectedMedakaModel: PropTypes.string,
   selectedTechnology: PropTypes.string,
   selectedWetlabProtocol: PropTypes.string,
   selectedWorkflows: PropTypes.instanceOf(Set),

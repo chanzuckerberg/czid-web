@@ -386,6 +386,20 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
           expect { subject }.to raise_error(SfnCGPipelineDispatchService::TechnologyMissingError)
         end
       end
+
+      context "when a nanopore run is given an unrecognized medaka model" do
+        let(:workflow_run) do
+          create(:workflow_run,
+                 workflow: test_workflow_name,
+                 status: WorkflowRun::STATUS[:created],
+                 sample: sample,
+                 inputs_json: { technology: nanopore_technology, medaka_model: "invalid option", vadr_options: vadr_options }.to_json)
+        end
+
+        it "fails with InvalidMedakaModelError" do
+          expect { subject }.to raise_error(SfnCGPipelineDispatchService::InvalidMedakaModelError)
+        end
+      end
     end
   end
 end

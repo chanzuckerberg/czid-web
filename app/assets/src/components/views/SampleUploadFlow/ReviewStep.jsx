@@ -238,6 +238,7 @@ class ReviewStep extends React.Component {
 
     const {
       technology,
+      medakaModel,
       metadata,
       onUploadComplete,
       originalHostGenomes,
@@ -416,6 +417,7 @@ class ReviewStep extends React.Component {
             <UploadProgressModal
               adminOptions={adminOptions}
               technology={technology}
+              medakaModel={medakaModel}
               metadata={processMetadataRows(metadata.rows)}
               onUploadComplete={onUploadComplete}
               project={project}
@@ -467,6 +469,7 @@ ReviewStep.propTypes = {
   onStepSelect: PropTypes.func,
   onUploadComplete: PropTypes.func.isRequired,
   admin: PropTypes.bool,
+  medakaModel: PropTypes.string,
   workflows: PropTypes.instanceOf(Set),
   wetlabProtocol: PropTypes.string,
 };

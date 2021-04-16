@@ -1426,7 +1426,7 @@ class SamplesController < ApplicationController
     permitted_params = [:name, :project_name, :project_id, :status, :s3_star_index_path,
                         :s3_bowtie2_index_path, :host_genome_id, :host_genome_name, :sample_notes,
                         :search, :basespace_dataset_id, :basespace_access_token, :client,
-                        :do_not_process, :pipeline_execution_strategy, :technology, :wetlab_protocol,
+                        :do_not_process, :pipeline_execution_strategy, :technology, :medaka_model, :wetlab_protocol,
                         :share_id,
                         { workflows: [], input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts, :upload_client] },]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample, :max_input_fragments]) if current_user.admin?

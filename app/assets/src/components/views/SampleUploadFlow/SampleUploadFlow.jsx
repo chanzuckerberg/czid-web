@@ -28,6 +28,7 @@ class SampleUploadFlow extends React.Component {
     project: null,
     sampleNamesToFiles: null, // Needed for local samples.
     // Metadata upload information
+    medakaModel: null,
     metadata: null, //
     metadataIssues: null,
     technology: null,
@@ -54,6 +55,7 @@ class SampleUploadFlow extends React.Component {
   handleUploadSamples = ({
     technology,
     project,
+    medakaModel,
     sampleNamesToFiles,
     samples,
     uploadType,
@@ -63,6 +65,7 @@ class SampleUploadFlow extends React.Component {
     this.setState({
       technology,
       currentStep: "uploadMetadata",
+      medakaModel,
       project,
       sampleNamesToFiles,
       samples,
@@ -175,6 +178,7 @@ class SampleUploadFlow extends React.Component {
         {this.state.samples && this.state.metadata && (
           <ReviewStep
             technology={this.state.technology}
+            medakaModel={this.state.medakaModel}
             hostGenomes={this.state.hostGenomes}
             metadata={this.state.metadata}
             onStepSelect={this.handleStepSelect}

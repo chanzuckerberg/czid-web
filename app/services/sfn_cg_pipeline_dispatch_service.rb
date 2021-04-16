@@ -37,6 +37,12 @@ class SfnCGPipelineDispatchService
     end
   end
 
+  class InvalidMedakaModelError < StandardError
+    def initialize
+      super("Medaka model option not recognized.")
+    end
+  end
+
   def initialize(workflow_run)
     @workflow_run = workflow_run
     @sample = workflow_run.sample
@@ -105,6 +111,16 @@ class SfnCGPipelineDispatchService
     end
   end
 
+  def medaka_model
+    wr_medaka_model = @workflow_run.inputs&.[]("medaka_model")
+
+    if ConsensusGenomeWorkflowRun::MEDAKA_MODEL_OPTIONS.include?(wr_medaka_model)
+      wr_medaka_model
+    else
+      raise InvalidMedakaModelError
+    end
+  end
+
   def apply_length_filter
     # apply_length_filter should be true by default, and false for ClearLabs samples
     !@workflow_run.inputs&.[]("clearlabs")
@@ -140,7 +156,7 @@ class SfnCGPipelineDispatchService
                           # ONT sars-cov-2 cg
                           {
                             apply_length_filter: apply_length_filter,
-                            medaka_model: @workflow_run.inputs&.[]("medaka_model"),
+                            medaka_model: medaka_model,
                             vadr_options: @workflow_run.inputs&.[]("vadr_options"),
                             # Remove ref_fasta once it's changed to an optional wdl input for ONT runs.
                             ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",

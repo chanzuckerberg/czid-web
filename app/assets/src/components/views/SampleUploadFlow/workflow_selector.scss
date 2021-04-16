@@ -20,6 +20,10 @@
       background-color: $gray-off-white;
     }
 
+    &.selected {
+      background-color: $gray-off-white;
+    }
+
     .technologyOptions {
       margin-top: $space-xxxs;
 
@@ -35,6 +39,10 @@
     .radioButton {
       flex-shrink: 0;
       margin: $space-l;
+
+      &.alignTitle {
+        margin-top: $space-xxs;
+      }
     }
 
     .iconSample {
@@ -96,6 +104,15 @@
           .subheader {
             @include font-header-xs;
             margin-bottom: $space-xs;
+          }
+
+          .dropdown {
+            @include font-body-xs;
+            min-width: 215px;
+          }
+
+          .dropdownMenu {
+            min-width: max-content !important;
           }
         }
       }

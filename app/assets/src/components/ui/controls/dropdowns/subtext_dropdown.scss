@@ -21,8 +21,17 @@
   margin-bottom: $space-m;
   cursor: pointer;
 
+  // for SectionsDropdown, the menu items already have padding that can't be overridden
+  &.noMargins {
+    margin: 0;
+  }
+
   .optionText {
     color: $black;
+
+    &.selectedOption {
+      font-weight: $font-weight-semibold;
+    }
   }
 
   .optionSubtext {
@@ -48,4 +57,16 @@
     // override background color from BareDropdown
     background-color: $white !important;
   }
+}
+
+.header {
+  @include font-caps-xxxxs;
+  color: $gray-dark;
+  margin-top: $space-m;
+  padding: 0 $space-l;
+}
+
+.divider {
+  border-top: $border-gray-lightest;
+  margin: 0 $space-l;
 }

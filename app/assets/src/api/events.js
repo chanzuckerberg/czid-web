@@ -68,6 +68,10 @@ function EventDictionary() {
   this.UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED =
     "UPLOAD_SAMPLE_STEP_CG_ARTIC_PIPELINE_LINK_CLICKED";
 
+  /** The user selected a medaka model for their Nanopore Conesnsus Genome sample(s) in the Sample Upload Flow. */
+  this.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED =
+    "UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED";
+
   /** The user closed the modal listing previously generated Consensus Genomes for the taxon. */
   this.CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED =
     "CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED";

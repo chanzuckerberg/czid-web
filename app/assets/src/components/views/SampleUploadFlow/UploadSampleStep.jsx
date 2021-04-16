@@ -57,6 +57,7 @@ import {
   CG_TECHNOLOGY_OPTIONS,
   SELECT_ID_KEY,
   TEMP_DEFAULT_NANOPORE_WETLAB_OPTION,
+  DEFAULT_MEDAKA_MODEL_OPTION,
 } from "./constants";
 
 const LOCAL_UPLOAD = "local";
@@ -86,6 +87,7 @@ class UploadSampleStep extends React.Component {
     removedLocalFiles: [], // Invalid local files that were removed.
     selectedTechnology: null,
     selectedProject: null,
+    selectedMedakaModel: DEFAULT_MEDAKA_MODEL_OPTION,
     selectedWetlabProtocol: null,
     selectedWorkflows: new Set(),
     showNoProjectError: false, // Whether we should show an error if no project is currently selected.
@@ -135,6 +137,7 @@ class UploadSampleStep extends React.Component {
   handleBasespaceOAuthMessageEvent = async event => {
     const {
       selectedProject,
+      selectedMedakaModel,
       selectedTechnology,
       selectedWetlabProtocol,
       selectedWorkflows,
@@ -160,6 +163,7 @@ class UploadSampleStep extends React.Component {
 
       this.props.onUploadSamples({
         project: selectedProject,
+        medakaModel: selectedMedakaModel,
         samples: samplesWithToken,
         technology: selectedTechnology,
         uploadType: "basespace",
@@ -374,6 +378,14 @@ class UploadSampleStep extends React.Component {
   handleWetlabProtocolChange = selected => {
     this.setState({ selectedWetlabProtocol: selected });
     logAnalyticsEvent(`UploadSampleStep_${selected}-protocol_selected`);
+  };
+
+  handleMedakaModelChange = selected => {
+    this.setState({ selectedMedakaModel: selected });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED,
+      { selected }
+    );
   };
 
   // *** Sample-related functions ***
@@ -671,6 +683,7 @@ class UploadSampleStep extends React.Component {
     const {
       currentTab,
       selectedTechnology,
+      selectedMedakaModel,
       selectedProject,
       selectedWorkflows,
       selectedWetlabProtocol,
@@ -681,6 +694,7 @@ class UploadSampleStep extends React.Component {
     } else {
       onUploadSamples({
         technology: selectedTechnology,
+        medakaModel: selectedMedakaModel,
         project: selectedProject,
         samples: this.getSelectedSamples(currentTab),
         uploadType: currentTab,
@@ -796,6 +810,7 @@ class UploadSampleStep extends React.Component {
   render() {
     const {
       currentTab,
+      selectedMedakaModel,
       selectedTechnology,
       selectedWorkflows,
       selectedWetlabProtocol,
@@ -851,9 +866,11 @@ class UploadSampleStep extends React.Component {
             )}
           </div>
           <WorkflowSelector
+            onMedakaModelChange={this.handleMedakaModelChange}
             onWetlabProtocolChange={this.handleWetlabProtocolChange}
             onTechnologyToggle={this.handleTechnologyToggle}
             onWorkflowToggle={this.handleWorkflowToggle}
+            selectedMedakaModel={selectedMedakaModel}
             selectedTechnology={selectedTechnology}
             selectedWorkflows={selectedWorkflows}
             selectedWetlabProtocol={selectedWetlabProtocol}

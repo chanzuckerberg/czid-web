@@ -23,6 +23,30 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
   }.freeze
 
   DEFAULT_MEDAKA_MODEL = "r941_min_high_g360".freeze
+  MEDAKA_MODEL_OPTIONS = [
+    "r941_min_high_g360",
+    "r941_min_fast_g303",
+    "r941_min_high_g303",
+    "r941_min_high_g330",
+    "r941_min_high_g340_rle",
+    "r941_min_high_g344",
+    "r941_min_high_g351",
+    "r103_prom_high_g360",
+    "r103_prom_snp_g3210",
+    "r103_prom_variant_g3210",
+    "r941_prom_fast_g303",
+    "r941_prom_high_g303",
+    "r941_prom_high_g330",
+    "r941_prom_high_g344",
+    "r941_prom_high_g360",
+    "r941_prom_high_g4011",
+    "r941_prom_snp_g303",
+    "r941_prom_snp_g322",
+    "r941_prom_snp_g360",
+    "r941_prom_variant_g303",
+    "r941_prom_variant_g322",
+    "r941_prom_variant_g360",
+  ].freeze
   # Never interpolate user input into DEFAULT_VADR_OPTIONS to prevent command injection.
   DEFAULT_VADR_OPTIONS = "-s -r --nomisc --mkey NC_045512 --lowsim5term 2 --lowsim3term 2 --fstlowthr 0.0 --alt_fail lowscore,fsthicnf,fstlocnf".freeze
 

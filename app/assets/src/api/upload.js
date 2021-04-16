@@ -49,6 +49,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
       "host_genome_id",
       "input_files_attributes",
       "max_input_fragments",
+      "medaka_model",
       "name",
       "pipeline_branch",
       "pipeline_execution_strategy",

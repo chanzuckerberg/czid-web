@@ -15,6 +15,7 @@ import {
   find,
 } from "lodash/fp";
 
+import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import Modal from "~ui/containers/Modal";
 import UploadConfirmationModal from "./UploadConfirmationModal";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -136,6 +137,7 @@ export default class UploadProgressModal extends React.Component {
   addFlagsToSamples = samples => {
     const {
       adminOptions,
+      medakaModel,
       technology,
       skipSampleProcessing,
       useStepFunctionPipeline,
@@ -150,6 +152,9 @@ export default class UploadProgressModal extends React.Component {
     return samples.map(sample => ({
       ...sample,
       do_not_process: skipSampleProcessing,
+      ...(technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && {
+        medaka_model: medakaModel,
+      }),
       pipeline_execution_strategy,
       technology,
       wetlab_protocol: wetlabProtocol,
@@ -715,6 +720,7 @@ UploadProgressModal.propTypes = {
     })
   ),
   adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
+  medakaModel: PropTypes.string,
   metadata: PropTypes.objectOf(PropTypes.any),
   onUploadComplete: PropTypes.func.isRequired,
   project: PropTypes.Project,

@@ -576,8 +576,8 @@ module SamplesHelper
       end
 
       if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
+        medaka_model = sample_attributes[:medaka_model] ? sample_attributes.delete(:medaka_model) : ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL
         # TODO: current default values; to be exposed as a user-facing option in a future version
-        medaka_model = ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL
         vadr_options = ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS
       end
 
