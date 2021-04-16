@@ -57,8 +57,8 @@ class SamplesController < ApplicationController
 
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
-  MIN_CLI_VERSION = '0.8.10'.freeze
-  CLI_DEPRECATION_MSG = "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git` or with sudo + pip2/pip3 depending on your setup to update and try again.".freeze
+  MIN_CLI_VERSION = '0.8.14'.freeze
+  CLI_DEPRECATION_MSG = "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git` or with sudo + pip2/pip3 depending on your setup to update and try again.\nThis version of the CLI will be deprecated entirely soon. Consider installing the new client at https://github.com/chanzuckerberg/idseq-cli-v2".freeze
 
   SAMPLE_DEFAULT_FIELDS = [
     :name,
