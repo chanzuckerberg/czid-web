@@ -1,3 +1,5 @@
+import { get } from "lodash/fp";
+
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants";
@@ -30,6 +32,12 @@ export const computeColumnsByWorkflow = ({
       width: 120,
       className: cs.basicCell,
       cellRenderer: TableRenderers.renderDateWithElapsed,
+      // Get latest run or fallback to sample createdAt
+      cellDataGetter: ({ rowData }) =>
+        get(
+          ["sample", "createdAtByWorkflow", WORKFLOWS.SHORT_READ_MNGS.value],
+          rowData
+        ) || rowData.createdAt,
     },
     {
       dataKey: "host",
@@ -158,6 +166,12 @@ export const computeColumnsByWorkflow = ({
       width: 120,
       className: cs.basicCell,
       cellRenderer: TableRenderers.renderDateWithElapsed,
+      // Get latest run or fallback to sample createdAt
+      cellDataGetter: ({ rowData }) =>
+        get(
+          ["sample", "createdAtByWorkflow", WORKFLOWS.CONSENSUS_GENOME.value],
+          rowData
+        ) || rowData.createdAt,
     },
     {
       dataKey: "host",

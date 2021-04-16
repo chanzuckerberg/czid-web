@@ -168,7 +168,7 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
         first_sample = formatted_samples.first
         expect(first_sample.keys).to contain_exactly(:db_sample, :metadata, :derived_sample_output, :run_info_by_workflow, :uploader, :workflow_runs_accession_ids, cg_workflow.to_sym)
         expect(first_sample[:derived_sample_output].keys).to contain_exactly(:host_genome_name, :pipeline_run, :project_name, :summary_stats)
-        expect(first_sample[:run_info_by_workflow][mngs_workflow].keys).to contain_exactly(:finalized, :report_ready, :result_status_description, :total_runtime, :with_assembly)
+        expect(first_sample[:run_info_by_workflow][mngs_workflow].keys).to contain_exactly(:finalized, :report_ready, :result_status_description, :total_runtime, :with_assembly, :created_at)
       end
 
       it "should return correctly formatted consensus-genome samples" do
@@ -177,7 +177,7 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
         first_sample = formatted_samples.first
         expect(first_sample.keys).to contain_exactly(:db_sample, :metadata, :derived_sample_output, :run_info_by_workflow, :uploader, :workflow_runs_accession_ids, cg_workflow.to_sym)
         expect(first_sample[:derived_sample_output].keys).to contain_exactly(:host_genome_name, :pipeline_run, :project_name, :summary_stats)
-        expect(first_sample[:run_info_by_workflow][cg_workflow].keys).to contain_exactly(:result_status_description)
+        expect(first_sample[:run_info_by_workflow][cg_workflow].keys).to contain_exactly(:result_status_description, :created_at)
       end
     end
 
@@ -214,7 +214,7 @@ RSpec.describe SnapshotSamplesHelper, type: :helper do
         first_sample = formatted_samples.first
         expect(first_sample.keys).to contain_exactly(:metadata, :derived_sample_output, :run_info_by_workflow, :uploader, cg_workflow.to_sym)
         expect(first_sample[:derived_sample_output].keys).to contain_exactly(:host_genome_name, :project_name, :summary_stats)
-        expect(first_sample[:run_info_by_workflow][cg_workflow].keys).to contain_exactly(:result_status_description)
+        expect(first_sample[:run_info_by_workflow][cg_workflow].keys).to contain_exactly(:result_status_description, :created_at)
       end
     end
   end

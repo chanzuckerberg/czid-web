@@ -147,6 +147,10 @@ const processRawSample = sample => {
         runInfo => toLower(runInfo.result_status_description),
         get("run_info_by_workflow", sample.details)
       ),
+      createdAtByWorkflow: mapValues(
+        "created_at",
+        get("run_info_by_workflow", sample.details)
+      ),
       uploadError: toLower(
         get("upload_error.result_status_description", sample.details)
       ),

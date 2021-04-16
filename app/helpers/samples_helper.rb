@@ -298,6 +298,7 @@ module SamplesHelper
       pipeline_run_entry[:result_status_description] = pipeline_run.status_display(output_states_by_pipeline_run_id)
       pipeline_run_entry[:finalized] = pipeline_run.finalized
       pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
+      pipeline_run_entry[:created_at] = pipeline_run.created_at
     else
       pipeline_run_entry[:result_status_description] = 'WAITING'
       pipeline_run_entry[:finalized] = 0
@@ -457,7 +458,9 @@ module SamplesHelper
 
     # TODO: Generalize when new workflows are introduced
     cg_workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
-    cg_run_info = { result_status_description: cg_workflow_run ? SFN_STATUS_MAPPING[cg_workflow_run.status] : "RUNNING" }
+    cg_run_info = {}
+    cg_run_info[:result_status_description] = cg_workflow_run ? SFN_STATUS_MAPPING[cg_workflow_run.status] : "RUNNING"
+    cg_run_info[:created_at] = cg_workflow_run&.created_at
 
     return {
       WorkflowRun::WORKFLOW[:short_read_mngs] => mngs_run_info,

@@ -624,7 +624,7 @@ RSpec.describe SamplesHelper, type: :helper do
 
       @sample3 = create(:sample, project: @project)
       create(:pipeline_run, sample_id: @sample3.id, finalized: 1, job_status: PipelineRun::STATUS_CHECKED)
-      create(:workflow_run, sample: @sample3, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+      @workflow_run = create(:workflow_run, sample: @sample3, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
     end
 
     it "returns the correct status for a sample that only has a consensus-genome workflow run" do
@@ -636,8 +636,11 @@ RSpec.describe SamplesHelper, type: :helper do
                             pipeline_run_stages_by_pipeline_run_id: nil,
                             report_ready_pipeline_run_ids: nil)
 
-      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]].keys).to contain_exactly(:result_status_description)
-      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({ result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]] })
+      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]].keys).to contain_exactly(:result_status_description, :created_at)
+      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({
+                                                                        result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]],
+                                                                        created_at: @workflow_run.created_at,
+                                                                      })
     end
 
     it "returns the correct status for a sample that only has a short-read-mngs pipeline run" do
@@ -679,9 +682,12 @@ RSpec.describe SamplesHelper, type: :helper do
                             report_ready_pipeline_run_ids: [@pipeline_run1.id])
 
       expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]].keys).to contain_exactly(:finalized, :report_ready, :result_status_description, :total_runtime, :with_assembly)
-      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]].keys).to contain_exactly(:result_status_description)
+      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]].keys).to contain_exactly(:result_status_description, :created_at)
       expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]][:result_status_description]).to eq("COMPLETE")
-      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({ result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]] })
+      expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({
+                                                                        result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]],
+                                                                        created_at: @workflow_run.created_at,
+                                                                      })
     end
 
     it "returns the correct status for a snapshot sample that has a short-read-mngs pipeline run" do
