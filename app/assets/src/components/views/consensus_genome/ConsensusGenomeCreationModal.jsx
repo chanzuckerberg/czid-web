@@ -13,6 +13,7 @@ import { IconInfoSmall } from "~/components/ui/icons";
 import Modal from "~ui/containers/Modal";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { SubtextDropdown } from "~ui/controls/dropdowns";
+import { VIRAL_CONSENSUS_GENOME_DOC_LINK } from "~/components/utils/documentationLinks";
 
 import cs from "./consensus_genome_creation_modal.scss";
 
@@ -134,7 +135,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
           consensus genome for this taxon. This pipeline should not be used on
           samples using enrichment protocols such as MSSPE.{" "}
           <ExternalLink
-            href={"https://help.idseq.net"}
+            href={VIRAL_CONSENSUS_GENOME_DOC_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.CONSENSUS_GENOME_CREATION_MODAL_HELP_LINK_CLICKED
             }
@@ -153,7 +154,7 @@ export default class ConsensusGenomeCreationModal extends React.Component {
             content={
               "Choose the reference genome you would like to map the non-host reads against to create a consensus genome."
             }
-            link={"https://help.idseq.net"}
+            link={VIRAL_CONSENSUS_GENOME_DOC_LINK}
             position={"top center"}
           />
         </div>
