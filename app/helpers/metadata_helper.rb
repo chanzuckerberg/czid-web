@@ -75,7 +75,7 @@ module MetadataHelper
     MetadataField.where(id: metadata_field_ids)
   end
 
-  def metadata_template_csv_helper(project_id, new_sample_names)
+  def metadata_template_csv_helper(project_id:, new_sample_names:, host_genomes:)
     samples_are_new = !new_sample_names.nil?
     project = Project.where(id: project_id)[0]
     # We should include the host genome columns if the user is downloading the template during new sample upload, or
@@ -86,11 +86,16 @@ module MetadataHelper
     # Both names are equivalent in CSV upload.
     include_host_genome = project.nil? || samples_are_new
 
-    # If project is nil, use global default and required fields.
-    fields = if project.nil?
+    fields = if host_genomes.any?
                required = MetadataField.where(is_required: true)
                default = MetadataField.where(is_default: true)
-
+               required | default | host_genomes.flat_map do |name|
+                 HostGenome.find_by(name: name).metadata_fields
+               end
+             # If project is nil, use global default and required fields.
+             elsif project.nil?
+               required = MetadataField.where(is_required: true)
+               default = MetadataField.where(is_default: true)
                (required | default)
              # If samples are new, just use Human metadata fields since Human is by far most common.
              elsif samples_are_new
@@ -110,11 +115,12 @@ module MetadataHelper
     # Assemble sample objects based on params.
     samples = if samples_are_new
                 # Use new sample names if provided.
-                new_sample_names.map do |sample_name|
+                new_sample_names.map.with_index do |sample_name, i|
+                  # By Default, always default to Human for new samples.
+                  hg = i >= host_genomes.length ? "Human" : host_genomes[i]
                   {
                     name: sample_name,
-                    # For now, always default to Human for new samples.
-                    host_genome_name: "Human",
+                    host_genome_name: hg,
                   }
                 end
               elsif project.nil?

@@ -2,7 +2,7 @@ class MetadataController < ApplicationController
   include MetadataHelper
 
   # Token auth needed for CLI uploads
-  TOKEN_AUTH_METHODS = [:validate_csv_for_new_samples].freeze
+  TOKEN_AUTH_METHODS = [:metadata_template_csv, :validate_csv_for_new_samples].freeze
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_METHODS
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_METHODS
 
@@ -23,7 +23,13 @@ class MetadataController < ApplicationController
     project_id = params[:project_id]
     # The names of new samples that are being created.
     new_sample_names = params[:new_sample_names]
-    send_data metadata_template_csv_helper(project_id, new_sample_names), filename: 'metadata_template.csv'
+    # Manually specified host genomes to select metadata fields
+    host_genomes = params[:host_genomes] || []
+    send_data metadata_template_csv_helper(
+      project_id: project_id,
+      new_sample_names: new_sample_names,
+      host_genomes: host_genomes
+    ), filename: 'metadata_template.csv'
   end
 
   def validate_csv_for_new_samples
