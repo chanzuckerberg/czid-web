@@ -103,9 +103,17 @@ function EventDictionary() {
   this.CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED =
     "CONSENSUS_GENOME_PREVIOUS_MODAL_CREATE_NEW_CLICKED";
 
-  /** The user clicked the consensus genome help button in a sample report */
+  /** The user clicked the help button in an Metagenomics report page.  */
+  this.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED =
+    "SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED";
+
+  /** The user clicked the help button in the Consensus Genome report page. */
   this.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED =
     "SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED";
+
+  /** The user clicked the help button in a heatmap. */
+  this.SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED =
+    "SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED";
 }
 
 const eventNames = new EventDictionary();

@@ -4,8 +4,11 @@ import PropTypes from "prop-types";
 import BasicPopup from "~/components/BasicPopup";
 import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
-import { withAnalytics } from "~/api/analytics";
-import { SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR } from "~/components/utils/appcues";
+import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import {
+  showAppcue,
+  SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
+} from "~/components/utils/appcues";
 import { logError } from "~/components/utils/logUtil";
 import { ViewHeader } from "~/components/layout";
 import { triggerCSVDownload } from "~/components/utils/csv";
@@ -112,13 +115,11 @@ const SamplesHeatmapHeader = ({
         {allowedFeatures.includes("appcues") && (
           <HelpButton
             className={cs.controlElement}
-            // eslint-disable-next-line no-console
-            onClick={withAnalytics(
-              () =>
-                window.Appcues &&
-                window.Appcues.show(SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR),
-              "SamplesHeatmapHeader_help-button_clicked"
-            )}
+            onClick={showAppcue({
+              flowId: SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
+              analyticEventName:
+                ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED,
+            })}
           />
         )}
       </ViewHeader.Controls>

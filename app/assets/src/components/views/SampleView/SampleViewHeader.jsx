@@ -21,7 +21,11 @@ import {
   SaveButton,
   ShareButton,
 } from "~ui/controls/buttons";
-import { SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR } from "~/components/utils/appcues";
+import {
+  showAppcue,
+  SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
+  SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
+} from "~/components/utils/appcues";
 import { openUrl } from "~utils/links";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import { PIPELINE_RUN_TABS } from "./constants";
@@ -99,19 +103,11 @@ export default function SampleViewHeader({
   const renderConsensusGenomeHelpButton = () => (
     <HelpButton
       className={cs.controlElement}
-      onClick={withAnalytics(
-        () =>
-          /*
-          TODO: Uncomment & insert CG appcue flow ID when it's ready (CH-118852)
-          window.Appcues &&
-          window.Appcues.show(INSERT_CG_HELP_BUTTON_APPCUE_FLOW_ID_HERE)
-        */
-          // eslint-disable-next-line no-console
-          console.log(
-            ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED
-          ),
-        ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED
-      )}
+      onClick={showAppcue({
+        flowId: SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
+        analyticEventName:
+          ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_CONSENSUS_GENOME_HELP_BUTTON_CLICKED,
+      })}
     />
   );
 
@@ -198,12 +194,11 @@ export default function SampleViewHeader({
           {!isEmpty(reportMetadata) && allowedFeatures.includes("appcues") && (
             <HelpButton
               className={cs.controlElement}
-              onClick={withAnalytics(
-                () =>
-                  window.Appcues &&
-                  window.Appcues.show(SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR),
-                "SampleViewHeader_help-button_clicked"
-              )}
+              onClick={showAppcue({
+                flowId: SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
+                analyticEventName:
+                  ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HEADER_MNGS_HELP_BUTTON_CLICKED,
+              })}
             />
           )}
         </ViewHeader.Controls>
