@@ -58,18 +58,18 @@ class Location < ApplicationRecord
     # until it's tested in staging a bit, it currently just invokes the lambda
     # and calls the old behavior. We'll use lambda metrics to see how it is working.
     if AppConfigHelper.get_app_config(AppConfig::ENABLE_SSRFS_UP) == "1"
-      SSRFsUp.get(query_url, { sensitive: ["key"] })
-      # return [resp.status_code != 200, JSON.parse(resp.body)]
+      resp = SSRFsUp.get(query_url, { sensitive: ["key"] })
+      [resp.status_code != 200, JSON.parse(resp.body)]
+    else
+      uri = Addressable::URI.parse(query_url)
+      request = Net::HTTP::Get.new(uri)
+      resp = Net::HTTP.start(uri.host, 443, use_ssl: true) do |http|
+        http.request(request)
+      end
+      # Search with 0 results will return HTTPNotFound. Consider it a successful request for our handling.
+      success = resp.is_a?(Net::HTTPSuccess) || resp.is_a?(Net::HTTPNotFound)
+      [success, JSON.parse(resp.body)]
     end
-
-    uri = Addressable::URI.parse(query_url)
-    request = Net::HTTP::Get.new(uri)
-    resp = Net::HTTP.start(uri.host, 443, use_ssl: true) do |http|
-      http.request(request)
-    end
-    # Search with 0 results will return HTTPNotFound. Consider it a successful request for our handling.
-    success = resp.is_a?(Net::HTTPSuccess) || resp.is_a?(Net::HTTPNotFound)
-    [success, JSON.parse(resp.body)]
   end
 
   # Search request to Location IQ API by freeform query.
