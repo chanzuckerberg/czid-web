@@ -160,6 +160,8 @@ class SfnCGPipelineDispatchService
                             apply_length_filter: apply_length_filter,
                             medaka_model: medaka_model,
                             vadr_options: @workflow_run.inputs&.[]("vadr_options"),
+                            # Remove ref_fasta once it's changed to an optional wdl input for ONT runs.
+                            ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",
                           }
                         elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
                           # illumina sars-cov-2 cg
