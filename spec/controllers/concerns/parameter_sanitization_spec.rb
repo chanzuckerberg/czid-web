@@ -12,5 +12,9 @@ RSpec.describe ParameterSanitization do
     it "allows valid accession ids" do
       expect(subject.sanitize_accession_id("GQ398265.1")).to eq("GQ398265.1")
     end
+
+    it "allows nil input" do
+      expect(subject.sanitize_accession_id(nil)).to eq(nil)
+    end
   end
 end

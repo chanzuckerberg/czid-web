@@ -4,6 +4,7 @@ class SfnCGPipelineDispatchService
   # It generates the Step Function's input JSON and starts SFN execution
 
   include Callable
+  include ParameterSanitization
 
   NA_PRIMER_FILE = "na_primers.bed".freeze
 
@@ -152,14 +153,13 @@ class SfnCGPipelineDispatchService
   end
 
   def generate_wdl_input
+    # SECURITY: To mitigate pipeline command injection, ensure any interpolated string inputs are either validated or controlled by the server.
     additional_inputs = if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
                           # ONT sars-cov-2 cg
                           {
                             apply_length_filter: apply_length_filter,
                             medaka_model: medaka_model,
                             vadr_options: @workflow_run.inputs&.[]("vadr_options"),
-                            # Remove ref_fasta once it's changed to an optional wdl input for ONT runs.
-                            ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",
                           }
                         elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
                           # illumina sars-cov-2 cg
@@ -170,7 +170,7 @@ class SfnCGPipelineDispatchService
                         else
                           # illumina gen viral cg
                           {
-                            ref_accession_id: @workflow_run.inputs&.[]("accession_id"),
+                            ref_accession_id: sanitize_accession_id(@workflow_run.inputs&.[]("accession_id")),
                             # This option filters all except SARS-CoV-2 at the moment:
                             filter_reads: false,
                             # This is a special empty primer file b/c the user doesn't specify a

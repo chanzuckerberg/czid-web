@@ -18,7 +18,9 @@ module ParameterSanitization
   end
 
   def sanitize_accession_id(accession_id)
-    # Allow capital letters, numbers, underscores, and periods
-    return accession_id.gsub(/[^A-Z0-9_\.]/, '')
+    if accession_id
+      # Allow capital letters, numbers, underscores, and periods
+      return accession_id.gsub(/[^A-Z0-9_\.]/, '')
+    end
   end
 end

@@ -283,7 +283,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
                  workflow: test_workflow_name,
                  status: WorkflowRun::STATUS[:created],
                  sample: sample,
-                 inputs_json: { technology: illumina_technology, accession_id: 1 }.to_json)
+                 inputs_json: { technology: illumina_technology, accession_id: "ABC123" }.to_json)
         end
 
         it "returns sfn input containing correct sfn parameters" do
@@ -291,7 +291,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
             sfn_input_json: {
               Input: {
                 Run: {
-                  ref_accession_id: 1,
+                  ref_accession_id: "ABC123",
                   primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{SfnCGPipelineDispatchService::NA_PRIMER_FILE}",
                 },
               },
