@@ -192,44 +192,46 @@ const ConsensusGenomeView = ({
     );
     const subtext = `${workflowRunResults.taxon_info.accession_id} - ${workflowRunResults.taxon_info.accession_name}`;
 
-    coverageVizRef.current = new Histogram(
-      coverageVizContainerRef.current,
-      [coverageVizData],
-      {
-        barOpacity: 1,
-        colors: [CG_HISTOGRAM_FILL_COLOR],
-        domain: [0, workflowRunResults.coverage_viz.total_length],
-        hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
-        labelsBold: true,
-        labelsLarge: true,
-        labelX: "Reference Genome",
-        labelY: "Coverage (SymLog)",
-        labelXSubtext: subtext,
-        labelYHorizontalOffset: 30,
-        labelYVerticalOffset: 54,
-        labelYLarge: true,
-        margins: {
-          left: 100,
-          right: 50,
-          top: 22,
-          bottom: 75,
-        },
-        numBins: Math.round(
-          workflowRunResults.coverage_viz.total_length /
-            workflowRunResults.coverage_viz.coverage_bin_size
-        ),
-        numTicksY: 2,
-        showStatistics: false,
-        skipBins: true,
-        yScaleType: HISTOGRAM_SCALE.SYM_LOG,
-        yTickFormat: numberWithCommas,
-        skipNiceDomains: true,
-        onHistogramBarHover: handleHistogramBarHover,
-        onHistogramBarEnter: handleHistogramBarEnter,
-        onHistogramBarExit: handleHistogramBarExit,
-      }
-    );
-    coverageVizRef.current.update();
+    if (coverageVizContainerRef !== null) {
+      coverageVizRef.current = new Histogram(
+        coverageVizContainerRef.current,
+        [coverageVizData],
+        {
+          barOpacity: 1,
+          colors: [CG_HISTOGRAM_FILL_COLOR],
+          domain: [0, workflowRunResults.coverage_viz.total_length],
+          hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
+          labelsBold: true,
+          labelsLarge: true,
+          labelX: "Reference Genome",
+          labelY: "Coverage (SymLog)",
+          labelXSubtext: subtext,
+          labelYHorizontalOffset: 30,
+          labelYVerticalOffset: 54,
+          labelYLarge: true,
+          margins: {
+            left: 100,
+            right: 50,
+            top: 22,
+            bottom: 75,
+          },
+          numBins: Math.round(
+            workflowRunResults.coverage_viz.total_length /
+              workflowRunResults.coverage_viz.coverage_bin_size
+          ),
+          numTicksY: 2,
+          showStatistics: false,
+          skipBins: true,
+          yScaleType: HISTOGRAM_SCALE.SYM_LOG,
+          yTickFormat: numberWithCommas,
+          skipNiceDomains: true,
+          onHistogramBarHover: handleHistogramBarHover,
+          onHistogramBarEnter: handleHistogramBarEnter,
+          onHistogramBarExit: handleHistogramBarExit,
+        }
+      );
+      coverageVizRef.current.update();
+    }
   };
 
   const getAccessionMetrics = () => {
