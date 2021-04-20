@@ -96,6 +96,7 @@ class UploadMetadataStep extends React.Component {
       continueDisabled,
       issues,
     } = this.state;
+
     return (
       <div className={cs.uploadMetadataStep}>
         <div
@@ -170,6 +171,7 @@ UploadMetadataStep.propTypes = {
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
   onDirty: PropTypes.func.isRequired,
+  workflows: PropTypes.instanceOf(Set),
 };
 
 export default UploadMetadataStep;

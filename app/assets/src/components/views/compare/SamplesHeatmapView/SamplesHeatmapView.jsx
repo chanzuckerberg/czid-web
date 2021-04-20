@@ -627,7 +627,7 @@ class SamplesHeatmapView extends React.Component {
         name: sample.name,
         index: i,
         host_genome_name: sample.host_genome_name,
-        metadata: processMetadata(sample.metadata, true),
+        metadata: processMetadata({ metadata: sample.metadata, flatten: true }),
         taxa: [],
         duplicate: false,
       };
@@ -744,7 +744,7 @@ class SamplesHeatmapView extends React.Component {
         name: sample.name,
         index: i,
         host_genome_name: sample.host_genome_name,
-        metadata: processMetadata(sample.metadata, true),
+        metadata: processMetadata({ metadata: sample.metadata, flatten: true }),
         taxa: [],
         duplicate: false,
       };

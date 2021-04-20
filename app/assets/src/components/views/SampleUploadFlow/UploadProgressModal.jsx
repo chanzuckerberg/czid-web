@@ -725,6 +725,7 @@ UploadProgressModal.propTypes = {
   onUploadComplete: PropTypes.func.isRequired,
   project: PropTypes.Project,
   skipSampleProcessing: PropTypes.bool,
+  technology: PropTypes.string,
   uploadType: PropTypes.string.isRequired,
   useStepFunctionPipeline: PropTypes.bool,
   wetlabProtocol: PropTypes.string,

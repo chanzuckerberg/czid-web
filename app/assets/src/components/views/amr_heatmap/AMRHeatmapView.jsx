@@ -78,7 +78,7 @@ export default class AMRHeatmapView extends React.Component {
     );
     const samplesWithKeyedMetadata = filteredSamples.map(sample => ({
       ...sample,
-      metadata: processMetadata(sample.metadata, true),
+      metadata: processMetadata({ metadata: sample.metadata, flatten: true }),
     }));
     const samplesWithAMRCounts = this.correctSampleAndGeneNames(
       samplesWithKeyedMetadata

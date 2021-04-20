@@ -11,6 +11,7 @@ import {
   has,
   head,
   isEmpty,
+  isNil,
   keys,
   map,
   mapValues,
@@ -34,6 +35,7 @@ import {
   getSample,
   getSampleReportData,
   getSamples,
+  getWorkflowRunResults,
   kickoffConsensusGenome,
 } from "~/api";
 import { getAmrData } from "~/api/amr";
@@ -86,6 +88,7 @@ import {
   NOTIFICATION_TYPES,
   PIPELINE_RUN_TABS,
   SPECIES_LEVEL_INDEX,
+  SUCCEEDED_STATE,
   TABS,
   TAXON_COUNT_TYPE_METRICS,
   TAXON_GENERAL_FIELDS,
@@ -134,6 +137,7 @@ class SampleView extends React.Component {
         currentTab: null,
         filteredReportData: [],
         loadingReport: false,
+        loadingWorkflowRunResults: false,
         pipelineRun: null,
         pipelineVersion: null,
         previousSelectedOptions: this.getDefaultSelectedOptions(),
@@ -158,6 +162,7 @@ class SampleView extends React.Component {
         sidebarTaxonData: null,
         view: "table",
         workflowRun: null,
+        workflowRunResults: null,
       },
       nonNestedLocalState,
       nonNestedUrlState
@@ -169,13 +174,55 @@ class SampleView extends React.Component {
     this.fetchBackgrounds();
   };
 
-  componentDidUpdate() {
-    const { amrData, currentTab } = this.state;
+  componentDidUpdate(_, prevState) {
+    const {
+      amrData,
+      currentTab,
+      loadingWorkflowRunResults,
+      workflowRun,
+      workflowRunResults,
+    } = this.state;
 
     if (currentTab === TABS.AMR && !amrData) {
       this.fetchAmrData();
     }
+
+    if (currentTab === TABS.CONSENSUS_GENOME) {
+      const currentRun = this.getCurrentRun();
+      const isFirstCGLoad = !isNil(currentRun) && isNil(workflowRunResults);
+      const tabChanged = currentTab !== prevState.currentTab;
+      const workflowRunChanged =
+        workflowRun &&
+        get("id", workflowRun) !== get("id", prevState.workflowRun);
+
+      if (
+        !loadingWorkflowRunResults &&
+        (isFirstCGLoad || tabChanged || workflowRunChanged)
+      ) {
+        this.fetchWorkflowRunResults();
+      }
+    }
   }
+
+  fetchWorkflowRunResults = async () => {
+    const { loadingWorkflowRunResults } = this.state;
+
+    if (!loadingWorkflowRunResults) {
+      this.setState({ loadingWorkflowRunResults: true });
+      const currentWorkflowRun = this.getCurrentRun();
+
+      // getWorkflowRunResults raises error unless successful
+      const results =
+        currentWorkflowRun.status === SUCCEEDED_STATE
+          ? await getWorkflowRunResults(currentWorkflowRun.id)
+          : {};
+
+      this.setState({
+        loadingWorkflowRunResults: false,
+        workflowRunResults: results,
+      });
+    }
+  };
 
   loadState = (store, key) => {
     try {
@@ -1165,7 +1212,7 @@ class SampleView extends React.Component {
   getSidebarParams = () => {
     const {
       backgrounds,
-      pipelineRun,
+      currentTab,
       sample,
       selectedOptions,
       sidebarMode,
@@ -1186,9 +1233,10 @@ class SampleView extends React.Component {
       };
     } else if (sidebarMode === "sampleDetails") {
       return {
+        currentRun: this.getCurrentRun(),
+        currentWorkflowTab: currentTab,
         sampleId: sample.id,
         snapshotShareId: snapshotShareId,
-        pipelineVersion: pipelineRun ? pipelineRun.pipeline_version : null,
         onMetadataUpdate: this.handleMetadataUpdate,
       };
     }
@@ -1370,7 +1418,7 @@ class SampleView extends React.Component {
     const mergedNtNrTab = {
       value: TABS.MERGED_NT_NR,
       label: (
-        <React.Fragment>
+        <>
           {TABS.MERGED_NT_NR}
           <StatusLabel
             className={cs.statusLabel}
@@ -1378,7 +1426,7 @@ class SampleView extends React.Component {
             status="Prototype"
             type="beta"
           />
-        </React.Fragment>
+        </>
       ),
     };
 
@@ -1872,6 +1920,26 @@ class SampleView extends React.Component {
     }
   };
 
+  renderConsensusGenomeView = () => {
+    const {
+      loadingWorkflowRunResults,
+      sample,
+      workflowRunResults,
+    } = this.state;
+
+    return (
+      sample && (
+        <ConsensusGenomeView
+          onWorkflowRunSelect={this.handleWorkflowRunSelect}
+          sample={sample}
+          loadingResults={loadingWorkflowRunResults}
+          workflowRun={this.getCurrentRun()}
+          workflowRunResults={workflowRunResults}
+        />
+      )
+    );
+  };
+
   render = () => {
     const {
       amrData,
@@ -1942,13 +2010,8 @@ class SampleView extends React.Component {
           {currentTab === TABS.MERGED_NT_NR &&
             this.renderReport({ displayMergedNtNrValue: true })}
           {currentTab === TABS.AMR && amrData && <AMRView amr={amrData} />}
-          {currentTab === TABS.CONSENSUS_GENOME && sample && (
-            <ConsensusGenomeView
-              onWorkflowRunSelect={this.handleWorkflowRunSelect}
-              sample={sample}
-              workflowRun={currentRun}
-            />
-          )}
+          {currentTab === TABS.CONSENSUS_GENOME &&
+            this.renderConsensusGenomeView()}
         </NarrowContainer>
         {sample && (
           <DetailsSidebar

@@ -1,4 +1,6 @@
 import React from "react";
+import PropTypes from "~/components/utils/propTypes";
+
 import cx from "classnames";
 import { Popup } from "semantic-ui-react";
 import { getAlignmentData } from "~/api";
@@ -33,7 +35,10 @@ class AlignmentViz extends React.Component {
     // TODO(mark): Remove the metadata call once the alignment viz takes assembly into account.
     const [alignmentData, metadata] = await Promise.all([
       getAlignmentData(sampleId, this.alignmentQuery, this.pipelineVersion),
-      getSampleMetadata(sampleId, this.pipelineVersion),
+      getSampleMetadata({
+        id: sampleId,
+        pipelineVersion: this.pipelineVersion,
+      }),
     ]);
 
     this.setState({
@@ -99,5 +104,14 @@ class AlignmentViz extends React.Component {
     }
   }
 }
+
+AlignmentViz.propTypes = {
+  sampleId: PropTypes.number,
+  alignmentQuery: PropTypes.string,
+  taxId: PropTypes.string,
+  taxLevel: PropTypes.string,
+  taxName: PropTypes.string,
+  pipelineVersion: PropTypes.string,
+};
 
 export default AlignmentViz;

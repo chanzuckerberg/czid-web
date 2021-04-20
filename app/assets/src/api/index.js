@@ -361,13 +361,7 @@ const validatePhyloTreeName = name =>
 
 const retryPhyloTree = id => postWithCSRF("/phylo_trees/retry", { id });
 
-const getSamplesLocations = ({
-  domain,
-  filters,
-  projectId,
-  search,
-  snapshotShareId,
-}) =>
+const getSamplesLocations = ({ domain, filters, projectId, search }) =>
   get("/locations/sample_locations.json", {
     params: {
       domain,

@@ -672,10 +672,7 @@ class SamplesController < ApplicationController
     summary_stats = nil
     pr_display = nil
     ercc_comparison = nil
-    wr_display = nil
 
-    # TODO: Generalize when splitting into multiple workflows per sample.
-    workflow_run = @sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
     editable = current_power.updatable_sample?(@sample)
 
     if pr
@@ -686,10 +683,6 @@ class SamplesController < ApplicationController
       if job_stats_hash.present?
         summary_stats = get_summary_stats(job_stats_hash, pr)
       end
-    elsif workflow_run
-      wr_display = workflow_run.status == WorkflowRun::STATUS[:succeeded] ? ConsensusGenomeMetricsService.call(workflow_run) : {}
-      wr_display[:executed_at] = workflow_run.executed_at
-      wr_display[:wdl_version] = workflow_run.wdl_version
     end
 
     render json: {
@@ -707,9 +700,6 @@ class SamplesController < ApplicationController
         ercc_comparison: ercc_comparison,
         pipeline_run: pr_display,
         summary_stats: summary_stats,
-        workflow: workflow_run&.workflow || WorkflowRun::WORKFLOW[:short_read_mngs],
-        workflow_run: wr_display,
-        wetlab_protocol: workflow_run&.inputs&.[]("wetlab_protocol"),
       },
     }
   end

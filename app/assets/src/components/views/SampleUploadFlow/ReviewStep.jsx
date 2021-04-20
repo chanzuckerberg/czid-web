@@ -469,6 +469,7 @@ ReviewStep.propTypes = {
   onStepSelect: PropTypes.func,
   onUploadComplete: PropTypes.func.isRequired,
   admin: PropTypes.bool,
+  technology: PropTypes.string,
   medakaModel: PropTypes.string,
   workflows: PropTypes.instanceOf(Set),
   wetlabProtocol: PropTypes.string,

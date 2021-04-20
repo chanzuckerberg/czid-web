@@ -1,7 +1,7 @@
 import { keyBy, mapValues, isObject } from "lodash/fp";
 
 // Transform the server metadata response to a simple key => value map.
-export const processMetadata = (metadata, flatten = false) => {
+export const processMetadata = ({ metadata, flatten = false }) => {
   let newMetadata = keyBy("key", metadata);
 
   newMetadata = mapValues(

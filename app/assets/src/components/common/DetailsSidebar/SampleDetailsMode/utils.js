@@ -10,9 +10,6 @@ export const processPipelineInfo = additionalInfo => {
   const {
     pipeline_run: pipelineRun,
     summary_stats: summaryStats,
-    wetlab_protocol: wetlabProtocol,
-    workflow,
-    workflow_run: workflowRunInfo,
   } = additionalInfo;
 
   let pipelineInfo = {};
@@ -44,94 +41,87 @@ export const processPipelineInfo = additionalInfo => {
       };
     }
     pipelineInfo.hostSubtracted = { text: pipelineRun.host_subtracted };
-  }
 
-  if (summaryStats) {
-    const adjustedRemainingReads = summaryStats.adjusted_remaining_reads
-      ? numberWithCommas(summaryStats.adjusted_remaining_reads)
-      : BLANK_TEXT;
-
-    const adjustedPercent = summaryStats.percent_remaining
-      ? ` (${summaryStats.percent_remaining.toFixed(2)}%)`
-      : "";
-
-    const unmappedReads = summaryStats.unmapped_reads
-      ? numberWithCommas(summaryStats.unmapped_reads)
-      : BLANK_TEXT;
-
-    const qcPercent = summaryStats.qc_percent
-      ? `${summaryStats.qc_percent.toFixed(2)}%`
-      : BLANK_TEXT;
-
-    const compressionRatio = summaryStats.compression_ratio
-      ? summaryStats.compression_ratio.toFixed(2)
-      : BLANK_TEXT;
-
-    pipelineInfo.nonhostReads = {
-      text: `${adjustedRemainingReads}${adjustedPercent}`,
-    };
-    pipelineInfo.unmappedReads = { text: unmappedReads };
-    pipelineInfo.qcPercent = { text: qcPercent };
-    pipelineInfo.compressionRatio = { text: compressionRatio };
-    pipelineInfo.lastProcessedAt = {
-      text: moment(summaryStats.last_processed_at).format("YYYY-MM-DD"),
-    };
-
-    const meanInsertSize = numberWithPlusOrMinus(
-      summaryStats.insert_size_mean,
-      summaryStats.insert_size_standard_deviation
-    );
-
-    if (meanInsertSize) {
-      pipelineInfo.meanInsertSize = { text: meanInsertSize };
-    }
-  }
-
-  if (workflow) {
     pipelineInfo.workflow = {
-      text: get("label", find({ value: workflow }, Object.values(WORKFLOWS))),
+      text: WORKFLOWS.SHORT_READ_MNGS.label,
     };
 
-    if (workflowRunInfo) {
-      if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
-        const cgWorkflowRunInfo = processCGWorkflowRunInfo(workflowRunInfo);
-        pipelineInfo = {
-          ...pipelineInfo,
-          ...mapValues(v => ({ text: v }), cgWorkflowRunInfo),
-        };
+    if (summaryStats) {
+      const adjustedRemainingReads = summaryStats.adjusted_remaining_reads
+        ? numberWithCommas(summaryStats.adjusted_remaining_reads)
+        : BLANK_TEXT;
+
+      const adjustedPercent = summaryStats.percent_remaining
+        ? ` (${summaryStats.percent_remaining.toFixed(2)}%)`
+        : "";
+
+      const unmappedReads = summaryStats.unmapped_reads
+        ? numberWithCommas(summaryStats.unmapped_reads)
+        : BLANK_TEXT;
+
+      const qcPercent = summaryStats.qc_percent
+        ? `${summaryStats.qc_percent.toFixed(2)}%`
+        : BLANK_TEXT;
+
+      const compressionRatio = summaryStats.compression_ratio
+        ? summaryStats.compression_ratio.toFixed(2)
+        : BLANK_TEXT;
+
+      pipelineInfo.nonhostReads = {
+        text: `${adjustedRemainingReads}${adjustedPercent}`,
+      };
+      pipelineInfo.unmappedReads = { text: unmappedReads };
+      pipelineInfo.qcPercent = { text: qcPercent };
+      pipelineInfo.compressionRatio = { text: compressionRatio };
+      pipelineInfo.lastProcessedAt = {
+        text: moment(summaryStats.last_processed_at).format("YYYY-MM-DD"),
+      };
+
+      const meanInsertSize = numberWithPlusOrMinus(
+        summaryStats.insert_size_mean,
+        summaryStats.insert_size_standard_deviation
+      );
+
+      if (meanInsertSize) {
+        pipelineInfo.meanInsertSize = { text: meanInsertSize };
       }
     }
-  }
-
-  if (wetlabProtocol) {
-    pipelineInfo.wetlabProtocol = {
-      // Get the friendly name
-      text: get("text", find({ value: wetlabProtocol }, CG_WETLAB_OPTIONS)),
-    };
   }
 
   return pipelineInfo;
 };
 
-const processCGWorkflowRunInfo = qualityMetrics => {
-  const {
-    ercc_mapped_reads: erccMappedReads,
-    executed_at: lastProcessedAt,
-    mapped_reads: mappedReads,
-    total_reads: totalReads,
-    wdl_version: pipelineVersion,
-  } = qualityMetrics;
+export const processCGWorkflowRunInfo = workflowRun => {
+  const qualityMetrics = get(
+    "parsed_cached_results.quality_metrics",
+    workflowRun
+  );
+  const erccMappedReads = get("ercc_mapped_reads", qualityMetrics);
+  const mappedReads = get("mapped_reads", qualityMetrics);
+  const totalReads = get("total_reads", qualityMetrics);
 
-  return {
+  const cgWorkflowRunInfo = {
     erccMappedReads: isUndefined(erccMappedReads)
       ? ""
       : numberWithCommas(erccMappedReads),
-    lastProcessedAt: moment(lastProcessedAt).format("YYYY-MM-DD"),
+    lastProcessedAt: moment(get("executed_at", workflowRun)).format(
+      "YYYY-MM-DD"
+    ),
     hostSubtracted: "Human",
     mappedReads: isUndefined(mappedReads) ? "" : numberWithCommas(mappedReads),
     totalReads: isUndefined(totalReads) ? "" : numberWithCommas(totalReads),
-    pipelineVersion,
+    pipelineVersion: get("wdl_version", workflowRun),
+    wetlabProtocol: get(
+      "text",
+      find(
+        { value: get("inputs.wetlab_protocol", workflowRun) },
+        CG_WETLAB_OPTIONS
+      )
+    ),
+    workflow: get("label", find({ value: workflowRun.workflow }, WORKFLOWS)),
   };
+
+  return mapValues(v => ({ text: v }), cgWorkflowRunInfo);
 };
 
 // Format the upload date.
