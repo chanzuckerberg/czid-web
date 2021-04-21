@@ -44,7 +44,6 @@ const ConsensusGenomeView = ({
   workflowRun,
   workflowRunResults,
 }) => {
-  const coverageVizRef = useRef();
   const coverageVizContainerRef = useRef();
   const [histogramTooltipData, setHistogramTooltipData] = useState(null);
   const [histogramTooltipLocation, setHistogramTooltipLocation] = useState(
@@ -184,53 +183,48 @@ const ConsensusGenomeView = ({
   };
 
   const renderHistogram = () => {
-    const coverageVizData = workflowRunResults.coverage_viz.coverage.map(
-      valueArr => ({
-        x0: valueArr[0] * workflowRunResults.coverage_viz.coverage_bin_size,
-        length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
-      })
-    );
-    const subtext = `${workflowRunResults.taxon_info.accession_id} - ${workflowRunResults.taxon_info.accession_name}`;
-
-    if (coverageVizContainerRef !== null) {
-      coverageVizRef.current = new Histogram(
-        coverageVizContainerRef.current,
-        [coverageVizData],
-        {
-          barOpacity: 1,
-          colors: [CG_HISTOGRAM_FILL_COLOR],
-          domain: [0, workflowRunResults.coverage_viz.total_length],
-          hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
-          labelsBold: true,
-          labelsLarge: true,
-          labelX: "Reference Genome",
-          labelY: "Coverage (SymLog)",
-          labelXSubtext: subtext,
-          labelYHorizontalOffset: 30,
-          labelYVerticalOffset: 54,
-          labelYLarge: true,
-          margins: {
-            left: 100,
-            right: 50,
-            top: 22,
-            bottom: 75,
-          },
-          numBins: Math.round(
-            workflowRunResults.coverage_viz.total_length /
-              workflowRunResults.coverage_viz.coverage_bin_size
-          ),
-          numTicksY: 2,
-          showStatistics: false,
-          skipBins: true,
-          yScaleType: HISTOGRAM_SCALE.SYM_LOG,
-          yTickFormat: numberWithCommas,
-          skipNiceDomains: true,
-          onHistogramBarHover: handleHistogramBarHover,
-          onHistogramBarEnter: handleHistogramBarEnter,
-          onHistogramBarExit: handleHistogramBarExit,
-        }
+    if (coverageVizContainerRef.current !== null) {
+      const coverageVizData = workflowRunResults.coverage_viz.coverage.map(
+        valueArr => ({
+          x0: valueArr[0] * workflowRunResults.coverage_viz.coverage_bin_size,
+          length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
+        })
       );
-      coverageVizRef.current.update();
+      const subtext = `${workflowRunResults.taxon_info.accession_id} - ${workflowRunResults.taxon_info.accession_name}`;
+
+      new Histogram(coverageVizContainerRef.current, [coverageVizData], {
+        barOpacity: 1,
+        colors: [CG_HISTOGRAM_FILL_COLOR],
+        domain: [0, workflowRunResults.coverage_viz.total_length],
+        hoverColors: [CG_HISTOGRAM_HOVER_FILL_COLOR],
+        labelsBold: true,
+        labelsLarge: true,
+        labelX: "Reference Genome",
+        labelY: "Coverage (SymLog)",
+        labelXSubtext: subtext,
+        labelYHorizontalOffset: 30,
+        labelYVerticalOffset: 54,
+        labelYLarge: true,
+        margins: {
+          left: 100,
+          right: 50,
+          top: 22,
+          bottom: 75,
+        },
+        numBins: Math.round(
+          workflowRunResults.coverage_viz.total_length /
+            workflowRunResults.coverage_viz.coverage_bin_size
+        ),
+        numTicksY: 2,
+        showStatistics: false,
+        skipBins: true,
+        yScaleType: HISTOGRAM_SCALE.SYM_LOG,
+        yTickFormat: numberWithCommas,
+        skipNiceDomains: true,
+        onHistogramBarHover: handleHistogramBarHover,
+        onHistogramBarEnter: handleHistogramBarEnter,
+        onHistogramBarExit: handleHistogramBarExit,
+      }).update();
     }
   };
 
