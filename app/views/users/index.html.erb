@@ -8,6 +8,7 @@
    <p id="notice"><%= notice %></p>
 
     <h1>Users</h1>
+    <div>- Click on a name to edit details.</div>
 
     <table>
       <thead>
@@ -31,7 +32,7 @@
           <tr>
             <td><%= user.id %></td>
             <td><%= user.email %></td>
-            <td><%= link_to user.name, user if user.name %></td>
+            <td><u><%= link_to user.name, user if user.name %></u></td>
             <td><%= user.institution %></td>
             <td><%= user.role == 1 ? "ADMIN" : "" %></td>
             <td>
