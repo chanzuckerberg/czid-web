@@ -620,11 +620,11 @@ RSpec.describe SamplesHelper, type: :helper do
       @pipeline_run1 = create(:pipeline_run, sample_id: @sample1.id, finalized: 1, job_status: PipelineRun::STATUS_CHECKED)
 
       @sample2 = create(:sample, project: @project)
-      create(:workflow_run, sample: @sample2, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+      @workflow_run1 = create(:workflow_run, sample: @sample2, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
 
       @sample3 = create(:sample, project: @project)
       create(:pipeline_run, sample_id: @sample3.id, finalized: 1, job_status: PipelineRun::STATUS_CHECKED)
-      @workflow_run = create(:workflow_run, sample: @sample3, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+      @workflow_run2 = create(:workflow_run, sample: @sample3, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
     end
 
     it "returns the correct status for a sample that only has a consensus-genome workflow run" do
@@ -639,7 +639,7 @@ RSpec.describe SamplesHelper, type: :helper do
       expect(results[WorkflowRun::WORKFLOW[:consensus_genome]].keys).to contain_exactly(:result_status_description, :created_at)
       expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({
                                                                         result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]],
-                                                                        created_at: @workflow_run.created_at,
+                                                                        created_at: @workflow_run1.created_at,
                                                                       })
     end
 
@@ -686,7 +686,7 @@ RSpec.describe SamplesHelper, type: :helper do
       expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]][:result_status_description]).to eq("COMPLETE")
       expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({
                                                                         result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]],
-                                                                        created_at: @workflow_run.created_at,
+                                                                        created_at: @workflow_run2.created_at,
                                                                       })
     end
 
