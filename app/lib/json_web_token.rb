@@ -40,7 +40,7 @@ class JsonWebToken
     # until it's tested in staging a bit, it currently just invokes the lambda
     # and calls the old behavior. We'll use lambda metrics to see how it is working.
     jwks_raw = if AppConfigHelper.get_app_config(AppConfig::ENABLE_SSRFS_UP) == "1"
-                 SSRFsUp.get(JWT_JWKS_KEYS_URL)
+                 SSRFsUp.get(JWT_JWKS_KEYS_URL).body
                else
                  Net::HTTP.get URI(JWT_JWKS_KEYS_URL)
                end
