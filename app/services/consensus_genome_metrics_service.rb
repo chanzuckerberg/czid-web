@@ -1,6 +1,20 @@
 class ConsensusGenomeMetricsService
   include Callable
 
+  ALL_METRICS = {
+    reference_genome_length: "Reference Length",
+    percent_genome_called: "% Genome Called",
+    percent_identity: "%id",
+    gc_percent: "GC Content",
+    ercc_mapped_reads: "ERCC Reads",
+    total_reads: "Total Reads",
+    mapped_reads: "Mapped Reads",
+    ref_snps: "SNPs",
+    n_actg: "Informative Nucleotides",
+    n_missing: "Missing Bases",
+    n_ambiguous: "Ambiguous Bases",
+  }.freeze
+
   def initialize(workflow_run)
     @workflow_run = workflow_run
   end
@@ -24,8 +38,8 @@ class ConsensusGenomeMetricsService
     quast_data = CSVSafe.parse(quast_data, col_sep: "\t").to_h
     metrics = JSON.parse(stats_data).symbolize_keys
 
-    allowed_keys = [:ercc_mapped_reads, :total_reads, :mapped_reads, :ref_snps, :n_actg, :n_missing, :n_ambiguous]
-    metrics = metrics.slice(*allowed_keys)
+    stats_metrics = [:ercc_mapped_reads, :total_reads, :mapped_reads, :ref_snps, :n_actg, :n_missing, :n_ambiguous]
+    metrics = metrics.slice(*stats_metrics)
 
     metrics[:gc_percent] = quast_data["GC (%)"].to_f.round(1)
     metrics[:percent_identity] = ((metrics[:n_actg] - metrics[:ref_snps]) / metrics[:n_actg].to_f * 100).round(1)

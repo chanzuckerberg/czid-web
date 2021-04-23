@@ -215,6 +215,61 @@ module BulkDownloadsHelper
 
   # This method generates the csv for the metadata bulk download.
   def self.generate_metadata_csv(samples)
+    metadata_headers, metadata_keys, metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: samples)
+
+    CSVSafe.generate(headers: true) do |csv|
+      csv << ["sample_name"] + metadata_headers
+      samples.each do |sample|
+        metadata = metadata_by_sample_id[sample.id] || {}
+        csv << [sample.name] + metadata.values_at(*metadata_keys)
+      end
+    end
+  end
+
+  def self.generate_cg_overview_csv(samples:, include_metadata: false)
+    csv_headers = ["Sample Name", "Reference Accession", "Reference Accession ID", *ConsensusGenomeMetricsService::ALL_METRICS.values]
+
+    if include_metadata
+      metadata_headers, metadata_keys, metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: samples)
+      cg_metadata_headers = ["Wetlab Protocol", "Executed At"]
+      csv_headers.concat(cg_metadata_headers, metadata_headers.map { |h| h.humanize.titleize })
+    end
+
+    CSVSafe.generate(headers: true) do |csv|
+      csv << csv_headers
+
+      samples.each do |sample|
+        workflow_runs = sample.workflow_runs.where(workflow: WorkflowRun::WORKFLOW[:consensus_genome])
+        workflow_runs.each do |wr|
+          cg_metric_csv_values = BulkDownloadsHelper.prepare_workflow_run_metrics_csv_info(workflow_run: wr)
+          csv_values = [sample.name, wr.inputs&.[]("accession_name"), wr.inputs&.[]("accession_id")] + cg_metric_csv_values
+
+          if include_metadata
+            metadata = metadata_by_sample_id[sample.id] || {}
+            sample_metadata_csv_values = metadata.values_at(*metadata_keys)
+            cg_metadata_csv_values = [wr.inputs&.[]("wetlab_protocol") || '', wr.executed_at]
+            csv_values.concat(cg_metadata_csv_values, sample_metadata_csv_values)
+          end
+
+          csv << csv_values
+        end
+      end
+    end
+  end
+
+  def self.prepare_workflow_run_metrics_csv_info(workflow_run:)
+    parsed_cached_results = workflow_run.parsed_cached_results
+    quality_metrics = parsed_cached_results&.[]("quality_metrics") if parsed_cached_results.present?
+
+    if quality_metrics.present?
+      return quality_metrics.values_at(*ConsensusGenomeMetricsService::ALL_METRICS.keys.map(&:to_s))
+    end
+
+    # Most likely will not reach this line since the frontend excludes samples that failed/have issues from bulk downloads
+    return (0...ConsensusGenomeMetricsService::ALL_METRICS.keys.length).map { |_| '' }
+  end
+
+  def self.generate_sample_metadata_csv_info(samples:)
     metadata_fields = MetadataHelper.get_unique_metadata_fields_for_samples(samples)
     # Order the metadata fields so that required fields are first.
     metadata_fields = MetadataHelper.order_metadata_fields_for_csv(metadata_fields)
@@ -224,12 +279,6 @@ module BulkDownloadsHelper
     sample_ids = samples.pluck(:id)
     metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids, use_csv_compatible_values: true)
 
-    CSVSafe.generate(headers: true) do |csv|
-      csv << ["sample_name"] + metadata_headers
-      samples.each do |sample|
-        metadata = metadata_by_sample_id[sample.id] || {}
-        csv << [sample.name] + metadata.values_at(*metadata_keys)
-      end
-    end
+    return [metadata_headers, metadata_keys, metadata_by_sample_id]
   end
 end

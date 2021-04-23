@@ -709,6 +709,24 @@ describe BulkDownload, type: :model do
       expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
     end
 
+    it "correctly generates download file for download type consensus_genome_overview" do
+      bulk_download = create_bulk_download(BulkDownloadTypesHelper::CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE, "include_metadata": {
+                                             "value": false,
+                                             "displayName": "No",
+                                           })
+
+      expect(BulkDownloadsHelper).to receive(:generate_cg_overview_csv).with(samples: anything,
+                                                                             include_metadata: false).exactly(1).times.and_return("mock_consensus_genome_overviews_csv")
+
+      add_s3_tar_writer_expectations(
+        "consensus_genome_overviews.csv" => "mock_consensus_genome_overviews_csv"
+      )
+
+      bulk_download.generate_download_file
+
+      expect(bulk_download.status).to eq(BulkDownload::STATUS_SUCCESS)
+    end
+
     it "correctly generates download file for download type contig_summary_report" do
       bulk_download = create_bulk_download(BulkDownloadTypesHelper::CONTIG_SUMMARY_REPORT_BULK_DOWNLOAD_TYPE, {})
 

@@ -86,7 +86,7 @@ class BulkDownloadModal extends React.Component {
     this.fetchBackgroundAvailability();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     const prevSamples = prevProps.selectedSampleIds;
     if (prevSamples !== this.props.selectedSampleIds) {
       this.fetchBackgroundAvailability();

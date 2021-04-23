@@ -594,6 +594,15 @@ class BulkDownload < ApplicationRecord
         sample_overviews_csv = generate_sample_list_csv(samples, selected_pipeline_runs_by_sample_id: pipeline_runs_by_sample_id, include_all_metadata: get_param_value("include_metadata"))
 
         s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
+      elsif download_type == CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE
+        Rails.logger.info("Generating consensus genome overviews for #{workflow_runs.length} consensus genomes...")
+        samples = Sample.where(id: workflow_runs.pluck(:sample_id))
+        consensus_genome_overviews_csv = BulkDownloadsHelper.generate_cg_overview_csv(
+          samples: samples,
+          include_metadata: get_param_value("include_metadata")
+        )
+
+        s3_tar_writer.add_file_with_data("consensus_genome_overviews.csv", consensus_genome_overviews_csv)
       elsif download_type == COMBINED_SAMPLE_TAXON_RESULTS_BULK_DOWNLOAD_TYPE
         metric = get_param_value("metric")
         Rails.logger.info("Generating combined sample taxon results for #{metric} for #{pipeline_runs.length} samples...")

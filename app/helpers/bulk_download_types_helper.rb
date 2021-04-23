@@ -19,6 +19,7 @@ module BulkDownloadTypesHelper
 
   # Specific to consensus genome workflows
   CONSENSUS_GENOME_DOWNLOAD_TYPE = "consensus_genome".freeze
+  CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE = "consensus_genome_overview".freeze
   SEPARATE_FILES_DOWNLOAD = "Separate Files".freeze
   SINGLE_FILE_CONCATENATED_DOWNLOAD = "Single File (Concatenated)".freeze
 
@@ -206,6 +207,26 @@ module BulkDownloadTypesHelper
       ],
       execution_type: VARIABLE_EXECUTION_TYPE,
       file_type_display: "consensus.fa",
+      workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
+    },
+    {
+      type: CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE,
+      display_name: "Consensus Genome Overview",
+      description: "Consensus Genome QC metrics (e.g. % genome coverage, mapped read #, SNP #) and other summary statistics",
+      category: "reports",
+      execution_type: RESQUE_EXECUTION_TYPE,
+      # This will be displayed in the bulk-download creation modal.
+      file_type_display: ".csv",
+      fields: [
+        {
+          display_name: "Include Metadata",
+          type: "include_metadata",
+          default_value: {
+            value: false,
+            display_name: "No",
+          },
+        },
+      ],
       workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
     },
   ].freeze
