@@ -15,10 +15,21 @@ class Table extends React.Component {
   }
 
   handleSort = ({ sortBy, sortDirection }) => {
-    this.setState({
-      sortBy,
-      sortDirection,
-    });
+    const { onColumnSort } = this.props;
+
+    this.setState(
+      {
+        sortBy,
+        sortDirection,
+      },
+      () => {
+        onColumnSort &&
+          onColumnSort({
+            sortBy,
+            sortDirection,
+          });
+      }
+    );
   };
 
   handleGetRow = ({ index }) => {
@@ -102,6 +113,8 @@ Table.propTypes = {
     })
   ).isRequired,
   data: PropTypes.array,
+  // This is supplemental to sortFunction since sortFunction is in render() and may be called without a user click.
+  onColumnSort: PropTypes.func,
   onSelectRow: PropTypes.func,
   onSelectAllRows: PropTypes.func,
   selectableKey: PropTypes.string,

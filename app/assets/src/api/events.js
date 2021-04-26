@@ -118,6 +118,10 @@ function EventDictionary() {
   /** The user clicked the help button in a heatmap. */
   this.SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED =
     "SAMPLES_HEATMAP_HEADER_HELP_BUTTON_CLICKED";
+
+  /** The user clicked the sortable column headers on the mngs report page. */
+  this.REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED =
+    "REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED";
 }
 
 const eventNames = new EventDictionary();

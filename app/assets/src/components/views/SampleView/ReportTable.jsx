@@ -708,10 +708,6 @@ class ReportTable extends React.Component {
     // Uses lodash's orderBy function.
     // It uses a triple sorting key that enables nested sorting of genus and species, while guaranteeing that
     // genus is always on top of its children species
-    logAnalyticsEvent("PipelineSampleReport_column-sort-arrow_clicked", {
-      path,
-      sortDirection,
-    });
     return orderBy(
       [
         // 1st value: value defined by path for the genus (guarantees all genus together)
@@ -747,6 +743,16 @@ class ReportTable extends React.Component {
   nestedNtNrSortFunction = ({ path, ...props }) => {
     const { dbType } = this.state;
     return this.nestedSortFunction({ path: [dbType].concat(path), ...props });
+  };
+
+  handleColumnSort = ({ sortBy, sortDirection }) => {
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED,
+      {
+        sortBy,
+        sortDirection,
+      }
+    );
   };
 
   toggleExpandGenus = ({ taxId }) => {
@@ -836,12 +842,13 @@ class ReportTable extends React.Component {
           columns={this.columns}
           data={this.getTableRows()}
           defaultRowHeight={rowHeight}
+          defaultSortBy={displayMergedNtNrValue ? "rpm" : "agg_score"}
+          defaultSortDirection={SortDirection.DESC}
           headerClassName={cs.header}
+          onColumnSort={this.handleColumnSort}
           rowClassName={cs.row}
           rowRenderer={this.rowRenderer}
           sortable={true}
-          defaultSortBy={displayMergedNtNrValue ? "rpm" : "agg_score"}
-          defaultSortDirection={SortDirection.DESC}
           sortedHeaderClassName={cs.sortedHeader}
         />
         {phyloTreeModalParams && (
@@ -880,10 +887,12 @@ ReportTable.propTypes = {
   // Needed only for hover actions
   // Consider adding a callback to render the hover actions
   alignVizAvailable: PropTypes.bool.isRequired,
+  consensusGenomeData: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.object)),
   consensusGenomeEnabled: PropTypes.bool.isRequired,
   fastaDownloadEnabled: PropTypes.bool.isRequired,
   onConsensusGenomeClick: PropTypes.func.isRequired,
   onCoverageVizClick: PropTypes.func.isRequired,
+  onPreviousConsensusGenomeClick: PropTypes.func.isRequired,
   phyloTreeAllowed: PropTypes.bool.isRequired,
   pipelineVersion: PropTypes.string,
   projectId: PropTypes.number,
