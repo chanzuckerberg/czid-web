@@ -129,8 +129,15 @@ class LocalSampleFileUpload extends React.Component {
             <div className={cs.title}>File Instructions</div>
             <List
               listItems={[
-                `Accepted file formats: fastq (.fq), fastq.gz (.fq.gz), fasta
-                (.fa), fasta.gz (.fa.gz).`,
+                <>
+                  Accepted file formats:
+                  <List
+                    listItems={[
+                      `Metagenomics: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).`,
+                      `SARS-CoV-2 Consensus Genome: fastq (.fq).`,
+                    ]}
+                  />
+                </>,
                 `Paired files must be labeled with "_R1" or
                 "_R2" at the end of the basename.`,
                 `File names must be no longer than 120 characters and can only
@@ -142,6 +149,7 @@ class LocalSampleFileUpload extends React.Component {
           </div>
         )}
         <FilePicker
+          accept=".fastq, .fq, .fasta, .fa, .gz"
           className={cx(cs.localFilePicker, !filePickerTitle && cs.short)}
           title={filePickerTitle}
           onChange={this.onDrop}
