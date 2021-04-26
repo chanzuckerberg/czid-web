@@ -20,7 +20,9 @@ class MetadataController < ApplicationController
 
   def metadata_template_csv
     # The project to pull metadata_fields and existing samples (if applicable) from.
-    project_id = params[:project_id]
+    project_id = if params[:project_id].present?
+                   current_power.updatable_projects.find(params[:project_id]).id
+                 end
     # The names of new samples that are being created.
     new_sample_names = params[:new_sample_names]
     # Manually specified host genomes to select metadata fields

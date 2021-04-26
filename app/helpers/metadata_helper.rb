@@ -114,6 +114,11 @@ module MetadataHelper
 
     # Assemble sample objects based on params.
     samples = if samples_are_new
+                unless new_sample_names.is_a?(Enumerable)
+                  # Should not happen but indicates a client error.
+                  raise "new_sample_names should be an array"
+                end
+
                 # Use new sample names if provided.
                 new_sample_names.map.with_index do |sample_name, i|
                   # By Default, always default to Human for new samples.
