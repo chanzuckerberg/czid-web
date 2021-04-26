@@ -1604,10 +1604,11 @@ class DiscoveryView extends React.Component {
               )}
             </div>
             {userDataCounts &&
-              userDataCounts.sampleCountByWorkflow[workflow] &&
-              !samples.length &&
-              tableHasLoaded &&
-              this.renderNoSearchResultsBanner("samples")}
+            userDataCounts.sampleCountByWorkflow[workflow] &&
+            !samples.length &&
+            tableHasLoaded
+              ? this.renderNoSearchResultsBanner("samples")
+              : null}
           </div>
         )}
         {currentTab === "visualizations" && (
