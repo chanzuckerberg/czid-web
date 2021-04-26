@@ -52,6 +52,8 @@ module AppConfigHelper
   end
 
   def set_workflow_version(workflow_name, workflow_version)
-    return set_app_config(format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: workflow_name), workflow_version)
+    key = format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: workflow_name)
+    Rails.logger.info("WorkflowUpgradeEvent: Setting #{key} to #{workflow_version}")
+    return set_app_config(key, workflow_version)
   end
 end
