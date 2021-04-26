@@ -152,7 +152,7 @@ class PhyloTree < ApplicationRecord
        (job_status == "SUCCEEDED" && !required_outputs.all? { |ro| exists_in_s3?(s3_outputs[ro]["s3_path"]) })
       self.status = STATUS_FAILED
       LogUtil.log_error(
-        "Phylo tree creation failed for #{name} (#{id}). See #{log_url}.",
+        "Phylo tree creation failed for #{name} (#{id}). See #{log_url} for further details.",
         phylo_tree_name: name,
         phylo_tree_id: id,
         log_url: log_url
