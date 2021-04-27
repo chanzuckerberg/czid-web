@@ -59,7 +59,7 @@ class Location < ApplicationRecord
     # and calls the old behavior. We'll use lambda metrics to see how it is working.
     if AppConfigHelper.get_app_config(AppConfig::ENABLE_SSRFS_UP) == "1"
       resp = SSRFsUp.get(query_url, { sensitive: ["key"] })
-      [resp.status_code != 200, JSON.parse(resp.body)]
+      [resp.status_code == 200 || resp.status_code == 404, JSON.parse(resp.body)]
     else
       uri = Addressable::URI.parse(query_url)
       request = Net::HTTP::Get.new(uri)
