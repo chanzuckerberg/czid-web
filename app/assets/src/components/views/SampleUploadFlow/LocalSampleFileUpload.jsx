@@ -67,7 +67,8 @@ class LocalSampleFileUpload extends React.Component {
 
   onRejected = rejectedFiles => {
     const emptyFiles = rejectedFiles.filter(f => f.size === 0);
-    const bigFiles = rejectedFiles.filter(f => f.size !== 0);
+    const bigFiles = rejectedFiles.filter(f => f.size >= 5e9);
+    const invalidFiles = rejectedFiles.filter(f => f.size > 0 && f.size < 5e9);
     const mapNames = _fp.compose(_fp.join(", "), _fp.map("name"));
     let msg = "Some of your files cannot be uploaded.\n";
     if (emptyFiles.length > 0) {
@@ -77,6 +78,10 @@ class LocalSampleFileUpload extends React.Component {
       msg += `- Too large: ${mapNames(
         bigFiles
       )}\nSize must be under 5GB for local uploads. For larger files, please try our CLI.`;
+    }
+    if (invalidFiles.length > 0) {
+      msg += `- Files with invalid formats: ${mapNames(invalidFiles)}
+      Accepted file formats include: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz)`;
     }
     window.alert(msg);
   };
