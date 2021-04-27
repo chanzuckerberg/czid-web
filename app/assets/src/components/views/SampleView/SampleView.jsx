@@ -1518,6 +1518,12 @@ class SampleView extends React.Component {
         message={message}
         status={status}
         type={type}
+        onClick={() =>
+          logAnalyticsEvent(
+            ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED,
+            { status }
+          )
+        }
       />
     );
   };

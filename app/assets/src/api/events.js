@@ -122,6 +122,12 @@ function EventDictionary() {
   /** The user clicked the sortable column headers on the mngs report page. */
   this.REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED =
     "REPORT_TABLE_COLUMN_SORT_ARROW_CLICKED";
+
+  /** The user clicked on the status message in the middle of the report page (e.g. failed sample message or pipeline viz link or help link).
+   * status: link category, e.g. "IN PROGRESS", "SAMPLE FAILED", etc.
+   */
+  this.SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED =
+    "SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED";
 }
 
 const eventNames = new EventDictionary();
