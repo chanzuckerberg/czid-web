@@ -50,8 +50,8 @@ const SampleDetailsMode = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (sampleId && currentRun) fetchMetadata();
-  }, [sampleId, currentRun]);
+    if (sampleId) fetchMetadata();
+  }, [sampleId]);
 
   const onTabChange = tab => {
     setCurrentTab(tab);
