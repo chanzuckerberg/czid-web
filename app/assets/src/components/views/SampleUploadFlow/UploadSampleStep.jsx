@@ -348,6 +348,7 @@ class UploadSampleStep extends React.Component {
   // *** Pipeline workflow related functions ***
 
   handleWorkflowToggle = workflow => {
+    this.props.onDirty();
     let { selectedWorkflows } = this.state;
     // TODO: Behavior will change to support multiple selectedWorkflows.
     if (!selectedWorkflows.has(workflow)) {
@@ -361,6 +362,7 @@ class UploadSampleStep extends React.Component {
   };
 
   handleTechnologyToggle = technology => {
+    this.props.onDirty();
     const { selectedWorkflows } = this.state;
 
     if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
@@ -376,11 +378,13 @@ class UploadSampleStep extends React.Component {
   };
 
   handleWetlabProtocolChange = selected => {
+    this.props.onDirty();
     this.setState({ selectedWetlabProtocol: selected });
     logAnalyticsEvent(`UploadSampleStep_${selected}-protocol_selected`);
   };
 
   handleMedakaModelChange = selected => {
+    this.props.onDirty();
     this.setState({ selectedMedakaModel: selected });
     logAnalyticsEvent(
       ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED,

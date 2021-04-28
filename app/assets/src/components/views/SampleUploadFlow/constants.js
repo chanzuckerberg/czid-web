@@ -32,9 +32,23 @@ export const CG_WETLAB_OPTIONS = [
   },
 ];
 
+export const CG_WETLAB_DISPLAY_NAMES = {
+  artic: "ARTIC v3",
+  artic_short_amplicons: "ARTIC v3 - Short Amplicons (275 bp)",
+  msspe: "MSSPE",
+  combined_msspe_artic: "Combined MSSPE & ARTIC v3",
+  snap: "SNAP",
+  ampliseq: "AmpliSeq",
+};
+
 export const CG_TECHNOLOGY_OPTIONS = {
   ILLUMINA: "Illumina",
   NANOPORE: "ONT",
+};
+
+export const CG_TECHNOLOGY_DISPLAY_NAMES = {
+  Illumina: "Illumina",
+  ONT: "Nanopore",
 };
 
 export const TEMP_DEFAULT_NANOPORE_WETLAB_OPTION = "artic";

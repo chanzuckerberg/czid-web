@@ -72,6 +72,10 @@ function EventDictionary() {
   this.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED =
     "UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED";
 
+  /** The user clicked the "Edit Analysis Type" link during the Review Step in the Sample Upload Flow. */
+  this.REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED =
+    "REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED";
+
   /** The user closed the modal listing previously generated Consensus Genomes for the taxon. */
   this.CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED =
     "CONSENSUS_GENOME_PREVIOUS_MODAL_CLOSED";

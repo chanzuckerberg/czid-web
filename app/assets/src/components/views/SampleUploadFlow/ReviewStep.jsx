@@ -21,8 +21,17 @@ import { formatFileSize } from "~/components/utils/format";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import Checkbox from "~ui/controls/Checkbox";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
+import {
+  ANALYTICS_EVENT_NAMES,
+  logAnalyticsEvent,
+  withAnalytics,
+} from "~/api/analytics";
+import { IconProjectPrivate, IconProjectPublic, IconSample } from "~ui/icons";
+import {
+  CG_WETLAB_DISPLAY_NAMES,
+  CG_TECHNOLOGY_OPTIONS,
+  CG_TECHNOLOGY_DISPLAY_NAMES,
+} from "./constants";
 
 import cs from "./sample_upload_flow.scss";
 import UploadProgressModal from "./UploadProgressModal";
@@ -209,6 +218,163 @@ class ReviewStep extends React.Component {
     );
   };
 
+  renderProjectInfo = () => {
+    const { showLessDescription } = this.state;
+    const { project, uploadType } = this.props;
+
+    const shouldTruncateDescription =
+      project.description && this.countNewLines(project.description) > 5;
+
+    return (
+      <div className={cs.projectContainer}>
+        <div className={cs.reviewHeader}>
+          <span className={cs.text}>Project Info</span>
+          <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
+            <div
+              className={cs.link}
+              onClick={() => {
+                this.onLinkClick("uploadSamples");
+                logAnalyticsEvent("ReviewStep_edit-project-link_clicked", {
+                  projectId: project.id,
+                  projectName: project.name,
+                  uploadType,
+                });
+              }}
+            >
+              Edit Project
+            </div>
+          </div>
+        </div>
+        <div className={cs.section}>
+          {project.public_access === 1 ? (
+            <IconProjectPublic className={cs.icon} />
+          ) : (
+            <IconProjectPrivate className={cs.icon} />
+          )}
+          <div className={cs.text}>
+            <div className={cs.header}>
+              <div className={cs.name}>{project.name}</div>
+              <div className={cs.publicAccess}>
+                {project.public_access ? "Public Project" : "Private Project"}
+              </div>
+              <ProjectInfoIconTooltip
+                isPublic={project.public_access === 1}
+                // Offset required to align the carrot of the tooltip accurately on top of the IconInfoSmall.
+                // This issue is caused by nested div containers being passed to the prop "content" in the BasicPopup component
+                offset={[-7, 0]}
+                position="top left"
+              />
+            </div>
+            {project.description && (
+              <div className={cs.descriptionContainer}>
+                {/* Use showmore/showless pattern if description has many (>4) newlines. */}
+                {/* TODO(julie): Consider making a separate component to do this in a
+                less hacky way. */}
+                <div
+                  className={cx(
+                    shouldTruncateDescription &&
+                      showLessDescription &&
+                      cs.truncated
+                  )}
+                >
+                  {project.description}
+                </div>
+                {shouldTruncateDescription && (
+                  <div
+                    className={cs.showHide}
+                    onClick={this.toggleDisplayDescription}
+                  >
+                    {showLessDescription ? "Show More" : "Show Less"}
+                  </div>
+                )}
+              </div>
+            )}
+            <div className={cs.existingSamples}>
+              {project.number_of_samples || 0} existing samples in project
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  renderAnalysisTypeInfo = () => {
+    const {
+      technology,
+      medakaModel,
+      project,
+      uploadType,
+      wetlabProtocol,
+      workflows,
+    } = this.props;
+
+    const workflowType = workflows.has(WORKFLOWS.CONSENSUS_GENOME.value)
+      ? "SARS-CoV-2 Consensus Genome"
+      : "Metagenomics";
+
+    return (
+      <div className={cs.sectionContainer}>
+        <div className={cs.reviewHeader}>
+          <span className={cs.text}>Analysis Type Info</span>
+          <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
+            <div
+              className={cs.link}
+              onClick={() => {
+                this.onLinkClick("uploadSamples");
+                logAnalyticsEvent(
+                  ANALYTICS_EVENT_NAMES.REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED,
+                  {
+                    projectId: project.id,
+                    projectName: project.name,
+                    uploadType,
+                  }
+                );
+              }}
+            >
+              Edit Analysis Type
+            </div>
+          </div>
+        </div>
+        <div className={cs.section}>
+          <IconSample className={cs.icon} />
+          <div className={cs.text}>
+            <div className={cs.header}>
+              <div className={cs.name}>{workflowType}</div>
+            </div>
+            <div className={cs.analysisTypeContent}>
+              <div className={cs.item}>
+                <div className={cs.subheader}>Sequencing Platform&#58;</div>
+                <div className={cs.description}>
+                  {/* Default to displaying "Illumina" for mNGS samples, which don't have
+                  technology set as an input parameter. */}
+                  {CG_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
+                </div>
+              </div>
+              {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) && (
+                <div className={cs.item}>
+                  <div className={cs.subheader}>Wetlab Protocol&#58;</div>
+                  <div className={cs.description}>
+                    {CG_WETLAB_DISPLAY_NAMES[wetlabProtocol]}
+                  </div>
+                </div>
+              )}
+              <div className={cs.item}>
+                {technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && (
+                  <>
+                    <div className={cs.subheader}>Medaka Model&#58;</div>
+                    <div className={cs.description}>{medakaModel}</div>
+                  </>
+                )}
+              </div>
+              {/* Include an empty item "column" for proper spacing. */}
+              <div className={cs.item} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   renderReviewTable = () => {
     const { projectMetadataFields } = this.state;
 
@@ -226,11 +392,61 @@ class ReviewStep extends React.Component {
     }
   };
 
+  renderSampleInfo = () => {
+    const { adminOptions } = this.state;
+
+    const { project, uploadType } = this.props;
+
+    const { admin } = this.context || {};
+    return (
+      <div className={cs.sectionContainer}>
+        <div className={cs.reviewHeader}>
+          <span className={cs.text}>Sample Info</span>
+          <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
+            <div
+              className={cs.link}
+              onClick={() => {
+                this.onLinkClick("uploadSamples");
+                logAnalyticsEvent("ReviewStep_edit-samples-link_clicked", {
+                  projectId: project.id,
+                  projectName: project.name,
+                  uploadType,
+                });
+              }}
+            >
+              Edit Samples
+            </div>
+            <div className={cs.divider}>|</div>
+            <div
+              className={cs.link}
+              onClick={() => {
+                this.onLinkClick("uploadMetadata");
+                logAnalyticsEvent("ReviewStep_edit-metadata-link_clicked", {
+                  projectId: project.id,
+                  projectName: project.name,
+                  uploadType,
+                });
+              }}
+            >
+              Edit Metadata
+            </div>
+          </div>
+        </div>
+        <div className={cs.tableScrollWrapper}>{this.renderReviewTable()}</div>
+        {admin && (
+          <AdminUploadOptions
+            adminOptions={adminOptions}
+            onAdminOptionsChanged={this.handleAdminOptionsChanged}
+          />
+        )}
+      </div>
+    );
+  };
+
   render() {
     const {
       adminOptions,
       consentChecked,
-      showLessDescription,
       showUploadModal,
       skipSampleProcessing,
       useStepFunctionPipeline,
@@ -250,130 +466,16 @@ class ReviewStep extends React.Component {
       workflows,
     } = this.props;
 
-    const shouldTruncateDescription =
-      project.description && this.countNewLines(project.description) > 5;
-
-    const { userSettings, admin } = this.context || {};
+    const { userSettings } = this.context || {};
 
     return (
       <div
         className={cx(cs.reviewStep, cs.uploadFlowStep, visible && cs.visible)}
       >
         <div className={cs.flexContent}>
-          <div className={cs.projectContainer}>
-            <div className={cs.reviewHeader}>
-              <span className={cs.text}>Project Info</span>
-              <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
-                <div
-                  className={cs.link}
-                  onClick={() => {
-                    this.onLinkClick("uploadSamples");
-                    logAnalyticsEvent("ReviewStep_edit-project-link_clicked", {
-                      projectId: project.id,
-                      projectName: project.name,
-                      uploadType: uploadType,
-                    });
-                  }}
-                >
-                  Edit Project
-                </div>
-              </div>
-            </div>
-            <div className={cs.project}>
-              {project.public_access === 1 ? (
-                <IconProjectPublic className={cs.projectIcon} />
-              ) : (
-                <IconProjectPrivate className={cs.projectIcon} />
-              )}
-              <div className={cs.text}>
-                <div className={cs.header}>
-                  <div className={cs.name}>{project.name}</div>
-                  <div className={cs.publicAccess}>
-                    {project.public_access
-                      ? "Public Project"
-                      : "Private Project"}
-                  </div>
-                  <ProjectInfoIconTooltip
-                    isPublic={project.public_access === 1}
-                    // Offset required to align the carrot of the tooltip accurately on top of the IconInfoSmall.
-                    // This issue is caused by nested div containers being passed to the prop "content" in the BasicPopup component
-                    offset={[-7, 0]}
-                    position="top left"
-                  />
-                </div>
-                {project.description && (
-                  <div className={cs.descriptionContainer}>
-                    {/* Use showmore/showless pattern if description has many (>4) newlines. */}
-                    {/* TODO(julie): Consider making a separate component to do this in a
-                    less hacky way. */}
-                    <div
-                      className={cx(
-                        shouldTruncateDescription &&
-                          showLessDescription &&
-                          cs.truncated
-                      )}
-                    >
-                      {project.description}
-                    </div>
-                    {shouldTruncateDescription && (
-                      <div
-                        className={cs.showHide}
-                        onClick={this.toggleDisplayDescription}
-                      >
-                        {showLessDescription ? "Show More" : "Show Less"}
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className={cs.existingSamples}>
-                  {project.number_of_samples || 0} existing samples in project
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={cs.sampleContainer}>
-            <div className={cs.reviewHeader}>
-              <span className={cs.text}>Sample Info</span>
-              <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
-                <div
-                  className={cs.link}
-                  onClick={() => {
-                    this.onLinkClick("uploadSamples");
-                    logAnalyticsEvent("ReviewStep_edit-samples-link_clicked", {
-                      projectId: project.id,
-                      projectName: project.name,
-                      uploadType: uploadType,
-                    });
-                  }}
-                >
-                  Edit Samples
-                </div>
-                <div className={cs.divider}>|</div>
-                <div
-                  className={cs.link}
-                  onClick={() => {
-                    this.onLinkClick("uploadMetadata");
-                    logAnalyticsEvent("ReviewStep_edit-metadata-link_clicked", {
-                      projectId: project.id,
-                      projectName: project.name,
-                      uploadType: uploadType,
-                    });
-                  }}
-                >
-                  Edit Metadata
-                </div>
-              </div>
-            </div>
-            <div className={cs.tableScrollWrapper}>
-              {this.renderReviewTable()}
-            </div>
-            {admin && (
-              <AdminUploadOptions
-                adminOptions={adminOptions}
-                onAdminOptionsChanged={this.handleAdminOptionsChanged}
-              />
-            )}
-          </div>
+          {this.renderProjectInfo()}
+          {this.renderAnalysisTypeInfo()}
+          {this.renderSampleInfo()}
         </div>
         <div className={cs.controls}>
           {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) || (

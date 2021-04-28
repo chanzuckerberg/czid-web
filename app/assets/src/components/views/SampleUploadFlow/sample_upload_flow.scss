@@ -273,7 +273,7 @@
   }
 
   .reviewHeader {
-    margin: 10px 0;
+    margin-bottom: $space-xl;
     display: flex;
 
     .text {
@@ -305,13 +305,19 @@
     }
   }
 
-  .sampleContainer {
+  .sectionContainer {
     margin-top: 50px;
   }
 
-  .project {
+  .icon {
+    height: $icon-xl;
+    width: $icon-xl;
+    margin-right: $space-l;
+  }
+
+  .section {
     background-color: $gray-off-white;
-    padding: 25px;
+    padding: $space-xl;
     display: flex;
 
     .name {
@@ -322,12 +328,6 @@
       @include font-body-s;
       color: $gray-darkest;
       margin-left: 10px;
-    }
-
-    .projectIcon {
-      height: 40px;
-      width: 40px;
-      margin-right: 15px;
     }
 
     .text {
@@ -366,7 +366,28 @@
       @include font-body-s;
       color: $gray-dark;
       white-space: pre-wrap;
-      margin: 10px 0;
+      margin: $space-m 0;
+    }
+  }
+
+  .analysisTypeContent {
+    display: flex;
+    margin-top: $space-l;
+
+    .item {
+      min-width: 180px;
+      margin-right: $space-xl;
+      color: $gray-dark;
+      flex: 1 0 0;
+
+      .subheader {
+        @include font-header-s;
+        margin-bottom: $space-xs;
+      }
+
+      .description {
+        @include font-body-s;
+      }
     }
   }
 

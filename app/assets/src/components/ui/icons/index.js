@@ -44,6 +44,7 @@ import IconProjectPrivate from "./IconProjectPrivate";
 import IconProjectPublic from "./IconProjectPublic";
 import IconPublicSmall from "./IconPublicSmall";
 import IconRefresh from "./IconRefresh";
+import IconSample from "./IconSample";
 import IconSamplePrivate from "./IconSamplePrivate";
 import IconSamplePublic from "./IconSamplePublic";
 import IconSave from "./IconSave";
@@ -109,6 +110,7 @@ export const ICONS_TAXONOMY = {
     IconProjectPublic,
     IconPublicSmall,
     IconRefresh,
+    IconSample,
     IconSamplePrivate,
     IconSamplePublic,
     IconSave,
