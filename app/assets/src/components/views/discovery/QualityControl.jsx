@@ -153,6 +153,10 @@ class QualityControl extends React.Component {
     });
 
     let data = this.extractData(projectSamples.samples);
+    const totalSampleCount =
+      data.validSamples.length +
+      data.runningSamples.length +
+      data.failedSamples.length;
 
     const samplesReadsStats = await getSamplesReadStats(
       data.validSamples.map(sample => sample.id)
@@ -173,7 +177,7 @@ class QualityControl extends React.Component {
       readsLostLegendColors: legendColors,
       readsLostCategories: categories,
       readsLostChartColors: chartColors,
-      totalSampleCount: project.total_sample_count,
+      totalSampleCount,
     });
   };
 
@@ -253,26 +257,40 @@ class QualityControl extends React.Component {
 
     samples.forEach(sample => {
       // PLQC is only for samples with an mNGS pipeline run
-      const runInfo =
-        get("upload_error", sample.details) ||
-        get(
-          ["run_info_by_workflow", WORKFLOWS.SHORT_READ_MNGS.value],
-          sample.details
-        );
+      // The `created_at` field is only present+filled for a workflow run type
+      // if the sample has a workflow run of that type, so we check if the sample
+      // has `created_at` filled for mNGS.
       if (
-        runInfo.result_status_description === "FAILED" ||
-        runInfo.result_status_description === "COMPLETE - ISSUE" ||
-        runInfo.result_status_description === "COMPLETE*"
+        get(
+          [
+            "run_info_by_workflow",
+            WORKFLOWS.SHORT_READ_MNGS.value,
+            "created_at",
+          ],
+          sample.details
+        )
       ) {
-        failedSamples.push(sample);
-      } else if (
-        runInfo.report_ready &&
-        sample.details.derived_sample_output.summary_stats
-      ) {
-        validSamples.push(sample);
-        samplesDict[sample.id] = sample;
-      } else {
-        runningSamples.push(sample);
+        const runInfo =
+          get("upload_error", sample.details) ||
+          get(
+            ["run_info_by_workflow", WORKFLOWS.SHORT_READ_MNGS.value],
+            sample.details
+          );
+        if (
+          runInfo.result_status_description === "FAILED" ||
+          runInfo.result_status_description === "COMPLETE - ISSUE" ||
+          runInfo.result_status_description === "COMPLETE*"
+        ) {
+          failedSamples.push(sample);
+        } else if (
+          runInfo.report_ready &&
+          sample.details.derived_sample_output.summary_stats
+        ) {
+          validSamples.push(sample);
+          samplesDict[sample.id] = sample;
+        } else {
+          runningSamples.push(sample);
+        }
       }
     });
 
