@@ -292,6 +292,11 @@ export const computeColumnsByWorkflow = ({
       cellDataGetter: ({ dataKey, rowData }) =>
         TableRenderers.formatNumberWithCommas(rowData[dataKey]),
     },
+    {
+      dataKey: "vadrPassFail",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
   ];
 
   for (const col of columnsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value]) {
@@ -323,7 +328,7 @@ export const DEFAULTS_BY_WORKFLOW = {
     "collectionLocationV2",
     "totalReadsCG",
     "percentGenomeCalled",
+    "vadrPassFail",
     "wetlabProtocol",
-    "technology",
   ],
 };

@@ -1,3 +1,5 @@
+import { VADR_ANCHOR_LINK } from "~/components/utils/documentationLinks";
+
 const TOOLTIP_BUFFER = 10;
 const TOOLTIP_MAX_WIDTH = 400;
 
@@ -109,5 +111,11 @@ export const FIELDS_METADATA = {
   referenceGenomeLength: {
     label: "Reference Genome Length",
     tooltip: "Length of reference genome in basepairs.",
+  },
+  vadrPassFail: {
+    label: "VADR",
+    tooltip:
+      "Viral Annotation Definer: a suite of tools used to determine if your consensus genome will pass the upload validation steps for NCBI and GISAID. Download errors and annotations on the results page.",
+    link: VADR_ANCHOR_LINK,
   },
 };

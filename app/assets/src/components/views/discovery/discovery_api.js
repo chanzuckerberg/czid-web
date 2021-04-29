@@ -128,6 +128,10 @@ const processRawSample = sample => {
       "quality_metrics",
       "reference_genome_length",
     ]),
+    vadrPassFail: getConsensusGenomeField([
+      "quality_metrics",
+      "vadr_pass_fail",
+    ]),
     technology: get(
       [WORKFLOWS.CONSENSUS_GENOME.value, "technology"],
       sample.details

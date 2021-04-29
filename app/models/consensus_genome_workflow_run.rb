@@ -1,9 +1,10 @@
 class ConsensusGenomeWorkflowRun < WorkflowRun
+  OUTPUT_CONSENSUS = "consensus_genome.make_consensus_out_consensus_fa".freeze
   OUTPUT_DEPTHS = "consensus_genome.compute_stats_out_sam_depths".freeze
   OUTPUT_QUAST = "consensus_genome.quast_out_quast_tsv".freeze
   OUTPUT_STATS = "consensus_genome.compute_stats_out_output_stats".freeze
+  OUTPUT_VADR_QUALITY = "consensus_genome.vadr_quality_out".freeze
   OUTPUT_ZIP = "consensus_genome.zip_outputs_out_output_zip".freeze
-  OUTPUT_CONSENSUS = "consensus_genome.make_consensus_out_consensus_fa".freeze
 
   SARS_COV_2_ACCESSION_ID = "MN908947.3".freeze
 
