@@ -14,7 +14,7 @@ A collaborative open project of [Chan Zuckerberg Initiative](https://www.chanzuc
 Check out our repositories:
 - [idseq-web](https://github.com/chanzuckerberg/idseq-web) - Frontend portal (here)
 - [idseq-workflows](https://github.com/chanzuckerberg/idseq-workflows) - Bioinformatics workflows
-- [idseq-cli](https://github.com/chanzuckerberg/idseq-cli) - Command line upload interface
+- [idseq-cli](https://github.com/chanzuckerberg/idseq-cli-v2) - Command line upload interface
 - [idseq-bench](https://github.com/chanzuckerberg/idseq-bench) - Pipeline benchmarking tools
 
 Check out our [wiki](https://github.com/chanzuckerberg/idseq-web/wiki) for getting started with development in this repository and in IDseq in general.
