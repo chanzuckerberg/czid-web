@@ -50,7 +50,7 @@ const UserForm = ({
       ) : (
         <span>{formattedError}</span>
       );
-      const form = this.props.selectedUser ? "update" : "create";
+      const form = selectedUser ? "update" : "create";
       logAnalyticsEvent(`CreateUser_${form}-errors_displayed`, {
         form,
         serverErrors,

@@ -200,7 +200,7 @@ class CreateUser extends React.Component {
       this.setState({
         submitting: false,
         showFailed: true,
-        serverErrors: err.response.data,
+        serverErrors: err.data,
       });
     }
   };
@@ -233,7 +233,7 @@ class CreateUser extends React.Component {
       this.setState({
         submitting: false,
         showFailed: true,
-        serverErrors: err.response.data,
+        serverErrors: err.data,
       });
     }
   }

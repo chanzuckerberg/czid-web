@@ -9,7 +9,7 @@ const createUser = ({
   archetypes,
   group,
 }) => {
-  postWithCSRF("/users.json", {
+  return postWithCSRF("/users.json", {
     user: {
       name,
       email,
@@ -31,7 +31,7 @@ const updateUser = ({
   archetypes,
   group,
 }) => {
-  putWithCSRF(`/users/${userId}.json`, {
+  return putWithCSRF(`/users/${userId}.json`, {
     user: {
       name,
       email,
