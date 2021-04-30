@@ -1,0 +1,12 @@
+{
+  "extends": ["plugin:jsx-a11y/recommended"],
+  "plugins": ["jsx-a11y", "only-warn"],
+  "rules": {
+    "camelcase": "off",
+    "no-prototype-builtins": "off",
+    "react/jsx-key": "off",
+    "react/no-unescaped-entities": "off",
+    "react/prop-types": "off",
+    "standard/computed-property-even-spacing": "off"
+  }
+}

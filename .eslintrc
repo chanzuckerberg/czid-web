@@ -13,7 +13,7 @@
     "standard",
     // disables rules that conflict with prettier
     // must come last
-    "prettier",
+    "prettier"
   ],
   "plugins": [
     "react"
