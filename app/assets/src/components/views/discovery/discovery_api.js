@@ -109,6 +109,10 @@ const processRawSample = sample => {
       "quality_metrics",
       "percent_identity",
     ]),
+    medakaModel: get(
+      [WORKFLOWS.CONSENSUS_GENOME.value, "medaka_model"],
+      sample.details
+    ),
     nActg: getConsensusGenomeField(["quality_metrics", "n_actg"]),
     percentGenomeCalled: getConsensusGenomeField([
       "quality_metrics",

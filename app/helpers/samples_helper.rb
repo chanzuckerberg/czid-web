@@ -436,6 +436,7 @@ module SamplesHelper
         cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
         technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_NAME[top_cg_workflow_run&.inputs&.[]("technology")]&.capitalize,
         wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
+        medaka_model: top_cg_workflow_run&.inputs&.[]("medaka_model"),
       }
 
       if is_snapshot

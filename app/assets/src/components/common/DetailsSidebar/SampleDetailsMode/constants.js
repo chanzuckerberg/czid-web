@@ -23,6 +23,10 @@ export const PIPELINE_INFO_FIELDS = [
     key: "workflow",
   },
   {
+    name: "Sequencing Platform",
+    key: "technology",
+  },
+  {
     name: "Pipeline Version",
     key: "pipelineVersion",
   },
@@ -70,8 +74,16 @@ export const WORKFLOW_INFO_FIELDS = [
     key: "workflow",
   },
   {
+    name: "Sequencing Platform",
+    key: "technology",
+  },
+  {
     name: "Wetlab Protocol",
     key: "wetlabProtocol",
+  },
+  {
+    name: "Medaka Model",
+    key: "medakaModel",
   },
   {
     name: "Pipeline Version",

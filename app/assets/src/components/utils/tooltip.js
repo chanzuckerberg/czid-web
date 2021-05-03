@@ -1,4 +1,7 @@
-import { VADR_ANCHOR_LINK } from "~/components/utils/documentationLinks";
+import {
+  UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
+  VADR_ANCHOR_LINK,
+} from "~/components/utils/documentationLinks";
 
 const TOOLTIP_BUFFER = 10;
 const TOOLTIP_MAX_WIDTH = 400;
@@ -92,8 +95,7 @@ export const FIELDS_METADATA = {
   },
   mappedReads: {
     label: "Mapped Reads",
-    tooltip:
-      "Number of reads aligning to the taxon in the NCBI NT/NR database.",
+    tooltip: "Number of reads aligning to the reference accession.",
   },
   percentGenomeCalled: {
     label: "% Genome Called",
@@ -117,5 +119,11 @@ export const FIELDS_METADATA = {
     tooltip:
       "Viral Annotation Definer: a suite of tools used to determine if your consensus genome will pass the upload validation steps for NCBI and GISAID. Download errors and annotations on the results page.",
     link: VADR_ANCHOR_LINK,
+  },
+  medakaModel: {
+    label: "Medaka Model",
+    tooltip:
+      "Medaka is a tool to create consensus sequences and variant calls from nanopore sequencing data.",
+    link: UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
   },
 };

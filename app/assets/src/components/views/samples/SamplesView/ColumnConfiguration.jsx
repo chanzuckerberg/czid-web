@@ -297,6 +297,11 @@ export const computeColumnsByWorkflow = ({
       flexGrow: 1,
       className: cs.basicCell,
     },
+    {
+      dataKey: "medakaModel",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
   ];
 
   for (const col of columnsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value]) {

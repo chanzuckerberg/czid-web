@@ -18,7 +18,7 @@ import {
   READ_DEDUP_KEYS,
   RESULTS_FOLDER_ROOT_KEY,
 } from "~/components/utils/resultsFolder";
-
+import { FIELDS_METADATA } from "~/components/utils/tooltip";
 import {
   PIPELINE_INFO_FIELDS,
   WORKFLOW_INFO_FIELDS,
@@ -105,6 +105,7 @@ class PipelineTab extends React.Component {
             {metadataLink}
           </div>
         ),
+      fieldMetadata: get(field.key, FIELDS_METADATA),
     };
   };
 

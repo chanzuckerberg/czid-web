@@ -2,7 +2,11 @@ import moment from "moment";
 import { find, get, isUndefined, mapValues } from "lodash/fp";
 
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { CG_WETLAB_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
+import {
+  CG_TECHNOLOGY_DISPLAY_NAMES,
+  CG_TECHNOLOGY_OPTIONS,
+  CG_WETLAB_OPTIONS,
+} from "~/components/views/SampleUploadFlow/constants";
 import { numberWithCommas, numberWithPlusOrMinus } from "~/helpers/strings";
 
 // Compute display values for Pipeline Info from server response.
@@ -44,6 +48,10 @@ export const processPipelineInfo = additionalInfo => {
 
     pipelineInfo.workflow = {
       text: WORKFLOWS.SHORT_READ_MNGS.label,
+    };
+
+    pipelineInfo.technology = {
+      text: CG_TECHNOLOGY_DISPLAY_NAMES[CG_TECHNOLOGY_OPTIONS.ILLUMINA],
     };
 
     if (summaryStats) {
@@ -109,8 +117,11 @@ export const processCGWorkflowRunInfo = workflowRun => {
     ),
     hostSubtracted: "Human",
     mappedReads: isUndefined(mappedReads) ? "" : numberWithCommas(mappedReads),
+    medakaModel: get("inputs.medaka_model", workflowRun),
     totalReads: isUndefined(totalReads) ? "" : numberWithCommas(totalReads),
     pipelineVersion: get("wdl_version", workflowRun),
+    technology:
+      CG_TECHNOLOGY_DISPLAY_NAMES[get("inputs.technology", workflowRun)],
     wetlabProtocol: get(
       "text",
       find(
