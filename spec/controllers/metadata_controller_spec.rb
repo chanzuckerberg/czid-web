@@ -85,5 +85,22 @@ RSpec.describe MetadataController, type: :controller do
         expect(csv.last).to include(host_genome_name)
       end
     end
+
+    describe "GET metadata_for_host_genome" do
+      it "returns metadata fields for a host genome" do
+        mf = create(:metadata_field)
+        hg = create(:host_genome, metadata_fields: [mf.name])
+        get :metadata_for_host_genome, params: { name: hg.name }
+        expect(response).to have_http_status :success
+
+        json = JSON.parse(response.body)
+        expect(json.first["name"]).to eq(mf.name)
+      end
+
+      it "returns not found if the host genome is not found" do
+        get :metadata_for_host_genome, params: { name: "missing" }
+        expect(response).to have_http_status :not_found
+      end
+    end
   end
 end

@@ -188,6 +188,7 @@ Rails.application.routes.draw do
     get :official_metadata_fields, on: :collection
     get :metadata_template_csv, on: :collection
     get :instructions, on: :collection
+    get :metadata_for_host_genome, on: :collection
     post :validate_csv_for_new_samples, on: :collection
   end
 
