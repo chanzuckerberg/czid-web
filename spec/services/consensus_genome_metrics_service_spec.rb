@@ -106,6 +106,14 @@ RSpec.describe ConsensusGenomeMetricsService, type: :service do
 
         subject.send(:generate)
       end
+
+      it "handles the error when the output is not available" do
+        expect(workflow_run_corona).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_STATS).and_return(stats_data)
+        expect(workflow_run_corona).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_QUAST).and_return(quast_data)
+        expect(workflow_run_corona).to receive(:output).with(ConsensusGenomeWorkflowRun::OUTPUT_VADR_QUALITY).and_raise(SfnExecution::OutputNotFoundError.new("fake_key", ["available_keys"]))
+
+        expect(subject.send(:generate)).to eq(consolidated_data)
+      end
     end
 
     it "handles the error when the SFN description is not found" do

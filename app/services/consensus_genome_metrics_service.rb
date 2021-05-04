@@ -41,7 +41,11 @@ class ConsensusGenomeMetricsService
     metrics = add_quast_metrics(metrics)
 
     if @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
-      metrics = add_vadr_metrics(metrics)
+      begin
+        metrics = add_vadr_metrics(metrics)
+      rescue SfnExecution::OutputNotFoundError
+        # Pass because CG runs pre-v2.0.0 will not have VADR outputs available.
+      end
     end
     return metrics
   rescue SfnExecution::SfnDescriptionNotFoundError => err
