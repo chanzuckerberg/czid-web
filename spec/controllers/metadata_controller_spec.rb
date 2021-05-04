@@ -64,6 +64,26 @@ RSpec.describe MetadataController, type: :controller do
         expect(headers).to include("Water Control")
         expect(headers).to include(mf.display_name)
       end
+
+      it "ignores case in host genome names" do
+        sample_name = "foo"
+        host_genome_name = "Titled"
+        mf = create(:metadata_field)
+        create(:host_genome, name: host_genome_name, metadata_fields: [mf.name])
+        get :metadata_template_csv, params: { new_sample_names: [sample_name], host_genomes: [host_genome_name.downcase] }
+        expect(response).to have_http_status :success
+
+        csv = CSV.new(response.body).read
+        expect(csv.length).to be(2)
+        headers = csv.first
+        expect(headers).to include("Sample Name")
+        expect(headers).to include("Host Organism")
+        expect(headers).to include("Collection Location")
+        expect(headers).to include("Water Control")
+        expect(headers).to include(mf.display_name)
+
+        expect(csv.last).to include(host_genome_name)
+      end
     end
   end
 end

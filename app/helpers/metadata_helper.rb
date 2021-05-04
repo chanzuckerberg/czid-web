@@ -110,7 +110,7 @@ module MetadataHelper
 
     field_names = ["Sample Name"] + (include_host_genome ? ["Host Organism"] : []) + fields.pluck(:display_name)
 
-    host_genomes_by_name = HostGenome.all.includes(:metadata_fields).reject { |x| x.metadata_fields.empty? }.index_by(&:name)
+    host_genomes_by_name = HostGenome.all.includes(:metadata_fields).reject { |x| x.metadata_fields.empty? }.index_by { |x| x.name.downcase }
 
     # Assemble sample objects based on params.
     samples = if samples_are_new
@@ -130,10 +130,10 @@ module MetadataHelper
                 end
               elsif project.nil?
                 # If the project is nil, construct a sample for each host genome.
-                host_genomes_by_name.map do |name, _|
+                host_genomes_by_name.map do |_, hg|
                   {
-                    name: "Example #{name} Sample",
-                    host_genome_name: name,
+                    name: "Example #{hg.name} Sample",
+                    host_genome_name: hg.name,
                   }
                 end
               else
@@ -150,19 +150,21 @@ module MetadataHelper
     CSVSafe.generate(headers: true) do |csv|
       csv << field_names
       samples.each do |sample|
+        hg = host_genomes_by_name[sample[:host_genome_name].downcase]
         values = fields.map do |field|
-          if host_genomes_by_name[sample[:host_genome_name]].metadata_fields.include?(field)
+          if hg && hg.metadata_fields.include?(field)
             if samples_are_new
               nil
             elsif project.nil?
-              generate_metadata_default_value(field, sample[:host_genome_name])
+              generate_metadata_default_value(field, hg.name)
             else
               sample[:metadata][field.name]&.csv_compatible_value
             end
           end
         end
 
-        csv << [sample[:name]] + (include_host_genome ? [sample[:host_genome_name]] : []) + values
+        host_genome_name = hg ? hg.name : sample[:host_genome_name]
+        csv << [sample[:name]] + (include_host_genome ? [host_genome_name] : []) + values
       end
     end
   end
