@@ -256,6 +256,7 @@ RSpec.describe SamplesHelper, type: :helper do
         it "saves successfully if technology is provided with consensus genome workflow runs" do
           additional_attributes = {
             technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore],
+            wetlab_protocol: ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic],
             workflows: [WorkflowRun::WORKFLOW[:consensus_genome]],
           }
           sample_attributes = [local_cg_sample_attributes.merge(additional_attributes)]
@@ -288,11 +289,13 @@ RSpec.describe SamplesHelper, type: :helper do
                                                            "taxon_id",
                                                            "taxon_name",
                                                            "technology",
+                                                           "wetlab_protocol",
                                                            "clearlabs",
                                                            "medaka_model",
                                                            "vadr_options",
                                                          ])
 
+          expect(created_workflow_run.inputs&.[]("wetlab_protocol")).to eq(ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL[:artic])
           expect(created_workflow_run.inputs&.[]("technology")).to eq(ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore])
           expect(created_workflow_run.inputs&.[]("medaka_model")).to eq(ConsensusGenomeWorkflowRun::DEFAULT_MEDAKA_MODEL)
           expect(created_workflow_run.inputs&.[]("vadr_options")).to eq(ConsensusGenomeWorkflowRun::DEFAULT_VADR_OPTIONS)

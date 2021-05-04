@@ -628,14 +628,13 @@ module SamplesHelper
             h[:taxon_id] = 2_697_049
             h[:taxon_name] = "Severe acute respiratory syndrome coronavirus 2"
             h[:technology] = technology
+            h[:wetlab_protocol] = wetlab_protocol
 
             if technology == ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT[:nanopore]
               # ClearLabs is an optional flag
               h[:clearlabs] = user.allowed_feature?("clearlabs")
               h[:medaka_model] = medaka_model
               h[:vadr_options] = vadr_options
-            else
-              h[:wetlab_protocol] = wetlab_protocol
             end
           end
 
