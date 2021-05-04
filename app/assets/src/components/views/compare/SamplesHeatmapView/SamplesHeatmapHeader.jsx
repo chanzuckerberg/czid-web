@@ -11,7 +11,7 @@ import {
 } from "~/components/utils/appcues";
 import { logError } from "~/components/utils/logUtil";
 import { ViewHeader } from "~/components/layout";
-import { triggerCSVDownload } from "~/components/utils/csv";
+import { triggerFileDownload } from "~/components/utils/clientDownload";
 import { logDownloadOption } from "~/components/views/report/utils/download";
 import { UserContext } from "~/components/common/UserContext";
 import { DOWNLOAD_OPTIONS } from "./constants";
@@ -43,9 +43,9 @@ const SamplesHeatmapHeader = ({
         onDownloadAllHeatmapMetricsCsv();
         break;
       case "current_heatmap_view_csv":
-        triggerCSVDownload({
-          csvDownloadUrl: onDownloadCurrentHeatmapViewCsv(),
-          fileName: "current_heatmap_view",
+        triggerFileDownload({
+          downloadUrl: onDownloadCurrentHeatmapViewCsv(),
+          fileName: "current_heatmap_view.csv",
         });
         break;
       default:

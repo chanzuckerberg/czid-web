@@ -30,7 +30,7 @@ RSpec.describe MetadataController, type: :controller do
       it "generates CSV with sample names from project" do
         project = create(:project, users: [@joe])
         sample = create(:sample, project: project, user: @joe)
-        get :metadata_template_csv, params: { project_id: project.id }
+        post :metadata_template_csv, params: { project_id: project.id }
         expect(response).to have_http_status :success
 
         csv = CSV.new(response.body).read
@@ -40,7 +40,7 @@ RSpec.describe MetadataController, type: :controller do
 
       it "generates CSV with sample names from params" do
         sample_name = "foo"
-        get :metadata_template_csv, params: { new_sample_names: [sample_name] }
+        post :metadata_template_csv, params: { new_sample_names: [sample_name] }
         expect(response).to have_http_status :success
 
         csv = CSV.new(response.body).read
@@ -52,7 +52,7 @@ RSpec.describe MetadataController, type: :controller do
         sample_name = "foo"
         mf = create(:metadata_field)
         hg = create(:host_genome, metadata_fields: [mf.name])
-        get :metadata_template_csv, params: { new_sample_names: [sample_name], host_genomes: [hg.name] }
+        post :metadata_template_csv, params: { new_sample_names: [sample_name], host_genomes: [hg.name] }
         expect(response).to have_http_status :success
 
         csv = CSV.new(response.body).read

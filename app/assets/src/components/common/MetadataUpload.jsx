@@ -2,6 +2,7 @@ import React from "react";
 import cx from "classnames";
 import _fp, { filter, keyBy, concat, find, sortBy } from "lodash/fp";
 
+import { generateClientDownloadFromEndpoint } from "~/components/utils/clientDownload";
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import MetadataCSVLocationsMenu, {
   geosearchCSVLocations,
@@ -12,7 +13,6 @@ import Tabs from "~/components/ui/controls/Tabs";
 import { getAllHostGenomes, getAllSampleTypes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { getURLParamString } from "~/helpers/url";
 import { WORKFLOWS } from "~/components/utils/workflows";
 
 import cs from "./metadata_upload.scss";
@@ -206,7 +206,7 @@ class MetadataUpload extends React.Component {
     });
   };
 
-  getCSVUrl = () => {
+  handleDownloadCSV = () => {
     const params = {
       ...(this.props.samplesAreNew
         ? { new_sample_names: map("name", this.props.samples) }
@@ -214,7 +214,12 @@ class MetadataUpload extends React.Component {
       project_id: this.props.project.id,
     };
 
-    return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
+    generateClientDownloadFromEndpoint({
+      endpoint: "/metadata/metadata_template_csv",
+      params,
+      fileName: "metadata_template.csv",
+      fileType: "text/csv",
+    });
   };
 
   getRequiredLocationMetadataType = () => {
@@ -274,6 +279,10 @@ class MetadataUpload extends React.Component {
                 onShowCSVInstructions,
                 "MetadataUpload_instruction-link_clicked"
               )}
+              onKeyDown={withAnalytics(
+                onShowCSVInstructions,
+                "MetadataUpload_instruction-link_clicked"
+              )}
             >
               View CSV Upload Instructions
             </span>
@@ -287,23 +296,31 @@ class MetadataUpload extends React.Component {
             visible={visible}
             onDirty={onDirty}
           />
-          <a
+          <div
             className={cs.link}
-            href={this.getCSVUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() =>
+            onClick={() => {
+              this.handleDownloadCSV();
               logAnalyticsEvent(
                 "MetadataUpload_download-csv-template_clicked",
                 {
                   projectId: project.id,
                   projectName: project.name,
                 }
-              )
-            }
+              );
+            }}
+            onKeyDown={() => {
+              this.handleDownloadCSV();
+              logAnalyticsEvent(
+                "MetadataUpload_download-csv-template_clicked",
+                {
+                  projectId: project.id,
+                  projectName: project.name,
+                }
+              );
+            }}
           >
             Download Metadata CSV Template
-          </a>
+          </div>
           {this.state.validatingCSV && (
             <div className={cs.validationMessage}>
               <IconLoading className={cs.loadingIcon} />

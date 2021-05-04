@@ -186,6 +186,7 @@ Rails.application.routes.draw do
   resource :metadata do
     get :dictionary, on: :collection
     get :official_metadata_fields, on: :collection
+    post :metadata_template_csv, on: :collection
     get :metadata_template_csv, on: :collection
     get :instructions, on: :collection
     get :metadata_for_host_genome, on: :collection

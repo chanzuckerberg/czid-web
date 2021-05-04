@@ -56,16 +56,3 @@ export const createCSVObjectURL = (headers, rows) => {
   const dataBlob = new Blob([dataString], { type: "text/csv" });
   return URL.createObjectURL(dataBlob);
 };
-
-export const triggerCSVDownload = ({ csvDownloadUrl, fileName }) => {
-  let link = document.createElement("a");
-  link.setAttribute("href", csvDownloadUrl);
-  link.setAttribute("download", fileName + ".csv");
-  link.setAttribute("visibility", "hidden");
-  link.setAttribute("rel", "noopener noreferrer");
-  link.setAttribute("target", "_blank");
-
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};

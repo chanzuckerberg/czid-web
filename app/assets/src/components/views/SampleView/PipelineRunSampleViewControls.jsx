@@ -6,7 +6,7 @@ import SvgSaver from "svgsaver";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import { logError } from "~/components/utils/logUtil";
-import { triggerCSVDownload } from "~/components/utils/csv";
+import { triggerFileDownload } from "~/components/utils/clientDownload";
 import PropTypes from "~/components/utils/propTypes";
 import {
   getDownloadDropdownOptions,
@@ -50,9 +50,9 @@ const PipelineRunSampleViewControls = ({
         downloadCSV();
         break;
       case "download_csv_with_filters":
-        triggerCSVDownload({
-          csvDownloadUrl: getDownloadReportTableWithAppliedFiltersLink(),
-          fileName: `${sample.name}_report_with_applied_filters`,
+        triggerFileDownload({
+          downloadUrl: getDownloadReportTableWithAppliedFiltersLink(),
+          fileName: `${sample.name}_report_with_applied_filters.csv`,
         });
         break;
       case "taxon_svg":
