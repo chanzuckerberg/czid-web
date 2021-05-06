@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { difference, isEmpty, union, pickBy } from "lodash/fp";
+import { difference, forEach, isEmpty, union, pickBy } from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -51,6 +51,7 @@ class SamplesView extends React.Component {
       // This tooltip is reset whenever the selectedSampleIds changes.
       bulkDownloadButtonTempTooltip: null,
       sarsCov2Count: 0,
+      referenceSelectId: null,
     };
 
     const { snapshotShareId } = this.props;
@@ -62,6 +63,8 @@ class SamplesView extends React.Component {
       basicIcon: !!snapshotShareId,
       allowedFeatures,
     });
+
+    this.referenceSelectId = null;
   }
 
   componentDidUpdate(prevProps) {
@@ -73,14 +76,30 @@ class SamplesView extends React.Component {
     }
   }
 
-  handleSelectRow = (value, checked) => {
-    const { selectedSampleIds, onSelectedSamplesUpdate } = this.props;
+  handleSelectRow = (value, checked, event) => {
+    const { samples, selectedSampleIds, onSelectedSamplesUpdate } = this.props;
+    const { referenceSelectId } = this;
+
     let newSelected = new Set(selectedSampleIds);
-    if (checked) {
-      newSelected.add(value);
+    if (event.shiftKey && referenceSelectId) {
+      const ids = samples.getIntermediateIds({
+        id1: referenceSelectId,
+        id2: value,
+      });
+      if (checked) {
+        forEach(v => newSelected.add(v), ids);
+      } else {
+        forEach(v => newSelected.delete(v), ids);
+      }
     } else {
-      newSelected.delete(value);
+      if (checked) {
+        newSelected.add(value);
+      } else {
+        newSelected.delete(value);
+      }
     }
+    this.referenceSelectId = value;
+
     onSelectedSamplesUpdate(newSelected);
     logAnalyticsEvent("SamplesView_row_selected", {
       rowIsChecked: checked,

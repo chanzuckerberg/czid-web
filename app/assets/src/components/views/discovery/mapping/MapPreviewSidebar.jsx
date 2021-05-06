@@ -1,5 +1,13 @@
 import cx from "classnames";
-import { difference, isEmpty, merge, pick, union, upperFirst } from "lodash/fp";
+import {
+  difference,
+  forEach,
+  isEmpty,
+  merge,
+  pick,
+  union,
+  upperFirst,
+} from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -189,6 +197,8 @@ export default class MapPreviewSidebar extends React.Component {
     // refs to components for reset
     this.samplesTable = null;
     this.projectsTable = null;
+
+    this.referenceSelectId = null;
   }
 
   componentDidUpdate = prevProps => {
@@ -200,14 +210,30 @@ export default class MapPreviewSidebar extends React.Component {
     }
   };
 
-  handleSelectRow = (value, checked) => {
-    const { selectedSampleIds, onSelectionUpdate } = this.props;
+  handleSelectRow = (value, checked, event) => {
+    const { samples, selectedSampleIds, onSelectionUpdate } = this.props;
+    const { referenceSelectId } = this;
+
     let newSelected = new Set(selectedSampleIds);
-    if (checked) {
-      newSelected.add(value);
+    if (event.shiftKey && referenceSelectId) {
+      const ids = samples.getIntermediateIds({
+        id1: referenceSelectId,
+        id2: value,
+      });
+      if (checked) {
+        forEach(v => newSelected.add(v), ids);
+      } else {
+        forEach(v => newSelected.delete(v), ids);
+      }
     } else {
-      newSelected.delete(value);
+      if (checked) {
+        newSelected.add(value);
+      } else {
+        newSelected.delete(value);
+      }
     }
+    this.referenceSelectId = value;
+
     onSelectionUpdate(newSelected);
     logAnalyticsEvent("MapPreviewSidebar_row_selected", {
       selectedSampleIds: newSelected.size,

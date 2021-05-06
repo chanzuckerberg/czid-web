@@ -1,4 +1,4 @@
-import { range } from "lodash/fp";
+import { findIndex, findLastIndex, range, slice } from "lodash/fp";
 import {
   getDiscoveryProjects,
   getDiscoverySamples,
@@ -86,6 +86,12 @@ class ObjectCollectionView {
 
   getViewLength = () => {
     return Object.keys(this._collection.entries).length;
+  };
+
+  getIntermediateIds = ({ id1, id2 }) => {
+    const start = findIndex(v => v === id1 || v === id2, this._orderedIds);
+    const end = findLastIndex(v => v === id1 || v === id2, this._orderedIds);
+    return slice(start, end + 1, this._orderedIds);
   };
 
   isLoading = () => this._loading;
