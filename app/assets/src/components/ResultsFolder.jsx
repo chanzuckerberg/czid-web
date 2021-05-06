@@ -7,6 +7,8 @@ import {
   RESULTS_FOLDER_STEP_KEYS,
 } from "~/components/utils/resultsFolder";
 
+import cs from "./results_folder.scss";
+
 class OutputFile extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -25,7 +27,7 @@ class OutputFile extends React.Component {
         className={`${this.file.url ? "" : "disabled-"}file-link`}
         onClick={this.conditionalOpenUrl.bind(this, this.file.url)}
       >
-        <td>
+        <td className={cs.tableData}>
           <i className="fa fa-file" />
           {this.file["displayName"]}
           <span className="size-tag"> -- {this.file["size"]}</span>
@@ -47,7 +49,7 @@ class ConfigFile extends React.Component {
         className="file-link"
         onClick={downloadStringToFile.bind(this, this.stageDagJson)}
       >
-        <td>
+        <td className={cs.tableData}>
           <i className="fa fa-file" />
           config.json
         </td>
@@ -59,7 +61,7 @@ class ConfigFile extends React.Component {
 const ResultsFolderStepDivider = () => {
   return (
     <tr key="last">
-      <td>
+      <td className={cs.tableData}>
         <Divider />
       </td>
     </tr>
@@ -87,7 +89,7 @@ class ResultsFolderStep extends React.Component {
     return (
       <tbody>
         <tr key="first">
-          <td>
+          <td className={cs.tableData}>
             Step <b>{stepName}</b>: {description}{" "}
             {readsAfter ? (
               <span>
@@ -182,7 +184,7 @@ class ResultsFolder extends React.Component {
                   <table key={k}>
                     <thead>
                       <tr>
-                        <th>
+                        <th className={cs.tableHeader}>
                           {stageName}: {stageDescription}
                         </th>
                       </tr>
@@ -199,7 +201,9 @@ class ResultsFolder extends React.Component {
             <table key="rawResults">
               <thead>
                 <tr>
-                  <th>Need an output that's not listed here?</th>
+                  <th className={cs.tableHeader}>
+                    Need an output that's not listed here?
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -207,7 +211,7 @@ class ResultsFolder extends React.Component {
                   className="file-link"
                   onClick={openUrl.bind(this, this.rawResultsUrl)}
                 >
-                  <td>Go to raw results folder</td>
+                  <td className={cs.tableData}>Go to raw results folder</td>
                 </tr>
               </tbody>
             </table>

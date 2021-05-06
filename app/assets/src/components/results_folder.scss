@@ -1,0 +1,12 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.tableHeader {
+  padding: $space-l $space-xs;
+  text-align: left;
+  border-bottom: $space-xxxxs solid $gray-light;
+}
+
+.tableData {
+  padding: $space-l $space-xs;
+}

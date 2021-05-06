@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { includes } from "lodash/fp";
 import { openUrl } from "~utils/links";
 import { withAnalytics } from "~/api/analytics";
-import UserForm from "~/components/views/UserForm";
+import UserForm from "~/components/views/users/UserForm";
 import { createUser, updateUser } from "~/api/user";
 
 const DPH = "DPH";
@@ -90,23 +90,11 @@ class CreateUser extends React.Component {
     this.setState({ showFailed: false });
   };
 
-  handleEmailChange = e => {
-    this.setState({
-      email: e.target.value,
-    });
-  };
+  handleEmailChange = email => this.setState({ email });
 
-  handleNameChange = e => {
-    this.setState({
-      name: e.target.value,
-    });
-  };
+  handleNameChange = name => this.setState({ name });
 
-  handleInstitutionChange = e => {
-    this.setState({
-      institution: e.target.value,
-    });
-  };
+  handleInstitutionChange = institution => this.setState({ institution });
 
   getArchetypes = () => {
     const {

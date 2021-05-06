@@ -43,4 +43,10 @@ const updateUser = ({
   });
 };
 
-export { createUser, updateUser };
+const requestPasswordReset = email => {
+  return postWithCSRF("/auth0/request_password_reset", {
+    user: { email },
+  });
+};
+
+export { createUser, updateUser, requestPasswordReset };

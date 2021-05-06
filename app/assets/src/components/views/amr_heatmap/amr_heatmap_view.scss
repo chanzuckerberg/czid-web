@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .AMRHeatmapView {
   .viewHeader {
@@ -19,6 +20,14 @@
 
     .filterRow {
       margin: 20px 0;
+      height: $space-xxl;
+
+      .filterControl {
+        float: left;
+        margin-left: auto;
+        padding: 0 $space-default;
+        width: 25%;
+      }
     }
   }
 

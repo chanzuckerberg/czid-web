@@ -209,6 +209,7 @@ class CollectionModal extends React.Component {
           <span className={cs.optional}>Optional</span>
         </div>
         <Textarea
+          className={cs.textArea}
           rows={numDescriptionRows}
           onChange={this.handleDescriptionChange}
         />

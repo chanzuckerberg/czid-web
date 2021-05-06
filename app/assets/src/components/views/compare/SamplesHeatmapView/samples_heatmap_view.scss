@@ -4,6 +4,7 @@
 
 .heatmap {
   margin-top: -$header-margin-bottom;
+
   .viewHeader {
     margin-top: 40px;
     margin-bottom: 40px;
@@ -23,6 +24,14 @@
     .filterRow {
       margin-top: $space-l;
       margin-bottom: $space-l;
+      height: $space-xxl;
+
+      .filterControl {
+        float: left;
+        margin-left: auto;
+        padding: 0 $space-default;
+        width: calc(100% / 6);
+      }
     }
 
     .filterTagsList {
@@ -39,7 +48,9 @@
     .statsRow {
       @include font-body-xs;
       color: $gray-dark;
+      height: $space-xxl;
       margin-left: $space-xxs;
+      padding: 0 $space-default;
 
       .infoIcon {
         margin-top: $space-xxxs;

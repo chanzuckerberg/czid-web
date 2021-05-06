@@ -22,12 +22,13 @@
 
   .descriptionTextArea {
     @include font-body-xs;
+    background-color: $white;
+    height: 100px;
     margin-top: 5px;
     padding: $space-l;
-    height: 100px;
     resize: vertical;
-    background-color: $white;
     text-indent: $space-xs;
+    width: 100%;
   }
 
   .charCounter {

@@ -5,8 +5,6 @@ import { Provider } from "react-redux";
 import * as Sentry from "@sentry/react";
 import store from "~/redux/store";
 import "url-search-params-polyfill";
-import "materialize-css";
-import "materialize-css/dist/css/materialize.css";
 import "font-awesome/scss/font-awesome.scss";
 import "semantic-ui-css/semantic.min.css";
 import "./loader.scss";

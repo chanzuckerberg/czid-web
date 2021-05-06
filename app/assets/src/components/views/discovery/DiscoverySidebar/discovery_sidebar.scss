@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .sidebar {
   font-size: 12px;
@@ -13,7 +14,7 @@
 }
 
 .metadataSection {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $space-xxxxs solid $gray-light;
 }
 
 .metadataContainer {

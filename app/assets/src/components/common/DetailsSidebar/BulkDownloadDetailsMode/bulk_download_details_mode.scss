@@ -38,7 +38,7 @@
 }
 
 .accordion {
-  border-bottom: 1px solid $gray-light;
+  border-bottom: $space-xxxxs solid $gray-light;
 
   .header {
     @include font-caps-xxs;

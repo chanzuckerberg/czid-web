@@ -32,6 +32,7 @@
 
 .popupText {
   @include font-body-xxs;
+  text-align: center;
 
   .popupSubtitle {
     color: $gray-dark;

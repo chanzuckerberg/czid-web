@@ -3,6 +3,9 @@ import PropTypes from "prop-types";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import Checkbox from "~ui/controls/Checkbox";
+import Input from "~ui/controls/Input";
+
+import cs from "./user_form.scss";
 
 const UserForm = ({
   archetypes,
@@ -79,37 +82,28 @@ const UserForm = ({
             {displayError(showFailed, serverErrors, errorMessage)}
           </div>
           <div className="row content-wrapper">
-            <div className="input-field">
-              <i className="fa fa-envelope" aria-hidden="true" />
-              <input
-                type="email"
+            <div className="section">
+              <Input
+                className={cs.inputField}
+                defaultValue={email}
+                label="Email"
                 onChange={onEmailChange}
-                className=""
-                onFocus={clearError}
-                value={email}
+                type="email"
               />
-              <label htmlFor="user_email">Email</label>
-            </div>
-            <div className="input-field">
-              <i className="fa fa-envelope" aria-hidden="true" />
-              <input
-                type="text"
+              <Input
+                className={cs.inputField}
+                defaultValue={name}
+                label="Name"
                 onChange={onNameChange}
-                className=""
-                onFocus={clearError}
-                value={name}
-              />
-              <label htmlFor="user_name">Name</label>
-            </div>
-            <div className="input-field">
-              <i className="fa fa-building" aria-hidden="true" />
-              <input
                 type="text"
-                onChange={onInstitutionChange}
-                onFocus={clearError}
-                value={institution}
               />
-              <label>Institution</label>
+              <Input
+                className={cs.inputField}
+                defaultValue={institution}
+                label="Institution"
+                onChange={onInstitutionChange}
+                type="text"
+              />
             </div>
             <div className="section">
               <div className="header">Archetypes</div>

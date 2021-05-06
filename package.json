@@ -110,7 +110,6 @@
     "fast-deep-equal": "^2.0.1",
     "font-awesome": "^4.7.0",
     "lodash": "^4.17.19",
-    "materialize-css": "^0.100.2",
     "memoize-one": "^5.0.4",
     "mini-css-extract-plugin": "^0.4.1",
     "ml-matrix": "^6.1.2",

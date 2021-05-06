@@ -16,10 +16,11 @@
 
   .textarea {
     @include font-body-xs;
+    height: 200px;
     margin-top: 5px;
     padding: 5px;
-    height: 200px;
     resize: vertical;
+    width: 100%;
   }
 
   .showHide {

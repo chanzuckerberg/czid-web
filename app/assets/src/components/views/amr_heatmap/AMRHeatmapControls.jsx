@@ -20,7 +20,7 @@ export default class AMRHeatmapControls extends React.Component {
     const { controls, selectedOptions, isDataReady } = this.props;
     const controlsList = controls.map(control => {
       return (
-        <div className="col s3" key={control.key}>
+        <div className={cs.filterControl} key={control.key}>
           <Dropdown
             fluid
             rounded
@@ -43,7 +43,7 @@ export default class AMRHeatmapControls extends React.Component {
       return;
     }
     return (
-      <div className="col s3" key="SequentialLegendVis">
+      <div className={cs.filterControl} key="SequentialLegendVis">
         <SequentialLegendVis
           min={0}
           max={maxValueForLegend}

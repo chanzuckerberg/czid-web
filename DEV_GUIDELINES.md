@@ -255,7 +255,7 @@ Be aware of shared style files, particularly [`_color.scss`](https://github.com/
 
 ### Other Best Practices
 
-- **Don't use `materialize`**: We are trying to get rid of it.
+- **Don't use `materialize`**: We got rid of it.
 - **[Flexbox](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)** can be very helpful for centering and aligning elements, as well as styling elements to fill up available space. Something to be aware of.
 
 ## _JSON_

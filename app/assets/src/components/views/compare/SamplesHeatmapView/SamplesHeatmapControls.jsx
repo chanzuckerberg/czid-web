@@ -11,7 +11,6 @@ import {
   mapValues,
   isEmpty,
 } from "lodash/fp";
-import cx from "classnames";
 
 import {
   Dropdown,
@@ -473,32 +472,38 @@ export default class SamplesHeatmapControls extends React.Component {
     return (
       <div className={cs.menu}>
         <Divider />
-        <div className={`${cs.filterRow} row`}>
-          <div className="col s2">{this.renderTaxonLevelSelect()}</div>
-          <div className="col s2">{this.renderCategoryFilter()}</div>
-          <div className="col s2">{this.renderSortTaxaSelect()}</div>
-          <div className="col s2">{this.renderSortSamplesSelect()}</div>
-          <div className="col s2">{this.renderMetricSelect()}</div>
-          <div className="col s2">{this.renderBackgroundSelect()}</div>
+        <div className={cs.filterRow}>
+          <div className={cs.filterControl}>
+            {this.renderTaxonLevelSelect()}
+          </div>
+          <div className={cs.filterControl}>{this.renderCategoryFilter()}</div>
+          <div className={cs.filterControl}>{this.renderSortTaxaSelect()}</div>
+          <div className={cs.filterControl}>
+            {this.renderSortSamplesSelect()}
+          </div>
+          <div className={cs.filterControl}>{this.renderMetricSelect()}</div>
+          <div className={cs.filterControl}>
+            {this.renderBackgroundSelect()}
+          </div>
         </div>
-        <div className={`${cs.filterRow} row`}>
-          <div className="col s2">{this.renderThresholdFilterSelect()}</div>
-          <div className="col s2">{this.renderSpecificityFilter()}</div>
-          <div className="col s2">{this.renderScaleSelect()}</div>
-          <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
-          <div className="col s2">{this.renderLegend()}</div>
+        <div className={cs.filterRow}>
+          <div className={cs.filterControl}>
+            {this.renderThresholdFilterSelect()}
+          </div>
+          <div className={cs.filterControl}>
+            {this.renderSpecificityFilter()}
+          </div>
+          <div className={cs.filterControl}>{this.renderScaleSelect()}</div>
+          <div className={cs.filterControl}>
+            {this.renderTaxonsPerSampleSlider()}
+          </div>
+          <div className={cs.filterControl}>{this.renderLegend()}</div>
         </div>
         {displayFilterTags && (
-          <div className={cx(cs.filterTagsList, "row")}>
-            <div className="col">{this.renderFilterTags()}</div>
-          </div>
+          <div className={cs.filterTagsList}>{this.renderFilterTags()}</div>
         )}
         {!loading && (
-          <div className={cx(cs.filterRow, "row")}>
-            <div className={cx(cs.statsRow, "col")}>
-              {this.renderFilterStatsInfo()}
-            </div>
-          </div>
+          <div className={cs.statsRow}>{this.renderFilterStatsInfo()}</div>
         )}
         <Divider />
       </div>
