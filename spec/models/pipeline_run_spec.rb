@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 GOOD_GENE = "Tet-40_Tet".freeze
 GOOD_ALLELE = "Tet-40_1546".freeze
@@ -227,7 +227,7 @@ describe PipelineRun, type: :model do
           end
 
           context "and at least one of them failed" do
-            let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run, job_status: 'FAILED')] }
+            let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run, job_status: "FAILED")] }
 
             it { is_expected.to be_falsy }
           end
@@ -323,12 +323,12 @@ describe PipelineRun, type: :model do
         allow(CSV).to receive(:read).and_return(CSV.new(pseudofile.read, headers: true))
         allow(pipeline_run).to receive(:update) do |update|
           amr_counts = []
-          ActiveRecord::Base.connection.execute('SET foreign_key_checks = 0;')
+          ActiveRecord::Base.connection.execute("SET foreign_key_checks = 0;")
           update[:amr_counts_attributes].each do |count|
             new_count = create(:amr_count, pipeline_run: pipeline_run, gene: count[:gene], allele: count[:allele], coverage: count[:coverage], depth: count[:depth], drug_family: count[:drug_family], rpm: count[:rpm], dpm: count[:dpm], total_reads: count[:total_reads])
             amr_counts.push(new_count)
           end
-          ActiveRecord::Base.connection.execute('SET foreign_key_checks = 1;')
+          ActiveRecord::Base.connection.execute("SET foreign_key_checks = 1;")
           pipeline_run.amr_counts = amr_counts
         end
       end
@@ -355,12 +355,12 @@ describe PipelineRun, type: :model do
         allow(CSV).to receive(:read).and_return(CSV.new(pseudofile.read, headers: true))
         allow(pipeline_run).to receive(:update) do |update|
           amr_counts = []
-          ActiveRecord::Base.connection.execute('SET foreign_key_checks = 0;')
+          ActiveRecord::Base.connection.execute("SET foreign_key_checks = 0;")
           update[:amr_counts_attributes].each do |count|
             new_count = create(:amr_count, pipeline_run: pipeline_run, annotation_gene: count[:annotation_gene], genbank_accession: count[:genbank_accession], gene: count[:gene], allele: count[:allele], coverage: count[:coverage], depth: count[:depth], drug_family: count[:drug_family], rpm: count[:rpm], dpm: count[:dpm], total_reads: count[:total_reads])
             amr_counts.push(new_count)
           end
-          ActiveRecord::Base.connection.execute('SET foreign_key_checks = 1;')
+          ActiveRecord::Base.connection.execute("SET foreign_key_checks = 1;")
           pipeline_run.amr_counts = amr_counts
         end
       end
@@ -436,7 +436,7 @@ describe PipelineRun, type: :model do
 
     let(:project) { create(:project) }
     let(:sample) { create(:sample, project_id: project.id) }
-    let(:pipeline_execution_strategy) { 'step_function' }
+    let(:pipeline_execution_strategy) { "step_function" }
 
     let(:check_for_user_error_response) { NO_USER_ERROR }
     let(:report_ready_response) { false }
@@ -503,6 +503,41 @@ describe PipelineRun, type: :model do
       context "and stage 3 reported failure, stage 1 reported success, but missing stage 2 status" do
         let(:pipeline_run_stages_statuses) { ["SUCCEEDED", nil, "FAILED", nil] }
         it { is_expected.to have_attributes(job_status: "2.GSNAPL/RAPSEARCH2 alignment-STARTED", finalized: 0) }
+      end
+    end
+  end
+
+  describe "#sfn_results_path" do
+    let(:project) { create(:project) }
+    let(:sample) do
+      create(:sample, project: project)
+    end
+    let(:pipeline_run) do
+      create(:pipeline_run,
+             sample: sample,
+             s3_output_prefix: "fake-prefix",
+             sfn_execution_arn: "fake-arn",
+             wdl_version: "5.0")
+    end
+    let(:pipeline_run_no_prefix) do
+      create(:pipeline_run,
+             sample: sample,
+             sfn_execution_arn: "fake-arn",
+             wdl_version: "5.0",
+             pipeline_version: "5.0")
+    end
+
+    context "when s3_output_prefix is provided" do
+      it "references the provided path" do
+        expected = File.join(pipeline_run.s3_output_prefix, pipeline_run.version_key_subpath)
+        expect(pipeline_run.sfn_results_path).to eq(expected)
+      end
+    end
+
+    context "when s3_output_prefix is absent" do
+      it "falls back to the previous sample-level path convention" do
+        expected = File.join(sample.sample_output_s3_path, pipeline_run.version_key_subpath)
+        expect(pipeline_run_no_prefix.sfn_results_path).to eq(expected)
       end
     end
   end

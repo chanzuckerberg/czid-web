@@ -130,7 +130,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       it "returns sfn input containing output prefix" do
         expect(subject).to include_json(
           sfn_input_json: {
-            OutputPrefix: sample.sample_output_s3_path,
+            OutputPrefix: "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{sample.sample_path}/#{pipeline_run.id}",
           }
         )
       end

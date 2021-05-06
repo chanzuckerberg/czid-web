@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_409_215_638) do
+ActiveRecord::Schema.define(version: 20_210_505_001_411) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -384,6 +384,7 @@ ActiveRecord::Schema.define(version: 20_210_409_215_638) do
     t.string "sfn_execution_arn", comment: "step function execution ARN for pipeline runs using pipeline_execution_strategy=step_function"
     t.boolean "use_taxon_whitelist", default: false, null: false, comment: "If true, pipeline processing will filter for a whitelist of taxons."
     t.string "wdl_version"
+    t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/samples/subpath/results' Never allow users to set this."
     t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"

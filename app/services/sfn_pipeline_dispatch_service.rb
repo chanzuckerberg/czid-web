@@ -39,8 +39,11 @@ class SfnPipelineDispatchService
   end
 
   def call
-    @pipeline_run.update(pipeline_version: @wdl_version[/\d+\.\d+/], wdl_version: @wdl_version)
-
+    @pipeline_run.update(
+      pipeline_version: @wdl_version[/\d+\.\d+/],
+      s3_output_prefix: output_prefix,
+      wdl_version: @wdl_version
+    )
     sfn_input_json = generate_wdl_input
     sfn_execution_arn = dispatch(sfn_input_json)
     return {
@@ -51,6 +54,10 @@ class SfnPipelineDispatchService
   end
 
   private
+
+  def output_prefix
+    "s3://#{ENV['SAMPLES_BUCKET_NAME']}/#{@sample.sample_path}/#{@pipeline_run.id}"
+  end
 
   def generate_wdl_input
     sfn_pipeline_input_json = {
@@ -63,8 +70,8 @@ class SfnPipelineDispatchService
         HostFilter: {
           fastqs_0: File.join(@sample.sample_input_s3_path, @sample.input_files[0].name),
           fastqs_1: @sample.input_files[1] ? File.join(@sample.sample_input_s3_path, @sample.input_files[1].name) : nil,
-          file_ext: @sample.fasta_input? ? 'fasta' : 'fastq',
-          nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || '',
+          file_ext: @sample.fasta_input? ? "fasta" : "fastq",
+          nucleotide_type: @sample.metadata.find_by(key: "nucleotide_type")&.string_validated_value || "",
           host_genome: @sample.host_genome_name.downcase,
           adapter_fasta: PipelineRun::ADAPTER_SEQUENCES[@sample.input_files[1] ? "paired-end" : "single-end"],
           star_genome: @sample.host_genome.s3_star_index_path,
@@ -92,11 +99,11 @@ class SfnPipelineDispatchService
         }, Experimental: {
           nt_db: @pipeline_run.alignment_config.s3_nt_db_path,
           nt_loc_db: @pipeline_run.alignment_config.s3_nt_loc_db_path,
-          file_ext: @sample.fasta_input? ? 'fasta' : 'fastq',
+          file_ext: @sample.fasta_input? ? "fasta" : "fastq",
           nt_info_db: @pipeline_run.alignment_config.s3_nt_info_db_path || PipelineRunStage::DEFAULT_S3_NT_INFO_DB_PATH,
         },
       },
-      OutputPrefix: @sample.sample_output_s3_path,
+      OutputPrefix: output_prefix,
     }
     return sfn_pipeline_input_json
   end

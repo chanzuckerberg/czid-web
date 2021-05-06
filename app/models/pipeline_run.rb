@@ -832,7 +832,9 @@ class PipelineRun < ApplicationRecord
   def sfn_results_path
     return "" if sfn_execution_arn.blank?
 
-    if pipeline_version_at_least(pipeline_version, "5.0.0")
+    if s3_output_prefix
+      return File.join(s3_output_prefix, version_key_subpath)
+    elsif pipeline_version_at_least(pipeline_version, "5.0.0")
       return File.join(sample_output_s3_path, version_key_subpath)
     else
       return "" unless pipeline_version.present? && wdl_version.present?
