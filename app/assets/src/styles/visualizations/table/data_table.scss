@@ -9,6 +9,7 @@
     display: table;
     width: calc(100% - 10px);
     border-bottom: 2px solid $gray-lightest;
+    text-align: left;
 
     th {
       line-height: normal;
@@ -27,6 +28,7 @@
     table-layout: fixed;
     display: table;
     width: 100%;
+    border-collapse: collapse;
   }
 
   tbody {
