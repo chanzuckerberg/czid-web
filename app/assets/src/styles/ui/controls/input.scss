@@ -5,10 +5,11 @@
   input[type="text"],
   input[type="number"] {
     @include font-body-xs;
-    height: 34px;
     border-radius: $border-radius-m;
-    box-sizing: border-box;
     border: $border-gray-light;
+    box-sizing: border-box;
+    height: 34px;
+    width: 100%;
 
     &:focus {
       border: $border-primary;
