@@ -87,9 +87,13 @@ class SamplesView extends React.Component {
         id2: value,
       });
       if (checked) {
-        forEach(v => newSelected.add(v), ids);
+        forEach(v => {
+          newSelected.add(v);
+        }, ids);
       } else {
-        forEach(v => newSelected.delete(v), ids);
+        forEach(v => {
+          newSelected.delete(v);
+        }, ids);
       }
     } else {
       if (checked) {
@@ -114,6 +118,8 @@ class SamplesView extends React.Component {
       selectedSampleIds,
       onSelectedSamplesUpdate,
     } = this.props;
+
+    this.referenceSelectId = null;
     let newSelected = new Set(
       checked
         ? union(Array.from(selectedSampleIds), selectableIds)

@@ -221,9 +221,13 @@ export default class MapPreviewSidebar extends React.Component {
         id2: value,
       });
       if (checked) {
-        forEach(v => newSelected.add(v), ids);
+        forEach(v => {
+          newSelected.add(v);
+        }, ids);
       } else {
-        forEach(v => newSelected.delete(v), ids);
+        forEach(v => {
+          newSelected.delete(v);
+        }, ids);
       }
     } else {
       if (checked) {
@@ -270,6 +274,8 @@ export default class MapPreviewSidebar extends React.Component {
 
   handleSelectAllRows = checked => {
     const { samples, selectedSampleIds, onSelectionUpdate } = this.props;
+
+    this.referenceSelectId = null;
     let newSelected = new Set(
       checked
         ? union(Array.from(selectedSampleIds), samples.getIds())
