@@ -398,8 +398,7 @@ RSpec.describe ProjectsController, type: :controller do
         describe "GET index for #{domain} domain" do
           it "sees all required fields" do
             extra_users = create_list(:user, 2)
-            expected_projects = []
-            expected_projects << create(
+            project = create(
               :public_project,
               users: extra_users + [@user],
               creator: @user,
@@ -408,14 +407,19 @@ RSpec.describe ProjectsController, type: :controller do
                   host_genome_name: "Human",
                   user: extra_users[0],
                   metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" },
+                  number_of_workflow_runs: 5,
+                  number_of_pipeline_runs: 1,
                 },
                 {
                   host_genome_name: "Mosquito",
                   user: @user,
                   metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" },
+                  number_of_workflow_runs: 1,
+                  number_of_pipeline_runs: 1,
                 },
               ]
             )
+            expected_projects = [project]
 
             get :index, params: { format: "json", domain: domain }
 
@@ -425,11 +429,16 @@ RSpec.describe ProjectsController, type: :controller do
 
             response_project = json_response["projects"][0]
             expected_users = (extra_users.as_json + [@user.as_json]).map { |u| u.slice("name", "email") }.sort_by { |u| u["name"] }
+
             expect(response_project).to include_json(id: expected_projects[0].id,
                                                      name: expected_projects[0].name,
                                                      created_at: expected_projects[0].created_at.as_json,
                                                      public_access: expected_projects[0].public_access,
-                                                     number_of_samples: 2,
+                                                     sample_counts: {
+                                                       number_of_samples: 2,
+                                                       mngs_runs_count: 2,
+                                                       cg_runs_count: 6,
+                                                     }.as_json,
                                                      hosts: ["Human", "Mosquito"],
                                                      tissues: ["Serum", "Water"],
                                                      locations: ["San Francisco, USA"],
@@ -463,6 +472,7 @@ RSpec.describe ProjectsController, type: :controller do
             expect(json_response["projects"].pluck("id")).to eq(expected_projects.pluck("id"))
 
             response_project = json_response["projects"][0]
+
             expect(response_project).to include_json(id: expected_projects[0].id,
                                                      name: expected_projects[0].name,
                                                      created_at: expected_projects[0].created_at.as_json,

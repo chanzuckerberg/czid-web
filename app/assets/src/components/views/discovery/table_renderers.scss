@@ -148,6 +148,22 @@
   }
 }
 
+.counts {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  .sampleCount {
+    @include font-header-xs;
+  }
+
+  .analysesCounts {
+    @include font-body-xxxs;
+    margin-top: $space-xxxs;
+    color: $gray-dark;
+  }
+}
+
 .popup {
   @include font-body-xs;
 

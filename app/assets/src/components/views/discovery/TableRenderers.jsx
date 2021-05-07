@@ -1,7 +1,7 @@
 import React from "react";
 
 import cx from "classnames";
-import { get, size } from "lodash/fp";
+import { at, isNil, get, size } from "lodash/fp";
 import moment from "moment";
 
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
@@ -65,6 +65,30 @@ class TableRenderers extends React.Component {
           <div className={cs.itemDetails}>{detailsRenderer(item)}</div>
         </div>
       </div>
+    );
+  };
+
+  static renderSampleCounts = ({ cellData: counts }) => {
+    const [numberOfSamples, mngsAnalysisRunsCount, cgAnlaysisRunsCount] = at(
+      ["number_of_samples", "mngs_runs_count", "cg_runs_count"],
+      counts
+    );
+
+    const hasAllCounts =
+      !isNil(numberOfSamples) &&
+      !isNil(mngsAnalysisRunsCount) &&
+      !isNil(cgAnlaysisRunsCount);
+    return (
+      hasAllCounts && (
+        <div className={cs.counts}>
+          <div className={cs.sampleCount}>{`${numberOfSamples} Sample${
+            numberOfSamples !== 1 ? "s" : ""
+          }`}</div>
+          <div className={cs.analysesCounts}>
+            {`${mngsAnalysisRunsCount} mNGS`} | {`${cgAnlaysisRunsCount} CG`}
+          </div>
+        </div>
+      )
     );
   };
 

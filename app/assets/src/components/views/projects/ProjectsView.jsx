@@ -68,10 +68,11 @@ class ProjectsView extends React.Component {
         cellRenderer: TableRenderers.renderList,
       },
       {
-        dataKey: "number_of_samples",
-        label: "No. of Samples",
+        dataKey: "sample_counts",
+        label: "Counts",
         width: 140,
         disableSort: true,
+        cellRenderer: TableRenderers.renderSampleCounts,
       },
     ];
 
@@ -149,20 +150,17 @@ class ProjectsView extends React.Component {
     const { onLoadRows } = this.props;
     const projects = await onLoadRows(args);
 
-    return projects.map(project => {
-      return merge(
+    return projects.map(project =>
+      merge(
         {
           project: pick(
             ["name", "description", "owner", "public_access"],
             project
           ),
         },
-        pick(
-          ["id", "created_at", "hosts", "tissues", "number_of_samples"],
-          project
-        )
-      );
-    });
+        pick(["id", "created_at", "hosts", "tissues", "sample_counts"], project)
+      )
+    );
   };
 
   reset = () => {

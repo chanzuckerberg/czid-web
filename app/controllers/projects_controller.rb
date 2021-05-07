@@ -85,19 +85,21 @@ class ProjectsController < ApplicationController
         projects = projects.order(Hash[order_by => order_dir])
         limited_projects = limit ? projects.offset(offset).limit(limit) : projects
 
+        basic_attributes = [
+          'id', 'name', 'description', 'created_at', 'public_access', Arel.sql('COUNT(DISTINCT samples.id) AS number_of_samples'),
+        ]
+
         if basic
-          attrs = [
-            'id', 'name', 'description', 'created_at', 'public_access', Arel.sql('COUNT(DISTINCT samples.id) AS number_of_samples'),
-          ]
-          names = attrs.map { |attr| attr.split(' AS ').last }
+          names = basic_attributes.map { |attr| attr.split(' AS ').last }
+          limited_projects = limited_projects.group(:id)
           render json: {
-            projects: limited_projects.group(:id).pluck(*attrs).map { |p| names.zip(p).to_h },
+            projects: limited_projects.group(:id).pluck(*basic_attributes).map { |p| names.zip(p).to_h },
           }
         else
           limited_projects = limited_projects
-                             .includes(:creator, samples: [:host_genome, :user, { metadata: [:metadata_field, :location] }])
+                             .includes(:creator, samples: [:host_genome, :user, { metadata: [:metadata_field, :location] }, :pipeline_runs, :workflow_runs])
                              .group(:id)
-                             .references(:samples)
+                             .references(:pipeline_runs, :samples, :workflow_runs)
           # get aggregated lists of association values in string by using MySQL's GROUP_CONCAT (should update to JSON_ARRAYAGG when possible)
           group_concat_host = Arel.sql("GROUP_CONCAT(DISTINCT host_genomes.name SEPARATOR '::') AS hosts")
           group_concat_sample_type = Arel.sql("GROUP_CONCAT(DISTINCT CASE WHEN metadata_fields.name = 'sample_type' THEN metadata.string_validated_value ELSE NULL END SEPARATOR '::') AS sample_types")
@@ -106,10 +108,11 @@ class ProjectsController < ApplicationController
           editable = Arel.sql("BIT_OR(IF(users.id=#{current_user.id} OR #{current_user.admin?}, 1, 0)) AS editable")
           creator = Arel.sql("creators_projects.name AS creator")
           creator_id = Arel.sql("creators_projects.id AS creator_id")
+          mngs_runs_count = Arel.sql("COUNT(DISTINCT pipeline_runs.id) AS mngs_runs_count")
+          cg_runs_count = Arel.sql("COUNT(DISTINCT CASE WHEN workflow_runs.workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' THEN workflow_runs.id ELSE NULL END) AS cg_runs_count")
 
           attrs = [
-            'id', 'name', 'description', 'created_at', 'public_access', Arel.sql('COUNT(DISTINCT samples.id) AS number_of_samples'),
-            group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, creator, creator_id,
+            *basic_attributes, group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, creator, creator_id, mngs_runs_count, cg_runs_count,
           ]
           names = attrs.map { |attr| attr.split(' AS ').last }
           name_email = ["name", "email"]
@@ -131,8 +134,9 @@ class ProjectsController < ApplicationController
               # Return as "tissue" for legacy compatibility. It's too hard to
               # rename all JS instances of "tissue".
               project_hash["tissues"] = project_hash["sample_types"]
-              project_hash.delete("sample_types")
-              project_hash
+
+              project_hash["sample_counts"] = project_hash.slice("number_of_samples", "mngs_runs_count", "cg_runs_count")
+              project_hash.except("sample_types", "number_of_samples", "mngs_runs_count", "cg_runs_count")
             end),
             all_projects_ids: (projects.pluck(:id).uniq if list_all_project_ids),
           }.compact
