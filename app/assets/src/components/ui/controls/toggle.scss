@@ -12,11 +12,12 @@
 // https://react.semantic-ui.com/modules/checkbox/#types-toggle
 .toggle.toggle.toggle label:after {
   transform: scale(1) !important;
+  margin: 4px;
 }
 
 .toggle.toggle.toggle label:before {
-  margin-left: 0px; // remove 4px margin
-  margin-right: 0px; // remove 4px margin
+  margin-top: 4px;
+  margin-bottom: 4px;
   height: 28px;
   line-height: 28px;
   width: 68px;

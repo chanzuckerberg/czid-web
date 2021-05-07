@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe ReadsStatsService do
   context "when no samples are passed in" do
@@ -11,7 +11,7 @@ RSpec.describe ReadsStatsService do
   context "when samples and stats exist" do
     let(:project) { create(:project) }
     let(:sample) { create(:sample, project_id: project.id) }
-    let(:pipeline_execution_strategy) { 'step_function' }
+    let(:pipeline_execution_strategy) { "step_function" }
     let(:pipeline_run_id) { 12_345 }
     let(:job_stats) do
       [
@@ -32,7 +32,13 @@ RSpec.describe ReadsStatsService do
     end
 
     before do
-      create(:pipeline_run, id: pipeline_run_id, sample_id: sample.id, pipeline_execution_strategy: pipeline_execution_strategy, job_status: PipelineRun::STATUS_CHECKED, finalized: 1)
+      create(:pipeline_run,
+             id: pipeline_run_id,
+             sample_id: sample.id,
+             pipeline_execution_strategy: pipeline_execution_strategy,
+             job_status: PipelineRun::STATUS_CHECKED,
+             finalized: 1,
+             s3_output_prefix: nil)
       job_stats.each do |step, reads_after|
         create(:job_stat, task: step, reads_after: reads_after, pipeline_run_id: pipeline_run_id)
       end

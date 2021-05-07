@@ -360,7 +360,7 @@ module PipelineRunsHelper
   # If strict mode is turned on, error out even if one pipeline run did not succeed.
   # Note: Does NOT do access control checks.
   def get_succeeded_pipeline_runs_for_samples(samples, strict = false, select_options = [])
-    default_select_query = [:finalized, :id, :job_status]
+    default_select_query = [:finalized, :id, :job_status, :s3_output_prefix]
     select_query = default_select_query.concat(select_options)
 
     # Gets the first pipeline runs for multiple samples in an efficient way.
