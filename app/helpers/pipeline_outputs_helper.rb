@@ -174,8 +174,15 @@ module PipelineOutputsHelper
     taxon_location = pipeline_run.taxon_byteranges.where(taxid: taxid, hit_type: hit_type).last if pipeline_run
     return '' if taxon_location.nil?
 
-    resp = Client.get_object(bucket: bucket, key: key, range: "bytes=#{taxon_location.first_byte}-#{taxon_location.last_byte}")
-    resp.body.read
+    begin
+      range = "bytes=#{taxon_location.first_byte}-#{taxon_location.last_byte}"
+      resp = Client.get_object(bucket: bucket, key: key, range: range)
+      resp.body.read
+    rescue Aws::S3::Errors::NoSuchKey => e
+      LogUtil.log_error("File not found: #{key}", exception: e)
+    rescue Aws::S3::Errors::InvalidRange => e
+      LogUtil.log_error("Invalid byterange requested: #{key} #{range}", exception: e)
+    end
   end
 
   # Either s3_path or bucket_name+key is required.

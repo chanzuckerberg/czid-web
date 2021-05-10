@@ -1562,21 +1562,21 @@ class PipelineRun < ApplicationRecord
   end
 
   def s3_paths_for_taxon_byteranges
-    file_prefix = ''
-    file_prefix = ASSEMBLY_PREFIX if supports_assembly?
+    path = supports_assembly? ? assembly_s3_path : postprocess_output_s3_path
+    file_prefix = supports_assembly? ? ASSEMBLY_PREFIX : ""
     # by tax_level and hit_type
     {
       TaxonCount::TAX_LEVEL_SPECIES => {
-        'NT' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
-        'NR' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}",
+        'NT' => "#{path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
+        'NR' => "#{path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}",
       },
       TaxonCount::TAX_LEVEL_GENUS => {
-        'NT' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-        'NR' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}",
+        'NT' => "#{path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
+        'NR' => "#{path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}",
       },
       TaxonCount::TAX_LEVEL_FAMILY => {
-        'NT' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-        'NR' => "#{assembly_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}",
+        'NT' => "#{path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
+        'NR' => "#{path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}",
       },
     }
   end
