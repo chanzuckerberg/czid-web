@@ -323,6 +323,32 @@ end
 
 `render json: @sample.as_json(only: SAMPLE_DEFAULT_FIELDS)`
 
+### Avoid unscoped direct object references
+
+- All controller code should refer to an object scope instead of the blanket ActiveRecord object. This ensures that at least some level of access control is checked.
+- Even if the model has no scoping, the scope could be as simple as:
+
+```
+def self.viewable(user)
+  all
+end
+```
+- See also: [Brakeman warning](https://brakemanscanner.org/docs/warning_types/unscoped_find/)
+
+#### **Avoid**
+
+`samples = Sample.where(id: params[:sampleIds])`
+
+`projects = Project.find(id: params[:project_id])`
+
+#### **Aspire**
+
+`samples = current_power.samples.where(id: params[:sampleIds])`
+
+`samples = samples_scope.where(id: params[:sampleIds])`
+
+`projects = current_power.projects.find(id: params[:project_id])`
+
 ### Avoid nested ternaries
 
 - Single ternaries are encouraged for simple expressions.
