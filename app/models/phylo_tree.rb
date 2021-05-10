@@ -91,11 +91,6 @@ class PhyloTree < ApplicationRecord
     }
   end
 
-  def runtime(human_readable = true)
-    seconds = (ready_at || Time.current) - created_at
-    human_readable ? distance_of_time_in_words(seconds) : seconds
-  end
-
   def monitor_results
     # Retrieve dag version, which is needed to construct the output path:
     update_pipeline_version(self, :dag_version, dag_version_file)

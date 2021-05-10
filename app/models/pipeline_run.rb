@@ -480,10 +480,6 @@ class PipelineRun < ApplicationRecord
     return "#{assembly_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if supports_assembly?
   end
 
-  def contigs_summary_s3_path
-    return "#{assembly_s3_path}/#{CONTIG_MAPPING_NAME}" if supports_assembly?
-  end
-
   def annotated_fasta_s3_path
     return "#{assembly_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if supports_assembly?
     return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
@@ -602,11 +598,9 @@ class PipelineRun < ApplicationRecord
     # generate a csv file for contig mapping based on lineage_json and top m8
     local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}#{id}"
     Open3.capture3("mkdir -p #{File.dirname(local_file_name)}")
-    # s3_file_name = contigs_summary_s3_path # TODO(yf): might turn back for s3 generation later
     CSVSafe.open(local_file_name, 'w') do |writer|
       write_contig_mapping_table_csv(writer)
     end
-    # Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
     local_file_name
   end
 
@@ -1905,10 +1899,6 @@ class PipelineRun < ApplicationRecord
 
   def rpm(raw_read_count)
     raw_read_count / ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
-  end
-
-  def alignment_db
-    alignment_config.name
   end
 
   private def supports_assembly?

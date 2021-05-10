@@ -1429,16 +1429,6 @@ class SamplesController < ApplicationController
     params.permit(*permitted_params)
   end
 
-  def sort_by(samples, dir = nil)
-    default_dir = 'id,desc'
-    dir ||= default_dir
-    column, direction = dir.split(',')
-    if column && direction && (Sample.column_names.include?(column) && ["desc", "asc"].include?(direction))
-      samples = samples.order("samples.#{column} #{direction}")
-    end
-    samples
-  end
-
   def check_owner
     unless current_user.admin? || current_user.id == @sample.user_id
       render json: {

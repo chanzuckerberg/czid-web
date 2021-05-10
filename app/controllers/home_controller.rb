@@ -74,12 +74,6 @@ class HomeController < ApplicationController
     render json: output
   end
 
-  def sort_by(samples, dir = nil)
-    default_dir = 'newest'
-    dir ||= default_dir
-    dir == 'newest' ? samples.order(id: :desc) : samples.order(id: :asc)
-  end
-
   def feedback
     render json: {
       status: 'ok',
