@@ -108,8 +108,13 @@ class ProjectsController < ApplicationController
           editable = Arel.sql("BIT_OR(IF(users.id=#{current_user.id} OR #{current_user.admin?}, 1, 0)) AS editable")
           creator = Arel.sql("creators_projects.name AS creator")
           creator_id = Arel.sql("creators_projects.id AS creator_id")
-          mngs_runs_count = Arel.sql("COUNT(DISTINCT pipeline_runs.id) AS mngs_runs_count")
-          cg_runs_count = Arel.sql("COUNT(DISTINCT CASE WHEN workflow_runs.workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' THEN workflow_runs.id ELSE NULL END) AS cg_runs_count")
+          mngs_runs_count = Arel.sql("COUNT(DISTINCT CASE WHEN samples.initial_workflow='#{WorkflowRun::WORKFLOW[:short_read_mngs]}' THEN samples.id ELSE NULL END) AS mngs_runs_count")
+          cg_runs_count = Arel.sql("COUNT(DISTINCT (CASE
+                                      WHEN workflow_runs.workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' THEN workflow_runs.id
+                                      WHEN samples.initial_workflow = '#{WorkflowRun::WORKFLOW[:consensus_genome]}' THEN samples.id
+                                      ELSE NULL
+                                    END)
+                          ) AS cg_runs_count")
 
           attrs = [
             *basic_attributes, group_concat_sample_type, group_concat_host, group_concat_location, editable, group_concat_users, creator, creator_id, mngs_runs_count, cg_runs_count,
