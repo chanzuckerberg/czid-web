@@ -18,3 +18,7 @@ export const CONDITIONAL_FIELDS = [
     triggerValues: ["NR.zscore", "NT.zscore"],
   },
 ];
+
+export const BULK_DOWNLOAD_TYPES = {
+  SAMPLE_METADATA: "sample_metadata",
+};

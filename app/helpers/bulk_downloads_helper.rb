@@ -42,8 +42,22 @@ module BulkDownloadsHelper
   end
 
   def format_bulk_download(bulk_download, detailed: false, admin: false)
+    number_of_pipeline_runs = bulk_download.pipeline_runs.length
+
+    # TODO: Adapt to a hash structure when a new workflow is introduced or when we can create
+    # bulk downloads from multiple workflows. This approach works because we can create
+    # a bulk download from one and only one workflow.
+    workflow, count = if number_of_pipeline_runs > 0
+                        [WorkflowRun::WORKFLOW[:short_read_mngs], number_of_pipeline_runs]
+                      else
+                        [WorkflowRun::WORKFLOW[:consensus_genome], bulk_download.workflow_runs.length]
+                      end
+
     formatted_bulk_download = bulk_download.as_json(except: [:access_token])
-    formatted_bulk_download[:num_samples] = bulk_download.pipeline_runs.length + bulk_download.workflow_runs.length
+    formatted_bulk_download[:analysis_type] = workflow
+    formatted_bulk_download[:analysis_count] = count
+
+    formatted_bulk_download[:num_samples] = (bulk_download.pipeline_runs.pluck(:sample_id) + bulk_download.workflow_runs.pluck(:sample_id)).uniq.length
     formatted_bulk_download[:download_name] = bulk_download.download_display_name
     formatted_bulk_download[:file_size] = ActiveSupport::NumberHelper.number_to_human_size(bulk_download.output_file_size)
     if admin

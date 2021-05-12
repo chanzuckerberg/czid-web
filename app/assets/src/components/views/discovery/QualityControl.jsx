@@ -1149,6 +1149,7 @@ class QualityControl extends React.Component {
 }
 
 QualityControl.propTypes = {
+  filters: PropTypes.array,
   projectId: PropTypes.number,
   handleBarClick: PropTypes.func.isRequired,
   sampleStatsSidebarOpen: PropTypes.bool,

@@ -1,8 +1,11 @@
 import React from "react";
+import { find, get } from "lodash/fp";
 
+import { WORKFLOWS } from "~/components/utils/workflows";
 import { IconDownload } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
 import LoadingBar from "~ui/controls/LoadingBar";
+import { BULK_DOWNLOAD_TYPES } from "./constants";
 
 import cs from "./bulk_download_table_renderers.scss";
 
@@ -40,8 +43,23 @@ export default class BulkDownloadTableRenderers extends React.Component {
     );
   };
 
-  static renderNumberOfSamples = ({ rowData }) => {
-    return <div className={cs.samplesCell}>{rowData.num_samples}</div>;
+  static renderCount = ({ rowData }) => {
+    const bulkDownloadType = get("download_type", rowData);
+
+    const count =
+      bulkDownloadType === BULK_DOWNLOAD_TYPES.SAMPLE_METADATA
+        ? get("num_samples", rowData)
+        : get("analysis_count", rowData);
+
+    const analysisType =
+      bulkDownloadType === BULK_DOWNLOAD_TYPES.SAMPLE_METADATA
+        ? `Sample`
+        : get(
+            "label",
+            find({ value: get("analysis_type", rowData) }, WORKFLOWS)
+          );
+
+    return <div>{`${count} ${analysisType}${count > 1 ? "s" : ""}`}</div>;
   };
 
   static renderStatus = ({ rowData }) => {
