@@ -279,7 +279,7 @@ class TaxonTreeVis extends React.Component {
     for (let metric in this.metrics) {
       if (this.metrics.hasOwnProperty(metric)) {
         rows.push(
-          <li
+          <span
             key={`tt_${metric}`}
             className={`taxon_tooltip__row ${
               this.props.metric === metric ? "taxon_tooltip__row--active" : ""
@@ -291,7 +291,7 @@ class TaxonTreeVis extends React.Component {
             <div className="taxon_tooltip__row__value">
               {Math.round(node.data.values[metric]).toLocaleString()}
             </div>
-          </li>
+          </span>
         );
       }
     }
@@ -310,7 +310,7 @@ class TaxonTreeVis extends React.Component {
         <div className="taxon_tooltip__name">{name}</div>
         <div className="taxon_tooltip__title">Data</div>
         <div className="taxon_tooltip__data">
-          <ul>{rows}</ul>
+          <div>{rows}</div>
         </div>
       </div>
     );
