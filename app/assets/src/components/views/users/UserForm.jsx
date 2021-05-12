@@ -83,25 +83,28 @@ const UserForm = ({
           </div>
           <div className="row content-wrapper">
             <div className="section">
+              <div className="header">Email</div>
               <Input
                 className={cs.inputField}
                 defaultValue={email}
-                label="Email"
                 onChange={onEmailChange}
+                placeholder="Email"
                 type="email"
               />
+              <div className="header">Name</div>
               <Input
                 className={cs.inputField}
                 defaultValue={name}
-                label="Name"
                 onChange={onNameChange}
+                placeholder="Name"
                 type="text"
               />
+              <div className="header">Institution</div>
               <Input
                 className={cs.inputField}
                 defaultValue={institution}
-                label="Institution"
                 onChange={onInstitutionChange}
+                placeholder="Institution"
                 type="text"
               />
             </div>
@@ -195,13 +198,16 @@ const UserForm = ({
               </div>
             </div>
             {!selectedUser && (
-              <div>
-                <Checkbox
-                  className="checkbox"
-                  checked={sendActivation}
-                  onChange={onSendActivationChange}
-                  label="Send activation email"
-                />
+              <div className="section">
+                <div className="header">Activation Email</div>
+                <div>
+                  <Checkbox
+                    className="checkbox"
+                    checked={sendActivation}
+                    onChange={onSendActivationChange}
+                    label="Send activation email"
+                  />
+                </div>
               </div>
             )}
           </div>
