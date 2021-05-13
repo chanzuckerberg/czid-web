@@ -91,6 +91,7 @@ class UploadSampleStep extends React.Component {
     selectedWetlabProtocol: null,
     selectedWorkflows: new Set(),
     showNoProjectError: false, // Whether we should show an error if no project is currently selected.
+    usedClearLabs: false,
     validatingSamples: false, // Disable the "Continue" button while validating samples.
   };
 
@@ -141,6 +142,7 @@ class UploadSampleStep extends React.Component {
       selectedTechnology,
       selectedWetlabProtocol,
       selectedWorkflows,
+      usedClearLabs,
     } = this.state;
     const basespaceSamples = this.getSelectedSamples("basespace");
 
@@ -162,6 +164,7 @@ class UploadSampleStep extends React.Component {
       );
 
       this.props.onUploadSamples({
+        clearlabs: usedClearLabs,
         project: selectedProject,
         medakaModel: selectedMedakaModel,
         samples: samplesWithToken,
@@ -389,6 +392,21 @@ class UploadSampleStep extends React.Component {
     logAnalyticsEvent(
       ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED,
       { selected }
+    );
+  };
+
+  handleClearLabsChange = usedClearLabs => {
+    this.props.onDirty();
+    this.setState({
+      usedClearLabs,
+      // If uploading ClearLabs samples, only allow default wetlab and medaka model options.
+      selectedMedakaModel: usedClearLabs
+        ? DEFAULT_MEDAKA_MODEL_OPTION
+        : this.state.selectedMedakaModel,
+    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_CLEAR_LABS_TOGGLED,
+      { usedClearLabs }
     );
   };
 
@@ -691,12 +709,14 @@ class UploadSampleStep extends React.Component {
       selectedProject,
       selectedWorkflows,
       selectedWetlabProtocol,
+      usedClearLabs,
     } = this.state;
 
     if (currentTab === BASESPACE_UPLOAD) {
       this.requestBasespaceReadProjectPermissions();
     } else {
       onUploadSamples({
+        clearlabs: usedClearLabs,
         technology: selectedTechnology,
         medakaModel: selectedMedakaModel,
         project: selectedProject,
@@ -818,6 +838,7 @@ class UploadSampleStep extends React.Component {
       selectedTechnology,
       selectedWorkflows,
       selectedWetlabProtocol,
+      usedClearLabs,
     } = this.state;
 
     const readyForBasespaceAuth =
@@ -870,6 +891,7 @@ class UploadSampleStep extends React.Component {
             )}
           </div>
           <WorkflowSelector
+            onClearLabsChange={this.handleClearLabsChange}
             onMedakaModelChange={this.handleMedakaModelChange}
             onWetlabProtocolChange={this.handleWetlabProtocolChange}
             onTechnologyToggle={this.handleTechnologyToggle}
@@ -878,6 +900,7 @@ class UploadSampleStep extends React.Component {
             selectedTechnology={selectedTechnology}
             selectedWorkflows={selectedWorkflows}
             selectedWetlabProtocol={selectedWetlabProtocol}
+            usedClearLabs={usedClearLabs}
           />
           <div className={cs.fileUpload}>
             <div className={cs.title}>Upload Files</div>

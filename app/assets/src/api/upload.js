@@ -43,6 +43,7 @@ export const initiateBulkUploadLocalWithMetadata = async ({
   const processedSamples = map(
     pick([
       "alignment_config_name",
+      "clearlabs",
       "client",
       "dag_vars",
       "do_not_process",

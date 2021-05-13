@@ -137,6 +137,7 @@ export default class UploadProgressModal extends React.Component {
   addFlagsToSamples = samples => {
     const {
       adminOptions,
+      clearlabs,
       medakaModel,
       technology,
       skipSampleProcessing,
@@ -153,6 +154,7 @@ export default class UploadProgressModal extends React.Component {
       ...sample,
       do_not_process: skipSampleProcessing,
       ...(technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && {
+        clearlabs,
         medaka_model: medakaModel,
       }),
       pipeline_execution_strategy,
@@ -720,6 +722,7 @@ UploadProgressModal.propTypes = {
     })
   ),
   adminOptions: PropTypes.objectOf(PropTypes.string).isRequired,
+  clearlabs: PropTypes.bool,
   medakaModel: PropTypes.string,
   metadata: PropTypes.objectOf(PropTypes.any),
   onUploadComplete: PropTypes.func.isRequired,

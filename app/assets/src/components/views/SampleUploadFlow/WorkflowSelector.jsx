@@ -8,6 +8,7 @@ import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import { IconInfoSmall } from "~/components/ui/icons";
 import IconSample from "~ui/icons/IconSample";
 import PropTypes from "~utils/propTypes";
+import Toggle from "~ui/controls/Toggle";
 import { WORKFLOWS } from "~utils/workflows";
 import { UserContext } from "~/components/common/UserContext";
 import {
@@ -30,6 +31,7 @@ import cx from "classnames";
 import cs from "./workflow_selector.scss";
 
 const WorkflowSelector = ({
+  onClearLabsChange,
   onMedakaModelChange,
   onTechnologyToggle,
   onWetlabProtocolChange,
@@ -38,6 +40,7 @@ const WorkflowSelector = ({
   selectedTechnology,
   selectedWetlabProtocol,
   selectedWorkflows,
+  usedClearLabs,
 }) => {
   const userContext = useContext(UserContext);
   const { allowedFeatures = [] } = userContext || {};
@@ -185,11 +188,34 @@ const WorkflowSelector = ({
   const renderNanoporeContent = () => (
     <div className={cs.nanoporeContent}>
       <div className={cs.item}>
+        <div className={cs.subheader}>
+          Used Clear Labs:
+          <ColumnHeaderTooltip
+            trigger={<IconInfoSmall className={cs.infoIcon} />}
+            content={
+              "Pipeline will be adjusted to accomodate Clear Lab fastq files which have undergone the length filtering and trimming steps."
+            }
+            position={"top center"}
+            link={"https://www.clearlabs.com/"}
+          />
+        </div>
+        <div className={cs.description}>
+          <Toggle
+            className={cs.toggle}
+            initialChecked={usedClearLabs}
+            onLabel={"Yes"}
+            offLabel={"No"}
+            onChange={label => onClearLabsChange(label === "Yes")}
+          />
+        </div>
+      </div>
+      <div className={cs.item}>
         <div className={cs.subheader}>Wetlab Protocol&#58;</div>
         <div className={cs.description}>ARTIC v3</div>
       </div>
 
-      {nanoporeV1FeatureEnabled ? (
+      {/* If uploading ClearLabs samples, only allow default wetlab and medaka model options. */}
+      {nanoporeV1FeatureEnabled && !usedClearLabs ? (
         <div className={cs.item}>
           <div className={cs.subheader}>
             Medaka Model:
@@ -270,6 +296,7 @@ const WorkflowSelector = ({
 };
 
 WorkflowSelector.propTypes = {
+  onClearLabsChange: PropTypes.func,
   onMedakaModelChange: PropTypes.func,
   onTechnologyToggle: PropTypes.func,
   onWetlabProtocolChange: PropTypes.func,
@@ -278,6 +305,7 @@ WorkflowSelector.propTypes = {
   selectedTechnology: PropTypes.string,
   selectedWetlabProtocol: PropTypes.string,
   selectedWorkflows: PropTypes.instanceOf(Set),
+  usedClearLabs: PropTypes.bool,
 };
 
 export default WorkflowSelector;

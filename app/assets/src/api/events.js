@@ -72,6 +72,10 @@ function EventDictionary() {
   this.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED =
     "UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_MEDAKA_MODEL_SELECTED";
 
+  /** The user toggled the ClearLabs option for their Nanopore Conesnsus Genome sample(s) in the Sample Upload Flow. */
+  this.UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_CLEAR_LABS_TOGGLED =
+    "UPLOAD_SAMPLE_STEP_CONSENSUS_GENOME_CLEAR_LABS_TOGGLED";
+
   /** The user clicked the "Edit Analysis Type" link during the Review Step in the Sample Upload Flow. */
   this.REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED =
     "REVIEW_STEP_EDIT_ANALYSIS_TYPE_LINK_CLICKED";

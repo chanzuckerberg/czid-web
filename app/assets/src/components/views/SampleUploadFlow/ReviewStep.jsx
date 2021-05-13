@@ -300,6 +300,7 @@ class ReviewStep extends React.Component {
 
   renderAnalysisTypeInfo = () => {
     const {
+      clearlabs,
       technology,
       medakaModel,
       project,
@@ -350,6 +351,14 @@ class ReviewStep extends React.Component {
                   {CG_TECHNOLOGY_DISPLAY_NAMES[technology] || "Illumina"}
                 </div>
               </div>
+              {technology === CG_TECHNOLOGY_OPTIONS.NANOPORE && (
+                <div className={cs.item}>
+                  <div className={cs.subheader}>Used Clear Labs&#58;</div>
+                  <div className={cs.description}>
+                    {clearlabs ? "Yes" : "No"}
+                  </div>
+                </div>
+              )}
               {workflows.has(WORKFLOWS.CONSENSUS_GENOME.value) && (
                 <div className={cs.item}>
                   <div className={cs.subheader}>Wetlab Protocol&#58;</div>
@@ -366,8 +375,6 @@ class ReviewStep extends React.Component {
                   </>
                 )}
               </div>
-              {/* Include an empty item "column" for proper spacing. */}
-              <div className={cs.item} />
             </div>
           </div>
         </div>
@@ -453,6 +460,7 @@ class ReviewStep extends React.Component {
     } = this.state;
 
     const {
+      clearlabs,
       technology,
       medakaModel,
       metadata,
@@ -518,6 +526,7 @@ class ReviewStep extends React.Component {
           {showUploadModal && (
             <UploadProgressModal
               adminOptions={adminOptions}
+              clearlabs={clearlabs}
               technology={technology}
               medakaModel={medakaModel}
               metadata={processMetadataRows(metadata.rows)}
@@ -571,6 +580,7 @@ ReviewStep.propTypes = {
   onStepSelect: PropTypes.func,
   onUploadComplete: PropTypes.func.isRequired,
   admin: PropTypes.bool,
+  clearlabs: PropTypes.bool,
   technology: PropTypes.string,
   medakaModel: PropTypes.string,
   workflows: PropTypes.instanceOf(Set),
