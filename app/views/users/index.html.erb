@@ -3,63 +3,65 @@
     return confirm("Do you want to delete user " + user + "?");
   }
 </script>
-<div id='user_create_page'>
+<div id='user_create_page' style="height: calc(100vh - 60px); display: flex; flex-direction: column">
   <% if current_user && current_user.admin %>
-   <p id="notice"><%= notice %></p>
+    <div style="flex: 0 0 auto">
+      <p id="notice"><%= notice %></p>
 
-    <h1>Users</h1>
-    <div>- Click on a name to edit details.</div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Email</th>
-          <th>Name</th>
-          <th>Institution</th>
-          <th>Admin?</th>
-          <th>Added by</th>
-          <th>Ever logged in?</th>
-          <th>Projects</th>
-          <th>Feature flags</th>
-          <th>Date joined</th>
-          <th colspan="3"></th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <% @users.each do |user| %>
+      <h1>Users</h1>
+      <div><i>Click on a name to edit details.</i></div>
+      <br/>
+      <p>
+        <%= link_to 'New User', new_user_path %> |
+        <%= link_to 'Front portal', root_path %>
+      </p>
+    </div>
+    <div style="flex: 1 0 0; overflow: auto;">
+      <table>
+        <thead>
           <tr>
-            <td><%= user.id %></td>
-            <td><%= user.email %></td>
-            <td><u><%= link_to user.name, user if user.name %></u></td>
-            <td><%= user.institution %></td>
-            <td><%= user.role == 1 ? "ADMIN" : "" %></td>
-            <td>
-              <u>
-                <%= link_to user.created_by_user_id, edit_user_path(user.created_by_user_id) if user.created_by_user_id %>
-              </u>
-            </td>
-            <td><%= user.sign_in_count > 0 ? "Yes" : "No" %></td>
-            <td><% user.projects[0...-1].each do |p| %>
-                  <%= link_to p.name, p if p %>,
-                <% end %>
-                <%= link_to user.projects.last.name, user.projects.last if user.projects.last %>
-            </td>
-            <td><%= JSON.parse(user.allowed_features || "[]").join(", ") %></td>
-            <td><%= user.created_at %></td>
-            <td><%= button_to 'Edit', edit_user_path(user), method: :get %></td>
-            <td><%= button_to 'Destroy', user, method: :delete, onclick: "return confirmDeleteUser(#{user.name.to_json});" %></td>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Institution</th>
+            <th>Admin?</th>
+            <th>Added by</th>
+            <th>Ever logged in?</th>
+            <th>Projects</th>
+            <th>Feature flags</th>
+            <th>Date joined</th>
+            <th colspan="3"></th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
+        </thead>
 
-    <p>
-      <%= link_to 'New User', new_user_path %> |
-      <%= link_to 'Front portal', root_path %>
-    </p>
-
+        <tbody>
+          <% @users.each do |user| %>
+            <tr>
+              <td><%= user.id %></td>
+              <td><%= user.email %></td>
+              <td><u><%= link_to user.name, user if user.name %></u></td>
+              <td><%= user.institution %></td>
+              <td><%= user.role == 1 ? "ADMIN" : "" %></td>
+              <td>
+                <u>
+                  <%= link_to user.created_by_user_id, edit_user_path(user.created_by_user_id) if user.created_by_user_id %>
+                </u>
+              </td>
+              <td><%= user.sign_in_count > 0 ? "Yes" : "No" %></td>
+              <td><% user.projects[0...-1].each do |p| %>
+                    <%= link_to p.name, p if p %>,
+                  <% end %>
+                  <%= link_to user.projects.last.name, user.projects.last if user.projects.last %>
+              </td>
+              <td><%= JSON.parse(user.allowed_features || "[]").join(", ") %></td>
+              <td><%= user.created_at %></td>
+              <td><%= button_to 'Edit', edit_user_path(user), method: :get %></td>
+              <td><%= button_to 'Destroy', user, method: :delete, onclick: "return confirmDeleteUser(#{user.name.to_json});" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   <% else %>
     <%= javascript_tag do %>
       react_component('ForbiddenPage', 'user_create_page');
