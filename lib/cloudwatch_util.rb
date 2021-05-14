@@ -1,6 +1,4 @@
 module CloudWatchUtil
-  @cloudwatch_client = Aws::CloudWatch::Client.new
-
   # metric_name: String, value: Float, unit: String, dimensions: [Hash<name: String, value: String>]
   def self.create_metric_datum(metric_name, value, unit, dimensions = [])
     return {
@@ -19,8 +17,8 @@ module CloudWatchUtil
     return if ENV['RAILS_ENV'] == 'test'
     raise ArgumentError, "Namespace is not a String" unless namespace.is_a? String
 
-    @cloudwatch_client.put_metric_data(namespace: namespace,
-                                       metric_data: metric_data)
+    AwsClient[:cloudwatch].put_metric_data(namespace: namespace,
+                                           metric_data: metric_data)
   rescue Aws::CloudWatch::Errors => err
     Rails.logger.error("Metric data #{metric_data} in namespace #{namespace} resulted in #{err.message}")
   rescue ArgumentError => err
