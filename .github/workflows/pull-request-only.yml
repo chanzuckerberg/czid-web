@@ -1,4 +1,4 @@
-name: Run semgrep
+name: idseq-web pull-request-only
 on:
   - pull_request
 
@@ -27,3 +27,13 @@ jobs:
         uses: ./.github/actions/sastisfaction
         with:
           snowflake_private_key: ${{ secrets.SASTISFACTION_READ_KEY }}
+
+  brakeman:
+    # This action is for inline GitHub diff annotations via ReviewDog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: ReviewDog Brakeman
+        uses: reviewdog/action-brakeman@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

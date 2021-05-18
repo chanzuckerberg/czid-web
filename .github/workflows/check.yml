@@ -127,13 +127,7 @@ jobs:
         then
           echo "No new Medium Confidence Brakeman warnings are allowed."
         fi
-      # TODO (https://app.clubhouse.io/idseq/story/17337/clean-up-brakeman-warnings-and-enable-annotations)
-      #  This is a good action but we have > 50 brakeman warnings
-      #  which maxes out the annotations API breaking the action.
-      #  We should clean these up and enable it.
-      # use: devmasx/brakeman-linter-action@v1.0.0
-      # env:
-      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   javascript:
     name: Javascript
     runs-on: ubuntu-latest
