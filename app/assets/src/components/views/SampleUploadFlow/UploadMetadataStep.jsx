@@ -130,13 +130,11 @@ class UploadMetadataStep extends React.Component {
               text="Continue"
               onClick={this.handleContinue}
               disabled={continueDisabled}
-              rounded={false}
               className={cs.continueButton}
             />
             <a href="/home">
               <SecondaryButton
                 text="Cancel"
-                rounded={false}
                 onClick={() =>
                   logAnalyticsEvent(
                     "UploadMetadataStep_cancel-button_clicked",

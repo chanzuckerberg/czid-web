@@ -520,7 +520,6 @@ class ReviewStep extends React.Component {
                   uploadType: uploadType,
                 }
               )}
-              rounded={false}
             />
           )}
           {showUploadModal && (
