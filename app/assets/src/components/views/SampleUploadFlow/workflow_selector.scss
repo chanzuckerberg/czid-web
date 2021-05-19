@@ -33,6 +33,10 @@
         &:hover {
           background-color: $gray-lightest;
         }
+
+        &.selected {
+          background-color: $gray-lightest;
+        }
       }
     }
 
@@ -98,12 +102,18 @@
         margin-top: $space-l;
 
         .item {
+          display: flex;
+          flex-direction: column;
           width: 160px;
           margin-right: $space-xl;
 
           .subheader {
             @include font-header-xs;
             margin-bottom: $space-xs;
+          }
+
+          .text {
+            margin-top: $space-xs; // align plaintext with text in toggle and dropdown menus
           }
 
           .dropdown {

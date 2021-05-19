@@ -29,6 +29,7 @@
   padding-top: 6px; // vertical align text
   min-height: 34px;
   min-width: 58px; // enough space for text
+  z-index: 1; // place label text on top of the toggle
 }
 
 // Place text to the left
@@ -40,17 +41,19 @@
 // Place text to the right
 .toggle.toggle.toggle input:indeterminate ~ label {
   padding-left: 34px;
-  color: $gray-dark !important;
+  color: $gray-darkest !important;
 }
 
 .toggle.toggle.toggle input:checked ~ label:before {
-  background-color: transparent !important; // override semantic-ui
+  background-color: $white !important; // override semantic-ui
+  z-index: -1; // make sure the white background color is behind the text label
   border: $border-primary;
   padding-left: 4px;
 }
 
 .toggle.toggle.toggle input:indeterminate ~ label:before {
-  background-color: transparent !important; // override semantic-ui
+  background-color: $white !important; // override semantic-ui
+  z-index: -1; // make sure the white background color is behind the text label
   border: $border-gray-light;
 }
 

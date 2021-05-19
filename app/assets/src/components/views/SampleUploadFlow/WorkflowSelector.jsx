@@ -158,7 +158,11 @@ const WorkflowSelector = ({
 
     return (
       <div
-        className={cx(cs.selectableOption, cs.technology)}
+        className={cx(
+          cs.selectableOption,
+          cs.technology,
+          illuminaTechnologyOptionSelected && cs.selected
+        )}
         onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA)}
       >
         <RadioButton
@@ -211,7 +215,7 @@ const WorkflowSelector = ({
       </div>
       <div className={cs.item}>
         <div className={cs.subheader}>Wetlab Protocol&#58;</div>
-        <div className={cs.description}>ARTIC v3</div>
+        <div className={cx(cs.description, cs.text)}>ARTIC v3</div>
       </div>
 
       {/* If uploading ClearLabs samples, only allow default wetlab and medaka model options. */}
@@ -249,7 +253,7 @@ const WorkflowSelector = ({
               position={"top center"}
             />
           </div>
-          <div className={cs.description}>r941_min_high_g360</div>
+          <div className={cx(cs.description, cs.text)}>r941_min_high_g360</div>
         </div>
       )}
     </div>
@@ -260,7 +264,11 @@ const WorkflowSelector = ({
       selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE;
     return (
       <div
-        className={cx(cs.selectableOption, cs.technology)}
+        className={cx(
+          cs.selectableOption,
+          cs.technology,
+          nanoporeTechnologyOptionSelected && cs.selected
+        )}
         onClick={() => onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.NANOPORE)}
       >
         <RadioButton
