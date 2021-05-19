@@ -40,6 +40,7 @@ import {
   logAnalyticsEvent,
   withAnalytics,
 } from "~/api/analytics";
+import BasicPopup from "~/components/BasicPopup";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
 import { UserContext } from "~/components/common/UserContext";
 import { NANOPORE_FEATURE } from "~/components/utils/features";
@@ -833,11 +834,12 @@ class UploadSampleStep extends React.Component {
 
   render() {
     const {
+      createProjectOpen,
       currentTab,
       selectedMedakaModel,
       selectedTechnology,
-      selectedWorkflows,
       selectedWetlabProtocol,
+      selectedWorkflows,
       usedClearLabs,
     } = this.state;
 
@@ -943,17 +945,26 @@ class UploadSampleStep extends React.Component {
               Basespace.
             </div>
           )}
-          <PrimaryButton
-            text={readyForBasespaceAuth ? "Authorize" : "Continue"}
-            onClick={this.handleContinue}
-            disabled={!this.isValid()}
-            rounded={false}
-            className={cs.continueButton}
-          />
+          <BasicPopup
+            basic={false}
+            disabled={!createProjectOpen || this.isValid()}
+            position="center"
+            trigger={
+              <span>
+                <PrimaryButton
+                  className={cs.continueButton}
+                  disabled={!this.isValid()}
+                  onClick={this.handleContinue}
+                  text={readyForBasespaceAuth ? "Authorize" : "Continue"}
+                />
+              </span>
+            }
+          >
+            Click "Create Project" above to finish project creation and continue
+          </BasicPopup>
           <a href="/home">
             <SecondaryButton
               text="Cancel"
-              rounded={false}
               onClick={() =>
                 logAnalyticsEvent("UploadSampleStep_cancel-button_clicked", {
                   ...this.getAnalyticsContext(),

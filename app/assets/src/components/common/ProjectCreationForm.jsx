@@ -1,9 +1,10 @@
 import React from "react";
-import cx from "classnames";
 import PropTypes from "prop-types";
 
 import BasicPopup from "~/components/BasicPopup";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
+import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
 import RadioButton from "~ui/controls/RadioButton";
@@ -238,17 +239,13 @@ class ProjectCreationForm extends React.Component {
         <div className={cs.controls}>
           <BasicPopup
             trigger={
-              <div
-                className={cx(
-                  cs.createButton,
-                  disableCreateButton && cs.disabled
-                )}
+              <PrimaryButton
+                disabled={disableCreateButton}
                 onClick={
                   disableCreateButton ? () => {} : this.handleCreateProject
                 }
-              >
-                Create Project
-              </div>
+                text="Create Project"
+              />
             }
             disabled={!disableCreateButton} // enable the popup when create button is disabled and vice versa
             inverted={false}
@@ -258,9 +255,11 @@ class ProjectCreationForm extends React.Component {
           >
             Please complete all fields to create a project.
           </BasicPopup>
-          <div className={cs.cancelButton} onClick={onCancel}>
-            Cancel
-          </div>
+          <SecondaryButton
+            className={cs.cancelButton}
+            onClick={onCancel}
+            text="Cancel"
+          />
         </div>
       </div>
     );
