@@ -1,8 +1,5 @@
-import React from "react";
-import PropTypes from "prop-types";
 import axios from "axios";
-import queryString from "query-string";
-import { connect } from "react-redux";
+import DeepEqual from "fast-deep-equal";
 import {
   assign,
   compact,
@@ -20,50 +17,56 @@ import {
   uniq,
   values,
 } from "lodash/fp";
-import DeepEqual from "fast-deep-equal";
+import PropTypes from "prop-types";
+import queryString from "query-string";
+import React from "react";
+import { connect } from "react-redux";
 
-import ErrorBoundary from "~/components/ErrorBoundary";
-import DetailsSidebar from "~/components/common/DetailsSidebar";
-import { NarrowContainer } from "~/components/layout";
-import { copyShortUrlToClipboard } from "~/helpers/url";
-import { processMetadata } from "~utils/metadata";
-import { diff } from "~/components/utils/objectUtil";
-import { logError } from "~/components/utils/logUtil";
-import { sanitizeCSVRow, createCSVObjectURL } from "~/components/utils/csv";
-import { getSampleTaxons, saveVisualization, getTaxaDetails } from "~/api";
-import { getSampleMetadataFields } from "~/api/metadata";
-import { updateProjectIds } from "~/redux/modules/discovery/slice";
+import { getSampleTaxons, getTaxaDetails, saveVisualization } from "~/api";
+import { validateSampleIds } from "~/api/access_control";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { getSampleMetadataFields } from "~/api/metadata";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
+import { UserContext } from "~/components/common/UserContext";
+import ErrorBoundary from "~/components/ErrorBoundary";
+import { NarrowContainer } from "~/components/layout";
+import ArrayUtils from "~/components/utils/ArrayUtils";
+import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
+import { MAIL_TO_HELP_LINK } from "~/components/utils/documentationLinks";
+import { logError } from "~/components/utils/logUtil";
+import { diff } from "~/components/utils/objectUtil";
 import {
   isPipelineFeatureAvailable,
   MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
-import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
-import { SortIcon } from "~ui/icons";
-import Notification from "~ui/notifications/Notification";
-import AccordionNotification from "~ui/notifications/AccordionNotification";
 import { showToast } from "~/components/utils/toast";
-import { validateSampleIds } from "~/api/access_control";
-import { UserContext } from "~/components/common/UserContext";
-import { URL_FIELDS } from "~/components/views/SampleView/constants.js";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
+import { URL_FIELDS } from "~/components/views/SampleView/constants.js";
+import SampleMessage from "~/components/views/SampleView/SampleMessage";
+import { copyShortUrlToClipboard } from "~/helpers/url";
+import { updateProjectIds } from "~/redux/modules/discovery/slice";
+import { IconAlert, SortIcon } from "~ui/icons";
+import AccordionNotification from "~ui/notifications/AccordionNotification";
+import Notification from "~ui/notifications/Notification";
+import { processMetadata } from "~utils/metadata";
+
 import {
+  BACKGROUND_METRICS,
+  METRIC_OPTIONS,
+  NOTIFICATION_TYPES,
   SCALE_OPTIONS,
   SORT_SAMPLES_OPTIONS,
+  SORT_TAXA_OPTIONS,
+  SPECIFICITY_OPTIONS,
+  TAXONS_PER_SAMPLE_RANGE,
   TAXON_LEVEL_OPTIONS,
   TAXON_LEVEL_SELECTED,
-  SORT_TAXA_OPTIONS,
-  TAXONS_PER_SAMPLE_RANGE,
-  SPECIFICITY_OPTIONS,
-  METRIC_OPTIONS,
-  BACKGROUND_METRICS,
-  NOTIFICATION_TYPES,
 } from "./constants";
-import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
-import ArrayUtils from "~/components/utils/ArrayUtils";
+import cs from "./samples_heatmap_view.scss";
 
 const parseAndCheckInt = (val, defaultVal) => {
   let parsed = parseInt(val);
@@ -106,6 +109,7 @@ class SamplesHeatmapView extends React.Component {
         readSpecificity: parseAndCheckInt(this.urlParams.readSpecificity, 1),
       },
       loading: false,
+      loadingFailed: false,
       selectedMetadata: this.urlParams.selectedMetadata || [
         "collection_location_v2",
       ],
@@ -520,7 +524,7 @@ class SamplesHeatmapView extends React.Component {
   async fetchViewData() {
     const { allowedFeatures = [] } = this.context || {};
 
-    this.setState({ loading: true });
+    this.setState({ loading: true }); // Gets false from this.updateFilters
 
     const sampleValidationInfo = await validateSampleIds(
       this.state.sampleIds,
@@ -538,10 +542,15 @@ class SamplesHeatmapView extends React.Component {
       this.showNotification(NOTIFICATION_TYPES.invalidSamples);
     }
 
-    let [heatmapData, metadataFields] = await Promise.all([
-      this.fetchHeatmapData(),
-      this.fetchMetadataFieldsBySampleIds(),
-    ]);
+    let heatmapData, metadataFields;
+    try {
+      [heatmapData, metadataFields] = await Promise.all([
+        this.fetchHeatmapData(),
+        this.fetchMetadataFieldsBySampleIds(),
+      ]);
+    } catch (err) {
+      this.handleLoadingFailure(err);
+    }
 
     let pipelineVersions = [];
     if (allowedFeatures.includes("heatmap_service")) {
@@ -575,11 +584,21 @@ class SamplesHeatmapView extends React.Component {
     if (metadataFields !== null) {
       newState.metadataTypes = metadataFields;
     }
+    newState.loadingFailed = false;
 
     this.updateHistoryState();
     // this.state.loading will be set to false at the end of updateFilters
     this.setState(newState, this.updateFilters);
   }
+
+  handleLoadingFailure = err => {
+    // eslint-disable-next-line no-console
+    console.error("Error loading heatmap data", err);
+    this.setState({
+      loading: false,
+      loadingFailed: true,
+    });
+  };
 
   extractDataFromService(rawData) {
     const { metrics } = this.props;
@@ -825,11 +844,18 @@ class SamplesHeatmapView extends React.Component {
   async fetchBackground() {
     const { allowedFeatures = [] } = this.context || {};
 
-    this.setState({ loading: true });
-    let backgroundData = await this.fetchBackgroundData();
+    this.setState({ loading: true }); // Gets false from this.updateFilters
+    let backgroundData;
+    try {
+      backgroundData = await this.fetchBackgroundData();
+    } catch (err) {
+      this.handleLoadingFailure(err);
+    }
+
     let newState = allowedFeatures.includes("heatmap_service")
       ? this.extractBackgroundMetricsFromService(backgroundData)
       : this.extractBackgroundMetrics(backgroundData);
+    newState.loadingFailed = false;
 
     this.updateHistoryState();
     this.setState(newState, this.updateFilters);
@@ -1144,7 +1170,7 @@ class SamplesHeatmapView extends React.Component {
     // Given a list of taxa for which details are currently missing,
     // fetch the information for those taxa from the server and
     // update the appropriate data structures to include the new taxa.
-    this.setState({ loading: true });
+    this.setState({ loading: true }); // Gets false from this.updateFilters
 
     const newTaxaInfo = await this.fetchNewTaxa(taxaMissingInfo);
     const extractedData = allowedFeatures.includes("heatmap_service")
@@ -1521,11 +1547,26 @@ class SamplesHeatmapView extends React.Component {
   }
 
   renderHeatmap() {
+    const { loadingFailed } = this.state;
+
     let shownTaxa = new Set(this.state.taxonIds, this.state.addedTaxonIds);
     shownTaxa = new Set(
       [...shownTaxa].filter(taxId => !this.removedTaxonIds.has(taxId))
     );
-    if (
+    if (loadingFailed) {
+      return (
+        <SampleMessage
+          icon={<IconAlert className={cs.iconAlert} type="error" />}
+          link={MAIL_TO_HELP_LINK}
+          linkText={"Contact us for help."}
+          message={
+            "Oh no! Something went wrong. Please try again or contact us for help."
+          }
+          status="error"
+          type="error"
+        />
+      );
+    } else if (
       this.state.loading ||
       !this.state.data ||
       !(this.state.data[this.state.selectedOptions.metric] || []).length ||
