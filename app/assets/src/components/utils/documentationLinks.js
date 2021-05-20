@@ -24,7 +24,7 @@ export const CG_ILLUMINA_PIPELINE_GITHUB_LINK =
 export const PREVIEW_TERMS_AND_PRIVACY_POLICY_CHANGES_DOC_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360058195412";
 export const UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK =
-  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360059656311";
+  "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360059656311#Upload";
 export const VADR_ANCHOR_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360049787632-Building-and-analyzing-a-SARS-CoV-2-consensus-genome#Viral-Annotation-DefineR-VADR";
 export const MAIL_TO_HELP_LINK = "mailto:help@idseq.net";
