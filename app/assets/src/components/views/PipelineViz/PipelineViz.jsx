@@ -1,21 +1,21 @@
-import React from "react";
 import cx from "classnames";
 import { diff } from "deep-object-diff";
 import { groupBy } from "lodash/fp";
+import React from "react";
 import { PanZoom } from "react-easy-panzoom";
 
-import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { getGraph } from "~/api/pipelineViz";
-import { getURLParamString, parseUrlParams } from "~/helpers/url";
-import NetworkGraph from "~/components/visualizations/NetworkGraph";
+import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 import PropTypes from "~/components/utils/propTypes";
+import NetworkGraph from "~/components/visualizations/NetworkGraph";
+import { getURLParamString, parseUrlParams } from "~/helpers/url";
 import { IconCloseSmall, IconArrowPipelineStage } from "~ui/icons";
-import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 
-import cs from "./pipeline_viz.scss";
 import PipelineVizHeader from "./PipelineVizHeader";
 import PipelineVizStatusIcon from "./PipelineVizStatusIcon";
+import cs from "./pipeline_viz.scss";
 import { inverseTransformDOMCoordinates } from "./utils";
 
 const START_NODE_ID = -1;

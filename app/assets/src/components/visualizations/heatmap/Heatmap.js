@@ -1,18 +1,18 @@
-import d3 from "d3";
-import textWidth from "text-width";
+import cx from "classnames";
 import Cluster from "clusterfck";
-import { clamp, find, mean, sortBy } from "lodash/fp";
-import { orderBy, some } from "lodash";
+import d3 from "d3";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
+import { orderBy, some } from "lodash";
+import { clamp, find, mean, sortBy } from "lodash/fp";
 import SvgSaver from "svgsaver";
-import cx from "classnames";
+import textWidth from "text-width";
 
 import { sanitizeCSVRow } from "~/components/utils/csv";
-import symlog from "../../utils/d3/scales/symlog.js";
-import cs from "./heatmap.scss";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.js";
+import symlog from "../../utils/d3/scales/symlog.js";
 import addSvgColorFilter from "../../utils/d3/svg.js";
+import cs from "./heatmap.scss";
 // used for filter to make plus icon blue
 const COLOR_HOVER_LINK = cs.primaryLight;
 

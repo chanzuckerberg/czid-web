@@ -1,12 +1,12 @@
-import React from "react";
-import PropTypes from "prop-types";
-import cx from "classnames";
 import axios from "axios";
+import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
-import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
-import { Input } from "~ui/controls";
-import StringHelper from "~/helpers/StringHelper";
 import { withAnalytics } from "~/api/analytics";
+import StringHelper from "~/helpers/StringHelper";
+import { Input } from "~ui/controls";
+import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 
 import cs from "./user_management_form.scss";
 

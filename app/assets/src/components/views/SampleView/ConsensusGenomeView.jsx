@@ -1,10 +1,8 @@
-import { camelCase, getOr, find, isEmpty, size, get, isNil } from "lodash/fp";
-import React, { useEffect, useState, useRef } from "react";
-import PropTypes from "~utils/propTypes";
-import memoize from "memoize-one";
 import cx from "classnames";
+import { camelCase, getOr, find, isEmpty, size, get, isNil } from "lodash/fp";
+import memoize from "memoize-one";
+import React, { useEffect, useState, useRef } from "react";
 
-import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
 import { logAnalyticsEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { formatPercent } from "~/components/utils/format";
@@ -22,9 +20,12 @@ import {
   SARS_COV_2_CONSENSUS_GENOME_DOC_LINK,
   VIRAL_CONSENSUS_GENOME_DOC_LINK,
 } from "~utils/documentationLinks";
+import PropTypes from "~utils/propTypes";
 import { sampleErrorInfo } from "~utils/sample";
 import { FIELDS_METADATA } from "~utils/tooltip";
+import ConsensusGenomeDropdown from "./ConsensusGenomeDropdown";
 
+import cs from "./consensus_genome_view.scss";
 import {
   CG_HISTOGRAM_FILL_COLOR,
   CG_HISTOGRAM_HOVER_FILL_COLOR,
@@ -34,7 +35,6 @@ import {
   SARS_COV_2_ACCESSION_ID,
   SUCCEEDED_STATE,
 } from "./constants";
-import cs from "./consensus_genome_view.scss";
 import csSampleMessage from "./sample_message.scss";
 
 const ConsensusGenomeView = ({
@@ -537,10 +537,11 @@ const ConsensusGenomeView = ({
 };
 
 ConsensusGenomeView.propTypes = {
-  workflowRunResults: PropTypes.object,
+  loadingResults: PropTypes.bool,
   onWorkflowRunSelect: PropTypes.func,
   sample: PropTypes.object.isRequired,
   workflowRun: PropTypes.object,
+  workflowRunResults: PropTypes.object,
 };
 
 export default ConsensusGenomeView;

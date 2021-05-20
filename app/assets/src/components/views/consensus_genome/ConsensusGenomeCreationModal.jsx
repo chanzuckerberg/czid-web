@@ -1,19 +1,19 @@
-import React from "react";
-import PropTypes from "prop-types";
-
 import { isNull } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
+
 import {
   logAnalyticsEvent,
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { IconInfoSmall } from "~/components/ui/icons";
-import Modal from "~ui/containers/Modal";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { SubtextDropdown } from "~ui/controls/dropdowns";
+import { IconInfoSmall } from "~/components/ui/icons";
 import { VIRAL_CONSENSUS_GENOME_DOC_LINK } from "~/components/utils/documentationLinks";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import Modal from "~ui/containers/Modal";
+import { SubtextDropdown } from "~ui/controls/dropdowns";
 
 import cs from "./consensus_genome_creation_modal.scss";
 

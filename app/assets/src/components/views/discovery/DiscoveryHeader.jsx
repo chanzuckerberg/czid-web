@@ -1,13 +1,13 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
 import { startCase } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
+import BasicPopup from "~/components/BasicPopup";
+import LiveSearchBox from "~ui/controls/LiveSearchBox";
+import Tabs from "~ui/controls/Tabs";
 import { IconFilters, IconInfoPanel } from "~ui/icons";
 import Label from "~ui/labels/Label";
-import Tabs from "~ui/controls/Tabs";
-import LiveSearchBox from "~ui/controls/LiveSearchBox";
-import BasicPopup from "~/components/BasicPopup";
 import { DISCOVERY_DOMAINS } from "./discovery_api";
 
 import cs from "./discovery_header.scss";

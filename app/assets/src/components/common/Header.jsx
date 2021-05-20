@@ -1,24 +1,24 @@
-import React from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
 import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
 
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import { showToast } from "~/components/utils/toast";
-import Notification from "~ui/notifications/Notification";
-import ToastContainer from "~ui/containers/ToastContainer";
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { IconAlert, LogoReversed, IconCloseSmall } from "~ui/icons";
 import {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
 } from "~/components/views/discovery/discovery_api";
+import ToastContainer from "~ui/containers/ToastContainer";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import { IconAlert, LogoReversed, IconCloseSmall } from "~ui/icons";
+import Notification from "~ui/notifications/Notification";
 import { postToUrlWithCSRF } from "~utils/links";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
 
 import cs from "./header.scss";
 

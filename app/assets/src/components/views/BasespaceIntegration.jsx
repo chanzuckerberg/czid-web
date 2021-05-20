@@ -1,8 +1,8 @@
 import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { logAnalyticsEvent } from "~/api/analytics";
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import PropTypes from "~/components/utils/propTypes";
 
 import cs from "./basespace_integration.scss";
 

@@ -1,13 +1,12 @@
-import React from "react";
 import PropTypes from "prop-types";
-import Divider from "./layout/Divider";
-import { openUrl, downloadStringToFile } from "./utils/links";
+import React from "react";
 import {
   RESULTS_FOLDER_STAGE_KEYS,
   RESULTS_FOLDER_STEP_KEYS,
 } from "~/components/utils/resultsFolder";
-
+import Divider from "./layout/Divider";
 import cs from "./results_folder.scss";
+import { openUrl, downloadStringToFile } from "./utils/links";
 
 class OutputFile extends React.Component {
   constructor(props, context) {

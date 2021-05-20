@@ -1,8 +1,8 @@
 import React from "react";
-import PropTypes from "~/components/utils/propTypes";
-import MetadataUpload from "~/components/common/MetadataUpload";
-import Instructions from "./Instructions";
 import { validateManualMetadataForProject } from "~/api/metadata";
+import MetadataUpload from "~/components/common/MetadataUpload";
+import PropTypes from "~/components/utils/propTypes";
+import Instructions from "./Instructions";
 import cs from "./metadata_upload_modal.scss";
 
 class UploadPage extends React.Component {

@@ -1,7 +1,7 @@
 import React from "react";
 
-import { IconSave } from "~ui/icons";
 import BasicPopup from "~/components/BasicPopup";
+import { IconSave } from "~ui/icons";
 
 import SecondaryButton from "./SecondaryButton";
 

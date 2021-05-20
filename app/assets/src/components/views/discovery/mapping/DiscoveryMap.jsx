@@ -4,10 +4,10 @@ import React from "react";
 import { logAnalyticsEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
-import ShapeMarker from "~/components/views/discovery/mapping/ShapeMarker";
-import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import MapBanner from "~/components/views/discovery/mapping/MapBanner";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
+import ShapeMarker from "~/components/views/discovery/mapping/ShapeMarker";
+import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import {
   indexOfMapLevel,
   isValidCoordinate,
@@ -50,8 +50,8 @@ class DiscoveryMap extends React.Component {
         viewport.zoom < zoomBoundaryCountry
           ? "country"
           : viewport.zoom < zoomBoundaryState
-            ? "state"
-            : "city";
+          ? "state"
+          : "city";
       this.onMapLevelChangeThrottled(level);
     }
 

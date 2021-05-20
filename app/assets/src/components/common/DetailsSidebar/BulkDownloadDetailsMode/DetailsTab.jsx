@@ -1,9 +1,8 @@
-import React from "react";
-import PropTypes from "~/components/utils/propTypes";
 import { get } from "lodash/fp";
-
-import { Accordion } from "~/components/layout";
+import React from "react";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
+import { Accordion } from "~/components/layout";
+import PropTypes from "~/components/utils/propTypes";
 
 import cs from "./bulk_download_details_mode.scss";
 

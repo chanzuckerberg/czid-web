@@ -1,8 +1,8 @@
 import { find, values } from "lodash/fp";
 
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import { URL_FIELDS } from "~/components/views/SampleView/constants";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { URL_FIELDS } from "~/components/views/SampleView/constants";
 
 const urlParser = new UrlQueryParser(URL_FIELDS);
 

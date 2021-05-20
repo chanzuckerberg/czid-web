@@ -1,7 +1,7 @@
+import cx from "classnames";
+import PropTypes from "prop-types";
 import React from "react";
 import { Radio } from "semantic-ui-react";
-import PropTypes from "prop-types";
-import cx from "classnames";
 
 import cs from "./toggle.scss";
 

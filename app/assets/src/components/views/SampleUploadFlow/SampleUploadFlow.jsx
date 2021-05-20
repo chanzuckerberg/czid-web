@@ -1,15 +1,15 @@
-import React from "react";
 import cx from "classnames";
 import { get, without, flow, omit, set, find } from "lodash/fp";
+import React from "react";
 
-import UploadSampleStep from "./UploadSampleStep";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "~/components/utils/propTypes";
 
-import UploadMetadataStep from "./UploadMetadataStep";
 import ReviewStep from "./ReviewStep";
-import cs from "./sample_upload_flow.scss";
 import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
+import UploadMetadataStep from "./UploadMetadataStep";
+import UploadSampleStep from "./UploadSampleStep";
+import cs from "./sample_upload_flow.scss";
 
 // See HOST_GENOME_SYNONYMS in MetadataField
 const HOST_GENOME_SYNONYMS = [

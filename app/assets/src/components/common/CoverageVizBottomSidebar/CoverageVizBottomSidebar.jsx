@@ -1,26 +1,27 @@
-import React from "react";
-import { sum, find, get, isEmpty } from "lodash/fp";
 import cx from "classnames";
+import { sum, find, get, isEmpty } from "lodash/fp";
+import React from "react";
 import ReactDOM from "react-dom";
 
+import { getCoverageVizData } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { formatPercent } from "~/components/utils/format";
-import { getTaxonName } from "~/helpers/taxon";
-import Sidebar from "~ui/containers/Sidebar";
-import HelpIcon from "~ui/containers/HelpIcon";
-import PropTypes from "~/components/utils/propTypes";
-import Histogram from "~/components/visualizations/Histogram";
-import GenomeViz from "~/components/visualizations/GenomeViz";
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import { IconLoading, IconArrowRight } from "~ui/icons";
 import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
-import { TooltipVizTable } from "~ui/containers";
-import { getCoverageVizData } from "~/api";
+import { formatPercent } from "~/components/utils/format";
+import PropTypes from "~/components/utils/propTypes";
 import { getTooltipStyle } from "~/components/utils/tooltip";
+import GenomeViz from "~/components/visualizations/GenomeViz";
+import Histogram from "~/components/visualizations/Histogram";
+import { getTaxonName } from "~/helpers/taxon";
+import { TooltipVizTable } from "~ui/containers";
+import HelpIcon from "~ui/containers/HelpIcon";
+import Sidebar from "~ui/containers/Sidebar";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import { IconLoading, IconArrowRight } from "~ui/icons";
+import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 
 import HitGroupViz from "./HitGroupViz";
+import cs from "./coverage_viz_bottom_sidebar.scss";
 import {
   getHistogramTooltipData,
   generateCoverageVizData,
@@ -28,7 +29,6 @@ import {
   selectContigsFromHitGroups,
   selectReadsFromHitGroups,
 } from "./utils";
-import cs from "./coverage_viz_bottom_sidebar.scss";
 
 // Lighter shade of primary blue.
 const READ_FILL_COLOR = "#A9BDFC";

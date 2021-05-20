@@ -1,7 +1,7 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { getOr } from "lodash/fp";
 import cx from "classnames";
+import { getOr } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import cs from "./tooltip_viz_table.scss";
 

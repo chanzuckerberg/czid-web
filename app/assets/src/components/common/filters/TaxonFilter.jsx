@@ -1,7 +1,7 @@
-import React from "react";
 import PropTypes from "prop-types";
-import { AsyncMultipleDropdown } from "~ui/controls/dropdowns";
+import React from "react";
 import { getSearchSuggestions } from "~/api";
+import { AsyncMultipleDropdown } from "~ui/controls/dropdowns";
 import cs from "./filters.scss";
 
 class TaxonFilter extends React.Component {

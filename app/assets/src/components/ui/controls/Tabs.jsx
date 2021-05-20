@@ -1,6 +1,6 @@
-import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
 import cs from "./tabs.scss";
 
 class Tabs extends React.Component {

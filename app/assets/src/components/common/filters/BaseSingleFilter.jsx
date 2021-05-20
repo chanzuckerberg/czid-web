@@ -1,5 +1,5 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 import { BareDropdown as Dropdown } from "~ui/controls/dropdowns";
 import cs from "./filters.scss";
 

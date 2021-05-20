@@ -1,6 +1,6 @@
+import PropTypes from "prop-types";
 import React from "react";
 import { Input as SemanticInput } from "semantic-ui-react";
-import PropTypes from "prop-types";
 
 class Input extends React.Component {
   handleChange = (_, inputProps) => {

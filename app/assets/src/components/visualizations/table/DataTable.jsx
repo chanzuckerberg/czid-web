@@ -1,7 +1,7 @@
-import PropTypes from "prop-types";
-import React from "react";
 import cx from "classnames";
 import { set, isObject } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 import Checkbox from "../../ui/controls/Checkbox";
 
 class DataTable extends React.Component {

@@ -1,17 +1,16 @@
-import React from "react";
-
 import cx from "classnames";
 import { at, isNil, get, size } from "lodash/fp";
 import moment from "moment";
+import React from "react";
 
-import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import BasicPopup from "~/components/BasicPopup";
 import List from "~/components/ui/List";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
+import { numberWithCommas } from "~/helpers/strings";
 import { IconSamplePrivate, IconSamplePublic } from "~ui/icons";
 import IconSample from "~ui/icons/IconSample";
 import StatusLabel from "~ui/labels/StatusLabel";
-import { numberWithCommas } from "~/helpers/strings";
-import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./table_renderers.scss";

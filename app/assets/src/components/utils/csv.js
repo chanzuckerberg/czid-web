@@ -1,6 +1,6 @@
 import { head, isEmpty, isNumber, isString, tail } from "lodash/fp";
-import { logError } from "./logUtil";
 import Papa from "papaparse";
+import { logError } from "./logUtil";
 
 // Assumes that the CSV has headers.
 export const parseCSVBlob = blob => {

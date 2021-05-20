@@ -1,7 +1,7 @@
-import { Icon as BaseIcon } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
 import PropTypes from "prop-types";
 import React from "react";
+import { Icon as BaseIcon } from "semantic-ui-react";
 
 const Icon = ({ name, size, className, onClick }) => {
   return (

@@ -1,13 +1,13 @@
-import React from "react";
 import cx from "classnames";
-import cs from "./project_description.scss";
 
 import PropTypes from "prop-types";
-import Textarea from "~ui/controls/Textarea";
-import MetadataSection from "~/components/common/DetailsSidebar/SampleDetailsMode/MetadataSection";
+import React from "react";
 
 import { saveProjectDescription } from "~/api";
+import MetadataSection from "~/components/common/DetailsSidebar/SampleDetailsMode/MetadataSection";
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
+import Textarea from "~ui/controls/Textarea";
+import cs from "./project_description.scss";
 
 class ProjectDescription extends React.Component {
   constructor(props) {

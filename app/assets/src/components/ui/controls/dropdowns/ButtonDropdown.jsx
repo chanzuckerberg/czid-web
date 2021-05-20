@@ -1,9 +1,9 @@
-import PrimaryButton from "../buttons/PrimaryButton";
-import SecondaryButton from "../buttons/SecondaryButton";
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
-import cx from "classnames";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import PrimaryButton from "../buttons/PrimaryButton";
+import SecondaryButton from "../buttons/SecondaryButton";
 import cs from "./button_dropdown.scss";
 
 class ButtonDropdown extends React.Component {

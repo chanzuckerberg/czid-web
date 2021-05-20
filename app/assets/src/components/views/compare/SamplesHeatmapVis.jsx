@@ -1,21 +1,21 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
 import { size, map, keyBy, isEmpty } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
-import { TooltipVizTable } from "~ui/containers";
-import { openUrlInNewTab } from "~utils/links";
+import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
+import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
+import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
+import TaxonSelector from "~/components/common/TaxonSelector";
+import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
+import { getTooltipStyle } from "~/components/utils/tooltip";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
-import { getTooltipStyle } from "~/components/utils/tooltip";
-import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
-import RowGroupLegend from "~/components/common/Heatmap/RowGroupLegend";
-import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
-import TaxonSelector from "~/components/common/TaxonSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
+import { TooltipVizTable } from "~ui/containers";
 import { IconAlertSmall, IconCloseSmall } from "~ui/icons";
-import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
+import { openUrlInNewTab } from "~utils/links";
 
 import cs from "./samples_heatmap_vis.scss";
 

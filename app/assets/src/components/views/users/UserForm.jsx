@@ -1,5 +1,5 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import Checkbox from "~ui/controls/Checkbox";

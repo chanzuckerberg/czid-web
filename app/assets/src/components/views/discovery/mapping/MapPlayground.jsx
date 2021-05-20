@@ -1,7 +1,7 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Marker } from "react-map-gl";
 import { get } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
+import { Marker } from "react-map-gl";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -62,7 +62,7 @@ class MapPlayground extends React.Component {
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Log1.5 of the count looked nice visually for not getting too large with many points.
     const markerSize = Math.max(
-      Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
+      (Math.log(pointCount) / Math.log(1.5)) * (get("zoom", viewport) || 3),
       minSize
     );
 

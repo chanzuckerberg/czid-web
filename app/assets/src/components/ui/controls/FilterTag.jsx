@@ -1,8 +1,8 @@
-import React from "react";
 import cx from "classnames";
+import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
 import Label from "~/components/ui/labels/Label";
+import PropTypes from "~/components/utils/propTypes";
 import Icon from "~ui/icons/Icon";
 
 import cs from "./filter_tag.scss";

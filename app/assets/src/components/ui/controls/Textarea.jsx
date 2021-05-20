@@ -1,8 +1,8 @@
+import cx from "classnames";
+import PropTypes from "prop-types";
 import React from "react";
 import { TextArea as SemanticTextarea } from "semantic-ui-react";
 import cs from "./textarea.scss";
-import cx from "classnames";
-import PropTypes from "prop-types";
 
 class Textarea extends React.Component {
   handleChange = (_, inputProps) => {

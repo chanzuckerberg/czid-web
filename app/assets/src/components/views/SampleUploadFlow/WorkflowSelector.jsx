@@ -1,33 +1,33 @@
+import cx from "classnames";
 import React, { useContext } from "react";
 
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
-import RadioButton from "~ui/controls/RadioButton";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import { IconInfoSmall } from "~/components/ui/icons";
-import IconSample from "~ui/icons/IconSample";
-import PropTypes from "~utils/propTypes";
-import Toggle from "~ui/controls/Toggle";
-import { WORKFLOWS } from "~utils/workflows";
-import { UserContext } from "~/components/common/UserContext";
-import {
-  NANOPORE_FEATURE,
-  NANOPORE_V1_FEATURE,
-} from "~/components/utils/features";
-import {
-  CG_WETLAB_OPTIONS,
-  CG_TECHNOLOGY_OPTIONS,
-  MEDAKA_MODEL_OPTIONS,
-} from "./constants";
 import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
+import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
+import { IconInfoSmall } from "~/components/ui/icons";
 import {
   ARTIC_PIPELINE_LINK,
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
   UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
 } from "~/components/utils/documentationLinks";
+import {
+  NANOPORE_FEATURE,
+  NANOPORE_V1_FEATURE,
+} from "~/components/utils/features";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import RadioButton from "~ui/controls/RadioButton";
+import Toggle from "~ui/controls/Toggle";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import IconSample from "~ui/icons/IconSample";
+import PropTypes from "~utils/propTypes";
+import { WORKFLOWS } from "~utils/workflows";
 
-import cx from "classnames";
+import {
+  CG_WETLAB_OPTIONS,
+  CG_TECHNOLOGY_OPTIONS,
+  MEDAKA_MODEL_OPTIONS,
+} from "./constants";
 import cs from "./workflow_selector.scss";
 
 const WorkflowSelector = ({

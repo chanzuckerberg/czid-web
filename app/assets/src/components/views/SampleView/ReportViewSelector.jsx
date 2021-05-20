@@ -1,8 +1,8 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 import { Menu, Popup } from "semantic-ui-react";
-import { IconTableSmall, IconTreeSmall } from "~ui/icons";
 import { logAnalyticsEvent } from "~/api/analytics";
+import { IconTableSmall, IconTreeSmall } from "~ui/icons";
 
 const ReportViewSelector = ({ view, onViewClick }) => {
   return (

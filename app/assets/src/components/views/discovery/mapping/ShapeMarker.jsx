@@ -1,6 +1,6 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { clamp } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 import { Marker } from "react-map-gl";
 
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -34,7 +34,7 @@ class ShapeMarker extends React.Component {
       clamp(
         minSize,
         maxSize,
-        pointCount / (pointCount + divisorConst) * sizeMultiple * zoom
+        (pointCount / (pointCount + divisorConst)) * sizeMultiple * zoom
       );
 
     return (

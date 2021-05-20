@@ -1,11 +1,11 @@
 import cx from "classnames";
-import PropTypes from "prop-types";
 import { find, without, includes } from "lodash/fp";
+import PropTypes from "prop-types";
 import React from "react";
 import BareDropdown from "./BareDropdown";
-import DropdownTrigger from "./common/DropdownTrigger";
-import DropdownLabel from "./common/DropdownLabel";
 import CheckboxItem from "./common/CheckboxItem";
+import DropdownLabel from "./common/DropdownLabel";
+import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./multiple_dropdown.scss";
 
 class MultipleDropdown extends React.Component {

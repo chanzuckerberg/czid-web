@@ -1,8 +1,8 @@
+import * as Sentry from "@sentry/react";
 import React from "react";
 import ReactDOM from "react-dom";
-import { UserContext } from "~/components/common/UserContext";
 import { Provider } from "react-redux";
-import * as Sentry from "@sentry/react";
+import { UserContext } from "~/components/common/UserContext";
 import store from "~/redux/store";
 import "url-search-params-polyfill";
 import "font-awesome/scss/font-awesome.scss";

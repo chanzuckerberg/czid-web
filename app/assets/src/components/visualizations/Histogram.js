@@ -1,8 +1,8 @@
-import { bin, deviation, extent, max, mean, min } from "d3-array";
 import cx from "classnames";
+import { bin, deviation, extent, max, mean, min } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
-import { select, event as currentEvent, mouse } from "d3-selection";
 import { scaleLinear, scaleLog, scaleSymlog } from "d3-scale";
+import { select, event as currentEvent, mouse } from "d3-selection";
 import { map } from "lodash/fp";
 
 import ArrayUtils from "~/components/utils/ArrayUtils";

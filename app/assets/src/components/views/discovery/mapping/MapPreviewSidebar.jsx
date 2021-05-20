@@ -16,11 +16,11 @@ import PropTypes from "~/components/utils/propTypes";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
+import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 import { ObjectCollectionView } from "../DiscoveryDataLayer";
 
-import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import cs from "./map_preview_sidebar.scss";
 
 export default class MapPreviewSidebar extends React.Component {

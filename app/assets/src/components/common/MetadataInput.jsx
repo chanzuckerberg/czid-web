@@ -1,18 +1,18 @@
-import React from "react";
-import { isUndefined, isNull, isArray } from "lodash/fp";
 import cx from "classnames";
+import { isUndefined, isNull, isArray } from "lodash/fp";
+import React from "react";
 
+import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
 import { UserContext } from "~/components/common/UserContext";
 import PropTypes from "~/components/utils/propTypes";
-import Input from "~ui/controls/Input";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
   processLocationSelection,
   getLocationWarning,
 } from "~ui/controls/GeoSearchInputBox";
-import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
-import { IconAlertSmall } from "~ui/icons";
+import Input from "~ui/controls/Input";
 import Toggle from "~ui/controls/Toggle";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import { IconAlertSmall } from "~ui/icons";
 
 import cs from "./metadata_input.scss";
 

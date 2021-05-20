@@ -1,9 +1,9 @@
+import { nanoid } from "nanoid";
 import React from "react";
 
 import { NarrowContainer } from "~/components/layout";
 import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import { nanoid } from "nanoid";
 import { NEXTCLADE_APP_LINK } from "~/components/utils/documentationLinks";
 
 import cs from "./support.scss";

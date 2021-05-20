@@ -1,10 +1,10 @@
+import cx from "classnames";
+import PropTypes from "prop-types";
 import React from "react";
 import { Form, TextArea } from "semantic-ui-react";
-import PropTypes from "prop-types";
-import cx from "classnames";
-import cs from "./cli_user_instructions.scss";
-import { openUrlInNewTab } from "~utils/links";
 import ExternalLink from "~ui/controls/ExternalLink";
+import { openUrlInNewTab } from "~utils/links";
+import cs from "./cli_user_instructions.scss";
 
 class CliUserInstructions extends React.Component {
   render() {

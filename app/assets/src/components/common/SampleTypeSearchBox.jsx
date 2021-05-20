@@ -1,5 +1,5 @@
-import React from "react";
 import { groupBy, get } from "lodash/fp";
+import React from "react";
 
 import PropTypes from "~/components/utils/propTypes";
 import {

@@ -1,7 +1,7 @@
-import React from "react";
-import cs from "./radio_button.scss";
 import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
+import cs from "./radio_button.scss";
 
 class RadioButton extends React.Component {
   render() {

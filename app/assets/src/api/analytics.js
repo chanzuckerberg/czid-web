@@ -1,6 +1,6 @@
 import eventNames from "~/api/events";
-import store from "~/redux/store";
 import { getGlobalAnalyticsContext } from "~/redux/modules/discovery/selectors";
+import store from "~/redux/store";
 
 // This is exported from here as well for importing convenience.
 export const ANALYTICS_EVENT_NAMES = eventNames;

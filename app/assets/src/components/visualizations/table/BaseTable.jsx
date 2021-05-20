@@ -1,22 +1,22 @@
-import React from "react";
+import cx from "classnames";
+import { concat, difference, find, includes, map } from "lodash/fp";
 import PropTypes from "prop-types";
+import React from "react";
 import {
   AutoSizer,
   Column,
   Table as VirtualizedTable,
 } from "react-virtualized";
 import "react-virtualized/styles.css";
-import cx from "classnames";
-import { concat, difference, find, includes, map } from "lodash/fp";
 
+import { logAnalyticsEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { humanize } from "~/helpers/strings";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import { IconPlusCircleSmall } from "~ui/icons";
 import SortIcon from "~ui/icons/SortIcon";
-import { humanize } from "~/helpers/strings";
-import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./base_table.scss";
 

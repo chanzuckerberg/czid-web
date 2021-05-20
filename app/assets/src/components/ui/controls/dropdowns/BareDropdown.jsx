@@ -10,15 +10,15 @@
 
 // TODO(mark): Refactor this component to remove props.options and props.itemSearchStrings, which are confusing and
 // redundant with props.items.customNode and props.children.
-import React from "react";
+import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 import { identity, omit, zip, filter, map, nth, sortBy } from "lodash/fp";
-import { forbidExtraProps } from "airbnb-prop-types";
+import PropTypes from "prop-types";
+import React from "react";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import Input from "~ui/controls/Input";
-import PropTypes from "prop-types";
-import PortalDropdown from "./PortalDropdown.jsx";
 import { IconArrowDownSmall, IconSearch } from "~ui/icons";
+import PortalDropdown from "./PortalDropdown.jsx";
 import cs from "./bare_dropdown.scss";
 
 class BareDropdown extends React.Component {

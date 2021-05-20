@@ -1,13 +1,13 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
-import Heatmap from "~/components/visualizations/heatmap/Heatmap";
+import { logAnalyticsEvent } from "~/api/analytics";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
-import { TooltipVizTable } from "~ui/containers";
 import { getTooltipStyle } from "~/components/utils/tooltip";
-import { logAnalyticsEvent } from "~/api/analytics";
+import Heatmap from "~/components/visualizations/heatmap/Heatmap";
+import { TooltipVizTable } from "~ui/containers";
 
 import cs from "./amr_heatmap_vis.scss";
 

@@ -1,5 +1,5 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 import { MultipleDropdown } from "~ui/controls/dropdowns";
 import cs from "./filters.scss";
 

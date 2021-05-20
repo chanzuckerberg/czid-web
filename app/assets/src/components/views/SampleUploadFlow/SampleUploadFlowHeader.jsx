@@ -1,12 +1,12 @@
-import React from "react";
-import { startCase } from "lodash/fp";
 import cx from "classnames";
+import { startCase } from "lodash/fp";
+import React from "react";
 
+import { logAnalyticsEvent } from "~/api/analytics";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PropTypes from "~/components/utils/propTypes";
 import Label from "~ui/labels/Label";
-import NarrowContainer from "~/components/layout/NarrowContainer";
-import { logAnalyticsEvent } from "~/api/analytics";
-import ExternalLink from "~/components/ui/controls/ExternalLink";
 
 import cs from "./sample_upload_flow.scss";
 

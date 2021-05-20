@@ -1,23 +1,23 @@
-import React from "react";
 import cx from "classnames";
 import _fp, { filter, keyBy, concat, find, sortBy } from "lodash/fp";
+import React from "react";
 
-import { generateClientDownloadFromEndpoint } from "~/components/utils/clientDownload";
-import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
+import { getAllHostGenomes, getAllSampleTypes } from "~/api";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { getProjectMetadataFields } from "~/api/metadata";
 import MetadataCSVLocationsMenu, {
   geosearchCSVLocations,
 } from "~/components/common/MetadataCSVLocationsMenu";
-import PropTypes from "~/components/utils/propTypes";
-import { IconAlert, IconLoading } from "~ui/icons";
+import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import Tabs from "~/components/ui/controls/Tabs";
-import { getAllHostGenomes, getAllSampleTypes } from "~/api";
-import { getProjectMetadataFields } from "~/api/metadata";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { generateClientDownloadFromEndpoint } from "~/components/utils/clientDownload";
+import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { IconAlert, IconLoading } from "~ui/icons";
 
-import cs from "./metadata_upload.scss";
-import MetadataManualInput from "./MetadataManualInput";
 import IssueGroup from "~ui/notifications/IssueGroup";
+import MetadataManualInput from "./MetadataManualInput";
+import cs from "./metadata_upload.scss";
 
 const map = _fp.map.convert({ cap: false });
 

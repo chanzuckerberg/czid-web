@@ -1,7 +1,7 @@
 import React from "react";
 
-import PropTypes from "../../../utils/propTypes";
 import MultipleNestedDropdown from "../../../ui/controls/dropdowns/MultipleNestedDropdown";
+import PropTypes from "../../../utils/propTypes";
 
 const CategoryFilter = ({
   allCategories,

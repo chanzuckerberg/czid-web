@@ -1,8 +1,8 @@
 // Dropdown that fetches list of updatable projects for the current user.
-import React from "react";
 import { find, sortBy } from "lodash/fp";
-import { SubtextDropdown } from "~ui/controls/dropdowns";
+import React from "react";
 import PropTypes from "~/components/utils/propTypes";
+import { SubtextDropdown } from "~ui/controls/dropdowns";
 
 class ProjectSelect extends React.Component {
   getOptions = () =>

@@ -1,10 +1,10 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { defaultTableRowRenderer, InfiniteLoader } from "react-virtualized";
+import cx from "classnames";
 import { isObject } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
+import { defaultTableRowRenderer, InfiniteLoader } from "react-virtualized";
 import BaseTable from "./BaseTable";
 import cs from "./infinite_table.scss";
-import cx from "classnames";
 
 const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
@@ -122,8 +122,8 @@ class InfiniteTable extends React.Component {
         {cellData == null
           ? ""
           : isObject(cellData)
-            ? cellData.name
-            : String(cellData)}
+          ? cellData.name
+          : String(cellData)}
       </div>
     );
   };

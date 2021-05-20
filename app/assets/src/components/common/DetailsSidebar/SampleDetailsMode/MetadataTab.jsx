@@ -1,13 +1,13 @@
-import React from "react";
 import { mapValues, filter, includes } from "lodash";
 // TODO(mark): Refactor all calls to lodash/fp.
 import { isObject, set, values } from "lodash/fp";
+import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import Input from "~/components/ui/controls/Input";
-import MetadataInput from "~/components/common/MetadataInput";
 import { logAnalyticsEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
+import MetadataInput from "~/components/common/MetadataInput";
+import Input from "~/components/ui/controls/Input";
+import PropTypes from "~/components/utils/propTypes";
 
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";

@@ -1,7 +1,7 @@
-import React from "react";
 import cx from "classnames";
 
 import PropTypes from "prop-types";
+import React from "react";
 import cs from "./dropdown_trigger.scss";
 
 class DropdownTrigger extends React.Component {

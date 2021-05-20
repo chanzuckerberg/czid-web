@@ -1,20 +1,20 @@
-import React from "react";
 import { set, isEmpty, map, get, head, find, isArray } from "lodash/fp";
+import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import { IconLoading } from "~ui/icons";
-import Notification from "~ui/notifications/Notification";
+import { withAnalytics } from "~/api/analytics";
 import {
   getBasespaceProjects,
   getSamplesForBasespaceProject,
 } from "~/api/basespace";
-import { withAnalytics } from "~/api/analytics";
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import PropTypes from "~/components/utils/propTypes";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import { IconLoading } from "~ui/icons";
+import Notification from "~ui/notifications/Notification";
 
-import { openBasespaceOAuthPopup } from "./utils";
-import { NO_TARGET_PROJECT_ERROR } from "./constants";
 import cs from "./basespace_sample_import.scss";
+import { NO_TARGET_PROJECT_ERROR } from "./constants";
+import { openBasespaceOAuthPopup } from "./utils";
 
 export default class BasespaceSampleImport extends React.Component {
   state = {

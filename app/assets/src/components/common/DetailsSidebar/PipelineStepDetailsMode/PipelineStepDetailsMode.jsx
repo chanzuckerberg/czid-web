@@ -1,15 +1,15 @@
-import React from "react";
 import cx from "classnames";
 import moment from "moment";
+import React from "react";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
 
-import { sampleErrorInfo } from "~/components/utils/sample";
-import { openUrl } from "~utils/links";
-import { Accordion } from "~/components/layout";
-import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
-import PropTypes from "~/components/utils/propTypes";
 import { withAnalytics } from "~/api/analytics";
+import { Accordion } from "~/components/layout";
+import PropTypes from "~/components/utils/propTypes";
+import { sampleErrorInfo } from "~/components/utils/sample";
+import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
+import { openUrl } from "~utils/links";
 
 import cs from "./pipeline_step_details_mode.scss";
 

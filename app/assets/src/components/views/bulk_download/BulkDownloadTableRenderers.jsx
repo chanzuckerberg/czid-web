@@ -1,13 +1,12 @@
-import React from "react";
 import { find, get } from "lodash/fp";
+import React from "react";
 
 import { WORKFLOWS } from "~/components/utils/workflows";
+import LoadingBar from "~ui/controls/LoadingBar";
 import { IconDownload } from "~ui/icons";
 import StatusLabel from "~ui/labels/StatusLabel";
-import LoadingBar from "~ui/controls/LoadingBar";
-import { BULK_DOWNLOAD_TYPES } from "./constants";
-
 import cs from "./bulk_download_table_renderers.scss";
+import { BULK_DOWNLOAD_TYPES } from "./constants";
 
 export default class BulkDownloadTableRenderers extends React.Component {
   static renderDownload = ({ rowData }, admin = false) => {

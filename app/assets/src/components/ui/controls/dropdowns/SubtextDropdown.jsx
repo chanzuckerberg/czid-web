@@ -1,11 +1,11 @@
-import React from "react";
-import PropTypes from "prop-types";
-
-import Dropdown from "./Dropdown";
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
+
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import Dropdown from "./Dropdown";
+
 import cs from "./subtext_dropdown.scss";
 
 class SubtextDropdown extends React.Component {

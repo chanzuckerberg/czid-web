@@ -1,9 +1,9 @@
-import React from "react";
 import cx from "classnames";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
-import cs from "./metadata_section.scss";
+import React from "react";
 import Accordion from "~/components/layout/Accordion";
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import cs from "./metadata_section.scss";
 
 class MetadataSection extends React.Component {
   state = {

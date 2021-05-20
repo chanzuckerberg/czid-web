@@ -1,8 +1,8 @@
-import { Label as BaseLabel } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
+import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
-import cx from "classnames";
+import { Label as BaseLabel } from "semantic-ui-react";
 import cs from "./label.scss";
 
 const Label = ({

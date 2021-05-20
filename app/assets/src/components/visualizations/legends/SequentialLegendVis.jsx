@@ -1,6 +1,6 @@
+import PropTypes from "prop-types";
 import React from "react";
 import SequentialLegend from "./SequentialLegend";
-import PropTypes from "prop-types";
 
 class SequentialLegendVis extends React.Component {
   constructor(props) {

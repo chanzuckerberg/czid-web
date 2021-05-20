@@ -1,9 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
-import Notification from "~ui/notifications/Notification";
 import Accordion from "~/components/layout/Accordion";
+import Notification from "~ui/notifications/Notification";
 
 import cs from "./accordion_notification.scss";
 

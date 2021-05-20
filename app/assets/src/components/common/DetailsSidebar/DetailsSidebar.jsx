@@ -8,10 +8,10 @@ import Sidebar from "~/components/ui/containers/Sidebar";
 import PropTypes from "~/components/utils/propTypes";
 
 import BulkDownloadDetailsMode from "./BulkDownloadDetailsMode";
+import GeneDetailsMode from "./GeneDetailsMode";
+import PipelineStepDetailsMode from "./PipelineStepDetailsMode";
 import SampleDetailsMode from "./SampleDetailsMode";
 import TaxonDetailsMode from "./TaxonDetailsMode";
-import PipelineStepDetailsMode from "./PipelineStepDetailsMode";
-import GeneDetailsMode from "./GeneDetailsMode";
 
 const DetailsSidebar = ({ mode, onClose, params, visible }) => {
   const renderContents = () => {

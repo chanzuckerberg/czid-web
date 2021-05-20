@@ -1,19 +1,19 @@
-import React, { useContext } from "react";
 import PropTypes from "prop-types";
+import React, { useContext } from "react";
 
-import BasicPopup from "~/components/BasicPopup";
-import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
-import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { ANALYTICS_EVENT_NAMES, withAnalytics } from "~/api/analytics";
+import BasicPopup from "~/components/BasicPopup";
+import { UserContext } from "~/components/common/UserContext";
+import { ViewHeader } from "~/components/layout";
 import {
   showAppcue,
   SAMPLES_HEATMAP_HEADER_HELP_SIDEBAR,
 } from "~/components/utils/appcues";
-import { logError } from "~/components/utils/logUtil";
-import { ViewHeader } from "~/components/layout";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
+import { logError } from "~/components/utils/logUtil";
 import { logDownloadOption } from "~/components/views/report/utils/download";
-import { UserContext } from "~/components/common/UserContext";
+import { HelpButton, SaveButton, ShareButton } from "~ui/controls/buttons";
+import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { DOWNLOAD_OPTIONS } from "./constants";
 
 import cs from "./samples_heatmap_view.scss";

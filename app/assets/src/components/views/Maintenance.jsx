@@ -1,7 +1,7 @@
 import React from "react";
 
-import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
+import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 
 import cs from "./maintenance.scss";
 

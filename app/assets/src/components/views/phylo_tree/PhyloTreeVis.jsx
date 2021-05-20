@@ -1,11 +1,11 @@
-import React from "react";
 import { get, compact, pluck, values, sortBy, concat, find } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
+import { getSampleMetadataFields } from "~/api/metadata";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import TooltipVizTable from "../../ui/containers/TooltipVizTable";
 import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
-import PropTypes from "prop-types";
-import TooltipVizTable from "../../ui/containers/TooltipVizTable";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import { getSampleMetadataFields } from "~/api/metadata";
 import { SAMPLE_FIELDS, SAMPLE_METADATA_FIELDS } from "./constants";
 
 const getAbsentName = attribute =>

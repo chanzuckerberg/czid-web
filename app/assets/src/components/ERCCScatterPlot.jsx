@@ -1,6 +1,6 @@
 import React from "react";
-import ScatterPlot from "./ScatterPlot";
 import PropTypes from "~/components/utils/propTypes";
+import ScatterPlot from "./ScatterPlot";
 import cs from "./ercc_scatterplot.scss";
 
 class ERCCScatterPlot extends React.Component {

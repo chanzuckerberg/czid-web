@@ -1,16 +1,16 @@
 // This modal contains a wizard that allows users to upload metadata to a project.
-import React from "react";
 import { flow, get, keyBy, mapValues, omit } from "lodash/fp";
 import PropTypes from "prop-types";
+import React from "react";
 
-import Wizard from "~ui/containers/Wizard";
-import Modal from "~ui/containers/Modal";
-import Notification from "~ui/notifications/Notification";
 import { getSamples } from "~/api";
-import { uploadMetadataForProject } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { uploadMetadataForProject } from "~/api/metadata";
 import { showToast } from "~/components/utils/toast";
+import Modal from "~ui/containers/Modal";
+import Wizard from "~ui/containers/Wizard";
 import ListNotification from "~ui/notifications/ListNotification";
+import Notification from "~ui/notifications/Notification";
 
 import ReviewPage from "./ReviewPage";
 import UploadPage from "./UploadPage";

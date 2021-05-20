@@ -1,8 +1,8 @@
 import { cluster as d3Cluster, hierarchy } from "d3-hierarchy";
 import "d3-transition";
+import { select, event as currentEvent } from "d3-selection";
 import { timeout } from "d3-timer";
 import { get, isObject } from "lodash/fp";
-import { select, event as currentEvent } from "d3-selection";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
 import cs from "./dendrogram.scss";
 

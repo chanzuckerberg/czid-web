@@ -1,9 +1,9 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
-import InfoBanner from "~/components/views/discovery/InfoBanner";
 import ImgMicrobeSecondary from "~/components/ui/illustrations/ImgMicrobeSecondary";
 import LandingHeader from "~/components/views/LandingHeader";
+import InfoBanner from "~/components/views/discovery/InfoBanner";
 
 import cs from "./page_not_found.scss";
 

@@ -1,6 +1,6 @@
-import Label from "./Label";
-import BasicPopup from "../../BasicPopup";
 import React from "react";
+import BasicPopup from "../../BasicPopup";
+import Label from "./Label";
 import cs from "./pathogen_label.scss";
 
 const NIAID_URL =

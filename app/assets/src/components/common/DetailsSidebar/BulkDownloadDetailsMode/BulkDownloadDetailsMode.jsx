@@ -1,11 +1,11 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
+import { logAnalyticsEvent } from "~/api/analytics";
 import { getBulkDownload } from "~/api/bulk_downloads";
+import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
-import { UserContext } from "~/components/common/UserContext";
-import { logAnalyticsEvent } from "~/api/analytics";
 import Notification from "~ui/notifications/Notification";
 
 import AdvancedDownloadTab from "./AdvancedDownloadTab";

@@ -26,11 +26,12 @@ import { getSampleTaxons, getTaxaDetails, saveVisualization } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
+import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
-import ErrorBoundary from "~/components/ErrorBoundary";
 import { NarrowContainer } from "~/components/layout";
 import ArrayUtils from "~/components/utils/ArrayUtils";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import { MAIL_TO_HELP_LINK } from "~/components/utils/documentationLinks";
 import { logError } from "~/components/utils/logUtil";
@@ -40,11 +41,10 @@ import {
   MASS_NORMALIZED_FEATURE,
 } from "~/components/utils/pipeline_versions";
 import { showToast } from "~/components/utils/toast";
-import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
-import { URL_FIELDS } from "~/components/views/SampleView/constants.js";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
+import { URL_FIELDS } from "~/components/views/SampleView/constants.js";
+import SamplesHeatmapVis from "~/components/views/compare/SamplesHeatmapVis";
 import { copyShortUrlToClipboard } from "~/helpers/url";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, SortIcon } from "~ui/icons";
@@ -52,6 +52,8 @@ import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 import { processMetadata } from "~utils/metadata";
 
+import SamplesHeatmapControls from "./SamplesHeatmapControls";
+import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 import {
   BACKGROUND_METRICS,
   METRIC_OPTIONS,
@@ -64,8 +66,6 @@ import {
   TAXON_LEVEL_OPTIONS,
   TAXON_LEVEL_SELECTED,
 } from "./constants";
-import SamplesHeatmapControls from "./SamplesHeatmapControls";
-import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 import cs from "./samples_heatmap_view.scss";
 
 const parseAndCheckInt = (val, defaultVal) => {

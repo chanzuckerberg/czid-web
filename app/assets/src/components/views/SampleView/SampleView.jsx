@@ -45,7 +45,6 @@ import {
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import AMRView from "~/components/AMRView";
-import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
@@ -53,6 +52,7 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import ErrorModal from "~/components/ui/containers/ErrorModal";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Tabs from "~/components/ui/controls/Tabs";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { createCSVObjectURL, sanitizeCSVRow } from "~/components/utils/csv";
 import {
   AMR_TABLE_FEATURE,
@@ -68,12 +68,12 @@ import {
 import PropTypes from "~/components/utils/propTypes";
 import { sampleErrorInfo } from "~/components/utils/sample";
 import { showToast } from "~/components/utils/toast";
-import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/ConsensusGenomeCreationModal";
-import ConsensusGenomePreviousModal from "~/components/views/consensus_genome/ConsensusGenomePreviousModal";
+import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
 import ConsensusGenomeView from "~/components/views/SampleView/ConsensusGenomeView";
 import SampleMessage from "~/components/views/SampleView/SampleMessage";
+import ConsensusGenomeCreationModal from "~/components/views/consensus_genome/ConsensusGenomeCreationModal";
+import ConsensusGenomePreviousModal from "~/components/views/consensus_genome/ConsensusGenomePreviousModal";
 import { getGeneraPathogenCounts } from "~/helpers/taxon";
 import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { IconAlert, IconLoading } from "~ui/icons";
@@ -81,6 +81,11 @@ import StatusLabel from "~ui/labels/StatusLabel";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
 
+import ReportFilters from "./ReportFilters";
+import ReportTable from "./ReportTable";
+import ReportViewSelector from "./ReportViewSelector";
+import SampleViewHeader from "./SampleViewHeader";
+import TaxonTreeVis from "./TaxonTreeVis";
 import {
   GENUS_LEVEL_INDEX,
   LOCAL_STORAGE_FIELDS,
@@ -95,13 +100,8 @@ import {
   TREE_METRICS,
   URL_FIELDS,
 } from "./constants";
-import ReportFilters from "./ReportFilters";
-import ReportTable from "./ReportTable";
-import ReportViewSelector from "./ReportViewSelector";
-import SampleViewHeader from "./SampleViewHeader";
 import csSampleMessage from "./sample_message.scss";
 import cs from "./sample_view.scss";
-import TaxonTreeVis from "./TaxonTreeVis";
 
 const mapValuesWithKey = mapValues.convert({ cap: false });
 

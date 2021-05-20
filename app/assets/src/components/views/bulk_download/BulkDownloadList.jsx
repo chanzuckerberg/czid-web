@@ -1,20 +1,20 @@
-import React from "react";
 import cx from "classnames";
-import { SortDirection } from "react-virtualized";
 import { some } from "lodash/fp";
+import React from "react";
+import { SortDirection } from "react-virtualized";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 
-import LoadingMessage from "~/components/common/LoadingMessage";
 import { getBulkDownloads, getPresignedOutputUrl } from "~/api/bulk_downloads";
+import BlankScreenMessage from "~/components/common/BlankScreenMessage";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
+import LoadingMessage from "~/components/common/LoadingMessage";
+import { UserContext } from "~/components/common/UserContext";
 import { ViewHeader, NarrowContainer, Divider } from "~/components/layout";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
-import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import { Table } from "~/components/visualizations/table";
-import { openUrl } from "~utils/links";
-import { UserContext } from "~/components/common/UserContext";
-import Notification from "~ui/notifications/Notification";
 import ImgDownloadPrimary from "~ui/illustrations/ImgDownloadPrimary";
-import DetailsSidebar from "~/components/common/DetailsSidebar";
+import Notification from "~ui/notifications/Notification";
+import { openUrl } from "~utils/links";
 
 import BulkDownloadTableRenderers from "./BulkDownloadTableRenderers";
 import cs from "./bulk_download_list.scss";

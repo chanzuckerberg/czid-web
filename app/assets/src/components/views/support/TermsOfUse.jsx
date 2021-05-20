@@ -1,7 +1,7 @@
+import { nanoid } from "nanoid";
 import React from "react";
 import { NarrowContainer } from "~/components/layout";
 import List from "~/components/ui/List";
-import { nanoid } from "nanoid";
 import cs from "./support.scss";
 
 export default function TermsOfUse() {

@@ -1,6 +1,4 @@
-import React from "react";
-import PropTypes from "~/components/utils/propTypes";
-
+import cx from "classnames";
 import {
   isEmpty,
   filter,
@@ -14,26 +12,27 @@ import {
   size,
   find,
 } from "lodash/fp";
-
-import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
-import Modal from "~ui/containers/Modal";
-import UploadConfirmationModal from "./UploadConfirmationModal";
+import React from "react";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { logError } from "~/components/utils/logUtil";
-import { formatFileSize } from "~/components/utils/format";
-import Notification from "~ui/notifications/Notification";
-import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
-import { IconAlert, IconCheckSmall, IconSuccess } from "~ui/icons";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import LoadingBar from "~/components/ui/controls/LoadingBar";
 import {
   initiateBulkUploadLocalWithMetadata,
   bulkUploadRemote,
   bulkUploadBasespace,
   uploadSampleFilesToPresignedURL,
 } from "~/api/upload";
+import LoadingBar from "~/components/ui/controls/LoadingBar";
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { formatFileSize } from "~/components/utils/format";
+import { logError } from "~/components/utils/logUtil";
+import PropTypes from "~/components/utils/propTypes";
 
-import cx from "classnames";
+import { CG_TECHNOLOGY_OPTIONS } from "~/components/views/SampleUploadFlow/constants";
+import Modal from "~ui/containers/Modal";
+import { IconAlert, IconCheckSmall, IconSuccess } from "~ui/icons";
+import ImgUploadPrimary from "~ui/illustrations/ImgUploadPrimary";
+import Notification from "~ui/notifications/Notification";
+import UploadConfirmationModal from "./UploadConfirmationModal";
+
 import cs from "./upload_progress_modal.scss";
 
 const BASESPACE_SAMPLE_FIELDS = [

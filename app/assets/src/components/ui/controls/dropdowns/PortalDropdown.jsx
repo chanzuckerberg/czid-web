@@ -4,11 +4,11 @@
 // another dropdown, this click will be interpreted by the outer dropdown as being an outside-click,
 // because we are using Portals.
 // TODO(mark): Handle nested dropdowns case, and replace semantic-ui dropdown with this component.
-import React from "react";
-import PropTypes from "prop-types";
-import { Manager, Reference, Popper } from "react-popper";
-import ReactDOM from "react-dom";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
+import ReactDOM from "react-dom";
+import { Manager, Reference, Popper } from "react-popper";
 
 import cs from "./portal_dropdown.scss";
 

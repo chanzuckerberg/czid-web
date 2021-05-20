@@ -1,8 +1,8 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
-import { LogoReversed } from "~ui/icons";
 import ExternalLink from "~ui/controls/ExternalLink";
+import { LogoReversed } from "~ui/icons";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 
 import cs from "./landing.scss";

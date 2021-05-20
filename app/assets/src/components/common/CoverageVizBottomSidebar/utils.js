@@ -1,5 +1,5 @@
-import memoize from "memoize-one";
 import { sortBy, filter } from "lodash/fp";
+import memoize from "memoize-one";
 import { formatPercent } from "~/components/utils/format";
 
 // Gets called on every mouse move, so need to memoize.
@@ -61,7 +61,10 @@ export const getGenomeVizTooltipData = memoize((hitGroups, dataIndex) => {
     name = "Loose Read";
   } else if (numContigs > 1) {
     name = "Aggregated Contigs";
-    counts = [["# Contigs", numContigs], ["Contig Read Count", hitObj[2]]];
+    counts = [
+      ["# Contigs", numContigs],
+      ["Contig Read Count", hitObj[2]],
+    ];
   } else if (numContigs === 1) {
     name = "Contig";
     counts = [["Contig Read Count", hitObj[2]]];

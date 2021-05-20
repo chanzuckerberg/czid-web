@@ -1,5 +1,3 @@
-import React from "react";
-import PropTypes from "prop-types";
 import {
   pull,
   isEqual,
@@ -11,22 +9,24 @@ import {
   mapValues,
   isEmpty,
 } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
+import { logAnalyticsEvent } from "~/api/analytics";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
+import { Divider } from "~/components/layout";
+import List from "~/components/ui/List";
+import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
+import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import FilterTag from "~ui/controls/FilterTag";
+import Slider from "~ui/controls/Slider";
 import {
   Dropdown,
   MultipleNestedDropdown,
   ThresholdFilterDropdown,
 } from "~ui/controls/dropdowns";
-import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
-import { Divider } from "~/components/layout";
-import { logAnalyticsEvent } from "~/api/analytics";
-import Slider from "~ui/controls/Slider";
-import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
-import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
-import FilterTag from "~ui/controls/FilterTag";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import { IconInfoSmall } from "~ui/icons";
-import List from "~/components/ui/List";
 
 import cs from "./samples_heatmap_view.scss";
 

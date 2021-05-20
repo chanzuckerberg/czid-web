@@ -1,6 +1,6 @@
 import { stratify, tree as d3Tree } from "d3-hierarchy";
-import { select, event as currentEvent } from "d3-selection";
 import { scaleLinear } from "d3-scale";
+import { select, event as currentEvent } from "d3-selection";
 
 export default class TidyTree {
   constructor(container, nodes, options) {
@@ -484,30 +484,24 @@ export default class TidyTree {
           d.data.scientificName
         );
       })
-      .style(
-        "text-anchor",
-        d => (this.hasVisibleChildren(d) ? "middle" : "start")
+      .style("text-anchor", d =>
+        this.hasVisibleChildren(d) ? "middle" : "start"
       )
-      .style(
-        "alignment-baseline",
-        d => (this.hasVisibleChildren(d) ? "baseline" : "middle")
+      .style("alignment-baseline", d =>
+        this.hasVisibleChildren(d) ? "baseline" : "middle"
       )
       .style("font-size", d => fontScale(d.data.values[this.options.attribute]))
       .style("font-weight", 600)
       .style("letter-spacing", 0.3)
-      .attr(
-        "dy",
-        d =>
-          this.hasVisibleChildren(d)
-            ? -4 - 1.3 * nodeScale(d.data.values[this.options.attribute])
-            : 0
+      .attr("dy", d =>
+        this.hasVisibleChildren(d)
+          ? -4 - 1.3 * nodeScale(d.data.values[this.options.attribute])
+          : 0
       )
-      .attr(
-        "x",
-        d =>
-          this.hasVisibleChildren(d)
-            ? 0
-            : 4 + 1.3 * nodeScale(d.data.values[this.options.attribute])
+      .attr("x", d =>
+        this.hasVisibleChildren(d)
+          ? 0
+          : 4 + 1.3 * nodeScale(d.data.values[this.options.attribute])
       )
       .call(this.wrap.bind(this), 110);
 

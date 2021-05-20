@@ -1,5 +1,5 @@
-import ThresholdMap from "~/components/utils/ThresholdMap";
 import { omit, set, get } from "lodash/fp";
+import ThresholdMap from "~/components/utils/ThresholdMap";
 
 export const computeThresholdedTaxons = (candidateTaxons, activeThresholds) => {
   let resultTaxons = [];
@@ -170,13 +170,12 @@ export const addContigCountsToTaxonomyDetails = (
   });
 
   // Add the contigCountsMap attributes to the corresponding taxonomy detail.
-  return baseTaxonomyDetails.map(
-    detail =>
-      contigCountsMap[detail.tax_id]
-        ? {
-            ...detail,
-            summaryContigCounts: contigCountsMap[detail.tax_id],
-          }
-        : omit("summaryContigCounts", detail)
+  return baseTaxonomyDetails.map(detail =>
+    contigCountsMap[detail.tax_id]
+      ? {
+          ...detail,
+          summaryContigCounts: contigCountsMap[detail.tax_id],
+        }
+      : omit("summaryContigCounts", detail)
   );
 };

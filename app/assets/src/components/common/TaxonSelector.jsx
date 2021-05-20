@@ -1,10 +1,10 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { debounce } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
+import { getTaxaWithReadsSuggestions } from "~/api";
 import { ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
-import { getTaxaWithReadsSuggestions } from "~/api";
 
 import cs from "./Heatmap/metadata_selector.scss";
 

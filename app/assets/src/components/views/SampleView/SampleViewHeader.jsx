@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
 import { get, isEmpty, size } from "lodash/fp";
+import React, { useContext } from "react";
 
 import { deleteSample, saveVisualization } from "~/api";
 import {
@@ -10,7 +10,13 @@ import {
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import ViewHeader from "~/components/layout/ViewHeader";
+import {
+  showAppcue,
+  SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
+  SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
+} from "~/components/utils/appcues";
 import PropTypes from "~/components/utils/propTypes";
+import { generateUrlToSampleView } from "~/components/utils/urls";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { getWorkflowRunZipLink } from "~/components/views/report/utils/download";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
@@ -21,17 +27,11 @@ import {
   SaveButton,
   ShareButton,
 } from "~ui/controls/buttons";
-import {
-  showAppcue,
-  SAMPLE_VIEW_HEADER_MNGS_HELP_SIDEBAR,
-  SAMPLE_VIEW_HEADER_CG_HELP_SIDEBAR,
-} from "~/components/utils/appcues";
 import { openUrl } from "~utils/links";
-import { generateUrlToSampleView } from "~/components/utils/urls";
-import { PIPELINE_RUN_TABS } from "./constants";
-
 import PipelineRunSampleViewControls from "./PipelineRunSampleViewControls";
 import WorkflowVersionHeader from "./WorkflowVersionHeader";
+import { PIPELINE_RUN_TABS } from "./constants";
+
 import cs from "./sample_view_header.scss";
 export default function SampleViewHeader({
   backgroundId,

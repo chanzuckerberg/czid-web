@@ -1,9 +1,9 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
+import { logAnalyticsEvent } from "~/api/analytics";
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
-import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./bulk_download_notification.scss";
 
@@ -25,7 +25,8 @@ export default class BulkDownloadNotification extends React.Component {
             }
           >
             Downloads page
-          </a>.
+          </a>
+          .
         </div>
       </div>
     );

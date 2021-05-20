@@ -1,17 +1,14 @@
-import React from "react";
-import { get, set } from "lodash/fp";
 import cx from "classnames";
+import { get, set } from "lodash/fp";
+import React from "react";
 
-import ERCCScatterPlot from "~/components/ERCCScatterPlot";
-import { WORKFLOWS } from "~/components/utils/workflows";
-import PropTypes from "~/components/utils/propTypes";
-import { getDownloadLinks } from "~/components/views/report/utils/download";
-import { logAnalyticsEvent } from "~/api/analytics";
 import { getSamplePipelineResults } from "~/api";
-import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { logAnalyticsEvent } from "~/api/analytics";
+import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
-import Link from "~ui/controls/Link";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { IconLoading, IconArrowRight } from "~/components/ui/icons";
+import PropTypes from "~/components/utils/propTypes";
 import {
   RESULTS_FOLDER_STAGE_KEYS,
   RESULTS_FOLDER_STEP_KEYS,
@@ -19,12 +16,15 @@ import {
   RESULTS_FOLDER_ROOT_KEY,
 } from "~/components/utils/resultsFolder";
 import { FIELDS_METADATA } from "~/components/utils/tooltip";
+import { WORKFLOWS } from "~/components/utils/workflows";
+import { getDownloadLinks } from "~/components/views/report/utils/download";
+import Link from "~ui/controls/Link";
+import MetadataSection from "./MetadataSection";
 import {
   PIPELINE_INFO_FIELDS,
   WORKFLOW_INFO_FIELDS,
   HOST_FILTERING_WIKI,
 } from "./constants";
-import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
 const READ_COUNTS_TABLE = "readsRemaining";

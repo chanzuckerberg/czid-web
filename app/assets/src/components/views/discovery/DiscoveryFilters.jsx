@@ -1,7 +1,7 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
 import { find, forEach, pick } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import {

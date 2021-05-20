@@ -1,29 +1,29 @@
-import React, { useEffect, useState } from "react";
 import { some } from "lodash";
 import { get, isEmpty, set } from "lodash/fp";
+import React, { useEffect, useState } from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import Tabs from "~/components/ui/controls/Tabs";
-import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
 import { saveSampleName, saveSampleNotes, getAllSampleTypes } from "~/api";
+import { logAnalyticsEvent } from "~/api/analytics";
 import {
   getSampleMetadata,
   saveSampleMetadata,
   getSampleMetadataFields,
 } from "~/api/metadata";
-import { logAnalyticsEvent } from "~/api/analytics";
-import { processMetadata, processMetadataTypes } from "~utils/metadata";
+import Tabs from "~/components/ui/controls/Tabs";
+import PropTypes from "~/components/utils/propTypes";
 import { generateUrlToSampleView } from "~/components/utils/urls";
+import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
+import { processMetadata, processMetadataTypes } from "~utils/metadata";
 import MetadataTab from "./MetadataTab";
-import PipelineTab from "./PipelineTab";
 import NotesTab from "./NotesTab";
+import PipelineTab from "./PipelineTab";
+
+import cs from "./sample_details_mode.scss";
 import {
   processPipelineInfo,
   processAdditionalInfo,
   processCGWorkflowRunInfo,
 } from "./utils";
-
-import cs from "./sample_details_mode.scss";
 
 const TABS = ["Metadata", "Pipeline", "Notes"];
 

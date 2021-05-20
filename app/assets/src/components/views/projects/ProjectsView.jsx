@@ -1,20 +1,20 @@
-import React from "react";
 import { merge, pick } from "lodash/fp";
+import React from "react";
 
-import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
-import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
-import NarrowContainer from "~/components/layout/NarrowContainer";
-import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
-import PropTypes from "~/components/utils/propTypes";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import PropTypes from "~/components/utils/propTypes";
+import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
+import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 import {
   DEFAULT_ROW_HEIGHT,
   MAX_PROJECT_ROW_HEIGHT,
   PROJECT_TABLE_COLUMNS,
 } from "./constants";
-import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";

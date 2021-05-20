@@ -1,17 +1,17 @@
-import React from "react";
-import PropTypes from "~/components/utils/propTypes";
-
+import cx from "classnames";
 import { head } from "lodash/fp";
+import React from "react";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
-import FilePicker from "~ui/controls/FilePicker";
-import RadioButton from "~ui/controls/RadioButton";
 import {
   NEXTCLADE_DEFAULT_TREE_LINK,
   NEXTCLADE_TREE_FORMAT_LINK,
   NEXTCLADE_TREE_ROOT_LINK,
 } from "~/components/utils/documentationLinks";
+import PropTypes from "~/components/utils/propTypes";
 
-import cx from "classnames";
+import FilePicker from "~ui/controls/FilePicker";
+import RadioButton from "~ui/controls/RadioButton";
+
 import cs from "./nextclade_modal_tree_options.scss";
 
 class NextcladeReferenceTreeOptions extends React.Component {

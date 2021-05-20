@@ -1,7 +1,7 @@
 import React from "react";
 
-import PropTypes from "../../../utils/propTypes";
 import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
+import PropTypes from "../../../utils/propTypes";
 
 const SPECIFICITY_OPTIONS = [
   { text: "All", value: 0 },

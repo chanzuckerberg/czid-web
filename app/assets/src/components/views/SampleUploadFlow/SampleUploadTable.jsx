@@ -1,16 +1,16 @@
 // Lists samples that the user has selected for upload.
 // Allows users to select and unselect samples, and remove unselected samples.
 
-import React from "react";
 import { difference, size, isEmpty, map, some } from "lodash/fp";
+import React from "react";
 import { SortDirection } from "react-virtualized";
 
-import PropTypes from "~/components/utils/propTypes";
 import { formatFileSize } from "~/components/utils/format";
+import PropTypes from "~/components/utils/propTypes";
 import { Table } from "~/components/visualizations/table";
 
-import { SELECT_ID_KEY } from "./constants";
 import SampleUploadTableRenderers from "./SampleUploadTableRenderers";
+import { SELECT_ID_KEY } from "./constants";
 import cs from "./sample_upload_table.scss";
 
 const NAME_COLUMN = {

@@ -1,8 +1,8 @@
-import React from "react";
+import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
 import { IconCheckSmall, IconAlert, IconInfo, IconCloseSmall } from "~ui/icons";
 import cs from "./notification.scss";
-import cx from "classnames";
 
 class Notification extends React.Component {
   getIcon(type) {

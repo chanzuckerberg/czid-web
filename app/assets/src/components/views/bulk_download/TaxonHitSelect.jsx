@@ -1,9 +1,9 @@
 // Given a set of samples, allows the user to select a taxon that had hits (reads or contigs) align to it
 // in at least one of the samples.
 // For each taxon, provides a count of how many of the provided samples had hits align to that taxon.
-import React from "react";
 import { debounce, orderBy } from "lodash/fp";
 import memoize from "memoize-one";
+import React from "react";
 
 import {
   getTaxaWithContigsSuggestions,

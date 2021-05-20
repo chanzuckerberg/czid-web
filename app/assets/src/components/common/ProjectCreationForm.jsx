@@ -1,18 +1,18 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
+import { createProject } from "~/api";
+import { logAnalyticsEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
+import List from "~/components/ui/List";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
+import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
+import Input from "~ui/controls/Input";
+import RadioButton from "~ui/controls/RadioButton";
+import Textarea from "~ui/controls/Textarea";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
-import Input from "~ui/controls/Input";
-import Textarea from "~ui/controls/Textarea";
-import RadioButton from "~ui/controls/RadioButton";
-import { createProject } from "~/api";
 import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
-import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
-import { logAnalyticsEvent } from "~/api/analytics";
-import List from "~/components/ui/List";
 
 import cs from "./project_creation_form.scss";
 

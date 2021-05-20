@@ -1,11 +1,11 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { capitalize, every, keys, countBy, map } from "lodash/fp";
 import cx from "classnames";
+import { capitalize, every, keys, countBy, map } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import Accordion from "~/components/layout/Accordion";
-import Notification from "~ui/notifications/Notification";
 import ExternalLink from "~ui/controls/ExternalLink";
+import Notification from "~ui/notifications/Notification";
 
 import cs from "./host_organism_message.scss";
 

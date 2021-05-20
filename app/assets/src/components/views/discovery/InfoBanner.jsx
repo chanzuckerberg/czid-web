@@ -1,12 +1,12 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
-import Link from "~ui/controls/Link";
 import ExternalLink from "~ui/controls/ExternalLink";
-import ImgSearchSecondary from "~ui/illustrations/ImgSearchSecondary";
+import Link from "~ui/controls/Link";
 import { IconArrowRight } from "~ui/icons";
+import ImgSearchSecondary from "~ui/illustrations/ImgSearchSecondary";
 import cs from "./info_banner.scss";
 
 const InfoBanner = ({

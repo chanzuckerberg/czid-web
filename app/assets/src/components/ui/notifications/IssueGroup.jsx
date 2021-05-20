@@ -1,7 +1,7 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
 import { zipObject } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import Accordion from "~/components/layout/Accordion";
 import DataTable from "~/components/visualizations/table/DataTable";

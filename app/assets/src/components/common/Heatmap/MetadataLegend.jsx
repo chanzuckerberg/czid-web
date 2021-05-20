@@ -2,9 +2,9 @@
 // the user hovers over a label for a metadata field, this component
 // shows a tooltip legend for that particular field. ***
 
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { getTooltipStyle } from "~/components/utils/tooltip";
 

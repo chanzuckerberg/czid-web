@@ -1,10 +1,10 @@
-import React from "react";
-import PropTypes from "~/components/utils/propTypes";
-import { maxBy } from "lodash";
+import cx from "classnames";
+import { max } from "d3-array";
 import { scaleLinear, scaleBand, scaleOrdinal } from "d3-scale";
 import { stack } from "d3-shape";
-import { max } from "d3-array";
-import cx from "classnames";
+import { maxBy } from "lodash";
+import React from "react";
+import PropTypes from "~/components/utils/propTypes";
 
 import XAxis from "./XAxis";
 import YAxis from "./YAxis";

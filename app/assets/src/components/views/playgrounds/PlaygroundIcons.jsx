@@ -1,9 +1,9 @@
-import React from "react";
 import cx from "classnames";
 import { values } from "lodash/fp";
+import React from "react";
+import NarrowContainer from "~/components/layout/NarrowContainer";
 import { ICONS_TAXONOMY } from "~ui/icons";
 import Illustrations from "~ui/illustrations";
-import NarrowContainer from "~/components/layout/NarrowContainer";
 import cs from "./playground_icons.scss";
 
 class PlaygroundIcons extends React.Component {

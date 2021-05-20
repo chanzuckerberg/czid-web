@@ -1,8 +1,8 @@
-import { Button as BaseButton } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
 import React from "react";
+import { Button as BaseButton } from "semantic-ui-react";
 
 import { IconArrowDownSmall } from "~ui/icons";
 

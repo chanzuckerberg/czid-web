@@ -1,6 +1,6 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import cs from "./link.scss";

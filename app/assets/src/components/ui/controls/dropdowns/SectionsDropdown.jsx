@@ -1,11 +1,11 @@
-import React from "react";
-import PropTypes from "prop-types";
-
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import DropdownTrigger from "~/components/ui/controls/dropdowns/common/DropdownTrigger";
-
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
+
+import DropdownTrigger from "~/components/ui/controls/dropdowns/common/DropdownTrigger";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+
 import cs from "./subtext_dropdown.scss";
 
 const SectionsDropdown = ({

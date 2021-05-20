@@ -1,11 +1,10 @@
-import React from "react";
-import PropTypes from "prop-types";
-
 import { includes } from "lodash/fp";
-import { openUrl } from "~utils/links";
+import PropTypes from "prop-types";
+import React from "react";
 import { withAnalytics } from "~/api/analytics";
-import UserForm from "~/components/views/users/UserForm";
 import { createUser, updateUser } from "~/api/user";
+import UserForm from "~/components/views/users/UserForm";
+import { openUrl } from "~utils/links";
 
 const DPH = "DPH";
 const GCE = "GCE";

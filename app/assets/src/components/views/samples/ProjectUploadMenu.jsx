@@ -1,9 +1,9 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
-import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import { logAnalyticsEvent } from "~/api/analytics";
+import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 
 import MetadataUploadModal from "./MetadataUploadModal";
 import cs from "./project_upload_menu.scss";

@@ -1,7 +1,7 @@
-import React from "react";
-import Dropzone from "react-dropzone";
 import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
+import Dropzone from "react-dropzone";
 import Icon from "../icons/Icon";
 import cs from "./file_picker.scss";
 

@@ -1,9 +1,9 @@
+import cx from "classnames";
+import { isNil } from "lodash/fp";
+import PropTypes from "prop-types";
 import React from "react";
 import BareDropdown from "./BareDropdown";
 import DropdownTrigger from "./common/DropdownTrigger";
-import { isNil } from "lodash/fp";
-import PropTypes from "prop-types";
-import cx from "classnames";
 import cs from "./dropdown.scss";
 
 class Dropdown extends React.Component {

@@ -1,6 +1,6 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { compact, get, isString } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";

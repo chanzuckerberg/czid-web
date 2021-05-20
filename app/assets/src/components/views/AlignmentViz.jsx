@@ -1,15 +1,14 @@
-import React from "react";
-import PropTypes from "~/components/utils/propTypes";
-
 import cx from "classnames";
+import React from "react";
 import { Popup } from "semantic-ui-react";
 import { getAlignmentData } from "~/api";
 import { getSampleMetadata } from "~/api/metadata";
-import AccessionViz from "../AccessionViz";
 import {
   isPipelineFeatureAvailable,
   ASSEMBLY_FEATURE,
 } from "~/components/utils/pipeline_versions";
+import PropTypes from "~/components/utils/propTypes";
+import AccessionViz from "../AccessionViz";
 import cs from "./alignment_viz.scss";
 
 class AlignmentViz extends React.Component {

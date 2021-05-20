@@ -1,16 +1,16 @@
-import React from "react";
-import PropTypes from "~/components/utils/propTypes";
 import { get, some, map, isUndefined, reject } from "lodash/fp";
-
+import React from "react";
+import { withAnalytics } from "~/api/analytics";
 import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import PropTypes from "~/components/utils/propTypes";
+
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { withAnalytics } from "~/api/analytics";
 
-import { CONDITIONAL_FIELDS } from "./constants.js";
 import cs from "./bulk_download_modal_footer.scss";
+import { CONDITIONAL_FIELDS } from "./constants.js";
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
   conditionalField.triggerValues.includes(

@@ -1,16 +1,16 @@
-import React from "react";
 import { fromPairs, set, find } from "lodash/fp";
 import PropTypes from "prop-types";
+import React from "react";
 
-import { SaveButton, ShareButton } from "~ui/controls/buttons";
-import BasicPopup from "~/components/BasicPopup";
-import { UserContext } from "~/components/common/UserContext";
 import { getPhyloTree, retryPhyloTree, saveVisualization } from "~/api";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import NarrowContainer from "~/components/layout/NarrowContainer";
+import BasicPopup from "~/components/BasicPopup";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
+import { UserContext } from "~/components/common/UserContext";
+import NarrowContainer from "~/components/layout/NarrowContainer";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
+import { SaveButton, ShareButton } from "~ui/controls/buttons";
 
 import Divider from "../../layout/Divider";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";

@@ -1,14 +1,14 @@
-import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
 
 import { getTaxonDescriptions, getTaxonDistributionForBackground } from "~/api";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Histogram, {
   HISTOGRAM_SCALE,
 } from "~/components/visualizations/Histogram";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { IconInfoSmall } from "~ui/icons";
-import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
 import cs from "./taxon_details_mode.scss";
 

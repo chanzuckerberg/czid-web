@@ -1,7 +1,7 @@
+import { forbidExtraProps } from "airbnb-prop-types";
+import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
-import cx from "classnames";
-import { forbidExtraProps } from "airbnb-prop-types";
 import { Modal as SemanticModal } from "semantic-ui-react";
 import { IconClose } from "~ui/icons";
 import cs from "./modal.scss";

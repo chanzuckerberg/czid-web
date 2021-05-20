@@ -1,9 +1,9 @@
 // This component was designed for showing the genus of a group of species
 // in the heatmap on hover, because genus is not always in the name of a species.
 // The code was adapted from MetadataLegend.
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
 import cs from "./row_group_legend.scss";
 

@@ -1,18 +1,18 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { merge, pick } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
+import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { humanize } from "~/helpers/strings";
-import { openUrl } from "~utils/links";
 import {
   IconHeatmapPrivate,
   IconHeatmapPublic,
   IconPhyloTreePrivate,
   IconPhyloTreePublic,
 } from "~ui/icons";
-import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { openUrl } from "~utils/links";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 import cs from "./visualizations_view.scss";
 

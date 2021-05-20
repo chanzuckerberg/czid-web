@@ -1,9 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
 import { filter } from "lodash";
-import BareDropdown from "../../ui/controls/dropdowns/BareDropdown";
+import PropTypes from "prop-types";
+import React from "react";
 import { Popup } from "semantic-ui-react";
+import BareDropdown from "../../ui/controls/dropdowns/BareDropdown";
 import cs from "./view_header.scss";
 
 class Title extends React.Component {

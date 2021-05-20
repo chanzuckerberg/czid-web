@@ -1,6 +1,6 @@
-import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
 import Label from "~/components/ui/labels/Label";
 import cs from "./dropdown_label.scss";
 

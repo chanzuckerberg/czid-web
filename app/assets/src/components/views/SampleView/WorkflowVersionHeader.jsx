@@ -1,10 +1,10 @@
-import React from "react";
 import cx from "classnames";
 import { map, get } from "lodash/fp";
+import React from "react";
 
+import { logAnalyticsEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
-import { logAnalyticsEvent } from "~/api/analytics";
 import { openUrl } from "~utils/links";
 
 import PipelineVersionSelect from "./PipelineVersionSelect";

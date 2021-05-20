@@ -1,12 +1,12 @@
-import { isEmpty } from "lodash/fp";
 import querystring from "querystring";
+import { isEmpty } from "lodash/fp";
 import React from "react";
 import SvgSaver from "svgsaver";
 
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
-import { logError } from "~/components/utils/logUtil";
 import { triggerFileDownload } from "~/components/utils/clientDownload";
+import { logError } from "~/components/utils/logUtil";
 import PropTypes from "~/components/utils/propTypes";
 import {
   getDownloadDropdownOptions,

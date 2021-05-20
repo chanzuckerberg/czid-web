@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
-import React from "react";
 import BaseSlider from "rc-slider";
+import React from "react";
 
 class Slider extends React.Component {
   constructor(props) {

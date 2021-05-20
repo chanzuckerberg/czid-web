@@ -1,9 +1,9 @@
-import React from "react";
-import { keys, filter } from "lodash/fp";
 import cx from "classnames";
+import { keys, filter } from "lodash/fp";
+import React from "react";
 
-import Checkbox from "~ui/controls/Checkbox";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import Checkbox from "~ui/controls/Checkbox";
 
 import cs from "./playground_typography.scss";
 

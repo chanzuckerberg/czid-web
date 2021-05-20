@@ -1,12 +1,12 @@
-import React from "react";
-import copy from "copy-to-clipboard";
 import cx from "classnames";
+import copy from "copy-to-clipboard";
 import moment from "moment";
+import React from "react";
 
+import { withAnalytics } from "~/api/analytics";
+import BasicPopup from "~/components/BasicPopup";
 import PropTypes from "~/components/utils/propTypes";
 import { IconCopySmall } from "~ui/icons";
-import BasicPopup from "~/components/BasicPopup";
-import { withAnalytics } from "~/api/analytics";
 
 import cs from "./bulk_download_details_mode.scss";
 

@@ -1,4 +1,3 @@
-import React from "react";
 import cx from "classnames";
 import {
   flow,
@@ -10,23 +9,27 @@ import {
   omit,
   without,
 } from "lodash/fp";
+import React from "react";
 
-import { WORKFLOWS } from "~/components/utils/workflows";
-import { UserContext } from "~/components/common/UserContext";
-import { getProjectMetadataFields } from "~/api/metadata";
-import DataTable from "~/components/visualizations/table/DataTable";
-import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
-import PropTypes from "~/components/utils/propTypes";
-import { formatFileSize } from "~/components/utils/format";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import TermsAgreement from "~ui/controls/TermsAgreement";
-import Checkbox from "~ui/controls/Checkbox";
 import {
   ANALYTICS_EVENT_NAMES,
   logAnalyticsEvent,
   withAnalytics,
 } from "~/api/analytics";
+import { getProjectMetadataFields } from "~/api/metadata";
+import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
+import { UserContext } from "~/components/common/UserContext";
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { formatFileSize } from "~/components/utils/format";
+import PropTypes from "~/components/utils/propTypes";
+import { WORKFLOWS } from "~/components/utils/workflows";
+import DataTable from "~/components/visualizations/table/DataTable";
+import Checkbox from "~ui/controls/Checkbox";
+import TermsAgreement from "~ui/controls/TermsAgreement";
 import { IconProjectPrivate, IconProjectPublic, IconSample } from "~ui/icons";
+import AdminUploadOptions from "./AdminUploadOptions";
+import HostOrganismMessage from "./HostOrganismMessage";
+import UploadProgressModal from "./UploadProgressModal";
 import {
   CG_WETLAB_DISPLAY_NAMES,
   CG_TECHNOLOGY_OPTIONS,
@@ -34,9 +37,6 @@ import {
 } from "./constants";
 
 import cs from "./sample_upload_flow.scss";
-import UploadProgressModal from "./UploadProgressModal";
-import HostOrganismMessage from "./HostOrganismMessage";
-import AdminUploadOptions from "./AdminUploadOptions";
 
 const processMetadataRows = metadataRows =>
   flow(

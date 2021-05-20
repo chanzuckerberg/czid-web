@@ -1,9 +1,9 @@
-import React from "react";
+import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 import PropTypes from "prop-types";
-import { forbidExtraProps } from "airbnb-prop-types";
-import { IconClose } from "~ui/icons";
+import React from "react";
 import { Sidebar as SemanticSidebar } from "semantic-ui-react";
+import { IconClose } from "~ui/icons";
 import cs from "./sidebar.scss";
 
 class Sidebar extends React.Component {

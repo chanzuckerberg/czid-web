@@ -2,8 +2,8 @@ import React from "react";
 
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
-import GeoSearchInputBox from "~ui/controls/GeoSearchInputBox";
 import HostOrganismMessage from "~/components/views/SampleUploadFlow/HostOrganismMessage";
+import GeoSearchInputBox from "~ui/controls/GeoSearchInputBox";
 
 import cs from "./playground_components.scss";
 
@@ -70,7 +70,10 @@ export default class PlaygroundComponents extends React.Component {
         // many
         <HostOrganismMessage
           key="4"
-          hostGenomes={[{ name: "Human", id: 1 }, { name: "Mosquito", id: 2 }]}
+          hostGenomes={[
+            { name: "Human", id: 1 },
+            { name: "Mosquito", id: 2 },
+          ]}
           samples={[
             { host_genome_id: 1, host_genome_name: "Human" },
             { host_genome_id: 2, host_genome_name: "none" },

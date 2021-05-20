@@ -1,19 +1,19 @@
+import { forbidExtraProps } from "airbnb-prop-types";
+import { get, find } from "lodash/fp";
+import PropTypes from "prop-types";
 import React from "react";
 import { Grid } from "semantic-ui-react";
-import { forbidExtraProps } from "airbnb-prop-types";
-import PropTypes from "prop-types";
-import { get, find } from "lodash/fp";
 
+import { logAnalyticsEvent } from "~/api/analytics";
+import Input from "~/components/ui/controls/Input";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import { IconCloseSmall } from "~ui/icons";
-import Input from "~/components/ui/controls/Input";
-import { logAnalyticsEvent } from "~/api/analytics";
 
 import PrimaryButton from "../buttons/PrimaryButton";
 import SecondaryButton from "../buttons/SecondaryButton";
-import DropdownTrigger from "./common/DropdownTrigger";
 import DropdownLabel from "./common/DropdownLabel";
+import DropdownTrigger from "./common/DropdownTrigger";
 import cs from "./threshold_filter_dropdown.scss";
 
 class ThresholdFilterDropdown extends React.Component {

@@ -1,5 +1,4 @@
 import { get, map, mapValues, toLower, upperCase } from "lodash/fp";
-import { numberWithPlusOrMinus } from "~/helpers/strings";
 import {
   getProjectDimensions,
   getProjects,
@@ -10,6 +9,7 @@ import {
   getVisualizations,
 } from "~/api";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import { numberWithPlusOrMinus } from "~/helpers/strings";
 
 const DISCOVERY_DOMAIN_MY_DATA = "my_data";
 const DISCOVERY_DOMAIN_ALL_DATA = "all_data";

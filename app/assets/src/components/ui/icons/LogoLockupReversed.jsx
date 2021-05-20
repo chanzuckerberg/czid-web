@@ -1,5 +1,5 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
 // Use for external tool branding (when the background is dark).
 // Use the prop "text" to update the label; default is "Tool Name"

@@ -2,8 +2,8 @@ import cx from "classnames";
 import React from "react";
 
 import PropTypes from "~/components/utils/propTypes";
-import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 import { IconArrowRight } from "~ui/icons";
+import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 
 import cs from "./sample_message.scss";
 

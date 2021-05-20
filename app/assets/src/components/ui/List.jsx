@@ -1,9 +1,9 @@
 import { forbidExtraProps } from "airbnb-prop-types";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import { nanoid } from "nanoid";
+import PropTypes from "prop-types";
 import React from "react";
 
-import { nanoid } from "nanoid";
 import cs from "./list.scss";
 
 const List = ({

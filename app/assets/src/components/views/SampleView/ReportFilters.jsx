@@ -1,17 +1,17 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { flatten, forEach, getOr, map, transform, values } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
+import { logAnalyticsEvent } from "~/api/analytics";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
 import MetricPicker from "~/components/views/report/filters/MetricPicker";
 import NameTypeFilter from "~/components/views/report/filters/NameTypeFilter";
-import SearchBox from "~ui/controls/SearchBox";
 import SpecificityFilter from "~/components/views/report/filters/SpecificityFilter";
-import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
-import { logAnalyticsEvent } from "~/api/analytics";
-import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import FilterTag from "~ui/controls/FilterTag";
+import SearchBox from "~ui/controls/SearchBox";
+import ThresholdFilterDropdown from "~ui/controls/dropdowns/ThresholdFilterDropdown";
 
 import { CATEGORIES, THRESHOLDS, TREE_METRICS } from "./constants";
 import cs from "./report_filters.scss";

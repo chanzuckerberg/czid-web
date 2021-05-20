@@ -1,6 +1,6 @@
+import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
-import cx from "classnames";
 
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import IconChartSmall from "~ui/icons/IconChartSmall";

@@ -1,8 +1,8 @@
-import React from "react";
+import { get, getOr, map } from "lodash/fp";
 import PropTypes from "prop-types";
+import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { get, getOr, map } from "lodash/fp";
 import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import TidyTree from "~/components/visualizations/TidyTree";
 

@@ -1,9 +1,9 @@
-import React from "react";
+import cx from "classnames";
+import { forEach, sumBy, values } from "lodash/fp";
 import PropTypes from "prop-types";
+import React from "react";
 import Input from "~ui/controls/Input";
 import { BareDropdown } from "~ui/controls/dropdowns";
-import { forEach, sumBy, values } from "lodash/fp";
-import cx from "classnames";
 import cs from "./live_search_pop_box.scss";
 
 class LiveSearchPopBox extends React.Component {

@@ -1,5 +1,5 @@
-import BasicPopup from "../../BasicPopup";
 import React from "react";
+import BasicPopup from "../../BasicPopup";
 
 const IconInsightSmall = ({ tooltip }) => {
   let icon = (

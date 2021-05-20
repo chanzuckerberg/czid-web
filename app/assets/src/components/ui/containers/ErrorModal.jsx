@@ -1,11 +1,11 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
-import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 import { IconAlert } from "~ui/icons";
+import ImgMicrobePrimary from "~ui/illustrations/ImgMicrobePrimary";
 
 import cs from "./error_modal.scss";
 

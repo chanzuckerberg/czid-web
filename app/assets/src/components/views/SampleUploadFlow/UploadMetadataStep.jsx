@@ -1,13 +1,13 @@
-import React from "react";
 import cx from "classnames";
+import React from "react";
 
+import { logAnalyticsEvent } from "~/api/analytics";
+import { validateManualMetadataForNewSamples } from "~/api/metadata";
 import MetadataUpload from "~/components/common/MetadataUpload";
-import Instructions from "~/components/views/samples/MetadataUploadModal/Instructions";
-import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import { validateManualMetadataForNewSamples } from "~/api/metadata";
-import { logAnalyticsEvent } from "~/api/analytics";
+import PropTypes from "~/components/utils/propTypes";
+import Instructions from "~/components/views/samples/MetadataUploadModal/Instructions";
 
 import cs from "./sample_upload_flow.scss";
 

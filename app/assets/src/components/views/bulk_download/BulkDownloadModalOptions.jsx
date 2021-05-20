@@ -1,23 +1,23 @@
-import React from "react";
-import PropTypes from "~/components/utils/propTypes";
-import { filter, get, orderBy } from "lodash/fp";
 import cx from "classnames";
+import { filter, get, orderBy } from "lodash/fp";
 import memoize from "memoize-one";
+import React from "react";
 
-import StatusLabel from "~ui/labels/StatusLabel";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
-import LoadingMessage from "~/components/common/LoadingMessage";
-import RadioButton from "~ui/controls/RadioButton";
-import Checkbox from "~ui/controls/Checkbox";
 import BasicPopup from "~/components/BasicPopup";
+import LoadingMessage from "~/components/common/LoadingMessage";
 import { UserContext } from "~/components/common/UserContext";
-import { humanize } from "~/helpers/strings";
+import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
+import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
+import { humanize } from "~/helpers/strings";
+import Checkbox from "~ui/controls/Checkbox";
+import RadioButton from "~ui/controls/RadioButton";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import StatusLabel from "~ui/labels/StatusLabel";
 
 import TaxonHitSelect from "./TaxonHitSelect";
-import { CONDITIONAL_FIELDS } from "./constants.js";
 import cs from "./bulk_download_modal_options.scss";
+import { CONDITIONAL_FIELDS } from "./constants.js";
 
 const triggersConditionalField = (conditionalField, selectedFields) =>
   conditionalField.triggerValues.includes(

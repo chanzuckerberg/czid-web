@@ -1,9 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { minBy, map } from "lodash/fp";
 import moment from "moment";
-import cs from "./public_sample_notification.scss";
+import PropTypes from "prop-types";
+import React from "react";
 import ListNotification from "~ui/notifications/ListNotification";
+import cs from "./public_sample_notification.scss";
 
 class PublicSampleNotification extends React.Component {
   render() {

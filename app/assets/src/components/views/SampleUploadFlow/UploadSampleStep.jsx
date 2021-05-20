@@ -1,6 +1,4 @@
-import React from "react";
 import cx from "classnames";
-import QueryString from "query-string";
 import {
   find,
   filter,
@@ -28,12 +26,9 @@ import {
   uniqueId,
   intersection,
 } from "lodash/fp";
+import QueryString from "query-string";
+import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import { WORKFLOWS } from "~/components/utils/workflows";
-import ProjectSelect from "~/components/common/ProjectSelect";
-import Tabs from "~/components/ui/controls/Tabs";
-import IssueGroup from "~ui/notifications/IssueGroup";
 import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
@@ -42,24 +37,29 @@ import {
 } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
+import ProjectSelect from "~/components/common/ProjectSelect";
 import { UserContext } from "~/components/common/UserContext";
-import { NANOPORE_FEATURE } from "~/components/utils/features";
+import Tabs from "~/components/ui/controls/Tabs";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
+import { NANOPORE_FEATURE } from "~/components/utils/features";
+import PropTypes from "~/components/utils/propTypes";
+import { WORKFLOWS } from "~/components/utils/workflows";
+import IssueGroup from "~ui/notifications/IssueGroup";
 
+import BasespaceSampleImport from "./BasespaceSampleImport";
 import LocalSampleFileUpload from "./LocalSampleFileUpload";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
-import BasespaceSampleImport from "./BasespaceSampleImport";
-import WorkflowSelector from "./WorkflowSelector";
-import cs from "./sample_upload_flow.scss";
 import SampleUploadTable from "./SampleUploadTable";
-import { openBasespaceOAuthPopup } from "./utils";
+import WorkflowSelector from "./WorkflowSelector";
 import {
   CG_TECHNOLOGY_OPTIONS,
   SELECT_ID_KEY,
   TEMP_DEFAULT_NANOPORE_WETLAB_OPTION,
   DEFAULT_MEDAKA_MODEL_OPTION,
 } from "./constants";
+import cs from "./sample_upload_flow.scss";
+import { openBasespaceOAuthPopup } from "./utils";
 
 const LOCAL_UPLOAD = "local";
 const REMOTE_UPLOAD = "remote";

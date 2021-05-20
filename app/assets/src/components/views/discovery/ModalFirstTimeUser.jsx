@@ -1,10 +1,10 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
 import { withAnalytics } from "~/api/analytics";
-import BacteriaCultureIcon from "~ui/icons/BacteriaCultureIcon";
-import Link from "~ui/controls/Link";
 import Modal from "~ui/containers/Modal";
+import Link from "~ui/controls/Link";
+import BacteriaCultureIcon from "~ui/icons/BacteriaCultureIcon";
 
 import InfoBanner from "./InfoBanner";
 import cs from "./modal_first_time_user.scss";
@@ -32,7 +32,8 @@ const ModalFirstTimeUser = ({ onClose }) => {
             your own data or browse our{" "}
             <Link className={cs.link} href="/public">
               Public Data
-            </Link>.
+            </Link>
+            .
           </React.Fragment>
         }
         title="Welcome to IDseq!"

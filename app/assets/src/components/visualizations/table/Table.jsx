@@ -1,6 +1,6 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { difference, find, isEmpty, map, orderBy } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 import { SortDirection } from "react-virtualized";
 
 import BaseTable from "./BaseTable";

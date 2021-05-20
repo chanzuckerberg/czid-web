@@ -1,8 +1,8 @@
-import React from "react";
-import FilePicker from "./FilePicker";
-import PropTypes from "prop-types";
 import { filter, some } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 import { parseCSVBlob } from "~/components/utils/csv";
+import FilePicker from "./FilePicker";
 
 class CSVUpload extends React.Component {
   state = {

@@ -1,7 +1,7 @@
 import React from "react";
 
-import PropTypes from "../../../utils/propTypes";
 import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
+import PropTypes from "../../../utils/propTypes";
 
 const NAME_TYPE_OPTIONS = [
   { text: "Scientific", value: "Scientific name" },

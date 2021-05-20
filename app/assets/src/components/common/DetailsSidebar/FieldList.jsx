@@ -1,8 +1,8 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
 
 import { get } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 
 import cs from "./field_list.scss";

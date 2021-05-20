@@ -1,5 +1,5 @@
-import React from "react";
 import { filter, first } from "lodash";
+import React from "react";
 
 // Separates the children based on type.
 // children - this.props.children.

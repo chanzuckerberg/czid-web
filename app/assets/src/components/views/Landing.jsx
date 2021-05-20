@@ -1,6 +1,6 @@
-import React from "react";
-import PropTypes from "prop-types";
 import axios from "axios";
+import PropTypes from "prop-types";
+import React from "react";
 import {
   Form,
   Input,
@@ -12,17 +12,17 @@ import {
 } from "semantic-ui-react";
 
 import BasicPopup from "~/components/BasicPopup";
-import { IconAlert } from "~ui/icons";
-import Container from "../ui/containers/Container";
+import LandingHeader from "~/components/views/LandingHeader";
 import ExternalLink from "~ui/controls/ExternalLink";
 import Link from "~ui/controls/Link";
-import TransparentButton from "../ui/controls/buttons/TransparentButton";
-import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
-import StringHelper from "../../helpers/StringHelper";
+import { IconAlert } from "~ui/icons";
 import ImgBacteriaPrimary from "~ui/illustrations/ImgBacteriaPrimary";
-import ImgDetectPrimary from "~ui/illustrations/ImgDetectPrimary";
 import ImgDecipherPrimary from "~ui/illustrations/ImgDecipherPrimary";
-import LandingHeader from "~/components/views/LandingHeader";
+import ImgDetectPrimary from "~ui/illustrations/ImgDetectPrimary";
+import StringHelper from "../../helpers/StringHelper";
+import Container from "../ui/containers/Container";
+import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
+import TransparentButton from "../ui/controls/buttons/TransparentButton";
 
 import cs from "./landing.scss";
 

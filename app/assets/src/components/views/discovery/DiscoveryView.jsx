@@ -1,8 +1,3 @@
-import React from "react";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
-import UrlQueryParser from "~/components/utils/UrlQueryParser";
-import moment from "moment";
 import {
   capitalize,
   clone,
@@ -26,20 +21,26 @@ import {
   xor,
   xorBy,
 } from "lodash/fp";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
+import { connect } from "react-redux";
 
-import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import { getSearchSuggestions } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { get } from "~/api/core";
 import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
+import { logError } from "~/components/utils/logUtil";
+import { generateUrlToSampleView } from "~/components/utils/urls";
 import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
-import { logError } from "~/components/utils/logUtil";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
-import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
 import { DEFAULTS_BY_WORKFLOW } from "~/components/views/samples/SamplesView/ColumnConfiguration";
+import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
+import { updateProjectIds } from "~/redux/modules/discovery/slice";
 import Tabs from "~ui/controls/Tabs";
 import {
   ImgProjectsSecondary,
@@ -48,17 +49,17 @@ import {
 } from "~ui/illustrations";
 import { VISUALIZATIONS_DOC_LINK } from "~utils/documentationLinks";
 import { openUrl } from "~utils/links";
-import { generateUrlToSampleView } from "~/components/utils/urls";
 
-import NoSearchResultsBanner from "./NoSearchResultsBanner";
-import DiscoveryHeader from "./DiscoveryHeader";
-import ModalFirstTimeUser from "./ModalFirstTimeUser";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
-import DiscoverySidebar from "./DiscoverySidebar";
-import DiscoveryFilters from "./DiscoveryFilters";
 import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
+import DiscoveryFilters from "./DiscoveryFilters";
+import DiscoveryHeader from "./DiscoveryHeader";
+import DiscoverySidebar from "./DiscoverySidebar";
+import InfoBanner from "./InfoBanner";
+import ModalFirstTimeUser from "./ModalFirstTimeUser";
+import NoSearchResultsBanner from "./NoSearchResultsBanner";
 import ProjectHeader from "./ProjectHeader";
 import {
   getDiscoveryDimensions,
@@ -71,10 +72,9 @@ import {
   DISCOVERY_DOMAIN_PUBLIC,
   DISCOVERY_DOMAIN_SNAPSHOT,
 } from "./discovery_api";
-import InfoBanner from "./InfoBanner";
-import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 
 import cs from "./discovery_view.scss";
+import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 
 // Data available
 // (A) non-filtered dimensions: for filter options

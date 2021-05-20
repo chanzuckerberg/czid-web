@@ -1,11 +1,11 @@
-import React from "react";
 import { set } from "lodash/fp";
+import React from "react";
 
-import { ViewHeader, NarrowContainer } from "~/components/layout";
 import { getUserSettingMetadataByCategory, updateUserSetting } from "~/api";
 import LoadingMessage from "~/components/common/LoadingMessage";
-import Checkbox from "~ui/controls/Checkbox";
 import { UserContext } from "~/components/common/UserContext";
+import { ViewHeader, NarrowContainer } from "~/components/layout";
+import Checkbox from "~ui/controls/Checkbox";
 
 import cs from "./user_settings_view.scss";
 

@@ -1,7 +1,7 @@
 // This legacy component is intended to be developer-facing only.
 // The user-facing component has since evolved to ResultsFolder.jsx.
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
 class RawResultsFolder extends React.Component {
   constructor(props, context) {

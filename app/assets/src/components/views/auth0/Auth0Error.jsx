@@ -1,9 +1,9 @@
-import React from "react";
 import { upperFirst } from "lodash/fp";
+import React from "react";
 
-import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 import BlankScreenMessage from "~/components/common/BlankScreenMessage";
 import PropTypes from "~/components/utils/propTypes";
+import ImgMicrobeSecondary from "~ui/illustrations/ImgMicrobeSecondary";
 
 import cs from "./auth0_error.scss";
 

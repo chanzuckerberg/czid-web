@@ -1,14 +1,14 @@
-import React from "react";
-import PropTypes from "prop-types";
-import moment from "moment";
+import cx from "classnames";
 import { assign, find, min } from "lodash/fp";
-import { IconMemberSmall, IconPrivateSmall, IconPublicSmall } from "~ui/icons";
-import IconViewSmall from "~ui/icons/IconViewSmall";
+import moment from "moment";
+import PropTypes from "prop-types";
+import React from "react";
 import ProjectInfoIconTooltip from "~/components/common/ProjectInfoIconTooltip";
 import ProjectSettingsModal from "~/components/views/samples/ProjectSettingsModal";
 import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
+import { IconMemberSmall, IconPrivateSmall, IconPublicSmall } from "~ui/icons";
+import IconViewSmall from "~ui/icons/IconViewSmall";
 import cs from "./project_header.scss";
-import cx from "classnames";
 
 const ProjectHeader = ({
   project,

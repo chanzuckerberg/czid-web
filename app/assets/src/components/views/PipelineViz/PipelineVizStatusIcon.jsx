@@ -1,6 +1,6 @@
+import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
-import cx from "classnames";
 
 import { IconLoading, IconSuccessSmall, IconInfoSmall } from "~ui/icons";
 

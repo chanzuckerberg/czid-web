@@ -1,18 +1,18 @@
-import React from "react";
-import PropTypes from "prop-types";
-import ReactDOM from "react-dom";
 import cx from "classnames";
 import copy from "copy-to-clipboard";
 import { get, map, sum, size } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
+import ReactDOM from "react-dom";
 
-import { withAnalytics } from "~/api/analytics";
-import { TooltipVizTable } from "~ui/containers";
-import BasicPopup from "~/components/BasicPopup";
-import GenomeViz from "~/components/visualizations/GenomeViz";
-import { IconCopySmall, IconDownloadSmall } from "~ui/icons";
-import { getURLParamString } from "~/helpers/url";
 import { getContigsSequencesByByteranges } from "~/api";
+import { withAnalytics } from "~/api/analytics";
+import BasicPopup from "~/components/BasicPopup";
 import { getTooltipStyle } from "~/components/utils/tooltip";
+import GenomeViz from "~/components/visualizations/GenomeViz";
+import { getURLParamString } from "~/helpers/url";
+import { TooltipVizTable } from "~ui/containers";
+import { IconCopySmall, IconDownloadSmall } from "~ui/icons";
 
 import cs from "./coverage_viz_bottom_sidebar.scss";
 import { generateContigReadVizData, getGenomeVizTooltipData } from "./utils";

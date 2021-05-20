@@ -1,10 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
-
-import cs from "./metadata_upload_modal.scss";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import List from "~/components/ui/List";
+import cs from "./metadata_upload_modal.scss";
 
 class UploadInstructions extends React.Component {
   render() {

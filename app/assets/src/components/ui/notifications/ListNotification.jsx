@@ -1,12 +1,12 @@
 // A notification that includes a list of items (such as errors) in an Accordion.
 
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
+import Accordion from "~/components/layout/Accordion";
 import Notification from "~ui/notifications/Notification";
 import cs from "./list_notification.scss";
-import Accordion from "~/components/layout/Accordion";
 
 class ListNotification extends React.Component {
   render() {

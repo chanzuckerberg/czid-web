@@ -4,17 +4,17 @@ import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
-import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import BulkDownloadModal from "~/components/views/bulk_download/BulkDownloadModal";
 import { showBulkDownloadNotification } from "~/components/views/bulk_download/BulkDownloadNotification";
-import NextcladeModal from "~/components/views/nextclade/NextcladeModal";
 import { ObjectCollectionView } from "~/components/views/discovery/DiscoveryDataLayer";
 import DiscoveryViewToggle from "~/components/views/discovery/DiscoveryViewToggle";
-import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import QualityControl from "~/components/views/discovery/QualityControl";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
+import NextcladeModal from "~/components/views/nextclade/NextcladeModal";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
@@ -29,14 +29,14 @@ import {
 } from "~ui/icons";
 import Label from "~ui/labels/Label";
 import { WORKFLOWS } from "~utils/workflows";
-import { SARS_COV_2, TRIGGERS, WORKFLOW_TRIGGERS } from "./constants";
 
 import {
   computeColumnsByWorkflow,
   DEFAULTS_BY_WORKFLOW,
 } from "./ColumnConfiguration";
-import cs from "./samples_view.scss";
 import ToolbarIcon from "./ToolbarIcon";
+import { SARS_COV_2, TRIGGERS, WORKFLOW_TRIGGERS } from "./constants";
+import cs from "./samples_view.scss";
 
 const MAX_NEXTCLADE_SAMPLES = 200;
 

@@ -1,7 +1,7 @@
-import Button from "./Button";
-import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
+import Button from "./Button";
 
 import cs from "./button_text_primary.scss";
 

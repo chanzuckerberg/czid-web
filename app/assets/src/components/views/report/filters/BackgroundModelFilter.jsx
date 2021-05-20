@@ -1,7 +1,7 @@
 import React from "react";
 
-import PropTypes from "~utils/propTypes";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
+import PropTypes from "~utils/propTypes";
 
 const BackgroundModelFilter = React.memo(
   ({

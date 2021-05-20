@@ -1,13 +1,13 @@
-import React from "react";
 import { compact } from "lodash/fp";
+import React from "react";
 
-import Input from "~ui/controls/Input";
-import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
-import PropTypes from "~/components/utils/propTypes";
 import { bulkImportRemoteSamples } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
-import Notification from "~ui/notifications/Notification";
 import List from "~/components/ui/List";
+import PropTypes from "~/components/utils/propTypes";
+import Input from "~ui/controls/Input";
+import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
+import Notification from "~ui/notifications/Notification";
 
 import {
   NO_TARGET_PROJECT_ERROR,

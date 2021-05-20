@@ -1,12 +1,12 @@
 import { omit } from "lodash/fp";
 import PropTypes from "prop-types";
-import ArrayUtils from "../../../utils/ArrayUtils";
 import React from "react";
+import ArrayUtils from "../../../utils/ArrayUtils";
 import BareDropdown from "./BareDropdown";
-import DropdownTrigger from "./common/DropdownTrigger";
-import DropdownLabel from "./common/DropdownLabel";
-import cs from "./multiple_nested_dropdown.scss";
 import CheckboxItem from "./common/CheckboxItem";
+import DropdownLabel from "./common/DropdownLabel";
+import DropdownTrigger from "./common/DropdownTrigger";
+import cs from "./multiple_nested_dropdown.scss";
 
 class MultipleNestedDropdown extends React.Component {
   constructor(props) {

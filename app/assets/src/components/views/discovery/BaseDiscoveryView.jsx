@@ -1,6 +1,6 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 // CSS file must be loaded after any elements you might want to override

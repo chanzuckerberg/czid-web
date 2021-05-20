@@ -1,15 +1,15 @@
+import axios from "axios";
 import PropTypes from "prop-types";
 import React from "react";
-import Input from "../../ui/controls/Input";
-import Wizard from "../../ui/containers/Wizard";
-import axios from "axios";
-import DataTable from "../../visualizations/table/DataTable";
 import Moment from "react-moment";
-import PhyloTreeChecks from "./PhyloTreeChecks";
-import SearchBox from "../../ui/controls/SearchBox";
+import { validatePhyloTreeName } from "~/api";
 import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
-import { validatePhyloTreeName } from "~/api";
+import Wizard from "../../ui/containers/Wizard";
+import Input from "../../ui/controls/Input";
+import SearchBox from "../../ui/controls/SearchBox";
+import DataTable from "../../visualizations/table/DataTable";
+import PhyloTreeChecks from "./PhyloTreeChecks";
 
 class PhyloTreeCreation extends React.Component {
   constructor(props) {

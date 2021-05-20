@@ -1,8 +1,8 @@
-import { select, event as currentEvent, mouse } from "d3-selection";
 import { extent, min, max } from "d3-array";
-import { flatten } from "lodash/fp";
-import { scaleLinear } from "d3-scale";
 import { color } from "d3-color";
+import { scaleLinear } from "d3-scale";
+import { select, event as currentEvent, mouse } from "d3-selection";
+import { flatten } from "lodash/fp";
 
 const DEFAULT_COLOR = "#3867FA";
 

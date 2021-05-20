@@ -1,6 +1,6 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { forEach, values, sortBy } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 import { BaseMultipleFilter } from "~/components/common/filters";
 
 class LocationFilter extends React.Component {

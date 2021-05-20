@@ -1,21 +1,21 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 import { StickyContainer, Sticky } from "react-sticky";
 
-import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControls";
-import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
-import DetailsSidebar from "~/components/common/DetailsSidebar";
-import ErrorBoundary from "~/components/ErrorBoundary";
 import { getAMRCounts } from "~/api/amr";
+import { logAnalyticsEvent } from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
+import ErrorBoundary from "~/components/ErrorBoundary";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
+import { ViewHeader, NarrowContainer } from "~/components/layout";
 import {
   processMetadata,
   processMetadataTypes,
 } from "~/components/utils/metadata";
-import { IconLoading } from "~ui/icons";
-import { logAnalyticsEvent } from "~/api/analytics";
-import { ViewHeader, NarrowContainer } from "~/components/layout";
+import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControls";
+import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
+import { IconLoading } from "~ui/icons";
 import { createCSVObjectURL } from "~utils/csv";
 
 import cs from "./amr_heatmap_view.scss";

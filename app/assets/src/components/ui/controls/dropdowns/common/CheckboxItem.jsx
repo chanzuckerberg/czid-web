@@ -1,9 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
-import BareDropdown from "../BareDropdown";
-import { IconCheckSmall } from "~ui/icons";
-import cs from "./checkbox_item.scss";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
+import { IconCheckSmall } from "~ui/icons";
+import BareDropdown from "../BareDropdown";
+import cs from "./checkbox_item.scss";
 
 const CheckboxItem = ({ value, label, checked, onOptionClick, boxed }) => (
   <BareDropdown.Item

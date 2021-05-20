@@ -1,11 +1,20 @@
 // These are the buttons that appear on a Report table row when hovered.
-import React from "react";
 import cx from "classnames";
 import { filter, size } from "lodash/fp";
+import React from "react";
 
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
+import { UserContext } from "~/components/common/UserContext";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
+import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
+import {
+  isPipelineFeatureAvailable,
+  COVERAGE_VIZ_FEATURE,
+  CONSENSUS_GENOME_FEATURE,
+  MINIMUM_VERSIONS,
+} from "~/components/utils/pipeline_versions";
+import PropTypes from "~/components/utils/propTypes";
 import {
   IconAlignmentSmall,
   IconBrowserSmall,
@@ -15,15 +24,6 @@ import {
   IconDownloadSmall,
   IconPhyloTreeSmall,
 } from "~ui/icons";
-import PropTypes from "~/components/utils/propTypes";
-import {
-  isPipelineFeatureAvailable,
-  COVERAGE_VIZ_FEATURE,
-  CONSENSUS_GENOME_FEATURE,
-  MINIMUM_VERSIONS,
-} from "~/components/utils/pipeline_versions";
-import { UserContext } from "~/components/common/UserContext";
-import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
 import cs from "./hover_actions.scss";
 
 class HoverActions extends React.Component {

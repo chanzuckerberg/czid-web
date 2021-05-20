@@ -1,7 +1,7 @@
-import React from "react";
 import { union } from "lodash/fp";
-import PublicSampleNotification from "./PublicSampleNotification";
+import React from "react";
 import { showToast } from "~/components/utils/toast";
+import PublicSampleNotification from "./PublicSampleNotification";
 
 const publicSampleNotification = (samples, projectName, onClose) => {
   showToast(

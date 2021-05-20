@@ -1,5 +1,5 @@
-import React from "react";
 import { uniq, find, chunk, random, get } from "lodash/fp";
+import React from "react";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";

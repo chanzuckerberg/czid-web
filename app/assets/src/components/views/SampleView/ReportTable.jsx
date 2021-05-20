@@ -1,33 +1,33 @@
-import React from "react";
-import { compact, filter, get, getOr, map, orderBy, reduce } from "lodash/fp";
-import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
 import cx from "classnames";
+import { compact, filter, get, getOr, map, orderBy, reduce } from "lodash/fp";
+import React from "react";
+import { defaultTableRowRenderer, SortDirection } from "react-virtualized";
 
-import { Table } from "~/components/visualizations/table";
 import {
   logAnalyticsEvent,
   withAnalytics,
   ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
-import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
 import { getCsrfToken } from "~/api/utils";
+import BasicPopup from "~/components/BasicPopup";
+import { UserContext } from "~/components/common/UserContext";
+import PathogenLabel from "~/components/ui/labels/PathogenLabel";
 import {
   isPipelineFeatureAvailable,
   ASSEMBLY_FEATURE,
   COVERAGE_VIZ_FEATURE,
 } from "~/components/utils/pipeline_versions";
-import { UserContext } from "~/components/common/UserContext";
-import BasicPopup from "~/components/BasicPopup";
-import { IconInsightSmall } from "~ui/icons";
-import PathogenLabel from "~/components/ui/labels/PathogenLabel";
-import PathogenPreview from "~/components/views/report/PathogenPreview";
-import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
 import PropTypes from "~/components/utils/propTypes";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
+import PhyloTreeChecks from "~/components/views/phylo_tree/PhyloTreeChecks";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import PathogenPreview from "~/components/views/report/PathogenPreview";
+import { getCategoryAdjective } from "~/components/views/report/utils/taxon";
+import { Table } from "~/components/visualizations/table";
+import { IconInsightSmall } from "~ui/icons";
 
-import { REPORT_TABLE_COLUMNS } from "./constants";
 import HoverActions from "./HoverActions";
+import { REPORT_TABLE_COLUMNS } from "./constants";
 import cs from "./report_table.scss";
 
 // Values for null values when sorting ascending and descending

@@ -1,4 +1,3 @@
-import React from "react";
 import _fp, {
   filter,
   groupBy,
@@ -9,13 +8,14 @@ import _fp, {
   get,
   compact,
 } from "lodash/fp";
+import React from "react";
+import { getOfficialMetadataFields } from "~/api/metadata";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DataTable from "~/components/visualizations/table/DataTable";
-import { getOfficialMetadataFields } from "~/api/metadata";
-import { getGroupIndex } from "./constants";
 import { Dropdown } from "~ui/controls/dropdowns";
-import cs from "./metadata_dictionary.scss";
 import { getAllHostGenomes } from "../../../api";
+import { getGroupIndex } from "./constants";
+import cs from "./metadata_dictionary.scss";
 
 const map = _fp.map.convert({ cap: false });
 

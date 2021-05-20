@@ -1,6 +1,6 @@
 // SVG generated with Sketch, from Jenn
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
 const IconBrowserSmall = ({ className }) => {
   return (

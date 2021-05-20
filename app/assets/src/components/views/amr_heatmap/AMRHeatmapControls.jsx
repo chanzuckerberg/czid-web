@@ -1,10 +1,10 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { Divider } from "~/components/layout";
-import { Dropdown } from "~ui/controls/dropdowns";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
+import { Dropdown } from "~ui/controls/dropdowns";
 
 import cs from "./amr_heatmap_view.scss";
 

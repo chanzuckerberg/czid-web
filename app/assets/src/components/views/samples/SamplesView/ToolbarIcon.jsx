@@ -1,8 +1,8 @@
 // ToolbarIcons are used at the top of the Samples View table.
 
-import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
 
 import BasicPopup from "~/components/BasicPopup";
 

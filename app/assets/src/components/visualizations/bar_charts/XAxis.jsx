@@ -1,6 +1,6 @@
+import cx from "classnames";
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
-import cx from "classnames";
 
 import { numberWithSiPrefix } from "~/helpers/strings";
 

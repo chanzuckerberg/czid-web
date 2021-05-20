@@ -1,7 +1,7 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { unset, get, set } from "lodash/fp";
 import memoize from "memoize-one";
+import PropTypes from "prop-types";
+import React from "react";
 
 import {
   getBackgrounds,
@@ -9,13 +9,13 @@ import {
   uploadedByCurrentUser,
   getHeatmapMetrics,
 } from "~/api";
-import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
 import { validateSampleIds } from "~/api/access_control";
 import { logAnalyticsEvent } from "~/api/analytics";
+import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
 
-import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
+import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
 import cs from "./bulk_download_modal.scss";
 
 const DEFAULT_CREATION_ERROR =

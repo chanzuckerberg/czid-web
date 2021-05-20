@@ -1,9 +1,9 @@
 import React from "react";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
+import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
 import PropTypes from "~utils/propTypes";
 
-import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
 import cs from "./consensus_genome_dropdown.scss";
-import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
 
 const ConsensusGenomeDropdown = ({
   workflowRuns,

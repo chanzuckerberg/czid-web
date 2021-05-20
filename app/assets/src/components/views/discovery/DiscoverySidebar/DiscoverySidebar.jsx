@@ -1,15 +1,15 @@
-import React from "react";
 import cx from "classnames";
 import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
+import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import PropTypes from "~/components/utils/propTypes";
-import { Accordion } from "~/components/layout";
 import BasicPopup from "~/components/BasicPopup";
+import { Accordion } from "~/components/layout";
+import PropTypes from "~/components/utils/propTypes";
 
-import cs from "./discovery_sidebar.scss";
 import ProjectDescription from "./ProjectDescription";
+import cs from "./discovery_sidebar.scss";
 
 export default class DiscoverySidebar extends React.Component {
   constructor(props) {

@@ -1,11 +1,6 @@
-import React from "react";
-import PropTypes from "~/components/utils/propTypes";
 import cx from "classnames";
 
 import d3 from "d3";
-import memoize from "memoize-one";
-import { getProject, getSamples, getSamplesReadStats } from "~/api";
-import { logAnalyticsEvent } from "~/api/analytics";
 import {
   ceil,
   compact,
@@ -17,21 +12,26 @@ import {
   max,
   sortBy,
 } from "lodash/fp";
-import InfoBanner from "./InfoBanner";
-import Histogram from "~/components/visualizations/Histogram";
-import { IconInfoSmall } from "~/components/ui/icons";
-import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
-import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import { TooltipVizTable } from "~ui/containers";
-import { getTooltipStyle } from "~/components/utils/tooltip";
-import Notification from "~ui/notifications/Notification";
-import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";
-import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
+import memoize from "memoize-one";
+import React from "react";
+
+import { getProject, getSamples, getSamplesReadStats } from "~/api";
+import { logAnalyticsEvent } from "~/api/analytics";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import List from "~/components/ui/List";
-
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { IconInfoSmall } from "~/components/ui/icons";
+import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
+import PropTypes from "~/components/utils/propTypes";
+import { getTooltipStyle } from "~/components/utils/tooltip";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
+import Histogram from "~/components/visualizations/Histogram";
+import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
+import CategoricalLegend from "~/components/visualizations/legends/CategoricalLegend";
+import { TooltipVizTable } from "~ui/containers";
+import Notification from "~ui/notifications/Notification";
+import InfoBanner from "./InfoBanner";
 import {
   BAR_FILL_COLOR,
   HOVER_BAR_FILL_COLOR,

@@ -1,7 +1,7 @@
-import { Menu as BaseMenu } from "semantic-ui-react";
+import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
-import cx from "classnames";
+import { Menu as BaseMenu } from "semantic-ui-react";
 
 class Menu extends React.Component {
   render() {

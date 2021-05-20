@@ -1,9 +1,9 @@
 import React from "react";
 
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import PipelineVersionSelect from "~/components/views/SampleView/PipelineVersionSelect";
-import PropTypes from "~/components/utils/propTypes";
 import ViewHeader from "~/components/layout/ViewHeader";
+import PropTypes from "~/components/utils/propTypes";
+import PipelineVersionSelect from "~/components/views/SampleView/PipelineVersionSelect";
 
 import cs from "./pipeline_viz.scss";
 
@@ -24,9 +24,7 @@ class PipelineVizHeader extends React.Component {
 
   handlePipelineVersionSelect = version => {
     const { sample } = this.props;
-    window.location = `${location.protocol}//${location.host}/samples/${
-      sample.id
-    }/pipeline_viz/${version}`;
+    window.location = `${location.protocol}//${location.host}/samples/${sample.id}/pipeline_viz/${version}`;
   };
 
   render() {

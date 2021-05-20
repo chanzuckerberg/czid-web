@@ -1,12 +1,12 @@
 // ViewHeader ignores all children that are not ViewHeader.Content or ViewHeader.Controls.
+import cx from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
-import Content from "./Content";
-import Pretitle from "./Pretitle";
-import Controls from "./Controls";
-import Title from "./Title";
-import cx from "classnames";
 import extractChildren from "../../utils/extractChildren";
+import Content from "./Content";
+import Controls from "./Controls";
+import Pretitle from "./Pretitle";
+import Title from "./Title";
 import cs from "./view_header.scss";
 
 const ViewHeader = ({ className, children }) => {

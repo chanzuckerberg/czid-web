@@ -1,27 +1,28 @@
-import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
 
+import { getBackgrounds } from "~/api";
+import { logAnalyticsEvent } from "~/api/analytics";
 import {
   createSnapshot,
   getSnapshotInfo,
   deleteSnapshot,
   updateSnapshotBackground,
 } from "~/api/snapshot_links";
-import { getBackgrounds } from "~/api";
-import { copyUrlToClipboard } from "~/helpers/url";
-import DisableSharingConfirmationModal from "./DisableSharingConfirmationModal";
 import BasicPopup from "~/components/BasicPopup";
 import LoadingMessage from "~/components/common/LoadingMessage";
-import HelpIcon from "~ui/containers/HelpIcon";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
-import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
-import Toggle from "~ui/controls/Toggle";
-import { Input } from "~ui/controls";
-import { IconInfoSmall } from "~/components/ui/icons";
-import { logAnalyticsEvent } from "~/api/analytics";
 import List from "~/components/ui/List";
+import { IconInfoSmall } from "~/components/ui/icons";
+import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
+import { copyUrlToClipboard } from "~/helpers/url";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import HelpIcon from "~ui/containers/HelpIcon";
+import { Input } from "~ui/controls";
+import Toggle from "~ui/controls/Toggle";
+import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
+
+import DisableSharingConfirmationModal from "./DisableSharingConfirmationModal";
 
 import cs from "./view_only_link_form.scss";
 

@@ -1,5 +1,5 @@
-import React from "react";
 import d3 from "d3";
+import React from "react";
 
 class ScatterPlot extends React.Component {
   componentDidMount() {
@@ -7,8 +7,7 @@ class ScatterPlot extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    d3
-      .select(this.container)
+    d3.select(this.container)
       .select("svg")
       .remove();
     this.renderD3(nextProps);
@@ -174,8 +173,8 @@ class ScatterPlot extends React.Component {
       return prev + cur;
     };
 
-    let xBar = xSeries.reduce(reduceSumFunc) * 1.0 / xSeries.length;
-    let yBar = ySeries.reduce(reduceSumFunc) * 1.0 / ySeries.length;
+    let xBar = (xSeries.reduce(reduceSumFunc) * 1.0) / xSeries.length;
+    let yBar = (ySeries.reduce(reduceSumFunc) * 1.0) / ySeries.length;
 
     let ssXX = xSeries
       .map(function(d) {

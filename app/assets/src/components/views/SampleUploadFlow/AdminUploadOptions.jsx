@@ -1,9 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { set } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
-import Input from "~ui/controls/Input";
 import HelpIcon from "~ui/containers/HelpIcon";
+import Input from "~ui/controls/Input";
 
 import cs from "./admin_upload_options.scss";
 

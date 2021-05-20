@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
-import Input from "~ui/controls/Input";
 import { requestPasswordReset } from "~/api/user";
+import Input from "~ui/controls/Input";
 
 import cs from "./forgot_password.scss";
 

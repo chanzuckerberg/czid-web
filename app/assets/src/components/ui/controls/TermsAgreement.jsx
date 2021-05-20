@@ -1,7 +1,7 @@
-import React from "react";
 import PropTypes from "prop-types";
-import cs from "./terms_agreement.scss";
+import React from "react";
 import Checkbox from "~ui/controls/Checkbox";
+import cs from "./terms_agreement.scss";
 
 class TermsAgreement extends React.Component {
   render() {

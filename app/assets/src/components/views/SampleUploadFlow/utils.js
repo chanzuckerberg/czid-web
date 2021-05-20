@@ -1,7 +1,7 @@
 import { sortBy } from "lodash/fp";
 
-import { getURLParamString } from "~/helpers/url";
 import { openUrlInPopupWindow } from "~/components/utils/links";
+import { getURLParamString } from "~/helpers/url";
 
 const BASESPACE_OAUTH_URL = "https://basespace.illumina.com/oauth/authorize";
 const BASESPACE_OAUTH_WINDOW_NAME = "BASESPACE_OAUTH_WINDOW";

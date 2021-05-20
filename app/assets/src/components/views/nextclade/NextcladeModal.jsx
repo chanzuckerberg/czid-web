@@ -1,5 +1,3 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
 import {
   compact,
@@ -11,26 +9,28 @@ import {
   uniq,
   values,
 } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { createConsensusGenomeCladeExport } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
-import { UserContext } from "~/components/common/UserContext";
-import { WORKFLOWS } from "~utils/workflows";
 import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import { UserContext } from "~/components/common/UserContext";
+import List from "~/components/ui/List";
+import ErrorModal from "~/components/ui/containers/ErrorModal";
+import { IconInfoSmall } from "~/components/ui/icons";
 import {
   NEXTCLADE_APP_LINK,
   NEXTCLADE_REFERENCE_TREE_LINK,
 } from "~/components/utils/documentationLinks";
+import { SARS_COV_2 } from "~/components/views/samples/SamplesView/constants";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import { IconInfoSmall } from "~/components/ui/icons";
-import ErrorModal from "~/components/ui/containers/ErrorModal";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
+import { WORKFLOWS } from "~utils/workflows";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
-import List from "~/components/ui/List";
-import { SARS_COV_2 } from "~/components/views/samples/SamplesView/constants";
 
 import cs from "./nextclade_modal.scss";
 

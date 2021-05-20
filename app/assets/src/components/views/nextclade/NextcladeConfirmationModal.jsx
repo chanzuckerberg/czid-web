@@ -1,11 +1,11 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
 import { Image } from "semantic-ui-react";
-import Modal from "~ui/containers/Modal";
-import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import IconLoading from "~/components/ui/icons/IconLoading";
+import Modal from "~ui/containers/Modal";
+import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 
 import cs from "./nextclade_confirmation_modal.scss";
 

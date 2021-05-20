@@ -1,9 +1,9 @@
-import React from "react";
+import { forbidExtraProps } from "airbnb-prop-types";
+import cx from "classnames";
 import PropTypes from "prop-types";
+import React from "react";
 import { DateInput as BaseDateInput } from "semantic-ui-calendar-react";
 import cs from "./date_input.scss";
-import cx from "classnames";
-import { forbidExtraProps } from "airbnb-prop-types";
 
 // TODO: fix limitations of the original component
 // 1) Styles of the date picker (table in popup) cannot be overridden

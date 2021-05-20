@@ -1,5 +1,5 @@
-import React from "react";
 import PropTypes from "prop-types";
+import React from "react";
 
 import { getOntology } from "~/api/amr";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -138,7 +138,8 @@ export default class GeneDetailsMode extends React.Component {
           }
         >
           CARD Antibiotic Resistance Ontology
-        </a>, which is released under the{" "}
+        </a>
+        , which is released under the{" "}
         <a
           href="https://creativecommons.org/licenses/by/4.0/"
           className={cs.cardLink}
@@ -267,7 +268,8 @@ export default class GeneDetailsMode extends React.Component {
       const pubmedId = pmidText.split(" ")[1];
       return (
         <div className={cs.textInner} key={pubmedId}>
-          {citation} (<span className={cs.link}>
+          {citation} (
+          <span className={cs.link}>
             <a
               href={URL_PUBMED + pubmedId}
               className={cs.link}
@@ -287,7 +289,8 @@ export default class GeneDetailsMode extends React.Component {
             >
               {pmidText}
             </a>
-          </span>)
+          </span>
+          )
         </div>
       );
     });

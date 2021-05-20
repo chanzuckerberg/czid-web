@@ -1,8 +1,8 @@
-import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
 
 import { clamp } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import cs from "./loading_bar.scss";
 

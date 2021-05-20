@@ -1,13 +1,13 @@
-import React from "react";
 import cx from "classnames";
-import PropTypes from "prop-types";
-import { Search } from "semantic-ui-react";
 import { escapeRegExp, debounce } from "lodash";
+import PropTypes from "prop-types";
+import React from "react";
+import { Search } from "semantic-ui-react";
 
-import cs from "./search_box.scss";
 import { get } from "~/api/core";
 import { getURLParamString } from "~/helpers/url";
 import { IconSearch } from "~ui/icons";
+import cs from "./search_box.scss";
 
 class SearchBox extends React.Component {
   constructor(props) {

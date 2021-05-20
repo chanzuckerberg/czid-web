@@ -1,4 +1,4 @@
-import React from "react";
+import cx from "classnames";
 import _fp, {
   size,
   get,
@@ -10,13 +10,13 @@ import _fp, {
   sumBy,
   keyBy,
 } from "lodash/fp";
-import cx from "classnames";
+import React from "react";
 
-import { sampleNameFromFileName } from "~utils/sample";
-import FilePicker from "~ui/controls/FilePicker";
-import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent } from "~/api/analytics";
 import List from "~/components/ui/List";
+import PropTypes from "~/components/utils/propTypes";
+import FilePicker from "~ui/controls/FilePicker";
+import { sampleNameFromFileName } from "~utils/sample";
 
 import cs from "./sample_upload_flow.scss";
 

@@ -1,5 +1,5 @@
-import compound from "./compound";
 import d3 from "d3";
+import compound from "./compound";
 
 function intersection(r1, r2) {
   let reverse = r1[0] > r1[1];

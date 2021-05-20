@@ -1,4 +1,3 @@
-import React from "react";
 import cx from "classnames";
 import _fp, {
   zipObject,
@@ -18,19 +17,20 @@ import _fp, {
   merge,
   keys,
 } from "lodash/fp";
+import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
-import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
-import DataTable from "~/components/visualizations/table/DataTable";
-import PropTypes from "~/components/utils/propTypes";
-import { IconPlusCircleSmall } from "~ui/icons";
-import { UserContext } from "~/components/common/UserContext";
 import HostOrganismSearchBox from "~/components/common/HostOrganismSearchBox";
+import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
+import PropTypes from "~/components/utils/propTypes";
+import DataTable from "~/components/visualizations/table/DataTable";
+import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
+import { IconPlusCircleSmall } from "~ui/icons";
 
-import cs from "./metadata_manual_input.scss";
 import MetadataInput from "./MetadataInput";
+import cs from "./metadata_manual_input.scss";
 
 const map = _fp.map.convert({ cap: false });
 

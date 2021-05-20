@@ -1,7 +1,7 @@
-import React from "react";
-import MetadataSection from "./MetadataSection";
-import Textarea from "~/components/ui/controls/Textarea";
 import PropTypes from "prop-types";
+import React from "react";
+import Textarea from "~/components/ui/controls/Textarea";
+import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
 class NotesTab extends React.Component {

@@ -1,18 +1,18 @@
-import React from "react";
+import axios from "axios";
 import cx from "classnames";
 import PropTypes from "prop-types";
-import axios from "axios";
+import React from "react";
 
 import { withAnalytics } from "~/api/analytics";
-import Modal from "~ui/containers/Modal";
-import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
-import ShareButton from "~ui/controls/buttons/ShareButton";
-import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 import { UserContext } from "~/components/common/UserContext";
 import Divider from "~/components/layout/Divider";
+import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
+import Modal from "~ui/containers/Modal";
+import ShareButton from "~ui/controls/buttons/ShareButton";
+import { IconProjectPrivate, IconProjectPublic } from "~ui/icons";
 
-import UserManagementForm from "./UserManagementForm";
 import PublicProjectConfirmationModal from "./PublicProjectConfirmationModal";
+import UserManagementForm from "./UserManagementForm";
 import ViewOnlyLinkForm from "./ViewOnlyLinkForm";
 import cs from "./project_settings_modal.scss";
 

@@ -1,4 +1,4 @@
-import QueryString from "query-string";
+import copy from "copy-to-clipboard";
 import {
   filter,
   isObject,
@@ -12,8 +12,8 @@ import {
   flatten,
   join,
 } from "lodash/fp";
+import QueryString from "query-string";
 import { shortenUrl } from "~/api";
-import copy from "copy-to-clipboard";
 
 // See also parseUrlParams in SamplesHeatmapView
 export const parseUrlParams = () => {

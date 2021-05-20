@@ -1,13 +1,13 @@
 import React from "react";
-import PropTypes from "~utils/propTypes";
 
 import { withAnalytics } from "~/api/analytics";
+import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import IconLoading from "~/components/ui/icons/IconLoading";
+import cs from "~/components/views/nextclade/nextclade_modal_footer.scss";
 import AccordionNotification from "~ui/notifications/AccordionNotification";
 import Notification from "~ui/notifications/Notification";
-import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 
-import cs from "~/components/views/nextclade/nextclade_modal_footer.scss";
+import PropTypes from "~utils/propTypes";
 
 const NextcladeModalFooter = ({
   invalidSampleNames,
