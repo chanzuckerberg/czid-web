@@ -36,22 +36,32 @@ const SampleDetailsMode = ({
   snapshotShareId,
   tempSelectedOptions,
 }) => {
-  const [metadata, setMetadata] = useState(null);
   const [additionalInfo, setAdditionalInfo] = useState(null);
+  const [currentTab, setCurrentTab] = useState(TABS[0]);
+  const [lastValidMetadata, setLastValidMetadata] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [metadata, setMetadata] = useState(null);
+  const [metadataChanged, setMetadataChanged] = useState({});
+  const [metadataErrors, setMetadataErrors] = useState({});
+  const [metadataSavePending, setMetadataSavePending] = useState({});
+  const [metadataTypes, setMetadataTypes] = useState(null);
   const [pipelineInfo, setPipelineInfo] = useState(null);
   const [pipelineRun, setPipelineRun] = useState(null);
-  const [metadataTypes, setMetadataTypes] = useState(null);
-  const [metadataChanged, setMetadataChanged] = useState({});
-  const [metadataSavePending, setMetadataSavePending] = useState({});
-  const [lastValidMetadata, setLastValidMetadata] = useState(null);
-  const [metadataErrors, setMetadataErrors] = useState({});
-  const [currentTab, setCurrentTab] = useState(TABS[0]);
   const [sampleTypes, setSampleTypes] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [singleKeyValueToSave, setSingleKeyValueToSave] = useState(null);
 
   useEffect(() => {
     if (sampleId) fetchMetadata();
   }, [sampleId]);
+
+  useEffect(() => {
+    // _save relies on this.state.metadata being up-to-date
+    if (singleKeyValueToSave) {
+      const [key, value] = singleKeyValueToSave;
+      _save(sampleId, key, value);
+      setSingleKeyValueToSave(null);
+    }
+  }, [metadata]);
 
   const onTabChange = tab => {
     setCurrentTab(tab);
@@ -113,12 +123,12 @@ const SampleDetailsMode = ({
       setMetadataChanged(set(key, true, metadataChanged));
       return;
     }
-
+    if (shouldSave) {
+      setSingleKeyValueToSave([key, value]);
+    }
     setMetadata(set(key, value, metadata));
     setMetadataChanged(set(key, !shouldSave, metadataChanged));
     setMetadataErrors(set(key, null, metadataErrors));
-
-    shouldSave && _save(sampleId, key, value);
 
     logAnalyticsEvent("SampleDetailsMode_metadata_changed", {
       sampleId,
