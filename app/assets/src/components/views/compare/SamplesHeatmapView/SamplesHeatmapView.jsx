@@ -576,9 +576,12 @@ class SamplesHeatmapView extends React.Component {
       ]);
     }
 
-    const newState = allowedFeatures.includes("heatmap_service")
-      ? this.extractDataFromService(heatmapData)
-      : this.extractData(heatmapData);
+    let newState = {};
+    if (!isEmpty(heatmapData)) {
+      newState = allowedFeatures.includes("heatmap_service")
+        ? this.extractDataFromService(heatmapData)
+        : this.extractData(heatmapData);
+    }
 
     // Only calculate the metadataTypes once.
     if (metadataFields !== null) {

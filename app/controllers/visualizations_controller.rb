@@ -192,7 +192,9 @@ class VisualizationsController < ApplicationController
   end
 
   def samples_taxons
-    if current_user.allowed_feature?("heatmap_service")
+    if samples_for_heatmap.blank?
+      render json: {}
+    elsif current_user.allowed_feature?("heatmap_service")
       pr_id_to_sample_id = HeatmapHelper.get_latest_pipeline_runs_for_samples(samples_for_heatmap)
       heatmap_dict = TaxonCountsHeatmapService.call(
         pipeline_run_ids: pr_id_to_sample_id.keys,
