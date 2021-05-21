@@ -798,7 +798,13 @@ class Sample < ApplicationRecord
   # NOTE: ensure_metadata_field_for_key should be called before this, to ensure a matching metadata field is available.
   def get_metadatum_to_save(key, val)
     m = get_existing_metadatum(key.to_s)
-    unless m
+    if m.blank?
+      if val.blank?
+        return {
+          metadatum: nil,
+          status: "ok",
+        }
+      end
       # Create the entry
       m = Metadatum.new
       m.sample = self
