@@ -82,10 +82,10 @@ begin
   $?.exitstatus == 0 || abort("\n== Could not register task ==\n")
   # resque workers can be interrupted safely, doing this will prevent errors from migrating while old versions are running and speed up deployment
   puts 'scaling down resque workers'
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count 0")
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count 0 --no-cli-pager")
   unless env == "sandbox"
-    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 0")
-    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 0")
+    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 0 --no-cli-pager")
+    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 0 --no-cli-pager")
   end
   puts 'running migrations'
   system!("/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json")
@@ -107,14 +107,14 @@ begin
   resque_count = env == "prod" ? 10 : 2
 
   # Resque workers
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count #{resque_count}")
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count #{resque_count} --no-cli-pager")
   # Resque scheduler
-  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-scheduler --desired-count 1")
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-scheduler --desired-count 1 --no-cli-pager")
   unless env == "sandbox"
     # Pipeline monitor
-    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 1")
+    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 1 --no-cli-pager")
     # Result monitor
-    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 1")
+    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 1 --no-cli-pager")
   end
 
   puts "load release tag into param store"
