@@ -650,6 +650,80 @@ RSpec.describe SamplesController, type: :controller do
       end
     end
 
+    describe "GET upload_credentials" do
+      let(:fake_role_arn) { "dsfsdfsdfs" }
+      let(:fake_access_key_id) { "123456789012" }
+
+      before do
+        @project = create(:project, users: [@joe])
+        input_file = InputFile.new
+        input_file.name = "test.fasta"
+        input_file.source = "test.fasta"
+        input_file.parts = "test.fasta"
+        input_file.source_type = "local"
+        input_file.upload_client = "cli"
+        @sample = create(:sample, project: @project, name: "Test Sample One", input_files: [input_file], user: @joe)
+        other_user = create(:user)
+        unowned_project = create(:project, users: [other_user])
+        @unowned_sample = create(:sample, project: unowned_project, name: "Test Sample Two", user: other_user)
+        @uploaded_sample = create(:sample, project: @project, name: "Test Sample Three", status: Sample::STATUS_CHECKED, user: @joe)
+
+        sign_in @joe
+      end
+
+      it "can get credentials for a sample" do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with('CLI_UPLOAD_ROLE_ARN').and_return(fake_role_arn)
+        mock_client = Aws::STS::Client.new(stub_responses: true)
+        creds = mock_client.stub_data(
+          :assume_role,
+          credentials: {
+            access_key_id: fake_access_key_id,
+          }
+        )
+        mock_client.stub_responses(:assume_role, creds)
+        allow(AwsClient).to receive(:[]) { |_client|
+          mock_client
+        }
+
+        get :upload_credentials, format: :json, params: { id: @sample.id }
+        expect(response).to have_http_status :success
+        creds = JSON.parse(response.body)
+        expect(creds["access_key_id"]).to eq(fake_access_key_id)
+        expect(mock_client.api_requests.length).to eq(1)
+        request = mock_client.api_requests.first
+
+        action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:CreateMultipartUpload",
+          "s3:AbortMultipartUpload",
+          "s3:ListMultipartUploadParts",
+        ]
+        object_arns = ["arn:aws:s3:::#{ENV['SAMPLES_BUCKET_NAME']}/samples/#{@project.id}/#{@sample.id}/fastqs/test.fasta"]
+        policy = {
+          Version: "2012-10-17",
+          Statement: {
+            Sid: "AllowSampleUploads",
+            Effect: "Allow",
+            Action: action,
+            Resource: object_arns,
+          },
+        }
+        expect(request[:params][:policy]).to eq(JSON.dump(policy))
+      end
+
+      it "returns not_found if user doesn't own sample" do
+        get :upload_credentials, format: :json, params: { id: @unowned_sample.id }
+        expect(response).to have_http_status :not_found
+      end
+
+      it "returns unauthorized if sample is already uploaded" do
+        get :upload_credentials, format: :json, params: { id: @uploaded_sample.id }
+        expect(response).to have_http_status :unauthorized
+      end
+    end
+
     describe "GET #consensus_genome_clade_export" do
       before do
         @project = create(:project, users: [@joe])

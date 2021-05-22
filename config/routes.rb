@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     get :raw_results_folder, on: :member
     post :bulk_upload, on: :collection
     post :bulk_upload_with_metadata, on: :collection
+    get :upload_credentials, on: :member
     get :metadata, on: :member
     get :metadata_fields, on: :collection
     get :contig_taxid_list, on: :member

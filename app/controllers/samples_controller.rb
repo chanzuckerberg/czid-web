@@ -24,7 +24,7 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :amr,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary,
-                  :coverage_viz_data,].freeze
+                  :coverage_viz_data, :upload_credentials,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :kickoff_workflow,].freeze
 
@@ -32,8 +32,8 @@ class SamplesController < ApplicationController
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
                    :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,].freeze
-  OWNER_ACTIONS = [:raw_results_folder].freeze
-  TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata].freeze
+  OWNER_ACTIONS = [:raw_results_folder, :upload_credentials].freeze
+  TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :sample_upload_credentials].freeze
 
   # For API-like access
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
@@ -537,7 +537,20 @@ class SamplesController < ApplicationController
     # CLI client should provide a version string to-be-checked against the
     # minimum version here. Bulk upload from CLI goes to this method.
     min_version = Gem::Version.new(MIN_CLI_VERSION)
-    unless client && (client == "web" || Gem::Version.new(version_number) >= min_version)
+    version_obj = client && client != "web" && Gem::Version.new(version_number)
+    unless client && (client == "web" || version_obj >= min_version)
+      render json: {
+        message: CLI_DEPRECATION_MSG,
+        # idseq-cli v0.6.0 only checks the 'errors' field, so ensure users see this.
+        errors: [CLI_DEPRECATION_MSG],
+        status: :upgrade_required,
+      }, status: :upgrade_required
+      return
+    end
+
+    # TODO: this ensures users of cli v2 use at least 2.1.1, remove this when the old version is deprecated and go back to
+    # using MIN_CLI_VERSION
+    if client && client != "web" && version_obj >= Gem::Version.new("2.0.0") && version_obj < Gem::Version.new("2.1.1")
       render json: {
         message: CLI_DEPRECATION_MSG,
         # idseq-cli v0.6.0 only checks the 'errors' field, so ensure users see this.
@@ -620,7 +633,6 @@ class SamplesController < ApplicationController
     resp = { samples: samples, sample_ids: samples.pluck(:id), errors: errors }
     # TODO: remove this 2.0.0 requirement once we discontinue support for < 2.0.0 higher up
     if client != "web" && Gem::Version.new(version_number) >= Gem::Version.new("2.0.0") && samples.any?
-      credentials = get_upload_credentials(samples)[:credentials]
       v2_samples = samples.map do |sample|
         input_files = sample.input_files.map do |input_file|
           {
@@ -634,7 +646,7 @@ class SamplesController < ApplicationController
           input_files: input_files,
         }
       end
-      resp = { samples: v2_samples, credentials: credentials, errors: errors }
+      resp = { samples: v2_samples, errors: errors }
     end
 
     if samples.count > 0
@@ -652,6 +664,20 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       format.json { render json: resp }
+    end
+  end
+
+  # GET /samples/1/upload_credentials
+  def upload_credentials
+    unless @sample.status == Sample::STATUS_CREATED
+      render json: {
+        error: "This sample was already uploaded.",
+      }, status: :unauthorized
+      return
+    end
+    credentials = get_upload_credentials([@sample])[:credentials]
+    respond_to do |format|
+      format.json { render json: credentials }
     end
   end
 
