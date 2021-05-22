@@ -33,7 +33,7 @@ class SamplesController < ApplicationController
                    :search_suggestions, :stats, :upload, :validate_sample_files, :taxa_with_reads_suggestions, :uploaded_by_current_user,
                    :taxa_with_contigs_suggestions, :validate_sample_ids, :enable_mass_normalized_backgrounds, :reads_stats, :consensus_genome_clade_export,].freeze
   OWNER_ACTIONS = [:raw_results_folder, :upload_credentials].freeze
-  TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :sample_upload_credentials].freeze
+  TOKEN_AUTH_ACTIONS = [:update, :bulk_upload_with_metadata, :upload_credentials].freeze
 
   # For API-like access
   skip_before_action :verify_authenticity_token, only: TOKEN_AUTH_ACTIONS
