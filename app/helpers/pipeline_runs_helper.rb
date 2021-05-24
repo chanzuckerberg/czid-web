@@ -215,16 +215,22 @@ module PipelineRunsHelper
   end
 
   def fetch_pipeline_version(s3_file = pipeline_version_file)
-    stdout = Syscall.run("aws", "s3", "cp", s3_file, "-")
-    return nil if stdout.blank?
-
-    whole_version = stdout.strip
-    whole_version =~ /(^\d+\.\d+).*/
-    # since we are externally managing the pipeline version for the phylo tree it's
-    #   version is `EXTERNALLY_MANAGED` this doesn't match the regex but we still
-    #   want to use it for results paths. This function will fall back to the full
-    #   string for the version if the pattern doesn't match to handle this case.
-    Regexp.last_match(1) || whole_version
+    u = URI(s3_file)
+    u.path.slice!(0)
+    begin
+      resp = S3_CLIENT.get_object(bucket: u.host, key: u.path)
+      whole_version = resp.body.read
+      whole_version = whole_version.strip
+      whole_version =~ /(^\d+\.\d+).*/
+      # since we are externally managing the pipeline version for the phylo tree it's
+      #   version is `EXTERNALLY_MANAGED` this doesn't match the regex but we still
+      #   want to use it for results paths. This function will fall back to the full
+      #   string for the version if the pattern doesn't match to handle this case.
+      Regexp.last_match(1) || whole_version
+    rescue Aws::S3::Errors::ServiceError => e
+      Rails.logger.error("Failed to get pipeline version at #{s3_file}. Error: #{e}")
+      return nil
+    end
   end
 
   def upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
