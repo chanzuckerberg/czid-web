@@ -14,6 +14,7 @@ import {
   merge,
   partition,
   pick,
+  remove,
   replace,
   sumBy,
   union,
@@ -33,6 +34,7 @@ import { UserContext } from "~/components/common/UserContext";
 import { Divider } from "~/components/layout";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
+import { CG_FLAT_LIST_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { generateUrlToSampleView } from "~/components/utils/urls";
 import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
@@ -1485,18 +1487,27 @@ class DiscoveryView extends React.Component {
   };
 
   computeWorkflowTabs = () => {
-    const { snapshotShareId } = this.props;
+    const { allowedFeatures, snapshotShareId } = this.props;
     let workflows = WORKFLOW_ORDER;
     if (snapshotShareId) workflows = [workflows[0]]; // Only mngs
 
+    if (!allowedFeatures.includes(CG_FLAT_LIST_FEATURE)) {
+      workflows = remove(
+        workflow => workflow === "CONSENSUS_GENOME_FLAT_LIST",
+        workflows
+      );
+    }
+
     return workflows.map(name => ({
       label: (
-        <React.Fragment>
-          <span className={cs.tabLabel}>{`${WORKFLOWS[name].label}s`}</span>
+        <>
+          <span className={cs.tabLabel}>{`${WORKFLOWS[name].label}${
+            name === "CONSENSUS_GENOME_FLAT_LIST" ? "" : "s"
+          }`}</span>
           <span className={cs.tabCounter}>
             {this.samplesByWorkflow[WORKFLOWS[name].value].length || "0"}
           </span>
-        </React.Fragment>
+        </>
       ),
       value: WORKFLOWS[name].value,
     }));
