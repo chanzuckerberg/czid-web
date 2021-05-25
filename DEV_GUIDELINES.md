@@ -384,9 +384,10 @@ class NoDepthDataError < StandardError
 end
 ```
 
-## RSpec Ruby testing
+## Ruby testing
 
-When in doubt, follow the [Better Specs guide](https://betterspecs.org/).
+- You do not need to test private methods but make sure everything at a higher level is covered. Try to make sure the entire interface is covered (there will be some special cases where testing private methods will be useful). When reviewing PRs, pay extra attention to ensure the interface is well tested. Read [Unit Testing: Interface vs. Implementation](https://mehulkar.com/blog/unit-testing-interface-vs-implementation/) for more info!
+- When in doubt on testing pattern, follow the [Better Specs guide](https://betterspecs.org/).
 
 ## Feature flags
 
