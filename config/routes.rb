@@ -200,7 +200,7 @@ Rails.application.routes.draw do
     get :sample_locations, on: :collection
   end
 
-  resources :workflow_runs, only: [:show] do
+  resources :workflow_runs, only: [:index, :show] do
     get :results, on: :member
     get :zip_link, on: :member
     put :rerun, on: :member

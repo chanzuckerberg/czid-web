@@ -20,15 +20,6 @@ module SamplesHelper
   # This regex extracts the sample_id from sample S3 paths.
   SAMPLE_PATH_ID_MATCHER = %r{\A.*samples/\d*/(\d*)/.*\z}.freeze
 
-  # Maps SFN execution statuses to classic frontend statuses
-  SFN_STATUS_MAPPING = {
-    WorkflowRun::STATUS[:created] => "CREATED",
-    WorkflowRun::STATUS[:running] => "RUNNING",
-    WorkflowRun::STATUS[:succeeded] => "COMPLETE",
-    WorkflowRun::STATUS[:succeeded_with_issue] => "COMPLETE - ISSUE",
-    WorkflowRun::STATUS[:failed] => "FAILED",
-  }.freeze
-
   class UploadCreationError < StandardError
     def initialize(errors)
       super("Upload creation encountered errors: #{errors}")
@@ -249,34 +240,43 @@ module SamplesHelper
     sample_list
   end
 
-  def filter_samples(samples, params)
-    host = params[:host]
-    location = params[:location]
-    location_v2 = params[:locationV2]
-    taxon = params[:taxon]
-    time = params[:time]
-    # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
-    # instances to "sample_type"
-    sample_type = params[:tissue]
-    visibility = params[:visibility]
-    project_id = params[:projectId]
-    search_string = params[:search]
-    requested_sample_ids = params[:sampleIds]
-    workflow = params[:workflow]
+  def fetch_samples(domain:, filters: {})
+    samples = samples_by_domain(domain)
+    samples = filter_samples(samples, filters)
 
-    samples = samples.where(project_id: project_id) if project_id.present?
-    samples = filter_by_taxid(samples, taxon) if taxon.present?
-    samples = filter_by_host(samples, host) if host.present?
-    samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
-    samples = filter_by_metadata_key(samples, "collection_location_v2", location_v2) if location_v2.present?
-    samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
-    samples = filter_by_metadata_key(samples, "sample_type", sample_type) if sample_type.present?
-    samples = filter_by_visibility(samples, visibility) if visibility.present?
-    samples = filter_by_search_string(samples, search_string) if search_string.present?
-    samples = filter_by_sample_ids(samples, requested_sample_ids) if requested_sample_ids.present?
-    samples = filter_by_workflow(samples, workflow) if workflow.present?
+    samples
+  end
 
-    return samples
+  def filter_samples(samples, filters)
+    if filters.present?
+      host = filters[:host]
+      location = filters[:location]
+      location_v2 = filters[:locationV2]
+      taxon = filters[:taxon]
+      time = filters[:time]
+      # Keep "tissue" for legacy compatibility. It's too hard to rename all JS
+      # instances to "sample_type"
+      sample_type = filters[:tissue]
+      visibility = filters[:visibility]
+      project_id = filters[:projectId]
+      search_string = filters[:search]
+      requested_sample_ids = filters[:sampleIds]
+      workflow = filters[:workflow]
+
+      samples = samples.where(project_id: project_id) if project_id.present?
+      samples = filter_by_taxid(samples, taxon) if taxon.present?
+      samples = filter_by_host(samples, host) if host.present?
+      samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
+      samples = filter_by_metadata_key(samples, "collection_location_v2", location_v2) if location_v2.present?
+      samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
+      samples = filter_by_metadata_key(samples, "sample_type", sample_type) if sample_type.present?
+      samples = filter_by_visibility(samples, visibility) if visibility.present?
+      samples = filter_by_search_string(samples, search_string) if search_string.present?
+      samples = filter_by_sample_ids(samples, requested_sample_ids) if requested_sample_ids.present?
+      samples = filter_by_workflow(samples, workflow) if workflow.present?
+    end
+
+    samples
   end
 
   def get_total_runtime(pipeline_run, run_stages)
@@ -404,14 +404,9 @@ module SamplesHelper
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, top_pipeline_run, job_stats_hash)
       job_info[:uploader] = sample_uploader(sample)
-      upload_error = if sample.upload_error && sample.upload_error == Sample::DO_NOT_PROCESS
-                       { result_status_description: 'SKIPPED' }
-                     elsif sample.upload_error && sample.upload_error != Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED
-                       { result_status_description: 'FAILED' }
-                     end
-      job_info[:upload_error] = upload_error if upload_error.present?
+      job_info[:upload_error] = get_result_status_description_for_errored_sample(sample) if sample.upload_error.present?
 
-      if upload_error.nil?
+      if sample.upload_error.nil?
         job_info[:run_info_by_workflow] = get_sample_run_info_by_workflow(
           sample: sample,
           is_snapshot: is_snapshot,
@@ -448,6 +443,14 @@ module SamplesHelper
     formatted_samples
   end
 
+  def get_result_status_description_for_errored_sample(sample)
+    if sample.upload_error == Sample::DO_NOT_PROCESS
+      { result_status_description: 'SKIPPED' }
+    elsif sample.upload_error != Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED
+      { result_status_description: 'FAILED' }
+    end
+  end
+
   def get_sample_run_info_by_workflow(sample:, top_pipeline_run:, output_states_by_pipeline_run_id:, pipeline_run_stages_by_pipeline_run_id:, report_ready_pipeline_run_ids:, is_snapshot: false)
     # Returns a hash where keys are workflows and values contain info regarding the workflow/pipeline run
     mngs_run_info = if is_snapshot
@@ -460,7 +463,7 @@ module SamplesHelper
     # TODO: Generalize when new workflows are introduced
     cg_workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
     cg_run_info = {}
-    cg_run_info[:result_status_description] = cg_workflow_run ? SFN_STATUS_MAPPING[cg_workflow_run.status] : "RUNNING"
+    cg_run_info[:result_status_description] = cg_workflow_run ? WorkflowRun::SFN_STATUS_MAPPING[cg_workflow_run.status] : "RUNNING"
     cg_run_info[:created_at] = cg_workflow_run&.created_at
 
     return {
@@ -469,10 +472,9 @@ module SamplesHelper
     }
   end
 
-  def get_visibility_by_sample_id(samples)
+  def get_visibility_by_sample_id(sample_ids)
     # When in conjunction with some filters, the query below was not returning the public property,
     # thus we need to get ids and redo the query independently
-    sample_ids = samples.pluck(:id)
     return Hash[
       current_power
            .samples

@@ -661,7 +661,7 @@ RSpec.describe SamplesHelper, type: :helper do
 
       expect(results[WorkflowRun::WORKFLOW[:consensus_genome]].keys).to contain_exactly(:result_status_description, :created_at)
       expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({
-                                                                        result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]],
+                                                                        result_status_description: WorkflowRun::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]],
                                                                         created_at: @workflow_run1.created_at,
                                                                       })
     end
@@ -708,7 +708,7 @@ RSpec.describe SamplesHelper, type: :helper do
       expect(results[WorkflowRun::WORKFLOW[:consensus_genome]].keys).to contain_exactly(:result_status_description, :created_at)
       expect(results[WorkflowRun::WORKFLOW[:short_read_mngs]][:result_status_description]).to eq("COMPLETE")
       expect(results[WorkflowRun::WORKFLOW[:consensus_genome]]).to eq({
-                                                                        result_status_description: SamplesHelper::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]],
+                                                                        result_status_description: WorkflowRun::SFN_STATUS_MAPPING[WorkflowRun::STATUS[:succeeded]],
                                                                         created_at: @workflow_run2.created_at,
                                                                       })
     end

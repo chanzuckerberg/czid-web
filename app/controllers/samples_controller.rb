@@ -96,9 +96,7 @@ class SamplesController < ApplicationController
 
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
-    samples = samples_by_domain(domain)
-    samples = filter_samples(samples, params)
-
+    samples = fetch_samples(domain: domain, filters: params)
     samples = samples.order(Hash[order_by => order_dir])
     limited_samples = samples.offset(offset).limit(limit)
 
@@ -110,7 +108,7 @@ class SamplesController < ApplicationController
     basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
     # If basic requested, then don't include extra details (ex: metadata) for each sample.
     unless basic
-      samples_visibility = get_visibility_by_sample_id(limited_samples)
+      samples_visibility = get_visibility_by_sample_id(limited_samples.pluck(:id))
       # format_samples loads a lot of information about samples
       # There are many ways we can refactor: multiple endpoints for client to ask for the information
       # they actually need or at least a configurable function to get only certain data

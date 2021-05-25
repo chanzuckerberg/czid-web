@@ -32,6 +32,15 @@ class WorkflowRun < ApplicationRecord
     failed: "FAILED",
   }.freeze
 
+  # Maps SFN execution statuses to classic frontend statuses
+  SFN_STATUS_MAPPING = {
+    STATUS[:created] => "CREATED",
+    STATUS[:running] => "RUNNING",
+    STATUS[:succeeded] => "COMPLETE",
+    STATUS[:succeeded_with_issue] => "COMPLETE - ISSUE",
+    STATUS[:failed] => "FAILED",
+  }.freeze
+
   INPUT_ERRORS = {
     "InvalidInputFileError" => "There was an error parsing one of the input files.",
     "InsufficientReadsError" => "The number of reads after filtering was insufficient for further analysis.",
@@ -41,6 +50,7 @@ class WorkflowRun < ApplicationRecord
 
   validates :status, inclusion: { in: STATUS.values }
 
+  scope :by_workflow, ->(workflow) { where(workflow: workflow) }
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
   scope :non_deprecated, -> { where(deprecated: false) }
 
@@ -113,6 +123,10 @@ class WorkflowRun < ApplicationRecord
   # Generic misc inputs from inputs_json database field
   def inputs
     @inputs ||= JSON.parse(inputs_json || "null")
+  end
+
+  def get_input(input_name)
+    inputs&.[](input_name)
   end
 
   def parsed_cached_results
