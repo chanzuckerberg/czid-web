@@ -8,7 +8,7 @@ source "$SCRIPT_DIR/_shared_functions.sh"
 # This command will wait for the commit of this git rev
 # to be available in Docker hub and passed all checks in github before deploying it
 main() {
-  declare force;
+  declare force=${force:-false};
   while getopts "f" opt; do
     # Ex: ./deploy_rev.sh -f ...
     case ${opt} in
