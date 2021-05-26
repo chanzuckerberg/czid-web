@@ -368,6 +368,11 @@ else
 end
 ```
 
+### Avoid adding to app/helpers
+
+- We have many legacy "helper" modules in `app/helpers`, but that folder is actually meant for Rails view helpers (which is not relevant in React). Going forward, consider putting utility code in `app/lib` or feature code in the appropriate model or controller instead.
+- See here for a general ["Where Do I Put My Code In Rails"](https://codefol.io/posts/where-do-i-put-my-code-in-rails-updated/) guide.
+
 ### Error handling in Services
 
 - Services should raise exceptions to communicate errors and allow the caller to handle as desired.
