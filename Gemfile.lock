@@ -1104,6 +1104,10 @@ GEM
     shellany (0.0.1)
     shortener (0.8.0)
       voight_kampff (~> 1.1.2)
+    shoryuken (5.2.1)
+      aws-sdk-core (>= 2)
+      concurrent-ruby
+      thor
     silencer (1.0.1)
     simplecov (0.21.2)
       docile (~> 1.1)
@@ -1186,6 +1190,7 @@ DEPENDENCIES
   aws-sdk
   aws-sdk-ecs
   aws-sdk-resources
+  aws-sdk-sqs
   aws-sdk-states
   bcrypt (~> 3.1.7)
   brakeman
@@ -1241,6 +1246,7 @@ DEPENDENCIES
   selenium-webdriver
   sentry-raven
   shortener
+  shoryuken
   silencer
   simplecov
   sprockets-es6
