@@ -36,8 +36,9 @@
 <% end %>
 <% if @sample.input_files.present? %>
   <p>
-    <strong>Upload source:</strong>
+    <strong>Input files:</strong>
     <%= @sample.input_files&.[](0)&.source_type %>
+    <%= "(#{@sample.input_files&.[](0)&.upload_client})" %>
     [<%= @sample.input_files&.[](0)&.source %>,
     <%= @sample.input_files&.[](1)&.source %>]
   </p>
