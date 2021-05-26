@@ -219,8 +219,10 @@ export default class UploadProgressModal extends React.Component {
       metadata,
       callbacks: {
         onCreateSamplesError: (errors, erroredSampleNames) => {
-          // eslint-disable-next-line no-console
-          console.error("onCreateSamplesError:", errors);
+          logError({
+            message: "UploadProgressModal: onCreateSamplesError",
+            details: { errors },
+          });
 
           const uploadStatuses = zipObject(
             erroredSampleNames,
@@ -276,8 +278,10 @@ export default class UploadProgressModal extends React.Component {
         metadata,
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(`${bulkUploadFnName} error:`, error);
+      logError({
+        message: `UploadProgressModal: ${bulkUploadFnName} error`,
+        details: { error },
+      });
       this.setState({
         uploadComplete: true,
         failedSampleNames: map("name", samples),

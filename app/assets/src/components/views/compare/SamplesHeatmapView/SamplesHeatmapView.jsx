@@ -408,7 +408,7 @@ class SamplesHeatmapView extends React.Component {
         }
         default: {
           logError({
-            msg:
+            message:
               "SamplesHeatmapView: Invalid filter passed to createCSVRowForSelectedOptions()",
             details: { name, val },
           });
@@ -550,6 +550,7 @@ class SamplesHeatmapView extends React.Component {
       ]);
     } catch (err) {
       this.handleLoadingFailure(err);
+      return; // Return early so that loadingFailed is not set to false later
     }
 
     let pipelineVersions = [];
@@ -595,8 +596,10 @@ class SamplesHeatmapView extends React.Component {
   }
 
   handleLoadingFailure = err => {
-    // eslint-disable-next-line no-console
-    console.error("Error loading heatmap data", err);
+    logError({
+      message: "SamplesHeatmapView: Error loading heatmap data",
+      details: { err },
+    });
     this.setState({
       loading: false,
       loadingFailed: true,
@@ -853,6 +856,7 @@ class SamplesHeatmapView extends React.Component {
       backgroundData = await this.fetchBackgroundData();
     } catch (err) {
       this.handleLoadingFailure(err);
+      return; // Return early so that loadingFailed is not set to false later
     }
 
     let newState = allowedFeatures.includes("heatmap_service")
