@@ -1,4 +1,7 @@
+import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
+import { StylesProvider, ThemeProvider } from "@material-ui/core/styles";
 import * as Sentry from "@sentry/react";
+import { defaultTheme } from "czifui";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
@@ -53,7 +56,13 @@ const react_component = (componentName, props, target, userContext) => {
       <Sentry.ErrorBoundary fallback={"An error has occured"}>
         <UserContext.Provider value={userContext || {}}>
           <Provider store={store}>
-            {React.createElement(matchedComponent, props)}
+            <StylesProvider injectFirst>
+              <EmotionThemeProvider theme={defaultTheme}>
+                <ThemeProvider theme={defaultTheme}>
+                  {React.createElement(matchedComponent, props)}
+                </ThemeProvider>
+              </EmotionThemeProvider>
+            </StylesProvider>
           </Provider>
         </UserContext.Provider>
       </Sentry.ErrorBoundary>,

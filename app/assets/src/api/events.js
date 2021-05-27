@@ -136,6 +136,10 @@ function EventDictionary() {
    */
   this.SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED =
     "SAMPLE_VIEW_SAMPLE_MESSAGE_LINK_CLICKED";
+
+  /** The user clicked on the Learn More link in the project visibility tooltip. */
+  this.PROJECT_VISIBILITY_HELP_LINK_CLICKED =
+    "PROJECT_VISIBILITY_HELP_LINK_CLICKED";
 }
 
 const eventNames = new EventDictionary();
