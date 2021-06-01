@@ -405,7 +405,7 @@ const MainMenu = ({ adminUser, userSignedIn }) => {
         <a
           className={cs.item}
           href="https://help.idseq.net"
-          rel="noopener"
+          rel="noopener noreferrer"
           /* eslint-disable-next-line react/jsx-no-target-blank */
           target="_blank"
           onClick={() => logAnalyticsEvent("MainMenu_help_clicked")}

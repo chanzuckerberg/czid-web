@@ -352,6 +352,7 @@ class PipelineTab extends React.Component {
                       className={cs.downloadLink}
                       href={option.path}
                       target={option.newPage ? "_blank" : "_self"}
+                      rel="noopener noreferrer"
                       onClick={() =>
                         logAnalyticsEvent("PipelineTab_download-link_clicked", {
                           newPage: option.newPage,
