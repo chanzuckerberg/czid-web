@@ -122,10 +122,11 @@ jobs:
         bundle exec brakeman --no-pager -w3
 
         # No new Medium Confidence warnings.
-        MAX_MEDIUM_WARNINGS=35
+        MAX_MEDIUM_WARNINGS=37
         if [ $(bundle exec brakeman --no-pager -w2 -f json | jq '.scan_info.security_warnings') -gt $MAX_MEDIUM_WARNINGS ]
         then
           echo "No new Medium Confidence Brakeman warnings are allowed."
+          exit 1
         fi
 
   javascript:
@@ -143,6 +144,13 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
+    - name: Check the Lockfile Version
+      run: |
+        VERSION=`cat package-lock.json | jq '.lockfileVersion'`
+        if [ "$VERSION" -lt "2"  ]; then
+          echo "Check the lockfileVersion in package-lock.json."
+          exit 1
+        fi
     - name: Install Dependencies
       run: npm install
     - name: Test
