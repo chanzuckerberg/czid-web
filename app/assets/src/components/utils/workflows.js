@@ -1,14 +1,25 @@
 // Pipeline workflow options
+export const WORKFLOW_ENTITIES = {
+  SAMPLES: "Samples",
+  WORKFLOW_RUNS: "WorkflowRuns",
+};
+
 export const WORKFLOWS = {
   CONSENSUS_GENOME: {
     label: "Consensus Genome",
     value: "consensus-genome",
+    entity: WORKFLOW_ENTITIES.SAMPLES,
   },
   CONSENSUS_GENOME_FLAT_LIST: {
     label: "Consensus Genome Flat List",
-    value: "consensus-genome",
+    value: "consensus-genome-flat-list",
+    entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
   },
-  SHORT_READ_MNGS: { label: "Metagenomic", value: "short-read-mngs" },
+  SHORT_READ_MNGS: {
+    label: "Metagenomic",
+    value: "short-read-mngs",
+    entity: WORKFLOW_ENTITIES.SAMPLES,
+  },
 };
 
 export const WORKFLOW_ORDER = [

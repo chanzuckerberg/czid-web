@@ -50,6 +50,7 @@ class WorkflowRun < ApplicationRecord
 
   validates :status, inclusion: { in: STATUS.values }
 
+  scope :by_time, ->(start_date:, end_date:) { where(created_at: start_date.beginning_of_day..end_date.end_of_day) }
   scope :by_workflow, ->(workflow) { where(workflow: workflow) }
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
   scope :non_deprecated, -> { where(deprecated: false) }

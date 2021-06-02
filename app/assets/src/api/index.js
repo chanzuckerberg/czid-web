@@ -172,6 +172,31 @@ const getSamples = ({
     }
   );
 
+const getWorkflowRuns = ({
+  projectId,
+  domain,
+  filters,
+  format = "with_sample_info",
+  listAllIds,
+  orderBy,
+  orderDir,
+  limit,
+  offset,
+} = {}) =>
+  get("/workflow_runs", {
+    params: {
+      projectId,
+      domain,
+      listAllIds,
+      format,
+      orderBy,
+      orderDir,
+      limit,
+      offset,
+      ...filters,
+    },
+  });
+
 const getSampleDimensions = ({
   domain,
   filters,
@@ -521,6 +546,7 @@ export {
   getTaxonDistributionForBackground,
   getUserSettingMetadataByCategory,
   getVisualizations,
+  getWorkflowRuns,
   getWorkflowRunResults,
   kickoffConsensusGenome,
   markSampleUploaded,

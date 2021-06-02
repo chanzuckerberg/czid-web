@@ -341,6 +341,7 @@ CollectionModal.propTypes = {
   fetchedSamples: PropTypes.array,
   selectedSampleIds: PropTypes.instanceOf(Set),
   trigger: PropTypes.node.isRequired,
+  workflow: PropTypes.string,
 };
 
 CollectionModal.contextType = UserContext;

@@ -1,5 +1,13 @@
 import cx from "classnames";
-import { difference, forEach, isEmpty, union, pickBy } from "lodash/fp";
+import {
+  difference,
+  find,
+  forEach,
+  isEmpty,
+  union,
+  pickBy,
+  values,
+} from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -48,7 +56,7 @@ class SamplesView extends React.Component {
       phyloTreeCreationModalOpen: false,
       bulkDownloadModalOpen: false,
       nextcladeModalOpen: false,
-      // This tooltip is reset whenever the selectedSampleIds changes.
+      // This tooltip is reset whenever the selectedIds changes.
       bulkDownloadButtonTempTooltip: null,
       sarsCov2Count: 0,
       referenceSelectId: null,
@@ -69,7 +77,7 @@ class SamplesView extends React.Component {
 
   componentDidUpdate(prevProps) {
     // Reset the tooltip whenever the selected samples changes.
-    if (this.props.selectedSampleIds !== prevProps.selectedSampleIds) {
+    if (this.props.selectedIds !== prevProps.selectedIds) {
       this.setState({
         bulkDownloadButtonTempTooltip: null,
       });
@@ -77,12 +85,12 @@ class SamplesView extends React.Component {
   }
 
   handleSelectRow = (value, checked, event) => {
-    const { samples, selectedSampleIds, onSelectedSamplesUpdate } = this.props;
+    const { objects, selectedIds, onUpdateSelectedIds, workflow } = this.props;
     const { referenceSelectId } = this;
 
-    let newSelected = new Set(selectedSampleIds);
+    let newSelected = new Set(selectedIds);
     if (event.shiftKey && referenceSelectId) {
-      const ids = samples.getIntermediateIds({
+      const ids = objects.getIntermediateIds({
         id1: referenceSelectId,
         id2: value,
       });
@@ -104,35 +112,35 @@ class SamplesView extends React.Component {
     }
     this.referenceSelectId = value;
 
-    onSelectedSamplesUpdate(newSelected);
+    onUpdateSelectedIds(newSelected);
+
     logAnalyticsEvent("SamplesView_row_selected", {
       rowIsChecked: checked,
-      sampleId: value,
-      selectedSampleIds: newSelected.size,
+      rowType: find({ value: workflow }, values(WORKFLOWS)).entity,
+      selectedId: value,
+      numberOfSelectedIds: newSelected.size,
+      workflow,
     });
   };
 
   handleSelectAllRows = checked => {
-    const {
-      selectableIds,
-      selectedSampleIds,
-      onSelectedSamplesUpdate,
-    } = this.props;
+    const { selectableIds, selectedIds, onUpdateSelectedIds } = this.props;
 
     this.referenceSelectId = null;
     let newSelected = new Set(
       checked
-        ? union(Array.from(selectedSampleIds), selectableIds)
-        : difference(Array.from(selectedSampleIds), selectableIds)
+        ? union(Array.from(selectedIds), selectableIds)
+        : difference(Array.from(selectedIds), selectableIds)
     );
-    onSelectedSamplesUpdate(newSelected);
+    onUpdateSelectedIds(newSelected);
   };
 
+  // TODO: implement for workflow runs
   isSelectAllChecked = () => {
-    const { selectableIds, selectedSampleIds } = this.props;
+    const { selectableIds, selectedIds } = this.props;
     return (
       !isEmpty(selectableIds) &&
-      isEmpty(difference(selectableIds, Array.from(selectedSampleIds)))
+      isEmpty(difference(selectableIds, Array.from(selectedIds)))
     );
   };
 
@@ -142,7 +150,7 @@ class SamplesView extends React.Component {
   };
 
   renderHeatmapTrigger = () => {
-    const { selectedSampleIds } = this.props;
+    const { selectedIds } = this.props;
 
     const heatmapOptions = [
       { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
@@ -151,7 +159,7 @@ class SamplesView extends React.Component {
 
     const heatmapIcon = <IconHeatmap className={cs.icon} />;
 
-    return selectedSampleIds.size < 2 ? (
+    return selectedIds.size < 2 ? (
       <ToolbarIcon
         className={cx(cs.action, cs.heatmap)}
         disabled
@@ -165,12 +173,12 @@ class SamplesView extends React.Component {
         className={cx(cs.action)}
         items={heatmapOptions.map(option => {
           const params = getURLParamString({
-            sampleIds: Array.from(selectedSampleIds),
+            sampleIds: Array.from(selectedIds),
           });
           const log = () =>
             logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
               option,
-              selectedSampleIds: selectedSampleIds.size,
+              selectedIds: selectedIds.size,
             });
           return (
             <BareDropdown.Item
@@ -208,8 +216,9 @@ class SamplesView extends React.Component {
     );
   };
 
+  // TODO(omar): Make BulkDownloadModal support selected workflow runs [CH-136639]
   renderBulkDownloadTrigger = () => {
-    const { selectedSampleIds, workflow } = this.props;
+    const { selectedIds, workflow } = this.props;
     const { bulkDownloadButtonTempTooltip } = this.state;
     const downloadIcon = <IconDownload className={cx(cs.icon, cs.download)} />;
     return (
@@ -218,10 +227,8 @@ class SamplesView extends React.Component {
         icon={downloadIcon}
         popperDependencies={[bulkDownloadButtonTempTooltip]}
         popupText={bulkDownloadButtonTempTooltip || "Download"}
-        popupSubtitle={
-          selectedSampleIds.size === 0 ? "Select at least 1 sample" : ""
-        }
-        disabled={selectedSampleIds.size === 0}
+        popupSubtitle={selectedIds.size === 0 ? "Select at least 1 sample" : ""}
+        disabled={selectedIds.size === 0}
         onClick={withAnalytics(
           this.handleBulkDownloadModalOpen,
           "SamplesView_bulk-download-modal-open_clicked",
@@ -232,7 +239,7 @@ class SamplesView extends React.Component {
   };
 
   renderCollectionTrigger = () => {
-    const { samples, selectedSampleIds, workflow } = this.props;
+    const { samples, selectedIds, workflow } = this.props;
 
     const targetSamples = samples.loaded;
 
@@ -240,7 +247,7 @@ class SamplesView extends React.Component {
       <IconBackgroundModel className={cx(cs.icon, cs.background)} />
     );
 
-    return selectedSampleIds.size < 2 ? (
+    return selectedIds.size < 2 ? (
       <ToolbarIcon
         className={cs.action}
         disabled
@@ -257,19 +264,20 @@ class SamplesView extends React.Component {
             popupText="Background Model"
           />
         }
-        selectedSampleIds={selectedSampleIds}
+        selectedIds={selectedIds}
         fetchedSamples={targetSamples.filter(sample =>
-          selectedSampleIds.has(sample.id)
+          selectedIds.has(sample.id)
         )}
         workflow={workflow}
       />
     );
   };
 
+  // TODO(omar): Make NextcladeModal support selected workflow runs [CH-136635]
   renderNextcladeTrigger = () => {
-    const { samples, selectedSampleIds } = this.props;
-    const selectedSamples = samples.loaded.filter(sample =>
-      selectedSampleIds.has(sample.id)
+    const { objects, selectedIds } = this.props;
+    const selectedSamples = objects.loaded.filter(sample =>
+      selectedIds.has(sample.id)
     );
 
     const sarsCov2Count = selectedSamples
@@ -306,7 +314,7 @@ class SamplesView extends React.Component {
   };
 
   renderTriggers = () => {
-    const { selectedSampleIds, workflow } = this.props;
+    const { selectedIds, workflow } = this.props;
 
     const triggers = {
       [TRIGGERS.backgroundModel]: this.renderCollectionTrigger,
@@ -322,7 +330,7 @@ class SamplesView extends React.Component {
     ));
 
     return (
-      <React.Fragment>
+      <>
         <div className={cs.counterContainer}>
           <Label
             circular
@@ -331,13 +339,13 @@ class SamplesView extends React.Component {
             onClick={() =>
               logAnalyticsEvent(`SamplesView_sample-counter_clicked`)
             }
-            text={`${selectedSampleIds.size}`}
+            text={`${selectedIds.size}`}
           />
           <span className={cs.label}>Selected</span>
         </div>
         <div className={cs.separator} />
         <div className={cs.actions}>{triggersToRender}</div>
-      </React.Fragment>
+      </>
     );
   };
 
@@ -360,7 +368,7 @@ class SamplesView extends React.Component {
       onActiveColumnsChange,
       onLoadRows,
       protectedColumns,
-      selectedSampleIds,
+      selectedIds,
       workflow,
     } = this.props;
 
@@ -391,7 +399,7 @@ class SamplesView extends React.Component {
           protectedColumns={protectedColumns}
           rowClassName={cs.tableDataRow}
           selectableKey={hideAllTriggers ? null : "id"}
-          selected={selectedSampleIds}
+          selected={selectedIds}
           selectAllChecked={selectAllChecked}
           selectableCellClassName={cs.selectableCell}
         />
@@ -412,7 +420,7 @@ class SamplesView extends React.Component {
         }}
         includePLQC={
           !!projectId &&
-          workflow !== WORKFLOWS.CONSENSUS_GENOME.value &&
+          workflow === WORKFLOWS.SHORT_READ_MNGS.value &&
           allowedFeatures.includes("plqc")
         }
       />
@@ -500,7 +508,7 @@ class SamplesView extends React.Component {
           "Unexpected issue. Please contact us for help.",
       });
     } else if (
-      this.props.selectedSampleIds.size > appConfig.maxSamplesBulkDownload &&
+      this.props.selectedIds.size > appConfig.maxSamplesBulkDownload &&
       !admin
     ) {
       // There is a separate max sample limit for the original input file download type.
@@ -545,7 +553,7 @@ class SamplesView extends React.Component {
     const {
       currentDisplay,
       samples,
-      selectedSampleIds,
+      selectedIds,
       snapshotShareId,
       workflow,
     } = this.props;
@@ -580,7 +588,7 @@ class SamplesView extends React.Component {
               this.handleBulkDownloadModalClose,
               "SamplesView_bulk-download-modal_closed"
             )}
-            selectedSampleIds={selectedSampleIds}
+            selectedSampleIds={selectedIds}
             workflow={workflow}
             onGenerate={this.handleBulkDownloadGenerate}
           />
@@ -592,7 +600,7 @@ class SamplesView extends React.Component {
               this.handleNextcladeModalClose,
               "SamplesView_nextclade-modal_closed"
             )}
-            samples={pickBy(s => selectedSampleIds.has(s.id), samples.entries)}
+            samples={pickBy(s => selectedIds.has(s.id), samples.entries)}
           />
         )}
       </div>
@@ -619,6 +627,7 @@ SamplesView.propTypes = {
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
   mapTilerKey: PropTypes.string,
+  objects: PropTypes.instanceOf(ObjectCollectionView),
   onActiveColumnsChange: PropTypes.func,
   onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
@@ -629,13 +638,13 @@ SamplesView.propTypes = {
   onMapTooltipTitleClick: PropTypes.func,
   onPLQCHistogramBarClick: PropTypes.func,
   onSampleSelected: PropTypes.func,
-  onSelectedSamplesUpdate: PropTypes.func,
+  onUpdateSelectedIds: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
   samples: PropTypes.instanceOf(ObjectCollectionView),
   sampleStatsSidebarOpen: PropTypes.bool,
-  selectableIds: PropTypes.array.isRequired,
-  selectedSampleIds: PropTypes.instanceOf(Set),
+  selectableIds: PropTypes.array,
+  selectedIds: PropTypes.instanceOf(Set),
   snapshotShareId: PropTypes.string,
   workflow: PropTypes.string,
 };

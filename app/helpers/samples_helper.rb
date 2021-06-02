@@ -787,7 +787,7 @@ module SamplesHelper
   private
 
   def filter_by_time(samples, start_date, end_date)
-    samples.where("samples.created_at >= ? AND samples.created_at <= ?", start_date.beginning_of_day, end_date.end_of_day)
+    samples.where(created_at: start_date.beginning_of_day..end_date.end_of_day)
   end
 
   def filter_by_visibility(samples, visibility)

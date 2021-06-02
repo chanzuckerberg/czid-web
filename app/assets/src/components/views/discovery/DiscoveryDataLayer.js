@@ -3,6 +3,7 @@ import {
   getDiscoveryProjects,
   getDiscoverySamples,
   getDiscoveryVisualizations,
+  getDiscoveryWorkflowRuns,
 } from "./discovery_api";
 
 class ObjectCollection {
@@ -165,8 +166,8 @@ class ObjectCollectionView {
         listAllIds: this._orderedIds === null,
       });
 
-      fetchedObjects.forEach(sample => {
-        this._collection.entries[sample.id] = sample;
+      fetchedObjects.forEach(object => {
+        this._collection.entries[object.id] = object;
       });
 
       // We currently load the ids of ALL objects in the view. This allows using a simple solution to
@@ -199,6 +200,7 @@ class DiscoveryDataLayer {
       domain,
       this.fetchVisualizations
     );
+    this.workflowRuns = new ObjectCollection(domain, this.fetchWorkflowRuns);
   }
 
   fetchSamples = async params => {
@@ -222,6 +224,14 @@ class DiscoveryDataLayer {
       visualizations: fetchedObjects,
       visualizationIds: fetchedObjectIds,
     } = await getDiscoveryVisualizations(params);
+    return { fetchedObjects, fetchedObjectIds };
+  };
+
+  fetchWorkflowRuns = async params => {
+    const {
+      workflowRuns: fetchedObjects,
+      workflowRunIds: fetchedObjectIds,
+    } = await getDiscoveryWorkflowRuns(params);
     return { fetchedObjects, fetchedObjectIds };
   };
 }

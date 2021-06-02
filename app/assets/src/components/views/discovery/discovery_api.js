@@ -7,6 +7,7 @@ import {
   getSamples,
   getSamplesLocations,
   getVisualizations,
+  getWorkflowRuns,
 } from "~/api";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import { numberWithPlusOrMinus } from "~/helpers/strings";
@@ -235,6 +236,78 @@ const processRawSample = sample => {
   return row;
 };
 
+const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
+  const cachedResults = get("cached_results", cgWorkflowRun);
+  const inputs = get("inputs", cgWorkflowRun);
+
+  return {
+    medakaModel: inputs["medaka_model"],
+    technology: inputs["technology"],
+    wetlabProtocol: upperCase(inputs["wetlab_protocol"]),
+    ...(cachedResults && {
+      coverageDepth: cachedResults["coverage_viz"]["coverage_depth"],
+      totalReadsCG: cachedResults["quality_metrics"]["total_reads"],
+      gcPercent: cachedResults["quality_metrics"]["gc_percent"],
+      refSnps: cachedResults["quality_metrics"]["ref_snps"],
+      percentIdentity: cachedResults["quality_metrics"]["percent_identity"],
+      nActg: cachedResults["quality_metrics"]["n_actg"],
+      percentGenomeCalled:
+        cachedResults["quality_metrics"]["percent_genome_called"],
+      nMissing: cachedResults["quality_metrics"]["n_missing"],
+      nAmbiguous: cachedResults["quality_metrics"]["n_ambiguous"],
+      referenceGenome: {
+        accessionName: cachedResults["taxon_info"]["accession_name"],
+        referenceGenomeId: cachedResults["taxon_info"]["accession_id"],
+        taxonName: cachedResults["taxon_info"]["taxon_name"],
+      },
+      referenceGenomeLength:
+        cachedResults["quality_metrics"]["reference_genome_length"],
+      vadrPassFail: cachedResults["quality_metrics"]["vadr_pass_fail"],
+    }),
+  };
+};
+
+const processRawWorkflowRun = workflowRun => {
+  const getSampleField = path => get(["sample", ...path], workflowRun);
+
+  const workflowRunFields =
+    workflowRun.workflow === WORKFLOWS.CONSENSUS_GENOME.value
+      ? processConsensusGenomeWorkflowRun(workflowRun)
+      : null;
+
+  const row = {
+    id: workflowRun.id,
+    status: toLower(workflowRun.status),
+    createdAt: workflowRun.created_at,
+    workflow: workflowRun.workflow,
+    sample: {
+      name: getSampleField(["info", "name"]),
+      createdAt: getSampleField(["info", "created_at"]),
+      project: getSampleField(["project_name"]),
+      publicAccess: !!getSampleField(["info", "public"]),
+      uploadError: toLower(
+        getSampleField(["info", "result_status_description"])
+      ),
+      user: getSampleField(["uploader", "name"]),
+      userId: getSampleField(["uploader", "id"]),
+    },
+    host: getSampleField(["info", "host_genome_name"]),
+    notes: getSampleField(["info", "sample_notes"]),
+    privateUntil: getSampleField(["info", "private_until"]),
+    projectId: getSampleField(["info", "project_id"]),
+    collectionLocation: getSampleField(["metadata", "collection_location"]),
+    collectionLocationV2: getSampleField([
+      "metadata",
+      "collection_location_v2",
+    ]),
+    nucleotideType: getSampleField(["metadata", "nucleotide_type"]),
+    sampleType: getSampleField(["metadata", "sample_type"]),
+    waterControl: getSampleField(["metadata", "water_control"]),
+    ...workflowRunFields,
+  };
+  return row;
+};
+
 const getDiscoverySamples = async ({
   domain,
   filters,
@@ -260,6 +333,37 @@ const getDiscoverySamples = async ({
   return {
     samples: map(processRawSample, sampleResults.samples),
     sampleIds: sampleResults.all_samples_ids,
+  };
+};
+
+const getDiscoveryWorkflowRuns = async ({
+  domain,
+  projectId,
+  filters,
+  format = "with_sample_info",
+  listAllIds = false,
+  orderBy,
+  orderDir,
+  limit = 100,
+  offset = 0,
+}) => {
+  const workflowRunsResults = await getWorkflowRuns({
+    projectId,
+    domain,
+    filters,
+    format,
+    listAllIds,
+    orderBy,
+    orderDir,
+    limit,
+    offset,
+  });
+
+  return {
+    workflowRuns: map(processRawWorkflowRun, workflowRunsResults.workflow_runs),
+    workflowRunIds: listAllIds
+      ? workflowRunsResults.all_workflow_run_ids
+      : null,
   };
 };
 
@@ -345,4 +449,5 @@ export {
   getDiscoverySamples,
   getDiscoveryStats,
   getDiscoveryVisualizations,
+  getDiscoveryWorkflowRuns,
 };

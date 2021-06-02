@@ -174,7 +174,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           response_workflow_run = workflow_runs[0]
           expected_workflow_run = WorkflowRun.find(response_workflow_run["id"])
           expected_sample = expected_workflow_run.sample
-          expected_sample_attributes = [:id, :created_at, :host_genome_id, :name, :private_until, :project_id, :sample_notes]
+          expected_sample_attributes = [:id, :created_at, :host_genome_name, :name, :private_until, :project_id, :sample_notes]
           expected_sample_info = expected_sample.slice(expected_sample_attributes)
           expected_sample_info["public"] = expected_sample.project.public_access
           metadata_by_sample_id = Metadatum.by_sample_ids([expected_sample.id])
@@ -211,7 +211,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
             response_workflow_run = workflow_runs.find { |wr| wr["id"] == @errored_workflow_run.id }
             expected_workflow_run = WorkflowRun.find(response_workflow_run["id"])
             expected_sample = expected_workflow_run.sample
-            expected_sample_attributes = [:id, :created_at, :host_genome_id, :name, :private_until, :project_id, :sample_notes]
+            expected_sample_attributes = [:id, :created_at, :host_genome_name, :name, :private_until, :project_id, :sample_notes]
             expected_sample_info = expected_sample.slice(expected_sample_attributes)
             expected_sample_info["public"] = expected_sample.project.public_access
             expected_sample_info["result_status_description"] = "SKIPPED"
@@ -316,7 +316,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           response_workflow_run = workflow_runs[0]
           expected_workflow_run = WorkflowRun.find(response_workflow_run["id"])
           expected_sample = expected_workflow_run.sample
-          expected_sample_attributes = [:id, :created_at, :host_genome_id, :name, :private_until, :project_id, :sample_notes]
+          expected_sample_attributes = [:id, :created_at, :host_genome_name, :name, :private_until, :project_id, :sample_notes]
           expected_sample_info = expected_sample.slice(expected_sample_attributes)
           expected_sample_info["public"] = expected_sample.project.public_access
           metadata_by_sample_id = Metadatum.by_sample_ids([expected_sample.id])
@@ -347,43 +347,130 @@ RSpec.describe WorkflowRunsController, type: :controller do
         ["basic", "with_sample_info"].freeze.each do |format_param|
           context "sample filters" do
             before do
-              create(:public_project, users: [@user], samples_data: [
-                       {
-                         user: @user,
-                         host_genome_name: "Bear",
-                         metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" },
-                         number_of_workflow_runs: 4,
-                         name: "Test Sample 6",
-                       },
-                       {
-                         user: @user,
-                         host_genome_name: "Cow",
-                         metadata_fields: { collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab" },
-                         number_of_workflow_runs: 1,
-                         name: "Test Sample 7",
-                       },
-                     ])
-              create(:public_project, users: [@user], samples_data: [
-                       {
-                         user: @user,
-                         host_genome_name: "Mosquito",
-                         metadata_fields: { collection_location: "Los Angeles, USA", sample_type: "Brain" },
-                         number_of_workflow_runs: 2,
-                         name: "Test Sample 8",
-                       },
-                     ])
+              @project1 = create(:public_project, users: [@user], samples_data: [
+                                   {
+                                     user: @user,
+                                     host_genome_name: "Bear",
+                                     metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" },
+                                     number_of_workflow_runs: 4,
+                                     name: "Test Sample 6",
+                                   },
+                                   {
+                                     user: @user,
+                                     host_genome_name: "Cow",
+                                     metadata_fields: { collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab" },
+                                     number_of_workflow_runs: 1,
+                                     name: "Test Sample 7",
+                                   },
+                                 ])
+              @project2 = create(:public_project, users: [@user], samples_data: [
+                                   {
+                                     user: @user,
+                                     host_genome_name: "Mosquito",
+                                     metadata_fields: { collection_location: "Los Angeles, USA", sample_type: "Brain" },
+                                     number_of_workflow_runs: 2,
+                                     name: "Test Sample 8",
+                                   },
+                                 ])
+              # project3 is private
+              @project3 = create(:project, users: [@user], samples_data: [
+                                   {
+                                     user: @user,
+                                     host_genome_name: "Koala",
+                                     metadata_fields: { collection_location: "Indio, USA", sample_type: "CSF" },
+                                     number_of_workflow_runs: 3,
+                                     name: "Test Sample 9",
+                                   },
+                                 ])
+            end
+
+            context "filtering by time" do
+              it "returns correct workflow runs in the specified time range in domain '#{domain}' with format '#{format_param}'" do
+                # Workflow Runs for this spec are created in the future so the testing of #index does not get contaminated by the workflow_runs created in the 'before do' block above.
+                project_in_the_future = create(:public_project, users: [@user], created_at: 3.days.from_now)
+                sample_in_the_future = create(:sample, project: project_in_the_future, created_at: 3.days.from_now)
+                workflow_run_in_the_future1 = create(:workflow_run, sample: sample_in_the_future, created_at: 3.days.from_now)
+                workflow_run_in_the_future2 = create(:workflow_run, sample: sample_in_the_future, created_at: 4.days.from_now)
+                workflow_run_in_the_future3 = create(:workflow_run, sample: sample_in_the_future, created_at: 5.days.from_now)
+
+                workflow_run_in_the_further_future = create(:workflow_run, sample: sample_in_the_future, created_at: 10.days.from_now)
+
+                start_date = 2.days.from_now.strftime("%Y%m%d")
+                end_date = 6.days.from_now.strftime("%Y%m%d")
+                get :index, params: { domain: domain, format: format_param, time: [start_date, end_date], workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+
+                json_response = JSON.parse(response.body)
+
+                workflow_runs = json_response["workflow_runs"]
+                workflow_run_ids = workflow_runs.map { |wr| wr["id"] }
+                expected_workflow_run_ids = [workflow_run_in_the_future1.id, workflow_run_in_the_future2.id, workflow_run_in_the_future3.id]
+
+                expect(json_response.keys).to eq(["workflow_runs"])
+                expect(workflow_run_ids).to contain_exactly(*expected_workflow_run_ids)
+                expect(workflow_run_ids).to_not include(workflow_run_in_the_further_future.id)
+              end
+            end
+
+            context "filtering by visibility" do
+              it "returns correct workflow runs with public visibility in domain '#{domain}' with format '#{format_param}'" do
+                get :index, params: { domain: domain, format: format_param, visibility: "public", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+
+                json_response = JSON.parse(response.body)
+
+                workflow_runs = json_response["workflow_runs"]
+                workflow_run_ids = workflow_runs.map { |wr| wr["id"] }
+                sample_ids = WorkflowRun.where(id: workflow_run_ids).pluck(:sample_id).uniq
+
+                expected_sample_ids = Sample.where(project_id: [@project1.id, @project2.id]).pluck(:id)
+                expected_workflow_run_ids = WorkflowRun.where(sample_id: expected_sample_ids).pluck(:id)
+
+                expect(json_response.keys).to eq(["workflow_runs"])
+                expect(sample_ids).to contain_exactly(*expected_sample_ids)
+                expect(workflow_run_ids).to contain_exactly(*expected_workflow_run_ids)
+              end
+
+              it "returns correct workflow runs with private visibility in domain '#{domain}' with format '#{format_param}'" do
+                get :index, params: { domain: domain, format: format_param, visibility: "private", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+
+                json_response = JSON.parse(response.body)
+
+                workflow_runs = json_response["workflow_runs"]
+                workflow_run_ids = workflow_runs.map { |wr| wr["id"] }
+                sample_ids = WorkflowRun.where(id: workflow_run_ids).pluck(:sample_id).uniq
+
+                expected_sample_ids = domain == "my_data" ? Sample.where(project_id: @project3.id).pluck(:id).uniq : []
+                expected_workflow_run_ids = WorkflowRun.where(sample_id: expected_sample_ids).pluck(:id)
+
+                expect(json_response.keys).to eq(["workflow_runs"])
+                expect(sample_ids).to contain_exactly(*expected_sample_ids)
+                expect(workflow_run_ids).to contain_exactly(*expected_workflow_run_ids)
+              end
+            end
+
+            context "filtering by projectId" do
+              it "returns correct workflow runs belonging to the specified project in domain '#{domain}' with format '#{format_param}'" do
+                get :index, params: { domain: domain, format: format_param, projectId: @project1.id, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+
+                json_response = JSON.parse(response.body)
+
+                workflow_runs = json_response["workflow_runs"]
+                workflow_runs_workflow = workflow_runs.map { |wr| wr["workflow"] }.uniq
+                workflow_run_ids = workflow_runs.map { |wr| wr["id"] }
+                sample_ids = WorkflowRun.where(id: workflow_run_ids).pluck(:sample_id).uniq
+
+                expected_sample_ids = Sample.where(project_id: @project1.id).pluck(:id).uniq
+                expected_workflow_run_ids = WorkflowRun.where(sample_id: expected_sample_ids).pluck(:id)
+
+                expect(json_response.keys).to eq(["workflow_runs"])
+                expect(workflow_runs_workflow).to eq([WorkflowRun::WORKFLOW[:consensus_genome]])
+                expect(sample_ids).to contain_exactly(*expected_sample_ids)
+                expect(workflow_run_ids).to contain_exactly(*expected_workflow_run_ids)
+              end
             end
 
             context "filtering by sample host" do
               it "returns correct workflow runs in domain '#{domain}' with format '#{format_param}'" do
-                sample_filters = {
-                  host: HostGenome.find_by(name: "Bear").id,
-                }
-                workflow_run_filters = {
-                  workflow: WorkflowRun::WORKFLOW[:consensus_genome],
-                }
-
-                get :index, params: { domain: domain, format: format_param, workflow_run_filters: workflow_run_filters, sample_filters: sample_filters }
+                get :index, params: { domain: domain, format: format_param, host: HostGenome.find_by(name: "Bear").id, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -402,14 +489,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
             context "filtering by sample location_v2" do
               it "returns correct workflow runs in domain '#{domain}' with format '#{format_param}'" do
-                sample_filters = {
-                  locationV2: "New York, USA",
-                }
-                workflow_run_filters = {
-                  workflow: WorkflowRun::WORKFLOW[:consensus_genome],
-                }
-
-                get :index, params: { domain: domain, format: format_param, workflow_run_filters: workflow_run_filters, sample_filters: sample_filters }
+                get :index, params: { domain: domain, format: format_param, locationV2: "New York, USA", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -421,20 +501,13 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
                 expect(json_response.keys).to eq(["workflow_runs"])
                 expect(workflow_runs_workflow).to eq([WorkflowRun::WORKFLOW[:consensus_genome]])
-                expect(collection_locations).to eq([sample_filters[:locationV2]])
+                expect(collection_locations).to eq(["New York, USA"])
               end
             end
 
             context "filtering by sample type" do
               it "returns the correct workflow runs in domain '#{domain}' with format '#{format_param}'" do
-                sample_filters = {
-                  tissue: "Brain",
-                }
-                workflow_run_filters = {
-                  workflow: WorkflowRun::WORKFLOW[:consensus_genome],
-                }
-
-                get :index, params: { domain: domain, format: format_param, workflow_run_filters: workflow_run_filters, sample_filters: sample_filters }
+                get :index, params: { domain: domain, format: format_param, tissue: "Brain", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -446,7 +519,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
                 expect(json_response.keys).to eq(["workflow_runs"])
                 expect(workflow_runs_workflow).to eq([WorkflowRun::WORKFLOW[:consensus_genome]])
-                expect(sample_types).to eq([sample_filters[:tissue]])
+                expect(sample_types).to eq(["Brain"])
               end
             end
           end
@@ -463,11 +536,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
             context "filtering by workflow" do
               it "returns correct and non-deprecated workflow runs in domain '#{domain}' with format '#{format_param}'" do
-                workflow_run_filters = {
-                  workflow: WorkflowRun::WORKFLOW[:consensus_genome],
-                }
-
-                get :index, params: { domain: domain, format: format_param, workflow_run_filters: workflow_run_filters }
+                get :index, params: { domain: domain, format: format_param, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 

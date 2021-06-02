@@ -9,6 +9,10 @@ export const TRIGGERS = {
 };
 
 export const WORKFLOW_TRIGGERS = {
+  [WORKFLOWS.CONSENSUS_GENOME_FLAT_LIST.value]: [
+    TRIGGERS.nextclade,
+    TRIGGERS.download,
+  ],
   [WORKFLOWS.CONSENSUS_GENOME.value]: [TRIGGERS.nextclade, TRIGGERS.download],
   [WORKFLOWS.SHORT_READ_MNGS.value]: [
     TRIGGERS.backgroundModel,

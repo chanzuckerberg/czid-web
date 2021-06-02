@@ -118,6 +118,60 @@ class TableRenderers extends React.Component {
     );
   };
 
+  static renderSampleInfo = ({ rowData, full = true, basicIcon = false }) => {
+    const sample = get("sample", rowData);
+    const sampleName = get("name", sample);
+    let status;
+
+    if (sample) {
+      if (sample.uploadError) status = sample.uploadError;
+      // If the sample does not have an upload error, set status to the workflow run status.
+      else status = get("status", rowData);
+    }
+
+    return (
+      <div className={cs.sample}>
+        {full && (
+          <div className={cs.visibility}>
+            {sample &&
+              (basicIcon ? (
+                <IconSample className={cx(cs.iconSample)} />
+              ) : sample.publicAccess ? (
+                <IconSamplePublic className={cx(cs.icon)} />
+              ) : (
+                <IconSamplePrivate className={cx(cs.icon)} />
+              ))}
+          </div>
+        )}
+        <div className={cs.sampleRightPane}>
+          {sample ? (
+            <div className={cs.sampleNameAndStatus}>
+              <BasicPopup
+                trigger={<div className={cs.sampleName}>{sampleName}</div>}
+                content={sampleName}
+              />
+              <StatusLabel
+                className={cs.sampleStatus}
+                status={status}
+                type={STATUS_TYPE[status]}
+              />
+            </div>
+          ) : (
+            <div className={cs.sampleNameAndStatus} />
+          )}
+          {sample ? (
+            <div className={cs.sampleDetails}>
+              <span className={cs.user}>{sample.user}</span>|
+              <span className={cs.project}>{sample.project}</span>
+            </div>
+          ) : (
+            <div className={cs.sampleDetails} />
+          )}
+        </div>
+      </div>
+    );
+  };
+
   static renderSample = ({
     sample,
     workflow = null,

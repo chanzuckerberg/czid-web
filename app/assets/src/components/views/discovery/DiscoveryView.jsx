@@ -37,7 +37,11 @@ import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import { CG_FLAT_LIST_FEATURE } from "~/components/utils/features";
 import { logError } from "~/components/utils/logUtil";
 import { generateUrlToSampleView } from "~/components/utils/urls";
-import { WORKFLOWS, WORKFLOW_ORDER } from "~/components/utils/workflows";
+import {
+  WORKFLOWS,
+  WORKFLOW_ENTITIES,
+  WORKFLOW_ORDER,
+} from "~/components/utils/workflows";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 import { DEFAULTS_BY_WORKFLOW } from "~/components/views/samples/SamplesView/ColumnConfiguration";
@@ -132,6 +136,7 @@ class DiscoveryView extends React.Component {
         filteredSampleDimensions: [],
         filteredSampleStats: {},
         filteredVisualizationCount: null,
+        filteredWorkflowRunCount: null,
         filters: {},
         loadingDimensions: true,
         loadingLocations: true,
@@ -157,6 +162,8 @@ class DiscoveryView extends React.Component {
           [WORKFLOWS.SHORT_READ_MNGS.value]: new Set(),
           [WORKFLOWS.CONSENSUS_GENOME.value]: new Set(),
         },
+        selectableWorkflowRunIds: [],
+        selectedWorkflowRunIds: new Set(),
         showFilters: true,
         showStats: true,
         userDataCounts: null,
@@ -194,6 +201,11 @@ class DiscoveryView extends React.Component {
       onViewChange: this.refreshVisualizationData,
       displayName: "VisualizationsViewBase",
     });
+    this.workflowRuns = this.dataLayer.workflowRuns.createView({
+      conditions,
+      onViewChange: this.refreshWorkflowRunData,
+      displayName: WORKFLOWS.CONSENSUS_GENOME_FLAT_LIST.value,
+    });
     this.mapPreviewProjects = this.projects;
     this.mapPreviewSamples = this.samples;
 
@@ -205,9 +217,12 @@ class DiscoveryView extends React.Component {
     this.mapPreviewSidebar = null;
 
     // preload first pages
-    domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.projects.loadPage(0);
     this.samples.loadPage(0);
-    domain !== DISCOVERY_DOMAIN_SNAPSHOT && this.visualizations.loadPage(0);
+    if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
+      this.projects.loadPage(0);
+      this.workflowRuns.loadPage(0);
+      this.visualizations.loadPage(0);
+    }
 
     this.updateBrowsingHistory("replace");
   }
@@ -215,7 +230,12 @@ class DiscoveryView extends React.Component {
   // Special case to support per-workflow tab views
   constructSamplesByWorkflow = () => {
     const result = {};
-    WORKFLOW_ORDER.forEach(name => {
+    const workflowOrder = remove(
+      workflow => workflow === "CONSENSUS_GENOME_FLAT_LIST",
+      WORKFLOW_ORDER
+    );
+
+    workflowOrder.forEach(name => {
       const workflow = WORKFLOWS[name].value;
       const conditions = this.getConditions();
       conditions.filters.workflow = workflow;
@@ -375,6 +395,7 @@ class DiscoveryView extends React.Component {
     if (domain !== DISCOVERY_DOMAIN_SNAPSHOT) {
       this.projects.reset({ conditions, loadFirstPage: true });
       this.visualizations.reset({ conditions, loadFirstPage: true });
+      this.workflowRuns.reset({ conditions, loadFirstPage: true });
     }
     if (this.mapPreviewSamples !== this.samples) {
       this.mapPreviewSamples.reset({ conditions, loadFirstPage: true });
@@ -391,6 +412,7 @@ class DiscoveryView extends React.Component {
         filteredSampleDimensions: [],
         filteredVisualizationCount: null,
         filteredSampleStats: {},
+        filteredWorkflowRunCount: null,
         loadingDimensions: true,
         mapSidebarProjectCount: null,
         mapSidebarSampleCount: null,
@@ -509,15 +531,27 @@ class DiscoveryView extends React.Component {
 
   refreshSampleData = () => {
     const { workflow } = this.state;
+
     this.setState({
       filteredSampleCount: this.samples.length,
-      selectableSampleIds: this.samplesByWorkflow[workflow].getIds(),
+      selectableSampleIds:
+        find({ value: workflow }, values(WORKFLOWS)).entity ===
+        WORKFLOW_ENTITIES.SAMPLES
+          ? this.samplesByWorkflow[workflow].getIds()
+          : [],
     });
   };
 
   refreshVisualizationData = () => {
     this.setState({
       filteredVisualizationCount: this.visualizations.length,
+    });
+  };
+
+  refreshWorkflowRunData = () => {
+    this.setState({
+      filteredWorkflowRunCount: this.workflowRuns.length,
+      selectableWorkflowRunIds: this.workflowRuns.getIds(),
     });
   };
 
@@ -1162,6 +1196,12 @@ class DiscoveryView extends React.Component {
     }));
   };
 
+  handleSelectedWorkflowRunsUpdate = selectedWorkflowRunIds => {
+    this.setState({
+      selectedWorkflowRunIds,
+    });
+  };
+
   handleMapSidebarTabChange = mapSidebarTab => {
     this.setState({ mapSidebarTab });
   };
@@ -1452,11 +1492,17 @@ class DiscoveryView extends React.Component {
 
   renderWorkflowTabs = () => {
     const { workflow } = this.state;
+    const currentView =
+      find({ value: workflow }, values(WORKFLOWS)).entity ===
+      WORKFLOW_ENTITIES.WORKFLOW_RUNS
+        ? this.workflowRuns
+        : this.samplesByWorkflow[workflow];
+
     return (
       <Tabs
         className={cs.workflowTabs}
         tabs={this.computeWorkflowTabs()}
-        value={this.samplesByWorkflow[workflow].displayName}
+        value={currentView.displayName}
         onChange={this.handleWorkflowTabChange}
         hideBorder
       />
@@ -1464,18 +1510,27 @@ class DiscoveryView extends React.Component {
   };
 
   handleWorkflowTabChange = workflow => {
-    const view = this.samplesByWorkflow[workflow];
+    const isWorkflowRunEntity =
+      find({ value: workflow }, values(WORKFLOWS)).entity ===
+      WORKFLOW_ENTITIES.WORKFLOW_RUNS;
+
+    const view = isWorkflowRunEntity
+      ? this.workflowRuns
+      : this.samplesByWorkflow[workflow];
+
     // PLQC is currently only available for mNGS samples.
     let { currentDisplay } = this.state;
     currentDisplay =
-      currentDisplay === "plqc" && workflow === WORKFLOWS.CONSENSUS_GENOME.value
+      currentDisplay === "plqc" && workflow !== WORKFLOWS.SHORT_READ_MNGS.value
         ? "table"
         : currentDisplay;
 
     this.setState(
       {
         currentDisplay,
-        selectableSampleIds: view.getIds(),
+        ...(isWorkflowRunEntity
+          ? { selectableWorkflowRunIds: view.getIds() }
+          : { selectableSampleIds: view.getIds() }),
         workflow,
       },
       () => {
@@ -1498,19 +1553,25 @@ class DiscoveryView extends React.Component {
       );
     }
 
-    return workflows.map(name => ({
-      label: (
-        <>
-          <span className={cs.tabLabel}>{`${WORKFLOWS[name].label}${
-            name === "CONSENSUS_GENOME_FLAT_LIST" ? "" : "s"
-          }`}</span>
-          <span className={cs.tabCounter}>
-            {this.samplesByWorkflow[WORKFLOWS[name].value].length || "0"}
-          </span>
-        </>
-      ),
-      value: WORKFLOWS[name].value,
-    }));
+    return workflows.map(name => {
+      const [workflowName, workflowCount] =
+        name === "CONSENSUS_GENOME_FLAT_LIST"
+          ? [WORKFLOWS[name].label, this.workflowRuns.length]
+          : [
+              `${WORKFLOWS[name].label}s`,
+              this.samplesByWorkflow[WORKFLOWS[name].value].length,
+            ];
+
+      return {
+        label: (
+          <>
+            <span className={cs.tabLabel}>{workflowName}</span>
+            <span className={cs.tabCounter}>{workflowCount || "0"}</span>
+          </>
+        ),
+        value: WORKFLOWS[name].value,
+      };
+    });
   };
 
   renderCenterPaneContent = () => {
@@ -1524,7 +1585,9 @@ class DiscoveryView extends React.Component {
       projectId,
       sampleActiveColumnsByWorkflow,
       selectableSampleIds,
+      selectableWorkflowRunIds,
       selectedSampleIds,
+      selectedWorkflowRunIds,
       showFilters,
       showStats,
       userDataCounts,
@@ -1534,13 +1597,30 @@ class DiscoveryView extends React.Component {
     const { admin, allowedFeatures, mapTilerKey, snapshotShareId } = this.props;
     const { projects, visualizations } = this;
 
+    const isWorkflowRunEntity =
+      find({ value: workflow }, values(WORKFLOWS)).entity ===
+      WORKFLOW_ENTITIES.WORKFLOW_RUNS;
+    const objects = isWorkflowRunEntity
+      ? this.workflowRuns
+      : this.samplesByWorkflow[workflow];
     const samples = this.samplesByWorkflow[workflow];
-    const tableHasLoaded = !samples.isLoading() && currentDisplay === "table";
+    const tableHasLoaded = !objects.isLoading() && currentDisplay === "table";
 
     const hideAllTriggers = !!snapshotShareId;
+    const [selectableIds, selectedIds, updateSelectedIds] = isWorkflowRunEntity
+      ? [
+          selectableWorkflowRunIds,
+          selectedWorkflowRunIds,
+          this.handleSelectedWorkflowRunsUpdate,
+        ]
+      : [
+          selectableSampleIds,
+          selectedSampleIds[workflow],
+          this.handleSelectedSamplesUpdate,
+        ];
 
     return (
-      <React.Fragment>
+      <>
         {currentTab === "projects" && (
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
@@ -1576,6 +1656,7 @@ class DiscoveryView extends React.Component {
             <div className={cs.dataContainer}>
               {currentDisplay !== "map" && this.renderWorkflowTabs()}
               {userDataCounts &&
+              !isWorkflowRunEntity &&
               !userDataCounts.sampleCountByWorkflow[workflow] ? (
                 this.renderNoDataWorkflowBanner(workflow)
               ) : (
@@ -1590,23 +1671,24 @@ class DiscoveryView extends React.Component {
                   mapLocationData={mapLocationData}
                   mapPreviewedLocationId={mapPreviewedLocationId}
                   mapTilerKey={mapTilerKey}
+                  objects={objects}
                   onActiveColumnsChange={this.handleSampleActiveColumnsChange}
                   onClearFilters={this.handleClearFilters}
                   onDisplaySwitch={this.handleDisplaySwitch}
-                  onLoadRows={samples.handleLoadObjectRows}
+                  onLoadRows={objects.handleLoadObjectRows}
                   onPLQCHistogramBarClick={this.handlePLQCHistogramBarClick}
                   onMapClick={this.clearMapPreview}
                   onMapLevelChange={this.handleMapLevelChange}
                   onMapMarkerClick={this.handleMapMarkerClick}
                   onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                   onSampleSelected={this.handleSampleSelected}
-                  onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
                   projectId={projectId}
                   snapshotShareId={snapshotShareId}
                   ref={samplesView => (this.samplesView = samplesView)}
                   samples={samples}
-                  selectableIds={selectableSampleIds}
-                  selectedSampleIds={selectedSampleIds[workflow]}
+                  selectableIds={selectableIds}
+                  selectedIds={selectedIds}
+                  onUpdateSelectedIds={updateSelectedIds}
                   filtersSidebarOpen={showFilters}
                   sampleStatsSidebarOpen={showStats}
                   hideAllTriggers={hideAllTriggers}
@@ -1634,7 +1716,7 @@ class DiscoveryView extends React.Component {
               this.renderNoSearchResultsBanner("visualizations")}
           </div>
         )}
-      </React.Fragment>
+      </>
     );
   };
 
