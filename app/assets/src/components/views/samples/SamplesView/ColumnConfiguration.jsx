@@ -444,6 +444,7 @@ export const computeColumnsByWorkflow = ({
     {
       dataKey: "referenceGenome",
       flexGrow: 1,
+      width: 200,
       className: cs.basicCell,
       cellRenderer: ({ cellData }) =>
         TableRenderers.renderReferenceGenome(cellData),
@@ -505,12 +506,12 @@ export const DEFAULTS_BY_WORKFLOW = {
   ],
   [WORKFLOWS.CONSENSUS_GENOME_FLAT_LIST.value]: [
     "sample",
+    "referenceGenome",
     "createdAt",
     "host",
     "collectionLocationV2",
     "totalReadsCG",
     "percentGenomeCalled",
     "vadrPassFail",
-    "wetlabProtocol",
   ],
 };
