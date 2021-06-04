@@ -237,32 +237,37 @@ const processRawSample = sample => {
 };
 
 const processConsensusGenomeWorkflowRun = cgWorkflowRun => {
-  const cachedResults = get("cached_results", cgWorkflowRun);
-  const inputs = get("inputs", cgWorkflowRun);
+  const getCachedResult = resultPath =>
+    get(["cached_results", ...resultPath], cgWorkflowRun);
+  const getInput = inputPath => get(["inputs", ...inputPath], cgWorkflowRun);
 
   return {
-    medakaModel: inputs["medaka_model"],
-    technology: inputs["technology"],
-    wetlabProtocol: upperCase(inputs["wetlab_protocol"]),
-    ...(cachedResults && {
-      coverageDepth: cachedResults["coverage_viz"]["coverage_depth"],
-      totalReadsCG: cachedResults["quality_metrics"]["total_reads"],
-      gcPercent: cachedResults["quality_metrics"]["gc_percent"],
-      refSnps: cachedResults["quality_metrics"]["ref_snps"],
-      percentIdentity: cachedResults["quality_metrics"]["percent_identity"],
-      nActg: cachedResults["quality_metrics"]["n_actg"],
-      percentGenomeCalled:
-        cachedResults["quality_metrics"]["percent_genome_called"],
-      nMissing: cachedResults["quality_metrics"]["n_missing"],
-      nAmbiguous: cachedResults["quality_metrics"]["n_ambiguous"],
+    medakaModel: getInput(["medaka_model"]),
+    technology: getInput(["technology"]),
+    wetlabProtocol: upperCase(getInput(["wetlab_protocol"])),
+    ...(get("cached_results", cgWorkflowRun) && {
+      coverageDepth: getCachedResult(["coverage_viz", "coverage_depth"]),
+      totalReadsCG: getCachedResult(["quality_metrics", "total_reads"]),
+      gcPercent: getCachedResult(["quality_metrics", "gc_percent"]),
+      refSnps: getCachedResult(["quality_metrics", "ref_snps"]),
+      percentIdentity: getCachedResult(["quality_metrics", "percent_identity"]),
+      nActg: getCachedResult(["quality_metrics", "n_actg"]),
+      percentGenomeCalled: getCachedResult([
+        "quality_metrics",
+        "percent_genome_called",
+      ]),
+      nMissing: getCachedResult(["quality_metrics", "n_missing"]),
+      nAmbiguous: getCachedResult(["quality_metrics", "n_ambiguous"]),
       referenceGenome: {
-        accessionName: cachedResults["taxon_info"]["accession_name"],
-        referenceGenomeId: cachedResults["taxon_info"]["accession_id"],
-        taxonName: cachedResults["taxon_info"]["taxon_name"],
+        accessionName: getCachedResult(["taxon_info", "accession_name"]),
+        referenceGenomeId: getCachedResult(["taxon_info", "accession_id"]),
+        taxonName: getCachedResult(["taxon_info", "taxon_name"]),
       },
-      referenceGenomeLength:
-        cachedResults["quality_metrics"]["reference_genome_length"],
-      vadrPassFail: cachedResults["quality_metrics"]["vadr_pass_fail"],
+      referenceGenomeLength: getCachedResult([
+        "quality_metrics",
+        "reference_genome_length",
+      ]),
+      vadrPassFail: getCachedResult(["quality_metrics", "vadr_pass_fail"]),
     }),
   };
 };

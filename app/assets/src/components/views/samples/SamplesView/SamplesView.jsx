@@ -264,7 +264,7 @@ class SamplesView extends React.Component {
             popupText="Background Model"
           />
         }
-        selectedIds={selectedIds}
+        selectedSampleIds={selectedIds}
         fetchedSamples={targetSamples.filter(sample =>
           selectedIds.has(sample.id)
         )}
