@@ -527,8 +527,8 @@ RSpec.describe SamplesController, type: :controller do
         json_response = JSON.parse(response.body)
 
         expect(json_response).not_to eq(nil)
-        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
-        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["validIds"]).to include(good_sample_one.id)
+        expect(json_response["validIds"]).to include(good_sample_two.id)
         expect(json_response["invalidSampleNames"]).to be_empty
         expect(json_response["error"]).to be_nil
       end
@@ -545,7 +545,7 @@ RSpec.describe SamplesController, type: :controller do
         json_response = JSON.parse(response.body)
 
         expect(json_response).not_to eq(nil)
-        expect(json_response["validSampleIds"]).to include(good_workflow_sample.id)
+        expect(json_response["validIds"]).to include(good_workflow_sample.id)
         expect(json_response["invalidSampleNames"]).to be_empty
         expect(json_response["error"]).to be_nil
       end
@@ -561,8 +561,8 @@ RSpec.describe SamplesController, type: :controller do
         json_response = JSON.parse(response.body)
 
         expect(json_response).not_to eq(nil)
-        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
-        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["validIds"]).to include(good_sample_one.id)
+        expect(json_response["validIds"]).to include(good_sample_two.id)
         expect(json_response["invalidSampleNames"]).to include(in_progress_sample.name)
         expect(json_response["error"]).to be_nil
       end
@@ -579,7 +579,7 @@ RSpec.describe SamplesController, type: :controller do
         json_response = JSON.parse(response.body)
 
         expect(json_response).not_to eq(nil)
-        expect(json_response["validSampleIds"]).to include(good_workflow_sample.id)
+        expect(json_response["validIds"]).to include(good_workflow_sample.id)
         expect(json_response["invalidSampleNames"]).to include(in_progress_workflow_sample.name)
         expect(json_response["error"]).to be_nil
       end
@@ -595,8 +595,8 @@ RSpec.describe SamplesController, type: :controller do
         json_response = JSON.parse(response.body)
 
         expect(json_response).not_to eq(nil)
-        expect(json_response["validSampleIds"]).to include(good_sample_one.id)
-        expect(json_response["validSampleIds"]).to include(good_sample_two.id)
+        expect(json_response["validIds"]).to include(good_sample_one.id)
+        expect(json_response["validIds"]).to include(good_sample_two.id)
         expect(json_response["invalidSampleNames"]).to include(failed_sample.name)
         expect(json_response["error"]).to be_nil
       end
@@ -613,7 +613,7 @@ RSpec.describe SamplesController, type: :controller do
         json_response = JSON.parse(response.body)
 
         expect(json_response).not_to eq(nil)
-        expect(json_response["validSampleIds"]).to include(good_workflow_sample.id)
+        expect(json_response["validIds"]).to include(good_workflow_sample.id)
         expect(json_response["invalidSampleNames"]).to include(failed_workflow_sample.name)
         expect(json_response["error"]).to be_nil
       end
@@ -826,7 +826,7 @@ RSpec.describe SamplesController, type: :controller do
         json_response = JSON.parse(response.body)
 
         expect(json_response).not_to eq(nil)
-        expect(json_response["validSampleIds"]).to include(different_owner_sample.id)
+        expect(json_response["validIds"]).to include(different_owner_sample.id)
         expect(json_response["invalidSampleNames"]).to be_empty
         expect(json_response["error"]).to be_nil
       end

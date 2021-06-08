@@ -10,12 +10,12 @@ import Notification from "~ui/notifications/Notification";
 import PropTypes from "~utils/propTypes";
 
 const NextcladeModalFooter = ({
+  hasValidIds,
   invalidSampleNames,
   loading,
   onClick,
   nonSarsCov2SampleNames,
   validationError,
-  validSampleIds,
 }) => {
   const renderAccordionNotification = ({
     message,
@@ -65,7 +65,7 @@ const NextcladeModalFooter = ({
 
   const renderInvalidSamplesWarning = () => {
     return renderAccordionNotification({
-      message: `${invalidSampleNames.length} sample${
+      message: `${invalidSampleNames.length} consensus genome${
         invalidSampleNames.length > 1 ? "s" : ""
       } won't be sent to Nextclade`,
       description: ", because they either failed or are still processing:",
@@ -76,7 +76,8 @@ const NextcladeModalFooter = ({
   const renderValidationError = () => {
     if (!loading && validationError) {
       renderNotification({
-        message: "An error occurred when verifying your selected samples.",
+        message:
+          "An error occurred when verifying your selected consensus genomes.",
         type: "error",
       });
     }
@@ -85,7 +86,7 @@ const NextcladeModalFooter = ({
   const renderViewQCInNextcladeButton = () => {
     return (
       <PrimaryButton
-        disabled={loading || validSampleIds.size === 0}
+        disabled={loading || !hasValidIds}
         text="View QC in Nextclade"
         onClick={withAnalytics(
           onClick,
@@ -97,10 +98,10 @@ const NextcladeModalFooter = ({
 
   const renderInvalidSamplesNotifications = () => {
     if (!loading) {
-      if (validSampleIds.size === 0) {
+      if (!hasValidIds) {
         return renderNotification({
           message:
-            "No valid samples to upload to Nextclade because they either failed or are still processing.",
+            "No valid consensus genomes to upload to Nextclade because they either failed or are still processing.",
           type: "error",
         });
       } else if (invalidSampleNames.length > 0) {
@@ -112,7 +113,7 @@ const NextcladeModalFooter = ({
   const renderNonSARSCov2Warning = () => {
     if (!loading && nonSarsCov2SampleNames.length > 0) {
       return renderAccordionNotification({
-        message: `${nonSarsCov2SampleNames.length} sample${
+        message: `${nonSarsCov2SampleNames.length} consensus genome${
           nonSarsCov2SampleNames.length > 1 ? "s" : ""
         } won't be sent to Nextclade`,
         description:
@@ -128,7 +129,7 @@ const NextcladeModalFooter = ({
         {loading && (
           <div className={cs.loading}>
             <IconLoading className={cs.loadingIcon} />
-            {" Validating samples..."}
+            {" Validating consensus genomes..."}
           </div>
         )}
         {renderValidationError()}
@@ -143,6 +144,7 @@ const NextcladeModalFooter = ({
 NextcladeModalFooter.propTypes = {
   description: PropTypes.string,
   invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
+  hasValidIds: PropTypes.bool,
   list: PropTypes.arrayOf(PropTypes.string),
   loading: PropTypes.bool,
   message: PropTypes.string,
@@ -150,7 +152,6 @@ NextcladeModalFooter.propTypes = {
   nonSarsCov2SampleNames: PropTypes.arrayOf(PropTypes.string),
   type: PropTypes.string,
   validationError: PropTypes.string,
-  validSampleIds: PropTypes.instanceOf(Set).isRequired,
 };
 
 export default NextcladeModalFooter;

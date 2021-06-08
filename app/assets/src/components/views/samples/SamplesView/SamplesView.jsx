@@ -3,6 +3,7 @@ import {
   difference,
   find,
   forEach,
+  get,
   isEmpty,
   union,
   pickBy,
@@ -273,15 +274,15 @@ class SamplesView extends React.Component {
     );
   };
 
-  // TODO(omar): Make NextcladeModal support selected workflow runs [CH-136635]
   renderNextcladeTrigger = () => {
     const { objects, selectedIds } = this.props;
-    const selectedSamples = objects.loaded.filter(sample =>
-      selectedIds.has(sample.id)
+
+    const selectedObjects = objects.loaded.filter(object =>
+      selectedIds.has(object.id)
     );
 
-    const sarsCov2Count = selectedSamples
-      .map(sample => sample.referenceGenome.taxonName)
+    const sarsCov2Count = selectedObjects
+      .map(object => get(["referenceGenome", "taxonName"], object))
       .reduce((n, taxonName) => {
         return n + (taxonName === SARS_COV_2);
       }, 0);
@@ -552,10 +553,11 @@ class SamplesView extends React.Component {
   render() {
     const {
       currentDisplay,
-      samples,
+      objects,
       selectedIds,
       snapshotShareId,
       workflow,
+      workflowEntity,
     } = this.props;
     const {
       phyloTreeCreationModalOpen,
@@ -588,9 +590,10 @@ class SamplesView extends React.Component {
               this.handleBulkDownloadModalClose,
               "SamplesView_bulk-download-modal_closed"
             )}
+            onGenerate={this.handleBulkDownloadGenerate}
             selectedSampleIds={selectedIds}
             workflow={workflow}
-            onGenerate={this.handleBulkDownloadGenerate}
+            workflowEntity={workflowEntity}
           />
         )}
         {nextcladeModalOpen && (
@@ -600,7 +603,8 @@ class SamplesView extends React.Component {
               this.handleNextcladeModalClose,
               "SamplesView_nextclade-modal_closed"
             )}
-            samples={pickBy(s => selectedIds.has(s.id), samples.entries)}
+            objects={pickBy(o => selectedIds.has(o.id), objects.entries)}
+            workflowEntity={workflowEntity}
           />
         )}
       </div>
@@ -647,6 +651,7 @@ SamplesView.propTypes = {
   selectedIds: PropTypes.instanceOf(Set),
   snapshotShareId: PropTypes.string,
   workflow: PropTypes.string,
+  workflowEntity: PropTypes.string,
 };
 
 SamplesView.contextType = UserContext;

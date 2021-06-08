@@ -169,10 +169,10 @@ class BulkDownloadModal extends React.Component {
   }
 
   async fetchValidationInfo(selectedSampleIds, workflow) {
-    const sampleValidationInfo = await validateSampleIds(
-      selectedSampleIds,
-      workflow
-    );
+    const sampleValidationInfo = await validateSampleIds({
+      sampleIds: selectedSampleIds,
+      workflow,
+    });
 
     return sampleValidationInfo;
   }

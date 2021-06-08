@@ -150,10 +150,7 @@ class SamplesController < ApplicationController
   # trouble with projects with a large number of samples.
   def validate_sample_ids
     queried_sample_ids = params[:sampleIds]
-    workflow = WorkflowRun::WORKFLOW[:short_read_mngs]
-    if params.key?(:workflow)
-      workflow = params[:workflow]
-    end
+    workflow = params.key?(:workflow) ? params[:workflow] : WorkflowRun::WORKFLOW[:short_read_mngs]
 
     # We want to return valid sample ids, but for invalid samples we need their names to display
     # to the user. No information is returned on samples they don't have access to.
@@ -170,15 +167,15 @@ class SamplesController < ApplicationController
       invalid_sample_names = invalid_samples.map(&:name)
 
       render json: {
-        validSampleIds: valid_sample_ids,
+        validIds: valid_sample_ids,
         invalidSampleNames: invalid_sample_names,
         error: nil,
       }
     else
       render json: {
-        validSampleIds: [],
+        validIds: [],
         invalidSampleNames: [],
-        error: id_validation_info[:error],
+        error: validated_sample_info[:error],
       }
     end
   end
@@ -1348,12 +1345,18 @@ class SamplesController < ApplicationController
     }
   end
 
-  # TODO: Move to another controller if expanding CG export features.
+  # TODO(omar): Move to WorkflowRunsController when clearning up dead CG code from this controller [CH-136648]
   def consensus_genome_clade_export
     # Get the WorkflowRuns.
     sample_ids = collection_params[:sampleIds]
-    samples = samples_scope.where(id: sample_ids)
-    workflow_runs = current_power.samples_workflow_runs(samples).consensus_genomes.active
+    workflow_run_ids = collection_params[:workflowRunIds]
+
+    if sample_ids.present?
+      samples = samples_scope.where(id: sample_ids)
+      workflow_runs = current_power.samples_workflow_runs(samples).consensus_genomes.active
+    elsif workflow_run_ids.present?
+      workflow_runs = current_power.workflow_runs.where(id: workflow_run_ids).consensus_genomes.active
+    end
 
     # Remove the line below if generalizing beyond SARS-CoV-2
     workflow_runs = workflow_runs.select { |wr| wr.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID }
@@ -1386,8 +1389,8 @@ class SamplesController < ApplicationController
 
     # Ensure data export is logged and attributed.
     event_name = "SamplesController_clade_exported"
-    MetricUtil.log_analytics_event(event_name, current_user, { sample_ids: samples.pluck(:id), workflow_run_ids: workflow_run_ids }, request)
-    Rails.logger.info("#{event_name} by user #{current_user.id} for samples (#{samples.pluck(:id)}) and workflow runs (#{workflow_run_ids})")
+    MetricUtil.log_analytics_event(event_name, current_user, { sample_ids: samples&.pluck(:id) || [], workflow_run_ids: workflow_run_ids || [] }, request)
+    Rails.logger.info("#{event_name} by user #{current_user.id} for workflow runs (#{workflow_run_ids})")
 
     render(
       json: { external_url: external_url },
@@ -1449,7 +1452,7 @@ class SamplesController < ApplicationController
 
   # Doesn't require :sample or :samples
   def collection_params
-    permitted_params = [:referenceTree, :workflow, { sampleIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name, :technology] }]
+    permitted_params = [:referenceTree, :workflow, { sampleIds: [], workflowRunIds: [], inputs_json: [:accession_id, :accession_name, :taxon_id, :taxon_name, :technology] }]
     params.permit(*permitted_params)
   end
 

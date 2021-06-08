@@ -204,6 +204,7 @@ Rails.application.routes.draw do
     get :results, on: :member
     get :zip_link, on: :member
     put :rerun, on: :member
+    post :validate_workflow_run_ids, on: :collection
   end
 
   authenticate :auth0_user, ->(u) { u.admin? } do

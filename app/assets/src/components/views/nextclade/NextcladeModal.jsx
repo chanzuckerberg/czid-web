@@ -5,6 +5,7 @@ import {
   filter,
   keys,
   map,
+  max,
   size,
   uniq,
   values,
@@ -13,7 +14,10 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { createConsensusGenomeCladeExport } from "~/api";
-import { validateSampleIds } from "~/api/access_control";
+import {
+  validateSampleIds,
+  validateWorkflowRunIds,
+} from "~/api/access_control";
 import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
@@ -27,7 +31,7 @@ import { SARS_COV_2 } from "~/components/views/samples/SamplesView/constants";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
-import { WORKFLOWS } from "~utils/workflows";
+import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
@@ -50,43 +54,49 @@ export default class NextcladeModal extends React.Component {
       selectedTreeType: "global",
       validationError: null,
       validSampleIds: new Set(),
+      validWorkflowRunIds: new Set(),
     };
   }
 
   componentDidMount() {
-    const { samples } = this.props;
+    const { objects } = this.props;
     const { admin } = this.context || {};
 
-    this.fetchSampleValidationInfo(keys(samples).map(Number));
+    this.fetchValidationInfo({ ids: keys(objects).map(Number) });
 
     if (admin) this.checkAdminSelections();
   }
 
-  fetchSampleValidationInfo = async selectedSampleIds => {
-    const { samples } = this.props;
+  fetchValidationInfo = async ({ ids }) => {
+    const { objects, workflowEntity } = this.props;
 
-    const {
-      validSampleIds,
-      invalidSampleNames,
-      error,
-    } = await validateSampleIds(
-      selectedSampleIds,
-      WORKFLOWS.CONSENSUS_GENOME.value
+    const isWorkflowRunEntity =
+      workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
+    const { validIds, invalidSampleNames, error } = isWorkflowRunEntity
+      ? await validateWorkflowRunIds({
+          workflowRunIds: ids,
+          workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+        })
+      : await validateSampleIds({
+          sampleIds: ids,
+          workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+        });
+
+    const validConsensusGenomes = filter(
+      o => validIds.includes(o.id),
+      values(objects)
     );
 
-    const validSamples = filter(
-      s => validSampleIds.includes(s.id),
-      values(samples)
-    );
+    const projectIds = map("projectId", validConsensusGenomes);
 
-    const projectIds = map("projectId", validSamples);
-
-    const nonSarsCov2SampleNames = values(validSamples)
-      .filter(sample => sample.referenceGenome.taxonName !== SARS_COV_2)
-      .map(sample => sample.sample.name);
+    const nonSarsCov2SampleNames = values(validConsensusGenomes)
+      .filter(cg => cg.referenceGenome.taxonName !== SARS_COV_2)
+      .map(cg => cg.sample.name);
 
     this.setState({
-      validSampleIds: new Set(validSampleIds),
+      ...(isWorkflowRunEntity
+        ? { validWorkflowRunIds: new Set(validIds) }
+        : { validSampleIds: new Set(validIds) }),
       invalidSampleNames,
       loading: false,
       nonSarsCov2SampleNames,
@@ -97,26 +107,30 @@ export default class NextcladeModal extends React.Component {
 
   checkAdminSelections = async () => {
     const { userId } = this.context || {};
-    const { samples } = this.props;
+    const { objects } = this.props;
 
     const selectedOwnerIds = compact(
-      uniq(map("sample.userId", values(samples)))
+      uniq(map("sample.userId", values(objects)))
     );
     if (difference(selectedOwnerIds, [userId]).length) {
       window.alert(
-        "Admin warning: You have selected samples that belong to other users. Double-check that you have permission to send to Nextclade for production samples."
+        "Admin warning: You have selected consensus genomes that belong to other users. Double-check that you have permission to send to Nextclade for production consensus genomes."
       );
     }
   };
 
   openExportLink = async () => {
+    const { workflowEntity } = this.props;
     const {
       validSampleIds,
+      validWorkflowRunIds,
       referenceTreeContents,
       selectedTreeType,
     } = this.state;
     const link = await createConsensusGenomeCladeExport({
-      sampleIds: Array.from(validSampleIds),
+      ...(workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
+        ? { workflowRunIds: Array.from(validWorkflowRunIds) }
+        : { sampleIds: Array.from(validSampleIds) }),
       referenceTree:
         selectedTreeType === "upload" ? referenceTreeContents : null,
     });
@@ -179,12 +193,18 @@ export default class NextcladeModal extends React.Component {
   };
 
   handleConfirmationModalClose = () => {
-    const { projectIds, validSampleIds, selectedTreeType } = this.state;
+    const {
+      projectIds,
+      validSampleIds,
+      validWorkflowRunIds,
+      selectedTreeType,
+    } = this.state;
 
     logAnalyticsEvent(
       ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED,
       {
         sampleIds: Array.from(validSampleIds),
+        workflowRunIds: Array.from(validWorkflowRunIds),
         selectedTreeType,
         projectIds,
       }
@@ -195,16 +215,20 @@ export default class NextcladeModal extends React.Component {
 
   handleConfirmationModalConfirm = async () => {
     const { onClose } = this.props;
-    const { projectIds, validSampleIds, selectedTreeType } = this.state;
-
-    const sampleIds = Array.from(validSampleIds);
+    const {
+      projectIds,
+      validSampleIds,
+      validWorkflowRunIds,
+      selectedTreeType,
+    } = this.state;
 
     try {
       this.setState({ loadingResults: true }, () => {
         logAnalyticsEvent(
           ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED,
           {
-            sampleIds,
+            sampleIds: Array.from(validSampleIds),
+            workflowRunIds: Array.from(validWorkflowRunIds),
             selectedTreeType,
             projectIds,
           }
@@ -228,7 +252,8 @@ export default class NextcladeModal extends React.Component {
             ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_UPLOAD_FAILED,
             {
               error,
-              sampleIds,
+              sampleIds: Array.from(validSampleIds),
+              workflowRunIds: Array.from(validWorkflowRunIds),
               selectedTreeType,
               projectIds,
             }
@@ -240,9 +265,12 @@ export default class NextcladeModal extends React.Component {
 
   handleErrorModalRetry = async () => {
     const { onClose } = this.props;
-    const { projectIds, validSampleIds, selectedTreeType } = this.state;
-
-    const sampleIds = Array.from(validSampleIds);
+    const {
+      projectIds,
+      validSampleIds,
+      validWorkflowRunIds,
+      selectedTreeType,
+    } = this.state;
 
     try {
       await this.openExportLink();
@@ -251,7 +279,8 @@ export default class NextcladeModal extends React.Component {
         logAnalyticsEvent(
           ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_RETRY_BUTTON_CLICKED,
           {
-            sampleIds,
+            sampleIds: Array.from(validSampleIds),
+            workflowRunIds: Array.from(validWorkflowRunIds),
             selectedTreeType,
             projectIds,
           }
@@ -263,7 +292,8 @@ export default class NextcladeModal extends React.Component {
         ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED,
         {
           error,
-          sampleIds,
+          sampleIds: Array.from(validSampleIds),
+          workflowRunIds: Array.from(validWorkflowRunIds),
           selectedTreeType,
           projectIds,
         }
@@ -276,7 +306,7 @@ export default class NextcladeModal extends React.Component {
   };
 
   render() {
-    const { open, onClose, samples } = this.props;
+    const { open, onClose, objects } = this.props;
     const {
       confirmationModalOpen,
       errorModalOpen,
@@ -287,6 +317,7 @@ export default class NextcladeModal extends React.Component {
       referenceTree,
       validationError,
       validSampleIds,
+      validWorkflowRunIds,
       selectedTreeType,
     } = this.state;
 
@@ -295,7 +326,7 @@ export default class NextcladeModal extends React.Component {
         <div className={cs.modal}>
           <div className={cs.nextcladeHeader}>
             <div className={cs.title}>
-              View Samples in Nextclade
+              View Consensus Genomes in Nextclade
               {this.renderTooltip({
                 content:
                   "Nextclade is a third-party tool and has its own policies.",
@@ -303,8 +334,8 @@ export default class NextcladeModal extends React.Component {
               })}
             </div>
             <div className={cs.tagline}>
-              {size(samples)} Sample
-              {size(samples) !== 1 ? "s" : ""} selected
+              {size(objects)} Consensus Genome
+              {size(objects) !== 1 ? "s" : ""} selected
             </div>
           </div>
           <div className={cs.nextcladeDescription}>
@@ -312,10 +343,11 @@ export default class NextcladeModal extends React.Component {
             <List
               listItems={[
                 `Assess sequence quality`,
-                `See where your samples differ from the reference sequence`,
-                `Identify which clade or lineage your samples belong to`,
-                <React.Fragment>
-                  View sample placement in the context of a Nextstrain
+                `See where your consensus genomes differ from the reference sequence`,
+                `Identify which clade or lineage your consensus genomes belong to`,
+                <>
+                  View consensus genome placement in the context of a Nextstrain{" "}
+                  <br />
                   phylogenetic tree
                   {this.renderTooltip({
                     content:
@@ -324,7 +356,7 @@ export default class NextcladeModal extends React.Component {
                     position: "top right",
                     offset: [11, 0],
                   })}
-                </React.Fragment>,
+                </>,
               ]}
             />
           </div>
@@ -354,7 +386,9 @@ export default class NextcladeModal extends React.Component {
               loading={loading}
               nonSarsCov2SampleNames={nonSarsCov2SampleNames}
               validationError={validationError}
-              validSampleIds={validSampleIds}
+              hasValidIds={
+                max([validWorkflowRunIds.size, validSampleIds.size]) > 0
+              }
             />
           </div>
         </div>
@@ -376,7 +410,7 @@ export default class NextcladeModal extends React.Component {
             onCancel={this.handleErrorModalClose}
             onConfirm={this.handleErrorModalRetry}
             title={
-              "Sorry! There was an error sending your samples to Nextclade."
+              "Sorry! There was an error sending your consensus genomes to Nextclade."
             }
           />
         )}
@@ -388,7 +422,8 @@ export default class NextcladeModal extends React.Component {
 NextcladeModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
-  samples: PropTypes.object.isRequired,
+  objects: PropTypes.object.isRequired,
+  workflowEntity: PropTypes.string,
 };
 
 NextcladeModal.contextType = UserContext;

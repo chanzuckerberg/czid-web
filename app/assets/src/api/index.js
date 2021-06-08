@@ -483,9 +483,14 @@ const getMassNormalizedBackgroundAvailability = sampleIds =>
     sampleIds,
   });
 
-const createConsensusGenomeCladeExport = ({ sampleIds, referenceTree }) =>
+const createConsensusGenomeCladeExport = ({
+  sampleIds = [],
+  workflowRunIds = [],
+  referenceTree,
+}) =>
   postWithCSRF("/samples/consensus_genome_clade_export", {
     sampleIds,
+    workflowRunIds,
     referenceTree,
   });
 

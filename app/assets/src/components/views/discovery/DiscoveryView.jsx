@@ -1597,9 +1597,9 @@ class DiscoveryView extends React.Component {
     const { admin, allowedFeatures, mapTilerKey, snapshotShareId } = this.props;
     const { projects, visualizations } = this;
 
+    const workflowEntity = find({ value: workflow }, values(WORKFLOWS)).entity;
     const isWorkflowRunEntity =
-      find({ value: workflow }, values(WORKFLOWS)).entity ===
-      WORKFLOW_ENTITIES.WORKFLOW_RUNS;
+      workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
     const objects = isWorkflowRunEntity
       ? this.workflowRuns
       : this.samplesByWorkflow[workflow];
@@ -1693,6 +1693,7 @@ class DiscoveryView extends React.Component {
                   sampleStatsSidebarOpen={showStats}
                   hideAllTriggers={hideAllTriggers}
                   workflow={workflow}
+                  workflowEntity={workflowEntity}
                 />
               )}
             </div>

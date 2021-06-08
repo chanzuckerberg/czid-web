@@ -523,22 +523,23 @@ class SamplesHeatmapView extends React.Component {
 
   async fetchViewData() {
     const { allowedFeatures = [] } = this.context || {};
+    const { sampleIds } = this.state;
 
     this.setState({ loading: true }); // Gets false from this.updateFilters
 
-    const sampleValidationInfo = await validateSampleIds(
-      this.state.sampleIds,
-      WORKFLOWS.SHORT_READ_MNGS.value
-    );
+    const { validIds, invalidSampleNames } = await validateSampleIds({
+      sampleIds,
+      workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+    });
 
     this.setState({
-      sampleIds: sampleValidationInfo.validSampleIds,
-      invalidSampleNames: sampleValidationInfo.invalidSampleNames,
+      sampleIds: validIds,
+      invalidSampleNames,
     });
 
     // If there are failed/waiting samples selected, display a warning
     // to the user that they won't appear in the heatmap.
-    if (sampleValidationInfo.invalidSampleNames.length > 0) {
+    if (invalidSampleNames.length > 0) {
       this.showNotification(NOTIFICATION_TYPES.invalidSamples);
     }
 

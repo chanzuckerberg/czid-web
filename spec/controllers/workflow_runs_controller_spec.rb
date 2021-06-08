@@ -700,6 +700,46 @@ RSpec.describe WorkflowRunsController, type: :controller do
         expect(JSON.parse(response.body, symbolize_names: true)[:status]).to eq("Output not available")
       end
     end
+
+    describe "POST /validate_workflow_run_ids" do
+      before do
+        project = create(:project, users: [@joe])
+        @sample1 = create(:sample, name: "Joe's good sample", project: project, user: @joe)
+        @successful_workflow_run1 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:succeeded])
+        @successful_workflow_run2 = create(:workflow_run, sample: @sample1, deprecated: false, status: WorkflowRun::STATUS[:succeeded])
+
+        @sample2 = create(:sample, name: "Joe's bad sample", project: project, user: @joe)
+        create(:workflow_run, sample: @sample2, deprecated: true, status: WorkflowRun::STATUS[:failed])
+
+        other_project = create(:project, users: [@admin])
+        other_sample = create(:sample, name: "Admin's sample", project: other_project, user: @admin)
+        create(:workflow_run, sample: other_sample, deprecated: false, status: WorkflowRun::STATUS[:succeeded])
+        create(:workflow_run, sample: other_sample, deprecated: false, status: WorkflowRun::STATUS[:running])
+        create(:workflow_run, sample: other_sample, deprecated: false, status: WorkflowRun::STATUS[:failed])
+      end
+
+      it "should return workflow runs that are active and belong to the user" do
+        post :validate_workflow_run_ids, params: { workflowRunIds: [@successful_workflow_run1.id, @successful_workflow_run2.id], workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response["validIds"]).to contain_exactly(@successful_workflow_run1.id, @successful_workflow_run2.id)
+        expect(json_response["invalidSampleNames"]).to be_empty
+        expect(json_response["error"]).to be_nil
+      end
+
+      it "should filter out workflow runs that are not active and do not belong to the user" do
+        post :validate_workflow_run_ids, params: { workflowRunIds: [*@sample1.workflow_runs.pluck(:id), *@sample2.workflow_runs.pluck(:id)], workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response["validIds"]).to contain_exactly(@successful_workflow_run1.id, @successful_workflow_run2.id)
+        expect(json_response["invalidSampleNames"]).to contain_exactly(@sample2.name)
+        expect(json_response["error"]).to be_nil
+      end
+    end
   end
 
   context "Admin" do

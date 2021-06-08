@@ -54,6 +54,8 @@ class WorkflowRun < ApplicationRecord
   scope :by_workflow, ->(workflow) { where(workflow: workflow) }
   scope :consensus_genomes, -> { where(workflow: WORKFLOW[:consensus_genome]) }
   scope :non_deprecated, -> { where(deprecated: false) }
+  scope :active, -> { where(status: WorkflowRun::STATUS[:succeeded], deprecated: false) }
+  scope :viewable, ->(user) { where(sample: Sample.viewable(user)) }
 
   class RerunDeprecatedWorkflowError < StandardError
     def initialize
@@ -138,14 +140,6 @@ class WorkflowRun < ApplicationRecord
     scope = where(status: STATUS[:running])
     scope = scope.where(workflow: workflow_name) if workflow_name.present?
     scope
-  end
-
-  def self.viewable(user)
-    where(sample: Sample.viewable(user))
-  end
-
-  def self.active
-    where(status: WorkflowRun::STATUS[:succeeded], deprecated: false)
   end
 
   def self.handle_sample_upload_failure(samples)

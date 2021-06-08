@@ -170,10 +170,10 @@ class CollectionModal extends React.Component {
 
   fetchSampleValidation = async () => {
     const { selectedSampleIds, workflow } = this.props;
-    const { invalidSampleNames } = await validateSampleIds(
-      Array.from(selectedSampleIds),
-      workflow
-    );
+    const { invalidSampleNames } = await validateSampleIds({
+      sampleIds: Array.from(selectedSampleIds),
+      workflow,
+    });
     this.setState({ invalidSampleNames });
   };
 

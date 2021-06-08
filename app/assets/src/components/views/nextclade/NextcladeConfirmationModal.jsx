@@ -14,7 +14,7 @@ const NextcladeConfirmationModal = ({ onCancel, onConfirm, open, loading }) => {
     <Modal className={cs.nextcladeConfirmation} narrowest open={open}>
       <Image className={cs.logo} src="/assets/LogoNextclade.png" />
       <div className={cs.title}>
-        You’re ready to send your samples to Nextclade.
+        You’re ready to send your consensus genomes to Nextclade.
       </div>
       <div className={cs.text}>
         Once you click Confirm, you will leave IDseq and send your sequence(s)

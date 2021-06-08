@@ -67,6 +67,51 @@ class WorkflowRunsController < ApplicationController
     }, status: :ok
   end
 
+  # POST /workflow_runs/validate_workflow_run_ids
+  #
+  # Validate access to workflow_run ids, and that the workflow_runs
+  # have completed and succeeded processing.
+  # Filters out workflow_runs that the user does not have read access to or are deprecated.
+  #
+  # Returns a list of valid workflow_run ids and the names of the samples that the workflow_runs the
+  # user does not have access to
+  #
+  # This is a POST route and not a GET request because Puma does not allow
+  # query strings longer than a certain amount (1024 * 10 chars), which causes
+  # trouble when a large amount of workflow run ids are specified.
+  def validate_workflow_run_ids
+    permitted_params = params.permit(:workflow, workflowRunIds: [])
+
+    validated_workflow_runs_info = WorkflowRunValidationService.call(query_ids: permitted_params[:workflowRunIds], current_user: current_user)
+    viewable_workflow_runs = validated_workflow_runs_info[:viewable_workflow_runs]
+
+    if validated_workflow_runs_info[:error].nil?
+      valid_workflow_run_ids = viewable_workflow_runs.by_workflow(permitted_params[:workflow]).active.pluck(:id)
+      invalid_workflow_runs = viewable_workflow_runs.reject { |wr| valid_workflow_run_ids.include?(wr.id) }
+
+      invalid_sample_ids = invalid_workflow_runs.map(&:sample_id).uniq
+      invalid_sample_names = Sample.where(id: invalid_sample_ids).pluck(:name)
+
+      render(
+        json: {
+          validIds: valid_workflow_run_ids,
+          invalidSampleNames: invalid_sample_names,
+          error: nil,
+        },
+        status: :ok
+      )
+    else
+      render(
+        json: {
+          validWorkflowRunIds: [],
+          invalidSampleNames: [],
+          error: validated_workflow_runs_info[:error],
+        },
+        status: :ok
+      )
+    end
+  end
+
   # Top-level zipped pipeline results
   def zip_link
     path = @workflow_run.zip_link
