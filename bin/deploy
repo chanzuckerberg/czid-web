@@ -85,10 +85,9 @@ begin
   # resque workers can be interrupted safely, doing this will prevent errors from migrating while old versions are running and speed up deployment
   puts 'scaling down resque workers'
   system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count 0")
-  unless env == "sandbox"
-    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 0")
-    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 0")
-  end
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 0")
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 0")
+
   puts 'running migrations'
   system!("/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json")
   system!("/tmp/czecs upgrade --task-definition-arn #{task_definition_arn} #{cluster} idseq-#{env}-web")
@@ -98,12 +97,10 @@ begin
   # Resque scheduler
   system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-scheduler --set rake_command=resque:scheduler --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-scheduler czecs-resque.json")
 
-  unless env == "sandbox"
-    # Pipeline monitor
-    system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-pipeline-monitor --set rake_command=pipeline_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-pipeline-monitor czecs-resque.json")
-    # Result monitor
-    system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-result-monitor --set rake_command=result_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-result-monitor czecs-resque.json")
-  end
+  # Pipeline monitor
+  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-pipeline-monitor --set rake_command=pipeline_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-pipeline-monitor czecs-resque.json")
+  # Result monitor
+  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-result-monitor --set rake_command=result_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-result-monitor czecs-resque.json")
 
   puts 'scaling up resque workers'
   resque_count = env == "prod" ? 10 : 2
@@ -112,17 +109,13 @@ begin
   system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count #{resque_count}")
   # Resque scheduler
   system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-scheduler --desired-count 1")
-  unless env == "sandbox"
-    # Pipeline monitor
-    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 1")
-    # Result monitor
-    system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 1")
-  end
+  # Pipeline monitor
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 1")
+  # Result monitor
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 1")
 
   puts "load release tag into param store"
-  unless env == "sandbox"
-    `aws ssm put-parameter --name /idseq-#{env}-web/GIT_RELEASE_SHA --value #{image.match(/^sha-([0-9a-f]{7,})$/)[1]} --type String --overwrite`
-  end
+  `aws ssm put-parameter --name /idseq-#{env}-web/GIT_RELEASE_SHA --value #{image.match(/^sha-([0-9a-f]{7,})$/)[1]} --type String --overwrite`
   notify_slack(env, image, "end")
 rescue Exception  # Even on abort/SystemExit
   notify_slack(env, image, "failure")

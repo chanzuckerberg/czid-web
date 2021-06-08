@@ -46,10 +46,10 @@ class AppConfig < ApplicationRecord
   S3_SAMPLE_UPLOAD_FILE_SIZE_LIMIT = 's3_sample_upload_file_size_limit'.freeze
   # Switch to enable view-only project snapshots that are visible to logged-out users.
   ENABLE_SNAPSHOT_SHARING = 'enable_snapshot_sharing'.freeze
-
   # Templates versions
   WORKFLOW_VERSION_TEMPLATE = "%<workflow_name>s-version".freeze
-
   # SSRF flag configures the app to use SSRFs-Up to send requests
   ENABLE_SSRFS_UP = "enabled_ssrfs_up".freeze
+  # When this is "1", CG status updates will be in HandleSfnNotifications instead of PipelineMonitor.
+  ENABLE_SFN_NOTIFICATIONS = "enable_sfn_notifications".freeze
 end

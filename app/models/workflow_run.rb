@@ -73,8 +73,8 @@ class WorkflowRun < ApplicationRecord
     return "#{workflow}-v#{wdl_version}"
   end
 
-  def update_status
-    remote_status = sfn_execution.description[:status]
+  def update_status(remote_status = nil)
+    remote_status ||= sfn_execution.description[:status]
     # Collapse failed status into our local unique failure status. Status retrieved from [2020/08/12]:
     # https://docs.aws.amazon.com/step-functions/latest/apireference/API_DescribeExecution.html#API_DescribeExecution_ResponseSyntax
     if ["TIMED_OUT", "ABORTED", "FAILED"].include?(remote_status)

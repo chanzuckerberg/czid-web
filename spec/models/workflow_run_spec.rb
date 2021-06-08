@@ -96,6 +96,13 @@ describe WorkflowRun, type: :model do
       expect(@workflow_running).to have_attributes(status: fake_sfn_execution_description[:status])
     end
 
+    it "accepts a run status as an argument" do
+      new_status = "FAILED"
+
+      @workflow_running.update_status(new_status)
+      expect(@workflow_running).to have_attributes(status: new_status)
+    end
+
     it "reports run failures" do
       @mock_aws_clients[:states].stub_responses(:describe_execution, fake_failed_sfn_execution_description)
       @mock_aws_clients[:states].stub_responses(:get_execution_history, fake_error_sfn_execution_history)

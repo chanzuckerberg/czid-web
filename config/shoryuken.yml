@@ -1,0 +1,2 @@
+queues:
+  - <%= ENV["SFN_NOTIFICATIONS_QUEUE_ARN"] %>

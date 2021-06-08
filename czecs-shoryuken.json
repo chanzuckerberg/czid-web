@@ -1,0 +1,48 @@
+{
+  "family": "{{ .Values.project }}-{{ .Values.env }}-{{ .Values.name }}",
+  "containerDefinitions": [
+    {
+      "name": "idseq-{{ .Values.name }}",
+      "image": "{{ .Values.account_id }}.dkr.ecr.{{ .Values.region }}.amazonaws.com/idseq-web:{{ .Values.tag }}",
+      "cpu": 1024,
+      "memoryReservation": 3072,
+      "essential": true,
+      "command": ["shoryuken {{ .Values.entry_command }}"],
+      "environment": [
+        {
+          "name": "RAILS_ENV",
+          "value": "{{ .Values.env }}"
+        },
+        {
+          "name": "ENVIRONMENT",
+          "value": "{{ .Values.env }}"
+        },
+        {
+          "name": "RAILS_LOG_TO_STDOUT",
+          "value": "yes"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "{{ .Values.region }}"
+        },
+        {
+          "name": "AWS_DEFAULT_REGION",
+          "value": "{{ .Values.region }}"
+        },
+        {
+          "name": "COUNT",
+          "value": "1"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "ecs-logs-{{ .Values.env }}",
+          "awslogs-region": "{{ .Values.region }}",
+          "awslogs-stream-prefix": "idseq-{{ .Values.name }}"
+        }
+      }
+    }
+  ],
+  "taskRoleArn": "{{ .Values.project }}-web-{{ .Values.env }}"
+}

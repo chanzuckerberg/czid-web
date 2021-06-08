@@ -174,3 +174,16 @@ services:
       <<: *web-variables
       <<: *aws-variables
     command: bundle exec "rake pipeline_monitor"
+  shoryuken:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/idseq-web:compose
+    volumes:
+      - .:/app:ro
+      - ./log:/app/log
+      - ./tmp:/app/tmp
+      - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
+    environment:
+      <<: *web-variables
+      <<: *aws-variables
+      SFN_NOTIFICATIONS_QUEUE_ARN:
+    command: bundle exec "shoryuken -R -C config/shoryuken.yml"

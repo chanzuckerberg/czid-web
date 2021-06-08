@@ -73,21 +73,23 @@ class CheckPipelineRuns
       end
     end
 
-    wr_ids.each do |wrid|
-      next unless wrid % num_shards == shard_id
+    if num_wr > 0 && AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) != "1"
+      wr_ids.each do |wrid|
+        next unless wrid % num_shards == shard_id
 
-      wr = WorkflowRun.find(wrid)
-      begin
-        break if @shutdown_requested
+        wr = WorkflowRun.find(wrid)
+        begin
+          break if @shutdown_requested
 
-        Rails.logger.info("  Checking WorkflowRun #{wrid} for sample #{wr.sample_id}")
-        wr.update_status
-      rescue StandardError => exception
-        LogUtil.log_error(
-          "Updating Workflow #{wrid} failed with exception: #{exception.message}",
-          exception: exception,
-          workflow_run_id: wrid
-        )
+          Rails.logger.info("  Checking WorkflowRun #{wrid} for sample #{wr.sample_id}")
+          wr.update_status
+        rescue StandardError => exception
+          LogUtil.log_error(
+            "Updating Workflow #{wrid} failed with exception: #{exception.message}",
+            exception: exception,
+            workflow_run_id: wrid
+          )
+        end
       end
     end
   end
