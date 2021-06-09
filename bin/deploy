@@ -87,6 +87,8 @@ begin
   system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque --desired-count 0")
   system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 0")
   system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 0")
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-scheduler --desired-count 0")
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-shoryuken --desired-count 0")
 
   puts 'running migrations'
   system!("/tmp/czecs task -f balances.json --timeout 0 --set taskDefinitionArn=#{task_definition_arn} --set cluster=#{cluster} czecs-task-migrate.json")
@@ -102,6 +104,9 @@ begin
   # Result monitor
   system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-result-monitor --set rake_command=result_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-result-monitor czecs-resque.json")
 
+  # Shoryuken
+  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=shoryuken --set entry_command='shoryuken -R -C config/shoryuken.yml' --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-shoryuken czecs-shoryuken.json")
+
   puts 'scaling up resque workers'
   resque_count = env == "prod" ? 10 : 2
 
@@ -113,6 +118,8 @@ begin
   system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-pipeline-monitor --desired-count 1")
   # Result monitor
   system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-resque-result-monitor --desired-count 1")
+  # Shoryuken
+  system!("aws ecs update-service --cluster #{cluster} --service idseq-#{env}-shoryuken --desired-count 1")
 
   puts "load release tag into param store"
   `aws ssm put-parameter --name /idseq-#{env}-web/GIT_RELEASE_SHA --value #{image.match(/^sha-([0-9a-f]{7,})$/)[1]} --type String --overwrite`
