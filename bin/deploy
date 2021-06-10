@@ -105,7 +105,7 @@ begin
   system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=resque-result-monitor --set rake_command=result_monitor --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-resque-result-monitor czecs-resque.json")
 
   # Shoryuken
-  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=shoryuken --set entry_command='shoryuken -R -C config/shoryuken.yml' --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-shoryuken czecs-shoryuken.json")
+  system!("/tmp/czecs upgrade -f balances.json --set tag=#{image} --set env=#{env} --set name=shoryuken --set entry_command='-R -C config/shoryuken.yml' --set account_id=#{aws_account_id} #{cluster} idseq-#{env}-shoryuken czecs-shoryuken.json")
 
   puts 'scaling up resque workers'
   resque_count = env == "prod" ? 10 : 2

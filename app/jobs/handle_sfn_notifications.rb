@@ -1,3 +1,5 @@
+# LOGGING: This runs within shoryuken. To find logs, go to the latest ecs-log-{env} -> idseq-shoryuken/idseq-shoryuken/* log streams.
+
 class HandleSfnNotifications
   include Shoryuken::Worker
 
