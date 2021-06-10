@@ -344,7 +344,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       end
 
       it "returns correct csv values without metadata" do
-        consensus_genome_overview_csv_string = BulkDownloadsHelper.generate_cg_overview_csv(samples: [@sample], include_metadata: false)
+        consensus_genome_overview_csv_string = BulkDownloadsHelper.generate_cg_overview_csv(workflow_runs: @sample.workflow_runs, include_metadata: false)
 
         expect(consensus_genome_overview_csv_string).to eq(generate_expected_csv_str([
                                                                                        cg_metric_headers,
@@ -391,7 +391,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       end
 
       it "returns correct csv values with metadata" do
-        consensus_genome_overview_csv_string = BulkDownloadsHelper.generate_cg_overview_csv(samples: @samples, include_metadata: true)
+        consensus_genome_overview_csv_string = BulkDownloadsHelper.generate_cg_overview_csv(workflow_runs: WorkflowRun.where(sample_id: @samples.map(&:id)), include_metadata: true)
 
         expect(consensus_genome_overview_csv_string).to eq(generate_expected_csv_str([
                                                                                        cg_metric_headers.concat(cg_metadata_headers, @sample_metadata_headers.map { |h| h.humanize.titleize }),

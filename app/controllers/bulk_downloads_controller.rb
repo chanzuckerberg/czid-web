@@ -48,13 +48,14 @@ class BulkDownloadsController < ApplicationController
 
     # Convert sample ids to pipeline run ids or workflow run ids.
     begin
-      viewable_samples = validate_bulk_download_create_params(create_params, current_user)
+      viewable_objects = validate_bulk_download_create_params(create_params, current_user)
+
       if create_params[:workflow] == WorkflowRun::WORKFLOW[:short_read_mngs]
-        pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(viewable_samples)
+        pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(viewable_objects)
       else
-        relevant_workflow_runs = WorkflowRun.where(sample_id: viewable_samples.pluck(:id), workflow: create_params[:workflow]).active
-        # get the most recent workflow run for each samples
-        workflow_run_ids = relevant_workflow_runs.pluck(:id)
+        # TODO(omar): When cleaning up dead CG code, remove the else statment part of the ternary
+        workflow_runs = create_params[:workflow_run_ids].present? ? viewable_objects : current_power.workflow_runs.where(sample_id: viewable_objects.pluck(:id), workflow: create_params[:workflow])
+        workflow_run_ids = workflow_runs.active.pluck(:id)
       end
     rescue StandardError => e
       # Throw an error if any sample doesn't have a valid pipeline or workflow run.
@@ -216,6 +217,6 @@ class BulkDownloadsController < ApplicationController
   end
 
   def bulk_download_create_params
-    params.permit(:download_type, :workflow, sample_ids: [], params: {})
+    params.permit(:download_type, :workflow, sample_ids: [], params: {}, workflow_run_ids: [])
   end
 end

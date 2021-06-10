@@ -55,7 +55,7 @@ export default class BulkDownloadModalFooter extends React.Component {
 
   isSelectedDownloadValid = () => {
     const {
-      validSampleIds,
+      validObjectIds,
       selectedFields,
       selectedDownloadTypeName,
     } = this.props;
@@ -63,7 +63,7 @@ export default class BulkDownloadModalFooter extends React.Component {
     const selectedFieldsForType = get(selectedDownloadTypeName, selectedFields);
     const downloadType = this.getSelectedDownloadType();
 
-    if (!downloadType || validSampleIds.size < 1) {
+    if (!downloadType || validObjectIds.size < 1) {
       return false;
     }
 
@@ -181,13 +181,13 @@ export default class BulkDownloadModalFooter extends React.Component {
 
   render() {
     const {
-      validSampleIds,
+      validObjectIds,
       invalidSampleNames,
       validationError,
       loading,
     } = this.props;
 
-    const numSamples = validSampleIds.size;
+    const numSamples = validObjectIds.size;
 
     return (
       <div className={cs.footer}>
@@ -208,7 +208,7 @@ export default class BulkDownloadModalFooter extends React.Component {
 BulkDownloadModalFooter.propTypes = {
   loading: PropTypes.bool,
   downloadTypes: PropTypes.arrayOf(PropTypes.DownloadType),
-  validSampleIds: PropTypes.instanceOf(Set).isRequired,
+  validObjectIds: PropTypes.instanceOf(Set).isRequired,
   invalidSampleNames: PropTypes.arrayOf(PropTypes.string),
   validationError: PropTypes.string,
   selectedDownloadTypeName: PropTypes.string,

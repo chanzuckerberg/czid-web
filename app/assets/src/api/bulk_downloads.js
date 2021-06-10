@@ -1,3 +1,4 @@
+import { WORKFLOW_ENTITIES } from "~utils/workflows";
 import { get, postWithCSRF } from "./core";
 
 export const getBulkDownloadTypes = workflow =>
@@ -6,7 +7,9 @@ export const getBulkDownloadTypes = workflow =>
 export const createBulkDownload = bulkDownload =>
   postWithCSRF("/bulk_downloads", {
     download_type: bulkDownload.downloadType,
-    sample_ids: bulkDownload.sampleIds,
+    ...(bulkDownload.workflowEntity === WORKFLOW_ENTITIES.SAMPLES
+      ? { sample_ids: bulkDownload.validObjectIds }
+      : { workflow_run_ids: bulkDownload.validObjectIds }),
     workflow: bulkDownload.workflow,
     params: bulkDownload.fields,
   });

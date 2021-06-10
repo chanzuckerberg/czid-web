@@ -6,13 +6,18 @@ import React from "react";
 import {
   getBackgrounds,
   getMassNormalizedBackgroundAvailability,
-  uploadedByCurrentUser,
+  samplesUploadedByCurrentUser,
   getHeatmapMetrics,
+  workflowRunsCreatedByCurrentUser,
 } from "~/api";
-import { validateSampleIds } from "~/api/access_control";
+import {
+  validateSampleIds,
+  validateWorkflowRunIds,
+} from "~/api/access_control";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { createBulkDownload, getBulkDownloadTypes } from "~/api/bulk_downloads";
 import Modal from "~ui/containers/Modal";
+import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
 
 import BulkDownloadModalFooter from "./BulkDownloadModalFooter";
 import BulkDownloadModalOptions from "./BulkDownloadModalOptions";
@@ -26,8 +31,9 @@ const assembleSelectedDownload = memoize(
     selectedDownloadTypeName,
     allSelectedFields,
     allSelectedFieldsDisplay,
-    sampleIds,
-    workflow
+    objectIds,
+    workflow,
+    workflowEntity
   ) => {
     const fieldValues = get(selectedDownloadTypeName, allSelectedFields);
     const fieldDisplayNames = get(
@@ -49,8 +55,9 @@ const assembleSelectedDownload = memoize(
     return {
       downloadType: selectedDownloadTypeName,
       fields,
-      sampleIds: Array.from(sampleIds),
+      validObjectIds: Array.from(objectIds),
       workflow,
+      workflowEntity,
     };
   }
 );
@@ -69,12 +76,12 @@ class BulkDownloadModal extends React.Component {
     // in the params. This is also how the bulk download is stored in the database.
     selectedFieldsDisplay: {},
     selectedDownloadTypeName: null,
-    validSampleIds: new Set(),
+    validObjectIds: new Set(),
     invalidSampleNames: [],
     validationError: null,
     backgroundOptions: null,
     metricsOptions: null,
-    allSamplesUploadedByCurrentUser: false,
+    allObjectsUploadedByCurrentUser: false,
     loading: true,
     waitingForCreate: false,
     createStatus: null,
@@ -87,8 +94,7 @@ class BulkDownloadModal extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const prevSamples = prevProps.selectedSampleIds;
-    if (prevSamples !== this.props.selectedSampleIds) {
+    if (prevProps.selectedIds !== this.props.selectedIds) {
       this.fetchBackgroundAvailability();
     }
   }
@@ -96,39 +102,43 @@ class BulkDownloadModal extends React.Component {
   // *** Async requests ***
 
   async fetchSampleOptionsAndValidateSelectedSamples() {
-    const { selectedSampleIds, workflow } = this.props;
+    const { selectedIds, workflow } = this.props;
+    let {
+      selectedFields: newSelectedFields,
+      selectedFieldsDisplay: newSelectedFieldsDisplay,
+    } = this.state;
 
-    const bulkDownloadTypesRequest = this.fetchDownloadTypes(workflow);
-    const sampleValidationInfoRequest = this.fetchValidationInfo(
-      Array.from(selectedSampleIds),
-      workflow
+    // TODO (omar): Remove temporary workflow fix when celaning up dead CG code.
+    const tempBulkDownloadWorkflow =
+      workflow === WORKFLOWS.SHORT_READ_MNGS.value
+        ? workflow
+        : WORKFLOWS.CONSENSUS_GENOME.value;
+    const bulkDownloadTypesRequest = getBulkDownloadTypes(
+      tempBulkDownloadWorkflow
     );
+    const validationInfoRequest = this.fetchValidationInfo({
+      ids: Array.from(selectedIds),
+      workflow,
+    });
     const backgroundOptionsRequest = this.fetchBackgrounds();
-    const metricsOptionsRequest = this.fetchHeatmapMetrics();
-    const allSamplesUploadedByCurrentUserRequest = this.checkAllSamplesUploadedByCurrentUser();
+    const metricsOptionsRequest = getHeatmapMetrics();
+    const allObjectsUploadedByCurrentUserRequest = this.checkAllObjectsUploadedByCurrentUser();
 
     const [
       bulkDownloadTypes,
-      sampleValidationInfo,
+      { validIds, invalidSampleNames, error: validationError },
       backgroundOptions,
       metricsOptions,
-      allSamplesUploadedByCurrentUser,
+      allObjectsUploadedByCurrentUser,
     ] = await Promise.all([
       bulkDownloadTypesRequest,
-      sampleValidationInfoRequest,
+      validationInfoRequest,
       backgroundOptionsRequest,
       metricsOptionsRequest,
-      allSamplesUploadedByCurrentUserRequest,
+      allObjectsUploadedByCurrentUserRequest,
     ]);
 
-    const validSampleIds = new Set(sampleValidationInfo.validSampleIds);
-    const invalidSampleNames = sampleValidationInfo.invalidSampleNames;
-    const validationError = sampleValidationInfo.error;
-
     // Set any default bulk download field values.
-    let newSelectedFields = this.state.selectedFields;
-    let newSelectedFieldsDisplay = this.state.selectedFieldsDisplay;
-
     bulkDownloadTypes.forEach(type => {
       if (type.fields) {
         type.fields.forEach(field => {
@@ -150,31 +160,33 @@ class BulkDownloadModal extends React.Component {
 
     this.setState({
       bulkDownloadTypes,
-      validSampleIds,
+      validObjectIds: new Set(validIds),
       invalidSampleNames,
       validationError,
       backgroundOptions,
       metricsOptions,
-      allSamplesUploadedByCurrentUser,
+      allObjectsUploadedByCurrentUser,
       selectedFields: newSelectedFields,
       selectedFieldsDisplay: newSelectedFieldsDisplay,
       loading: false,
     });
   }
 
-  async fetchDownloadTypes(workflow) {
-    const bulkDownloadTypes = await getBulkDownloadTypes(workflow);
+  async fetchValidationInfo({ ids, workflow }) {
+    const { workflowEntity } = this.props;
 
-    return bulkDownloadTypes;
-  }
+    const validationRequest = await (workflowEntity ===
+    WORKFLOW_ENTITIES.WORKFLOW_RUNS
+      ? validateWorkflowRunIds({
+          workflowRunIds: ids,
+          workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+        })
+      : validateSampleIds({
+          sampleIds: ids,
+          workflow,
+        }));
 
-  async fetchValidationInfo(selectedSampleIds, workflow) {
-    const sampleValidationInfo = await validateSampleIds({
-      sampleIds: selectedSampleIds,
-      workflow,
-    });
-
-    return sampleValidationInfo;
+    return validationRequest;
   }
 
   // TODO(mark): Set a reasonable default background based on the samples and the user's preferences.
@@ -191,50 +203,45 @@ class BulkDownloadModal extends React.Component {
   }
 
   async fetchBackgroundAvailability() {
-    const { selectedSampleIds } = this.props;
-    const enableMassNormalizedBackgrounds = await getMassNormalizedBackgroundAvailability(
-      Array.from(selectedSampleIds)
-    );
+    const { selectedIds } = this.props;
+    const {
+      massNormalizedBackgroundsAvailable,
+    } = await getMassNormalizedBackgroundAvailability(Array.from(selectedIds));
 
     this.setState({
-      enableMassNormalizedBackgrounds:
-        enableMassNormalizedBackgrounds.massNormalizedBackgroundsAvailable,
+      enableMassNormalizedBackgrounds: massNormalizedBackgroundsAvailable,
     });
   }
 
-  // We use the heatmap metrics as the valid metrics for bulk downloads.
-  async fetchHeatmapMetrics() {
-    const heatmapMetrics = await getHeatmapMetrics();
+  async checkAllObjectsUploadedByCurrentUser() {
+    const { selectedIds, workflowEntity } = this.props;
 
-    return heatmapMetrics;
-  }
+    const validationRequest = await (workflowEntity ===
+    WORKFLOW_ENTITIES.WORKFLOW_RUNS
+      ? workflowRunsCreatedByCurrentUser(Array.from(selectedIds))
+      : samplesUploadedByCurrentUser(Array.from(selectedIds)));
 
-  async checkAllSamplesUploadedByCurrentUser() {
-    const { selectedSampleIds } = this.props;
-    const allSamplesUploadedByCurrentUser = await uploadedByCurrentUser(
-      Array.from(selectedSampleIds)
-    );
-
-    return allSamplesUploadedByCurrentUser;
+    return validationRequest;
   }
 
   // *** Callbacks ***
 
   handleDownloadRequest = () => {
-    const { workflow } = this.props;
+    const { workflow, workflowEntity } = this.props;
     const {
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
-      validSampleIds,
+      validObjectIds,
     } = this.state;
 
     const selectedDownload = assembleSelectedDownload(
       selectedDownloadTypeName,
       selectedFields,
       selectedFieldsDisplay,
-      validSampleIds,
-      workflow
+      validObjectIds,
+      workflow,
+      workflowEntity
     );
 
     this.createBulkDownload(selectedDownload);
@@ -322,18 +329,16 @@ class BulkDownloadModal extends React.Component {
     onGenerate();
   };
 
-  // *** Render methods ***
-
   render() {
-    const { open, onClose, workflow } = this.props;
+    const { open, onClose, workflow, workflowEntity } = this.props;
     const {
       bulkDownloadTypes,
-      validSampleIds,
+      validObjectIds,
       invalidSampleNames,
       validationError,
       backgroundOptions,
       metricsOptions,
-      allSamplesUploadedByCurrentUser,
+      allObjectsUploadedByCurrentUser,
       selectedDownloadTypeName,
       selectedFields,
       waitingForCreate,
@@ -342,7 +347,11 @@ class BulkDownloadModal extends React.Component {
       enableMassNormalizedBackgrounds,
     } = this.state;
 
-    const numSamples = validSampleIds.size;
+    const numObjects = validObjectIds.size;
+    const objectDownloaded =
+      workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
+        ? "consensus genome"
+        : "sample";
 
     return (
       <Modal narrow open={open} tall onClose={onClose}>
@@ -350,28 +359,30 @@ class BulkDownloadModal extends React.Component {
           <div className={cs.header}>
             <div className={cs.title}>Select a Download Type</div>
             <div className={cs.tagline}>
-              {numSamples} sample{numSamples !== 1 ? "s" : ""} selected
+              {numObjects} {objectDownloaded}
+              {numObjects !== 1 ? "s" : ""} selected
             </div>
           </div>
           <div className={cs.options}>
             <BulkDownloadModalOptions
               downloadTypes={bulkDownloadTypes}
-              validSampleIds={validSampleIds}
+              validObjectIds={validObjectIds}
               backgroundOptions={backgroundOptions}
               metricsOptions={metricsOptions}
-              allSamplesUploadedByCurrentUser={allSamplesUploadedByCurrentUser}
+              allObjectsUploadedByCurrentUser={allObjectsUploadedByCurrentUser}
               onFieldSelect={this.handleFieldSelect}
               selectedFields={selectedFields}
               selectedDownloadTypeName={selectedDownloadTypeName}
               onSelect={this.handleSelectDownloadType}
               enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
+              objectDownloaded={objectDownloaded}
             />
           </div>
           <div className={cs.footer}>
             <BulkDownloadModalFooter
               loading={!bulkDownloadTypes}
               downloadTypes={bulkDownloadTypes}
-              validSampleIds={validSampleIds}
+              validObjectIds={validObjectIds}
               invalidSampleNames={invalidSampleNames}
               validationError={validationError}
               waitingForCreate={waitingForCreate}
@@ -392,10 +403,11 @@ class BulkDownloadModal extends React.Component {
 BulkDownloadModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool,
-  selectedSampleIds: PropTypes.instanceOf(Set),
+  selectedIds: PropTypes.instanceOf(Set),
   // called when a bulk download has successfully been kicked off
   onGenerate: PropTypes.func.isRequired,
   workflow: PropTypes.string.isRequired,
+  workflowEntity: PropTypes.string,
 };
 
 export default BulkDownloadModal;

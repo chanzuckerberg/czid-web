@@ -567,7 +567,7 @@ class BulkDownload < ApplicationRecord
 
       # Add the accession ids to the fasta headers
       headers = {}
-      workflow_runs_ordered.map do |run|
+      workflow_runs_ordered.includes(:sample).map do |run|
         headers[run.id] = ">#{run.sample.name} #{get_accession_id(run)}\n"
       end
 
@@ -596,9 +596,8 @@ class BulkDownload < ApplicationRecord
         s3_tar_writer.add_file_with_data("sample_overviews.csv", sample_overviews_csv)
       elsif download_type == CONSENSUS_GENOME_OVERVIEW_BULK_DOWNLOAD_TYPE
         Rails.logger.info("Generating consensus genome overviews for #{workflow_runs.length} consensus genomes...")
-        samples = Sample.where(id: workflow_runs.pluck(:sample_id))
         consensus_genome_overviews_csv = BulkDownloadsHelper.generate_cg_overview_csv(
-          samples: samples,
+          workflow_runs: workflow_runs,
           include_metadata: get_param_value("include_metadata")
         )
 

@@ -740,6 +740,48 @@ RSpec.describe WorkflowRunsController, type: :controller do
         expect(json_response["error"]).to be_nil
       end
     end
+
+    describe "POST /created_by_current_user" do
+      before do
+        project = create(:project, users: [@joe])
+        @sample = create(:sample, project: project, user: @joe, workflow_runs_data: [
+                           { status: WorkflowRun::STATUS[:succeeded] },
+                           { status: WorkflowRun::STATUS[:created] },
+                           { status: WorkflowRun::STATUS[:running] },
+                         ])
+
+        other_project = create(:project, users: [@admin])
+        @other_sample = create(:sample, project: other_project, user: @admin, workflow_runs_data: [
+                                 { status: WorkflowRun::STATUS[:succeeded] },
+                                 { status: WorkflowRun::STATUS[:created] },
+                                 { status: WorkflowRun::STATUS[:running] },
+                               ])
+      end
+
+      it "returns true when all workflow runs were created by the current user" do
+        workflow_run_ids = @sample.workflow_runs.pluck(:id)
+
+        post :created_by_current_user, params: { workflowRunIds: workflow_run_ids }
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.keys).to contain_exactly("created_by_current_user")
+        expect(json_response["created_by_current_user"]).to eq(true)
+      end
+
+      it "returns false when workflow runs that were not created by the current user were provided" do
+        workflow_run_ids = [*@sample.workflow_runs.pluck(:id), *@other_sample.workflow_runs.pluck(:id)]
+
+        post :created_by_current_user, params: { workflowRunIds: workflow_run_ids }
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+
+        expect(json_response.keys).to contain_exactly("created_by_current_user")
+        expect(json_response["created_by_current_user"]).to eq(false)
+      end
+    end
   end
 
   context "Admin" do

@@ -27,7 +27,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
     describe "POST #create" do
       before do
-        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+        AppConfigHelper.set_app_config(AppConfig::MAX_OBJECTS_BULK_DOWNLOAD, 100)
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 50)
         stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
                                             "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
@@ -174,8 +174,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_two = create(:sample, project: @project,
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        # Set MAX_SAMPLES_BULK_DOWNLOAD to 1
-        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 1)
+        # Set MAX_OBJECTS_BULK_DOWNLOAD to 1
+        AppConfigHelper.set_app_config(AppConfig::MAX_OBJECTS_BULK_DOWNLOAD, 1)
 
         bulk_download_params = {
           download_type: "sample_overview",
@@ -187,7 +187,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(response).to have_http_status(422)
 
         json_response = JSON.parse(response.body)
-        expect(json_response["error"]).to eq(BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % 1)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::MAX_OBJECTS_EXCEEDED_ERROR_TEMPLATE % 1)
       end
 
       it "should use the correct max samples app config for normal downloads" do
@@ -229,7 +229,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         expect(response).to have_http_status(422)
 
         json_response = JSON.parse(response.body)
-        expect(json_response["error"]).to eq(BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % 1)
+        expect(json_response["error"]).to eq(BulkDownloadsHelper::MAX_OBJECTS_EXCEEDED_ERROR_TEMPLATE % 1)
       end
 
       it "checks and uses the most recent pipeline run for a sample" do
@@ -560,7 +560,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
 
     describe "POST #create" do
       before do
-        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 100)
+        AppConfigHelper.set_app_config(AppConfig::MAX_OBJECTS_BULK_DOWNLOAD, 100)
         AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES, 50)
         stub_const('ENV', ENV.to_hash.merge("SERVER_DOMAIN" => "https://idseq-net",
                                             "SAMPLES_BUCKET_NAME" => "idseq-samples-prod"))
@@ -583,8 +583,8 @@ RSpec.describe BulkDownloadsController, type: :controller do
         @sample_two = create(:sample, project: @project,
                                       pipeline_runs_data: [{ finalized: 1, job_status: PipelineRun::STATUS_CHECKED }])
 
-        # Set MAX_SAMPLES_BULK_DOWNLOAD to 1
-        AppConfigHelper.set_app_config(AppConfig::MAX_SAMPLES_BULK_DOWNLOAD, 1)
+        # Set MAX_OBJECTS_BULK_DOWNLOAD to 1
+        AppConfigHelper.set_app_config(AppConfig::MAX_OBJECTS_BULK_DOWNLOAD, 1)
 
         bulk_download_params = {
           download_type: "sample_overview",

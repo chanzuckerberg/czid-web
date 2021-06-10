@@ -35,14 +35,14 @@ module AppConfigHelper
     # Fetch all app configs in one query.
     app_configs = AppConfig
                   .where(key: [
-                           AppConfig::MAX_SAMPLES_BULK_DOWNLOAD,
+                           AppConfig::MAX_OBJECTS_BULK_DOWNLOAD,
                            AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES,
                          ])
                   .map { |app_config| [app_config.key, app_config.value] }
                   .to_h
 
     {
-      maxSamplesBulkDownload: app_configs[AppConfig::MAX_SAMPLES_BULK_DOWNLOAD].to_i,
+      maxObjectsBulkDownload: app_configs[AppConfig::MAX_OBJECTS_BULK_DOWNLOAD].to_i,
       maxSamplesBulkDownloadOriginalFiles: app_configs[AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES].to_i,
     }
   end

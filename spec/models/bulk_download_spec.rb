@@ -715,7 +715,7 @@ describe BulkDownload, type: :model do
                                              "displayName": "No",
                                            })
 
-      expect(BulkDownloadsHelper).to receive(:generate_cg_overview_csv).with(samples: anything,
+      expect(BulkDownloadsHelper).to receive(:generate_cg_overview_csv).with(workflow_runs: anything,
                                                                              include_metadata: false).exactly(1).times.and_return("mock_consensus_genome_overviews_csv")
 
       add_s3_tar_writer_expectations(

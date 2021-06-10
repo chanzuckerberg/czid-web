@@ -37,7 +37,7 @@ import {
   IconNextcladeLarge,
 } from "~ui/icons";
 import Label from "~ui/labels/Label";
-import { WORKFLOWS } from "~utils/workflows";
+import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
 
 import {
   computeColumnsByWorkflow,
@@ -502,21 +502,25 @@ class SamplesView extends React.Component {
   };
 
   handleBulkDownloadModalOpen = () => {
+    const { selectedIds, workflowEntity } = this.props;
     const { appConfig, admin } = this.context || {};
-    if (!appConfig.maxSamplesBulkDownload) {
+
+    if (!appConfig.maxObjectsBulkDownload) {
       this.setState({
         bulkDownloadButtonTempTooltip:
           "Unexpected issue. Please contact us for help.",
       });
-    } else if (
-      this.props.selectedIds.size > appConfig.maxSamplesBulkDownload &&
-      !admin
-    ) {
-      // There is a separate max sample limit for the original input file download type.
-      // This is checked in BulkDownloadModal, and the original input file option is disabled if there
-      // are too many samples.
+    } else if (selectedIds.size > appConfig.maxObjectsBulkDownload && !admin) {
+      // This check ensures that the # of selected objects does not surpass our max object limit that we allow in bulk downloads.
+      // There is a separate check in BulkDownloadModal that looks for a max number of objects allowed and disables the
+      // 'original input file download' option if the # of selected objects surpasses that limit.
+      const objectToDownload =
+        workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
+          ? "consensus genomes"
+          : "samples";
+
       this.setState({
-        bulkDownloadButtonTempTooltip: `No more than ${appConfig.maxSamplesBulkDownload} samples allowed in one download.`,
+        bulkDownloadButtonTempTooltip: `No more than ${appConfig.maxObjectsBulkDownload} ${objectToDownload} allowed in one download.`,
       });
     } else {
       this.setState({ bulkDownloadModalOpen: true });
@@ -591,7 +595,7 @@ class SamplesView extends React.Component {
               "SamplesView_bulk-download-modal_closed"
             )}
             onGenerate={this.handleBulkDownloadGenerate}
-            selectedSampleIds={selectedIds}
+            selectedIds={selectedIds}
             workflow={workflow}
             workflowEntity={workflowEntity}
           />

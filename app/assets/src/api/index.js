@@ -450,12 +450,24 @@ const getTaxaWithContigsSuggestions = (query, sampleIds) =>
     sampleIds,
   });
 
-const uploadedByCurrentUser = async sampleIds => {
-  const response = await postWithCSRF("samples/uploaded_by_current_user", {
+const samplesUploadedByCurrentUser = async sampleIds => {
+  const {
+    uploaded_by_current_user: allSamplesUploadedByCurrentUser,
+  } = await postWithCSRF("samples/uploaded_by_current_user", {
     sampleIds,
   });
 
-  return response.uploaded_by_current_user;
+  return allSamplesUploadedByCurrentUser;
+};
+
+const workflowRunsCreatedByCurrentUser = async workflowRunIds => {
+  const {
+    created_by_current_user: allWorkflowRunsCreatedByCurrentUser,
+  } = await postWithCSRF("workflow_runs/created_by_current_user", {
+    workflowRunIds,
+  });
+
+  return allWorkflowRunsCreatedByCurrentUser;
 };
 
 const getHeatmapMetrics = () => get("/visualizations/heatmap_metrics.json");
@@ -562,10 +574,11 @@ export {
   saveVisualization,
   shortenUrl,
   updateUserSetting,
-  uploadedByCurrentUser,
+  samplesUploadedByCurrentUser,
   uploadFileToUrl,
   uploadFileToUrlWithRetries,
   validatePhyloTreeName,
   validateSampleFiles,
   validateSampleNames,
+  workflowRunsCreatedByCurrentUser,
 };

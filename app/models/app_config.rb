@@ -10,8 +10,8 @@ class AppConfig < ApplicationRecord
   # When this is "1", new users will also be created in the Auth0 database.
   # Enable when Auth0 rolls out.
   USE_AUTH0_FOR_NEW_USERS = 'use_auth0_for_new_users'.freeze
-  # The maximum number of samples that can be part of one bulk download.
-  MAX_SAMPLES_BULK_DOWNLOAD = 'max_samples_bulk_download'.freeze
+  # The maximum number of objects (samples or workflow runs) that can be part of one bulk download.
+  MAX_OBJECTS_BULK_DOWNLOAD = 'max_objects_bulk_download'.freeze
   # The maximum number of samples that can be part of an original input files bulk download.
   # Original input file downloads are significantly bigger and slower than other downloads, so a separate limit is needed.
   MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES = 'max_samples_bulk_download_original_files'.freeze

@@ -33,7 +33,7 @@ class BulkDownloadModalOptions extends React.Component {
     const {
       backgroundOptions,
       metricsOptions,
-      validSampleIds,
+      validObjectIds,
       onFieldSelect,
       selectedFields,
       selectedDownloadTypeName,
@@ -108,7 +108,7 @@ class BulkDownloadModalOptions extends React.Component {
           <div className={cs.field} key={field.type}>
             <div className={cs.label}>{field.display_name}:</div>
             <TaxonHitSelect
-              sampleIds={validSampleIds}
+              sampleIds={validObjectIds}
               onChange={(value, displayName) => {
                 onFieldSelect(
                   downloadType.type,
@@ -127,7 +127,7 @@ class BulkDownloadModalOptions extends React.Component {
           <div className={cs.field} key={field.type}>
             <div className={cs.label}>{field.display_name}:</div>
             <TaxonHitSelect
-              sampleIds={validSampleIds}
+              sampleIds={validObjectIds}
               onChange={(value, displayName) => {
                 onFieldSelect(
                   downloadType.type,
@@ -232,10 +232,11 @@ class BulkDownloadModalOptions extends React.Component {
 
   renderDownloadType = downloadType => {
     const {
-      validSampleIds,
+      validObjectIds,
       onSelect,
       allSamplesUploadedByCurrentUser,
       selectedDownloadTypeName,
+      objectDownloaded,
     } = this.props;
     const { admin, appConfig } = this.context || {};
 
@@ -249,11 +250,15 @@ class BulkDownloadModalOptions extends React.Component {
       !admin
     ) {
       disabled = true;
-      disabledMessage = `To download ${downloadType.display_name}, you must be the original uploader of all selected samples.`;
+      disabledMessage = `To download ${
+        downloadType.display_name
+      }, you must be the original uploader of all selected ${objectDownloaded}${
+        validObjectIds.size !== 1 ? "s" : ""
+      }.`;
     } else if (
       downloadType.type === "original_input_file" &&
       appConfig.maxSamplesBulkDownloadOriginalFiles &&
-      validSampleIds.size > appConfig.maxSamplesBulkDownloadOriginalFiles &&
+      validObjectIds.size > appConfig.maxSamplesBulkDownloadOriginalFiles &&
       !admin
     ) {
       disabled = true;
@@ -388,12 +393,13 @@ BulkDownloadModalOptions.propTypes = {
   // The selected fields of the currently selected download type.
   selectedFields: PropTypes.objectOf(PropTypes.string),
   onFieldSelect: PropTypes.func.isRequired,
-  validSampleIds: PropTypes.instanceOf(Set).isRequired,
+  validObjectIds: PropTypes.instanceOf(Set).isRequired,
   backgroundOptions: PropTypes.array,
   metricsOptions: PropTypes.array,
   allSamplesUploadedByCurrentUser: PropTypes.bool,
   onSelect: PropTypes.func.isRequired,
   enableMassNormalizedBackgrounds: PropTypes.bool,
+  objectDownloaded: PropTypes.string,
 };
 
 BulkDownloadModalOptions.contextType = UserContext;

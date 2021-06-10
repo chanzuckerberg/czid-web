@@ -2,9 +2,10 @@ module BulkDownloadsHelper
   include PipelineRunsHelper
 
   SAMPLE_NO_PERMISSION_ERROR = "You do not have permission to access all of the selected samples. Please contact us for help.".freeze
+  WORKFLOW_RUN_NO_PERMISSION_ERROR = "You do not have permission to access all of the selected workflow runs. Please contact us for help.".freeze
   SAMPLE_STILL_RUNNING_ERROR = "Some selected samples have not finished running yet. Please remove these samples and try again.".freeze
   SAMPLE_FAILED_ERROR = "Some selected samples failed their most recent run. Please remove these samples and try again.".freeze
-  MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE = "No more than %s samples allowed in one download.".freeze
+  MAX_OBJECTS_EXCEEDED_ERROR_TEMPLATE = "No more than %s objects allowed in one download.".freeze
   BULK_DOWNLOAD_NOT_FOUND = "No bulk download was found with this id.".freeze
   OUTPUT_FILE_NOT_SUCCESSFUL = "Bulk download has not succeeded. Can't get output file url.".freeze
   INVALID_ACCESS_TOKEN = "The access token was invalid for this bulk download.".freeze
@@ -87,35 +88,47 @@ module BulkDownloadsHelper
     formatted_bulk_download
   end
 
-  def validate_num_samples(num_samples, app_config_key)
-    # Max samples check.
-    max_samples_allowed = get_app_config(app_config_key)
+  def validate_num_objects(num_objects, app_config_key)
+    # Max objects (samples or workflow runs) check.
+    max_objects_allowed = get_app_config(app_config_key)
 
-    # Max samples should be string containing an integer, but just in case.
-    if max_samples_allowed.nil?
+    # Max objects should be string containing an integer, but just in case.
+    if max_objects_allowed.nil?
       raise BulkDownloadsHelper::KICKOFF_FAILURE_HUMAN_READABLE
     end
 
-    if num_samples > Integer(max_samples_allowed) && !current_user.admin?
-      raise BulkDownloadsHelper::MAX_SAMPLES_EXCEEDED_ERROR_TEMPLATE % max_samples_allowed
+    if num_objects > Integer(max_objects_allowed) && !current_user.admin?
+      raise BulkDownloadsHelper::MAX_OBJECTS_EXCEEDED_ERROR_TEMPLATE % max_objects_allowed
     end
   end
 
   # Will raise errors if any validation fails.
-  # Returns viewable samples in the bulk download.
+  # Returns viewable objects (samples or workflow runs) in the bulk download.
   def validate_bulk_download_create_params(create_params, user)
+    current_power = Power.new(user)
     sample_ids = create_params[:sample_ids]
+    workflow_run_ids = create_params[:workflow_run_ids]
 
-    if create_params[:download_type] == BulkDownloadTypesHelper::ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE
-      validate_num_samples(sample_ids.length, AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES)
-    else
-      validate_num_samples(sample_ids.length, AppConfig::MAX_SAMPLES_BULK_DOWNLOAD)
+    # Check that user can view all the objects being downloaded.
+    if sample_ids.present?
+      num_objects = sample_ids.count
+      viewable_objects = current_power.viewable_samples.where(id: sample_ids)
+      objects_count = sample_ids.length
+    elsif workflow_run_ids.present?
+      num_objects = workflow_run_ids.count
+      viewable_objects = current_power.workflow_runs.where(id: workflow_run_ids)
+      objects_count = workflow_run_ids.length
     end
 
-    # Check that user can view all the samples being downloaded.
-    viewable_samples = current_power.viewable_samples.where(id: sample_ids)
-    if viewable_samples.length != sample_ids.length
-      raise BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR
+    if create_params[:download_type] == BulkDownloadTypesHelper::ORIGINAL_INPUT_FILE_BULK_DOWNLOAD_TYPE
+      validate_num_objects(num_objects, AppConfig::MAX_SAMPLES_BULK_DOWNLOAD_ORIGINAL_FILES)
+    else
+      validate_num_objects(num_objects, AppConfig::MAX_OBJECTS_BULK_DOWNLOAD)
+    end
+
+    if objects_count != viewable_objects.count
+      raise BulkDownloadsHelper::SAMPLE_NO_PERMISSION_ERROR if sample_ids.present?
+      raise BulkDownloadsHelper::WORKFLOW_RUN_NO_PERMISSION_ERROR if workflow_run_ids.present?
     end
 
     type_data = BulkDownloadTypesHelper::BULK_DOWNLOAD_TYPE_NAME_TO_DATA[create_params[:download_type]]
@@ -129,14 +142,11 @@ module BulkDownloadsHelper
     end
 
     if type_data[:uploader_only] && !user.admin?
-      samples = Sample.where(user: user, id: sample_ids)
-
-      if sample_ids.length != samples.length
-        raise BulkDownloadsHelper::UPLOADER_ONLY_DOWNLOAD_TYPE
-      end
+      my_objects = sample_ids.present? ? current_power.viewable_samples.where(user: user, id: sample_ids) : current_power.workflow_runs.created_by(user).where(id: workflow_run_ids)
+      raise BulkDownloadsHelper::UPLOADER_ONLY_DOWNLOAD_TYPE if objects_count != my_objects.length
     end
 
-    return viewable_samples
+    return viewable_objects
   end
 
   # Generate the metric values matrix.
@@ -240,10 +250,11 @@ module BulkDownloadsHelper
     end
   end
 
-  def self.generate_cg_overview_csv(samples:, include_metadata: false)
+  def self.generate_cg_overview_csv(workflow_runs:, include_metadata: false)
     csv_headers = ["Sample Name", "Reference Accession", "Reference Accession ID", *ConsensusGenomeMetricsService::ALL_METRICS.values]
 
     if include_metadata
+      samples = Sample.where(id: workflow_runs.pluck(:sample_id).uniq)
       metadata_headers, metadata_keys, metadata_by_sample_id = BulkDownloadsHelper.generate_sample_metadata_csv_info(samples: samples)
       cg_metadata_headers = ["Wetlab Protocol", "Executed At"]
       csv_headers.concat(cg_metadata_headers, metadata_headers.map { |h| h.humanize.titleize })
@@ -252,21 +263,18 @@ module BulkDownloadsHelper
     CSVSafe.generate(headers: true) do |csv|
       csv << csv_headers
 
-      samples.each do |sample|
-        workflow_runs = sample.workflow_runs.where(workflow: WorkflowRun::WORKFLOW[:consensus_genome])
-        workflow_runs.each do |wr|
-          cg_metric_csv_values = BulkDownloadsHelper.prepare_workflow_run_metrics_csv_info(workflow_run: wr)
-          csv_values = [sample.name, wr.inputs&.[]("accession_name"), wr.inputs&.[]("accession_id")] + cg_metric_csv_values
+      workflow_runs.includes(:sample).each do |wr|
+        cg_metric_csv_values = BulkDownloadsHelper.prepare_workflow_run_metrics_csv_info(workflow_run: wr)
+        csv_values = [wr.sample.name, wr.inputs&.[]("accession_name"), wr.inputs&.[]("accession_id")] + cg_metric_csv_values
 
-          if include_metadata
-            metadata = metadata_by_sample_id[sample.id] || {}
-            sample_metadata_csv_values = metadata.values_at(*metadata_keys)
-            cg_metadata_csv_values = [wr.inputs&.[]("wetlab_protocol") || '', wr.executed_at]
-            csv_values.concat(cg_metadata_csv_values, sample_metadata_csv_values)
-          end
-
-          csv << csv_values
+        if include_metadata
+          metadata = metadata_by_sample_id[wr.sample.id] || {}
+          sample_metadata_csv_values = metadata.values_at(*metadata_keys)
+          cg_metadata_csv_values = [wr.inputs&.[]("wetlab_protocol") || '', wr.executed_at]
+          csv_values.concat(cg_metadata_csv_values, sample_metadata_csv_values)
         end
+
+        csv << csv_values
       end
     end
   end

@@ -90,7 +90,7 @@ class WorkflowRunsController < ApplicationController
       invalid_workflow_runs = viewable_workflow_runs.reject { |wr| valid_workflow_run_ids.include?(wr.id) }
 
       invalid_sample_ids = invalid_workflow_runs.map(&:sample_id).uniq
-      invalid_sample_names = Sample.where(id: invalid_sample_ids).pluck(:name)
+      invalid_sample_names = current_power.samples.where(id: invalid_sample_ids).pluck(:name)
 
       render(
         json: {
@@ -110,6 +110,21 @@ class WorkflowRunsController < ApplicationController
         status: :ok
       )
     end
+  end
+
+  # POST /workflow_runs/created_by_current_user
+  # Returns whether all workflow runs were created by the current user.
+  # This method uses POST because hundreds of workflowRunIds can be passed.
+  def created_by_current_user
+    permitted_params = params.permit(workflowRunIds: [])
+    workflow_runs = current_power.workflow_runs.created_by(current_user).where(id: permitted_params[:workflowRunIds])
+
+    render(
+      json: {
+        created_by_current_user: permitted_params[:workflowRunIds].length == workflow_runs.length,
+      },
+      status: :ok
+    )
   end
 
   # Top-level zipped pipeline results

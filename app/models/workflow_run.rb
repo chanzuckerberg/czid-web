@@ -56,6 +56,7 @@ class WorkflowRun < ApplicationRecord
   scope :non_deprecated, -> { where(deprecated: false) }
   scope :active, -> { where(status: WorkflowRun::STATUS[:succeeded], deprecated: false) }
   scope :viewable, ->(user) { where(sample: Sample.viewable(user)) }
+  scope :created_by, ->(user) { includes(:sample).where(samples: { user: user }) }
 
   class RerunDeprecatedWorkflowError < StandardError
     def initialize
