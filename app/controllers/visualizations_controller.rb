@@ -54,7 +54,7 @@ class VisualizationsController < ApplicationController
 
     id = visualization_params[:id]
     if id
-      vis = Visualization.find(id)
+      vis = current_power.visualizations.find(id)
       vis.data[:sampleIds] = vis.sample_ids
       @visualization_data[:savedParamValues] = vis.data
     end

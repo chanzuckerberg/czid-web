@@ -5,8 +5,6 @@ class PhyloTreesController < ApplicationController
   include ElasticsearchHelper
   include ParameterSanitization
 
-  before_action :login_required, only: :create
-
   ########################################
   # Current logic for phylo_tree permissions:
   # 1. index/show permissions are based on viewability of all the samples
@@ -130,8 +128,13 @@ class PhyloTreesController < ApplicationController
     taxon_search_args = [params[:query]]
     taxon_search_args << params[:args].split(",") if params[:args].present?
     filters = {}
-    filters[:project_id] = params[:project_id]
-    filters[:samples] = Sample.where(id: params[:sample_id]) if params[:sample_id]
+    if params[:project_id]
+      filters[:project_id] = current_power.projects.find(params[:project_id]).id
+    end
+    if params[:sample_id]
+      # Note: 'where' because downstream expects a Relation.
+      filters[:samples] = current_power.samples.where(id: params[:sample_id])
+    end
     taxon_search_args << filters
     taxon_list = taxon_search(*taxon_search_args)
     render json: JSON.dump(taxon_list)
@@ -155,7 +158,7 @@ class PhyloTreesController < ApplicationController
                             .order(id: :desc).limit(ELIGIBLE_PIPELINE_RUNS_LIMIT).pluck(:id)
     # Always include the project's top pipeline runs (in case they were excluded due to the ELIGIBLE_PIPELINE_RUNS_LIMIT)
     project_pipeline_run_ids_with_taxid = TaxonByterange.joins(pipeline_run: [{ sample: :project }]).where(taxid: taxid, samples: { project_id: project_id }).pluck(:pipeline_run_id)
-    top_project_pipeline_run_ids_with_taxid = PipelineRun.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs.pluck(:id)
+    top_project_pipeline_run_ids_with_taxid = current_power.pipeline_runs.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs.pluck(:id)
 
     # Retrieve information for displaying the tree's sample list.
     @samples = sample_details_json(
