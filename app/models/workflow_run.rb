@@ -1,14 +1,44 @@
 class WorkflowRun < ApplicationRecord
-  # WorklfowRun model manages the run of a generic workflow type through our pipeline
-  # and access to the results
+  # WorkflowRun model manages the run of a generic workflow type through our
+  # pipeline and access to the results.
+  #
   # WorkflowRun includes a *deprecated* attribute. Notes on deprecation:
   # * Deprecated runs are runs that were rerun, and superseded by other runs.
-  # * Deprecated runs make it easier to select active runs (`where(deprecated: false)`),
-  #   as opposed to having to sort by execution.
-  # * The benefits are even more obvious if we start supporting multiple workflow runs per sample.
-  #   In that case, the date of execution would not be enough to identify valid runs.
-  # * For views that require all the versions, the deprecated field can be ignored.
-  #   The wdl_version and executed_at fields might be used to select the relevant runs in that case.
+  # * Deprecated runs make it easier to select active runs (`where(deprecated:
+  #   false)`), as opposed to having to sort by execution.
+  # * The benefits are even more obvious if we start supporting multiple
+  #   workflow runs per sample. In that case, the date of execution would not be
+  #   enough to identify valid runs.
+  # * For views that require all the versions, the deprecated field can be
+  #   ignored. The wdl_version and executed_at fields might be used to select
+  #   the relevant runs in that case.
+  #
+  # Why keep deprecated runs at all?
+  # * Main reason is for comparing before-and-after a rerun (e.g. seeing if a
+  #   failed sample will now succeed, or seeing that a successful sample now
+  #   fails, or comparing results before-and-after an index update). We just
+  #   need somewhere to track the inputs, attributes, and log links, and the
+  #   model record is a natural place.
+  #
+  # Why are reruns "idempotent" (creating new runs) instead of in-place
+  # (updating the existing run)?
+  # * It's easier to compare results with their full history and logs (e.g.
+  #   seeing what changed).
+  # * In-replace reruns often lead to trouble when only some fields are reset
+  #   and not others, or inputs change subtly between reruns. For example this
+  #   could happen in the context of S3 if old intermediate files are actually
+  #   'dirty' and can't be reused. Another case could be if some statistic
+  #   columns are updated but not others. This can be avoided by making sure to
+  #   really reset everything, but in that case may as well create a new record.
+  #
+  # What should go into inputs_json?
+  # * Include any WDL inputs that affect the results, but don't include other
+  #   informational attributes like a sample ID.
+  #
+  # What should go into cached_results?
+  # * Include simple outputs that you need to load quickly in a batch of runs.
+  #   Don't include larger file-based outputs or outputs that can be loaded from
+  #   S3 on-demand.
   include PipelineOutputsHelper
 
   belongs_to :sample
