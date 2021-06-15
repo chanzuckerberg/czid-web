@@ -1,3 +1,8 @@
+# ERCC refers to the External RNA Controls Consortium. Power users may be
+# trained to use "ERCC spike-in controls" in their sample preparation, and the
+# idea is that you should be able to verify these ERCC count concentrations
+# after sample processing as a form of quality control.
+
 require 'csv'
 
 class ErccCount < ApplicationRecord

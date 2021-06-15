@@ -1,3 +1,19 @@
+# What is a taxon?
+# * A taxon is a group or ranking in the biological classification system. Each
+#   level of the taxonomy has a corresponding taxid (taxon ID). For example, in
+#   NCBI, Escherichia coli has the rank of Species and taxid 562. The genus
+#   Escherichia has taxid 562. The family Enterobacteriaceae has taxid 543. And
+#   so forth. Collectively that would represent the lineage of the taxon.
+#
+# What is a taxon count?
+# * A taxon count is an IDseq record representing the determined read counts and
+#   other details at this taxon. For example, a sample might be determined to
+#   contain 8,000 reads mapping to Klebsiella pneumoniae. You can think of it as
+#   the record for displaying one row result on one report page.
+# * Taxon counts are initially generated in the mngs Alignment stage, but then
+#   refined in assembly steps in the Post Processing stage. See loader method
+#   PipelineRun#db_load_taxon_counts.
+#
 # NOTE: Validations here are typically skipped because of update_all in results
 # loader.
 class TaxonCount < ApplicationRecord

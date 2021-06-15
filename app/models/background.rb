@@ -1,3 +1,12 @@
+# A background model is a statistical representation of the microbes found in a
+# group of samples. Background models help filter out contaminants and noise
+# when the user generates or selects an appropriate background model for their
+# samples.
+#
+# See also:
+# https://chanzuckerberg.zendesk.com/hc/en-us/articles/360050883054-Background-Models
+#
+# Background models are generated from specific PipelineRuns and the taxa in those runs.
 class Background < ApplicationRecord
   has_and_belongs_to_many :pipeline_runs
   has_many :samples, through: :pipeline_runs

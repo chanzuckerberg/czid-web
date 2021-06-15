@@ -1,3 +1,13 @@
+# * A PipelineRun represents one run or execution of the mngs pipeline for a
+#   sample. It was created to make rerunning samples easier with
+#   inputs/outputs/versions of each run. All the mngs run outputs should belong
+#   to the PipelineRun (e.g. taxon counts, contigs, stats, etc).
+# * PipelineRunStages (Host Filtering, Alignment, Post Processing, and
+#   Experimental) were further added to organize large chunks of the sample
+#   processing within a PipelineRun.
+# * OutputStates were added to represent the status of various outputs that the
+#   server expects to load after pipeline execution.
+
 require 'open3'
 require 'json'
 require 'csv'
