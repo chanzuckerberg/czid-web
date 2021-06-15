@@ -183,7 +183,7 @@ const getWorkflowRuns = ({
   limit,
   offset,
 } = {}) =>
-  get("/workflow_runs", {
+  get("/workflow_runs.json", {
     params: {
       projectId,
       domain,
