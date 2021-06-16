@@ -91,7 +91,7 @@
                 <% end %>
               <% end %>
               <td><%= pipeline_run.adjusted_remaining_reads %> &nbsp;</td>
-              <td><%= pipeline_run.pipeline_version %> &nbsp;</td>
+              <td><%= pipeline_run.wdl_version || pipeline_run.pipeline_version %> &nbsp;</td>
               <td><%= run_stage.created_at %></td>
               <td><%= run_stage.duration_hrs %></td>
             </tr>
