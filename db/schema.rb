@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_210_505_001_411) do
+ActiveRecord::Schema.define(version: 20_210_609_193_212) do
   create_table "alignment_configs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -293,6 +293,34 @@ ActiveRecord::Schema.define(version: 20_210_505_001_411) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "output"], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
+  end
+
+  create_table "phylo_tree_ngs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.json "inputs_json", comment: "Generic JSON field for recording execution inputs."
+    t.string "status", default: "CREATED", null: false, comment: "A soft enum (string) describing the execution status."
+    t.string "wdl_version", comment: "Version of the WDL used in execution."
+    t.string "sfn_execution_arn", comment: "Step Function execution ARN."
+    t.string "s3_output_prefix", comment: "Record the SFN-WDL OutputPrefix used. Ex: 's3://bucket/phylo_trees/subpath/results' Never allow users to set this."
+    t.datetime "executed_at", comment: "Self-managed field to track the time of kickoff and dispatch."
+    t.boolean "deprecated", default: false, null: false, comment: "If true, don't surface the run to the user."
+    t.bigint "rerun_from", comment: "Id of the phylo tree this was rerun from, if applicable"
+    t.string "name", null: false, comment: "Name of the NG phylo tree"
+    t.virtual "tax_id", type: :integer, comment: "Taxon id of interest", as: "json_unquote(json_extract(`inputs_json`,'$.tax_id'))"
+    t.bigint "user_id", null: false
+    t.bigint "project_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_phylo_tree_ngs_on_name"
+    t.index ["project_id", "tax_id"], name: "index_phylo_tree_ngs_on_project_id_and_tax_id"
+    t.index ["user_id"], name: "index_phylo_tree_ngs_on_user_id"
+  end
+
+  create_table "phylo_tree_ngs_pipeline_runs", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|
+    t.bigint "phylo_tree_ng_id"
+    t.bigint "pipeline_run_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["phylo_tree_ng_id", "pipeline_run_id"], name: "index_ptng_pr_id", unique: true
   end
 
   create_table "phylo_trees", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci", force: :cascade do |t|

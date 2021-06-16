@@ -7,11 +7,13 @@ class Visualization < ApplicationRecord
 
   HEATMAP_TYPE = "heatmap".freeze
   PHYLO_TREE_TYPE = "phylo_tree".freeze
+  PHYLO_TREE_NG_TYPE = "phylo_tree_ng".freeze
   TREE_TYPE = "tree".freeze
   TABLE_TYPE = "table".freeze
   validates :visualization_type, presence: true, inclusion: { in: [
     HEATMAP_TYPE,
     PHYLO_TREE_TYPE,
+    PHYLO_TREE_NG_TYPE,
     TREE_TYPE,
     TABLE_TYPE,
   ] }

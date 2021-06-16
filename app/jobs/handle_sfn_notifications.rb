@@ -20,6 +20,7 @@ class HandleSfnNotifications
         status = details["status"]
 
         wr = WorkflowRun.find_by(sfn_execution_arn: arn)
+        # TODO(julie): add a case for phylo_tree_ng
         if wr
           wr.update_status(status)
           Rails.logger.info("Updated WorkflowRun #{wr.id} #{arn} to #{status}")
