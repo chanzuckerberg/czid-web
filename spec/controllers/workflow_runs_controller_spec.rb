@@ -130,7 +130,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
         end
 
         it "should not see workflow runs from other users" do
-          get :index, params: { domain: "my_data", format: "basic" }
+          get :index, params: { domain: "my_data", mode: "basic" }
 
           json_response = JSON.parse(response.body)
           workflow_runs = json_response["workflow_runs"]
@@ -139,8 +139,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
           expect(workflow_run_ids).to_not include(@other_user_workflow_run.id)
         end
 
-        it "sees all basic fields with 'basic' format" do
-          get :index, params: { domain: "my_data", format: "basic" }
+        it "sees all basic fields with 'basic' mode" do
+          get :index, params: { domain: "my_data", mode: "basic" }
 
           json_response = JSON.parse(response.body)
           workflow_runs = json_response["workflow_runs"]
@@ -164,8 +164,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                         workflow: expected_workflow_run.workflow)
         end
 
-        it "sees basic fields with sample info included with 'with_sample_info' format" do
-          get :index, params: { domain: "my_data", format: "with_sample_info" }
+        it "sees basic fields with sample info included with 'with_sample_info' mode" do
+          get :index, params: { domain: "my_data", mode: "with_sample_info" }
 
           json_response = JSON.parse(response.body)
           workflow_runs = json_response["workflow_runs"]
@@ -201,8 +201,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
         end
 
         context "when a sample upload error occurs" do
-          it "sees basic fields with sample info included with 'with_sample_info' format and a result_status_description is included" do
-            get :index, params: { domain: "my_data", format: "with_sample_info" }
+          it "sees basic fields with sample info included with 'with_sample_info' mode and a result_status_description is included" do
+            get :index, params: { domain: "my_data", mode: "with_sample_info" }
 
             json_response = JSON.parse(response.body)
             workflow_runs = json_response["workflow_runs"]
@@ -272,7 +272,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
         end
 
         it "should not see private workflow runs" do
-          get :index, params: { domain: "public", format: "basic" }
+          get :index, params: { domain: "public", mode: "basic" }
 
           json_response = JSON.parse(response.body)
           workflow_runs = json_response["workflow_runs"]
@@ -281,8 +281,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
           expect(workflow_run_ids).to_not include(@private_workflow_run.id)
         end
 
-        it "sees all basic fields when 'basic' format is specified" do
-          get :index, params: { domain: "public", format: "basic" }
+        it "sees all basic fields when 'basic' mode is specified" do
+          get :index, params: { domain: "public", mode: "basic" }
 
           json_response = JSON.parse(response.body)
           workflow_runs = json_response["workflow_runs"]
@@ -306,8 +306,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                         workflow: expected_workflow_run.workflow)
         end
 
-        it "sees basic fields with sample info included when 'with_sample_info' format is specified" do
-          get :index, params: { domain: "public", format: "with_sample_info" }
+        it "sees basic fields with sample info included when 'with_sample_info' mode is specified" do
+          get :index, params: { domain: "public", mode: "with_sample_info" }
 
           json_response = JSON.parse(response.body)
           workflow_runs = json_response["workflow_runs"]
@@ -344,7 +344,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
       end
 
       ["my_data", "public"].each do |domain|
-        ["basic", "with_sample_info"].freeze.each do |format_param|
+        ["basic", "with_sample_info"].freeze.each do |mode|
           context "sample filters" do
             before do
               @project1 = create(:public_project, users: [@user], samples_data: [
@@ -385,7 +385,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
             end
 
             context "filtering by time" do
-              it "returns correct workflow runs in the specified time range in domain '#{domain}' with format '#{format_param}'" do
+              it "returns correct workflow runs in the specified time range in domain '#{domain}' with mode '#{mode}'" do
                 # Workflow Runs for this spec are created in the future so the testing of #index does not get contaminated by the workflow_runs created in the 'before do' block above.
                 project_in_the_future = create(:public_project, users: [@user], created_at: 3.days.from_now)
                 sample_in_the_future = create(:sample, project: project_in_the_future, created_at: 3.days.from_now)
@@ -397,7 +397,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
 
                 start_date = 2.days.from_now.strftime("%Y%m%d")
                 end_date = 6.days.from_now.strftime("%Y%m%d")
-                get :index, params: { domain: domain, format: format_param, time: [start_date, end_date], workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+                get :index, params: { domain: domain, mode: mode, time: [start_date, end_date], workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -412,8 +412,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
             end
 
             context "filtering by visibility" do
-              it "returns correct workflow runs with public visibility in domain '#{domain}' with format '#{format_param}'" do
-                get :index, params: { domain: domain, format: format_param, visibility: "public", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+              it "returns correct workflow runs with public visibility in domain '#{domain}' with mode '#{mode}'" do
+                get :index, params: { domain: domain, mode: mode, visibility: "public", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -429,8 +429,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
                 expect(workflow_run_ids).to contain_exactly(*expected_workflow_run_ids)
               end
 
-              it "returns correct workflow runs with private visibility in domain '#{domain}' with format '#{format_param}'" do
-                get :index, params: { domain: domain, format: format_param, visibility: "private", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+              it "returns correct workflow runs with private visibility in domain '#{domain}' with mode '#{mode}'" do
+                get :index, params: { domain: domain, mode: mode, visibility: "private", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -448,8 +448,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
             end
 
             context "filtering by projectId" do
-              it "returns correct workflow runs belonging to the specified project in domain '#{domain}' with format '#{format_param}'" do
-                get :index, params: { domain: domain, format: format_param, projectId: @project1.id, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+              it "returns correct workflow runs belonging to the specified project in domain '#{domain}' with mode '#{mode}'" do
+                get :index, params: { domain: domain, mode: mode, projectId: @project1.id, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -469,8 +469,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
             end
 
             context "filtering by sample host" do
-              it "returns correct workflow runs in domain '#{domain}' with format '#{format_param}'" do
-                get :index, params: { domain: domain, format: format_param, host: HostGenome.find_by(name: "Bear").id, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+              it "returns correct workflow runs in domain '#{domain}' with mode '#{mode}'" do
+                get :index, params: { domain: domain, mode: mode, host: HostGenome.find_by(name: "Bear").id, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -488,8 +488,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
             end
 
             context "filtering by sample location_v2" do
-              it "returns correct workflow runs in domain '#{domain}' with format '#{format_param}'" do
-                get :index, params: { domain: domain, format: format_param, locationV2: "New York, USA", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+              it "returns correct workflow runs in domain '#{domain}' with mode '#{mode}'" do
+                get :index, params: { domain: domain, mode: mode, locationV2: "New York, USA", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -506,8 +506,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
             end
 
             context "filtering by sample type" do
-              it "returns the correct workflow runs in domain '#{domain}' with format '#{format_param}'" do
-                get :index, params: { domain: domain, format: format_param, tissue: "Brain", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+              it "returns the correct workflow runs in domain '#{domain}' with mode '#{mode}'" do
+                get :index, params: { domain: domain, mode: mode, tissue: "Brain", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -535,8 +535,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
             end
 
             context "filtering by workflow" do
-              it "returns correct and non-deprecated workflow runs in domain '#{domain}' with format '#{format_param}'" do
-                get :index, params: { domain: domain, format: format_param, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+              it "returns correct and non-deprecated workflow runs in domain '#{domain}' with mode '#{mode}'" do
+                get :index, params: { domain: domain, mode: mode, workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
 
                 json_response = JSON.parse(response.body)
 
@@ -553,8 +553,8 @@ RSpec.describe WorkflowRunsController, type: :controller do
         end
       end
 
-      ["basic", "with_sample_info"].each do |format_param|
-        describe "GET index for my_data domain with format '#{format_param}'" do
+      ["basic", "with_sample_info"].each do |mode|
+        describe "GET index for my_data domain with mode '#{mode}'" do
           before do
             other_user = create(:user)
             my_projects = [
@@ -573,7 +573,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           end
 
           it "sees own workflow runs" do
-            get :index, params: { domain: "my_data", format: format_param }
+            get :index, params: { domain: "my_data", mode: mode }
 
             json_response = JSON.parse(response.body)
             workflow_runs = json_response["workflow_runs"]
@@ -583,7 +583,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           end
 
           it "sees own workflow runs with a list of all workflow run ids" do
-            get :index, params: { domain: "my_data", format: format_param, listAllIds: true }
+            get :index, params: { domain: "my_data", mode: mode, listAllIds: true }
 
             json_response = JSON.parse(response.body)
             workflow_runs = json_response["workflow_runs"]
@@ -595,7 +595,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           end
         end
 
-        describe "GET index for public domain with format '#{format_param}'" do
+        describe "GET index for public domain with mode '#{mode}'" do
           before do
             other_user = create(:user)
             public_projects = [
@@ -615,7 +615,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           end
 
           it "sees public workflow runs" do
-            get :index, params: { domain: "public", format: format_param }
+            get :index, params: { domain: "public", mode: mode }
 
             json_response = JSON.parse(response.body)
             workflow_runs = json_response["workflow_runs"]
@@ -625,7 +625,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
           end
 
           it "sees public workflow runs with a list of all workflow run ids" do
-            get :index, params: { domain: "public", format: format_param, listAllIds: true }
+            get :index, params: { domain: "public", mode: mode, listAllIds: true }
 
             json_response = JSON.parse(response.body)
             workflow_runs = json_response["workflow_runs"]

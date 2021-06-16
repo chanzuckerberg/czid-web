@@ -23,7 +23,7 @@ class WorkflowRunsController < ApplicationController
       limit: permitted_params[:limit] ? permitted_params[:limit].to_i : WorkflowRunsController::MAX_PAGE_SIZE
     )
 
-    formatted_workflow_runs = format_workflow_runs(workflow_runs: paginated_workflow_runs, format: permitted_params[:format] || "basic")
+    formatted_workflow_runs = format_workflow_runs(workflow_runs: paginated_workflow_runs, mode: permitted_params[:mode] || "basic")
     should_list_all_workflow_run_ids = ActiveModel::Type::Boolean.new.cast(permitted_params[:listAllIds])
 
     response = {}.tap do |resp|
@@ -155,7 +155,7 @@ class WorkflowRunsController < ApplicationController
   end
 
   def index_params
-    params.permit(:domain, :format, :offset, :limit, :orderBy, :orderDir, :listAllIds, :host, :locationV2, :tissue, :projectId, :visibility, :workflow, time: [])
+    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :host, :locationV2, :tissue, :projectId, :visibility, :workflow, time: [])
   end
 
   def fetch_workflow_runs(domain:, filters: {})
@@ -169,10 +169,10 @@ class WorkflowRunsController < ApplicationController
     filtered_workflow_runs
   end
 
-  def format_workflow_runs(workflow_runs:, format: "basic")
+  def format_workflow_runs(workflow_runs:, mode: "basic")
     return [] if workflow_runs.empty?
 
-    should_include_sample_info = format == "with_sample_info"
+    should_include_sample_info = mode == "with_sample_info"
     if should_include_sample_info
       sample_ids = workflow_runs.pluck(:sample_id).uniq
       sample_attributes = [:id, :created_at, :host_genome_name, :name, :private_until, :project_id, :sample_notes]

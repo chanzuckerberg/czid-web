@@ -234,7 +234,7 @@ class BulkDownloadModalOptions extends React.Component {
     const {
       validObjectIds,
       onSelect,
-      allSamplesUploadedByCurrentUser,
+      allObjectsUploadedByCurrentUser,
       selectedDownloadTypeName,
       objectDownloaded,
     } = this.props;
@@ -246,7 +246,7 @@ class BulkDownloadModalOptions extends React.Component {
 
     if (
       downloadType.uploader_only &&
-      !allSamplesUploadedByCurrentUser &&
+      !allObjectsUploadedByCurrentUser &&
       !admin
     ) {
       disabled = true;
@@ -396,7 +396,7 @@ BulkDownloadModalOptions.propTypes = {
   validObjectIds: PropTypes.instanceOf(Set).isRequired,
   backgroundOptions: PropTypes.array,
   metricsOptions: PropTypes.array,
-  allSamplesUploadedByCurrentUser: PropTypes.bool,
+  allObjectsUploadedByCurrentUser: PropTypes.bool,
   onSelect: PropTypes.func.isRequired,
   enableMassNormalizedBackgrounds: PropTypes.bool,
   objectDownloaded: PropTypes.string,
