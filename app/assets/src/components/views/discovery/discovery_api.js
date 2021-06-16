@@ -286,6 +286,7 @@ const processRawWorkflowRun = workflowRun => {
     createdAt: workflowRun.created_at,
     workflow: workflowRun.workflow,
     sample: {
+      id: getSampleField(["info", "id"]),
       name: getSampleField(["info", "name"]),
       createdAt: getSampleField(["info", "created_at"]),
       project: getSampleField(["project_name"]),

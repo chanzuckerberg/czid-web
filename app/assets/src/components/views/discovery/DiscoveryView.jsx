@@ -5,6 +5,7 @@ import {
   concat,
   escapeRegExp,
   find,
+  get as _get,
   getOr,
   isEmpty,
   keyBy,
@@ -168,6 +169,7 @@ class DiscoveryView extends React.Component {
         showStats: true,
         userDataCounts: null,
         workflow: WORKFLOWS.SHORT_READ_MNGS.value,
+        workflowEntity: WORKFLOW_ENTITIES.SAMPLES,
       },
       localState,
       sessionState,
@@ -183,6 +185,11 @@ class DiscoveryView extends React.Component {
     if (!this.state.sampleActiveColumnsByWorkflow) {
       this.state.sampleActiveColumnsByWorkflow = DEFAULTS_BY_WORKFLOW;
     }
+
+    this.workflowEntity = find(
+      { value: this.state.workflow },
+      values(WORKFLOWS)
+    ).entity;
 
     this.dataLayer = new DiscoveryDataLayer(domain);
     const conditions = this.getConditions();
@@ -663,6 +670,7 @@ class DiscoveryView extends React.Component {
     this.setState(
       {
         workflow,
+        workflowEntity: find({ value: workflow }, values(WORKFLOWS)).entity,
         userDataCounts: {
           sampleCountByWorkflow: sampleStats.countByWorkflow,
           sampleCount: sampleStats.count,
@@ -787,7 +795,7 @@ class DiscoveryView extends React.Component {
         break;
       }
       case "sample": {
-        this.handleSampleSelected({ sample: { id: value }, currentEvent });
+        this.handleObjectSelected({ object: { id: value }, currentEvent });
         break;
       }
       case "project": {
@@ -897,13 +905,24 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  handleSampleSelected = ({ sample, currentEvent }) => {
+  handleObjectSelected = ({ object, currentEvent }) => {
     const { snapshotShareId } = this.props;
-    const { workflow } = this.state;
+    const { workflow, workflowEntity } = this.state;
+
+    let sampleId;
+    let workflowRunId;
+
+    if (workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS) {
+      sampleId = _get("sample.id", object);
+      workflowRunId = object.id;
+    } else {
+      sampleId = _get("id", object);
+    }
 
     let url = generateUrlToSampleView({
       workflow,
-      sampleId: sample.id,
+      sampleId,
+      workflowRunId,
       snapshotShareId,
     });
 
@@ -1532,6 +1551,7 @@ class DiscoveryView extends React.Component {
           ? { selectableWorkflowRunIds: view.getIds() }
           : { selectableSampleIds: view.getIds() }),
         workflow,
+        workflowEntity: find({ value: workflow }, values(WORKFLOWS)).entity,
       },
       () => {
         this.updateBrowsingHistory("replace");
@@ -1592,12 +1612,12 @@ class DiscoveryView extends React.Component {
       showStats,
       userDataCounts,
       workflow,
+      workflowEntity,
     } = this.state;
 
     const { admin, allowedFeatures, mapTilerKey, snapshotShareId } = this.props;
     const { projects, visualizations } = this;
 
-    const workflowEntity = find({ value: workflow }, values(WORKFLOWS)).entity;
     const isWorkflowRunEntity =
       workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
     const objects = isWorkflowRunEntity
@@ -1681,7 +1701,7 @@ class DiscoveryView extends React.Component {
                   onMapLevelChange={this.handleMapLevelChange}
                   onMapMarkerClick={this.handleMapMarkerClick}
                   onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
-                  onSampleSelected={this.handleSampleSelected}
+                  onObjectSelected={this.handleObjectSelected}
                   projectId={projectId}
                   snapshotShareId={snapshotShareId}
                   ref={samplesView => (this.samplesView = samplesView)}
@@ -1771,7 +1791,7 @@ class DiscoveryView extends React.Component {
               loading={loading}
               onFilterClick={this.handleMetadataFilterClick}
               onProjectSelected={this.handleProjectSelected}
-              onSampleClicked={this.handleSampleSelected}
+              onSampleClicked={this.handleObjectSelected}
               onSelectionUpdate={this.handleSelectedSamplesUpdate}
               onTabChange={this.handleMapSidebarTabChange}
               projectDimensions={

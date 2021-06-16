@@ -217,7 +217,6 @@ class SamplesView extends React.Component {
     );
   };
 
-  // TODO(omar): Make BulkDownloadModal support selected workflow runs [CH-136639]
   renderBulkDownloadTrigger = () => {
     const { selectedIds, workflow } = this.props;
     const { bulkDownloadButtonTempTooltip } = this.state;
@@ -545,12 +544,17 @@ class SamplesView extends React.Component {
   };
 
   handleRowClick = ({ event, rowData }) => {
-    const { onSampleSelected, samples } = this.props;
-    const sample = samples.get(rowData.id);
-    onSampleSelected && onSampleSelected({ sample, currentEvent: event });
+    const { onObjectSelected, objects, workflowEntity } = this.props;
+    const object = objects.get(rowData.id);
+    onObjectSelected && onObjectSelected({ object, currentEvent: event });
+
     logAnalyticsEvent("SamplesView_row_clicked", {
-      sampleId: sample.id,
-      sampleName: sample.name,
+      sampleId: object.id,
+      sampleName:
+        workflowEntity === WORKFLOW_ENTITIES.SAMPLE
+          ? object.name
+          : get("sample.info.name", object),
+      workflowEntity,
     });
   };
 
@@ -645,7 +649,7 @@ SamplesView.propTypes = {
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onPLQCHistogramBarClick: PropTypes.func,
-  onSampleSelected: PropTypes.func,
+  onObjectSelected: PropTypes.func,
   onUpdateSelectedIds: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,

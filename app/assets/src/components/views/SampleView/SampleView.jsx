@@ -114,6 +114,7 @@ class SampleView extends React.Component {
     const {
       selectedOptions: selectedOptionsFromUrl,
       tempSelectedOptions,
+      workflowRunId: workflowRunIdFromUrl,
       ...nonNestedUrlState
     } = this.urlParser.parse(location.search);
     const {
@@ -162,6 +163,7 @@ class SampleView extends React.Component {
         sidebarTaxonData: null,
         view: "table",
         workflowRun: null,
+        workflowRunId: workflowRunIdFromUrl || null,
         workflowRunResults: null,
       },
       nonNestedLocalState,
@@ -744,7 +746,21 @@ class SampleView extends React.Component {
   };
 
   handleWorkflowRunSelect = workflowRun => {
-    this.setState({ workflowRun });
+    const updatedQueryParameters = this.urlParser.updateQueryStringParameter(
+      location.search,
+      "workflowRunId",
+      workflowRun.id
+    );
+    const stringifiedQueryParams = this.urlParser.stringify(
+      updatedQueryParameters
+    );
+
+    history.replaceState(
+      updatedQueryParameters,
+      `SampleView`,
+      `${location.pathname + "?" + stringifiedQueryParams}`
+    );
+    this.setState({ workflowRun, workflowRunId: workflowRun.id });
   };
 
   handleTabChange = tab => {
@@ -1379,13 +1395,17 @@ class SampleView extends React.Component {
       pipelineVersion,
       sample,
       workflowRun,
+      workflowRunId,
     } = this.state;
-
     if (PIPELINE_RUN_TABS.includes(currentTab)) {
       return pipelineRun;
     }
 
     if (sample && sample.workflow_runs.length > 0) {
+      if (workflowRunId) {
+        return find({ id: workflowRunId }, sample.workflow_runs);
+      }
+
       const workflowType = Object.values(WORKFLOWS).find(
         workflow => workflow.label === currentTab
       ).value;

@@ -10,6 +10,7 @@ export const URL_FIELDS = {
   tempSelectedOptions: "object",
   view: "string",
   currentTab: "string",
+  workflowRunId: "number",
 };
 
 export const CG_VIEW_METRIC_COLUMNS = [

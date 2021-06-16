@@ -1,3 +1,4 @@
+import { has } from "lodash/fp";
 import QueryString from "query-string";
 
 class UrlQueryParser {
@@ -61,6 +62,17 @@ class UrlQueryParser {
       default:
         return value;
     }
+  }
+
+  // Updates a query string parameter that currently exist in the URL and returns the updated query paramters.
+  updateQueryStringParameter(searchUrl, key, value) {
+    const queryStringParams = this.parse(searchUrl);
+
+    if (has(key, queryStringParams)) {
+      queryStringParams[key] = value;
+    }
+
+    return queryStringParams;
   }
 }
 
