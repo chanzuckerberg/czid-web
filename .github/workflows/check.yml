@@ -151,8 +151,15 @@ jobs:
           echo "Check the lockfileVersion in package-lock.json."
           exit 1
         fi
+    - name: Switch git to use HTTP
+      # See: https://github.com/actions/setup-node/issues/214#issuecomment-842538631
+      run: >
+        git config --global url."https://github.com/".insteadOf
+        ssh://git@github.com/
     - name: Install Dependencies
-      run: npm install
+      # Verifies that package.json and package-lock.json match.
+      # See: https://docs.npmjs.com/cli/v7/commands/npm-ci
+      run: npm ci
     - name: Test
       run: npm test
       env:
@@ -160,7 +167,7 @@ jobs:
     - name: ESLint
       # setup-node automatically creates annotations from this output
       # Use eslint-disable or fix another warning to stay below the max.
-      run: ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --max-warnings 80
+      run: ./node_modules/.bin/eslint app/assets/src --ext .js,.jsx --max-warnings 70
     - name: ESLint a11y Rules
       # These rules are related to web accessibility, with a separate warnings budget.
       # Use eslint-disable or fix another warning to stay below the max.
@@ -191,6 +198,6 @@ jobs:
     - name: Flake8
       uses: julianwachholz/flake8-action@v1
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Test
       run: python3 -m unittest discover -v -s test/python/ -p 'test_*.py'
