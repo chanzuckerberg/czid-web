@@ -644,16 +644,15 @@ class SamplesController < ApplicationController
       resp = { samples: v2_samples, errors: errors }
     end
 
-    if samples.count > 0
-      log_analytics_params = {
-        version: client, # web if web version number if cli
-        client: client_type, # here we map version number to CLI for easier queries
-        count: samples.count,
-      }
+    samples.each do |sample|
       MetricUtil.log_analytics_event(
-        EventDictionary::SAMPLES_BULK_UPLOADED,
+        EventDictionary::SAMPLE_UPLOAD_STARTED,
         current_user,
-        log_analytics_params
+        {
+          version: client, # web if web version number if cli
+          client: client_type, # here we map version number to CLI for easier queries
+          sample_id: sample.id,
+        }
       )
     end
 
@@ -1154,8 +1153,18 @@ class SamplesController < ApplicationController
   # PATCH/PUT /samples/1
   # PATCH/PUT /samples/1.json
   def update
+    old_status = @sample.status
     respond_to do |format|
       if @sample.update(sample_params)
+        if old_status == Sample::STATUS_CREATED && @sample.status == Sample::STATUS_UPLOADED
+          MetricUtil.log_analytics_event(
+            EventDictionary::SAMPLE_UPLOAD_SUCCEEDED,
+            current_user,
+            {
+              sample_id: @sample.id,
+            }
+          )
+        end
         format.html { redirect_to @sample, notice: 'Sample was successfully updated.' }
         format.json { render :show, status: :ok, location: @sample }
       else

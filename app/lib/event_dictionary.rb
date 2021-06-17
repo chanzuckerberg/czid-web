@@ -39,9 +39,13 @@ class EventDictionary
   #  @param project_ids An array of project ids that were included in the email notification.
   SEND_SAMPLE_VISIBILITY_EMAIL_USER_EMAIL_SENT = "SEND_SAMPLE_VISIBILITY_EMAIL_USER_EMAIL_SENT".freeze
 
-  # A user has uploaded via the bulk_upload_with_metadata endpoint.
+  # A user has initiated a sample via the bulk_upload_with_metadata endpoint.
   #  @param version The version of the client the user is bulk uploading from, 'web' if web client
   #  @param client The client the user is bulk uploading from 'CLI' or 'web'
-  #  @param count The number of samples uploaded
-  SAMPLES_BULK_UPLOADED = "SAMPLES_BULK_UPLOADED".freeze
+  #  @param sample_id The ID of the uploaded sample
+  SAMPLE_UPLOAD_STARTED = "SAMPLE_UPLOAD_STARTED".freeze
+
+  # A sample upload has finished successfully
+  #  @param sample_id The ID of the uploaded sample
+  SAMPLE_UPLOAD_SUCCEEDED = "SAMPLE_UPLOAD_SUCCEEDED".freeze
 end
