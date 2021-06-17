@@ -4,17 +4,17 @@ class PhyloTreeNg < ApplicationRecord
   belongs_to :project
 
   # Newick file representing the phylo tree.
-  OUTPUT_NEWICK = "phylotree-ng-1.phylotree.nwk".freeze
+  OUTPUT_NEWICK = "phylotree.phylotree_newick".freeze
   # Metadata JSON for reference sequences downloaded from the NCBI database.
-  OUTPUT_NCBI_METADATA = "phylotree-ng-1.ncbi_metadata.json".freeze
+  OUTPUT_NCBI_METADATA = "phylotree.ncbi_metadata_json".freeze
   # SKA distances output for download
-  OUTPUT_SKA_DISTANCES = "phylotree-ng-1.ska.distances.tsv".freeze
+  OUTPUT_SKA_DISTANCES = "phylotree.ska_distances".freeze
   # SKA variants output for download
-  OUTPUT_SKA_VARIANTS = "phylotree-ng-1.ska.variants.aln".freeze
+  OUTPUT_SKA_VARIANTS = "phylotree.variants".freeze
   # PNG of a genomic distance matrix (heatmap) for when the samples are too divergent.
-  OUTPUT_CLUSTERMAP_PNG = "phylotree-ng-1.clustermap.png".freeze
+  OUTPUT_CLUSTERMAP_PNG = "phylotree.clustermap_png".freeze
   # SVG of a genomic distance matrix (heatmap) for when the samples are too divergent.
-  OUTPUT_CLUSTERMAP_SVG = "phylotree-ng-1.clustermap.svg".freeze
+  OUTPUT_CLUSTERMAP_SVG = "phylotree.clustermap_svg".freeze
 
   INPUT_ERRORS = {
     "TooDivergentError" => "Sequences are too divergent to create a single phylo tree",
