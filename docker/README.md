@@ -1,4 +1,4 @@
-- This folder is just a README for now since `Dockerfile` and `docker-compose.yml` are usually kept in the repository root / top of the build context.
+This folder is just a README for now since `Dockerfile` and `docker-compose.yml` are usually kept in the repository root / top of the build context.
 
 ## Tips and tricks
 
