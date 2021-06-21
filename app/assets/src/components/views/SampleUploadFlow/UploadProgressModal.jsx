@@ -535,7 +535,8 @@ export default class UploadProgressModal extends React.Component {
                 } to ${project.name}`}
           </div>
           <div className={cs.subtitle}>
-            Please stay on this page until upload completes!
+            Please stay on this page until upload completes! Closing your device
+            or putting it to sleep will interrupt the upload.
           </div>
         </React.Fragment>
       );

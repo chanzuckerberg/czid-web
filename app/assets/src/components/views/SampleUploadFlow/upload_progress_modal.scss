@@ -51,6 +51,7 @@
 
     .subtitle {
       @include font-body-s;
+      padding: 0 40px;
 
       .helpLink {
         color: $primary !important;
