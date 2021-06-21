@@ -11,7 +11,7 @@ export const WORKFLOWS = {
     entity: WORKFLOW_ENTITIES.SAMPLES,
   },
   CONSENSUS_GENOME_FLAT_LIST: {
-    label: "Consensus Genome Flat List",
+    label: "Consensus Genome",
     value: "consensus-genome-flat-list",
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
   },

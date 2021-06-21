@@ -1571,6 +1571,11 @@ class DiscoveryView extends React.Component {
         workflow => workflow === "CONSENSUS_GENOME_FLAT_LIST",
         workflows
       );
+    } else {
+      workflows = remove(
+        workflow => workflow === "CONSENSUS_GENOME",
+        workflows
+      );
     }
 
     return workflows.map(name => {
