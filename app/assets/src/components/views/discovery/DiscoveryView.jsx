@@ -638,7 +638,7 @@ class DiscoveryView extends React.Component {
   };
 
   loadUserDataStats = async () => {
-    const { domain } = this.props;
+    const { allowedFeatures, domain } = this.props;
     const { projectId } = this.state;
     let { workflow } = this.state;
 
@@ -662,7 +662,9 @@ class DiscoveryView extends React.Component {
       sampleStats.countByWorkflow
     );
     if (numOfMngsSamples === 0 && numOfCgSamples > 0) {
-      workflow = WORKFLOWS.CONSENSUS_GENOME.value;
+      workflow = allowedFeatures.includes(CG_FLAT_LIST_FEATURE)
+        ? WORKFLOWS.CONSENSUS_GENOME_FLAT_LIST.value
+        : WORKFLOWS.CONSENSUS_GENOME.value;
     } else if (numOfCgSamples === 0 && numOfMngsSamples > 0) {
       workflow = WORKFLOWS.SHORT_READ_MNGS.value;
     }
@@ -1412,10 +1414,16 @@ class DiscoveryView extends React.Component {
   };
 
   renderNoDataWorkflowBanner = workflow => {
-    const workflowLabel =
+    const [workflowLabel, emptyTitle] =
       workflow === WORKFLOWS.SHORT_READ_MNGS.value
-        ? WORKFLOWS.SHORT_READ_MNGS.label
-        : WORKFLOWS.CONSENSUS_GENOME.label;
+        ? [
+            WORKFLOWS.SHORT_READ_MNGS.label,
+            `${WORKFLOWS.SHORT_READ_MNGS.label} Samples`,
+          ]
+        : [
+            WORKFLOWS.CONSENSUS_GENOME.label,
+            `${WORKFLOWS.CONSENSUS_GENOME.label}s`,
+          ];
     return (
       <InfoBanner
         className={cs.noResultsContainer}
@@ -1425,7 +1433,7 @@ class DiscoveryView extends React.Component {
           text: `Run ${workflowLabel}s`,
         }}
         message={`No samples were processed by the ${workflowLabel} Pipeline.`}
-        title={`0 ${workflowLabel} Samples`}
+        title={`0 ${emptyTitle}`}
         type={workflow}
       />
     );
@@ -1623,6 +1631,11 @@ class DiscoveryView extends React.Component {
     const { admin, allowedFeatures, mapTilerKey, snapshotShareId } = this.props;
     const { projects, visualizations } = this;
 
+    // TODO(omar): Remove this temporary workflow hack when cleaning up dead CG code.
+    const tempWorkflow =
+      workflow === WORKFLOWS.SHORT_READ_MNGS.value
+        ? WORKFLOWS.SHORT_READ_MNGS.value
+        : WORKFLOWS.CONSENSUS_GENOME.value;
     const isWorkflowRunEntity =
       workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
     const objects = isWorkflowRunEntity
@@ -1681,9 +1694,8 @@ class DiscoveryView extends React.Component {
             <div className={cs.dataContainer}>
               {currentDisplay !== "map" && this.renderWorkflowTabs()}
               {userDataCounts &&
-              !isWorkflowRunEntity &&
-              !userDataCounts.sampleCountByWorkflow[workflow] ? (
-                this.renderNoDataWorkflowBanner(workflow)
+              !userDataCounts.sampleCountByWorkflow[tempWorkflow] ? (
+                this.renderNoDataWorkflowBanner(tempWorkflow)
               ) : (
                 <SamplesView
                   activeColumns={sampleActiveColumnsByWorkflow[workflow]}
@@ -1723,8 +1735,8 @@ class DiscoveryView extends React.Component {
               )}
             </div>
             {userDataCounts &&
-            userDataCounts.sampleCountByWorkflow[workflow] &&
-            !samples.length &&
+            userDataCounts.sampleCountByWorkflow[tempWorkflow] &&
+            !objects.length &&
             tableHasLoaded
               ? this.renderNoSearchResultsBanner("samples")
               : null}
