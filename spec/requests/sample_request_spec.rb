@@ -63,7 +63,7 @@ RSpec.describe "Sample request", type: :request do
         it "should keep pipeline_execution_strategy flag nil in the sample when no flag is passed" do
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -76,7 +76,7 @@ RSpec.describe "Sample request", type: :request do
         it "should properly add the pipeline_execution_strategy flag, step_function, to the pipeline run when no flag is passed" do
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -96,7 +96,7 @@ RSpec.describe "Sample request", type: :request do
 
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -111,7 +111,7 @@ RSpec.describe "Sample request", type: :request do
 
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -133,7 +133,7 @@ RSpec.describe "Sample request", type: :request do
 
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -150,7 +150,7 @@ RSpec.describe "Sample request", type: :request do
 
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -167,7 +167,7 @@ RSpec.describe "Sample request", type: :request do
 
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -184,7 +184,7 @@ RSpec.describe "Sample request", type: :request do
 
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -199,7 +199,7 @@ RSpec.describe "Sample request", type: :request do
 
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -217,7 +217,7 @@ RSpec.describe "Sample request", type: :request do
 
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -236,7 +236,7 @@ RSpec.describe "Sample request", type: :request do
 
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -249,7 +249,7 @@ RSpec.describe "Sample request", type: :request do
         it "should set the 'main' pipeline workflow by default" do
           post "/samples/bulk_upload_with_metadata", params: { samples: [@sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -270,7 +270,7 @@ RSpec.describe "Sample request", type: :request do
           sample_params[:workflows] = ["consensus-genome"]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -288,7 +288,7 @@ RSpec.describe "Sample request", type: :request do
           sample_params[:workflows] = [bogus_pipeline_workflow]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           expect(json_response["sample_ids"]).to be_empty
@@ -301,7 +301,7 @@ RSpec.describe "Sample request", type: :request do
           sample_params[:workflows] = [WorkflowRun::WORKFLOW[:consensus_genome]]
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           sample_id = json_response["sample_ids"][0]
@@ -318,7 +318,7 @@ RSpec.describe "Sample request", type: :request do
           sample_params[:wetlab_protocol] = nil
           post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
         end
       end
@@ -389,7 +389,7 @@ RSpec.describe "Sample request", type: :request do
 
         post "/samples/bulk_upload_with_metadata", params: { samples: [sample_params], metadata: @metadata_params, client: @client_params, format: :json }
 
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
         expect(response).to have_http_status(:ok)
         json_response = JSON.parse(response.body)
         sample_id = json_response["sample_ids"][0]

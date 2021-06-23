@@ -1,3 +1,7 @@
+# NOTE (2021-06-22): The guard-rspec gem does not currently support Rails 6 (due
+# to rspec < 4.0 and an rspec-rails issue). Try upgrading in the future or
+# looking for alternative solutions if you need Guard support.
+
 # A sample Guardfile
 # More info at https://github.com/guard/guard#readme
 

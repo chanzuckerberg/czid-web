@@ -36,8 +36,6 @@ RSpec.describe PipelineReportService, type: :service do
 
   context "converted report test for species taxid 573" do
     before do
-      ResqueSpec.reset!
-
       create(:taxon_lineage, tax_name: "Klebsiella pneumoniae", taxid: 573, genus_taxid: 570, superkingdom_taxid: 2)
       create(:taxon_lineage, tax_name: "Klebsiella", taxid: 570, genus_taxid: 570, superkingdom_taxid: 2)
 
@@ -194,8 +192,6 @@ RSpec.describe PipelineReportService, type: :service do
 
   context "converted report test for species taxid 573 with mass normalized background model" do
     before do
-      ResqueSpec.reset!
-
       create(:taxon_lineage, tax_name: "Klebsiella pneumoniae", taxid: 573, genus_taxid: 570, superkingdom_taxid: 2)
       create(:taxon_lineage, tax_name: "Klebsiella", taxid: 570, genus_taxid: 570, superkingdom_taxid: 2)
 
@@ -329,8 +325,6 @@ RSpec.describe PipelineReportService, type: :service do
 
   context "converted report test for species taxid 1313" do
     before do
-      ResqueSpec.reset!
-
       create(:taxon_lineage, tax_name: "Streptococcus pneumoniae", taxid: 1313, genus_taxid: 1301, superkingdom_taxid: 2)
       create(:taxon_lineage, tax_name: "Streptococcus", taxid: 1301, genus_taxid: 1301, superkingdom_taxid: 2)
       create(:taxon_lineage, tax_name: "Streptococcus mitis", taxid: 28_037, genus_taxid: 1301, superkingdom_taxid: 2)
@@ -498,8 +492,6 @@ RSpec.describe PipelineReportService, type: :service do
 
   context "taxon missing from background" do
     before do
-      ResqueSpec.reset!
-
       create(:taxon_lineage, tax_name: "species", taxid: 1, genus_taxid: 2)
       create(:taxon_lineage, tax_name: "genus", taxid: 2, genus_taxid: 2)
 
@@ -551,8 +543,6 @@ RSpec.describe PipelineReportService, type: :service do
 
   describe "sample contains pathogenic taxa" do
     before do
-      ResqueSpec.reset!
-
       create(:taxon_lineage, tax_name: "Escherichia", taxid: 1, genus_taxid: 1, genus_name: "Escherichia")
       create(:taxon_lineage, tax_name: "Escherichia albertii", taxid: 2, genus_taxid: 1, genus_name: "Escherichia")
       create(:taxon_lineage, tax_name: "Escherichia coli", taxid: 3, genus_taxid: 1, genus_name: "Escherichia")

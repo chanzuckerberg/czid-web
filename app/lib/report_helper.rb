@@ -222,7 +222,7 @@ module ReportHelper
         pipeline_run_id = #{pipeline_run_id.to_i} AND
         taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
         taxon_counts.count_type IN #{count_types}
-    "]).to_hash
+    "]).to_a
   end
 
   def self.zero_metrics(count_type)

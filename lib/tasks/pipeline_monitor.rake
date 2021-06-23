@@ -242,7 +242,7 @@ class CheckPipelineRuns
         sql_query += "    AND web_commit = \"#{web_commit}\""
         commit_filter += "-" + web_commit
       end
-      sql_results = Sample.connection.select_all(sql_query).to_hash
+      sql_results = Sample.connection.select_all(sql_query).to_a
       unless sql_results.empty?
         most_recent_submission = sql_results.pluck('unixtime_of_creation').max
         hours_since_last_run = Integer((t_now - most_recent_submission) / 360) / 10.0

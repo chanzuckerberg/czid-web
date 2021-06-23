@@ -5,6 +5,7 @@ RSpec.describe SnapshotLinksController, type: :controller do
     @user = create(:user)
     @unauthorized_user = create(:user)
     @other_user = create(:user)
+    @host_genome = create(:host_genome, name: "Human")
   end
 
   context "when the user is logged in" do

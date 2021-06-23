@@ -28,6 +28,17 @@ module Idseq
       port: 587,
       user_name: ENV["SMTP_USER"],
     }
+
+    # ResqueMiddleware to make it more secure:
+    Dir["./app/middleware/*.rb"].sort.each do |file|
+      require file
+    end
+    config.middleware.use ResqueMiddleware
+
+    # This is an allowlist that protects against Host header spoofing. Only
+    # idseq.net or subdomains are allowed. Test with a command such as:
+    # curl -i -H $'Host: www.google.com' 'localhost:3000/auth0/login'
+    config.hosts << '.idseq.net'
   end
 end
 

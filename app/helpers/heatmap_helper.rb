@@ -234,7 +234,7 @@ module HeatmapHelper
         threshold_filters: threshold_filters,
         count_type: sort[:count_type]
       )
-    ).to_hash
+    ).to_a
 
     # organizing the results by pipeline_run_id
     result_hash = {}
@@ -411,7 +411,7 @@ module HeatmapHelper
         AND taxon_counts.count_type IN ('NT', 'NR')
         AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
         #{parent_ids_clause}
-        OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
+        OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_a
   end
 
   def self.background_metrics_query(background_id, pr_id_to_sample_id, taxon_ids)
@@ -437,7 +437,7 @@ module HeatmapHelper
         pipeline_run_id IN (#{pr_id_to_sample_id.keys.join(',')})
         AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
         AND taxon_counts.count_type IN ('NT', 'NR')
-        AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_hash
+        AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')}))").to_a
   end
 
   def self.compute_aggregate_scores_v2!(rows)

@@ -253,7 +253,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
         {
           "coverage_viz" => {},
           # Creates a hash of where the ALL_METRICS are the keys and 1 are the values
-          "quality_metrics" => Hash[ConsensusGenomeMetricsService::ALL_METRICS.keys.map { |key| [key, 1] }],
+          "quality_metrics" => ConsensusGenomeMetricsService::ALL_METRICS.keys.index_with { |_key| 1 },
           "taxon_info" => {},
         }
       end
@@ -322,7 +322,7 @@ RSpec.describe BulkDownloadsHelper, type: :helper do
       {
         "coverage_viz" => {},
         # Creates a hash of where the ALL_METRICS are the keys and 1 are the values
-        "quality_metrics" => Hash[ConsensusGenomeMetricsService::ALL_METRICS.keys.map { |key| [key, 1] }],
+        "quality_metrics" => ConsensusGenomeMetricsService::ALL_METRICS.keys.index_with { |_key| 1 },
         "taxon_info" => {},
       }
     end

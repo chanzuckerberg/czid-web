@@ -8,9 +8,16 @@ RSpec.describe MetadataController, type: :controller do
   context "Joe" do
     before do
       sign_in @joe
+      hg = create(:host_genome, name: "Human")
       mf = create(:metadata_field, name: "human_mf", display_name: "MF Human")
+
+      loc = create(:metadata_field, name: "collection_location_v2", display_name: "Collection Location", is_core: 1, is_default: 1, is_required: 1, default_for_new_host_genome: 1)
+      water = create(:metadata_field, name: "water_control", display_name: "Water Control", is_core: 1, is_default: 1, is_required: 1, default_for_new_host_genome: 1)
+
       human = HostGenome.find_by(name: "Human")
-      human.metadata_fields << mf unless human.metadata_fields.include?(mf)
+      [mf, loc, water].each do |field|
+        hg.metadata_fields << field unless human.metadata_fields.include?(field)
+      end
     end
 
     describe "GET metadata_template_csv" do
@@ -94,7 +101,7 @@ RSpec.describe MetadataController, type: :controller do
         expect(response).to have_http_status :success
 
         json = JSON.parse(response.body)
-        expect(json.first["name"]).to eq(mf.name)
+        expect(json.map { |x| x["name"] }).to include(mf.name)
       end
 
       it "returns not found if the host genome is not found" do

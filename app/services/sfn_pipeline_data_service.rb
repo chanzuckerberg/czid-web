@@ -258,7 +258,7 @@ class SfnPipelineDataService
   end
 
   def collect_step_output_files(stage_info)
-    output_file_map = Hash[stage_info["task_names"].collect { |task_name| [task_name, []] }]
+    output_file_map = Hash[stage_info["task_names"].collect { |task_name| [task_name, []] }] # rubocop:disable Rails/IndexWith
     stage_info["outputs"].each do |output_var, wdl_reference|
       output_step, var_name = wdl_reference.split(".")
       output_info = {

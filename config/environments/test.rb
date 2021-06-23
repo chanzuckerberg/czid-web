@@ -23,8 +23,9 @@ Rails.application.configure do
 
   # Configure caching to be the same as development
   config.action_controller.perform_caching = true
-  config.cache_store = :redis_store, 'redis://redis:6379/0/cache',
+  config.cache_store = :redis_cache_store,
                        {
+                         url: 'redis://redis:6379/0/cache',
                          # Needed for redis to evict keys in volatile-lru mode
                          expires_in: 30.days,
                        }
@@ -52,8 +53,8 @@ Rails.application.configure do
     "http://localhost:3000",
     "http://127.0.0.1:3000",
   ]
-
-  config.middleware.use ResqueMiddleware
+  # Any host header is OK in testing
+  config.hosts = nil
 
   ENV["AUTH0_DOMAIN"] = "czi-idseq-fake.idseq.net"
   ENV["AUTH0_CLIENT_ID"] = "FakeAuth0ClientId"

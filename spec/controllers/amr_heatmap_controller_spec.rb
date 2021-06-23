@@ -137,7 +137,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
         amr_counts_two = sample_two.first_pipeline_run.amr_counts[0]
 
         get :amr_counts, params: { sampleIds: [sample_one["id"], sample_two["id"]] }
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
         expect(response).to have_http_status(:ok)
 
         # Compare controller output to our test sample.
@@ -208,7 +208,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
         amr_counts_one = sample_one.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
 
         get :amr_counts, params: { sampleIds: [sample_one["id"], 99_999] } # Sample ID 99999 should not exist
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
         expect(response).to have_http_status(:ok)
 
         # Compare controller output to our test sample.
@@ -275,7 +275,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
         amr_counts_joe = sample_joe.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
 
         get :amr_counts, params: { sampleIds: [sample_joe["id"], sample_admin["id"]] } # Joe shouldn't be able to access sample_admin
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
         expect(response).to have_http_status(:ok)
 
         # Compare controller output to our test sample.
@@ -319,7 +319,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                             }])
 
         get :amr_counts, params: { sampleIds: [sample_one["id"]] }
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to include("application/json")
         expect(response).to have_http_status(:ok)
 
         # Compare controller output to our test sample.
@@ -365,7 +365,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
 
         it "should return relevant information from the Ontology JSON stored on s3" do
           get :fetch_ontology, params: { geneName: "OqxB" }
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           expect(json_response).to include_json(
@@ -399,7 +399,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
 
         it "should return an ontology object with an error message if no match is found" do
           get :fetch_ontology, params: { geneName: "ImNotInCard" }
-          expect(response.content_type).to eq("application/json")
+          expect(response.content_type).to include("application/json")
           expect(response).to have_http_status(:ok)
 
           json_response = JSON.parse(response.body)

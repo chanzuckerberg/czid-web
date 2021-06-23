@@ -1,6 +1,6 @@
 class ResqueMiddleware
   # Separate controller instance to access RequestForgeryProtection methods
-  BASE_CONTROLLER = ActionController::Base.new
+  BASE_CONTROLLER ||= ActionController::Base.new
 
   def initialize(app)
     @app = app

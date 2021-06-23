@@ -92,7 +92,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       let(:sfn_arn) { FAKE_SFN_ARN }
       let(:sfn_execution_arn) { CommonStubConstants::FAKE_SFN_EXECUTION_ARN }
       let(:dag_json_name) { "" }
-      let(:PIPELINE_RUN_STAGE_NAMES) { pipeline_run.pipeline_run_stages.pluck(:name).map { |n| [n, {}] }.to_h }
+      let(:PIPELINE_RUN_STAGE_NAMES) { pipeline_run.pipeline_run_stages.pluck(:name).index_with { |_n| {} }.to_h }
 
       before do
         travel_to DateTime.current

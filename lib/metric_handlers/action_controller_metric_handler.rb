@@ -16,7 +16,8 @@ module MetricHandlers
           method: @event.payload[:method],
           params: @event.payload[:params],
           path: @event.payload[:path],
-          request: @event.payload[:request],
+          # Without .to_s this causes SystemStackError when request is present:
+          request: @event.payload[:request].to_s,
           status: @event.payload[:status],
           location: @event.payload[:location],
           db_runtime: @event.payload[:db_runtime],

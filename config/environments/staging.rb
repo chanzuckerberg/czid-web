@@ -13,8 +13,9 @@ Rails.application.configure do
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
-  config.cache_store = :redis_store, ENV['REDISCLOUD_URL'] + '/0/cache',
+  config.cache_store = :redis_cache_store,
                        {
+                         url: ENV['REDISCLOUD_URL'] + '/0/cache',
                          # Needed for redis to evict keys in volatile-lru mode
                          expires_in: 30.days,
                        }
@@ -109,8 +110,6 @@ Rails.application.configure do
 
   # Set the logging destination(s)
   config.log_to = %w[stdout]
-
-  config.middleware.use ResqueMiddleware
 end
 
 # Deployed logging configuration

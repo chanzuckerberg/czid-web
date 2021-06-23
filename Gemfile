@@ -19,11 +19,11 @@ gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'consul', '>= 0.13.1'
 gem 'health_check', '>= 2.7.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem 'jbuilder', '~> 2.5'
+gem 'jbuilder', '~> 2.11'
 # Logger
 gem 'logging-rails', require: 'logging/rails'
 gem 'lograge'
-gem 'lograge-sql'
+gem 'lograge-sql', '~> 1.3'
 gem 'multipart-post'
 gem 'silencer'
 # elasticsearch
@@ -35,9 +35,10 @@ gem 'parallel', '1.14.0'
 # Use Puma as the app server
 gem 'puma', '~> 5.3'
 # Use Redis adapter to run Action Cable in production
-# gem 'redis', '~> 3.0'
+gem 'redis', '~> 4.3'
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.2.6'
+gem 'rails', '~> 6.1'
 gem 'rails-controller-testing'
 gem 'rake'
 # Worker/Scheduler management
@@ -68,7 +69,7 @@ gem 'rack-mini-profiler'
 gem 'stackprof'
 
 # Helps batch ActiveRecord calls
-gem 'activerecord-import'
+gem 'activerecord-import', '~> 1.1'
 
 # Segment analytics for backend events
 gem 'analytics-ruby', '~> 2.0.0', require: 'segment/analytics'
@@ -79,11 +80,10 @@ gem 'shortener'
 # Explicit load to avoid an 'unable to load' warning
 gem 'http-2'
 
-gem 'deep_cloneable', '~> 2.4.0'
-# For using redis as a cache
-gem 'redis-rails', '~> 5'
+gem 'deep_cloneable', '~> 3.1'
+
 # For caching actions by request URL
-gem 'actionpack-action_caching'
+gem 'actionpack-action_caching', '~> 1.2'
 gem 'nokogiri'
 
 # For adding foreign key constraints
@@ -114,8 +114,7 @@ group :development, :test do
   gem 'capybara', '~> 2.17', '>= 2.17.0'
   gem 'factory_bot_rails'
   gem 'guard', '~> 2.15'
-  gem 'guard-rspec', '~> 4.7'
-  gem 'rspec-rails', '>= 3.7.2'
+  gem 'rspec-rails', '~> 5.0'
   gem 'rubocop', '>=0.92'
   gem 'rubocop-performance'
   gem 'rubocop-rails'
@@ -132,7 +131,6 @@ group :development do
 end
 
 group :test do
-  gem 'resque_spec'
   gem 'rspec-json_expectations'
   gem 'webmock', '~> 3.6'
 end

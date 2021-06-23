@@ -7,6 +7,8 @@ RSpec.describe Metadatum, type: :model do
   before do
     allow(Rails).to receive(:cache).and_return(memory_store)
     Rails.cache.clear
+
+    create(:host_genome, name: "Human")
   end
 
   context "#check_and_set_location_type" do

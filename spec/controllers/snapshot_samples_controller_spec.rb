@@ -5,6 +5,7 @@ RSpec.describe SnapshotSamplesController, type: :controller do
     create(:metadata_field, name: "collection_location", base_type: 0)
     create(:metadata_field, name: "collection_location_v2", base_type: 3)
     create(:metadata_field, name: "sample_type", base_type: 0)
+    create(:host_genome, name: "Human")
     nucleotide_type = create(:metadata_field, name: "nucleotide_type", base_type: 0)
 
     user = create(:user)
