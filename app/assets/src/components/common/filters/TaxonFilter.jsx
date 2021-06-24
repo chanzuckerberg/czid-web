@@ -23,7 +23,7 @@ class TaxonFilter extends React.Component {
   };
 
   render() {
-    const { onChange, selectedOptions } = this.props;
+    const { onChange, selectedOptions, disabled } = this.props;
 
     return (
       <AsyncMultipleDropdown
@@ -33,6 +33,7 @@ class TaxonFilter extends React.Component {
         selectedOptions={selectedOptions}
         onFilterChange={this.handleFilterChange}
         onChange={onChange}
+        disabled={disabled}
       />
     );
   }
@@ -42,6 +43,7 @@ TaxonFilter.propTypes = {
   domain: PropTypes.string,
   selectedOptions: PropTypes.array,
   onChange: PropTypes.func,
+  disabled: PropTypes.bool,
 };
 
 export default TaxonFilter;

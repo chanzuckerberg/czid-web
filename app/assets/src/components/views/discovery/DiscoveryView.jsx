@@ -1898,6 +1898,7 @@ class DiscoveryView extends React.Component {
       showFilters,
       showStats,
       userDataCounts,
+      workflow,
     } = this.state;
     const { domain, allowedFeatures, snapshotProjectName } = this.props;
 
@@ -1947,6 +1948,7 @@ class DiscoveryView extends React.Component {
                 domain={domain}
                 onFilterChange={this.handleFilterChange}
                 allowedFeatures={allowedFeatures}
+                workflow={workflow}
               />
             )}
           </div>

@@ -282,6 +282,7 @@ ReportFilters.propTypes = {
   view: PropTypes.oneOf(["tree", "table"]),
   enableMassNormalizedBackgrounds: PropTypes.bool,
   selectedInvalidBackground: PropTypes.bool,
+  shouldDisableFilters: PropTypes.bool,
   snapshotShareId: PropTypes.string,
 };
 

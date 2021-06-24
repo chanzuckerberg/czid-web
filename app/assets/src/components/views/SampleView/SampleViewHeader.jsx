@@ -286,6 +286,7 @@ SampleViewHeader.defaultProps = {
 SampleViewHeader.propTypes = {
   backgroundId: PropTypes.number,
   currentTab: PropTypes.string,
+  currentRun: PropTypes.object,
   deletable: PropTypes.bool,
   editable: PropTypes.bool.isRequired,
   getDownloadReportTableWithAppliedFiltersLink: PropTypes.func,

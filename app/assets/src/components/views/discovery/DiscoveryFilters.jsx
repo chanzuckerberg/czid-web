@@ -10,6 +10,7 @@ import {
   LocationFilter,
   TaxonFilter,
 } from "~/components/common/filters";
+import { WORKFLOWS } from "~/components/utils/workflows";
 import FilterTag from "~ui/controls/FilterTag";
 import { DISCOVERY_DOMAIN_SNAPSHOT } from "./discovery_api";
 
@@ -152,18 +153,20 @@ class DiscoveryFilters extends React.Component {
       time,
       tissue,
       visibility,
+      workflow,
     } = this.props;
 
     return (
       <div className={cx(cs.filtersContainer, className)}>
         {/* TODO(ihan): enable taxon and location filter for snapshot view */}
         {domain !== DISCOVERY_DOMAIN_SNAPSHOT && (
-          <React.Fragment>
+          <>
             <div className={cs.filterContainer}>
               <TaxonFilter
                 domain={domain}
                 onChange={this.handleChange.bind(this, "taxonSelected")}
                 selectedOptions={taxonSelected}
+                disabled={workflow !== WORKFLOWS.SHORT_READ_MNGS.value}
               />
               {this.renderTags("taxon")}
             </div>
@@ -178,7 +181,7 @@ class DiscoveryFilters extends React.Component {
               />
               {this.renderTags("locationV2")}
             </div>
-          </React.Fragment>
+          </>
         )}
         <div className={cs.filterContainer}>
           <BaseSingleFilter
@@ -238,6 +241,7 @@ DiscoveryFilters.propTypes = {
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   className: PropTypes.string,
   domain: PropTypes.string,
+  workflow: PropTypes.string,
 
   // Filter options and counters
   host: PropTypes.array,

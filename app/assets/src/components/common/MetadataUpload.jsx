@@ -522,6 +522,8 @@ MetadataUpload.propTypes = {
   samplesAreNew: PropTypes.bool,
   withinModal: PropTypes.bool,
   visible: PropTypes.bool,
+  workflow: PropTypes.string,
+  workflows: PropTypes.instanceOf(Set),
 };
 
 export default MetadataUpload;

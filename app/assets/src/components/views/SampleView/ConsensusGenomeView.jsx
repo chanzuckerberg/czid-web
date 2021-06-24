@@ -537,9 +537,11 @@ const ConsensusGenomeView = ({
 };
 
 ConsensusGenomeView.propTypes = {
+  link: PropTypes.string,
   loadingResults: PropTypes.bool,
   onWorkflowRunSelect: PropTypes.func,
   sample: PropTypes.object.isRequired,
+  test: PropTypes.string,
   workflowRun: PropTypes.object,
   workflowRunResults: PropTypes.object,
 };
