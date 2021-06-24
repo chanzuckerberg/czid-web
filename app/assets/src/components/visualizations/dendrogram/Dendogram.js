@@ -314,7 +314,7 @@ export default class Dendogram {
       let color = this.colors[i];
       this.legend
         .append("circle")
-        .attr("r", 5)
+        .attr("r", 2)
         .attr("transform", `translate(${x}, ${y})`)
         .style("fill", color);
 
@@ -579,6 +579,13 @@ export default class Dendogram {
 
     this.viz.selectAll(".link.highlight").raise();
 
+    this.viz.selectAll(".link").style("stroke-width", 1);
+
+    // Offset each node so it is at the end of the line rather than overlapping it.
+    this.root.each(node => {
+      node.y += node.children ? 1 : 2;
+    });
+
     let node = this.viz
       .selectAll(".node")
       .data(this.root.descendants(), nodeId);
@@ -652,7 +659,7 @@ export default class Dendogram {
     nodeEnter
       .append("circle")
       .attr("r", function(node) {
-        return node.children ? 3 : 5;
+        return node.children ? 1 : 2;
       })
       .on("click", node => {
         this.clickHandler(
