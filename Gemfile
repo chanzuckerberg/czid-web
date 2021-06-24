@@ -14,16 +14,12 @@ gem 'aws-sdk-states'
 gem 'brakeman'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
-# Use CoffeeScript for .coffee assets and views
-gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'consul', '>= 0.13.1'
 gem 'health_check', '>= 2.7.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.11'
 # Logger
-gem 'logging-rails', require: 'logging/rails'
 gem 'lograge'
-gem 'lograge-sql', '~> 1.3'
 gem 'multipart-post'
 gem 'silencer'
 # elasticsearch
@@ -123,7 +119,6 @@ group :development, :test do
 end
 
 group :development do
-  gem 'active_record_query_trace'
   gem 'amazing_print'
   gem 'listen', '>= 3.0.5', '< 3.2'
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.

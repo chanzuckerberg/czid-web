@@ -63,7 +63,7 @@ RSpec.describe HandleSfnNotifications, type: :job do
         _ = workflow_run  # Force it to be loaded
         expect(WorkflowRun).to receive(:find_by).with(sfn_execution_arn: known_execution_arn).and_call_original
 
-        expect(subject.perform(nil, valid_message)).to eq(true)
+        expect(subject.perform(nil, valid_message)).to be_truthy
 
         expect(workflow_run.reload.status).to eq(new_status)
       end

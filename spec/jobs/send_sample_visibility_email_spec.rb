@@ -25,7 +25,7 @@ RSpec.describe SendSampleVisibilityEmail, type: :job do
 
       expect(subject).to receive(:prepare_individual_emails).with(beta_user, beta_user.samples)
       expect(subject).to receive(:prepare_individual_emails).with(regular_user, regular_user.samples)
-      expect(subject.perform).to eq(true)
+      expect(subject.perform).to be_truthy
     end
 
     it "exits properly when there are no matching samples" do
