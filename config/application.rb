@@ -39,6 +39,8 @@ module Idseq
     # idseq.net or subdomains are allowed. Test with a command such as:
     # curl -i -H $'Host: www.google.com' 'localhost:3000/auth0/login'
     config.hosts << '.idseq.net'
+    # Exclude health_check so that load balancer checks are allowed:
+    config.host_authorization = { exclude: ->(request) { request.path =~ /health_check/ } }
   end
 end
 
