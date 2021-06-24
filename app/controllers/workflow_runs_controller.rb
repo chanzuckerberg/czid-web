@@ -202,7 +202,8 @@ class WorkflowRunsController < ApplicationController
           formatted_wr[:sample] = {}.tap do |formatted_sample|
             formatted_sample[:info] = wr_sample.slice(sample_attributes)
             formatted_sample[:info][:public] = samples_visibility_by_sample_id[wr_sample.id]
-            formatted_sample[:info].merge!(get_result_status_description_for_errored_sample(wr_sample)) if wr_sample.upload_error.present?
+            result_status_description = get_result_status_description_for_errored_sample(wr_sample) if wr_sample.upload_error.present?
+            formatted_sample[:info].merge!(result_status_description) if result_status_description.present?
             formatted_sample[:metadata] = metadata_by_sample_id[wr_sample.id]
             formatted_sample[:project_name] = wr_sample.project.name
             formatted_sample[:uploader] = sample_uploader(wr_sample)
