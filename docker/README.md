@@ -44,3 +44,14 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
 - Example to run Rails natively without Docker:
   - `alias local-idseq='REDISCLOUD_URL="redis://127.0.0.1:6379" DB_HOST=127.0.0.1 chamber exec idseq-dev-web -- $@'`
   - `local-idseq rails server`
+
+### Read-only file system @ rb_sysopen - /app/Gemfile.lock
+
+- `'rescue in filesystem_access': There was an error accessing ``/app/Gemfile.lock``. (Bundler::GenericSystemCallError) The underlying system error is Errno::EROFS: Read-only file system @ rb_sysopen - /app/Gemfile.lock`
+  - Try running `bundle install` from outside Docker. The internal Docker filesystem is read-only but Rails is trying to update an outdated Gemfile.lock. The new Gemfile.lock will be synced into the container.
+
+### Redis not able to persist on disk
+- `/usr/local/bundle/gems/redis-4.3.1/lib/redis/client.rb:147:in 'call': MISCONF Redis is configured to save RDB snapshots, but it is currently not able to persist on disk. Commands that may modify the data set are disabled, because this instance is configured to report errors during writes if RDB snapshotting fails (stop-writes-on-bgsave-error option). Please check the Redis logs for details about the RDB error. (Redis::CommandError)`
+  - Most likely you are out of Docker disk space.
+  - Try `docker system prune` or `docker system prune --all`
+  - Alternatively you can expand the hard disk allocation given to Docker. On Docker Desktop: Preferences -> Resources -> Advanced -> Disk image size. It will show the used space.

@@ -40,7 +40,7 @@ task 'update_lineage_db', [:run_mode] => :environment do |_t, args|
   ### Note(2020-06-10): This will change to a new bucket name in idseq-prod account.
   ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
 
-  Logging.logger.root.level = :info
+  Rails.logger.level = :info
 
   testrun = args.run_mode == "testrun"
   noverify = args.run_mode == "noverify"

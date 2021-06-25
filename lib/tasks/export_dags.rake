@@ -1,5 +1,5 @@
 task :export_dags, [:sample_id, :print, :step] => :environment do |_, args|
-  Logging.logger.root.level = :warn
+  Rails.logger.level = :warn
 
   class DAGExporter < PipelineRunStage
     attr_accessor :args

@@ -6,7 +6,7 @@
   - `aws-oidc exec -- docker-compose run web "rspec"`
 - To run a specific file:
   - `aws-oidc exec -- docker-compose run web "rspec path/to/file/file.rb"`
-  - Ex: `aws-oidc exec -- docker-compose run web "rspec spec/controllers/auth0_controller_spec.rb"`
+  - Ex: `aws-oidc exec -- docker-compose run web "rspec spec/controllers/workflow_runs_controller_spec.rb"`
 - To reset the test database:
   - `aws-oidc exec -- docker-compose run -e RAILS_ENV=test web rake db:drop db:create db:migrate`
   - See also: `bin/setup-shared`
