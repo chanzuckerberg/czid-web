@@ -17,50 +17,58 @@ Rails.application.routes.draw do
   get 'users/password/new' => 'users#password_new'
 
   resources :samples do
-    put :reupload_source, on: :member
-    put :kickoff_pipeline, on: :member
-    put :retry_pipeline, on: :member
-    get :all, on: :collection
-    get :pipeline_runs, on: :member
-    get :report_v2, on: :member
-    get :amr, on: :member
-    get :report_csv, on: :member
-    get :bulk_import, on: :collection
-    get :upload, on: :collection
-    get :nonhost_fasta, on: :member
-    get :unidentified_fasta, on: :member
-    get :contigs_fasta, on: :member
-    get :contigs_fasta_by_byteranges, on: :member
-    get :contigs_sequences_by_byteranges, on: :member
-    get :contigs_summary, on: :member
-    get :results_folder, on: :member
-    get :raw_results_folder, on: :member
-    post :bulk_upload, on: :collection
-    post :bulk_upload_with_metadata, on: :collection
-    get :upload_credentials, on: :member
-    get :metadata, on: :member
-    get :metadata_fields, on: :collection
-    get :contig_taxid_list, on: :member
-    get :taxid_contigs, on: :member
-    get :summary_contig_counts, on: :member
-    get :samples_going_public, on: :collection
-    get :index_v2, on: :collection
-    get :details, on: :collection
-    post :enable_mass_normalized_backgrounds, on: :collection
-    get :dimensions, on: :collection
-    get :stats, on: :collection
-    post :save_metadata, on: :member
-    post :save_metadata_v2, on: :member
-    post :validate_sample_files, on: :collection
-    post :validate_sample_ids, on: :collection
-    get :coverage_viz_summary, on: :member
-    get :coverage_viz_data, on: :member
-    post :taxa_with_reads_suggestions, on: :collection
-    post :taxa_with_contigs_suggestions, on: :collection
-    post :uploaded_by_current_user, on: :collection
-    get :reads_stats, on: :collection
-    post :consensus_genome_clade_export, on: :collection
-    post :kickoff_workflow, on: :member
+    member do
+      get :pipeline_runs
+      get :report_v2
+      get :amr
+      get :report_csv
+      get :nonhost_fasta
+      get :unidentified_fasta
+      get :contigs_fasta
+      get :contigs_fasta_by_byteranges
+      get :contigs_sequences_by_byteranges
+      get :contigs_summary
+      get :results_folder
+      get :raw_results_folder
+      get :upload_credentials
+      get :metadata
+      get :contig_taxid_list
+      get :taxid_contigs
+      get :summary_contig_counts
+      get :coverage_viz_summary
+      get :coverage_viz_data
+
+      put :reupload_source
+      put :kickoff_pipeline
+      put :retry_pipeline
+
+      post :save_metadata
+      post :save_metadata_v2
+      post :kickoff_workflow
+    end
+
+    collection do
+      get :all
+      get :bulk_import
+      get :upload
+      get :metadata_fields
+      get :samples_going_public
+      get :index_v2
+      get :details
+      get :dimensions
+      get :reads_stats
+      get :stats
+
+      post :validate_sample_files
+      post :enable_mass_normalized_backgrounds
+      post :bulk_upload_with_metadata
+      post :bulk_upload
+      post :validate_sample_ids
+      post :taxa_with_reads_suggestions
+      post :taxa_with_contigs_suggestions
+      post :uploaded_by_current_user
+      post :consensus_genome_clade_export
+    end
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
@@ -85,24 +93,32 @@ Rails.application.routes.draw do
   get 'maintenance', to: 'home#maintenance'
 
   resources :projects do
-    get :make_project_reports_csv, on: :member
-    get :project_reports_csv_status, on: :member
-    get :send_project_reports_csv, on: :member
-    get :make_host_gene_counts, on: :member
-    get :host_gene_counts_status, on: :member
-    get :send_host_gene_counts, on: :member
-    get :all_users, on: :member
-    get :dimensions, on: :collection
-    put :add_favorite, on: :member
-    put :remove_favorite, on: :member
-    put :update_project_visibility, on: :member
-    put :add_user, on: :member
-    put :update, on: :member
-    post :validate_metadata_csv, on: :member
-    post :upload_metadata, on: :member
-    post :validate_sample_names, on: :member
-    get :metadata_fields, on: :collection
+    member do
+      get :make_project_reports_csv
+      get :project_reports_csv_status
+      get :send_project_reports_csv
+      get :make_host_gene_counts
+      get :host_gene_counts_status
+      get :send_host_gene_counts
+      get :all_users
+
+      put :add_favorite
+      put :remove_favorite
+      put :update_project_visibility
+      put :add_user
+      put :update
+
+      post :validate_metadata_csv
+      post :upload_metadata
+      post :validate_sample_names
+    end
+
+    collection do
+      get :metadata_fields
+      get :dimensions
+    end
   end
+
   get 'projects/:id/csv', to: 'projects#send_project_csv'
   get 'choose_project', to: 'projects#choose_project'
 
@@ -185,34 +201,50 @@ Rails.application.routes.draw do
   end
 
   resource :metadata do
-    get :dictionary, on: :collection
-    get :official_metadata_fields, on: :collection
-    post :metadata_template_csv, on: :collection
-    get :metadata_template_csv, on: :collection
-    get :instructions, on: :collection
-    get :metadata_for_host_genome, on: :collection
-    post :validate_csv_for_new_samples, on: :collection
+    collection do
+      get :dictionary
+      get :official_metadata_fields
+      get :metadata_template_csv
+      get :instructions
+      get :metadata_for_host_genome
+
+      post :validate_csv_for_new_samples
+      post :metadata_template_csv
+    end
   end
 
   resource :locations do
-    get :external_search, on: :collection
-    get :map_playground, on: :collection
-    get :sample_locations, on: :collection
+    collection do
+      get :external_search
+      get :map_playground
+      get :sample_locations
+    end
   end
 
   resources :workflow_runs, only: [:index, :show] do
-    get :results, on: :member
-    get :zip_link, on: :member
-    put :rerun, on: :member
-    post :validate_workflow_run_ids, on: :collection
-    post :created_by_current_user, on: :collection
+    member do
+      get :results
+      get :zip_link
+
+      put :rerun
+    end
+
+    collection do
+      post :validate_workflow_run_ids
+      post :created_by_current_user
+    end
   end
 
   resources :phylo_tree_ngs, only: [:create, :index, :new, :show] do
-    get :choose_taxon, on: :collection
-    get :download, on: :member
-    get :validate_name, on: :collection
-    put :rerun, on: :member
+    member do
+      get :download
+      put :rerun
+    end
+
+    collection do
+      get :choose_taxon
+      get :validate_name
+    end
   end
 
   authenticate :auth0_user, ->(u) { u.admin? } do
