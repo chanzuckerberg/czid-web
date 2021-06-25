@@ -120,17 +120,27 @@ RSpec.describe PhyloTreeNg, type: :model do
     end
 
     context "phylo tree is active" do
+      before do
+        allow(SfnPhyloTreeNgDispatchService).to receive(:call) {
+          {
+            sfn_input_json: {},
+            sfn_execution_arn: "fake_sfn_execution_arn",
+          }
+        }
+      end
       it "updates current phylo tree to be deprecated" do
         expect(phylo_tree_ng.deprecated?).to be(false)
         subject
         expect(phylo_tree_ng.deprecated?).to be(true)
       end
 
-      # TODO(julie): Uncomment and fill out the following tests when the dispatch service is ready.
+      # TODO(julie): Uncomment the following tests when the rerun method is ready.
       # it "creates and returns new phylo tree that references previous phylo tree" do
+      #   expect(subject.rerun_from).to eq(phylo_tree_ng.id)
       # end
 
       # it "creates and returns new phylo tree with the same inputs JSON" do
+      #   expect(subject.inputs_json).to eq(phylo_tree_ng.inputs_json)
       # end
     end
   end

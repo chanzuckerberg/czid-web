@@ -18,11 +18,13 @@ class AppConfig < ApplicationRecord
   # When this is "1", the announcement banner on the top of the site header will be enabled.
   # Other conditions may check a time constraint.
   SHOW_ANNOUNCEMENT_BANNER = 'show_announcement_banner'.freeze
-  # The ARN of the pipeline's Step Function
+  # The ARN of the mNGS pipeline's Step Function
+  SFN_MNGS_ARN = 'sfn_mngs_arn'.freeze
   SFN_ARN = 'sfn_arn'.freeze
   # The pipeline version to use
   SFN_PIPELINE_VERSION = 'sfn_pipeline_version'.freeze
-  # The ARN of the Consensus Genome V0 pipeline's Step Function
+  # The ARN of a single stage pipeline's Step Function
+  SFN_SINGLE_WDL_ARN = 'sfn_single_wdl_arn'.freeze
   SFN_CG_ARN = 'sfn_cg_arn'.freeze
   # When this is "1", the COVID-19 Public Site banner on the landing page will be shown.
   SHOW_LANDING_PUBLIC_SITE_BANNER = 'show_landing_public_site_banner'.freeze

@@ -10,7 +10,7 @@ class SfnCGPipelineDispatchService
 
   class SfnArnMissingError < StandardError
     def initialize
-      super("SFN_CG_ARN not set on App Config.")
+      super("SFN_SINGLE_WDL_ARN and SFN_CG_ARN not set on App Config.")
     end
   end
 
@@ -48,7 +48,7 @@ class SfnCGPipelineDispatchService
     @workflow_run = workflow_run
     @sample = workflow_run.sample
 
-    @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_CG_ARN)
+    @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_SINGLE_WDL_ARN) || AppConfigHelper.get_app_config(AppConfig::SFN_CG_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
     @wdl_version = AppConfigHelper.get_workflow_version(@workflow_run.workflow)

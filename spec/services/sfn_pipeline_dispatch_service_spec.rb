@@ -69,7 +69,7 @@ RSpec.describe SfnPipelineDispatchService, type: :service do
       allow(ENV).to receive(:[]).with('SAMPLES_BUCKET_NAME').and_return(FAKE_SAMPLES_BUCKET)
       allow(ENV).to receive(:[]).with('AWS_REGION').and_return(FAKE_REGION)
 
-      create(:app_config, key: AppConfig::SFN_ARN, value: FAKE_SFN_ARN)
+      create(:app_config, key: AppConfig::SFN_MNGS_ARN, value: FAKE_SFN_ARN)
     end
 
     context "when SFN has no tag for WDL version" do

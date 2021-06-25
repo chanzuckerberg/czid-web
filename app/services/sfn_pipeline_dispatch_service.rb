@@ -17,7 +17,7 @@ class SfnPipelineDispatchService
 
   class SfnArnMissingError < StandardError
     def initialize
-      super("SFN ARN not set on App Config")
+      super("SFN_MNGS_ARN and SFN_ARN not set on App Config")
     end
   end
 
@@ -31,7 +31,7 @@ class SfnPipelineDispatchService
     @pipeline_run = pipeline_run
     @sample = pipeline_run.sample
 
-    @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
+    @sfn_arn = AppConfigHelper.get_app_config(AppConfig::SFN_MNGS_ARN) || AppConfigHelper.get_app_config(AppConfig::SFN_ARN)
     raise SfnArnMissingError if @sfn_arn.blank?
 
     @wdl_version = AppConfigHelper.get_workflow_version(WORKFLOW_NAME)

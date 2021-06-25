@@ -36,7 +36,11 @@ class PhyloTreeNg < ApplicationRecord
   end
 
   def dispatch
-    # TODO(julie): Call SfnPhyloTreeNgDispatchService once implemented
+    SfnPhyloTreeNgDispatchService.call(self)
+  end
+
+  def version_tag
+    return "phylotree-ng-v#{wdl_version}"
   end
 
   def results

@@ -74,7 +74,7 @@ describe WorkflowRun, type: :model do
       @mock_aws_clients[client]
     }
 
-    AppConfigHelper.set_app_config(AppConfig::SFN_CG_ARN, fake_sfn_arn)
+    AppConfigHelper.set_app_config(AppConfig::SFN_SINGLE_WDL_ARN, fake_sfn_arn)
   end
 
   context "#in_progress" do

@@ -68,7 +68,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with('SAMPLES_BUCKET_NAME').and_return(fake_samples_bucket)
 
-      create(:app_config, key: AppConfig::SFN_CG_ARN, value: fake_sfn_arn)
+      create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: fake_sfn_arn)
 
       Aws.config[:stub_responses] = true
       @mock_aws_clients = {
