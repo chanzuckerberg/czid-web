@@ -208,6 +208,13 @@ Rails.application.routes.draw do
     post :created_by_current_user, on: :collection
   end
 
+  resources :phylo_tree_ngs, only: [:create, :index, :new, :show] do
+    get :choose_taxon, on: :collection
+    get :download, on: :member
+    get :validate_name, on: :collection
+    put :rerun, on: :member
+  end
+
   authenticate :auth0_user, ->(u) { u.admin? } do
     mount RESQUE_SERVER, at: "/resque"
   end

@@ -1,4 +1,6 @@
 class PhyloTreeNgsController < ApplicationController
+  include ParameterSanitization
+
   # TODO: CH-142663
   def index
   end
@@ -19,8 +21,15 @@ class PhyloTreeNgsController < ApplicationController
   def choose_taxon
   end
 
-  # TODO: CH-142676
   def validate_name
+    # This just checks if a sanitized name would have an ActiveRecord name error:
+    name = sanitize_title_name(collection_params[:name])
+    pt = PhyloTreeNg.new(name: name)
+    pt.valid?
+    render json: {
+      valid: !pt.errors.key?(:name),
+      sanitizedName: name,
+    }
   end
 
   # TODO: CH-142676
@@ -29,5 +38,11 @@ class PhyloTreeNgsController < ApplicationController
 
   # TODO: CH-142676
   def download
+  end
+
+  private
+
+  def collection_params
+    params.permit(:name)
   end
 end
