@@ -283,13 +283,37 @@ class DiscoveryView extends React.Component {
     return {};
   };
 
+  overwriteCGDefaultActiveColumns({ stateObject }) {
+    const defaultCGColumns =
+      DEFAULTS_BY_WORKFLOW[WORKFLOWS.CONSENSUS_GENOME.value];
+
+    stateObject.sampleActiveColumnsByWorkflow[
+      WORKFLOWS.CONSENSUS_GENOME.value
+    ] = defaultCGColumns;
+    stateObject.sampleActiveColumnsByWorkflow[
+      WORKFLOWS.CONSENSUS_GENOME_FLAT_LIST.value
+    ] = defaultCGColumns;
+    stateObject["updatedAt"] = new Date();
+
+    return stateObject;
+  }
+
   updateBrowsingHistory = (action = "push") => {
     const { domain, snapshotShareId, updateDiscoveryProjectId } = this.props;
+    const { updatedAt: updatedAtFromLocalStorage } = this.loadState(
+      localStorage,
+      "DiscoveryViewOptions"
+    );
+    const { updatedAt: updatedAtFromSessionStorage } = this.loadState(
+      sessionStorage,
+      "DiscoveryViewOptions"
+    );
 
     const localFields = [
       "sampleActiveColumnsByWorkflow",
       "showFilters",
       "showStats",
+      "updatedAt",
     ];
 
     const sessionFields = concat(localFields, [
@@ -307,8 +331,26 @@ class DiscoveryView extends React.Component {
     ]).filter(key => key !== "sampleActiveColumnsByWorkflow");
     const stateFields = concat(urlFields, ["project"]);
 
-    const localState = pick(localFields, this.state);
-    const sessionState = pick(sessionFields, this.state);
+    let localState = pick(localFields, this.state);
+    localState["updatedAt"] = updatedAtFromLocalStorage;
+
+    let sessionState = pick(sessionFields, this.state);
+    sessionState["updatedAt"] = updatedAtFromSessionStorage;
+
+    // TODO(omar): This is a temporary fix to ensure that upon launch of [v1] General Viral CG,
+    // users will have the reference accession column appear by default next to the sample name.
+    // This should be removed after some period of time where we know that all users have the
+    // correct default "consensus-genome" columns.
+    if (!updatedAtFromLocalStorage) {
+      localState = this.overwriteCGDefaultActiveColumns({
+        stateObject: localState,
+      });
+    } else if (!updatedAtFromSessionStorage) {
+      sessionState = this.overwriteCGDefaultActiveColumns({
+        stateObject: sessionState,
+      });
+    }
+
     const urlState = pick(urlFields, this.state);
     const historyState = pick(stateFields, this.state);
 

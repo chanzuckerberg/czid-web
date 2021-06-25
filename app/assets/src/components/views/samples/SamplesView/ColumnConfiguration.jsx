@@ -496,13 +496,13 @@ export const DEFAULTS_BY_WORKFLOW = {
   ],
   [WORKFLOWS.CONSENSUS_GENOME.value]: [
     "sample",
+    "referenceGenome",
     "createdAt",
     "host",
     "collectionLocationV2",
     "totalReadsCG",
     "percentGenomeCalled",
     "vadrPassFail",
-    "wetlabProtocol",
   ],
   [WORKFLOWS.CONSENSUS_GENOME_FLAT_LIST.value]: [
     "sample",
