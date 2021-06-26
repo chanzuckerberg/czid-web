@@ -37,6 +37,7 @@ class User < ApplicationRecord
   has_many :favorites, through: :favorite_projects, source: :project, dependent: :destroy
   has_many :visualizations, dependent: :destroy
   has_many :phylo_trees, dependent: :destroy
+  has_many :phylo_tree_ngs, dependent: :destroy
   has_many :backgrounds, dependent: :destroy
   has_many :bulk_downloads, dependent: :destroy
   has_many :user_settings, dependent: :destroy

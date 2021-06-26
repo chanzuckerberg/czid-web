@@ -128,20 +128,25 @@ RSpec.describe PhyloTreeNg, type: :model do
           }
         }
       end
+
       it "updates current phylo tree to be deprecated" do
         expect(phylo_tree_ng.deprecated?).to be(false)
         subject
         expect(phylo_tree_ng.deprecated?).to be(true)
       end
 
-      # TODO(julie): Uncomment the following tests when the rerun method is ready.
-      # it "creates and returns new phylo tree that references previous phylo tree" do
-      #   expect(subject.rerun_from).to eq(phylo_tree_ng.id)
-      # end
+      it "creates and returns new phylo tree with appropriate fields" do
+        new_tree = subject
 
-      # it "creates and returns new phylo tree with the same inputs JSON" do
-      #   expect(subject.inputs_json).to eq(phylo_tree_ng.inputs_json)
-      # end
+        expect(new_tree).to have_attributes(
+          name: phylo_tree_ng.name,
+          rerun_from: phylo_tree_ng.id,
+          inputs_json: phylo_tree_ng.inputs_json,
+          project_id: phylo_tree_ng.project_id,
+          user_id: phylo_tree_ng.user_id,
+          status: WorkflowRun::STATUS[:created]
+        )
+      end
     end
   end
 
@@ -156,6 +161,31 @@ RSpec.describe PhyloTreeNg, type: :model do
         data = { "treeNgId" => phylo_tree_ng.id }
         expect(Visualization.last.data).to eq(data)
       end
+    end
+  end
+
+  describe ".editable" do
+    let(:user) { create(:user) }
+    let(:project) { create(:project, users: [user]) }
+
+    let(:sample) { create(:sample, project: project) }
+    let(:pipeline_run) { create(:pipeline_run, sample: sample) }
+
+    let(:other_project) { create(:project) }
+    let(:other_sample) { create(:sample, project: other_project) }
+    let(:other_pipeline_run) { create(:pipeline_run, sample: other_sample) }
+
+    let(:tree1) { create(:phylo_tree_ng, user: user, project: project, pipeline_runs: [pipeline_run]) }
+    let(:tree2) { create(:phylo_tree_ng, user: user, project: project) }
+    let(:tree3) { create(:phylo_tree_ng, pipeline_runs: [other_pipeline_run]) }
+    let(:tree4) { create(:phylo_tree_ng) }
+
+    subject { PhyloTreeNg.editable(user) }
+
+    it "returns only trees where the user can edit the project and see all pipeline runs" do
+      _ = [tree1, tree2, tree3, tree4]
+
+      expect(subject.pluck(:id)).to eq([tree1.id])
     end
   end
 end

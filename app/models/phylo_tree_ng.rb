@@ -61,6 +61,16 @@ class PhyloTreeNg < ApplicationRecord
     end
   end
 
+  def self.editable(user)
+    if user.admin?
+      all
+    else
+      # user can edit tree IFF user can see tree and user can edit project
+      editable_project_ids = Project.editable(user).pluck(:id)
+      viewable(user).where(project_id: editable_project_ids)
+    end
+  end
+
   # Duplicated from WorkflowRun
   def update_status(remote_status = nil)
     remote_status ||= sfn_execution.description[:status]
@@ -110,10 +120,16 @@ class PhyloTreeNg < ApplicationRecord
 
     # Deprecate the phylo tree and do not show it to the user.
     update!(deprecated: true)
-    # TODO: When PhyloTreeNgController.create is ready, use it to create a new phylo tree with the same name and inputs.
-    # phylo_tree = PhyloTreeNg.create(rerun_from: id, inputs_json: inputs_json)
-    # phylo_tree.dispatch
-    # phylo_tree
+
+    phylo_tree = PhyloTreeNg.create(
+      inputs_json: inputs_json,
+      name: name,
+      project_id: project_id,
+      rerun_from: id,
+      user_id: user_id
+    )
+    phylo_tree.dispatch
+    phylo_tree
   end
 
   private

@@ -54,4 +54,49 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       end
     end
   end
+
+  describe "PUT rerun" do
+    let(:phylo_tree) { create(:phylo_tree_ng) }
+
+    context "from regular user" do
+      before do
+        joe = create(:joe)
+        sign_in joe
+      end
+
+      it "redirects the user" do
+        put :rerun, params: { id: phylo_tree.id }
+
+        expect(response).to have_http_status(:redirect)
+      end
+    end
+
+    context "from admin user" do
+      before do
+        admin = create(:admin)
+        sign_in admin
+      end
+
+      it "calls rerun on the phylo tree" do
+        create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: "fake-arn")
+        create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: "phylotree-ng"), value: "0.0.1")
+
+        put :rerun, params: { id: phylo_tree.id }
+
+        expect(response).to have_http_status(:success)
+      end
+
+      it "returns an error if the phylo tree is not found" do
+        put :rerun, params: { id: 0 }
+
+        expect(response).to have_http_status(:internal_server_error)
+      end
+
+      it "returns an error if the rerun dispatch fails" do
+        put :rerun, params: { id: phylo_tree.id }
+
+        expect(response).to have_http_status(:internal_server_error)
+      end
+    end
+  end
 end

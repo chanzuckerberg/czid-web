@@ -98,4 +98,12 @@ class Power
       projects
     end
   end
+
+  power :viewable_phylo_tree_ngs do
+    PhyloTreeNg.viewable(@user)
+  end
+
+  power :updatable_phylo_tree_ngs do
+    PhyloTreeNg.editable(@user)
+  end
 end
