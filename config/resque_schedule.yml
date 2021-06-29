@@ -7,3 +7,9 @@ SendSampleVisibilityEmail:
   class: SendSampleVisibilityEmail
   queue: send_sample_visiblity_email
   description: "This job sends upcoming sample visibility reminders."
+
+HandleSfnNotificationsTimeout:
+  every: 1h
+  class: HandleSfnNotificationsTimeout
+  queue: handle_sfn_notifications_timeout
+  description: "This job checks for SFN executions that fail to update (get notified) after a maximum timeout period."
