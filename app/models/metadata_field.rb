@@ -132,13 +132,13 @@ class MetadataField < ApplicationRecord
 
   def metadata_field_validations
     if is_default == 1 && is_core == 0
-      errors[:name] << 'Default field must also be core field'
+      errors.add(:name, 'Default field must also be core field')
     end
     if is_required == 1 && is_default == 0
-      errors[:name] << 'Required field must also be default field'
+      errors.add(:name, 'Required field must also be default field')
     end
     if is_required == 1 && !default_for_host_genome?
-      errors[:name] << 'Required field must also be default_for_new_host_genome field'
+      errors.add(:name, 'Required field must also be default_for_new_host_genome field')
     end
   end
 

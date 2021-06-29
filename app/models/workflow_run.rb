@@ -96,7 +96,7 @@ class WorkflowRun < ApplicationRecord
 
   def dispatch
     if workflow == WORKFLOW[:consensus_genome]
-      SfnCGPipelineDispatchService.call(self)
+      SfnCgPipelineDispatchService.call(self)
     end
   end
 

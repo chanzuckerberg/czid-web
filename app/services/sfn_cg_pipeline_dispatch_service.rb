@@ -1,4 +1,4 @@
-class SfnCGPipelineDispatchService
+class SfnCgPipelineDispatchService
   # This service is responsible for dispatching a request to the
   # Consensus Genomes Step Functions-based pipeline.
   # It generates the Step Function's input JSON and starts SFN execution

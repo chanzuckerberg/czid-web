@@ -186,7 +186,7 @@ describe WorkflowRun, type: :model do
 
     context "workflow is active" do
       before do
-        allow(SfnCGPipelineDispatchService).to receive(:call) {
+        allow(SfnCgPipelineDispatchService).to receive(:call) {
                                                  {
                                                    sfn_input_json: {},
                                                    sfn_execution_arn: "fake_sfn_execution_arn",

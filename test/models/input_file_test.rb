@@ -13,7 +13,7 @@ class InputFileTest < ActiveSupport::TestCase
   test "validate name presence" do
     file = InputFile.new(source_type: 'local', source: 'file1.fastq.gz', upload_client: 'web')
     assert_not file.valid?
-    assert_equal [:sample, :name], file.errors.keys
+    assert_equal [:sample, :name], file.errors.attribute_names
   end
 
   test "validate name format" do
@@ -22,19 +22,19 @@ class InputFileTest < ActiveSupport::TestCase
       file = InputFile.new(source_type: 'local', source: 'file1.fastq.gz', upload_client: 'web')
       file.name = name
       assert_not file.valid?
-      assert_equal [:sample, :name], file.errors.keys
+      assert_equal [:sample, :name], file.errors.attribute_names
     end
   end
 
   test "validate source_type" do
     file = InputFile.new(source_type: 'invalid', name: 'valid.fastq.gz', source: 'file1.fastq.gz', upload_client: 'web')
     assert_not file.valid?
-    assert_equal [:sample, :source_type], file.errors.keys
+    assert_equal [:sample, :source_type], file.errors.attribute_names
   end
 
   test "validate upload_client" do
     file = InputFile.new(source_type: 'local', name: 'valid.fastq.gz', source: 'file1.fastq.gz', upload_client: 'invalid')
     assert_not file.valid?
-    assert_equal [:sample, :upload_client], file.errors.keys
+    assert_equal [:sample, :upload_client], file.errors.attribute_names
   end
 end

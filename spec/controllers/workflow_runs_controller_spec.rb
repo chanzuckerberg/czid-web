@@ -797,7 +797,7 @@ RSpec.describe WorkflowRunsController, type: :controller do
       end
 
       it "creates a new workflow run, dispatches and deprecates previous run" do
-        expect(SfnCGPipelineDispatchService).to receive(:call).with(instance_of(WorkflowRun))
+        expect(SfnCgPipelineDispatchService).to receive(:call).with(instance_of(WorkflowRun))
 
         put :rerun, params: { id: @workflow_run.id }
 

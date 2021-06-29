@@ -1,3 +1,7 @@
+module AddHostGenomeMigrationExample
+  # This is to satisfy the zeitwerk loader.
+end
+
 class AddCarpHost < ActiveRecord::Migration[5.1]
   # TEMPLATE for a migration adding a host genome.
   # The example chosen here is "Carp" host.

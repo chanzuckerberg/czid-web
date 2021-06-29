@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'json'
 
-RSpec.describe SfnCGPipelineDispatchService, type: :service do
+RSpec.describe SfnCgPipelineDispatchService, type: :service do
   let(:fake_samples_bucket) { "fake-samples-bucket" }
   let(:s3_samples_key_prefix) { "samples/%<project_id>s/%<sample_id>s" }
   let(:s3_sample_input_files_path) { "s3://#{fake_samples_bucket}/#{s3_samples_key_prefix}/fastqs/%<input_file_name>s" }
@@ -61,7 +61,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
 
   describe "#call" do
     subject do
-      SfnCGPipelineDispatchService.call(workflow_run)
+      SfnCgPipelineDispatchService.call(workflow_run)
     end
 
     before do
@@ -84,7 +84,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
     context "when workflow has no version" do
       it "returns an exception" do
         @mock_aws_clients[:states].stub_responses(:list_tags_for_resource, tags: [])
-        expect { subject }.to raise_error(SfnCGPipelineDispatchService::SfnVersionMissingError, /WDL version for '#{test_workflow_name}' not set/)
+        expect { subject }.to raise_error(SfnCgPipelineDispatchService::SfnVersionMissingError, /WDL version for '#{test_workflow_name}' not set/)
       end
     end
 
@@ -273,7 +273,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         end
 
         it "throws an error" do
-          expect { subject }.to raise_error(SfnCGPipelineDispatchService::WetlabProtocolMissingError)
+          expect { subject }.to raise_error(SfnCgPipelineDispatchService::WetlabProtocolMissingError)
         end
       end
 
@@ -292,7 +292,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
               Input: {
                 Run: {
                   ref_accession_id: "ABC123",
-                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{SfnCGPipelineDispatchService::NA_PRIMER_FILE}",
+                  primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{SfnCgPipelineDispatchService::NA_PRIMER_FILE}",
                 },
               },
             }
@@ -383,7 +383,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         end
 
         it "fails with TechnologyMissingError" do
-          expect { subject }.to raise_error(SfnCGPipelineDispatchService::TechnologyMissingError)
+          expect { subject }.to raise_error(SfnCgPipelineDispatchService::TechnologyMissingError)
         end
       end
 
@@ -397,7 +397,7 @@ RSpec.describe SfnCGPipelineDispatchService, type: :service do
         end
 
         it "fails with InvalidMedakaModelError" do
-          expect { subject }.to raise_error(SfnCGPipelineDispatchService::InvalidMedakaModelError)
+          expect { subject }.to raise_error(SfnCgPipelineDispatchService::InvalidMedakaModelError)
         end
       end
     end
