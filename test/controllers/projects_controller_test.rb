@@ -59,30 +59,6 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to projects_url
   end
 
-  test 'validate_sample_names basic' do
-    sign_in @user
-
-    post validate_sample_names_project_url(@metadata_validation_project), params: {
-      sample_names: ['Test One', 'Test Two', 'metadata_validation_sample_mosquito'],
-    }, as: :json
-
-    assert_response :success
-
-    assert_equal ['Test One', 'Test Two', 'metadata_validation_sample_mosquito_1'], @response.parsed_body
-  end
-
-  test 'validate_sample_names weird edge case' do
-    sign_in @user
-
-    post validate_sample_names_project_url(@metadata_validation_project), params: {
-      sample_names: ['Test One', 'Test One', 'Test One_1'],
-    }, as: :json
-
-    assert_response :success
-
-    assert_equal ['Test One', 'Test One_1', 'Test One_1_1'], @response.parsed_body
-  end
-
   test 'joe can query the metadata fields that belong to a public project' do
     sign_in @user_nonadmin
 

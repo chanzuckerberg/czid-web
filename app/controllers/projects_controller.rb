@@ -541,9 +541,18 @@ class ProjectsController < ApplicationController
   # Returns an array of sample names that has no name collisions with existing samples or with each other.
   def validate_sample_names
     sample_names = params[:sample_names]
+    ignore_unuploaded = params[:ignore_unuploaded]
     new_sample_names = []
 
-    existing_names = Sample.where(project: @project).pluck(:name)
+    existing_names = if ignore_unuploaded
+                       # Ignore checking for sample name conflicts if the samples haven't uploaded yet
+                       Sample
+                         .where(project: @project)
+                         .where.not(status: Sample::STATUS_CREATED)
+                         .pluck(:name)
+                     else
+                       Sample.where(project: @project).pluck(:name)
+                     end
 
     sample_names.each do |sample_name|
       i = 0

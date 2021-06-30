@@ -638,6 +638,51 @@ RSpec.describe ProjectsController, type: :controller do
           expect(created.creator_id).to eq(@user.id)
         end
       end
+
+      describe "POST validate_sample_names" do
+        before do
+          @project = create(:project, :with_sample, users: [@joe])
+          create(:sample, project: @project, name: "Test Three", status: Sample::STATUS_CHECKED)
+        end
+
+        it "adds a number to a sample name that conflicts with a pre-existing sample" do
+          post :validate_sample_names, params: {
+            format: "json",
+            id: @project.id,
+            sample_names: ["Test One", "Test Two", "Test Three"],
+          }
+          expect(response).to have_http_status(:success)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response).to eq(["Test One", "Test Two", "Test Three_1"])
+        end
+
+        it "adds a number to a sample name that conflicts with a sample name in the list" do
+          post :validate_sample_names, params: {
+            format: "json",
+            id: @project.id,
+            sample_names: ["Test One", "Test One", "Test One_1"],
+          }
+          expect(response).to have_http_status(:success)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response).to eq(["Test One", "Test One_1", "Test One_1_1"])
+        end
+
+        it 'validate_sample_names resumable' do
+          create(:sample, project: @project, name: "Created", status: Sample::STATUS_CREATED)
+          post :validate_sample_names, params: {
+            format: "json",
+            id: @project.id,
+            sample_names: ["Test One", "Test One", "Created", "Test Three"],
+            ignore_unuploaded: true,
+          }
+          expect(response).to have_http_status(:success)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response).to eq(["Test One", "Test One_1", "Created", "Test Three_1"])
+        end
+      end
     end
   end
 end
