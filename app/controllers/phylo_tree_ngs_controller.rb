@@ -1,8 +1,4 @@
 class PhyloTreeNgsController < ApplicationController
-  include ApplicationHelper
-  include SamplesHelper
-  include PipelineRunsHelper
-  include ElasticsearchHelper
   include ParameterSanitization
 
   ########################################
@@ -20,16 +16,15 @@ class PhyloTreeNgsController < ApplicationController
   # have read access to all those samples.
   ########################################
 
-  OTHER_ACTIONS = [:new, :create, :index, :choose_taxon, :validate_name].freeze
-
   before_action :admin_required, only: [:rerun]
+  before_action :assert_access, only: [:index]
 
   def index
     permitted_params = index_params
     tax_id = permitted_params[:taxId]&.to_i
     project_id = permitted_params[:projectId]
 
-    if HUMAN_TAX_IDS.include? tax_id
+    if ApplicationHelper::HUMAN_TAX_IDS.include? tax_id
       render json: { message: "Human taxon ids are not allowed" }, status: :forbidden
     else
       phylo_tree_ngs = fetch_phylo_tree_ngs(filters: permitted_params.slice(:taxId, :projectId))
