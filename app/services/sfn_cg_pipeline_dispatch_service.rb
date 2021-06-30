@@ -137,6 +137,8 @@ class SfnCgPipelineDispatchService
       "artic_v3_primers.bed"
     when protocols[:combined_msspe_artic]
       "combined_msspe_artic_primers.bed"
+    when protocols[:covidseq]
+      "covidseq_primers.bed"
     when protocols[:msspe]
       "msspe_primers.bed"
     when protocols[:snap]

@@ -30,15 +30,20 @@ export const CG_WETLAB_OPTIONS = [
     text: "AmpliSeq",
     value: "ampliseq",
   },
+  {
+    text: "COVIDseq",
+    value: "covidseq",
+  },
 ];
 
 export const CG_WETLAB_DISPLAY_NAMES = {
-  artic: "ARTIC v3",
-  artic_short_amplicons: "ARTIC v3 - Short Amplicons (275 bp)",
-  msspe: "MSSPE",
-  combined_msspe_artic: "Combined MSSPE & ARTIC v3",
-  snap: "SNAP",
   ampliseq: "AmpliSeq",
+  artic_short_amplicons: "ARTIC v3 - Short Amplicons (275 bp)",
+  artic: "ARTIC v3",
+  combined_msspe_artic: "Combined MSSPE & ARTIC v3",
+  covidseq: "COVIDseq",
+  msspe: "MSSPE",
+  snap: "SNAP",
 };
 
 export const CG_TECHNOLOGY_OPTIONS = {

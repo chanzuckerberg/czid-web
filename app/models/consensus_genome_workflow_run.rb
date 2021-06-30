@@ -28,6 +28,8 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     artic_short_amplicons: "artic_short_amplicons",
     # MSSPE + ARTIC concatenated
     combined_msspe_artic: "combined_msspe_artic",
+    # Retrieved from: https://github.com/artic-network/artic-ncov2019/blob/master/primer_schemes/nCoV-2019/V1/nCoV-2019.bed
+    covidseq: "covidseq",
     # See: https://www.nature.com/articles/s41564-019-0637-9
     msspe: "msspe",
     # See: https://swiftbiosci.com/swift-normalase-amplicon-panels
