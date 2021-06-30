@@ -146,8 +146,8 @@ class PhyloTreeCreation extends React.Component {
   }
 
   handlePhyloTreeResponse(response) {
-    const data = response.data;
-    let phyloTrees = data.phyloTrees;
+    const { phyloTrees, taxonName } = response.data;
+
     if (!phyloTrees || !Array.isArray(phyloTrees) || phyloTrees.length === 0) {
       this.setState({
         skipListTrees: true,
@@ -155,9 +155,9 @@ class PhyloTreeCreation extends React.Component {
       });
     } else {
       this.setState({
-        phyloTrees: this.parsePhyloTreeData(response.data.phyloTrees),
+        phyloTrees: this.parsePhyloTreeData(phyloTrees),
         phyloTreesLoaded: true,
-        taxonName: (data.taxon || {}).name,
+        taxonName,
       });
     }
   }

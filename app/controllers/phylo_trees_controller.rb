@@ -58,9 +58,7 @@ class PhyloTreesController < ApplicationController
     # Restrict to specified taxid
     if taxid
       @phylo_trees = @phylo_trees.where(taxid: taxid)
-      taxon_lineage = TaxonLineage.where(taxid: taxid).last
-      @taxon = { taxid: taxid,
-                 name: taxon_lineage.name, }
+      taxon_name = TaxonLineage.where(taxid: taxid).last.name
     end
 
     # Augment tree data with user name
@@ -75,7 +73,7 @@ class PhyloTreesController < ApplicationController
       format.json do
         render json: {
           project: @project,
-          taxon: @taxon,
+          taxonName: taxon_name,
           phyloTrees: @phylo_trees,
         }
       end
