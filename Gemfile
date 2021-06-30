@@ -1,4 +1,22 @@
-# Please add a comment for every Gem/group so we know its purpose.
+# Notes and guidelines:
+# - Add a comment for every Gem/group so we know its purpose.
+# - Gem ordering can matter, but otherwise try to sort gems into common
+#   categories and alphabetize within the categories.
+#
+# Constraints:
+# - By default, you should either not specify a version, or specify a
+#   pessimistic constraint (twiddle-wakka) at the MAJOR or MINOR level (in
+#   MAJOR.MINOR.PATCH).
+# - Example: gem 'library', '~> 2.2' means it is free to upgrade to the highest
+#   2.x but not 3.x (>= 2.2.0 and < 3.0).
+# - Example: gem 'library', '~> 2' similarly means >= 2.0 and < 3.0.
+# - We use MAJOR or MINOR because the PATCH level is too restrictive (we trust
+#   that PATCH releases should be safe), but we still want some friction before
+#   MAJOR upgrades happen since there may be breaking changes.
+# - We don't specify precise versions because we generally expect later gem
+#   versions to be compatible and have improvements.
+# - If you need to enforce >= PATCH version, put it secondary. Example: gem
+#   'library', '~> 2.2, '>= 2.2.5'
 
 source 'https://rubygems.org'
 
@@ -7,10 +25,14 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
+# -- AWS resources:
+# TODO: We want to replace 'aws-sdk' with only the service gems we use.
+gem 'aws-sdk'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
-# step functions sdk
+gem "aws-sdk-sqs"
 gem 'aws-sdk-states'
+
 gem 'brakeman'
 # Use ActiveModel has_secure_password
 gem 'bcrypt', '~> 3.1.7'
@@ -51,8 +73,6 @@ gem 'turbolinks', '~> 5'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 gem 'will_paginate'
-# Use AWS-SDK to make AWS requests with byte range
-gem 'aws-sdk'
 # Redirect
 gem 'activesupport'
 gem 'rack-host-redirect'
@@ -143,5 +163,4 @@ gem "jwt", "~> 2.2"
 gem "ssrfs-up", "0.0.17" # https://github.com/chanzuckerberg/SSRFs-Up
 
 # Background processing based on AWS SQS
-gem "aws-sdk-sqs"
 gem "shoryuken"
