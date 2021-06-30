@@ -10,7 +10,10 @@ if ENV['SENTRY_DSN_BACKEND']
   Raven.configure do |config|
     config.dsn = ENV['SENTRY_DSN_BACKEND']
 
-    # Sentry automatically sets the current environment to RAILS_ENV.
+    # This supersedes current_environment_from_env
+    # (https://github.com/getsentry/sentry-ruby/blob/master/sentry-raven/lib/raven/configuration.rb#L546)
+    # to add a check for Rails.env in case RAILS_ENV is not set.
+    config.current_environment = ENV['RAILS_ENV'] || Rails.env
     # We only want to send events to Sentry in staging and prod environments
     # To send events from development, add 'development' to config.environments
     config.environments = ['staging', 'prod']

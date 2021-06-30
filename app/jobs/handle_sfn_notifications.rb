@@ -5,13 +5,13 @@ class HandleSfnNotifications
 
   STATUS_CHANGE_DETAIL_TYPE ||= "Step Functions Execution Status Change".freeze
 
-  shoryuken_options queue: ENV["SFN_NOTIFICATIONS_QUEUE_ARN"], auto_delete: true, body_parser: :json
+  shoryuken_options queue: ENV["SFN_NOTIFICATIONS_QUEUE_ARN"], body_parser: :json
 
-  def perform(_, contents)
+  def perform(sqs_msg, body)
     return unless AppConfigHelper.get_app_config(AppConfig::ENABLE_SFN_NOTIFICATIONS) == "1"
 
-    if contents && contents["Message"]
-      parsed_message = JSON.parse(contents["Message"])
+    if body && body["Message"]
+      parsed_message = JSON.parse(body["Message"])
       detail_type = parsed_message["detail-type"]
 
       if detail_type == STATUS_CHANGE_DETAIL_TYPE
@@ -23,10 +23,15 @@ class HandleSfnNotifications
         # TODO(julie): add a case for phylo_tree_ng
         if wr
           wr.update_status(status)
+          sqs_msg.delete
           Rails.logger.info("Updated WorkflowRun #{wr.id} #{arn} to #{status}")
         end
       end
-      # TODO: Add more handling for different detail_type or no matching ARN
     end
+
+    # If the message isn't relevant to us, it automatically goes back to the
+    # queue since we don't call sqs_msg.delete.
+  rescue StandardError => e
+    LogUtil.log_error("Unexpected error in HandleSfnNotifications", exception: e, body: body)
   end
 end
