@@ -3,15 +3,15 @@
 
 gem install bundler --conservative
 
-docker-compose build
+aws-oidc exec -- docker-compose build
 
 npm install && ./node_modules/.bin/webpack --config webpack.config.dev.js
-docker-compose up -d db
+aws-oidc exec -- docker-compose up -d db
 sleep 10
 
-docker-compose run --rm web rake db:drop db:create db:migrate db:seed
-docker-compose run --rm -e RAILS_ENV=test web rake db:drop db:create db:migrate db:seed
-docker-compose up -d db redis web resque resque_result_monitor resque_pipeline_monitor elasticsearch
+aws-oidc exec -- docker-compose run --rm web rake db:drop db:create db:migrate db:seed
+aws-oidc exec -- docker-compose run --rm -e RAILS_ENV=test web rake db:drop db:create db:migrate db:seed
+aws-oidc exec -- docker-compose up -d db redis web resque resque_result_monitor resque_pipeline_monitor elasticsearch
 sleep 10
 
-docker-compose run web rake create_elasticsearch_indices
+aws-oidc exec -- docker-compose run web rake create_elasticsearch_indices
