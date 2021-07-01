@@ -17,12 +17,8 @@ class DagGenerator
     @dag_vars_dict = dag_vars_dict
   end
 
-  # See our dag templates in app/lib/dags.
   def render
-    rendered = ActionController::Base.new.render_to_string(
-      file: @template_file,
-      locals: { attr: @attribute_dict }
-    )
+    rendered = ActionController::Base.render(template: @template_file, locals: { attr: @attribute_dict })
     # Couldn't find a more direct way to prettify from template
     json_object = JSON.parse(rendered)
     JSON.pretty_generate(json_object)

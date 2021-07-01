@@ -1,4 +1,4 @@
-# NOTE: As of Oct 2020 this is still used for phylo tree creation.
+# NOTE: As of July 2021 this is still used for phylo tree creation.
 json.name "phylo_tree"
 json.output_dir_s3 attr[:phylo_tree_output_s3_path]
 

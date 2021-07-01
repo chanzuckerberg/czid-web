@@ -273,10 +273,10 @@ class PhyloTree < ApplicationRecord
     aegea_batch_submit_command(base_command)
   end
 
-  # See our dag templates in app/lib/dags.
+  # The template below is in app/views/phylo_trees:
   def prepare_dag(dag_name, attribute_dict)
     dag_s3 = "#{phylo_tree_output_s3_path}/#{dag_name}.json"
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.jbuilder",
+    dag = DagGenerator.new("phylo_trees/#{dag_name}.json.jbuilder",
                            project_id,
                            nil,
                            nil,
