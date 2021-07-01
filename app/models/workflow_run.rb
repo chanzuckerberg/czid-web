@@ -33,7 +33,7 @@ class WorkflowRun < ApplicationRecord
   #
   # What should go into inputs_json?
   # * Include any WDL inputs that affect the results, but don't include other
-  #   informational attributes like a sample ID.
+  #   informational attributes like a sample ID. Secret fields should also not belong here.
   #
   # What should go into cached_results?
   # * Include simple outputs that you need to load quickly in a batch of runs.

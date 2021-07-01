@@ -155,6 +155,9 @@ RSpec.describe WorkflowRunsController, type: :controller do
           expect(response_workflow_run).to include_json(cached_results: expected_workflow_run.cached_results,
                                                         created_at: expected_workflow_run.created_at.as_json,
                                                         inputs: {
+                                                          accession_name: expected_workflow_run.get_input("accession_name"),
+                                                          accession_id: expected_workflow_run.get_input("accession_id"),
+                                                          taxon_id: expected_workflow_run.get_input("taxon_id"),
                                                           technology: expected_workflow_run.get_input("technology"),
                                                           wetlab_protocol: expected_workflow_run.get_input("wetlab_protocol"),
                                                           medaka_model: expected_workflow_run.get_input("medaka_model"),
@@ -188,6 +191,9 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                         status: expected_workflow_run.status,
                                                         workflow: expected_workflow_run.workflow,
                                                         inputs: {
+                                                          accession_name: expected_workflow_run.get_input("accession_name"),
+                                                          accession_id: expected_workflow_run.get_input("accession_id"),
+                                                          taxon_id: expected_workflow_run.get_input("taxon_id"),
                                                           technology: expected_workflow_run.get_input("technology"),
                                                           wetlab_protocol: expected_workflow_run.get_input("wetlab_protocol"),
                                                           medaka_model: expected_workflow_run.get_input("medaka_model"),
@@ -226,6 +232,9 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                           status: expected_workflow_run.status,
                                                           workflow: expected_workflow_run.workflow,
                                                           inputs: {
+                                                            accession_name: expected_workflow_run.get_input("accession_name"),
+                                                            accession_id: expected_workflow_run.get_input("accession_id"),
+                                                            taxon_id: expected_workflow_run.get_input("taxon_id"),
                                                             technology: expected_workflow_run.get_input("technology"),
                                                             wetlab_protocol: expected_workflow_run.get_input("wetlab_protocol"),
                                                             medaka_model: expected_workflow_run.get_input("medaka_model"),
@@ -297,6 +306,9 @@ RSpec.describe WorkflowRunsController, type: :controller do
           expect(response_workflow_run).to include_json(cached_results: expected_workflow_run.cached_results,
                                                         created_at: expected_workflow_run.created_at.as_json,
                                                         inputs: {
+                                                          accession_name: expected_workflow_run.get_input("accession_name"),
+                                                          accession_id: expected_workflow_run.get_input("accession_id"),
+                                                          taxon_id: expected_workflow_run.get_input("taxon_id"),
                                                           technology: expected_workflow_run.get_input("technology"),
                                                           wetlab_protocol: expected_workflow_run.get_input("wetlab_protocol"),
                                                           medaka_model: expected_workflow_run.get_input("medaka_model"),
@@ -330,6 +342,9 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                                         status: expected_workflow_run.status,
                                                         workflow: expected_workflow_run.workflow,
                                                         inputs: {
+                                                          accession_name: expected_workflow_run.get_input("accession_name"),
+                                                          accession_id: expected_workflow_run.get_input("accession_id"),
+                                                          taxon_id: expected_workflow_run.get_input("taxon_id"),
                                                           technology: expected_workflow_run.get_input("technology"),
                                                           wetlab_protocol: expected_workflow_run.get_input("wetlab_protocol"),
                                                           medaka_model: expected_workflow_run.get_input("medaka_model"),
