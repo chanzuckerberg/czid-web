@@ -292,4 +292,115 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       end
     end
   end
+
+  describe "GET choose_taxon" do
+    let(:query) { "E coli" }
+    let(:args) { "species,genus" }
+    let(:tax_levels) { ["species", "genus"] }
+    let(:fake_results) do
+      [
+        {
+          "title" => "Escherichia coli",
+          "description" => "Taxonomy ID: 562",
+          "taxid" => 562,
+          "level" => "species",
+        },
+        {
+          "title" => "Mycolicibacterium",
+          "description" => "Taxonomy ID: 1866885",
+          "taxid" => 1_866_885,
+          "level" => "genus",
+        },
+      ]
+    end
+
+    let(:forbidden_project) { create(:project) }
+    let(:forbidden_sample)  { create(:sample, project: forbidden_project) }
+
+    let(:allowed_project) { create(:project, users: [@joe]) }
+    let(:allowed_sample)  { create(:sample, project: allowed_project) }
+
+    context "from regular user" do
+      before do
+        sign_in @joe
+      end
+
+      it "returns no results for an empty request" do
+        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(nil, nil, {}).and_call_original
+
+        get :choose_taxon
+
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq({})
+      end
+
+      it "serves results for a simple query" do
+        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, {}).and_return(fake_results)
+
+        get :choose_taxon, params: { query: query }
+
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq(fake_results)
+      end
+
+      it "raises an error for invalid project id" do
+        expect do
+          get :choose_taxon, params: { query: query, project_id: forbidden_project.id }
+        end.to raise_error(ActiveRecord::RecordNotFound)
+      end
+
+      it "limits results by project id" do
+        project_id = allowed_project.id
+        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, { project_id: project_id }).and_return(fake_results)
+
+        get :choose_taxon, params: { query: query, project_id: project_id }
+
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq(fake_results)
+      end
+
+      it "limits results by sample id" do
+        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, hash_including(:samples)).and_return(fake_results)
+
+        get :choose_taxon, params: { query: query, sample_id: allowed_sample.id }
+
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq(fake_results)
+      end
+
+      it "filters out invalid sample ids" do
+        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, { samples: match_array([]) }).and_return(fake_results)
+
+        get :choose_taxon, params: { query: query, sample_id: forbidden_sample.id }
+
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq(fake_results)
+      end
+
+      it "allows valid taxonomy levels in args" do
+        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, tax_levels, hash_including(:samples)).and_return(fake_results)
+
+        get :choose_taxon, params: { query: query, args: "species,genus", sample_id: allowed_sample.id }
+
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq(fake_results)
+      end
+
+      it "ignores invalid taxonomy levels" do
+        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, [], hash_including(:samples)).and_return(fake_results)
+
+        get :choose_taxon, params: { query: query, args: "ordo", sample_id: allowed_sample.id }
+
+        expect(response).to have_http_status(:success)
+        json_response = JSON.parse(response.body)
+        expect(json_response).to eq(fake_results)
+      end
+    end
+  end
 end

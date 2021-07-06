@@ -1,4 +1,5 @@
 class PhyloTreeNgsController < ApplicationController
+  include ElasticsearchHelper
   include ParameterSanitization
 
   ########################################
@@ -58,8 +59,24 @@ class PhyloTreeNgsController < ApplicationController
   def create
   end
 
-  # TODO: CH-142676
   def choose_taxon
+    tax_levels = nil
+    if collection_params[:args].present?
+      # Note(2021-07-01): Right now only "species,genus" is being sent:
+      tax_levels = params[:args].split(",").select { |l| TaxonCount::NAME_2_LEVEL[l] }
+    end
+
+    filters = {}
+    if collection_params[:project_id]
+      filters[:project_id] = current_power.projects.find(collection_params[:project_id]).id
+    end
+    if collection_params[:sample_id]
+      # Note: 'where' because downstream expects a Relation.
+      filters[:samples] = current_power.samples.where(id: collection_params[:sample_id])
+    end
+
+    taxon_list = taxon_search(collection_params[:query], tax_levels, filters)
+    render json: JSON.dump(taxon_list)
   end
 
   # GET /phylo_tree_ngs/validate_name
@@ -94,7 +111,7 @@ class PhyloTreeNgsController < ApplicationController
   private
 
   def collection_params
-    params.permit(:name)
+    params.permit(:name, :query, :args, :project_id, :sample_id)
   end
 
   def index_params
