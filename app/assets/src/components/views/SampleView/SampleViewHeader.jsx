@@ -119,7 +119,8 @@ export default function SampleViewHeader({
         isEmpty(sample.pipeline_runs) &&
         size(sample.workflow_runs) === 1);
 
-    if (workflow === WORKFLOWS.CONSENSUS_GENOME.value) {
+    // TODO(omar): Explicitly check for CG workflow when cleaning up dead CG code.
+    if (workflow !== WORKFLOWS.SHORT_READ_MNGS.value) {
       const succeeded = get("status", currentRun) === "SUCCEEDED";
       return (
         <ViewHeader.Controls>
