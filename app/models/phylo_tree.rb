@@ -276,7 +276,7 @@ class PhyloTree < ApplicationRecord
   # The template below is in app/views/phylo_trees:
   def prepare_dag(dag_name, attribute_dict)
     dag_s3 = "#{phylo_tree_output_s3_path}/#{dag_name}.json"
-    dag = DagGenerator.new("phylo_trees/#{dag_name}.json.jbuilder",
+    dag = DagGenerator.new("phylo_trees/#{dag_name}",
                            project_id,
                            nil,
                            nil,
