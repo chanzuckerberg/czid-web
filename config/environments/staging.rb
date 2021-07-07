@@ -109,5 +109,8 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   # Set the logging destination(s)
+  logger           = ActiveSupport::Logger.new(STDOUT)
+  logger.formatter = config.log_formatter
+  config.logger    = ActiveSupport::TaggedLogging.new(logger)
   config.log_to = %w[stdout]
 end
