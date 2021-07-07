@@ -250,6 +250,76 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     end
   end
 
+  describe "GET show" do
+    let(:fake_sfn_name) { "fake_sfn_name" }
+    let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
+    let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
+
+    before do
+      sign_in @joe
+
+      project_one = create(:project, users: [@joe])
+      sample_one = create(:sample, project: project_one)
+      pr_one = create(:pipeline_run, sample: sample_one)
+      create(:taxon_lineage, taxid: 1, tax_name: "some species")
+      create(:taxon_count, tax_id: 1, pipeline_run_id: pr_one.id, tax_level: 1)
+
+      sample_two = create(:sample, project: project_one)
+      pr_two = create(:pipeline_run, sample: sample_two)
+      create(:taxon_lineage, taxid: 2, tax_name: "some genus")
+      create(:taxon_count, tax_id: 2, pipeline_run_id: pr_two.id, tax_level: 2)
+
+      @phylo_tree_one = create(:phylo_tree_ng,
+                               user: @joe,
+                               project: project_one,
+                               pipeline_runs: [pr_one],
+                               name: "Phylo tree ng 1",
+                               sfn_execution_arn: fake_sfn_execution_arn,
+                               status: WorkflowRun::STATUS[:failed],
+                               inputs_json: { pipeline_run_ids: [pr_one.id], tax_id: 1 })
+
+      @pt_mock_results = {
+        newick: "(26813:358.92523,(26603:0.0,26663:0.0,26715:0.0,26745:0.0,26809:0.0):358.92523,NCBI_NT_accession_LM9974131:358.93127);",
+        ncbi_metadata: "{\"NCBI_NT_accession_LM9974131\": {\"name\": \"Pseudomonas sp. 12M76_air genome assembly PRJEB5504_assembly_1, scaffold CONTIG000001\", \"accession\": \"LM997413.1\"}}",
+      }
+
+      @phylo_tree_two = create(:phylo_tree_ng,
+                               user: @joe,
+                               project: project_one,
+                               pipeline_runs: [pr_two],
+                               name: "Phylo tree ng 2",
+                               sfn_execution_arn: fake_sfn_execution_arn,
+                               status: WorkflowRun::STATUS[:running],
+                               inputs_json: { pipeline_run_ids: [pr_two.id], tax_id: 2 })
+    end
+
+    context "phylo_tree_ng has a species level taxon of interest" do
+      it "can see phylo_tree_ng and includes parent_taxid" do
+        expect_any_instance_of(PhyloTreeNg).to receive(:results).and_return(@pt_mock_results)
+        get :show, params: { id: @phylo_tree_one.id, format: "json" }
+
+        expect(response).to have_http_status :ok
+        pt = JSON.parse(response.body)
+
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "parent_taxid", "sampleDetailsByNodeName")
+        expect(pt["tax_level"]).to eq(1)
+      end
+    end
+
+    context "phylo_tree_ng has a genus level taxon of interest" do
+      it "can see phylo_tree_ng" do
+        expect_any_instance_of(PhyloTreeNg).to receive(:results).and_return(@pt_mock_results)
+        get :show, params: { id: @phylo_tree_two.id, format: "json" }
+
+        expect(response).to have_http_status :ok
+        pt = JSON.parse(response.body)
+
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "sampleDetailsByNodeName")
+        expect(pt["tax_level"]).to eq(2)
+      end
+    end
+  end
+
   describe "PUT rerun" do
     let(:phylo_tree) { create(:phylo_tree_ng) }
 
