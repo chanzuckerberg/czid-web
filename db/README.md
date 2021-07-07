@@ -1,3 +1,11 @@
+## Migration safety
+
+- Writing safe, zero-downtime DB migrations requires special attention, particularly on large tables such as `taxon_counts` or frequently accessed fields. This is because there could be a mismatch between the old and new versions of the code during the deployment, or a migration could lock columns/tables that are needed to fulfill requests.
+- Ideally, operations such as renaming a column are split across multiple _code deploys_ (not just multiple pull requests).
+- CZI blog post describing the problem: https://medium.com/czi-technology/db-migrations-and-push-safety-in-rails-508bc877dd7e
+- See potentially dangerous operations here and recommmendations: https://github.com/ankane/strong_migrations#checks (We may adopt this Gem!)
+- Related IDseq post-mortem: https://czi.quip.com/SZigAbUTTNGa
+
 ## Tips and tricks
 
 ### Applying migrations
