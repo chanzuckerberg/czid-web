@@ -97,14 +97,14 @@
         }
       }
 
-      .nanoporeContent {
+      .technologyContent {
         display: flex;
         margin-top: $space-l;
 
         .item {
           display: flex;
           flex-direction: column;
-          width: 160px;
+          min-width: 160px;
           margin-right: $space-xl;
 
           .subheader {
@@ -124,19 +124,6 @@
           .dropdownMenu {
             min-width: max-content !important;
           }
-        }
-      }
-
-      .wetlabOption {
-        margin-top: $space-l;
-
-        .title {
-          @include font-header-xs;
-          margin-bottom: $space-xxs;
-        }
-
-        .dropdown {
-          min-width: 140px;
         }
       }
     }

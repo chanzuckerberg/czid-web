@@ -30,6 +30,9 @@ class ConsensusGenomeWorkflowRun < WorkflowRun
     combined_msspe_artic: "combined_msspe_artic",
     # Retrieved from: https://github.com/artic-network/artic-ncov2019/blob/master/primer_schemes/nCoV-2019/V1/nCoV-2019.bed
     covidseq: "covidseq",
+    # Midnight primer set used at Biohub for Nanopore samples to produce longer reads and reduce the likelihood of
+    # coverage drop-out due to genome mutations in the primer sites.
+    midnight: "midnight",
     # See: https://www.nature.com/articles/s41564-019-0637-9
     msspe: "msspe",
     # See: https://swiftbiosci.com/swift-normalase-amplicon-panels

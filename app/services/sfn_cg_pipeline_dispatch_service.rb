@@ -26,6 +26,12 @@ class SfnCgPipelineDispatchService
     end
   end
 
+  class InvalidWetlabProtocolError < StandardError
+    def initialize(protocol, technology)
+      super("Protocol #{protocol} is not supported for technology #{technology}.")
+    end
+  end
+
   class InvalidTechnologyError < StandardError
     def initialize(technology)
       super("Technology #{technology} not recognized.")
@@ -108,7 +114,7 @@ class SfnCgPipelineDispatchService
     if ConsensusGenomeWorkflowRun::TECHNOLOGY_INPUT.value?(wr_technology)
       wr_technology
     else
-      raise InvalidTechnologyError(technology)
+      raise InvalidTechnologyError, technology
     end
   end
 
@@ -127,7 +133,7 @@ class SfnCgPipelineDispatchService
     !@workflow_run.inputs&.[]("clearlabs")
   end
 
-  def primer_file
+  def illumina_primer_file
     protocols = ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL
 
     case @workflow_run.inputs&.[]("wetlab_protocol")
@@ -145,8 +151,27 @@ class SfnCgPipelineDispatchService
       "snap_primers.bed"
     when protocols[:artic_short_amplicons]
       "artic_v3_short_275_primers.bed"
+    when protocols[:midnight]
+      raise InvalidWetlabProtocolError(@workflow_run.inputs&.[]("wetlab_protocol"), technology)
     else
       raise WetlabProtocolMissingError
+    end
+  end
+
+  def nanopore_primer_set
+    protocols = ConsensusGenomeWorkflowRun::WETLAB_PROTOCOL
+
+    case @workflow_run.inputs&.[]("wetlab_protocol")
+    when protocols[:artic]
+      "nCoV-2019/V3"
+    when protocols[:midnight]
+      "nCoV-2019/V1200"
+    else
+      if @workflow_run.inputs&.[]("wetlab_protocol")
+        raise InvalidWetlabProtocolError.new(@workflow_run.inputs&.[]("wetlab_protocol"), technology)
+      else
+        raise WetlabProtocolMissingError
+      end
     end
   end
 
@@ -164,12 +189,13 @@ class SfnCgPipelineDispatchService
                             vadr_options: @workflow_run.inputs&.[]("vadr_options"),
                             # Remove ref_fasta once it's changed to an optional wdl input for ONT runs.
                             ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",
+                            primer_set: nanopore_primer_set,
                           }
                         elsif @workflow_run.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID
                           # illumina sars-cov-2 cg
                           {
                             ref_fasta: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID}.fa",
-                            primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{primer_file}",
+                            primer_bed: "s3://#{S3_DATABASE_BUCKET}/consensus-genome/#{illumina_primer_file}",
                           }
                         else
                           # illumina gen viral cg

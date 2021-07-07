@@ -26,6 +26,7 @@ import { WORKFLOWS } from "~utils/workflows";
 import {
   CG_WETLAB_OPTIONS,
   CG_TECHNOLOGY_OPTIONS,
+  CG_NANOPORE_WETLAB_OPTIONS,
   MEDAKA_MODEL_OPTIONS,
 } from "./constants";
 import cs from "./workflow_selector.scss";
@@ -64,10 +65,10 @@ const WorkflowSelector = ({
     </ExternalLink>
   );
 
-  const renderWetlabSelector = () => {
+  const renderWetlabSelector = technology => {
     return (
-      <div className={cs.wetlabOption}>
-        <div className={cs.title}>Wetlab protocol:</div>
+      <div className={cs.item}>
+        <div className={cs.subheader}>Wetlab Protocol&#58;</div>
         <Dropdown
           className={cs.dropdown}
           onChange={value => {
@@ -79,7 +80,11 @@ const WorkflowSelector = ({
               wetlabOption: value,
             });
           }}
-          options={CG_WETLAB_OPTIONS}
+          options={
+            technology === CG_TECHNOLOGY_OPTIONS.ILLUMINA
+              ? CG_WETLAB_OPTIONS
+              : CG_NANOPORE_WETLAB_OPTIONS
+          }
           placeholder="Select"
           value={selectedWetlabProtocol}
         ></Dropdown>
@@ -132,7 +137,7 @@ const WorkflowSelector = ({
           {cgWorkflowSelected &&
             (nanoporeFeatureEnabled
               ? renderTechnologyOptions()
-              : renderWetlabSelector())}
+              : renderWetlabSelector(CG_TECHNOLOGY_OPTIONS.ILLUMINA))}
         </div>
       </div>
     );
@@ -181,16 +186,18 @@ const WorkflowSelector = ({
             })}
             .
           </div>
-          {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
-            illuminaTechnologyOptionSelected &&
-            renderWetlabSelector()}
+          <div className={cs.technologyContent}>
+            {selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value) &&
+              illuminaTechnologyOptionSelected &&
+              renderWetlabSelector(CG_TECHNOLOGY_OPTIONS.ILLUMINA)}
+          </div>
         </div>
       </div>
     );
   };
 
   const renderNanoporeContent = () => (
-    <div className={cs.nanoporeContent}>
+    <div className={cs.technologyContent}>
       <div className={cs.item}>
         <div className={cs.subheader}>
           Used Clear Labs:
@@ -213,48 +220,55 @@ const WorkflowSelector = ({
           />
         </div>
       </div>
-      <div className={cs.item}>
-        <div className={cs.subheader}>Wetlab Protocol&#58;</div>
-        <div className={cx(cs.description, cs.text)}>ARTIC v3</div>
-      </div>
 
       {/* If uploading ClearLabs samples, only allow default wetlab and medaka model options. */}
       {nanoporeV1FeatureEnabled && !usedClearLabs ? (
-        <div className={cs.item}>
-          <div className={cs.subheader}>
-            Medaka Model:
-            <ColumnHeaderTooltip
-              trigger={<IconInfoSmall className={cs.infoIcon} />}
-              content={
-                "For best results, specify the correct model. Where a version of Guppy has been used without a corresponding model, choose a model with the highest version equal to or less than the Guppy version."
-              }
-              position={"top center"}
-              link={UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK}
+        <>
+          {renderWetlabSelector(CG_TECHNOLOGY_OPTIONS.NANOPORE)}
+          <div className={cs.item}>
+            <div className={cs.subheader}>
+              Medaka Model:
+              <ColumnHeaderTooltip
+                trigger={<IconInfoSmall className={cs.infoIcon} />}
+                content={
+                  "For best results, specify the correct model. Where a version of Guppy has been used without a corresponding model, choose a model with the highest version equal to or less than the Guppy version."
+                }
+                position={"top center"}
+                link={UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK}
+              />
+            </div>
+            <SectionsDropdown
+              className={cs.dropdown}
+              menuClassName={cs.dropdownMenu}
+              fluid
+              categories={MEDAKA_MODEL_OPTIONS}
+              onChange={val => onMedakaModelChange(val)}
+              selectedValue={selectedMedakaModel}
             />
           </div>
-          <SectionsDropdown
-            className={cs.dropdown}
-            menuClassName={cs.dropdownMenu}
-            fluid
-            categories={MEDAKA_MODEL_OPTIONS}
-            onChange={val => onMedakaModelChange(val)}
-            selectedValue={selectedMedakaModel}
-          />
-        </div>
+        </>
       ) : (
-        <div className={cs.item}>
-          <div className={cs.subheader}>
-            Medaka Model:
-            <ColumnHeaderTooltip
-              trigger={<IconInfoSmall className={cs.infoIcon} />}
-              content={
-                "Medaka is a tool to create consensus sequences and variant calls from Nanopore sequencing data."
-              }
-              position={"top center"}
-            />
+        <>
+          <div className={cs.item}>
+            <div className={cs.subheader}>Wetlab Protocol&#58;</div>
+            <div className={cx(cs.description, cs.text)}>ARTIC v3</div>
           </div>
-          <div className={cx(cs.description, cs.text)}>r941_min_high_g360</div>
-        </div>
+          <div className={cs.item}>
+            <div className={cs.subheader}>
+              Medaka Model:
+              <ColumnHeaderTooltip
+                trigger={<IconInfoSmall className={cs.infoIcon} />}
+                content={
+                  "Medaka is a tool to create consensus sequences and variant calls from Nanopore sequencing data."
+                }
+                position={"top center"}
+              />
+            </div>
+            <div className={cx(cs.description, cs.text)}>
+              r941_min_high_g360
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

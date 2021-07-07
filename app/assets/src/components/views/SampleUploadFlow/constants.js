@@ -42,6 +42,7 @@ export const CG_WETLAB_DISPLAY_NAMES = {
   artic: "ARTIC v3",
   combined_msspe_artic: "Combined MSSPE & ARTIC v3",
   covidseq: "COVIDseq",
+  midnight: "Midnight",
   msspe: "MSSPE",
   snap: "SNAP",
 };
@@ -56,7 +57,18 @@ export const CG_TECHNOLOGY_DISPLAY_NAMES = {
   ONT: "Nanopore",
 };
 
-export const TEMP_DEFAULT_NANOPORE_WETLAB_OPTION = "artic";
+export const CG_NANOPORE_WETLAB_OPTIONS = [
+  {
+    text: "ARTIC v3",
+    value: "artic",
+  },
+  {
+    text: "Midnight",
+    value: "midnight",
+  },
+];
+
+export const DEFAULT_NANOPORE_WETLAB_OPTION = "artic";
 
 export const DEFAULT_MEDAKA_MODEL_OPTION = "r941_min_high_g360";
 

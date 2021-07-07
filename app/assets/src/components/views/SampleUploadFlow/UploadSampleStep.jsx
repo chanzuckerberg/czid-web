@@ -55,7 +55,7 @@ import WorkflowSelector from "./WorkflowSelector";
 import {
   CG_TECHNOLOGY_OPTIONS,
   SELECT_ID_KEY,
-  TEMP_DEFAULT_NANOPORE_WETLAB_OPTION,
+  DEFAULT_NANOPORE_WETLAB_OPTION,
   DEFAULT_MEDAKA_MODEL_OPTION,
 } from "./constants";
 import cs from "./sample_upload_flow.scss";
@@ -372,6 +372,7 @@ class UploadSampleStep extends React.Component {
     if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
       this.setState({
         selectedTechnology: technology,
+        selectedWetlabProtocol: null,
       });
 
       logAnalyticsEvent(
@@ -401,6 +402,9 @@ class UploadSampleStep extends React.Component {
     this.setState({
       usedClearLabs,
       // If uploading ClearLabs samples, only allow default wetlab and medaka model options.
+      selectedWetlabProtocol: usedClearLabs
+        ? DEFAULT_NANOPORE_WETLAB_OPTION
+        : this.state.selectedWetlabProtocol,
       selectedMedakaModel: usedClearLabs
         ? DEFAULT_MEDAKA_MODEL_OPTION
         : this.state.selectedMedakaModel,
@@ -723,11 +727,7 @@ class UploadSampleStep extends React.Component {
         project: selectedProject,
         samples: this.getSelectedSamples(currentTab),
         uploadType: currentTab,
-        // For now, if Nanopore was selected as the sequencing platform, default to ARTIC v3 Wetlab Protocol
-        wetlabProtocol:
-          selectedTechnology === CG_TECHNOLOGY_OPTIONS.NANOPORE
-            ? TEMP_DEFAULT_NANOPORE_WETLAB_OPTION
-            : selectedWetlabProtocol,
+        wetlabProtocol: selectedWetlabProtocol,
         workflows: selectedWorkflows,
       });
     }
@@ -764,7 +764,7 @@ class UploadSampleStep extends React.Component {
             workflowsValid = !!selectedWetlabProtocol;
             break;
           case CG_TECHNOLOGY_OPTIONS.NANOPORE:
-            workflowsValid = true;
+            workflowsValid = !!selectedWetlabProtocol;
             break;
           default:
             workflowsValid = false;
