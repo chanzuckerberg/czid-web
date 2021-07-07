@@ -198,6 +198,159 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     end
   end
 
+  describe "GET new" do
+    before do
+      sign_in @joe
+
+      @species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", superkingdom_taxid: 2)
+      @project = create(:project, users: [@joe], name: "new tree project")
+      @sample_one = create(:sample, project: @project, name: "sample_one")
+      @pr_one = create(:pipeline_run,
+                       sample: @sample_one,
+                       job_status: "CHECKED",
+                       taxon_counts_data: [
+                         { taxon_name: @species_a.tax_name, tax_level: 1, nt: 70 },
+                         { taxon_name: @species_a.tax_name, tax_level: 1, nr: 10 },
+                       ])
+      create(:taxon_byterange,
+             taxid: 1,
+             hit_type: TaxonCount::COUNT_TYPE_NT,
+             first_byte: 0,
+             last_byte: 70,
+             pipeline_run_id: @pr_one.id)
+
+      @sample_two = create(:sample, project: @project, name: "sample_two")
+      @pr_two = create(:pipeline_run,
+                       sample: @sample_two,
+                       job_status: "CHECKED",
+                       taxon_counts_data: [
+                         { taxon_name: @species_a.tax_name, tax_level: 1, nt: 30 },
+                         { taxon_name: @species_a.tax_name, tax_level: 1, nr: 50 },
+                       ])
+      create(:taxon_byterange,
+             taxid: 1,
+             hit_type: TaxonCount::COUNT_TYPE_NT,
+             first_byte: 0,
+             last_byte: 50,
+             pipeline_run_id: @pr_two.id)
+    end
+
+    context "fetching eligible sample info given new phylo tree parameters" do
+      it "errors if taxId specified is a human taxId" do
+        get :new, format: :json, params: { taxId: 9605 }
+
+        expect(response).to have_http_status :forbidden
+        expect(JSON.parse(response.body, symbolize_names: true)[:message]).to eq("Human taxon ids are not allowed")
+      end
+
+      it "includes project in response" do
+        get :new, format: :json, params: { projectId: @project.id, taxId: 1 }
+
+        expect(response).to have_http_status :ok
+        json_response = JSON.parse(response.body, symbolize_names: true)
+
+        expect(json_response.keys).to contain_exactly(:project, :samples)
+        expect(json_response[:project][:id]).to eq(@project.id)
+      end
+
+      it "includes sample info as an array of hashes in response" do
+        samples_info = [
+          {
+            name: "sample_one",
+            project_id: @project.id,
+            host: @sample_one.host_genome_name,
+            project_name: "new tree project",
+            pipeline_run_id: @pr_one.id,
+            sample_id: @sample_one.id,
+            taxid_reads: { NT: 70, NR: 10 },
+          }, {
+            name: "sample_two",
+            project_id: @project.id,
+            host: @sample_two.host_genome_name,
+            project_name: "new tree project",
+            pipeline_run_id: @pr_two.id,
+            sample_id: @sample_two.id,
+            taxid_reads: { NT: 30, NR: 50 },
+          },
+        ]
+
+        get :new, format: :json, params: { projectId: @project.id, taxId: 1 }
+
+        expect(response).to have_http_status :ok
+        json_response = JSON.parse(response.body, symbolize_names: true)
+
+        expect(json_response.keys).to contain_exactly(:project, :samples)
+        expect(json_response[:samples]).to include_json(samples_info)
+      end
+    end
+  end
+
+  describe "POST create" do
+    before do
+      sign_in @joe
+
+      @project = create(:project, users: [@joe])
+      sample_one = create(:sample, project: @project)
+      @pr_one = create(:pipeline_run, sample: sample_one)
+
+      sample_two = create(:sample, project: @project)
+      @pr_two = create(:pipeline_run, sample: sample_two)
+
+      admin_project = create(:project, users: [@admin])
+      admin_sample_one = create(:sample, project: admin_project)
+      @admin_pr_one = create(:pipeline_run, sample: admin_sample_one)
+
+      create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: "fake:sfn:arn")
+      create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: "phylotree-ng"), value: "1.0.0")
+    end
+
+    context "user creates a phylo tree using their samples" do
+      it "should create and dispatch a new phylo tree ng" do
+        phylo_tree_ng_params = {
+          pipeline_run_ids: [@pr_one.id, @pr_two.id],
+          tax_id: 1,
+          superkingdom_name: "viruses",
+          name: "new_tree",
+          project_id: @project.id,
+          user_id: @joe.id,
+        }
+
+        post :create, params: phylo_tree_ng_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+        phylo_tree_ng = PhyloTreeNg.find(json_response["phylo_tree_id"])
+
+        # Verify that the phylo tree was created correctly.
+        expect(phylo_tree_ng).not_to eq(nil)
+        expect(phylo_tree_ng.name).to eq("new_tree")
+        expect(phylo_tree_ng.project_id).to eq(@project.id)
+        expect(phylo_tree_ng.user_id).to eq(@joe.id)
+        expect(phylo_tree_ng.status).to eq(WorkflowRun::STATUS[:running])
+        expect(phylo_tree_ng.tax_id).to eq(1)
+        expect(phylo_tree_ng.inputs_json["pipeline_run_ids"]).to eq([@pr_one.id, @pr_two.id])
+        expect(phylo_tree_ng.inputs_json["superkingdom_name"]).to eq("viruses")
+      end
+    end
+
+    context "user tries creating a phylo tree using an admin's sample" do
+      it "should return an unauthorized error" do
+        phylo_tree_ng_params = {
+          pipeline_run_ids: [@pr_one.id, @admin_pr_one.id],
+          tax_id: 1,
+          superkingdom_name: "viruses",
+          name: "new_tree",
+          project_id: @project.id,
+          user_id: @joe.id,
+        }
+
+        post :create, params: phylo_tree_ng_params
+
+        expect(response).to have_http_status :unauthorized
+      end
+    end
+  end
+
   describe "GET validate_name" do
     before do
       sign_in @joe
