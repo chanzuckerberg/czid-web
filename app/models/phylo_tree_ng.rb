@@ -16,6 +16,14 @@ class PhyloTreeNg < ApplicationRecord
   # SVG of a genomic distance matrix (heatmap) for when the samples are too divergent.
   OUTPUT_CLUSTERMAP_SVG = "phylotree.clustermap_svg".freeze
 
+  DOWNLOADABLE_OUTPUTS = [
+    OUTPUT_CLUSTERMAP_PNG,
+    OUTPUT_CLUSTERMAP_SVG,
+    OUTPUT_NEWICK,
+    OUTPUT_SKA_DISTANCES,
+    OUTPUT_SKA_VARIANTS,
+  ].freeze
+
   INPUT_ERRORS = {
     "TooDivergentError" => "Sequences are too divergent to create a single phylo tree",
   }.freeze

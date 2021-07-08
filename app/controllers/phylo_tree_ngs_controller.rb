@@ -1,6 +1,7 @@
 class PhyloTreeNgsController < ApplicationController
   include ElasticsearchHelper
   include ParameterSanitization
+  include PipelineOutputsHelper
 
   ########################################
   # Current logic for phylo_tree permissions:
@@ -18,7 +19,7 @@ class PhyloTreeNgsController < ApplicationController
   ########################################
 
   before_action :admin_required, only: [:rerun]
-  before_action :set_phylo_tree, only: [:show]
+  before_action :set_phylo_tree, only: [:show, :download]
 
   # Carried over from PhyloTreesController:
   # This limit determines how many rows can be displayed in "additional samples".
@@ -211,8 +212,29 @@ class PhyloTreeNgsController < ApplicationController
     }, status: :internal_server_error
   end
 
-  # TODO: CH-142676
+  # GET /phylo_tree_ngs/:id/download
   def download
+    output_name = member_params[:output]
+    unless PhyloTreeNg::DOWNLOADABLE_OUTPUTS.include?(output_name)
+      raise "Invalid output requested"
+    end
+
+    s3_path = @phylo_tree_ng.output_path(output_name)
+    # Ex: "Cool Tree_ska.distances.tsv"
+    filename = "#{@phylo_tree_ng.name}_#{File.basename(s3_path)}"
+    url = get_presigned_s3_url(s3_path: s3_path, filename: filename)
+    if url
+      redirect_to url
+    else
+      raise "Requested output not found for this tree"
+    end
+  rescue StandardError => e
+    message = "Unexpected error in phylo tree NG download"
+    LogUtil.log_error(message, exception: e, id: @phylo_tree_ng.id)
+    render(
+      json: { status: message },
+      status: :internal_server_error
+    )
   end
 
   private
@@ -230,7 +252,7 @@ class PhyloTreeNgsController < ApplicationController
   end
 
   def member_params
-    params.permit(:id)
+    params.permit(:id, :output)
   end
 
   def create_params

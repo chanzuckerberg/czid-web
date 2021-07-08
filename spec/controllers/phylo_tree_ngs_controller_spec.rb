@@ -626,4 +626,62 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       end
     end
   end
+
+  describe "GET download" do
+    let(:project) { create(:project, users: [@joe]) }
+    let(:sample) { create(:sample, project: project) }
+    let(:pipeline_run) { create(:pipeline_run, sample: sample) }
+
+    let(:allowed_tree) { create(:phylo_tree_ng, user: @joe, project: project, pipeline_runs: [pipeline_run], name: "Test Tree") }
+    let(:forbidden_tree) { create(:phylo_tree_ng) }
+    let(:s3_path) { "s3://fake/path/phylotree.nwk" }
+
+    context "from regular user" do
+      before do
+        sign_in @joe
+      end
+
+      it "gets a requested download link" do
+        expect_any_instance_of(PhyloTreeNg).to receive(:output_path).with(PhyloTreeNg::OUTPUT_NEWICK).and_return(s3_path)
+        expect_any_instance_of(PipelineOutputsHelper).to receive(:get_presigned_s3_url).with(s3_path: s3_path, filename: "Test Tree_phylotree.nwk").and_call_original
+
+        get :download, params: { id: allowed_tree.id, output: PhyloTreeNg::OUTPUT_NEWICK }
+
+        expect(response).to have_http_status(:redirect)
+      end
+
+      it "errors on a disallowed tree" do
+        expect do
+          get :download, params: { id: forbidden_tree.id }
+        end.to raise_error(ActiveRecord::RecordNotFound)
+      end
+
+      it "errors on a non-existent tree" do
+        expect do
+          get :download, params: { id: 0 }
+        end.to raise_error(ActiveRecord::RecordNotFound)
+      end
+
+      it "errors on empty output name" do
+        get :download, params: { id: allowed_tree.id }
+
+        expect(response).to have_http_status(:internal_server_error)
+      end
+
+      it "errors on an invalid output name" do
+        get :download, params: { id: allowed_tree.id, output: "fake-output" }
+
+        expect(response).to have_http_status(:internal_server_error)
+      end
+
+      it "errors if the data is not available" do
+        expect_any_instance_of(PhyloTreeNg).to receive(:output_path).with(PhyloTreeNg::OUTPUT_NEWICK).and_return(s3_path)
+        expect_any_instance_of(PipelineOutputsHelper).to receive(:get_presigned_s3_url).with(s3_path: s3_path, filename: "Test Tree_phylotree.nwk")
+
+        get :download, params: { id: allowed_tree.id, output: PhyloTreeNg::OUTPUT_NEWICK }
+
+        expect(response).to have_http_status(:internal_server_error)
+      end
+    end
+  end
 end
