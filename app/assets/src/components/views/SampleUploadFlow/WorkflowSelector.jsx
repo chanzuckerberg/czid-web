@@ -210,7 +210,7 @@ const WorkflowSelector = ({
             link={"https://www.clearlabs.com/"}
           />
         </div>
-        <div className={cs.description}>
+        <div className={cs.description} onClick={e => e.stopPropagation()}>
           <Toggle
             className={cs.toggle}
             initialChecked={usedClearLabs}
