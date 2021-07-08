@@ -8,11 +8,6 @@ export const WORKFLOWS = {
   CONSENSUS_GENOME: {
     label: "Consensus Genome",
     value: "consensus-genome",
-    entity: WORKFLOW_ENTITIES.SAMPLES,
-  },
-  CONSENSUS_GENOME_FLAT_LIST: {
-    label: "Consensus Genome",
-    value: "consensus-genome-flat-list",
     entity: WORKFLOW_ENTITIES.WORKFLOW_RUNS,
   },
   SHORT_READ_MNGS: {
@@ -22,8 +17,4 @@ export const WORKFLOWS = {
   },
 };
 
-export const WORKFLOW_ORDER = [
-  "SHORT_READ_MNGS",
-  "CONSENSUS_GENOME",
-  "CONSENSUS_GENOME_FLAT_LIST",
-];
+export const WORKFLOW_ORDER = ["SHORT_READ_MNGS", "CONSENSUS_GENOME"];

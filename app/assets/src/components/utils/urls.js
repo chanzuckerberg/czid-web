@@ -13,13 +13,8 @@ const generateUrlToSampleView = ({
   workflow = null,
   workflowRunId = null,
 } = {}) => {
-  // TODO(omar): Remove temporary workflow hack when cleaning up dead CG code
-  const currentWorkflow =
-    workflow === WORKFLOWS.CONSENSUS_GENOME_FLAT_LIST.value
-      ? WORKFLOWS.CONSENSUS_GENOME.value
-      : workflow;
-  const currentTab = currentWorkflow
-    ? find({ value: currentWorkflow }, values(WORKFLOWS)).label
+  const currentTab = workflow
+    ? find({ value: workflow }, values(WORKFLOWS)).label
     : null;
   const snapshotSharePrefix = snapshotShareId ? `/pub/${snapshotShareId}` : "";
   const queryString = `${urlParser.stringify({

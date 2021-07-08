@@ -53,9 +53,7 @@ class BulkDownloadsController < ApplicationController
       if create_params[:workflow] == WorkflowRun::WORKFLOW[:short_read_mngs]
         pipeline_run_ids = get_valid_pipeline_run_ids_for_samples(viewable_objects)
       else
-        # TODO(omar): When cleaning up dead CG code, remove the else statment part of the ternary
-        workflow_runs = create_params[:workflow_run_ids].present? ? viewable_objects : current_power.workflow_runs.where(sample_id: viewable_objects.pluck(:id), workflow: create_params[:workflow])
-        workflow_run_ids = workflow_runs.active.pluck(:id)
+        workflow_run_ids = viewable_objects.active.pluck(:id)
       end
     rescue StandardError => e
       # Throw an error if any sample doesn't have a valid pipeline or workflow run.

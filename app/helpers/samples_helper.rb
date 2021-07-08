@@ -54,7 +54,7 @@ module SamplesHelper
         derived_output = sample_info[:derived_sample_output]
         pipeline_run = derived_output[:pipeline_run]
         db_sample = sample_info[:db_sample]
-        run_info = sample_info[:run_info_by_workflow][WorkflowRun::WORKFLOW[:short_read_mngs]]
+        run_info = sample_info[:mngs_run_info]
 
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
@@ -372,11 +372,6 @@ module SamplesHelper
     records_by_parent_id
   end
 
-  def top_workflow_runs_multiget(sample_ids, workflow)
-    # executed_at ascending because index_by takes last in group.
-    WorkflowRun.where(sample_id: sample_ids, deprecated: false, workflow: workflow).order(executed_at: :asc).index_by(&:sample_id)
-  end
-
   def format_samples(samples, selected_pipeline_runs_by_sample_id: nil, use_csv_compatible_values: false, is_snapshot: false)
     formatted_samples = []
     return formatted_samples if samples.empty?
@@ -392,7 +387,6 @@ module SamplesHelper
     end
     output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
     metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids, use_raw_date_strings: true, use_csv_compatible_values: use_csv_compatible_values)
-    top_cg_workflow_run_by_sample_id = top_workflow_runs_multiget(sample_ids, WorkflowRun::WORKFLOW[:consensus_genome])
 
     # Massage data into the right format
     snapshot_omissions = [:project, :input_files, :db_sample]
@@ -407,32 +401,8 @@ module SamplesHelper
       job_info[:upload_error] = get_result_status_description_for_errored_sample(sample) if sample.upload_error.present?
 
       if sample.upload_error.nil?
-        job_info[:run_info_by_workflow] = get_sample_run_info_by_workflow(
-          sample: sample,
-          is_snapshot: is_snapshot,
-          top_pipeline_run: top_pipeline_run,
-          output_states_by_pipeline_run_id: output_states_by_pipeline_run_id,
-          pipeline_run_stages_by_pipeline_run_id: pipeline_run_stages_by_pipeline_run_id,
-          report_ready_pipeline_run_ids: report_ready_pipeline_run_ids
-        )
+        job_info[:mngs_run_info] = is_snapshot ? snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id) : pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
       end
-
-      # TODO: Remove this in General Viral CG v1 when flat list implementation is complete
-      top_cg_workflow_run = top_cg_workflow_run_by_sample_id[sample.id]
-      if is_snapshot == false
-        job_info[:workflow_runs_accession_ids] = {
-          all: sample.workflow_runs.non_deprecated.map { |wr| wr.inputs&.[]("accession_id") },
-          top_cg: top_cg_workflow_run&.inputs&.[]("accession_id"),
-        }
-      end
-
-      # Frontend caches by sample_id so responses must include the same info.
-      job_info[WorkflowRun::WORKFLOW[:consensus_genome].to_sym] = {
-        cached_results: JSON.parse(top_cg_workflow_run&.cached_results || "null"),
-        technology: ConsensusGenomeWorkflowRun::TECHNOLOGY_NAME[top_cg_workflow_run&.inputs&.[]("technology")]&.capitalize,
-        wetlab_protocol: top_cg_workflow_run&.inputs&.[]("wetlab_protocol"),
-        medaka_model: top_cg_workflow_run&.inputs&.[]("medaka_model"),
-      }
 
       if is_snapshot
         snapshot_omissions.each { |param| job_info.delete(param) }
@@ -449,27 +419,6 @@ module SamplesHelper
     elsif sample.upload_error != Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED
       { result_status_description: 'FAILED' }
     end
-  end
-
-  def get_sample_run_info_by_workflow(sample:, top_pipeline_run:, output_states_by_pipeline_run_id:, pipeline_run_stages_by_pipeline_run_id:, report_ready_pipeline_run_ids:, is_snapshot: false)
-    # Returns a hash where keys are workflows and values contain info regarding the workflow/pipeline run
-    mngs_run_info = if is_snapshot
-                      snapshot_pipeline_run_info(top_pipeline_run, output_states_by_pipeline_run_id)
-                    else
-                      pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
-                                        pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
-                    end
-
-    # TODO: Generalize when new workflows are introduced
-    cg_workflow_run = sample.first_workflow_run(WorkflowRun::WORKFLOW[:consensus_genome])
-    cg_run_info = {}
-    cg_run_info[:result_status_description] = cg_workflow_run ? WorkflowRun::SFN_STATUS_MAPPING[cg_workflow_run.status] : "RUNNING"
-    cg_run_info[:created_at] = cg_workflow_run&.created_at
-
-    return {
-      WorkflowRun::WORKFLOW[:short_read_mngs] => mngs_run_info,
-      WorkflowRun::WORKFLOW[:consensus_genome] => cg_run_info,
-    }
   end
 
   def get_visibility_by_sample_id(sample_ids)

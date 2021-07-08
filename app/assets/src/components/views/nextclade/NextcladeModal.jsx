@@ -5,7 +5,6 @@ import {
   filter,
   keys,
   map,
-  max,
   size,
   uniq,
   values,
@@ -14,10 +13,7 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { createConsensusGenomeCladeExport } from "~/api";
-import {
-  validateSampleIds,
-  validateWorkflowRunIds,
-} from "~/api/access_control";
+import { validateWorkflowRunIds } from "~/api/access_control";
 import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import { UserContext } from "~/components/common/UserContext";
 import List from "~/components/ui/List";
@@ -31,7 +27,7 @@ import { SARS_COV_2 } from "~/components/views/samples/SamplesView/constants";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import Modal from "~ui/containers/Modal";
 import { openUrlInNewTab } from "~utils/links";
-import { WORKFLOWS, WORKFLOW_ENTITIES } from "~utils/workflows";
+import { WORKFLOWS } from "~utils/workflows";
 import NextcladeConfirmationModal from "./NextcladeConfirmationModal";
 import NextcladeModalFooter from "./NextcladeModalFooter";
 import NextcladeReferenceTreeOptions from "./NextcladeReferenceTreeOptions";
@@ -53,7 +49,6 @@ export default class NextcladeModal extends React.Component {
       referenceTree: null,
       selectedTreeType: "global",
       validationError: null,
-      validSampleIds: new Set(),
       validWorkflowRunIds: new Set(),
     };
   }
@@ -68,19 +63,16 @@ export default class NextcladeModal extends React.Component {
   }
 
   fetchValidationInfo = async ({ ids }) => {
-    const { objects, workflowEntity } = this.props;
+    const { objects } = this.props;
 
-    const isWorkflowRunEntity =
-      workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS;
-    const { validIds, invalidSampleNames, error } = isWorkflowRunEntity
-      ? await validateWorkflowRunIds({
-          workflowRunIds: ids,
-          workflow: WORKFLOWS.CONSENSUS_GENOME.value,
-        })
-      : await validateSampleIds({
-          sampleIds: ids,
-          workflow: WORKFLOWS.CONSENSUS_GENOME.value,
-        });
+    const {
+      validIds,
+      invalidSampleNames,
+      error,
+    } = await validateWorkflowRunIds({
+      workflowRunIds: ids,
+      workflow: WORKFLOWS.CONSENSUS_GENOME.value,
+    });
 
     const validConsensusGenomes = filter(
       o => validIds.includes(o.id),
@@ -94,13 +86,11 @@ export default class NextcladeModal extends React.Component {
       .map(cg => cg.sample.name);
 
     this.setState({
-      ...(isWorkflowRunEntity
-        ? { validWorkflowRunIds: new Set(validIds) }
-        : { validSampleIds: new Set(validIds) }),
       invalidSampleNames,
       loading: false,
       nonSarsCov2SampleNames,
       validationError: error,
+      validWorkflowRunIds: new Set(validIds),
       projectIds: projectIds,
     });
   };
@@ -120,17 +110,13 @@ export default class NextcladeModal extends React.Component {
   };
 
   openExportLink = async () => {
-    const { workflowEntity } = this.props;
     const {
-      validSampleIds,
       validWorkflowRunIds,
       referenceTreeContents,
       selectedTreeType,
     } = this.state;
     const link = await createConsensusGenomeCladeExport({
-      ...(workflowEntity === WORKFLOW_ENTITIES.WORKFLOW_RUNS
-        ? { workflowRunIds: Array.from(validWorkflowRunIds) }
-        : { sampleIds: Array.from(validSampleIds) }),
+      workflowRunIds: Array.from(validWorkflowRunIds),
       referenceTree:
         selectedTreeType === "upload" ? referenceTreeContents : null,
     });
@@ -193,17 +179,11 @@ export default class NextcladeModal extends React.Component {
   };
 
   handleConfirmationModalClose = () => {
-    const {
-      projectIds,
-      validSampleIds,
-      validWorkflowRunIds,
-      selectedTreeType,
-    } = this.state;
+    const { projectIds, validWorkflowRunIds, selectedTreeType } = this.state;
 
     logAnalyticsEvent(
       ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CANCEL_BUTTON_CLICKED,
       {
-        sampleIds: Array.from(validSampleIds),
         workflowRunIds: Array.from(validWorkflowRunIds),
         selectedTreeType,
         projectIds,
@@ -215,19 +195,13 @@ export default class NextcladeModal extends React.Component {
 
   handleConfirmationModalConfirm = async () => {
     const { onClose } = this.props;
-    const {
-      projectIds,
-      validSampleIds,
-      validWorkflowRunIds,
-      selectedTreeType,
-    } = this.state;
+    const { projectIds, validWorkflowRunIds, selectedTreeType } = this.state;
 
     try {
       this.setState({ loadingResults: true }, () => {
         logAnalyticsEvent(
           ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_CONFIRM_BUTTON_CLICKED,
           {
-            sampleIds: Array.from(validSampleIds),
             workflowRunIds: Array.from(validWorkflowRunIds),
             selectedTreeType,
             projectIds,
@@ -252,7 +226,6 @@ export default class NextcladeModal extends React.Component {
             ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_UPLOAD_FAILED,
             {
               error,
-              sampleIds: Array.from(validSampleIds),
               workflowRunIds: Array.from(validWorkflowRunIds),
               selectedTreeType,
               projectIds,
@@ -265,12 +238,7 @@ export default class NextcladeModal extends React.Component {
 
   handleErrorModalRetry = async () => {
     const { onClose } = this.props;
-    const {
-      projectIds,
-      validSampleIds,
-      validWorkflowRunIds,
-      selectedTreeType,
-    } = this.state;
+    const { projectIds, validWorkflowRunIds, selectedTreeType } = this.state;
 
     try {
       await this.openExportLink();
@@ -279,7 +247,6 @@ export default class NextcladeModal extends React.Component {
         logAnalyticsEvent(
           ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_CONFIRMATION_MODAL_RETRY_BUTTON_CLICKED,
           {
-            sampleIds: Array.from(validSampleIds),
             workflowRunIds: Array.from(validWorkflowRunIds),
             selectedTreeType,
             projectIds,
@@ -292,7 +259,6 @@ export default class NextcladeModal extends React.Component {
         ANALYTICS_EVENT_NAMES.NEXTCLADE_MODAL_RETRY_UPLOAD_FAILED,
         {
           error,
-          sampleIds: Array.from(validSampleIds),
           workflowRunIds: Array.from(validWorkflowRunIds),
           selectedTreeType,
           projectIds,
@@ -316,7 +282,6 @@ export default class NextcladeModal extends React.Component {
       nonSarsCov2SampleNames,
       referenceTree,
       validationError,
-      validSampleIds,
       validWorkflowRunIds,
       selectedTreeType,
     } = this.state;
@@ -386,9 +351,7 @@ export default class NextcladeModal extends React.Component {
               loading={loading}
               nonSarsCov2SampleNames={nonSarsCov2SampleNames}
               validationError={validationError}
-              hasValidIds={
-                max([validWorkflowRunIds.size, validSampleIds.size]) > 0
-              }
+              hasValidIds={validWorkflowRunIds && validWorkflowRunIds.size > 0}
             />
           </div>
         </div>

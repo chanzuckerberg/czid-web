@@ -341,10 +341,10 @@ RSpec.describe BulkDownloadsController, type: :controller do
       end
 
       it "should be able to create a bulk download with workflow runs" do
-        @sample_one = create(:sample, project: @project, name: "Test Sample One",
-                                      workflow_runs_data: [{ status: WorkflowRun::STATUS[:succeeded] }])
-        @sample_two = create(:sample, project: @project, name: "Test Sample Two",
-                                      workflow_runs_data: [{ status: WorkflowRun::STATUS[:succeeded] }])
+        sample_one = create(:sample, project: @project, name: "Test Sample One")
+        sample_two = create(:sample, project: @project, name: "Test Sample Two")
+        workflow_run_one = create(:workflow_run, sample: sample_one, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
+        workflow_run_two = create(:workflow_run, sample: sample_two, workflow: WorkflowRun::WORKFLOW[:consensus_genome], status: WorkflowRun::STATUS[:succeeded])
 
         expect(Open3).to receive(:capture3)
           .with("aegea", "ecs", "run", a_string_starting_with("--execute"), any_args)
@@ -363,7 +363,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         }
         bulk_download_params = {
           download_type: BulkDownloadTypesHelper::CONSENSUS_GENOME_DOWNLOAD_TYPE,
-          sample_ids: [@sample_one, @sample_two],
+          workflow_run_ids: [workflow_run_one.id, workflow_run_two.id],
           params: fields,
           workflow: WorkflowRun::WORKFLOW[:consensus_genome],
         }
@@ -377,8 +377,7 @@ RSpec.describe BulkDownloadsController, type: :controller do
         # Verify that bulk download was created correctly.
         expect(bulk_download).not_to eq(nil)
         expect(bulk_download.download_type).to eq(BulkDownloadTypesHelper::CONSENSUS_GENOME_DOWNLOAD_TYPE)
-        expect(bulk_download.workflow_run_ids).to include(@sample_one.workflow_runs.first.id)
-        expect(bulk_download.workflow_run_ids).to include(@sample_two.workflow_runs.first.id)
+        expect(bulk_download.workflow_run_ids).to contain_exactly(workflow_run_one.id, workflow_run_two.id)
         expect(bulk_download.user_id).to eq(@joe.id)
         expect(bulk_download.status).to eq(BulkDownload::STATUS_RUNNING)
         expect(bulk_download.ecs_task_arn).to eq("ABC")

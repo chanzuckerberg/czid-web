@@ -1,4 +1,4 @@
-import { get, map, mapValues, toLower, upperCase } from "lodash/fp";
+import { get, map, toLower, upperCase } from "lodash/fp";
 import {
   getProjectDimensions,
   getProjects,
@@ -152,27 +152,15 @@ const processRawSample = sample => {
       name: sample.name,
       project: get("derived_sample_output.project_name", sample.details),
       publicAccess: !!sample.public,
-      statusByWorkflow: mapValues(
-        runInfo => toLower(runInfo.result_status_description),
-        get("run_info_by_workflow", sample.details)
+      pipelineRunStatus: toLower(
+        get("mngs_run_info.result_status_description", sample.details)
       ),
-      createdAtByWorkflow: mapValues(
-        "created_at",
-        get("run_info_by_workflow", sample.details)
-      ),
+      pipelineRunCreatedAt: get("mngs_run_info.created_at", sample.details),
       uploadError: toLower(
         get("upload_error.result_status_description", sample.details)
       ),
       user: get("uploader.name", sample.details),
       userId: get("uploader.id", sample.details),
-      topCgWorkflowRunAccessionId: get(
-        "workflow_runs_accession_ids.top_cg",
-        sample.details
-      ),
-      allWorkflowRunsAccessionIds: get(
-        "workflow_runs_accession_ids.all",
-        sample.details
-      ),
     },
     collectionLocation: get("metadata.collection_location", sample.details),
     collectionLocationV2: get(
@@ -222,14 +210,7 @@ const processRawSample = sample => {
       "derived_sample_output.pipeline_run.total_reads",
       sample.details
     ),
-    totalRuntime: get(
-      [
-        "run_info_by_workflow",
-        WORKFLOWS.SHORT_READ_MNGS.value,
-        "total_runtime",
-      ],
-      sample.details
-    ),
+    totalRuntime: get("mngs_run_info.total_runtime", sample.details),
     waterControl: get("metadata.water_control", sample.details),
     ...consensusGenomeFields,
   };
@@ -301,7 +282,6 @@ const processRawWorkflowRun = workflowRun => {
     notes: getSampleField(["info", "sample_notes"]),
     privateUntil: getSampleField(["info", "private_until"]),
     projectId: getSampleField(["info", "project_id"]),
-    collectionLocation: getSampleField(["metadata", "collection_location"]),
     collectionLocationV2: getSampleField([
       "metadata",
       "collection_location_v2",

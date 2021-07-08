@@ -24,7 +24,6 @@ import { IconInfoSmall } from "~/components/ui/icons";
 import ImgVizSecondary from "~/components/ui/illustrations/ImgVizSecondary";
 import PropTypes from "~/components/utils/propTypes";
 import { getTooltipStyle } from "~/components/utils/tooltip";
-import { WORKFLOWS } from "~/components/utils/workflows";
 import { SAMPLE_TABLE_COLUMNS_V2 } from "~/components/views/samples/constants.js";
 import Histogram from "~/components/visualizations/Histogram";
 import HorizontalStackedBarChart from "~/components/visualizations/bar_charts/HorizontalStackedBarChart";
@@ -260,22 +259,10 @@ class QualityControl extends React.Component {
       // The `created_at` field is only present+filled for a workflow run type
       // if the sample has a workflow run of that type, so we check if the sample
       // has `created_at` filled for mNGS.
-      if (
-        get(
-          [
-            "run_info_by_workflow",
-            WORKFLOWS.SHORT_READ_MNGS.value,
-            "created_at",
-          ],
-          sample.details
-        )
-      ) {
+      if (get("mngs_run_info.created_at", sample.details)) {
         const runInfo =
           get("upload_error", sample.details) ||
-          get(
-            ["run_info_by_workflow", WORKFLOWS.SHORT_READ_MNGS.value],
-            sample.details
-          );
+          get("mngs_run_info", sample.details);
         if (
           runInfo.result_status_description === "FAILED" ||
           runInfo.result_status_description === "COMPLETE - ISSUE" ||

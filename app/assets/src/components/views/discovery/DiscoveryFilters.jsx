@@ -166,7 +166,7 @@ class DiscoveryFilters extends React.Component {
                 domain={domain}
                 onChange={this.handleChange.bind(this, "taxonSelected")}
                 selectedOptions={taxonSelected}
-                disabled={workflow !== WORKFLOWS.SHORT_READ_MNGS.value}
+                disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
               />
               {this.renderTags("taxon")}
             </div>

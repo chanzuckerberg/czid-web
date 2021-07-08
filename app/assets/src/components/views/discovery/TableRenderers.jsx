@@ -1,12 +1,9 @@
 import cx from "classnames";
-import { at, isNil, get, size } from "lodash/fp";
+import { at, isNil, get } from "lodash/fp";
 import moment from "moment";
 import React from "react";
 
 import BasicPopup from "~/components/BasicPopup";
-import List from "~/components/ui/List";
-import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
-import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
 import { numberWithCommas } from "~/helpers/strings";
 import { IconSamplePrivate, IconSamplePublic } from "~ui/icons";
 import IconSample from "~ui/icons/IconSample";
@@ -172,60 +169,14 @@ class TableRenderers extends React.Component {
     );
   };
 
-  static renderSample = ({
-    sample,
-    workflow = null,
-    full = true,
-    basicIcon = false,
-    allowedFeatures = [],
-  }) => {
+  static renderSample = ({ sample, full = true, basicIcon = false }) => {
     const sampleName = get("name", sample);
-    const numOfCg = sample && size(sample.allWorkflowRunsAccessionIds);
-    const shouldShowMoreCGPopup =
-      allowedFeatures.includes(GEN_VIRAL_CG_FEATURE) && numOfCg > 1;
-
     let sampleStatus;
-    let cgPopupListItems;
-    let cgPopupContent;
 
     if (sample) {
-      if (sample.uploadError) sampleStatus = sample.uploadError;
-      else if (workflow) sampleStatus = get(workflow, sample.statusByWorkflow);
-      // no upload error occurred and no workflow was specified so default to the initialWorkflow
-      else sampleStatus = get(sample.initialWorkflow, sample.statusByWorkflow);
-
-      if (shouldShowMoreCGPopup) {
-        cgPopupListItems = [
-          <div className={cs.topWr}>
-            <div className={cs.accessionId}>
-              {sample.topCgWorkflowRunAccessionId}
-            </div>{" "}
-            - Currently shown
-          </div>,
-        ];
-
-        sample.allWorkflowRunsAccessionIds.forEach(accessionId => {
-          if (accessionId !== sample.topCgWorkflowRunAccessionId) {
-            cgPopupListItems.push(
-              <div className={cs.accessionId}>{accessionId}</div>
-            );
-          }
-        });
-
-        cgPopupContent = numOfCg && (
-          <div className={cs.popup}>
-            <div className={cs.header}>
-              {numOfCg} total consensus genomes run on this sample:
-            </div>
-            <List
-              listItems={cgPopupListItems}
-              listClassName={cs.list}
-              itemClassName={cs.unorderedListItem}
-            />
-            Click sample to view others on the report page.
-          </div>
-        );
-      }
+      sampleStatus = sample.uploadError
+        ? sample.uploadError
+        : sample.pipelineRunStatus;
     }
 
     return (
@@ -262,19 +213,6 @@ class TableRenderers extends React.Component {
             <div className={cs.sampleDetails}>
               <span className={cs.user}>{sample.user}</span>|
               <span className={cs.project}>{sample.project}</span>
-              {shouldShowMoreCGPopup && (
-                <ColumnHeaderTooltip
-                  trigger={
-                    <div className={cs.consensusGenomeCount}>
-                      {`+${numOfCg - 1} more genome${numOfCg > 2 ? "s" : ""}`}
-                    </div>
-                  }
-                  content={cgPopupContent}
-                  position="top left"
-                  wide
-                  offset={[21, 0]}
-                />
-              )}
             </div>
           ) : (
             <div className={cs.sampleDetails} />

@@ -4,6 +4,7 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
 
+import { WORKFLOWS } from "~/components/utils/workflows";
 import { getURLParamString } from "~/helpers/url";
 
 import {
@@ -167,6 +168,7 @@ const getSamples = ({
         basic, // if true, then don't include extra details (ex: metadata) for each sample
         // &sampleIds=[1,2] instead of default &sampleIds[]=1&sampleIds[]=2 format.
         sampleIds: JSON.stringify(sampleIds),
+        workflow: WORKFLOWS.SHORT_READ_MNGS.value,
         ...filters,
       },
     }
@@ -496,12 +498,10 @@ const getMassNormalizedBackgroundAvailability = sampleIds =>
   });
 
 const createConsensusGenomeCladeExport = ({
-  sampleIds = [],
   workflowRunIds = [],
   referenceTree,
 }) =>
-  postWithCSRF("/samples/consensus_genome_clade_export", {
-    sampleIds,
+  postWithCSRF("/workflow_runs/consensus_genome_clade_export", {
     workflowRunIds,
     referenceTree,
   });

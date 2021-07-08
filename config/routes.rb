@@ -67,7 +67,6 @@ Rails.application.routes.draw do
       post :taxa_with_reads_suggestions
       post :taxa_with_contigs_suggestions
       post :uploaded_by_current_user
-      post :consensus_genome_clade_export
     end
   end
 
@@ -232,6 +231,7 @@ Rails.application.routes.draw do
     collection do
       post :validate_workflow_run_ids
       post :created_by_current_user
+      post :consensus_genome_clade_export
     end
   end
 

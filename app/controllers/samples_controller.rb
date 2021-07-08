@@ -80,10 +80,6 @@ class SamplesController < ApplicationController
     :workflow,
   ].freeze
 
-  CLADE_FASTA_S3_KEY = "clade_exports/fastas/temp-%{path}".freeze
-  CLADE_REFERENCE_TREE_S3_KEY = "clade_exports/trees/temp-%{path}".freeze
-  CLADE_EXTERNAL_SITE = "clades.nextstrain.org".freeze
-
   def index_v2
     # this method is going to replace 'index' once we fully migrate to the
     # discovery views (old one was kept to avoid breaking the current interface
@@ -1351,66 +1347,6 @@ class SamplesController < ApplicationController
     render json: {
       uploaded_by_current_user: sample_ids.length == samples.length,
     }
-  end
-
-  # TODO(omar): Move to WorkflowRunsController when clearning up dead CG code from this controller [CH-136648]
-  def consensus_genome_clade_export
-    # Get the WorkflowRuns.
-    sample_ids = collection_params[:sampleIds]
-    workflow_run_ids = collection_params[:workflowRunIds]
-
-    if sample_ids.present?
-      samples = samples_scope.where(id: sample_ids)
-      workflow_runs = current_power.samples_workflow_runs(samples).consensus_genomes.active
-    elsif workflow_run_ids.present?
-      workflow_runs = current_power.workflow_runs.where(id: workflow_run_ids).consensus_genomes.active
-    end
-
-    # Remove the line below if generalizing beyond SARS-CoV-2
-    workflow_runs = workflow_runs.select { |wr| wr.inputs&.[]("accession_id") == ConsensusGenomeWorkflowRun::SARS_COV_2_ACCESSION_ID }
-    workflow_run_ids = workflow_runs.pluck(:id)
-
-    if workflow_run_ids.empty?
-      render(
-        json: { status: "No valid WorkflowRuns" },
-        status: :bad_request
-      ) and return
-    end
-
-    # Concatenate the fastas, upload to S3, and generate a presigned link.
-    content = ConsensusGenomeConcatService.call(workflow_run_ids)
-    key = format(CLADE_FASTA_S3_KEY, path: SecureRandom.alphanumeric(5))
-    S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, key, content)
-    fasta_url = get_presigned_s3_url(bucket_name: SAMPLES_BUCKET_NAME, key: key, duration: 300)
-
-    # Generate the external URL.
-    options = { "input-fasta": fasta_url }
-    # If a reference tree file was provided, upload to s3 and generate a presigned link.
-    if collection_params[:referenceTree].present?
-      tree_key = format(CLADE_REFERENCE_TREE_S3_KEY, path: SecureRandom.alphanumeric(5))
-      tree_contents = collection_params[:referenceTree]
-      S3Util.upload_to_s3(SAMPLES_BUCKET_NAME, tree_key, tree_contents)
-      tree_url = get_presigned_s3_url(bucket_name: SAMPLES_BUCKET_NAME, key: tree_key, duration: 300)
-      options["input-tree"] = tree_url
-    end
-    external_url = URI::HTTPS.build(host: CLADE_EXTERNAL_SITE, query: options.to_query)
-
-    # Ensure data export is logged and attributed.
-    event_name = "SamplesController_clade_exported"
-    MetricUtil.log_analytics_event(event_name, current_user, { sample_ids: samples&.pluck(:id) || [], workflow_run_ids: workflow_run_ids || [] }, request)
-    Rails.logger.info("#{event_name} by user #{current_user.id} for workflow runs (#{workflow_run_ids})")
-
-    render(
-      json: { external_url: external_url },
-      status: :ok
-    )
-  rescue StandardError => e
-    message = "Unexpected error in clade export generation"
-    LogUtil.log_error(message, exception: e, workflow_run_ids: workflow_run_ids)
-    render(
-      json: { status: message },
-      status: :internal_server_error
-    )
   end
 
   # Use callbacks to share common setup or constraints between actions.
