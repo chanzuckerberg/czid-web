@@ -10,6 +10,7 @@ class LogUtil
       details: details,
     }.to_json)
     if exception
+      # Exceptions have a default level of "error".
       Raven.capture_exception(
         exception,
         message: message,
@@ -18,9 +19,12 @@ class LogUtil
     end
   end
 
-  def self.log_message(message, **details)
+  # If you want to report a message rather than an exception you can use the log_message method.
+  # Levels we can specify here: "debug", "info", "warning", "error", "fatal".
+  def self.log_message(message, level: "info", **details)
     Raven.capture_message(
       message,
+      level: level,
       extra: details
     )
   end
