@@ -17,4 +17,11 @@ class LogUtil
       )
     end
   end
+
+  def self.log_message(message, **details)
+    Raven.capture_message(
+      message,
+      extra: details
+    )
+  end
 end
