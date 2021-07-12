@@ -7,7 +7,8 @@ desc 'Imports NCBI lineage data into IDseq'
 #
 # NCBI publishes unversioned dumps of its taxonomy database. This script
 # imports a previously downloaded dump into MySQL, denormalizes it, and inserts
-# the rows into taxon_lineages. We insert only new records and update the rest.
+# the rows into taxon_lineages. We insert only new records and insert new versions
+# of records that are updated.
 #
 # Lineage records are assigned a [version_start, version_end] inclusive range.
 # Each pipline run has an AlignmentConfig that has a lineage_version. The
@@ -22,7 +23,8 @@ desc 'Imports NCBI lineage data into IDseq'
 #
 # In summary:
 # If a current lineage record is still valid, its version_end gets += 1.
-# If a current lineage record is different in any column, it is updated.
+# If a current lineage record is different in any column, it's version_end stays the same
+#   and a new record is inserted with it's version_start and version_end equal to the new version.
 # If a new lineage record appears, it is inserted.
 # If a current lineage record is absent, its version_end stays the same.
 #
@@ -403,8 +405,7 @@ class LineageDatabaseImporter
       "SELECT old.taxid
       FROM taxon_lineages old
       INNER JOIN #{@taxon_lineages_table} new USING(taxid)
-      WHERE old.version_end = #{@current_version}
-        AND (#{col_expressions.join("\n OR ")})"
+      WHERE (#{col_expressions.join("\n OR ")})"
     ).pluck("taxid")
   end
 
@@ -451,8 +452,9 @@ class LineageDatabaseImporter
 
     if update_ids.count > 0
       check_affected("
-        DELETE FROM taxon_lineages
-        WHERE taxid IN (#{update_ids.join(', ')})
+        UPDATE taxon_lineages
+        SET ended_at = '#{@ncbi_date}'
+        WHERE (taxid IN (#{update_ids.join(', ')}))
           AND version_end = #{@current_version}
       ", update_ids.count)
       check_affected("
