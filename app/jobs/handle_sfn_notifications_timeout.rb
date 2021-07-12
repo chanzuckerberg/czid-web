@@ -23,16 +23,27 @@ class HandleSfnNotificationsTimeout
         wr.update_status(WorkflowRun::STATUS[:failed])
         Rails.logger.info("Marked WorkflowRun #{wr.id} as failed due to timeout.")
       end
+    end
 
+    overdue_trees = PhyloTreeNg.where(status: WorkflowRun::STATUS[:running]).where("executed_at < ?", MAX_RUNTIME.ago)
+    if overdue_trees.present?
+      overdue_trees.each do |pt|
+        # Alert is sent within update_status:
+        pt.update_status(WorkflowRun::STATUS[:failed])
+        Rails.logger.info("Marked PhyloTreeNg #{pt.id} as failed due to timeout.")
+      end
+    end
+
+    if overdue_runs.present? || overdue_trees.present?
       dimensions = [
         { name: "EventName", value: "SfnNotificationsTimeout" },
       ]
       metric_data = [
-        CloudWatchUtil.create_metric_datum("Event occurrences", overdue_runs.size, "Count", dimensions),
+        CloudWatchUtil.create_metric_datum("Event occurrences", overdue_runs.size + overdue_trees.size, "Count", dimensions),
       ]
       CloudWatchUtil.put_metric_data("#{Rails.env}-sfn-notifications-timeout-count", metric_data)
     end
 
-    return overdue_runs.size
+    return overdue_runs.size + overdue_trees.size
   end
 end

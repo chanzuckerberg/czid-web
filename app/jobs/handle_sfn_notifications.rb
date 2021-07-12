@@ -20,11 +20,15 @@ class HandleSfnNotifications
         status = details["status"]
 
         wr = WorkflowRun.find_by(sfn_execution_arn: arn)
-        # TODO(julie): add a case for phylo_tree_ng
+        pt = PhyloTreeNg.find_by(sfn_execution_arn: arn)
         if wr
           wr.update_status(status)
           sqs_msg.delete
           Rails.logger.info("Updated WorkflowRun #{wr.id} #{arn} to #{status}")
+        elsif pt
+          pt.update_status(status)
+          sqs_msg.delete
+          Rails.logger.info("Updated PhyloTreeNg #{pt.id} #{arn} to #{status}")
         end
       end
     end

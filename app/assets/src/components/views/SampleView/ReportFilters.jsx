@@ -133,7 +133,7 @@ class ReportFilters extends React.Component {
                 serverSearchActionArgs={{
                   // TODO (gdingle): change backend to support filter by sampleId
                   args: "species,genus",
-                  sample_id: sampleId,
+                  sampleId,
                 }}
                 onResultSelect={(_, { result }) => {
                   return this.handleFilterChange({

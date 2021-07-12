@@ -131,14 +131,16 @@ class PhyloTreeNgsController < ApplicationController
 
   def create
     permitted_params = create_params
-    pipeline_run_ids = permitted_params[:pipeline_run_ids].map(&:to_i)
-    project_id = permitted_params[:project_id]&.to_i
-    tax_id = permitted_params[:tax_id]&.to_i
+    pipeline_run_ids = permitted_params[:pipelineRunIds].map(&:to_i)
+    project_id = permitted_params[:projectId]&.to_i
+    tax_id = permitted_params[:taxId]&.to_i
 
     if ApplicationHelper::HUMAN_TAX_IDS.include? tax_id
       render json: { message: "Human taxon ids are not allowed" }, status: :forbidden
       return
     end
+
+    superkingdom_name = TaxonLineage.where(taxid: tax_id).last.superkingdom_name.downcase
 
     project = current_power.updatable_projects.find(project_id)
     non_viewable_pipeline_run_ids = pipeline_run_ids.to_set - current_power.pipeline_runs.pluck(:id).to_set
@@ -147,12 +149,13 @@ class PhyloTreeNgsController < ApplicationController
     else
       phylo_tree = PhyloTreeNg.new(
         inputs_json: {
-          additional_reference_accession_ids: permitted_params[:additional_reference_accession_ids],
+          additional_reference_accession_ids: permitted_params[:additional_reference_accession_ids] || [],
           tax_id: tax_id,
-          superkingdom_name: permitted_params[:superkingdom_name],
+          superkingdom_name: superkingdom_name,
           pipeline_run_ids: pipeline_run_ids,
         },
         name: sanitize_title_name(permitted_params[:name]),
+        pipeline_runs: PipelineRun.where(id: pipeline_run_ids),
         project_id: project.id,
         user_id: current_user.id
       )
@@ -175,12 +178,12 @@ class PhyloTreeNgsController < ApplicationController
     end
 
     filters = {}
-    if collection_params[:project_id]
-      filters[:project_id] = current_power.projects.find(collection_params[:project_id]).id
+    if collection_params[:projectId]
+      filters[:projectId] = current_power.projects.find(collection_params[:projectId]).id
     end
-    if collection_params[:sample_id]
+    if collection_params[:sampleId]
       # Note: 'where' because downstream expects a Relation.
-      filters[:samples] = current_power.samples.where(id: collection_params[:sample_id])
+      filters[:samples] = current_power.samples.where(id: collection_params[:sampleId])
     end
 
     taxon_list = taxon_search(collection_params[:query], tax_levels, filters)
@@ -244,7 +247,7 @@ class PhyloTreeNgsController < ApplicationController
   end
 
   def collection_params
-    params.permit(:name, :query, :args, :project_id, :sample_id)
+    params.permit(:name, :query, :args, :projectId, :sampleId)
   end
 
   def index_params
@@ -256,7 +259,7 @@ class PhyloTreeNgsController < ApplicationController
   end
 
   def create_params
-    params.permit(:name, :project_id, :tax_id, :superkingdom_name, { additional_reference_accession_ids: [], pipeline_run_ids: [] })
+    params.permit(:name, :projectId, :taxId, { additionalReferenceAccessionIds: [], pipelineRunIds: [] })
   end
 
   def fetch_phylo_tree_ngs(filters: {})

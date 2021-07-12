@@ -296,6 +296,8 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       sample_two = create(:sample, project: @project)
       @pr_two = create(:pipeline_run, sample: sample_two)
 
+      create(:taxon_lineage, taxid: 1, tax_name: "some species", superkingdom_name: "Viruses")
+
       admin_project = create(:project, users: [@admin])
       admin_sample_one = create(:sample, project: admin_project)
       @admin_pr_one = create(:pipeline_run, sample: admin_sample_one)
@@ -307,12 +309,11 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     context "user creates a phylo tree using their samples" do
       it "should create and dispatch a new phylo tree ng" do
         phylo_tree_ng_params = {
-          pipeline_run_ids: [@pr_one.id, @pr_two.id],
-          tax_id: 1,
-          superkingdom_name: "viruses",
+          pipelineRunIds: [@pr_one.id, @pr_two.id],
+          taxId: 1,
           name: "new_tree",
-          project_id: @project.id,
-          user_id: @joe.id,
+          projectId: @project.id,
+          userId: @joe.id,
         }
 
         post :create, params: phylo_tree_ng_params
@@ -336,12 +337,11 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     context "user tries creating a phylo tree using an admin's sample" do
       it "should return an unauthorized error" do
         phylo_tree_ng_params = {
-          pipeline_run_ids: [@pr_one.id, @admin_pr_one.id],
-          tax_id: 1,
-          superkingdom_name: "viruses",
+          pipelineRunIds: [@pr_one.id, @admin_pr_one.id],
+          taxId: 1,
           name: "new_tree",
-          project_id: @project.id,
-          user_id: @joe.id,
+          projectId: @project.id,
+          userId: @joe.id,
         }
 
         post :create, params: phylo_tree_ng_params
@@ -570,15 +570,15 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
 
       it "raises an error for invalid project id" do
         expect do
-          get :choose_taxon, params: { query: query, project_id: forbidden_project.id }
+          get :choose_taxon, params: { query: query, projectId: forbidden_project.id }
         end.to raise_error(ActiveRecord::RecordNotFound)
       end
 
       it "limits results by project id" do
         project_id = allowed_project.id
-        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, { project_id: project_id }).and_return(fake_results)
+        expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, { projectId: project_id }).and_return(fake_results)
 
-        get :choose_taxon, params: { query: query, project_id: project_id }
+        get :choose_taxon, params: { query: query, projectId: project_id }
 
         expect(response).to have_http_status(:success)
         json_response = JSON.parse(response.body)
@@ -588,7 +588,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       it "limits results by sample id" do
         expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, hash_including(:samples)).and_return(fake_results)
 
-        get :choose_taxon, params: { query: query, sample_id: allowed_sample.id }
+        get :choose_taxon, params: { query: query, sampleId: allowed_sample.id }
 
         expect(response).to have_http_status(:success)
         json_response = JSON.parse(response.body)
@@ -598,7 +598,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       it "filters out invalid sample ids" do
         expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, nil, { samples: match_array([]) }).and_return(fake_results)
 
-        get :choose_taxon, params: { query: query, sample_id: forbidden_sample.id }
+        get :choose_taxon, params: { query: query, sampleId: forbidden_sample.id }
 
         expect(response).to have_http_status(:success)
         json_response = JSON.parse(response.body)
@@ -608,7 +608,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       it "allows valid taxonomy levels in args" do
         expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, tax_levels, hash_including(:samples)).and_return(fake_results)
 
-        get :choose_taxon, params: { query: query, args: "species,genus", sample_id: allowed_sample.id }
+        get :choose_taxon, params: { query: query, args: "species,genus", sampleId: allowed_sample.id }
 
         expect(response).to have_http_status(:success)
         json_response = JSON.parse(response.body)
@@ -618,7 +618,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       it "ignores invalid taxonomy levels" do
         expect_any_instance_of(ElasticsearchHelper).to receive(:taxon_search).with(query, [], hash_including(:samples)).and_return(fake_results)
 
-        get :choose_taxon, params: { query: query, args: "ordo", sample_id: allowed_sample.id }
+        get :choose_taxon, params: { query: query, args: "ordo", sampleId: allowed_sample.id }
 
         expect(response).to have_http_status(:success)
         json_response = JSON.parse(response.body)

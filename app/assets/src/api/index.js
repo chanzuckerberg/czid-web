@@ -381,6 +381,32 @@ const getContigsSequencesByByteranges = (
   return get(`/samples/${sampleId}/contigs_sequences_by_byteranges?${params}`);
 };
 
+const createPhyloTree = ({
+  treeName,
+  dagBranch,
+  dagVars,
+  projectId,
+  taxId,
+  taxName,
+  pipelineRunIds,
+  nextGeneration = false,
+}) => {
+  const endpoint = nextGeneration
+    ? "/phylo_tree_ngs/create.json"
+    : "/phylo_trees/create.json";
+
+  return postWithCSRF(endpoint, {
+    name: treeName,
+    projectId,
+    taxId,
+    pipelineRunIds,
+    // The following inputs are only applicable for the old phylo_trees/create endpoint.
+    dagBranch,
+    dagVars,
+    taxName,
+  });
+};
+
 const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 
 const validatePhyloTreeName = name =>
@@ -530,6 +556,7 @@ export {
   bulkImportRemoteSamples,
   createBackground,
   createConsensusGenomeCladeExport,
+  createPhyloTree,
   createProject,
   deleteSample,
   getAlignmentData,

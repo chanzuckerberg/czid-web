@@ -131,6 +131,9 @@ Rails.application.routes.draw do
   get 'search_suggestions', to: 'samples#search_suggestions'
   get 'phylo_trees/validate_name', to: 'phylo_trees#validate_name'
 
+  post 'phylo_tree_ngs/create', to: 'phylo_tree_ngs#create'
+  get 'choose_taxon_ng', to: 'phylo_tree_ngs#choose_taxon'
+
   get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
   post 'visualizations/taxa_details.json', to: 'visualizations#taxa_details'
   get 'visualizations/heatmap_metrics.json', to: 'visualizations#heatmap_metrics'

@@ -2,7 +2,7 @@ import axios from "axios";
 import PropTypes from "prop-types";
 import React from "react";
 import Moment from "react-moment";
-import { validatePhyloTreeName } from "~/api";
+import { createPhyloTree, validatePhyloTreeName } from "~/api";
 import { IconLoading } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 import Wizard from "../../ui/containers/Wizard";
@@ -10,6 +10,8 @@ import Input from "../../ui/controls/Input";
 import SearchBox from "../../ui/controls/SearchBox";
 import DataTable from "../../visualizations/table/DataTable";
 import PhyloTreeChecks from "./PhyloTreeChecks";
+import { UserContext } from "~/components/common/UserContext";
+import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
 
 class PhyloTreeCreation extends React.Component {
   constructor(props) {
@@ -295,6 +297,14 @@ class PhyloTreeCreation extends React.Component {
   };
 
   handleCreation() {
+    const {
+      taxonId: taxId,
+      taxonName: taxName,
+      treeName,
+      projectId,
+    } = this.state;
+    const { allowedFeatures = [] } = this.context || {};
+
     if (!this.isNumberOfSamplesValid()) {
       this.setState({
         showErrorSamples: true,
@@ -310,19 +320,17 @@ class PhyloTreeCreation extends React.Component {
       pipelineRunIds.push(this.state.otherSamples[rowIndex].pipelineRunId);
     });
 
-    axios
-      .post("/phylo_trees/create", {
-        name: this.state.treeName,
-        dagBranch: this.dagBranch,
-        dagVars: this.dagVars,
-        projectId: this.state.projectId,
-        taxId: this.state.taxonId,
-        taxName: this.state.taxonName,
-        pipelineRunIds: pipelineRunIds,
-        authenticity_token: this.props.csrf,
-      })
-      .then(response => {
-        let phyloTreeId = response.data.phylo_tree_id;
+    createPhyloTree({
+      treeName,
+      dagBranch: this.dagBranch,
+      dagVars: this.dagVars,
+      projectId,
+      taxId,
+      taxName,
+      pipelineRunIds,
+      nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
+    })
+      .then(({ phylo_tree_id: phyloTreeId }) => {
         if (phyloTreeId) {
           location.href = `/phylo_trees/index?treeId=${phyloTreeId}`;
         } else {
@@ -442,6 +450,7 @@ class PhyloTreeCreation extends React.Component {
   }
 
   page(action) {
+    const { allowedFeatures = [] } = this.context || {};
     const projectSamplesColumns = [
       "name",
       "host",
@@ -510,10 +519,14 @@ class PhyloTreeCreation extends React.Component {
             <div className="wizard__page-2__searchbar__container">Organism</div>
             <div className="wizard__page-2__searchbar__container">
               <SearchBox
-                serverSearchAction="choose_taxon"
+                serverSearchAction={
+                  allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)
+                    ? "choose_taxon_ng"
+                    : "choose_taxon"
+                }
                 serverSearchActionArgs={{
                   args: "species,genus",
-                  project_id: this.state.projectId,
+                  projectId: this.state.projectId,
                 }}
                 onResultSelect={this.handleSelectTaxon}
                 initialValue={this.state.taxonName}
@@ -676,5 +689,7 @@ PhyloTreeCreation.propTypes = {
   taxonId: PropTypes.number,
   taxonName: PropTypes.string,
 };
+
+PhyloTreeCreation.contextType = UserContext;
 
 export default PhyloTreeCreation;

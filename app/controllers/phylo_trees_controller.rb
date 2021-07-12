@@ -126,12 +126,12 @@ class PhyloTreesController < ApplicationController
     taxon_search_args = [params[:query]]
     taxon_search_args << params[:args].split(",") if params[:args].present?
     filters = {}
-    if params[:project_id]
-      filters[:project_id] = current_power.projects.find(params[:project_id]).id
+    if params[:projectId]
+      filters[:projectId] = current_power.projects.find(params[:projectId]).id
     end
-    if params[:sample_id]
+    if params[:sampleId]
       # Note: 'where' because downstream expects a Relation.
-      filters[:samples] = current_power.samples.where(id: params[:sample_id])
+      filters[:samples] = current_power.samples.where(id: params[:sampleId])
     end
     taxon_search_args << filters
     taxon_list = taxon_search(*taxon_search_args)
