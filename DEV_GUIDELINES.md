@@ -389,6 +389,22 @@ class NoDepthDataError < StandardError
 end
 ```
 
+### Use camelCase for new controller parameter names
+
+As with the JSON rule above, try to use camelCase for new Rails controller parameter names to standardize. If the value gets saved in a Ruby variable, the Ruby variable name should still be snake_case.
+
+#### **Avoid**
+
+```
+params.permit(:name, :project_id, :tax_id, :superkingdom_name, { additional_reference_accession_ids: [], pipeline_run_ids: [] })
+```
+
+#### **Aspire**
+
+```
+params.permit(:name, :projectId, :taxId, :superkingdomName, { additionalReferenceAccessionIds: [], pipelineRunIds: [] })
+```
+
 ## Ruby testing
 
 - You do not need to test private methods but make sure everything at a higher level is covered. Try to make sure the entire interface is covered (there will be some special cases where testing private methods will be useful). When reviewing PRs, pay extra attention to ensure the interface is well tested. Read [Unit Testing: Interface vs. Implementation](https://mehulkar.com/blog/unit-testing-interface-vs-implementation/) for more info!
