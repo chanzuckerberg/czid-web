@@ -22,7 +22,7 @@ class ProjectsController < ApplicationController
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility, :upload_metadata, :validate_metadata_csv].freeze
   OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
-  TOKEN_AUTH_METHODS = [:index, :create].freeze
+  TOKEN_AUTH_METHODS = [:index, :create, :validate_sample_names].freeze
 
   # Required for token auth for CLI actions
   prepend_before_action :token_based_login_support, only: TOKEN_AUTH_METHODS
