@@ -542,12 +542,9 @@ class DiscoveryView extends React.Component {
   };
 
   refreshSampleData = () => {
-    const { workflow } = this.state;
-
     this.setState({
       filteredSampleCount: this.samples.length,
-      selectableSampleIds:
-        workflow === WORKFLOWS.SHORT_READ_MNGS ? this.samples.getIds() : [],
+      selectableSampleIds: this.samples.getIds(),
     });
   };
 

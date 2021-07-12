@@ -135,7 +135,6 @@ class SamplesView extends React.Component {
     onUpdateSelectedIds(newSelected);
   };
 
-  // TODO: implement for workflow runs
   isSelectAllChecked = () => {
     const { selectableIds, selectedIds } = this.props;
     return (
