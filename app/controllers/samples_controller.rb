@@ -1410,9 +1410,11 @@ class SamplesController < ApplicationController
   end
 
   def warn_if_large_bulk_upload(samples)
-    # 100 is the limit that was chosen during covid19 surge for biohub projects.
-    # At the time, we had successfully handled up to ~1000 uploads per day.
-    if samples.length < 100
+    # NOTE(2021-07-14): We raised this to 400 because users will frequently
+    # upload a 384-well plate. CG samples in particular have a lower failure
+    # rate than mngs, so this notification is simply an FYI (you'll get failed
+    # sample alerts separately).
+    if samples.length < 400
       return
     end
 

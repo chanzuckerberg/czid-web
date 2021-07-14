@@ -493,6 +493,6 @@ export default class AMRHeatmapView extends React.Component {
   }
 }
 
-AMRHeatmapVis.propTypes = {
+AMRHeatmapView.propTypes = {
   sampleIds: PropTypes.array,
 };

@@ -24,6 +24,7 @@ const NoSearchResultsBanner = ({
 };
 
 NoSearchResultsBanner.propTypes = {
+  className: PropTypes.string,
   icon: PropTypes.elementType.isRequired,
   link: PropTypes.shape({
     href: PropTypes.string.isRequired,

@@ -238,6 +238,7 @@ class PhyloTreeVis extends React.Component {
 }
 
 PhyloTreeVis.propTypes = {
+  afterSelectedMetadataChange: PropTypes.func,
   defaultMetadata: PropTypes.string,
   newick: PropTypes.string,
   nodeData: PropTypes.object,
