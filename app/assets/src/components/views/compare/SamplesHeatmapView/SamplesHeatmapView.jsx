@@ -13,6 +13,7 @@ import {
   omit,
   property,
   set,
+  size,
   toLower,
   uniq,
   values,
@@ -24,7 +25,11 @@ import { connect } from "react-redux";
 
 import { getSampleTaxons, getTaxaDetails, saveVisualization } from "~/api";
 import { validateSampleIds } from "~/api/access_control";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  logAnalyticsEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { getSampleMetadataFields } from "~/api/metadata";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -597,14 +602,25 @@ class SamplesHeatmapView extends React.Component {
   }
 
   handleLoadingFailure = err => {
-    logError({
-      message: "SamplesHeatmapView: Error loading heatmap data",
-      details: { err },
-    });
+    const { allTaxonIds, sampleIds } = this.state;
+
     this.setState({
       loading: false,
       loadingFailed: true,
     });
+
+    logError({
+      message: "SamplesHeatmapView: Error loading heatmap data",
+      details: { err, sampleIds },
+    });
+    logAnalyticsEvent(
+      ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR,
+      {
+        numSamples: size(sampleIds),
+        numTaxons: size(allTaxonIds),
+        sampleIds: sampleIds,
+      }
+    );
   };
 
   extractDataFromService(rawData) {

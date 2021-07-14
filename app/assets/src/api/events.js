@@ -140,6 +140,10 @@ function EventDictionary() {
   /** The user clicked on the Learn More link in the project visibility tooltip. */
   this.PROJECT_VISIBILITY_HELP_LINK_CLICKED =
     "PROJECT_VISIBILITY_HELP_LINK_CLICKED";
+
+  /** The user ran into an error while loading heatmap data. */
+  this.SAMPLES_HEATMAP_VIEW_LOADING_ERROR =
+    "SAMPLES_HEATMAP_VIEW_LOADING_ERROR";
 }
 
 const eventNames = new EventDictionary();
