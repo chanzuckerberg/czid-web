@@ -274,6 +274,7 @@ const SampleDetailsMode = ({
 
 SampleDetailsMode.propTypes = {
   currentRun: PropTypes.object,
+  currentWorkflowTab: PropTypes.string,
   sampleId: PropTypes.number,
   pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,

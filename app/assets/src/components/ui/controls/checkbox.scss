@@ -20,6 +20,12 @@
     position: absolute;
   }
 
+  &.disabled {
+    cursor: default !important;
+    border: $gray-lightest;
+    pointer-events: none;
+  }
+
   .checkmark {
     position: relative;
     height: 16px;

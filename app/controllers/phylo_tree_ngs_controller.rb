@@ -300,17 +300,27 @@ class PhyloTreeNgsController < ApplicationController
     # - sample name
     # - project id and name
     # - pipeline run id to be used for the sample.
-    samples_projects = Sample.joins(:pipeline_runs, :project, :host_genome).where(
-      pipeline_runs: { id: pipeline_run_ids }
-    ).pluck(
-      "samples.name,
+    samples_projects = Sample.joins(:project, :host_genome, pipeline_runs: [:contigs]).where(
+      pipeline_runs: { id: pipeline_run_ids },
+      contigs: { pipeline_run_id: pipeline_run_ids }
+    ).where(Arel.sql("
+      contigs.species_taxid_nt = :tax_id or
+      contigs.genus_taxid_nt = :tax_id or
+      contigs.species_taxid_nr = :tax_id or
+      contigs.genus_taxid_nt = :tax_id
+    "), tax_id: tax_id).group(
+      "samples_name",
+      "pipeline_run_id"
+    ).pluck(Arel.sql("
+      samples.name as samples_name,
       samples.project_id,
       samples.created_at,
       host_genomes.name as host,
       projects.name as project_name,
       pipeline_runs.id as pipeline_run_id,
-      samples.id as sample_id"
-    ).map do |name, project_id, created_at, host, project_name, pipeline_run_id, sample_id|
+      samples.id as sample_id,
+      COUNT(DISTINCT(contigs.id)) as num_contigs
+    ")).map do |name, project_id, created_at, host, project_name, pipeline_run_id, sample_id, num_contigs|
       {
         "name" => name,
         "project_id" => project_id,
@@ -319,27 +329,15 @@ class PhyloTreeNgsController < ApplicationController
         "project_name" => project_name,
         "pipeline_run_id" => pipeline_run_id,
         "sample_id" => sample_id,
+        "num_contigs" => num_contigs,
       }
     end
 
-    # Also add:
-    # - number of reads matching the specified tax_id.
-    # Do not include the query on taxon_counts in the previous query above using a join,
-    # because the taxon_counts table is large.
-    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: tax_id).index_by { |tc| "#{tc.pipeline_run_id},#{tc.count_type}" }
-
     metadata_by_sample_id = Metadatum.by_sample_ids(samples_projects.pluck("sample_id"), use_raw_date_strings: true)
-
-    nt_nr = %w[NT NR]
     samples_projects.each do |sp|
-      sp["taxid_reads"] ||= {}
-      nt_nr.each do |count_type|
-        key = "#{sp['pipeline_run_id']},#{count_type}"
-        sp["taxid_reads"][count_type] = (taxon_counts[key] || []).count # count is a column of taxon_counts indicating number of reads
-      end
       if metadata_by_sample_id[sp["sample_id"]]
-        sp["sample_type"] = metadata_by_sample_id[sp["sample_id"]][:sample_type]
-        sp["collection_location"] = metadata_by_sample_id[sp["sample_id"]][:collection_location_v2]
+        sp["tissue"] = metadata_by_sample_id[sp["sample_id"]][:sample_type]
+        sp["location"] = metadata_by_sample_id[sp["sample_id"]][:collection_location_v2]
       end
     end
 

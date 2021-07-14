@@ -409,8 +409,41 @@ const createPhyloTree = ({
 
 const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 
-const validatePhyloTreeName = name =>
-  get(`/phylo_trees/validate_name`, { params: { name } });
+const getPhyloTrees = ({ taxId, projectId, nextGeneration = false }) => {
+  const endpoint = nextGeneration
+    ? "/phylo_tree_ngs/index.json"
+    : "/phylo_trees/index.json";
+
+  return get(endpoint, {
+    params: {
+      taxId,
+      projectId,
+    },
+  });
+};
+
+const getNewPhyloTree = ({ taxId, projectId, nextGeneration = false }) => {
+  const endpoint = nextGeneration
+    ? "/phylo_tree_ngs/new.json"
+    : "/phylo_trees/new.json";
+
+  return get(endpoint, {
+    params: {
+      taxId,
+      projectId,
+    },
+  });
+};
+
+const getProjectsToChooseFrom = () => get("/choose_project.json");
+
+const validatePhyloTreeName = ({ treeName, nextGeneration = false }) => {
+  const endpoint = nextGeneration
+    ? "phylo_tree_ngs/validate_name"
+    : "/phylo_trees/validate_name";
+
+  return get(endpoint, { params: { name: treeName } });
+};
 
 const retryPhyloTree = id => postWithCSRF("/phylo_trees/retry", { id });
 
@@ -568,10 +601,13 @@ export {
   getCoverageVizSummary,
   getHeatmapMetrics,
   getMassNormalizedBackgroundAvailability,
+  getNewPhyloTree,
   getPhyloTree,
+  getPhyloTrees,
   getProject,
   getProjectDimensions,
   getProjects,
+  getProjectsToChooseFrom,
   getSample,
   getSampleDimensions,
   getSamplePipelineResults,

@@ -1,9 +1,10 @@
 import cx from "classnames";
-import { set, isObject } from "lodash/fp";
+import { get, set, isObject } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Checkbox from "../../ui/controls/Checkbox";
-
+import cs from "./data_table.scss";
 class DataTable extends React.Component {
   // TODO: async get data function
   constructor(props) {
@@ -82,10 +83,12 @@ class DataTable extends React.Component {
       let allRows = this.state.selectedRows || new Set();
       let filteredData = this.filterData(this.state.indexedData);
       for (let i = 0; i < filteredData.length; i++) {
-        if (checked) {
-          allRows.add(filteredData[i].__originalIndex);
-        } else {
-          allRows.delete(filteredData[i].__originalIndex);
+        if (!get("shouldDisable", filteredData[i])) {
+          if (checked) {
+            allRows.add(filteredData[i].__originalIndex);
+          } else {
+            allRows.delete(filteredData[i].__originalIndex);
+          }
         }
         stateUpdate = { selectedRows: allRows };
       }
@@ -109,13 +112,16 @@ class DataTable extends React.Component {
   }
 
   getCellStyle = column => {
-    if (this.props.columnWidth) {
-      return { width: this.props.columnWidth };
-    } else if (this.props.getColumnWidth) {
-      return { width: this.props.getColumnWidth(column) };
-    } else {
-      return {};
+    const { columnWidth, getColumnWidth } = this.props;
+
+    const style = {};
+    if (columnWidth) {
+      style["width"] = columnWidth;
+    } else if (getColumnWidth) {
+      style["width"] = getColumnWidth(column);
     }
+
+    return style;
   };
 
   render() {
@@ -158,31 +164,59 @@ class DataTable extends React.Component {
           </tr>
         </thead>
         <tbody>
-          {filteredData.map(row => (
-            <tr key={row.__originalIndex}>
-              {this.props.onSelectedRowsChanged && (
-                <td className="data-table__data column-reserved-selectable">
-                  <Checkbox
-                    checked={this.state.selectedRows.has(row.__originalIndex)}
-                    onChange={this.handleCheckBoxChange}
-                    value={row.__originalIndex}
-                  />
-                </td>
-              )}
-              {this.props.columns.map((column, colIdx) => (
-                <td
-                  className={`data-table__data column-${column}`}
-                  style={this.getCellStyle(column)}
-                  key={colIdx}
-                >
-                  {/* If we want to display an object (e.g. location object), provide a 'name' field */}
-                  {isObject(row[column]) && row[column].name !== undefined
-                    ? row[column].name
-                    : row[column]}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {filteredData.map(row => {
+            const shouldDisable = get("shouldDisable", row);
+            const checkbox = (
+              <Checkbox
+                checked={
+                  !shouldDisable &&
+                  this.state.selectedRows.has(row.__originalIndex)
+                }
+                onChange={this.handleCheckBoxChange}
+                value={row.__originalIndex}
+              />
+            );
+
+            return (
+              <tr
+                key={row.__originalIndex}
+                className={shouldDisable && cs.disabled}
+              >
+                {this.props.onSelectedRowsChanged && (
+                  <td className="data-table__data column-reserved-selectable">
+                    {shouldDisable ? (
+                      <ColumnHeaderTooltip
+                        trigger={
+                          <span>
+                            {React.cloneElement(checkbox, { disabled: true })}
+                          </span>
+                        }
+                        content={get(["tooltipInfo", "content"], row)}
+                        position={get(["tooltipInfo", "position"], row)}
+                      />
+                    ) : (
+                      checkbox
+                    )}
+                  </td>
+                )}
+                {this.props.columns.map((column, colIdx) => (
+                  <td
+                    className={cx(
+                      `data-table__data column-${column}`,
+                      shouldDisable && cs.disabled
+                    )}
+                    style={this.getCellStyle(column)}
+                    key={colIdx}
+                  >
+                    {/* If we want to display an object (e.g. location object), provide a 'name' field */}
+                    {isObject(row[column]) && row[column].name !== undefined
+                      ? row[column].name
+                      : row[column]}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     );

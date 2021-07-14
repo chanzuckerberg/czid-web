@@ -204,7 +204,9 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
 
       @species_a = create(:taxon_lineage, tax_name: "species a", taxid: 1, species_taxid: 1, species_name: "species a", superkingdom_taxid: 2)
       @project = create(:project, users: [@joe], name: "new tree project")
-      @sample_one = create(:sample, project: @project, name: "sample_one")
+      @sample_one = create(:sample, project: @project, name: "sample_one", metadata_fields: {
+                             collection_location_v2: "New York, USA", sample_type: "Nasopharyngeal Swab",
+                           })
       @pr_one = create(:pipeline_run,
                        sample: @sample_one,
                        job_status: "CHECKED",
@@ -212,6 +214,9 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
                          { taxon_name: @species_a.tax_name, tax_level: 1, nt: 70 },
                          { taxon_name: @species_a.tax_name, tax_level: 1, nr: 10 },
                        ])
+      create(:contig, pipeline_run_id: @pr_one.id, species_taxid_nt: @species_a.species_taxid)
+      create(:contig, pipeline_run_id: @pr_one.id, species_taxid_nt: @species_a.species_taxid)
+
       create(:taxon_byterange,
              taxid: 1,
              hit_type: TaxonCount::COUNT_TYPE_NT,
@@ -219,7 +224,9 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
              last_byte: 70,
              pipeline_run_id: @pr_one.id)
 
-      @sample_two = create(:sample, project: @project, name: "sample_two")
+      @sample_two = create(:sample, project: @project, name: "sample_two", metadata_fields: {
+                             collection_location_v2: "Los Angeles, USA", sample_type: "Brain",
+                           })
       @pr_two = create(:pipeline_run,
                        sample: @sample_two,
                        job_status: "CHECKED",
@@ -253,34 +260,29 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(json_response[:project][:id]).to eq(@project.id)
       end
 
-      it "includes sample info as an array of hashes in response" do
-        samples_info = [
-          {
-            name: "sample_one",
-            project_id: @project.id,
-            host: @sample_one.host_genome_name,
-            project_name: "new tree project",
-            pipeline_run_id: @pr_one.id,
-            sample_id: @sample_one.id,
-            taxid_reads: { NT: 70, NR: 10 },
-          }, {
-            name: "sample_two",
-            project_id: @project.id,
-            host: @sample_two.host_genome_name,
-            project_name: "new tree project",
-            pipeline_run_id: @pr_two.id,
-            sample_id: @sample_two.id,
-            taxid_reads: { NT: 30, NR: 50 },
-          },
-        ]
+      it "includes correct sample info in response" do
+        expected_samples_info = {
+          name: "sample_one",
+          project_id: @project.id,
+          host: @sample_one.host_genome_name,
+          project_name: "new tree project",
+          pipeline_run_id: @pr_one.id,
+          sample_id: @sample_one.id,
+          tissue: "Nasopharyngeal Swab",
+          location: "New York, USA",
+          num_contigs: 2,
+        }
 
         get :new, format: :json, params: { projectId: @project.id, taxId: 1 }
 
         expect(response).to have_http_status :ok
         json_response = JSON.parse(response.body, symbolize_names: true)
+        sample_info = json_response[:samples][0]
 
         expect(json_response.keys).to contain_exactly(:project, :samples)
-        expect(json_response[:samples]).to include_json(samples_info)
+        expect(sample_info.except(:created_at)).to eq(expected_samples_info)
+        # Workaround to compare two timestamps
+        expect(Time.parse(sample_info[:created_at]).to_i).to eq(Time.parse(@sample_one.created_at.to_s).to_i)
       end
     end
   end

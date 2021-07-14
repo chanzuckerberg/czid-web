@@ -39,7 +39,10 @@ class Checkbox extends React.Component {
     const { isChecked } = this.state;
 
     return (
-      <div className={cx(cs.checkbox, className)} onClick={this.handleClick}>
+      <div
+        className={cx(cs.checkbox, className, disabled && cs.disabled)}
+        onClick={disabled ? null : this.handleClick}
+      >
         <input
           type="checkbox"
           value={value}

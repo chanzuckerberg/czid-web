@@ -159,8 +159,9 @@ class PhyloTreesController < ApplicationController
     top_project_pipeline_run_ids_with_taxid = current_power.pipeline_runs.where(id: project_pipeline_run_ids_with_taxid).top_completed_runs.pluck(:id)
 
     # Retrieve information for displaying the tree's sample list.
+    pipeline_run_ids = (eligible_pipeline_run_ids_with_taxid | top_project_pipeline_run_ids_with_taxid).uniq
     @samples = sample_details_json(
-      (eligible_pipeline_run_ids_with_taxid | top_project_pipeline_run_ids_with_taxid).uniq,
+      pipeline_run_ids,
       taxid
     )
 
@@ -272,41 +273,40 @@ class PhyloTreesController < ApplicationController
     # - sample name
     # - project id and name
     # - pipeline run id to be used for the sample.
-    samples_projects = Sample.connection.select_all("
+    sanitized_sql_statement = ActiveRecord::Base.sanitize_sql_array(["
       select
         samples.name,
-        samples.project_id,
-        samples.created_at,
+        samples.project_id as project_id,
+        samples.created_at as created_at,
         host_genomes.name as host,
         projects.name as project_name,
         pipeline_runs.id as pipeline_run_id,
-        samples.id as sample_id
-      from pipeline_runs, projects, samples, host_genomes
+        samples.id as sample_id,
+        COUNT(DISTINCT(contigs.id)) as num_contigs
+      from pipeline_runs, projects, samples, host_genomes, contigs
       where
-        pipeline_runs.id in (#{pipeline_run_ids.join(',')}) and
+        pipeline_runs.id in (:pipeline_run_ids) and
         pipeline_runs.sample_id = samples.id and
         samples.project_id = projects.id and
-        host_genomes.id = samples.host_genome_id
-    ").to_a
+        host_genomes.id = samples.host_genome_id and
+        contigs.pipeline_run_id = pipeline_runs.id and (
+          contigs.species_taxid_nt = :taxid or
+          contigs.genus_taxid_nt = :taxid or
+          contigs.species_taxid_nr = :taxid or
+          contigs.genus_taxid_nt = :taxid
+        )
+      group by samples.name, pipeline_runs.id
+    ",
+                                                                     pipeline_run_ids: pipeline_run_ids.join(","),
+                                                                     taxid: tax_id,])
 
-    # Also add:
-    # - number of reads matching the specified taxid.
-    # Do not include the query on taxon_counts in the previous query above using a join,
-    # because the taxon_counts table is large.
-    taxon_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where(tax_id: taxid).index_by { |tc| "#{tc.pipeline_run_id},#{tc.count_type}" }
+    samples_projects = Sample.connection.select_all(sanitized_sql_statement).to_a
 
     metadata_by_sample_id = Metadatum.by_sample_ids(samples_projects.pluck("sample_id"), use_raw_date_strings: true)
-
-    nt_nr = %w[NT NR]
     samples_projects.each do |sp|
-      sp["taxid_reads"] ||= {}
-      nt_nr.each do |count_type|
-        key = "#{sp['pipeline_run_id']},#{count_type}"
-        sp["taxid_reads"][count_type] = (taxon_counts[key] || []).count # count is a column of taxon_counts indicating number of reads
-      end
       if metadata_by_sample_id[sp["sample_id"]]
-        sp["sample_type"] = metadata_by_sample_id[sp["sample_id"]][:sample_type]
-        sp["collection_location"] = metadata_by_sample_id[sp["sample_id"]][:collection_location_v2]
+        sp["tissue"] = metadata_by_sample_id[sp["sample_id"]][:sample_type]
+        sp["location"] = metadata_by_sample_id[sp["sample_id"]][:collection_location_v2]
       end
     end
 
