@@ -55,3 +55,8 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
   - Most likely you are out of Docker disk space.
   - Try `docker system prune` or `docker system prune --all`
   - Alternatively you can expand the hard disk allocation given to Docker. On Docker Desktop: Preferences -> Resources -> Advanced -> Disk image size. It will show the used space.
+
+### ActiveRecord::ConnectionNotEstablished - Unknown MySQL server host 'db'
+- If you see the above error and `mysql` is failing to come up, you may also be out of Docker disk space.
+  - Check if your containers are exiting with `Write error saving DB on disk: No space left on device`
+  - Try `docker system prune` or `docker system prune --all`
