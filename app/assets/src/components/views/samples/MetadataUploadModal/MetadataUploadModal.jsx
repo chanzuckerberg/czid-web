@@ -101,7 +101,7 @@ class MetadataUploadModal extends React.Component {
   getPages = () => {
     const uploadTitle = (
       <span>
-        Upload Metadata for{" "}
+        Edit Metadata for{" "}
         <span className={cs.projectName}>{this.props.project.name}</span>
       </span>
     );

@@ -26,7 +26,7 @@ class ProjectUploadMenu extends React.Component {
 
     const trigger = (
       <div className={cs.trigger}>
-        <SecondaryButton text="Upload" />
+        <SecondaryButton text="Add Data" />
       </div>
     );
 
@@ -40,7 +40,7 @@ class ProjectUploadMenu extends React.Component {
         }}
       />,
       <BareDropdown.Item
-        text="Upload Metadata"
+        text="Edit Metadata"
         key="2"
         onClick={this.openModal}
       />,
