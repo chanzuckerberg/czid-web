@@ -1059,7 +1059,7 @@ class SamplesHeatmapView extends React.Component {
       readSpecificity,
       categories,
       subcategories,
-      species,
+      species, // 0 for genus mode, 1 for species mode
     } = this.state.selectedOptions;
     let phageSelected =
       subcategories["Viruses"] && subcategories["Viruses"].includes("Phage");
@@ -1070,6 +1070,23 @@ class SamplesHeatmapView extends React.Component {
       return false;
     }
     if (readSpecificity && taxonDetails["id"] < 0) {
+      // NOTE(2021-07-15): This intentionally does not filter for
+      // taxonDetails["parentId"] < 0 because we are treating the behavior
+      // differently from the Report Page for now. The Report Page equivalent is
+      // filterReadSpecificity in SampleView.jsx.
+      //
+      // On both the Report Page and Heatmap in Specific-Only Mode, a
+      // non-specific species is hidden.
+      //
+      // On the Report Page in Specific-Only Mode, a specific species with a
+      // non-specific genus is hidden because the genus row is filtered out.
+      //
+      // On the Heatmap in Specific-Only Mode, a specific species with a
+      // non-specific genus is shown because the heatmap displays species or
+      // genus rows by themselves.
+      //
+      // We intend to make the behavior more consistent or clearer but it is To
+      // Be Decided: https://app.clubhouse.io/idseq/story/135993
       return false;
     }
     if (categories.length) {
