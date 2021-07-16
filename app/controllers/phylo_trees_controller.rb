@@ -297,7 +297,7 @@ class PhyloTreesController < ApplicationController
         )
       group by samples.name, pipeline_runs.id
     ",
-                                                                     pipeline_run_ids: pipeline_run_ids.join(","),
+                                                                     pipeline_run_ids: pipeline_run_ids,
                                                                      taxid: taxid,])
 
     samples_projects = Sample.connection.select_all(sanitized_sql_statement).to_a
