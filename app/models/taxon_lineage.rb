@@ -1,6 +1,35 @@
 # frozen_string_literal: true
 
-# The TaxonLineage model gives the taxids forming the taxonomic lineage of any given species-level taxid.
+# The TaxonLineage model gives the taxids forming the taxonomic lineage of any
+# given species-level taxid.
+
+# NOTES:
+#
+# So you've found a negative taxon ID. Now what?
+# * See also "What is a taxon?" in taxon_count.rb.
+# * NCBI will frequently categorize some records as unclassified or unassigned
+#   at any possible level of the taxonomy (species, genus, family, order, class,
+#   etc.). These informal ranks are "non-hierarchical names that reflect either
+#   uncertainty of placement in a specific rank or represent informal and poorly
+#   defined names in the NCBI classification"
+#   (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7408187/).
+# * A negative taxid is our internal way of encoding these entries in the
+#   lineage for grouping and display purposes.
+# * For example, "Bronnoya virus"
+#   (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=2034337) has
+#   species taxid 2034337, but its parent level is "unclassified Bunyavirales"
+#   with no rank. The next defined level for this lineage is "Bunyavirales"
+#   (order taxid 1980410), so there is no specific genus or family.
+# * That means we would represent this lineage as species_taxid 2034337,
+#   genus_taxid -200, family_taxid -300, order_taxid 1980410, etc. The missing
+#   levels are filled in starting from -100 for species_taxid.
+# * The Read Specificity filters on the Heatmap and Report Page toggle between
+#   displaying these non-specific (negative) taxons.
+# * What does it mean if there's a negative taxid that isn't -100, -200,
+#   -300...? See docstring for _fill_missing_calls in the lineage.py link below.
+# * More notes and a second example here:
+#   https://github.com/chanzuckerberg/idseq-workflows/blob/main/short-read-mngs/idseq-dag/idseq_dag/util/lineage.py
+
 require 'elasticsearch/model'
 
 class TaxonLineage < ApplicationRecord
