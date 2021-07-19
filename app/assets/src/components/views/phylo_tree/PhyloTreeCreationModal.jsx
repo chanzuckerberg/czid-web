@@ -88,11 +88,11 @@ class PhyloTreeCreationModal extends React.Component {
   }
 
   loadPhylotrees = () => {
-    const { taxId, projectId } = this.state;
+    const { taxonId, projectId } = this.state;
     const { allowedFeatures = [] } = this.context || {};
 
     getPhyloTrees({
-      taxId,
+      taxId: taxonId,
       projectId,
       nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
     }).then(({ phyloTrees, taxonName }) => {
@@ -256,12 +256,7 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   handleCreation = () => {
-    const {
-      treeName,
-      projectId,
-      taxonId: taxId,
-      taxonName: taxName,
-    } = this.state;
+    const { treeName, projectId, taxonId, taxonName } = this.state;
     const { dagBranch, dagVars } = this;
     const { allowedFeatures = [] } = this.context || {};
 
@@ -285,8 +280,8 @@ class PhyloTreeCreationModal extends React.Component {
       dagBranch,
       dagVars,
       projectId,
-      taxId,
-      taxName,
+      taxId: taxonId,
+      taxName: taxonName,
       pipelineRunIds,
       nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
     }).then(({ phylo_tree_id: phyloTreeId }) => {
