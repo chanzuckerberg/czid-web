@@ -4,6 +4,7 @@ import React from "react";
 
 import { getPhyloTree, retryPhyloTree, saveVisualization } from "~/api";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { rerunPhyloTree } from "~/api/phylo_tree_ngs";
 import BasicPopup from "~/components/BasicPopup";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
@@ -231,9 +232,16 @@ class PhyloTreeListView extends React.Component {
       <div className={cs.adminPanel}>
         <div className={cs.header}>Admin panel:</div>
         <PrimaryButton
-          text="Retry"
+          text="Retry Phylo Tree"
           onClick={() => {
             retryPhyloTree(currentTree.id);
+            location.reload();
+          }}
+        />
+        <PrimaryButton
+          text="Retry Phylo Tree NG"
+          onClick={() => {
+            rerunPhyloTree(currentTree.id);
             location.reload();
           }}
         />
