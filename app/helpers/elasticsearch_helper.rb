@@ -69,10 +69,15 @@ module ElasticsearchHelper
       search_response = TaxonLineage.search(search_params)
       search_taxon_ids = search_response.aggregations.distinct_taxa.buckets.pluck(:key)
 
+      # Make a list of lineages with unique taxids and sorted by record ID
+      # descending. We use `uniq` below instead of `distinct` to comply with
+      # MySQL 5.7 ONLY_FULL_GROUP_BY behavior. If you include `id` in the
+      # `pluck`/`select`, that counts as deduping with the record ID, which is
+      # not what we want because the record ID is already unique.
       taxon_data = TaxonLineage
                    .where("#{level}_taxid" => search_taxon_ids)
                    .order(id: :desc)
-                   .distinct("#{level}_taxid")
+                   .uniq { |lin| lin["#{level}_taxid"] }
                    .pluck("#{level}_name", "#{level}_taxid")
                    .map do |name, taxid|
                      {

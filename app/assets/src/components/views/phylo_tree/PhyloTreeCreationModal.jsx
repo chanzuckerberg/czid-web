@@ -577,9 +577,9 @@ class PhyloTreeCreationModal extends React.Component {
     const { onClose } = this.props;
     const { defaultPage, phyloTreesLoaded, skipListTrees } = this.state;
 
-    if (phyloTreesLoaded) {
-      return (
-        <Modal open tall onClose={onClose}>
+    return (
+      <Modal open tall onClose={onClose}>
+        {phyloTreesLoaded ? (
           <Wizard
             className="phylo-tree-creation-wizard"
             skipPageInfoNPages={skipListTrees ? 0 : 1}
@@ -591,11 +591,11 @@ class PhyloTreeCreationModal extends React.Component {
           >
             {this.getPages()}
           </Wizard>
-        </Modal>
-      );
-    } else {
-      return <IconLoading />;
-    }
+        ) : (
+          <IconLoading />
+        )}
+      </Modal>
+    );
   }
 }
 

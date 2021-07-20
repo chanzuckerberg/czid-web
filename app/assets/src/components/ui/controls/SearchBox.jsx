@@ -113,7 +113,11 @@ class SearchBox extends React.Component {
           }
         )}
         results={results}
-        value={value}
+        // This fixes '`value` prop on `input` should not be null. Consider
+        // using an empty string to clear the component or `undefined` for
+        // uncontrolled components.' We pick empty string because we're using
+        // Search as a controlled component:
+        value={value || ""}
         placeholder={this.placeholder}
         onResultSelect={this.handleResultSelect}
         onSelectionChange={(e, { result }) => {
