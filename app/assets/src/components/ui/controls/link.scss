@@ -1,11 +1,24 @@
 @import "~styles/themes/colors";
 
 // !important uses needed to override materialize.css
-.link {
+.linkDefault {
   color: $primary !important;
 
   &:hover,
   &:active {
     color: $primary-darkest !important;
+  }
+}
+
+.linkBlack {
+  color: $black !important;
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+
+  &:hover,
+  &:active {
+    color: $black !important;
+    text-decoration-line: underline;
+    text-decoration-style: solid;
   }
 }

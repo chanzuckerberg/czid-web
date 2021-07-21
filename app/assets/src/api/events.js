@@ -144,6 +144,18 @@ function EventDictionary() {
   /** The user ran into an error while loading heatmap data. */
   this.SAMPLES_HEATMAP_VIEW_LOADING_ERROR =
     "SAMPLES_HEATMAP_VIEW_LOADING_ERROR";
+
+  /** The user clicked on the Learn More link in the error modal explaining why a heatmap is shown when the samples are
+   * too divergent to display a phylo tree.
+   */
+  this.PHYLO_TREE_HEATMAP_ERROR_MODAL_HELP_LINK_CLICKED =
+    "PHYLO_TREE_HEATMAP_ERROR_MODAL_HELP_LINK_CLICKED";
+
+  /** The user clicked on the Learn More link in the AccordionNotification of the error modal explaining why a heatmap is
+   * shown when the samples are too divergent to display a phylo tree.
+   */
+  this.PHYLO_TREE_HEATMAP_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED =
+    "PHYLO_TREE_HEATMAP_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED";
 }
 
 const eventNames = new EventDictionary();

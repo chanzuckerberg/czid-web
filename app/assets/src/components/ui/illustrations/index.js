@@ -2,6 +2,7 @@ import ImgBacteriaPrimary from "./ImgBacteriaPrimary";
 import ImgDecipherPrimary from "./ImgDecipherPrimary";
 import ImgDetectPrimary from "./ImgDetectPrimary";
 import ImgDownloadPrimary from "./ImgDownloadPrimary";
+import ImagHeatmapPrimary from "./ImgHeatmapPrimary";
 import ImgMicrobePrimary from "./ImgMicrobePrimary";
 import ImgMicrobeSecondary from "./ImgMicrobeSecondary";
 import ImgProjectsSecondary from "./ImgProjectsSecondary";
@@ -15,6 +16,7 @@ export const ILLUSTRATIONS = {
   ImgDecipherPrimary,
   ImgDetectPrimary,
   ImgDownloadPrimary,
+  ImagHeatmapPrimary,
   ImgMicrobePrimary,
   ImgMicrobeSecondary,
   ImgProjectsSecondary,

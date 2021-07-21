@@ -43,6 +43,7 @@
 .content {
   // prevent margin collapse, so that interior elements can set a bottom margin
   overflow: auto;
+  margin-right: $space-xl;
 
   &.bottomPadding {
     margin-bottom: 20px;

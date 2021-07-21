@@ -25,11 +25,20 @@ class Link extends React.Component {
   };
 
   render() {
-    const { href, className, children, external } = this.props;
+    const {
+      href,
+      coloredBackground,
+      className,
+      children,
+      external,
+    } = this.props;
     return (
       <a
         href={href}
-        className={cx(cs.link, className)}
+        className={cx(
+          coloredBackground ? cs.linkBlack : cs.linkDefault,
+          className
+        )}
         target={external ? "_blank" : null}
         rel="noopener noreferrer"
         onClick={this.onClick}
@@ -41,6 +50,8 @@ class Link extends React.Component {
 }
 
 Link.propTypes = {
+  // We use black styling for links on a colored background.
+  coloredBackground: PropTypes.bool,
   children: PropTypes.node,
   className: PropTypes.string,
   external: PropTypes.bool,
@@ -54,6 +65,7 @@ Link.propTypes = {
 
 Link.defaultProps = {
   analyticsEventData: {},
+  coloredBackground: false,
   externalLink: false,
 };
 

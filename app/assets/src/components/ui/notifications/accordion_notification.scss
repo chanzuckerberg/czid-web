@@ -3,7 +3,7 @@
 @import "~styles/themes/elements";
 
 .listContainer {
-  margin-bottom: $space-m;
+  margin-bottom: $space-xs;
   &.error {
     border-color: $error-medium;
     background-color: $error-off-white;

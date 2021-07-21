@@ -1,0 +1,48 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.errorModal {
+  .accordionHeader {
+    @include font-header-s;
+  }
+
+  .accordionNotification {
+    margin-bottom: $space-xl;
+  }
+
+  .notification {
+    margin: 0px;
+  }
+
+  .textContainer {
+    margin-bottom: $space-xl;
+
+    .title {
+      @include font-header-xl;
+      display: flex;
+      align-items: flex-start;
+
+      .text {
+        margin-right: $space-l;
+      }
+
+      .imgHeatmap {
+        fill: $primary;
+        width: $img-s;
+        flex-shrink: 0;
+      }
+    }
+
+    .message {
+      @include font-body-s;
+      margin-top: $space-s;
+      color: $gray-darkest;
+    }
+  }
+
+  .actions {
+    margin-top: $space-m;
+    display: flex;
+  }
+}

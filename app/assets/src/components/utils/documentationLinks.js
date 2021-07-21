@@ -28,3 +28,6 @@ export const UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK =
 export const VADR_ANCHOR_LINK =
   "https://chanzuckerberg.zendesk.com/hc/en-us/articles/360049787632-Building-and-analyzing-a-SARS-CoV-2-consensus-genome#Viral-Annotation-DefineR-VADR";
 export const MAIL_TO_HELP_LINK = "mailto:help@idseq.net";
+// TODO: replace with actual help center link when docs are ready
+export const PHYLO_TREE_HEATMAP_LINK =
+  "https://chanzuckerberg.zendesk.com/hc/en-us";

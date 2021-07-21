@@ -11,6 +11,7 @@ const ExternalLink = props => {
 ExternalLink.propTypes = forbidExtraProps({
   analyticsEventData: PropTypes.object,
   analyticsEventName: PropTypes.string,
+  coloredBackground: PropTypes.bool,
   children: PropTypes.node,
   className: PropTypes.string,
   href: PropTypes.string,

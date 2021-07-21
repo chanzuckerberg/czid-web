@@ -10,19 +10,23 @@ import cs from "./accordion_notification.scss";
 export default class AccordionNotification extends React.Component {
   render() {
     const {
+      bottomContentPadding,
       className,
       header,
+      headerClassName,
       content,
       toggleable,
       type,
+      notificationClassName,
       open,
       displayStyle,
       onClose,
     } = this.props;
     const accordion = (
       <Accordion
-        bottomContentPadding
+        bottomContentPadding={bottomContentPadding}
         header={header}
+        headerClassName={headerClassName}
         open={open}
         toggleable={toggleable}
         className={cx(cs.listContainer, cs[type])}
@@ -37,7 +41,7 @@ export default class AccordionNotification extends React.Component {
         <Notification
           type={type}
           displayStyle={displayStyle}
-          className={cs.notificationContainer}
+          className={cx(cs.notificationContainer, notificationClassName)}
           onClose={onClose}
         >
           {accordion}
@@ -48,14 +52,18 @@ export default class AccordionNotification extends React.Component {
 }
 
 AccordionNotification.defaultProps = {
+  bottomContentPadding: true,
   type: "info",
   displayStyle: "flat",
 };
 
 AccordionNotification.propTypes = {
+  bottomContentPadding: PropTypes.bool,
   className: PropTypes.string,
   header: PropTypes.node,
+  headerClassName: PropTypes.string,
   content: PropTypes.node,
+  notificationClassName: PropTypes.string,
   open: PropTypes.bool,
   toggleable: PropTypes.bool,
   type: PropTypes.oneOf(["success", "info", "warning", "error"]),
