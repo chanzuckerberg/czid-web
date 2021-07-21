@@ -87,15 +87,41 @@ class PhyloTreeCreationModal extends React.Component {
     this.loadPhylotrees();
   }
 
-  loadPhylotrees = () => {
+  loadPhylotrees = async () => {
     const { taxonId, projectId } = this.state;
     const { allowedFeatures = [] } = this.context || {};
 
-    getPhyloTrees({
+    const { phyloTrees, taxonName } = await getPhyloTrees({
       taxId: taxonId,
       projectId,
-      nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
-    }).then(({ phyloTrees, taxonName }) => {
+    });
+
+    if (allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)) {
+      // With PHYLO_TREE_NG_FEATURE, we combine the old and new 'index' results:
+      const { phyloTrees: phyloTreeNgs, taxonNameNg } = await getPhyloTrees({
+        taxId: taxonId,
+        projectId,
+        nextGeneration: true,
+      });
+
+      if (isEmpty(phyloTrees) && isEmpty(phyloTreeNgs)) {
+        this.setState({
+          skipListTrees: true,
+          phyloTreesLoaded: true,
+        });
+      } else {
+        this.setState({
+          // NOTE: This shows NG first so it may seem out-of-order if user has a
+          // mix of old and new trees. Could sort by updated_at.
+          phyloTrees: this.parsePhyloTreeData(phyloTreeNgs, true).concat(
+            this.parsePhyloTreeData(phyloTrees)
+          ),
+          phyloTreesLoaded: true,
+          taxonName: taxonNameNg,
+        });
+      }
+    } else {
+      // Without PHYLO_TREE_NG_FEATURE
       if (isEmpty(phyloTrees)) {
         this.setState({
           skipListTrees: true,
@@ -108,15 +134,29 @@ class PhyloTreeCreationModal extends React.Component {
           taxonName,
         });
       }
-    });
+    }
   };
 
-  parsePhyloTreeData = phyloTreeData => {
+  parsePhyloTreeData = (phyloTreeData, nextGeneration = false) => {
+    if (isEmpty(phyloTreeData)) {
+      return [];
+    }
     return phyloTreeData.map(row => ({
       name: row.name,
       user: (row.user || {}).name,
       last_update: <Moment fromNow date={row.updated_at} />,
-      view: <a href={`/phylo_trees/index?treeId=${row.id}`}>View</a>,
+      view: (
+        // TODO: Get the /phylo_tree_ngs/ page to actually work.
+        <a
+          href={
+            nextGeneration
+              ? `/phylo_tree_ngs/${row.id}`
+              : `/phylo_trees/index?treeId=${row.id}`
+          }
+        >
+          View
+        </a>
+      ),
     }));
   };
 
@@ -286,7 +326,11 @@ class PhyloTreeCreationModal extends React.Component {
       nextGeneration: allowedFeatures.includes(PHYLO_TREE_NG_FEATURE),
     }).then(({ phylo_tree_id: phyloTreeId }) => {
       if (phyloTreeId) {
-        location.href = `/phylo_trees/index?treeId=${phyloTreeId}`;
+        if (allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)) {
+          location.href = `/phylo_tree_ngs/${phyloTreeId}`;
+        } else {
+          location.href = `/phylo_trees/index?treeId=${phyloTreeId}`;
+        }
       } else {
         // TODO: properly handle error
         // eslint-disable-next-line no-console
@@ -435,7 +479,7 @@ class PhyloTreeCreationModal extends React.Component {
               <SearchBox
                 serverSearchAction={
                   allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)
-                    ? "choose_taxon_ng"
+                    ? "phylo_tree_ngs/choose_taxon"
                     : "choose_taxon"
                 }
                 serverSearchActionArgs={{

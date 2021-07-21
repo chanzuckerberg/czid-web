@@ -28,6 +28,7 @@ class PhyloTreeNgsController < ApplicationController
   ELIGIBLE_PIPELINE_RUNS_LIMIT = 1000
   PIPELINE_RUN_IDS_WITH_TAXID_LIMIT = 10_000
 
+  # GET /phylo_tree_ngs
   def index
     permitted_params = index_params
     tax_id = permitted_params[:taxId]&.to_i
@@ -55,6 +56,7 @@ class PhyloTreeNgsController < ApplicationController
     end
   end
 
+  # GET /phylo_tree_ngs/:id
   def show
     pt = @phylo_tree_ng.as_json(only: ["id", "name", "tax_id", "status"])
     results = @phylo_tree_ng.results
@@ -95,6 +97,7 @@ class PhyloTreeNgsController < ApplicationController
     render json: pt
   end
 
+  # GET /phylo_tree_ngs/new
   def new
     permitted_params = index_params
     tax_id = permitted_params[:taxId]&.to_i
@@ -129,6 +132,7 @@ class PhyloTreeNgsController < ApplicationController
     }
   end
 
+  # POST /phylo_tree_ngs
   def create
     permitted_params = create_params
     pipeline_run_ids = permitted_params[:pipelineRunIds].map(&:to_i)
@@ -170,6 +174,7 @@ class PhyloTreeNgsController < ApplicationController
     end
   end
 
+  # GET /phylo_tree_ngs/choose_taxon
   def choose_taxon
     tax_levels = nil
     if collection_params[:args].present?

@@ -82,7 +82,8 @@ class PhyloTreesController < ApplicationController
 
   def show
     pt = @phylo_tree.as_json(only: ["id", "name", "taxid", "tax_level", "tax_name", "newick", "status"])
-    pt["user"] = @phylo_tree.user.name
+    # &.name helps in local dev in case users are missing:
+    pt["user"] = @phylo_tree.user&.name
     pt["parent_taxid"] = TaxonLineage.where(taxid: @phylo_tree.taxid).last.genus_taxid if @phylo_tree.tax_level == 1
 
     nodes = {}

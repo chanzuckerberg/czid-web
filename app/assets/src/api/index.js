@@ -392,7 +392,7 @@ const createPhyloTree = ({
   nextGeneration = false,
 }) => {
   const endpoint = nextGeneration
-    ? "/phylo_tree_ngs/create.json"
+    ? "/phylo_tree_ngs.json"
     : "/phylo_trees/create.json";
 
   return postWithCSRF(endpoint, {
@@ -411,7 +411,7 @@ const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 
 const getPhyloTrees = ({ taxId, projectId, nextGeneration = false }) => {
   const endpoint = nextGeneration
-    ? "/phylo_tree_ngs/index.json"
+    ? "/phylo_tree_ngs.json"
     : "/phylo_trees/index.json";
 
   return get(endpoint, {

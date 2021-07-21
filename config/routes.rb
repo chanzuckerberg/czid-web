@@ -1,3 +1,16 @@
+# Standard resources example:
+# HTTP Verb   Path              Controller#Action
+# GET         /photos           photos#index
+# GET         /photos/new       photos#new
+# POST        /photos           photos#create
+# GET         /photos/:id       photos#show
+# GET         /photos/:id/edit  photos#edit
+# PATCH/PUT   /photos/:id       photos#update
+# DELETE      /photos/:id       photos#destroy
+#
+# If you follow this convention, DON'T add new paths such as /photos/index.json
+# or /photos/create.json (use GET /photos.json and POST /photos.json).
+
 Rails.application.routes.draw do
   resources :backgrounds do
     get :show_taxon_dist, on: :member
@@ -130,9 +143,6 @@ Rails.application.routes.draw do
   get 'choose_taxon', to: 'phylo_trees#choose_taxon'
   get 'search_suggestions', to: 'samples#search_suggestions'
   get 'phylo_trees/validate_name', to: 'phylo_trees#validate_name'
-
-  post 'phylo_tree_ngs/create', to: 'phylo_tree_ngs#create'
-  get 'choose_taxon_ng', to: 'phylo_tree_ngs#choose_taxon'
 
   get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
   post 'visualizations/taxa_details.json', to: 'visualizations#taxa_details'
