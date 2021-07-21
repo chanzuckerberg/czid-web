@@ -1,5 +1,15 @@
 import cx from "classnames";
-import _fp, { filter, keyBy, concat, find, sortBy } from "lodash/fp";
+import _fp, {
+  isEmpty,
+  isEqual,
+  filter,
+  get,
+  keyBy,
+  concat,
+  find,
+  sortBy,
+  remove,
+} from "lodash/fp";
 import React from "react";
 
 import { getAllHostGenomes, getAllSampleTypes } from "~/api";
@@ -7,8 +17,8 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { getProjectMetadataFields } from "~/api/metadata";
 import MetadataCSVLocationsMenu, {
   geosearchCSVLocations,
-} from "~/components/common/MetadataCSVLocationsMenu";
-import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
+} from "~/components/common/Metadata/MetadataCSVLocationsMenu";
+import MetadataCSVUpload from "~/components/common/Metadata/MetadataCSVUpload";
 import Tabs from "~/components/ui/controls/Tabs";
 import { generateClientDownloadFromEndpoint } from "~/components/utils/clientDownload";
 import PropTypes from "~/components/utils/propTypes";
@@ -17,6 +27,7 @@ import { IconAlert, IconLoading } from "~ui/icons";
 
 import IssueGroup from "~ui/notifications/IssueGroup";
 import MetadataManualInput from "./MetadataManualInput";
+import { METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW } from "./constants";
 import cs from "./metadata_upload.scss";
 
 const map = _fp.map.convert({ cap: false });
@@ -60,6 +71,7 @@ class MetadataUpload extends React.Component {
       getAllSampleTypes(),
     ]);
     this.setState({
+      allProjectMetadataFields: projectMetadataFields,
       projectMetadataFields: this.processProjectMetadataFields(
         projectMetadataFields
       ),
@@ -81,21 +93,55 @@ class MetadataUpload extends React.Component {
       );
 
       this.setState({
+        allProjectMetadataFields: projectMetadataFields,
         projectMetadataFields: this.processProjectMetadataFields(
           projectMetadataFields
         ),
       });
     }
+
+    // User may switch workflows during the sample uploading process so we need to keep
+    // the project metadata available up to date.
+    if (
+      this.state.allProjectMetadataFields &&
+      !isEqual(prevProps.workflows, this.props.workflows)
+    ) {
+      this.setState({
+        projectMetadataFields: this.processProjectMetadataFields(
+          this.state.allProjectMetadataFields
+        ),
+      });
+    }
   }
 
-  processProjectMetadataFields = projectMetadataFields => {
-    const sorted = sortBy(
+  // Removes metadataFields that should not be selectable for a particular workflow
+  filterMetadataFieldsByWorkflow = projectMetadataFields => {
+    const { workflows } = this.props;
+
+    // We currently only support one workflow per upload. Either mNGS or CG. [as of 2021-07-14]
+    const workflow = Array.from(workflows)[0];
+    return remove(
       metadataField =>
-        this.ordering[metadataField.key] || Number.MAX_SAFE_INTEGER,
+        METADATA_FIELDS_UNAVAILABLE_BY_WORKFLOW[workflow].has(
+          get("key", metadataField)
+        ),
       projectMetadataFields
     );
+  };
 
-    return keyBy("key", sorted);
+  processProjectMetadataFields = projectMetadataFields => {
+    if (!isEmpty(projectMetadataFields)) {
+      const filteredProjectMetadataFields = this.filterMetadataFieldsByWorkflow(
+        projectMetadataFields
+      );
+      const sorted = sortBy(
+        metadataField =>
+          this.ordering[metadataField.key] || Number.MAX_SAFE_INTEGER,
+        filteredProjectMetadataFields
+      );
+
+      return keyBy("key", sorted);
+    }
   };
 
   handleTabChange = tab => {
@@ -240,7 +286,7 @@ class MetadataUpload extends React.Component {
       samplesAreNew,
       visible,
       withinModal,
-      workflow,
+      workflows,
     } = this.props;
     const {
       currentTab,
@@ -263,7 +309,7 @@ class MetadataUpload extends React.Component {
             projectMetadataFields={projectMetadataFields}
             hostGenomes={hostGenomes}
             sampleTypes={sampleTypes}
-            workflow={workflow}
+            workflows={workflows}
           />
         );
       }
@@ -271,7 +317,7 @@ class MetadataUpload extends React.Component {
 
     if (currentTab === "CSV Upload") {
       return (
-        <React.Fragment>
+        <>
           <div>
             <span
               className={cs.link}
@@ -333,7 +379,7 @@ class MetadataUpload extends React.Component {
               Verifying collection locations...
             </div>
           )}
-        </React.Fragment>
+        </>
       );
     }
     return null;
@@ -522,7 +568,6 @@ MetadataUpload.propTypes = {
   samplesAreNew: PropTypes.bool,
   withinModal: PropTypes.bool,
   visible: PropTypes.bool,
-  workflow: PropTypes.string,
   workflows: PropTypes.instanceOf(Set),
 };
 

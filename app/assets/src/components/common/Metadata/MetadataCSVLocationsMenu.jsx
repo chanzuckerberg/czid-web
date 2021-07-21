@@ -3,10 +3,10 @@ import React from "react";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
-import MetadataInput from "~/components/common/MetadataInput";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import PropTypes from "~/components/utils/propTypes";
 import IssueGroup from "~ui/notifications/IssueGroup";
+import MetadataInput from "./MetadataInput";
 
 import cs from "./metadata_csv_locations_menu.scss";
 

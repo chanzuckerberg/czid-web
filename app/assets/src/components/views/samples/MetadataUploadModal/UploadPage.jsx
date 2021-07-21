@@ -1,6 +1,6 @@
 import React from "react";
 import { validateManualMetadataForProject } from "~/api/metadata";
-import MetadataUpload from "~/components/common/MetadataUpload";
+import MetadataUpload from "~/components/common/Metadata/MetadataUpload";
 import PropTypes from "~/components/utils/propTypes";
 import Instructions from "./Instructions";
 import cs from "./metadata_upload_modal.scss";

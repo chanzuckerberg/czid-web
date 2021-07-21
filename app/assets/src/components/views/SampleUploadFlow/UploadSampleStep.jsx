@@ -948,7 +948,7 @@ class UploadSampleStep extends React.Component {
           <BasicPopup
             basic={false}
             disabled={!createProjectOpen || this.isValid()}
-            position="center"
+            position="top center"
             trigger={
               <span>
                 <PrimaryButton

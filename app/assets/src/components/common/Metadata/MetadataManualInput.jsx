@@ -72,6 +72,8 @@ const COLUMN_HEADER_TOOLTIPS = {
   preservation_method: "Preservation method of host.",
   sample_unit: "Number of hosts in sample.",
   trap_type: "Trap type used on host.",
+  ct_value:
+    "The number of cycles required for the fluorescent signal to cross the background fluorescent threshold during qPCR. The value is inversely proportional to the amount of target nucleic acid.",
 };
 
 // When the auto-populate button is clicked, the following metadata fields will be populated with these values.
@@ -99,6 +101,37 @@ class MetadataManualInput extends React.Component {
   };
 
   componentDidMount() {
+    this.setRequiredFields();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { projectMetadataFields, samples, samplesAreNew } = this.props;
+    // Whenever the samples change, we need to re-sync the metadata with the parent.
+    // (e.g. update which samples are included in the metadata object)
+    // This is because the validation function checks whether the metadata and samples being uploaded are synced up.
+    if (samples !== prevProps.samples) {
+      if (samplesAreNew) {
+        const isWaterControlSet = this.setDefaultWaterControl();
+
+        // If the water control default was set, the metadata is already synced. No need to do it again.
+        if (!isWaterControlSet) {
+          this.resyncMetadataWithParent();
+        }
+      } else {
+        this.resyncMetadataWithParent();
+      }
+    }
+
+    // The projectMetadataFields may change when a user changes the workflow during the upload process.
+    // e.g. User starts uploading an mNGS sample -> metadataFields unavailable for selection for a particular
+    // workflow get filtered out get passed as props here -> User goes back and selects the CG workflow ->
+    // projectMetadataFields available to the workflow get updated (based on the metadataFields unavailable for the CG).
+    if (projectMetadataFields !== prevProps.projectMetadataFields) {
+      this.setRequiredFields();
+    }
+  }
+
+  setRequiredFields = () => {
     const { projectMetadataFields, hostGenomes, samplesAreNew } = this.props;
 
     this.setState(
@@ -118,26 +151,7 @@ class MetadataManualInput extends React.Component {
       },
       samplesAreNew ? this.setDefaultWaterControl : null
     );
-  }
-
-  componentDidUpdate(prevProps) {
-    const { samples, samplesAreNew } = this.props;
-    // Whenever the samples change, we need to re-sync the metadata with the parent.
-    // (e.g. update which samples are included in the metadata object)
-    // This is because the validation function checks whether the metadata and samples being uploaded are synced up.
-    if (samples !== prevProps.samples) {
-      if (samplesAreNew) {
-        const isWaterControlSet = this.setDefaultWaterControl();
-
-        // If the water control default was set, the metadata is already synced. No need to do it again.
-        if (!isWaterControlSet) {
-          this.resyncMetadataWithParent();
-        }
-      } else {
-        this.resyncMetadataWithParent();
-      }
-    }
-  }
+  };
 
   // Need to special case this to avoid a missing required field error.
   // Return whether water control was set.

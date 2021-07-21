@@ -291,6 +291,12 @@ export const computeColumnsByWorkflow = ({
       flexGrow: 1,
       className: cs.basicCell,
     },
+    {
+      dataKey: "ctValue",
+      label: "Ct Value",
+      flexGrow: 1,
+      className: cs.basicCell,
+    },
   ];
 
   for (const col of columnsByWorkflow[WORKFLOWS.CONSENSUS_GENOME.value]) {

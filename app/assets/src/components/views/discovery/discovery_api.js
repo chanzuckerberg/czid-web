@@ -167,6 +167,7 @@ const processRawSample = sample => {
       "metadata.collection_location_v2",
       sample.details
     ),
+    ctValue: get("metadata.ct_value", sample.details),
     createdAt: sample.created_at,
     duplicateCompressionRatio: get(
       "derived_sample_output.summary_stats.compression_ratio",
@@ -286,6 +287,7 @@ const processRawWorkflowRun = workflowRun => {
       "metadata",
       "collection_location_v2",
     ]),
+    ctValue: getSampleField(["metadata", "ct_value"]),
     nucleotideType: getSampleField(["metadata", "nucleotide_type"]),
     sampleType: getSampleField(["metadata", "sample_type"]),
     waterControl: getSampleField(["metadata", "water_control"]),

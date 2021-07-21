@@ -126,4 +126,9 @@ export const FIELDS_METADATA = {
       "Medaka is a tool to create consensus sequences and variant calls from nanopore sequencing data.",
     link: UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
   },
+  ctValue: {
+    label: "Ct Value",
+    tooltip:
+      "The number of cycles required for the fluorescent signal to cross the background fluorescent threshold during qPCR. The value is inversely proportional to the amount of target nucleic acid.",
+  },
 };

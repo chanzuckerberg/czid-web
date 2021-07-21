@@ -5,7 +5,7 @@ import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import FieldList from "~/components/common/DetailsSidebar/FieldList";
-import MetadataInput from "~/components/common/MetadataInput";
+import MetadataInput from "~/components/common/Metadata/MetadataInput";
 import Input from "~/components/ui/controls/Input";
 import PropTypes from "~/components/utils/propTypes";
 

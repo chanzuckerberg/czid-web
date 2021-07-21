@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { isUndefined, isNull, isArray } from "lodash/fp";
+import { isUndefined, isNaN, isNull, isArray, max } from "lodash/fp";
 import React from "react";
 
 import SampleTypeSearchBox from "~/components/common/SampleTypeSearchBox";
@@ -13,6 +13,7 @@ import Input from "~ui/controls/Input";
 import Toggle from "~ui/controls/Toggle";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import { IconAlertSmall } from "~ui/icons";
+import { FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT } from "./constants";
 
 import cs from "./metadata_input.scss";
 
@@ -21,8 +22,22 @@ import cs from "./metadata_input.scss";
 // a particular metadata field, undefined will be passed to the MetadataInput for that field
 // and the first sample's metadata value will contain to be shown.
 // To avoid this, we explicitly pass in the empty string whenever the field is undefined or null.
-const ensureDefinedValue = value =>
-  isUndefined(value) || isNull(value) ? "" : value;
+const ensureDefinedValue = ({ key = "", value, type }) => {
+  let safeValue = isUndefined(value) || isNull(value) ? "" : value;
+
+  if (
+    FIELDS_THAT_SHOULD_NOT_HAVE_NEGATIVE_INPUT.has(key) &&
+    type === "number"
+  ) {
+    const parsedValue = Number.parseInt(value);
+    if (!isNaN(parsedValue)) {
+      // Do not let the user select values less than 0
+      safeValue = max([parsedValue, 0]);
+    }
+  }
+
+  return safeValue;
+};
 
 class MetadataInput extends React.Component {
   constructor(props) {
@@ -107,7 +122,11 @@ class MetadataInput extends React.Component {
           className={className}
           onChange={val => onChange(metadataType.key, val)}
           onBlur={() => onSave && onSave(metadataType.key)}
-          value={ensureDefinedValue(value)}
+          value={ensureDefinedValue({
+            key: metadataType.key,
+            value,
+            type: metadataType.dataType,
+          })}
           placeholder={taxaCategory === "human" ? "YYYY-MM" : "YYYY-MM-DD"}
           type="text"
         />
@@ -145,7 +164,11 @@ class MetadataInput extends React.Component {
           className={className}
           onChange={val => onChange(metadataType.key, val)}
           onBlur={() => onSave && onSave(metadataType.key)}
-          value={ensureDefinedValue(value)}
+          value={ensureDefinedValue({
+            key: metadataType.key,
+            value,
+            type: metadataType.dataType,
+          })}
           type={metadataType.dataType === "number" ? "number" : "text"}
         />
       );
