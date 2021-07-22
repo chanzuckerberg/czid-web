@@ -28,7 +28,7 @@ class CreateUser extends React.Component {
       id: this.user ? this.user.id : null,
       adminStatus: this.user ? this.user.admin : null,
       archetypes: this.user ? this.user.archetypes : [],
-      group: this.user ? this.user.group : null,
+      segments: this.user ? this.user.segments : null,
     };
     this.state = {
       submitting: false,
@@ -59,11 +59,11 @@ class CreateUser extends React.Component {
         MICROBIOME_INVESTIGATOR,
         this.selectedUser.archetypes
       ),
-      isAfricaCDC: includes(AFRICA_CDC, this.selectedUser.group),
-      isBiohub: includes(BIOHUB, this.selectedUser.group),
-      isDPH: includes(DPH, this.selectedUser.group),
-      isGCE: includes(GCE, this.selectedUser.group),
-      isLMIC: includes(LMIC, this.selectedUser.group),
+      isAfricaCDC: includes(AFRICA_CDC, this.selectedUser.segments),
+      isBiohub: includes(BIOHUB, this.selectedUser.segments),
+      isDPH: includes(DPH, this.selectedUser.segments),
+      isGCE: includes(GCE, this.selectedUser.segments),
+      isLMIC: includes(LMIC, this.selectedUser.segments),
     };
   }
 
@@ -118,25 +118,25 @@ class CreateUser extends React.Component {
     return JSON.stringify(archetypes);
   };
 
-  getGroups = () => {
+  getSegments = () => {
     const { isAfricaCDC, isBiohub, isDPH, isGCE, isLMIC } = this.state;
-    let groups = [];
+    let segments = [];
     if (isAfricaCDC) {
-      groups.push(AFRICA_CDC);
+      segments.push(AFRICA_CDC);
     }
     if (isBiohub) {
-      groups.push(BIOHUB);
+      segments.push(BIOHUB);
     }
     if (isDPH) {
-      groups.push(DPH);
+      segments.push(DPH);
     }
     if (isGCE) {
-      groups.push(GCE);
+      segments.push(GCE);
     }
     if (isLMIC) {
-      groups.push(LMIC);
+      segments.push(LMIC);
     }
-    return JSON.stringify(groups);
+    return JSON.stringify(segments);
   };
 
   isCreateFormInvalid() {
@@ -162,7 +162,7 @@ class CreateUser extends React.Component {
   createUser = async () => {
     const { name, email, institution, isAdmin, sendActivation } = this.state;
     const archetypes = this.getArchetypes();
-    const group = this.getGroups();
+    const segments = this.getSegments();
     try {
       await createUser({
         name,
@@ -171,7 +171,7 @@ class CreateUser extends React.Component {
         isAdmin,
         sendActivation,
         archetypes,
-        group,
+        segments,
       });
       this.setState(
         {
@@ -195,7 +195,7 @@ class CreateUser extends React.Component {
   async updateUser() {
     const { name, email, institution, isAdmin, id } = this.state;
     const archetypes = this.getArchetypes();
-    const group = this.getGroups();
+    const segments = this.getSegments();
     try {
       await updateUser({
         userId: id,
@@ -204,7 +204,7 @@ class CreateUser extends React.Component {
         institution,
         isAdmin,
         archetypes,
-        group,
+        segments,
       });
       this.setState(
         {
@@ -274,7 +274,7 @@ class CreateUser extends React.Component {
           email={email}
           errorMessage={errorMessage}
           funcName={funcName}
-          groups={{
+          segments={{
             isAfricaCDC,
             isBiohub,
             isDPH,
@@ -357,7 +357,7 @@ CreateUser.propTypes = {
     name: PropTypes.string,
     institution: PropTypes.string,
     id: PropTypes.number,
-    group: PropTypes.string,
+    segments: PropTypes.string,
   }),
 };
 

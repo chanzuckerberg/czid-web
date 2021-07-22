@@ -13,7 +13,7 @@ const UserForm = ({
   email,
   errorMessage,
   funcName,
-  groups,
+  segments,
   institution,
   isAdmin,
   name,
@@ -144,11 +144,11 @@ const UserForm = ({
               </div>
             </div>
             <div className="section">
-              <div className="header">Group</div>
+              <div className="header">Segments</div>
               <div>
                 <Checkbox
                   className="checkbox"
-                  checked={groups.isDPH}
+                  checked={segments.isDPH}
                   onChange={onDPHChange}
                   label="DPH"
                 />
@@ -156,7 +156,7 @@ const UserForm = ({
               <div>
                 <Checkbox
                   className="checkbox"
-                  checked={groups.isGCE}
+                  checked={segments.isGCE}
                   onChange={onGCEChange}
                   label="GCE"
                 />
@@ -164,7 +164,7 @@ const UserForm = ({
               <div>
                 <Checkbox
                   className="checkbox"
-                  checked={groups.isAfricaCDC}
+                  checked={segments.isAfricaCDC}
                   onChange={onAfricaCDCChange}
                   label="Africa CDC"
                 />
@@ -172,7 +172,7 @@ const UserForm = ({
               <div>
                 <Checkbox
                   className="checkbox"
-                  checked={groups.isBiohub}
+                  checked={segments.isBiohub}
                   onChange={onBiohubChange}
                   label="Biohub"
                 />
@@ -180,7 +180,7 @@ const UserForm = ({
               <div>
                 <Checkbox
                   className="checkbox"
-                  checked={groups.isLMIC}
+                  checked={segments.isLMIC}
                   onChange={onLMICChange}
                   label="LMIC"
                 />
@@ -239,7 +239,7 @@ UserForm.propTypes = {
   email: PropTypes.string,
   errorMessage: PropTypes.string,
   funcName: PropTypes.string,
-  groups: PropTypes.shape({
+  segments: PropTypes.shape({
     isAfricaCDC: PropTypes.bool,
     isBiohub: PropTypes.bool,
     isDPH: PropTypes.bool,

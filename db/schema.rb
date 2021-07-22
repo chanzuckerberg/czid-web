@@ -684,7 +684,7 @@ ActiveRecord::Schema.define(version: 20_210_614_220_919) do
     t.integer "phylo_trees_count", default: 0, null: false
     t.bigint "created_by_user_id", comment: "The user_id that created/invited this user."
     t.text "archetypes"
-    t.string "group"
+    t.string "segments"
     t.index ["authentication_token_encrypted"], name: "index_users_on_authentication_token_encrypted", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
   end

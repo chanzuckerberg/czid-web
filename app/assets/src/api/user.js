@@ -7,7 +7,7 @@ const createUser = ({
   isAdmin,
   sendActivation,
   archetypes,
-  group,
+  segments,
 }) => {
   return postWithCSRF("/users.json", {
     user: {
@@ -15,7 +15,7 @@ const createUser = ({
       email,
       institution,
       archetypes,
-      group,
+      segments,
       role: isAdmin ? 1 : 0,
       send_activation: sendActivation,
     },
@@ -29,7 +29,7 @@ const updateUser = ({
   institution,
   isAdmin,
   archetypes,
-  group,
+  segments,
 }) => {
   return putWithCSRF(`/users/${userId}.json`, {
     user: {
@@ -37,7 +37,7 @@ const updateUser = ({
       email,
       institution,
       archetypes,
-      group,
+      segments,
       role: isAdmin ? 1 : 0,
     },
   });
