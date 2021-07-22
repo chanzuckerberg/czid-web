@@ -1,17 +1,26 @@
+import cx from "classnames";
 import { fromPairs, set, find } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
 import { getPhyloTree, retryPhyloTree, saveVisualization } from "~/api";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import {
+  ANALYTICS_EVENT_NAMES,
+  logAnalyticsEvent,
+  withAnalytics,
+} from "~/api/analytics";
 import { rerunPhyloTree } from "~/api/phylo_tree_ngs";
 import BasicPopup from "~/components/BasicPopup";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import { PHYLO_TREE_HEATMAP_LINK } from "~/components/utils/documentationLinks";
+import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
+import Notification from "~ui/notifications/Notification";
 
 import Divider from "../../layout/Divider";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
@@ -39,6 +48,7 @@ class PhyloTreeListView extends React.Component {
         urlParams,
         props.phyloTrees
       ),
+      showOldTreeWarning: true,
       sidebarConfig: null,
       sidebarMode: null,
       sidebarVisible: false,
@@ -61,6 +71,7 @@ class PhyloTreeListView extends React.Component {
 
   async componentDidMount() {
     let currentTree = await getPhyloTree(this.state.selectedPhyloTreeId);
+    // TODO: if currentTree is a PhyloTreeNg, set show showOldTreeWarning to false.
     this.setState({ currentTree });
   }
 
@@ -252,9 +263,14 @@ class PhyloTreeListView extends React.Component {
     );
   };
 
+  hideOldTreeWarning = () => {
+    this.setState({ showOldTreeWarning: false });
+  };
+
   render() {
-    const { treeContainer } = this.state;
+    const { showOldTreeWarning, treeContainer } = this.state;
     const { admin } = this.context || {};
+    const { allowedFeatures = [] } = this.context || {};
 
     if (!this.state.selectedPhyloTreeId) {
       return (
@@ -352,6 +368,38 @@ class PhyloTreeListView extends React.Component {
           params={this.state.sidebarConfig}
         />
         <NarrowContainer>
+          {showOldTreeWarning &&
+            allowedFeatures.includes(PHYLO_TREE_NG_FEATURE) && (
+              <Notification
+                className={cx(
+                  cs.notification,
+                  showOldTreeWarning ? cs.show : cs.hide
+                )}
+                type="info"
+                displayStyle="flat"
+                onClose={this.hideOldTreeWarning}
+                closeWithDismiss={false}
+              >
+                <div className={cs.notificationContent}>
+                  <span className={cs.warning}>
+                    This tree was created with a previous version of our
+                    phylogenetic tree module that used kSNP3.
+                  </span>{" "}
+                  Please create a new tree from these samples to use our new
+                  module, which uses SKA, for continued analysis.{" "}
+                  <ExternalLink
+                    coloredBackground={true}
+                    href={PHYLO_TREE_HEATMAP_LINK}
+                    analyticsEventName={
+                      ANALYTICS_EVENT_NAMES.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED
+                    }
+                  >
+                    Learn more
+                  </ExternalLink>
+                  .
+                </div>
+              </Notification>
+            )}
           {currentTree.newick ? (
             <PhyloTreeVis
               afterSelectedMetadataChange={this.afterSelectedMetadataChange}

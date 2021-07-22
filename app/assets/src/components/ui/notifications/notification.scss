@@ -23,11 +23,11 @@
     flex-grow: 0;
     margin-left: $space-xxs;
     margin-right: $space-l;
-    height: 20px;
     align-self: flex-start;
 
     svg {
-      width: 20px;
+      width: $icon-l;
+      height: $icon-l;
     }
 
     .successIcon {
@@ -40,16 +40,18 @@
     // Helps to center single-line text vertically.
     margin-top: 1px;
     flex: 1 1 0;
+    align-self: baseline;
   }
 
   .removeIcon {
     cursor: pointer;
     height: 14px;
     width: 14px;
-    fill: $gray-darkest;
+    fill: $gray-dark;
     margin-right: $space-l;
-    padding-top: $space-xxs;
+    margin-top: $space-xxs;
     margin-left: auto;
+    align-self: flex-start;
   }
 
   .actions {

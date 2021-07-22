@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 @import "~styles/themes/typography";
 
 .phyloTreeListView {
@@ -35,5 +36,24 @@
 
   .header {
     @include font-header-l;
+  }
+}
+
+.notification {
+  margin: $space-m 0;
+
+  .notificationContent {
+    margin-right: $space-l;
+    .warning {
+      font-weight: $font-weight-bold;
+    }
+  }
+
+  &.show {
+    display: flex;
+  }
+
+  &.hide {
+    display: none;
   }
 }
