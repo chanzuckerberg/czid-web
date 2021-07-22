@@ -8,11 +8,9 @@ class AddCtValueMetadataField < ActiveRecord::Migration[6.1]
       is_core: 1,
       is_default: 1,
       group: "Infection",
-      host_genomes: HostGenome.all,
-      examples: JSON.dump({ all: ["8", "14", "27"] })
+      host_genomes: HostGenome.all
     )
 
-    ct_value.update(default_for_new_host_genome: 1)
     ct_value.projects = Project.all
   end
 
