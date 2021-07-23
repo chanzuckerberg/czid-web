@@ -82,7 +82,7 @@ class VisualizationsView extends React.Component {
       ) : (
         <IconHeatmapPrivate className={cs.icon} />
       );
-    } else if (visualizationType === "phylo_tree") {
+    } else if (["phylo_tree", "phylo_tree_ng"].includes(visualizationType)) {
       return publicAccess ? (
         <IconPhyloTreePublic className={cs.icon} />
       ) : (

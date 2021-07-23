@@ -2,6 +2,8 @@ import { isEmpty, forEach } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 import Moment from "react-moment";
+import { Link as RouterLink } from "react-router-dom";
+
 import {
   createPhyloTree,
   getNewPhyloTree,
@@ -145,17 +147,10 @@ class PhyloTreeCreationModal extends React.Component {
       name: row.name,
       user: (row.user || {}).name,
       last_update: <Moment fromNow date={row.updated_at} />,
-      view: (
-        // TODO: Get the /phylo_tree_ngs/ page to actually work.
-        <a
-          href={
-            nextGeneration
-              ? `/phylo_tree_ngs/${row.id}`
-              : `/phylo_trees/index?treeId=${row.id}`
-          }
-        >
-          View
-        </a>
+      view: nextGeneration ? (
+        <RouterLink to={`/phylo_tree_ngs/${row.id}`}>View</RouterLink>
+      ) : (
+        <a href={`/phylo_trees/index?treeId=${row.id}`}>View</a>
       ),
     }));
   };

@@ -1863,18 +1863,19 @@ class SamplesHeatmapView extends React.Component {
 }
 
 SamplesHeatmapView.propTypes = {
+  addedTaxonIds: PropTypes.array,
   backgrounds: PropTypes.array,
   categories: PropTypes.array,
+  heatmapTs: PropTypes.number,
   metrics: PropTypes.array,
+  prefilterConstants: PropTypes.object,
+  removedTaxonIds: PropTypes.array,
   sampleIds: PropTypes.array,
   sampleIdsToProjectIds: PropTypes.array,
   savedParamValues: PropTypes.object,
   subcategories: PropTypes.object,
-  removedTaxonIds: PropTypes.array,
   taxonLevels: PropTypes.array,
   thresholdFilters: PropTypes.object,
-  heatmapTs: PropTypes.number,
-  prefilterConstants: PropTypes.object,
 };
 
 SamplesHeatmapView.contextType = UserContext;

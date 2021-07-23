@@ -257,6 +257,7 @@ class DiscoveryView extends React.Component {
     const defaultCGColumns =
       DEFAULTS_BY_WORKFLOW[WORKFLOWS.CONSENSUS_GENOME.value];
 
+    // eslint-disable-next-line standard/computed-property-even-spacing
     stateObject.sampleActiveColumnsByWorkflow[
       WORKFLOWS.CONSENSUS_GENOME.value
     ] = defaultCGColumns;

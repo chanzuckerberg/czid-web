@@ -149,6 +149,7 @@ SearchBox.propTypes = {
   placeholder: PropTypes.string,
   // indicates if field is cleared when user selects a result
   clearOnSelect: PropTypes.bool,
+  onEnter: PropTypes.func,
 };
 
 export default SearchBox;

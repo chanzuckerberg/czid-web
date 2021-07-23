@@ -105,12 +105,13 @@ class AlignmentViz extends React.Component {
 }
 
 AlignmentViz.propTypes = {
-  sampleId: PropTypes.number,
   alignmentQuery: PropTypes.string,
+  pipelineVersion: PropTypes.string,
+  readsPerPage: PropTypes.number,
+  sampleId: PropTypes.number,
   taxId: PropTypes.string,
   taxLevel: PropTypes.string,
   taxName: PropTypes.string,
-  pipelineVersion: PropTypes.string,
 };
 
 export default AlignmentViz;

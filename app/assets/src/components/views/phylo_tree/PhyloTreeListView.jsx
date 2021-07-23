@@ -9,7 +9,7 @@ import {
   logAnalyticsEvent,
   withAnalytics,
 } from "~/api/analytics";
-import { rerunPhyloTree } from "~/api/phylo_tree_ngs";
+import { getPhyloTreeNg, rerunPhyloTreeNg } from "~/api/phylo_tree_ngs";
 import BasicPopup from "~/components/BasicPopup";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { UserContext } from "~/components/common/UserContext";
@@ -49,6 +49,7 @@ class PhyloTreeListView extends React.Component {
         props.phyloTrees
       ),
       showOldTreeWarning: true,
+      selectedPhyloTreeNgId: props.selectedPhyloTreeNgId,
       sidebarConfig: null,
       sidebarMode: null,
       sidebarVisible: false,
@@ -70,9 +71,16 @@ class PhyloTreeListView extends React.Component {
   }
 
   async componentDidMount() {
-    let currentTree = await getPhyloTree(this.state.selectedPhyloTreeId);
+    const { selectedPhyloTreeId, selectedPhyloTreeNgId } = this.state;
+
+    if (selectedPhyloTreeNgId) {
+      this.setState({
+        currentTree: await getPhyloTreeNg(selectedPhyloTreeNgId),
+      });
+    } else if (selectedPhyloTreeId) {
+      this.setState({ currentTree: await getPhyloTree(selectedPhyloTreeId) });
+    }
     // TODO: if currentTree is a PhyloTreeNg, set show showOldTreeWarning to false.
-    this.setState({ currentTree });
   }
 
   handleTreeChange = async newPhyloTreeId => {
@@ -252,7 +260,7 @@ class PhyloTreeListView extends React.Component {
         <PrimaryButton
           text="Retry Phylo Tree NG"
           onClick={() => {
-            rerunPhyloTree(currentTree.id);
+            rerunPhyloTreeNg(currentTree.id);
             location.reload();
           }}
         />
@@ -268,11 +276,17 @@ class PhyloTreeListView extends React.Component {
   };
 
   render() {
-    const { showOldTreeWarning, treeContainer } = this.state;
+    const {
+      currentTree,
+      selectedPhyloTreeId,
+      selectedPhyloTreeNgId,
+      showOldTreeWarning,
+      treeContainer,
+    } = this.state;
     const { admin } = this.context || {};
     const { allowedFeatures = [] } = this.context || {};
 
-    if (!this.state.selectedPhyloTreeId) {
+    if (!selectedPhyloTreeId && !selectedPhyloTreeNgId) {
       return (
         <div className={cs.noTreeBanner}>
           No phylogenetic trees were found. You can create trees from the report
@@ -281,11 +295,7 @@ class PhyloTreeListView extends React.Component {
       );
     }
 
-    if (!this.state.currentTree) {
-      return null;
-    }
-
-    let currentTree = this.state.currentTree;
+    if (!currentTree) return null;
     return (
       <div className={cs.phyloTreeListView}>
         <NarrowContainer>
@@ -426,8 +436,15 @@ class PhyloTreeListView extends React.Component {
 }
 
 PhyloTreeListView.propTypes = {
-  phyloTrees: PropTypes.array,
   allowedFeatures: PropTypes.array,
+  phyloTrees: PropTypes.array,
+  selectedPhyloTreeNgId: PropTypes.number,
+};
+
+PhyloTreeListView.defaultProps = {
+  // TODO: Remove this and add fetching support when 'phyloTrees' is not
+  // supplied (e.g. when coming from DiscoveryViewRouter):
+  phyloTrees: [],
 };
 
 PhyloTreeListView.contextType = UserContext;

@@ -1,5 +1,5 @@
 <%= javascript_tag do %>
-  react_component('DiscoveryView', {
+  react_component('DiscoveryViewRouter', {
     domain: "my_data",
     admin: <%= current_user.admin %>,
     projectId: <%= params[:project_id] || "null" %>,

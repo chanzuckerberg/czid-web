@@ -65,6 +65,9 @@ class VisualizationsController < ApplicationController
       return redirect_to "/samples/#{sample_id}?" + vis.data.to_query
     elsif @type == "phylo_tree"
       return redirect_to "/phylo_trees/index?" + vis.data.to_query
+    elsif @type == "phylo_tree_ng"
+      tree_id = vis.data["treeNgId"]
+      return redirect_to "/phylo_tree_ngs/#{tree_id}?" + vis.data.to_query
     end
   end
 

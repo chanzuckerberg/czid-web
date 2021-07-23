@@ -159,6 +159,8 @@ Put API calls in [`/api`](https://github.com/chanzuckerberg/idseq-web-private/tr
 
 Start putting fetch methods like `fetchSampleMetadata` in `/api`, so that it's easy to see all the back-end endpoints the front-end is using.
 
+The main `index.js` file is quite large, so prefer putting methods in a more specific file in the `/api` folder if possible.
+
 ### PropTypes
 
 When passing complex objects as props, add the structure of the object to a `propTypes.js` file. If the object is ad-hoc and very specific to the component, put the propTypes file inside the component directory. If the object will be used widely across the app, put it in [`utils/propTypes.js`](https://github.com/chanzuckerberg/idseq-web-private/blob/main/app/assets/src/components/utils/propTypes.js)

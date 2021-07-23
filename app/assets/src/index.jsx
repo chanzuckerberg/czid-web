@@ -5,8 +5,11 @@ import { defaultTheme } from "czifui";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
+import { BrowserRouter } from "react-router-dom";
+
 import { UserContext } from "~/components/common/UserContext";
 import store from "~/redux/store";
+
 import "url-search-params-polyfill";
 import "font-awesome/scss/font-awesome.scss";
 import "semantic-ui-css/semantic.min.css";
@@ -54,17 +57,19 @@ const react_component = (componentName, props, target, userContext) => {
   if (matchedComponent) {
     ReactDOM.render(
       <Sentry.ErrorBoundary fallback={"An error has occured"}>
-        <UserContext.Provider value={userContext || {}}>
-          <Provider store={store}>
-            <StylesProvider injectFirst>
-              <EmotionThemeProvider theme={defaultTheme}>
-                <ThemeProvider theme={defaultTheme}>
-                  {React.createElement(matchedComponent, props)}
-                </ThemeProvider>
-              </EmotionThemeProvider>
-            </StylesProvider>
-          </Provider>
-        </UserContext.Provider>
+        <BrowserRouter>
+          <UserContext.Provider value={userContext || {}}>
+            <Provider store={store}>
+              <StylesProvider injectFirst>
+                <EmotionThemeProvider theme={defaultTheme}>
+                  <ThemeProvider theme={defaultTheme}>
+                    {React.createElement(matchedComponent, props)}
+                  </ThemeProvider>
+                </EmotionThemeProvider>
+              </StylesProvider>
+            </Provider>
+          </UserContext.Provider>
+        </BrowserRouter>
       </Sentry.ErrorBoundary>,
       document.getElementById(target)
     );
