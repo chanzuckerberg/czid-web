@@ -7,28 +7,27 @@ import Icon from "~ui/icons/Icon";
 
 import cs from "./filter_tag.scss";
 
-export default class FilterTag extends React.Component {
-  render() {
-    const { text, onClose, className } = this.props;
-    const labelText = (
-      <React.Fragment>
-        {text}
-        <Icon name="close" onClick={onClose} />
-      </React.Fragment>
-    );
+const FilterTag = ({ text, onClose, className }) => {
+  const labelText = (
+    <>
+      {text}
+      <Icon name="close" onClick={onClose} />
+    </>
+  );
 
-    return (
-      <Label
-        className={cx(cs.filterTag, className)}
-        size="tiny"
-        text={labelText}
-      />
-    );
-  }
-}
+  return (
+    <Label
+      className={cx(cs.filterTag, className)}
+      size="tiny"
+      text={labelText}
+    />
+  );
+};
 
 FilterTag.propTypes = {
   text: PropTypes.string,
   onClose: PropTypes.func.isRequired,
   className: PropTypes.string,
 };
+
+export default FilterTag;

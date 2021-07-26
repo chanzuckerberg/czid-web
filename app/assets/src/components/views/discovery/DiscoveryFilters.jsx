@@ -83,18 +83,19 @@ class DiscoveryFilters extends React.Component {
     });
   }
 
-  handleRemoveTag(selectedKey, removedValue) {
-    let newSelected = null;
+  handleRemoveTag = ({ selectedKey, valueToRemove = "" }) => {
+    let newSelected = [];
+
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
-        option => (option.value || option) !== removedValue
+        option => (option.value || option) !== valueToRemove
       );
     }
 
     let newState = {};
     newState[selectedKey] = newSelected;
     this.setState(newState, this.notifyFilterChangeHandler);
-  }
+  };
 
   renderTags(optionsKey) {
     let selectedKey = `${optionsKey}Selected`;
@@ -122,7 +123,11 @@ class DiscoveryFilters extends React.Component {
             key={option.value}
             text={option.text}
             onClose={withAnalytics(
-              this.handleRemoveTag.bind(this, selectedKey, option.value),
+              () =>
+                this.handleRemoveTag({
+                  selectedKey,
+                  valueToRemove: option.value,
+                }),
               "DiscoveryFilters_tag_removed",
               {
                 value: option.value,
@@ -168,7 +173,8 @@ class DiscoveryFilters extends React.Component {
                 selectedOptions={taxonSelected}
                 disabled={workflow === WORKFLOWS.CONSENSUS_GENOME.value}
               />
-              {this.renderTags("taxon")}
+              {workflow !== WORKFLOWS.CONSENSUS_GENOME.value &&
+                this.renderTags("taxon")}
             </div>
             <div className={cs.filterContainer}>
               <LocationFilter

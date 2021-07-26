@@ -4,10 +4,8 @@ import { getSearchSuggestions } from "~/api";
 import { AsyncMultipleDropdown } from "~ui/controls/dropdowns";
 import cs from "./filters.scss";
 
-class TaxonFilter extends React.Component {
-  handleFilterChange = async query => {
-    const { domain } = this.props;
-
+const TaxonFilter = ({ domain, selectedOptions, onChange, disabled }) => {
+  const handleFilterChange = async query => {
     const searchResults = await getSearchSuggestions({
       query,
       categories: ["taxon"],
@@ -22,22 +20,18 @@ class TaxonFilter extends React.Component {
     return options;
   };
 
-  render() {
-    const { onChange, selectedOptions, disabled } = this.props;
-
-    return (
-      <AsyncMultipleDropdown
-        arrowInsideTrigger={false}
-        trigger={<div className={cs.filterLabel}>Taxon</div>}
-        menuLabel="Select Taxon"
-        selectedOptions={selectedOptions}
-        onFilterChange={this.handleFilterChange}
-        onChange={onChange}
-        disabled={disabled}
-      />
-    );
-  }
-}
+  return (
+    <AsyncMultipleDropdown
+      arrowInsideTrigger={false}
+      trigger={<div className={cs.filterLabel}>Taxon</div>}
+      menuLabel="Select Taxon"
+      selectedOptions={selectedOptions}
+      onFilterChange={handleFilterChange}
+      onChange={onChange}
+      disabled={disabled}
+    />
+  );
+};
 
 TaxonFilter.propTypes = {
   domain: PropTypes.string,
