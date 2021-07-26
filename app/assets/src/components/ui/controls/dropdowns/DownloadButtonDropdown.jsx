@@ -23,6 +23,7 @@ const DownloadButtonDropdown = props => {
 DownloadButtonDropdown.propTypes = forbidExtraProps({
   className: PropTypes.string,
   disabled: PropTypes.bool,
+  items: PropTypes.arrayOf(PropTypes.node),
   options: PropTypes.array,
   onClick: PropTypes.func,
   direction: PropTypes.oneOf(["left", "right"]),

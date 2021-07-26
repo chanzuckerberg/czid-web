@@ -82,11 +82,11 @@ class PhyloTreeListView extends React.Component {
     if (selectedPhyloTreeNgId) {
       this.setState({
         currentTree: await getPhyloTreeNg(selectedPhyloTreeNgId),
+        showOldTreeWarning: false,
       });
     } else if (selectedPhyloTreeId) {
       this.setState({ currentTree: await getPhyloTree(selectedPhyloTreeId) });
     }
-    // TODO: if currentTree is a PhyloTreeNg, set show showOldTreeWarning to false.
   }
 
   handleTreeChange = async newPhyloTreeId => {
@@ -366,6 +366,7 @@ class PhyloTreeListView extends React.Component {
               />
               <PhyloTreeDownloadButton
                 className={cs.controlElement}
+                showPhyloTreeNgOptions={!!selectedPhyloTreeNgId}
                 tree={currentTree}
                 treeContainer={treeContainer}
               />

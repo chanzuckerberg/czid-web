@@ -38,6 +38,7 @@ class ButtonDropdown extends React.Component {
         hideArrow
         disabled={this.props.disabled}
         floating
+        items={this.props.items}
         onChange={this.props.onClick}
         options={this.props.options}
         trigger={this.getButton()}
@@ -52,6 +53,7 @@ ButtonDropdown.propTypes = {
   disabled: PropTypes.bool,
   icon: PropTypes.element,
   onClick: PropTypes.func,
+  items: PropTypes.arrayOf(PropTypes.node),
   options: PropTypes.array,
   primary: PropTypes.bool,
   secondary: PropTypes.bool,
