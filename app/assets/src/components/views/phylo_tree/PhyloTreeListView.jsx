@@ -28,10 +28,16 @@ import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import PhyloTreeVis from "./PhyloTreeVis";
 import cs from "./phylo_tree_list_view.scss";
 
+// Old PhyloTree statuses:
 const STATUS_INITIALIZED = 0;
 // Unused: const STATUS_READY = 1;
 const STATUS_FAILED = 2;
 const STATUS_IN_PROGRESS = 3;
+
+// PhyloTreeNg statuses:
+const NG_STATUS_CREATED = "CREATED";
+const NG_STATUS_RUNNING = "RUNNING";
+const NG_STATUS_FAILED = "FAILED";
 
 class PhyloTreeListView extends React.Component {
   constructor(props) {
@@ -149,10 +155,13 @@ class PhyloTreeListView extends React.Component {
   getTreeStatus(tree) {
     let statusMessage = "";
     switch (tree) {
-      case STATUS_INITIALIZED:
+      case NG_STATUS_CREATED:
+      case NG_STATUS_RUNNING:
       case STATUS_IN_PROGRESS:
+      case STATUS_INITIALIZED:
         statusMessage = "Computation in progress. Please check back later!";
         break;
+      case NG_STATUS_FAILED:
       case STATUS_FAILED:
         statusMessage = "Tree creation failed!";
         break;

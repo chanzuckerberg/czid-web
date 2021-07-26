@@ -1,4 +1,4 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe PhyloTreeNgsController, type: :controller do
   create_users
@@ -409,6 +409,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     let(:fake_sfn_name) { "fake_sfn_name" }
     let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
     let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
+    let(:fake_species) { "some species" }
 
     before do
       sign_in @joe
@@ -416,7 +417,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       project_one = create(:project, users: [@joe])
       sample_one = create(:sample, project: project_one)
       pr_one = create(:pipeline_run, sample: sample_one)
-      create(:taxon_lineage, taxid: 1, tax_name: "some species")
+      create(:taxon_lineage, taxid: 1, tax_name: fake_species)
       create(:taxon_count, tax_id: 1, pipeline_run_id: pr_one.id, tax_level: 1)
 
       sample_two = create(:sample, project: project_one)
@@ -430,7 +431,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
                                pipeline_runs: [pr_one],
                                name: "Phylo tree ng 1",
                                sfn_execution_arn: fake_sfn_execution_arn,
-                               status: WorkflowRun::STATUS[:failed],
+                               status: WorkflowRun::STATUS[:succeeded],
                                inputs_json: { pipeline_run_ids: [pr_one.id], tax_id: 1 })
 
       @pt_mock_results = {
@@ -444,11 +445,38 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
                                pipeline_runs: [pr_two],
                                name: "Phylo tree ng 2",
                                sfn_execution_arn: fake_sfn_execution_arn,
-                               status: WorkflowRun::STATUS[:running],
+                               status: WorkflowRun::STATUS[:succeeded],
                                inputs_json: { pipeline_run_ids: [pr_two.id], tax_id: 2 })
+
+      @created_tree = create(:phylo_tree_ng,
+                             user: @joe,
+                             project: project_one,
+                             pipeline_runs: [pr_one],
+                             name: "Phylo tree ng 1",
+                             sfn_execution_arn: fake_sfn_execution_arn,
+                             status: WorkflowRun::STATUS[:created],
+                             inputs_json: { pipeline_run_ids: [pr_one.id], tax_id: 1 })
+
+      @running_tree = create(:phylo_tree_ng,
+                             user: @joe,
+                             project: project_one,
+                             pipeline_runs: [pr_one],
+                             name: "Phylo tree ng 1",
+                             sfn_execution_arn: fake_sfn_execution_arn,
+                             status: WorkflowRun::STATUS[:running],
+                             inputs_json: { pipeline_run_ids: [pr_one.id], tax_id: 1 })
+
+      @failed_tree = create(:phylo_tree_ng,
+                            user: @joe,
+                            project: project_one,
+                            pipeline_runs: [pr_one],
+                            name: "Phylo tree ng 1",
+                            sfn_execution_arn: fake_sfn_execution_arn,
+                            status: WorkflowRun::STATUS[:failed],
+                            inputs_json: { pipeline_run_ids: [pr_one.id], tax_id: 1 })
     end
 
-    context "phylo_tree_ng has a species level taxon of interest" do
+    context "successful phylo_tree_ng has a species level taxon of interest" do
       it "can see phylo_tree_ng and includes parent_taxid" do
         expect_any_instance_of(PhyloTreeNg).to receive(:results).and_return(@pt_mock_results)
         get :show, params: { id: @phylo_tree_one.id, format: "json" }
@@ -461,7 +489,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       end
     end
 
-    context "phylo_tree_ng has a genus level taxon of interest" do
+    context "successful phylo_tree_ng has a genus level taxon of interest" do
       it "can see phylo_tree_ng" do
         expect_any_instance_of(PhyloTreeNg).to receive(:results).and_return(@pt_mock_results)
         get :show, params: { id: @phylo_tree_two.id, format: "json" }
@@ -471,6 +499,24 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
 
         expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "sampleDetailsByNodeName")
         expect(pt["tax_level"]).to eq(2)
+      end
+    end
+
+    ["CREATED", "RUNNING", "FAILED"].each do |state_name, tree|
+      it "serves a tree in #{state_name} state" do
+        states = { "CREATED" => @created_tree, "RUNNING" => @running_tree, "FAILED" => @failed_tree }
+        tree = states[state_name]
+
+        get :show, params: { id: tree.id, format: "json" }
+
+        expect(response).to have_http_status :ok
+        pt = JSON.parse(response.body)
+
+        expect(pt).to include(
+          "name" => tree.name,
+          "status" => tree.status,
+          "tax_name" => fake_species
+        )
       end
     end
   end
@@ -540,10 +586,10 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     end
 
     let(:forbidden_project) { create(:project) }
-    let(:forbidden_sample)  { create(:sample, project: forbidden_project) }
+    let(:forbidden_sample) { create(:sample, project: forbidden_project) }
 
     let(:allowed_project) { create(:project, users: [@joe]) }
-    let(:allowed_sample)  { create(:sample, project: allowed_project) }
+    let(:allowed_sample) { create(:sample, project: allowed_project) }
 
     context "from regular user" do
       before do

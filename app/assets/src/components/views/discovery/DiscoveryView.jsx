@@ -26,6 +26,7 @@ import moment from "moment";
 import PropTypes from "prop-types";
 import React from "react";
 import { connect } from "react-redux";
+import { withRouter } from "react-router";
 
 import { getSearchSuggestions } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -906,7 +907,7 @@ class DiscoveryView extends React.Component {
   };
 
   handleObjectSelected = ({ object, currentEvent }) => {
-    const { snapshotShareId } = this.props;
+    const { snapshotShareId, history: RouterHistory } = this.props;
     const { workflow, workflowEntity } = this.state;
 
     let sampleId;
@@ -926,7 +927,13 @@ class DiscoveryView extends React.Component {
       snapshotShareId,
     });
 
-    openUrl(url, currentEvent);
+    // If user used CMD or CTRL, openUrl will open in a new tab:
+    if (currentEvent && (currentEvent.metaKey || currentEvent.ctrlKey)) {
+      openUrl(url, currentEvent);
+    } else {
+      // Otherwise navigate via React Router:
+      RouterHistory.push(url);
+    }
   };
 
   getSnapshotPrefix = () => {
@@ -1941,10 +1948,11 @@ DiscoveryView.propTypes = {
   admin: PropTypes.bool,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   domain: PropTypes.oneOf(DISCOVERY_DOMAINS).isRequired,
+  history: PropTypes.object,
   mapTilerKey: PropTypes.string,
   projectId: PropTypes.number,
-  snapshotProjectName: PropTypes.string,
   snapshotProjectDescription: PropTypes.string,
+  snapshotProjectName: PropTypes.string,
   snapshotShareId: PropTypes.string,
   updateDiscoveryProjectId: PropTypes.func,
 };
@@ -1958,4 +1966,4 @@ const connectedComponent = connect(null, mapDispatchToProps)(DiscoveryView);
 
 connectedComponent.name = "DiscoveryView";
 
-export default connectedComponent;
+export default withRouter(connectedComponent);

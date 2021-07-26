@@ -66,12 +66,20 @@ class PhyloTreeNgsController < ApplicationController
 
       format.json do
         pt = @phylo_tree_ng.as_json(only: ["id", "name", "tax_id", "status"])
-        results = @phylo_tree_ng.results
+
         taxon_lineage = TaxonLineage.where(taxid: pt["tax_id"]).last
+        pt["tax_name"] = taxon_lineage.tax_name
+
+        # If the tree didn't succeed, everything below the next block is not
+        # used for display:
+        if @phylo_tree_ng.status != WorkflowRun::STATUS[:succeeded]
+          render json: pt and return
+        end
+
+        results = @phylo_tree_ng.results
         pt["user"] = @phylo_tree_ng.user.name
         pt["tax_level"] = TaxonCount.find_by(tax_id: pt["tax_id"]).tax_level
         pt["parent_taxid"] = taxon_lineage.genus_taxid if pt["tax_level"] == 1
-        pt["tax_name"] = taxon_lineage.tax_name
         pt["newick"] = results[:newick]
 
         pipeline_runs = @phylo_tree_ng.pipeline_runs

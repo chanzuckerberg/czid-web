@@ -10,6 +10,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { Switch, Route } from "react-router-dom";
 
+import SampleView from "~/components/views/SampleView/SampleView";
 import DiscoveryView from "~/components/views/discovery/DiscoveryView";
 import { DISCOVERY_DOMAINS } from "~/components/views/discovery/discovery_api";
 import PhyloTreeListView from "~/components/views/phylo_tree/PhyloTreeListView";
@@ -30,7 +31,24 @@ const DiscoveryViewRouter = ({
       <Route
         path="/phylo_tree_ngs/:id"
         render={({ match }) => (
-          <PhyloTreeListView selectedPhyloTreeNgId={match.params.id} />
+          <PhyloTreeListView
+            selectedPhyloTreeNgId={parseInt(match.params.id)}
+          />
+        )}
+      />
+      <Route
+        path="/samples/:id"
+        render={({ match }) => (
+          <SampleView sampleId={parseInt(match.params.id)} />
+        )}
+      />
+      <Route
+        path="/pub/:snapshotShareId/samples/:sampleId"
+        render={({ match }) => (
+          <SampleView
+            sampleId={parseInt(match.params.sampleId)}
+            snapshotShareId={match.params.snapshotShareId}
+          />
         )}
       />
       <Route>
