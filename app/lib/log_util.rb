@@ -20,11 +20,10 @@ class LogUtil
   end
 
   # If you want to report a message rather than an exception you can use the log_message method.
-  # Levels we can specify here: "debug", "info", "warning", "error", "fatal".
-  def self.log_message(message, level: "info", **details)
+  def self.log_message(message, **details)
     Raven.capture_message(
       message,
-      level: level,
+      level: "info",
       extra: details
     )
   end
