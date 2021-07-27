@@ -399,6 +399,34 @@ RSpec.describe WorkflowRunsController, type: :controller do
                                  ])
             end
 
+            context "filtering by search string" do
+              it "returns correct workflow runs belonging to samples that contain the search string" do
+                get :index, params: { domain: domain, mode: mode, search: "Test Sample 9", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+
+                json_response = JSON.parse(response.body)
+
+                workflow_runs = json_response["workflow_runs"]
+                workflow_run_ids = workflow_runs.map { |wr| wr["id"].to_i }
+
+                expected_sample_ids = domain == "my_data" ? Sample.where(project_id: @project3.id).pluck(:id).uniq : []
+                expected_workflow_run_ids = WorkflowRun.where(sample_id: expected_sample_ids).pluck(:id)
+
+                expect(json_response.keys).to eq(["workflow_runs"])
+                expect(workflow_run_ids).to contain_exactly(*expected_workflow_run_ids)
+              end
+
+              it "returns no workflow runs when searching for a non-existant sample" do
+                get :index, params: { domain: domain, mode: mode, search: "This sample name does not exist", workflow: WorkflowRun::WORKFLOW[:consensus_genome] }
+
+                json_response = JSON.parse(response.body)
+
+                workflow_runs = json_response["workflow_runs"]
+
+                expect(json_response.keys).to eq(["workflow_runs"])
+                expect(workflow_runs).to eq([])
+              end
+            end
+
             context "filtering by time" do
               it "returns correct workflow runs in the specified time range in domain '#{domain}' with mode '#{mode}'" do
                 # Workflow Runs for this spec are created in the future so the testing of #index does not get contaminated by the workflow_runs created in the 'before do' block above.

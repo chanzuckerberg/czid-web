@@ -13,7 +13,7 @@ class WorkflowRunsController < ApplicationController
   def index
     permitted_params = index_params
 
-    filters = permitted_params.slice(:host, :locationV2, :tissue, :projectId, :visibility, :time, :workflow)
+    filters = permitted_params.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility, :time, :workflow)
     workflow_runs = fetch_workflow_runs(domain: permitted_params[:domain], filters: filters)
 
     order_by = sanitize_order_by(WorkflowRun, order_by, :id)
@@ -214,11 +214,11 @@ class WorkflowRunsController < ApplicationController
   end
 
   def index_params
-    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :host, :locationV2, :tissue, :projectId, :visibility, :workflow, time: [])
+    params.permit(:domain, :mode, :offset, :limit, :orderBy, :orderDir, :listAllIds, :search, :host, :locationV2, :tissue, :projectId, :visibility, :workflow, time: [])
   end
 
   def fetch_workflow_runs(domain:, filters: {})
-    sample_filters = filters.slice(:host, :locationV2, :tissue, :projectId, :visibility)
+    sample_filters = filters.slice(:search, :host, :locationV2, :tissue, :projectId, :visibility)
     workflow_run_filters = filters.slice(:workflow, :time)
 
     samples = fetch_samples(domain: domain, filters: sample_filters)
