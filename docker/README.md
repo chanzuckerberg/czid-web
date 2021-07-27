@@ -47,16 +47,46 @@ This folder is just a README for now since `Dockerfile` and `docker-compose.yml`
 
 ### Read-only file system @ rb_sysopen - /app/Gemfile.lock
 
-- `'rescue in filesystem_access': There was an error accessing ``/app/Gemfile.lock``. (Bundler::GenericSystemCallError) The underlying system error is Errno::EROFS: Read-only file system @ rb_sysopen - /app/Gemfile.lock`
+- ` 'rescue in filesystem_access': There was an error accessing ``/app/Gemfile.lock``. (Bundler::GenericSystemCallError) The underlying system error is Errno::EROFS: Read-only file system @ rb_sysopen - /app/Gemfile.lock `
   - Try running `bundle install` from outside Docker. The internal Docker filesystem is read-only but Rails is trying to update an outdated Gemfile.lock. The new Gemfile.lock will be synced into the container.
 
 ### Redis not able to persist on disk
+
 - `/usr/local/bundle/gems/redis-4.3.1/lib/redis/client.rb:147:in 'call': MISCONF Redis is configured to save RDB snapshots, but it is currently not able to persist on disk. Commands that may modify the data set are disabled, because this instance is configured to report errors during writes if RDB snapshotting fails (stop-writes-on-bgsave-error option). Please check the Redis logs for details about the RDB error. (Redis::CommandError)`
   - Most likely you are out of Docker disk space.
   - Try `docker system prune` or `docker system prune --all`
   - Alternatively you can expand the hard disk allocation given to Docker. On Docker Desktop: Preferences -> Resources -> Advanced -> Disk image size. It will show the used space.
 
 ### ActiveRecord::ConnectionNotEstablished - Unknown MySQL server host 'db'
+
 - If you see the above error and `mysql` is failing to come up, you may also be out of Docker disk space.
   - Check if your containers are exiting with `Write error saving DB on disk: No space left on device`
   - Try `docker system prune` or `docker system prune --all`
+
+## Debugging AWS credentials issues
+
+- There are a variety of AWS credentials issues that could occur. The first step is to figure out at which level the credentials are broken (your local shell or just inside Docker, or awscli vs AWS SDK Gem API calls).
+- `aws sts get-caller-identity` lists your current identity config. See if it's broken in your main shell or only within Docker. Try it within `aws-oidc exec -- docker-compose run container-name-here bash`.
+- `aws configure get region` shows what `awscli` thinks is set as the region.
+- `aws configure list` is very useful for showing the currently detected settings and their source.
+- Use `printenv` or `echo` to see a env variable value, or `env | grep AWS` to list all AWS related variables. For example, there may be some interfering variables such as `AWS_SDK_LOAD_CONFIG` or `AWS_DEFAULT_REGION`.
+
+### You must specify a region. You can also configure your region by running "aws configure"
+
+- `awscli` is especially picky about credentials, which might be the source of your error if the code invokes `Open3.capture3("aws ...")` (not recommended). `awscli` seems to ignore any `AWS_REGION` env variable.
+- Make sure your `~/.aws/config` file has a default profile and default region like this at the top (replace the `...`):
+
+```
+[default]
+output             = json
+credential_process = sh -c 'aws-oidc creds-process --issuer-url=... --client-id=... --aws-role-arn=arn:aws:iam::...:role/... 2> /dev/tty'
+region             = us-west-2
+```
+
+- You may want to go through aws-oidc setup again: https://github.com/chanzuckerberg/aws-oidc
+- Your `~/.aws/config` and `~/.aws/credentials` files are available in the Docker container at `/root/.aws`, so they may be referenced even though the primary credentials come from `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`.
+- From the [AWS CLI docs](https://docs.aws.amazon.com/cli/latest/topic/config-vars.html#id1):
+  - Credentials from per-operation or per-function parameters get first priority.
+  - Next, credentials from environment variables have precedence over credentials from `~/.aws/credentials` and `~/.aws/config`.
+  - Credentials specified in `~/.aws/credentials` have precedence over credentials in `~/.aws/config`.
+  - Credentials provided by AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY will override the credentials located in the profile provided by AWS_PROFILE, if all are set.
