@@ -42,7 +42,6 @@ import { UserContext } from "~/components/common/UserContext";
 import Tabs from "~/components/ui/controls/Tabs";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import { NANOPORE_FEATURE } from "~/components/utils/features";
 import PropTypes from "~/components/utils/propTypes";
 import { WORKFLOWS } from "~/components/utils/workflows";
 import IssueGroup from "~ui/notifications/IssueGroup";
@@ -746,7 +745,6 @@ class UploadSampleStep extends React.Component {
 
   // Whether the current user input is valid. Determines whether the Continue button is enabled.
   isValid = () => {
-    const { allowedFeatures = [] } = this.context || {};
     const {
       currentTab,
       selectedTechnology,
@@ -758,20 +756,16 @@ class UploadSampleStep extends React.Component {
 
     let workflowsValid;
     if (selectedWorkflows.has(WORKFLOWS.CONSENSUS_GENOME.value)) {
-      if (allowedFeatures.includes(NANOPORE_FEATURE)) {
-        switch (selectedTechnology) {
-          case CG_TECHNOLOGY_OPTIONS.ILLUMINA:
-            workflowsValid = !!selectedWetlabProtocol;
-            break;
-          case CG_TECHNOLOGY_OPTIONS.NANOPORE:
-            workflowsValid = !!selectedWetlabProtocol;
-            break;
-          default:
-            workflowsValid = false;
-            break;
-        }
-      } else {
-        workflowsValid = !!selectedWetlabProtocol;
+      switch (selectedTechnology) {
+        case CG_TECHNOLOGY_OPTIONS.ILLUMINA:
+          workflowsValid = !!selectedWetlabProtocol;
+          break;
+        case CG_TECHNOLOGY_OPTIONS.NANOPORE:
+          workflowsValid = !!selectedWetlabProtocol;
+          break;
+        default:
+          workflowsValid = false;
+          break;
       }
     } else if (selectedWorkflows.has(WORKFLOWS.SHORT_READ_MNGS.value)) {
       workflowsValid = true;

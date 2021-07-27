@@ -7,7 +7,6 @@ import React from "react";
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
-import { GEN_VIRAL_CG_FEATURE } from "~/components/utils/features";
 import {
   isPipelineFeatureAvailable,
   COVERAGE_VIZ_FEATURE,
@@ -71,7 +70,6 @@ class HoverActions extends React.Component {
 
   // Metadata for each of the hover actions.
   getHoverActions = () => {
-    const { allowedFeatures = [] } = this.context || {};
     const {
       consensusGenomeEnabled,
       pipelineVersion,
@@ -158,10 +156,7 @@ class HoverActions extends React.Component {
       },
     ];
 
-    if (
-      allowedFeatures.includes(GEN_VIRAL_CG_FEATURE) &&
-      consensusGenomeEnabled
-    ) {
+    if (consensusGenomeEnabled) {
       if (previousConsensusGenomeRuns) {
         hoverActions.push({
           key: `consensus_genome_${params.taxId}`,

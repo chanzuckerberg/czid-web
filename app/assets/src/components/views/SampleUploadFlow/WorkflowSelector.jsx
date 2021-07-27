@@ -1,8 +1,7 @@
 import cx from "classnames";
-import React, { useContext } from "react";
+import React from "react";
 
 import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
-import { UserContext } from "~/components/common/UserContext";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import SectionsDropdown from "~/components/ui/controls/dropdowns/SectionsDropdown";
 import { IconInfoSmall } from "~/components/ui/icons";
@@ -11,10 +10,6 @@ import {
   CG_ILLUMINA_PIPELINE_GITHUB_LINK,
   UPLOAD_SAMPLE_PIPELINE_OVERVIEW_LINK,
 } from "~/components/utils/documentationLinks";
-import {
-  NANOPORE_FEATURE,
-  NANOPORE_V1_FEATURE,
-} from "~/components/utils/features";
 import ColumnHeaderTooltip from "~ui/containers/ColumnHeaderTooltip";
 import RadioButton from "~ui/controls/RadioButton";
 import Toggle from "~ui/controls/Toggle";
@@ -43,13 +38,6 @@ const WorkflowSelector = ({
   selectedWorkflows,
   usedClearLabs,
 }) => {
-  const userContext = useContext(UserContext);
-  const { allowedFeatures = [] } = userContext || {};
-  const nanoporeFeatureEnabled = allowedFeatures.includes(NANOPORE_FEATURE);
-  const nanoporeV1FeatureEnabled = allowedFeatures.includes(
-    NANOPORE_V1_FEATURE
-  );
-
   const createExternalLink = ({
     additionalStyle = null,
     analyticsEventName,
@@ -73,9 +61,6 @@ const WorkflowSelector = ({
           className={cs.dropdown}
           onChange={value => {
             onWetlabProtocolChange(value);
-            !nanoporeFeatureEnabled &&
-              onTechnologyToggle(CG_TECHNOLOGY_OPTIONS.ILLUMINA);
-
             logAnalyticsEvent("WorkflowSelector_wetlab-protocol_selected", {
               wetlabOption: value,
             });
@@ -134,10 +119,7 @@ const WorkflowSelector = ({
             Run your samples through our Illumina or Nanopore supported
             pipelines to get consensus genomes for SARS-CoV-2.
           </div>
-          {cgWorkflowSelected &&
-            (nanoporeFeatureEnabled
-              ? renderTechnologyOptions()
-              : renderWetlabSelector(CG_TECHNOLOGY_OPTIONS.ILLUMINA))}
+          {cgWorkflowSelected && renderTechnologyOptions()}
         </div>
       </div>
     );
@@ -222,7 +204,7 @@ const WorkflowSelector = ({
       </div>
 
       {/* If uploading ClearLabs samples, only allow default wetlab and medaka model options. */}
-      {nanoporeV1FeatureEnabled && !usedClearLabs ? (
+      {!usedClearLabs ? (
         <>
           {renderWetlabSelector(CG_TECHNOLOGY_OPTIONS.NANOPORE)}
           <div className={cs.item}>
