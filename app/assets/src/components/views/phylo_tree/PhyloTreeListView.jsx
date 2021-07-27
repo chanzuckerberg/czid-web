@@ -18,6 +18,7 @@ import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import { PHYLO_TREE_HEATMAP_LINK } from "~/components/utils/documentationLinks";
 import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
+import PhyloTreeHeatmapErrorModal from "~/components/views/phylo_tree/PhyloTreeHeatmapErrorModal";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import Notification from "~ui/notifications/Notification";
@@ -47,6 +48,7 @@ class PhyloTreeListView extends React.Component {
 
     this.state = {
       currentTree: null,
+      heatmapErrorModalOpen: false,
       phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree])),
       selectedPipelineRunId: null,
       selectedSampleId: null,
@@ -80,9 +82,11 @@ class PhyloTreeListView extends React.Component {
     const { selectedPhyloTreeId, selectedPhyloTreeNgId } = this.state;
 
     if (selectedPhyloTreeNgId) {
+      const currentTree = await getPhyloTreeNg(selectedPhyloTreeNgId);
       this.setState({
-        currentTree: await getPhyloTreeNg(selectedPhyloTreeNgId),
+        currentTree,
         showOldTreeWarning: false,
+        heatmapErrorModalOpen: currentTree.clustermap_png_url,
       });
     } else if (selectedPhyloTreeId) {
       this.setState({ currentTree: await getPhyloTree(selectedPhyloTreeId) });
@@ -284,14 +288,23 @@ class PhyloTreeListView extends React.Component {
     this.setState({ showOldTreeWarning: false });
   };
 
+  handleCloseHeatmapErrorModal = () => {
+    this.setState({ heatmapErrorModalOpen: false });
+  };
+
   render() {
     const {
       currentTree,
+      heatmapErrorModalOpen,
       selectedPhyloTreeId,
       selectedPhyloTreeNgId,
       showOldTreeWarning,
       treeContainer,
     } = this.state;
+    const clustermapPngUrl = currentTree
+      ? currentTree.clustermap_png_url
+      : false;
+
     const { admin } = this.context || {};
     const { allowedFeatures = [] } = this.context || {};
 
@@ -432,14 +445,28 @@ class PhyloTreeListView extends React.Component {
               phyloTreeId={this.state.selectedPhyloTreeId}
             />
           ) : (
-            <div className={cs.noTreeBanner}>
-              {this.getTreeStatus(currentTree.status)}
+            <div>
+              {clustermapPngUrl ? (
+                <NarrowContainer size="small">
+                  <img className={cs.heatmap} src={clustermapPngUrl} />
+                </NarrowContainer>
+              ) : (
+                <div className={cs.noTreeBanner}>
+                  {this.getTreeStatus(currentTree.status)}
+                </div>
+              )}
             </div>
           )}
         </NarrowContainer>
         {admin &&
           currentTree.status === STATUS_FAILED &&
           this.renderAdminPanel()}
+        {heatmapErrorModalOpen && (
+          <PhyloTreeHeatmapErrorModal
+            open
+            onContinue={this.handleCloseHeatmapErrorModal}
+          />
+        )}
       </div>
     );
   }

@@ -408,7 +408,19 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
   describe "GET show" do
     let(:fake_sfn_name) { "fake_sfn_name" }
     let(:fake_sfn_arn) { "fake:sfn:arn".freeze }
+    let(:fake_s3_path) { "s3://fake_bucket/fake/path".freeze }
     let(:fake_sfn_execution_arn) { "fake:sfn:execution:arn:#{fake_sfn_name}".freeze }
+    let(:fake_sfn_execution_description) do
+      {
+        execution_arn: fake_sfn_execution_arn,
+        input: "{}",
+        # AWS SDK rounds to second
+        start_date: Time.zone.now.round,
+        state_machine_arn: fake_sfn_arn,
+        status: "SUCCEEDED",
+        output: JSON.dump({ "Result": { "phylotree.clustermap_png": fake_s3_path } }),
+      }
+    end
     let(:fake_species) { "some species" }
 
     before do
@@ -430,6 +442,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
                                project: project_one,
                                pipeline_runs: [pr_one],
                                name: "Phylo tree ng 1",
+                               s3_output_prefix: fake_s3_path,
                                sfn_execution_arn: fake_sfn_execution_arn,
                                status: WorkflowRun::STATUS[:succeeded],
                                inputs_json: { pipeline_run_ids: [pr_one.id], tax_id: 1 })
@@ -499,6 +512,28 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
 
         expect(pt.keys).to contain_exactly("id", "name", "tax_id", "tax_level", "tax_name", "newick", "status", "user", "sampleDetailsByNodeName")
         expect(pt["tax_level"]).to eq(2)
+      end
+    end
+
+    context "samples too divergent to produce phylo_tree_ng" do
+      it "returns link to clustermap png" do
+        @mock_aws_clients = {
+          s3: Aws::S3::Client.new(stub_responses: true),
+          states: Aws::States::Client.new(stub_responses: true),
+        }
+        allow(AwsClient).to receive(:[]) { |client|
+          @mock_aws_clients[client]
+        }
+
+        expect_any_instance_of(PhyloTreeNg).to receive(:results).and_raise(SfnExecution::OutputNotFoundError.new(PhyloTreeNg::OUTPUT_NEWICK, PhyloTreeNg::DOWNLOADABLE_OUTPUTS))
+        expect_any_instance_of(SfnExecution).to receive(:sfn_archive_from_s3).and_return(fake_sfn_execution_description)
+
+        get :show, params: { id: @phylo_tree_one.id, format: "json" }
+
+        expect(response).to have_http_status :ok
+        pt = JSON.parse(response.body)
+
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "status", "tax_name", "clustermap_png_url")
       end
     end
 
