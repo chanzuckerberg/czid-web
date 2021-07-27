@@ -84,7 +84,7 @@ class DiscoveryFilters extends React.Component {
   }
 
   handleRemoveTag = ({ selectedKey, valueToRemove = "" }) => {
-    let newSelected = [];
+    let newSelected = null;
 
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
