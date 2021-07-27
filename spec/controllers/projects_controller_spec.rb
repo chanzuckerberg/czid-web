@@ -643,6 +643,7 @@ RSpec.describe ProjectsController, type: :controller do
         before do
           @project = create(:project, :with_sample, users: [@joe])
           create(:sample, project: @project, name: "Test Three", status: Sample::STATUS_CHECKED)
+          create(:sample, project: @project, name: "Test Four", status: Sample::STATUS_CHECKED)
         end
 
         it "adds a number to a sample name that conflicts with a pre-existing sample" do
@@ -667,6 +668,18 @@ RSpec.describe ProjectsController, type: :controller do
 
           json_response = JSON.parse(response.body)
           expect(json_response).to eq(["Test One", "Test One_1", "Test One_1_1"])
+        end
+
+        it "ignores case when resolving sample name conflicts" do
+          post :validate_sample_names, params: {
+            format: "json",
+            id: @project.id,
+            sample_names: ["Test four"],
+          }
+          expect(response).to have_http_status(:success)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response).to eq(["Test four_1"])
         end
 
         it 'validate_sample_names resumable' do

@@ -550,8 +550,9 @@ class ProjectsController < ApplicationController
                          .where(project: @project)
                          .where.not(status: Sample::STATUS_CREATED)
                          .pluck(:name)
+                         .map(&:downcase)
                      else
-                       Sample.where(project: @project).pluck(:name)
+                       Sample.where(project: @project).pluck(:name).map(&:downcase)
                      end
 
     sample_names.each do |sample_name|
@@ -559,14 +560,14 @@ class ProjectsController < ApplicationController
       cur_sample_name = sample_name
 
       # If the sample name already exists in the project, add a _1, _2, _3, etc.
-      while existing_names.include?(cur_sample_name)
+      while existing_names.include?(cur_sample_name.downcase)
         i += 1
         cur_sample_name = sample_name + "_#{i}"
       end
 
       new_sample_names << cur_sample_name
       # Add the validated sample name to existing names, so subsequent names don't collide.
-      existing_names << cur_sample_name
+      existing_names << cur_sample_name.downcase
     end
 
     render json: new_sample_names
