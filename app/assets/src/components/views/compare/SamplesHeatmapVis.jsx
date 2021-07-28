@@ -175,10 +175,12 @@ class SamplesHeatmapVis extends React.Component {
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
       const taxon = this.props.taxonDetails[id];
+      // parentId is false when taxon level is genus
+      // This means there is no sortKey when set to "Taxon Level: Genus"
       const sortKey =
         taxon.parentId === -200 // MISSING_GENUS_ID
           ? Number.MAX_SAFE_INTEGER
-          : taxon.parentId; // parentId is false when taxon level is genus
+          : taxon.parentId;
       return {
         label: taxon.name,
         sortKey: sortKey,

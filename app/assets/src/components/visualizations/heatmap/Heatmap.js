@@ -1002,6 +1002,8 @@ export default class Heatmap {
 
     if (this.rowClustering) return;
 
+    // This means that rowLabelHover gets applied if the sortKey (if any)
+    // matches the rowLabelEntered:
     this.gRowLabels
       .selectAll(`.${cs.rowLabel}`)
       .classed(
@@ -1014,7 +1016,10 @@ export default class Heatmap {
     );
     const firstElem = currentGroup[0][0];
 
-    this.options.onRowGroupEnter &&
+    // If there's no firstElem, that means rowLabelHover was not applied to any
+    // row:
+    !!firstElem &&
+      this.options.onRowGroupEnter &&
       this.options.onRowGroupEnter(
         rowLabelEntered,
         firstElem.getBoundingClientRect(),
