@@ -3,7 +3,12 @@ import { fromPairs, set, find } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { getPhyloTree, retryPhyloTree, saveVisualization } from "~/api";
+import {
+  getPhyloTree,
+  getPhyloTrees,
+  retryPhyloTree,
+  saveVisualization,
+} from "~/api";
 import {
   ANALYTICS_EVENT_NAMES,
   logAnalyticsEvent,
@@ -49,7 +54,10 @@ class PhyloTreeListView extends React.Component {
     this.state = {
       currentTree: null,
       heatmapErrorModalOpen: false,
-      phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree])),
+      phyloTreeMap: fromPairs(
+        (props.phyloTrees || []).map(tree => [tree.id, tree])
+      ),
+      phyloTrees: props.phyloTrees || [],
       selectedPipelineRunId: null,
       selectedSampleId: null,
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(
@@ -79,6 +87,8 @@ class PhyloTreeListView extends React.Component {
   }
 
   async componentDidMount() {
+    const { allowedFeatures = [] } = this.context || {};
+    const { phyloTrees } = this.props;
     const { selectedPhyloTreeId, selectedPhyloTreeNgId } = this.state;
 
     if (selectedPhyloTreeNgId) {
@@ -91,21 +101,67 @@ class PhyloTreeListView extends React.Component {
     } else if (selectedPhyloTreeId) {
       this.setState({ currentTree: await getPhyloTree(selectedPhyloTreeId) });
     }
+
+    // Populating the dropdown list of trees: First make sure the list of old
+    // trees is there. Then add new NG trees if feature is enabled:
+    let allPhyloTrees = phyloTrees || [];
+    if (!phyloTrees) {
+      const { phyloTrees } = await getPhyloTrees();
+      allPhyloTrees = phyloTrees;
+    }
+    if (allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)) {
+      const { phyloTrees: phyloTreeNgs } = await getPhyloTrees({
+        nextGeneration: true,
+      });
+      allPhyloTrees = [...phyloTreeNgs, ...allPhyloTrees];
+    }
+    this.setState({ phyloTrees: allPhyloTrees });
   }
 
-  handleTreeChange = async newPhyloTreeId => {
-    // TODO (gdingle): do we want to keep using sessionStorage and cookies and urlparams and db saving?!
-    window.sessionStorage.setItem("treeId", newPhyloTreeId);
-    this.persistInUrl("treeId", newPhyloTreeId);
-    let currentTree = await getPhyloTree(newPhyloTreeId);
-    this.setState({
-      selectedPhyloTreeId: newPhyloTreeId,
-      currentTree: currentTree,
-      sidebarVisible: false,
-    });
-    logAnalyticsEvent("PhyloTreeListView_phylo-tree_changed", {
-      selectedPhyloTreeId: newPhyloTreeId,
-    });
+  handleTreeChange = async (newPhyloTreeId, nextGeneration = false) => {
+    if (nextGeneration) {
+      const currentTree = await getPhyloTreeNg(newPhyloTreeId);
+      this.setState({
+        currentTree,
+        selectedPhyloTreeId: null,
+        selectedPhyloTreeNgId: newPhyloTreeId,
+        showOldTreeWarning: false,
+        sidebarVisible: false,
+      });
+
+      window.history.replaceState(
+        window.history.state,
+        document.title,
+        `/phylo_tree_ngs/${newPhyloTreeId}`
+      );
+      // NG isn't using the sessionStorage 'default tree' functionality
+
+      logAnalyticsEvent("PhyloTreeListView_phylo-tree_changed", {
+        selectedPhyloTreeNgId: newPhyloTreeId,
+      });
+    } else {
+      // OLD TREE SELECTED
+      const currentTree = await getPhyloTree(newPhyloTreeId);
+      this.setState({
+        currentTree,
+        selectedPhyloTreeId: newPhyloTreeId,
+        selectedPhyloTreeNgId: null,
+        showOldTreeWarning: true,
+        sidebarVisible: false,
+      });
+
+      window.history.replaceState(
+        window.history.state,
+        document.title,
+        `/phylo_trees/index?treeId=${newPhyloTreeId}`
+      );
+      // TODO (gdingle): do we want to keep using sessionStorage and cookies and urlparams and db saving?!
+      window.sessionStorage.setItem("treeId", newPhyloTreeId);
+
+      logAnalyticsEvent("PhyloTreeListView_phylo-tree_changed", {
+        selectedPhyloTreeId: newPhyloTreeId,
+      });
+    }
   };
 
   afterSelectedMetadataChange = selectedMetadata => {
@@ -296,6 +352,7 @@ class PhyloTreeListView extends React.Component {
     const {
       currentTree,
       heatmapErrorModalOpen,
+      phyloTrees,
       selectedPhyloTreeId,
       selectedPhyloTreeNgId,
       showOldTreeWarning,
@@ -340,10 +397,11 @@ class PhyloTreeListView extends React.Component {
               <ViewHeader.Title
                 label={currentTree.name}
                 id={this.state.selectedPhyloTreeId}
-                options={this.props.phyloTrees.map(tree => ({
+                options={phyloTrees.map(tree => ({
                   label: tree.name,
-                  id: tree.id,
-                  onClick: () => this.handleTreeChange(tree.id),
+                  id: `${tree.id}-${tree.nextGeneration}`,
+                  onClick: () =>
+                    this.handleTreeChange(tree.id, tree.nextGeneration),
                 }))}
               />
             </ViewHeader.Content>
@@ -476,12 +534,6 @@ PhyloTreeListView.propTypes = {
   allowedFeatures: PropTypes.array,
   phyloTrees: PropTypes.array,
   selectedPhyloTreeNgId: PropTypes.number,
-};
-
-PhyloTreeListView.defaultProps = {
-  // TODO: Remove this and add fetching support when 'phyloTrees' is not
-  // supplied (e.g. when coming from DiscoveryViewRouter):
-  phyloTrees: [],
 };
 
 PhyloTreeListView.contextType = UserContext;

@@ -411,7 +411,7 @@ const createPhyloTree = ({
 
 const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 
-const getPhyloTrees = ({ taxId, projectId, nextGeneration = false }) => {
+const getPhyloTrees = ({ taxId, projectId, nextGeneration = false } = {}) => {
   const endpoint = nextGeneration
     ? "/phylo_tree_ngs.json"
     : "/phylo_trees/index.json";

@@ -312,6 +312,7 @@ class PhyloTreeNgsController < ApplicationController
       phylo_tree_ngs = phylo_tree_ngs.includes(:user).map do |pt|
         formatted_pt = pt.slice(*basic_attributes)
         formatted_pt[:user] = pt.user.slice(:name, :id)
+        formatted_pt[:nextGeneration] = true
         formatted_pt
       end
     end

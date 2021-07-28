@@ -115,7 +115,7 @@ class PhyloTreeCreationModal extends React.Component {
         this.setState({
           // NOTE: This shows NG first so it may seem out-of-order if user has a
           // mix of old and new trees. Could sort by updated_at.
-          phyloTrees: this.parsePhyloTreeData(phyloTreeNgs, true).concat(
+          phyloTrees: this.parsePhyloTreeData(phyloTreeNgs).concat(
             this.parsePhyloTreeData(phyloTrees)
           ),
           phyloTreesLoaded: true,
@@ -139,7 +139,7 @@ class PhyloTreeCreationModal extends React.Component {
     }
   };
 
-  parsePhyloTreeData = (phyloTreeData, nextGeneration = false) => {
+  parsePhyloTreeData = phyloTreeData => {
     if (isEmpty(phyloTreeData)) {
       return [];
     }
@@ -147,7 +147,7 @@ class PhyloTreeCreationModal extends React.Component {
       name: row.name,
       user: (row.user || {}).name,
       last_update: <Moment fromNow date={row.updated_at} />,
-      view: nextGeneration ? (
+      view: row.nextGeneration ? (
         <RouterLink to={`/phylo_tree_ngs/${row.id}`}>View</RouterLink>
       ) : (
         <a href={`/phylo_trees/index?treeId=${row.id}`}>View</a>

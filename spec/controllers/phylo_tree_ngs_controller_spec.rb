@@ -99,12 +99,13 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(json_response[:project]).to be_nil
         expect(json_response[:taxonName]).to be_nil
         expect(json_response[:phyloTrees].pluck(:id)).to contain_exactly(@phylo_tree_one.id, @phylo_tree_two.id, @phylo_tree_three.id)
-        expect(phylo_tree_ng.keys).to contain_exactly(:id, :name, :updated_at, :user)
+        expect(phylo_tree_ng.keys).to contain_exactly(:id, :name, :updated_at, :user, :nextGeneration)
         expect(phylo_tree_ng).to include_json(
           id: phylo_tree_ng[:id],
           name: phylo_tree_ng[:name],
           updated_at: phylo_tree_ng[:updated_at],
-          user: phylo_tree_ng[:user]
+          user: phylo_tree_ng[:user],
+          nextGeneration: true
         )
       end
     end
