@@ -35,6 +35,11 @@ class PhyloTreeDownloadButton extends React.Component {
       "phylotree.ska_distances",
       "phylotree.variants",
     ];
+    this.heatmapOnlyOptions = [
+      "phylotree.clustermap_svg",
+      "phylotree.clustermap_png",
+      "phylotree.ska_distances",
+    ];
     this.download = this.download.bind(this);
     this.svgSaver = new SvgSaver();
   }
@@ -65,28 +70,35 @@ class PhyloTreeDownloadButton extends React.Component {
     });
   }
 
-  render() {
-    const {
-      showPhyloTreeNgOptions,
-      tree,
-      treeContainer,
-      ...props
-    } = this.props;
+  getPhyloTreeOptions = () => {
+    const { tree } = this.props;
     let readyOptions = this.dataOptions.filter(opt => !!tree[opt.value]);
 
     // Don't include the newick file unless it's a phyloTreeNg.
     readyOptions = readyOptions.concat(
       this.treeOptions.filter(
-        opt =>
-          !this.phyloTreeNgOptions.includes(opt.value) || showPhyloTreeNgOptions
+        opt => !this.phyloTreeNgOptions.includes(opt.value)
       )
     );
+    return readyOptions;
+  };
 
-    if (showPhyloTreeNgOptions) {
-      // Convert the options to BareDropdown Items and add the Divider.
-      readyOptions = readyOptions.concat(this.heatmapImageOptions);
+  getPhyloTreeNgItems = () => {
+    let readyOptions = this.treeOptions.concat(this.heatmapImageOptions);
 
-      let dropdownItems = readyOptions.map(option => {
+    // Convert the options to BareDropdown Items and add the Divider.
+    let dropdownItems = readyOptions.map(option => {
+      return (
+        <BareDropdown.Item
+          key={option.value}
+          onClick={() => this.download(option.value)}
+          text={option.text}
+        />
+      );
+    });
+    dropdownItems.push(<BareDropdown.Divider key="divider_one" />);
+    dropdownItems = dropdownItems.concat(
+      this.skaOptions.map(option => {
         return (
           <BareDropdown.Item
             key={option.value}
@@ -94,10 +106,25 @@ class PhyloTreeDownloadButton extends React.Component {
             text={option.text}
           />
         );
-      });
-      dropdownItems.push(<BareDropdown.Divider key="divider_one" />);
-      dropdownItems = dropdownItems.concat(
-        this.skaOptions.map(option => {
+      })
+    );
+    return dropdownItems;
+  };
+
+  getHeatmapItems = () => {
+    let dropdownItems = this.heatmapImageOptions.map(option => {
+      return (
+        <BareDropdown.Item
+          key={option.value}
+          onClick={() => this.download(option.value)}
+          text={option.text}
+        />
+      );
+    });
+    dropdownItems.push(<BareDropdown.Divider key="divider_one" />);
+    dropdownItems = dropdownItems.concat(
+      this.skaOptions.map(option => {
+        if (this.heatmapOnlyOptions.includes(option.value)) {
           return (
             <BareDropdown.Item
               key={option.value}
@@ -105,13 +132,28 @@ class PhyloTreeDownloadButton extends React.Component {
               text={option.text}
             />
           );
-        })
-      );
+        }
+      })
+    );
+    return dropdownItems;
+  };
 
+  render() {
+    const {
+      showPhyloTreeNgOptions,
+      tree,
+      treeContainer,
+      ...props
+    } = this.props;
+
+    if (showPhyloTreeNgOptions) {
+      const downloadItems = tree.clustermap_png_url
+        ? this.getHeatmapItems()
+        : this.getPhyloTreeNgItems();
       return (
         <DownloadButtonDropdown
-          items={dropdownItems}
-          disabled={dropdownItems.length === 0}
+          items={downloadItems}
+          disabled={downloadItems.length === 0}
           {...props}
         />
       );
@@ -119,8 +161,8 @@ class PhyloTreeDownloadButton extends React.Component {
 
     return (
       <DownloadButtonDropdown
-        options={readyOptions}
-        disabled={readyOptions.length === 0}
+        options={this.getPhyloTreeOptions()}
+        disabled={this.getPhyloTreeOptions().length === 0}
         onClick={this.download}
         {...props}
       />
