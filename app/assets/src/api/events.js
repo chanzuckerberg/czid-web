@@ -160,6 +160,10 @@ function EventDictionary() {
   /** The user clicked the Learn More link in the old Phylo Tree warning banner. */
   this.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED =
     "OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED";
+
+  /** The user had a failed phylo tree (either original or NG), and they clicked on the link on the report to get help with re-running the tree. */
+  this.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED =
+    "PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED";
 }
 
 const eventNames = new EventDictionary();

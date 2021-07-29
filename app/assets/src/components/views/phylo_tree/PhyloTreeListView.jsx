@@ -21,11 +21,16 @@ import { UserContext } from "~/components/common/UserContext";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import { PHYLO_TREE_HEATMAP_LINK } from "~/components/utils/documentationLinks";
+import {
+  PHYLO_TREE_HEATMAP_LINK,
+  MAIL_TO_HELP_LINK,
+} from "~/components/utils/documentationLinks";
 import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
+import SampleMessage from "~/components/views/SampleView/SampleMessage";
 import PhyloTreeHeatmapErrorModal from "~/components/views/phylo_tree/PhyloTreeHeatmapErrorModal";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
+import { IconAlert } from "~ui/icons";
 import Notification from "~ui/notifications/Notification";
 
 import Divider from "../../layout/Divider";
@@ -221,10 +226,6 @@ class PhyloTreeListView extends React.Component {
       case STATUS_INITIALIZED:
         statusMessage = "Computation in progress. Please check back later!";
         break;
-      case NG_STATUS_FAILED:
-      case STATUS_FAILED:
-        statusMessage = "Tree creation failed!";
-        break;
       default:
         // TODO: process error
         statusMessage = "Tree unavailable!";
@@ -348,19 +349,174 @@ class PhyloTreeListView extends React.Component {
     this.setState({ heatmapErrorModalOpen: false });
   };
 
+  renderVisualization = () => {
+    const { currentTree } = this.state;
+    const clustermapPngUrl = currentTree
+      ? currentTree.clustermap_png_url
+      : false;
+
+    if (currentTree.newick) {
+      return (
+        <PhyloTreeVis
+          afterSelectedMetadataChange={this.afterSelectedMetadataChange}
+          defaultMetadata={this.selectedMetadata}
+          newick={currentTree.newick}
+          nodeData={currentTree.sampleDetailsByNodeName}
+          onMetadataUpdate={this.handleMetadataUpdate}
+          onNewTreeContainer={t => this.setState({ treeContainer: t })}
+          onSampleNodeClick={this.handleSampleNodeClick}
+          phyloTreeId={this.state.selectedPhyloTreeId}
+        />
+      );
+    } else if (clustermapPngUrl) {
+      return (
+        <NarrowContainer size="small">
+          <img className={cs.heatmap} src={clustermapPngUrl} />
+        </NarrowContainer>
+      );
+    } else if ([STATUS_FAILED, NG_STATUS_FAILED].includes(currentTree.status)) {
+      return (
+        <SampleMessage
+          icon={<IconAlert className={cs.iconAlert} type={"error"} />}
+          link={MAIL_TO_HELP_LINK}
+          linkText="Contact us for help."
+          message="Sorry, we were unable to compute a phylogenetic tree."
+          status="Tree Failed"
+          type="error"
+          onClick={() =>
+            logAnalyticsEvent(
+              ANALYTICS_EVENT_NAMES.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED
+            )
+          }
+        />
+      );
+    } else {
+      return (
+        <div className={cs.noTreeBanner}>
+          {this.getTreeStatus(currentTree.status)}
+        </div>
+      );
+    }
+  };
+
+  renderHeader = () => {
+    const {
+      currentTree,
+      phyloTrees,
+      selectedPhyloTreeNgId,
+      treeContainer,
+    } = this.state;
+    return (
+      <NarrowContainer>
+        <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
+          <ViewHeader.Content>
+            <ViewHeader.Pretitle>
+              Phylogenetic Tree{" "}
+              {currentTree.tax_name && (
+                <span>
+                  &nbsp;-&nbsp;
+                  <span
+                    className={cs.taxonName}
+                    onClick={this.handleTaxonModeOpen}
+                  >
+                    {currentTree.tax_name}
+                  </span>
+                </span>
+              )}
+            </ViewHeader.Pretitle>
+            <ViewHeader.Title
+              label={currentTree.name}
+              id={this.state.selectedPhyloTreeId}
+              options={phyloTrees.map(tree => ({
+                label: tree.name,
+                id: `${tree.id}-${tree.nextGeneration}`,
+                onClick: () =>
+                  this.handleTreeChange(tree.id, tree.nextGeneration),
+              }))}
+            />
+          </ViewHeader.Content>
+          <ViewHeader.Controls className={cs.controls}>
+            <BasicPopup
+              trigger={
+                <ShareButton
+                  onClick={withAnalytics(
+                    this.handleShareClick,
+                    "PhyloTreeListView_share-button_clicked",
+                    {
+                      treeName: currentTree.name,
+                      treeId: currentTree.id,
+                    }
+                  )}
+                  className={cs.controlElement}
+                />
+              }
+              content="A shareable URL was copied to your clipboard!"
+              on="click"
+              hideOnScroll
+            />
+            <SaveButton
+              onClick={withAnalytics(
+                this.handleSaveClick,
+                "PhyloTreeListView_save-button_clicked",
+                {
+                  treeName: currentTree.name,
+                  treeId: currentTree.id,
+                }
+              )}
+              className={cs.controlElement}
+            />
+            <PhyloTreeDownloadButton
+              className={cs.controlElement}
+              showPhyloTreeNgOptions={!!selectedPhyloTreeNgId}
+              tree={currentTree}
+              treeContainer={treeContainer}
+            />
+          </ViewHeader.Controls>
+        </ViewHeader>
+      </NarrowContainer>
+    );
+  };
+
+  renderOldTreeWarning = () => {
+    const { showOldTreeWarning } = this.state;
+    return (
+      <Notification
+        className={cx(cs.notification, showOldTreeWarning ? cs.show : cs.hide)}
+        type="info"
+        displayStyle="flat"
+        onClose={this.hideOldTreeWarning}
+        closeWithDismiss={false}
+      >
+        <div className={cs.notificationContent}>
+          <span className={cs.warning}>
+            This tree was created with a previous version of our phylogenetic
+            tree module that used kSNP3.
+          </span>{" "}
+          Please create a new tree from these samples to use our new module,
+          which uses SKA, for continued analysis.{" "}
+          <ExternalLink
+            coloredBackground={true}
+            href={PHYLO_TREE_HEATMAP_LINK}
+            analyticsEventName={
+              ANALYTICS_EVENT_NAMES.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED
+            }
+          >
+            Learn more
+          </ExternalLink>
+          .
+        </div>
+      </Notification>
+    );
+  };
+
   render() {
     const {
       currentTree,
       heatmapErrorModalOpen,
-      phyloTrees,
       selectedPhyloTreeId,
       selectedPhyloTreeNgId,
       showOldTreeWarning,
-      treeContainer,
     } = this.state;
-    const clustermapPngUrl = currentTree
-      ? currentTree.clustermap_png_url
-      : false;
 
     const { admin } = this.context || {};
     const { allowedFeatures = [] } = this.context || {};
@@ -377,73 +533,7 @@ class PhyloTreeListView extends React.Component {
     if (!currentTree) return null;
     return (
       <div className={cs.phyloTreeListView}>
-        <NarrowContainer>
-          <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
-            <ViewHeader.Content>
-              <ViewHeader.Pretitle>
-                Phylogenetic Tree{" "}
-                {currentTree.tax_name && (
-                  <span>
-                    &nbsp;-&nbsp;
-                    <span
-                      className={cs.taxonName}
-                      onClick={this.handleTaxonModeOpen}
-                    >
-                      {currentTree.tax_name}
-                    </span>
-                  </span>
-                )}
-              </ViewHeader.Pretitle>
-              <ViewHeader.Title
-                label={currentTree.name}
-                id={this.state.selectedPhyloTreeId}
-                options={phyloTrees.map(tree => ({
-                  label: tree.name,
-                  id: `${tree.id}-${tree.nextGeneration}`,
-                  onClick: () =>
-                    this.handleTreeChange(tree.id, tree.nextGeneration),
-                }))}
-              />
-            </ViewHeader.Content>
-            <ViewHeader.Controls className={cs.controls}>
-              <BasicPopup
-                trigger={
-                  <ShareButton
-                    onClick={withAnalytics(
-                      this.handleShareClick,
-                      "PhyloTreeListView_share-button_clicked",
-                      {
-                        treeName: currentTree.name,
-                        treeId: currentTree.id,
-                      }
-                    )}
-                    className={cs.controlElement}
-                  />
-                }
-                content="A shareable URL was copied to your clipboard!"
-                on="click"
-                hideOnScroll
-              />
-              <SaveButton
-                onClick={withAnalytics(
-                  this.handleSaveClick,
-                  "PhyloTreeListView_save-button_clicked",
-                  {
-                    treeName: currentTree.name,
-                    treeId: currentTree.id,
-                  }
-                )}
-                className={cs.controlElement}
-              />
-              <PhyloTreeDownloadButton
-                className={cs.controlElement}
-                showPhyloTreeNgOptions={!!selectedPhyloTreeNgId}
-                tree={currentTree}
-                treeContainer={treeContainer}
-              />
-            </ViewHeader.Controls>
-          </ViewHeader>
-        </NarrowContainer>
+        {this.renderHeader()}
         <Divider />
         <DetailsSidebar
           visible={this.state.sidebarVisible}
@@ -460,61 +550,9 @@ class PhyloTreeListView extends React.Component {
         />
         <NarrowContainer>
           {showOldTreeWarning &&
-            allowedFeatures.includes(PHYLO_TREE_NG_FEATURE) && (
-              <Notification
-                className={cx(
-                  cs.notification,
-                  showOldTreeWarning ? cs.show : cs.hide
-                )}
-                type="info"
-                displayStyle="flat"
-                onClose={this.hideOldTreeWarning}
-                closeWithDismiss={false}
-              >
-                <div className={cs.notificationContent}>
-                  <span className={cs.warning}>
-                    This tree was created with a previous version of our
-                    phylogenetic tree module that used kSNP3.
-                  </span>{" "}
-                  Please create a new tree from these samples to use our new
-                  module, which uses SKA, for continued analysis.{" "}
-                  <ExternalLink
-                    coloredBackground={true}
-                    href={PHYLO_TREE_HEATMAP_LINK}
-                    analyticsEventName={
-                      ANALYTICS_EVENT_NAMES.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED
-                    }
-                  >
-                    Learn more
-                  </ExternalLink>
-                  .
-                </div>
-              </Notification>
-            )}
-          {currentTree.newick ? (
-            <PhyloTreeVis
-              afterSelectedMetadataChange={this.afterSelectedMetadataChange}
-              defaultMetadata={this.selectedMetadata}
-              newick={currentTree.newick}
-              nodeData={currentTree.sampleDetailsByNodeName}
-              onMetadataUpdate={this.handleMetadataUpdate}
-              onNewTreeContainer={t => this.setState({ treeContainer: t })}
-              onSampleNodeClick={this.handleSampleNodeClick}
-              phyloTreeId={this.state.selectedPhyloTreeId}
-            />
-          ) : (
-            <div>
-              {clustermapPngUrl ? (
-                <NarrowContainer size="small">
-                  <img className={cs.heatmap} src={clustermapPngUrl} />
-                </NarrowContainer>
-              ) : (
-                <div className={cs.noTreeBanner}>
-                  {this.getTreeStatus(currentTree.status)}
-                </div>
-              )}
-            </div>
-          )}
+            allowedFeatures.includes(PHYLO_TREE_NG_FEATURE) &&
+            this.renderOldTreeWarning()}
+          {this.renderVisualization()}
         </NarrowContainer>
         {admin &&
           currentTree.status === STATUS_FAILED &&
