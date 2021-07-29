@@ -405,7 +405,8 @@ class LineageDatabaseImporter
       "SELECT old.taxid
       FROM taxon_lineages old
       INNER JOIN #{@taxon_lineages_table} new USING(taxid)
-      WHERE (#{col_expressions.join("\n OR ")})"
+      WHERE old.version_end = #{@current_version}
+        AND (#{col_expressions.join("\n OR ")})"
     ).pluck("taxid")
   end
 
