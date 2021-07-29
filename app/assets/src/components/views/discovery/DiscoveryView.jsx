@@ -690,7 +690,7 @@ class DiscoveryView extends React.Component {
     const {
       projectId,
       filteredProjectCount,
-      filteredSampleCount,
+      filteredSampleStats,
       filteredVisualizationCount,
     } = this.state;
 
@@ -708,7 +708,7 @@ class DiscoveryView extends React.Component {
         value: "projects",
       },
       {
-        label: renderTab("Samples", filteredSampleCount || "-"),
+        label: renderTab("Samples", filteredSampleStats.count || "-"),
         value: "samples",
       },
       domain !== DISCOVERY_DOMAIN_PUBLIC &&
@@ -1833,7 +1833,7 @@ class DiscoveryView extends React.Component {
               sampleDimensions={computedSampleDimensions}
               sampleStats={{
                 ...filteredSampleStats,
-                count: filteredSampleCount,
+                count: filteredSampleStats.count,
               }}
               project={
                 !snapshotShareId
