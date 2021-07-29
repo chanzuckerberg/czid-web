@@ -282,24 +282,15 @@ class PhyloTreesController < ApplicationController
         host_genomes.name as host,
         projects.name as project_name,
         pipeline_runs.id as pipeline_run_id,
-        samples.id as sample_id,
-        COUNT(DISTINCT(contigs.id)) as num_contigs
-      from pipeline_runs, projects, samples, host_genomes, contigs
+        samples.id as sample_id
+      from pipeline_runs, projects, samples, host_genomes
       where
         pipeline_runs.id in (:pipeline_run_ids) and
         pipeline_runs.sample_id = samples.id and
         samples.project_id = projects.id and
-        host_genomes.id = samples.host_genome_id and
-        contigs.pipeline_run_id = pipeline_runs.id and (
-          contigs.species_taxid_nt = :taxid or
-          contigs.genus_taxid_nt = :taxid or
-          contigs.species_taxid_nr = :taxid or
-          contigs.genus_taxid_nt = :taxid
-        )
-      group by samples.name, pipeline_runs.id
+        host_genomes.id = samples.host_genome_id
     ",
-                                                                     pipeline_run_ids: pipeline_run_ids,
-                                                                     taxid: taxid,])
+                                                                     pipeline_run_ids: pipeline_run_ids,])
 
     samples_projects = Sample.connection.select_all(sanitized_sql_statement).to_a
 

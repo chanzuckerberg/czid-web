@@ -1,4 +1,4 @@
-import { debounce, isEmpty, forEach } from "lodash/fp";
+import { debounce, get, isEmpty, forEach } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 import Moment from "react-moment";
@@ -23,8 +23,10 @@ import DataTable from "../../visualizations/table/DataTable";
 import PhyloTreeChecks from "./PhyloTreeChecks";
 
 class PhyloTreeCreationModal extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
+
+    const { allowedFeatures = [] } = context || {};
 
     this.state = {
       defaultPage: 0,
@@ -68,7 +70,9 @@ class PhyloTreeCreationModal extends React.Component {
       tissue: "Sample Type",
       location: "Location",
       date: "Date",
-      numContigs: "Contigs",
+      ...(allowedFeatures.includes(PHYLO_TREE_NG_FEATURE) && {
+        numContigs: "Contigs",
+      }),
     };
 
     this.otherSamplesHeaders = {
@@ -194,11 +198,15 @@ class PhyloTreeCreationModal extends React.Component {
   };
 
   parseProjectSamplesData = samples => {
+    const { allowedFeatures = [] } = this.context || {};
+
+    const hasPhyloTreeNgFeature = allowedFeatures.includes(
+      PHYLO_TREE_NG_FEATURE
+    );
     const projectSamples = [];
     const otherSamples = [];
 
     forEach(sample => {
-      const numContigs = sample.num_contigs;
       let formattedSample = {
         name: sample.name,
         host: sample.host,
@@ -206,17 +214,21 @@ class PhyloTreeCreationModal extends React.Component {
         location: sample.location,
         date: <Moment fromNow date={sample.created_at} />,
         pipelineRunId: sample.pipeline_run_id,
-        numContigs,
       };
 
-      if (numContigs === 0) {
+      if (hasPhyloTreeNgFeature) {
+        const numContigs = get("num_contigs", sample);
+
         formattedSample = {
-          shouldDisable: true,
-          tooltipInfo: {
-            position: "right center",
-            content:
-              "There must be at least 1 contig in the sample for it to be included in the tree.",
-          },
+          numContigs,
+          ...(numContigs === 0 && {
+            shouldDisable: true,
+            tooltipInfo: {
+              position: "right center",
+              content:
+                "There must be at least 1 contig in the sample for it to be included in the tree.",
+            },
+          }),
           ...formattedSample,
         };
       }
@@ -424,8 +436,12 @@ class PhyloTreeCreationModal extends React.Component {
       "tissue",
       "location",
       "date",
-      "numContigs",
     ];
+
+    if (allowedFeatures.includes(PHYLO_TREE_NG_FEATURE)) {
+      projectSamplesColumns.push("numContigs");
+    }
+
     const otherSamplesColumns = ["project", ...projectSamplesColumns];
 
     let options = {
