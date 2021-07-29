@@ -18,7 +18,7 @@ run=1
 count=1
 while [ $run -eq 1 ] ; do
     echo "Trying Amazon ECR push..."
-    docker push $REPO
+    docker push "$REPO:$COMMIT"
     if [ $? -eq 0 ]; then  # Success
         run=0
         break
