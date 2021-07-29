@@ -1,4 +1,4 @@
-import { isEmpty, forEach } from "lodash/fp";
+import { debounce, isEmpty, forEach } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 import Moment from "react-moment";
@@ -83,6 +83,11 @@ class PhyloTreeCreationModal extends React.Component {
 
     this.inputTimeout = null;
     this.inputDelay = 500;
+
+    this.isTreeNameValidDebounced = debounce(
+      this.inputDelay,
+      this.isTreeNameValid
+    );
   }
 
   componentDidMount() {
@@ -278,8 +283,10 @@ class PhyloTreeCreationModal extends React.Component {
     }, this.inputDelay);
   };
 
+  // We want to debounce isTreeNameValid because it does an API call, but not
+  // handleNameChange because we want the search input to update immediately.
   handleNameChange = newName => {
-    this.setState({ treeName: newName.trim() }, this.isTreeNameValid);
+    this.setState({ treeName: newName.trim() }, this.isTreeNameValidDebounced);
   };
 
   handleBranchChange = newBranch => {

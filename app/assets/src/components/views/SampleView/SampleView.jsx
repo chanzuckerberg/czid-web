@@ -1355,8 +1355,9 @@ class SampleView extends React.Component {
     const { reportData, selectedOptions } = this.state;
 
     const newSelectedOptions = { ...selectedOptions };
-    newSelectedOptions.thresholds = [];
     newSelectedOptions.categories = {};
+    newSelectedOptions.taxon = null;
+    newSelectedOptions.thresholds = [];
 
     this.setState(
       {

@@ -14,7 +14,8 @@ class SearchBox extends React.Component {
     super(props);
 
     this.delayCheckMatch = 1000;
-    this.waitHandleSearchChange = 500;
+    // 200 ms matches tuning done for AUTOCOMPLETE_DEBOUNCE_DELAY
+    this.waitHandleSearchChange = 200;
     this.minChars = 2;
 
     this.placeholder = this.props.placeholder;
@@ -26,6 +27,14 @@ class SearchBox extends React.Component {
       value: "",
       selectedResult: null,
     };
+    // We care about debouncing handleServerSearchAction and not
+    // handleSearchChange because we want the input box to update immediately,
+    // but the API calls should be moderated in the background. Frontend search
+    // (clientSearchSource) also does not need debouncing:
+    this.handleServerSearchActionDebounced = debounce(
+      this.handleServerSearchAction,
+      this.waitHandleSearchChange
+    );
 
     this.state = {
       isLoading: false,
@@ -58,38 +67,55 @@ class SearchBox extends React.Component {
     this.props.onResultSelect(e, { result });
   }
 
+  handleServerSearchAction = async () => {
+    const {
+      levelLabel,
+      serverSearchAction,
+      serverSearchActionArgs,
+    } = this.props;
+    const { value } = this.state;
+
+    let url = `/${serverSearchAction}?query=${value}`;
+    if (serverSearchActionArgs) {
+      url += `&${getURLParamString(serverSearchActionArgs)}`;
+    }
+    const searchResults = await get(url);
+    if (levelLabel) {
+      for (let i = 0; i < searchResults.length; i++) {
+        searchResults[i].title += " (" + searchResults[i].level + ")";
+      }
+    }
+
+    this.setState({
+      isLoading: false,
+      results: searchResults,
+    });
+  };
+
   handleSearchChange = (e, { value }) => {
+    const { serverSearchAction, clientSearchSource } = this.props;
+
     this.setState({ isLoading: true, selectedResult: null, value });
 
     setTimeout(async () => {
-      if (this.state.value.length === 0) {
+      if (value.length === 0) {
         this.setState(this.blankState);
         return;
       }
-      if (this.state.value.length < this.minChars) return;
+      if (value.length < this.minChars) return;
 
-      let searchResults;
-      if (this.props.clientSearchSource) {
-        const re = new RegExp(escapeRegExp(this.state.value), "i");
+      if (clientSearchSource) {
+        const re = new RegExp(escapeRegExp(value), "i");
         const isMatch = result => re.test(result.title);
-        searchResults = this.props.clientSearchSource.filter(isMatch);
-      } else if (this.props.serverSearchAction) {
-        let url = `/${this.props.serverSearchAction}?query=${this.state.value}`;
-        if (this.props.serverSearchActionArgs) {
-          url += `&${getURLParamString(this.props.serverSearchActionArgs)}`;
-        }
-        searchResults = await get(url);
-        if (this.props.levelLabel) {
-          for (let i = 0; i < searchResults.length; i++) {
-            searchResults[i].title += " (" + searchResults[i].level + ")";
-          }
-        }
-      }
+        const searchResults = clientSearchSource.filter(isMatch);
 
-      this.setState({
-        isLoading: false,
-        results: searchResults,
-      });
+        this.setState({
+          isLoading: false,
+          results: searchResults,
+        });
+      } else if (serverSearchAction) {
+        this.handleServerSearchActionDebounced();
+      }
     }, this.delayCheckMatch);
   };
 
