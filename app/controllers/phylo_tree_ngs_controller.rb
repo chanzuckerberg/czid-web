@@ -324,24 +324,28 @@ class PhyloTreeNgsController < ApplicationController
     return [] if pipeline_run_ids.blank?
     return [] if ApplicationHelper::HUMAN_TAX_IDS.include? tax_id.to_i
 
+    # Need left join here so we can capture contigs that contain the specified taxon, or 0 if there are no matches.
+    sanitized_join_sql_statement = ActiveRecord::Base.sanitize_sql_array(["
+      LEFT JOIN contigs ON (
+        pipeline_runs.id = contigs.pipeline_run_id AND (
+          contigs.species_taxid_nt = :tax_id OR
+          contigs.species_taxid_nr = :tax_id OR
+          contigs.genus_taxid_nt = :tax_id OR
+          contigs.genus_taxid_nr = :tax_id
+        )
+      )",
+                                                                          tax_id: tax_id,])
+
     # Retrieve information for displaying the tree's sample list.
     # Expose it as an array of hashes containing
     # - sample name
     # - project id and name
     # - pipeline run id to be used for the sample.
-    samples_projects = Sample.joins(:project, :host_genome, pipeline_runs: [:contigs]).where(
-      pipeline_runs: { id: pipeline_run_ids },
-      contigs: { pipeline_run_id: pipeline_run_ids }
-    ).where(Arel.sql("
-      contigs.species_taxid_nt = :tax_id or
-      contigs.genus_taxid_nt = :tax_id or
-      contigs.species_taxid_nr = :tax_id or
-      contigs.genus_taxid_nt = :tax_id
-    "), tax_id: tax_id).group(
-      "samples_name",
-      "pipeline_run_id"
-    ).pluck(Arel.sql("
-      samples.name as samples_name,
+    # - number of contigs that contain the specified taxon
+    samples_projects = current_power.pipeline_runs.joins(sample: [:project, :host_genome]).joins(Arel.sql(sanitized_join_sql_statement)).where(
+      id: pipeline_run_ids
+    ).group("id").pluck(Arel.sql("
+      samples.name,
       samples.project_id,
       samples.created_at,
       host_genomes.name as host,
