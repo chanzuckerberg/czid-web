@@ -441,7 +441,7 @@ const getProjectsToChooseFrom = () => get("/choose_project.json");
 
 const validatePhyloTreeName = ({ treeName, nextGeneration = false }) => {
   const endpoint = nextGeneration
-    ? "phylo_tree_ngs/validate_name"
+    ? "/phylo_tree_ngs/validate_name"
     : "/phylo_trees/validate_name";
 
   return get(endpoint, { params: { name: treeName } });
