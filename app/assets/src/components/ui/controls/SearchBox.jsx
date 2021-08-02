@@ -13,7 +13,6 @@ class SearchBox extends React.Component {
   constructor(props) {
     super(props);
 
-    this.delayCheckMatch = 1000;
     // 200 ms matches tuning done for AUTOCOMPLETE_DEBOUNCE_DELAY
     this.waitHandleSearchChange = 200;
     this.minChars = 2;
@@ -97,26 +96,24 @@ class SearchBox extends React.Component {
 
     this.setState({ isLoading: true, selectedResult: null, value });
 
-    setTimeout(async () => {
-      if (value.length === 0) {
-        this.setState(this.blankState);
-        return;
-      }
-      if (value.length < this.minChars) return;
+    if (value.length === 0) {
+      this.setState(this.blankState);
+      return;
+    }
+    if (value.length < this.minChars) return;
 
-      if (clientSearchSource) {
-        const re = new RegExp(escapeRegExp(value), "i");
-        const isMatch = result => re.test(result.title);
-        const searchResults = clientSearchSource.filter(isMatch);
+    if (clientSearchSource) {
+      const re = new RegExp(escapeRegExp(value), "i");
+      const isMatch = result => re.test(result.title);
+      const searchResults = clientSearchSource.filter(isMatch);
 
-        this.setState({
-          isLoading: false,
-          results: searchResults,
-        });
-      } else if (serverSearchAction) {
-        this.handleServerSearchActionDebounced();
-      }
-    }, this.delayCheckMatch);
+      this.setState({
+        isLoading: false,
+        results: searchResults,
+      });
+    } else if (serverSearchAction) {
+      this.handleServerSearchActionDebounced();
+    }
   };
 
   render() {
@@ -131,13 +128,7 @@ class SearchBox extends React.Component {
         icon={<IconSearch className={cs.searchIcon} />}
         loading={isLoading}
         category={this.props.category}
-        onSearchChange={debounce(
-          this.handleSearchChange,
-          this.waitHandleSearchChange,
-          {
-            leading: true,
-          }
-        )}
+        onSearchChange={this.handleSearchChange}
         results={results}
         // This fixes '`value` prop on `input` should not be null. Consider
         // using an empty string to clear the component or `undefined` for
