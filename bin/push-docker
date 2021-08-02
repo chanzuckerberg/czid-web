@@ -10,7 +10,6 @@ COMMIT="sha-$2"
 echo $BRANCH
 echo $COMMIT
 echo $REPO
-echo $TAG
 echo '--'
 
 # Retry up to 5 times total if we fail to push to Amazon ECR
@@ -18,7 +17,9 @@ run=1
 count=1
 while [ $run -eq 1 ] ; do
     echo "Trying Amazon ECR push..."
+    # NOTE: Pushing without a tag no longer pushes all tags. It only pushes latest.
     docker push "$REPO:$COMMIT"
+    docker push "$REPO:$BRANCH"
     if [ $? -eq 0 ]; then  # Success
         run=0
         break
