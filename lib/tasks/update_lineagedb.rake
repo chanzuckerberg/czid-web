@@ -472,6 +472,7 @@ class LineageDatabaseImporter
       SET version_end = #{new_version}
       WHERE (taxid NOT IN (#{retire_ids.join(', ')}))
         AND version_end = #{@current_version}
+        AND ended_at < CURRENT_TIMESTAMP()
     ", unchanged_ids.count)
   end
 
