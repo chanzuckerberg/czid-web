@@ -609,10 +609,26 @@ class SamplesHeatmapView extends React.Component {
       loadingFailed: true,
     });
 
-    logError({
-      message: "SamplesHeatmapView: Error loading heatmap data",
-      details: { err, sampleIds },
-    });
+    const logSingleError = e => {
+      logError({
+        message: "SamplesHeatmapView: Error loading heatmap data",
+        details: {
+          err: e,
+          href: window.location.href,
+          message: e.message,
+          sampleIds,
+          status: e.status,
+          statusText: e.statusText,
+        },
+      });
+    };
+
+    if (Array.isArray(err)) {
+      err.forEach(e => logSingleError(e));
+    } else {
+      logSingleError(err);
+    }
+
     logAnalyticsEvent(
       ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_VIEW_LOADING_ERROR,
       {
@@ -1578,7 +1594,12 @@ class SamplesHeatmapView extends React.Component {
   }
 
   renderLoading() {
-    const numSamples = this.state.sampleIds.length;
+    const { sampleIds } = this.state;
+
+    // This should only be for a split-second temporary state:
+    if (!sampleIds) return null;
+
+    const numSamples = sampleIds.length;
     return (
       <p className={cs.loadingIndicator}>
         <i className="fa fa-spinner fa-pulse fa-fw" />
