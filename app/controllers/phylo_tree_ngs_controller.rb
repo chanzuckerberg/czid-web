@@ -174,9 +174,21 @@ class PhyloTreeNgsController < ApplicationController
     if !non_viewable_pipeline_run_ids.empty?
       render json: { message: "You are not authorized to view all pipeline runs in the list." }, status: :unauthorized
     else
+      additional_reference_accession_ids = Set.new()
+      pipeline_run_ids.each do |pipeline_run_id|
+        coverage_viz_summary_s3_path = current_power.pipeline_runs.find(pipeline_run_id).coverage_viz_summary_s3_path
+        if coverage_viz_summary_s3_path
+          coverage_viz_summary = S3Util.get_s3_file(coverage_viz_summary_s3_path)
+          if coverage_viz_summary
+            coverage_viz_summary = JSON.parse(coverage_viz_summary)
+            best_accessions = coverage_viz_summary[tax_id.to_s]["best_accessions"]
+            additional_reference_accession_ids.add(best_accessions.first["id"])
+          end
+        end
+      end
       phylo_tree = PhyloTreeNg.new(
         inputs_json: {
-          additional_reference_accession_ids: permitted_params[:additional_reference_accession_ids] || [],
+          additional_reference_accession_ids: additional_reference_accession_ids.to_a || [],
           tax_id: tax_id,
           superkingdom_name: superkingdom_name,
           pipeline_run_ids: pipeline_run_ids,
@@ -287,7 +299,7 @@ class PhyloTreeNgsController < ApplicationController
   end
 
   def create_params
-    params.permit(:name, :projectId, :taxId, { additionalReferenceAccessionIds: [], pipelineRunIds: [] })
+    params.permit(:name, :projectId, :taxId, { pipelineRunIds: [] })
   end
 
   def fetch_phylo_tree_ngs(filters: {})
