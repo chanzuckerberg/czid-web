@@ -1495,7 +1495,7 @@ GEM
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
     ssrf_filter (1.0.7)
-    ssrfs-up (0.0.18)
+    ssrfs-up (0.0.19)
       aws-sdk-lambda (~> 1, >= 1)
       ssrf_filter (~> 1.0)
       typhoeus (~> 1.0, >= 1.0.1)
@@ -1609,7 +1609,7 @@ DEPENDENCIES
   silencer
   simplecov
   sprockets-es6
-  ssrfs-up (= 0.0.18)
+  ssrfs-up (~> 0.0.19)
   stackprof
   thread
   turbolinks (~> 5)
