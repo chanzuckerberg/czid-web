@@ -44,6 +44,7 @@ class BaseDiscoveryView extends React.Component {
         ref={infiniteTable => (this.infiniteTable = infiniteTable)}
         rowClassName={cx(cs.tableDataRow, rowClassName)}
         sortable
+        draggableColumns
       />
     );
   }

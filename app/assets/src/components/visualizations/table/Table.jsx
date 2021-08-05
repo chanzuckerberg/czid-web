@@ -113,6 +113,7 @@ Table.propTypes = {
     })
   ).isRequired,
   data: PropTypes.array,
+  draggableColumns: PropTypes.bool,
   // This is supplemental to sortFunction since sortFunction is in render() and may be called without a user click.
   onColumnSort: PropTypes.func,
   onSelectRow: PropTypes.func,

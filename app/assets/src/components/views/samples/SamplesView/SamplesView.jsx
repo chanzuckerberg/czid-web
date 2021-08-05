@@ -378,6 +378,7 @@ class SamplesView extends React.Component {
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
           columns={this.columnsByWorkflow[workflow]}
           defaultRowHeight={rowHeight}
+          draggableColumns
           initialActiveColumns={activeColumns}
           loadingClassName={csTableRenderer.loading}
           onActiveColumnsChange={onActiveColumnsChange}

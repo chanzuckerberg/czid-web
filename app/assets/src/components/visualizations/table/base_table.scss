@@ -31,14 +31,22 @@
 .header {
   @include font-body-s;
 
-  align-self: center;
   color: $gray-dark;
   font-weight: $font-weight-semibold;
   outline: 0;
   text-transform: none;
+
+  align-self: center;
   align-items: center;
   justify-content: center;
   text-align: center;
+
+  &.draggableHeader {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    justify-content: space-between !important;
+  }
 
   .sortableHeader {
     max-width: 100%;
@@ -133,5 +141,27 @@
 
   &:hover::-webkit-scrollbar {
     display: block;
+  }
+}
+
+.dragHandle {
+  flex: 0 0 16px;
+  z-index: 2;
+  cursor: col-resize;
+  color: #0085ff;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.dragHandleIcon {
+  flex: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  &:hover {
+    cursor: grab;
   }
 }

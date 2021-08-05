@@ -2,6 +2,7 @@ import cx from "classnames";
 import { concat, difference, find, includes, map } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
+import Draggable from "react-draggable";
 import {
   AutoSizer,
   Column,
@@ -11,7 +12,9 @@ import "react-virtualized/styles.css";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import BasicPopup from "~/components/BasicPopup";
+import { UserContext } from "~/components/common/UserContext";
 import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
+import { DRAGGABLE_COLUMNS_FEATURE } from "~/components/utils/features";
 import { humanize } from "~/helpers/strings";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
@@ -27,8 +30,8 @@ class BaseTable extends React.Component {
   // TODO: - limitations -
   // - needs dynamic row height (dynamic required use of CellMeasurer)
 
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
 
     this.state = {
       activeColumns: this.props.initialActiveColumns,
@@ -36,6 +39,7 @@ class BaseTable extends React.Component {
         this.props.columns,
         this.props.defaultColumnWidth
       ),
+      columnWidthPercentages: {},
     };
   }
 
@@ -85,6 +89,84 @@ class BaseTable extends React.Component {
         )}
       </div>
     );
+  };
+
+  draggableHeaderRenderer = ({
+    dataKey,
+    nextDataKey,
+    columnData,
+    label,
+    totalTableWidth,
+  }) => {
+    const { headerLabelClassName } = this.props;
+
+    return (
+      <React.Fragment key={dataKey}>
+        {/* 
+          We need this empty div so we can properly position the column name in the middle
+          and the draggable component to the far right.
+        */}
+        <div />
+        {columnData ? (
+          <ColumnHeaderTooltip
+            trigger={
+              <span className={cx(cs.label, headerLabelClassName)}>
+                {label}
+              </span>
+            }
+            title={label}
+            content={columnData.tooltip}
+            link={columnData.link}
+          />
+        ) : (
+          <span className={cx(cs.label, headerLabelClassName)}>{label}</span>
+        )}
+        <Draggable
+          axis="x"
+          defaultClassName={cs.dragHandle}
+          onDrag={(_, { deltaX }) =>
+            this.resizeRow({
+              dataKey,
+              deltaX,
+              nextDataKey,
+              totalTableWidth,
+            })
+          }
+          position={{ x: 0 }}
+        >
+          <div className={cs.dragHandleIcon}>|</div>
+        </Draggable>
+      </React.Fragment>
+    );
+  };
+
+  resizeRow = ({ dataKey, deltaX, nextDataKey, totalTableWidth }) => {
+    const { columns } = this.state;
+
+    this.setState(prevState => {
+      const prevColumnWidthPercentages = prevState.columnWidthPercentages;
+      // The amount of dragging the user has performed (as a percentage)
+      const percentDelta = deltaX / totalTableWidth;
+
+      return {
+        columnWidthPercentages: {
+          ...prevColumnWidthPercentages,
+          [dataKey]:
+            // If the previous column width percentage does not exist (happens when you haven't dragged a column yet)
+            // calculate the percentage based on the column width / totalTableWidth.
+            (prevColumnWidthPercentages[dataKey]
+              ? prevColumnWidthPercentages[dataKey]
+              : find({ dataKey }, columns).width / totalTableWidth) +
+            percentDelta,
+          // Compute the nextDataKey's width percentage as well since dragging a column affects the next column.
+          [nextDataKey]:
+            (prevColumnWidthPercentages[nextDataKey]
+              ? prevColumnWidthPercentages[nextDataKey]
+              : find({ dataKey: nextDataKey }, columns).width /
+                totalTableWidth) - percentDelta,
+        },
+      };
+    });
   };
 
   _sortableHeaderRenderer = ({
@@ -197,12 +279,14 @@ class BaseTable extends React.Component {
   };
 
   render() {
+    const { allowedFeatures } = this.context || {};
     const {
       cellClassName,
       defaultCellRenderer,
       defaultHeaderHeight,
       defaultRowHeight,
       defaultSelectColumnWidth,
+      draggableColumns,
       forwardRef,
       gridClassName,
       headerClassName,
@@ -221,9 +305,12 @@ class BaseTable extends React.Component {
       sortDirection,
       ...extraTableProps
     } = this.props;
+    const { activeColumns, columns, columnWidthPercentages } = this.state;
 
-    const { activeColumns, columns } = this.state;
     const columnOrder = activeColumns || map("dataKey", columns);
+    const numberOfColumns = columnOrder.length;
+    const draggableColumnsFeatureEnabled =
+      allowedFeatures.includes(DRAGGABLE_COLUMNS_FEATURE) && draggableColumns;
     return (
       <div
         className={cs.tableContainer}
@@ -264,26 +351,64 @@ class BaseTable extends React.Component {
                   width={defaultSelectColumnWidth}
                 />
               )}
-              {columnOrder.map(dataKey => {
-                const columnProps = find({ dataKey: dataKey }, columns);
+              {columnOrder.map((dataKey, index) => {
+                const columnProps = find({ dataKey }, columns);
                 if (!columnProps) {
                   console.error(
                     `${dataKey} was expected but not found in column config. Skipping.`
                   );
                   return null;
                 }
-                const { cellRenderer, className, ...extraProps } = columnProps;
+
+                const isLastColumn = index === numberOfColumns - 1;
+                const {
+                  cellRenderer,
+                  className,
+                  headerClassName,
+                  // The px width value is destuctured here because we don't want it to override
+                  // the width dervived from the percentage of the column * total width of the table.
+                  // The column percentages are critical to the functionality of draggable columns.
+                  width: pxWidth,
+                  ...extraProps
+                } = columnProps;
+
+                let headerRenderer;
+                if (sortable && !columnProps.disableSort) {
+                  headerRenderer = this._sortableHeaderRenderer;
+                } else if (
+                  draggableColumnsFeatureEnabled &&
+                  !columnProps.disableDrag &&
+                  !isLastColumn
+                ) {
+                  headerRenderer = args =>
+                    this.draggableHeaderRenderer({
+                      totalTableWidth: width,
+                      nextDataKey: columnOrder[index + 1],
+                      ...args,
+                    });
+                } else {
+                  headerRenderer = this.basicHeaderRenderer;
+                }
+
                 return (
                   <Column
                     className={cx(cs.cell, cellClassName, className)}
                     columnData={columnProps.columnData}
-                    key={columnProps.dataKey}
-                    headerRenderer={
-                      sortable && !columnProps.disableSort
-                        ? this._sortableHeaderRenderer
-                        : this.basicHeaderRenderer
+                    key={dataKey}
+                    // If the width percentage has not been calculated yet, use the default column width
+                    width={
+                      columnWidthPercentages[dataKey]
+                        ? columnWidthPercentages[dataKey] * width
+                        : pxWidth
                     }
+                    headerRenderer={headerRenderer}
                     cellRenderer={cellRenderer || defaultCellRenderer}
+                    headerClassName={cx(
+                      headerClassName,
+                      draggableColumnsFeatureEnabled && !isLastColumn
+                        ? cs.draggableHeader
+                        : ""
+                    )}
                     {...extraProps}
                   />
                 );
@@ -321,6 +446,7 @@ BaseTable.defaultProps = {
   defaultRowHeight: 30,
   defaultSelectColumnWidth: 30,
   selected: new Set(),
+  draggableColumns: false,
 };
 
 BaseTable.propTypes = {
@@ -335,6 +461,7 @@ BaseTable.propTypes = {
   defaultHeaderHeight: PropTypes.number,
   defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
   defaultSelectColumnWidth: PropTypes.number,
+  draggableColumns: PropTypes.bool,
   gridClassName: PropTypes.string,
   headerClassName: PropTypes.string,
   headerLabelClassName: PropTypes.string,
@@ -368,5 +495,7 @@ BaseTable.propTypes = {
   onSelectAllRows: PropTypes.func,
   selectAllChecked: PropTypes.bool,
 };
+
+BaseTable.contextType = UserContext;
 
 export default BaseTable;

@@ -200,6 +200,7 @@ InfiniteTable.defaultProps = {
 };
 
 InfiniteTable.propTypes = {
+  draggableColumns: PropTypes.bool,
   defaultCellRenderer: PropTypes.func,
   loadingClassName: PropTypes.string,
   minimumBatchSize: PropTypes.number,
