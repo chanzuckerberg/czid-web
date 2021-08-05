@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 
+import { UserContext } from "~/components/common/UserContext";
+import { IMPROVED_BG_MODEL_SELECTION_FEATURE } from "~/components/utils/features";
 import SubtextDropdown from "~ui/controls/dropdowns/SubtextDropdown";
 import PropTypes from "~utils/propTypes";
 
@@ -11,6 +13,9 @@ const BackgroundModelFilter = React.memo(
     value,
     ...props
   }) => {
+    const userContext = useContext(UserContext);
+    const { allowedFeatures } = userContext || {};
+
     let disabled = props.disabled || false;
     let backgroundOptions = allBackgrounds.map(background => {
       const disabledOption =
@@ -36,6 +41,7 @@ const BackgroundModelFilter = React.memo(
     return (
       <SubtextDropdown
         {...props}
+        search={allowedFeatures.includes(IMPROVED_BG_MODEL_SELECTION_FEATURE)}
         options={backgroundOptions}
         initialSelectedValue={value}
         disabled={disabled}
