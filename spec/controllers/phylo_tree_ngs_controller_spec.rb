@@ -300,6 +300,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
       @pr_two = create(:pipeline_run, sample: sample_two)
 
       create(:taxon_lineage, taxid: 1, tax_name: "some species", superkingdom_name: "Viruses")
+      create(:taxon_lineage, taxid: 20, genus_taxid: 20, species_taxid: 2, tax_name: "some genus", superkingdom_name: "Viruses")
 
       admin_project = create(:project, users: [@admin])
       admin_sample_one = create(:sample, project: admin_project)
@@ -307,6 +308,34 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
 
       create(:app_config, key: AppConfig::SFN_SINGLE_WDL_ARN, value: "fake:sfn:arn")
       create(:app_config, key: format(AppConfig::WORKFLOW_VERSION_TEMPLATE, workflow_name: "phylotree-ng"), value: "1.0.0")
+
+      allow(S3Util).to receive(:get_s3_file)
+        .and_return(
+          { "1" =>
+            { "best_accessions" =>
+              [{ "id" => "A1.1",
+                 "name" => "Taxon 1 top accession, complete genome\n",
+                 "num_contigs" => 30,
+                 "num_reads" => 100,
+                 "score" => 28_000,
+                 "coverage_depth" => 15.5, },
+               { "id" => "A2.2",
+                 "name" => "Taxon 1 accession, complete genome",
+                 "num_contigs" => 2,
+                 "num_reads" => 0,
+                 "score" => 4500,
+                 "coverage_depth" => 1.7, },],
+              "num_accessions" => 2, },
+            "2" =>
+            { "best_accessions" =>
+              [{ "id" => "B1.1",
+                 "name" => "Taxon 2 top accession, complete genome\n",
+                 "num_contigs" => 30,
+                 "num_reads" => 100,
+                 "score" => 28_000,
+                 "coverage_depth" => 15.5, }],
+              "num_accessions" => 1, }, }.to_json
+        )
     end
 
     context "user creates a phylo tree using their samples" do
@@ -334,6 +363,34 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(phylo_tree_ng.tax_id).to eq(1)
         expect(phylo_tree_ng.inputs_json["pipeline_run_ids"]).to eq([@pr_one.id, @pr_two.id])
         expect(phylo_tree_ng.inputs_json["superkingdom_name"]).to eq("viruses")
+        expect(phylo_tree_ng.inputs_json["additional_reference_accession_ids"]).to eq(["A1.1"])
+      end
+
+      it "should create and dispatch a new phylo tree ng with a genus reference taxon" do
+        phylo_tree_ng_params = {
+          pipelineRunIds: [@pr_one.id, @pr_two.id],
+          taxId: 20,
+          name: "new_tree",
+          projectId: @project.id,
+          userId: @joe.id,
+        }
+
+        post :create, params: phylo_tree_ng_params
+
+        expect(response).to have_http_status(200)
+        json_response = JSON.parse(response.body)
+        phylo_tree_ng = PhyloTreeNg.find(json_response["phylo_tree_id"])
+
+        # Verify that the phylo tree was created correctly.
+        expect(phylo_tree_ng).not_to eq(nil)
+        expect(phylo_tree_ng.name).to eq("new_tree")
+        expect(phylo_tree_ng.project_id).to eq(@project.id)
+        expect(phylo_tree_ng.user_id).to eq(@joe.id)
+        expect(phylo_tree_ng.status).to eq(WorkflowRun::STATUS[:running])
+        expect(phylo_tree_ng.tax_id).to eq(20)
+        expect(phylo_tree_ng.inputs_json["pipeline_run_ids"]).to eq([@pr_one.id, @pr_two.id])
+        expect(phylo_tree_ng.inputs_json["superkingdom_name"]).to eq("viruses")
+        expect(phylo_tree_ng.inputs_json["additional_reference_accession_ids"]).to eq(["B1.1"])
       end
     end
 

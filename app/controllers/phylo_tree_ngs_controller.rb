@@ -174,21 +174,10 @@ class PhyloTreeNgsController < ApplicationController
     if !non_viewable_pipeline_run_ids.empty?
       render json: { message: "You are not authorized to view all pipeline runs in the list." }, status: :unauthorized
     else
-      additional_reference_accession_ids = Set.new()
-      pipeline_run_ids.each do |pipeline_run_id|
-        coverage_viz_summary_s3_path = current_power.pipeline_runs.find(pipeline_run_id).coverage_viz_summary_s3_path
-        if coverage_viz_summary_s3_path
-          coverage_viz_summary = S3Util.get_s3_file(coverage_viz_summary_s3_path)
-          if coverage_viz_summary
-            coverage_viz_summary = JSON.parse(coverage_viz_summary)
-            best_accessions = coverage_viz_summary[tax_id.to_s]["best_accessions"]
-            additional_reference_accession_ids.add(best_accessions.first["id"])
-          end
-        end
-      end
+      additional_reference_accession_ids = get_additional_reference_accession_ids(pipeline_run_ids, tax_id)
       phylo_tree = PhyloTreeNg.new(
         inputs_json: {
-          additional_reference_accession_ids: additional_reference_accession_ids.to_a || [],
+          additional_reference_accession_ids: additional_reference_accession_ids,
           tax_id: tax_id,
           superkingdom_name: superkingdom_name,
           pipeline_run_ids: pipeline_run_ids,
@@ -330,6 +319,37 @@ class PhyloTreeNgsController < ApplicationController
     end
 
     phylo_tree_ngs
+  end
+
+  def get_additional_reference_accession_ids(pipeline_run_ids, tax_id)
+    additional_reference_accession_ids = Set.new()
+    pipeline_run_ids.each do |pipeline_run_id|
+      coverage_viz_summary_s3_path = current_power.pipeline_runs.find(pipeline_run_id).coverage_viz_summary_s3_path
+      if coverage_viz_summary_s3_path
+        coverage_viz_summary = S3Util.get_s3_file(coverage_viz_summary_s3_path)
+        if coverage_viz_summary
+          coverage_viz_summary = JSON.parse(coverage_viz_summary)
+          top_accession = get_top_accession_from_coverage_viz_summary(coverage_viz_summary, tax_id)
+          additional_reference_accession_ids.add(top_accession)
+        end
+      end
+    end
+
+    additional_reference_accession_ids.to_a
+  end
+
+  def get_top_accession_from_coverage_viz_summary(coverage_viz_summary, tax_id)
+    if coverage_viz_summary[tax_id.to_s]
+      best_accessions = coverage_viz_summary[tax_id.to_s]["best_accessions"]
+      return best_accessions.first["id"]
+    else
+      available_reference_tax_ids = coverage_viz_summary.keys()
+      species_ids = TaxonLineage.where(genus_taxid: tax_id, species_taxid: available_reference_tax_ids).distinct.pluck(:species_taxid)
+      if species_ids.first
+        best_accessions = coverage_viz_summary[species_ids.first.to_s]["best_accessions"]
+        return best_accessions.first["id"]
+      end
+    end
   end
 
   def sample_details_json(pipeline_run_ids, tax_id)
