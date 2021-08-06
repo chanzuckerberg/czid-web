@@ -44,7 +44,7 @@ const ConsensusGenomeDropdown = ({
 
 ConsensusGenomeDropdown.defaultProps = {
   fluid: true,
-  label: "Taxon",
+  label: "Mapped to",
   rounded: true,
 };
 

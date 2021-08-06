@@ -43,7 +43,14 @@ class Tabs extends React.Component {
   };
 
   render() {
-    const { className, hideBorder, onChange, value, tabs } = this.props;
+    const {
+      className,
+      hideBorder,
+      onChange,
+      value,
+      tabs,
+      tabStyling,
+    } = this.props;
     const { indicatorLeft, indicatorWidth } = this.state;
 
     // Normalize tab format since we accept both an array of strings
@@ -59,7 +66,10 @@ class Tabs extends React.Component {
               key={tab.value}
               ref={c => (this._tabs[tab.value] = c)}
               onClick={() => onChange(tab.value)}
-              className={cx(cs.tab, value === tab.value && cs.selected)}
+              className={cx(
+                tabStyling || cs.tab,
+                value === tab.value && cs.selected
+              )}
             >
               {tab.label}
             </div>
@@ -89,6 +99,7 @@ Tabs.propTypes = {
   value: PropTypes.string,
   className: PropTypes.string,
   hideBorder: PropTypes.bool,
+  tabStyling: PropTypes.string,
 };
 
 export default Tabs;

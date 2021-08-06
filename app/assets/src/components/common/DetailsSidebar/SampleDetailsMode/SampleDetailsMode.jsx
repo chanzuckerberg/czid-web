@@ -1,5 +1,5 @@
 import { some } from "lodash";
-import { get, isEmpty, set } from "lodash/fp";
+import { get, isEmpty, find, size, set } from "lodash/fp";
 import React, { useEffect, useState } from "react";
 
 import { saveSampleName, saveSampleNotes, getAllSampleTypes } from "~/api";
@@ -12,6 +12,7 @@ import {
 import Tabs from "~/components/ui/controls/Tabs";
 import PropTypes from "~/components/utils/propTypes";
 import { generateUrlToSampleView } from "~/components/utils/urls";
+import ConsensusGenomeDropdown from "~/components/views/SampleView/ConsensusGenomeDropdown";
 import { TABS as WORKFLOW_TABS } from "~/components/views/SampleView/constants";
 import { processMetadata, processMetadataTypes } from "~utils/metadata";
 import MetadataTab from "./MetadataTab";
@@ -25,16 +26,20 @@ import {
   processCGWorkflowRunInfo,
 } from "./utils";
 
-const TABS = ["Metadata", "Pipeline", "Notes"];
+const TABS = ["Metadata", "Pipelines", "Notes"];
 
 const SampleDetailsMode = ({
   currentRun,
   currentWorkflowTab,
+  handleWorkflowTabChange,
+  sample,
   sampleId,
   onMetadataUpdate,
+  onWorkflowRunSelect,
   showReportLink,
   snapshotShareId,
   tempSelectedOptions,
+  sampleWorkflowLabels,
 }) => {
   const [additionalInfo, setAdditionalInfo] = useState(null);
   const [currentTab, setCurrentTab] = useState(TABS[0]);
@@ -204,19 +209,50 @@ const SampleDetailsMode = ({
         />
       );
     }
-    if (currentTab === "Pipeline") {
-      return (
-        <PipelineTab
-          pipelineInfo={
-            currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME
-              ? processCGWorkflowRunInfo(currentRun)
-              : pipelineInfo
-          }
-          erccComparison={additionalInfo.ercc_comparison}
-          pipelineRun={pipelineRun}
-          sampleId={sampleId}
-          snapshotShareId={snapshotShareId}
+    if (currentTab === "Pipelines") {
+      const workflowTabs = size(sampleWorkflowLabels) >= 1 && (
+        <Tabs
+          className={cs.workflowTabs}
+          tabStyling={cs.tabLabels}
+          tabs={sampleWorkflowLabels}
+          value={currentWorkflowTab}
+          onChange={handleWorkflowTabChange}
+          hideBorder
         />
+      );
+
+      const consensusGenomeDropdown = currentWorkflowTab ===
+        WORKFLOW_TABS.CONSENSUS_GENOME &&
+        size(sample.workflow_runs) > 1 && (
+          <div className={cs.dropdownContainer}>
+            <ConsensusGenomeDropdown
+              workflowRuns={sample.workflow_runs}
+              initialSelectedValue={currentRun.id}
+              onConsensusGenomeSelection={workflowRunId =>
+                onWorkflowRunSelect(
+                  find({ id: workflowRunId }, sample.workflow_runs)
+                )
+              }
+            />
+          </div>
+        );
+
+      return (
+        <>
+          {workflowTabs}
+          {consensusGenomeDropdown}
+          <PipelineTab
+            pipelineInfo={
+              currentWorkflowTab === WORKFLOW_TABS.CONSENSUS_GENOME
+                ? processCGWorkflowRunInfo(currentRun)
+                : pipelineInfo
+            }
+            erccComparison={additionalInfo.ercc_comparison}
+            pipelineRun={pipelineRun}
+            sampleId={sampleId}
+            snapshotShareId={snapshotShareId}
+          />
+        </>
       );
     }
     if (currentTab === "Notes") {
@@ -275,9 +311,13 @@ const SampleDetailsMode = ({
 SampleDetailsMode.propTypes = {
   currentRun: PropTypes.object,
   currentWorkflowTab: PropTypes.string,
+  handleWorkflowTabChange: PropTypes.func,
+  sample: PropTypes.object,
   sampleId: PropTypes.number,
   pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,
+  onWorkflowRunSelect: PropTypes.func,
+  sampleWorkflowLabels: PropTypes.array,
   showReportLink: PropTypes.bool,
   snapshotShareId: PropTypes.string,
   tempSelectedOptions: PropTypes.object,

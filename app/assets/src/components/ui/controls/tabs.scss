@@ -1,15 +1,14 @@
 @import "~styles/themes/colors";
 @import "~styles/typography";
+@import "~styles/themes/typography";
 
 .tabs {
   height: 30px;
   padding-bottom: 10px;
 
   .tab {
+    @include font-header-s;
     color: $gray-dark;
-    font-size: $font-size-body;
-    letter-spacing: 0.4px;
-    font-weight: 600;
     margin-right: 30px;
     cursor: pointer;
 

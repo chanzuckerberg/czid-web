@@ -1248,10 +1248,19 @@ class SampleView extends React.Component {
         },
       };
     } else if (sidebarMode === "sampleDetails") {
+      const sampleWorkflowLabels = compact([
+        size(sample.pipeline_runs) && WORKFLOWS.SHORT_READ_MNGS.label,
+        size(sample.workflow_runs) && WORKFLOWS.CONSENSUS_GENOME.label,
+      ]);
+
       return {
         currentRun: this.getCurrentRun(),
         currentWorkflowTab: currentTab,
+        handleWorkflowTabChange: this.handleTabChange,
+        onWorkflowRunSelect: this.handleWorkflowRunSelect,
+        sample,
         sampleId: sample.id,
+        sampleWorkflowLabels,
         snapshotShareId: snapshotShareId,
         onMetadataUpdate: this.handleMetadataUpdate,
       };

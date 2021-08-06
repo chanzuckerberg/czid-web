@@ -18,12 +18,28 @@
 }
 
 .tabs {
-  margin: 30px 10px;
+  margin: 30px $space-m $space-l;
+}
+
+.workflowTabs {
+  margin: 0 $space-m;
+}
+
+.tabLabels {
+  @include font-header-xs;
+  color: $gray-dark;
+  margin-right: 30px;
+  cursor: pointer;
+}
+
+.dropdownContainer {
+  width: 340px;
+  margin: $space-l $space-m $space-xl;
 }
 
 .noData {
   color: $gray-light;
-  margin-left: 10px;
+  margin-left: $space-m;
 }
 
 .loading {
