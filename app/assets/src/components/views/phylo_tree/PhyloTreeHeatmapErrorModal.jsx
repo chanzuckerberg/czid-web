@@ -4,7 +4,7 @@ import React from "react";
 import { ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import AccordionNotification from "~/components/ui/notifications/AccordionNotification";
-import { PHYLO_TREE_HEATMAP_LINK } from "~/components/utils/documentationLinks";
+import { PHYLO_TREE_LINK } from "~/components/utils/documentationLinks";
 import Modal from "~ui/containers/Modal";
 import { PrimaryButton } from "~ui/controls/buttons";
 import ImgHeatmapPrimary from "~ui/illustrations/ImgHeatmapPrimary";
@@ -30,7 +30,7 @@ const PhyloTreeHeatmapErrorModal = ({
           ANALYTICS_EVENT_NAMES.PHYLO_TREE_HEATMAP_ERROR_MODAL_NOTIFICATION_HELP_LINK_CLICKED
         }
         coloredBackground={true}
-        href={PHYLO_TREE_HEATMAP_LINK}
+        href={PHYLO_TREE_LINK}
       >
         Learn more.
       </ExternalLink>
@@ -64,7 +64,7 @@ const PhyloTreeHeatmapErrorModal = ({
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.PHYLO_TREE_HEATMAP_ERROR_MODAL_HELP_LINK_CLICKED
             }
-            href={PHYLO_TREE_HEATMAP_LINK}
+            href={PHYLO_TREE_LINK}
           >
             Learn more.
           </ExternalLink>

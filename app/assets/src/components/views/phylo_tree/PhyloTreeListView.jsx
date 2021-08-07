@@ -22,7 +22,7 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import ExternalLink from "~/components/ui/controls/ExternalLink";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import {
-  PHYLO_TREE_HEATMAP_LINK,
+  PHYLO_TREE_LINK,
   MAIL_TO_HELP_LINK,
 } from "~/components/utils/documentationLinks";
 import { PHYLO_TREE_NG_FEATURE } from "~/components/utils/features";
@@ -496,7 +496,7 @@ class PhyloTreeListView extends React.Component {
           which uses SKA, for continued analysis.{" "}
           <ExternalLink
             coloredBackground={true}
-            href={PHYLO_TREE_HEATMAP_LINK}
+            href={PHYLO_TREE_LINK}
             analyticsEventName={
               ANALYTICS_EVENT_NAMES.OLD_PHYLO_TREE_WARNING_BANNER_HELP_LINK_CLICKED
             }
