@@ -164,6 +164,14 @@ function EventDictionary() {
   /** The user had a failed phylo tree (either original or NG), and they clicked on the link on the report to get help with re-running the tree. */
   this.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED =
     "PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED";
+
+  /** The user clicked the BackgroundModelFilter in the SampleView */
+  this.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED =
+    "SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED";
+
+  /** The user clicked the BackgroundModelFilter in the SamplesHeatmapControls */
+  this.SAMPLES_HEATMAP_CONTROLS_BACKGROUND_MODEL_FILTER_CLICKED =
+    "SAMPLES_HEATMAP_CONTROLS_BACKGROUND_MODEL_FILTER_CLICKED";
 }
 
 const eventNames = new EventDictionary();

@@ -12,7 +12,7 @@ import {
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import { Divider } from "~/components/layout";
 import List from "~/components/ui/List";
@@ -141,6 +141,11 @@ export default class SamplesHeatmapControls extends React.Component {
         disabled={this.props.loading || !this.props.data}
         enableMassNormalizedBackgrounds={enableMassNormalizedBackgrounds}
         onChange={this.onBackgroundChange}
+        onClick={() =>
+          logAnalyticsEvent(
+            ANALYTICS_EVENT_NAMES.SAMPLES_HEATMAP_CONTROLS_BACKGROUND_MODEL_FILTER_CLICKED
+          )
+        }
         value={selectedOptions.background}
       />
     );

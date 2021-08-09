@@ -9,6 +9,7 @@ const BackgroundModelFilter = React.memo(
   ({
     allBackgrounds,
     enableMassNormalizedBackgrounds,
+    onClick,
     onChange,
     value,
     ...props
@@ -46,6 +47,7 @@ const BackgroundModelFilter = React.memo(
         initialSelectedValue={value}
         disabled={disabled}
         onChange={onChange}
+        onClick={onClick}
       />
     );
   }
@@ -62,6 +64,7 @@ BackgroundModelFilter.propTypes = {
   enableMassNormalizedBackgrounds: PropTypes.bool,
   label: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
   placeholder: PropTypes.string,
   rounded: PropTypes.bool,
   selectedInvalidBackground: PropTypes.bool,

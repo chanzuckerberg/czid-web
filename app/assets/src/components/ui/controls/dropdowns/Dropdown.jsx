@@ -100,6 +100,7 @@ class Dropdown extends React.Component {
         showNoResultsMessage={this.props.showNoResultsMessage}
         isLoadingSearchOptions={this.props.isLoadingSearchOptions}
         menuClassName={this.props.menuClassName}
+        onClick={this.props.onClick}
       />
     );
   }
@@ -130,6 +131,7 @@ Dropdown.propTypes = {
   // you must also provide a list of strings to search by.
   itemSearchStrings: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   search: PropTypes.bool,
   menuLabel: PropTypes.string,

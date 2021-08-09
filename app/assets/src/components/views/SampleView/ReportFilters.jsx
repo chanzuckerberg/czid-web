@@ -2,7 +2,7 @@ import { flatten, forEach, getOr, map, transform, values } from "lodash/fp";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { ANALYTICS_EVENT_NAMES, logAnalyticsEvent } from "~/api/analytics";
 import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
 import BackgroundModelFilter from "~/components/views/report/filters/BackgroundModelFilter";
 import CategoryFilter from "~/components/views/report/filters/CategoryFilter";
@@ -164,6 +164,11 @@ class ReportFilters extends React.Component {
           {/* from server */}
           <div className={cs.filterListElement}>
             <BackgroundModelFilter
+              onClick={() =>
+                logAnalyticsEvent(
+                  ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED
+                )
+              }
               allBackgrounds={backgrounds}
               erred={selectedInvalidBackground}
               value={selected.background}
