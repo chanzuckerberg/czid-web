@@ -147,7 +147,7 @@ class PhyloTreeDownloadButton extends React.Component {
     } = this.props;
 
     if (showPhyloTreeNgOptions) {
-      const downloadItems = tree.clustermap_png_url
+      const downloadItems = tree.clustermap_svg_url
         ? this.getHeatmapItems()
         : this.getPhyloTreeNgItems();
       return (

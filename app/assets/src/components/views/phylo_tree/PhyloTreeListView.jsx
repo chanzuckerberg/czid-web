@@ -101,7 +101,7 @@ class PhyloTreeListView extends React.Component {
       this.setState({
         currentTree,
         showOldTreeWarning: false,
-        heatmapErrorModalOpen: currentTree.clustermap_png_url,
+        heatmapErrorModalOpen: currentTree.clustermap_svg_url,
       });
     } else if (selectedPhyloTreeId) {
       this.setState({ currentTree: await getPhyloTree(selectedPhyloTreeId) });
@@ -351,8 +351,8 @@ class PhyloTreeListView extends React.Component {
 
   renderVisualization = () => {
     const { currentTree } = this.state;
-    const clustermapPngUrl = currentTree
-      ? currentTree.clustermap_png_url
+    const clustermapSvgUrl = currentTree
+      ? currentTree.clustermap_svg_url
       : false;
 
     if (currentTree.newick) {
@@ -368,12 +368,8 @@ class PhyloTreeListView extends React.Component {
           phyloTreeId={this.state.selectedPhyloTreeId}
         />
       );
-    } else if (clustermapPngUrl) {
-      return (
-        <NarrowContainer size="small">
-          <img className={cs.heatmap} src={clustermapPngUrl} />
-        </NarrowContainer>
-      );
+    } else if (clustermapSvgUrl) {
+      return <img className={cs.heatmap} src={clustermapSvgUrl} />;
     } else if ([STATUS_FAILED, NG_STATUS_FAILED].includes(currentTree.status)) {
       return (
         <SampleMessage

@@ -476,7 +476,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         start_date: Time.zone.now.round,
         state_machine_arn: fake_sfn_arn,
         status: "SUCCEEDED",
-        output: JSON.dump({ "Result": { "phylotree.clustermap_png": fake_s3_path } }),
+        output: JSON.dump({ "Result": { "phylotree.clustermap_svg": fake_s3_path } }),
       }
     end
     let(:fake_species) { "some species" }
@@ -574,7 +574,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
     end
 
     context "samples too divergent to produce phylo_tree_ng" do
-      it "returns link to clustermap png" do
+      it "returns link to clustermap svg" do
         @mock_aws_clients = {
           s3: Aws::S3::Client.new(stub_responses: true),
           states: Aws::States::Client.new(stub_responses: true),
@@ -591,7 +591,7 @@ RSpec.describe PhyloTreeNgsController, type: :controller do
         expect(response).to have_http_status :ok
         pt = JSON.parse(response.body)
 
-        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "status", "tax_name", "clustermap_png_url")
+        expect(pt.keys).to contain_exactly("id", "name", "tax_id", "status", "tax_name", "clustermap_svg_url")
       end
     end
 
