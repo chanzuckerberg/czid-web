@@ -239,7 +239,8 @@ class PhyloTreeListView extends React.Component {
     if (
       this.state.sidebarMode === "taxonDetails" &&
       this.state.sidebarVisible &&
-      currentTree.taxid === this.state.sidebarConfig.taxonId
+      (currentTree.taxid === this.state.sidebarConfig.taxonId ||
+        currentTree.tax_id === this.state.sidebarConfig.taxonId)
     ) {
       this.setState({
         sidebarVisible: false,
@@ -254,7 +255,7 @@ class PhyloTreeListView extends React.Component {
         sidebarVisible: true,
         sidebarConfig: {
           parentTaxonId: currentTree.parent_taxid,
-          taxonId: currentTree.taxid,
+          taxonId: currentTree.taxid || currentTree.tax_id,
           taxonName: currentTree.tax_name,
         },
         sidebarMode: "taxonDetails",
@@ -264,7 +265,7 @@ class PhyloTreeListView extends React.Component {
         treeName: currentTree.name,
         treeId: currentTree.id,
         parentTaxonId: currentTree.parent_taxid,
-        taxonId: currentTree.taxid,
+        taxonId: currentTree.taxid || currentTree.tax_id,
         taxonName: currentTree.tax_name,
       });
     }
