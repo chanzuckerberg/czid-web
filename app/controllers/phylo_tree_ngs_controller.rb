@@ -110,9 +110,11 @@ class PhyloTreeNgsController < ApplicationController
 
           pt["sampleDetailsByNodeName"] = nodes
         rescue SfnExecution::OutputNotFoundError
-          # If the samples were too divergent to produce a phylo tree, the newick tree output will be missing,
-          # so return a url to the clustermap to display instead.
-          pt["clustermap_svg_url"] = get_presigned_s3_url(s3_path: @phylo_tree_ng.output_path(PhyloTreeNg::OUTPUT_CLUSTERMAP_SVG))
+          # If the samples were too divergent to produce a phylo tree, the
+          # newick tree output will be missing, so return a url to the
+          # clustermap to display instead. We use "image/svg+xml" to override S3
+          # default "binary/octet-stream" for SVGs.
+          pt["clustermap_svg_url"] = get_presigned_s3_url(s3_path: @phylo_tree_ng.output_path(PhyloTreeNg::OUTPUT_CLUSTERMAP_SVG), content_type: "image/svg+xml")
         end
 
         render json: pt
