@@ -91,7 +91,7 @@ class PhyloTreeNgsController < ApplicationController
             "samples.name, projects.name as project_name," \
             "host_genomes.name as host_genome_name"
           ).as_json.each_with_object({}) do |pr, result|
-            result[pr["id"]] = {
+            result[pr["name"]] = {
               pipeline_run_id: pr["id"],
               sample_id: pr["sample_id"],
               name: pr["name"],
@@ -106,6 +106,7 @@ class PhyloTreeNgsController < ApplicationController
           ncbi_metadata.each do |node_id, node_metadata|
             nodes[node_id] = node_metadata
             nodes[node_id]["name"] ||= node_metadata["accession"]
+            nodes[node_id]["accession"] = node_id
           end
 
           pt["sampleDetailsByNodeName"] = nodes
