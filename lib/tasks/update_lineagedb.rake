@@ -156,6 +156,7 @@ class LineageDatabaseImporter
     import_new_taxid_lineages!
     affected = build_new_taxon_lineages!
     upgrade_taxon_lineages!(affected, noverify)
+    update_tax_names!
     # This is very slow, since this script is using raw SQL the
     #  elasticsearch index will not be updated, since elasticsearch-model
     #  relies on callbacks. The safest and easiest way to ensure the
@@ -163,6 +164,17 @@ class LineageDatabaseImporter
     #  Since this script is run rarely this shouldn't be a huge deal
     #  but if it is slow you may want to look into only updating affected ids.
     import_elasticsearch!
+  end
+
+  def update_tax_names!
+    puts "Updating lineage taxon names..."
+    # Starting from species, go up through the levels and set the tax_name if you
+    # have a positive taxid on that level.
+    # TaxonLineage.tax_level is a function call so this goes 1,2,3,.. with the same positive/negative check for the sake of keeping the update queries to a minimum.
+    (1..8).each do |level_int|
+      level_str = TaxonCount::LEVEL_2_NAME[level_int]
+      TaxonLineage.where("#{level_str}_taxid > 0").where(tax_name: nil).update_all("tax_name=#{level_str}_name") # rubocop:disable Rails/SkipsModelValidations
+    end
   end
 
   def import_elasticsearch!
