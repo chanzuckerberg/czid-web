@@ -672,6 +672,7 @@ class ReportTable extends React.Component {
         pipelineVersion={pipelineVersion}
         snapshotShareId={snapshotShareId}
         consensusGenomeEnabled={consensusGenomeEnabled}
+        sampleId={sampleId}
       />
     );
   };

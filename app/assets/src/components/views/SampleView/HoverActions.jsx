@@ -3,6 +3,7 @@ import cx from "classnames";
 import { filter, size } from "lodash/fp";
 import React from "react";
 
+import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 // TODO(mark): Move BasicPopup into /ui.
 import BasicPopup from "~/components/BasicPopup";
 import { UserContext } from "~/components/common/UserContext";
@@ -209,6 +210,8 @@ class HoverActions extends React.Component {
 
   // Render the hover action according to metadata.
   renderHoverAction = hoverAction => {
+    const { sampleId } = this.props;
+
     let trigger, tooltipMessage;
     const IconComponent = hoverAction.iconComponentClass;
 
@@ -242,7 +245,13 @@ class HoverActions extends React.Component {
         basic={false}
         position="top center"
         key={hoverAction.key}
-        trigger={trigger}
+        trigger={React.cloneElement(trigger, {
+          onMouseEnter: () =>
+            logAnalyticsEvent(
+              ANALYTICS_EVENT_NAMES.SAMPLE_VIEW_HOVER_ACTION_HOVERED,
+              { hoverAction, sampleId }
+            ),
+        })}
         content={tooltipMessage}
       />
     );
@@ -278,6 +287,7 @@ HoverActions.propTypes = {
   phyloTreeEnabled: PropTypes.bool,
   pipelineVersion: PropTypes.string,
   previousConsensusGenomeRuns: PropTypes.array,
+  sampleId: PropTypes.number,
   snapshotShareId: PropTypes.string,
   taxCategory: PropTypes.string,
   taxCommonName: PropTypes.string,

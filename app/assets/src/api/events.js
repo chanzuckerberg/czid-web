@@ -165,6 +165,9 @@ function EventDictionary() {
   this.PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED =
     "PHYLO_TREE_LIST_VIEW_PIPELINE_ERROR_HELP_CLICKED";
 
+  /** The user hovered over a hoverAction in a mNGS sample report */
+  this.SAMPLE_VIEW_HOVER_ACTION_HOVERED = "SAMPLE_VIEW_HOVER_ACTION_HOVERED";
+
   /** The user clicked the BackgroundModelFilter in the SampleView */
   this.SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED =
     "SAMPLE_VIEW_BACKGROUND_MODEL_FILTER_CLICKED";
