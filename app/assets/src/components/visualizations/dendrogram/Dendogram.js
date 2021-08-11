@@ -314,7 +314,7 @@ export default class Dendogram {
       let color = this.colors[i];
       this.legend
         .append("circle")
-        .attr("r", 2)
+        .attr("r", 5)
         .attr("transform", `translate(${x}, ${y})`)
         .style("fill", color);
 
